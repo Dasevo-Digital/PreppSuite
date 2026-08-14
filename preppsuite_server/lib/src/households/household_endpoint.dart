@@ -67,4 +67,61 @@ class HouseholdEndpoint extends Endpoint {
   ) {
     return _repository.rotateInviteCode(session, householdId: householdId);
   }
+
+  /// Updates the household's own country/region. Only the owner may do
+  /// this — it changes what every member sees in the warnings feed.
+  Future<Household> updateRegion(
+    Session session,
+    UuidValue householdId, {
+    required String countryCode,
+    String? regionKey,
+  }) {
+    return _repository.updateRegion(
+      session,
+      householdId: householdId,
+      countryCode: countryCode,
+      regionKey: regionKey,
+    );
+  }
+
+  /// Lists a household's additional warning-region subscriptions (beyond
+  /// its own country/region).
+  Future<List<WarningRegionSubscription>> listWarningRegions(
+    Session session,
+    UuidValue householdId,
+  ) {
+    return _repository.listWarningRegions(session, householdId: householdId);
+  }
+
+  /// Adds an additional region whose warnings the household wants to see.
+  /// Only the owner may do this.
+  Future<WarningRegionSubscription> addWarningRegion(
+    Session session,
+    UuidValue householdId, {
+    required WarningRegionKind kind,
+    required String value,
+    required String label,
+  }) {
+    return _repository.addWarningRegion(
+      session,
+      householdId: householdId,
+      kind: kind,
+      value: value,
+      label: label,
+    );
+  }
+
+  /// Removes an additional region subscription. Only the owner may do
+  /// this.
+  Future<void> removeWarningRegion(
+    Session session,
+    UuidValue householdId,
+    UuidValue warningRegionSubscriptionId,
+  ) {
+    return _repository.removeWarningRegion(
+      session,
+      householdId: householdId,
+      warningRegionSubscriptionId: warningRegionSubscriptionId,
+    );
+  }
 }

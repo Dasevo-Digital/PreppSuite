@@ -32,18 +32,21 @@ void main() {
 
   tearDown(() => db.close());
 
-  test('build produces a valid, non-empty PDF for an empty household', () async {
-    final bytes = await const MissingEquipmentReport().build(
-      db: db,
-      householdId: 'household-1',
-      householdName: 'Test-Haushalt',
-      strings: _strings,
-    );
+  test(
+    'build produces a valid, non-empty PDF for an empty household',
+    () async {
+      final bytes = await const MissingEquipmentReport().build(
+        db: db,
+        householdId: 'household-1',
+        householdName: 'Test-Haushalt',
+        strings: _strings,
+      );
 
-    expect(bytes, isNotEmpty);
-    // PDF files start with the "%PDF-" magic header.
-    expect(ascii.decode(bytes.take(5).toList()), '%PDF-');
-  });
+      expect(bytes, isNotEmpty);
+      // PDF files start with the "%PDF-" magic header.
+      expect(ascii.decode(bytes.take(5).toList()), '%PDF-');
+    },
+  );
 
   test(
     'build includes unchecked checklist items grouped under their template '

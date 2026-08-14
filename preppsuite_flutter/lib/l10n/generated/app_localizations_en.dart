@@ -43,6 +43,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get regionKeyHelper => 'Germany only, for more precise warnings';
 
   @override
+  String get regionKeyExplanationTooltip => 'What is this?';
+
+  @override
+  String get regionKeyExplanationTitle => 'Official Regional Key (ARS)';
+
+  @override
+  String get regionKeyExplanationBody =>
+      'The \"amtlicher Regionalschlüssel\" (ARS) is a 12-digit code that German authorities use to uniquely identify every municipality, down to the district and locality level. It\'s issued by the national statistics office (Destatis) and used, among other things, to precisely scope official warnings (BBK/NINA) to your area instead of your entire federal state.\n\nWithout it, warnings are only filtered by country. With it, you get warnings specific to your municipality.\n\nYou can look up your municipality\'s ARS via the Federal Statistical Office\'s municipality directory (\"Gemeindeverzeichnis\") or your local BBK warning app. Leave this field empty if you don\'t know it — you can add it later in household settings.';
+
+  @override
+  String get regionKeyExplanationClose => 'Got it';
+
+  @override
   String get displayNameLabel => 'Your display name';
 
   @override
@@ -105,6 +118,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHousehold => 'Household';
 
   @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get navShelters => 'Shelters';
+
+  @override
   String get inventoryTitle => 'Inventory';
 
   @override
@@ -165,6 +184,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minQuantityLabel => 'Minimum quantity (optional)';
 
   @override
+  String get caloriesLabel => 'Calories, total kcal (optional)';
+
+  @override
+  String get supplyCalculatorPersonCountLabel => 'People';
+
+  @override
+  String supplyCalculatorDaysLabel(int days) {
+    return 'Supplies for $days days';
+  }
+
+  @override
+  String get supplyCalculatorWaterLabel => 'Drinking water';
+
+  @override
+  String get supplyCalculatorCaloriesLabel => 'Calories';
+
+  @override
+  String supplyCalculatorProgress(String current, String target, String unit) {
+    return '$current / $target $unit';
+  }
+
+  @override
   String get notesLabel => 'Notes (optional)';
 
   @override
@@ -196,6 +237,125 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get productNotFound =>
       'Product not found — fill in the details by hand.';
+
+  @override
+  String get itemPhotoLabel => 'Photo';
+
+  @override
+  String get addPhotoButton => 'Add photo';
+
+  @override
+  String get takePhotoButton => 'Take photo';
+
+  @override
+  String get chooseFromGalleryButton => 'Choose from gallery';
+
+  @override
+  String get removePhotoButton => 'Remove photo';
+
+  @override
+  String get csvImportButton => 'Import CSV';
+
+  @override
+  String get csvImportTitle => 'Import CSV';
+
+  @override
+  String get csvImportInstructionsTitle => 'Expected format';
+
+  @override
+  String get csvImportInstructionsBody =>
+      'The first row must be a header row. Required columns: name, category, quantity, unit, storageLocation. Optional columns: expirationDate, minQuantity, notes. German column names are also recognized (Name, Kategorie, Menge, Einheit, Lagerort, Ablaufdatum, Mindestbestand, Notizen).\n\nCategory: water, food, medical, tools, documents, energy, hygiene, or other (German names also work, e.g. Wasser, Lebensmittel).\nDates: YYYY-MM-DD or DD.MM.YYYY.\nNumbers: \".\" or \",\" as the decimal separator.\nDelimiter: \",\" or \";\", detected automatically.';
+
+  @override
+  String get csvImportPickFileButton => 'Choose CSV file…';
+
+  @override
+  String get csvImportChangeFileButton => 'Choose a different file…';
+
+  @override
+  String get csvImportParsing => 'Reading file…';
+
+  @override
+  String csvImportSummary(int valid, int total) {
+    return '$valid of $total rows can be imported.';
+  }
+
+  @override
+  String csvImportRowError(int row, String reason) {
+    return 'Row $row: $reason';
+  }
+
+  @override
+  String get csvImportReasonMissingColumns =>
+      'Missing required columns (name, category, quantity, unit, storage location).';
+
+  @override
+  String get csvImportReasonNameMissing => 'Name is missing.';
+
+  @override
+  String csvImportReasonUnknownCategory(String value) {
+    return 'Unknown category \"$value\".';
+  }
+
+  @override
+  String csvImportReasonInvalidQuantity(String value) {
+    return 'Invalid quantity \"$value\".';
+  }
+
+  @override
+  String get csvImportReasonUnitMissing => 'Unit is missing.';
+
+  @override
+  String get csvImportReasonStorageLocationMissing =>
+      'Storage location is missing.';
+
+  @override
+  String csvImportReasonInvalidDate(String value) {
+    return 'Invalid date \"$value\".';
+  }
+
+  @override
+  String csvImportReasonInvalidMinQuantity(String value) {
+    return 'Invalid minimum quantity \"$value\".';
+  }
+
+  @override
+  String csvImportImportButton(int count) {
+    return 'Import $count rows';
+  }
+
+  @override
+  String csvImportSuccessMessage(int count) {
+    return '$count items imported.';
+  }
+
+  @override
+  String get csvImportNoValidRows => 'No valid rows found in this file.';
+
+  @override
+  String csvImportFileReadError(String error) {
+    return 'Could not read this file: $error';
+  }
+
+  @override
+  String get csvImportRowsSectionTitle => 'Rows';
+
+  @override
+  String csvImportRowLabel(int row) {
+    return 'Row $row';
+  }
+
+  @override
+  String get csvImportEditRowTooltip => 'Edit';
+
+  @override
+  String get csvImportRemoveRowTooltip => 'Remove from import';
+
+  @override
+  String get csvImportEditRowTitle => 'Edit row';
+
+  @override
+  String get cancelButton => 'Cancel';
 
   @override
   String get navChecklists => 'Checklists';
@@ -373,4 +533,153 @@ class AppLocalizationsEn extends AppLocalizations {
   String inventoryAttentionTooltip(int count) {
     return '$count item(s) low on stock or expired';
   }
+
+  @override
+  String get settingsAppearanceTitle => 'Appearance';
+
+  @override
+  String get themeSystemOption => 'System';
+
+  @override
+  String get themeLightOption => 'Light';
+
+  @override
+  String get themeDarkOption => 'Dark';
+
+  @override
+  String get settingsMyRegionTitle => 'My region';
+
+  @override
+  String get settingsNoRegionSet => 'No region set';
+
+  @override
+  String get settingsAdditionalRegionsTitle => 'Additional regions';
+
+  @override
+  String get settingsNoAdditionalRegions => 'No additional regions added yet.';
+
+  @override
+  String get settingsAddRegionButton => 'Add region';
+
+  @override
+  String get settingsAddRegionDialogTitle => 'Add region';
+
+  @override
+  String get settingsRegionTypeKreis => 'District (Kreis)';
+
+  @override
+  String get settingsRegionTypeBundesland => 'State (Bundesland)';
+
+  @override
+  String get settingsKreisSchluesselLabel => 'Kreisschlüssel (5 digits)';
+
+  @override
+  String get settingsKreisSchluesselInvalid =>
+      'Enter a 5-digit Kreisschlüssel.';
+
+  @override
+  String get settingsRegionLabelLabel => 'Label';
+
+  @override
+  String get settingsNotificationsTitle => 'Notifications';
+
+  @override
+  String get settingsNotificationsToggleLabel => 'Notify me about new warnings';
+
+  @override
+  String get settingsNotificationsToggleHint =>
+      'Local notifications only, while the app is running — no push server.';
+
+  @override
+  String get settingsUseLocationButton => 'Determine state via location';
+
+  @override
+  String settingsLocationErrorMessage(String error) {
+    return 'Couldn\'t determine your location: $error';
+  }
+
+  @override
+  String get settingsLocationNoMatchMessage =>
+      'Couldn\'t match your location to a German state.';
+
+  @override
+  String settingsLocationSuccessMessage(String state) {
+    return '$state added as an additional region.';
+  }
+
+  @override
+  String get shelterMapTitle => 'Shelters';
+
+  @override
+  String shelterInfoLine(int radius) {
+    return 'OpenStreetMap and WWBOTA/DLBOTA loaded within $radius km.';
+  }
+
+  @override
+  String get shelterLegendGreenLabel => 'Green';
+
+  @override
+  String get shelterLegendGreenDescription =>
+      'officially confirmed as a usable shelter';
+
+  @override
+  String get shelterLegendYellowLabel => 'Yellow';
+
+  @override
+  String get shelterLegendYellowDescription =>
+      'possible shelter, access/use unconfirmed';
+
+  @override
+  String get shelterLegendRedLabel => 'Red';
+
+  @override
+  String get shelterLegendRedDescription =>
+      'not released, historical, or informational only';
+
+  @override
+  String get shelterDisclaimer =>
+      'This map does not replace an official warning, evacuation, or emergency-response instruction.';
+
+  @override
+  String get shelterNoConfirmedShelters =>
+      'No currently released public shelters are known in Germany in the loaded official data. If that changes, they\'ll appear here in green.';
+
+  @override
+  String shelterFilterAll(int count) {
+    return 'All $count';
+  }
+
+  @override
+  String shelterFilterCount(String label, int count) {
+    return '$label $count';
+  }
+
+  @override
+  String get shelterSearchHint => 'Postal code or place';
+
+  @override
+  String get shelterSearchButton => 'Search';
+
+  @override
+  String get shelterSearchNoResult => 'No result found.';
+
+  @override
+  String get shelterUseLocationButton => 'Investigate current location';
+
+  @override
+  String get shelterRefreshButton => 'Refresh';
+
+  @override
+  String get shelterWwbotaErrorMessage => 'WWBOTA/DLBOTA could not be loaded.';
+
+  @override
+  String get shelterOverpassErrorMessage =>
+      'OpenStreetMap/Overpass could not be loaded.';
+
+  @override
+  String get shelterEmptyPrompt =>
+      'No location loaded yet. Use your current location or search for a place.';
+
+  @override
+  String get shelterAttribution => '© OpenStreetMap contributors';
 }

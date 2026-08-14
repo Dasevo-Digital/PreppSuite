@@ -11,7 +11,10 @@ void main() {
   // behavior for the placeholder/plural strings — the one place a
   // locale-specific formatting quirk could still slip through.
   group('parameterized strings resolve correctly for both locales', () {
-    for (final AppLocalizations l10n in [AppLocalizationsDe(), AppLocalizationsEn()]) {
+    for (final AppLocalizations l10n in [
+      AppLocalizationsDe(),
+      AppLocalizationsEn(),
+    ]) {
       final locale = l10n.localeName;
 
       test('[$locale] errorGeneric interpolates the error text', () {
@@ -47,8 +50,17 @@ void main() {
     }
   });
 
-  test('both locales are registered and resolvable via lookupAppLocalizations', () {
-    expect(lookupAppLocalizations(const Locale('de')), isA<AppLocalizationsDe>());
-    expect(lookupAppLocalizations(const Locale('en')), isA<AppLocalizationsEn>());
-  });
+  test(
+    'both locales are registered and resolvable via lookupAppLocalizations',
+    () {
+      expect(
+        lookupAppLocalizations(const Locale('de')),
+        isA<AppLocalizationsDe>(),
+      );
+      expect(
+        lookupAppLocalizations(const Locale('en')),
+        isA<AppLocalizationsEn>(),
+      );
+    },
+  );
 }

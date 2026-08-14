@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:preppsuite_client/preppsuite_client.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
-import '../../../core/locale_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../main.dart';
 import '../application/household_exception_l10n.dart';
@@ -113,58 +112,8 @@ class HouseholdOverviewScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.settingsSectionTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  title: Text(l10n.languageLabel),
-                  trailing: _LanguagePicker(l10n: l10n),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  title: Text(l10n.serverAddressLabel),
-                  subtitle: SelectableText(serverUrl),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
-    );
-  }
-}
-
-class _LanguagePicker extends ConsumerWidget {
-  const _LanguagePicker({required this.l10n});
-
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final current = ref.watch(localeOverrideProvider);
-
-    return DropdownButton<Locale?>(
-      value: current,
-      underline: const SizedBox.shrink(),
-      items: [
-        DropdownMenuItem(value: null, child: Text(l10n.languageSystemOption)),
-        DropdownMenuItem(
-          value: const Locale('de'),
-          child: Text(l10n.languageGermanOption),
-        ),
-        DropdownMenuItem(
-          value: const Locale('en'),
-          child: Text(l10n.languageEnglishOption),
-        ),
-      ],
-      onChanged: (locale) =>
-          ref.read(localeOverrideProvider.notifier).setLocale(locale),
     );
   }
 }

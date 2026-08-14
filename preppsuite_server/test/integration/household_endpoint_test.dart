@@ -199,5 +199,127 @@ void main() {
         expect(rotated.inviteCode, isNot(household.inviteCode));
       },
     );
+
+    test(
+      'when the owner updates the region then it is persisted',
+      () async {
+        final ownerSession = sessionBuilder.copyWith(
+          authentication: AuthenticationOverride.authenticationInfo(
+            await createAuthUser(),
+            {},
+          ),
+        );
+        final household = await endpoints.household.createHousehold(
+          ownerSession,
+          name: 'Region-Haushalt',
+          countryCode: 'DE',
+          regionKey: null,
+          displayName: 'Owner',
+        );
+
+        final updated = await endpoints.household.updateRegion(
+          ownerSession,
+          household.id!,
+          countryCode: 'DE',
+          regionKey: '053340000000',
+        );
+
+        expect(updated.regionKey, '053340000000');
+      },
+    );
+
+    test(
+      'when a non-owner updates the region then it throws',
+      () async {
+        final ownerSession = sessionBuilder.copyWith(
+          authentication: AuthenticationOverride.authenticationInfo(
+            await createAuthUser(),
+            {},
+          ),
+        );
+        final memberSession = sessionBuilder.copyWith(
+          authentication: AuthenticationOverride.authenticationInfo(
+            await createAuthUser(),
+            {},
+          ),
+        );
+        final household = await endpoints.household.createHousehold(
+          ownerSession,
+          name: 'Region-Haushalt-2',
+          countryCode: 'DE',
+          regionKey: null,
+          displayName: 'Owner',
+        );
+        await endpoints.household.joinHousehold(
+          memberSession,
+          inviteCode: household.inviteCode,
+          displayName: 'Member',
+        );
+
+        await expectLater(
+          endpoints.household.updateRegion(
+            memberSession,
+            household.id!,
+            countryCode: 'DE',
+            regionKey: '053340000000',
+          ),
+          throwsA(
+            isA<HouseholdException>().having(
+              (e) => e.reason,
+              'reason',
+              HouseholdExceptionReason.notOwner,
+            ),
+          ),
+        );
+      },
+    );
+
+    test(
+      'when the owner adds and removes a warning region subscription then '
+      'it round-trips through listWarningRegions',
+      () async {
+        final ownerSession = sessionBuilder.copyWith(
+          authentication: AuthenticationOverride.authenticationInfo(
+            await createAuthUser(),
+            {},
+          ),
+        );
+        final household = await endpoints.household.createHousehold(
+          ownerSession,
+          name: 'Abo-Haushalt',
+          countryCode: 'DE',
+          regionKey: null,
+          displayName: 'Owner',
+        );
+
+        final added = await endpoints.household.addWarningRegion(
+          ownerSession,
+          household.id!,
+          kind: WarningRegionKind.bundesland,
+          value: 'BY',
+          label: 'Bayern',
+        );
+        expect(added.value, 'BY');
+
+        final listed = await endpoints.household.listWarningRegions(
+          ownerSession,
+          household.id!,
+        );
+        expect(listed, hasLength(1));
+        expect(listed.single.label, 'Bayern');
+
+        await endpoints.household.removeWarningRegion(
+          ownerSession,
+          household.id!,
+          added.id!,
+        );
+
+        final afterRemoval = await endpoints.household.listWarningRegions(
+          ownerSession,
+          household.id!,
+        );
+        expect(afterRemoval, isEmpty);
+      },
+    );
   });
 }

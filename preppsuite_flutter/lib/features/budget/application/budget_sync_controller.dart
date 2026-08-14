@@ -43,8 +43,7 @@ class BudgetSyncController extends Notifier<AsyncValue<void>> {
   }
 }
 
-final budgetSyncControllerProvider = NotifierProvider.family<
-  BudgetSyncController,
-  AsyncValue<void>,
-  String
->(BudgetSyncController.new);
+final budgetSyncControllerProvider =
+    NotifierProvider.family<BudgetSyncController, AsyncValue<void>, String>(
+      BudgetSyncController.new,
+    );

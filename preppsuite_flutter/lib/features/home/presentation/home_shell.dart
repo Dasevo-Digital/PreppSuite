@@ -8,6 +8,8 @@ import '../../checklists/presentation/checklist_list_screen.dart';
 import '../../household/presentation/household_overview_screen.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/presentation/inventory_list_screen.dart';
+import '../../settings/presentation/settings_screen.dart';
+import '../../shelters/presentation/shelter_map_screen.dart';
 import '../../warnings/presentation/warning_banner.dart';
 
 /// Top-level navigation once a household exists. Only lists destinations
@@ -39,13 +41,17 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       ChecklistListScreen(householdId: householdId),
       BudgetListScreen(householdId: householdId),
       HouseholdOverviewScreen(membership: widget.membership),
+      SettingsScreen(membership: widget.membership),
+      const ShelterMapScreen(),
     ];
 
     return Scaffold(
       body: Column(
         children: [
-          WarningBanner(householdId: householdId),
-          Expanded(child: IndexedStack(index: _index, children: screens)),
+          WarningBanner(household: widget.membership.household),
+          Expanded(
+            child: IndexedStack(index: _index, children: screens),
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -79,6 +85,16 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             icon: const Icon(Icons.home_outlined),
             selectedIcon: const Icon(Icons.home),
             label: l10n.navHousehold,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: l10n.navSettings,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.shield_outlined),
+            selectedIcon: const Icon(Icons.shield),
+            label: l10n.navShelters,
           ),
         ],
       ),

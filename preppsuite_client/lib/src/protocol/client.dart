@@ -28,11 +28,15 @@ import 'package:preppsuite_client/src/protocol/households/models/household_membe
     as _i9;
 import 'package:preppsuite_client/src/protocol/households/models/household_member.dart'
     as _i10;
-import 'package:preppsuite_client/src/protocol/inventory/models/inventory_item.dart'
+import 'package:preppsuite_client/src/protocol/warnings/models/warning_region_subscription.dart'
     as _i11;
-import 'package:preppsuite_client/src/protocol/warnings/models/warning.dart'
+import 'package:preppsuite_client/src/protocol/warnings/models/warning_region_kind.dart'
     as _i12;
-import 'protocol.dart' as _i13;
+import 'package:preppsuite_client/src/protocol/inventory/models/inventory_item.dart'
+    as _i13;
+import 'package:preppsuite_client/src/protocol/warnings/models/warning.dart'
+    as _i14;
+import 'protocol.dart' as _i15;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -418,6 +422,64 @@ class EndpointHousehold extends _i2.EndpointRef {
         'rotateInviteCode',
         {'householdId': householdId},
       );
+
+  /// Updates the household's own country/region. Only the owner may do
+  /// this — it changes what every member sees in the warnings feed.
+  _i3.Future<_i8.Household> updateRegion(
+    _i2.UuidValue householdId, {
+    required String countryCode,
+    String? regionKey,
+  }) => caller.callServerEndpoint<_i8.Household>(
+    'household',
+    'updateRegion',
+    {
+      'householdId': householdId,
+      'countryCode': countryCode,
+      'regionKey': regionKey,
+    },
+  );
+
+  /// Lists a household's additional warning-region subscriptions (beyond
+  /// its own country/region).
+  _i3.Future<List<_i11.WarningRegionSubscription>> listWarningRegions(
+    _i2.UuidValue householdId,
+  ) => caller.callServerEndpoint<List<_i11.WarningRegionSubscription>>(
+    'household',
+    'listWarningRegions',
+    {'householdId': householdId},
+  );
+
+  /// Adds an additional region whose warnings the household wants to see.
+  /// Only the owner may do this.
+  _i3.Future<_i11.WarningRegionSubscription> addWarningRegion(
+    _i2.UuidValue householdId, {
+    required _i12.WarningRegionKind kind,
+    required String value,
+    required String label,
+  }) => caller.callServerEndpoint<_i11.WarningRegionSubscription>(
+    'household',
+    'addWarningRegion',
+    {
+      'householdId': householdId,
+      'kind': kind,
+      'value': value,
+      'label': label,
+    },
+  );
+
+  /// Removes an additional region subscription. Only the owner may do
+  /// this.
+  _i3.Future<void> removeWarningRegion(
+    _i2.UuidValue householdId,
+    _i2.UuidValue warningRegionSubscriptionId,
+  ) => caller.callServerEndpoint<void>(
+    'household',
+    'removeWarningRegion',
+    {
+      'householdId': householdId,
+      'warningRegionSubscriptionId': warningRegionSubscriptionId,
+    },
+  );
 }
 
 /// Delta sync for household inventory items. Accessed through
@@ -431,10 +493,10 @@ class EndpointInventory extends _i2.EndpointRef {
 
   /// Returns all inventory items (including tombstoned ones) for
   /// [householdId] changed after [since].
-  _i3.Future<List<_i11.InventoryItem>> pullInventoryChanges(
+  _i3.Future<List<_i13.InventoryItem>> pullInventoryChanges(
     _i2.UuidValue householdId,
     DateTime since,
-  ) => caller.callServerEndpoint<List<_i11.InventoryItem>>(
+  ) => caller.callServerEndpoint<List<_i13.InventoryItem>>(
     'inventory',
     'pullInventoryChanges',
     {
@@ -446,10 +508,10 @@ class EndpointInventory extends _i2.EndpointRef {
   /// Upserts [changes] for [householdId] and returns the canonical
   /// server-side rows (with server-assigned ids and re-stamped
   /// `updatedAt`) so the client can reconcile its local copies.
-  _i3.Future<List<_i11.InventoryItem>> pushInventoryChanges(
+  _i3.Future<List<_i13.InventoryItem>> pushInventoryChanges(
     _i2.UuidValue householdId,
-    List<_i11.InventoryItem> changes,
-  ) => caller.callServerEndpoint<List<_i11.InventoryItem>>(
+    List<_i13.InventoryItem> changes,
+  ) => caller.callServerEndpoint<List<_i13.InventoryItem>>(
     'inventory',
     'pushInventoryChanges',
     {
@@ -468,10 +530,10 @@ class EndpointWarning extends _i2.EndpointRef {
   @override
   String get name => 'warning';
 
-  _i3.Future<List<_i12.Warning>> pullWarnings(
+  _i3.Future<List<_i14.Warning>> pullWarnings(
     _i2.UuidValue householdId,
     DateTime since,
-  ) => caller.callServerEndpoint<List<_i12.Warning>>(
+  ) => caller.callServerEndpoint<List<_i14.Warning>>(
     'warning',
     'pullWarnings',
     {
@@ -512,7 +574,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i13.Protocol(),
+         _i15.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,

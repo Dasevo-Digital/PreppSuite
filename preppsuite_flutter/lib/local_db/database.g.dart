@@ -138,10 +138,32 @@ class $InventoryItemsTable extends InventoryItems
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _caloriesMeta = const VerificationMeta(
+    'calories',
+  );
+  @override
+  late final GeneratedColumn<int> calories = GeneratedColumn<int>(
+    'calories',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
     'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -196,7 +218,9 @@ class $InventoryItemsTable extends InventoryItems
     storageLocation,
     expirationDate,
     minQuantity,
+    calories,
     notes,
+    photoPath,
     updatedAt,
     deletedAt,
     dirty,
@@ -314,10 +338,22 @@ class $InventoryItemsTable extends InventoryItems
         ),
       );
     }
+    if (data.containsKey('calories')) {
+      context.handle(
+        _caloriesMeta,
+        calories.isAcceptableOrUnknown(data['calories']!, _caloriesMeta),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
         notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
       );
     }
     if (data.containsKey('updated_at')) {
@@ -397,9 +433,17 @@ class $InventoryItemsTable extends InventoryItems
         DriftSqlType.double,
         data['${effectivePrefix}min_quantity'],
       ),
+      calories: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}calories'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
+      ),
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
       ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -439,7 +483,20 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   final String storageLocation;
   final DateTime? expirationDate;
   final double? minQuantity;
+
+  /// Total kcal for the item's current [quantity] (not per-unit) — only
+  /// meaningful for `category: food`. Powers the "Vorräte für X Tage"
+  /// supply calculator (`supply_calculator.dart`).
+  final int? calories;
   final String? notes;
+
+  /// Path to a locally-stored photo of the item (see
+  /// `inventory_photo_service.dart`), relative to the app's documents
+  /// directory. Local-only for now — photo sync is a future server-side
+  /// feature (binary uploads need their own endpoint, not the generic
+  /// JSON push/pull sync channel; see docs/sync-protocol.md's treatment of
+  /// large assets like map tiles for the established precedent).
+  final String? photoPath;
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final bool dirty;
@@ -456,7 +513,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     required this.storageLocation,
     this.expirationDate,
     this.minQuantity,
+    this.calories,
     this.notes,
+    this.photoPath,
     required this.updatedAt,
     this.deletedAt,
     required this.dirty,
@@ -486,8 +545,14 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     if (!nullToAbsent || minQuantity != null) {
       map['min_quantity'] = Variable<double>(minQuantity);
     }
+    if (!nullToAbsent || calories != null) {
+      map['calories'] = Variable<int>(calories);
+    }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || photoPath != null) {
+      map['photo_path'] = Variable<String>(photoPath);
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -521,9 +586,15 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       minQuantity: minQuantity == null && nullToAbsent
           ? const Value.absent()
           : Value(minQuantity),
+      calories: calories == null && nullToAbsent
+          ? const Value.absent()
+          : Value(calories),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
+      photoPath: photoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoPath),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
@@ -550,7 +621,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       storageLocation: serializer.fromJson<String>(json['storageLocation']),
       expirationDate: serializer.fromJson<DateTime?>(json['expirationDate']),
       minQuantity: serializer.fromJson<double?>(json['minQuantity']),
+      calories: serializer.fromJson<int?>(json['calories']),
       notes: serializer.fromJson<String?>(json['notes']),
+      photoPath: serializer.fromJson<String?>(json['photoPath']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       dirty: serializer.fromJson<bool>(json['dirty']),
@@ -572,7 +645,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'storageLocation': serializer.toJson<String>(storageLocation),
       'expirationDate': serializer.toJson<DateTime?>(expirationDate),
       'minQuantity': serializer.toJson<double?>(minQuantity),
+      'calories': serializer.toJson<int?>(calories),
       'notes': serializer.toJson<String?>(notes),
+      'photoPath': serializer.toJson<String?>(photoPath),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'dirty': serializer.toJson<bool>(dirty),
@@ -592,7 +667,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     String? storageLocation,
     Value<DateTime?> expirationDate = const Value.absent(),
     Value<double?> minQuantity = const Value.absent(),
+    Value<int?> calories = const Value.absent(),
     Value<String?> notes = const Value.absent(),
+    Value<String?> photoPath = const Value.absent(),
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     bool? dirty,
@@ -611,7 +688,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
         ? expirationDate.value
         : this.expirationDate,
     minQuantity: minQuantity.present ? minQuantity.value : this.minQuantity,
+    calories: calories.present ? calories.value : this.calories,
     notes: notes.present ? notes.value : this.notes,
+    photoPath: photoPath.present ? photoPath.value : this.photoPath,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     dirty: dirty ?? this.dirty,
@@ -640,7 +719,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       minQuantity: data.minQuantity.present
           ? data.minQuantity.value
           : this.minQuantity,
+      calories: data.calories.present ? data.calories.value : this.calories,
       notes: data.notes.present ? data.notes.value : this.notes,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
@@ -662,7 +743,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ..write('storageLocation: $storageLocation, ')
           ..write('expirationDate: $expirationDate, ')
           ..write('minQuantity: $minQuantity, ')
+          ..write('calories: $calories, ')
           ..write('notes: $notes, ')
+          ..write('photoPath: $photoPath, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('dirty: $dirty')
@@ -684,7 +767,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     storageLocation,
     expirationDate,
     minQuantity,
+    calories,
     notes,
+    photoPath,
     updatedAt,
     deletedAt,
     dirty,
@@ -705,7 +790,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           other.storageLocation == this.storageLocation &&
           other.expirationDate == this.expirationDate &&
           other.minQuantity == this.minQuantity &&
+          other.calories == this.calories &&
           other.notes == this.notes &&
+          other.photoPath == this.photoPath &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.dirty == this.dirty);
@@ -724,7 +811,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<String> storageLocation;
   final Value<DateTime?> expirationDate;
   final Value<double?> minQuantity;
+  final Value<int?> calories;
   final Value<String?> notes;
+  final Value<String?> photoPath;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<bool> dirty;
@@ -742,7 +831,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.storageLocation = const Value.absent(),
     this.expirationDate = const Value.absent(),
     this.minQuantity = const Value.absent(),
+    this.calories = const Value.absent(),
     this.notes = const Value.absent(),
+    this.photoPath = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.dirty = const Value.absent(),
@@ -761,7 +852,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     required String storageLocation,
     this.expirationDate = const Value.absent(),
     this.minQuantity = const Value.absent(),
+    this.calories = const Value.absent(),
     this.notes = const Value.absent(),
+    this.photoPath = const Value.absent(),
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.dirty = const Value.absent(),
@@ -787,7 +880,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<String>? storageLocation,
     Expression<DateTime>? expirationDate,
     Expression<double>? minQuantity,
+    Expression<int>? calories,
     Expression<String>? notes,
+    Expression<String>? photoPath,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<bool>? dirty,
@@ -806,7 +901,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       if (storageLocation != null) 'storage_location': storageLocation,
       if (expirationDate != null) 'expiration_date': expirationDate,
       if (minQuantity != null) 'min_quantity': minQuantity,
+      if (calories != null) 'calories': calories,
       if (notes != null) 'notes': notes,
+      if (photoPath != null) 'photo_path': photoPath,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (dirty != null) 'dirty': dirty,
@@ -827,7 +924,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Value<String>? storageLocation,
     Value<DateTime?>? expirationDate,
     Value<double?>? minQuantity,
+    Value<int?>? calories,
     Value<String?>? notes,
+    Value<String?>? photoPath,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<bool>? dirty,
@@ -846,7 +945,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       storageLocation: storageLocation ?? this.storageLocation,
       expirationDate: expirationDate ?? this.expirationDate,
       minQuantity: minQuantity ?? this.minQuantity,
+      calories: calories ?? this.calories,
       notes: notes ?? this.notes,
+      photoPath: photoPath ?? this.photoPath,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       dirty: dirty ?? this.dirty,
@@ -893,8 +994,14 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     if (minQuantity.present) {
       map['min_quantity'] = Variable<double>(minQuantity.value);
     }
+    if (calories.present) {
+      map['calories'] = Variable<int>(calories.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
+    }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
     }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
@@ -926,7 +1033,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
           ..write('storageLocation: $storageLocation, ')
           ..write('expirationDate: $expirationDate, ')
           ..write('minQuantity: $minQuantity, ')
+          ..write('calories: $calories, ')
           ..write('notes: $notes, ')
+          ..write('photoPath: $photoPath, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('dirty: $dirty, ')
@@ -4025,7 +4134,9 @@ typedef $$InventoryItemsTableCreateCompanionBuilder =
       required String storageLocation,
       Value<DateTime?> expirationDate,
       Value<double?> minQuantity,
+      Value<int?> calories,
       Value<String?> notes,
+      Value<String?> photoPath,
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
       Value<bool> dirty,
@@ -4045,7 +4156,9 @@ typedef $$InventoryItemsTableUpdateCompanionBuilder =
       Value<String> storageLocation,
       Value<DateTime?> expirationDate,
       Value<double?> minQuantity,
+      Value<int?> calories,
       Value<String?> notes,
+      Value<String?> photoPath,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
       Value<bool> dirty,
@@ -4121,8 +4234,18 @@ class $$InventoryItemsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get calories => $composableBuilder(
+    column: $table.calories,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get notes => $composableBuilder(
     column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4211,8 +4334,18 @@ class $$InventoryItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get calories => $composableBuilder(
+    column: $table.calories,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get notes => $composableBuilder(
     column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4287,8 +4420,14 @@ class $$InventoryItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get calories =>
+      $composableBuilder(column: $table.calories, builder: (column) => column);
+
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get photoPath =>
+      $composableBuilder(column: $table.photoPath, builder: (column) => column);
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
@@ -4345,7 +4484,9 @@ class $$InventoryItemsTableTableManager
                 Value<String> storageLocation = const Value.absent(),
                 Value<DateTime?> expirationDate = const Value.absent(),
                 Value<double?> minQuantity = const Value.absent(),
+                Value<int?> calories = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<bool> dirty = const Value.absent(),
@@ -4363,7 +4504,9 @@ class $$InventoryItemsTableTableManager
                 storageLocation: storageLocation,
                 expirationDate: expirationDate,
                 minQuantity: minQuantity,
+                calories: calories,
                 notes: notes,
+                photoPath: photoPath,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 dirty: dirty,
@@ -4383,7 +4526,9 @@ class $$InventoryItemsTableTableManager
                 required String storageLocation,
                 Value<DateTime?> expirationDate = const Value.absent(),
                 Value<double?> minQuantity = const Value.absent(),
+                Value<int?> calories = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<bool> dirty = const Value.absent(),
@@ -4401,7 +4546,9 @@ class $$InventoryItemsTableTableManager
                 storageLocation: storageLocation,
                 expirationDate: expirationDate,
                 minQuantity: minQuantity,
+                calories: calories,
                 notes: notes,
+                photoPath: photoPath,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
                 dirty: dirty,

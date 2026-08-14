@@ -92,6 +92,7 @@ class InventoryService {
           storageLocation: incoming.storageLocation,
           expirationDate: incoming.expirationDate,
           minQuantity: incoming.minQuantity,
+          calories: incoming.calories,
           notes: incoming.notes,
           updatedAt: DateTime.now().toUtc(),
           deletedAt: incoming.deletedAt,
@@ -117,6 +118,7 @@ class InventoryService {
       ..storageLocation = incoming.storageLocation
       ..expirationDate = incoming.expirationDate
       ..minQuantity = incoming.minQuantity
+      ..calories = incoming.calories
       ..notes = incoming.notes
       ..updatedAt = DateTime.now().toUtc()
       ..deletedAt = incoming.deletedAt;

@@ -28,11 +28,15 @@ import 'package:preppsuite_server/src/generated/households/models/household_memb
     as _i9;
 import 'package:preppsuite_server/src/generated/households/models/household_member.dart'
     as _i10;
-import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
+import 'package:preppsuite_server/src/generated/warnings/models/warning_region_subscription.dart'
     as _i11;
-import 'package:preppsuite_server/src/generated/warnings/models/warning.dart'
+import 'package:preppsuite_server/src/generated/warnings/models/warning_region_kind.dart'
     as _i12;
-import 'package:preppsuite_server/src/generated/future_calls.dart' as _i13;
+import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
+    as _i13;
+import 'package:preppsuite_server/src/generated/warnings/models/warning.dart'
+    as _i14;
+import 'package:preppsuite_server/src/generated/future_calls.dart' as _i15;
 import 'package:preppsuite_server/src/generated/protocol.dart';
 import 'package:preppsuite_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -931,6 +935,148 @@ class _HouseholdEndpoint {
       }
     });
   }
+
+  _i3.Future<_i8.Household> updateRegion(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue householdId, {
+    required String countryCode,
+    String? regionKey,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'household',
+            method: 'updateRegion',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'household',
+          methodName: 'updateRegion',
+          parameters: _i1.testObjectToJson({
+            'householdId': householdId,
+            'countryCode': countryCode,
+            'regionKey': regionKey,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i8.Household>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i11.WarningRegionSubscription>> listWarningRegions(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue householdId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'household',
+            method: 'listWarningRegions',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'household',
+          methodName: 'listWarningRegions',
+          parameters: _i1.testObjectToJson({'householdId': householdId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<List<_i11.WarningRegionSubscription>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i11.WarningRegionSubscription> addWarningRegion(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue householdId, {
+    required _i12.WarningRegionKind kind,
+    required String value,
+    required String label,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'household',
+            method: 'addWarningRegion',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'household',
+          methodName: 'addWarningRegion',
+          parameters: _i1.testObjectToJson({
+            'householdId': householdId,
+            'kind': kind,
+            'value': value,
+            'label': label,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i11.WarningRegionSubscription>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<void> removeWarningRegion(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue householdId,
+    _i2.UuidValue warningRegionSubscriptionId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'household',
+            method: 'removeWarningRegion',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'household',
+          methodName: 'removeWarningRegion',
+          parameters: _i1.testObjectToJson({
+            'householdId': householdId,
+            'warningRegionSubscriptionId': warningRegionSubscriptionId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _InventoryEndpoint {
@@ -943,7 +1089,7 @@ class _InventoryEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<List<_i11.InventoryItem>> pullInventoryChanges(
+  _i3.Future<List<_i13.InventoryItem>> pullInventoryChanges(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue householdId,
     DateTime since,
@@ -970,7 +1116,7 @@ class _InventoryEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i11.InventoryItem>>);
+                as _i3.Future<List<_i13.InventoryItem>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -978,10 +1124,10 @@ class _InventoryEndpoint {
     });
   }
 
-  _i3.Future<List<_i11.InventoryItem>> pushInventoryChanges(
+  _i3.Future<List<_i13.InventoryItem>> pushInventoryChanges(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue householdId,
-    List<_i11.InventoryItem> changes,
+    List<_i13.InventoryItem> changes,
   ) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1005,7 +1151,7 @@ class _InventoryEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i11.InventoryItem>>);
+                as _i3.Future<List<_i13.InventoryItem>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1024,7 +1170,7 @@ class _WarningEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<List<_i12.Warning>> pullWarnings(
+  _i3.Future<List<_i14.Warning>> pullWarnings(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue householdId,
     DateTime since,
@@ -1051,7 +1197,7 @@ class _WarningEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i12.Warning>>);
+                as _i3.Future<List<_i14.Warning>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1068,7 +1214,7 @@ class _WarningPollFutureCall {
     var _localUniqueSession = (sessionBuilder as _i1.InternalTestSessionBuilder)
         .internalBuild();
     try {
-      await _i13.WarningPollInvokeFutureCall().invoke(
+      await _i15.WarningPollInvokeFutureCall().invoke(
         _localUniqueSession,
         object,
       );

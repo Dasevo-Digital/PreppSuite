@@ -45,8 +45,7 @@ class ChecklistSyncController extends Notifier<AsyncValue<void>> {
   }
 }
 
-final checklistSyncControllerProvider = NotifierProvider.family<
-  ChecklistSyncController,
-  AsyncValue<void>,
-  String
->(ChecklistSyncController.new);
+final checklistSyncControllerProvider =
+    NotifierProvider.family<ChecklistSyncController, AsyncValue<void>, String>(
+      ChecklistSyncController.new,
+    );

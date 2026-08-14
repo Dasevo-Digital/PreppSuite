@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart' show InventoryItemCategory;
+import 'package:preppsuite_client/preppsuite_client.dart'
+    show InventoryItemCategory;
 import 'package:uuid/uuid.dart';
 
 import '../../../local_db/database.dart';
@@ -84,7 +85,9 @@ class BudgetController {
   }
 
   void _triggerSync() {
-    _ref.read(budgetSyncControllerProvider(householdId).notifier).syncDebounced();
+    _ref
+        .read(budgetSyncControllerProvider(householdId).notifier)
+        .syncDebounced();
   }
 }
 

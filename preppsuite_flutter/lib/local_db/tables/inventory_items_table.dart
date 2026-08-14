@@ -23,7 +23,21 @@ class InventoryItems extends Table {
   TextColumn get storageLocation => text()();
   DateTimeColumn get expirationDate => dateTime().nullable()();
   RealColumn get minQuantity => real().nullable()();
+
+  /// Total kcal for the item's current [quantity] (not per-unit) — only
+  /// meaningful for `category: food`. Powers the "Vorräte für X Tage"
+  /// supply calculator (`supply_calculator.dart`).
+  IntColumn get calories => integer().nullable()();
+
   TextColumn get notes => text().nullable()();
+
+  /// Path to a locally-stored photo of the item (see
+  /// `inventory_photo_service.dart`), relative to the app's documents
+  /// directory. Local-only for now — photo sync is a future server-side
+  /// feature (binary uploads need their own endpoint, not the generic
+  /// JSON push/pull sync channel; see docs/sync-protocol.md's treatment of
+  /// large assets like map tiles for the established precedent).
+  TextColumn get photoPath => text().nullable()();
 
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

@@ -1,0 +1,11 @@
+### What a [WarningRegionSubscription.value] identifies.
+enum: WarningRegionKind
+serialized: byName
+values:
+  ### `value` is a 5-digit German Kreisschlüssel (district key) — the most
+  ### precise granularity the public BBK API supports (see
+  ### `services/german_states.dart` for why not full ARS/Gemeinde level).
+  - kreis
+
+  ### `value` is a 2-letter German state (Bundesland) code, e.g. "BY".
+  - bundesland

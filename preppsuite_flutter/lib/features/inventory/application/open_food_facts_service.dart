@@ -42,7 +42,11 @@ class OpenFoodFactsService {
         ProductQueryConfiguration(
           barcode,
           version: ProductQueryVersion.v3,
-          fields: [ProductField.NAME, ProductField.BRANDS, ProductField.QUANTITY],
+          fields: [
+            ProductField.NAME,
+            ProductField.BRANDS,
+            ProductField.QUANTITY,
+          ],
         ),
       );
 

@@ -42,8 +42,12 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final itemsAsync = ref.watch(checklistItemsProvider(widget.template.clientId));
-    final controller = ref.read(checklistControllerProvider(widget.householdId));
+    final itemsAsync = ref.watch(
+      checklistItemsProvider(widget.template.clientId),
+    );
+    final controller = ref.read(
+      checklistControllerProvider(widget.householdId),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.template.title)),

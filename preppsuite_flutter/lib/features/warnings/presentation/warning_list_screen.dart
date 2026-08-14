@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart' show WarningSource;
+import 'package:preppsuite_client/preppsuite_client.dart'
+    show Household, WarningSource;
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
+import '../../household/application/household_providers.dart';
 import '../application/warning_providers.dart';
+import '../application/warning_relevance.dart';
 import '../application/warning_severity_l10n.dart';
 
 class WarningListScreen extends ConsumerWidget {
-  const WarningListScreen({super.key});
+  const WarningListScreen({super.key, required this.household});
+
+  final Household household;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final warningsAsync = ref.watch(allWarningsProvider);
+    final subscriptions =
+        ref.watch(householdWarningRegionsProvider(household.id!)).value ??
+        const [];
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.warningsTitle)),
@@ -21,22 +29,57 @@ class WarningListScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>
             Center(child: Text(l10n.errorGeneric(error.toString()))),
-        data: (warnings) => warnings.isEmpty
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Text(
-                    l10n.warningsEmpty,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
+        data: (warnings) {
+          if (warnings.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  l10n.warningsEmpty,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
-              )
-            : ListView.builder(
-                itemCount: warnings.length,
-                itemBuilder: (context, index) =>
-                    _WarningTile(warning: warnings[index], l10n: l10n),
               ),
+            );
+          }
+
+          // "Show region-relevant warnings first" — relevance is the
+          // primary key here (unlike the banner, which prioritizes
+          // severity since it only ever shows a single, most-urgent
+          // warning); severity and recency break ties.
+          final sorted = [...warnings]
+            ..sort((a, b) {
+              final relevanceCompare =
+                  warningRelevanceRank(
+                    warning: b,
+                    household: household,
+                    subscriptions: subscriptions,
+                  ).compareTo(
+                    warningRelevanceRank(
+                      warning: a,
+                      household: household,
+                      subscriptions: subscriptions,
+                    ),
+                  );
+              if (relevanceCompare != 0) return relevanceCompare;
+
+              final severityCompare =
+                  warningSeverityRank(
+                    warningSeverityFromName(b.severity),
+                  ).compareTo(
+                    warningSeverityRank(warningSeverityFromName(a.severity)),
+                  );
+              if (severityCompare != 0) return severityCompare;
+
+              return b.sent.compareTo(a.sent);
+            });
+
+          return ListView.builder(
+            itemCount: sorted.length,
+            itemBuilder: (context, index) =>
+                _WarningTile(warning: sorted[index], l10n: l10n),
+          );
+        },
       ),
     );
   }
@@ -85,7 +128,9 @@ class _WarningTile extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               Text(
-                MaterialLocalizations.of(context).formatMediumDate(warning.sent),
+                MaterialLocalizations.of(
+                  context,
+                ).formatMediumDate(warning.sent),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],

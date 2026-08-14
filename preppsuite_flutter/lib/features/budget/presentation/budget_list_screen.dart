@@ -135,7 +135,10 @@ class _TotalCard extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(l10n.budgetTotalLabel, style: Theme.of(context).textTheme.titleMedium),
+            Text(
+              l10n.budgetTotalLabel,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
             Text(
               formatMoney(totalCents, currency),
               style: Theme.of(context).textTheme.titleLarge,
@@ -161,7 +164,11 @@ class _EntryTile extends ConsumerWidget {
       leading: Icon(categoryIcon(category)),
       title: Text(entry.label),
       subtitle: entry.purchaseDate != null
-          ? Text(MaterialLocalizations.of(context).formatMediumDate(entry.purchaseDate!))
+          ? Text(
+              MaterialLocalizations.of(
+                context,
+              ).formatMediumDate(entry.purchaseDate!),
+            )
           : null,
       trailing: Text(
         formatMoney(entry.amountCents, entry.currency),

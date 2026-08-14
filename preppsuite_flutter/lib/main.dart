@@ -5,6 +5,7 @@ import 'package:serverpod_flutter/serverpod_flutter.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import 'app.dart';
+import 'core/prefs_auth_storage.dart';
 import 'features/inventory/application/open_food_facts_service.dart';
 
 /// Global Serverpod client used to talk to the self-hosted backend.
@@ -29,7 +30,13 @@ void main() async {
 
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor()
-    ..authSessionManager = FlutterAuthSessionManager();
+    ..authSessionManager = FlutterAuthSessionManager(
+      // See PrefsAuthKeyValueStorage's doc comment: avoids needing a
+      // Keychain-Sharing entitlement, which needs real code signing.
+      storage: KeyValueClientAuthSuccessStorage(
+        keyValueStorage: PrefsAuthKeyValueStorage(),
+      ),
+    );
 
   client.auth.initialize();
 

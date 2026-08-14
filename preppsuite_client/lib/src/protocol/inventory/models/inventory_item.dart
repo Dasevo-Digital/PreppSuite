@@ -33,6 +33,7 @@ abstract class InventoryItem implements _i1.SerializableModel {
     required this.storageLocation,
     this.expirationDate,
     this.minQuantity,
+    this.calories,
     this.notes,
     DateTime? updatedAt,
     this.deletedAt,
@@ -52,6 +53,7 @@ abstract class InventoryItem implements _i1.SerializableModel {
     required String storageLocation,
     DateTime? expirationDate,
     double? minQuantity,
+    int? calories,
     String? notes,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -88,6 +90,7 @@ abstract class InventoryItem implements _i1.SerializableModel {
               jsonSerialization['expirationDate'],
             ),
       minQuantity: (jsonSerialization['minQuantity'] as num?)?.toDouble(),
+      calories: jsonSerialization['calories'] as int?,
       notes: jsonSerialization['notes'] as String?,
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
@@ -135,6 +138,11 @@ abstract class InventoryItem implements _i1.SerializableModel {
   /// Below this quantity, the item is flagged as low-stock.
   double? minQuantity;
 
+  /// Total kcal for the item's current [quantity] (not per-unit) — kept
+  /// deliberately optional and only meaningful for `category: food`.
+  /// Powers the "Vorräte für X Tage" supply calculator's calorie tally.
+  int? calories;
+
   String? notes;
 
   /// Server-stamped on every write; the authority for last-write-wins
@@ -162,6 +170,7 @@ abstract class InventoryItem implements _i1.SerializableModel {
     String? storageLocation,
     DateTime? expirationDate,
     double? minQuantity,
+    int? calories,
     String? notes,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -183,6 +192,7 @@ abstract class InventoryItem implements _i1.SerializableModel {
       'storageLocation': storageLocation,
       if (expirationDate != null) 'expirationDate': expirationDate?.toJson(),
       if (minQuantity != null) 'minQuantity': minQuantity,
+      if (calories != null) 'calories': calories,
       if (notes != null) 'notes': notes,
       'updatedAt': updatedAt.toJson(),
       if (deletedAt != null) 'deletedAt': deletedAt?.toJson(),
@@ -212,6 +222,7 @@ class _InventoryItemImpl extends InventoryItem {
     required String storageLocation,
     DateTime? expirationDate,
     double? minQuantity,
+    int? calories,
     String? notes,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -229,6 +240,7 @@ class _InventoryItemImpl extends InventoryItem {
          storageLocation: storageLocation,
          expirationDate: expirationDate,
          minQuantity: minQuantity,
+         calories: calories,
          notes: notes,
          updatedAt: updatedAt,
          deletedAt: deletedAt,
@@ -252,6 +264,7 @@ class _InventoryItemImpl extends InventoryItem {
     String? storageLocation,
     Object? expirationDate = _Undefined,
     Object? minQuantity = _Undefined,
+    Object? calories = _Undefined,
     Object? notes = _Undefined,
     DateTime? updatedAt,
     Object? deletedAt = _Undefined,
@@ -274,6 +287,7 @@ class _InventoryItemImpl extends InventoryItem {
           ? expirationDate
           : this.expirationDate,
       minQuantity: minQuantity is double? ? minQuantity : this.minQuantity,
+      calories: calories is int? ? calories : this.calories,
       notes: notes is String? ? notes : this.notes,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt is DateTime? ? deletedAt : this.deletedAt,

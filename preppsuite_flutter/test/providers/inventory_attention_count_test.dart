@@ -51,20 +51,28 @@ void main() {
       (_, _) {},
     );
     await container.read(inventoryItemsProvider('household-1').future);
-    final count = container.read(inventoryAttentionCountProvider('household-1'));
+    final count = container.read(
+      inventoryAttentionCountProvider('household-1'),
+    );
     sub.close();
     return count;
   }
 
   test('counts zero when nothing is low-stock or expired', () async {
-    await db.upsertInventoryItem(draft(clientId: 'a', quantity: 10, minQuantity: 2));
+    await db.upsertInventoryItem(
+      draft(clientId: 'a', quantity: 10, minQuantity: 2),
+    );
 
     expect(await attentionCountAfterSettling(), 0);
   });
 
   test('counts items below minimum quantity', () async {
-    await db.upsertInventoryItem(draft(clientId: 'low', quantity: 1, minQuantity: 5));
-    await db.upsertInventoryItem(draft(clientId: 'ok', quantity: 10, minQuantity: 5));
+    await db.upsertInventoryItem(
+      draft(clientId: 'low', quantity: 1, minQuantity: 5),
+    );
+    await db.upsertInventoryItem(
+      draft(clientId: 'ok', quantity: 10, minQuantity: 5),
+    );
 
     expect(await attentionCountAfterSettling(), 1);
   });

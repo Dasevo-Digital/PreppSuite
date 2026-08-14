@@ -1,9 +1,11 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart' show InventoryItemCategory;
+import 'package:preppsuite_client/preppsuite_client.dart'
+    show InventoryItemCategory;
 import 'package:uuid/uuid.dart';
 
 import '../../../local_db/database.dart';
+import 'inventory_csv_import.dart';
 import 'inventory_providers.dart';
 import 'inventory_sync_controller.dart';
 
@@ -28,6 +30,8 @@ class InventoryController {
     String? notes,
     String? barcode,
     String? offProductId,
+    String? photoPath,
+    int? calories,
   }) async {
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
@@ -43,6 +47,8 @@ class InventoryController {
         notes: Value(notes),
         barcode: Value(barcode),
         offProductId: Value(offProductId),
+        photoPath: Value(photoPath),
+        calories: Value(calories),
         updatedAt: DateTime.now().toUtc(),
       ),
     );
@@ -61,6 +67,8 @@ class InventoryController {
     String? notes,
     String? barcode,
     String? offProductId,
+    String? photoPath,
+    int? calories,
   }) async {
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
@@ -77,9 +85,34 @@ class InventoryController {
         expirationDate: Value(expirationDate),
         minQuantity: Value(minQuantity),
         notes: Value(notes),
+        photoPath: Value(photoPath),
+        calories: Value(calories),
         updatedAt: DateTime.now().toUtc(),
       ),
     );
+    _triggerSync();
+  }
+
+  /// Inserts many items in a single batch, e.g. from a CSV import. Each
+  /// row gets a fresh [clientId], same as [addItem].
+  Future<void> addItemsBulk(List<ParsedInventoryRow> rows) async {
+    if (rows.isEmpty) return;
+    await _db.upsertInventoryItems([
+      for (final row in rows)
+        InventoryItemsCompanion.insert(
+          clientId: const Uuid().v4(),
+          householdId: householdId,
+          name: row.name,
+          category: row.category.name,
+          quantity: row.quantity,
+          unit: row.unit,
+          storageLocation: row.storageLocation,
+          expirationDate: Value(row.expirationDate),
+          minQuantity: Value(row.minQuantity),
+          notes: Value(row.notes),
+          updatedAt: DateTime.now().toUtc(),
+        ),
+    ]);
     _triggerSync();
   }
 
@@ -99,6 +132,8 @@ class InventoryController {
         expirationDate: Value(existing.expirationDate),
         minQuantity: Value(existing.minQuantity),
         notes: Value(existing.notes),
+        photoPath: Value(existing.photoPath),
+        calories: Value(existing.calories),
         updatedAt: DateTime.now().toUtc(),
         deletedAt: Value(DateTime.now().toUtc()),
       ),
@@ -107,7 +142,9 @@ class InventoryController {
   }
 
   void _triggerSync() {
-    _ref.read(inventorySyncControllerProvider(householdId).notifier).syncDebounced();
+    _ref
+        .read(inventorySyncControllerProvider(householdId).notifier)
+        .syncDebounced();
   }
 }
 

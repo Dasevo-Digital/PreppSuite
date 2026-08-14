@@ -189,7 +189,9 @@ class SyncService {
       // since templates are pushed first in the same sync pass, but a
       // template push can fail independently) — leave dirty, retry later.
       if (template?.serverId == null) continue;
-      toPush.add(_itemToProto(row, proto.UuidValue.fromString(template!.serverId!)));
+      toPush.add(
+        _itemToProto(row, proto.UuidValue.fromString(template!.serverId!)),
+      );
     }
     if (toPush.isEmpty) return;
 
@@ -392,7 +394,11 @@ class SyncService {
 
   // --- Warnings (pull-only, server-generated) -------------------------
 
-  Future<void> syncWarnings(String householdId) async {
+  /// Returns the warnings that arrived/changed in this pull (empty if
+  /// nothing new), so callers can react to genuinely new ones — see
+  /// `WarningSyncController.syncNow`, which uses this to fire local
+  /// notifications without needing to separately diff the local DB.
+  Future<List<proto.Warning>> syncWarnings(String householdId) async {
     final id = proto.UuidValue.fromString(householdId);
     final since = await _db.lastPulledAt(_warningEntity) ?? DateTime.utc(2000);
     final changes = await client.warning.pullWarnings(id, since);
@@ -409,6 +415,7 @@ class SyncService {
     }
 
     await _db.pruneExpiredWarnings();
+    return changes;
   }
 
   WarningsCompanion _warningFromProto(proto.Warning warning) {

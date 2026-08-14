@@ -34,6 +34,11 @@ fields:
   ### Below this quantity, the item is flagged as low-stock.
   minQuantity: double?
 
+  ### Total kcal for the item's current [quantity] (not per-unit) — kept
+  ### deliberately optional and only meaningful for `category: food`.
+  ### Powers the "Vorräte für X Tage" supply calculator's calorie tally.
+  calories: int?
+
   notes: String?
 
   ### Server-stamped on every write; the authority for last-write-wins

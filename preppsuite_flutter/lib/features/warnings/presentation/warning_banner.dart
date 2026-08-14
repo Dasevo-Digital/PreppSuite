@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:preppsuite_client/preppsuite_client.dart' show Household;
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../household/application/household_providers.dart';
 import '../application/warning_providers.dart';
+import '../application/warning_relevance.dart';
 import '../application/warning_severity_l10n.dart';
 import '../application/warning_sync_controller.dart';
 import 'warning_list_screen.dart';
@@ -11,27 +14,51 @@ import 'warning_list_screen.dart';
 /// sit above the tab content in [HomeShell] so it's visible regardless of
 /// which tab is open.
 class WarningBanner extends ConsumerWidget {
-  const WarningBanner({super.key, required this.householdId});
+  const WarningBanner({super.key, required this.household});
 
-  final String householdId;
+  final Household household;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final householdId = household.id!.toString();
     // Keeps the pull-only warning sync alive for as long as any screen is
     // showing (this widget lives above all tabs in HomeShell).
     ref.watch(warningSyncControllerProvider(householdId));
     final l10n = AppLocalizations.of(context)!;
     final warningsAsync = ref.watch(activeWarningsProvider);
+    final subscriptions =
+        ref.watch(householdWarningRegionsProvider(household.id!)).value ??
+        const [];
 
     return warningsAsync.maybeWhen(
       data: (warnings) {
         if (warnings.isEmpty) return const SizedBox.shrink();
 
-        final sorted = [...warnings]..sort(
-          (a, b) => warningSeverityRank(
-            warningSeverityFromName(b.severity),
-          ).compareTo(warningSeverityRank(warningSeverityFromName(a.severity))),
-        );
+        // Severity is still the primary sort key — an extreme nationwide
+        // warning must never be buried behind a minor local one — but
+        // among warnings of the same severity, the more regionally
+        // relevant one surfaces first.
+        final sorted = [...warnings]
+          ..sort((a, b) {
+            final severityCompare =
+                warningSeverityRank(
+                  warningSeverityFromName(b.severity),
+                ).compareTo(
+                  warningSeverityRank(warningSeverityFromName(a.severity)),
+                );
+            if (severityCompare != 0) return severityCompare;
+            return warningRelevanceRank(
+              warning: b,
+              household: household,
+              subscriptions: subscriptions,
+            ).compareTo(
+              warningRelevanceRank(
+                warning: a,
+                household: household,
+                subscriptions: subscriptions,
+              ),
+            );
+          });
         final mostSevere = sorted.first;
         final severity = warningSeverityFromName(mostSevere.severity);
 
@@ -39,7 +66,9 @@ class WarningBanner extends ConsumerWidget {
           color: warningSeverityColor(context, severity),
           child: InkWell(
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const WarningListScreen()),
+              MaterialPageRoute(
+                builder: (_) => WarningListScreen(household: household),
+              ),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),

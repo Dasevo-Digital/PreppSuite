@@ -18,7 +18,10 @@ int warningSeverityRank(WarningSeverity severity) {
   };
 }
 
-String localizeWarningSeverity(AppLocalizations l10n, WarningSeverity severity) {
+String localizeWarningSeverity(
+  AppLocalizations l10n,
+  WarningSeverity severity,
+) {
   return switch (severity) {
     WarningSeverity.minor => l10n.warningSeverityMinor,
     WarningSeverity.moderate => l10n.warningSeverityModerate,

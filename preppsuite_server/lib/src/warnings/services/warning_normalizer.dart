@@ -18,6 +18,12 @@ class WarningNormalizer {
     Session session,
     List<BbkRawWarning> warnings, {
     required String countryCode,
+
+    /// When set (precise per-Kreis polling via `BbkClient.fetchDashboard`),
+    /// used as every warning's `regionKey` instead of the coarser
+    /// state-code guess parsed from the warning id. Null for the nationwide
+    /// `fetchAll()` poll, where the id-based guess is all we have.
+    String? regionKeyOverride,
   }) async {
     for (final warning in warnings) {
       await _upsert(
@@ -25,7 +31,7 @@ class WarningNormalizer {
         source: WarningSource.bbk,
         externalId: warning.id,
         countryCode: countryCode,
-        regionKey: _bbkRegionFromId(warning.id),
+        regionKey: regionKeyOverride ?? _bbkRegionFromId(warning.id),
         severity: _parseSeverity(warning.severity),
         eventType: warning.eventTitleDe,
         headline: warning.eventTitleDe,

@@ -29,20 +29,24 @@ import 'households/models/household_role.dart' as _i14;
 import 'inventory/models/inventory_item.dart' as _i15;
 import 'inventory/models/inventory_item_category.dart' as _i16;
 import 'warnings/models/warning.dart' as _i17;
-import 'warnings/models/warning_severity.dart' as _i18;
-import 'warnings/models/warning_source.dart' as _i19;
+import 'warnings/models/warning_region_kind.dart' as _i18;
+import 'warnings/models/warning_region_subscription.dart' as _i19;
+import 'warnings/models/warning_severity.dart' as _i20;
+import 'warnings/models/warning_source.dart' as _i21;
 import 'package:preppsuite_server/src/generated/budget/models/budget_entry.dart'
-    as _i20;
-import 'package:preppsuite_server/src/generated/checklists/models/checklist_template.dart'
-    as _i21;
-import 'package:preppsuite_server/src/generated/checklists/models/checklist_item.dart'
     as _i22;
-import 'package:preppsuite_server/src/generated/households/models/household_member.dart'
+import 'package:preppsuite_server/src/generated/checklists/models/checklist_template.dart'
     as _i23;
-import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
+import 'package:preppsuite_server/src/generated/checklists/models/checklist_item.dart'
     as _i24;
-import 'package:preppsuite_server/src/generated/warnings/models/warning.dart'
+import 'package:preppsuite_server/src/generated/households/models/household_member.dart'
     as _i25;
+import 'package:preppsuite_server/src/generated/warnings/models/warning_region_subscription.dart'
+    as _i26;
+import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
+    as _i27;
+import 'package:preppsuite_server/src/generated/warnings/models/warning.dart'
+    as _i28;
 export 'budget/models/budget_entry.dart';
 export 'checklists/models/checklist_category.dart';
 export 'checklists/models/checklist_item.dart';
@@ -56,6 +60,8 @@ export 'households/models/household_role.dart';
 export 'inventory/models/inventory_item.dart';
 export 'inventory/models/inventory_item_category.dart';
 export 'warnings/models/warning.dart';
+export 'warnings/models/warning_region_kind.dart';
+export 'warnings/models/warning_region_subscription.dart';
 export 'warnings/models/warning_severity.dart';
 export 'warnings/models/warning_source.dart';
 
@@ -738,6 +744,12 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'double?',
         ),
         _i2.ColumnDefinition(
+          name: 'calories',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: true,
+          dartType: 'int?',
+        ),
+        _i2.ColumnDefinition(
           name: 'notes',
           columnType: _i2.ColumnType.text,
           isNullable: true,
@@ -969,6 +981,100 @@ class Protocol extends _i1.SerializationManagerServer {
       ],
       managed: true,
     ),
+    _i2.TableDefinition(
+      name: 'warning_region_subscription',
+      dartName: 'WarningRegionSubscription',
+      schema: 'public',
+      module: 'preppsuite',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'householdId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'kind',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:WarningRegionKind',
+        ),
+        _i2.ColumnDefinition(
+          name: 'value',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'label',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'warning_region_subscription_fk_0',
+          columns: ['householdId'],
+          referenceTable: 'household',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'warning_region_subscription_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'warning_region_subscription_unique',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'householdId',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'kind',
+            ),
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'value',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
     ..._i3.Protocol.targetTableDefinitions,
     ..._i4.Protocol.targetTableDefinitions,
     ..._i2.Protocol.targetTableDefinitions,
@@ -1040,11 +1146,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i17.Warning) {
       return _i17.Warning.fromJson(data) as T;
     }
-    if (t == _i18.WarningSeverity) {
-      return _i18.WarningSeverity.fromJson(data) as T;
+    if (t == _i18.WarningRegionKind) {
+      return _i18.WarningRegionKind.fromJson(data) as T;
     }
-    if (t == _i19.WarningSource) {
-      return _i19.WarningSource.fromJson(data) as T;
+    if (t == _i19.WarningRegionSubscription) {
+      return _i19.WarningRegionSubscription.fromJson(data) as T;
+    }
+    if (t == _i20.WarningSeverity) {
+      return _i20.WarningSeverity.fromJson(data) as T;
+    }
+    if (t == _i21.WarningSource) {
+      return _i21.WarningSource.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.BudgetEntry?>()) {
       return (data != null ? _i5.BudgetEntry.fromJson(data) : null) as T;
@@ -1091,44 +1203,59 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i17.Warning?>()) {
       return (data != null ? _i17.Warning.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i18.WarningSeverity?>()) {
-      return (data != null ? _i18.WarningSeverity.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i18.WarningRegionKind?>()) {
+      return (data != null ? _i18.WarningRegionKind.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i19.WarningSource?>()) {
-      return (data != null ? _i19.WarningSource.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i19.WarningRegionSubscription?>()) {
+      return (data != null
+              ? _i19.WarningRegionSubscription.fromJson(data)
+              : null)
+          as T;
     }
-    if (t == List<_i20.BudgetEntry>) {
+    if (t == _i1.getType<_i20.WarningSeverity?>()) {
+      return (data != null ? _i20.WarningSeverity.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i21.WarningSource?>()) {
+      return (data != null ? _i21.WarningSource.fromJson(data) : null) as T;
+    }
+    if (t == List<_i22.BudgetEntry>) {
       return (data as List)
-              .map((e) => deserialize<_i20.BudgetEntry>(e))
+              .map((e) => deserialize<_i22.BudgetEntry>(e))
               .toList()
           as T;
     }
-    if (t == List<_i21.ChecklistTemplate>) {
+    if (t == List<_i23.ChecklistTemplate>) {
       return (data as List)
-              .map((e) => deserialize<_i21.ChecklistTemplate>(e))
+              .map((e) => deserialize<_i23.ChecklistTemplate>(e))
               .toList()
           as T;
     }
-    if (t == List<_i22.ChecklistItem>) {
+    if (t == List<_i24.ChecklistItem>) {
       return (data as List)
-              .map((e) => deserialize<_i22.ChecklistItem>(e))
+              .map((e) => deserialize<_i24.ChecklistItem>(e))
               .toList()
           as T;
     }
-    if (t == List<_i23.HouseholdMember>) {
+    if (t == List<_i25.HouseholdMember>) {
       return (data as List)
-              .map((e) => deserialize<_i23.HouseholdMember>(e))
+              .map((e) => deserialize<_i25.HouseholdMember>(e))
               .toList()
           as T;
     }
-    if (t == List<_i24.InventoryItem>) {
+    if (t == List<_i26.WarningRegionSubscription>) {
       return (data as List)
-              .map((e) => deserialize<_i24.InventoryItem>(e))
+              .map((e) => deserialize<_i26.WarningRegionSubscription>(e))
               .toList()
           as T;
     }
-    if (t == List<_i25.Warning>) {
-      return (data as List).map((e) => deserialize<_i25.Warning>(e)).toList()
+    if (t == List<_i27.InventoryItem>) {
+      return (data as List)
+              .map((e) => deserialize<_i27.InventoryItem>(e))
+              .toList()
+          as T;
+    }
+    if (t == List<_i28.Warning>) {
+      return (data as List).map((e) => deserialize<_i28.Warning>(e)).toList()
           as T;
     }
     try {
@@ -1158,8 +1285,10 @@ class Protocol extends _i1.SerializationManagerServer {
       _i15.InventoryItem => 'InventoryItem',
       _i16.InventoryItemCategory => 'InventoryItemCategory',
       _i17.Warning => 'Warning',
-      _i18.WarningSeverity => 'WarningSeverity',
-      _i19.WarningSource => 'WarningSource',
+      _i18.WarningRegionKind => 'WarningRegionKind',
+      _i19.WarningRegionSubscription => 'WarningRegionSubscription',
+      _i20.WarningSeverity => 'WarningSeverity',
+      _i21.WarningSource => 'WarningSource',
       _ => null,
     };
   }
@@ -1200,9 +1329,13 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'InventoryItemCategory';
       case _i17.Warning():
         return 'Warning';
-      case _i18.WarningSeverity():
+      case _i18.WarningRegionKind():
+        return 'WarningRegionKind';
+      case _i19.WarningRegionSubscription():
+        return 'WarningRegionSubscription';
+      case _i20.WarningSeverity():
         return 'WarningSeverity';
-      case _i19.WarningSource():
+      case _i21.WarningSource():
         return 'WarningSource';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1265,11 +1398,17 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Warning') {
       return deserialize<_i17.Warning>(data['data']);
     }
+    if (dataClassName == 'WarningRegionKind') {
+      return deserialize<_i18.WarningRegionKind>(data['data']);
+    }
+    if (dataClassName == 'WarningRegionSubscription') {
+      return deserialize<_i19.WarningRegionSubscription>(data['data']);
+    }
     if (dataClassName == 'WarningSeverity') {
-      return deserialize<_i18.WarningSeverity>(data['data']);
+      return deserialize<_i20.WarningSeverity>(data['data']);
     }
     if (dataClassName == 'WarningSource') {
-      return deserialize<_i19.WarningSource>(data['data']);
+      return deserialize<_i21.WarningSource>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1321,6 +1460,8 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i15.InventoryItem.t;
       case _i17.Warning:
         return _i17.Warning.t;
+      case _i19.WarningRegionSubscription:
+        return _i19.WarningRegionSubscription.t;
     }
     return null;
   }

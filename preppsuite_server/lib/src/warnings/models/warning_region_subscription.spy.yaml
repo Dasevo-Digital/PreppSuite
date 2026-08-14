@@ -1,0 +1,28 @@
+### An additional region (beyond a household's own `regionKey`) whose
+### warnings a household wants to see — e.g. a neighboring Kreis, or an
+### entire Bundesland. Purely additive: removing all of a household's
+### subscriptions doesn't affect its own `regionKey`-based relevance.
+class: WarningRegionSubscription
+table: warning_region_subscription
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+
+  household: Household?, relation(onDelete=Cascade)
+
+  kind: WarningRegionKind
+
+  ### A 5-digit Kreisschlüssel (kind=kreis) or 2-letter state code
+  ### (kind=bundesland).
+  value: String
+
+  ### Display name the client sent when adding this (Kreis or Bundesland
+  ### name) — there's no server-side lookup table for Kreis names, so this
+  ### is user/client-supplied rather than derived.
+  label: String
+
+  createdAt: DateTime, defaultModel=now
+
+indexes:
+  warning_region_subscription_unique:
+    fields: householdId, kind, value
+    unique: true

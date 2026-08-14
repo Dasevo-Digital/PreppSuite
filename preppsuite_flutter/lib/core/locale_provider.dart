@@ -41,6 +41,7 @@ class LocaleOverrideController extends Notifier<Locale?> {
   }
 }
 
-final localeOverrideProvider = NotifierProvider<LocaleOverrideController, Locale?>(
-  LocaleOverrideController.new,
-);
+final localeOverrideProvider =
+    NotifierProvider<LocaleOverrideController, Locale?>(
+      LocaleOverrideController.new,
+    );

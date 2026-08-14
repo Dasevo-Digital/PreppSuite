@@ -15,8 +15,7 @@ class CreateHouseholdScreen extends ConsumerStatefulWidget {
       _CreateHouseholdScreenState();
 }
 
-class _CreateHouseholdScreenState
-    extends ConsumerState<CreateHouseholdScreen> {
+class _CreateHouseholdScreenState extends ConsumerState<CreateHouseholdScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _regionKeyController = TextEditingController();
@@ -31,6 +30,24 @@ class _CreateHouseholdScreenState
     _regionKeyController.dispose();
     _displayNameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _showRegionKeyExplanation(AppLocalizations l10n) {
+    return showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.regionKeyExplanationTitle),
+        content: SingleChildScrollView(
+          child: Text(l10n.regionKeyExplanationBody),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.regionKeyExplanationClose),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _submit(AppLocalizations l10n) async {
@@ -112,6 +129,11 @@ class _CreateHouseholdScreenState
                         decoration: InputDecoration(
                           labelText: l10n.regionKeyLabel,
                           helperText: l10n.regionKeyHelper,
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.info_outline),
+                            tooltip: l10n.regionKeyExplanationTooltip,
+                            onPressed: () => _showRegionKeyExplanation(l10n),
+                          ),
                         ),
                       ),
                     ],

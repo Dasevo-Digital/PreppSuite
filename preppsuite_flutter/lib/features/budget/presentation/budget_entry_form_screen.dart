@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart' show InventoryItemCategory;
+import 'package:preppsuite_client/preppsuite_client.dart'
+    show InventoryItemCategory;
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
@@ -41,7 +42,9 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
     final existing = widget.existing;
     _labelController = TextEditingController(text: existing?.label ?? '');
     _amountController = TextEditingController(
-      text: existing != null ? (existing.amountCents / 100).toStringAsFixed(2) : '',
+      text: existing != null
+          ? (existing.amountCents / 100).toStringAsFixed(2)
+          : '',
     );
     _currency = existing?.currency ?? 'EUR';
     _category = existing != null
@@ -135,7 +138,9 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
                   children: [
                     TextFormField(
                       controller: _labelController,
-                      decoration: InputDecoration(labelText: l10n.budgetLabelLabel),
+                      decoration: InputDecoration(
+                        labelText: l10n.budgetLabelLabel,
+                      ),
                       validator: (value) =>
                           (value == null || value.trim().isEmpty)
                           ? l10n.fieldRequired
@@ -147,7 +152,9 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
                         Expanded(
                           child: TextFormField(
                             controller: _amountController,
-                            decoration: InputDecoration(labelText: l10n.amountLabel),
+                            decoration: InputDecoration(
+                              labelText: l10n.amountLabel,
+                            ),
                             keyboardType: const TextInputType.numberWithOptions(
                               decimal: true,
                             ),
@@ -164,7 +171,9 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             initialValue: _currency,
-                            decoration: InputDecoration(labelText: l10n.currencyLabel),
+                            decoration: InputDecoration(
+                              labelText: l10n.currencyLabel,
+                            ),
                             items: [
                               for (final currency in _currencies)
                                 DropdownMenuItem(
@@ -173,7 +182,9 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
                                 ),
                             ],
                             onChanged: (value) {
-                              if (value != null) setState(() => _currency = value);
+                              if (value != null) {
+                                setState(() => _currency = value);
+                              }
                             },
                           ),
                         ),
@@ -182,7 +193,9 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
                     const SizedBox(height: 16),
                     DropdownButtonFormField<InventoryItemCategory>(
                       initialValue: _category,
-                      decoration: InputDecoration(labelText: l10n.categoryLabel),
+                      decoration: InputDecoration(
+                        labelText: l10n.categoryLabel,
+                      ),
                       items: [
                         for (final category in InventoryItemCategory.values)
                           DropdownMenuItem(

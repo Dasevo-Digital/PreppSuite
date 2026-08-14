@@ -26,6 +26,8 @@
 	<string>$(PRODUCT_COPYRIGHT)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>PreppSuite verwendet die Kamera, um Barcodes von Vorratsartikeln zu scannen.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

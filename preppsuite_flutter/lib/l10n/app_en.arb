@@ -15,6 +15,10 @@
   "countryLabel": "Country",
   "regionKeyLabel": "Regional key (optional)",
   "regionKeyHelper": "Germany only, for more precise warnings",
+  "regionKeyExplanationTooltip": "What is this?",
+  "regionKeyExplanationTitle": "Official Regional Key (ARS)",
+  "regionKeyExplanationBody": "The \"amtlicher Regionalschlüssel\" (ARS) is a 12-digit code that German authorities use to uniquely identify every municipality, down to the district and locality level. It's issued by the national statistics office (Destatis) and used, among other things, to precisely scope official warnings (BBK/NINA) to your area instead of your entire federal state.\n\nWithout it, warnings are only filtered by country. With it, you get warnings specific to your municipality.\n\nYou can look up your municipality's ARS via the Federal Statistical Office's municipality directory (\"Gemeindeverzeichnis\") or your local BBK warning app. Leave this field empty if you don't know it — you can add it later in household settings.",
+  "regionKeyExplanationClose": "Got it",
   "displayNameLabel": "Your display name",
   "createButton": "Create",
 
@@ -44,6 +48,8 @@
 
   "navInventory": "Inventory",
   "navHousehold": "Household",
+  "navSettings": "Settings",
+  "navShelters": "Shelters",
 
   "inventoryTitle": "Inventory",
   "inventoryEmpty": "No items yet. Tap + to add your first one.",
@@ -65,6 +71,24 @@
   "storageLocationLabel": "Storage location",
   "expirationDateLabel": "Expiration date (optional)",
   "minQuantityLabel": "Minimum quantity (optional)",
+  "caloriesLabel": "Calories, total kcal (optional)",
+  "supplyCalculatorPersonCountLabel": "People",
+  "supplyCalculatorDaysLabel": "Supplies for {days} days",
+  "@supplyCalculatorDaysLabel": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "supplyCalculatorWaterLabel": "Drinking water",
+  "supplyCalculatorCaloriesLabel": "Calories",
+  "supplyCalculatorProgress": "{current} / {target} {unit}",
+  "@supplyCalculatorProgress": {
+    "placeholders": {
+      "current": {"type": "String"},
+      "target": {"type": "String"},
+      "unit": {"type": "String"}
+    }
+  },
   "notesLabel": "Notes (optional)",
   "saveButton": "Save",
   "deleteButton": "Delete",
@@ -80,6 +104,91 @@
     }
   },
   "productNotFound": "Product not found — fill in the details by hand.",
+  "itemPhotoLabel": "Photo",
+  "addPhotoButton": "Add photo",
+  "takePhotoButton": "Take photo",
+  "chooseFromGalleryButton": "Choose from gallery",
+  "removePhotoButton": "Remove photo",
+
+  "csvImportButton": "Import CSV",
+  "csvImportTitle": "Import CSV",
+  "csvImportInstructionsTitle": "Expected format",
+  "csvImportInstructionsBody": "The first row must be a header row. Required columns: name, category, quantity, unit, storageLocation. Optional columns: expirationDate, minQuantity, notes. German column names are also recognized (Name, Kategorie, Menge, Einheit, Lagerort, Ablaufdatum, Mindestbestand, Notizen).\n\nCategory: water, food, medical, tools, documents, energy, hygiene, or other (German names also work, e.g. Wasser, Lebensmittel).\nDates: YYYY-MM-DD or DD.MM.YYYY.\nNumbers: \".\" or \",\" as the decimal separator.\nDelimiter: \",\" or \";\", detected automatically.",
+  "csvImportPickFileButton": "Choose CSV file…",
+  "csvImportChangeFileButton": "Choose a different file…",
+  "csvImportParsing": "Reading file…",
+  "csvImportSummary": "{valid} of {total} rows can be imported.",
+  "@csvImportSummary": {
+    "placeholders": {
+      "valid": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "csvImportRowError": "Row {row}: {reason}",
+  "@csvImportRowError": {
+    "placeholders": {
+      "row": {"type": "int"},
+      "reason": {"type": "String"}
+    }
+  },
+  "csvImportReasonMissingColumns": "Missing required columns (name, category, quantity, unit, storage location).",
+  "csvImportReasonNameMissing": "Name is missing.",
+  "csvImportReasonUnknownCategory": "Unknown category \"{value}\".",
+  "@csvImportReasonUnknownCategory": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "csvImportReasonInvalidQuantity": "Invalid quantity \"{value}\".",
+  "@csvImportReasonInvalidQuantity": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "csvImportReasonUnitMissing": "Unit is missing.",
+  "csvImportReasonStorageLocationMissing": "Storage location is missing.",
+  "csvImportReasonInvalidDate": "Invalid date \"{value}\".",
+  "@csvImportReasonInvalidDate": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "csvImportReasonInvalidMinQuantity": "Invalid minimum quantity \"{value}\".",
+  "@csvImportReasonInvalidMinQuantity": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "csvImportImportButton": "Import {count} rows",
+  "@csvImportImportButton": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "csvImportSuccessMessage": "{count} items imported.",
+  "@csvImportSuccessMessage": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "csvImportNoValidRows": "No valid rows found in this file.",
+  "csvImportFileReadError": "Could not read this file: {error}",
+  "@csvImportFileReadError": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "csvImportRowsSectionTitle": "Rows",
+  "csvImportRowLabel": "Row {row}",
+  "@csvImportRowLabel": {
+    "placeholders": {
+      "row": {"type": "int"}
+    }
+  },
+  "csvImportEditRowTooltip": "Edit",
+  "csvImportRemoveRowTooltip": "Remove from import",
+  "csvImportEditRowTitle": "Edit row",
+  "cancelButton": "Cancel",
 
   "navChecklists": "Checklists",
   "navBudget": "Budget",
@@ -161,5 +270,80 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  }
+  },
+
+  "settingsAppearanceTitle": "Appearance",
+  "themeSystemOption": "System",
+  "themeLightOption": "Light",
+  "themeDarkOption": "Dark",
+
+  "settingsMyRegionTitle": "My region",
+  "settingsNoRegionSet": "No region set",
+
+  "settingsAdditionalRegionsTitle": "Additional regions",
+  "settingsNoAdditionalRegions": "No additional regions added yet.",
+  "settingsAddRegionButton": "Add region",
+  "settingsAddRegionDialogTitle": "Add region",
+  "settingsRegionTypeKreis": "District (Kreis)",
+  "settingsRegionTypeBundesland": "State (Bundesland)",
+  "settingsKreisSchluesselLabel": "Kreisschlüssel (5 digits)",
+  "settingsKreisSchluesselInvalid": "Enter a 5-digit Kreisschlüssel.",
+  "settingsRegionLabelLabel": "Label",
+
+  "settingsNotificationsTitle": "Notifications",
+  "settingsNotificationsToggleLabel": "Notify me about new warnings",
+  "settingsNotificationsToggleHint": "Local notifications only, while the app is running — no push server.",
+
+  "settingsUseLocationButton": "Determine state via location",
+  "settingsLocationErrorMessage": "Couldn't determine your location: {error}",
+  "@settingsLocationErrorMessage": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "settingsLocationNoMatchMessage": "Couldn't match your location to a German state.",
+  "settingsLocationSuccessMessage": "{state} added as an additional region.",
+  "@settingsLocationSuccessMessage": {
+    "placeholders": {
+      "state": {"type": "String"}
+    }
+  },
+
+  "shelterMapTitle": "Shelters",
+  "shelterInfoLine": "OpenStreetMap and WWBOTA/DLBOTA loaded within {radius} km.",
+  "@shelterInfoLine": {
+    "placeholders": {
+      "radius": {"type": "int"}
+    }
+  },
+  "shelterLegendGreenLabel": "Green",
+  "shelterLegendGreenDescription": "officially confirmed as a usable shelter",
+  "shelterLegendYellowLabel": "Yellow",
+  "shelterLegendYellowDescription": "possible shelter, access/use unconfirmed",
+  "shelterLegendRedLabel": "Red",
+  "shelterLegendRedDescription": "not released, historical, or informational only",
+  "shelterDisclaimer": "This map does not replace an official warning, evacuation, or emergency-response instruction.",
+  "shelterNoConfirmedShelters": "No currently released public shelters are known in Germany in the loaded official data. If that changes, they'll appear here in green.",
+  "shelterFilterAll": "All {count}",
+  "@shelterFilterAll": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "shelterFilterCount": "{label} {count}",
+  "@shelterFilterCount": {
+    "placeholders": {
+      "label": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  },
+  "shelterSearchHint": "Postal code or place",
+  "shelterSearchButton": "Search",
+  "shelterSearchNoResult": "No result found.",
+  "shelterUseLocationButton": "Investigate current location",
+  "shelterRefreshButton": "Refresh",
+  "shelterWwbotaErrorMessage": "WWBOTA/DLBOTA could not be loaded.",
+  "shelterOverpassErrorMessage": "OpenStreetMap/Overpass could not be loaded.",
+  "shelterEmptyPrompt": "No location loaded yet. Use your current location or search for a place.",
+  "shelterAttribution": "© OpenStreetMap contributors"
 }

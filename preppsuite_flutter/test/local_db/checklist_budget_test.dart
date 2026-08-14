@@ -78,7 +78,11 @@ void main() {
           draftTemplate(clientId: 'own', householdId: 'household-1'),
         );
         await db.upsertChecklistTemplate(
-          draftTemplate(clientId: 'built-in', householdId: null, isBuiltIn: true),
+          draftTemplate(
+            clientId: 'built-in',
+            householdId: null,
+            isBuiltIn: true,
+          ),
         );
         await db.upsertChecklistTemplate(
           draftTemplate(clientId: 'other', householdId: 'household-2'),
@@ -102,18 +106,21 @@ void main() {
       },
     );
 
-    test('checklistTemplateByClientId and byServerId find the same row', () async {
-      await db.upsertChecklistTemplate(draftTemplate(clientId: 'a'));
-      await db.markChecklistTemplatesSynced([
-        ('a', 'server-a', DateTime.utc(2026, 3)),
-      ]);
+    test(
+      'checklistTemplateByClientId and byServerId find the same row',
+      () async {
+        await db.upsertChecklistTemplate(draftTemplate(clientId: 'a'));
+        await db.markChecklistTemplatesSynced([
+          ('a', 'server-a', DateTime.utc(2026, 3)),
+        ]);
 
-      final byClient = await db.checklistTemplateByClientId('a');
-      final byServer = await db.checklistTemplateByServerId('server-a');
+        final byClient = await db.checklistTemplateByClientId('a');
+        final byServer = await db.checklistTemplateByServerId('server-a');
 
-      expect(byClient?.clientId, 'a');
-      expect(byServer?.clientId, 'a');
-    });
+        expect(byClient?.clientId, 'a');
+        expect(byServer?.clientId, 'a');
+      },
+    );
 
     test('dirtyChecklistTemplates excludes built-ins (never locally dirty '
         'under this household)', () async {
@@ -136,10 +143,18 @@ void main() {
       'sortOrder',
       () async {
         await db.upsertChecklistItem(
-          draftItem(clientId: 'b', templateClientId: 'template-1', sortOrder: 1),
+          draftItem(
+            clientId: 'b',
+            templateClientId: 'template-1',
+            sortOrder: 1,
+          ),
         );
         await db.upsertChecklistItem(
-          draftItem(clientId: 'a', templateClientId: 'template-1', sortOrder: 0),
+          draftItem(
+            clientId: 'a',
+            templateClientId: 'template-1',
+            sortOrder: 0,
+          ),
         );
         await db.upsertChecklistItem(
           draftItem(clientId: 'c', templateClientId: 'template-2'),
@@ -172,7 +187,9 @@ void main() {
   group('budget entries', () {
     test('watchBudgetEntries returns only the given household, newest '
         'purchase first', () async {
-      await db.upsertBudgetEntry(draftBudget(clientId: 'other', householdId: 'household-2'));
+      await db.upsertBudgetEntry(
+        draftBudget(clientId: 'other', householdId: 'household-2'),
+      );
       await db.upsertBudgetEntry(
         draftBudget(clientId: 'a', deletedAt: DateTime.utc(2026, 2)),
       );

@@ -35,6 +35,7 @@ abstract class InventoryItem
     required this.storageLocation,
     this.expirationDate,
     this.minQuantity,
+    this.calories,
     this.notes,
     DateTime? updatedAt,
     this.deletedAt,
@@ -54,6 +55,7 @@ abstract class InventoryItem
     required String storageLocation,
     DateTime? expirationDate,
     double? minQuantity,
+    int? calories,
     String? notes,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -90,6 +92,7 @@ abstract class InventoryItem
               jsonSerialization['expirationDate'],
             ),
       minQuantity: (jsonSerialization['minQuantity'] as num?)?.toDouble(),
+      calories: jsonSerialization['calories'] as int?,
       notes: jsonSerialization['notes'] as String?,
       updatedAt: jsonSerialization['updatedAt'] == null
           ? null
@@ -139,6 +142,11 @@ abstract class InventoryItem
   /// Below this quantity, the item is flagged as low-stock.
   double? minQuantity;
 
+  /// Total kcal for the item's current [quantity] (not per-unit) — kept
+  /// deliberately optional and only meaningful for `category: food`.
+  /// Powers the "Vorräte für X Tage" supply calculator's calorie tally.
+  int? calories;
+
   String? notes;
 
   /// Server-stamped on every write; the authority for last-write-wins
@@ -169,6 +177,7 @@ abstract class InventoryItem
     String? storageLocation,
     DateTime? expirationDate,
     double? minQuantity,
+    int? calories,
     String? notes,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -190,6 +199,7 @@ abstract class InventoryItem
       'storageLocation': storageLocation,
       if (expirationDate != null) 'expirationDate': expirationDate?.toJson(),
       if (minQuantity != null) 'minQuantity': minQuantity,
+      if (calories != null) 'calories': calories,
       if (notes != null) 'notes': notes,
       'updatedAt': updatedAt.toJson(),
       if (deletedAt != null) 'deletedAt': deletedAt?.toJson(),
@@ -213,6 +223,7 @@ abstract class InventoryItem
       'storageLocation': storageLocation,
       if (expirationDate != null) 'expirationDate': expirationDate?.toJson(),
       if (minQuantity != null) 'minQuantity': minQuantity,
+      if (calories != null) 'calories': calories,
       if (notes != null) 'notes': notes,
       'updatedAt': updatedAt.toJson(),
       if (deletedAt != null) 'deletedAt': deletedAt?.toJson(),
@@ -266,6 +277,7 @@ class _InventoryItemImpl extends InventoryItem {
     required String storageLocation,
     DateTime? expirationDate,
     double? minQuantity,
+    int? calories,
     String? notes,
     DateTime? updatedAt,
     DateTime? deletedAt,
@@ -283,6 +295,7 @@ class _InventoryItemImpl extends InventoryItem {
          storageLocation: storageLocation,
          expirationDate: expirationDate,
          minQuantity: minQuantity,
+         calories: calories,
          notes: notes,
          updatedAt: updatedAt,
          deletedAt: deletedAt,
@@ -306,6 +319,7 @@ class _InventoryItemImpl extends InventoryItem {
     String? storageLocation,
     Object? expirationDate = _Undefined,
     Object? minQuantity = _Undefined,
+    Object? calories = _Undefined,
     Object? notes = _Undefined,
     DateTime? updatedAt,
     Object? deletedAt = _Undefined,
@@ -328,6 +342,7 @@ class _InventoryItemImpl extends InventoryItem {
           ? expirationDate
           : this.expirationDate,
       minQuantity: minQuantity is double? ? minQuantity : this.minQuantity,
+      calories: calories is int? ? calories : this.calories,
       notes: notes is String? ? notes : this.notes,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt is DateTime? ? deletedAt : this.deletedAt,
@@ -400,6 +415,11 @@ class InventoryItemUpdateTable extends _i1.UpdateTable<InventoryItemTable> {
     value,
   );
 
+  _i1.ColumnValue<int, int> calories(int? value) => _i1.ColumnValue(
+    table.calories,
+    value,
+  );
+
   _i1.ColumnValue<String, String> notes(String? value) => _i1.ColumnValue(
     table.notes,
     value,
@@ -467,6 +487,10 @@ class InventoryItemTable extends _i1.Table<_i1.UuidValue?> {
       'minQuantity',
       this,
     );
+    calories = _i1.ColumnInt(
+      'calories',
+      this,
+    );
     notes = _i1.ColumnString(
       'notes',
       this,
@@ -515,6 +539,11 @@ class InventoryItemTable extends _i1.Table<_i1.UuidValue?> {
   /// Below this quantity, the item is flagged as low-stock.
   late final _i1.ColumnDouble minQuantity;
 
+  /// Total kcal for the item's current [quantity] (not per-unit) — kept
+  /// deliberately optional and only meaningful for `category: food`.
+  /// Powers the "Vorräte für X Tage" supply calculator's calorie tally.
+  late final _i1.ColumnInt calories;
+
   late final _i1.ColumnString notes;
 
   /// Server-stamped on every write; the authority for last-write-wins
@@ -552,6 +581,7 @@ class InventoryItemTable extends _i1.Table<_i1.UuidValue?> {
     storageLocation,
     expirationDate,
     minQuantity,
+    calories,
     notes,
     updatedAt,
     deletedAt,

@@ -47,8 +47,7 @@ class InventorySyncController extends Notifier<AsyncValue<void>> {
   }
 }
 
-final inventorySyncControllerProvider = NotifierProvider.family<
-  InventorySyncController,
-  AsyncValue<void>,
-  String
->(InventorySyncController.new);
+final inventorySyncControllerProvider =
+    NotifierProvider.family<InventorySyncController, AsyncValue<void>, String>(
+      InventorySyncController.new,
+    );

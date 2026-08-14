@@ -147,6 +147,92 @@ class HouseholdService {
     return Household.db.updateRow(session, household);
   }
 
+  /// Updates the household's own country/region — the primary scope used
+  /// for warning relevance (see `WarningService.isWarningRelevant`).
+  /// Owner-only, since it changes what every member sees.
+  Future<Household> updateRegion(
+    Session session, {
+    required UuidValue householdId,
+    required String countryCode,
+    String? regionKey,
+  }) async {
+    final member = await requireMember(session, householdId: householdId);
+    if (member.role != HouseholdRole.owner) {
+      throw HouseholdException(reason: HouseholdExceptionReason.notOwner);
+    }
+
+    final household = await Household.db.findById(session, householdId);
+    if (household == null) {
+      throw HouseholdException(reason: HouseholdExceptionReason.notAMember);
+    }
+
+    household
+      ..countryCode = countryCode
+      ..regionKey = regionKey;
+    return Household.db.updateRow(session, household);
+  }
+
+  /// Additional regions (beyond the household's own) whose warnings this
+  /// household wants to see. Readable by any member.
+  Future<List<WarningRegionSubscription>> listWarningRegions(
+    Session session, {
+    required UuidValue householdId,
+  }) async {
+    await requireMember(session, householdId: householdId);
+
+    return WarningRegionSubscription.db.find(
+      session,
+      where: (t) => t.householdId.equals(householdId),
+      orderBy: (t) => t.createdAt,
+    );
+  }
+
+  /// Owner-only, same reasoning as [updateRegion].
+  Future<WarningRegionSubscription> addWarningRegion(
+    Session session, {
+    required UuidValue householdId,
+    required WarningRegionKind kind,
+    required String value,
+    required String label,
+  }) async {
+    final member = await requireMember(session, householdId: householdId);
+    if (member.role != HouseholdRole.owner) {
+      throw HouseholdException(reason: HouseholdExceptionReason.notOwner);
+    }
+
+    return WarningRegionSubscription.db.insertRow(
+      session,
+      WarningRegionSubscription(
+        householdId: householdId,
+        kind: kind,
+        value: value,
+        label: label,
+        createdAt: DateTime.now().toUtc(),
+      ),
+    );
+  }
+
+  /// Owner-only, same reasoning as [updateRegion].
+  Future<void> removeWarningRegion(
+    Session session, {
+    required UuidValue householdId,
+    required UuidValue warningRegionSubscriptionId,
+  }) async {
+    final member = await requireMember(session, householdId: householdId);
+    if (member.role != HouseholdRole.owner) {
+      throw HouseholdException(reason: HouseholdExceptionReason.notOwner);
+    }
+
+    final subscription = await WarningRegionSubscription.db.findById(
+      session,
+      warningRegionSubscriptionId,
+    );
+    if (subscription == null || subscription.householdId != householdId) {
+      return;
+    }
+    await WarningRegionSubscription.db.deleteRow(session, subscription);
+  }
+
   /// Verifies the currently authenticated user is a member of [householdId]
   /// and returns their membership row. Every household-scoped endpoint
   /// (inventory/checklist/budget/warning) must call this before reading or

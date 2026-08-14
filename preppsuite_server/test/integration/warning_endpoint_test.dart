@@ -20,12 +20,13 @@ void main() {
     Future<UuidValue> createHousehold(
       TestSessionBuilder session, {
       required String countryCode,
+      String? regionKey,
     }) async {
       final household = await endpoints.household.createHousehold(
         session,
         name: 'Test-Haushalt',
         countryCode: countryCode,
-        regionKey: null,
+        regionKey: regionKey,
         displayName: 'Tester',
       );
       return household.id!;
@@ -35,6 +36,7 @@ void main() {
       Session dbSession, {
       required String externalId,
       required String countryCode,
+      String? regionKey,
     }) async {
       await Warning.db.insertRow(
         dbSession,
@@ -42,6 +44,7 @@ void main() {
           source: WarningSource.bbk,
           externalId: externalId,
           countryCode: countryCode,
+          regionKey: regionKey,
           severity: WarningSeverity.moderate,
           eventType: 'Test event',
           headline: 'Test warning',
@@ -126,6 +129,68 @@ void main() {
         );
 
         expect(pulled.map((w) => w.externalId), ['new']);
+      },
+    );
+
+    test(
+      "when a household has a region set then only warnings in its own "
+      'Kreis/state or an added subscription are returned',
+      () async {
+        final session = await memberSession();
+        final householdId = await createHousehold(
+          session,
+          countryCode: 'DE',
+          regionKey: '053340000000', // Städteregion Aachen (NW)
+        );
+        await endpoints.household.addWarningRegion(
+          session,
+          householdId,
+          kind: WarningRegionKind.bundesland,
+          value: 'BY',
+          label: 'Bayern',
+        );
+
+        await insertWarning(
+          sessionBuilder.build(),
+          externalId: 'own-kreis',
+          countryCode: 'DE',
+          regionKey: '05334',
+        );
+        await insertWarning(
+          sessionBuilder.build(),
+          externalId: 'own-state',
+          countryCode: 'DE',
+          regionKey: 'NW',
+        );
+        await insertWarning(
+          sessionBuilder.build(),
+          externalId: 'subscribed-state',
+          countryCode: 'DE',
+          regionKey: 'BY',
+        );
+        await insertWarning(
+          sessionBuilder.build(),
+          externalId: 'unrelated-state',
+          countryCode: 'DE',
+          regionKey: 'SN',
+        );
+        await insertWarning(
+          sessionBuilder.build(),
+          externalId: 'nationwide',
+          countryCode: 'DE',
+          regionKey: null,
+        );
+
+        final pulled = await endpoints.warning.pullWarnings(
+          session,
+          householdId,
+          DateTime.utc(2000),
+        );
+
+        expect(
+          pulled.map((w) => w.externalId).toSet(),
+          {'own-kreis', 'own-state', 'subscribed-state', 'nationwide'},
+        );
       },
     );
   });

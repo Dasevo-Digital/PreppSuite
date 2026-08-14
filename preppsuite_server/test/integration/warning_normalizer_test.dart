@@ -86,6 +86,43 @@ void main() {
     );
 
     test(
+      'when upserting from the per-Kreis dashboard endpoint then the '
+      'precise Kreisschlüssel overrides the id-parsed state code',
+      () async {
+        final session = sessionBuilder.build();
+        final fixture = await File(
+          'test/fixtures/bbk_dashboard_sample.json',
+        ).readAsString();
+        final client = BbkClient(
+          httpClient: FixtureHttpClient({
+            'https://warnung.bund.de/api31/dashboard/053340000000.json':
+                fixture,
+          }),
+        );
+
+        await normalizer.upsertBbk(
+          session,
+          await client.fetchDashboard('05334'),
+          countryCode: 'DE',
+          regionKeyOverride: '05334',
+        );
+
+        final stored = await Warning.db.find(
+          session,
+          where: (t) => t.source.equals(WarningSource.bbk),
+        );
+
+        expect(stored, hasLength(2));
+        expect(stored.every((w) => w.regionKey == '05334'), isTrue);
+        expect(stored.every((w) => w.severity == WarningSeverity.minor), isTrue);
+        expect(
+          stored.first.sent.toIso8601String(),
+          startsWith('2026-08-13'),
+        );
+      },
+    );
+
+    test(
       'when the same external id is upserted twice with an unchanged sent '
       'timestamp then it does not duplicate or bump updatedAt',
       () async {

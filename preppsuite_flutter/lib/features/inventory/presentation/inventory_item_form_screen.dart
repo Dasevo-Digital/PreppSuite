@@ -1,11 +1,16 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart' show InventoryItemCategory;
+import 'package:preppsuite_client/preppsuite_client.dart'
+    show InventoryItemCategory;
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/inventory_category_l10n.dart';
 import '../application/inventory_controller.dart';
+import '../application/inventory_photo_service.dart';
 import '../application/open_food_facts_service.dart';
 import 'barcode_scanner_screen.dart';
 
@@ -32,13 +37,21 @@ class _InventoryItemFormScreenState
   late final TextEditingController _unitController;
   late final TextEditingController _storageLocationController;
   late final TextEditingController _minQuantityController;
+  late final TextEditingController _caloriesController;
   late final TextEditingController _notesController;
   late InventoryItemCategory _category;
   DateTime? _expirationDate;
   String? _barcode;
   String? _offProductId;
+  String? _photoPath;
   bool _isSubmitting = false;
   bool _isScanning = false;
+
+  /// Camera capture needs a platform delegate `image_picker` doesn't wire
+  /// up on desktop (see `InventoryPhotoService.pickFromCamera`) — offer it
+  /// only where it actually works out of the box.
+  bool get _cameraAvailable =>
+      !kIsWeb && !Platform.isMacOS && !Platform.isWindows && !Platform.isLinux;
 
   bool get _isEditing => widget.existing != null;
 
@@ -59,6 +72,9 @@ class _InventoryItemFormScreenState
           ? _formatNumber(existing!.minQuantity!)
           : '',
     );
+    _caloriesController = TextEditingController(
+      text: existing?.calories != null ? '${existing!.calories}' : '',
+    );
     _notesController = TextEditingController(text: existing?.notes ?? '');
     _category = existing != null
         ? InventoryItemCategoryX.fromName(existing.category)
@@ -66,6 +82,7 @@ class _InventoryItemFormScreenState
     _expirationDate = existing?.expirationDate;
     _barcode = existing?.barcode;
     _offProductId = existing?.offProductId;
+    _photoPath = existing?.photoPath;
   }
 
   @override
@@ -75,6 +92,7 @@ class _InventoryItemFormScreenState
     _unitController.dispose();
     _storageLocationController.dispose();
     _minQuantityController.dispose();
+    _caloriesController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -123,6 +141,65 @@ class _InventoryItemFormScreenState
     }
   }
 
+  Future<void> _replacePhoto(String? newPath) async {
+    if (newPath == null) return;
+    final oldPath = _photoPath;
+    setState(() => _photoPath = newPath);
+    // Only delete the old file once the new one is confirmed in place, so a
+    // failed pick never loses an existing photo.
+    if (oldPath != null && oldPath != newPath) {
+      await const InventoryPhotoService().delete(oldPath);
+    }
+  }
+
+  Future<void> _removePhoto() async {
+    final oldPath = _photoPath;
+    setState(() => _photoPath = null);
+    await const InventoryPhotoService().delete(oldPath);
+  }
+
+  Future<void> _showPhotoOptions() async {
+    final l10n = AppLocalizations.of(context)!;
+    const service = InventoryPhotoService();
+
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_cameraAvailable)
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined),
+                title: Text(l10n.takePhotoButton),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _replacePhoto(await service.pickFromCamera());
+                },
+              ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(l10n.chooseFromGalleryButton),
+              onTap: () async {
+                Navigator.of(context).pop();
+                await _replacePhoto(await service.pickFromGallery());
+              },
+            ),
+            if (_photoPath != null)
+              ListTile(
+                leading: const Icon(Icons.delete_outline),
+                title: Text(l10n.removePhotoButton),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _removePhoto();
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -135,6 +212,8 @@ class _InventoryItemFormScreenState
     final minQuantity = minQuantityText.isEmpty
         ? null
         : double.parse(minQuantityText);
+    final caloriesText = _caloriesController.text.trim();
+    final calories = caloriesText.isEmpty ? null : int.parse(caloriesText);
     final notes = _notesController.text.trim();
 
     if (_isEditing) {
@@ -150,6 +229,8 @@ class _InventoryItemFormScreenState
         notes: notes.isEmpty ? null : notes,
         barcode: _barcode,
         offProductId: _offProductId,
+        photoPath: _photoPath,
+        calories: calories,
       );
     } else {
       await controller.addItem(
@@ -163,6 +244,8 @@ class _InventoryItemFormScreenState
         notes: notes.isEmpty ? null : notes,
         barcode: _barcode,
         offProductId: _offProductId,
+        photoPath: _photoPath,
+        calories: calories,
       );
     }
 
@@ -209,13 +292,22 @@ class _InventoryItemFormScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Center(
+                      child: _PhotoPicker(
+                        photoPath: _photoPath,
+                        onTap: _isSubmitting ? null : _showPhotoOptions,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                     if (_barcode != null) ...[
                       Chip(
                         avatar: _isScanning
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.qr_code, size: 18),
                         label: Text(l10n.scannedBarcodeLabel(_barcode!)),
@@ -228,7 +320,9 @@ class _InventoryItemFormScreenState
                     ],
                     TextFormField(
                       controller: _nameController,
-                      decoration: InputDecoration(labelText: l10n.itemNameLabel),
+                      decoration: InputDecoration(
+                        labelText: l10n.itemNameLabel,
+                      ),
                       validator: (value) =>
                           (value == null || value.trim().isEmpty)
                           ? l10n.fieldRequired
@@ -237,7 +331,9 @@ class _InventoryItemFormScreenState
                     const SizedBox(height: 16),
                     DropdownButtonFormField<InventoryItemCategory>(
                       initialValue: _category,
-                      decoration: InputDecoration(labelText: l10n.categoryLabel),
+                      decoration: InputDecoration(
+                        labelText: l10n.categoryLabel,
+                      ),
                       items: [
                         for (final category in InventoryItemCategory.values)
                           DropdownMenuItem(
@@ -268,7 +364,9 @@ class _InventoryItemFormScreenState
                         Expanded(
                           child: TextFormField(
                             controller: _unitController,
-                            decoration: InputDecoration(labelText: l10n.unitLabel),
+                            decoration: InputDecoration(
+                              labelText: l10n.unitLabel,
+                            ),
                             validator: (value) =>
                                 (value == null || value.trim().isEmpty)
                                 ? l10n.fieldRequired
@@ -320,6 +418,23 @@ class _InventoryItemFormScreenState
                       ),
                       validator: _numberValidator(l10n, required: false),
                     ),
+                    if (_category == InventoryItemCategory.food) ...[
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _caloriesController,
+                        decoration: InputDecoration(
+                          labelText: l10n.caloriesLabel,
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) {
+                          final trimmed = value?.trim() ?? '';
+                          if (trimmed.isEmpty) return null;
+                          return int.tryParse(trimmed) == null
+                              ? l10n.invalidNumber
+                              : null;
+                        },
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _notesController,
@@ -358,5 +473,58 @@ class _InventoryItemFormScreenState
       }
       return double.tryParse(trimmed) == null ? l10n.invalidNumber : null;
     };
+  }
+}
+
+/// A tappable square that shows the item's photo, or a placeholder icon
+/// with an "add photo" affordance if there isn't one yet.
+class _PhotoPicker extends StatelessWidget {
+  const _PhotoPicker({required this.photoPath, required this.onTap});
+
+  final String? photoPath;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final photoPath = this.photoPath;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Semantics(
+        label: l10n.itemPhotoLabel,
+        image: photoPath != null,
+        button: true,
+        child: Container(
+          width: 120,
+          height: 120,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: colorScheme.surfaceContainerHighest,
+            border: Border.all(color: colorScheme.outlineVariant),
+          ),
+          child: photoPath != null
+              ? Image.file(File(photoPath), fit: BoxFit.cover)
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_a_photo_outlined,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.addPhotoButton,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+        ),
+      ),
+    );
   }
 }

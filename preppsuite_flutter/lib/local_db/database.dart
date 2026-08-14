@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -39,6 +39,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 3) {
         await m.createTable(warnings);
       }
+      if (from < 4) {
+        await m.addColumn(inventoryItems, inventoryItems.photoPath);
+      }
+      if (from < 5) {
+        await m.addColumn(inventoryItems, inventoryItems.calories);
+      }
     },
   );
 
@@ -46,7 +52,9 @@ class AppDatabase extends _$AppDatabase {
 
   Stream<List<InventoryItem>> watchInventoryItems(String householdId) {
     return (select(inventoryItems)
-          ..where((t) => t.householdId.equals(householdId) & t.deletedAt.isNull())
+          ..where(
+            (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
+          )
           ..orderBy([(t) => OrderingTerm.asc(t.name)]))
         .watch();
   }
@@ -66,6 +74,12 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> upsertInventoryItem(InventoryItemsCompanion item) {
     return into(inventoryItems).insertOnConflictUpdate(item);
+  }
+
+  /// Used by CSV import so hundreds of rows commit as a single batch
+  /// instead of one write (and one sync nudge) per row.
+  Future<void> upsertInventoryItems(List<InventoryItemsCompanion> items) {
+    return batch((b) => b.insertAllOnConflictUpdate(inventoryItems, items));
   }
 
   Future<List<InventoryItem>> dirtyInventoryItems(String householdId) {
@@ -215,7 +229,9 @@ class AppDatabase extends _$AppDatabase {
 
   Stream<List<BudgetEntry>> watchBudgetEntries(String householdId) {
     return (select(budgetEntries)
-          ..where((t) => t.householdId.equals(householdId) & t.deletedAt.isNull())
+          ..where(
+            (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
+          )
           ..orderBy([(t) => OrderingTerm.desc(t.purchaseDate)]))
         .watch();
   }
@@ -257,7 +273,11 @@ class AppDatabase extends _$AppDatabase {
   /// instead (see `warning_severity_l10n.dart`).
   Stream<List<Warning>> watchActiveWarnings() {
     return (select(warnings)
-          ..where((t) => t.expires.isNull() | t.expires.isBiggerThanValue(DateTime.now()))
+          ..where(
+            (t) =>
+                t.expires.isNull() |
+                t.expires.isBiggerThanValue(DateTime.now()),
+          )
           ..orderBy([(t) => OrderingTerm.desc(t.sent)]))
         .watch();
   }
@@ -275,7 +295,9 @@ class AppDatabase extends _$AppDatabase {
 
   /// Keeps the local cache from growing forever — long-expired warnings
   /// aren't useful history for a household to scroll through.
-  Future<void> pruneExpiredWarnings({Duration retention = const Duration(days: 30)}) {
+  Future<void> pruneExpiredWarnings({
+    Duration retention = const Duration(days: 30),
+  }) {
     final cutoff = DateTime.now().subtract(retention);
     return (delete(
       warnings,

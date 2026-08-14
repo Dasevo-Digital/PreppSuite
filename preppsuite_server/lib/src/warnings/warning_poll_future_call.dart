@@ -54,12 +54,32 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
   }
 
   Future<void> _pollOnce(Session session) async {
-    final countryCodes = await _distinctHouseholdCountryCodes(session);
+    final households = await Household.db.find(session);
+    final countryCodes = households.map((h) => h.countryCode).toSet();
     if (countryCodes.isEmpty) return;
 
     if (countryCodes.contains('DE')) {
+      // Nationwide pass: cheap fallback for households without a region set,
+      // and the only source of (coarser, state-level) precision for
+      // `bundesland`-kind subscriptions, since there's no dedicated
+      // state-wide BBK endpoint.
       final bbkWarnings = await _bbkClient.fetchAll();
       await _normalizer.upsertBbk(session, bbkWarnings, countryCode: 'DE');
+
+      for (final kreisSchluessel in await _distinctKreisSchluessel(
+        session,
+        households,
+      )) {
+        final dashboardWarnings = await _bbkClient.fetchDashboard(
+          kreisSchluessel,
+        );
+        await _normalizer.upsertBbk(
+          session,
+          dashboardWarnings,
+          countryCode: 'DE',
+          regionKeyOverride: kreisSchluessel,
+        );
+      }
     }
 
     for (final countryCode in countryCodes) {
@@ -75,8 +95,31 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
     }
   }
 
-  Future<Set<String>> _distinctHouseholdCountryCodes(Session session) async {
-    final households = await Household.db.find(session);
-    return households.map((h) => h.countryCode).toSet();
+  /// Every distinct 5-digit Kreisschlüssel worth polling precisely: each
+  /// household's own `regionKey` (first 5 digits) plus every household's
+  /// `kind: kreis` [WarningRegionSubscription]s. Households sharing a
+  /// district only cause one fetch, not one per household.
+  Future<Set<String>> _distinctKreisSchluessel(
+    Session session,
+    List<Household> households,
+  ) async {
+    final result = <String>{};
+
+    for (final household in households) {
+      final regionKey = household.regionKey;
+      if (regionKey != null && regionKey.length >= 5) {
+        result.add(regionKey.substring(0, 5));
+      }
+    }
+
+    final subscriptions = await WarningRegionSubscription.db.find(
+      session,
+      where: (t) => t.kind.equals(WarningRegionKind.kreis),
+    );
+    for (final subscription in subscriptions) {
+      result.add(subscription.value);
+    }
+
+    return result;
   }
 }

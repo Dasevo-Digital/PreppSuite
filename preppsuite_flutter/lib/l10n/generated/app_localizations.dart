@@ -164,6 +164,30 @@ abstract class AppLocalizations {
   /// **'Germany only, for more precise warnings'**
   String get regionKeyHelper;
 
+  /// No description provided for @regionKeyExplanationTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'What is this?'**
+  String get regionKeyExplanationTooltip;
+
+  /// No description provided for @regionKeyExplanationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Official Regional Key (ARS)'**
+  String get regionKeyExplanationTitle;
+
+  /// No description provided for @regionKeyExplanationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The \"amtlicher Regionalschlüssel\" (ARS) is a 12-digit code that German authorities use to uniquely identify every municipality, down to the district and locality level. It\'s issued by the national statistics office (Destatis) and used, among other things, to precisely scope official warnings (BBK/NINA) to your area instead of your entire federal state.\n\nWithout it, warnings are only filtered by country. With it, you get warnings specific to your municipality.\n\nYou can look up your municipality\'s ARS via the Federal Statistical Office\'s municipality directory (\"Gemeindeverzeichnis\") or your local BBK warning app. Leave this field empty if you don\'t know it — you can add it later in household settings.'**
+  String get regionKeyExplanationBody;
+
+  /// No description provided for @regionKeyExplanationClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get regionKeyExplanationClose;
+
   /// No description provided for @displayNameLabel.
   ///
   /// In en, this message translates to:
@@ -283,6 +307,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Household'**
   String get navHousehold;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// No description provided for @navShelters.
+  ///
+  /// In en, this message translates to:
+  /// **'Shelters'**
+  String get navShelters;
 
   /// No description provided for @inventoryTitle.
   ///
@@ -404,6 +440,42 @@ abstract class AppLocalizations {
   /// **'Minimum quantity (optional)'**
   String get minQuantityLabel;
 
+  /// No description provided for @caloriesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories, total kcal (optional)'**
+  String get caloriesLabel;
+
+  /// No description provided for @supplyCalculatorPersonCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get supplyCalculatorPersonCountLabel;
+
+  /// No description provided for @supplyCalculatorDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplies for {days} days'**
+  String supplyCalculatorDaysLabel(int days);
+
+  /// No description provided for @supplyCalculatorWaterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Drinking water'**
+  String get supplyCalculatorWaterLabel;
+
+  /// No description provided for @supplyCalculatorCaloriesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories'**
+  String get supplyCalculatorCaloriesLabel;
+
+  /// No description provided for @supplyCalculatorProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} / {target} {unit}'**
+  String supplyCalculatorProgress(String current, String target, String unit);
+
   /// No description provided for @notesLabel.
   ///
   /// In en, this message translates to:
@@ -463,6 +535,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Product not found — fill in the details by hand.'**
   String get productNotFound;
+
+  /// No description provided for @itemPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get itemPhotoLabel;
+
+  /// No description provided for @addPhotoButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get addPhotoButton;
+
+  /// No description provided for @takePhotoButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get takePhotoButton;
+
+  /// No description provided for @chooseFromGalleryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get chooseFromGalleryButton;
+
+  /// No description provided for @removePhotoButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get removePhotoButton;
+
+  /// No description provided for @csvImportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Import CSV'**
+  String get csvImportButton;
+
+  /// No description provided for @csvImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import CSV'**
+  String get csvImportTitle;
+
+  /// No description provided for @csvImportInstructionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected format'**
+  String get csvImportInstructionsTitle;
+
+  /// No description provided for @csvImportInstructionsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The first row must be a header row. Required columns: name, category, quantity, unit, storageLocation. Optional columns: expirationDate, minQuantity, notes. German column names are also recognized (Name, Kategorie, Menge, Einheit, Lagerort, Ablaufdatum, Mindestbestand, Notizen).\n\nCategory: water, food, medical, tools, documents, energy, hygiene, or other (German names also work, e.g. Wasser, Lebensmittel).\nDates: YYYY-MM-DD or DD.MM.YYYY.\nNumbers: \".\" or \",\" as the decimal separator.\nDelimiter: \",\" or \";\", detected automatically.'**
+  String get csvImportInstructionsBody;
+
+  /// No description provided for @csvImportPickFileButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose CSV file…'**
+  String get csvImportPickFileButton;
+
+  /// No description provided for @csvImportChangeFileButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a different file…'**
+  String get csvImportChangeFileButton;
+
+  /// No description provided for @csvImportParsing.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading file…'**
+  String get csvImportParsing;
+
+  /// No description provided for @csvImportSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{valid} of {total} rows can be imported.'**
+  String csvImportSummary(int valid, int total);
+
+  /// No description provided for @csvImportRowError.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row}: {reason}'**
+  String csvImportRowError(int row, String reason);
+
+  /// No description provided for @csvImportReasonMissingColumns.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing required columns (name, category, quantity, unit, storage location).'**
+  String get csvImportReasonMissingColumns;
+
+  /// No description provided for @csvImportReasonNameMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Name is missing.'**
+  String get csvImportReasonNameMissing;
+
+  /// No description provided for @csvImportReasonUnknownCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown category \"{value}\".'**
+  String csvImportReasonUnknownCategory(String value);
+
+  /// No description provided for @csvImportReasonInvalidQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid quantity \"{value}\".'**
+  String csvImportReasonInvalidQuantity(String value);
+
+  /// No description provided for @csvImportReasonUnitMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit is missing.'**
+  String get csvImportReasonUnitMissing;
+
+  /// No description provided for @csvImportReasonStorageLocationMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage location is missing.'**
+  String get csvImportReasonStorageLocationMissing;
+
+  /// No description provided for @csvImportReasonInvalidDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid date \"{value}\".'**
+  String csvImportReasonInvalidDate(String value);
+
+  /// No description provided for @csvImportReasonInvalidMinQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid minimum quantity \"{value}\".'**
+  String csvImportReasonInvalidMinQuantity(String value);
+
+  /// No description provided for @csvImportImportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Import {count} rows'**
+  String csvImportImportButton(int count);
+
+  /// No description provided for @csvImportSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items imported.'**
+  String csvImportSuccessMessage(int count);
+
+  /// No description provided for @csvImportNoValidRows.
+  ///
+  /// In en, this message translates to:
+  /// **'No valid rows found in this file.'**
+  String get csvImportNoValidRows;
+
+  /// No description provided for @csvImportFileReadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read this file: {error}'**
+  String csvImportFileReadError(String error);
+
+  /// No description provided for @csvImportRowsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rows'**
+  String get csvImportRowsSectionTitle;
+
+  /// No description provided for @csvImportRowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Row {row}'**
+  String csvImportRowLabel(int row);
+
+  /// No description provided for @csvImportEditRowTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get csvImportEditRowTooltip;
+
+  /// No description provided for @csvImportRemoveRowTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from import'**
+  String get csvImportRemoveRowTooltip;
+
+  /// No description provided for @csvImportEditRowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit row'**
+  String get csvImportEditRowTitle;
+
+  /// No description provided for @cancelButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelButton;
 
   /// No description provided for @navChecklists.
   ///
@@ -793,6 +1057,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} item(s) low on stock or expired'**
   String inventoryAttentionTooltip(int count);
+
+  /// No description provided for @settingsAppearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearanceTitle;
+
+  /// No description provided for @themeSystemOption.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystemOption;
+
+  /// No description provided for @themeLightOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLightOption;
+
+  /// No description provided for @themeDarkOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDarkOption;
+
+  /// No description provided for @settingsMyRegionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My region'**
+  String get settingsMyRegionTitle;
+
+  /// No description provided for @settingsNoRegionSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No region set'**
+  String get settingsNoRegionSet;
+
+  /// No description provided for @settingsAdditionalRegionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional regions'**
+  String get settingsAdditionalRegionsTitle;
+
+  /// No description provided for @settingsNoAdditionalRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'No additional regions added yet.'**
+  String get settingsNoAdditionalRegions;
+
+  /// No description provided for @settingsAddRegionButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add region'**
+  String get settingsAddRegionButton;
+
+  /// No description provided for @settingsAddRegionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add region'**
+  String get settingsAddRegionDialogTitle;
+
+  /// No description provided for @settingsRegionTypeKreis.
+  ///
+  /// In en, this message translates to:
+  /// **'District (Kreis)'**
+  String get settingsRegionTypeKreis;
+
+  /// No description provided for @settingsRegionTypeBundesland.
+  ///
+  /// In en, this message translates to:
+  /// **'State (Bundesland)'**
+  String get settingsRegionTypeBundesland;
+
+  /// No description provided for @settingsKreisSchluesselLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Kreisschlüssel (5 digits)'**
+  String get settingsKreisSchluesselLabel;
+
+  /// No description provided for @settingsKreisSchluesselInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a 5-digit Kreisschlüssel.'**
+  String get settingsKreisSchluesselInvalid;
+
+  /// No description provided for @settingsRegionLabelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get settingsRegionLabelLabel;
+
+  /// No description provided for @settingsNotificationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get settingsNotificationsTitle;
+
+  /// No description provided for @settingsNotificationsToggleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify me about new warnings'**
+  String get settingsNotificationsToggleLabel;
+
+  /// No description provided for @settingsNotificationsToggleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Local notifications only, while the app is running — no push server.'**
+  String get settingsNotificationsToggleHint;
+
+  /// No description provided for @settingsUseLocationButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Determine state via location'**
+  String get settingsUseLocationButton;
+
+  /// No description provided for @settingsLocationErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t determine your location: {error}'**
+  String settingsLocationErrorMessage(String error);
+
+  /// No description provided for @settingsLocationNoMatchMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t match your location to a German state.'**
+  String get settingsLocationNoMatchMessage;
+
+  /// No description provided for @settingsLocationSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{state} added as an additional region.'**
+  String settingsLocationSuccessMessage(String state);
+
+  /// No description provided for @shelterMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shelters'**
+  String get shelterMapTitle;
+
+  /// No description provided for @shelterInfoLine.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenStreetMap and WWBOTA/DLBOTA loaded within {radius} km.'**
+  String shelterInfoLine(int radius);
+
+  /// No description provided for @shelterLegendGreenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get shelterLegendGreenLabel;
+
+  /// No description provided for @shelterLegendGreenDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'officially confirmed as a usable shelter'**
+  String get shelterLegendGreenDescription;
+
+  /// No description provided for @shelterLegendYellowLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow'**
+  String get shelterLegendYellowLabel;
+
+  /// No description provided for @shelterLegendYellowDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'possible shelter, access/use unconfirmed'**
+  String get shelterLegendYellowDescription;
+
+  /// No description provided for @shelterLegendRedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get shelterLegendRedLabel;
+
+  /// No description provided for @shelterLegendRedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'not released, historical, or informational only'**
+  String get shelterLegendRedDescription;
+
+  /// No description provided for @shelterDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'This map does not replace an official warning, evacuation, or emergency-response instruction.'**
+  String get shelterDisclaimer;
+
+  /// No description provided for @shelterNoConfirmedShelters.
+  ///
+  /// In en, this message translates to:
+  /// **'No currently released public shelters are known in Germany in the loaded official data. If that changes, they\'ll appear here in green.'**
+  String get shelterNoConfirmedShelters;
+
+  /// No description provided for @shelterFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String shelterFilterAll(int count);
+
+  /// No description provided for @shelterFilterCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} {count}'**
+  String shelterFilterCount(String label, int count);
+
+  /// No description provided for @shelterSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal code or place'**
+  String get shelterSearchHint;
+
+  /// No description provided for @shelterSearchButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get shelterSearchButton;
+
+  /// No description provided for @shelterSearchNoResult.
+  ///
+  /// In en, this message translates to:
+  /// **'No result found.'**
+  String get shelterSearchNoResult;
+
+  /// No description provided for @shelterUseLocationButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Investigate current location'**
+  String get shelterUseLocationButton;
+
+  /// No description provided for @shelterRefreshButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get shelterRefreshButton;
+
+  /// No description provided for @shelterWwbotaErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'WWBOTA/DLBOTA could not be loaded.'**
+  String get shelterWwbotaErrorMessage;
+
+  /// No description provided for @shelterOverpassErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenStreetMap/Overpass could not be loaded.'**
+  String get shelterOverpassErrorMessage;
+
+  /// No description provided for @shelterEmptyPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'No location loaded yet. Use your current location or search for a place.'**
+  String get shelterEmptyPrompt;
+
+  /// No description provided for @shelterAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'© OpenStreetMap contributors'**
+  String get shelterAttribution;
 }
 
 class _AppLocalizationsDelegate

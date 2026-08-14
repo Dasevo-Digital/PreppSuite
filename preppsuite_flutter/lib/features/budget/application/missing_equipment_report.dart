@@ -78,7 +78,10 @@ class MissingEquipmentReport {
         build: (context) => [
           pw.Header(
             level: 0,
-            child: pw.Text(strings.title, style: const pw.TextStyle(fontSize: 24)),
+            child: pw.Text(
+              strings.title,
+              style: const pw.TextStyle(fontSize: 24),
+            ),
           ),
           pw.Text(householdName, style: const pw.TextStyle(fontSize: 14)),
           pw.Text(

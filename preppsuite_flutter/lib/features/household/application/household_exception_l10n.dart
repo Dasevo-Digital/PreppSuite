@@ -8,8 +8,7 @@ import '../../../l10n/generated/app_localizations.dart';
 String localizeHouseholdError(AppLocalizations l10n, Object error) {
   if (error is HouseholdException) {
     return switch (error.reason) {
-      HouseholdExceptionReason.invalidInviteCode =>
-        l10n.errorInvalidInviteCode,
+      HouseholdExceptionReason.invalidInviteCode => l10n.errorInvalidInviteCode,
       HouseholdExceptionReason.notAMember => l10n.errorNotAMember,
       HouseholdExceptionReason.notOwner => l10n.errorNotOwner,
       HouseholdExceptionReason.alreadyInHousehold =>

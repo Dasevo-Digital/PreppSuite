@@ -34,6 +34,7 @@ void main() {
       required UuidValue clientId,
       String name = 'Trinkwasser 6x1.5L',
       double quantity = 6,
+      int? calories,
       DateTime? updatedAt,
       DateTime? deletedAt,
     }) {
@@ -46,6 +47,7 @@ void main() {
         quantity: quantity,
         unit: 'Flasche',
         storageLocation: 'Keller',
+        calories: calories,
         updatedAt: updatedAt ?? DateTime.now().toUtc(),
         deletedAt: deletedAt,
       );
@@ -69,6 +71,37 @@ void main() {
         expect(result.single.id, isNotNull);
         expect(result.single.clientId, clientId);
         expect(result.single.name, 'Trinkwasser 6x1.5L');
+      },
+    );
+
+    test(
+      "when pushing an item with calories set then it round-trips through "
+      'pull',
+      () async {
+        final session = await memberSession();
+        final householdId = await createHousehold(session);
+        final clientId = const Uuid().v4obj();
+
+        await endpoints.inventory.pushInventoryChanges(
+          session,
+          householdId,
+          [
+            draftItem(
+              householdId,
+              clientId: clientId,
+              name: 'Nudeln',
+              calories: 3500,
+            ),
+          ],
+        );
+
+        final pulled = await endpoints.inventory.pullInventoryChanges(
+          session,
+          householdId,
+          DateTime.utc(2000),
+        );
+
+        expect(pulled.single.calories, 3500);
       },
     );
 

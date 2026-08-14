@@ -23,6 +23,10 @@ household:
   - getMyHousehold:
   - listMembers:
   - rotateInviteCode:
+  - updateRegion:
+  - listWarningRegions:
+  - addWarningRegion:
+  - removeWarningRegion:
 inventory:
   - pullInventoryChanges:
   - pushInventoryChanges:

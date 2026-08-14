@@ -47,6 +47,21 @@ dependencies:
   pdf: ^3.12.0
   printing: ^5.14.3
   shared_preferences: ^2.5.5
+  serverpod_auth_core_flutter: 3.4.11
+  csv: ^8.0.0
+  # Pinned below 9.x: file_picker 12.0.0 (via file_picker_darwin 1.0.0)
+  # calls macOS-native methods by FileType name (e.g. "custom"), but the
+  # native macOS handler only implements the older "pickFiles"-style API —
+  # every pick fails with MissingPluginException on this platform. 8.x's
+  # macOS implementation uses "pickFiles" and works correctly.
+  file_picker: ^8.3.7
+  image_picker: ^1.2.3
+  path: ^1.9.1
+  flutter_local_notifications: ^22.3.0
+  geolocator: ^14.0.2
+  http: ^1.6.0
+  flutter_map: ^8.3.1
+  latlong2: ^0.10.1
 
 dev_dependencies:
   build_runner: ^2.15.1

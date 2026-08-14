@@ -24,13 +24,15 @@ import 'package:preppsuite_server/src/generated/checklists/models/checklist_temp
     as _i10;
 import 'package:preppsuite_server/src/generated/checklists/models/checklist_item.dart'
     as _i11;
-import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
+import 'package:preppsuite_server/src/generated/warnings/models/warning_region_kind.dart'
     as _i12;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
     as _i13;
-import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
     as _i14;
-import 'package:preppsuite_server/src/generated/future_calls.dart' as _i15;
+import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
+    as _i15;
+import 'package:preppsuite_server/src/generated/future_calls.dart' as _i16;
 export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _i1.EndpointDispatch {
@@ -560,6 +562,118 @@ class Endpoints extends _i1.EndpointDispatch {
                     params['householdId'],
                   ),
         ),
+        'updateRegion': _i1.MethodConnector(
+          name: 'updateRegion',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'countryCode': _i1.ParameterDescription(
+              name: 'countryCode',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'regionKey': _i1.ParameterDescription(
+              name: 'regionKey',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .updateRegion(
+                    session,
+                    params['householdId'],
+                    countryCode: params['countryCode'],
+                    regionKey: params['regionKey'],
+                  ),
+        ),
+        'listWarningRegions': _i1.MethodConnector(
+          name: 'listWarningRegions',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .listWarningRegions(
+                    session,
+                    params['householdId'],
+                  ),
+        ),
+        'addWarningRegion': _i1.MethodConnector(
+          name: 'addWarningRegion',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'kind': _i1.ParameterDescription(
+              name: 'kind',
+              type: _i1.getType<_i12.WarningRegionKind>(),
+              nullable: false,
+            ),
+            'value': _i1.ParameterDescription(
+              name: 'value',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'label': _i1.ParameterDescription(
+              name: 'label',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .addWarningRegion(
+                    session,
+                    params['householdId'],
+                    kind: params['kind'],
+                    value: params['value'],
+                    label: params['label'],
+                  ),
+        ),
+        'removeWarningRegion': _i1.MethodConnector(
+          name: 'removeWarningRegion',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'warningRegionSubscriptionId': _i1.ParameterDescription(
+              name: 'warningRegionSubscriptionId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['household'] as _i6.HouseholdEndpoint)
+                  .removeWarningRegion(
+                    session,
+                    params['householdId'],
+                    params['warningRegionSubscriptionId'],
+                  ),
+        ),
       },
     );
     connectors['inventory'] = _i1.EndpointConnector(
@@ -601,7 +715,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'changes': _i1.ParameterDescription(
               name: 'changes',
-              type: _i1.getType<List<_i12.InventoryItem>>(),
+              type: _i1.getType<List<_i13.InventoryItem>>(),
               nullable: false,
             ),
           },
@@ -649,14 +763,14 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth_core'] = _i13.Endpoints()
+    modules['serverpod_auth_core'] = _i14.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_idp'] = _i14.Endpoints()
+    modules['serverpod_auth_idp'] = _i15.Endpoints()
       ..initializeEndpoints(server);
   }
 
   @override
   _i1.FutureCallDispatch? get futureCalls {
-    return _i15.FutureCalls();
+    return _i16.FutureCalls();
   }
 }
