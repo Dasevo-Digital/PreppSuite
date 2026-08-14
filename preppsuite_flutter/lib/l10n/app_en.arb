@@ -1,0 +1,165 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "PreppSuite",
+
+  "signOutButton": "Sign out",
+
+  "onboardingChooseTitle": "Welcome to PreppSuite",
+  "onboardingChooseSubtitle": "Create a new household or join an existing one.",
+  "createHouseholdButton": "Create household",
+  "joinHouseholdButton": "Join household",
+
+  "createHouseholdTitle": "Create household",
+  "householdNameLabel": "Household name",
+  "countryLabel": "Country",
+  "regionKeyLabel": "Regional key (optional)",
+  "regionKeyHelper": "Germany only, for more precise warnings",
+  "displayNameLabel": "Your display name",
+  "createButton": "Create",
+
+  "joinHouseholdTitle": "Join household",
+  "inviteCodeLabel": "Invite code",
+  "joinButton": "Join",
+
+  "householdOverviewTitle": "My household",
+  "inviteCodeSectionTitle": "Invite code",
+  "rotateInviteCodeButton": "Generate new code",
+  "membersSectionTitle": "Members",
+  "roleOwner": "Owner",
+  "roleMember": "Member",
+
+  "loadingHousehold": "Loading household…",
+  "fieldRequired": "This field is required.",
+  "errorGeneric": "Something went wrong: {error}",
+  "@errorGeneric": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "errorInvalidInviteCode": "This invite code is not valid.",
+  "errorAlreadyInHousehold": "You already belong to a household.",
+  "errorNotOwner": "Only the household's owner can do this.",
+  "errorNotAMember": "You are not a member of this household.",
+
+  "navInventory": "Inventory",
+  "navHousehold": "Household",
+
+  "inventoryTitle": "Inventory",
+  "inventoryEmpty": "No items yet. Tap + to add your first one.",
+  "addItemButton": "Add item",
+  "editItemTitle": "Edit item",
+  "addItemTitle": "Add item",
+  "itemNameLabel": "Name",
+  "categoryLabel": "Category",
+  "categoryWater": "Water",
+  "categoryFood": "Food",
+  "categoryMedical": "Medical",
+  "categoryTools": "Tools",
+  "categoryDocuments": "Documents",
+  "categoryEnergy": "Energy",
+  "categoryHygiene": "Hygiene",
+  "categoryOther": "Other",
+  "quantityLabel": "Quantity",
+  "unitLabel": "Unit",
+  "storageLocationLabel": "Storage location",
+  "expirationDateLabel": "Expiration date (optional)",
+  "minQuantityLabel": "Minimum quantity (optional)",
+  "notesLabel": "Notes (optional)",
+  "saveButton": "Save",
+  "deleteButton": "Delete",
+  "lowStockBadge": "Low stock",
+  "expiredBadge": "Expired",
+  "invalidNumber": "Enter a valid number.",
+  "clearDateButton": "Clear date",
+  "scanBarcodeButton": "Scan barcode",
+  "scannedBarcodeLabel": "Barcode: {barcode}",
+  "@scannedBarcodeLabel": {
+    "placeholders": {
+      "barcode": {"type": "String"}
+    }
+  },
+  "productNotFound": "Product not found — fill in the details by hand.",
+
+  "navChecklists": "Checklists",
+  "navBudget": "Budget",
+
+  "checklistsTitle": "Checklists",
+  "checklistsEmpty": "No checklists yet. Tap + to create your first one.",
+  "createTemplateButton": "New checklist",
+  "createTemplateTitle": "New checklist",
+  "templateTitleLabel": "Checklist name",
+  "checklistCategoryFirstAid": "First aid",
+  "checklistCategoryCustom": "Custom",
+  "builtInBadge": "Built-in",
+  "duplicateTemplateAction": "Duplicate",
+  "deleteTemplateAction": "Delete checklist",
+  "checklistItemTitleLabel": "Item",
+  "addChecklistItemHint": "Add an item…",
+  "addButton": "Add",
+  "checklistProgress": "{checked} of {total}",
+  "@checklistProgress": {
+    "placeholders": {
+      "checked": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+
+  "budgetTitle": "Budget",
+  "budgetEmpty": "No spending recorded yet. Tap + to add your first entry.",
+  "addBudgetEntryButton": "Add entry",
+  "addBudgetEntryTitle": "Add entry",
+  "editBudgetEntryTitle": "Edit entry",
+  "budgetLabelLabel": "Label",
+  "amountLabel": "Amount",
+  "currencyLabel": "Currency",
+  "purchaseDateLabel": "Purchase date (optional)",
+  "budgetTotalLabel": "Total",
+
+  "warningsTitle": "Warnings",
+  "warningsEmpty": "No warnings for your region right now.",
+  "warningSeverityMinor": "Minor",
+  "warningSeverityModerate": "Moderate",
+  "warningSeveritySevere": "Severe",
+  "warningSeverityExtreme": "Extreme",
+  "warningBannerMore": "+{count} more",
+  "@warningBannerMore": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "viewAllWarningsAction": "View all",
+  "warningExpiredLabel": "Expired",
+  "warningSourceBbk": "German Federal Office for Civil Protection (BBK)",
+  "warningSourceMeteoalarm": "MeteoAlarm",
+
+  "exportPdfButton": "Export missing equipment",
+  "pdfReportTitle": "Missing Equipment Report",
+  "pdfGeneratedOn": "Generated on {date}",
+  "@pdfGeneratedOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "pdfChecklistSectionTitle": "Open checklist items",
+  "pdfNoMissingChecklistItems": "Nothing open — every checklist is complete.",
+  "pdfInventorySectionTitle": "Low-stock inventory items",
+  "pdfNoLowStockItems": "Nothing below its minimum quantity.",
+  "pdfColumnItem": "Item",
+  "pdfColumnQuantity": "Quantity",
+  "pdfColumnMinQuantity": "Minimum",
+  "pdfColumnUnit": "Unit",
+
+  "settingsSectionTitle": "Settings",
+  "languageLabel": "Language",
+  "languageSystemOption": "System",
+  "languageGermanOption": "Deutsch",
+  "languageEnglishOption": "English",
+  "serverAddressLabel": "Server address",
+  "inventoryAttentionTooltip": "{count} item(s) low on stock or expired",
+  "@inventoryAttentionTooltip": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
+}

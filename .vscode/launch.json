@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "preppsuite_flutter",
+            "cwd": "${workspaceFolder}/preppsuite_flutter",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart"
+        },
+        {
+            "name": "preppsuite_server",
+            "cwd": "${workspaceFolder}/preppsuite_server",
+            "request": "launch",
+            "type": "dart",
+            "preLaunchTask": "docker_compose_up",
+            "program": "bin/main.dart",
+            "env": {
+                "SERVERPOD_PASSWORD_database": "icTGQwuQD72rItA56ZJlgGuDQVzYY3vq"
+            },
+            "args": [
+                "--apply-migrations"
+            ]
+        }
+    ],
+    "compounds": [
+        {
+            "name": "preppsuite (full stack)",
+            "configurations": [
+                "preppsuite_server",
+                "preppsuite_flutter"
+            ],
+            "presentation": {
+                "order": 1
+            }
+        }
+    ]
+}

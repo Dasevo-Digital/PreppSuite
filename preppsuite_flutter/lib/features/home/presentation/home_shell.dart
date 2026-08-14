@@ -1,0 +1,87 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:preppsuite_client/preppsuite_client.dart';
+
+import '../../../l10n/generated/app_localizations.dart';
+import '../../budget/presentation/budget_list_screen.dart';
+import '../../checklists/presentation/checklist_list_screen.dart';
+import '../../household/presentation/household_overview_screen.dart';
+import '../../inventory/application/inventory_providers.dart';
+import '../../inventory/presentation/inventory_list_screen.dart';
+import '../../warnings/presentation/warning_banner.dart';
+
+/// Top-level navigation once a household exists. Only lists destinations
+/// that have real content — the warning banner sits above every tab rather
+/// than being its own destination, since it's meant to be seen regardless
+/// of which tab is open, not sought out.
+class HomeShell extends ConsumerStatefulWidget {
+  const HomeShell({super.key, required this.membership});
+
+  final HouseholdMembershipInfo membership;
+
+  @override
+  ConsumerState<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends ConsumerState<HomeShell> {
+  int _index = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final householdId = widget.membership.household.id!.toString();
+    final attentionCount = ref.watch(
+      inventoryAttentionCountProvider(householdId),
+    );
+
+    final screens = [
+      InventoryListScreen(householdId: householdId),
+      ChecklistListScreen(householdId: householdId),
+      BudgetListScreen(householdId: householdId),
+      HouseholdOverviewScreen(membership: widget.membership),
+    ];
+
+    return Scaffold(
+      body: Column(
+        children: [
+          WarningBanner(householdId: householdId),
+          Expanded(child: IndexedStack(index: _index, children: screens)),
+        ],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (index) => setState(() => _index = index),
+        destinations: [
+          NavigationDestination(
+            icon: attentionCount == 0
+                ? const Icon(Icons.inventory_2_outlined)
+                : Tooltip(
+                    message: l10n.inventoryAttentionTooltip(attentionCount),
+                    child: Badge(
+                      label: Text('$attentionCount'),
+                      child: const Icon(Icons.inventory_2_outlined),
+                    ),
+                  ),
+            selectedIcon: const Icon(Icons.inventory_2),
+            label: l10n.navInventory,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.checklist_outlined),
+            selectedIcon: const Icon(Icons.checklist),
+            label: l10n.navChecklists,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.savings_outlined),
+            selectedIcon: const Icon(Icons.savings),
+            label: l10n.navBudget,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: l10n.navHousehold,
+          ),
+        ],
+      ),
+    );
+  }
+}

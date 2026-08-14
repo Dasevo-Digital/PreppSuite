@@ -1,0 +1,8 @@
+### Which upstream feed a [Warning] came from.
+enum: WarningSource
+serialized: byName
+values:
+  ### German BBK (warnung.bund.de) — MoWaS, DWD, Katwarn, etc.
+  - bbk
+  ### EU-wide MeteoAlarm/EUMETNET weather warnings.
+  - meteoalarm

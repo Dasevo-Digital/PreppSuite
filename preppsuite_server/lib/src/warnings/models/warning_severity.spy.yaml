@@ -1,0 +1,9 @@
+### Normalized severity, shared vocabulary between both source feeds (both
+### already use the CAP standard's Minor/Moderate/Severe/Extreme scale).
+enum: WarningSeverity
+serialized: byName
+values:
+  - minor
+  - moderate
+  - severe
+  - extreme

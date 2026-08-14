@@ -1,0 +1,30 @@
+emailIdp:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
+jwtRefresh:
+  - refreshAccessToken:
+budget:
+  - pullBudgetChanges:
+  - pushBudgetChanges:
+checklist:
+  - pullChecklistTemplateChanges:
+  - pushChecklistTemplateChanges:
+  - pullChecklistItemChanges:
+  - pushChecklistItemChanges:
+household:
+  - createHousehold:
+  - joinHousehold:
+  - getMyHousehold:
+  - listMembers:
+  - rotateInviteCode:
+inventory:
+  - pullInventoryChanges:
+  - pushInventoryChanges:
+warning:
+  - pullWarnings:

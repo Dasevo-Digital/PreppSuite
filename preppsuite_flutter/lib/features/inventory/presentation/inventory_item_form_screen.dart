@@ -1,0 +1,362 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:preppsuite_client/preppsuite_client.dart' show InventoryItemCategory;
+
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../local_db/database.dart';
+import '../application/inventory_category_l10n.dart';
+import '../application/inventory_controller.dart';
+import '../application/open_food_facts_service.dart';
+import 'barcode_scanner_screen.dart';
+
+class InventoryItemFormScreen extends ConsumerStatefulWidget {
+  const InventoryItemFormScreen({
+    super.key,
+    required this.householdId,
+    this.existing,
+  });
+
+  final String householdId;
+  final InventoryItem? existing;
+
+  @override
+  ConsumerState<InventoryItemFormScreen> createState() =>
+      _InventoryItemFormScreenState();
+}
+
+class _InventoryItemFormScreenState
+    extends ConsumerState<InventoryItemFormScreen> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameController;
+  late final TextEditingController _quantityController;
+  late final TextEditingController _unitController;
+  late final TextEditingController _storageLocationController;
+  late final TextEditingController _minQuantityController;
+  late final TextEditingController _notesController;
+  late InventoryItemCategory _category;
+  DateTime? _expirationDate;
+  String? _barcode;
+  String? _offProductId;
+  bool _isSubmitting = false;
+  bool _isScanning = false;
+
+  bool get _isEditing => widget.existing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existing;
+    _nameController = TextEditingController(text: existing?.name ?? '');
+    _quantityController = TextEditingController(
+      text: existing != null ? _formatNumber(existing.quantity) : '',
+    );
+    _unitController = TextEditingController(text: existing?.unit ?? '');
+    _storageLocationController = TextEditingController(
+      text: existing?.storageLocation ?? '',
+    );
+    _minQuantityController = TextEditingController(
+      text: existing?.minQuantity != null
+          ? _formatNumber(existing!.minQuantity!)
+          : '',
+    );
+    _notesController = TextEditingController(text: existing?.notes ?? '');
+    _category = existing != null
+        ? InventoryItemCategoryX.fromName(existing.category)
+        : InventoryItemCategory.food;
+    _expirationDate = existing?.expirationDate;
+    _barcode = existing?.barcode;
+    _offProductId = existing?.offProductId;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _quantityController.dispose();
+    _unitController.dispose();
+    _storageLocationController.dispose();
+    _minQuantityController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  String _formatNumber(double value) => value == value.roundToDouble()
+      ? value.toStringAsFixed(0)
+      : value.toString();
+
+  Future<void> _pickExpirationDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _expirationDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) setState(() => _expirationDate = picked);
+  }
+
+  Future<void> _scanBarcode() async {
+    final barcode = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+    );
+    if (barcode == null || !mounted) return;
+
+    setState(() {
+      _barcode = barcode;
+      _isScanning = true;
+    });
+
+    final product = await const OpenFoodFactsService().lookup(barcode);
+    if (!mounted) return;
+
+    setState(() {
+      _isScanning = false;
+      if (product != null) {
+        _nameController.text = product.name;
+        _offProductId = product.barcode;
+      }
+    });
+
+    if (product == null && mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.productNotFound)));
+    }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSubmitting = true);
+    final controller = ref.read(
+      inventoryControllerProvider(widget.householdId),
+    );
+    final quantity = double.parse(_quantityController.text.trim());
+    final minQuantityText = _minQuantityController.text.trim();
+    final minQuantity = minQuantityText.isEmpty
+        ? null
+        : double.parse(minQuantityText);
+    final notes = _notesController.text.trim();
+
+    if (_isEditing) {
+      await controller.updateItem(
+        widget.existing!,
+        name: _nameController.text.trim(),
+        category: _category,
+        quantity: quantity,
+        unit: _unitController.text.trim(),
+        storageLocation: _storageLocationController.text.trim(),
+        expirationDate: _expirationDate,
+        minQuantity: minQuantity,
+        notes: notes.isEmpty ? null : notes,
+        barcode: _barcode,
+        offProductId: _offProductId,
+      );
+    } else {
+      await controller.addItem(
+        name: _nameController.text.trim(),
+        category: _category,
+        quantity: quantity,
+        unit: _unitController.text.trim(),
+        storageLocation: _storageLocationController.text.trim(),
+        expirationDate: _expirationDate,
+        minQuantity: minQuantity,
+        notes: notes.isEmpty ? null : notes,
+        barcode: _barcode,
+        offProductId: _offProductId,
+      );
+    }
+
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _delete() async {
+    final controller = ref.read(
+      inventoryControllerProvider(widget.householdId),
+    );
+    await controller.deleteItem(widget.existing!);
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isEditing ? l10n.editItemTitle : l10n.addItemTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            tooltip: l10n.scanBarcodeButton,
+            onPressed: _isSubmitting ? null : _scanBarcode,
+          ),
+          if (_isEditing)
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: l10n.deleteButton,
+              onPressed: _isSubmitting ? null : _delete,
+            ),
+        ],
+      ),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_barcode != null) ...[
+                      Chip(
+                        avatar: _isScanning
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.qr_code, size: 18),
+                        label: Text(l10n.scannedBarcodeLabel(_barcode!)),
+                        onDeleted: () => setState(() {
+                          _barcode = null;
+                          _offProductId = null;
+                        }),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(labelText: l10n.itemNameLabel),
+                      validator: (value) =>
+                          (value == null || value.trim().isEmpty)
+                          ? l10n.fieldRequired
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<InventoryItemCategory>(
+                      initialValue: _category,
+                      decoration: InputDecoration(labelText: l10n.categoryLabel),
+                      items: [
+                        for (final category in InventoryItemCategory.values)
+                          DropdownMenuItem(
+                            value: category,
+                            child: Text(localizeCategory(l10n, category)),
+                          ),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) setState(() => _category = value);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _quantityController,
+                            decoration: InputDecoration(
+                              labelText: l10n.quantityLabel,
+                            ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            validator: _numberValidator(l10n, required: true),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _unitController,
+                            decoration: InputDecoration(labelText: l10n.unitLabel),
+                            validator: (value) =>
+                                (value == null || value.trim().isEmpty)
+                                ? l10n.fieldRequired
+                                : null,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _storageLocationController,
+                      decoration: InputDecoration(
+                        labelText: l10n.storageLocationLabel,
+                      ),
+                      validator: (value) =>
+                          (value == null || value.trim().isEmpty)
+                          ? l10n.fieldRequired
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.expirationDateLabel),
+                      subtitle: Text(
+                        _expirationDate == null
+                            ? '—'
+                            : MaterialLocalizations.of(
+                                context,
+                              ).formatMediumDate(_expirationDate!),
+                      ),
+                      trailing: _expirationDate == null
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.clear),
+                              tooltip: l10n.clearDateButton,
+                              onPressed: () =>
+                                  setState(() => _expirationDate = null),
+                            ),
+                      onTap: _pickExpirationDate,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _minQuantityController,
+                      decoration: InputDecoration(
+                        labelText: l10n.minQuantityLabel,
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: _numberValidator(l10n, required: false),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _notesController,
+                      decoration: InputDecoration(labelText: l10n.notesLabel),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 24),
+                    FilledButton(
+                      onPressed: _isSubmitting ? null : _submit,
+                      child: _isSubmitting
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(l10n.saveButton),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String? Function(String?) _numberValidator(
+    AppLocalizations l10n, {
+    required bool required,
+  }) {
+    return (value) {
+      final trimmed = value?.trim() ?? '';
+      if (trimmed.isEmpty) {
+        return required ? l10n.fieldRequired : null;
+      }
+      return double.tryParse(trimmed) == null ? l10n.invalidNumber : null;
+    };
+  }
+}

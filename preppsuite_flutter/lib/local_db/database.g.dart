@@ -1,0 +1,5923 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'database.dart';
+
+// ignore_for_file: type=lint
+class $InventoryItemsTable extends InventoryItems
+    with TableInfo<$InventoryItemsTable, InventoryItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
+  @override
+  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
+    'client_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _serverIdMeta = const VerificationMeta(
+    'serverId',
+  );
+  @override
+  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
+    'server_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _barcodeMeta = const VerificationMeta(
+    'barcode',
+  );
+  @override
+  late final GeneratedColumn<String> barcode = GeneratedColumn<String>(
+    'barcode',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _offProductIdMeta = const VerificationMeta(
+    'offProductId',
+  );
+  @override
+  late final GeneratedColumn<String> offProductId = GeneratedColumn<String>(
+    'off_product_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _storageLocationMeta = const VerificationMeta(
+    'storageLocation',
+  );
+  @override
+  late final GeneratedColumn<String> storageLocation = GeneratedColumn<String>(
+    'storage_location',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expirationDateMeta = const VerificationMeta(
+    'expirationDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> expirationDate =
+      GeneratedColumn<DateTime>(
+        'expiration_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _minQuantityMeta = const VerificationMeta(
+    'minQuantity',
+  );
+  @override
+  late final GeneratedColumn<double> minQuantity = GeneratedColumn<double>(
+    'min_quantity',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    clientId,
+    serverId,
+    householdId,
+    name,
+    category,
+    barcode,
+    offProductId,
+    quantity,
+    unit,
+    storageLocation,
+    expirationDate,
+    minQuantity,
+    notes,
+    updatedAt,
+    deletedAt,
+    dirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventory_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InventoryItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('client_id')) {
+      context.handle(
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_clientIdMeta);
+    }
+    if (data.containsKey('server_id')) {
+      context.handle(
+        _serverIdMeta,
+        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
+      );
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('barcode')) {
+      context.handle(
+        _barcodeMeta,
+        barcode.isAcceptableOrUnknown(data['barcode']!, _barcodeMeta),
+      );
+    }
+    if (data.containsKey('off_product_id')) {
+      context.handle(
+        _offProductIdMeta,
+        offProductId.isAcceptableOrUnknown(
+          data['off_product_id']!,
+          _offProductIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_quantityMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    if (data.containsKey('storage_location')) {
+      context.handle(
+        _storageLocationMeta,
+        storageLocation.isAcceptableOrUnknown(
+          data['storage_location']!,
+          _storageLocationMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_storageLocationMeta);
+    }
+    if (data.containsKey('expiration_date')) {
+      context.handle(
+        _expirationDateMeta,
+        expirationDate.isAcceptableOrUnknown(
+          data['expiration_date']!,
+          _expirationDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('min_quantity')) {
+      context.handle(
+        _minQuantityMeta,
+        minQuantity.isAcceptableOrUnknown(
+          data['min_quantity']!,
+          _minQuantityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {clientId};
+  @override
+  InventoryItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryItem(
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_id'],
+      )!,
+      serverId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}server_id'],
+      ),
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      barcode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}barcode'],
+      ),
+      offProductId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}off_product_id'],
+      ),
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quantity'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      )!,
+      storageLocation: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}storage_location'],
+      )!,
+      expirationDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}expiration_date'],
+      ),
+      minQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}min_quantity'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $InventoryItemsTable createAlias(String alias) {
+    return $InventoryItemsTable(attachedDatabase, alias);
+  }
+}
+
+class InventoryItem extends DataClass implements Insertable<InventoryItem> {
+  final String clientId;
+  final String? serverId;
+  final String householdId;
+  final String name;
+
+  /// Stores an [InventoryItemCategory] enum name (see
+  /// `package:preppsuite_client`), kept as plain text here so this table
+  /// doesn't need to depend on the generated protocol package.
+  final String category;
+  final String? barcode;
+  final String? offProductId;
+  final double quantity;
+  final String unit;
+  final String storageLocation;
+  final DateTime? expirationDate;
+  final double? minQuantity;
+  final String? notes;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final bool dirty;
+  const InventoryItem({
+    required this.clientId,
+    this.serverId,
+    required this.householdId,
+    required this.name,
+    required this.category,
+    this.barcode,
+    this.offProductId,
+    required this.quantity,
+    required this.unit,
+    required this.storageLocation,
+    this.expirationDate,
+    this.minQuantity,
+    this.notes,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.dirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['client_id'] = Variable<String>(clientId);
+    if (!nullToAbsent || serverId != null) {
+      map['server_id'] = Variable<String>(serverId);
+    }
+    map['household_id'] = Variable<String>(householdId);
+    map['name'] = Variable<String>(name);
+    map['category'] = Variable<String>(category);
+    if (!nullToAbsent || barcode != null) {
+      map['barcode'] = Variable<String>(barcode);
+    }
+    if (!nullToAbsent || offProductId != null) {
+      map['off_product_id'] = Variable<String>(offProductId);
+    }
+    map['quantity'] = Variable<double>(quantity);
+    map['unit'] = Variable<String>(unit);
+    map['storage_location'] = Variable<String>(storageLocation);
+    if (!nullToAbsent || expirationDate != null) {
+      map['expiration_date'] = Variable<DateTime>(expirationDate);
+    }
+    if (!nullToAbsent || minQuantity != null) {
+      map['min_quantity'] = Variable<double>(minQuantity);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['dirty'] = Variable<bool>(dirty);
+    return map;
+  }
+
+  InventoryItemsCompanion toCompanion(bool nullToAbsent) {
+    return InventoryItemsCompanion(
+      clientId: Value(clientId),
+      serverId: serverId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverId),
+      householdId: Value(householdId),
+      name: Value(name),
+      category: Value(category),
+      barcode: barcode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(barcode),
+      offProductId: offProductId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(offProductId),
+      quantity: Value(quantity),
+      unit: Value(unit),
+      storageLocation: Value(storageLocation),
+      expirationDate: expirationDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expirationDate),
+      minQuantity: minQuantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(minQuantity),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      dirty: Value(dirty),
+    );
+  }
+
+  factory InventoryItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryItem(
+      clientId: serializer.fromJson<String>(json['clientId']),
+      serverId: serializer.fromJson<String?>(json['serverId']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      name: serializer.fromJson<String>(json['name']),
+      category: serializer.fromJson<String>(json['category']),
+      barcode: serializer.fromJson<String?>(json['barcode']),
+      offProductId: serializer.fromJson<String?>(json['offProductId']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      unit: serializer.fromJson<String>(json['unit']),
+      storageLocation: serializer.fromJson<String>(json['storageLocation']),
+      expirationDate: serializer.fromJson<DateTime?>(json['expirationDate']),
+      minQuantity: serializer.fromJson<double?>(json['minQuantity']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'clientId': serializer.toJson<String>(clientId),
+      'serverId': serializer.toJson<String?>(serverId),
+      'householdId': serializer.toJson<String>(householdId),
+      'name': serializer.toJson<String>(name),
+      'category': serializer.toJson<String>(category),
+      'barcode': serializer.toJson<String?>(barcode),
+      'offProductId': serializer.toJson<String?>(offProductId),
+      'quantity': serializer.toJson<double>(quantity),
+      'unit': serializer.toJson<String>(unit),
+      'storageLocation': serializer.toJson<String>(storageLocation),
+      'expirationDate': serializer.toJson<DateTime?>(expirationDate),
+      'minQuantity': serializer.toJson<double?>(minQuantity),
+      'notes': serializer.toJson<String?>(notes),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+    };
+  }
+
+  InventoryItem copyWith({
+    String? clientId,
+    Value<String?> serverId = const Value.absent(),
+    String? householdId,
+    String? name,
+    String? category,
+    Value<String?> barcode = const Value.absent(),
+    Value<String?> offProductId = const Value.absent(),
+    double? quantity,
+    String? unit,
+    String? storageLocation,
+    Value<DateTime?> expirationDate = const Value.absent(),
+    Value<double?> minQuantity = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? dirty,
+  }) => InventoryItem(
+    clientId: clientId ?? this.clientId,
+    serverId: serverId.present ? serverId.value : this.serverId,
+    householdId: householdId ?? this.householdId,
+    name: name ?? this.name,
+    category: category ?? this.category,
+    barcode: barcode.present ? barcode.value : this.barcode,
+    offProductId: offProductId.present ? offProductId.value : this.offProductId,
+    quantity: quantity ?? this.quantity,
+    unit: unit ?? this.unit,
+    storageLocation: storageLocation ?? this.storageLocation,
+    expirationDate: expirationDate.present
+        ? expirationDate.value
+        : this.expirationDate,
+    minQuantity: minQuantity.present ? minQuantity.value : this.minQuantity,
+    notes: notes.present ? notes.value : this.notes,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    dirty: dirty ?? this.dirty,
+  );
+  InventoryItem copyWithCompanion(InventoryItemsCompanion data) {
+    return InventoryItem(
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      serverId: data.serverId.present ? data.serverId.value : this.serverId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      name: data.name.present ? data.name.value : this.name,
+      category: data.category.present ? data.category.value : this.category,
+      barcode: data.barcode.present ? data.barcode.value : this.barcode,
+      offProductId: data.offProductId.present
+          ? data.offProductId.value
+          : this.offProductId,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      storageLocation: data.storageLocation.present
+          ? data.storageLocation.value
+          : this.storageLocation,
+      expirationDate: data.expirationDate.present
+          ? data.expirationDate.value
+          : this.expirationDate,
+      minQuantity: data.minQuantity.present
+          ? data.minQuantity.value
+          : this.minQuantity,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryItem(')
+          ..write('clientId: $clientId, ')
+          ..write('serverId: $serverId, ')
+          ..write('householdId: $householdId, ')
+          ..write('name: $name, ')
+          ..write('category: $category, ')
+          ..write('barcode: $barcode, ')
+          ..write('offProductId: $offProductId, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('storageLocation: $storageLocation, ')
+          ..write('expirationDate: $expirationDate, ')
+          ..write('minQuantity: $minQuantity, ')
+          ..write('notes: $notes, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    clientId,
+    serverId,
+    householdId,
+    name,
+    category,
+    barcode,
+    offProductId,
+    quantity,
+    unit,
+    storageLocation,
+    expirationDate,
+    minQuantity,
+    notes,
+    updatedAt,
+    deletedAt,
+    dirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryItem &&
+          other.clientId == this.clientId &&
+          other.serverId == this.serverId &&
+          other.householdId == this.householdId &&
+          other.name == this.name &&
+          other.category == this.category &&
+          other.barcode == this.barcode &&
+          other.offProductId == this.offProductId &&
+          other.quantity == this.quantity &&
+          other.unit == this.unit &&
+          other.storageLocation == this.storageLocation &&
+          other.expirationDate == this.expirationDate &&
+          other.minQuantity == this.minQuantity &&
+          other.notes == this.notes &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.dirty == this.dirty);
+}
+
+class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
+  final Value<String> clientId;
+  final Value<String?> serverId;
+  final Value<String> householdId;
+  final Value<String> name;
+  final Value<String> category;
+  final Value<String?> barcode;
+  final Value<String?> offProductId;
+  final Value<double> quantity;
+  final Value<String> unit;
+  final Value<String> storageLocation;
+  final Value<DateTime?> expirationDate;
+  final Value<double?> minQuantity;
+  final Value<String?> notes;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> dirty;
+  final Value<int> rowid;
+  const InventoryItemsCompanion({
+    this.clientId = const Value.absent(),
+    this.serverId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.category = const Value.absent(),
+    this.barcode = const Value.absent(),
+    this.offProductId = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.storageLocation = const Value.absent(),
+    this.expirationDate = const Value.absent(),
+    this.minQuantity = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryItemsCompanion.insert({
+    required String clientId,
+    this.serverId = const Value.absent(),
+    required String householdId,
+    required String name,
+    required String category,
+    this.barcode = const Value.absent(),
+    this.offProductId = const Value.absent(),
+    required double quantity,
+    required String unit,
+    required String storageLocation,
+    this.expirationDate = const Value.absent(),
+    this.minQuantity = const Value.absent(),
+    this.notes = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : clientId = Value(clientId),
+       householdId = Value(householdId),
+       name = Value(name),
+       category = Value(category),
+       quantity = Value(quantity),
+       unit = Value(unit),
+       storageLocation = Value(storageLocation),
+       updatedAt = Value(updatedAt);
+  static Insertable<InventoryItem> custom({
+    Expression<String>? clientId,
+    Expression<String>? serverId,
+    Expression<String>? householdId,
+    Expression<String>? name,
+    Expression<String>? category,
+    Expression<String>? barcode,
+    Expression<String>? offProductId,
+    Expression<double>? quantity,
+    Expression<String>? unit,
+    Expression<String>? storageLocation,
+    Expression<DateTime>? expirationDate,
+    Expression<double>? minQuantity,
+    Expression<String>? notes,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? dirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (clientId != null) 'client_id': clientId,
+      if (serverId != null) 'server_id': serverId,
+      if (householdId != null) 'household_id': householdId,
+      if (name != null) 'name': name,
+      if (category != null) 'category': category,
+      if (barcode != null) 'barcode': barcode,
+      if (offProductId != null) 'off_product_id': offProductId,
+      if (quantity != null) 'quantity': quantity,
+      if (unit != null) 'unit': unit,
+      if (storageLocation != null) 'storage_location': storageLocation,
+      if (expirationDate != null) 'expiration_date': expirationDate,
+      if (minQuantity != null) 'min_quantity': minQuantity,
+      if (notes != null) 'notes': notes,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryItemsCompanion copyWith({
+    Value<String>? clientId,
+    Value<String?>? serverId,
+    Value<String>? householdId,
+    Value<String>? name,
+    Value<String>? category,
+    Value<String?>? barcode,
+    Value<String?>? offProductId,
+    Value<double>? quantity,
+    Value<String>? unit,
+    Value<String>? storageLocation,
+    Value<DateTime?>? expirationDate,
+    Value<double?>? minQuantity,
+    Value<String?>? notes,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? dirty,
+    Value<int>? rowid,
+  }) {
+    return InventoryItemsCompanion(
+      clientId: clientId ?? this.clientId,
+      serverId: serverId ?? this.serverId,
+      householdId: householdId ?? this.householdId,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      barcode: barcode ?? this.barcode,
+      offProductId: offProductId ?? this.offProductId,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
+      storageLocation: storageLocation ?? this.storageLocation,
+      expirationDate: expirationDate ?? this.expirationDate,
+      minQuantity: minQuantity ?? this.minQuantity,
+      notes: notes ?? this.notes,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      dirty: dirty ?? this.dirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (clientId.present) {
+      map['client_id'] = Variable<String>(clientId.value);
+    }
+    if (serverId.present) {
+      map['server_id'] = Variable<String>(serverId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (barcode.present) {
+      map['barcode'] = Variable<String>(barcode.value);
+    }
+    if (offProductId.present) {
+      map['off_product_id'] = Variable<String>(offProductId.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (storageLocation.present) {
+      map['storage_location'] = Variable<String>(storageLocation.value);
+    }
+    if (expirationDate.present) {
+      map['expiration_date'] = Variable<DateTime>(expirationDate.value);
+    }
+    if (minQuantity.present) {
+      map['min_quantity'] = Variable<double>(minQuantity.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryItemsCompanion(')
+          ..write('clientId: $clientId, ')
+          ..write('serverId: $serverId, ')
+          ..write('householdId: $householdId, ')
+          ..write('name: $name, ')
+          ..write('category: $category, ')
+          ..write('barcode: $barcode, ')
+          ..write('offProductId: $offProductId, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('storageLocation: $storageLocation, ')
+          ..write('expirationDate: $expirationDate, ')
+          ..write('minQuantity: $minQuantity, ')
+          ..write('notes: $notes, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChecklistTemplatesTable extends ChecklistTemplates
+    with TableInfo<$ChecklistTemplatesTable, ChecklistTemplate> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistTemplatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
+  @override
+  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
+    'client_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _serverIdMeta = const VerificationMeta(
+    'serverId',
+  );
+  @override
+  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
+    'server_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isBuiltInMeta = const VerificationMeta(
+    'isBuiltIn',
+  );
+  @override
+  late final GeneratedColumn<bool> isBuiltIn = GeneratedColumn<bool>(
+    'is_built_in',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_built_in" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    clientId,
+    serverId,
+    householdId,
+    title,
+    category,
+    isBuiltIn,
+    updatedAt,
+    deletedAt,
+    dirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_templates';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChecklistTemplate> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('client_id')) {
+      context.handle(
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_clientIdMeta);
+    }
+    if (data.containsKey('server_id')) {
+      context.handle(
+        _serverIdMeta,
+        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
+      );
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('is_built_in')) {
+      context.handle(
+        _isBuiltInMeta,
+        isBuiltIn.isAcceptableOrUnknown(data['is_built_in']!, _isBuiltInMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {clientId};
+  @override
+  ChecklistTemplate map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistTemplate(
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_id'],
+      )!,
+      serverId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}server_id'],
+      ),
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      ),
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      isBuiltIn: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_built_in'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $ChecklistTemplatesTable createAlias(String alias) {
+    return $ChecklistTemplatesTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistTemplate extends DataClass
+    implements Insertable<ChecklistTemplate> {
+  final String clientId;
+  final String? serverId;
+  final String? householdId;
+  final String title;
+
+  /// Stores a `ChecklistCategory` enum name (see
+  /// `package:preppsuite_client`) as plain text.
+  final String category;
+  final bool isBuiltIn;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final bool dirty;
+  const ChecklistTemplate({
+    required this.clientId,
+    this.serverId,
+    this.householdId,
+    required this.title,
+    required this.category,
+    required this.isBuiltIn,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.dirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['client_id'] = Variable<String>(clientId);
+    if (!nullToAbsent || serverId != null) {
+      map['server_id'] = Variable<String>(serverId);
+    }
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    map['title'] = Variable<String>(title);
+    map['category'] = Variable<String>(category);
+    map['is_built_in'] = Variable<bool>(isBuiltIn);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['dirty'] = Variable<bool>(dirty);
+    return map;
+  }
+
+  ChecklistTemplatesCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistTemplatesCompanion(
+      clientId: Value(clientId),
+      serverId: serverId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      title: Value(title),
+      category: Value(category),
+      isBuiltIn: Value(isBuiltIn),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      dirty: Value(dirty),
+    );
+  }
+
+  factory ChecklistTemplate.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistTemplate(
+      clientId: serializer.fromJson<String>(json['clientId']),
+      serverId: serializer.fromJson<String?>(json['serverId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      title: serializer.fromJson<String>(json['title']),
+      category: serializer.fromJson<String>(json['category']),
+      isBuiltIn: serializer.fromJson<bool>(json['isBuiltIn']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'clientId': serializer.toJson<String>(clientId),
+      'serverId': serializer.toJson<String?>(serverId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'title': serializer.toJson<String>(title),
+      'category': serializer.toJson<String>(category),
+      'isBuiltIn': serializer.toJson<bool>(isBuiltIn),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+    };
+  }
+
+  ChecklistTemplate copyWith({
+    String? clientId,
+    Value<String?> serverId = const Value.absent(),
+    Value<String?> householdId = const Value.absent(),
+    String? title,
+    String? category,
+    bool? isBuiltIn,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? dirty,
+  }) => ChecklistTemplate(
+    clientId: clientId ?? this.clientId,
+    serverId: serverId.present ? serverId.value : this.serverId,
+    householdId: householdId.present ? householdId.value : this.householdId,
+    title: title ?? this.title,
+    category: category ?? this.category,
+    isBuiltIn: isBuiltIn ?? this.isBuiltIn,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    dirty: dirty ?? this.dirty,
+  );
+  ChecklistTemplate copyWithCompanion(ChecklistTemplatesCompanion data) {
+    return ChecklistTemplate(
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      serverId: data.serverId.present ? data.serverId.value : this.serverId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      title: data.title.present ? data.title.value : this.title,
+      category: data.category.present ? data.category.value : this.category,
+      isBuiltIn: data.isBuiltIn.present ? data.isBuiltIn.value : this.isBuiltIn,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistTemplate(')
+          ..write('clientId: $clientId, ')
+          ..write('serverId: $serverId, ')
+          ..write('householdId: $householdId, ')
+          ..write('title: $title, ')
+          ..write('category: $category, ')
+          ..write('isBuiltIn: $isBuiltIn, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    clientId,
+    serverId,
+    householdId,
+    title,
+    category,
+    isBuiltIn,
+    updatedAt,
+    deletedAt,
+    dirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistTemplate &&
+          other.clientId == this.clientId &&
+          other.serverId == this.serverId &&
+          other.householdId == this.householdId &&
+          other.title == this.title &&
+          other.category == this.category &&
+          other.isBuiltIn == this.isBuiltIn &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.dirty == this.dirty);
+}
+
+class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
+  final Value<String> clientId;
+  final Value<String?> serverId;
+  final Value<String?> householdId;
+  final Value<String> title;
+  final Value<String> category;
+  final Value<bool> isBuiltIn;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> dirty;
+  final Value<int> rowid;
+  const ChecklistTemplatesCompanion({
+    this.clientId = const Value.absent(),
+    this.serverId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.category = const Value.absent(),
+    this.isBuiltIn = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChecklistTemplatesCompanion.insert({
+    required String clientId,
+    this.serverId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    required String title,
+    required String category,
+    this.isBuiltIn = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : clientId = Value(clientId),
+       title = Value(title),
+       category = Value(category),
+       updatedAt = Value(updatedAt);
+  static Insertable<ChecklistTemplate> custom({
+    Expression<String>? clientId,
+    Expression<String>? serverId,
+    Expression<String>? householdId,
+    Expression<String>? title,
+    Expression<String>? category,
+    Expression<bool>? isBuiltIn,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? dirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (clientId != null) 'client_id': clientId,
+      if (serverId != null) 'server_id': serverId,
+      if (householdId != null) 'household_id': householdId,
+      if (title != null) 'title': title,
+      if (category != null) 'category': category,
+      if (isBuiltIn != null) 'is_built_in': isBuiltIn,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChecklistTemplatesCompanion copyWith({
+    Value<String>? clientId,
+    Value<String?>? serverId,
+    Value<String?>? householdId,
+    Value<String>? title,
+    Value<String>? category,
+    Value<bool>? isBuiltIn,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? dirty,
+    Value<int>? rowid,
+  }) {
+    return ChecklistTemplatesCompanion(
+      clientId: clientId ?? this.clientId,
+      serverId: serverId ?? this.serverId,
+      householdId: householdId ?? this.householdId,
+      title: title ?? this.title,
+      category: category ?? this.category,
+      isBuiltIn: isBuiltIn ?? this.isBuiltIn,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      dirty: dirty ?? this.dirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (clientId.present) {
+      map['client_id'] = Variable<String>(clientId.value);
+    }
+    if (serverId.present) {
+      map['server_id'] = Variable<String>(serverId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (isBuiltIn.present) {
+      map['is_built_in'] = Variable<bool>(isBuiltIn.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistTemplatesCompanion(')
+          ..write('clientId: $clientId, ')
+          ..write('serverId: $serverId, ')
+          ..write('householdId: $householdId, ')
+          ..write('title: $title, ')
+          ..write('category: $category, ')
+          ..write('isBuiltIn: $isBuiltIn, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChecklistItemsTable extends ChecklistItems
+    with TableInfo<$ChecklistItemsTable, ChecklistItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
+  @override
+  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
+    'client_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _serverIdMeta = const VerificationMeta(
+    'serverId',
+  );
+  @override
+  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
+    'server_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _templateClientIdMeta = const VerificationMeta(
+    'templateClientId',
+  );
+  @override
+  late final GeneratedColumn<String> templateClientId = GeneratedColumn<String>(
+    'template_client_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetQuantityMeta = const VerificationMeta(
+    'targetQuantity',
+  );
+  @override
+  late final GeneratedColumn<double> targetQuantity = GeneratedColumn<double>(
+    'target_quantity',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isCheckedMeta = const VerificationMeta(
+    'isChecked',
+  );
+  @override
+  late final GeneratedColumn<bool> isChecked = GeneratedColumn<bool>(
+    'is_checked',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_checked" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _linkedInventoryItemIdMeta =
+      const VerificationMeta('linkedInventoryItemId');
+  @override
+  late final GeneratedColumn<String> linkedInventoryItemId =
+      GeneratedColumn<String>(
+        'linked_inventory_item_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    clientId,
+    serverId,
+    householdId,
+    templateClientId,
+    title,
+    targetQuantity,
+    isChecked,
+    linkedInventoryItemId,
+    sortOrder,
+    updatedAt,
+    deletedAt,
+    dirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChecklistItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('client_id')) {
+      context.handle(
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_clientIdMeta);
+    }
+    if (data.containsKey('server_id')) {
+      context.handle(
+        _serverIdMeta,
+        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
+      );
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('template_client_id')) {
+      context.handle(
+        _templateClientIdMeta,
+        templateClientId.isAcceptableOrUnknown(
+          data['template_client_id']!,
+          _templateClientIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_templateClientIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('target_quantity')) {
+      context.handle(
+        _targetQuantityMeta,
+        targetQuantity.isAcceptableOrUnknown(
+          data['target_quantity']!,
+          _targetQuantityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_checked')) {
+      context.handle(
+        _isCheckedMeta,
+        isChecked.isAcceptableOrUnknown(data['is_checked']!, _isCheckedMeta),
+      );
+    }
+    if (data.containsKey('linked_inventory_item_id')) {
+      context.handle(
+        _linkedInventoryItemIdMeta,
+        linkedInventoryItemId.isAcceptableOrUnknown(
+          data['linked_inventory_item_id']!,
+          _linkedInventoryItemIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {clientId};
+  @override
+  ChecklistItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistItem(
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_id'],
+      )!,
+      serverId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}server_id'],
+      ),
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      ),
+      templateClientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}template_client_id'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      targetQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}target_quantity'],
+      ),
+      isChecked: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_checked'],
+      )!,
+      linkedInventoryItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}linked_inventory_item_id'],
+      ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $ChecklistItemsTable createAlias(String alias) {
+    return $ChecklistItemsTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
+  final String clientId;
+  final String? serverId;
+  final String? householdId;
+  final String templateClientId;
+  final String title;
+  final double? targetQuantity;
+  final bool isChecked;
+  final String? linkedInventoryItemId;
+  final int sortOrder;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final bool dirty;
+  const ChecklistItem({
+    required this.clientId,
+    this.serverId,
+    this.householdId,
+    required this.templateClientId,
+    required this.title,
+    this.targetQuantity,
+    required this.isChecked,
+    this.linkedInventoryItemId,
+    required this.sortOrder,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.dirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['client_id'] = Variable<String>(clientId);
+    if (!nullToAbsent || serverId != null) {
+      map['server_id'] = Variable<String>(serverId);
+    }
+    if (!nullToAbsent || householdId != null) {
+      map['household_id'] = Variable<String>(householdId);
+    }
+    map['template_client_id'] = Variable<String>(templateClientId);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || targetQuantity != null) {
+      map['target_quantity'] = Variable<double>(targetQuantity);
+    }
+    map['is_checked'] = Variable<bool>(isChecked);
+    if (!nullToAbsent || linkedInventoryItemId != null) {
+      map['linked_inventory_item_id'] = Variable<String>(linkedInventoryItemId);
+    }
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['dirty'] = Variable<bool>(dirty);
+    return map;
+  }
+
+  ChecklistItemsCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistItemsCompanion(
+      clientId: Value(clientId),
+      serverId: serverId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverId),
+      householdId: householdId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(householdId),
+      templateClientId: Value(templateClientId),
+      title: Value(title),
+      targetQuantity: targetQuantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetQuantity),
+      isChecked: Value(isChecked),
+      linkedInventoryItemId: linkedInventoryItemId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkedInventoryItemId),
+      sortOrder: Value(sortOrder),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      dirty: Value(dirty),
+    );
+  }
+
+  factory ChecklistItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistItem(
+      clientId: serializer.fromJson<String>(json['clientId']),
+      serverId: serializer.fromJson<String?>(json['serverId']),
+      householdId: serializer.fromJson<String?>(json['householdId']),
+      templateClientId: serializer.fromJson<String>(json['templateClientId']),
+      title: serializer.fromJson<String>(json['title']),
+      targetQuantity: serializer.fromJson<double?>(json['targetQuantity']),
+      isChecked: serializer.fromJson<bool>(json['isChecked']),
+      linkedInventoryItemId: serializer.fromJson<String?>(
+        json['linkedInventoryItemId'],
+      ),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'clientId': serializer.toJson<String>(clientId),
+      'serverId': serializer.toJson<String?>(serverId),
+      'householdId': serializer.toJson<String?>(householdId),
+      'templateClientId': serializer.toJson<String>(templateClientId),
+      'title': serializer.toJson<String>(title),
+      'targetQuantity': serializer.toJson<double?>(targetQuantity),
+      'isChecked': serializer.toJson<bool>(isChecked),
+      'linkedInventoryItemId': serializer.toJson<String?>(
+        linkedInventoryItemId,
+      ),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+    };
+  }
+
+  ChecklistItem copyWith({
+    String? clientId,
+    Value<String?> serverId = const Value.absent(),
+    Value<String?> householdId = const Value.absent(),
+    String? templateClientId,
+    String? title,
+    Value<double?> targetQuantity = const Value.absent(),
+    bool? isChecked,
+    Value<String?> linkedInventoryItemId = const Value.absent(),
+    int? sortOrder,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? dirty,
+  }) => ChecklistItem(
+    clientId: clientId ?? this.clientId,
+    serverId: serverId.present ? serverId.value : this.serverId,
+    householdId: householdId.present ? householdId.value : this.householdId,
+    templateClientId: templateClientId ?? this.templateClientId,
+    title: title ?? this.title,
+    targetQuantity: targetQuantity.present
+        ? targetQuantity.value
+        : this.targetQuantity,
+    isChecked: isChecked ?? this.isChecked,
+    linkedInventoryItemId: linkedInventoryItemId.present
+        ? linkedInventoryItemId.value
+        : this.linkedInventoryItemId,
+    sortOrder: sortOrder ?? this.sortOrder,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    dirty: dirty ?? this.dirty,
+  );
+  ChecklistItem copyWithCompanion(ChecklistItemsCompanion data) {
+    return ChecklistItem(
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      serverId: data.serverId.present ? data.serverId.value : this.serverId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      templateClientId: data.templateClientId.present
+          ? data.templateClientId.value
+          : this.templateClientId,
+      title: data.title.present ? data.title.value : this.title,
+      targetQuantity: data.targetQuantity.present
+          ? data.targetQuantity.value
+          : this.targetQuantity,
+      isChecked: data.isChecked.present ? data.isChecked.value : this.isChecked,
+      linkedInventoryItemId: data.linkedInventoryItemId.present
+          ? data.linkedInventoryItemId.value
+          : this.linkedInventoryItemId,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistItem(')
+          ..write('clientId: $clientId, ')
+          ..write('serverId: $serverId, ')
+          ..write('householdId: $householdId, ')
+          ..write('templateClientId: $templateClientId, ')
+          ..write('title: $title, ')
+          ..write('targetQuantity: $targetQuantity, ')
+          ..write('isChecked: $isChecked, ')
+          ..write('linkedInventoryItemId: $linkedInventoryItemId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    clientId,
+    serverId,
+    householdId,
+    templateClientId,
+    title,
+    targetQuantity,
+    isChecked,
+    linkedInventoryItemId,
+    sortOrder,
+    updatedAt,
+    deletedAt,
+    dirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistItem &&
+          other.clientId == this.clientId &&
+          other.serverId == this.serverId &&
+          other.householdId == this.householdId &&
+          other.templateClientId == this.templateClientId &&
+          other.title == this.title &&
+          other.targetQuantity == this.targetQuantity &&
+          other.isChecked == this.isChecked &&
+          other.linkedInventoryItemId == this.linkedInventoryItemId &&
+          other.sortOrder == this.sortOrder &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.dirty == this.dirty);
+}
+
+class ChecklistItemsCompanion extends UpdateCompanion<ChecklistItem> {
+  final Value<String> clientId;
+  final Value<String?> serverId;
+  final Value<String?> householdId;
+  final Value<String> templateClientId;
+  final Value<String> title;
+  final Value<double?> targetQuantity;
+  final Value<bool> isChecked;
+  final Value<String?> linkedInventoryItemId;
+  final Value<int> sortOrder;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> dirty;
+  final Value<int> rowid;
+  const ChecklistItemsCompanion({
+    this.clientId = const Value.absent(),
+    this.serverId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.templateClientId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.targetQuantity = const Value.absent(),
+    this.isChecked = const Value.absent(),
+    this.linkedInventoryItemId = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChecklistItemsCompanion.insert({
+    required String clientId,
+    this.serverId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    required String templateClientId,
+    required String title,
+    this.targetQuantity = const Value.absent(),
+    this.isChecked = const Value.absent(),
+    this.linkedInventoryItemId = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : clientId = Value(clientId),
+       templateClientId = Value(templateClientId),
+       title = Value(title),
+       updatedAt = Value(updatedAt);
+  static Insertable<ChecklistItem> custom({
+    Expression<String>? clientId,
+    Expression<String>? serverId,
+    Expression<String>? householdId,
+    Expression<String>? templateClientId,
+    Expression<String>? title,
+    Expression<double>? targetQuantity,
+    Expression<bool>? isChecked,
+    Expression<String>? linkedInventoryItemId,
+    Expression<int>? sortOrder,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? dirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (clientId != null) 'client_id': clientId,
+      if (serverId != null) 'server_id': serverId,
+      if (householdId != null) 'household_id': householdId,
+      if (templateClientId != null) 'template_client_id': templateClientId,
+      if (title != null) 'title': title,
+      if (targetQuantity != null) 'target_quantity': targetQuantity,
+      if (isChecked != null) 'is_checked': isChecked,
+      if (linkedInventoryItemId != null)
+        'linked_inventory_item_id': linkedInventoryItemId,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChecklistItemsCompanion copyWith({
+    Value<String>? clientId,
+    Value<String?>? serverId,
+    Value<String?>? householdId,
+    Value<String>? templateClientId,
+    Value<String>? title,
+    Value<double?>? targetQuantity,
+    Value<bool>? isChecked,
+    Value<String?>? linkedInventoryItemId,
+    Value<int>? sortOrder,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? dirty,
+    Value<int>? rowid,
+  }) {
+    return ChecklistItemsCompanion(
+      clientId: clientId ?? this.clientId,
+      serverId: serverId ?? this.serverId,
+      householdId: householdId ?? this.householdId,
+      templateClientId: templateClientId ?? this.templateClientId,
+      title: title ?? this.title,
+      targetQuantity: targetQuantity ?? this.targetQuantity,
+      isChecked: isChecked ?? this.isChecked,
+      linkedInventoryItemId:
+          linkedInventoryItemId ?? this.linkedInventoryItemId,
+      sortOrder: sortOrder ?? this.sortOrder,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      dirty: dirty ?? this.dirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (clientId.present) {
+      map['client_id'] = Variable<String>(clientId.value);
+    }
+    if (serverId.present) {
+      map['server_id'] = Variable<String>(serverId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (templateClientId.present) {
+      map['template_client_id'] = Variable<String>(templateClientId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (targetQuantity.present) {
+      map['target_quantity'] = Variable<double>(targetQuantity.value);
+    }
+    if (isChecked.present) {
+      map['is_checked'] = Variable<bool>(isChecked.value);
+    }
+    if (linkedInventoryItemId.present) {
+      map['linked_inventory_item_id'] = Variable<String>(
+        linkedInventoryItemId.value,
+      );
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistItemsCompanion(')
+          ..write('clientId: $clientId, ')
+          ..write('serverId: $serverId, ')
+          ..write('householdId: $householdId, ')
+          ..write('templateClientId: $templateClientId, ')
+          ..write('title: $title, ')
+          ..write('targetQuantity: $targetQuantity, ')
+          ..write('isChecked: $isChecked, ')
+          ..write('linkedInventoryItemId: $linkedInventoryItemId, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $BudgetEntriesTable extends BudgetEntries
+    with TableInfo<$BudgetEntriesTable, BudgetEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BudgetEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
+  @override
+  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
+    'client_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _serverIdMeta = const VerificationMeta(
+    'serverId',
+  );
+  @override
+  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
+    'server_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _labelMeta = const VerificationMeta('label');
+  @override
+  late final GeneratedColumn<String> label = GeneratedColumn<String>(
+    'label',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountCentsMeta = const VerificationMeta(
+    'amountCents',
+  );
+  @override
+  late final GeneratedColumn<int> amountCents = GeneratedColumn<int>(
+    'amount_cents',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _purchaseDateMeta = const VerificationMeta(
+    'purchaseDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> purchaseDate = GeneratedColumn<DateTime>(
+    'purchase_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _linkedInventoryItemIdMeta =
+      const VerificationMeta('linkedInventoryItemId');
+  @override
+  late final GeneratedColumn<String> linkedInventoryItemId =
+      GeneratedColumn<String>(
+        'linked_inventory_item_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    clientId,
+    serverId,
+    householdId,
+    label,
+    amountCents,
+    currency,
+    category,
+    purchaseDate,
+    linkedInventoryItemId,
+    updatedAt,
+    deletedAt,
+    dirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'budget_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BudgetEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('client_id')) {
+      context.handle(
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_clientIdMeta);
+    }
+    if (data.containsKey('server_id')) {
+      context.handle(
+        _serverIdMeta,
+        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
+      );
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('label')) {
+      context.handle(
+        _labelMeta,
+        label.isAcceptableOrUnknown(data['label']!, _labelMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_labelMeta);
+    }
+    if (data.containsKey('amount_cents')) {
+      context.handle(
+        _amountCentsMeta,
+        amountCents.isAcceptableOrUnknown(
+          data['amount_cents']!,
+          _amountCentsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_amountCentsMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('purchase_date')) {
+      context.handle(
+        _purchaseDateMeta,
+        purchaseDate.isAcceptableOrUnknown(
+          data['purchase_date']!,
+          _purchaseDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('linked_inventory_item_id')) {
+      context.handle(
+        _linkedInventoryItemIdMeta,
+        linkedInventoryItemId.isAcceptableOrUnknown(
+          data['linked_inventory_item_id']!,
+          _linkedInventoryItemIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {clientId};
+  @override
+  BudgetEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BudgetEntry(
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_id'],
+      )!,
+      serverId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}server_id'],
+      ),
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      label: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}label'],
+      )!,
+      amountCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount_cents'],
+      )!,
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      purchaseDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}purchase_date'],
+      ),
+      linkedInventoryItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}linked_inventory_item_id'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $BudgetEntriesTable createAlias(String alias) {
+    return $BudgetEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
+  final String clientId;
+  final String? serverId;
+  final String householdId;
+  final String label;
+
+  /// Integer cents, to avoid floating-point money.
+  final int amountCents;
+  final String currency;
+
+  /// Stores an `InventoryItemCategory` enum name as plain text.
+  final String category;
+  final DateTime? purchaseDate;
+  final String? linkedInventoryItemId;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final bool dirty;
+  const BudgetEntry({
+    required this.clientId,
+    this.serverId,
+    required this.householdId,
+    required this.label,
+    required this.amountCents,
+    required this.currency,
+    required this.category,
+    this.purchaseDate,
+    this.linkedInventoryItemId,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.dirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['client_id'] = Variable<String>(clientId);
+    if (!nullToAbsent || serverId != null) {
+      map['server_id'] = Variable<String>(serverId);
+    }
+    map['household_id'] = Variable<String>(householdId);
+    map['label'] = Variable<String>(label);
+    map['amount_cents'] = Variable<int>(amountCents);
+    map['currency'] = Variable<String>(currency);
+    map['category'] = Variable<String>(category);
+    if (!nullToAbsent || purchaseDate != null) {
+      map['purchase_date'] = Variable<DateTime>(purchaseDate);
+    }
+    if (!nullToAbsent || linkedInventoryItemId != null) {
+      map['linked_inventory_item_id'] = Variable<String>(linkedInventoryItemId);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['dirty'] = Variable<bool>(dirty);
+    return map;
+  }
+
+  BudgetEntriesCompanion toCompanion(bool nullToAbsent) {
+    return BudgetEntriesCompanion(
+      clientId: Value(clientId),
+      serverId: serverId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverId),
+      householdId: Value(householdId),
+      label: Value(label),
+      amountCents: Value(amountCents),
+      currency: Value(currency),
+      category: Value(category),
+      purchaseDate: purchaseDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(purchaseDate),
+      linkedInventoryItemId: linkedInventoryItemId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(linkedInventoryItemId),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      dirty: Value(dirty),
+    );
+  }
+
+  factory BudgetEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BudgetEntry(
+      clientId: serializer.fromJson<String>(json['clientId']),
+      serverId: serializer.fromJson<String?>(json['serverId']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      label: serializer.fromJson<String>(json['label']),
+      amountCents: serializer.fromJson<int>(json['amountCents']),
+      currency: serializer.fromJson<String>(json['currency']),
+      category: serializer.fromJson<String>(json['category']),
+      purchaseDate: serializer.fromJson<DateTime?>(json['purchaseDate']),
+      linkedInventoryItemId: serializer.fromJson<String?>(
+        json['linkedInventoryItemId'],
+      ),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'clientId': serializer.toJson<String>(clientId),
+      'serverId': serializer.toJson<String?>(serverId),
+      'householdId': serializer.toJson<String>(householdId),
+      'label': serializer.toJson<String>(label),
+      'amountCents': serializer.toJson<int>(amountCents),
+      'currency': serializer.toJson<String>(currency),
+      'category': serializer.toJson<String>(category),
+      'purchaseDate': serializer.toJson<DateTime?>(purchaseDate),
+      'linkedInventoryItemId': serializer.toJson<String?>(
+        linkedInventoryItemId,
+      ),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+    };
+  }
+
+  BudgetEntry copyWith({
+    String? clientId,
+    Value<String?> serverId = const Value.absent(),
+    String? householdId,
+    String? label,
+    int? amountCents,
+    String? currency,
+    String? category,
+    Value<DateTime?> purchaseDate = const Value.absent(),
+    Value<String?> linkedInventoryItemId = const Value.absent(),
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? dirty,
+  }) => BudgetEntry(
+    clientId: clientId ?? this.clientId,
+    serverId: serverId.present ? serverId.value : this.serverId,
+    householdId: householdId ?? this.householdId,
+    label: label ?? this.label,
+    amountCents: amountCents ?? this.amountCents,
+    currency: currency ?? this.currency,
+    category: category ?? this.category,
+    purchaseDate: purchaseDate.present ? purchaseDate.value : this.purchaseDate,
+    linkedInventoryItemId: linkedInventoryItemId.present
+        ? linkedInventoryItemId.value
+        : this.linkedInventoryItemId,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    dirty: dirty ?? this.dirty,
+  );
+  BudgetEntry copyWithCompanion(BudgetEntriesCompanion data) {
+    return BudgetEntry(
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      serverId: data.serverId.present ? data.serverId.value : this.serverId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      label: data.label.present ? data.label.value : this.label,
+      amountCents: data.amountCents.present
+          ? data.amountCents.value
+          : this.amountCents,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      category: data.category.present ? data.category.value : this.category,
+      purchaseDate: data.purchaseDate.present
+          ? data.purchaseDate.value
+          : this.purchaseDate,
+      linkedInventoryItemId: data.linkedInventoryItemId.present
+          ? data.linkedInventoryItemId.value
+          : this.linkedInventoryItemId,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetEntry(')
+          ..write('clientId: $clientId, ')
+          ..write('serverId: $serverId, ')
+          ..write('householdId: $householdId, ')
+          ..write('label: $label, ')
+          ..write('amountCents: $amountCents, ')
+          ..write('currency: $currency, ')
+          ..write('category: $category, ')
+          ..write('purchaseDate: $purchaseDate, ')
+          ..write('linkedInventoryItemId: $linkedInventoryItemId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    clientId,
+    serverId,
+    householdId,
+    label,
+    amountCents,
+    currency,
+    category,
+    purchaseDate,
+    linkedInventoryItemId,
+    updatedAt,
+    deletedAt,
+    dirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BudgetEntry &&
+          other.clientId == this.clientId &&
+          other.serverId == this.serverId &&
+          other.householdId == this.householdId &&
+          other.label == this.label &&
+          other.amountCents == this.amountCents &&
+          other.currency == this.currency &&
+          other.category == this.category &&
+          other.purchaseDate == this.purchaseDate &&
+          other.linkedInventoryItemId == this.linkedInventoryItemId &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.dirty == this.dirty);
+}
+
+class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
+  final Value<String> clientId;
+  final Value<String?> serverId;
+  final Value<String> householdId;
+  final Value<String> label;
+  final Value<int> amountCents;
+  final Value<String> currency;
+  final Value<String> category;
+  final Value<DateTime?> purchaseDate;
+  final Value<String?> linkedInventoryItemId;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> dirty;
+  final Value<int> rowid;
+  const BudgetEntriesCompanion({
+    this.clientId = const Value.absent(),
+    this.serverId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.label = const Value.absent(),
+    this.amountCents = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.category = const Value.absent(),
+    this.purchaseDate = const Value.absent(),
+    this.linkedInventoryItemId = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  BudgetEntriesCompanion.insert({
+    required String clientId,
+    this.serverId = const Value.absent(),
+    required String householdId,
+    required String label,
+    required int amountCents,
+    required String currency,
+    required String category,
+    this.purchaseDate = const Value.absent(),
+    this.linkedInventoryItemId = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : clientId = Value(clientId),
+       householdId = Value(householdId),
+       label = Value(label),
+       amountCents = Value(amountCents),
+       currency = Value(currency),
+       category = Value(category),
+       updatedAt = Value(updatedAt);
+  static Insertable<BudgetEntry> custom({
+    Expression<String>? clientId,
+    Expression<String>? serverId,
+    Expression<String>? householdId,
+    Expression<String>? label,
+    Expression<int>? amountCents,
+    Expression<String>? currency,
+    Expression<String>? category,
+    Expression<DateTime>? purchaseDate,
+    Expression<String>? linkedInventoryItemId,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? dirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (clientId != null) 'client_id': clientId,
+      if (serverId != null) 'server_id': serverId,
+      if (householdId != null) 'household_id': householdId,
+      if (label != null) 'label': label,
+      if (amountCents != null) 'amount_cents': amountCents,
+      if (currency != null) 'currency': currency,
+      if (category != null) 'category': category,
+      if (purchaseDate != null) 'purchase_date': purchaseDate,
+      if (linkedInventoryItemId != null)
+        'linked_inventory_item_id': linkedInventoryItemId,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  BudgetEntriesCompanion copyWith({
+    Value<String>? clientId,
+    Value<String?>? serverId,
+    Value<String>? householdId,
+    Value<String>? label,
+    Value<int>? amountCents,
+    Value<String>? currency,
+    Value<String>? category,
+    Value<DateTime?>? purchaseDate,
+    Value<String?>? linkedInventoryItemId,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? dirty,
+    Value<int>? rowid,
+  }) {
+    return BudgetEntriesCompanion(
+      clientId: clientId ?? this.clientId,
+      serverId: serverId ?? this.serverId,
+      householdId: householdId ?? this.householdId,
+      label: label ?? this.label,
+      amountCents: amountCents ?? this.amountCents,
+      currency: currency ?? this.currency,
+      category: category ?? this.category,
+      purchaseDate: purchaseDate ?? this.purchaseDate,
+      linkedInventoryItemId:
+          linkedInventoryItemId ?? this.linkedInventoryItemId,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      dirty: dirty ?? this.dirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (clientId.present) {
+      map['client_id'] = Variable<String>(clientId.value);
+    }
+    if (serverId.present) {
+      map['server_id'] = Variable<String>(serverId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (label.present) {
+      map['label'] = Variable<String>(label.value);
+    }
+    if (amountCents.present) {
+      map['amount_cents'] = Variable<int>(amountCents.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (purchaseDate.present) {
+      map['purchase_date'] = Variable<DateTime>(purchaseDate.value);
+    }
+    if (linkedInventoryItemId.present) {
+      map['linked_inventory_item_id'] = Variable<String>(
+        linkedInventoryItemId.value,
+      );
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BudgetEntriesCompanion(')
+          ..write('clientId: $clientId, ')
+          ..write('serverId: $serverId, ')
+          ..write('householdId: $householdId, ')
+          ..write('label: $label, ')
+          ..write('amountCents: $amountCents, ')
+          ..write('currency: $currency, ')
+          ..write('category: $category, ')
+          ..write('purchaseDate: $purchaseDate, ')
+          ..write('linkedInventoryItemId: $linkedInventoryItemId, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WarningsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _serverIdMeta = const VerificationMeta(
+    'serverId',
+  );
+  @override
+  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
+    'server_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _externalIdMeta = const VerificationMeta(
+    'externalId',
+  );
+  @override
+  late final GeneratedColumn<String> externalId = GeneratedColumn<String>(
+    'external_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _countryCodeMeta = const VerificationMeta(
+    'countryCode',
+  );
+  @override
+  late final GeneratedColumn<String> countryCode = GeneratedColumn<String>(
+    'country_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _regionKeyMeta = const VerificationMeta(
+    'regionKey',
+  );
+  @override
+  late final GeneratedColumn<String> regionKey = GeneratedColumn<String>(
+    'region_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _severityMeta = const VerificationMeta(
+    'severity',
+  );
+  @override
+  late final GeneratedColumn<String> severity = GeneratedColumn<String>(
+    'severity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _eventTypeMeta = const VerificationMeta(
+    'eventType',
+  );
+  @override
+  late final GeneratedColumn<String> eventType = GeneratedColumn<String>(
+    'event_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _headlineMeta = const VerificationMeta(
+    'headline',
+  );
+  @override
+  late final GeneratedColumn<String> headline = GeneratedColumn<String>(
+    'headline',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _effectiveMeta = const VerificationMeta(
+    'effective',
+  );
+  @override
+  late final GeneratedColumn<DateTime> effective = GeneratedColumn<DateTime>(
+    'effective',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _expiresMeta = const VerificationMeta(
+    'expires',
+  );
+  @override
+  late final GeneratedColumn<DateTime> expires = GeneratedColumn<DateTime>(
+    'expires',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sentMeta = const VerificationMeta('sent');
+  @override
+  late final GeneratedColumn<DateTime> sent = GeneratedColumn<DateTime>(
+    'sent',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    serverId,
+    source,
+    externalId,
+    countryCode,
+    regionKey,
+    severity,
+    eventType,
+    headline,
+    description,
+    effective,
+    expires,
+    sent,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'warnings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Warning> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('server_id')) {
+      context.handle(
+        _serverIdMeta,
+        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_serverIdMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sourceMeta);
+    }
+    if (data.containsKey('external_id')) {
+      context.handle(
+        _externalIdMeta,
+        externalId.isAcceptableOrUnknown(data['external_id']!, _externalIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_externalIdMeta);
+    }
+    if (data.containsKey('country_code')) {
+      context.handle(
+        _countryCodeMeta,
+        countryCode.isAcceptableOrUnknown(
+          data['country_code']!,
+          _countryCodeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_countryCodeMeta);
+    }
+    if (data.containsKey('region_key')) {
+      context.handle(
+        _regionKeyMeta,
+        regionKey.isAcceptableOrUnknown(data['region_key']!, _regionKeyMeta),
+      );
+    }
+    if (data.containsKey('severity')) {
+      context.handle(
+        _severityMeta,
+        severity.isAcceptableOrUnknown(data['severity']!, _severityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_severityMeta);
+    }
+    if (data.containsKey('event_type')) {
+      context.handle(
+        _eventTypeMeta,
+        eventType.isAcceptableOrUnknown(data['event_type']!, _eventTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventTypeMeta);
+    }
+    if (data.containsKey('headline')) {
+      context.handle(
+        _headlineMeta,
+        headline.isAcceptableOrUnknown(data['headline']!, _headlineMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_headlineMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('effective')) {
+      context.handle(
+        _effectiveMeta,
+        effective.isAcceptableOrUnknown(data['effective']!, _effectiveMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_effectiveMeta);
+    }
+    if (data.containsKey('expires')) {
+      context.handle(
+        _expiresMeta,
+        expires.isAcceptableOrUnknown(data['expires']!, _expiresMeta),
+      );
+    }
+    if (data.containsKey('sent')) {
+      context.handle(
+        _sentMeta,
+        sent.isAcceptableOrUnknown(data['sent']!, _sentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sentMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {serverId};
+  @override
+  Warning map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Warning(
+      serverId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}server_id'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      externalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}external_id'],
+      )!,
+      countryCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}country_code'],
+      )!,
+      regionKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}region_key'],
+      ),
+      severity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}severity'],
+      )!,
+      eventType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_type'],
+      )!,
+      headline: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}headline'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      effective: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}effective'],
+      )!,
+      expires: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}expires'],
+      ),
+      sent: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}sent'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $WarningsTable createAlias(String alias) {
+    return $WarningsTable(attachedDatabase, alias);
+  }
+}
+
+class Warning extends DataClass implements Insertable<Warning> {
+  final String serverId;
+  final String source;
+  final String externalId;
+  final String countryCode;
+  final String? regionKey;
+
+  /// Stores a `WarningSeverity` enum name as plain text.
+  final String severity;
+  final String eventType;
+  final String headline;
+  final String? description;
+  final DateTime effective;
+  final DateTime? expires;
+  final DateTime sent;
+  final DateTime updatedAt;
+  const Warning({
+    required this.serverId,
+    required this.source,
+    required this.externalId,
+    required this.countryCode,
+    this.regionKey,
+    required this.severity,
+    required this.eventType,
+    required this.headline,
+    this.description,
+    required this.effective,
+    this.expires,
+    required this.sent,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['server_id'] = Variable<String>(serverId);
+    map['source'] = Variable<String>(source);
+    map['external_id'] = Variable<String>(externalId);
+    map['country_code'] = Variable<String>(countryCode);
+    if (!nullToAbsent || regionKey != null) {
+      map['region_key'] = Variable<String>(regionKey);
+    }
+    map['severity'] = Variable<String>(severity);
+    map['event_type'] = Variable<String>(eventType);
+    map['headline'] = Variable<String>(headline);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['effective'] = Variable<DateTime>(effective);
+    if (!nullToAbsent || expires != null) {
+      map['expires'] = Variable<DateTime>(expires);
+    }
+    map['sent'] = Variable<DateTime>(sent);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  WarningsCompanion toCompanion(bool nullToAbsent) {
+    return WarningsCompanion(
+      serverId: Value(serverId),
+      source: Value(source),
+      externalId: Value(externalId),
+      countryCode: Value(countryCode),
+      regionKey: regionKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(regionKey),
+      severity: Value(severity),
+      eventType: Value(eventType),
+      headline: Value(headline),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      effective: Value(effective),
+      expires: expires == null && nullToAbsent
+          ? const Value.absent()
+          : Value(expires),
+      sent: Value(sent),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory Warning.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Warning(
+      serverId: serializer.fromJson<String>(json['serverId']),
+      source: serializer.fromJson<String>(json['source']),
+      externalId: serializer.fromJson<String>(json['externalId']),
+      countryCode: serializer.fromJson<String>(json['countryCode']),
+      regionKey: serializer.fromJson<String?>(json['regionKey']),
+      severity: serializer.fromJson<String>(json['severity']),
+      eventType: serializer.fromJson<String>(json['eventType']),
+      headline: serializer.fromJson<String>(json['headline']),
+      description: serializer.fromJson<String?>(json['description']),
+      effective: serializer.fromJson<DateTime>(json['effective']),
+      expires: serializer.fromJson<DateTime?>(json['expires']),
+      sent: serializer.fromJson<DateTime>(json['sent']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'serverId': serializer.toJson<String>(serverId),
+      'source': serializer.toJson<String>(source),
+      'externalId': serializer.toJson<String>(externalId),
+      'countryCode': serializer.toJson<String>(countryCode),
+      'regionKey': serializer.toJson<String?>(regionKey),
+      'severity': serializer.toJson<String>(severity),
+      'eventType': serializer.toJson<String>(eventType),
+      'headline': serializer.toJson<String>(headline),
+      'description': serializer.toJson<String?>(description),
+      'effective': serializer.toJson<DateTime>(effective),
+      'expires': serializer.toJson<DateTime?>(expires),
+      'sent': serializer.toJson<DateTime>(sent),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  Warning copyWith({
+    String? serverId,
+    String? source,
+    String? externalId,
+    String? countryCode,
+    Value<String?> regionKey = const Value.absent(),
+    String? severity,
+    String? eventType,
+    String? headline,
+    Value<String?> description = const Value.absent(),
+    DateTime? effective,
+    Value<DateTime?> expires = const Value.absent(),
+    DateTime? sent,
+    DateTime? updatedAt,
+  }) => Warning(
+    serverId: serverId ?? this.serverId,
+    source: source ?? this.source,
+    externalId: externalId ?? this.externalId,
+    countryCode: countryCode ?? this.countryCode,
+    regionKey: regionKey.present ? regionKey.value : this.regionKey,
+    severity: severity ?? this.severity,
+    eventType: eventType ?? this.eventType,
+    headline: headline ?? this.headline,
+    description: description.present ? description.value : this.description,
+    effective: effective ?? this.effective,
+    expires: expires.present ? expires.value : this.expires,
+    sent: sent ?? this.sent,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  Warning copyWithCompanion(WarningsCompanion data) {
+    return Warning(
+      serverId: data.serverId.present ? data.serverId.value : this.serverId,
+      source: data.source.present ? data.source.value : this.source,
+      externalId: data.externalId.present
+          ? data.externalId.value
+          : this.externalId,
+      countryCode: data.countryCode.present
+          ? data.countryCode.value
+          : this.countryCode,
+      regionKey: data.regionKey.present ? data.regionKey.value : this.regionKey,
+      severity: data.severity.present ? data.severity.value : this.severity,
+      eventType: data.eventType.present ? data.eventType.value : this.eventType,
+      headline: data.headline.present ? data.headline.value : this.headline,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      effective: data.effective.present ? data.effective.value : this.effective,
+      expires: data.expires.present ? data.expires.value : this.expires,
+      sent: data.sent.present ? data.sent.value : this.sent,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Warning(')
+          ..write('serverId: $serverId, ')
+          ..write('source: $source, ')
+          ..write('externalId: $externalId, ')
+          ..write('countryCode: $countryCode, ')
+          ..write('regionKey: $regionKey, ')
+          ..write('severity: $severity, ')
+          ..write('eventType: $eventType, ')
+          ..write('headline: $headline, ')
+          ..write('description: $description, ')
+          ..write('effective: $effective, ')
+          ..write('expires: $expires, ')
+          ..write('sent: $sent, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    serverId,
+    source,
+    externalId,
+    countryCode,
+    regionKey,
+    severity,
+    eventType,
+    headline,
+    description,
+    effective,
+    expires,
+    sent,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Warning &&
+          other.serverId == this.serverId &&
+          other.source == this.source &&
+          other.externalId == this.externalId &&
+          other.countryCode == this.countryCode &&
+          other.regionKey == this.regionKey &&
+          other.severity == this.severity &&
+          other.eventType == this.eventType &&
+          other.headline == this.headline &&
+          other.description == this.description &&
+          other.effective == this.effective &&
+          other.expires == this.expires &&
+          other.sent == this.sent &&
+          other.updatedAt == this.updatedAt);
+}
+
+class WarningsCompanion extends UpdateCompanion<Warning> {
+  final Value<String> serverId;
+  final Value<String> source;
+  final Value<String> externalId;
+  final Value<String> countryCode;
+  final Value<String?> regionKey;
+  final Value<String> severity;
+  final Value<String> eventType;
+  final Value<String> headline;
+  final Value<String?> description;
+  final Value<DateTime> effective;
+  final Value<DateTime?> expires;
+  final Value<DateTime> sent;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const WarningsCompanion({
+    this.serverId = const Value.absent(),
+    this.source = const Value.absent(),
+    this.externalId = const Value.absent(),
+    this.countryCode = const Value.absent(),
+    this.regionKey = const Value.absent(),
+    this.severity = const Value.absent(),
+    this.eventType = const Value.absent(),
+    this.headline = const Value.absent(),
+    this.description = const Value.absent(),
+    this.effective = const Value.absent(),
+    this.expires = const Value.absent(),
+    this.sent = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  WarningsCompanion.insert({
+    required String serverId,
+    required String source,
+    required String externalId,
+    required String countryCode,
+    this.regionKey = const Value.absent(),
+    required String severity,
+    required String eventType,
+    required String headline,
+    this.description = const Value.absent(),
+    required DateTime effective,
+    this.expires = const Value.absent(),
+    required DateTime sent,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : serverId = Value(serverId),
+       source = Value(source),
+       externalId = Value(externalId),
+       countryCode = Value(countryCode),
+       severity = Value(severity),
+       eventType = Value(eventType),
+       headline = Value(headline),
+       effective = Value(effective),
+       sent = Value(sent),
+       updatedAt = Value(updatedAt);
+  static Insertable<Warning> custom({
+    Expression<String>? serverId,
+    Expression<String>? source,
+    Expression<String>? externalId,
+    Expression<String>? countryCode,
+    Expression<String>? regionKey,
+    Expression<String>? severity,
+    Expression<String>? eventType,
+    Expression<String>? headline,
+    Expression<String>? description,
+    Expression<DateTime>? effective,
+    Expression<DateTime>? expires,
+    Expression<DateTime>? sent,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (serverId != null) 'server_id': serverId,
+      if (source != null) 'source': source,
+      if (externalId != null) 'external_id': externalId,
+      if (countryCode != null) 'country_code': countryCode,
+      if (regionKey != null) 'region_key': regionKey,
+      if (severity != null) 'severity': severity,
+      if (eventType != null) 'event_type': eventType,
+      if (headline != null) 'headline': headline,
+      if (description != null) 'description': description,
+      if (effective != null) 'effective': effective,
+      if (expires != null) 'expires': expires,
+      if (sent != null) 'sent': sent,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  WarningsCompanion copyWith({
+    Value<String>? serverId,
+    Value<String>? source,
+    Value<String>? externalId,
+    Value<String>? countryCode,
+    Value<String?>? regionKey,
+    Value<String>? severity,
+    Value<String>? eventType,
+    Value<String>? headline,
+    Value<String?>? description,
+    Value<DateTime>? effective,
+    Value<DateTime?>? expires,
+    Value<DateTime>? sent,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return WarningsCompanion(
+      serverId: serverId ?? this.serverId,
+      source: source ?? this.source,
+      externalId: externalId ?? this.externalId,
+      countryCode: countryCode ?? this.countryCode,
+      regionKey: regionKey ?? this.regionKey,
+      severity: severity ?? this.severity,
+      eventType: eventType ?? this.eventType,
+      headline: headline ?? this.headline,
+      description: description ?? this.description,
+      effective: effective ?? this.effective,
+      expires: expires ?? this.expires,
+      sent: sent ?? this.sent,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (serverId.present) {
+      map['server_id'] = Variable<String>(serverId.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (externalId.present) {
+      map['external_id'] = Variable<String>(externalId.value);
+    }
+    if (countryCode.present) {
+      map['country_code'] = Variable<String>(countryCode.value);
+    }
+    if (regionKey.present) {
+      map['region_key'] = Variable<String>(regionKey.value);
+    }
+    if (severity.present) {
+      map['severity'] = Variable<String>(severity.value);
+    }
+    if (eventType.present) {
+      map['event_type'] = Variable<String>(eventType.value);
+    }
+    if (headline.present) {
+      map['headline'] = Variable<String>(headline.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (effective.present) {
+      map['effective'] = Variable<DateTime>(effective.value);
+    }
+    if (expires.present) {
+      map['expires'] = Variable<DateTime>(expires.value);
+    }
+    if (sent.present) {
+      map['sent'] = Variable<DateTime>(sent.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WarningsCompanion(')
+          ..write('serverId: $serverId, ')
+          ..write('source: $source, ')
+          ..write('externalId: $externalId, ')
+          ..write('countryCode: $countryCode, ')
+          ..write('regionKey: $regionKey, ')
+          ..write('severity: $severity, ')
+          ..write('eventType: $eventType, ')
+          ..write('headline: $headline, ')
+          ..write('description: $description, ')
+          ..write('effective: $effective, ')
+          ..write('expires: $expires, ')
+          ..write('sent: $sent, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SyncStateTable extends SyncState
+    with TableInfo<$SyncStateTable, SyncStateData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncStateTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _entityMeta = const VerificationMeta('entity');
+  @override
+  late final GeneratedColumn<String> entity = GeneratedColumn<String>(
+    'entity',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastPulledAtMeta = const VerificationMeta(
+    'lastPulledAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastPulledAt = GeneratedColumn<DateTime>(
+    'last_pulled_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [entity, lastPulledAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_state';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncStateData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('entity')) {
+      context.handle(
+        _entityMeta,
+        entity.isAcceptableOrUnknown(data['entity']!, _entityMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityMeta);
+    }
+    if (data.containsKey('last_pulled_at')) {
+      context.handle(
+        _lastPulledAtMeta,
+        lastPulledAt.isAcceptableOrUnknown(
+          data['last_pulled_at']!,
+          _lastPulledAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_lastPulledAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {entity};
+  @override
+  SyncStateData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncStateData(
+      entity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity'],
+      )!,
+      lastPulledAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_pulled_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncStateTable createAlias(String alias) {
+    return $SyncStateTable(attachedDatabase, alias);
+  }
+}
+
+class SyncStateData extends DataClass implements Insertable<SyncStateData> {
+  final String entity;
+  final DateTime lastPulledAt;
+  const SyncStateData({required this.entity, required this.lastPulledAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['entity'] = Variable<String>(entity);
+    map['last_pulled_at'] = Variable<DateTime>(lastPulledAt);
+    return map;
+  }
+
+  SyncStateCompanion toCompanion(bool nullToAbsent) {
+    return SyncStateCompanion(
+      entity: Value(entity),
+      lastPulledAt: Value(lastPulledAt),
+    );
+  }
+
+  factory SyncStateData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncStateData(
+      entity: serializer.fromJson<String>(json['entity']),
+      lastPulledAt: serializer.fromJson<DateTime>(json['lastPulledAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'entity': serializer.toJson<String>(entity),
+      'lastPulledAt': serializer.toJson<DateTime>(lastPulledAt),
+    };
+  }
+
+  SyncStateData copyWith({String? entity, DateTime? lastPulledAt}) =>
+      SyncStateData(
+        entity: entity ?? this.entity,
+        lastPulledAt: lastPulledAt ?? this.lastPulledAt,
+      );
+  SyncStateData copyWithCompanion(SyncStateCompanion data) {
+    return SyncStateData(
+      entity: data.entity.present ? data.entity.value : this.entity,
+      lastPulledAt: data.lastPulledAt.present
+          ? data.lastPulledAt.value
+          : this.lastPulledAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncStateData(')
+          ..write('entity: $entity, ')
+          ..write('lastPulledAt: $lastPulledAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(entity, lastPulledAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncStateData &&
+          other.entity == this.entity &&
+          other.lastPulledAt == this.lastPulledAt);
+}
+
+class SyncStateCompanion extends UpdateCompanion<SyncStateData> {
+  final Value<String> entity;
+  final Value<DateTime> lastPulledAt;
+  final Value<int> rowid;
+  const SyncStateCompanion({
+    this.entity = const Value.absent(),
+    this.lastPulledAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncStateCompanion.insert({
+    required String entity,
+    required DateTime lastPulledAt,
+    this.rowid = const Value.absent(),
+  }) : entity = Value(entity),
+       lastPulledAt = Value(lastPulledAt);
+  static Insertable<SyncStateData> custom({
+    Expression<String>? entity,
+    Expression<DateTime>? lastPulledAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (entity != null) 'entity': entity,
+      if (lastPulledAt != null) 'last_pulled_at': lastPulledAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncStateCompanion copyWith({
+    Value<String>? entity,
+    Value<DateTime>? lastPulledAt,
+    Value<int>? rowid,
+  }) {
+    return SyncStateCompanion(
+      entity: entity ?? this.entity,
+      lastPulledAt: lastPulledAt ?? this.lastPulledAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (entity.present) {
+      map['entity'] = Variable<String>(entity.value);
+    }
+    if (lastPulledAt.present) {
+      map['last_pulled_at'] = Variable<DateTime>(lastPulledAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncStateCompanion(')
+          ..write('entity: $entity, ')
+          ..write('lastPulledAt: $lastPulledAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+abstract class _$AppDatabase extends GeneratedDatabase {
+  _$AppDatabase(QueryExecutor e) : super(e);
+  $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $InventoryItemsTable inventoryItems = $InventoryItemsTable(this);
+  late final $ChecklistTemplatesTable checklistTemplates =
+      $ChecklistTemplatesTable(this);
+  late final $ChecklistItemsTable checklistItems = $ChecklistItemsTable(this);
+  late final $BudgetEntriesTable budgetEntries = $BudgetEntriesTable(this);
+  late final $WarningsTable warnings = $WarningsTable(this);
+  late final $SyncStateTable syncState = $SyncStateTable(this);
+  @override
+  Iterable<TableInfo<Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  @override
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    inventoryItems,
+    checklistTemplates,
+    checklistItems,
+    budgetEntries,
+    warnings,
+    syncState,
+  ];
+}
+
+typedef $$InventoryItemsTableCreateCompanionBuilder =
+    InventoryItemsCompanion Function({
+      required String clientId,
+      Value<String?> serverId,
+      required String householdId,
+      required String name,
+      required String category,
+      Value<String?> barcode,
+      Value<String?> offProductId,
+      required double quantity,
+      required String unit,
+      required String storageLocation,
+      Value<DateTime?> expirationDate,
+      Value<double?> minQuantity,
+      Value<String?> notes,
+      required DateTime updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> dirty,
+      Value<int> rowid,
+    });
+typedef $$InventoryItemsTableUpdateCompanionBuilder =
+    InventoryItemsCompanion Function({
+      Value<String> clientId,
+      Value<String?> serverId,
+      Value<String> householdId,
+      Value<String> name,
+      Value<String> category,
+      Value<String?> barcode,
+      Value<String?> offProductId,
+      Value<double> quantity,
+      Value<String> unit,
+      Value<String> storageLocation,
+      Value<DateTime?> expirationDate,
+      Value<double?> minQuantity,
+      Value<String?> notes,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> dirty,
+      Value<int> rowid,
+    });
+
+class $$InventoryItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryItemsTable> {
+  $$InventoryItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get barcode => $composableBuilder(
+    column: $table.barcode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get offProductId => $composableBuilder(
+    column: $table.offProductId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get storageLocation => $composableBuilder(
+    column: $table.storageLocation,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get expirationDate => $composableBuilder(
+    column: $table.expirationDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get minQuantity => $composableBuilder(
+    column: $table.minQuantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$InventoryItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryItemsTable> {
+  $$InventoryItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get barcode => $composableBuilder(
+    column: $table.barcode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get offProductId => $composableBuilder(
+    column: $table.offProductId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get storageLocation => $composableBuilder(
+    column: $table.storageLocation,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get expirationDate => $composableBuilder(
+    column: $table.expirationDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get minQuantity => $composableBuilder(
+    column: $table.minQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$InventoryItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryItemsTable> {
+  $$InventoryItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get clientId =>
+      $composableBuilder(column: $table.clientId, builder: (column) => column);
+
+  GeneratedColumn<String> get serverId =>
+      $composableBuilder(column: $table.serverId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get barcode =>
+      $composableBuilder(column: $table.barcode, builder: (column) => column);
+
+  GeneratedColumn<String> get offProductId => $composableBuilder(
+    column: $table.offProductId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get storageLocation => $composableBuilder(
+    column: $table.storageLocation,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get expirationDate => $composableBuilder(
+    column: $table.expirationDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get minQuantity => $composableBuilder(
+    column: $table.minQuantity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get dirty =>
+      $composableBuilder(column: $table.dirty, builder: (column) => column);
+}
+
+class $$InventoryItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $InventoryItemsTable,
+          InventoryItem,
+          $$InventoryItemsTableFilterComposer,
+          $$InventoryItemsTableOrderingComposer,
+          $$InventoryItemsTableAnnotationComposer,
+          $$InventoryItemsTableCreateCompanionBuilder,
+          $$InventoryItemsTableUpdateCompanionBuilder,
+          (
+            InventoryItem,
+            BaseReferences<_$AppDatabase, $InventoryItemsTable, InventoryItem>,
+          ),
+          InventoryItem,
+          PrefetchHooks Function()
+        > {
+  $$InventoryItemsTableTableManager(
+    _$AppDatabase db,
+    $InventoryItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventoryItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventoryItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> clientId = const Value.absent(),
+                Value<String?> serverId = const Value.absent(),
+                Value<String> householdId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<String?> barcode = const Value.absent(),
+                Value<String?> offProductId = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<String> storageLocation = const Value.absent(),
+                Value<DateTime?> expirationDate = const Value.absent(),
+                Value<double?> minQuantity = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryItemsCompanion(
+                clientId: clientId,
+                serverId: serverId,
+                householdId: householdId,
+                name: name,
+                category: category,
+                barcode: barcode,
+                offProductId: offProductId,
+                quantity: quantity,
+                unit: unit,
+                storageLocation: storageLocation,
+                expirationDate: expirationDate,
+                minQuantity: minQuantity,
+                notes: notes,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                dirty: dirty,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String clientId,
+                Value<String?> serverId = const Value.absent(),
+                required String householdId,
+                required String name,
+                required String category,
+                Value<String?> barcode = const Value.absent(),
+                Value<String?> offProductId = const Value.absent(),
+                required double quantity,
+                required String unit,
+                required String storageLocation,
+                Value<DateTime?> expirationDate = const Value.absent(),
+                Value<double?> minQuantity = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryItemsCompanion.insert(
+                clientId: clientId,
+                serverId: serverId,
+                householdId: householdId,
+                name: name,
+                category: category,
+                barcode: barcode,
+                offProductId: offProductId,
+                quantity: quantity,
+                unit: unit,
+                storageLocation: storageLocation,
+                expirationDate: expirationDate,
+                minQuantity: minQuantity,
+                notes: notes,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                dirty: dirty,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$InventoryItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $InventoryItemsTable,
+      InventoryItem,
+      $$InventoryItemsTableFilterComposer,
+      $$InventoryItemsTableOrderingComposer,
+      $$InventoryItemsTableAnnotationComposer,
+      $$InventoryItemsTableCreateCompanionBuilder,
+      $$InventoryItemsTableUpdateCompanionBuilder,
+      (
+        InventoryItem,
+        BaseReferences<_$AppDatabase, $InventoryItemsTable, InventoryItem>,
+      ),
+      InventoryItem,
+      PrefetchHooks Function()
+    >;
+typedef $$ChecklistTemplatesTableCreateCompanionBuilder =
+    ChecklistTemplatesCompanion Function({
+      required String clientId,
+      Value<String?> serverId,
+      Value<String?> householdId,
+      required String title,
+      required String category,
+      Value<bool> isBuiltIn,
+      required DateTime updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> dirty,
+      Value<int> rowid,
+    });
+typedef $$ChecklistTemplatesTableUpdateCompanionBuilder =
+    ChecklistTemplatesCompanion Function({
+      Value<String> clientId,
+      Value<String?> serverId,
+      Value<String?> householdId,
+      Value<String> title,
+      Value<String> category,
+      Value<bool> isBuiltIn,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> dirty,
+      Value<int> rowid,
+    });
+
+class $$ChecklistTemplatesTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistTemplatesTable> {
+  $$ChecklistTemplatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isBuiltIn => $composableBuilder(
+    column: $table.isBuiltIn,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ChecklistTemplatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistTemplatesTable> {
+  $$ChecklistTemplatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isBuiltIn => $composableBuilder(
+    column: $table.isBuiltIn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ChecklistTemplatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistTemplatesTable> {
+  $$ChecklistTemplatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get clientId =>
+      $composableBuilder(column: $table.clientId, builder: (column) => column);
+
+  GeneratedColumn<String> get serverId =>
+      $composableBuilder(column: $table.serverId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<bool> get isBuiltIn =>
+      $composableBuilder(column: $table.isBuiltIn, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get dirty =>
+      $composableBuilder(column: $table.dirty, builder: (column) => column);
+}
+
+class $$ChecklistTemplatesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ChecklistTemplatesTable,
+          ChecklistTemplate,
+          $$ChecklistTemplatesTableFilterComposer,
+          $$ChecklistTemplatesTableOrderingComposer,
+          $$ChecklistTemplatesTableAnnotationComposer,
+          $$ChecklistTemplatesTableCreateCompanionBuilder,
+          $$ChecklistTemplatesTableUpdateCompanionBuilder,
+          (
+            ChecklistTemplate,
+            BaseReferences<
+              _$AppDatabase,
+              $ChecklistTemplatesTable,
+              ChecklistTemplate
+            >,
+          ),
+          ChecklistTemplate,
+          PrefetchHooks Function()
+        > {
+  $$ChecklistTemplatesTableTableManager(
+    _$AppDatabase db,
+    $ChecklistTemplatesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistTemplatesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistTemplatesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistTemplatesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> clientId = const Value.absent(),
+                Value<String?> serverId = const Value.absent(),
+                Value<String?> householdId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<bool> isBuiltIn = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChecklistTemplatesCompanion(
+                clientId: clientId,
+                serverId: serverId,
+                householdId: householdId,
+                title: title,
+                category: category,
+                isBuiltIn: isBuiltIn,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                dirty: dirty,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String clientId,
+                Value<String?> serverId = const Value.absent(),
+                Value<String?> householdId = const Value.absent(),
+                required String title,
+                required String category,
+                Value<bool> isBuiltIn = const Value.absent(),
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChecklistTemplatesCompanion.insert(
+                clientId: clientId,
+                serverId: serverId,
+                householdId: householdId,
+                title: title,
+                category: category,
+                isBuiltIn: isBuiltIn,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                dirty: dirty,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ChecklistTemplatesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ChecklistTemplatesTable,
+      ChecklistTemplate,
+      $$ChecklistTemplatesTableFilterComposer,
+      $$ChecklistTemplatesTableOrderingComposer,
+      $$ChecklistTemplatesTableAnnotationComposer,
+      $$ChecklistTemplatesTableCreateCompanionBuilder,
+      $$ChecklistTemplatesTableUpdateCompanionBuilder,
+      (
+        ChecklistTemplate,
+        BaseReferences<
+          _$AppDatabase,
+          $ChecklistTemplatesTable,
+          ChecklistTemplate
+        >,
+      ),
+      ChecklistTemplate,
+      PrefetchHooks Function()
+    >;
+typedef $$ChecklistItemsTableCreateCompanionBuilder =
+    ChecklistItemsCompanion Function({
+      required String clientId,
+      Value<String?> serverId,
+      Value<String?> householdId,
+      required String templateClientId,
+      required String title,
+      Value<double?> targetQuantity,
+      Value<bool> isChecked,
+      Value<String?> linkedInventoryItemId,
+      Value<int> sortOrder,
+      required DateTime updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> dirty,
+      Value<int> rowid,
+    });
+typedef $$ChecklistItemsTableUpdateCompanionBuilder =
+    ChecklistItemsCompanion Function({
+      Value<String> clientId,
+      Value<String?> serverId,
+      Value<String?> householdId,
+      Value<String> templateClientId,
+      Value<String> title,
+      Value<double?> targetQuantity,
+      Value<bool> isChecked,
+      Value<String?> linkedInventoryItemId,
+      Value<int> sortOrder,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> dirty,
+      Value<int> rowid,
+    });
+
+class $$ChecklistItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $ChecklistItemsTable> {
+  $$ChecklistItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get templateClientId => $composableBuilder(
+    column: $table.templateClientId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get targetQuantity => $composableBuilder(
+    column: $table.targetQuantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isChecked => $composableBuilder(
+    column: $table.isChecked,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linkedInventoryItemId => $composableBuilder(
+    column: $table.linkedInventoryItemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ChecklistItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ChecklistItemsTable> {
+  $$ChecklistItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get templateClientId => $composableBuilder(
+    column: $table.templateClientId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get targetQuantity => $composableBuilder(
+    column: $table.targetQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isChecked => $composableBuilder(
+    column: $table.isChecked,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linkedInventoryItemId => $composableBuilder(
+    column: $table.linkedInventoryItemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ChecklistItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ChecklistItemsTable> {
+  $$ChecklistItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get clientId =>
+      $composableBuilder(column: $table.clientId, builder: (column) => column);
+
+  GeneratedColumn<String> get serverId =>
+      $composableBuilder(column: $table.serverId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get templateClientId => $composableBuilder(
+    column: $table.templateClientId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<double> get targetQuantity => $composableBuilder(
+    column: $table.targetQuantity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isChecked =>
+      $composableBuilder(column: $table.isChecked, builder: (column) => column);
+
+  GeneratedColumn<String> get linkedInventoryItemId => $composableBuilder(
+    column: $table.linkedInventoryItemId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get dirty =>
+      $composableBuilder(column: $table.dirty, builder: (column) => column);
+}
+
+class $$ChecklistItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ChecklistItemsTable,
+          ChecklistItem,
+          $$ChecklistItemsTableFilterComposer,
+          $$ChecklistItemsTableOrderingComposer,
+          $$ChecklistItemsTableAnnotationComposer,
+          $$ChecklistItemsTableCreateCompanionBuilder,
+          $$ChecklistItemsTableUpdateCompanionBuilder,
+          (
+            ChecklistItem,
+            BaseReferences<_$AppDatabase, $ChecklistItemsTable, ChecklistItem>,
+          ),
+          ChecklistItem,
+          PrefetchHooks Function()
+        > {
+  $$ChecklistItemsTableTableManager(
+    _$AppDatabase db,
+    $ChecklistItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ChecklistItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ChecklistItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ChecklistItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> clientId = const Value.absent(),
+                Value<String?> serverId = const Value.absent(),
+                Value<String?> householdId = const Value.absent(),
+                Value<String> templateClientId = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<double?> targetQuantity = const Value.absent(),
+                Value<bool> isChecked = const Value.absent(),
+                Value<String?> linkedInventoryItemId = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChecklistItemsCompanion(
+                clientId: clientId,
+                serverId: serverId,
+                householdId: householdId,
+                templateClientId: templateClientId,
+                title: title,
+                targetQuantity: targetQuantity,
+                isChecked: isChecked,
+                linkedInventoryItemId: linkedInventoryItemId,
+                sortOrder: sortOrder,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                dirty: dirty,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String clientId,
+                Value<String?> serverId = const Value.absent(),
+                Value<String?> householdId = const Value.absent(),
+                required String templateClientId,
+                required String title,
+                Value<double?> targetQuantity = const Value.absent(),
+                Value<bool> isChecked = const Value.absent(),
+                Value<String?> linkedInventoryItemId = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChecklistItemsCompanion.insert(
+                clientId: clientId,
+                serverId: serverId,
+                householdId: householdId,
+                templateClientId: templateClientId,
+                title: title,
+                targetQuantity: targetQuantity,
+                isChecked: isChecked,
+                linkedInventoryItemId: linkedInventoryItemId,
+                sortOrder: sortOrder,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                dirty: dirty,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ChecklistItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ChecklistItemsTable,
+      ChecklistItem,
+      $$ChecklistItemsTableFilterComposer,
+      $$ChecklistItemsTableOrderingComposer,
+      $$ChecklistItemsTableAnnotationComposer,
+      $$ChecklistItemsTableCreateCompanionBuilder,
+      $$ChecklistItemsTableUpdateCompanionBuilder,
+      (
+        ChecklistItem,
+        BaseReferences<_$AppDatabase, $ChecklistItemsTable, ChecklistItem>,
+      ),
+      ChecklistItem,
+      PrefetchHooks Function()
+    >;
+typedef $$BudgetEntriesTableCreateCompanionBuilder =
+    BudgetEntriesCompanion Function({
+      required String clientId,
+      Value<String?> serverId,
+      required String householdId,
+      required String label,
+      required int amountCents,
+      required String currency,
+      required String category,
+      Value<DateTime?> purchaseDate,
+      Value<String?> linkedInventoryItemId,
+      required DateTime updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> dirty,
+      Value<int> rowid,
+    });
+typedef $$BudgetEntriesTableUpdateCompanionBuilder =
+    BudgetEntriesCompanion Function({
+      Value<String> clientId,
+      Value<String?> serverId,
+      Value<String> householdId,
+      Value<String> label,
+      Value<int> amountCents,
+      Value<String> currency,
+      Value<String> category,
+      Value<DateTime?> purchaseDate,
+      Value<String?> linkedInventoryItemId,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool> dirty,
+      Value<int> rowid,
+    });
+
+class $$BudgetEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $BudgetEntriesTable> {
+  $$BudgetEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amountCents => $composableBuilder(
+    column: $table.amountCents,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get purchaseDate => $composableBuilder(
+    column: $table.purchaseDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linkedInventoryItemId => $composableBuilder(
+    column: $table.linkedInventoryItemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BudgetEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $BudgetEntriesTable> {
+  $$BudgetEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get clientId => $composableBuilder(
+    column: $table.clientId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get label => $composableBuilder(
+    column: $table.label,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amountCents => $composableBuilder(
+    column: $table.amountCents,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get purchaseDate => $composableBuilder(
+    column: $table.purchaseDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linkedInventoryItemId => $composableBuilder(
+    column: $table.linkedInventoryItemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get dirty => $composableBuilder(
+    column: $table.dirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BudgetEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BudgetEntriesTable> {
+  $$BudgetEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get clientId =>
+      $composableBuilder(column: $table.clientId, builder: (column) => column);
+
+  GeneratedColumn<String> get serverId =>
+      $composableBuilder(column: $table.serverId, builder: (column) => column);
+
+  GeneratedColumn<String> get householdId => $composableBuilder(
+    column: $table.householdId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get label =>
+      $composableBuilder(column: $table.label, builder: (column) => column);
+
+  GeneratedColumn<int> get amountCents => $composableBuilder(
+    column: $table.amountCents,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get purchaseDate => $composableBuilder(
+    column: $table.purchaseDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get linkedInventoryItemId => $composableBuilder(
+    column: $table.linkedInventoryItemId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get dirty =>
+      $composableBuilder(column: $table.dirty, builder: (column) => column);
+}
+
+class $$BudgetEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BudgetEntriesTable,
+          BudgetEntry,
+          $$BudgetEntriesTableFilterComposer,
+          $$BudgetEntriesTableOrderingComposer,
+          $$BudgetEntriesTableAnnotationComposer,
+          $$BudgetEntriesTableCreateCompanionBuilder,
+          $$BudgetEntriesTableUpdateCompanionBuilder,
+          (
+            BudgetEntry,
+            BaseReferences<_$AppDatabase, $BudgetEntriesTable, BudgetEntry>,
+          ),
+          BudgetEntry,
+          PrefetchHooks Function()
+        > {
+  $$BudgetEntriesTableTableManager(_$AppDatabase db, $BudgetEntriesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BudgetEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$BudgetEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$BudgetEntriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> clientId = const Value.absent(),
+                Value<String?> serverId = const Value.absent(),
+                Value<String> householdId = const Value.absent(),
+                Value<String> label = const Value.absent(),
+                Value<int> amountCents = const Value.absent(),
+                Value<String> currency = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<DateTime?> purchaseDate = const Value.absent(),
+                Value<String?> linkedInventoryItemId = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BudgetEntriesCompanion(
+                clientId: clientId,
+                serverId: serverId,
+                householdId: householdId,
+                label: label,
+                amountCents: amountCents,
+                currency: currency,
+                category: category,
+                purchaseDate: purchaseDate,
+                linkedInventoryItemId: linkedInventoryItemId,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                dirty: dirty,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String clientId,
+                Value<String?> serverId = const Value.absent(),
+                required String householdId,
+                required String label,
+                required int amountCents,
+                required String currency,
+                required String category,
+                Value<DateTime?> purchaseDate = const Value.absent(),
+                Value<String?> linkedInventoryItemId = const Value.absent(),
+                required DateTime updatedAt,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool> dirty = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => BudgetEntriesCompanion.insert(
+                clientId: clientId,
+                serverId: serverId,
+                householdId: householdId,
+                label: label,
+                amountCents: amountCents,
+                currency: currency,
+                category: category,
+                purchaseDate: purchaseDate,
+                linkedInventoryItemId: linkedInventoryItemId,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                dirty: dirty,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BudgetEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BudgetEntriesTable,
+      BudgetEntry,
+      $$BudgetEntriesTableFilterComposer,
+      $$BudgetEntriesTableOrderingComposer,
+      $$BudgetEntriesTableAnnotationComposer,
+      $$BudgetEntriesTableCreateCompanionBuilder,
+      $$BudgetEntriesTableUpdateCompanionBuilder,
+      (
+        BudgetEntry,
+        BaseReferences<_$AppDatabase, $BudgetEntriesTable, BudgetEntry>,
+      ),
+      BudgetEntry,
+      PrefetchHooks Function()
+    >;
+typedef $$WarningsTableCreateCompanionBuilder =
+    WarningsCompanion Function({
+      required String serverId,
+      required String source,
+      required String externalId,
+      required String countryCode,
+      Value<String?> regionKey,
+      required String severity,
+      required String eventType,
+      required String headline,
+      Value<String?> description,
+      required DateTime effective,
+      Value<DateTime?> expires,
+      required DateTime sent,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$WarningsTableUpdateCompanionBuilder =
+    WarningsCompanion Function({
+      Value<String> serverId,
+      Value<String> source,
+      Value<String> externalId,
+      Value<String> countryCode,
+      Value<String?> regionKey,
+      Value<String> severity,
+      Value<String> eventType,
+      Value<String> headline,
+      Value<String?> description,
+      Value<DateTime> effective,
+      Value<DateTime?> expires,
+      Value<DateTime> sent,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$WarningsTableFilterComposer
+    extends Composer<_$AppDatabase, $WarningsTable> {
+  $$WarningsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get countryCode => $composableBuilder(
+    column: $table.countryCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get regionKey => $composableBuilder(
+    column: $table.regionKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get severity => $composableBuilder(
+    column: $table.severity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get headline => $composableBuilder(
+    column: $table.headline,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get effective => $composableBuilder(
+    column: $table.effective,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get expires => $composableBuilder(
+    column: $table.expires,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get sent => $composableBuilder(
+    column: $table.sent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$WarningsTableOrderingComposer
+    extends Composer<_$AppDatabase, $WarningsTable> {
+  $$WarningsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get serverId => $composableBuilder(
+    column: $table.serverId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get countryCode => $composableBuilder(
+    column: $table.countryCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get regionKey => $composableBuilder(
+    column: $table.regionKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get severity => $composableBuilder(
+    column: $table.severity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get headline => $composableBuilder(
+    column: $table.headline,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get effective => $composableBuilder(
+    column: $table.effective,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get expires => $composableBuilder(
+    column: $table.expires,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get sent => $composableBuilder(
+    column: $table.sent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$WarningsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WarningsTable> {
+  $$WarningsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get serverId =>
+      $composableBuilder(column: $table.serverId, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get externalId => $composableBuilder(
+    column: $table.externalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get countryCode => $composableBuilder(
+    column: $table.countryCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get regionKey =>
+      $composableBuilder(column: $table.regionKey, builder: (column) => column);
+
+  GeneratedColumn<String> get severity =>
+      $composableBuilder(column: $table.severity, builder: (column) => column);
+
+  GeneratedColumn<String> get eventType =>
+      $composableBuilder(column: $table.eventType, builder: (column) => column);
+
+  GeneratedColumn<String> get headline =>
+      $composableBuilder(column: $table.headline, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get effective =>
+      $composableBuilder(column: $table.effective, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expires =>
+      $composableBuilder(column: $table.expires, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get sent =>
+      $composableBuilder(column: $table.sent, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$WarningsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $WarningsTable,
+          Warning,
+          $$WarningsTableFilterComposer,
+          $$WarningsTableOrderingComposer,
+          $$WarningsTableAnnotationComposer,
+          $$WarningsTableCreateCompanionBuilder,
+          $$WarningsTableUpdateCompanionBuilder,
+          (Warning, BaseReferences<_$AppDatabase, $WarningsTable, Warning>),
+          Warning,
+          PrefetchHooks Function()
+        > {
+  $$WarningsTableTableManager(_$AppDatabase db, $WarningsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WarningsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WarningsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WarningsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> serverId = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String> externalId = const Value.absent(),
+                Value<String> countryCode = const Value.absent(),
+                Value<String?> regionKey = const Value.absent(),
+                Value<String> severity = const Value.absent(),
+                Value<String> eventType = const Value.absent(),
+                Value<String> headline = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<DateTime> effective = const Value.absent(),
+                Value<DateTime?> expires = const Value.absent(),
+                Value<DateTime> sent = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WarningsCompanion(
+                serverId: serverId,
+                source: source,
+                externalId: externalId,
+                countryCode: countryCode,
+                regionKey: regionKey,
+                severity: severity,
+                eventType: eventType,
+                headline: headline,
+                description: description,
+                effective: effective,
+                expires: expires,
+                sent: sent,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String serverId,
+                required String source,
+                required String externalId,
+                required String countryCode,
+                Value<String?> regionKey = const Value.absent(),
+                required String severity,
+                required String eventType,
+                required String headline,
+                Value<String?> description = const Value.absent(),
+                required DateTime effective,
+                Value<DateTime?> expires = const Value.absent(),
+                required DateTime sent,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => WarningsCompanion.insert(
+                serverId: serverId,
+                source: source,
+                externalId: externalId,
+                countryCode: countryCode,
+                regionKey: regionKey,
+                severity: severity,
+                eventType: eventType,
+                headline: headline,
+                description: description,
+                effective: effective,
+                expires: expires,
+                sent: sent,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$WarningsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $WarningsTable,
+      Warning,
+      $$WarningsTableFilterComposer,
+      $$WarningsTableOrderingComposer,
+      $$WarningsTableAnnotationComposer,
+      $$WarningsTableCreateCompanionBuilder,
+      $$WarningsTableUpdateCompanionBuilder,
+      (Warning, BaseReferences<_$AppDatabase, $WarningsTable, Warning>),
+      Warning,
+      PrefetchHooks Function()
+    >;
+typedef $$SyncStateTableCreateCompanionBuilder =
+    SyncStateCompanion Function({
+      required String entity,
+      required DateTime lastPulledAt,
+      Value<int> rowid,
+    });
+typedef $$SyncStateTableUpdateCompanionBuilder =
+    SyncStateCompanion Function({
+      Value<String> entity,
+      Value<DateTime> lastPulledAt,
+      Value<int> rowid,
+    });
+
+class $$SyncStateTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastPulledAt => $composableBuilder(
+    column: $table.lastPulledAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncStateTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get entity => $composableBuilder(
+    column: $table.entity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastPulledAt => $composableBuilder(
+    column: $table.lastPulledAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncStateTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get entity =>
+      $composableBuilder(column: $table.entity, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastPulledAt => $composableBuilder(
+    column: $table.lastPulledAt,
+    builder: (column) => column,
+  );
+}
+
+class $$SyncStateTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncStateTable,
+          SyncStateData,
+          $$SyncStateTableFilterComposer,
+          $$SyncStateTableOrderingComposer,
+          $$SyncStateTableAnnotationComposer,
+          $$SyncStateTableCreateCompanionBuilder,
+          $$SyncStateTableUpdateCompanionBuilder,
+          (
+            SyncStateData,
+            BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateData>,
+          ),
+          SyncStateData,
+          PrefetchHooks Function()
+        > {
+  $$SyncStateTableTableManager(_$AppDatabase db, $SyncStateTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncStateTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncStateTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncStateTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> entity = const Value.absent(),
+                Value<DateTime> lastPulledAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncStateCompanion(
+                entity: entity,
+                lastPulledAt: lastPulledAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String entity,
+                required DateTime lastPulledAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SyncStateCompanion.insert(
+                entity: entity,
+                lastPulledAt: lastPulledAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncStateTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncStateTable,
+      SyncStateData,
+      $$SyncStateTableFilterComposer,
+      $$SyncStateTableOrderingComposer,
+      $$SyncStateTableAnnotationComposer,
+      $$SyncStateTableCreateCompanionBuilder,
+      $$SyncStateTableUpdateCompanionBuilder,
+      (
+        SyncStateData,
+        BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateData>,
+      ),
+      SyncStateData,
+      PrefetchHooks Function()
+    >;
+
+class $AppDatabaseManager {
+  final _$AppDatabase _db;
+  $AppDatabaseManager(this._db);
+  $$InventoryItemsTableTableManager get inventoryItems =>
+      $$InventoryItemsTableTableManager(_db, _db.inventoryItems);
+  $$ChecklistTemplatesTableTableManager get checklistTemplates =>
+      $$ChecklistTemplatesTableTableManager(_db, _db.checklistTemplates);
+  $$ChecklistItemsTableTableManager get checklistItems =>
+      $$ChecklistItemsTableTableManager(_db, _db.checklistItems);
+  $$BudgetEntriesTableTableManager get budgetEntries =>
+      $$BudgetEntriesTableTableManager(_db, _db.budgetEntries);
+  $$WarningsTableTableManager get warnings =>
+      $$WarningsTableTableManager(_db, _db.warnings);
+  $$SyncStateTableTableManager get syncState =>
+      $$SyncStateTableTableManager(_db, _db.syncState);
+}

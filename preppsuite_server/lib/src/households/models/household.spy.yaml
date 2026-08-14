@@ -1,0 +1,27 @@
+### A household groups the members who share a supply/checklist/budget plan
+### and defines the region used to scope civil-protection warning feeds.
+class: Household
+table: household
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+
+  ### Display name chosen by the household's creator.
+  name: String
+
+  ### ISO 3166-1 alpha-2 country code. Drives which warning feeds apply.
+  countryCode: String
+
+  ### Optional German "Amtlicher Regionalschlüssel" for fine-grained BBK
+  ### warning scoping. Only meaningful when countryCode is "DE".
+  regionKey: String?
+
+  ### Short random token used by other users to join this household.
+  inviteCode: String
+
+  ### The time when this household was created.
+  createdAt: DateTime, defaultModel=now
+
+indexes:
+  household_invite_code:
+    fields: inviteCode
+    unique: true

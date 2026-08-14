@@ -1,0 +1,33 @@
+### A single line item within a [ChecklistTemplate]. [household] mirrors
+### its template's household (null for built-in template items) so item
+### sync/authorization doesn't require joining through the template.
+class: ChecklistItem
+table: checklist_item
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+  clientId: UuidValue
+
+  household: Household?, relation(optional, onDelete=Cascade)
+  template: ChecklistTemplate?, relation(onDelete=Cascade)
+
+  title: String
+  targetQuantity: double?
+  isChecked: bool, defaultModel=false
+
+  ### Optional, manual-only in v1: a future phase may use this to derive
+  ### completion from live inventory stock instead.
+  linkedInventoryItemId: UuidValue?
+
+  sortOrder: int, defaultModel=0
+
+  updatedAt: DateTime, defaultModel=now
+  deletedAt: DateTime?
+
+indexes:
+  checklist_item_household_client_id:
+    fields: householdId, clientId
+    unique: true
+  checklist_item_household_updated_at:
+    fields: householdId, updatedAt
+  checklist_item_template:
+    fields: templateId

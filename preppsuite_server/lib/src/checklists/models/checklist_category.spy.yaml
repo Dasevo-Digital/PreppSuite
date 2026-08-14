@@ -1,0 +1,8 @@
+### Broad grouping for a checklist template.
+enum: ChecklistCategory
+serialized: byName
+values:
+  - water
+  - food
+  - firstAid
+  - custom

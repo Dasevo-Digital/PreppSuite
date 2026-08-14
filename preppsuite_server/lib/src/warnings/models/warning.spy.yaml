@@ -1,0 +1,56 @@
+### A normalized civil-protection/weather warning, upserted by the
+### self-rescheduling poll in `warning_poll_future_call.dart`. Read-only
+### from the client's perspective — delivered via a plain pull, never
+### through the generic push/pull sync used by household-editable entities,
+### since warnings are entirely server-generated.
+class: Warning
+table: warning
+fields:
+  id: UuidValue?, defaultPersist=random_v7
+
+  source: WarningSource
+
+  ### The source's own id for this warning; used with [source] to
+  ### deduplicate on upsert.
+  externalId: String
+
+  ### ISO 3166-1 alpha-2. Scopes which households see this warning.
+  countryCode: String
+
+  ### Free-text area description/code from the source feed (BBK state
+  ### code, MeteoAlarm EMMA_ID/areaDesc) — informational, not matched
+  ### precisely against a household's `regionKey` in v1.
+  regionKey: String?
+
+  severity: WarningSeverity
+
+  ### Free-text event type/category from the source (not a closed
+  ### vocabulary — BBK and MeteoAlarm each use their own).
+  eventType: String
+
+  headline: String
+  description: String?
+
+  ### When the warning takes/took effect.
+  effective: DateTime
+
+  ### Null when the source doesn't report an expiry (e.g. BBK's mapData
+  ### feed).
+  expires: DateTime?
+
+  ### When the source issued/last updated this warning.
+  sent: DateTime
+
+  ### The unprocessed source payload as a JSON string, kept for
+  ### debugging/future re-parsing.
+  rawPayload: String
+
+  createdAt: DateTime, defaultModel=now
+  updatedAt: DateTime, defaultModel=now
+
+indexes:
+  warning_source_external_id:
+    fields: source, externalId
+    unique: true
+  warning_country_updated_at:
+    fields: countryCode, updatedAt
