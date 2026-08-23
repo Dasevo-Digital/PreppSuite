@@ -98,24 +98,27 @@ void main() {
       );
     });
 
-    test('a kreis subscription makes that Kreis relevant beyond own region', () {
-      expect(
-        isWarningRelevant(
-          warning(regionKey: '09162'),
-          household(regionKey: '053340000000'),
-          [
-            WarningRegionSubscription(
-              householdId: UuidValue.fromString(const Uuid().v4()),
-              kind: WarningRegionKind.kreis,
-              value: '09162',
-              label: 'München',
-              createdAt: DateTime.utc(2026),
-            ),
-          ],
-        ),
-        isTrue,
-      );
-    });
+    test(
+      'a kreis subscription makes that Kreis relevant beyond own region',
+      () {
+        expect(
+          isWarningRelevant(
+            warning(regionKey: '09162'),
+            household(regionKey: '053340000000'),
+            [
+              WarningRegionSubscription(
+                householdId: UuidValue.fromString(const Uuid().v4()),
+                kind: WarningRegionKind.kreis,
+                value: '09162',
+                label: 'München',
+                createdAt: DateTime.utc(2026),
+              ),
+            ],
+          ),
+          isTrue,
+        );
+      },
+    );
 
     test(
       'a bundesland subscription matches both the 2-letter and numeric '
@@ -148,23 +151,26 @@ void main() {
       },
     );
 
-    test('a warning matching no region and no subscription is not relevant', () {
-      expect(
-        isWarningRelevant(
-          warning(regionKey: '14612'), // Sachsen
-          household(regionKey: '053340000000'), // NW
-          [
-            WarningRegionSubscription(
-              householdId: UuidValue.fromString(const Uuid().v4()),
-              kind: WarningRegionKind.bundesland,
-              value: 'BY',
-              label: 'Bayern',
-              createdAt: DateTime.utc(2026),
-            ),
-          ],
-        ),
-        isFalse,
-      );
-    });
+    test(
+      'a warning matching no region and no subscription is not relevant',
+      () {
+        expect(
+          isWarningRelevant(
+            warning(regionKey: '14612'), // Sachsen
+            household(regionKey: '053340000000'), // NW
+            [
+              WarningRegionSubscription(
+                householdId: UuidValue.fromString(const Uuid().v4()),
+                kind: WarningRegionKind.bundesland,
+                value: 'BY',
+                label: 'Bayern',
+                createdAt: DateTime.utc(2026),
+              ),
+            ],
+          ),
+          isFalse,
+        );
+      },
+    );
   });
 }

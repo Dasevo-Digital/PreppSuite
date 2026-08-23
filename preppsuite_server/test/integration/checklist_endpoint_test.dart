@@ -142,10 +142,13 @@ void main() {
         final session = await memberSession();
         final householdId = await createHousehold(session);
 
-        final template = await endpoints.checklist
-            .pushChecklistTemplateChanges(session, householdId, [
-              draftTemplate(householdId, clientId: const Uuid().v4obj()),
-            ]);
+        final template = await endpoints.checklist.pushChecklistTemplateChanges(
+          session,
+          householdId,
+          [
+            draftTemplate(householdId, clientId: const Uuid().v4obj()),
+          ],
+        );
 
         final items = await endpoints.checklist.pushChecklistItemChanges(
           session,
@@ -171,12 +174,11 @@ void main() {
         final session = await memberSession();
         final householdId = await createHousehold(session);
 
-        final builtIns = await endpoints.checklist
-            .pullChecklistTemplateChanges(
-              session,
-              householdId,
-              DateTime.utc(2000),
-            );
+        final builtIns = await endpoints.checklist.pullChecklistTemplateChanges(
+          session,
+          householdId,
+          DateTime.utc(2000),
+        );
         final builtInTemplate = builtIns.firstWhere((t) => t.isBuiltIn);
 
         final items = await endpoints.checklist.pushChecklistItemChanges(
@@ -202,10 +204,13 @@ void main() {
       () async {
         final ownerSession = await memberSession();
         final ownerHouseholdId = await createHousehold(ownerSession);
-        final template = await endpoints.checklist
-            .pushChecklistTemplateChanges(ownerSession, ownerHouseholdId, [
-              draftTemplate(ownerHouseholdId, clientId: const Uuid().v4obj()),
-            ]);
+        final template = await endpoints.checklist.pushChecklistTemplateChanges(
+          ownerSession,
+          ownerHouseholdId,
+          [
+            draftTemplate(ownerHouseholdId, clientId: const Uuid().v4obj()),
+          ],
+        );
 
         final outsiderSession = await memberSession();
         final outsiderHouseholdId = await createHousehold(outsiderSession);

@@ -36,7 +36,10 @@ void run(List<String> args) async {
   // Register the self-rescheduling warning-feed poller (see
   // WarningPollFutureCall's doc comment for why it's a plain FutureCall
   // rather than a generated one).
-  pod.registerFutureCall(WarningPollFutureCall(), WarningPollFutureCall.callName);
+  pod.registerFutureCall(
+    WarningPollFutureCall(),
+    WarningPollFutureCall.callName,
+  );
 
   // Setup a default page at the web root.
   // These are used by the default page.

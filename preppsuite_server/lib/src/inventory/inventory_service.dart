@@ -123,6 +123,10 @@ class InventoryService {
       ..updatedAt = DateTime.now().toUtc()
       ..deletedAt = incoming.deletedAt;
 
-    return InventoryItem.db.updateRow(session, existing, transaction: transaction);
+    return InventoryItem.db.updateRow(
+      session,
+      existing,
+      transaction: transaction,
+    );
   }
 }

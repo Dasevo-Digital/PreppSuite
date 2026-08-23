@@ -101,6 +101,10 @@ class BudgetService {
       ..updatedAt = DateTime.now().toUtc()
       ..deletedAt = incoming.deletedAt;
 
-    return BudgetEntry.db.updateRow(session, existing, transaction: transaction);
+    return BudgetEntry.db.updateRow(
+      session,
+      existing,
+      transaction: transaction,
+    );
   }
 }

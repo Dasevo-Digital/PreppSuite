@@ -40,7 +40,10 @@ void main() {
         );
 
         expect(stored, hasLength(2));
-        expect(stored.every((w) => w.severity == WarningSeverity.minor), isTrue);
+        expect(
+          stored.every((w) => w.severity == WarningSeverity.minor),
+          isTrue,
+        );
         expect(stored.every((w) => w.countryCode == 'DE'), isTrue);
         expect(
           stored.map((w) => w.externalId),
@@ -114,7 +117,10 @@ void main() {
 
         expect(stored, hasLength(2));
         expect(stored.every((w) => w.regionKey == '05334'), isTrue);
-        expect(stored.every((w) => w.severity == WarningSeverity.minor), isTrue);
+        expect(
+          stored.every((w) => w.severity == WarningSeverity.minor),
+          isTrue,
+        );
         expect(
           stored.first.sent.toIso8601String(),
           startsWith('2026-08-13'),

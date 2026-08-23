@@ -218,6 +218,10 @@ class ChecklistService {
       ..updatedAt = DateTime.now().toUtc()
       ..deletedAt = incoming.deletedAt;
 
-    return ChecklistItem.db.updateRow(session, existing, transaction: transaction);
+    return ChecklistItem.db.updateRow(
+      session,
+      existing,
+      transaction: transaction,
+    );
   }
 }

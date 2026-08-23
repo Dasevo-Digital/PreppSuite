@@ -4,3 +4,6 @@
 
 # Pubspec overrides
 pubspec_overrides.yaml
+
+# Build output
+build/

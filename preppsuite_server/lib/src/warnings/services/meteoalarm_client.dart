@@ -52,8 +52,7 @@ class MeteoAlarmClient {
 
     final document = XmlDocument.parse(response.body);
     return [
-      for (final entry in document.findAllElements('entry'))
-        _parseEntry(entry),
+      for (final entry in document.findAllElements('entry')) _parseEntry(entry),
     ];
   }
 

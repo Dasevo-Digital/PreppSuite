@@ -18,7 +18,11 @@ class InventoryEndpoint extends Endpoint {
     UuidValue householdId,
     DateTime since,
   ) {
-    return _service.pullChanges(session, householdId: householdId, since: since);
+    return _service.pullChanges(
+      session,
+      householdId: householdId,
+      since: since,
+    );
   }
 
   /// Upserts [changes] for [householdId] and returns the canonical

@@ -33,16 +33,19 @@ void main() {
     },
   );
 
-  test('fetchAll returns an empty list for a source with no warnings', () async {
-    final client = BbkClient(
-      httpClient: FixtureHttpClient({
-        'https://warnung.bund.de/api31/mowas/mapData.json': '[]',
-        'https://warnung.bund.de/api31/dwd/mapData.json': '[]',
-      }),
-    );
+  test(
+    'fetchAll returns an empty list for a source with no warnings',
+    () async {
+      final client = BbkClient(
+        httpClient: FixtureHttpClient({
+          'https://warnung.bund.de/api31/mowas/mapData.json': '[]',
+          'https://warnung.bund.de/api31/dwd/mapData.json': '[]',
+        }),
+      );
 
-    expect(await client.fetchAll(), isEmpty);
-  });
+      expect(await client.fetchAll(), isEmpty);
+    },
+  );
 
   test(
     'fetchDashboard parses the real captured per-Kreis dashboard shape '
@@ -54,8 +57,7 @@ void main() {
 
       final client = BbkClient(
         httpClient: FixtureHttpClient({
-          'https://warnung.bund.de/api31/dashboard/053340000000.json':
-              fixture,
+          'https://warnung.bund.de/api31/dashboard/053340000000.json': fixture,
         }),
       );
 

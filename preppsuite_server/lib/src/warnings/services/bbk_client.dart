@@ -29,7 +29,8 @@ class BbkRawWarning {
 /// `lhp`/`police` use the same `mapData.json` shape and can be added later
 /// without any parsing changes.
 class BbkClient {
-  BbkClient({http.Client? httpClient}) : _httpClient = httpClient ?? http.Client();
+  BbkClient({http.Client? httpClient})
+    : _httpClient = httpClient ?? http.Client();
 
   final http.Client _httpClient;
 
