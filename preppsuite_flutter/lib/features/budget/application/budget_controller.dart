@@ -34,6 +34,7 @@ class BudgetController {
         category: category.name,
         purchaseDate: Value(purchaseDate),
         updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
       ),
     );
     _triggerSync();
@@ -59,6 +60,7 @@ class BudgetController {
         purchaseDate: Value(purchaseDate),
         linkedInventoryItemId: Value(existing.linkedInventoryItemId),
         updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
       ),
     );
     _triggerSync();
@@ -78,6 +80,7 @@ class BudgetController {
         purchaseDate: Value(existing.purchaseDate),
         linkedInventoryItemId: Value(existing.linkedInventoryItemId),
         updatedAt: now,
+        dirty: const Value(true),
         deletedAt: Value(now),
       ),
     );

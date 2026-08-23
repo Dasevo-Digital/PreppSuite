@@ -64,6 +64,14 @@ instant but flags it local). Pull cursors live in the `sync_state` table.
 Checklist templates sync before checklist items, because items reference
 templates by *server* id.
 
+**Every local write must set `dirty: const Value(true)` explicitly.** The
+column defaults to true, but a default only applies on INSERT, and
+`insertOnConflictUpdate` writes just the columns the companion sets. Leaving
+`dirty` out therefore updates an already-synced row's values while leaving it
+marked clean, and the edit is never pushed — silently, including deletions.
+This was a real bug across all three controllers; `inventory_controller_test`
+guards it.
+
 **Adding a drift column means a migration.** Bump `schemaVersion` and add the
 matching branch to `onUpgrade` in the same edit — an existing install will not
 recreate its tables.

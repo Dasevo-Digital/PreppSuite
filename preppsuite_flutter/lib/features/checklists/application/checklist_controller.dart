@@ -28,6 +28,7 @@ class ChecklistController {
         title: title,
         category: category.name,
         updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
       ),
     );
     _triggerSync();
@@ -47,6 +48,7 @@ class ChecklistController {
         title: source.title,
         category: source.category,
         updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
       ),
     );
 
@@ -61,6 +63,7 @@ class ChecklistController {
           targetQuantity: Value(item.targetQuantity),
           sortOrder: Value(item.sortOrder),
           updatedAt: DateTime.now().toUtc(),
+          dirty: const Value(true),
         ),
       );
     }
@@ -78,6 +81,7 @@ class ChecklistController {
         category: template.category,
         isBuiltIn: Value(template.isBuiltIn),
         updatedAt: now,
+        dirty: const Value(true),
         deletedAt: Value(now),
       ),
     );
@@ -104,6 +108,7 @@ class ChecklistController {
         targetQuantity: Value(targetQuantity),
         sortOrder: Value(currentItems.length),
         updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
       ),
     );
     _triggerSync();
@@ -122,6 +127,7 @@ class ChecklistController {
         linkedInventoryItemId: Value(item.linkedInventoryItemId),
         sortOrder: Value(item.sortOrder),
         updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
       ),
     );
     _triggerSync();
@@ -145,6 +151,7 @@ class ChecklistController {
         linkedInventoryItemId: Value(item.linkedInventoryItemId),
         sortOrder: Value(item.sortOrder),
         updatedAt: deletedAt,
+        dirty: const Value(true),
         deletedAt: Value(deletedAt),
       ),
     );

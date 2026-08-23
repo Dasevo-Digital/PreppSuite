@@ -50,6 +50,7 @@ class InventoryController {
         photoPath: Value(photoPath),
         calories: Value(calories),
         updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
       ),
     );
     _triggerSync();
@@ -88,6 +89,7 @@ class InventoryController {
         photoPath: Value(photoPath),
         calories: Value(calories),
         updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
       ),
     );
     _triggerSync();
@@ -111,6 +113,7 @@ class InventoryController {
           minQuantity: Value(row.minQuantity),
           notes: Value(row.notes),
           updatedAt: DateTime.now().toUtc(),
+          dirty: const Value(true),
         ),
     ]);
     _triggerSync();
@@ -148,6 +151,7 @@ class InventoryController {
         photoPath: Value(existing.photoPath),
         calories: Value(existing.calories),
         updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
       ),
     );
     _triggerSync();
@@ -172,6 +176,7 @@ class InventoryController {
         photoPath: Value(existing.photoPath),
         calories: Value(existing.calories),
         updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
         deletedAt: Value(DateTime.now().toUtc()),
       ),
     );
