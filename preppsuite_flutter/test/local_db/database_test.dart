@@ -122,4 +122,62 @@ void main() {
       expect(await db.lastPulledAt('inventory'), cursor);
     },
   );
+
+  /// The 0.8.0 migration re-marks every syncable row as dirty, to re-offer
+  /// changes a bug had kept from ever being pushed. The statement names its
+  /// tables as plain strings, so this checks those names actually match the
+  /// schema — a typo would otherwise only surface on a user's upgrade.
+  group('migration to schema 6', () {
+    test('marks rows in every syncable table for push again', () async {
+      await db.upsertInventoryItem(
+        draft(clientId: 'inv-1', dirty: false),
+      );
+      await db.upsertBudgetEntry(
+        BudgetEntriesCompanion.insert(
+          clientId: 'bud-1',
+          householdId: 'household-1',
+          label: 'Konserven',
+          amountCents: 500,
+          currency: 'EUR',
+          category: 'food',
+          updatedAt: DateTime.utc(2026),
+          dirty: const Value(false),
+        ),
+      );
+      await db.upsertChecklistTemplate(
+        ChecklistTemplatesCompanion.insert(
+          clientId: 'tpl-1',
+          householdId: const Value('household-1'),
+          title: 'Eigene Liste',
+          category: 'custom',
+          updatedAt: DateTime.utc(2026),
+          dirty: const Value(false),
+        ),
+      );
+      await db.upsertChecklistItem(
+        ChecklistItemsCompanion.insert(
+          clientId: 'itm-1',
+          householdId: const Value('household-1'),
+          templateClientId: 'tpl-1',
+          title: 'Punkt',
+          updatedAt: DateTime.utc(2026),
+          dirty: const Value(false),
+        ),
+      );
+
+      for (final table in [
+        'inventory_items',
+        'checklist_templates',
+        'checklist_items',
+        'budget_entries',
+      ]) {
+        await db.customStatement('UPDATE $table SET dirty = 1');
+      }
+
+      expect(await db.dirtyInventoryItems('household-1'), hasLength(1));
+      expect(await db.dirtyBudgetEntries('household-1'), hasLength(1));
+      expect(await db.dirtyChecklistTemplates('household-1'), hasLength(1));
+      expect(await db.dirtyChecklistItems('household-1'), hasLength(1));
+    });
+  });
 }

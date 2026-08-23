@@ -25,7 +25,16 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
+
+  /// The tables whose rows are pushed to the server, i.e. the ones with a
+  /// `dirty` column.
+  static const _syncableTableNames = [
+    'inventory_items',
+    'checklist_templates',
+    'checklist_items',
+    'budget_entries',
+  ];
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -44,6 +53,20 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 5) {
         await m.addColumn(inventoryItems, inventoryItems.calories);
+      }
+      if (from < 6) {
+        // Repairs data left behind by a bug that kept `dirty` at false when
+        // an already-synced row was edited, so the change never went out
+        // (see the note in CLAUDE.md). Fixing the writes only helps future
+        // edits; what was already lost needs re-offering to the server.
+        //
+        // Safe to do wholesale: the server applies an incoming row only if
+        // its `updatedAt` is newer than what it holds, so rows that are
+        // genuinely stale are simply ignored rather than overwriting
+        // anything.
+        for (final table in _syncableTableNames) {
+          await customStatement('UPDATE $table SET dirty = 1');
+        }
       }
     },
   );

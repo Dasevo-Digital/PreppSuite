@@ -28,9 +28,8 @@ Liste abbuchen.
 einstellbare Zahl an Tagen und Personen.
 
 **Checklisten.** Drei mitgelieferte Listen – Wasser, Lebensmittel und
-Erste Hilfe, angelehnt an die amtlichen Empfehlungen – dazu beliebig
-viele eigene.
-Einzelne Punkte lassen sich mit einem Vorratsartikel verknüpfen.
+Erste Hilfe, angelehnt an die amtlichen Empfehlungen – dazu beliebig viele
+eigene. Einzelne Punkte lassen sich mit einem Vorratsartikel verknüpfen.
 
 **Budget.** Was die Vorsorge gekostet hat, nach Kategorie. Dazu ein
 PDF-Bericht der fehlenden Ausrüstung – der Bestände also, die unter ihrem
@@ -145,5 +144,7 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   Push-Dienst im Hintergrund. Ablauf-Erinnerungen für Vorräte werden
   dagegen im Voraus eingeplant und erreichen das Gerät auch bei
   geschlossener App.
+- Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen
+  wurden. Der Abgleich überträgt Text, keine Dateien.
 - Veröffentlicht wird bisher nur eine macOS-Fassung. Die übrigen
   Plattformen sind angelegt, aber nicht regelmässig gebaut.
