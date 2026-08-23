@@ -63,8 +63,14 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
       // and the only source of (coarser, state-level) precision for
       // `bundesland`-kind subscriptions, since there's no dedicated
       // state-wide BBK endpoint.
-      final bbkWarnings = await _bbkClient.fetchAll();
-      await _normalizer.upsertBbk(session, bbkWarnings, countryCode: 'DE');
+      final nationwide = await _bbkClient.fetchAll();
+      await _normalizer.upsertBbk(
+        session,
+        nationwide.warnings,
+        countryCode: 'DE',
+      );
+
+      final seenIds = {for (final w in nationwide.warnings) w.id};
 
       for (final kreisSchluessel in await _distinctKreisSchluessel(
         session,
@@ -78,6 +84,28 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
           dashboardWarnings,
           countryCode: 'DE',
           regionKeyOverride: kreisSchluessel,
+        );
+        // Folded into the same set so a warning that only the per-Kreis
+        // endpoint knows about is not retired by the reap below.
+        seenIds.addAll(dashboardWarnings.map((w) => w.id));
+      }
+
+      // Skipped whenever any source failed: an incomplete picture would
+      // retire warnings that are still active (see [BbkFetchResult]).
+      if (nationwide.complete) {
+        final retired = await _normalizer.expireMissingBbk(
+          session,
+          seenExternalIds: seenIds,
+          countryCode: 'DE',
+        );
+        if (retired > 0) {
+          session.log('Warning poll: retired $retired stale BBK warning(s)');
+        }
+      } else {
+        session.log(
+          'Warning poll: at least one BBK source failed, skipping expiry '
+          'of stale warnings this round',
+          level: LogLevel.warning,
         );
       }
     }

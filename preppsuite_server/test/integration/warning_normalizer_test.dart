@@ -30,7 +30,7 @@ void main() {
 
         await normalizer.upsertBbk(
           session,
-          await client.fetchAll(),
+          (await client.fetchAll()).warnings,
           countryCode: 'DE',
         );
 
@@ -142,7 +142,7 @@ void main() {
             'https://warnung.bund.de/api31/dwd/mapData.json': '[]',
           }),
         );
-        final warnings = await client.fetchAll();
+        final warnings = (await client.fetchAll()).warnings;
 
         await normalizer.upsertBbk(session, warnings, countryCode: 'DE');
         final firstPass = {
@@ -164,6 +164,126 @@ void main() {
 
         expect(secondPass.length, firstPass.length);
         expect(secondPass, firstPass);
+      },
+    );
+
+    /// Builds a raw BBK warning without going through the HTTP client, so
+    /// id shapes and reaping can be exercised directly.
+    BbkRawWarning raw(String id) => BbkRawWarning(
+      id: id,
+      startDate: '2026-08-11T08:30:54+02:00',
+      severity: 'Minor',
+      eventTitleDe: 'Test',
+      raw: {'id': id},
+    );
+
+    test(
+      'when a warning drops out of the feed then it is stamped with an '
+      'expiry instead of staying active forever',
+      () async {
+        final session = sessionBuilder.build();
+        await normalizer.upsertBbk(session, [
+          raw('mow.DE-HE-A-1'),
+          raw('mow.DE-HE-B-2'),
+        ], countryCode: 'DE');
+
+        final retired = await normalizer.expireMissingBbk(
+          session,
+          seenExternalIds: {'mow.DE-HE-A-1'},
+          countryCode: 'DE',
+        );
+
+        expect(retired, 1);
+
+        final stored = {
+          for (final w in await Warning.db.find(
+            session,
+            where: (t) => t.source.equals(WarningSource.bbk),
+          ))
+            w.externalId: w.expires,
+        };
+
+        expect(stored['mow.DE-HE-A-1'], isNull, reason: 'still in the feed');
+        expect(stored['mow.DE-HE-B-2'], isNotNull, reason: 'gone from feed');
+      },
+    );
+
+    test(
+      'when a warning is already expired then its expiry is not moved on a '
+      'later poll',
+      () async {
+        final session = sessionBuilder.build();
+        await normalizer.upsertBbk(session, [
+          raw('mow.DE-HE-A-1'),
+        ], countryCode: 'DE');
+
+        await normalizer.expireMissingBbk(
+          session,
+          seenExternalIds: const {},
+          countryCode: 'DE',
+        );
+        final firstExpiry = (await Warning.db.find(session)).single.expires;
+
+        final retiredAgain = await normalizer.expireMissingBbk(
+          session,
+          seenExternalIds: const {},
+          countryCode: 'DE',
+        );
+
+        expect(retiredAgain, 0, reason: 'nothing left to retire');
+        expect(
+          (await Warning.db.find(session)).single.expires,
+          firstExpiry,
+          reason: 'expiry records when it ended, it must not creep forward',
+        );
+      },
+    );
+
+    test('expiring is scoped to BBK warnings of the given country', () async {
+      final session = sessionBuilder.build();
+      await normalizer.upsertBbk(session, [
+        raw('mow.DE-HE-A-1'),
+      ], countryCode: 'DE');
+      await normalizer.upsertBbk(session, [
+        raw('mow.AT-9-B-2'),
+      ], countryCode: 'AT');
+
+      await normalizer.expireMissingBbk(
+        session,
+        seenExternalIds: const {},
+        countryCode: 'DE',
+      );
+
+      final austrian = await Warning.db.findFirstRow(
+        session,
+        where: (t) => t.externalId.equals('mow.AT-9-B-2'),
+      );
+      expect(austrian!.expires, isNull);
+    });
+
+    test(
+      'the state code is read from both id shapes the sources use',
+      () async {
+        final session = sessionBuilder.build();
+
+        await normalizer.upsertBbk(session, [
+          // mowas/dwd shape
+          raw('mow.DE-HE-MKK-W220-20260811-001'),
+          // lhp/police shape, confirmed live: lhp.LHP.NW.nw86768
+          raw('lhp.LHP.NW.nw86768'),
+          // Two capitals that are not a state code must not be mistaken
+          // for a region — a wrong region hides a warning, no region
+          // shows it to everyone.
+          raw('xyz.ZZ.QQ.123'),
+        ], countryCode: 'DE');
+
+        final byId = {
+          for (final w in await Warning.db.find(session)) w.externalId: w,
+        };
+
+        expect(byId['mow.DE-HE-MKK-W220-20260811-001']!.regionKey, 'HE');
+        expect(byId['lhp.LHP.NW.nw86768']!.regionKey, 'NW');
+        expect(byId['xyz.ZZ.QQ.123']!.regionKey, isNull);
       },
     );
   }, rollbackDatabase: RollbackDatabase.afterEach);

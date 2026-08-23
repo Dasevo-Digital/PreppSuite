@@ -22,27 +22,59 @@ class BbkRawWarning {
   final Map<String, dynamic> raw;
 }
 
+/// The outcome of a nationwide poll across every BBK source.
+///
+/// [complete] is what makes expiring stale warnings safe: a source that
+/// answered with a non-200 or unparseable body yields an empty list, which
+/// is indistinguishable from "nothing is warned about right now" by looking
+/// at [warnings] alone. Treating a failed fetch as an empty one would
+/// silently retire every active warning on a single bad response, so
+/// reaping only runs when every source actually answered.
+class BbkFetchResult {
+  const BbkFetchResult({required this.warnings, required this.complete});
+
+  final List<BbkRawWarning> warnings;
+  final bool complete;
+}
+
 /// Fetches Germany-wide warnings from the public, key-less BBK API.
 ///
-/// Only `mowas` (the federal Modular Warning System — most civil-protection
-/// warnings) and `dwd` (weather) are polled for v1; `katwarn`/`biwapp`/
-/// `lhp`/`police` use the same `mapData.json` shape and can be added later
-/// without any parsing changes.
+/// All six published sources are polled: `mowas` (the federal Modular
+/// Warning System), `dwd` (weather), `katwarn`, `biwapp`, `lhp` (flooding)
+/// and `police`. All confirmed live to answer 200 with the same
+/// `mapData.json` array shape, so one parser covers them.
 class BbkClient {
   BbkClient({http.Client? httpClient})
     : _httpClient = httpClient ?? http.Client();
 
   final http.Client _httpClient;
 
-  static const _sources = ['mowas', 'dwd'];
+  static const _sources = [
+    'mowas',
+    'dwd',
+    'katwarn',
+    'biwapp',
+    'lhp',
+    'police',
+  ];
   static const _baseUrl = 'https://warnung.bund.de/api31';
 
-  Future<List<BbkRawWarning>> fetchAll() async {
+  Future<BbkFetchResult> fetchAll() async {
     final results = <BbkRawWarning>[];
+    var complete = true;
+
     for (final source in _sources) {
-      results.addAll(await _fetchSource(source));
+      final fetched = await _fetchSource(source);
+      if (fetched == null) {
+        // One bad source must not discard the others' warnings, but it does
+        // mean the picture is incomplete — see [BbkFetchResult.complete].
+        complete = false;
+        continue;
+      }
+      results.addAll(fetched);
     }
-    return results;
+
+    return BbkFetchResult(warnings: results, complete: complete);
   }
 
   /// Fetches warnings for one district (Kreis), identified by its 5-digit
@@ -88,14 +120,27 @@ class BbkClient {
     );
   }
 
-  Future<List<BbkRawWarning>> _fetchSource(String source) async {
-    final response = await _httpClient.get(
-      Uri.parse('$_baseUrl/$source/mapData.json'),
-    );
-    if (response.statusCode != 200) return [];
+  /// Returns `null` when the source could not be read at all — distinct
+  /// from an empty list, which means the source answered and has nothing
+  /// active. See [BbkFetchResult.complete].
+  Future<List<BbkRawWarning>?> _fetchSource(String source) async {
+    final http.Response response;
+    try {
+      response = await _httpClient.get(
+        Uri.parse('$_baseUrl/$source/mapData.json'),
+      );
+    } catch (_) {
+      return null;
+    }
+    if (response.statusCode != 200) return null;
 
-    final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-    if (decoded is! List) return [];
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(utf8.decode(response.bodyBytes));
+    } catch (_) {
+      return null;
+    }
+    if (decoded is! List) return null;
 
     return [
       for (final entry in decoded)

@@ -19,14 +19,17 @@ man vorsorgt, macht die eigenen Bestände also nicht unlesbar.
 Ablaufdatum. Erfassung per Barcode über Open Food Facts, wahlweise mit
 Foto. Bestehende Listen lassen sich als CSV einlesen, samt Behandlung
 fehlerhafter Zeilen. Kategorien: Wasser, Lebensmittel, Medizin, Werkzeug,
-Dokumente, Energie, Hygiene, Sonstiges.
+Dokumente, Energie, Hygiene, Sonstiges. Vor dem Ablaufdatum erinnert die
+App mit einstellbarem Vorlauf; Verbrauchtes lässt sich direkt aus der
+Liste abbuchen.
 
 **Vorrats-Rechner.** Rechnet den Bestand gegen die Empfehlung des BBK –
 2 Liter Trinkwasser und 2200 kcal pro Person und Tag – für eine
 einstellbare Zahl an Tagen und Personen.
 
-**Checklisten.** Zwei mitgelieferte Listen – Wasser und Erste Hilfe,
-angelehnt an die amtlichen Empfehlungen – dazu beliebig viele eigene.
+**Checklisten.** Drei mitgelieferte Listen – Wasser, Lebensmittel und
+Erste Hilfe, angelehnt an die amtlichen Empfehlungen – dazu beliebig
+viele eigene.
 Einzelne Punkte lassen sich mit einem Vorratsartikel verknüpfen.
 
 **Budget.** Was die Vorsorge gekostet hat, nach Kategorie. Dazu ein
@@ -34,10 +37,12 @@ PDF-Bericht der fehlenden Ausrüstung – der Bestände also, die unter ihrem
 Mindestbestand liegen.
 
 **Warnungen.** Amtliche Meldungen für die eigene Region, im Banner über
-allen Ansichten und als Verlauf. Quellen sind das BBK (MoWaS und DWD über
-warnung.bund.de) sowie MeteoAlarm für 18 europäische Länder. Der Server
-fragt die Feeds alle 15 Minuten ab; neue Warnungen melden sich auf dem
-Gerät.
+allen Ansichten und als Verlauf. Quellen sind das BBK über
+warnung.bund.de – alle sechs Kanäle, von MoWaS und DWD über Katwarn und
+Biwapp bis Hochwasser und Polizei – sowie MeteoAlarm für 18 europäische
+Länder. Der Server fragt alle 15 Minuten ab und filtert BBK-Warnungen bis
+auf Kreisebene, sodass ein Haushalt nicht die Meldungen des halben Landes
+sieht.
 
 **Schutzräume.** Karte mit Schutzräumen und Bunkern aus OpenStreetMap und
 der WWBOTA-Datenbank, nach Entfernung und nach Belastbarkeit der Angabe
@@ -129,13 +134,16 @@ Die mitgelieferte Schrift Noto Sans steht unter der SIL Open Font License
 
 Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
 
-- Die Warnungen werden nur grob nach Region gefiltert. Jeder deutsche
-  Haushalt sieht sämtliche BBK-Warnungen; die Einordnung nach Nähe erfolgt
-  erst in der Anzeige. Gründe und der Weg zu einer genaueren Lösung stehen
-  in `docs/warning-feeds.md`.
-- BBK-Warnungen tragen kein Ablaufdatum und gelten deshalb als aktiv, bis
-  sie aus der Quelle verschwinden.
-- Meldungen erscheinen nur, solange die App läuft – es gibt keinen
-  Push-Dienst im Hintergrund.
+- MeteoAlarm-Warnungen lassen sich nicht nach Region filtern – ihre
+  Gebietsangabe ist freier Text ohne Schlüssel. Sie gelten deshalb für
+  jeden Haushalt des Landes. BBK-Warnungen werden dagegen bis auf
+  Kreisebene gefiltert; genauer gibt die Quelle nichts her.
+- Keine Quelle liefert ein Ablaufdatum. Warnungen werden beendet, wenn sie
+  aus einem vollständigen Abruf verschwinden – solange kein Abruf gelingt,
+  bleiben sie stehen. Einzelheiten in `docs/warning-feeds.md`.
+- Warnmeldungen erscheinen nur, solange die App läuft – es gibt keinen
+  Push-Dienst im Hintergrund. Ablauf-Erinnerungen für Vorräte werden
+  dagegen im Voraus eingeplant und erreichen das Gerät auch bei
+  geschlossener App.
 - Veröffentlicht wird bisher nur eine macOS-Fassung. Die übrigen
   Plattformen sind angelegt, aber nicht regelmässig gebaut.

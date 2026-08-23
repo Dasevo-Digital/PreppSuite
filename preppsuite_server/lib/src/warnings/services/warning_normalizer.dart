@@ -4,6 +4,7 @@ import 'package:serverpod/serverpod.dart';
 
 import '../../generated/protocol.dart';
 import 'bbk_client.dart';
+import 'german_states.dart';
 import 'meteoalarm_client.dart';
 
 /// Maps both sources' structurally different raw payloads onto the
@@ -42,6 +43,50 @@ class WarningNormalizer {
         rawPayload: jsonEncode(warning.raw),
       );
     }
+  }
+
+  /// Ends BBK warnings that the source no longer lists.
+  ///
+  /// No BBK endpoint carries an expiry — neither `mapData.json` nor the
+  /// per-Kreis dashboard (whose `valid` field is a boolean, not a date), so
+  /// a warning stays "active" forever unless something retires it. What the
+  /// feed does say is which warnings are current, so a warning that has
+  /// dropped out of a *complete* poll is over, and gets `expires` stamped
+  /// at the moment we noticed.
+  ///
+  /// Only ever called with the union of every source's ids from a poll
+  /// where all of them answered — see [BbkFetchResult.complete]. Rows that
+  /// already carry an `expires` are left alone, so the timestamp records
+  /// when the warning ended rather than creeping forward on each poll.
+  ///
+  /// Returns how many warnings were retired.
+  Future<int> expireMissingBbk(
+    Session session, {
+    required Set<String> seenExternalIds,
+    required String countryCode,
+  }) async {
+    final active = await Warning.db.find(
+      session,
+      where: (t) =>
+          t.source.equals(WarningSource.bbk) &
+          t.countryCode.equals(countryCode) &
+          t.expires.equals(null),
+    );
+
+    final now = DateTime.now().toUtc();
+    var retired = 0;
+
+    for (final warning in active) {
+      if (seenExternalIds.contains(warning.externalId)) continue;
+
+      warning
+        ..expires = now
+        ..updatedAt = now;
+      await Warning.db.updateRow(session, warning);
+      retired++;
+    }
+
+    return retired;
   }
 
   Future<void> upsertMeteoAlarm(
@@ -142,10 +187,25 @@ class WarningNormalizer {
     return DateTime.tryParse(value)?.toUtc();
   }
 
-  /// BBK ids embed a state code, e.g. `mow.DE-HE-KS-...` → `HE` (Hesse).
-  /// Best-effort/informational only.
+  /// BBK ids embed a state code, but not in one shape — the sources use
+  /// two, both confirmed against the live feeds:
+  ///
+  /// - `mowas`/`dwd`: `mow.DE-HE-KS-SE106-...` → `HE` (Hesse)
+  /// - `lhp`/`police`: `lhp.LHP.NW.nw86768` → `NW` (North Rhine-Westphalia)
+  ///
+  /// The second shape is only accepted when the two letters are actually a
+  /// known state code. Without that check any dot-separated pair of capitals
+  /// would be read as a region, and a wrong `regionKey` is worse than none:
+  /// none means "show it to everyone" (see `isWarningRelevant`), while a
+  /// wrong one hides the warning from the households it concerns.
   String? _bbkRegionFromId(String id) {
-    final match = RegExp(r'DE-([A-Z]{2})-').firstMatch(id);
-    return match?.group(1);
+    final withCountry = RegExp(r'DE-([A-Z]{2})-').firstMatch(id);
+    if (withCountry != null) return withCountry.group(1);
+
+    for (final match in RegExp(r'\.([A-Z]{2})\.').allMatches(id)) {
+      final code = match.group(1)!;
+      if (germanStateByBbkCode(code) != null) return code;
+    }
+    return null;
   }
 }
