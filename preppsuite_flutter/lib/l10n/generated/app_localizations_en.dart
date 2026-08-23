@@ -682,4 +682,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shelterAttribution => '© OpenStreetMap contributors';
+
+  @override
+  String get expiryReminderTitle => 'Supply expiring soon';
+
+  @override
+  String expiryReminderBody(String name, int days) {
+    return '$name expires in $days days.';
+  }
+
+  @override
+  String expiryReminderBodyTomorrow(String name) {
+    return '$name expires tomorrow.';
+  }
+
+  @override
+  String get settingsExpiryRemindersTitle => 'Expiry reminders';
+
+  @override
+  String get settingsExpiryRemindersHint =>
+      'A reminder before a supply expires. Choose how many days ahead.';
+
+  @override
+  String get settingsExpiryRemindersDisabledHint =>
+      'Turn on notifications above so reminders can be scheduled.';
+
+  @override
+  String get settingsExpiryRemindersNoneHint =>
+      'No lead time selected — no reminders will be scheduled.';
+
+  @override
+  String expiryLeadDaysLabel(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get expiryLeadDayOneLabel => '1 day';
+
+  @override
+  String get consumeAction => 'Use up';
+
+  @override
+  String consumeDialogTitle(String name) {
+    return 'Use up $name';
+  }
+
+  @override
+  String get consumeDialogAmountLabel => 'Amount';
+
+  @override
+  String consumeDialogRemaining(String quantity, String unit) {
+    return 'In stock: $quantity $unit';
+  }
+
+  @override
+  String get consumeDialogConfirm => 'Deduct';
+
+  @override
+  String get consumeDialogAll => 'Used up entirely';
+
+  @override
+  String get consumeInvalidAmount =>
+      'Amount must be greater than 0 and at most the stock on hand.';
 }

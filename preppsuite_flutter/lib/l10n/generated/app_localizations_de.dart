@@ -686,4 +686,66 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get shelterAttribution => '© OpenStreetMap contributors';
+
+  @override
+  String get expiryReminderTitle => 'Vorrat läuft bald ab';
+
+  @override
+  String expiryReminderBody(String name, int days) {
+    return '$name läuft in $days Tagen ab.';
+  }
+
+  @override
+  String expiryReminderBodyTomorrow(String name) {
+    return '$name läuft morgen ab.';
+  }
+
+  @override
+  String get settingsExpiryRemindersTitle => 'Ablauf-Erinnerungen';
+
+  @override
+  String get settingsExpiryRemindersHint =>
+      'Erinnerung, bevor ein Vorrat abläuft. Wähle, wie viele Tage vorher.';
+
+  @override
+  String get settingsExpiryRemindersDisabledHint =>
+      'Schalte oben die Benachrichtigungen ein, damit Erinnerungen geplant werden.';
+
+  @override
+  String get settingsExpiryRemindersNoneHint =>
+      'Keine Vorlaufzeit gewählt — es werden keine Erinnerungen geplant.';
+
+  @override
+  String expiryLeadDaysLabel(int days) {
+    return '$days Tage';
+  }
+
+  @override
+  String get expiryLeadDayOneLabel => '1 Tag';
+
+  @override
+  String get consumeAction => 'Verbrauchen';
+
+  @override
+  String consumeDialogTitle(String name) {
+    return '$name verbrauchen';
+  }
+
+  @override
+  String get consumeDialogAmountLabel => 'Menge';
+
+  @override
+  String consumeDialogRemaining(String quantity, String unit) {
+    return 'Bestand: $quantity $unit';
+  }
+
+  @override
+  String get consumeDialogConfirm => 'Abbuchen';
+
+  @override
+  String get consumeDialogAll => 'Alles verbraucht';
+
+  @override
+  String get consumeInvalidAmount =>
+      'Menge muss grösser als 0 und höchstens der Bestand sein.';
 }

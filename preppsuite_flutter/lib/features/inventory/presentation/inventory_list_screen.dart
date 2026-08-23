@@ -7,6 +7,7 @@ import '../../../core/person_count_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/inventory_category_l10n.dart';
+import '../application/inventory_controller.dart';
 import '../application/inventory_providers.dart';
 import '../application/inventory_sync_controller.dart';
 import '../application/supply_calculator.dart';
@@ -117,29 +118,30 @@ class _InventoryTile extends ConsumerWidget {
       subtitle: Text(
         '${_formatQuantity(item.quantity)} ${item.unit} · ${item.storageLocation}',
       ),
-      trailing: !isLowStock && !isExpired
-          ? null
-          : Wrap(
-              spacing: 4,
-              children: [
-                if (isExpired)
-                  Chip(
-                    label: Text(l10n.expiredBadge),
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.errorContainer,
-                  ),
-                if (isLowStock)
-                  Chip(
-                    label: Text(l10n.lowStockBadge),
-                    visualDensity: VisualDensity.compact,
-                    backgroundColor: Theme.of(
-                      context,
-                    ).colorScheme.tertiaryContainer,
-                  ),
-              ],
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isExpired)
+            Chip(
+              label: Text(l10n.expiredBadge),
+              visualDensity: VisualDensity.compact,
+              backgroundColor: Theme.of(context).colorScheme.errorContainer,
             ),
+          if (isLowStock)
+            Chip(
+              label: Text(l10n.lowStockBadge),
+              visualDensity: VisualDensity.compact,
+              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+            ),
+          // Only offered while there is something left to deduct.
+          if (item.quantity > 0)
+            IconButton(
+              icon: const Icon(Icons.remove_circle_outline),
+              tooltip: l10n.consumeAction,
+              onPressed: () => _showConsumeDialog(context, ref),
+            ),
+        ],
+      ),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => InventoryItemFormScreen(
@@ -151,10 +153,112 @@ class _InventoryTile extends ConsumerWidget {
     );
   }
 
+  Future<void> _showConsumeDialog(BuildContext context, WidgetRef ref) async {
+    final amount = await showDialog<double>(
+      context: context,
+      builder: (_) => _ConsumeDialog(item: item, l10n: l10n),
+    );
+    if (amount == null) return;
+
+    await ref
+        .read(inventoryControllerProvider(item.householdId))
+        .consumeQuantity(item, amount);
+  }
+
   String _formatQuantity(double quantity) {
     return quantity == quantity.roundToDouble()
         ? quantity.toStringAsFixed(0)
         : quantity.toString();
+  }
+}
+
+/// Asks how much of an item was used up. Pre-filled with 1, since
+/// deducting a single unit is the common case and should take one tap.
+class _ConsumeDialog extends StatefulWidget {
+  const _ConsumeDialog({required this.item, required this.l10n});
+
+  final InventoryItem item;
+  final AppLocalizations l10n;
+
+  @override
+  State<_ConsumeDialog> createState() => _ConsumeDialogState();
+}
+
+class _ConsumeDialogState extends State<_ConsumeDialog> {
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.item.quantity >= 1 ? '1' : _format(widget.item.quantity),
+  );
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  static String _format(double value) => value == value.roundToDouble()
+      ? value.toStringAsFixed(0)
+      : value.toString();
+
+  void _submit() {
+    // Accepts a comma as decimal separator — the German keyboard offers
+    // that one, and the CSV importer is lenient about it for the same
+    // reason.
+    final parsed = double.tryParse(
+      _controller.text.trim().replaceAll(',', '.'),
+    );
+    if (parsed == null || parsed <= 0 || parsed > widget.item.quantity) {
+      setState(() => _error = widget.l10n.consumeInvalidAmount);
+      return;
+    }
+    Navigator.of(context).pop(parsed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+
+    return AlertDialog(
+      title: Text(l10n.consumeDialogTitle(widget.item.name)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.consumeDialogRemaining(
+              _format(widget.item.quantity),
+              widget.item.unit,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: l10n.consumeDialogAmountLabel,
+              suffixText: widget.item.unit,
+              errorText: _error,
+            ),
+            onSubmitted: (_) => _submit(),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancelButton),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(widget.item.quantity),
+          child: Text(l10n.consumeDialogAll),
+        ),
+        FilledButton(
+          onPressed: _submit,
+          child: Text(l10n.consumeDialogConfirm),
+        ),
+      ],
+    );
   }
 }
 

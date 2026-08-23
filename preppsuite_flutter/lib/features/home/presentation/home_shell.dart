@@ -7,6 +7,7 @@ import '../../budget/presentation/budget_list_screen.dart';
 import '../../checklists/presentation/checklist_list_screen.dart';
 import '../../household/presentation/household_overview_screen.dart';
 import '../../inventory/application/inventory_providers.dart';
+import '../../inventory/presentation/expiry_reminder_scheduler.dart';
 import '../../inventory/presentation/inventory_list_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../../shelters/presentation/shelter_map_screen.dart';
@@ -48,6 +49,9 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     return Scaffold(
       body: Column(
         children: [
+          // Zero-sized; keeps scheduled expiry reminders in step with the
+          // inventory for as long as any tab is open.
+          ExpiryReminderScheduler(householdId: householdId),
           WarningBanner(household: widget.membership.household),
           Expanded(
             child: IndexedStack(index: _index, children: screens),

@@ -1,5 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:preppsuite_client/preppsuite_client.dart' show Warning;
+import 'package:timezone/timezone.dart' as tz;
+
+import '../features/inventory/application/expiry_reminder_planner.dart';
 
 /// Local (on-device) notifications for newly-pulled warnings — not a real
 /// push (no FCM/APNs server component), so a notification only fires while
@@ -90,5 +93,68 @@ class NotificationService {
         ),
       ),
     );
+  }
+
+  /// Payload prefix marking a notification as an expiry reminder, so
+  /// [scheduleExpiryReminders] can clear exactly its own pending ones and
+  /// leave anything else (warnings) alone.
+  static const _expiryPayloadPrefix = 'expiry:';
+
+  /// Replaces all pending expiry reminders with [reminders].
+  ///
+  /// Rescheduling wholesale rather than diffing: the planner already
+  /// produces the complete set that should be pending, and an item's
+  /// expiration date, name or existence can change between runs. Cancel-
+  /// then-schedule is a few more platform calls but cannot leave a
+  /// reminder behind for an item that no longer expires then.
+  ///
+  /// [title] and [body] build the user-facing text, so this stays free of
+  /// localization concerns — see `expiry_reminder_controller.dart`.
+  Future<void> scheduleExpiryReminders(
+    List<ExpiryReminder> reminders, {
+    required String Function(ExpiryReminder) title,
+    required String Function(ExpiryReminder) body,
+  }) async {
+    await _ensureInitialized();
+    await cancelExpiryReminders();
+
+    for (final reminder in reminders) {
+      await _plugin.zonedSchedule(
+        id: reminder.id,
+        title: title(reminder),
+        body: body(reminder),
+        payload: '$_expiryPayloadPrefix${reminder.itemClientId}',
+        // `fireAt` is local wall-clock time; converting it to UTC gives the
+        // right absolute instant without needing the timezone database and
+        // a platform channel to name the local zone. The only cost is that
+        // a reminder scheduled across a DST change fires an hour off its
+        // intended hour, which does not matter for a date-based nudge.
+        scheduledDate: tz.TZDateTime.from(reminder.fireAt.toUtc(), tz.UTC),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        notificationDetails: const NotificationDetails(
+          macOS: DarwinNotificationDetails(),
+          iOS: DarwinNotificationDetails(),
+          android: AndroidNotificationDetails(
+            'expiry',
+            'Ablaufende Vorräte',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Cancels every pending expiry reminder, leaving other notifications
+  /// untouched. Identified by payload rather than by recomputing ids, so
+  /// it still works for reminders scheduled by an earlier app run.
+  Future<void> cancelExpiryReminders() async {
+    await _ensureInitialized();
+    final pending = await _plugin.pendingNotificationRequests();
+    for (final request in pending) {
+      if (request.payload?.startsWith(_expiryPayloadPrefix) ?? false) {
+        await _plugin.cancel(id: request.id);
+      }
+    }
   }
 }

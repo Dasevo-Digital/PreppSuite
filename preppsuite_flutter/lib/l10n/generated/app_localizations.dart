@@ -1315,6 +1315,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'© OpenStreetMap contributors'**
   String get shelterAttribution;
+
+  /// No description provided for @expiryReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supply expiring soon'**
+  String get expiryReminderTitle;
+
+  /// No description provided for @expiryReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} expires in {days} days.'**
+  String expiryReminderBody(String name, int days);
+
+  /// No description provided for @expiryReminderBodyTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} expires tomorrow.'**
+  String expiryReminderBodyTomorrow(String name);
+
+  /// No description provided for @settingsExpiryRemindersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry reminders'**
+  String get settingsExpiryRemindersTitle;
+
+  /// No description provided for @settingsExpiryRemindersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A reminder before a supply expires. Choose how many days ahead.'**
+  String get settingsExpiryRemindersHint;
+
+  /// No description provided for @settingsExpiryRemindersDisabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications above so reminders can be scheduled.'**
+  String get settingsExpiryRemindersDisabledHint;
+
+  /// No description provided for @settingsExpiryRemindersNoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No lead time selected — no reminders will be scheduled.'**
+  String get settingsExpiryRemindersNoneHint;
+
+  /// No description provided for @expiryLeadDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String expiryLeadDaysLabel(int days);
+
+  /// No description provided for @expiryLeadDayOneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'1 day'**
+  String get expiryLeadDayOneLabel;
+
+  /// No description provided for @consumeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Use up'**
+  String get consumeAction;
+
+  /// No description provided for @consumeDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use up {name}'**
+  String consumeDialogTitle(String name);
+
+  /// No description provided for @consumeDialogAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get consumeDialogAmountLabel;
+
+  /// No description provided for @consumeDialogRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'In stock: {quantity} {unit}'**
+  String consumeDialogRemaining(String quantity, String unit);
+
+  /// No description provided for @consumeDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Deduct'**
+  String get consumeDialogConfirm;
+
+  /// No description provided for @consumeDialogAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Used up entirely'**
+  String get consumeDialogAll;
+
+  /// No description provided for @consumeInvalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount must be greater than 0 and at most the stock on hand.'**
+  String get consumeInvalidAmount;
 }
 
 class _AppLocalizationsDelegate

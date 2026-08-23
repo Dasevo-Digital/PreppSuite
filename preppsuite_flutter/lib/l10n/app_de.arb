@@ -224,5 +224,24 @@
   "shelterWwbotaErrorMessage": "WWBOTA/DLBOTA konnte nicht geladen werden.",
   "shelterOverpassErrorMessage": "OpenStreetMap/Overpass konnte nicht geladen werden.",
   "shelterEmptyPrompt": "Noch keine Standortdaten geladen. Nutze den Standort- oder die Ortssuche.",
-  "shelterAttribution": "© OpenStreetMap contributors"
+  "shelterAttribution": "© OpenStreetMap contributors",
+
+  "expiryReminderTitle": "Vorrat läuft bald ab",
+  "expiryReminderBody": "{name} läuft in {days} Tagen ab.",
+  "expiryReminderBodyTomorrow": "{name} läuft morgen ab.",
+
+  "settingsExpiryRemindersTitle": "Ablauf-Erinnerungen",
+  "settingsExpiryRemindersHint": "Erinnerung, bevor ein Vorrat abläuft. Wähle, wie viele Tage vorher.",
+  "settingsExpiryRemindersDisabledHint": "Schalte oben die Benachrichtigungen ein, damit Erinnerungen geplant werden.",
+  "settingsExpiryRemindersNoneHint": "Keine Vorlaufzeit gewählt — es werden keine Erinnerungen geplant.",
+  "expiryLeadDaysLabel": "{days} Tage",
+  "expiryLeadDayOneLabel": "1 Tag",
+
+  "consumeAction": "Verbrauchen",
+  "consumeDialogTitle": "{name} verbrauchen",
+  "consumeDialogAmountLabel": "Menge",
+  "consumeDialogRemaining": "Bestand: {quantity} {unit}",
+  "consumeDialogConfirm": "Abbuchen",
+  "consumeDialogAll": "Alles verbraucht",
+  "consumeInvalidAmount": "Menge muss grösser als 0 und höchstens der Bestand sein."
 }

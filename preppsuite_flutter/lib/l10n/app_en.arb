@@ -1,15 +1,11 @@
 {
   "@@locale": "en",
-
   "appTitle": "PreppSuite",
-
   "signOutButton": "Sign out",
-
   "onboardingChooseTitle": "Welcome to PreppSuite",
   "onboardingChooseSubtitle": "Create a new household or join an existing one.",
   "createHouseholdButton": "Create household",
   "joinHouseholdButton": "Join household",
-
   "createHouseholdTitle": "Create household",
   "householdNameLabel": "Household name",
   "countryLabel": "Country",
@@ -21,36 +17,33 @@
   "regionKeyExplanationClose": "Got it",
   "displayNameLabel": "Your display name",
   "createButton": "Create",
-
   "joinHouseholdTitle": "Join household",
   "inviteCodeLabel": "Invite code",
   "joinButton": "Join",
-
   "householdOverviewTitle": "My household",
   "inviteCodeSectionTitle": "Invite code",
   "rotateInviteCodeButton": "Generate new code",
   "membersSectionTitle": "Members",
   "roleOwner": "Owner",
   "roleMember": "Member",
-
   "loadingHousehold": "Loading household…",
   "fieldRequired": "This field is required.",
   "errorGeneric": "Something went wrong: {error}",
   "@errorGeneric": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "errorInvalidInviteCode": "This invite code is not valid.",
   "errorAlreadyInHousehold": "You already belong to a household.",
   "errorNotOwner": "Only the household's owner can do this.",
   "errorNotAMember": "You are not a member of this household.",
-
   "navInventory": "Inventory",
   "navHousehold": "Household",
   "navSettings": "Settings",
   "navShelters": "Shelters",
-
   "inventoryTitle": "Inventory",
   "inventoryEmpty": "No items yet. Tap + to add your first one.",
   "addItemButton": "Add item",
@@ -76,7 +69,9 @@
   "supplyCalculatorDaysLabel": "Supplies for {days} days",
   "@supplyCalculatorDaysLabel": {
     "placeholders": {
-      "days": {"type": "int"}
+      "days": {
+        "type": "int"
+      }
     }
   },
   "supplyCalculatorWaterLabel": "Drinking water",
@@ -84,9 +79,15 @@
   "supplyCalculatorProgress": "{current} / {target} {unit}",
   "@supplyCalculatorProgress": {
     "placeholders": {
-      "current": {"type": "String"},
-      "target": {"type": "String"},
-      "unit": {"type": "String"}
+      "current": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
     }
   },
   "notesLabel": "Notes (optional)",
@@ -100,7 +101,9 @@
   "scannedBarcodeLabel": "Barcode: {barcode}",
   "@scannedBarcodeLabel": {
     "placeholders": {
-      "barcode": {"type": "String"}
+      "barcode": {
+        "type": "String"
+      }
     }
   },
   "productNotFound": "Product not found — fill in the details by hand.",
@@ -109,7 +112,6 @@
   "takePhotoButton": "Take photo",
   "chooseFromGalleryButton": "Choose from gallery",
   "removePhotoButton": "Remove photo",
-
   "csvImportButton": "Import CSV",
   "csvImportTitle": "Import CSV",
   "csvImportInstructionsTitle": "Expected format",
@@ -120,15 +122,23 @@
   "csvImportSummary": "{valid} of {total} rows can be imported.",
   "@csvImportSummary": {
     "placeholders": {
-      "valid": {"type": "int"},
-      "total": {"type": "int"}
+      "valid": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "csvImportRowError": "Row {row}: {reason}",
   "@csvImportRowError": {
     "placeholders": {
-      "row": {"type": "int"},
-      "reason": {"type": "String"}
+      "row": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
     }
   },
   "csvImportReasonMissingColumns": "Missing required columns (name, category, quantity, unit, storage location).",
@@ -136,13 +146,17 @@
   "csvImportReasonUnknownCategory": "Unknown category \"{value}\".",
   "@csvImportReasonUnknownCategory": {
     "placeholders": {
-      "value": {"type": "String"}
+      "value": {
+        "type": "String"
+      }
     }
   },
   "csvImportReasonInvalidQuantity": "Invalid quantity \"{value}\".",
   "@csvImportReasonInvalidQuantity": {
     "placeholders": {
-      "value": {"type": "String"}
+      "value": {
+        "type": "String"
+      }
     }
   },
   "csvImportReasonUnitMissing": "Unit is missing.",
@@ -150,49 +164,59 @@
   "csvImportReasonInvalidDate": "Invalid date \"{value}\".",
   "@csvImportReasonInvalidDate": {
     "placeholders": {
-      "value": {"type": "String"}
+      "value": {
+        "type": "String"
+      }
     }
   },
   "csvImportReasonInvalidMinQuantity": "Invalid minimum quantity \"{value}\".",
   "@csvImportReasonInvalidMinQuantity": {
     "placeholders": {
-      "value": {"type": "String"}
+      "value": {
+        "type": "String"
+      }
     }
   },
   "csvImportImportButton": "Import {count} rows",
   "@csvImportImportButton": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "csvImportSuccessMessage": "{count} items imported.",
   "@csvImportSuccessMessage": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "csvImportNoValidRows": "No valid rows found in this file.",
   "csvImportFileReadError": "Could not read this file: {error}",
   "@csvImportFileReadError": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "csvImportRowsSectionTitle": "Rows",
   "csvImportRowLabel": "Row {row}",
   "@csvImportRowLabel": {
     "placeholders": {
-      "row": {"type": "int"}
+      "row": {
+        "type": "int"
+      }
     }
   },
   "csvImportEditRowTooltip": "Edit",
   "csvImportRemoveRowTooltip": "Remove from import",
   "csvImportEditRowTitle": "Edit row",
   "cancelButton": "Cancel",
-
   "navChecklists": "Checklists",
   "navBudget": "Budget",
-
   "checklistsTitle": "Checklists",
   "checklistsEmpty": "No checklists yet. Tap + to create your first one.",
   "createTemplateButton": "New checklist",
@@ -209,11 +233,14 @@
   "checklistProgress": "{checked} of {total}",
   "@checklistProgress": {
     "placeholders": {
-      "checked": {"type": "int"},
-      "total": {"type": "int"}
+      "checked": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
-
   "budgetTitle": "Budget",
   "budgetEmpty": "No spending recorded yet. Tap + to add your first entry.",
   "addBudgetEntryButton": "Add entry",
@@ -224,7 +251,6 @@
   "currencyLabel": "Currency",
   "purchaseDateLabel": "Purchase date (optional)",
   "budgetTotalLabel": "Total",
-
   "warningsTitle": "Warnings",
   "warningsEmpty": "No warnings for your region right now.",
   "warningSeverityMinor": "Minor",
@@ -234,20 +260,23 @@
   "warningBannerMore": "+{count} more",
   "@warningBannerMore": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "viewAllWarningsAction": "View all",
   "warningExpiredLabel": "Expired",
   "warningSourceBbk": "German Federal Office for Civil Protection (BBK)",
   "warningSourceMeteoalarm": "MeteoAlarm",
-
   "exportPdfButton": "Export missing equipment",
   "pdfReportTitle": "Missing Equipment Report",
   "pdfGeneratedOn": "Generated on {date}",
   "@pdfGeneratedOn": {
     "placeholders": {
-      "date": {"type": "String"}
+      "date": {
+        "type": "String"
+      }
     }
   },
   "pdfChecklistSectionTitle": "Open checklist items",
@@ -258,7 +287,6 @@
   "pdfColumnQuantity": "Quantity",
   "pdfColumnMinQuantity": "Minimum",
   "pdfColumnUnit": "Unit",
-
   "settingsSectionTitle": "Settings",
   "languageLabel": "Language",
   "languageSystemOption": "System",
@@ -268,18 +296,17 @@
   "inventoryAttentionTooltip": "{count} item(s) low on stock or expired",
   "@inventoryAttentionTooltip": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
-
   "settingsAppearanceTitle": "Appearance",
   "themeSystemOption": "System",
   "themeLightOption": "Light",
   "themeDarkOption": "Dark",
-
   "settingsMyRegionTitle": "My region",
   "settingsNoRegionSet": "No region set",
-
   "settingsAdditionalRegionsTitle": "Additional regions",
   "settingsNoAdditionalRegions": "No additional regions added yet.",
   "settingsAddRegionButton": "Add region",
@@ -289,31 +316,34 @@
   "settingsKreisSchluesselLabel": "Kreisschlüssel (5 digits)",
   "settingsKreisSchluesselInvalid": "Enter a 5-digit Kreisschlüssel.",
   "settingsRegionLabelLabel": "Label",
-
   "settingsNotificationsTitle": "Notifications",
   "settingsNotificationsToggleLabel": "Notify me about new warnings",
   "settingsNotificationsToggleHint": "Local notifications only, while the app is running — no push server.",
-
   "settingsUseLocationButton": "Determine state via location",
   "settingsLocationErrorMessage": "Couldn't determine your location: {error}",
   "@settingsLocationErrorMessage": {
     "placeholders": {
-      "error": {"type": "String"}
+      "error": {
+        "type": "String"
+      }
     }
   },
   "settingsLocationNoMatchMessage": "Couldn't match your location to a German state.",
   "settingsLocationSuccessMessage": "{state} added as an additional region.",
   "@settingsLocationSuccessMessage": {
     "placeholders": {
-      "state": {"type": "String"}
+      "state": {
+        "type": "String"
+      }
     }
   },
-
   "shelterMapTitle": "Shelters",
   "shelterInfoLine": "OpenStreetMap and WWBOTA/DLBOTA loaded within {radius} km.",
   "@shelterInfoLine": {
     "placeholders": {
-      "radius": {"type": "int"}
+      "radius": {
+        "type": "int"
+      }
     }
   },
   "shelterLegendGreenLabel": "Green",
@@ -327,14 +357,20 @@
   "shelterFilterAll": "All {count}",
   "@shelterFilterAll": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shelterFilterCount": "{label} {count}",
   "@shelterFilterCount": {
     "placeholders": {
-      "label": {"type": "String"},
-      "count": {"type": "int"}
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
     }
   },
   "shelterSearchHint": "Postal code or place",
@@ -345,5 +381,62 @@
   "shelterWwbotaErrorMessage": "WWBOTA/DLBOTA could not be loaded.",
   "shelterOverpassErrorMessage": "OpenStreetMap/Overpass could not be loaded.",
   "shelterEmptyPrompt": "No location loaded yet. Use your current location or search for a place.",
-  "shelterAttribution": "© OpenStreetMap contributors"
+  "shelterAttribution": "© OpenStreetMap contributors",
+  "expiryReminderTitle": "Supply expiring soon",
+  "expiryReminderBody": "{name} expires in {days} days.",
+  "@expiryReminderBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "expiryReminderBodyTomorrow": "{name} expires tomorrow.",
+  "@expiryReminderBodyTomorrow": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsExpiryRemindersTitle": "Expiry reminders",
+  "settingsExpiryRemindersHint": "A reminder before a supply expires. Choose how many days ahead.",
+  "settingsExpiryRemindersDisabledHint": "Turn on notifications above so reminders can be scheduled.",
+  "settingsExpiryRemindersNoneHint": "No lead time selected — no reminders will be scheduled.",
+  "expiryLeadDaysLabel": "{days} days",
+  "@expiryLeadDaysLabel": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "expiryLeadDayOneLabel": "1 day",
+  "consumeAction": "Use up",
+  "consumeDialogTitle": "Use up {name}",
+  "@consumeDialogTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "consumeDialogAmountLabel": "Amount",
+  "consumeDialogRemaining": "In stock: {quantity} {unit}",
+  "@consumeDialogRemaining": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "consumeDialogConfirm": "Deduct",
+  "consumeDialogAll": "Used up entirely",
+  "consumeInvalidAmount": "Amount must be greater than 0 and at most the stock on hand."
 }

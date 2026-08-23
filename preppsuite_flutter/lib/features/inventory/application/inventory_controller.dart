@@ -116,6 +116,43 @@ class InventoryController {
     _triggerSync();
   }
 
+  /// Deducts [amount] from an item's stock — the rotation step: use up
+  /// what is nearest to expiring and write down what is left, without
+  /// going through the full edit form.
+  ///
+  /// Reaching zero leaves the item in place rather than tombstoning it.
+  /// A staple that ran out is exactly what the low-stock badge and the
+  /// missing-equipment report are for; deleting it would quietly drop it
+  /// off both, which is the opposite of what an emptied supply should do.
+  Future<void> consumeQuantity(InventoryItem existing, double amount) async {
+    final remaining = (existing.quantity - amount).clamp(
+      0.0,
+      existing.quantity,
+    );
+
+    await _db.upsertInventoryItem(
+      InventoryItemsCompanion.insert(
+        clientId: existing.clientId,
+        serverId: Value(existing.serverId),
+        householdId: existing.householdId,
+        name: existing.name,
+        category: existing.category,
+        barcode: Value(existing.barcode),
+        offProductId: Value(existing.offProductId),
+        quantity: remaining,
+        unit: existing.unit,
+        storageLocation: existing.storageLocation,
+        expirationDate: Value(existing.expirationDate),
+        minQuantity: Value(existing.minQuantity),
+        notes: Value(existing.notes),
+        photoPath: Value(existing.photoPath),
+        calories: Value(existing.calories),
+        updatedAt: DateTime.now().toUtc(),
+      ),
+    );
+    _triggerSync();
+  }
+
   Future<void> deleteItem(InventoryItem existing) async {
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
