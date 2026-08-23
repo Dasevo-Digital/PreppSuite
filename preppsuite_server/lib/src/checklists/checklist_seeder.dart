@@ -3,9 +3,14 @@ import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 
 /// Seeds a small set of built-in, read-only checklist templates
-/// (`householdId == null`) on first server startup. Idempotent: skips
-/// entirely if any built-in template already exists, so it's safe to call
-/// on every boot.
+/// (`householdId == null`) on server startup. Idempotent per template:
+/// each one is looked up by its fixed `clientId` and inserted only if
+/// missing, so it's safe to call on every boot.
+///
+/// Checking per template rather than "does any built-in exist" is what
+/// makes the catalog extensible: a template added to [_builtInTemplates]
+/// later still reaches servers that were seeded before it existed. An
+/// all-or-nothing check would silently skip it forever there.
 ///
 /// This is deliberately a minimal starter set (content curation is a
 /// product concern, not an architecture one) proving the built-in/
@@ -15,17 +20,18 @@ class ChecklistSeeder {
   const ChecklistSeeder();
 
   Future<void> seedBuiltInTemplates(Session session) async {
-    final existing = await ChecklistTemplate.db.count(
-      session,
-      where: (t) => t.isBuiltIn.equals(true),
-    );
-    if (existing > 0) return;
-
     for (final template in _builtInTemplates) {
+      final clientId = UuidValue.fromString(template.clientId);
+      final existing = await ChecklistTemplate.db.findFirstRow(
+        session,
+        where: (t) => t.clientId.equals(clientId),
+      );
+      if (existing != null) continue;
+
       final inserted = await ChecklistTemplate.db.insertRow(
         session,
         ChecklistTemplate(
-          clientId: UuidValue.fromString(template.clientId),
+          clientId: clientId,
           title: template.title,
           category: template.category,
           isBuiltIn: true,
@@ -106,6 +112,47 @@ const _builtInTemplates = [
       _BuiltInItem(
         '00000000-0000-4000-8000-000000000204',
         'Erste-Hilfe-Broschüre',
+      ),
+    ],
+  ),
+  // Mengen je Person für 10 Tage, nach dem Vorratskalkulator des BBK —
+  // dieselbe Quelle, aus der auch `supply_calculator.dart` seine 2 l und
+  // 2200 kcal pro Person und Tag nimmt.
+  _BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000003',
+    'Lebensmittel',
+    ChecklistCategory.food,
+    [
+      _BuiltInItem(
+        '00000000-0000-4000-8000-000000000301',
+        'Getreideprodukte, Brot, Kartoffeln, Nudeln, Reis '
+            '(3,5 kg pro Person für 10 Tage)',
+      ),
+      _BuiltInItem(
+        '00000000-0000-4000-8000-000000000302',
+        'Gemüse und Hülsenfrüchte, z. B. als Konserve (4 kg pro Person '
+            'für 10 Tage)',
+      ),
+      _BuiltInItem(
+        '00000000-0000-4000-8000-000000000303',
+        'Obst und Nüsse (2,5 kg pro Person für 10 Tage)',
+      ),
+      _BuiltInItem(
+        '00000000-0000-4000-8000-000000000304',
+        'Milch und Milchprodukte (2,6 kg pro Person für 10 Tage)',
+      ),
+      _BuiltInItem(
+        '00000000-0000-4000-8000-000000000305',
+        'Fisch, Fleisch, Eier oder Volleipulver (1,5 kg pro Person '
+            'für 10 Tage)',
+      ),
+      _BuiltInItem(
+        '00000000-0000-4000-8000-000000000306',
+        'Fette und Öle (0,35 kg pro Person für 10 Tage)',
+      ),
+      _BuiltInItem(
+        '00000000-0000-4000-8000-000000000307',
+        'Vorrat, der ohne Kochen essbar ist',
       ),
     ],
   ),
