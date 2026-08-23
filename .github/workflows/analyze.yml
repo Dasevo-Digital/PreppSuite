@@ -20,6 +20,10 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # Run from the workspace root so all three packages are covered
+      # (server, generated client, app) — each still picks up its own
+      # analysis_options.yaml. `flutter analyze` treats info- and
+      # warning-level issues as fatal by default, matching the
+      # `dart analyze --fatal-infos` this used to run on the server alone.
       - name: Analyze
-        working-directory: preppsuite_server
-        run: dart analyze --fatal-infos
+        run: flutter analyze
