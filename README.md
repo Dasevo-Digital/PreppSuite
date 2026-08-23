@@ -114,6 +114,17 @@ Nach jeder Änderung an einer Modellbeschreibung (`*.spy.yaml`):
 cd preppsuite_server && serverpod generate
 ```
 
+## Lizenz
+
+Der Projektcode steht unter der Lizenz in [LICENSE](LICENSE).
+
+Die Daten stammen aus fremden Quellen und stehen unter deren eigenen
+Bedingungen: Kartenkacheln und Schutzraum-Einträge von OpenStreetMap
+(ODbL, Namensnennung in der Karte), Produktdaten von Open Food Facts
+(ODbL), Warnungen vom BBK und von MeteoAlarm, Ortssuche über Nominatim.
+Die mitgelieferte Schrift Noto Sans steht unter der SIL Open Font License
+(`preppsuite_flutter/assets/fonts/OFL.txt`).
+
 ## Stand
 
 Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
