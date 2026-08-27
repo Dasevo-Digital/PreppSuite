@@ -8,7 +8,7 @@
 PRODUCT_NAME = preppsuite_flutter
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.preppsuiteFlutter
+PRODUCT_BUNDLE_IDENTIFIER = de.status403.preppsuite
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 LeonardoGamar. MIT-Lizenz, siehe LICENSE.

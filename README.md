@@ -82,6 +82,19 @@ Fertige macOS-Fassungen liegen unter *Releases*. Sie sind nicht mit einem
 gekauften Zertifikat signiert; Gatekeeper meldet sich beim ersten Start,
 über **Rechtsklick → Öffnen** startet die App trotzdem.
 
+Die App trägt die Kennung `de.status403.preppsuite`. Wer sie nur für sich
+baut, kann sie behalten. Wer eine eigene Fassung über den App Store oder
+TestFlight verteilen will, braucht eine eigene unter einer Domain, die er
+selbst kontrolliert — zwei Apps mit derselben Kennung kann Apple nicht
+auseinanderhalten. Sie steht an drei Stellen:
+`macos/Runner/Configs/AppInfo.xcconfig` sowie in den Xcode-Projekten unter
+`ios/` und `macos/`.
+
+Zu beachten: die Kennung bestimmt auch, wo die lokale Datenbank liegt. Wird
+sie an einer bestehenden Installation geändert, startet die App mit einer
+leeren Datenbank — die alte liegt dann unter der vorherigen Kennung in
+`~/Library/Containers/`.
+
 ## Aufbau
 
 | Verzeichnis | Inhalt |
