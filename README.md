@@ -159,5 +159,8 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   geschlossener App.
 - Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen
   wurden. Der Abgleich überträgt Text, keine Dateien.
-- Veröffentlicht wird bisher nur eine macOS-Fassung. Die übrigen
-  Plattformen sind angelegt, aber nicht regelmässig gebaut.
+- Veröffentlicht wird bisher nur eine macOS-Fassung. Für iOS ist geprüft,
+  dass die App durchbaut (`flutter build ios --no-codesign`); ausgeliefert
+  wird sie nicht, das bräuchte ein Apple-Entwicklerkonto. Android, Linux und
+  Windows sind angelegt, aber nie gebaut. Web bräuchte Umbau: der
+  Foto-Teil verwendet `dart:io`, das im Browser nicht zur Verfügung steht.
