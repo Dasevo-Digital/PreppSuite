@@ -121,6 +121,14 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
         countryCode: countryCode,
       );
     }
+
+    // Nothing else ever removes a warning, so without this the table grows
+    // for as long as the server runs — and every row carries its full
+    // source payload.
+    final pruned = await _normalizer.pruneExpiredWarnings(session);
+    if (pruned > 0) {
+      session.log('Warning poll: pruned $pruned long-expired warning(s)');
+    }
   }
 
   /// Every distinct 5-digit Kreisschlüssel worth polling precisely: each

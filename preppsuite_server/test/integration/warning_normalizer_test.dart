@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:preppsuite_server/src/generated/protocol.dart';
+import 'package:serverpod/serverpod.dart' show Session;
 import 'package:preppsuite_server/src/warnings/services/bbk_client.dart';
 import 'package:preppsuite_server/src/warnings/services/meteoalarm_client.dart';
 import 'package:preppsuite_server/src/warnings/services/warning_normalizer.dart';
@@ -259,6 +260,113 @@ void main() {
         where: (t) => t.externalId.equals('mow.AT-9-B-2'),
       );
       expect(austrian!.expires, isNull);
+    });
+
+    /// Inserts a warning directly, so expiry and age can be set freely.
+    Future<void> storeWarning(
+      Session session, {
+      required String externalId,
+      DateTime? expires,
+      DateTime? sent,
+    }) async {
+      final stamp = sent ?? DateTime.now().toUtc();
+      await Warning.db.insertRow(
+        session,
+        Warning(
+          source: WarningSource.bbk,
+          externalId: externalId,
+          countryCode: 'DE',
+          severity: WarningSeverity.minor,
+          eventType: 'Test',
+          headline: 'Test',
+          effective: stamp,
+          expires: expires,
+          sent: stamp,
+          rawPayload: '{}',
+          createdAt: stamp,
+          updatedAt: stamp,
+        ),
+      );
+    }
+
+    group('pruneExpiredWarnings', () {
+      test('removes warnings whose expiry is long past', () async {
+        final session = sessionBuilder.build();
+        final now = DateTime.now().toUtc();
+        await storeWarning(
+          session,
+          externalId: 'long-gone',
+          expires: now.subtract(const Duration(days: 90)),
+        );
+        await storeWarning(
+          session,
+          externalId: 'recently-ended',
+          expires: now.subtract(const Duration(days: 5)),
+        );
+
+        final pruned = await normalizer.pruneExpiredWarnings(session);
+
+        expect(pruned, 1);
+        expect(
+          (await Warning.db.find(session)).map((w) => w.externalId),
+          ['recently-ended'],
+        );
+      });
+
+      test('keeps a warning that has no expiry, however old', () async {
+        // The BBK feed carries containment zones that have stood for
+        // months. They have no expiry precisely because they are still in
+        // force — deleting by age alone would drop exactly those.
+        final session = sessionBuilder.build();
+        await storeWarning(
+          session,
+          externalId: 'still-in-force',
+          expires: null,
+          sent: DateTime.now().toUtc().subtract(const Duration(days: 200)),
+        );
+
+        final pruned = await normalizer.pruneExpiredWarnings(session);
+
+        expect(pruned, 0);
+        expect(await Warning.db.find(session), hasLength(1));
+      });
+
+      test('the retention window is configurable', () async {
+        final session = sessionBuilder.build();
+        await storeWarning(
+          session,
+          externalId: 'ended-10-days-ago',
+          expires: DateTime.now().toUtc().subtract(const Duration(days: 10)),
+        );
+
+        expect(
+          await normalizer.pruneExpiredWarnings(
+            session,
+            retention: const Duration(days: 30),
+          ),
+          0,
+          reason: 'inside the window',
+        );
+        expect(
+          await normalizer.pruneExpiredWarnings(
+            session,
+            retention: const Duration(days: 7),
+          ),
+          1,
+          reason: 'outside a shorter window',
+        );
+      });
+
+      test('leaves an active warning alone', () async {
+        final session = sessionBuilder.build();
+        await storeWarning(
+          session,
+          externalId: 'active',
+          expires: DateTime.now().toUtc().add(const Duration(days: 2)),
+        );
+
+        expect(await normalizer.pruneExpiredWarnings(session), 0);
+      });
     });
 
     test(

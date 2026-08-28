@@ -89,6 +89,35 @@ class WarningNormalizer {
     return retired;
   }
 
+  /// Deletes warnings whose expiry is long past.
+  ///
+  /// Only rows that actually carry an `expires` are considered. A warning
+  /// without one is by definition still current: [expireMissingBbk] stamps
+  /// the field the moment a warning drops out of its source, and MeteoAlarm
+  /// supplies it directly. Deleting by age alone would remove genuinely
+  /// long-running warnings — the BBK feed carries swine-fever containment
+  /// zones that have stood since March.
+  ///
+  /// [retention] is deliberately longer than the app's own 30 days (see
+  /// `AppDatabase.pruneExpiredWarnings`): the server is what a device that
+  /// has been offline for a while pulls from, so it should not forget
+  /// first.
+  ///
+  /// Returns how many rows were removed.
+  Future<int> pruneExpiredWarnings(
+    Session session, {
+    Duration retention = const Duration(days: 60),
+  }) async {
+    final cutoff = DateTime.now().toUtc().subtract(retention);
+
+    final deleted = await Warning.db.deleteWhere(
+      session,
+      where: (t) => t.expires < cutoff,
+    );
+
+    return deleted.length;
+  }
+
   Future<void> upsertMeteoAlarm(
     Session session,
     List<MeteoAlarmRawWarning> warnings, {
