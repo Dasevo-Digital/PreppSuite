@@ -1,6 +1,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Without this the release build cannot reach the server at all: the
+         Flutter tooling only adds it to the debug and profile manifests, so
+         it is missing from exactly the build that gets handed out. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Android 13 and later ask the user before any notification shows.
+         Expiry reminders and warnings both depend on it. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- geolocator does not declare these itself, unlike most plugins: the
+         app has to ask. Without them the shelter map and the region lookup
+         fail silently on Android. Coarse is listed alongside fine so the
+         system can offer the approximate-location choice, which is plenty
+         for picking a Kreis. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <application
-        android:label="preppsuite_flutter"
+        android:label="PreppSuite"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
