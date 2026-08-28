@@ -3,10 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../features/budget/application/budget_sync_controller.dart';
-import '../features/checklists/application/checklist_sync_controller.dart';
-import '../features/inventory/application/inventory_sync_controller.dart';
-import '../features/warnings/application/warning_sync_controller.dart';
+import 'sync_runner.dart';
 
 /// How often the app looks for changes made on another device.
 const syncInterval = Duration(seconds: 60);
@@ -25,7 +22,8 @@ const syncInterval = Duration(seconds: 60);
 /// away through each controller's own debounce.
 ///
 /// Invisible, like `ExpiryReminderScheduler`; lives in [HomeShell] so it
-/// stays mounted for the whole session.
+/// stays mounted for the whole session. The pass itself belongs to
+/// [SyncRunner], which the retry button shares.
 class SyncScheduler extends ConsumerStatefulWidget {
   const SyncScheduler({super.key, required this.householdId});
 
@@ -38,10 +36,6 @@ class SyncScheduler extends ConsumerStatefulWidget {
 class _SyncSchedulerState extends ConsumerState<SyncScheduler> {
   Timer? _timer;
   AppLifecycleListener? _lifecycle;
-
-  /// Guards against a second pass starting while one is still running — a
-  /// slow connection would otherwise stack them up.
-  bool _running = false;
 
   @override
   void initState() {
@@ -59,7 +53,7 @@ class _SyncSchedulerState extends ConsumerState<SyncScheduler> {
 
   void _start() {
     _timer?.cancel();
-    _timer = Timer.periodic(syncInterval, (_) => _syncAll());
+    _timer = Timer.periodic(syncInterval, (_) => _run());
   }
 
   void _handleLifecycle(AppLifecycleState state) {
@@ -68,7 +62,7 @@ class _SyncSchedulerState extends ConsumerState<SyncScheduler> {
         // Catch up immediately rather than waiting out the interval — the
         // first thing someone does on returning is look at the data.
         _start();
-        unawaited(_syncAll());
+        unawaited(_run());
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
@@ -78,23 +72,9 @@ class _SyncSchedulerState extends ConsumerState<SyncScheduler> {
     }
   }
 
-  /// Runs the entities one after another. Order is deliberate: warnings
-  /// first because they are the time-critical ones, then the rest.
-  Future<void> _syncAll() async {
-    if (_running || !mounted) return;
-    _running = true;
-    try {
-      final id = widget.householdId;
-      await ref.read(warningSyncControllerProvider(id).notifier).syncNow();
-      if (!mounted) return;
-      await ref.read(inventorySyncControllerProvider(id).notifier).syncNow();
-      if (!mounted) return;
-      await ref.read(checklistSyncControllerProvider(id).notifier).syncNow();
-      if (!mounted) return;
-      await ref.read(budgetSyncControllerProvider(id).notifier).syncNow();
-    } finally {
-      _running = false;
-    }
+  Future<void> _run() async {
+    if (!mounted) return;
+    await ref.read(syncRunnerProvider).runPass(widget.householdId);
   }
 
   @override

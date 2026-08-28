@@ -1,15 +1,11 @@
 {
   "@@locale": "de",
-
   "appTitle": "PreppSuite",
-
   "signOutButton": "Abmelden",
-
   "onboardingChooseTitle": "Willkommen bei PreppSuite",
   "onboardingChooseSubtitle": "Erstelle einen neuen Haushalt oder tritt einem bestehenden bei.",
   "createHouseholdButton": "Haushalt erstellen",
   "joinHouseholdButton": "Haushalt beitreten",
-
   "createHouseholdTitle": "Haushalt erstellen",
   "householdNameLabel": "Name des Haushalts",
   "countryLabel": "Land",
@@ -21,18 +17,15 @@
   "regionKeyExplanationClose": "Verstanden",
   "displayNameLabel": "Dein Anzeigename",
   "createButton": "Erstellen",
-
   "joinHouseholdTitle": "Haushalt beitreten",
   "inviteCodeLabel": "Einladungscode",
   "joinButton": "Beitreten",
-
   "householdOverviewTitle": "Mein Haushalt",
   "inviteCodeSectionTitle": "Einladungscode",
   "rotateInviteCodeButton": "Neuen Code erzeugen",
   "membersSectionTitle": "Mitglieder",
   "roleOwner": "Besitzer",
   "roleMember": "Mitglied",
-
   "loadingHousehold": "Haushalt wird geladen…",
   "fieldRequired": "Dieses Feld darf nicht leer sein.",
   "errorGeneric": "Es ist ein Fehler aufgetreten: {error}",
@@ -40,12 +33,10 @@
   "errorAlreadyInHousehold": "Du gehörst bereits einem Haushalt an.",
   "errorNotOwner": "Nur der Besitzer kann diese Aktion ausführen.",
   "errorNotAMember": "Du bist kein Mitglied dieses Haushalts.",
-
   "navInventory": "Vorrat",
   "navHousehold": "Haushalt",
   "navSettings": "Einstellungen",
   "navShelters": "Schutzräume",
-
   "inventoryTitle": "Vorrat",
   "inventoryEmpty": "Noch keine Vorräte erfasst. Tippe auf +, um den ersten Eintrag anzulegen.",
   "addItemButton": "Eintrag hinzufügen",
@@ -87,7 +78,6 @@
   "takePhotoButton": "Foto aufnehmen",
   "chooseFromGalleryButton": "Aus Galerie wählen",
   "removePhotoButton": "Foto entfernen",
-
   "csvImportButton": "CSV importieren",
   "csvImportTitle": "CSV importieren",
   "csvImportInstructionsTitle": "Erwartetes Format",
@@ -115,10 +105,8 @@
   "csvImportRemoveRowTooltip": "Aus Import entfernen",
   "csvImportEditRowTitle": "Eintrag bearbeiten",
   "cancelButton": "Abbrechen",
-
   "navChecklists": "Checklisten",
   "navBudget": "Budget",
-
   "checklistsTitle": "Checklisten",
   "checklistsEmpty": "Noch keine Checklisten. Tippe auf +, um die erste zu erstellen.",
   "createTemplateButton": "Neue Checkliste",
@@ -133,7 +121,6 @@
   "addChecklistItemHint": "Eintrag hinzufügen…",
   "addButton": "Hinzufügen",
   "checklistProgress": "{checked} von {total}",
-
   "budgetTitle": "Budget",
   "budgetEmpty": "Noch keine Ausgaben erfasst. Tippe auf +, um den ersten Eintrag anzulegen.",
   "addBudgetEntryButton": "Eintrag hinzufügen",
@@ -144,7 +131,6 @@
   "currencyLabel": "Währung",
   "purchaseDateLabel": "Kaufdatum (optional)",
   "budgetTotalLabel": "Gesamt",
-
   "warningsTitle": "Warnungen",
   "warningsEmpty": "Aktuell keine Warnungen für deine Region.",
   "warningSeverityMinor": "Gering",
@@ -156,7 +142,6 @@
   "warningExpiredLabel": "Abgelaufen",
   "warningSourceBbk": "Bundesamt für Bevölkerungsschutz (BBK)",
   "warningSourceMeteoalarm": "MeteoAlarm",
-
   "exportPdfButton": "Fehlende Ausrüstung exportieren",
   "pdfReportTitle": "Bericht: Fehlende Ausrüstung",
   "pdfGeneratedOn": "Erstellt am {date}",
@@ -168,7 +153,6 @@
   "pdfColumnQuantity": "Menge",
   "pdfColumnMinQuantity": "Mindestbestand",
   "pdfColumnUnit": "Einheit",
-
   "settingsSectionTitle": "Einstellungen",
   "languageLabel": "Sprache",
   "languageSystemOption": "System",
@@ -176,15 +160,12 @@
   "languageEnglishOption": "English",
   "serverAddressLabel": "Server-Adresse",
   "inventoryAttentionTooltip": "{count} Artikel mit niedrigem Bestand oder abgelaufen",
-
   "settingsAppearanceTitle": "Erscheinungsbild",
   "themeSystemOption": "System",
   "themeLightOption": "Hell",
   "themeDarkOption": "Dunkel",
-
   "settingsMyRegionTitle": "Meine Region",
   "settingsNoRegionSet": "Keine Region festgelegt",
-
   "settingsAdditionalRegionsTitle": "Weitere Regionen",
   "settingsNoAdditionalRegions": "Noch keine weiteren Regionen hinzugefügt.",
   "settingsAddRegionButton": "Region hinzufügen",
@@ -194,16 +175,13 @@
   "settingsKreisSchluesselLabel": "Kreisschlüssel (5-stellig)",
   "settingsKreisSchluesselInvalid": "Bitte einen 5-stelligen Kreisschlüssel eingeben.",
   "settingsRegionLabelLabel": "Bezeichnung",
-
   "settingsNotificationsTitle": "Benachrichtigungen",
   "settingsNotificationsToggleLabel": "Bei neuen Warnungen benachrichtigen",
   "settingsNotificationsToggleHint": "Nur lokale Benachrichtigungen, solange die App läuft — kein Push-Server.",
-
   "settingsUseLocationButton": "Bundesland per Standort ermitteln",
   "settingsLocationErrorMessage": "Standort konnte nicht ermittelt werden: {error}",
   "settingsLocationNoMatchMessage": "Aus deinem Standort konnte kein Bundesland ermittelt werden.",
   "settingsLocationSuccessMessage": "{state} als weitere Region hinzugefügt.",
-
   "shelterMapTitle": "Schutzräume",
   "shelterInfoLine": "OpenStreetMap und WWBOTA/DLBOTA im Umkreis von {radius} km geladen.",
   "shelterLegendGreenLabel": "Grün",
@@ -225,23 +203,27 @@
   "shelterOverpassErrorMessage": "OpenStreetMap/Overpass konnte nicht geladen werden.",
   "shelterEmptyPrompt": "Noch keine Standortdaten geladen. Nutze den Standort- oder die Ortssuche.",
   "shelterAttribution": "© OpenStreetMap contributors",
-
   "expiryReminderTitle": "Vorrat läuft bald ab",
   "expiryReminderBody": "{name} läuft in {days} Tagen ab.",
   "expiryReminderBodyTomorrow": "{name} läuft morgen ab.",
-
   "settingsExpiryRemindersTitle": "Ablauf-Erinnerungen",
   "settingsExpiryRemindersHint": "Erinnerung, bevor ein Vorrat abläuft. Wähle, wie viele Tage vorher.",
   "settingsExpiryRemindersDisabledHint": "Schalte oben die Benachrichtigungen ein, damit Erinnerungen geplant werden.",
   "settingsExpiryRemindersNoneHint": "Keine Vorlaufzeit gewählt — es werden keine Erinnerungen geplant.",
   "expiryLeadDaysLabel": "{days} Tage",
   "expiryLeadDayOneLabel": "1 Tag",
-
   "consumeAction": "Verbrauchen",
   "consumeDialogTitle": "{name} verbrauchen",
   "consumeDialogAmountLabel": "Menge",
   "consumeDialogRemaining": "Bestand: {quantity} {unit}",
   "consumeDialogConfirm": "Abbuchen",
   "consumeDialogAll": "Alles verbraucht",
-  "consumeInvalidAmount": "Menge muss grösser als 0 und höchstens der Bestand sein."
+  "consumeInvalidAmount": "Menge muss grösser als 0 und höchstens der Bestand sein.",
+  "syncStaleTitle": "Änderungen sind noch nicht geteilt",
+  "syncStaleNever": "Diese App hat den Server noch nie erreicht. Prüfe die Serveradresse in den Einstellungen.",
+  "syncStaleSince": "Zuletzt erfolgreich abgeglichen vor {age}. Bis dahin bleiben Änderungen nur auf diesem Gerät.",
+  "syncRetryButton": "Erneut versuchen",
+  "syncAgeMinutes": "{count} Minuten",
+  "syncAgeHours": "{count} Stunden",
+  "syncAgeDays": "{count} Tagen"
 }

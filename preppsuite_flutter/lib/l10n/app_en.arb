@@ -438,5 +438,40 @@
   },
   "consumeDialogConfirm": "Deduct",
   "consumeDialogAll": "Used up entirely",
-  "consumeInvalidAmount": "Amount must be greater than 0 and at most the stock on hand."
+  "consumeInvalidAmount": "Amount must be greater than 0 and at most the stock on hand.",
+  "syncStaleTitle": "Changes have not been shared yet",
+  "syncStaleNever": "This app has never reached the server. Check the server address in the settings.",
+  "syncStaleSince": "Last successful sync {age} ago. Until then, changes stay on this device only.",
+  "@syncStaleSince": {
+    "placeholders": {
+      "age": {
+        "type": "String"
+      }
+    }
+  },
+  "syncRetryButton": "Try again",
+  "syncAgeMinutes": "{count} minutes",
+  "@syncAgeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncAgeHours": "{count} hours",
+  "@syncAgeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncAgeDays": "{count} days",
+  "@syncAgeDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

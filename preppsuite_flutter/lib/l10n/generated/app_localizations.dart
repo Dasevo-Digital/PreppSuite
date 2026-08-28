@@ -1411,6 +1411,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amount must be greater than 0 and at most the stock on hand.'**
   String get consumeInvalidAmount;
+
+  /// No description provided for @syncStaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes have not been shared yet'**
+  String get syncStaleTitle;
+
+  /// No description provided for @syncStaleNever.
+  ///
+  /// In en, this message translates to:
+  /// **'This app has never reached the server. Check the server address in the settings.'**
+  String get syncStaleNever;
+
+  /// No description provided for @syncStaleSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Last successful sync {age} ago. Until then, changes stay on this device only.'**
+  String syncStaleSince(String age);
+
+  /// No description provided for @syncRetryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get syncRetryButton;
+
+  /// No description provided for @syncAgeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} minutes'**
+  String syncAgeMinutes(int count);
+
+  /// No description provided for @syncAgeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hours'**
+  String syncAgeHours(int count);
+
+  /// No description provided for @syncAgeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String syncAgeDays(int count);
 }
 
 class _AppLocalizationsDelegate

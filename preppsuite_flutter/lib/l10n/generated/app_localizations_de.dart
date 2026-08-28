@@ -748,4 +748,34 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get consumeInvalidAmount =>
       'Menge muss grösser als 0 und höchstens der Bestand sein.';
+
+  @override
+  String get syncStaleTitle => 'Änderungen sind noch nicht geteilt';
+
+  @override
+  String get syncStaleNever =>
+      'Diese App hat den Server noch nie erreicht. Prüfe die Serveradresse in den Einstellungen.';
+
+  @override
+  String syncStaleSince(String age) {
+    return 'Zuletzt erfolgreich abgeglichen vor $age. Bis dahin bleiben Änderungen nur auf diesem Gerät.';
+  }
+
+  @override
+  String get syncRetryButton => 'Erneut versuchen';
+
+  @override
+  String syncAgeMinutes(int count) {
+    return '$count Minuten';
+  }
+
+  @override
+  String syncAgeHours(int count) {
+    return '$count Stunden';
+  }
+
+  @override
+  String syncAgeDays(int count) {
+    return '$count Tagen';
+  }
 }

@@ -4,6 +4,7 @@ import 'package:preppsuite_client/preppsuite_client.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../sync/sync_scheduler.dart';
+import '../../../sync/sync_status_banner.dart';
 import '../../budget/presentation/budget_list_screen.dart';
 import '../../checklists/presentation/checklist_list_screen.dart';
 import '../../household/presentation/household_overview_screen.dart';
@@ -56,6 +57,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           // Zero-sized; the single clock for background sync, replacing the
           // four independent timers the entities used to run.
           SyncScheduler(householdId: householdId),
+          SyncStatusBanner(householdId: householdId),
           WarningBanner(household: widget.membership.household),
           Expanded(
             child: IndexedStack(index: _index, children: screens),
