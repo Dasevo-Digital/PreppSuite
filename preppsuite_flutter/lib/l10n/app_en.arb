@@ -477,5 +477,17 @@
   "serverAddressHint": "Address of the server this app syncs with.",
   "serverAddressInvalid": "That is not a valid address. For example: preppsuite.example.com or 192.168.1.5:8080",
   "serverAddressSignOutHint": "After a change you will need to sign in again — an account only applies to its own server.",
-  "serverAddressChangeAction": "Change server address"
+  "serverAddressChangeAction": "Change server address",
+  "csvExportButton": "Export as CSV",
+  "csvExportDialogTitle": "Save supplies as CSV",
+  "csvExportSuccessMessage": "{count} items exported",
+  "@csvExportSuccessMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "csvExportEmptyMessage": "There are no items to export yet.",
+  "csvExportErrorMessage": "The file could not be written."
 }

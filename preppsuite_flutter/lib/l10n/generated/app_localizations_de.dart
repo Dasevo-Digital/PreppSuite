@@ -793,4 +793,23 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get serverAddressChangeAction => 'Serveradresse ändern';
+
+  @override
+  String get csvExportButton => 'Als CSV ausgeben';
+
+  @override
+  String get csvExportDialogTitle => 'Vorräte als CSV sichern';
+
+  @override
+  String csvExportSuccessMessage(int count) {
+    return '$count Artikel ausgegeben';
+  }
+
+  @override
+  String get csvExportEmptyMessage =>
+      'Es gibt noch keine Artikel zum Ausgeben.';
+
+  @override
+  String get csvExportErrorMessage =>
+      'Die Datei konnte nicht geschrieben werden.';
 }

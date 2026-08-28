@@ -1477,6 +1477,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change server address'**
   String get serverAddressChangeAction;
+
+  /// No description provided for @csvExportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as CSV'**
+  String get csvExportButton;
+
+  /// No description provided for @csvExportDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save supplies as CSV'**
+  String get csvExportDialogTitle;
+
+  /// No description provided for @csvExportSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items exported'**
+  String csvExportSuccessMessage(int count);
+
+  /// No description provided for @csvExportEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no items to export yet.'**
+  String get csvExportEmptyMessage;
+
+  /// No description provided for @csvExportErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be written.'**
+  String get csvExportErrorMessage;
 }
 
 class _AppLocalizationsDelegate

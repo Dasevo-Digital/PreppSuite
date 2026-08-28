@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +9,7 @@ import '../../../core/person_count_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/inventory_category_l10n.dart';
+import '../application/inventory_csv_export.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_providers.dart';
 import '../application/inventory_sync_controller.dart';
@@ -32,6 +35,11 @@ class InventoryListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.inventoryTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: l10n.csvExportButton,
+            onPressed: () => _exportCsv(context, ref, householdId, l10n),
+          ),
           IconButton(
             icon: const Icon(Icons.upload_file),
             tooltip: l10n.csvImportButton,
@@ -91,6 +99,57 @@ class InventoryListScreen extends ConsumerWidget {
         label: Text(l10n.addItemButton),
       ),
     );
+  }
+
+  /// Writes the whole inventory out as CSV, in the format the importer
+  /// reads back — see `inventory_csv_export.dart`.
+  Future<void> _exportCsv(
+    BuildContext context,
+    WidgetRef ref,
+    String householdId,
+    AppLocalizations l10n,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final items =
+        ref.read(inventoryItemsProvider(householdId)).value ?? const [];
+
+    if (items.isEmpty) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.csvExportEmptyMessage)),
+      );
+      return;
+    }
+
+    // Encoded here rather than handed over as a string: file_picker wants
+    // bytes, and this way the file is written exactly as built.
+    final bytes = utf8.encode(buildInventoryCsv(items));
+
+    try {
+      final path = await FilePicker.platform.saveFile(
+        dialogTitle: l10n.csvExportDialogTitle,
+        fileName: 'preppsuite-vorraete.csv',
+        type: FileType.custom,
+        allowedExtensions: const ['csv'],
+        bytes: bytes,
+      );
+      if (path == null) return;
+
+      // On desktop the picker returns the path without writing anything,
+      // so the file still has to be created here; on mobile it has already
+      // been written and this would duplicate it.
+      final file = File(path);
+      if (!file.existsSync() || file.lengthSync() == 0) {
+        await file.writeAsBytes(bytes);
+      }
+
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.csvExportSuccessMessage(items.length))),
+      );
+    } catch (_) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.csvExportErrorMessage)),
+      );
+    }
   }
 }
 

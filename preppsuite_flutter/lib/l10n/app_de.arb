@@ -229,5 +229,10 @@
   "serverAddressHint": "Adresse des Servers, mit dem sich diese App abgleicht.",
   "serverAddressInvalid": "Das ist keine gültige Adresse. Beispiel: preppsuite.example.com oder 192.168.1.5:8080",
   "serverAddressSignOutHint": "Nach einer Änderung musst du dich neu anmelden — ein Konto gilt nur auf seinem Server.",
-  "serverAddressChangeAction": "Serveradresse ändern"
+  "serverAddressChangeAction": "Serveradresse ändern",
+  "csvExportButton": "Als CSV ausgeben",
+  "csvExportDialogTitle": "Vorräte als CSV sichern",
+  "csvExportSuccessMessage": "{count} Artikel ausgegeben",
+  "csvExportEmptyMessage": "Es gibt noch keine Artikel zum Ausgeben.",
+  "csvExportErrorMessage": "Die Datei konnte nicht geschrieben werden."
 }

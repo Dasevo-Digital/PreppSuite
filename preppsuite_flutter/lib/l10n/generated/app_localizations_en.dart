@@ -788,4 +788,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serverAddressChangeAction => 'Change server address';
+
+  @override
+  String get csvExportButton => 'Export as CSV';
+
+  @override
+  String get csvExportDialogTitle => 'Save supplies as CSV';
+
+  @override
+  String csvExportSuccessMessage(int count) {
+    return '$count items exported';
+  }
+
+  @override
+  String get csvExportEmptyMessage => 'There are no items to export yet.';
+
+  @override
+  String get csvExportErrorMessage => 'The file could not be written.';
 }
