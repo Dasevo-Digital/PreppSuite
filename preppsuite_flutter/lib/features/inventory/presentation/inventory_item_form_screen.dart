@@ -130,6 +130,13 @@ class _InventoryItemFormScreenState
       if (product != null) {
         _nameController.text = product.name;
         _offProductId = product.barcode;
+
+        // Only ever fills an empty field: a value already typed in is the
+        // user's own correction and outranks the estimate from the label.
+        final kcal = product.totalKcal;
+        if (kcal != null && _caloriesController.text.trim().isEmpty) {
+          _caloriesController.text = '$kcal';
+        }
       }
     });
 
