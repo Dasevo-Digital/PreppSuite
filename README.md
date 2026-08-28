@@ -25,7 +25,9 @@ Liste abbuchen.
 
 **Vorrats-Rechner.** Rechnet den Bestand gegen die Empfehlung des BBK –
 2 Liter Trinkwasser und 2200 kcal pro Person und Tag – für eine
-einstellbare Zahl an Tagen und Personen.
+einstellbare Zahl an Tagen und Personen. Die Kalorien kommen beim
+Barcode-Scan aus den Nährwerten von Open Food Facts, hochgerechnet auf die
+Packungsgrösse.
 
 **Checklisten.** Drei mitgelieferte Listen – Wasser, Lebensmittel und
 Erste Hilfe, angelehnt an die amtlichen Empfehlungen – dazu beliebig viele
@@ -69,9 +71,14 @@ Er lauscht dann auf Port 8080. Für den Dauerbetrieb liegt ein
 `Dockerfile` bereit; die Zugangsdaten gehören in
 `config/passwords.yaml` beziehungsweise in die Umgebung.
 
-Die App zeigt ab Werk auf `http://localhost:8080`. Für eine andere Adresse
-wird sie mit dieser gebaut – die Adresse steckt fest in der fertigen
-Fassung:
+Die Adresse des Servers wird in der App eingetragen – auf dem
+Anmeldebildschirm und später unter Einstellungen. Kurzformen genügen:
+`192.168.1.5:8080` oder `preppsuite.example.com`. Fehlt das Schema, wird
+`https` angenommen, bei IP-Adressen und `localhost` dagegen `http`.
+
+Wer eine Fassung weitergibt, die von vornherein auf den eigenen Server
+zeigt, baut sie mit der Adresse – der eingetragene Wert übersteuert sie
+später trotzdem:
 
 ```bash
 cd preppsuite_flutter
