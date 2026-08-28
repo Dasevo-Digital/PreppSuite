@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:preppsuite_client/preppsuite_client.dart';
 import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
+import '../../../core/push_registration_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../main.dart';
 import '../application/household_exception_l10n.dart';
@@ -30,7 +31,7 @@ class HouseholdOverviewScreen extends ConsumerWidget {
           IconButton(
             tooltip: l10n.signOutButton,
             icon: const Icon(Icons.logout),
-            onPressed: () => client.auth.signOutDevice(),
+            onPressed: () => _signOut(ref),
           ),
         ],
       ),
@@ -115,5 +116,16 @@ class HouseholdOverviewScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Revokes this device's push registration before dropping the session.
+  ///
+  /// Order matters: the call needs the token that is about to be thrown
+  /// away. Signing out first would leave the server pushing this
+  /// household's warnings to a phone that no longer belongs to it, with no
+  /// way left to say otherwise.
+  Future<void> _signOut(WidgetRef ref) async {
+    await unregisterPushOnSignOut(ref.read(pushRegistrationServiceProvider));
+    await client.auth.signOutDevice();
   }
 }

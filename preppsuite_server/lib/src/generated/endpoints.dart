@@ -17,22 +17,25 @@ import '../budget/budget_endpoint.dart' as _i4;
 import '../checklists/checklist_endpoint.dart' as _i5;
 import '../households/household_endpoint.dart' as _i6;
 import '../inventory/inventory_endpoint.dart' as _i7;
-import '../warnings/warning_endpoint.dart' as _i8;
+import '../notifications/push_device_endpoint.dart' as _i8;
+import '../warnings/warning_endpoint.dart' as _i9;
 import 'package:preppsuite_server/src/generated/budget/models/budget_entry.dart'
-    as _i9;
-import 'package:preppsuite_server/src/generated/checklists/models/checklist_template.dart'
     as _i10;
-import 'package:preppsuite_server/src/generated/checklists/models/checklist_item.dart'
+import 'package:preppsuite_server/src/generated/checklists/models/checklist_template.dart'
     as _i11;
-import 'package:preppsuite_server/src/generated/warnings/models/warning_region_kind.dart'
+import 'package:preppsuite_server/src/generated/checklists/models/checklist_item.dart'
     as _i12;
-import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
+import 'package:preppsuite_server/src/generated/warnings/models/warning_region_kind.dart'
     as _i13;
-import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
     as _i14;
-import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
+import 'package:preppsuite_server/src/generated/notifications/models/push_platform.dart'
     as _i15;
-import 'package:preppsuite_server/src/generated/future_calls.dart' as _i16;
+import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart'
+    as _i16;
+import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart'
+    as _i17;
+import 'package:preppsuite_server/src/generated/future_calls.dart' as _i18;
 export 'future_calls.dart' show ServerpodFutureCallsGetter;
 
 class Endpoints extends _i1.EndpointDispatch {
@@ -75,7 +78,13 @@ class Endpoints extends _i1.EndpointDispatch {
           'inventory',
           null,
         ),
-      'warning': _i8.WarningEndpoint()
+      'pushDevice': _i8.PushDeviceEndpoint()
+        ..initialize(
+          server,
+          'pushDevice',
+          null,
+        ),
+      'warning': _i9.WarningEndpoint()
         ..initialize(
           server,
           'warning',
@@ -325,7 +334,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'changes': _i1.ParameterDescription(
               name: 'changes',
-              type: _i1.getType<List<_i9.BudgetEntry>>(),
+              type: _i1.getType<List<_i10.BudgetEntry>>(),
               nullable: false,
             ),
           },
@@ -381,7 +390,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'changes': _i1.ParameterDescription(
               name: 'changes',
-              type: _i1.getType<List<_i10.ChecklistTemplate>>(),
+              type: _i1.getType<List<_i11.ChecklistTemplate>>(),
               nullable: false,
             ),
           },
@@ -431,7 +440,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'changes': _i1.ParameterDescription(
               name: 'changes',
-              type: _i1.getType<List<_i11.ChecklistItem>>(),
+              type: _i1.getType<List<_i12.ChecklistItem>>(),
               nullable: false,
             ),
           },
@@ -622,7 +631,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'kind': _i1.ParameterDescription(
               name: 'kind',
-              type: _i1.getType<_i12.WarningRegionKind>(),
+              type: _i1.getType<_i13.WarningRegionKind>(),
               nullable: false,
             ),
             'value': _i1.ParameterDescription(
@@ -715,7 +724,7 @@ class Endpoints extends _i1.EndpointDispatch {
             ),
             'changes': _i1.ParameterDescription(
               name: 'changes',
-              type: _i1.getType<List<_i13.InventoryItem>>(),
+              type: _i1.getType<List<_i14.InventoryItem>>(),
               nullable: false,
             ),
           },
@@ -728,6 +737,62 @@ class Endpoints extends _i1.EndpointDispatch {
                     session,
                     params['householdId'],
                     params['changes'],
+                  ),
+        ),
+      },
+    );
+    connectors['pushDevice'] = _i1.EndpointConnector(
+      name: 'pushDevice',
+      endpoint: endpoints['pushDevice']!,
+      methodConnectors: {
+        'registerDevice': _i1.MethodConnector(
+          name: 'registerDevice',
+          params: {
+            'householdId': _i1.ParameterDescription(
+              name: 'householdId',
+              type: _i1.getType<_i1.UuidValue>(),
+              nullable: false,
+            ),
+            'token': _i1.ParameterDescription(
+              name: 'token',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'platform': _i1.ParameterDescription(
+              name: 'platform',
+              type: _i1.getType<_i15.PushPlatform>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['pushDevice'] as _i8.PushDeviceEndpoint)
+                  .registerDevice(
+                    session,
+                    params['householdId'],
+                    params['token'],
+                    params['platform'],
+                  ),
+        ),
+        'unregisterDevice': _i1.MethodConnector(
+          name: 'unregisterDevice',
+          params: {
+            'token': _i1.ParameterDescription(
+              name: 'token',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _i1.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['pushDevice'] as _i8.PushDeviceEndpoint)
+                  .unregisterDevice(
+                    session,
+                    params['token'],
                   ),
         ),
       },
@@ -755,7 +820,7 @@ class Endpoints extends _i1.EndpointDispatch {
                 _i1.Session session,
                 Map<String, dynamic> params,
               ) async =>
-                  (endpoints['warning'] as _i8.WarningEndpoint).pullWarnings(
+                  (endpoints['warning'] as _i9.WarningEndpoint).pullWarnings(
                     session,
                     params['householdId'],
                     params['since'],
@@ -763,14 +828,14 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
-    modules['serverpod_auth_core'] = _i14.Endpoints()
+    modules['serverpod_auth_core'] = _i16.Endpoints()
       ..initializeEndpoints(server);
-    modules['serverpod_auth_idp'] = _i15.Endpoints()
+    modules['serverpod_auth_idp'] = _i17.Endpoints()
       ..initializeEndpoints(server);
   }
 
   @override
   _i1.FutureCallDispatch? get futureCalls {
-    return _i16.FutureCalls();
+    return _i18.FutureCalls();
   }
 }

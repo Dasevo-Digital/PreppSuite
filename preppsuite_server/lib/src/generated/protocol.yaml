@@ -30,5 +30,8 @@ household:
 inventory:
   - pullInventoryChanges:
   - pushInventoryChanges:
+pushDevice:
+  - registerDevice:
+  - unregisterDevice:
 warning:
   - pullWarnings:

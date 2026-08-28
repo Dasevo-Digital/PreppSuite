@@ -107,6 +107,17 @@ Server side mirrors it: `lib/src/<feature>/` with `<feature>_endpoint.dart`
   hand-maintained lists that must stay in sync.
 - Warning region filtering is coarse by design in v1, and BBK warnings have no
   expiry. The limits are documented in [`docs/warning-feeds.md`](docs/warning-feeds.md).
+- Push notifications go out from the server via FCM (which relays to APNs for
+  iOS). `PushDevice` is deliberately *outside* the push/pull sync — a token
+  belongs to one device and must never travel to another. Without a
+  `firebaseServiceAccount` password the server boots normally with push off,
+  and `firebase_messaging` is not a dependency until the project's config
+  files exist (the Gradle plugin fails the Android build without them). See
+  [`docs/push-notifications.md`](docs/push-notifications.md).
+- `notificationsEnabledProvider` returns `false` for one turn of the event
+  loop before its persisted value loads. Anything that *acts* on the setting
+  rather than displaying it must `await ensureLoaded()` first — reading the
+  provisional `false` unregistered the device on every launch.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

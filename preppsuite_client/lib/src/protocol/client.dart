@@ -34,9 +34,13 @@ import 'package:preppsuite_client/src/protocol/warnings/models/warning_region_ki
     as _i12;
 import 'package:preppsuite_client/src/protocol/inventory/models/inventory_item.dart'
     as _i13;
-import 'package:preppsuite_client/src/protocol/warnings/models/warning.dart'
+import 'package:preppsuite_client/src/protocol/notifications/models/push_device.dart'
     as _i14;
-import 'protocol.dart' as _i15;
+import 'package:preppsuite_client/src/protocol/notifications/models/push_platform.dart'
+    as _i15;
+import 'package:preppsuite_client/src/protocol/warnings/models/warning.dart'
+    as _i16;
+import 'protocol.dart' as _i17;
 
 /// By extending [EmailIdpBaseEndpoint], the email identity provider endpoints
 /// are made available on the server and enable the corresponding sign-in widget
@@ -521,6 +525,39 @@ class EndpointInventory extends _i2.EndpointRef {
   );
 }
 
+/// Registration of device push tokens. Accessed through
+/// `client.pushDevice`.
+/// {@category Endpoint}
+class EndpointPushDevice extends _i2.EndpointRef {
+  EndpointPushDevice(_i2.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'pushDevice';
+
+  /// Registers (or refreshes) this device's push token for [householdId].
+  _i3.Future<_i14.PushDevice> registerDevice(
+    _i2.UuidValue householdId,
+    String token,
+    _i15.PushPlatform platform,
+  ) => caller.callServerEndpoint<_i14.PushDevice>(
+    'pushDevice',
+    'registerDevice',
+    {
+      'householdId': householdId,
+      'token': token,
+      'platform': platform,
+    },
+  );
+
+  /// Stops pushes to [token].
+  _i3.Future<void> unregisterDevice(String token) =>
+      caller.callServerEndpoint<void>(
+        'pushDevice',
+        'unregisterDevice',
+        {'token': token},
+      );
+}
+
 /// Read-only warning pull, scoped to the household's country. Accessed
 /// through `client.warning`.
 /// {@category Endpoint}
@@ -530,10 +567,10 @@ class EndpointWarning extends _i2.EndpointRef {
   @override
   String get name => 'warning';
 
-  _i3.Future<List<_i14.Warning>> pullWarnings(
+  _i3.Future<List<_i16.Warning>> pullWarnings(
     _i2.UuidValue householdId,
     DateTime since,
-  ) => caller.callServerEndpoint<List<_i14.Warning>>(
+  ) => caller.callServerEndpoint<List<_i16.Warning>>(
     'warning',
     'pullWarnings',
     {
@@ -574,7 +611,7 @@ class Client extends _i2.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
          host,
-         _i15.Protocol(),
+         _i17.Protocol(),
          securityContext: securityContext,
          streamingConnectionTimeout: streamingConnectionTimeout,
          connectionTimeout: connectionTimeout,
@@ -589,6 +626,7 @@ class Client extends _i2.ServerpodClientShared {
     checklist = EndpointChecklist(this);
     household = EndpointHousehold(this);
     inventory = EndpointInventory(this);
+    pushDevice = EndpointPushDevice(this);
     warning = EndpointWarning(this);
     modules = Modules(this);
   }
@@ -605,6 +643,8 @@ class Client extends _i2.ServerpodClientShared {
 
   late final EndpointInventory inventory;
 
+  late final EndpointPushDevice pushDevice;
+
   late final EndpointWarning warning;
 
   late final Modules modules;
@@ -617,6 +657,7 @@ class Client extends _i2.ServerpodClientShared {
     'checklist': checklist,
     'household': household,
     'inventory': inventory,
+    'pushDevice': pushDevice,
     'warning': warning,
   };
 

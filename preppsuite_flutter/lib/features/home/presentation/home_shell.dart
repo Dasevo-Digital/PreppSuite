@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:preppsuite_client/preppsuite_client.dart';
 
+import '../../../core/push_registration_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../sync/sync_scheduler.dart';
 import '../../../sync/sync_status_banner.dart';
@@ -38,6 +39,10 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     final attentionCount = ref.watch(
       inventoryAttentionCountProvider(householdId),
     );
+    // Keeps this device's push registration in step with the notification
+    // setting for as long as a household is open. Watched rather than
+    // rendered — it has no UI of its own.
+    ref.watch(pushRegistrationControllerProvider(householdId));
 
     final screens = [
       InventoryListScreen(householdId: householdId),

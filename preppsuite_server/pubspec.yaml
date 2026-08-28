@@ -9,6 +9,10 @@ environment:
 resolution: workspace
 
 dependencies:
+  # Signs the service-account JWT and refreshes the access token for FCM's
+  # HTTP v1 API. Already in the tree via serverpod's GCP support; declared
+  # here because a transitive dependency cannot be imported.
+  googleapis_auth: ^2.3.3
   http: ^1.6.0
   serverpod: 3.4.11
   serverpod_auth_core_server: 3.4.11

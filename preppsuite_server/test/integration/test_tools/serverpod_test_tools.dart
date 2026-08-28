@@ -34,9 +34,13 @@ import 'package:preppsuite_server/src/generated/warnings/models/warning_region_k
     as _i12;
 import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
     as _i13;
-import 'package:preppsuite_server/src/generated/warnings/models/warning.dart'
+import 'package:preppsuite_server/src/generated/notifications/models/push_device.dart'
     as _i14;
-import 'package:preppsuite_server/src/generated/future_calls.dart' as _i15;
+import 'package:preppsuite_server/src/generated/notifications/models/push_platform.dart'
+    as _i15;
+import 'package:preppsuite_server/src/generated/warnings/models/warning.dart'
+    as _i16;
+import 'package:preppsuite_server/src/generated/future_calls.dart' as _i17;
 import 'package:preppsuite_server/src/generated/protocol.dart';
 import 'package:preppsuite_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -165,6 +169,8 @@ class TestEndpoints {
 
   late final _InventoryEndpoint inventory;
 
+  late final _PushDeviceEndpoint pushDevice;
+
   late final _WarningEndpoint warning;
 }
 
@@ -196,6 +202,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     inventory = _InventoryEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    pushDevice = _PushDeviceEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1160,6 +1170,85 @@ class _InventoryEndpoint {
   }
 }
 
+class _PushDeviceEndpoint {
+  _PushDeviceEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<_i14.PushDevice> registerDevice(
+    _i1.TestSessionBuilder sessionBuilder,
+    _i2.UuidValue householdId,
+    String token,
+    _i15.PushPlatform platform,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'pushDevice',
+            method: 'registerDevice',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'pushDevice',
+          methodName: 'registerDevice',
+          parameters: _i1.testObjectToJson({
+            'householdId': householdId,
+            'token': token,
+            'platform': platform,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<_i14.PushDevice>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<void> unregisterDevice(
+    _i1.TestSessionBuilder sessionBuilder,
+    String token,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+            endpoint: 'pushDevice',
+            method: 'unregisterDevice',
+          );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'pushDevice',
+          methodName: 'unregisterDevice',
+          parameters: _i1.testObjectToJson({'token': token}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _i3.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _WarningEndpoint {
   _WarningEndpoint(
     this._endpointDispatch,
@@ -1170,7 +1259,7 @@ class _WarningEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<List<_i14.Warning>> pullWarnings(
+  _i3.Future<List<_i16.Warning>> pullWarnings(
     _i1.TestSessionBuilder sessionBuilder,
     _i2.UuidValue householdId,
     DateTime since,
@@ -1197,7 +1286,7 @@ class _WarningEndpoint {
                   _localUniqueSession,
                   _localCallContext.arguments,
                 )
-                as _i3.Future<List<_i14.Warning>>);
+                as _i3.Future<List<_i16.Warning>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1214,7 +1303,7 @@ class _WarningPollFutureCall {
     var _localUniqueSession = (sessionBuilder as _i1.InternalTestSessionBuilder)
         .internalBuild();
     try {
-      await _i15.WarningPollInvokeFutureCall().invoke(
+      await _i17.WarningPollInvokeFutureCall().invoke(
         _localUniqueSession,
         object,
       );

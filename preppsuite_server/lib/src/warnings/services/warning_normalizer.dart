@@ -6,6 +6,7 @@ import '../../generated/protocol.dart';
 import 'bbk_client.dart';
 import 'german_states.dart';
 import 'meteoalarm_client.dart';
+import 'warning_severity_rank.dart';
 
 /// Maps both sources' structurally different raw payloads onto the
 /// canonical [Warning] model and upserts them, deduplicating by
@@ -15,7 +16,8 @@ import 'meteoalarm_client.dart';
 class WarningNormalizer {
   const WarningNormalizer();
 
-  Future<void> upsertBbk(
+  /// Returns the warnings worth notifying about — see [_upsert].
+  Future<List<Warning>> upsertBbk(
     Session session,
     List<BbkRawWarning> warnings, {
     required String countryCode,
@@ -26,8 +28,9 @@ class WarningNormalizer {
     /// `fetchAll()` poll, where the id-based guess is all we have.
     String? regionKeyOverride,
   }) async {
+    final notifiable = <Warning>[];
     for (final warning in warnings) {
-      await _upsert(
+      final upserted = await _upsert(
         session,
         source: WarningSource.bbk,
         externalId: warning.id,
@@ -42,7 +45,9 @@ class WarningNormalizer {
         sent: _parseDateTime(warning.startDate) ?? DateTime.now().toUtc(),
         rawPayload: jsonEncode(warning.raw),
       );
+      if (upserted != null) notifiable.add(upserted);
     }
+    return notifiable;
   }
 
   /// Ends BBK warnings that the source no longer lists.
@@ -118,18 +123,20 @@ class WarningNormalizer {
     return deleted.length;
   }
 
-  Future<void> upsertMeteoAlarm(
+  /// Returns the warnings worth notifying about — see [_upsert].
+  Future<List<Warning>> upsertMeteoAlarm(
     Session session,
     List<MeteoAlarmRawWarning> warnings, {
     required String countryCode,
   }) async {
+    final notifiable = <Warning>[];
     for (final warning in warnings) {
       if (warning.identifier.isEmpty) continue;
 
       final sent = _parseDateTime(warning.sent);
       if (sent == null) continue;
 
-      await _upsert(
+      final upserted = await _upsert(
         session,
         source: WarningSource.meteoalarm,
         externalId: warning.identifier,
@@ -144,10 +151,21 @@ class WarningNormalizer {
         sent: sent,
         rawPayload: jsonEncode(warning.raw),
       );
+      if (upserted != null) notifiable.add(upserted);
     }
+    return notifiable;
   }
 
-  Future<void> _upsert(
+  /// Upserts one warning and reports whether it is worth notifying about.
+  ///
+  /// Returns the stored row when the warning is new, or when an existing
+  /// one has been *escalated* to a higher severity; null otherwise. The
+  /// narrowness is the point: the sources re-issue warnings constantly
+  /// with corrected wording or a shifted end time, and pushing on every one
+  /// of those would teach people to swipe the notifications away — which
+  /// is the one outcome a warning system cannot afford. A warning that gets
+  /// worse is the exception worth waking someone for.
+  Future<Warning?> _upsert(
     Session session, {
     required WarningSource source,
     required String externalId,
@@ -167,10 +185,10 @@ class WarningNormalizer {
       where: (t) => t.source.equals(source) & t.externalId.equals(externalId),
     );
 
-    if (existing != null && !sent.isAfter(existing.sent)) return;
+    if (existing != null && !sent.isAfter(existing.sent)) return null;
 
     if (existing == null) {
-      await Warning.db.insertRow(
+      return Warning.db.insertRow(
         session,
         Warning(
           source: source,
@@ -189,8 +207,10 @@ class WarningNormalizer {
           updatedAt: DateTime.now().toUtc(),
         ),
       );
-      return;
     }
+
+    final escalated =
+        warningSeverityRank(severity) > warningSeverityRank(existing.severity);
 
     existing
       ..regionKey = regionKey
@@ -203,7 +223,8 @@ class WarningNormalizer {
       ..sent = sent
       ..rawPayload = rawPayload
       ..updatedAt = DateTime.now().toUtc();
-    await Warning.db.updateRow(session, existing);
+    final updated = await Warning.db.updateRow(session, existing);
+    return escalated ? updated : null;
   }
 
   WarningSeverity _parseSeverity(String value) {

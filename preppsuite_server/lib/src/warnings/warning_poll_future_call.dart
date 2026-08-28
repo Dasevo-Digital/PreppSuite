@@ -1,6 +1,9 @@
 import 'package:serverpod/serverpod.dart';
 
 import '../generated/protocol.dart';
+import '../notifications/services/fcm_sender.dart';
+import '../notifications/services/push_sender.dart';
+import '../notifications/warning_push_notifier.dart';
 import 'services/bbk_client.dart';
 import 'services/meteoalarm_client.dart';
 import 'services/warning_normalizer.dart';
@@ -19,6 +22,7 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
     BbkClient? bbkClient,
     MeteoAlarmClient? meteoAlarmClient,
     WarningNormalizer? normalizer,
+    this.pushSender,
   }) : _bbkClient = bbkClient ?? BbkClient(),
        _meteoAlarmClient = meteoAlarmClient ?? MeteoAlarmClient(),
        _normalizer = normalizer ?? const WarningNormalizer();
@@ -29,6 +33,37 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
   final BbkClient _bbkClient;
   final MeteoAlarmClient _meteoAlarmClient;
   final WarningNormalizer _normalizer;
+
+  /// Overridden in tests. Left null in production, where the sender is
+  /// built from the server's credentials on first use — the passwords are
+  /// only reachable through a [Session], which does not exist yet when
+  /// this is constructed in `server.dart`.
+  final PushSender? pushSender;
+
+  PushSender? _resolvedSender;
+
+  /// Builds the sender once, from `session.passwords['firebaseServiceAccount']`
+  /// (a Google service-account key as JSON). Absent or unparseable
+  /// credentials mean push stays off and everything else keeps working —
+  /// which is the state of every install that has not set up Firebase.
+  PushSender _sender(Session session) {
+    if (pushSender != null) return pushSender!;
+    return _resolvedSender ??= _buildSender(session);
+  }
+
+  PushSender _buildSender(Session session) {
+    final sender = FcmSender.fromServiceAccountJson(
+      session.passwords['firebaseServiceAccount'],
+    );
+    if (sender == null) {
+      session.log(
+        'Warning push disabled: no usable "firebaseServiceAccount" password '
+        'configured',
+      );
+      return const DisabledPushSender();
+    }
+    return sender;
+  }
 
   @override
   Future<void> invoke(Session session, SerializableModel? object) async {
@@ -58,16 +93,23 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
     final countryCodes = households.map((h) => h.countryCode).toSet();
     if (countryCodes.isEmpty) return;
 
+    // Collected across every source and only pushed once the whole poll is
+    // in, so a device is capped against the run as a whole rather than
+    // once per feed (see [WarningPushNotifier.maxPerDevicePerRun]).
+    final notifiable = <Warning>[];
+
     if (countryCodes.contains('DE')) {
       // Nationwide pass: cheap fallback for households without a region set,
       // and the only source of (coarser, state-level) precision for
       // `bundesland`-kind subscriptions, since there's no dedicated
       // state-wide BBK endpoint.
       final nationwide = await _bbkClient.fetchAll();
-      await _normalizer.upsertBbk(
-        session,
-        nationwide.warnings,
-        countryCode: 'DE',
+      notifiable.addAll(
+        await _normalizer.upsertBbk(
+          session,
+          nationwide.warnings,
+          countryCode: 'DE',
+        ),
       );
 
       final seenIds = {for (final w in nationwide.warnings) w.id};
@@ -79,11 +121,13 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
         final dashboardWarnings = await _bbkClient.fetchDashboard(
           kreisSchluessel,
         );
-        await _normalizer.upsertBbk(
-          session,
-          dashboardWarnings,
-          countryCode: 'DE',
-          regionKeyOverride: kreisSchluessel,
+        notifiable.addAll(
+          await _normalizer.upsertBbk(
+            session,
+            dashboardWarnings,
+            countryCode: 'DE',
+            regionKeyOverride: kreisSchluessel,
+          ),
         );
         // Folded into the same set so a warning that only the per-Kreis
         // endpoint knows about is not retired by the reap below.
@@ -115,11 +159,24 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
       if (slug == null) continue;
 
       final warnings = await _meteoAlarmClient.fetchCountry(slug);
-      await _normalizer.upsertMeteoAlarm(
-        session,
-        warnings,
-        countryCode: countryCode,
+      notifiable.addAll(
+        await _normalizer.upsertMeteoAlarm(
+          session,
+          warnings,
+          countryCode: countryCode,
+        ),
       );
+    }
+
+    // Before the prune, so a warning that arrives already long expired is
+    // not pushed and then immediately deleted.
+    if (notifiable.isNotEmpty) {
+      final pushed = await WarningPushNotifier(
+        sender: _sender(session),
+      ).notify(session, notifiable);
+      if (pushed > 0) {
+        session.log('Warning poll: pushed $pushed notification(s)');
+      }
     }
 
     // Nothing else ever removes a warning, so without this the table grows

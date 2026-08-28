@@ -23,6 +23,31 @@ class SyncService {
   static const _budgetEntity = 'budget';
   static const _warningEntity = 'warning';
 
+  // --- Push devices ------------------------------------------------------
+
+  /// Tells the server this device wants warning pushes for [householdId].
+  ///
+  /// Not part of any entity's push/pull cycle: a device token is not
+  /// household data, it belongs to exactly one device, and it must never
+  /// end up in local storage that gets restored onto a different phone.
+  /// It lives here only because this is the one place allowed to speak to
+  /// the server.
+  Future<void> registerPushDevice({
+    required String householdId,
+    required String token,
+    required proto.PushPlatform platform,
+  }) {
+    return client.pushDevice.registerDevice(
+      proto.UuidValue.fromString(householdId),
+      token,
+      platform,
+    );
+  }
+
+  Future<void> unregisterPushDevice(String token) {
+    return client.pushDevice.unregisterDevice(token);
+  }
+
   // --- Inventory ---------------------------------------------------------
 
   Future<void> syncInventory(String householdId) async {

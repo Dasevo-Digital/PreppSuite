@@ -28,25 +28,27 @@ import 'households/models/household_membership_info.dart' as _i13;
 import 'households/models/household_role.dart' as _i14;
 import 'inventory/models/inventory_item.dart' as _i15;
 import 'inventory/models/inventory_item_category.dart' as _i16;
-import 'warnings/models/warning.dart' as _i17;
-import 'warnings/models/warning_region_kind.dart' as _i18;
-import 'warnings/models/warning_region_subscription.dart' as _i19;
-import 'warnings/models/warning_severity.dart' as _i20;
-import 'warnings/models/warning_source.dart' as _i21;
+import 'notifications/models/push_device.dart' as _i17;
+import 'notifications/models/push_platform.dart' as _i18;
+import 'warnings/models/warning.dart' as _i19;
+import 'warnings/models/warning_region_kind.dart' as _i20;
+import 'warnings/models/warning_region_subscription.dart' as _i21;
+import 'warnings/models/warning_severity.dart' as _i22;
+import 'warnings/models/warning_source.dart' as _i23;
 import 'package:preppsuite_server/src/generated/budget/models/budget_entry.dart'
-    as _i22;
-import 'package:preppsuite_server/src/generated/checklists/models/checklist_template.dart'
-    as _i23;
-import 'package:preppsuite_server/src/generated/checklists/models/checklist_item.dart'
     as _i24;
-import 'package:preppsuite_server/src/generated/households/models/household_member.dart'
+import 'package:preppsuite_server/src/generated/checklists/models/checklist_template.dart'
     as _i25;
-import 'package:preppsuite_server/src/generated/warnings/models/warning_region_subscription.dart'
+import 'package:preppsuite_server/src/generated/checklists/models/checklist_item.dart'
     as _i26;
-import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
+import 'package:preppsuite_server/src/generated/households/models/household_member.dart'
     as _i27;
-import 'package:preppsuite_server/src/generated/warnings/models/warning.dart'
+import 'package:preppsuite_server/src/generated/warnings/models/warning_region_subscription.dart'
     as _i28;
+import 'package:preppsuite_server/src/generated/inventory/models/inventory_item.dart'
+    as _i29;
+import 'package:preppsuite_server/src/generated/warnings/models/warning.dart'
+    as _i30;
 export 'budget/models/budget_entry.dart';
 export 'checklists/models/checklist_category.dart';
 export 'checklists/models/checklist_item.dart';
@@ -59,6 +61,8 @@ export 'households/models/household_membership_info.dart';
 export 'households/models/household_role.dart';
 export 'inventory/models/inventory_item.dart';
 export 'inventory/models/inventory_item_category.dart';
+export 'notifications/models/push_device.dart';
+export 'notifications/models/push_platform.dart';
 export 'warnings/models/warning.dart';
 export 'warnings/models/warning_region_kind.dart';
 export 'warnings/models/warning_region_subscription.dart';
@@ -832,6 +836,121 @@ class Protocol extends _i1.SerializationManagerServer {
       managed: true,
     ),
     _i2.TableDefinition(
+      name: 'push_device',
+      dartName: 'PushDevice',
+      schema: 'public',
+      module: 'preppsuite',
+      columns: [
+        _i2.ColumnDefinition(
+          name: 'id',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue?',
+          columnDefault: 'gen_random_uuid_v7()',
+        ),
+        _i2.ColumnDefinition(
+          name: 'householdId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'authUserId',
+          columnType: _i2.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _i2.ColumnDefinition(
+          name: 'token',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'String',
+        ),
+        _i2.ColumnDefinition(
+          name: 'platform',
+          columnType: _i2.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:PushPlatform',
+        ),
+        _i2.ColumnDefinition(
+          name: 'updatedAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _i2.ColumnDefinition(
+          name: 'createdAt',
+          columnType: _i2.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+      ],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'push_device_fk_0',
+          columns: ['householdId'],
+          referenceTable: 'household',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+        _i2.ForeignKeyDefinition(
+          constraintName: 'push_device_fk_1',
+          columns: ['authUserId'],
+          referenceTable: 'serverpod_auth_core_user',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.cascade,
+          matchType: null,
+        ),
+      ],
+      indexes: [
+        _i2.IndexDefinition(
+          indexName: 'push_device_pkey',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'id',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: true,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'push_device_token',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'token',
+            ),
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
+        _i2.IndexDefinition(
+          indexName: 'push_device_household',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'householdId',
+            ),
+          ],
+          type: 'btree',
+          isUnique: false,
+          isPrimary: false,
+        ),
+      ],
+      managed: true,
+    ),
+    _i2.TableDefinition(
       name: 'warning',
       dartName: 'Warning',
       schema: 'public',
@@ -1143,20 +1262,26 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i16.InventoryItemCategory) {
       return _i16.InventoryItemCategory.fromJson(data) as T;
     }
-    if (t == _i17.Warning) {
-      return _i17.Warning.fromJson(data) as T;
+    if (t == _i17.PushDevice) {
+      return _i17.PushDevice.fromJson(data) as T;
     }
-    if (t == _i18.WarningRegionKind) {
-      return _i18.WarningRegionKind.fromJson(data) as T;
+    if (t == _i18.PushPlatform) {
+      return _i18.PushPlatform.fromJson(data) as T;
     }
-    if (t == _i19.WarningRegionSubscription) {
-      return _i19.WarningRegionSubscription.fromJson(data) as T;
+    if (t == _i19.Warning) {
+      return _i19.Warning.fromJson(data) as T;
     }
-    if (t == _i20.WarningSeverity) {
-      return _i20.WarningSeverity.fromJson(data) as T;
+    if (t == _i20.WarningRegionKind) {
+      return _i20.WarningRegionKind.fromJson(data) as T;
     }
-    if (t == _i21.WarningSource) {
-      return _i21.WarningSource.fromJson(data) as T;
+    if (t == _i21.WarningRegionSubscription) {
+      return _i21.WarningRegionSubscription.fromJson(data) as T;
+    }
+    if (t == _i22.WarningSeverity) {
+      return _i22.WarningSeverity.fromJson(data) as T;
+    }
+    if (t == _i23.WarningSource) {
+      return _i23.WarningSource.fromJson(data) as T;
     }
     if (t == _i1.getType<_i5.BudgetEntry?>()) {
       return (data != null ? _i5.BudgetEntry.fromJson(data) : null) as T;
@@ -1200,62 +1325,68 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data != null ? _i16.InventoryItemCategory.fromJson(data) : null)
           as T;
     }
-    if (t == _i1.getType<_i17.Warning?>()) {
-      return (data != null ? _i17.Warning.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i17.PushDevice?>()) {
+      return (data != null ? _i17.PushDevice.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i18.WarningRegionKind?>()) {
-      return (data != null ? _i18.WarningRegionKind.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i18.PushPlatform?>()) {
+      return (data != null ? _i18.PushPlatform.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i19.WarningRegionSubscription?>()) {
+    if (t == _i1.getType<_i19.Warning?>()) {
+      return (data != null ? _i19.Warning.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i20.WarningRegionKind?>()) {
+      return (data != null ? _i20.WarningRegionKind.fromJson(data) : null) as T;
+    }
+    if (t == _i1.getType<_i21.WarningRegionSubscription?>()) {
       return (data != null
-              ? _i19.WarningRegionSubscription.fromJson(data)
+              ? _i21.WarningRegionSubscription.fromJson(data)
               : null)
           as T;
     }
-    if (t == _i1.getType<_i20.WarningSeverity?>()) {
-      return (data != null ? _i20.WarningSeverity.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i22.WarningSeverity?>()) {
+      return (data != null ? _i22.WarningSeverity.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i21.WarningSource?>()) {
-      return (data != null ? _i21.WarningSource.fromJson(data) : null) as T;
+    if (t == _i1.getType<_i23.WarningSource?>()) {
+      return (data != null ? _i23.WarningSource.fromJson(data) : null) as T;
     }
-    if (t == List<_i22.BudgetEntry>) {
+    if (t == List<_i24.BudgetEntry>) {
       return (data as List)
-              .map((e) => deserialize<_i22.BudgetEntry>(e))
+              .map((e) => deserialize<_i24.BudgetEntry>(e))
               .toList()
           as T;
     }
-    if (t == List<_i23.ChecklistTemplate>) {
+    if (t == List<_i25.ChecklistTemplate>) {
       return (data as List)
-              .map((e) => deserialize<_i23.ChecklistTemplate>(e))
+              .map((e) => deserialize<_i25.ChecklistTemplate>(e))
               .toList()
           as T;
     }
-    if (t == List<_i24.ChecklistItem>) {
+    if (t == List<_i26.ChecklistItem>) {
       return (data as List)
-              .map((e) => deserialize<_i24.ChecklistItem>(e))
+              .map((e) => deserialize<_i26.ChecklistItem>(e))
               .toList()
           as T;
     }
-    if (t == List<_i25.HouseholdMember>) {
+    if (t == List<_i27.HouseholdMember>) {
       return (data as List)
-              .map((e) => deserialize<_i25.HouseholdMember>(e))
+              .map((e) => deserialize<_i27.HouseholdMember>(e))
               .toList()
           as T;
     }
-    if (t == List<_i26.WarningRegionSubscription>) {
+    if (t == List<_i28.WarningRegionSubscription>) {
       return (data as List)
-              .map((e) => deserialize<_i26.WarningRegionSubscription>(e))
+              .map((e) => deserialize<_i28.WarningRegionSubscription>(e))
               .toList()
           as T;
     }
-    if (t == List<_i27.InventoryItem>) {
+    if (t == List<_i29.InventoryItem>) {
       return (data as List)
-              .map((e) => deserialize<_i27.InventoryItem>(e))
+              .map((e) => deserialize<_i29.InventoryItem>(e))
               .toList()
           as T;
     }
-    if (t == List<_i28.Warning>) {
-      return (data as List).map((e) => deserialize<_i28.Warning>(e)).toList()
+    if (t == List<_i30.Warning>) {
+      return (data as List).map((e) => deserialize<_i30.Warning>(e)).toList()
           as T;
     }
     try {
@@ -1284,11 +1415,13 @@ class Protocol extends _i1.SerializationManagerServer {
       _i14.HouseholdRole => 'HouseholdRole',
       _i15.InventoryItem => 'InventoryItem',
       _i16.InventoryItemCategory => 'InventoryItemCategory',
-      _i17.Warning => 'Warning',
-      _i18.WarningRegionKind => 'WarningRegionKind',
-      _i19.WarningRegionSubscription => 'WarningRegionSubscription',
-      _i20.WarningSeverity => 'WarningSeverity',
-      _i21.WarningSource => 'WarningSource',
+      _i17.PushDevice => 'PushDevice',
+      _i18.PushPlatform => 'PushPlatform',
+      _i19.Warning => 'Warning',
+      _i20.WarningRegionKind => 'WarningRegionKind',
+      _i21.WarningRegionSubscription => 'WarningRegionSubscription',
+      _i22.WarningSeverity => 'WarningSeverity',
+      _i23.WarningSource => 'WarningSource',
       _ => null,
     };
   }
@@ -1327,15 +1460,19 @@ class Protocol extends _i1.SerializationManagerServer {
         return 'InventoryItem';
       case _i16.InventoryItemCategory():
         return 'InventoryItemCategory';
-      case _i17.Warning():
+      case _i17.PushDevice():
+        return 'PushDevice';
+      case _i18.PushPlatform():
+        return 'PushPlatform';
+      case _i19.Warning():
         return 'Warning';
-      case _i18.WarningRegionKind():
+      case _i20.WarningRegionKind():
         return 'WarningRegionKind';
-      case _i19.WarningRegionSubscription():
+      case _i21.WarningRegionSubscription():
         return 'WarningRegionSubscription';
-      case _i20.WarningSeverity():
+      case _i22.WarningSeverity():
         return 'WarningSeverity';
-      case _i21.WarningSource():
+      case _i23.WarningSource():
         return 'WarningSource';
     }
     className = _i2.Protocol().getClassNameForObject(data);
@@ -1395,20 +1532,26 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'InventoryItemCategory') {
       return deserialize<_i16.InventoryItemCategory>(data['data']);
     }
+    if (dataClassName == 'PushDevice') {
+      return deserialize<_i17.PushDevice>(data['data']);
+    }
+    if (dataClassName == 'PushPlatform') {
+      return deserialize<_i18.PushPlatform>(data['data']);
+    }
     if (dataClassName == 'Warning') {
-      return deserialize<_i17.Warning>(data['data']);
+      return deserialize<_i19.Warning>(data['data']);
     }
     if (dataClassName == 'WarningRegionKind') {
-      return deserialize<_i18.WarningRegionKind>(data['data']);
+      return deserialize<_i20.WarningRegionKind>(data['data']);
     }
     if (dataClassName == 'WarningRegionSubscription') {
-      return deserialize<_i19.WarningRegionSubscription>(data['data']);
+      return deserialize<_i21.WarningRegionSubscription>(data['data']);
     }
     if (dataClassName == 'WarningSeverity') {
-      return deserialize<_i20.WarningSeverity>(data['data']);
+      return deserialize<_i22.WarningSeverity>(data['data']);
     }
     if (dataClassName == 'WarningSource') {
-      return deserialize<_i21.WarningSource>(data['data']);
+      return deserialize<_i23.WarningSource>(data['data']);
     }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
@@ -1458,10 +1601,12 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i12.HouseholdMember.t;
       case _i15.InventoryItem:
         return _i15.InventoryItem.t;
-      case _i17.Warning:
-        return _i17.Warning.t;
-      case _i19.WarningRegionSubscription:
-        return _i19.WarningRegionSubscription.t;
+      case _i17.PushDevice:
+        return _i17.PushDevice.t;
+      case _i19.Warning:
+        return _i19.Warning.t;
+      case _i21.WarningRegionSubscription:
+        return _i21.WarningRegionSubscription.t;
     }
     return null;
   }
