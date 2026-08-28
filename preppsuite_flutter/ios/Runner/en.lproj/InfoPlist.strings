@@ -1,0 +1,8 @@
+/* Why the app needs the camera */
+"NSCameraUsageDescription" = "PreppSuite uses the camera to scan barcodes on your supplies.";
+
+/* Why the app needs location */
+"NSLocationWhenInUseUsageDescription" = "PreppSuite uses your location to determine your region for more precise warnings and to find nearby shelters.";
+
+/* Why the app accesses photos */
+"NSPhotoLibraryUsageDescription" = "PreppSuite accesses your photos so you can attach a picture to a supply item.";

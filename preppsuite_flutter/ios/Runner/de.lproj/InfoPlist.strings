@@ -1,0 +1,8 @@
+/* Warum die App die Kamera braucht */
+"NSCameraUsageDescription" = "PreppSuite verwendet die Kamera, um Barcodes von Vorratsartikeln zu scannen.";
+
+/* Warum die App den Standort braucht */
+"NSLocationWhenInUseUsageDescription" = "PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen und Schutzräume in der Nähe zu finden.";
+
+/* Warum die App auf Fotos zugreift */
+"NSPhotoLibraryUsageDescription" = "PreppSuite greift auf deine Fotos zu, damit du einem Vorratsartikel ein Bild zuordnen kannst.";
