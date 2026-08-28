@@ -774,4 +774,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String syncAgeDays(int count) {
     return '$count days';
   }
+
+  @override
+  String get serverAddressHint => 'Address of the server this app syncs with.';
+
+  @override
+  String get serverAddressInvalid =>
+      'That is not a valid address. For example: preppsuite.example.com or 192.168.1.5:8080';
+
+  @override
+  String get serverAddressSignOutHint =>
+      'After a change you will need to sign in again — an account only applies to its own server.';
+
+  @override
+  String get serverAddressChangeAction => 'Change server address';
 }

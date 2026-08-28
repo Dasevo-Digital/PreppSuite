@@ -1453,6 +1453,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} days'**
   String syncAgeDays(int count);
+
+  /// No description provided for @serverAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Address of the server this app syncs with.'**
+  String get serverAddressHint;
+
+  /// No description provided for @serverAddressInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a valid address. For example: preppsuite.example.com or 192.168.1.5:8080'**
+  String get serverAddressInvalid;
+
+  /// No description provided for @serverAddressSignOutHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After a change you will need to sign in again — an account only applies to its own server.'**
+  String get serverAddressSignOutHint;
+
+  /// No description provided for @serverAddressChangeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Change server address'**
+  String get serverAddressChangeAction;
 }
 
 class _AppLocalizationsDelegate

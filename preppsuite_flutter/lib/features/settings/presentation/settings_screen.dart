@@ -5,6 +5,8 @@ import 'package:preppsuite_client/preppsuite_client.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../core/locale_provider.dart';
 import '../../../core/notifications_provider.dart';
+import '../../../core/server_url.dart';
+import '../../../core/server_url_dialog.dart';
 import '../../../core/theme_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../main.dart';
@@ -87,9 +89,16 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Card(
-            child: ListTile(
-              title: Text(l10n.serverAddressLabel),
-              subtitle: SelectableText(serverUrl),
+            child: Consumer(
+              builder: (context, ref, _) => ListTile(
+                title: Text(l10n.serverAddressLabel),
+                subtitle: SelectableText(ref.watch(serverUrlProvider)),
+                trailing: IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  tooltip: l10n.serverAddressChangeAction,
+                  onPressed: () => ServerUrlDialog.show(context),
+                ),
+              ),
             ),
           ),
         ],

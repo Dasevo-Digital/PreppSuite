@@ -225,5 +225,9 @@
   "syncRetryButton": "Erneut versuchen",
   "syncAgeMinutes": "{count} Minuten",
   "syncAgeHours": "{count} Stunden",
-  "syncAgeDays": "{count} Tagen"
+  "syncAgeDays": "{count} Tagen",
+  "serverAddressHint": "Adresse des Servers, mit dem sich diese App abgleicht.",
+  "serverAddressInvalid": "Das ist keine gültige Adresse. Beispiel: preppsuite.example.com oder 192.168.1.5:8080",
+  "serverAddressSignOutHint": "Nach einer Änderung musst du dich neu anmelden — ein Konto gilt nur auf seinem Server.",
+  "serverAddressChangeAction": "Serveradresse ändern"
 }
