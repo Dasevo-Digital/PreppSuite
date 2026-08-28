@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:preppsuite_client/preppsuite_client.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../sync/sync_scheduler.dart';
 import '../../budget/presentation/budget_list_screen.dart';
 import '../../checklists/presentation/checklist_list_screen.dart';
 import '../../household/presentation/household_overview_screen.dart';
@@ -52,6 +53,9 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           // Zero-sized; keeps scheduled expiry reminders in step with the
           // inventory for as long as any tab is open.
           ExpiryReminderScheduler(householdId: householdId),
+          // Zero-sized; the single clock for background sync, replacing the
+          // four independent timers the entities used to run.
+          SyncScheduler(householdId: householdId),
           WarningBanner(household: widget.membership.household),
           Expanded(
             child: IndexedStack(index: _index, children: screens),

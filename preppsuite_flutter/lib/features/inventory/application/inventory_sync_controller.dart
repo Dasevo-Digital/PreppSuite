@@ -15,19 +15,13 @@ class InventorySyncController extends Notifier<AsyncValue<void>> {
 
   final String householdId;
 
-  Timer? _periodicTimer;
   Timer? _debounceTimer;
 
   @override
   AsyncValue<void> build() {
     ref.onDispose(() {
-      _periodicTimer?.cancel();
       _debounceTimer?.cancel();
     });
-    _periodicTimer = Timer.periodic(
-      const Duration(seconds: 60),
-      (_) => syncNow(),
-    );
     Future.microtask(syncNow);
     return const AsyncData(null);
   }
