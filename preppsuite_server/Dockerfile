@@ -2,7 +2,10 @@
 # docker build -f preppsuite_server/Dockerfile .
 
 # Build stage
-FROM dart:3.8.0 AS build
+# Must stay at or above the SDK floor in preppsuite_server/pubspec.yaml —
+# googleapis_auth (for FCM) needs 3.9+, and this image is the only place
+# that pins a Dart version, so a bump there has to be repeated here.
+FROM dart:3.12 AS build
 
 # Create a minimal workspace that preserves locked server dependency versions.
 WORKDIR /app
@@ -11,7 +14,7 @@ COPY preppsuite_server preppsuite_server
 RUN printf '%s\n' \
   'name: _' \
   'environment:' \
-  '  sdk: ^3.8.0' \
+  '  sdk: ^3.9.0' \
   'workspace:' \
   '  - preppsuite_server' \
   > pubspec.yaml

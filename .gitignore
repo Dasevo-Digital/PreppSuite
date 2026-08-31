@@ -7,3 +7,6 @@ pubspec_overrides.yaml
 
 # Build output
 build/
+
+# Erzeugt von scripts/generate-env.sh — enthaelt Geheimnisse
+.env

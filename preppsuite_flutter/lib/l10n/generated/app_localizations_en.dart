@@ -446,6 +446,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warningsEmpty => 'No warnings for your region right now.';
 
   @override
+  String get warningsNinaHintTitle => 'Warnings while the app is closed';
+
+  @override
+  String get warningsNinaHintBody =>
+      'PreppSuite polls the official warning feeds every 15 minutes and shows them as an overview. For immediate alerts that reach you with the app closed, use NINA from Germany\'s Federal Office of Civil Protection — the same official source, in seconds rather than minutes.';
+
+  @override
   String get warningSeverityMinor => 'Minor';
 
   @override

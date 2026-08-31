@@ -448,6 +448,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get warningsEmpty => 'Aktuell keine Warnungen für deine Region.';
 
   @override
+  String get warningsNinaHintTitle => 'Warnungen bei geschlossener App';
+
+  @override
+  String get warningsNinaHintBody =>
+      'PreppSuite ruft die amtlichen Warnungen alle 15 Minuten ab und zeigt sie als Überblick. Wer sofort und auch bei geschlossener App gewarnt werden möchte, nutzt dafür NINA vom Bundesamt für Bevölkerungsschutz — dieselbe amtliche Quelle, in Sekunden statt Minuten.';
+
+  @override
   String get warningSeverityMinor => 'Gering';
 
   @override

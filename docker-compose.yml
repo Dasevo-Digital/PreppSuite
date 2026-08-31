@@ -1,0 +1,114 @@
+# Selbst betreiben: Server, Datenbank und Redis in einem Rutsch.
+#
+#   ./scripts/generate-env.sh   # erzeugt .env mit zufaelligen Geheimnissen
+#   docker compose up -d
+#
+# Der Server konfiguriert sich vollstaendig ueber Umgebungsvariablen; die
+# Dateien unter preppsuite_server/config/ werden dabei ueberschrieben. Es
+# muss also nichts bearbeitet werden.
+#
+# Nicht zu verwechseln mit preppsuite_server/docker-compose.yaml — das ist
+# die Entwicklungsumgebung und startet nur Postgres und Redis, damit
+# `dart test` und `dart bin/main.dart` lokal laufen.
+
+name: preppsuite
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: preppsuite
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?.env fehlt — erst ./scripts/generate-env.sh ausfuehren}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d preppsuite']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --requirepass "${REDIS_PASSWORD:?.env fehlt}"
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" ping | grep -q PONG']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+  server:
+    build:
+      context: .
+      dockerfile: preppsuite_server/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      # Nur die API nach aussen. Insights (8081) und der Webserver (8082)
+      # bleiben im Docker-Netz — die App braucht beide nicht, und Insights
+      # ist ein Wartungszugang, der nicht ins Internet gehoert.
+      - '${PREPPSUITE_PORT:-8080}:8080'
+    environment:
+      # --- Betriebsart -------------------------------------------------
+      SERVERPOD_RUN_MODE: production
+      SERVERPOD_SERVER_ID: default
+      SERVERPOD_SERVER_ROLE: monolith
+      SERVERPOD_LOGGING_MODE: normal
+      # Wendet ausstehende Migrationen beim Start an. Ohne das muesste nach
+      # jeder Aktualisierung von Hand nachgezogen werden.
+      SERVERPOD_APPLY_MIGRATIONS: 'true'
+
+      # --- Adresse, unter der die App den Server erreicht ---------------
+      # Steht in .env. Trifft sie nicht zu, funktioniert der Abgleich
+      # trotzdem — die App nutzt die Adresse, die man dort eintraegt.
+      SERVERPOD_API_SERVER_PUBLIC_HOST: ${PREPPSUITE_HOST:-localhost}
+      SERVERPOD_API_SERVER_PUBLIC_PORT: ${PREPPSUITE_PUBLIC_PORT:-8080}
+      SERVERPOD_API_SERVER_PUBLIC_SCHEME: ${PREPPSUITE_SCHEME:-http}
+      # Insights und Webserver erben denselben Host. Ohne das bleibt der
+      # Platzhalter examplepod.com aus der Serverpod-Vorlage stehen und
+      # taucht in Logs und ausgelieferter Konfiguration auf.
+      SERVERPOD_INSIGHTS_SERVER_PUBLIC_HOST: ${PREPPSUITE_HOST:-localhost}
+      SERVERPOD_INSIGHTS_SERVER_PUBLIC_SCHEME: ${PREPPSUITE_SCHEME:-http}
+      SERVERPOD_WEB_SERVER_PUBLIC_HOST: ${PREPPSUITE_HOST:-localhost}
+      SERVERPOD_WEB_SERVER_PUBLIC_SCHEME: ${PREPPSUITE_SCHEME:-http}
+
+      # --- Datenbank ---------------------------------------------------
+      SERVERPOD_DATABASE_HOST: postgres
+      SERVERPOD_DATABASE_PORT: '5432'
+      SERVERPOD_DATABASE_NAME: preppsuite
+      SERVERPOD_DATABASE_USER: postgres
+      # Im Docker-Netz, nicht ueber das Internet — TLS zwischen zwei
+      # Containern auf derselben Maschine bringt nichts als Aufwand.
+      SERVERPOD_DATABASE_REQUIRE_SSL: 'false'
+      SERVERPOD_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+
+      # --- Redis -------------------------------------------------------
+      SERVERPOD_REDIS_ENABLED: 'true'
+      SERVERPOD_REDIS_HOST: redis
+      SERVERPOD_REDIS_PORT: '6379'
+      SERVERPOD_REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+      # --- Geheimnisse -------------------------------------------------
+      # Serverpod bildet jede Variable mit dem Praefix SERVERPOD_PASSWORD_
+      # auf den gleichnamigen Passworteintrag ab, config/passwords.yaml
+      # wird also nicht gebraucht.
+      SERVERPOD_SERVICE_SECRET: ${SERVERPOD_SERVICE_SECRET}
+      SERVERPOD_PASSWORD_emailSecretHashPepper: ${EMAIL_SECRET_HASH_PEPPER}
+      SERVERPOD_PASSWORD_jwtHmacSha512PrivateKey: ${JWT_PRIVATE_KEY}
+      SERVERPOD_PASSWORD_jwtRefreshTokenHashPepper: ${JWT_REFRESH_PEPPER}
+
+      # --- Push (optional) ---------------------------------------------
+      # Leer lassen heisst: Server laeuft normal, Push bleibt aus. Siehe
+      # docs/push-notifications.md.
+      SERVERPOD_PASSWORD_firebaseServiceAccount: ${FIREBASE_SERVICE_ACCOUNT:-}
+
+volumes:
+  postgres_data:

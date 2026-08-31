@@ -45,6 +45,11 @@ Länder. Der Server fragt alle 15 Minuten ab und filtert BBK-Warnungen bis
 auf Kreisebene, sodass ein Haushalt nicht die Meldungen des halben Landes
 sieht.
 
+Bewusst ein Überblick, kein Alarm: der Abruf läuft alle 15 Minuten, während
+NINA vom BBK dieselben Meldungen in rund 30 Sekunden zustellt. Wer sofort
+und auch bei geschlossener App gewarnt werden will, nutzt dafür NINA — die
+App sagt das an Ort und Stelle auch selbst.
+
 **Schutzräume.** Karte mit Schutzräumen und Bunkern aus OpenStreetMap und
 der WWBOTA-Datenbank, nach Entfernung und nach Belastbarkeit der Angabe
 filterbar.
@@ -58,18 +63,33 @@ Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
 
 ## Selbst betreiben
 
-Der Server braucht PostgreSQL und Redis. Für die Entwicklung liegt beides
-als Container bei:
+Zwei Befehle, wenn Docker läuft:
 
 ```bash
-cd preppsuite_server
+./scripts/generate-env.sh   # erzeugt .env mit zufälligen Geheimnissen
 docker compose up -d
-dart bin/main.dart --apply-migrations
 ```
 
-Er lauscht dann auf Port 8080. Für den Dauerbetrieb liegt ein
-`Dockerfile` bereit; die Zugangsdaten gehören in
-`config/passwords.yaml` beziehungsweise in die Umgebung.
+Das startet Server, PostgreSQL und Redis. Migrationen werden beim Start
+angewendet, auch bei späteren Aktualisierungen. Der Server hört danach auf
+Port 8080.
+
+Es muss keine Konfigurationsdatei bearbeitet werden: der Server nimmt
+seine gesamte Einstellung aus Umgebungsvariablen, die in `.env` stehen.
+`config/passwords.yaml` wird für diesen Weg nicht gebraucht — sie steht zu
+Recht nicht im Repository, ein frischer Clone hätte also keine.
+
+Für den Betrieb hinter einem Reverse Proxy mit TLS in `.env` setzen:
+
+```bash
+PREPPSUITE_HOST=preppsuite.example.com
+PREPPSUITE_SCHEME=https
+PREPPSUITE_PUBLIC_PORT=443
+```
+
+Zum Entwickeln startet `preppsuite_server/docker-compose.yaml` nur
+PostgreSQL und Redis, damit `dart bin/main.dart` und `dart test` lokal
+gegen echte Dienste laufen.
 
 Die Adresse des Servers wird in der App eingetragen – auf dem
 Anmeldebildschirm und später unter Einstellungen. Kurzformen genügen:
@@ -84,6 +104,11 @@ später trotzdem:
 cd preppsuite_flutter
 flutter build macos --release --dart-define=SERVER_URL=https://preppsuite.example.com/
 ```
+
+Push-Benachrichtigungen sind optional und standardmäßig aus; der Server
+läuft ohne sie normal. Was dafür nötig ist und warum es sich für eine
+selbst betriebene Installation kaum lohnt, steht in
+[`docs/push-notifications.md`](docs/push-notifications.md).
 
 Fertige macOS-Fassungen liegen unter *Releases*. Sie sind nicht mit einem
 gekauften Zertifikat signiert; Gatekeeper meldet sich beim ersten Start,

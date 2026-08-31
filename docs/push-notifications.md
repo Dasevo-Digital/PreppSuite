@@ -8,6 +8,29 @@ Zivilschutzwarnung zählt.
 Dieses Dokument beschreibt den Server- und App-Anteil, der das ändert, und
 was an Zugangsdaten dafür nötig ist.
 
+## Vorab: lohnt sich das?
+
+Für eine selbst betriebene Installation meistens nicht.
+
+Der Engpass ist nicht die Zustellung, sondern der Abruf: der Poller fragt
+alle 15 Minuten ab, eine Meldung wäre also im Mittel siebeneinhalb Minuten
+alt. NINA vom BBK stellt dieselben Warnungen in rund 30 Sekunden zu, ohne
+Konto und kostenlos. Push in PreppSuite kann dieses Rennen nicht gewinnen,
+und den Abruf deutlich zu verkürzen verbietet sich gegenüber einer
+öffentlichen API, die jede weitere Installation zusätzlich belastet.
+
+Dazu kommt: FCM bindet nicht den Server an ein Firebase-Projekt, sondern
+die **App**. Wer den Server selbst hostet und die fertige App aus den
+Releases nutzt, hat damit kein Push — er müsste die App selbst bauen. Auf
+iOS scheitert es endgültig, weil der APNs-Schlüssel an der Signatur der App
+hängt und nicht weitergegeben werden kann.
+
+Der Weg unten ist deshalb für **eine** Installation gedacht: die des
+Betreibers, der ohnehin selbst baut. Für alle anderen ist die ehrliche
+Antwort NINA, und die App sagt das auch selbst. Was PreppSuite dagegen ohne
+jeden Dienst kann, sind Ablauferinnerungen für Vorräte — die werden lokal
+geplant und brauchen weder Server noch Google.
+
 ## Architektur
 
 Beide Plattformen laufen über **Firebase Cloud Messaging (FCM HTTP v1)**.
@@ -120,11 +143,10 @@ Einzeilig machen mit `jq -c . dein-schluessel.json`. Einfache
 Anführungszeichen sind hier richtig: YAML lässt darin Backslashes in Ruhe,
 und die `\n` im `private_key` müssen den JSON-Parser unverändert erreichen.
 
-Alternativ per Umgebungsvariable `PREPPSUITE_FIREBASE_SERVICE_ACCOUNT` —
-der Weg für Docker. Achtung: Serverpod liest Umgebungsvariablen **nicht**
-von allein als Passwörter; jede muss in `server.dart` über
-`pod.loadCustomPasswords` angemeldet werden. Für diesen Schlüssel ist das
-bereits eingetragen.
+Alternativ per Umgebungsvariable
+`SERVERPOD_PASSWORD_firebaseServiceAccount` — der Weg für Docker. Serverpod
+bildet jede Variable mit dem Präfix `SERVERPOD_PASSWORD_` von selbst auf
+den gleichnamigen Passworteintrag ab.
 
 **b) Datei `preppsuite_server/config/firebase_service_account_key.json`** —
 einfach die heruntergeladene Datei dorthin legen, fertig. Nichts umformen,

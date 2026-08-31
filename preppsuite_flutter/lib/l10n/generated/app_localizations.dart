@@ -896,6 +896,18 @@ abstract class AppLocalizations {
   /// **'No warnings for your region right now.'**
   String get warningsEmpty;
 
+  /// No description provided for @warningsNinaHintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warnings while the app is closed'**
+  String get warningsNinaHintTitle;
+
+  /// No description provided for @warningsNinaHintBody.
+  ///
+  /// In en, this message translates to:
+  /// **'PreppSuite polls the official warning feeds every 15 minutes and shows them as an overview. For immediate alerts that reach you with the app closed, use NINA from Germany\'s Federal Office of Civil Protection — the same official source, in seconds rather than minutes.'**
+  String get warningsNinaHintBody;
+
   /// No description provided for @warningSeverityMinor.
   ///
   /// In en, this message translates to:

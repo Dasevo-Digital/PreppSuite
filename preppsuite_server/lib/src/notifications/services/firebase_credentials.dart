@@ -8,7 +8,9 @@ import 'package:serverpod/serverpod.dart';
 const firebaseServiceAccountFile = 'config/firebase_service_account_key.json';
 
 /// Password key holding the whole key as one JSON string, for deployments
-/// that inject secrets rather than mount files.
+/// that inject secrets rather than mount files. Serverpod maps the
+/// environment variable `SERVERPOD_PASSWORD_firebaseServiceAccount` onto
+/// this key on its own — no registration needed.
 const firebaseServiceAccountPassword = 'firebaseServiceAccount';
 
 /// Finds the Firebase service-account key, or null if there is none.
@@ -24,8 +26,8 @@ String? loadFirebaseServiceAccount(Session session) {
 ///
 /// The password wins over the file. Explicit configuration should not be
 /// quietly overruled by a stray file left in a container image — and the
-/// password is also how an environment variable arrives, via
-/// `loadCustomPasswords` in `server.dart`.
+/// password is also how the `SERVERPOD_PASSWORD_firebaseServiceAccount`
+/// environment variable arrives.
 String? resolveFirebaseServiceAccount({
   required String? password,
   required String path,

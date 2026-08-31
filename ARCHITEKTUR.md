@@ -111,10 +111,9 @@ Server side mirrors it: `lib/src/<feature>/` with `<feature>_endpoint.dart`
   iOS). `PushDevice` is deliberately *outside* the push/pull sync — a token
   belongs to one device and must never travel to another. The service-account
   key comes from the `firebaseServiceAccount` password (settable via
-  `PREPPSUITE_FIREBASE_SERVICE_ACCOUNT`, which only works because
-  `server.dart` registers it — Serverpod does not read env passwords on its
-  own) or from `config/firebase_service_account_key.json`; without either the
-  server boots normally with push off,
+  `SERVERPOD_PASSWORD_firebaseServiceAccount`) or from
+  `config/firebase_service_account_key.json`; without either the server boots
+  normally with push off,
   and `firebase_messaging` is not a dependency until the project's config
   files exist (the Gradle plugin fails the Android build without them). See
   [`docs/push-notifications.md`](docs/push-notifications.md).

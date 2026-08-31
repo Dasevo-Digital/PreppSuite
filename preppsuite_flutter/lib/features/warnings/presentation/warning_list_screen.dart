@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:preppsuite_client/preppsuite_client.dart'
-    show Household, WarningSource;
+    show Household, WarningRegionSubscription, WarningSource;
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
@@ -25,61 +25,129 @@ class WarningListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.warningsTitle)),
-      body: warningsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) =>
-            Center(child: Text(l10n.errorGeneric(error.toString()))),
-        data: (warnings) {
-          if (warnings.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Text(
-                  l10n.warningsEmpty,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ),
-            );
-          }
+      body: Column(
+        children: [
+          Expanded(
+            child: _buildList(context, l10n, warningsAsync, subscriptions),
+          ),
+          // NINA is the BBK's app and only covers Germany — recommending it
+          // to an Austrian household would be wrong.
+          if (household.countryCode == 'DE') _NinaHint(l10n: l10n),
+        ],
+      ),
+    );
+  }
 
-          // "Show region-relevant warnings first" — relevance is the
-          // primary key here (unlike the banner, which prioritizes
-          // severity since it only ever shows a single, most-urgent
-          // warning); severity and recency break ties.
-          final sorted = [...warnings]
-            ..sort((a, b) {
-              final relevanceCompare =
+  Widget _buildList(
+    BuildContext context,
+    AppLocalizations l10n,
+    AsyncValue<List<Warning>> warningsAsync,
+    List<WarningRegionSubscription> subscriptions,
+  ) {
+    return warningsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stackTrace) =>
+          Center(child: Text(l10n.errorGeneric(error.toString()))),
+      data: (warnings) {
+        if (warnings.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Text(
+                l10n.warningsEmpty,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+          );
+        }
+
+        // "Show region-relevant warnings first" — relevance is the
+        // primary key here (unlike the banner, which prioritizes
+        // severity since it only ever shows a single, most-urgent
+        // warning); severity and recency break ties.
+        final sorted = [...warnings]
+          ..sort((a, b) {
+            final relevanceCompare =
+                warningRelevanceRank(
+                  warning: b,
+                  household: household,
+                  subscriptions: subscriptions,
+                ).compareTo(
                   warningRelevanceRank(
-                    warning: b,
+                    warning: a,
                     household: household,
                     subscriptions: subscriptions,
-                  ).compareTo(
-                    warningRelevanceRank(
-                      warning: a,
-                      household: household,
-                      subscriptions: subscriptions,
-                    ),
-                  );
-              if (relevanceCompare != 0) return relevanceCompare;
+                  ),
+                );
+            if (relevanceCompare != 0) return relevanceCompare;
 
-              final severityCompare =
-                  warningSeverityRank(
-                    warningSeverityFromName(b.severity),
-                  ).compareTo(
-                    warningSeverityRank(warningSeverityFromName(a.severity)),
-                  );
-              if (severityCompare != 0) return severityCompare;
+            final severityCompare =
+                warningSeverityRank(
+                  warningSeverityFromName(b.severity),
+                ).compareTo(
+                  warningSeverityRank(warningSeverityFromName(a.severity)),
+                );
+            if (severityCompare != 0) return severityCompare;
 
-              return b.sent.compareTo(a.sent);
-            });
+            return b.sent.compareTo(a.sent);
+          });
 
-          return ListView.builder(
-            itemCount: sorted.length,
-            itemBuilder: (context, index) =>
-                _WarningTile(warning: sorted[index], l10n: l10n),
-          );
-        },
+        return ListView.builder(
+          itemCount: sorted.length,
+          itemBuilder: (context, index) =>
+              _WarningTile(warning: sorted[index], l10n: l10n),
+        );
+      },
+    );
+  }
+}
+
+/// Points at NINA for the job PreppSuite deliberately does not do.
+///
+/// The 15-minute poll is the honest reason: even with push, a warning here
+/// would be minutes behind the BBK's own app, which delivers in about 30
+/// seconds. Saying so is more useful than quietly being slower.
+class _NinaHint extends StatelessWidget {
+  const _NinaHint({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.notifications_active_outlined,
+              size: 20,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.warningsNinaHintTitle,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.warningsNinaHintBody,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

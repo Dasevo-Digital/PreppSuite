@@ -1,0 +1,54 @@
+name: Selbst betreiben
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# The self-hosting path is the one thing no other job touches: the server
+# image is built from a Dockerfile that pins its own Dart version, so a
+# dependency raising its SDK floor breaks it silently — which is exactly
+# what happened when googleapis_auth was added for push. This job starts
+# the whole stack the way a self-hoster would and waits for the API to
+# answer.
+jobs:
+  stack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate secrets
+        run: ./scripts/generate-env.sh
+
+      - name: Build and start the stack
+        run: docker compose up --quiet-pull --build -d
+
+      - name: Wait for the API to answer
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS -m 3 http://localhost:8080/ >/dev/null 2>&1; then
+              echo "API answered after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API did not answer within 60s"
+          docker compose logs
+          exit 1
+
+      # Proves more than "the process is up": migrations applied, the
+      # database is writable, and the startup seeder ran.
+      - name: Check the schema was migrated and seeded
+        run: |
+          docker compose exec -T postgres \
+            psql -U postgres -d preppsuite -tAc \
+            "select count(*) from checklist_template" | grep -qE '^[1-9]'
+          docker compose exec -T postgres \
+            psql -U postgres -d preppsuite -tAc \
+            "select count(*) from push_device" | grep -qE '^[0-9]'
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v

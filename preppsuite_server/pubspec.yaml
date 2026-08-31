@@ -4,7 +4,9 @@ description: Starting point for a Serverpod server.
 # homepage: https://www.example.com
 
 environment:
-  sdk: '^3.8.0'
+  # 3.9 rather than 3.8 because googleapis_auth requires it. The server
+  # genuinely cannot build below this — the Dockerfile has to match.
+  sdk: '^3.9.0'
 
 resolution: workspace
 
