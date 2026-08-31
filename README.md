@@ -110,6 +110,49 @@ läuft ohne sie normal. Was dafür nötig ist und warum es sich für eine
 selbst betriebene Installation kaum lohnt, steht in
 [`docs/push-notifications.md`](docs/push-notifications.md).
 
+### Android weitergeben
+
+Die Release-APK wird mit dem Debug-Schlüssel signiert, solange kein eigener
+vorliegt. Zum Ausprobieren reicht das; zum Weitergeben nicht, denn das
+Passwort dieses Schlüssels ist der öffentlich bekannte Wert `android` —
+jeder könnte damit eine gefälschte Aktualisierung signieren, die Android
+als echt annimmt.
+
+Einen eigenen Schlüssel erzeugen (einmalig, außerhalb des Repositorys):
+
+```bash
+keytool -genkeypair -v -keystore ~/.android-keystores/preppsuite-release.jks \
+  -keyalg RSA -keysize 4096 -validity 10000 -alias preppsuite
+```
+
+Dazu `preppsuite_flutter/android/key.properties` anlegen — die Datei ist
+ignoriert und bleibt lokal:
+
+```properties
+storeFile=/Users/DEIN_NAME/.android-keystores/preppsuite-release.jks
+storePassword=…
+keyPassword=…
+keyAlias=preppsuite
+```
+
+Danach signiert `flutter build apk --release` von selbst richtig. Fehlt die
+Datei, warnt der Build und fällt auf den Debug-Schlüssel zurück.
+
+**Der Schlüssel ist unersetzlich.** Geht er verloren, lässt sich für alle,
+die die App installiert haben, nie wieder eine Aktualisierung
+veröffentlichen — sie müssten deinstallieren und dabei ihre lokalen Daten
+aufgeben. Keystore und Passwörter gehören deshalb an zwei getrennte,
+gesicherte Orte, nicht nur auf den Rechner, auf dem gebaut wird.
+
+Für die Weitergabe über *Releases* statt über den Play Store lohnt sich
+
+```bash
+flutter build apk --release --split-per-abi
+```
+
+Das ergibt getrennte Pakete je Prozessorarchitektur, jedes rund ein Drittel
+der Größe der gemeinsamen APK.
+
 Fertige macOS-Fassungen liegen unter *Releases*. Sie sind nicht mit einem
 gekauften Zertifikat signiert; Gatekeeper meldet sich beim ersten Start,
 über **Rechtsklick → Öffnen** startet die App trotzdem.

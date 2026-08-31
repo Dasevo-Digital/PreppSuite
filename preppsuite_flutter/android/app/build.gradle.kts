@@ -1,3 +1,20 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+// Release signing is read from android/key.properties, which is git-ignored
+// and holds the path to a keystore kept outside the repository. It is
+// deliberately optional: without it the release build falls back to the
+// debug key, so a fresh clone can still run `flutter build apk --release`
+// to try the app out. What it must never do is silently produce a
+// debug-signed APK for distribution — see README, "Android weitergeben".
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        FileInputStream(keystorePropertiesFile).use { load(it) }
+    }
+}
+val hasReleaseKeystore = keystorePropertiesFile.exists()
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -29,11 +46,31 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (hasReleaseKeystore) {
+            create("release") {
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+                storeFile = file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasReleaseKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                // Fine for trying the app out, useless for handing it on:
+                // the debug keystore's password is the publicly known
+                // "android", so anyone could sign a forged update.
+                logger.warn(
+                    "PreppSuite: no android/key.properties — release APK is " +
+                        "signed with the debug key and must not be distributed."
+                )
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }
