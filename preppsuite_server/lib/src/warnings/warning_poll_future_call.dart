@@ -2,6 +2,7 @@ import 'package:serverpod/serverpod.dart';
 
 import '../generated/protocol.dart';
 import '../notifications/services/fcm_sender.dart';
+import '../notifications/services/firebase_credentials.dart';
 import '../notifications/services/push_sender.dart';
 import '../notifications/warning_push_notifier.dart';
 import 'services/bbk_client.dart';
@@ -42,10 +43,10 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
 
   PushSender? _resolvedSender;
 
-  /// Builds the sender once, from `session.passwords['firebaseServiceAccount']`
-  /// (a Google service-account key as JSON). Absent or unparseable
-  /// credentials mean push stays off and everything else keeps working —
-  /// which is the state of every install that has not set up Firebase.
+  /// Builds the sender once, from whichever Firebase service-account key
+  /// [loadFirebaseServiceAccount] finds. Absent or unparseable credentials
+  /// mean push stays off and everything else keeps working — which is the
+  /// state of every install that has not set up Firebase.
   PushSender _sender(Session session) {
     if (pushSender != null) return pushSender!;
     return _resolvedSender ??= _buildSender(session);
@@ -53,12 +54,13 @@ class WarningPollFutureCall extends FutureCall<SerializableModel> {
 
   PushSender _buildSender(Session session) {
     final sender = FcmSender.fromServiceAccountJson(
-      session.passwords['firebaseServiceAccount'],
+      loadFirebaseServiceAccount(session),
     );
     if (sender == null) {
       session.log(
-        'Warning push disabled: no usable "firebaseServiceAccount" password '
-        'configured',
+        'Warning push disabled: no usable Firebase service account found '
+        '(looked for the "$firebaseServiceAccountPassword" password and '
+        '$firebaseServiceAccountFile)',
       );
       return const DisabledPushSender();
     }

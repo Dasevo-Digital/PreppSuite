@@ -101,21 +101,44 @@ Setzt das kostenpflichtige Apple Developer Program voraus (99 €/Jahr).
 ### 4. Server-Zugangsdaten
 
 Firebase → Projekteinstellungen → Dienstkonten → „Neuen privaten Schlüssel
-generieren“. Der Inhalt der JSON-Datei kommt in
-`preppsuite_server/config/passwords.yaml`:
+generieren“. Es kommt eine JSON-Datei heraus. **Die ist ein echtes
+Geheimnis** — wer sie hat, kann im Namen deines Projekts Nachrichten an
+alle registrierten Geräte schicken.
+
+Der Server sucht sie an zwei Stellen, in dieser Reihenfolge:
+
+**a) Passwort `firebaseServiceAccount`** — in
+`preppsuite_server/config/passwords.yaml` (nicht unter Versionskontrolle),
+als *eine* Zeile, weil YAML sonst über die Zeilenumbrüche stolpert:
 
 ```yaml
-production:
+shared:
   firebaseServiceAccount: '{"type":"service_account","project_id":"…"}'
 ```
 
-Alternativ per Umgebungsvariable `SERVERPOD_PASSWORD_firebaseServiceAccount`
-— im Docker-Betrieb der sauberere Weg, weil `passwords.yaml` nicht ins
-Repository gehört. Die Projekt-ID liest der Server aus dem Schlüssel selbst;
-es gibt nichts Zweites zu konfigurieren, das abweichen könnte.
+Einzeilig machen mit `jq -c . dein-schluessel.json`. Einfache
+Anführungszeichen sind hier richtig: YAML lässt darin Backslashes in Ruhe,
+und die `\n` im `private_key` müssen den JSON-Parser unverändert erreichen.
 
-**Ohne diesen Eintrag startet der Server normal und Push bleibt aus.** Das
-ist der Normalzustand einer frischen Installation, kein Fehler.
+Alternativ per Umgebungsvariable `PREPPSUITE_FIREBASE_SERVICE_ACCOUNT` —
+der Weg für Docker. Achtung: Serverpod liest Umgebungsvariablen **nicht**
+von allein als Passwörter; jede muss in `server.dart` über
+`pod.loadCustomPasswords` angemeldet werden. Für diesen Schlüssel ist das
+bereits eingetragen.
+
+**b) Datei `preppsuite_server/config/firebase_service_account_key.json`** —
+einfach die heruntergeladene Datei dorthin legen, fertig. Nichts umformen,
+nichts eintragen. Der Pfad steht schon in `.gitignore`.
+
+Der Passworteintrag gewinnt über die Datei, damit eine bewusst gesetzte
+Umgebungsvariable nicht von einer vergessenen Datei im Container-Image
+überstimmt wird.
+
+Die Projekt-ID liest der Server aus dem Schlüssel selbst; es gibt nichts
+Zweites zu konfigurieren, das abweichen könnte.
+
+**Ohne beides startet der Server normal und Push bleibt aus.** Das ist der
+Normalzustand einer frischen Installation, kein Fehler.
 
 ### 5. App-Anteil
 

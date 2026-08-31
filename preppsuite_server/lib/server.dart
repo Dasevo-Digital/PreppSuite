@@ -6,6 +6,7 @@ import 'package:serverpod_auth_idp_server/providers/email.dart';
 
 import 'src/checklists/checklist_seeder.dart';
 import 'src/generated/endpoints.dart';
+import 'src/notifications/services/firebase_credentials.dart';
 import 'src/generated/protocol.dart';
 import 'src/warnings/warning_poll_future_call.dart';
 import 'src/web/routes/app_config_route.dart';
@@ -15,6 +16,18 @@ import 'src/web/routes/root.dart';
 void run(List<String> args) async {
   // Initialize Serverpod and connect it with your generated code.
   final pod = Serverpod(args, Protocol(), Endpoints());
+
+  // Serverpod does not read passwords from the environment on its own —
+  // every environment-supplied one has to be registered here. This is the
+  // path a container deployment wants for the Firebase key, since
+  // config/passwords.yaml is deliberately not in version control. An unset
+  // variable simply leaves whatever passwords.yaml (or the key file) says.
+  pod.loadCustomPasswords([
+    (
+      envName: 'PREPPSUITE_FIREBASE_SERVICE_ACCOUNT',
+      alias: firebaseServiceAccountPassword,
+    ),
+  ]);
 
   // Initialize authentication services for the server.
   // Token managers will be used to validate and issue authentication keys,
