@@ -134,6 +134,8 @@ leeren Datenbank — die alte liegt dann unter der vorherigen Kennung in
 | `preppsuite_server` | Serverpod-Backend: Endpunkte, Dienste, Datenmodelle, Warnfeed-Abruf |
 | `preppsuite_client` | Erzeugter Client. Wird nicht von Hand bearbeitet |
 | `preppsuite_flutter` | Die App |
+| `scripts` | `generate-env.sh` für den ersten Start |
+| `docs` | Warnquellen und Push-Benachrichtigungen im Detail |
 
 Die Anwendung liest ausschliesslich aus einer lokalen Datenbank auf dem
 Gerät; der Abgleich mit dem Server läuft daneben und schreibt in dieselbe
@@ -142,9 +144,15 @@ offen markiert und beim nächsten Abgleich übertragen; gelöscht wird nur
 als Merker, damit die Löschung auch auf den anderen Geräten ankommt. Bei
 gleichzeitiger Änderung gewinnt die jüngere.
 
+Im Wurzelverzeichnis liegt `docker-compose.yml` für den Betrieb — Server,
+Datenbank und Redis zusammen. Nicht zu verwechseln mit
+`preppsuite_server/docker-compose.yaml`, das nur PostgreSQL und Redis für
+die Entwicklung startet.
+
 Die Annahmen, die dahinterstehen, sind in [`CLAUDE.md`](CLAUDE.md)
 aufgeschrieben, die Warnquellen in
-[`docs/warning-feeds.md`](docs/warning-feeds.md).
+[`docs/warning-feeds.md`](docs/warning-feeds.md) und der Push-Weg in
+[`docs/push-notifications.md`](docs/push-notifications.md).
 
 ## Entwicklung
 
@@ -185,14 +193,22 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
 - Keine Quelle liefert ein Ablaufdatum. Warnungen werden beendet, wenn sie
   aus einem vollständigen Abruf verschwinden – solange kein Abruf gelingt,
   bleiben sie stehen. Einzelheiten in `docs/warning-feeds.md`.
-- Warnmeldungen erscheinen nur, solange die App läuft – es gibt keinen
-  Push-Dienst im Hintergrund. Ablauf-Erinnerungen für Vorräte werden
-  dagegen im Voraus eingeplant und erreichen das Gerät auch bei
-  geschlossener App.
+- Warnmeldungen erscheinen nur, solange die App läuft. Serverseitig gibt es
+  einen Push-Weg über FCM, er ist aber standardmäßig aus und lohnt sich für
+  eine selbst betriebene Installation kaum: der Abruf läuft alle 15 Minuten,
+  während NINA vom BBK dieselben Meldungen in rund 30 Sekunden zustellt.
+  Gründe und Einrichtung in [`docs/push-notifications.md`](docs/push-notifications.md).
+  Ablauf-Erinnerungen für Vorräte werden dagegen lokal im Voraus eingeplant
+  und erreichen das Gerät auch bei geschlossener App – ohne Server und ohne
+  Drittanbieter.
 - Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen
   wurden. Der Abgleich überträgt Text, keine Dateien.
-- Veröffentlicht wird bisher nur eine macOS-Fassung. Für iOS ist geprüft,
-  dass die App durchbaut (`flutter build ios --no-codesign`); ausgeliefert
-  wird sie nicht, das bräuchte ein Apple-Entwicklerkonto. Android, Linux und
-  Windows sind angelegt, aber nie gebaut. Web bräuchte Umbau: der
-  Foto-Teil verwendet `dart:io`, das im Browser nicht zur Verfügung steht.
+- Veröffentlicht wird bisher nur eine macOS-Fassung. Android baut inzwischen
+  durch und wurde am fertigen Paket geprüft (Kennung, Mindest-API,
+  Berechtigungen); die Release-APK ist allerdings noch mit dem
+  Debug-Schlüssel signiert, für eine Weitergabe bräuchte es einen eigenen
+  Keystore. Für iOS ist geprüft, dass die App durchbaut
+  (`flutter build ios --no-codesign`); ausgeliefert wird sie nicht, das
+  bräuchte ein Apple-Entwicklerkonto. Linux und Windows sind angelegt, aber
+  nie gebaut. Web bräuchte Umbau: der Foto-Teil verwendet `dart:io`, das im
+  Browser nicht zur Verfügung steht.
