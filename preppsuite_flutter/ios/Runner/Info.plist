@@ -72,5 +72,18 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!-- Background warning polling. iOS decides when BGAppRefreshTask
+	     actually runs — it can be hours, so the app treats a background
+	     poll as a bonus and never promises it. Android is the platform
+	     where this is dependable. -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>preppsuite.warningPoll</string>
+	</array>
 </dict>
 </plist>

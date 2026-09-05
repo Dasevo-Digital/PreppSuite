@@ -1,35 +1,29 @@
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show Household, WarningRegionKind, WarningRegionSubscription;
-
 import '../../../local_db/database.dart';
 import '../../household/application/german_states.dart';
+import 'warning_region_filter.dart';
 
-/// How closely a warning matches a household's own region — a rank rather
-/// than a yes/no, so the UI can put closer matches first among warnings
-/// that are all technically relevant. Higher is more relevant.
+/// How closely a warning matches the regions a device follows — a rank
+/// rather than a yes/no, so the UI can put closer matches first among
+/// warnings that are all technically relevant. Higher is more relevant.
 ///
 /// Rank 0 is deliberately ambiguous: it covers both "concerns everyone"
 /// (no region on the warning) and "concerns someone else". That was
 /// harmless while a server decided what reached the device at all. It is
-/// not harmless now, so anything that has to *filter* must use
-/// [isWarningRelevant] instead.
+/// not harmless now that the app sees every warning in the country, so
+/// anything that *filters* must use [isWarningRelevant] instead.
 int warningRelevanceRank({
   required Warning warning,
-  required Household household,
-  required List<WarningRegionSubscription> subscriptions,
+  required WarningRegionFilter filter,
 }) {
   final regionKey = warning.regionKey;
   if (regionKey == null) return 0;
+  if (!filter.hasAnyRegion) return 0;
 
-  final ownRegion = household.regionKey;
-  final hasOwnRegion = ownRegion != null && ownRegion.length >= 5;
-  if (!hasOwnRegion && subscriptions.isEmpty) return 0;
+  final ownKreis = filter.ownKreisSchluessel;
+  if (ownKreis != null) {
+    if (regionKey == ownKreis) return 2;
 
-  if (hasOwnRegion) {
-    final kreisPrefix = ownRegion.substring(0, 5);
-    if (regionKey == kreisPrefix) return 2;
-
-    final ownState = germanStateForKreisSchluessel(kreisPrefix);
+    final ownState = germanStateForKreisSchluessel(ownKreis);
     if (ownState != null &&
         (regionKey == ownState.bbkCode ||
             regionKey.startsWith(ownState.arsPrefix))) {
@@ -37,12 +31,12 @@ int warningRelevanceRank({
     }
   }
 
-  for (final subscription in subscriptions) {
-    switch (subscription.kind) {
+  for (final region in filter.extraRegions) {
+    switch (region.kind) {
       case WarningRegionKind.kreis:
-        if (regionKey == subscription.value) return 2;
+        if (regionKey == region.value) return 2;
       case WarningRegionKind.bundesland:
-        final state = germanStateByBbkCode(subscription.value);
+        final state = germanStateByBbkCode(region.value);
         if (state != null &&
             (regionKey == state.bbkCode ||
                 regionKey.startsWith(state.arsPrefix))) {
@@ -54,7 +48,7 @@ int warningRelevanceRank({
   return 0;
 }
 
-/// Whether [warning] concerns [household] at all.
+/// Whether [warning] concerns this device at all.
 ///
 /// Ported from the server's `WarningService.isWarningRelevant` when the app
 /// took over fetching — the app now sees every warning in the country, so
@@ -65,20 +59,11 @@ int warningRelevanceRank({
 /// alert.
 bool isWarningRelevant({
   required Warning warning,
-  required Household household,
-  required List<WarningRegionSubscription> subscriptions,
+  required WarningRegionFilter filter,
 }) {
-  final regionKey = warning.regionKey;
-  if (regionKey == null) return true;
+  if (warning.countryCode != filter.countryCode) return false;
+  if (warning.regionKey == null) return true;
+  if (!filter.hasAnyRegion) return true;
 
-  final ownRegion = household.regionKey;
-  final hasOwnRegion = ownRegion != null && ownRegion.length >= 5;
-  if (!hasOwnRegion && subscriptions.isEmpty) return true;
-
-  return warningRelevanceRank(
-        warning: warning,
-        household: household,
-        subscriptions: subscriptions,
-      ) >
-      0;
+  return warningRelevanceRank(warning: warning, filter: filter) > 0;
 }

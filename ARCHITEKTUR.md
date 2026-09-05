@@ -107,6 +107,21 @@ Server side mirrors it: `lib/src/<feature>/` with `<feature>_endpoint.dart`
   hand-maintained lists that must stay in sync.
 - Warning region filtering is coarse by design in v1, and BBK warnings have no
   expiry. The limits are documented in [`docs/warning-feeds.md`](docs/warning-feeds.md).
+- **Warnings are fetched by the app, not the server.** `WarningPollService`
+  talks to BBK and MeteoAlarm directly (both public, key-less). It runs from
+  two places that must stay interchangeable: `WarningSyncController` while a
+  screen is open, and `runWarningBackgroundPoll` in a separate isolate via
+  WorkManager. The isolate has no Riverpod, no session and no household — it
+  reads `WarningRegionStore` (preferences) and the local database, which is
+  why relevance takes a plain `WarningRegionFilter` rather than the generated
+  `Household` type.
+- `warningRelevanceRank` ranks, it does not filter — its 0 means both
+  "concerns everyone" and "concerns someone else". Use `isWarningRelevant`
+  wherever a yes/no is needed; the distinction only became load-bearing once
+  the server stopped pre-filtering.
+- The `notified` column, not the in-memory list, is the record of what has
+  been announced. A background isolate ends after every run, so anything
+  held only in memory is gone by the next one.
 - Push notifications go out from the server via FCM (which relays to APNs for
   iOS). `PushDevice` is deliberately *outside* the push/pull sync — a token
   belongs to one device and must never travel to another. The service-account

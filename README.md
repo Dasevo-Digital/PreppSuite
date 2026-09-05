@@ -45,10 +45,16 @@ Länder. Der Server fragt alle 15 Minuten ab und filtert BBK-Warnungen bis
 auf Kreisebene, sodass ein Haushalt nicht die Meldungen des halben Landes
 sieht.
 
-Bewusst ein Überblick, kein Alarm: der Abruf läuft alle 15 Minuten, während
-NINA vom BBK dieselben Meldungen in rund 30 Sekunden zustellt. Wer sofort
-und auch bei geschlossener App gewarnt werden will, nutzt dafür NINA — die
-App sagt das an Ort und Stelle auch selbst.
+Der Abruf läuft in der App selbst, nicht über einen Server – beide Quellen
+sind öffentlich und ohne Schlüssel. Auf Android und iOS läuft er zusätzlich
+im Hintergrund weiter, sodass Warnungen auch bei geschlossener App
+ankommen. Android hält dabei ein Mindestintervall von 15 Minuten ein; auf
+iOS entscheidet das System selbst, wann es den Abruf zulässt, was auch
+Stunden dauern kann.
+
+Bewusst ein Überblick, kein Alarm: NINA vom BBK stellt dieselben Meldungen
+in rund 30 Sekunden zu. Wer sofort gewarnt werden will, nutzt dafür NINA –
+die App sagt das an Ort und Stelle auch selbst.
 
 **Schutzräume.** Karte mit Schutzräumen und Bunkern aus OpenStreetMap und
 der WWBOTA-Datenbank, nach Entfernung und nach Belastbarkeit der Angabe

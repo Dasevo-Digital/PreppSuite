@@ -48,17 +48,11 @@ class WarningBanner extends ConsumerWidget {
                   warningSeverityRank(warningSeverityFromName(a.severity)),
                 );
             if (severityCompare != 0) return severityCompare;
+            final filter = warningRegionFilterFor(household, subscriptions);
             return warningRelevanceRank(
               warning: b,
-              household: household,
-              subscriptions: subscriptions,
-            ).compareTo(
-              warningRelevanceRank(
-                warning: a,
-                household: household,
-                subscriptions: subscriptions,
-              ),
-            );
+              filter: filter,
+            ).compareTo(warningRelevanceRank(warning: a, filter: filter));
           });
         final mostSevere = sorted.first;
         final severity = warningSeverityFromName(mostSevere.severity);

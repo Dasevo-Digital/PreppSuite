@@ -7,6 +7,20 @@ import 'notification_service.dart';
 
 const _notificationsEnabledPrefsKey = 'notificationsEnabled';
 
+/// Reads the persisted notification setting without a provider container.
+///
+/// The background worker runs in its own isolate, where Riverpod does not
+/// exist — but it still has to respect the switch, or it would poll and
+/// notify for someone who asked not to be told.
+class NotificationsEnabledStore {
+  const NotificationsEnabledStore();
+
+  Future<bool> isEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_notificationsEnabledPrefsKey) ?? false;
+  }
+}
+
 /// Whether the user opted in to local notifications for new warnings.
 /// Defaults to `false` (opt-in only, since enabling it triggers an OS
 /// permission prompt) — mirrors `locale_provider.dart`'s shape.
@@ -31,11 +45,11 @@ class NotificationsEnabledController extends Notifier<bool> {
   Future<void> ensureLoaded() => _initialLoad ?? Future.value();
 
   Future<void> _loadInitial() async {
-    final prefs = await SharedPreferences.getInstance();
+    final enabled = await const NotificationsEnabledStore().isEnabled();
     // See LocaleOverrideController for why this guard is needed after an
     // async gap.
     if (!ref.mounted) return;
-    state = prefs.getBool(_notificationsEnabledPrefsKey) ?? false;
+    state = enabled;
   }
 
   /// Requests OS permission when turning notifications on; only persists

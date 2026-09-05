@@ -63,6 +63,10 @@ dependencies:
   # Parses MeteoAlarm's Atom+CAP feed, which the app now fetches itself
   # instead of going through a server.
   xml: ^6.6.1
+  # Periodic background polling for warnings. Android runs it through
+  # WorkManager (15-minute floor, a platform limit); on iOS it maps to
+  # BGAppRefreshTask, which the system schedules when it feels like it.
+  workmanager: ^0.10.9
   flutter_map: ^8.3.1
   latlong2: ^0.10.1
   # Needed directly for scheduling expiry reminders; flutter_local_notifications

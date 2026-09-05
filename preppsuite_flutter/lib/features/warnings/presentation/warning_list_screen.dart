@@ -66,19 +66,15 @@ class WarningListScreen extends ConsumerWidget {
         // primary key here (unlike the banner, which prioritizes
         // severity since it only ever shows a single, most-urgent
         // warning); severity and recency break ties.
+        final filter = warningRegionFilterFor(household, subscriptions);
         final sorted = [...warnings]
           ..sort((a, b) {
             final relevanceCompare =
                 warningRelevanceRank(
                   warning: b,
-                  household: household,
-                  subscriptions: subscriptions,
+                  filter: filter,
                 ).compareTo(
-                  warningRelevanceRank(
-                    warning: a,
-                    household: household,
-                    subscriptions: subscriptions,
-                  ),
+                  warningRelevanceRank(warning: a, filter: filter),
                 );
             if (relevanceCompare != 0) return relevanceCompare;
 
