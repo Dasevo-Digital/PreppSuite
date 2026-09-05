@@ -864,7 +864,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get sharingErrorUnwritable =>
-      'In diesen Ordner lässt sich nicht schreiben. Unter macOS gilt die Freigabe nur bis zum Beenden der App — wähle den Ordner danach einfach erneut. Unter Android gibt die Ordnerauswahl oft einen Pfad zurück, den Apps nicht benutzen dürfen; dort funktioniert ein Ordner, den die Sync-App selbst angelegt hat.';
+      'In diesen Ordner lässt sich nicht schreiben. Unter Android geht die Freigabe bei einer Neuinstallation verloren und lässt sich in den Systemeinstellungen entziehen – wähle den Ordner dann einfach erneut. Sonst prüfe, ob er noch da und beschreibbar ist.';
 
   @override
   String get sharingErrorUnreadable =>

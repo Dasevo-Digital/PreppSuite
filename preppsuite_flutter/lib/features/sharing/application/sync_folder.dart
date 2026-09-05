@@ -13,6 +13,19 @@ const _devicesFolderName = 'devices';
 const _householdFileName = 'household.json';
 const _probeFileName = '.preppsuite-write-test';
 
+/// The layout inside [preppSuiteFolderName], as paths relative to the
+/// folder the user picked.
+///
+/// Shared by both implementations so that a folder written by a phone and
+/// one written by a laptop are the same folder — Android reaches it
+/// through the Storage Access Framework and cannot use `dart:io` at all,
+/// but it must land in exactly these places.
+const devicesDirectoryPath = '$preppSuiteFolderName/$_devicesFolderName';
+const householdFilePath = '$preppSuiteFolderName/$_householdFileName';
+
+String deviceFilePath(String deviceId) =>
+    '$devicesDirectoryPath/$deviceId.json';
+
 /// A directory two or more devices can both see — a Nextcloud, Syncthing,
 /// Dropbox or iCloud Drive folder.
 ///

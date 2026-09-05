@@ -2,8 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- The sandbox is deliberately off. PreppSuite is handed out
+	     directly, not through the App Store, and it has to keep reading a
+	     folder the user picked once — a Nextcloud or Syncthing directory —
+	     on every later launch. Under the sandbox that permission dies with
+	     the process: the only way to hold on to it is a security-scoped
+	     bookmark, which needs native Swift and whose one Dart package
+	     stopped at Dart 2. See docs/gemeinsamer-ordner.md. -->
 	<key>com.apple.security.app-sandbox</key>
-	<true/>
+	<false/>
 	<key>com.apple.security.cs.allow-jit</key>
 	<true/>
 	<key>com.apple.security.network.client</key>

@@ -1,10 +1,10 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
+import '../application/shared_folder_access.dart';
 import '../application/shared_folder_sync_service.dart';
 import '../application/sharing_providers.dart';
 
@@ -80,7 +80,7 @@ class _Body extends ConsumerWidget {
           Text(l10n.sharingInactive, style: theme.textTheme.bodyMedium)
         else ...[
           Text(
-            l10n.sharingActiveFolder(state.folderPath!),
+            l10n.sharingActiveFolder(state.folder!.label),
             style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: 8),
@@ -120,15 +120,15 @@ class _Body extends ConsumerWidget {
   }
 
   Future<void> _pickFolder(BuildContext context, WidgetRef ref) async {
-    final path = await FilePicker.platform.getDirectoryPath(
+    final picked = await pickSharedFolder(
       dialogTitle: l10n.settingsSharingTitle,
     );
-    if (path == null) return;
+    if (picked == null) return;
 
     final previousId = profile.id;
     final error = await ref
         .read(sharedFolderProvider.notifier)
-        .joinFolder(path, profile: profile);
+        .joinFolder(picked, profile: profile);
     if (!context.mounted) return;
 
     if (error != null) {

@@ -161,15 +161,10 @@ Die mitgelieferte Schrift Noto Sans steht unter der SIL Open Font License
 
 Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
 
-- **Der gemeinsame Ordner ist unter Android eingeschränkt.** Die
-  Ordnerauswahl gibt dort oft einen Pfad zurück, in den Apps nicht
-  schreiben dürfen. Die App probiert das beim Einrichten aus und sagt es,
-  statt später still nichts zu tun; es funktioniert dann ein Ordner, den
-  die Sync-App selbst angelegt hat. Der saubere Weg wäre ein SAF-Zugang und
-  ist nicht gebaut. Unter macOS gilt die Freigabe eines Ordners nur bis zum
-  Beenden der App – danach muss er erneut gewählt werden, weil die App in
-  der Sandbox läuft. Auf Linux und Windows funktioniert jeder Ordner
-  dauerhaft.
+- Auf Android geht die Freigabe eines Ordners bei einer Neuinstallation
+  verloren und lässt sich in den Systemeinstellungen entziehen. Die App
+  merkt das beim nächsten Abgleich und sagt es; der Ordner wird dann
+  einmal neu gewählt.
 - Der Abgleich ist kein Echtzeit-Abgleich: alle zwei Minuten, beim Start und
   beim Zurückkehren in die App – dazu die Laufzeit des Dienstes, der die
   Dateien transportiert.

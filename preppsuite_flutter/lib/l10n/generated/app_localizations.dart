@@ -1595,7 +1595,7 @@ abstract class AppLocalizations {
   /// No description provided for @sharingErrorUnwritable.
   ///
   /// In en, this message translates to:
-  /// **'This folder cannot be written to. On macOS the permission lasts only until the app quits — just pick the folder again afterwards. On Android the folder picker often returns a path apps are not allowed to use; there, a folder the sync app created itself works.'**
+  /// **'This folder cannot be written to. On Android the permission is lost on reinstall and can be revoked in the system settings — just pick the folder again. Otherwise check that it is still there and writable.'**
   String get sharingErrorUnwritable;
 
   /// No description provided for @sharingErrorUnreadable.

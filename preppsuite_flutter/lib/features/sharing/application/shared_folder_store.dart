@@ -1,7 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import 'shared_folder_access.dart';
+
 const _folderPathKey = 'sharedFolderPath';
+const _folderLabelKey = 'sharedFolderLabel';
 const _deviceIdKey = 'syncDeviceId';
 
 /// Which folder this device shares through, and what it calls itself in
@@ -15,23 +18,35 @@ class SharedFolderStore {
   const SharedFolderStore();
 
   /// The folder the user picked, or null when sharing is switched off.
-  Future<String?> folderPath() async {
+  ///
+  /// A filesystem path on every platform but Android, where it is the
+  /// `content://` tree the Storage Access Framework handed over — which is
+  /// also why the label is stored beside it rather than derived from it.
+  Future<SharedFolderLocation?> location() async {
     final prefs = await SharedPreferences.getInstance();
-    final path = prefs.getString(_folderPathKey);
-    return (path == null || path.isEmpty) ? null : path;
+    final value = prefs.getString(_folderPathKey);
+    if (value == null || value.isEmpty) return null;
+
+    final label = prefs.getString(_folderLabelKey);
+    return SharedFolderLocation(
+      value: value,
+      label: label == null || label.isEmpty ? value : label,
+    );
   }
 
-  Future<void> saveFolderPath(String path) async {
+  Future<void> saveLocation(SharedFolderLocation folder) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_folderPathKey, path);
+    await prefs.setString(_folderPathKey, folder.value);
+    await prefs.setString(_folderLabelKey, folder.label);
   }
 
   /// Forgets the folder. Deliberately leaves this device's snapshot behind:
   /// the other devices are still reading it, and removing it would delete
   /// rows from the household that were never asked to be deleted.
-  Future<void> clearFolderPath() async {
+  Future<void> clearLocation() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_folderPathKey);
+    await prefs.remove(_folderLabelKey);
   }
 
   /// This device's name in the folder, generated on first use.

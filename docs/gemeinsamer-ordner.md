@@ -114,20 +114,33 @@ verteilen.
 
 ## Grenzen
 
-**Android.** Die Ordnerauswahl liefert dort häufig einen Pfad zurück, den
-Apps nicht benutzen dürfen (Scoped Storage). PreppSuite probiert das beim
-Einrichten aus und sagt es, statt später still nichts zu tun. Was
-funktioniert, ist ein Ordner, den die Sync-App selbst angelegt hat und
-freigibt. Ein SAF-Zugang wäre der saubere Weg und ist nicht gebaut.
+**Android** kennt seit Scoped Storage keine frei wählbaren Pfade mehr. Die
+Ordnerauswahl liefert einen `content://`-Baum, den nur das Storage Access
+Framework lesen kann; `dart:io` kommt gar nicht daran. Die sechs
+Operationen laufen dort deshalb über einen eigenen Kanal nach
+`MainActivity.kt`. Die Freigabe wird als *persistable* genommen und
+überlebt damit den Neustart — der Ordner wird einmal gewählt, nicht bei
+jedem Start.
 
-**macOS.** Die App läuft in der Sandbox. Ein gewählter Ordner ist dort nur
-bis zum Beenden der App freigegeben; danach muss er erneut gewählt werden.
-Dauerhaft würde es über *security-scoped bookmarks* gehen — das braucht
-nativen Swift-Code, denn das einzige Dart-Paket dafür ist auf Dart 2
-stehengeblieben. Der andere Weg wäre, die Sandbox für die macOS-Fassung
-abzuschalten; die App wird ohnehin nicht über den App Store verteilt.
-Beides ist eine Entscheidung, keine Kleinigkeit, und keins davon ist
-gebaut.
+Verloren geht sie trotzdem bei einer Neuinstallation, und die Nutzerin kann
+sie in den Systemeinstellungen entziehen. Beides fällt beim nächsten
+Abgleich auf (`ensureWritable` prüft die gespeicherte Freigabe, nicht nur
+den Ordner) und wird gesagt, statt still nichts zu tun.
+
+Geschrieben wird auf Android direkt in die Zieldatei statt über Umbenennen.
+Ein Leser kann also im Prinzip eine halb geschriebene Datei erwischen; das
+kostet diese eine Datei für einen Durchlauf, weil sie sich nicht lesen
+lässt und übersprungen wird. Die Alternative auf SAF wäre löschen und
+umbenennen — ein Fenster, in dem die Datei ganz fehlt, dazu Anzeigenamen,
+die der Provider umschreiben darf.
+
+**macOS** läuft ohne Sandbox. Unter der Sandbox stirbt die Freigabe eines
+gewählten Ordners mit dem Prozess; sie zu behalten geht nur über
+*security-scoped bookmarks*, was nativen Swift-Code bräuchte, denn das
+einzige Dart-Paket dafür ist auf Dart 2 stehengeblieben. Die App wird
+ohnehin direkt weitergegeben und nicht über den App Store, wo die Sandbox
+Pflicht wäre. Der Eintrag steht mit Begründung in
+`macos/Runner/Release.entitlements`.
 
 **Kein Echtzeit-Abgleich.** Zwischen „ich hake etwas ab" und „die andere
 Person sieht es" liegen der Zwei-Minuten-Takt und die Laufzeit des

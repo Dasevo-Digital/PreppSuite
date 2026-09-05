@@ -141,10 +141,16 @@ tree; the test suite deliberately targets that layer rather than the UI.
   limit) and opportunistic on iOS. The app never promises the iOS case.
 - NINA delivers the same warnings in ~30 seconds against this app's 15
   minutes. The warning screen says so rather than pretending otherwise.
-- The folder picker on Android usually returns a path the app may not
-  write to (scoped storage). `IoSyncFolder.isWritable` probes at setup time
-  so the user is told rather than left with a feature that quietly does
-  nothing. A SAF backend would be the real fix and is not built.
+- Android reaches the shared folder through the Storage Access Framework
+  (`SafSyncFolder` plus the channel in `MainActivity.kt`), because a
+  `content://` tree is not something `dart:io` can open. Both
+  implementations must produce the identical layout — `deviceFilePath` and
+  friends in `sync_folder.dart` are the single definition of it.
+- The macOS build runs **without** the app sandbox, deliberately: under it
+  a picked folder's permission dies with the process, and keeping it needs
+  security-scoped bookmarks in Swift. The reason is written into
+  `macos/Runner/Release.entitlements`; put it back only alongside that
+  native code.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

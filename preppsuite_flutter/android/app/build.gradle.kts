@@ -83,6 +83,10 @@ kotlin {
 
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    // The shared-folder sync reaches the folder the user picked through
+    // the Storage Access Framework — see MainActivity. DocumentFile is the
+    // readable way to walk a content:// tree.
+    implementation("androidx.documentfile:documentfile:1.0.1")
 }
 
 flutter {

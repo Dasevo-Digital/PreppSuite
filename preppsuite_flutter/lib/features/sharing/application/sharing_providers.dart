@@ -6,14 +6,14 @@ import '../../../core/app_database_providers.dart';
 import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
 import 'household_file.dart';
+import 'shared_folder_access.dart';
 import 'shared_folder_store.dart';
 import 'shared_folder_sync_service.dart';
-import 'sync_folder.dart';
 
 /// Why a folder could not be joined.
 enum SharedFolderJoinError {
-  /// Picked, but not writable. On Android this is the common one: the
-  /// picker hands back a path the app has no permission to use.
+  /// Picked, but not writable — a read-only location, or a drive that is
+  /// no longer there.
   unwritable,
 
   /// There is a `household.json` there, but it is damaged or was written
@@ -23,30 +23,30 @@ enum SharedFolderJoinError {
 
 class SharedFolderState {
   const SharedFolderState({
-    this.folderPath,
+    this.folder,
     this.lastSyncedAt,
     this.syncing = false,
     this.lastResult,
   });
 
   /// The folder this device shares through, or null when sharing is off.
-  final String? folderPath;
+  final SharedFolderLocation? folder;
 
   final DateTime? lastSyncedAt;
   final bool syncing;
   final SharedFolderSyncResult? lastResult;
 
-  bool get isSharing => folderPath != null;
+  bool get isSharing => folder != null;
 
   SharedFolderState copyWith({
-    String? folderPath,
-    bool clearFolderPath = false,
+    SharedFolderLocation? folder,
+    bool clearFolder = false,
     DateTime? lastSyncedAt,
     bool? syncing,
     SharedFolderSyncResult? lastResult,
   }) {
     return SharedFolderState(
-      folderPath: clearFolderPath ? null : (folderPath ?? this.folderPath),
+      folder: clearFolder ? null : (folder ?? this.folder),
       lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
       syncing: syncing ?? this.syncing,
       lastResult: lastResult ?? this.lastResult,
@@ -71,20 +71,20 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   Future<SharedFolderState> build() async {
     ref.onDispose(() => _timer?.cancel());
 
-    final path = await _store.folderPath();
+    final folder = await _store.location();
     final lastSynced = await ref
         .watch(appDatabaseProvider)
         .lastPulledAt(SharedFolderSyncService.syncStateEntity);
 
-    _restartTimer(active: path != null);
-    if (path != null) {
+    _restartTimer(active: folder != null);
+    if (folder != null) {
       // Deliberately after a beat and never awaited: the first sync must
       // not hold up whatever is waiting on this provider, and letting the
       // app finish starting first keeps it off the critical path.
       unawaited(Future.delayed(const Duration(milliseconds: 500), syncNow));
     }
 
-    return SharedFolderState(folderPath: path, lastSyncedAt: lastSynced);
+    return SharedFolderState(folder: folder, lastSyncedAt: lastSynced);
   }
 
   /// Points this device at [path], adopting whatever household is already
@@ -95,10 +95,10 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   /// this device's rows with that household's id, because otherwise they
   /// would simply stop being visible — every table is partitioned by it.
   Future<SharedFolderJoinError?> joinFolder(
-    String path, {
+    SharedFolderLocation location, {
     required HouseholdProfile profile,
   }) async {
-    final folder = IoSyncFolder(path);
+    final folder = syncFolderFor(location.value);
     if (!await folder.isWritable()) return SharedFolderJoinError.unwritable;
 
     final raw = await folder.readHouseholdFile();
@@ -130,9 +130,9 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
       }
     }
 
-    await _store.saveFolderPath(path);
+    await _store.saveLocation(location);
     state = AsyncData(
-      (state.value ?? const SharedFolderState()).copyWith(folderPath: path),
+      (state.value ?? const SharedFolderState()).copyWith(folder: location),
     );
     _restartTimer(active: true);
     await syncNow();
@@ -145,12 +145,10 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   /// device's rows from everyone else's next merge, which is not what
   /// "stop syncing my phone" means.
   Future<void> leaveFolder() async {
-    await _store.clearFolderPath();
+    await _store.clearLocation();
     _restartTimer(active: false);
     state = AsyncData(
-      (state.value ?? const SharedFolderState()).copyWith(
-        clearFolderPath: true,
-      ),
+      (state.value ?? const SharedFolderState()).copyWith(clearFolder: true),
     );
   }
 
@@ -160,8 +158,8 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   Future<void> syncNow() async {
     if (_syncing) return;
 
-    final path = await _store.folderPath();
-    if (path == null) return;
+    final folder = await _store.location();
+    if (folder == null) return;
 
     final profile = ref.read(householdProfileProvider).value;
     if (profile == null) return;
@@ -171,7 +169,7 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
     try {
       final service = SharedFolderSyncService(
         database: ref.read(appDatabaseProvider),
-        folder: IoSyncFolder(path),
+        folder: syncFolderFor(folder.value),
         deviceId: await _store.deviceId(),
         identity: _identityOf(profile),
       );
