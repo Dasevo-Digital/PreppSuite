@@ -206,6 +206,17 @@ tree; the test suite deliberately targets that layer rather than the UI.
   security-scoped bookmarks in Swift. The reason is written into
   `macos/Runner/Release.entitlements`; put it back only alongside that
   native code.
+- iOS needs a deployment target of at least 14.0 — `workmanager-apple`
+  brings the floor. It lives in three places in `project.pbxproj` plus
+  `ios/Podfile`.
+- The `zstandard` iOS and macOS pods copy zstd's sources in at `pod
+  install` and **delete them again after every build**. A build that
+  follows another without an intervening `pod install` therefore fails
+  with "Build input file cannot be found". Running it again fixes it.
+- Anything at the very top of `HomeShell`'s body is under the status bar.
+  The shell consumes the top inset itself, once, so the warning banner
+  does not sit beneath the clock and the tab below is not handed an inset
+  nothing used. A second `SafeArea` inside either would double it.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

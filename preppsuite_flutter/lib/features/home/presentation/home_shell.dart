@@ -52,16 +52,26 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     ];
 
     return Scaffold(
-      body: Column(
-        children: [
-          // Zero-sized; keeps scheduled expiry reminders in step with the
-          // inventory for as long as any tab is open.
-          ExpiryReminderScheduler(householdId: householdId),
-          WarningBanner(profile: widget.profile),
-          Expanded(
-            child: IndexedStack(index: _index, children: screens),
-          ),
-        ],
+      // The warning banner sits above every tab, which puts it at the very
+      // top of the body — underneath the status bar, where iOS draws the
+      // clock straight through it. Consuming the inset here rather than in
+      // the banner keeps it right when no warning is showing either: the
+      // tab below would otherwise be handed a top inset that nothing above
+      // it had used. The bottom is left alone; the navigation bar does its
+      // own.
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // Zero-sized; keeps scheduled expiry reminders in step with the
+            // inventory for as long as any tab is open.
+            ExpiryReminderScheduler(householdId: householdId),
+            WarningBanner(profile: widget.profile),
+            Expanded(
+              child: IndexedStack(index: _index, children: screens),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
