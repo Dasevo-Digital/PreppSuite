@@ -1,31 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart';
-
 import '../../../core/geolocation_service.dart';
 import '../../../core/locale_provider.dart';
 import '../../../core/notifications_provider.dart';
-import '../../../core/server_url.dart';
-import '../../../core/server_url_dialog.dart';
 import '../../../core/theme_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
-import '../../../main.dart';
+import '../../../model/household_profile.dart';
 import '../../household/application/german_states.dart';
-import '../../household/application/household_exception_l10n.dart';
 import '../../household/application/household_providers.dart';
 import '../../household/application/warning_feed_countries.dart';
 import '../../inventory/presentation/expiry_reminders_card.dart';
+import '../../warnings/application/warning_region_filter.dart';
 
 class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({super.key, required this.membership});
+  const SettingsScreen({super.key, required this.profile});
 
-  final HouseholdMembershipInfo membership;
+  final HouseholdProfile profile;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final isOwner = membership.member.role == HouseholdRole.owner;
-    final household = membership.household;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navSettings)),
@@ -56,18 +50,14 @@ class SettingsScreen extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          _MyRegionCard(household: household, isOwner: isOwner, l10n: l10n),
+          _MyRegionCard(profile: profile, l10n: l10n),
           const SizedBox(height: 24),
           Text(
             l10n.settingsAdditionalRegionsTitle,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          _AdditionalRegionsCard(
-            householdId: household.id!,
-            isOwner: isOwner,
-            l10n: l10n,
-          ),
+          _AdditionalRegionsCard(profile: profile, l10n: l10n),
           const SizedBox(height: 24),
           Text(
             l10n.settingsNotificationsTitle,
@@ -82,25 +72,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           ExpiryRemindersCard(l10n: l10n),
-          const SizedBox(height: 24),
-          Text(
-            l10n.serverAddressLabel,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: Consumer(
-              builder: (context, ref, _) => ListTile(
-                title: Text(l10n.serverAddressLabel),
-                subtitle: SelectableText(ref.watch(serverUrlProvider)),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  tooltip: l10n.serverAddressChangeAction,
-                  onPressed: () => ServerUrlDialog.show(context),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -189,25 +160,24 @@ class _NotificationsToggle extends ConsumerWidget {
   }
 }
 
+/// The household's own country and region.
+///
+/// Every "is the caller the owner" check is gone: there is one user, on one
+/// device, and nobody to ask permission from.
 class _MyRegionCard extends StatelessWidget {
-  const _MyRegionCard({
-    required this.household,
-    required this.isOwner,
-    required this.l10n,
-  });
+  const _MyRegionCard({required this.profile, required this.l10n});
 
-  final Household household;
-  final bool isOwner;
+  final HouseholdProfile profile;
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
     final country = warningFeedCountries.firstWhere(
-      (c) => c.code == household.countryCode,
+      (c) => c.code == profile.countryCode,
       orElse: () => WarningFeedCountry(
-        household.countryCode,
-        household.countryCode,
-        household.countryCode,
+        profile.countryCode,
+        profile.countryCode,
+        profile.countryCode,
       ),
     );
     final countryName = Localizations.localeOf(context).languageCode == 'de'
@@ -217,91 +187,52 @@ class _MyRegionCard extends StatelessWidget {
     return Card(
       child: ListTile(
         title: Text(countryName),
-        subtitle: Text(household.regionKey ?? l10n.settingsNoRegionSet),
-        trailing: isOwner
-            ? IconButton(
-                icon: const Icon(Icons.edit_outlined),
-                tooltip: l10n.csvImportEditRowTooltip,
-                onPressed: () => showDialog<void>(
-                  context: context,
-                  builder: (context) => _EditRegionDialog(household: household),
-                ),
-              )
-            : null,
+        subtitle: Text(profile.regionKey ?? l10n.settingsNoRegionSet),
+        trailing: IconButton(
+          icon: const Icon(Icons.edit_outlined),
+          tooltip: l10n.csvImportEditRowTooltip,
+          onPressed: () => showDialog<void>(
+            context: context,
+            builder: (context) => _EditRegionDialog(profile: profile),
+          ),
+        ),
       ),
     );
   }
 }
 
 class _EditRegionDialog extends ConsumerStatefulWidget {
-  const _EditRegionDialog({required this.household});
+  const _EditRegionDialog({required this.profile});
 
-  final Household household;
+  final HouseholdProfile profile;
 
   @override
   ConsumerState<_EditRegionDialog> createState() => _EditRegionDialogState();
 }
 
 class _EditRegionDialogState extends ConsumerState<_EditRegionDialog> {
-  late final TextEditingController _regionKeyController;
-  late String _countryCode;
-  bool _isSubmitting = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _countryCode = widget.household.countryCode;
-    _regionKeyController = TextEditingController(
-      text: widget.household.regionKey ?? '',
-    );
-  }
-
+  late final TextEditingController _regionKeyController = TextEditingController(
+    text: widget.profile.regionKey ?? '',
+  );
+  late String _countryCode = widget.profile.countryCode;
   @override
   void dispose() {
     _regionKeyController.dispose();
     super.dispose();
   }
 
-  Future<void> _showRegionKeyExplanation(AppLocalizations l10n) {
-    return showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.regionKeyExplanationTitle),
-        content: SingleChildScrollView(
-          child: Text(l10n.regionKeyExplanationBody),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.regionKeyExplanationClose),
+  Future<void> _save() async {
+    final region = _regionKeyController.text.trim();
+    await ref
+        .read(householdProfileProvider.notifier)
+        .save(
+          widget.profile.copyWith(
+            countryCode: _countryCode,
+            regionKey: region.isEmpty ? null : region,
+            clearRegionKey: region.isEmpty,
           ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _save(AppLocalizations l10n) async {
-    setState(() {
-      _isSubmitting = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await client.household.updateRegion(
-        widget.household.id!,
-        countryCode: _countryCode,
-        regionKey: _regionKeyController.text.trim().isEmpty
-            ? null
-            : _regionKeyController.text.trim(),
-      );
-      ref.invalidate(myHouseholdProvider);
-      if (mounted) Navigator.of(context).pop();
-    } catch (error) {
-      setState(() => _errorMessage = localizeHouseholdError(l10n, error));
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
-    }
+        );
+    if (mounted) Navigator.of(context).pop();
   }
 
   @override
@@ -310,53 +241,40 @@ class _EditRegionDialogState extends ConsumerState<_EditRegionDialog> {
 
     return AlertDialog(
       title: Text(l10n.settingsMyRegionTitle),
-      content: SizedBox(
-        width: 380,
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              DropdownButtonFormField<String>(
-                initialValue: _countryCode,
-                decoration: InputDecoration(labelText: l10n.countryLabel),
-                items: [
-                  for (final country in warningFeedCountries)
-                    DropdownMenuItem(
-                      value: country.code,
-                      child: Text(
-                        Localizations.localeOf(context).languageCode == 'de'
-                            ? country.nameDe
-                            : country.nameEn,
-                      ),
-                    ),
-                ],
-                onChanged: (value) =>
-                    setState(() => _countryCode = value ?? 'DE'),
-              ),
-              if (_countryCode == 'DE') ...[
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _regionKeyController,
-                  decoration: InputDecoration(
-                    labelText: l10n.regionKeyLabel,
-                    helperText: l10n.regionKeyHelper,
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.info_outline),
-                      tooltip: l10n.regionKeyExplanationTooltip,
-                      onPressed: () => _showRegionKeyExplanation(l10n),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DropdownButtonFormField<String>(
+              initialValue: _countryCode,
+              decoration: InputDecoration(labelText: l10n.countryLabel),
+              items: [
+                for (final country in warningFeedCountries)
+                  DropdownMenuItem(
+                    value: country.code,
+                    child: Text(
+                      Localizations.localeOf(context).languageCode == 'de'
+                          ? country.nameDe
+                          : country.nameEn,
                     ),
                   ),
-                ),
               ],
-              if (_errorMessage != null) ...[
-                const SizedBox(height: 16),
-                Text(
-                  _errorMessage!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+              onChanged: (value) =>
+                  setState(() => _countryCode = value ?? _countryCode),
+            ),
+            if (_countryCode == 'DE') ...[
+              const SizedBox(height: 16),
+              TextField(
+                controller: _regionKeyController,
+                decoration: InputDecoration(
+                  labelText: l10n.regionKeyLabel,
+                  helperText: l10n.regionKeyHelper,
                 ),
-              ],
+                keyboardType: TextInputType.number,
+              ),
             ],
-          ),
+          ],
         ),
       ),
       actions: [
@@ -364,182 +282,143 @@ class _EditRegionDialogState extends ConsumerState<_EditRegionDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.cancelButton),
         ),
-        FilledButton(
-          onPressed: _isSubmitting ? null : () => _save(l10n),
-          child: _isSubmitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.saveButton),
-        ),
+        FilledButton(onPressed: _save, child: Text(l10n.saveButton)),
       ],
     );
   }
 }
 
+/// Regions followed beyond the household's own.
 class _AdditionalRegionsCard extends ConsumerWidget {
-  const _AdditionalRegionsCard({
-    required this.householdId,
-    required this.isOwner,
-    required this.l10n,
-  });
+  const _AdditionalRegionsCard({required this.profile, required this.l10n});
 
-  final UuidValue householdId;
-  final bool isOwner;
+  final HouseholdProfile profile;
   final AppLocalizations l10n;
-
-  Future<void> _removeRegion(
-    WidgetRef ref,
-    WarningRegionSubscription subscription,
-  ) async {
-    await client.household.removeWarningRegion(householdId, subscription.id!);
-    ref.invalidate(householdWarningRegionsProvider(householdId));
-  }
-
-  Future<void> _useLocation(BuildContext context, WidgetRef ref) async {
-    final messenger = ScaffoldMessenger.of(context);
-    try {
-      final state = await GeolocationService().determineBundesland();
-      if (state == null) {
-        messenger.showSnackBar(
-          SnackBar(content: Text(l10n.settingsLocationNoMatchMessage)),
-        );
-        return;
-      }
-      await client.household.addWarningRegion(
-        householdId,
-        kind: WarningRegionKind.bundesland,
-        value: state.bbkCode,
-        label: state.nameDe,
-      );
-      ref.invalidate(householdWarningRegionsProvider(householdId));
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(l10n.settingsLocationSuccessMessage(state.nameDe)),
-        ),
-      );
-    } on LocationUnavailableException catch (error) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.settingsLocationErrorMessage('$error'))),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final regionsAsync = ref.watch(
-      householdWarningRegionsProvider(householdId),
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Card(
-          margin: EdgeInsets.zero,
-          child: regionsAsync.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
+    return Card(
+      child: Column(
+        children: [
+          if (profile.extraRegions.isEmpty)
+            ListTile(subtitle: Text(l10n.settingsNoAdditionalRegions))
+          else
+            for (final region in profile.extraRegions)
+              ListTile(
+                leading: Icon(
+                  region.kind == WarningRegionKind.kreis
+                      ? Icons.location_city
+                      : Icons.map_outlined,
+                ),
+                title: Text(region.value),
+                subtitle: Text(
+                  region.kind == WarningRegionKind.kreis
+                      ? l10n.settingsRegionTypeKreis
+                      : l10n.settingsRegionTypeBundesland,
+                ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: l10n.csvImportRemoveRowTooltip,
+                  onPressed: () => ref
+                      .read(householdProfileProvider.notifier)
+                      .removeRegion(region),
+                ),
+              ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: TextButton.icon(
+                onPressed: () => showDialog<void>(
+                  context: context,
+                  builder: (context) => const _AddRegionDialog(),
+                ),
+                icon: const Icon(Icons.add),
+                label: Text(l10n.settingsAddRegionButton),
+              ),
             ),
-            error: (error, stackTrace) => Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(l10n.errorGeneric(error.toString())),
-            ),
-            data: (regions) => regions.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(l10n.settingsNoAdditionalRegions),
-                  )
-                : Column(
-                    children: [
-                      for (var i = 0; i < regions.length; i++) ...[
-                        if (i > 0) const Divider(height: 1),
-                        ListTile(
-                          title: Text(regions[i].label),
-                          trailing: isOwner
-                              ? IconButton(
-                                  icon: const Icon(Icons.close),
-                                  tooltip: l10n.csvImportRemoveRowTooltip,
-                                  onPressed: () =>
-                                      _removeRegion(ref, regions[i]),
-                                )
-                              : null,
-                        ),
-                      ],
-                    ],
-                  ),
-          ),
-        ),
-        if (isOwner) ...[
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () => showDialog<void>(
-              context: context,
-              builder: (context) => _AddRegionDialog(householdId: householdId),
-            ),
-            icon: const Icon(Icons.add),
-            label: Text(l10n.settingsAddRegionButton),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton.icon(
-            onPressed: () => _useLocation(context, ref),
-            icon: const Icon(Icons.my_location),
-            label: Text(l10n.settingsUseLocationButton),
           ),
         ],
-      ],
+      ),
     );
   }
 }
 
 class _AddRegionDialog extends ConsumerStatefulWidget {
-  const _AddRegionDialog({required this.householdId});
-
-  final UuidValue householdId;
+  const _AddRegionDialog();
 
   @override
   ConsumerState<_AddRegionDialog> createState() => _AddRegionDialogState();
 }
 
 class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _kreisController = TextEditingController();
-  final _labelController = TextEditingController();
-  WarningRegionKind _kind = WarningRegionKind.bundesland;
-  GermanState _selectedState = germanStates.first;
-  bool _isSubmitting = false;
+  final _valueController = TextEditingController();
+  WarningRegionKind _kind = WarningRegionKind.kreis;
+  String? _error;
+  bool _locating = false;
 
   @override
   void dispose() {
-    _kreisController.dispose();
-    _labelController.dispose();
+    _valueController.dispose();
     super.dispose();
   }
 
-  Future<void> _save() async {
-    if (_kind == WarningRegionKind.kreis &&
-        !_formKey.currentState!.validate()) {
+  Future<void> _add(AppLocalizations l10n) async {
+    final value = _valueController.text.trim();
+
+    // A Kreisschlüssel is exactly five digits; anything else silently
+    // matches nothing, which looks like the feature being broken rather
+    // than the input being wrong.
+    final valid = switch (_kind) {
+      WarningRegionKind.kreis => RegExp(r'^\d{5}$').hasMatch(value),
+      WarningRegionKind.bundesland =>
+        germanStateByBbkCode(value.toUpperCase()) != null,
+    };
+    if (!valid) {
+      setState(() => _error = l10n.settingsKreisSchluesselInvalid);
       return;
     }
 
-    setState(() => _isSubmitting = true);
+    await ref
+        .read(householdProfileProvider.notifier)
+        .addRegion(
+          WarningRegion(
+            kind: _kind,
+            value: _kind == WarningRegionKind.bundesland
+                ? value.toUpperCase()
+                : value,
+          ),
+        );
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  /// Fills in the Bundesland the device is currently in. Kreis-level
+  /// precision is not available this way — Nominatim answers with a state
+  /// name, which is what the original server-side version used too.
+  Future<void> _useLocation(AppLocalizations l10n) async {
+    setState(() {
+      _locating = true;
+      _error = null;
+    });
+
     try {
-      await client.household.addWarningRegion(
-        widget.householdId,
-        kind: _kind,
-        value: _kind == WarningRegionKind.kreis
-            ? _kreisController.text.trim()
-            : _selectedState.bbkCode,
-        label: _kind == WarningRegionKind.kreis
-            ? _labelController.text.trim()
-            : _selectedState.nameDe,
-      );
-      ref.invalidate(householdWarningRegionsProvider(widget.householdId));
-      if (mounted) Navigator.of(context).pop();
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      final state = await GeolocationService().determineBundesland();
+      if (!mounted) return;
+      setState(() {
+        _locating = false;
+        if (state == null) {
+          _error = l10n.settingsLocationNoMatchMessage;
+        } else {
+          _kind = WarningRegionKind.bundesland;
+          _valueController.text = state.bbkCode;
+        }
+      });
+    } on LocationUnavailableException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _locating = false;
+        _error = l10n.settingsLocationErrorMessage(error.toString());
+      });
     }
   }
 
@@ -549,69 +428,45 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
 
     return AlertDialog(
       title: Text(l10n.settingsAddRegionDialogTitle),
-      content: SizedBox(
-        width: 380,
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SegmentedButton<WarningRegionKind>(
-                segments: [
-                  ButtonSegment(
-                    value: WarningRegionKind.bundesland,
-                    label: Text(l10n.settingsRegionTypeBundesland),
-                  ),
-                  ButtonSegment(
-                    value: WarningRegionKind.kreis,
-                    label: Text(l10n.settingsRegionTypeKreis),
-                  ),
-                ],
-                selected: {_kind},
-                onSelectionChanged: (selection) =>
-                    setState(() => _kind = selection.first),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SegmentedButton<WarningRegionKind>(
+            segments: [
+              ButtonSegment(
+                value: WarningRegionKind.kreis,
+                label: Text(l10n.settingsRegionTypeKreis),
               ),
-              const SizedBox(height: 16),
-              if (_kind == WarningRegionKind.bundesland)
-                DropdownButtonFormField<GermanState>(
-                  initialValue: _selectedState,
-                  decoration: InputDecoration(
-                    labelText: l10n.settingsRegionTypeBundesland,
-                  ),
-                  items: [
-                    for (final state in germanStates)
-                      DropdownMenuItem(value: state, child: Text(state.nameDe)),
-                  ],
-                  onChanged: (value) => setState(
-                    () => _selectedState = value ?? germanStates.first,
-                  ),
-                )
-              else ...[
-                TextFormField(
-                  controller: _kreisController,
-                  decoration: InputDecoration(
-                    labelText: l10n.settingsKreisSchluesselLabel,
-                  ),
-                  validator: (value) =>
-                      (value == null || value.trim().length != 5)
-                      ? l10n.settingsKreisSchluesselInvalid
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _labelController,
-                  decoration: InputDecoration(
-                    labelText: l10n.settingsRegionLabelLabel,
-                  ),
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? l10n.fieldRequired
-                      : null,
-                ),
-              ],
+              ButtonSegment(
+                value: WarningRegionKind.bundesland,
+                label: Text(l10n.settingsRegionTypeBundesland),
+              ),
             ],
+            selected: {_kind},
+            onSelectionChanged: (selection) =>
+                setState(() => _kind = selection.first),
           ),
-        ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _valueController,
+            decoration: InputDecoration(
+              labelText: _kind == WarningRegionKind.kreis
+                  ? l10n.settingsKreisSchluesselLabel
+                  : l10n.settingsRegionLabelLabel,
+              errorText: _error,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: _locating ? null : () => _useLocation(l10n),
+              icon: const Icon(Icons.my_location),
+              label: Text(l10n.settingsUseLocationButton),
+            ),
+          ),
+        ],
       ),
       actions: [
         TextButton(
@@ -619,14 +474,8 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
           child: Text(l10n.cancelButton),
         ),
         FilledButton(
-          onPressed: _isSubmitting ? null : _save,
-          child: _isSubmitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l10n.saveButton),
+          onPressed: () => _add(l10n),
+          child: Text(l10n.settingsAddRegionButton),
         ),
       ],
     );

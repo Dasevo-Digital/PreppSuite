@@ -6,54 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+# One job now. There is no server to start containers for and no generated
+# client to check for staleness — the app is the whole project.
 jobs:
-  # Serverpod integration tests need a real Postgres + Redis, so they run
-  # against the docker-compose stack from preppsuite_server.
-  server:
-    runs-on: ubuntu-latest
-    env:
-      VERSION: '3.4.11'
-      SERVERPOD_PASSWORD_database: 'APi6TY2eFHvcAOXuSpE-8osYa3Hl_CTN'
-      SERVERPOD_PASSWORD_redis: 'SIpV-DDEuPOYHJRNKdw-yR5hmbDu-GON'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.44.8'
-
-      - name: Start containers
-        working-directory: preppsuite_server
-        run: docker compose up --quiet-pull --build -d
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Install Serverpod CLI
-        run: dart pub global activate serverpod_cli $VERSION
-
-      - name: Run Serverpod generator
-        working-directory: preppsuite_server
-        run: serverpod generate
-
-      # The generator writes preppsuite_client, which is committed. A diff
-      # here means the checked-in client is stale relative to the .spy.yaml
-      # models — the app would then be analyzed against an outdated API.
-      - name: Check generated client is up to date
-        run: git diff --exit-code -- preppsuite_client preppsuite_server/lib/src/generated
-
-      - name: Run tests
-        working-directory: preppsuite_server
-        run: dart test
-
-      - name: Stop containers
-        if: always()
-        working-directory: preppsuite_server
-        run: docker compose down -v
-
-  # App tests are pure Dart/Flutter (drift runs against in-memory SQLite),
-  # so they need no backend and run as their own job.
   app:
     runs-on: ubuntu-latest
 

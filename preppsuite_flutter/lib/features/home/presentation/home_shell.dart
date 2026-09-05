@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart';
-
-import '../../../core/push_registration_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
-import '../../../sync/sync_scheduler.dart';
-import '../../../sync/sync_status_banner.dart';
+import '../../../model/household_profile.dart';
 import '../../budget/presentation/budget_list_screen.dart';
 import '../../checklists/presentation/checklist_list_screen.dart';
 import '../../household/presentation/household_overview_screen.dart';
@@ -16,14 +12,18 @@ import '../../settings/presentation/settings_screen.dart';
 import '../../shelters/presentation/shelter_map_screen.dart';
 import '../../warnings/presentation/warning_banner.dart';
 
-/// Top-level navigation once a household exists. Only lists destinations
+/// Top-level navigation once a profile exists. Only lists destinations
 /// that have real content — the warning banner sits above every tab rather
 /// than being its own destination, since it's meant to be seen regardless
 /// of which tab is open, not sought out.
+///
+/// The sync scheduler and its status banner used to live here too. Both
+/// are gone with the server: there is no pass to schedule and no "last
+/// sync failed" state to report.
 class HomeShell extends ConsumerStatefulWidget {
-  const HomeShell({super.key, required this.membership});
+  const HomeShell({super.key, required this.profile});
 
-  final HouseholdMembershipInfo membership;
+  final HouseholdProfile profile;
 
   @override
   ConsumerState<HomeShell> createState() => _HomeShellState();
@@ -35,21 +35,17 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final householdId = widget.membership.household.id!.toString();
+    final householdId = widget.profile.id;
     final attentionCount = ref.watch(
       inventoryAttentionCountProvider(householdId),
     );
-    // Keeps this device's push registration in step with the notification
-    // setting for as long as a household is open. Watched rather than
-    // rendered — it has no UI of its own.
-    ref.watch(pushRegistrationControllerProvider(householdId));
 
     final screens = [
       InventoryListScreen(householdId: householdId),
       ChecklistListScreen(householdId: householdId),
       BudgetListScreen(householdId: householdId),
-      HouseholdOverviewScreen(membership: widget.membership),
-      SettingsScreen(membership: widget.membership),
+      HouseholdOverviewScreen(profile: widget.profile),
+      SettingsScreen(profile: widget.profile),
       const ShelterMapScreen(),
     ];
 
@@ -59,11 +55,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           // Zero-sized; keeps scheduled expiry reminders in step with the
           // inventory for as long as any tab is open.
           ExpiryReminderScheduler(householdId: householdId),
-          // Zero-sized; the single clock for background sync, replacing the
-          // four independent timers the entities used to run.
-          SyncScheduler(householdId: householdId),
-          SyncStatusBanner(householdId: householdId),
-          WarningBanner(household: widget.membership.household),
+          WarningBanner(profile: widget.profile),
           Expanded(
             child: IndexedStack(index: _index, children: screens),
           ),

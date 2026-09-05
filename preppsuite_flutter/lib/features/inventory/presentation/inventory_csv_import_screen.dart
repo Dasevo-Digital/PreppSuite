@@ -1,8 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show InventoryItemCategory;
+import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/inventory_category_l10n.dart';

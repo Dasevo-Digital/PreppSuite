@@ -1,8 +1,0 @@
-### The role a member has within a household.
-enum: HouseholdRole
-serialized: byName
-values:
-  ### Can rotate the invite code and remove members.
-  - owner
-  ### Regular member of the household.
-  - member

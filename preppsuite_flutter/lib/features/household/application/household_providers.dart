@@ -1,21 +1,84 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart';
+import 'package:uuid/uuid.dart';
 
-import '../../../main.dart';
+import '../../../model/household_profile.dart';
+import '../../../model/household_profile_store.dart';
+import '../../warnings/application/warning_region_filter.dart';
+import '../../warnings/application/warning_region_store.dart';
 
-/// The caller's current household + membership, or `null` if they have not
-/// created or joined one yet. Drives [HouseholdGate]'s onboarding decision.
-final myHouseholdProvider =
-    FutureProvider.autoDispose<HouseholdMembershipInfo?>(
-      (ref) => client.household.getMyHousehold(),
+/// The household profile, or null while it is still loading or has never
+/// been set up.
+///
+/// Replaces what used to be a round trip to the server for the signed-in
+/// user's household. There is no signing in any more: the profile is this
+/// installation's own, created on first run.
+class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
+  static const _store = HouseholdProfileStore();
+
+  @override
+  Future<HouseholdProfile?> build() => _store.load();
+
+  /// Creates the profile on first run.
+  Future<HouseholdProfile> create({
+    required String name,
+    required String countryCode,
+    String? regionKey,
+    int personCount = 1,
+  }) async {
+    final profile = HouseholdProfile(
+      // Generated once and then fixed: every local row partitions by it,
+      // and two devices sharing a folder have to agree on it for their
+      // rows to merge rather than pile up side by side.
+      id: const Uuid().v4(),
+      name: name,
+      countryCode: countryCode,
+      regionKey: regionKey,
+      personCount: personCount,
     );
+    await _persist(profile);
+    return profile;
+  }
 
-final householdMembersProvider = FutureProvider.autoDispose
-    .family<List<HouseholdMember>, UuidValue>(
-      (ref, householdId) => client.household.listMembers(householdId),
+  /// Named `save` rather than `update` because [AsyncNotifier] already
+  /// defines an `update` with an incompatible shape.
+  Future<void> save(HouseholdProfile profile) => _persist(profile);
+
+  /// Adopts a profile that came from somewhere else — a shared folder, a
+  /// restored backup — keeping its id so the data merges.
+  Future<void> adopt(HouseholdProfile profile) => _persist(profile);
+
+  Future<void> _persist(HouseholdProfile profile) async {
+    await _store.save(profile);
+    // The background worker cannot read this provider, so the regions it
+    // polls for are mirrored into their own store on every change.
+    await const WarningRegionStore().save(profile.warningFilter);
+    state = AsyncData(profile);
+  }
+
+  Future<void> addRegion(WarningRegion region) async {
+    final profile = state.value;
+    if (profile == null) return;
+    if (profile.extraRegions.contains(region)) return;
+    await _persist(
+      profile.copyWith(extraRegions: [...profile.extraRegions, region]),
     );
+  }
 
-final householdWarningRegionsProvider = FutureProvider.autoDispose
-    .family<List<WarningRegionSubscription>, UuidValue>(
-      (ref, householdId) => client.household.listWarningRegions(householdId),
+  Future<void> removeRegion(WarningRegion region) async {
+    final profile = state.value;
+    if (profile == null) return;
+    await _persist(
+      profile.copyWith(
+        extraRegions: [
+          for (final existing in profile.extraRegions)
+            if (existing != region) existing,
+        ],
+      ),
+    );
+  }
+}
+
+final householdProfileProvider =
+    AsyncNotifierProvider<HouseholdProfileController, HouseholdProfile?>(
+      HouseholdProfileController.new,
     );

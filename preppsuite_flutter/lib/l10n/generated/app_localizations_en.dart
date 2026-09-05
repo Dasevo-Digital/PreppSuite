@@ -812,4 +812,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get csvExportErrorMessage => 'The file could not be written.';
+
+  @override
+  String get profileSetupTitle => 'Set up your household';
+
+  @override
+  String get profileSetupIntro =>
+      'PreppSuite runs entirely on this device. There is no account and no server — just these details, so warnings and supply targets match your situation.';
+
+  @override
+  String get profileSetupSubmit => 'Get started';
+
+  @override
+  String get personCountLabel => 'People in the household';
 }

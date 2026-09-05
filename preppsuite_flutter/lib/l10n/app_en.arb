@@ -491,5 +491,9 @@
     }
   },
   "csvExportEmptyMessage": "There are no items to export yet.",
-  "csvExportErrorMessage": "The file could not be written."
+  "csvExportErrorMessage": "The file could not be written.",
+  "profileSetupTitle": "Set up your household",
+  "profileSetupIntro": "PreppSuite runs entirely on this device. There is no account and no server — just these details, so warnings and supply targets match your situation.",
+  "profileSetupSubmit": "Get started",
+  "personCountLabel": "People in the household"
 }

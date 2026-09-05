@@ -1,12 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart' show Household;
+import '../../../model/household_profile.dart';
 
+import '../../../core/app_database_providers.dart';
 import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
-import '../../household/application/household_providers.dart';
 import 'warning_background_worker.dart';
 import 'warning_poll_service.dart';
-import 'warning_providers.dart';
 import 'warning_region_filter.dart';
 import 'warning_region_store.dart';
 import 'warning_relevance.dart';
@@ -22,9 +21,9 @@ final warningPollServiceProvider = Provider<WarningPollService>((ref) {
 /// directly. This runs the same [WarningPollService] the background worker
 /// runs; the difference is only who scheduled it.
 class WarningSyncController extends Notifier<AsyncValue<void>> {
-  WarningSyncController(this.household);
+  WarningSyncController(this.profile);
 
-  final Household household;
+  final HouseholdProfile profile;
 
   @override
   AsyncValue<void> build() {
@@ -64,12 +63,7 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
     }
   }
 
-  WarningRegionFilter _currentFilter() {
-    final subscriptions =
-        ref.read(householdWarningRegionsProvider(household.id!)).value ??
-        const [];
-    return warningRegionFilterFor(household, subscriptions);
-  }
+  WarningRegionFilter _currentFilter() => profile.warningFilter;
 
   /// Announces only warnings that concern this household's region — the
   /// same relevance rule the list view sorts by, and the same one the
@@ -105,6 +99,10 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
 }
 
 final warningSyncControllerProvider =
-    NotifierProvider.family<WarningSyncController, AsyncValue<void>, Household>(
+    NotifierProvider.family<
+      WarningSyncController,
+      AsyncValue<void>,
+      HouseholdProfile
+    >(
       WarningSyncController.new,
     );

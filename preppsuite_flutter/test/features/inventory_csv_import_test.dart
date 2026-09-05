@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:preppsuite_client/preppsuite_client.dart';
+import 'package:preppsuite_flutter/model/categories.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_csv_import.dart';
 
 void main() {

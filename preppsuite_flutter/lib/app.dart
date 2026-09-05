@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/locale_provider.dart';
 import 'core/theme_provider.dart';
-import 'features/auth/presentation/auth_gate.dart';
+import 'features/household/presentation/household_gate.dart';
 import 'l10n/generated/app_localizations.dart';
 
 /// Forest green — chosen for the prepper/civil-protection theme rather
@@ -28,7 +28,7 @@ class PreppSuiteApp extends ConsumerWidget {
         useMaterial3: true,
       ),
       themeMode: ref.watch(themeModeProvider),
-      home: const AuthGate(),
+      home: const HouseholdGate(),
     );
   }
 }

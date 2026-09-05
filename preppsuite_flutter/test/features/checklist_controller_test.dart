@@ -2,21 +2,10 @@ import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show ChecklistCategory;
+import 'package:preppsuite_flutter/model/categories.dart';
 import 'package:preppsuite_flutter/features/checklists/application/checklist_controller.dart';
 import 'package:preppsuite_flutter/features/checklists/application/checklist_providers.dart';
-import 'package:preppsuite_flutter/features/checklists/application/checklist_sync_controller.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
-
-/// The real controller nudges sync after every write, which starts timers
-/// and reaches for the global Serverpod client. Neither is under test here.
-class _NoopSyncController extends ChecklistSyncController {
-  _NoopSyncController(super.householdId);
-
-  @override
-  AsyncValue<void> build() => const AsyncData(null);
-}
 
 void main() {
   const householdId = 'household-1';
@@ -29,7 +18,6 @@ void main() {
     container = ProviderContainer(
       overrides: [
         appDatabaseProvider.overrideWithValue(db),
-        checklistSyncControllerProvider.overrideWith2(_NoopSyncController.new),
       ],
     );
     controller = container.read(checklistControllerProvider(householdId));

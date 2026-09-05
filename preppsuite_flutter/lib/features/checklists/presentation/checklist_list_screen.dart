@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show ChecklistCategory;
+import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/checklist_category_l10n.dart';
 import '../application/checklist_controller.dart';
 import '../application/checklist_providers.dart';
-import '../application/checklist_sync_controller.dart';
 import 'checklist_detail_screen.dart';
 
 class ChecklistListScreen extends ConsumerWidget {
@@ -19,7 +17,6 @@ class ChecklistListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    ref.watch(checklistSyncControllerProvider(householdId));
     final templatesAsync = ref.watch(checklistTemplatesProvider(householdId));
 
     return Scaffold(

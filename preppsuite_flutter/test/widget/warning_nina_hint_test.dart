@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:preppsuite_client/preppsuite_client.dart' as proto;
-import 'package:preppsuite_flutter/features/household/application/household_providers.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_providers.dart';
 import 'package:preppsuite_flutter/features/warnings/presentation/warning_list_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
+import 'package:preppsuite_flutter/model/household_profile.dart';
 
 void main() {
-  final householdId = proto.UuidValue.fromString(
-    '00000000-0000-4000-8000-000000000001',
-  );
-
-  proto.Household household(String countryCode) => proto.Household(
-    id: householdId,
+  HouseholdProfile profile(String countryCode) => HouseholdProfile(
+    id: 'household-1',
     name: 'Testhaushalt',
     countryCode: countryCode,
-    inviteCode: 'TESTTEST',
-    createdAt: DateTime.utc(2026),
   );
 
   Future<void> pumpScreen(WidgetTester tester, String countryCode) async {
@@ -27,15 +20,12 @@ void main() {
           // Served as a plain value rather than a drift stream: a real one
           // never settles inside a widget test.
           allWarningsProvider.overrideWith((ref) => Stream.value(const [])),
-          householdWarningRegionsProvider(
-            householdId,
-          ).overrideWith((ref) async => const []),
         ],
         child: MaterialApp(
           locale: const Locale('de'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: WarningListScreen(household: household(countryCode)),
+          home: WarningListScreen(profile: profile(countryCode)),
         ),
       ),
     );

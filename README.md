@@ -1,17 +1,12 @@
 # PreppSuite
 
-Vorrats- und Notfallplanung für den eigenen Haushalt – selbst betrieben,
-ohne fremden Dienst dazwischen.
+Vorrats- und Notfallplanung für den eigenen Haushalt – vollständig auf dem
+eigenen Gerät.
 
-PreppSuite hält fest, was an Vorräten da ist, was fehlt und was demnächst
-abläuft, und stellt das neben die amtlichen Warnungen für die eigene
-Region. Alle Daten liegen auf dem eigenen Server; es gibt keinen zentralen
-Anbieter, bei dem ein Konto nötig wäre.
-
-Die App arbeitet vollständig offline. Was auf dem Gerät eingetragen wird,
-steht sofort dort und wird abgeglichen, sobald der Server erreichbar ist –
-nicht umgekehrt. Ein Ausfall der Verbindung, gerade in der Lage, für die
-man vorsorgt, macht die eigenen Bestände also nicht unlesbar.
+Kein Konto, kein Server, keine Anmeldung. Die App speichert alles lokal und
+holt sich nur das, was ohnehin öffentlich ist: amtliche Warnungen vom BBK und
+von MeteoAlarm, Produktdaten von Open Food Facts, Karten und Schutzräume von
+OpenStreetMap. Sie ist offline vollständig benutzbar.
 
 ## Was sie kann
 
@@ -67,62 +62,26 @@ Code erneuern und Mitglieder entfernen.
 
 Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
 
-## Selbst betreiben
+## Installieren
 
-Zwei Befehle, wenn Docker läuft:
+Fertige macOS-Fassungen liegen unter *Releases*. Sie sind nicht mit einem
+gekauften Zertifikat signiert; Gatekeeper meldet sich beim ersten Start, über
+**Rechtsklick → Öffnen** startet die App trotzdem.
 
-```bash
-./scripts/generate-env.sh   # erzeugt .env mit zufälligen Geheimnissen
-docker compose up -d
-```
-
-Das startet Server, PostgreSQL und Redis. Migrationen werden beim Start
-angewendet, auch bei späteren Aktualisierungen. Der Server hört danach auf
-Port 8080.
-
-Es muss keine Konfigurationsdatei bearbeitet werden: der Server nimmt
-seine gesamte Einstellung aus Umgebungsvariablen, die in `.env` stehen.
-`config/passwords.yaml` wird für diesen Weg nicht gebraucht — sie steht zu
-Recht nicht im Repository, ein frischer Clone hätte also keine.
-
-Für den Betrieb hinter einem Reverse Proxy mit TLS in `.env` setzen:
+Selbst bauen:
 
 ```bash
-PREPPSUITE_HOST=preppsuite.example.com
-PREPPSUITE_SCHEME=https
-PREPPSUITE_PUBLIC_PORT=443
-```
-
-Zum Entwickeln startet `preppsuite_server/docker-compose.yaml` nur
-PostgreSQL und Redis, damit `dart bin/main.dart` und `dart test` lokal
-gegen echte Dienste laufen.
-
-Die Adresse des Servers wird in der App eingetragen – auf dem
-Anmeldebildschirm und später unter Einstellungen. Kurzformen genügen:
-`192.168.1.5:8080` oder `preppsuite.example.com`. Fehlt das Schema, wird
-`https` angenommen, bei IP-Adressen und `localhost` dagegen `http`.
-
-Wer eine Fassung weitergibt, die von vornherein auf den eigenen Server
-zeigt, baut sie mit der Adresse – der eingetragene Wert übersteuert sie
-später trotzdem:
-
-```bash
+flutter pub get
 cd preppsuite_flutter
-flutter build macos --release --dart-define=SERVER_URL=https://preppsuite.example.com/
+flutter build macos --release      # oder apk, ios, ...
 ```
-
-Push-Benachrichtigungen sind optional und standardmäßig aus; der Server
-läuft ohne sie normal. Was dafür nötig ist und warum es sich für eine
-selbst betriebene Installation kaum lohnt, steht in
-[`docs/push-notifications.md`](docs/push-notifications.md).
 
 ### Android weitergeben
 
 Die Release-APK wird mit dem Debug-Schlüssel signiert, solange kein eigener
 vorliegt. Zum Ausprobieren reicht das; zum Weitergeben nicht, denn das
-Passwort dieses Schlüssels ist der öffentlich bekannte Wert `android` —
-jeder könnte damit eine gefälschte Aktualisierung signieren, die Android
-als echt annimmt.
+Passwort dieses Schlüssels ist der öffentlich bekannte Wert `android` – jeder
+könnte damit eine gefälschte Aktualisierung signieren.
 
 Einen eigenen Schlüssel erzeugen (einmalig, außerhalb des Repositorys):
 
@@ -131,50 +90,22 @@ keytool -genkeypair -v -keystore ~/.android-keystores/preppsuite-release.jks \
   -keyalg RSA -keysize 4096 -validity 10000 -alias preppsuite
 ```
 
-Dazu `preppsuite_flutter/android/key.properties` anlegen — die Datei ist
-ignoriert und bleibt lokal:
+Dazu `preppsuite_flutter/android/key.properties` mit `storeFile`,
+`storePassword`, `keyPassword` und `keyAlias` anlegen – die Datei ist
+ignoriert und bleibt lokal. Danach signiert `flutter build apk --release` von
+selbst richtig; fehlt sie, warnt der Build und fällt auf den Debug-Schlüssel
+zurück.
 
-```properties
-storeFile=/Users/DEIN_NAME/.android-keystores/preppsuite-release.jks
-storePassword=…
-keyPassword=…
-keyAlias=preppsuite
-```
+**Der Schlüssel ist unersetzlich.** Geht er verloren, lässt sich für alle, die
+die App installiert haben, nie wieder eine Aktualisierung veröffentlichen.
+Keystore und Passwörter gehören an zwei getrennte gesicherte Orte.
 
-Danach signiert `flutter build apk --release` von selbst richtig. Fehlt die
-Datei, warnt der Build und fällt auf den Debug-Schlüssel zurück.
+Für die Weitergabe über *Releases* lohnt sich `--split-per-abi`: getrennte
+Pakete je Prozessorarchitektur, jedes rund ein Drittel der Größe.
 
-**Der Schlüssel ist unersetzlich.** Geht er verloren, lässt sich für alle,
-die die App installiert haben, nie wieder eine Aktualisierung
-veröffentlichen — sie müssten deinstallieren und dabei ihre lokalen Daten
-aufgeben. Keystore und Passwörter gehören deshalb an zwei getrennte,
-gesicherte Orte, nicht nur auf den Rechner, auf dem gebaut wird.
-
-Für die Weitergabe über *Releases* statt über den Play Store lohnt sich
-
-```bash
-flutter build apk --release --split-per-abi
-```
-
-Das ergibt getrennte Pakete je Prozessorarchitektur, jedes rund ein Drittel
-der Größe der gemeinsamen APK.
-
-Fertige macOS-Fassungen liegen unter *Releases*. Sie sind nicht mit einem
-gekauften Zertifikat signiert; Gatekeeper meldet sich beim ersten Start,
-über **Rechtsklick → Öffnen** startet die App trotzdem.
-
-Die App trägt die Kennung `de.status403.preppsuite`. Wer sie nur für sich
-baut, kann sie behalten. Wer eine eigene Fassung über den App Store oder
-TestFlight verteilen will, braucht eine eigene unter einer Domain, die er
-selbst kontrolliert — zwei Apps mit derselben Kennung kann Apple nicht
-auseinanderhalten. Sie steht an drei Stellen:
-`macos/Runner/Configs/AppInfo.xcconfig` sowie in den Xcode-Projekten unter
-`ios/` und `macos/`.
-
-Zu beachten: die Kennung bestimmt auch, wo die lokale Datenbank liegt. Wird
-sie an einer bestehenden Installation geändert, startet die App mit einer
-leeren Datenbank — die alte liegt dann unter der vorherigen Kennung in
-`~/Library/Containers/`.
+Die App trägt die Kennung `de.status403.preppsuite`. Wer eine eigene Fassung
+über den App Store verteilen will, braucht eine eigene unter einer Domain, die
+er selbst kontrolliert.
 
 ## Aufbau
 
@@ -235,29 +166,27 @@ Die mitgelieferte Schrift Noto Sans steht unter der SIL Open Font License
 
 Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
 
+- **Teilen zwischen mehreren Personen fehlt derzeit.** Mit dem Server ist es
+  weggefallen; der Ersatz über einen gemeinsamen Cloud-Ordner ist noch nicht
+  gebaut. Der Datenbestand trägt die dafür nötigen Merkmale bereits (stabile
+  Kennungen je Zeile, Änderungsmerker, Löschmarken statt echtem Löschen).
 - MeteoAlarm-Warnungen lassen sich nicht nach Region filtern – ihre
-  Gebietsangabe ist freier Text ohne Schlüssel. Sie gelten deshalb für
-  jeden Haushalt des Landes. BBK-Warnungen werden dagegen bis auf
-  Kreisebene gefiltert; genauer gibt die Quelle nichts her.
-- Keine Quelle liefert ein Ablaufdatum. Warnungen werden beendet, wenn sie
-  aus einem vollständigen Abruf verschwinden – solange kein Abruf gelingt,
-  bleiben sie stehen. Einzelheiten in `docs/warning-feeds.md`.
-- Warnmeldungen erscheinen nur, solange die App läuft. Serverseitig gibt es
-  einen Push-Weg über FCM, er ist aber standardmäßig aus und lohnt sich für
-  eine selbst betriebene Installation kaum: der Abruf läuft alle 15 Minuten,
-  während NINA vom BBK dieselben Meldungen in rund 30 Sekunden zustellt.
-  Gründe und Einrichtung in [`docs/push-notifications.md`](docs/push-notifications.md).
-  Ablauf-Erinnerungen für Vorräte werden dagegen lokal im Voraus eingeplant
-  und erreichen das Gerät auch bei geschlossener App – ohne Server und ohne
-  Drittanbieter.
+  Gebietsangabe ist freier Text ohne Schlüssel. Sie gelten deshalb für jeden
+  Haushalt des Landes. BBK-Warnungen werden bis auf Kreisebene gefiltert;
+  genauer gibt die Quelle nichts her.
+- Keine Quelle liefert ein Ablaufdatum. Warnungen werden beendet, wenn sie aus
+  einem vollständigen Abruf verschwinden – solange kein Abruf gelingt, bleiben
+  sie stehen. Einzelheiten in [`docs/warning-feeds.md`](docs/warning-feeds.md).
+- Der Hintergrundabruf ist auf Android verlässlich (15 Minuten Mindestabstand,
+  eine Vorgabe der Plattform) und auf iOS nur gelegentlich – dort entscheidet
+  das System. Für sofortige Warnungen ist NINA vom BBK die richtige Antwort,
+  die App sagt das auch selbst.
+- Karten und Wikipedia sind noch nicht offline verfügbar. Beides ist geplant:
+  Vektorkarten als PMTiles, Wikipedia als ZIM-Datei.
 - Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen
-  wurden. Der Abgleich überträgt Text, keine Dateien.
-- Veröffentlicht wird bisher nur eine macOS-Fassung. Android baut inzwischen
-  durch und wurde am fertigen Paket geprüft (Kennung, Mindest-API,
-  Berechtigungen); die Release-APK ist allerdings noch mit dem
-  Debug-Schlüssel signiert, für eine Weitergabe bräuchte es einen eigenen
-  Keystore. Für iOS ist geprüft, dass die App durchbaut
-  (`flutter build ios --no-codesign`); ausgeliefert wird sie nicht, das
-  bräuchte ein Apple-Entwicklerkonto. Linux und Windows sind angelegt, aber
-  nie gebaut. Web bräuchte Umbau: der Foto-Teil verwendet `dart:io`, das im
-  Browser nicht zur Verfügung steht.
+  wurden.
+- Veröffentlicht wird bisher nur eine macOS-Fassung. Android baut durch und
+  wurde am fertigen Paket geprüft; die Release-APK ist noch mit dem
+  Debug-Schlüssel signiert. Für iOS ist geprüft, dass die App durchbaut;
+  ausgeliefert wird sie nicht. Linux und Windows sind angelegt, aber nie
+  gebaut. Web bräuchte Umbau: der Foto-Teil verwendet `dart:io`.

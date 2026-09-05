@@ -8,7 +8,6 @@ import '../../../local_db/database.dart';
 import '../../household/application/household_providers.dart';
 import '../../inventory/application/inventory_category_l10n.dart';
 import '../application/budget_providers.dart';
-import '../application/budget_sync_controller.dart';
 import '../application/missing_equipment_report.dart';
 import 'budget_entry_form_screen.dart';
 
@@ -20,7 +19,6 @@ class BudgetListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    ref.watch(budgetSyncControllerProvider(householdId));
     final entriesAsync = ref.watch(budgetEntriesProvider(householdId));
 
     return Scaffold(
@@ -82,8 +80,7 @@ class BudgetListScreen extends ConsumerWidget {
   ) async {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
-    final membership = ref.read(myHouseholdProvider).value;
-    final householdName = membership?.household.name ?? '';
+    final householdName = ref.read(householdProfileProvider).value?.name ?? '';
     final db = ref.read(appDatabaseProvider);
 
     final strings = MissingEquipmentReportStrings(

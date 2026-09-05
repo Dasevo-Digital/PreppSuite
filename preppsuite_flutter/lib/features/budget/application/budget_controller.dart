@@ -1,19 +1,16 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show InventoryItemCategory;
+import '../../../model/categories.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../local_db/database.dart';
 import 'budget_providers.dart';
-import 'budget_sync_controller.dart';
 
 /// Local writes for budget entries, plus nudging sync afterward. See
 /// `InventoryController` for the general shape this follows.
 class BudgetController {
-  BudgetController(this._ref, this._db, this.householdId);
+  BudgetController(this._db, this.householdId);
 
-  final Ref _ref;
   final AppDatabase _db;
   final String householdId;
 
@@ -87,17 +84,12 @@ class BudgetController {
     _triggerSync();
   }
 
-  void _triggerSync() {
-    _ref
-        .read(budgetSyncControllerProvider(householdId).notifier)
-        .syncDebounced();
-  }
+  void _triggerSync() {}
 }
 
 final budgetControllerProvider = Provider.autoDispose
     .family<BudgetController, String>(
       (ref, householdId) => BudgetController(
-        ref,
         ref.watch(appDatabaseProvider),
         householdId,
       ),

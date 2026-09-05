@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show InventoryItemCategory;
+import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';

@@ -1,21 +1,18 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show InventoryItemCategory;
+import '../../../model/categories.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../local_db/database.dart';
 import 'inventory_csv_import.dart';
 import 'inventory_providers.dart';
-import 'inventory_sync_controller.dart';
 
 /// Local writes (create/update/delete-as-tombstone) plus nudging the sync
 /// controller afterward. The UI never talks to Drift or the network client
 /// directly — everything goes through here.
 class InventoryController {
-  InventoryController(this._ref, this._db, this.householdId);
+  InventoryController(this._db, this.householdId);
 
-  final Ref _ref;
   final AppDatabase _db;
   final String householdId;
 
@@ -183,17 +180,12 @@ class InventoryController {
     _triggerSync();
   }
 
-  void _triggerSync() {
-    _ref
-        .read(inventorySyncControllerProvider(householdId).notifier)
-        .syncDebounced();
-  }
+  void _triggerSync() {}
 }
 
 final inventoryControllerProvider = Provider.autoDispose
     .family<InventoryController, String>(
       (ref, householdId) => InventoryController(
-        ref,
         ref.watch(appDatabaseProvider),
         householdId,
       ),

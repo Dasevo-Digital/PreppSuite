@@ -1,38 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show Household, WarningRegionSubscription, WarningSource;
+import '../../../model/categories.dart';
+import '../../../model/household_profile.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
-import '../../household/application/household_providers.dart';
 import '../application/warning_providers.dart';
 import '../application/warning_relevance.dart';
 import '../application/warning_severity_l10n.dart';
 
 class WarningListScreen extends ConsumerWidget {
-  const WarningListScreen({super.key, required this.household});
+  const WarningListScreen({super.key, required this.profile});
 
-  final Household household;
+  final HouseholdProfile profile;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final warningsAsync = ref.watch(allWarningsProvider);
-    final subscriptions =
-        ref.watch(householdWarningRegionsProvider(household.id!)).value ??
-        const [];
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.warningsTitle)),
       body: Column(
         children: [
           Expanded(
-            child: _buildList(context, l10n, warningsAsync, subscriptions),
+            child: _buildList(context, l10n, warningsAsync),
           ),
           // NINA is the BBK's app and only covers Germany — recommending it
           // to an Austrian household would be wrong.
-          if (household.countryCode == 'DE') _NinaHint(l10n: l10n),
+          if (profile.countryCode == 'DE') _NinaHint(l10n: l10n),
         ],
       ),
     );
@@ -42,7 +38,6 @@ class WarningListScreen extends ConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     AsyncValue<List<Warning>> warningsAsync,
-    List<WarningRegionSubscription> subscriptions,
   ) {
     return warningsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -66,15 +61,17 @@ class WarningListScreen extends ConsumerWidget {
         // primary key here (unlike the banner, which prioritizes
         // severity since it only ever shows a single, most-urgent
         // warning); severity and recency break ties.
-        final filter = warningRegionFilterFor(household, subscriptions);
         final sorted = [...warnings]
           ..sort((a, b) {
             final relevanceCompare =
                 warningRelevanceRank(
                   warning: b,
-                  filter: filter,
+                  filter: profile.warningFilter,
                 ).compareTo(
-                  warningRelevanceRank(warning: a, filter: filter),
+                  warningRelevanceRank(
+                    warning: a,
+                    filter: profile.warningFilter,
+                  ),
                 );
             if (relevanceCompare != 0) return relevanceCompare;
 
@@ -158,7 +155,7 @@ class _WarningTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final severity = warningSeverityFromName(warning.severity);
-    final source = WarningSource.values.byName(warning.source);
+    final source = WarningSource.fromName(warning.source);
     final isExpired =
         warning.expires != null && warning.expires!.isBefore(DateTime.now());
 

@@ -1,6 +1,0 @@
-### Thrown when a household operation can not be completed.
-###
-### Inspect the [reason] field to understand why.
-exception: HouseholdException
-fields:
-  reason: HouseholdExceptionReason

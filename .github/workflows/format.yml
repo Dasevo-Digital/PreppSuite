@@ -20,8 +20,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      # Checked across the whole workspace, generated code included —
-      # the Serverpod and drift generators both emit dart-format-clean
+      # Generated code included: drift's generator emits dart-format-clean
       # output, so a diff here means a hand edit that needs reformatting.
       - name: Check formatting
         run: dart format --output=none --set-exit-if-changed .

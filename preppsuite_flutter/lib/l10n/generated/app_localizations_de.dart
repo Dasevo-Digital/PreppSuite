@@ -819,4 +819,17 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get csvExportErrorMessage =>
       'Die Datei konnte nicht geschrieben werden.';
+
+  @override
+  String get profileSetupTitle => 'Haushalt einrichten';
+
+  @override
+  String get profileSetupIntro =>
+      'PreppSuite läuft vollständig auf diesem Gerät. Es gibt kein Konto und keinen Server – nur diese Angaben, damit Warnungen und Bedarfsrechnung zu dir passen.';
+
+  @override
+  String get profileSetupSubmit => 'Los geht\'s';
+
+  @override
+  String get personCountLabel => 'Personen im Haushalt';
 }

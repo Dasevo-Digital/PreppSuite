@@ -1,19 +1,16 @@
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show ChecklistCategory;
+import '../../../model/categories.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../local_db/database.dart';
 import 'checklist_providers.dart';
-import 'checklist_sync_controller.dart';
 
 /// Local writes for checklist templates/items, plus nudging sync afterward.
 /// See `InventoryController` for the general shape this follows.
 class ChecklistController {
-  ChecklistController(this._ref, this._db, this.householdId);
+  ChecklistController(this._db, this.householdId);
 
-  final Ref _ref;
   final AppDatabase _db;
   final String householdId;
 
@@ -157,17 +154,12 @@ class ChecklistController {
     );
   }
 
-  void _triggerSync() {
-    _ref
-        .read(checklistSyncControllerProvider(householdId).notifier)
-        .syncDebounced();
-  }
+  void _triggerSync() {}
 }
 
 final checklistControllerProvider = Provider.autoDispose
     .family<ChecklistController, String>(
       (ref, householdId) => ChecklistController(
-        ref,
         ref.watch(appDatabaseProvider),
         householdId,
       ),

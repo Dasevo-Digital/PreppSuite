@@ -236,5 +236,9 @@
   "csvExportDialogTitle": "Vorräte als CSV sichern",
   "csvExportSuccessMessage": "{count} Artikel ausgegeben",
   "csvExportEmptyMessage": "Es gibt noch keine Artikel zum Ausgeben.",
-  "csvExportErrorMessage": "Die Datei konnte nicht geschrieben werden."
+  "csvExportErrorMessage": "Die Datei konnte nicht geschrieben werden.",
+  "profileSetupTitle": "Haushalt einrichten",
+  "profileSetupIntro": "PreppSuite läuft vollständig auf diesem Gerät. Es gibt kein Konto und keinen Server – nur diese Angaben, damit Warnungen und Bedarfsrechnung zu dir passen.",
+  "profileSetupSubmit": "Los geht's",
+  "personCountLabel": "Personen im Haushalt"
 }

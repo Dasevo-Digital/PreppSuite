@@ -1519,6 +1519,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The file could not be written.'**
   String get csvExportErrorMessage;
+
+  /// No description provided for @profileSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up your household'**
+  String get profileSetupTitle;
+
+  /// No description provided for @profileSetupIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'PreppSuite runs entirely on this device. There is no account and no server — just these details, so warnings and supply targets match your situation.'**
+  String get profileSetupIntro;
+
+  /// No description provided for @profileSetupSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get profileSetupSubmit;
+
+  /// No description provided for @personCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'People in the household'**
+  String get personCountLabel;
 }
 
 class _AppLocalizationsDelegate

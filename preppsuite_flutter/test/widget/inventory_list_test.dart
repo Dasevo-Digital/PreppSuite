@@ -4,29 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_controller.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
-import 'package:preppsuite_flutter/features/inventory/application/inventory_sync_controller.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/consume_dialog.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/inventory_list_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Stands in for the real sync controller, which starts a 60s periodic
-/// timer and reaches for the global Serverpod client — neither exists in a
-/// widget test, and a pending timer fails the test outright.
-class _NoopSyncController extends InventorySyncController {
-  _NoopSyncController(super.householdId);
-
-  @override
-  AsyncValue<void> build() => const AsyncData(null);
-}
-
 /// Records what the screen asked for instead of writing it. The write
 /// itself is covered without a widget tree in
 /// `test/features/inventory_controller_test.dart` — here the question is
 /// only whether the UI asks for the right thing.
 class _RecordingController extends InventoryController {
-  _RecordingController(super.ref, super.db, super.householdId, this.consumed);
+  _RecordingController(super.db, super.householdId, this.consumed);
 
   /// Owned by the test rather than by the controller: cancelling the
   /// dialog never reads the provider, so an instance-held list would not
@@ -83,14 +72,11 @@ void main() {
       ProviderScope(
         overrides: [
           appDatabaseProvider.overrideWithValue(db),
-          inventorySyncControllerProvider.overrideWith2(
-            _NoopSyncController.new,
-          ),
           inventoryItemsProvider(
             householdId,
           ).overrideWith((ref) => Stream.value(items)),
           inventoryControllerProvider(householdId).overrideWith(
-            (ref) => _RecordingController(ref, db, householdId, consumed),
+            (ref) => _RecordingController(db, householdId, consumed),
           ),
         ],
         child: MaterialApp(

@@ -1,5 +1,4 @@
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show InventoryItemCategory;
+import '../../../model/categories.dart';
 
 import '../../../local_db/database.dart';
 import 'inventory_category_l10n.dart';

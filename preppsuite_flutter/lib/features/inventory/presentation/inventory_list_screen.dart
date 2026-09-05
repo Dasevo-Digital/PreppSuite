@@ -12,7 +12,6 @@ import '../application/inventory_category_l10n.dart';
 import '../application/inventory_csv_export.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_providers.dart';
-import '../application/inventory_sync_controller.dart';
 import '../application/supply_calculator.dart';
 import 'consume_dialog.dart';
 import 'inventory_csv_import_screen.dart';
@@ -26,9 +25,7 @@ class InventoryListScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    // Watching this keeps the sync controller alive (initial + periodic +
     // debounced sync) for as long as this screen is on screen.
-    ref.watch(inventorySyncControllerProvider(householdId));
     final itemsAsync = ref.watch(inventoryItemsProvider(householdId));
 
     return Scaffold(

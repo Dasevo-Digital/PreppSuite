@@ -1,5 +1,4 @@
-import 'package:preppsuite_client/preppsuite_client.dart'
-    show WarningSeverity, WarningSource;
+import '../../../model/categories.dart';
 
 import '../../../local_db/database.dart';
 import 'bbk_client.dart';

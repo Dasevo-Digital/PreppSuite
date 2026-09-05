@@ -1,4 +1,4 @@
-import 'package:preppsuite_client/preppsuite_client.dart';
+import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 

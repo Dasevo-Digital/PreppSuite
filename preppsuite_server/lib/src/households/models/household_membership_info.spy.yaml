@@ -1,7 +1,0 @@
-### Combines a household with the caller's own membership row, returned by
-### [HouseholdEndpoint.getMyHousehold] so the client can complete onboarding
-### without a second round-trip.
-class: HouseholdMembershipInfo
-fields:
-  household: Household
-  member: HouseholdMember

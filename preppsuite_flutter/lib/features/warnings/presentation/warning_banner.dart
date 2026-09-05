@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:preppsuite_client/preppsuite_client.dart' show Household;
+import '../../../model/household_profile.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
-import '../../household/application/household_providers.dart';
 import '../application/warning_providers.dart';
 import '../application/warning_relevance.dart';
 import '../application/warning_severity_l10n.dart';
@@ -14,9 +13,9 @@ import 'warning_list_screen.dart';
 /// sit above the tab content in [HomeShell] so it's visible regardless of
 /// which tab is open.
 class WarningBanner extends ConsumerWidget {
-  const WarningBanner({super.key, required this.household});
+  const WarningBanner({super.key, required this.profile});
 
-  final Household household;
+  final HouseholdProfile profile;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,12 +23,9 @@ class WarningBanner extends ConsumerWidget {
     // (this widget lives above all tabs in HomeShell). Keyed by the whole
     // household rather than its id: the poll needs the country and the
     // region to know what to fetch.
-    ref.watch(warningSyncControllerProvider(household));
+    ref.watch(warningSyncControllerProvider(profile));
     final l10n = AppLocalizations.of(context)!;
     final warningsAsync = ref.watch(activeWarningsProvider);
-    final subscriptions =
-        ref.watch(householdWarningRegionsProvider(household.id!)).value ??
-        const [];
 
     return warningsAsync.maybeWhen(
       data: (warnings) {
@@ -48,11 +44,12 @@ class WarningBanner extends ConsumerWidget {
                   warningSeverityRank(warningSeverityFromName(a.severity)),
                 );
             if (severityCompare != 0) return severityCompare;
-            final filter = warningRegionFilterFor(household, subscriptions);
             return warningRelevanceRank(
               warning: b,
-              filter: filter,
-            ).compareTo(warningRelevanceRank(warning: a, filter: filter));
+              filter: profile.warningFilter,
+            ).compareTo(
+              warningRelevanceRank(warning: a, filter: profile.warningFilter),
+            );
           });
         final mostSevere = sorted.first;
         final severity = warningSeverityFromName(mostSevere.severity);
@@ -62,7 +59,7 @@ class WarningBanner extends ConsumerWidget {
           child: InkWell(
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => WarningListScreen(household: household),
+                builder: (_) => WarningListScreen(profile: profile),
               ),
             ),
             child: Padding(
