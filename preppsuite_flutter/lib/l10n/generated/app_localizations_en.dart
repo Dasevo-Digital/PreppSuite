@@ -939,4 +939,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offlineMapHelp => 'Where do I get such a file?';
+
+  @override
+  String get navKnowledge => 'Knowledge';
+
+  @override
+  String get knowledgeTitle => 'Knowledge';
+
+  @override
+  String get knowledgeEmptyTitle => 'No knowledge file yet';
+
+  @override
+  String get knowledgeEmptyBody =>
+      'A ZIM file on the device — Kiwix\'s Wikipedia, for instance — makes looking things up independent of the network. Where to get one is in docs/wissen-offline.md.';
+
+  @override
+  String get knowledgeChooseAction => 'Choose a file';
+
+  @override
+  String get knowledgeChangeAction => 'Choose a different file';
+
+  @override
+  String get knowledgeForgetAction => 'Remove file';
+
+  @override
+  String get knowledgeSearchHint => 'Search titles';
+
+  @override
+  String get knowledgeSearchNote =>
+      'Searches titles, not the text of the articles.';
+
+  @override
+  String knowledgeNoResults(String query) {
+    return 'No title starts with “$query”.';
+  }
+
+  @override
+  String get knowledgeSearchPrompt => 'Type a beginning to search.';
+
+  @override
+  String get knowledgeErrorUnreadable =>
+      'The file cannot be read. A ZIM archive is expected, of the kind Kiwix publishes.';
+
+  @override
+  String get knowledgeArticleUnsupported =>
+      'Articles cannot be shown on this platform — the browser component is missing. Searching works, reading does not.';
+
+  @override
+  String knowledgeSource(String name) {
+    return 'From $name';
+  }
 }

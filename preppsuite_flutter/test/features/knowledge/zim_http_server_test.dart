@@ -1,0 +1,118 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/zim_archive.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/zim_http_server.dart';
+import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart'
+    show FileByteRangeSource;
+
+import 'zim_fixture.dart';
+
+/// The article view is a browser engine pointed at this server, so what it
+/// answers is what a Wikipedia page turns out to be.
+void main() {
+  late Directory workspace;
+  late ZimArchive archive;
+  late ZimHttpServer server;
+  late HttpClient client;
+
+  setUp(() async {
+    workspace = Directory.systemTemp.createTempSync('preppsuite-zim-server');
+    final path = writeZim(
+      workspace,
+      ZimFixture(
+        entries: [
+          ZimFixtureEntry(
+            namespace: 'C',
+            url: 'Trinkwasser',
+            title: 'Trinkwasser',
+            content: utf8.encode('<h1>Trinkwasser</h1>'),
+          ),
+          const ZimFixtureEntry(
+            namespace: 'C',
+            url: 'style/main.css',
+            title: 'main.css',
+            content: [98, 111, 100, 121], // "body"
+            mimeType: 1,
+          ),
+          const ZimFixtureEntry(
+            namespace: 'C',
+            url: 'Wasservorrat',
+            title: 'Wasservorrat',
+            redirectTo: 'C/Trinkwasser',
+          ),
+        ],
+      ),
+    );
+
+    archive = await ZimArchive.open(
+      await FileByteRangeSource.open(File(path)),
+    );
+    server = await ZimHttpServer.start(archive);
+    client = HttpClient();
+  });
+
+  tearDown(() async {
+    client.close(force: true);
+    await server.close();
+    await archive.close();
+    workspace.deleteSync(recursive: true);
+  });
+
+  Future<HttpClientResponse> get(String path) async {
+    final request = await client.getUrl(
+      Uri.parse('http://127.0.0.1:${server.port}$path'),
+    );
+    return request.close();
+  }
+
+  test('an article is served as utf-8 html', () async {
+    final response = await get('/C/Trinkwasser');
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect(response.headers.contentType?.mimeType, 'text/html');
+    // Without the charset the engine guesses, and German articles come out
+    // with mangled umlauts.
+    expect(response.headers.contentType?.charset, 'utf-8');
+    expect(await utf8.decodeStream(response), '<h1>Trinkwasser</h1>');
+  });
+
+  test('a url containing slashes keeps all of them', () async {
+    // Stylesheets and images sit in subdirectories; splitting the path on
+    // every slash would look for an entry that does not exist and every
+    // page would lose its styling.
+    final response = await get('/C/style/main.css');
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect(response.headers.contentType?.mimeType, 'image/png');
+    expect(await utf8.decodeStream(response), 'body');
+  });
+
+  test('a redirect is followed rather than reported', () async {
+    // The engine would follow a 302 too, but the archive stores redirects
+    // as entries rather than as HTTP, so there is nothing to redirect to.
+    final response = await get('/C/Wasservorrat');
+
+    expect(response.statusCode, HttpStatus.ok);
+    expect(await utf8.decodeStream(response), '<h1>Trinkwasser</h1>');
+  });
+
+  test('an entry the archive does not hold is a 404', () async {
+    final response = await get('/C/Rechenschieber');
+
+    expect(response.statusCode, HttpStatus.notFound);
+    await response.drain<void>();
+  });
+
+  test('a path without a namespace is a 404 rather than a crash', () async {
+    final response = await get('/favicon.ico');
+
+    expect(response.statusCode, HttpStatus.notFound);
+    await response.drain<void>();
+  });
+
+  test('the server is reachable only over loopback', () async {
+    expect(server.uriFor(await archive.entryAt(0)).host, '127.0.0.1');
+  });
+}

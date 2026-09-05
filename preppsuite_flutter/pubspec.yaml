@@ -66,6 +66,12 @@ dependencies:
   latlong2: ^0.10.1
   vector_map_tiles: ^9.0.0-beta.13
   vector_tile_renderer: ^6.1.0
+  zstandard: ^1.5.0
+  archive: ^4.0.0
+  # Renders the HTML that comes out of a ZIM archive. The pages are real
+  # Wikipedia, stylesheets and all; anything less than a browser engine
+  # would show them badly.
+  webview_flutter: ^4.14.1
   # Needed directly for scheduling expiry reminders; flutter_local_notifications
   # pulls it in too, but a transitive dependency cannot be imported.
   timezone: ^0.11.0

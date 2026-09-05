@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The offline encyclopedia is served to the WebView from a server bound to
+  the loopback address inside this app, so its URLs are plain http. Android
+  blocks cleartext by default, which is right for everything else — this
+  opens exactly 127.0.0.1 and nothing more.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

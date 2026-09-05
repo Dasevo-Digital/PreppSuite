@@ -61,6 +61,12 @@ Vektorkacheln. Ohne eigene Datei kommen die Kacheln wie bisher von
 OpenStreetMap. Was für eine Datei das sein muss und wie man sie herstellt,
 steht in [`docs/karte-offline.md`](docs/karte-offline.md).
 
+**Wissen offline.** Eine ZIM-Datei – Wikipedia von Kiwix, eine
+Themensammlung oder eigene Lernmaterialien – macht das Nachschlagen
+unabhängig vom Netz. Gesucht wird nach Titeln, gelesen wird der Artikel
+mit Bildern und Formatierung. Einzelheiten in
+[`docs/wissen-offline.md`](docs/wissen-offline.md).
+
 **Teilen.** Mehrere Geräte teilen sich Bestände, Listen und Budget über
 einen Ordner, den sie alle sehen – Nextcloud, Syncthing, iCloud Drive,
 Dropbox. PreppSuite legt dort nur Dateien ab; wer sie transportiert,
@@ -134,8 +140,9 @@ daneben und schreibt in dieselbe Datenbank.
 Die Annahmen, die dahinterstehen, sind in [`CLAUDE.md`](CLAUDE.md)
 aufgeschrieben, die Warnquellen in
 [`docs/warning-feeds.md`](docs/warning-feeds.md), das Ordnerformat in
-[`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md) und die
-Offline-Karte in [`docs/karte-offline.md`](docs/karte-offline.md).
+[`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md), die
+Offline-Karte in [`docs/karte-offline.md`](docs/karte-offline.md) und die
+Wissensdatei in [`docs/wissen-offline.md`](docs/wissen-offline.md).
 
 ## Entwicklung
 
@@ -195,7 +202,11 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   fertigen `.pmtiles` aus dem Netz sind meist Protomaps-Schema und werden
   beim Auswählen abgelehnt. Einzelheiten in
   [`docs/karte-offline.md`](docs/karte-offline.md).
-- Wikipedia ist noch nicht offline verfügbar. Geplant als ZIM-Datei.
+- Die Suche in der Wissensdatei geht über Titel, nicht über den Text. Die
+  Volltextsuche eines ZIM-Archivs steckt in einem Xapian-Index, für den es
+  keine Dart-Anbindung gibt.
+- Artikel lesen geht auf Android, iOS und macOS. Auf Linux und Windows
+  fehlt die Browser-Komponente; suchen lässt sich dort, lesen nicht.
 - Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen
   wurden – im Ordner liegen nur die Daten, nicht die Bilder.
 - Veröffentlicht wird bisher nur eine macOS-Fassung. Android baut durch und

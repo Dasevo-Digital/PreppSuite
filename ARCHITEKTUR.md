@@ -101,9 +101,16 @@ before anything is stored. Its raster layer is filtered out of the theme —
 that one fetches a shaded relief over HTTP, which has no place on a map
 whose point is working without a network.
 
-**PMTiles is read through `ByteRangeSource`, never a `File` directly.** A
-country extract is gigabytes: it is never copied and never fully read, and
-on Android it is a `content://` document that `dart:io` cannot open at all.
+**ZIM search is by title, never full text.** The archive's full-text index
+is Xapian, a C++ library with no Dart binding. `searchTitles` binary-searches
+the archive's own title order — version 6 keeps it in an `X/listing` entry,
+version 5 in the header — and capitalizes the query's first letter, because
+that order is by bytes and Wikipedia titles start with a capital.
+
+**PMTiles and ZIM are both read through `ByteRangeSource`, never a `File`
+directly.** A country extract or a Wikipedia archive is gigabytes: neither
+is ever copied or fully read, and on Android both are `content://`
+documents that `dart:io` cannot open at all.
 
 **Adding or removing a drift column means a migration.** Bump
 `schemaVersion` and add the matching branch to `onUpgrade` in the same edit —
@@ -135,6 +142,11 @@ lib/features/<feature>/
 `features/maps/` is the offline map: a hand-written PMTiles v3 reader, a
 `VectorTileProvider` over it, and the layer that falls back to
 OpenStreetMap's raster tiles when no archive is configured.
+
+`features/knowledge/` is the offline encyclopedia: a hand-written ZIM
+reader, a loopback HTTP server in front of it, and a WebView pointed at
+that. The server is what makes links, images and stylesheets inside an
+article resolve without any code — they come back to the same origin.
 
 `features/sharing/` is the shared-folder sync. `SyncFolder` is an interface
 over "a directory" with a `dart:io` implementation, so the merge is tested

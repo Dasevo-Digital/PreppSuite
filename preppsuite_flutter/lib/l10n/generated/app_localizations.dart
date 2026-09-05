@@ -1723,6 +1723,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Where do I get such a file?'**
   String get offlineMapHelp;
+
+  /// No description provided for @navKnowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge'**
+  String get navKnowledge;
+
+  /// No description provided for @knowledgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge'**
+  String get knowledgeTitle;
+
+  /// No description provided for @knowledgeEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No knowledge file yet'**
+  String get knowledgeEmptyTitle;
+
+  /// No description provided for @knowledgeEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A ZIM file on the device — Kiwix\'s Wikipedia, for instance — makes looking things up independent of the network. Where to get one is in docs/wissen-offline.md.'**
+  String get knowledgeEmptyBody;
+
+  /// No description provided for @knowledgeChooseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a file'**
+  String get knowledgeChooseAction;
+
+  /// No description provided for @knowledgeChangeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a different file'**
+  String get knowledgeChangeAction;
+
+  /// No description provided for @knowledgeForgetAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove file'**
+  String get knowledgeForgetAction;
+
+  /// No description provided for @knowledgeSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search titles'**
+  String get knowledgeSearchHint;
+
+  /// No description provided for @knowledgeSearchNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Searches titles, not the text of the articles.'**
+  String get knowledgeSearchNote;
+
+  /// No description provided for @knowledgeNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No title starts with “{query}”.'**
+  String knowledgeNoResults(String query);
+
+  /// No description provided for @knowledgeSearchPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a beginning to search.'**
+  String get knowledgeSearchPrompt;
+
+  /// No description provided for @knowledgeErrorUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The file cannot be read. A ZIM archive is expected, of the kind Kiwix publishes.'**
+  String get knowledgeErrorUnreadable;
+
+  /// No description provided for @knowledgeArticleUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Articles cannot be shown on this platform — the browser component is missing. Searching works, reading does not.'**
+  String get knowledgeArticleUnsupported;
+
+  /// No description provided for @knowledgeSource.
+  ///
+  /// In en, this message translates to:
+  /// **'From {name}'**
+  String knowledgeSource(String name);
 }
 
 class _AppLocalizationsDelegate

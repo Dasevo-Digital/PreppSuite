@@ -8,6 +8,7 @@ import '../../household/presentation/household_overview_screen.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/presentation/expiry_reminder_scheduler.dart';
 import '../../inventory/presentation/inventory_list_screen.dart';
+import '../../knowledge/presentation/knowledge_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../../shelters/presentation/shelter_map_screen.dart';
 import '../../warnings/presentation/warning_banner.dart';
@@ -47,6 +48,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       HouseholdOverviewScreen(profile: widget.profile),
       SettingsScreen(profile: widget.profile),
       const ShelterMapScreen(),
+      const KnowledgeScreen(),
     ];
 
     return Scaffold(
@@ -102,6 +104,11 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             icon: const Icon(Icons.shield_outlined),
             selectedIcon: const Icon(Icons.shield),
             label: l10n.navShelters,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.menu_book_outlined),
+            selectedIcon: const Icon(Icons.menu_book),
+            label: l10n.navKnowledge,
           ),
         ],
       ),

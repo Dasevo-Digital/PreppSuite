@@ -570,5 +570,33 @@
   "offlineMapErrorUnreadable": "The file cannot be read. A PMTiles version 3 archive is expected.",
   "offlineMapErrorNotVector": "The archive holds finished image tiles rather than vector data. PreppSuite draws the map itself and needs vector tiles.",
   "offlineMapErrorSchema": "The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md.",
-  "offlineMapHelp": "Where do I get such a file?"
+  "offlineMapHelp": "Where do I get such a file?",
+  "navKnowledge": "Knowledge",
+  "knowledgeTitle": "Knowledge",
+  "knowledgeEmptyTitle": "No knowledge file yet",
+  "knowledgeEmptyBody": "A ZIM file on the device — Kiwix's Wikipedia, for instance — makes looking things up independent of the network. Where to get one is in docs/wissen-offline.md.",
+  "knowledgeChooseAction": "Choose a file",
+  "knowledgeChangeAction": "Choose a different file",
+  "knowledgeForgetAction": "Remove file",
+  "knowledgeSearchHint": "Search titles",
+  "knowledgeSearchNote": "Searches titles, not the text of the articles.",
+  "knowledgeNoResults": "No title starts with “{query}”.",
+  "@knowledgeNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "knowledgeSearchPrompt": "Type a beginning to search.",
+  "knowledgeErrorUnreadable": "The file cannot be read. A ZIM archive is expected, of the kind Kiwix publishes.",
+  "knowledgeArticleUnsupported": "Articles cannot be shown on this platform — the browser component is missing. Searching works, reading does not.",
+  "knowledgeSource": "From {name}",
+  "@knowledgeSource": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }
