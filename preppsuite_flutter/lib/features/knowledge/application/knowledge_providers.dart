@@ -1,7 +1,5 @@
 import 'dart:async' show unawaited;
-import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../maps/application/map_archive_access.dart' show openMapArchive;
@@ -15,18 +13,6 @@ import 'zim_store.dart';
 enum KnowledgeProblem {
   /// Missing, unreadable, or not a ZIM archive at all.
   unreadable,
-}
-
-/// Whether this platform can show an article.
-///
-/// The pages are real Wikipedia — stylesheets, tables, maths — so they are
-/// rendered by the system's browser engine, and `webview_flutter` reaches
-/// that on Android, iOS and macOS only. Searching the archive works
-/// everywhere; on Linux and Windows the article is where it stops, and the
-/// screen says so rather than opening an empty panel.
-bool get supportsArticleView {
-  if (kIsWeb) return false;
-  return Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
 }
 
 class KnowledgeState {

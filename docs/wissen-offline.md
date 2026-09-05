@@ -42,6 +42,14 @@ Datei ausliefert – das ist der Grund, warum Verweise zwischen Artikeln,
 Bilder und Stilangaben ohne weiteres Zutun funktionieren: sie landen alle
 wieder bei derselben Datei.
 
+Auf Android, iOS, iPadOS und macOS steckt diese Komponente in der App.
+Auf **Linux und Windows** gibt es dafür keine Einbettung, deshalb öffnet
+der Artikel dort ein **eigenes Fenster** – gezeichnet von WebKitGTK
+beziehungsweise WebView2, also von der Maschinerie, die auf dem Rechner
+ohnehin liegt. Der Alternativweg wäre, einen ganzen Chromium mitzuliefern:
+ein paar hundert Megabyte gegen eine Desktop-Fassung, die insgesamt siebzig
+wiegt.
+
 Der Server hört nur auf 127.0.0.1 und läuft nur, solange eine Datei
 gewählt ist. Andere Programme auf demselben Gerät könnten ihn in dieser
 Zeit erreichen; zu finden wäre dort die öffentliche Enzyklopädie, die die
@@ -89,8 +97,11 @@ Telefontastatur auch trifft.
 
 ## Grenzen
 
-**Artikel lesen geht auf Android, iOS und macOS.** Auf Linux und Windows
-fehlt die Browser-Komponente; suchen lässt sich dort, lesen nicht.
+**Unter Linux und Windows muss die Browser-Komponente da sein.** Unter
+Windows 11 ist WebView2 dabei, unter Windows 10 nicht immer; unter Linux
+braucht es WebKitGTK, auf Debian und Ubuntu das Paket
+`libwebkit2gtk-4.1-0`. Fehlt sie, sagt die App das beim Öffnen – suchen
+geht weiter, lesen nicht.
 
 **zstd und xz.** Kiwix komprimiert seit 2020 mit zstd, davor mit xz. Beides
 liest die App. Die älteren Verfahren zlib und bzip2, die das Format noch

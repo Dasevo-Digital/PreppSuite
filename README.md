@@ -209,8 +209,10 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   geht jederzeit; das Angefangene bleibt durchsuchbar.
 - Der Index kennt keinen deutschen Wortstamm: „Notvorräte" findet nicht
   „Notvorrat".
-- Artikel lesen geht auf Android, iOS und macOS. Auf Linux und Windows
-  fehlt die Browser-Komponente; suchen lässt sich dort, lesen nicht.
+- Artikel öffnen unter Linux und Windows ein eigenes Fenster statt eines
+  Bereichs in der App, und brauchen dort die Browser-Komponente des
+  Systems: WebView2 unter Windows, `libwebkit2gtk-4.1-0` unter Linux.
+  Fehlt sie, sagt die App das beim Öffnen.
 - Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen
   wurden – im Ordner liegen nur die Daten, nicht die Bilder.
 - Veröffentlicht wird bisher nur eine macOS-Fassung. Android baut durch und

@@ -1802,6 +1802,12 @@ abstract class AppLocalizations {
   /// **'Articles cannot be shown on this platform — the browser component is missing. Searching works, reading does not.'**
   String get knowledgeArticleUnsupported;
 
+  /// No description provided for @knowledgeArticleNoEngine.
+  ///
+  /// In en, this message translates to:
+  /// **'The system\'s browser component is missing. On Linux that is WebKitGTK (package libwebkit2gtk-4.1), on Windows the WebView2 runtime.'**
+  String get knowledgeArticleNoEngine;
+
   /// No description provided for @knowledgeSource.
   ///
   /// In en, this message translates to:

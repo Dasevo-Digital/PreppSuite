@@ -986,6 +986,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Articles cannot be shown on this platform — the browser component is missing. Searching works, reading does not.';
 
   @override
+  String get knowledgeArticleNoEngine =>
+      'The system\'s browser component is missing. On Linux that is WebKitGTK (package libwebkit2gtk-4.1), on Windows the WebView2 runtime.';
+
+  @override
   String knowledgeSource(String name) {
     return 'From $name';
   }

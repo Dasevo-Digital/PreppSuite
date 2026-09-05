@@ -1,3 +1,4 @@
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,7 +12,13 @@ import 'features/inventory/application/open_food_facts_service.dart';
 /// in the local database. What used to happen here — building the Serverpod
 /// client, restoring an auth session, resolving a server URL — is simply
 /// gone.
-void main() async {
+void main(List<String> args) async {
+  // The Linux and Windows article window is a second copy of this
+  // executable, launched to draw the title bar above the web view. It
+  // recognises itself by the arguments it was given and never gets as far
+  // as the app; on every other platform there are none and this is false.
+  if (runWebViewTitleBarWidget(args)) return;
+
   WidgetsFlutterBinding.ensureInitialized();
 
   OpenFoodFactsService.configure();

@@ -591,6 +591,7 @@
   "knowledgeSearchPrompt": "Type a beginning to search.",
   "knowledgeErrorUnreadable": "The file cannot be read. A ZIM archive is expected, of the kind Kiwix publishes.",
   "knowledgeArticleUnsupported": "Articles cannot be shown on this platform — the browser component is missing. Searching works, reading does not.",
+  "knowledgeArticleNoEngine": "The system's browser component is missing. On Linux that is WebKitGTK (package libwebkit2gtk-4.1), on Windows the WebView2 runtime.",
   "knowledgeSource": "From {name}",
   "@knowledgeSource": {
     "placeholders": {

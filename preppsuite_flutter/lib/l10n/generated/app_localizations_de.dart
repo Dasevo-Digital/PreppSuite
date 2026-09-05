@@ -992,6 +992,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Artikel lassen sich auf dieser Plattform nicht anzeigen – dafür fehlt die Browser-Komponente. Suchen funktioniert, Lesen nicht.';
 
   @override
+  String get knowledgeArticleNoEngine =>
+      'Zum Lesen fehlt die Browser-Komponente des Systems. Unter Linux ist das WebKitGTK (Paket libwebkit2gtk-4.1), unter Windows die WebView2-Laufzeit.';
+
+  @override
   String knowledgeSource(String name) {
     return 'Aus $name';
   }

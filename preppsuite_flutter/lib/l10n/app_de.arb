@@ -284,6 +284,7 @@
   "knowledgeSearchPrompt": "Tippe einen Anfang ein, um zu suchen.",
   "knowledgeErrorUnreadable": "Die Datei lässt sich nicht lesen. Erwartet wird ein ZIM-Archiv, wie Kiwix es ausliefert.",
   "knowledgeArticleUnsupported": "Artikel lassen sich auf dieser Plattform nicht anzeigen – dafür fehlt die Browser-Komponente. Suchen funktioniert, Lesen nicht.",
+  "knowledgeArticleNoEngine": "Zum Lesen fehlt die Browser-Komponente des Systems. Unter Linux ist das WebKitGTK (Paket libwebkit2gtk-4.1), unter Windows die WebView2-Laufzeit.",
   "knowledgeSource": "Aus {name}",
   "knowledgeModeTitles": "Titel",
   "knowledgeModeFullText": "Volltext",

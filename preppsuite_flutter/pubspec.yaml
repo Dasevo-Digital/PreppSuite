@@ -71,7 +71,16 @@ dependencies:
   # Renders the HTML that comes out of a ZIM archive. The pages are real
   # Wikipedia, stylesheets and all; anything less than a browser engine
   # would show them badly.
+  #
+  # It reaches Android, iOS and macOS. Linux and Windows have no
+  # implementation at all, which is why the second package is here.
   webview_flutter: ^4.14.1
+  # The article view on Linux and Windows, where it opens a window of its
+  # own rather than a panel. Uses the engine the system already has —
+  # WebKitGTK and WebView2 — rather than bundling Chromium, which is what
+  # the embedded alternative (webview_cef) costs: a few hundred megabytes
+  # per platform, against an app whose whole desktop build is seventy.
+  desktop_webview_window: ^0.3.0
   # The FFI binding to the Xapian shim in native/zim_xapian, which
   # searches the full-text index a ZIM archive carries inside it.
   ffi: ^2.1.4

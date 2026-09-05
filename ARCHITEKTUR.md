@@ -168,7 +168,11 @@ OpenStreetMap's raster tiles when no archive is configured.
 `features/knowledge/` is the offline encyclopedia: a hand-written ZIM
 reader, a loopback HTTP server in front of it, and a WebView pointed at
 that. The server is what makes links, images and stylesheets inside an
-article resolve without any code — they come back to the same origin.
+article resolve without any code — they come back to the same origin. It
+is also what makes the platform split cheap: `articleViewer` picks an
+embedded panel where `webview_flutter` reaches an engine and a window of
+its own on Linux and Windows, where it does not, and both are handed the
+same URL.
 
 `features/sharing/` is the shared-folder sync. `SyncFolder` is an interface
 over "a directory" with a `dart:io` implementation, so the merge is tested

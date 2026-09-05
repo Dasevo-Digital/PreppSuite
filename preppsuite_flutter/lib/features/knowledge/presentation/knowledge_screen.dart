@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
+import '../application/article_viewer.dart';
 import '../application/knowledge_providers.dart';
 import '../application/zim_archive.dart';
 import 'article_screen.dart';
@@ -209,24 +210,34 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     KnowledgeState state,
     ZimEntry entry,
   ) async {
-    if (!supportsArticleView) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.knowledgeArticleUnsupported)),
-      );
-      return;
-    }
-
     final resolved = await state.archive!.resolve(entry);
     if (resolved == null || !mounted) return;
 
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => ArticleScreen(
-          title: entry.title,
-          uri: state.server!.uriFor(resolved),
-        ),
-      ),
-    );
+    final uri = state.server!.uriFor(resolved);
+
+    switch (articleViewer) {
+      case ArticleViewer.panel:
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (context) => ArticleScreen(title: entry.title, uri: uri),
+          ),
+        );
+
+      case ArticleViewer.window:
+        // Whether an engine is actually installed is only knowable by
+        // asking for one, so the message comes after the attempt rather
+        // than instead of it.
+        if (await openArticleWindow(title: entry.title, uri: uri)) return;
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.knowledgeArticleNoEngine)),
+        );
+
+      case ArticleViewer.none:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.knowledgeArticleUnsupported)),
+        );
+    }
   }
 
   Future<void> _choose(AppLocalizations l10n) async {
