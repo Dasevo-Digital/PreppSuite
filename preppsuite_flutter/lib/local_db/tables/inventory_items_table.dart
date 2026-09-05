@@ -1,19 +1,18 @@
 import 'package:drift/drift.dart';
 
-/// Local mirror of the server's `InventoryItem`. [clientId] is the row's
-/// stable local identity (generated on first insert, before any sync);
-/// [serverId] is filled in once the row has been pushed and echoed back.
-/// [dirty] marks rows with local edits not yet confirmed pushed.
+/// A stored supply. [clientId] is the row's identity everywhere — it is
+/// generated once, on the device that created the row, and is what a
+/// shared folder matches rows by. [dirty] marks local edits that have not
+/// been published to that folder yet.
 class InventoryItems extends Table {
   TextColumn get clientId => text()();
-  TextColumn get serverId => text().nullable()();
   TextColumn get householdId => text()();
 
   TextColumn get name => text()();
 
-  /// Stores an [InventoryItemCategory] enum name (see
-  /// `package:preppsuite_client`), kept as plain text here so this table
-  /// doesn't need to depend on the generated protocol package.
+  /// Stores an `InventoryItemCategory` enum name (see
+  /// `lib/model/categories.dart`) as plain text — which is why renaming a
+  /// value there silently orphans existing rows.
   TextColumn get category => text()();
 
   TextColumn get barcode => text().nullable()();
@@ -33,10 +32,9 @@ class InventoryItems extends Table {
 
   /// Path to a locally-stored photo of the item (see
   /// `inventory_photo_service.dart`), relative to the app's documents
-  /// directory. Local-only for now — photo sync is a future server-side
-  /// feature (binary uploads need their own endpoint, not the generic
-  /// JSON push/pull sync channel; see docs/sync-protocol.md's treatment of
-  /// large assets like map tiles for the established precedent).
+  /// directory. Device-local and deliberately never shared: the path means
+  /// nothing on another device, and the picture itself is not in the
+  /// folder. The shared-folder merge leaves this column alone.
   TextColumn get photoPath => text().nullable()();
 
   DateTimeColumn get updatedAt => dateTime()();

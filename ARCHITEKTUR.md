@@ -3,7 +3,8 @@
 Self-hosted-free household preparedness app (inventory, checklists, budget,
 official warnings, shelter map). **Everything runs on the device.** There is
 no server, no account and no network dependency beyond the public feeds the
-app fetches itself.
+app fetches itself. Several devices share a household through a folder they
+can all see — see [`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md).
 
 Single Flutter package: `preppsuite_flutter` (Flutter + Riverpod + drift).
 It used to be a three-package Serverpod workspace; the server and its
@@ -57,8 +58,31 @@ server stopped pre-filtering.
 in-memory list. A background isolate ends after every run.
 
 **`HouseholdProfile.id` is the partition key for every local table.** It is
-generated once and never changes, because two devices sharing a folder have
-to agree on it for their rows to merge rather than pile up side by side.
+generated once and changes exactly once more: joining a folder that already
+holds a household adopts that id, and `adoptHouseholdId` re-stamps every
+existing row onto it. Without the re-stamp those rows do not merge — they
+stop being visible, because every query selects by this column.
+
+**A device only ever writes its own file in the shared folder.** That is
+what makes the whole design work without locking: two people editing at the
+same time write different paths, so the cloud engine underneath never has to
+resolve a conflict — and the way those engines resolve one is to keep a copy
+and rename the other, which would silently split a household in two.
+
+**Merging is last-writer-wins by `updatedAt`, strictly greater.** Strictly,
+so replaying a snapshot is free and the order device files happen to be read
+in cannot change the result. It also means the clocks matter: a device set an
+hour ahead wins arguments it should lose. That is why deletions are
+tombstones — a wrong win can still be overruled.
+
+**Rows seeded by `ChecklistSeeder` carry a fixed `updatedAt`
+(`ChecklistSeeder.seededAt`), not `now()`.** A real timestamp would make a
+fresh install's seed newer than another device's month-old edits, and the
+merge would dutifully un-tick everything that had been ticked off.
+
+**Nothing a controller writes is ever pushed by the controller.** A local
+write only marks the row dirty; `SharedFolderSyncService` publishes on its
+own schedule. Controllers hold no `Ref` and start no sync.
 
 **Every local write must set `dirty: const Value(true)` explicitly.** The
 column defaults to true, but a default only applies on INSERT, and
@@ -68,9 +92,18 @@ marked clean. This was a real bug across all three controllers;
 `inventory_controller_test` guards it. The flag now feeds shared-folder sync
 rather than a server.
 
-**Adding a drift column means a migration.** Bump `schemaVersion` and add the
-matching branch to `onUpgrade` in the same edit — an existing install will not
-recreate its tables.
+**Adding or removing a drift column means a migration.** Bump
+`schemaVersion` and add the matching branch to `onUpgrade` in the same edit —
+an existing install will not recreate its tables. Removing one needs
+`m.alterTable(TableMigration(table))`, since SQLite cannot drop a column in
+place; `migration_to_8_test` writes out the old schema by hand and upgrades
+it for real, which is the only way that path is ever exercised.
+
+**The snapshot format in `device_snapshot.dart` is a contract, not a dump.**
+Row codecs are hand-written rather than drift's generated `toJson` precisely
+so that a migration does not silently change a file format other installs —
+and older app versions — have to keep reading. A decode returns null for
+anything it cannot use, which costs one row instead of the whole sync.
 
 **No hard-coded user-facing strings.** Every one goes through
 `AppLocalizations` with entries in both `app_de.arb` and `app_en.arb`.
@@ -85,6 +118,10 @@ lib/features/<feature>/
   application/     # logic, providers, HTTP clients — where the tests live
   presentation/    # widgets and screens
 ```
+
+`features/sharing/` is the shared-folder sync. `SyncFolder` is an interface
+over "a directory" with a `dart:io` implementation, so the merge is tested
+against an in-memory folder with several databases standing in for devices.
 
 Keep decision logic in `application/` so it stays testable without a widget
 tree; the test suite deliberately targets that layer rather than the UI.
@@ -104,6 +141,10 @@ tree; the test suite deliberately targets that layer rather than the UI.
   limit) and opportunistic on iOS. The app never promises the iOS case.
 - NINA delivers the same warnings in ~30 seconds against this app's 15
   minutes. The warning screen says so rather than pretending otherwise.
+- The folder picker on Android usually returns a path the app may not
+  write to (scoped storage). `IoSyncFolder.isWritable` probes at setup time
+  so the user is told rather than left with a feature that quietly does
+  nothing. A SAF backend would be the real fix and is not built.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

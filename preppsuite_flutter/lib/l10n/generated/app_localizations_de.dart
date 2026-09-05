@@ -757,18 +757,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Menge muss grösser als 0 und höchstens der Bestand sein.';
 
   @override
-  String get syncStaleTitle => 'Änderungen sind noch nicht geteilt';
-
-  @override
-  String get syncStaleNever =>
-      'Diese App hat den Server noch nie erreicht. Prüfe die Serveradresse in den Einstellungen.';
-
-  @override
-  String syncStaleSince(String age) {
-    return 'Zuletzt erfolgreich abgeglichen vor $age. Bis dahin bleiben Änderungen nur auf diesem Gerät.';
-  }
-
-  @override
   String get syncRetryButton => 'Erneut versuchen';
 
   @override
@@ -785,21 +773,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String syncAgeDays(int count) {
     return '$count Tagen';
   }
-
-  @override
-  String get serverAddressHint =>
-      'Adresse des Servers, mit dem sich diese App abgleicht.';
-
-  @override
-  String get serverAddressInvalid =>
-      'Das ist keine gültige Adresse. Beispiel: preppsuite.example.com oder 192.168.1.5:8080';
-
-  @override
-  String get serverAddressSignOutHint =>
-      'Nach einer Änderung musst du dich neu anmelden — ein Konto gilt nur auf seinem Server.';
-
-  @override
-  String get serverAddressChangeAction => 'Serveradresse ändern';
 
   @override
   String get csvExportButton => 'Als CSV ausgeben';
@@ -832,4 +805,95 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get personCountLabel => 'Personen im Haushalt';
+
+  @override
+  String get settingsSharingTitle => 'Gemeinsamer Ordner';
+
+  @override
+  String get sharingIntro =>
+      'Vorräte, Checklisten und Ausgaben liegen in einem Ordner, den mehrere Geräte sehen — etwa in Nextcloud, Syncthing, iCloud Drive oder Dropbox. PreppSuite schreibt dort nur Dateien. Wer sie transportiert, entscheidest du.';
+
+  @override
+  String get sharingInactive =>
+      'Dieses Gerät teilt nichts. Alle Daten bleiben hier.';
+
+  @override
+  String sharingActiveFolder(String path) {
+    return 'Ordner: $path';
+  }
+
+  @override
+  String get sharingChooseFolderAction => 'Ordner wählen';
+
+  @override
+  String get sharingChangeFolderAction => 'Anderen Ordner wählen';
+
+  @override
+  String get sharingLeaveAction => 'Nicht mehr teilen';
+
+  @override
+  String get sharingSyncNowAction => 'Jetzt abgleichen';
+
+  @override
+  String get sharingSyncing => 'Wird abgeglichen …';
+
+  @override
+  String get sharingNeverSynced => 'Noch nie abgeglichen.';
+
+  @override
+  String sharingLastSynced(String age) {
+    return 'Zuletzt abgeglichen vor $age.';
+  }
+
+  @override
+  String sharingDeviceCount(int count) {
+    return '$count Geräte teilen diesen Ordner.';
+  }
+
+  @override
+  String get sharingDeviceCountOne =>
+      'Bisher nutzt nur dieses Gerät den Ordner.';
+
+  @override
+  String sharingReceived(int count) {
+    return '$count Einträge von anderen Geräten übernommen.';
+  }
+
+  @override
+  String get sharingUpToDate => 'Alles auf dem Stand.';
+
+  @override
+  String get sharingErrorUnwritable =>
+      'In diesen Ordner lässt sich nicht schreiben. Unter macOS gilt die Freigabe nur bis zum Beenden der App — wähle den Ordner danach einfach erneut. Unter Android gibt die Ordnerauswahl oft einen Pfad zurück, den Apps nicht benutzen dürfen; dort funktioniert ein Ordner, den die Sync-App selbst angelegt hat.';
+
+  @override
+  String get sharingErrorUnreadable =>
+      'Im Ordner liegt bereits ein Haushalt, der sich nicht lesen lässt. Vermutlich stammt er aus einer neueren Version von PreppSuite.';
+
+  @override
+  String get sharingErrorVersion =>
+      'Die Dateien im Ordner stammen aus einer neueren Version. Es wurde nichts verändert.';
+
+  @override
+  String get sharingErrorFailed =>
+      'Der Abgleich ist fehlgeschlagen. Der nächste Versuch läuft von allein.';
+
+  @override
+  String sharingJoinedOther(String name) {
+    return 'Dieses Gerät gehört jetzt zum Haushalt „$name“. Die bisherigen Einträge wurden mitgenommen.';
+  }
+
+  @override
+  String get sharingLeaveDialogTitle => 'Nicht mehr teilen?';
+
+  @override
+  String get sharingLeaveDialogBody =>
+      'Dieses Gerät gleicht dann nicht mehr ab. Gelöscht wird nichts — weder hier noch im Ordner.';
+
+  @override
+  String get sharingLeaveDialogConfirm => 'Beenden';
+
+  @override
+  String get sharingErrorDifferentHousehold =>
+      'Der Ordner gehört zu einem anderen Haushalt. Es wurde nichts zusammengeführt — zwei fremde Datenbestände lassen sich nicht wieder trennen.';
 }

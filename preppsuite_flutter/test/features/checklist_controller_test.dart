@@ -28,13 +28,12 @@ void main() {
     await db.close();
   });
 
-  /// A template and one item, both already pushed once — the state the
-  /// dirty bug needed to bite: `dirty` at false, a server id present.
+  /// A template and one item that have already been published — `dirty`
+  /// at false, which is the state the dirty bug needed to bite.
   Future<(ChecklistTemplate, ChecklistItem)> syncedTemplateWithItem() async {
     await db.upsertChecklistTemplate(
       ChecklistTemplatesCompanion.insert(
         clientId: 'tpl-1',
-        serverId: const Value('srv-tpl-1'),
         householdId: const Value(householdId),
         title: 'Eigene Liste',
         category: 'custom',
@@ -45,7 +44,6 @@ void main() {
     await db.upsertChecklistItem(
       ChecklistItemsCompanion.insert(
         clientId: 'itm-1',
-        serverId: const Value('srv-itm-1'),
         householdId: const Value(householdId),
         templateClientId: 'tpl-1',
         title: 'Trinkwasser',
@@ -149,7 +147,6 @@ void main() {
       expect(templates, hasLength(1), reason: 'only the copy is dirty');
       final copy = templates.single;
       expect(copy.clientId, isNot('tpl-1'), reason: 'a fresh local identity');
-      expect(copy.serverId, isNull, reason: 'the copy was never pushed yet');
       expect(copy.title, 'Eigene Liste');
 
       final copiedItems = await db.watchChecklistItems(copy.clientId).first;

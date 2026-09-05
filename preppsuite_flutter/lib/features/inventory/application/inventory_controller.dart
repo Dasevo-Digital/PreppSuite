@@ -7,9 +7,12 @@ import '../../../local_db/database.dart';
 import 'inventory_csv_import.dart';
 import 'inventory_providers.dart';
 
-/// Local writes (create/update/delete-as-tombstone) plus nudging the sync
-/// controller afterward. The UI never talks to Drift or the network client
-/// directly — everything goes through here.
+/// Local writes: create, update, and delete-as-tombstone. The UI never
+/// talks to Drift directly — everything goes through here, which is what
+/// keeps `dirty` and `updatedAt` set on every path.
+///
+/// Nothing here pushes. A write only marks the row dirty; publishing it to
+/// a shared folder is the sync controller's job, on its own schedule.
 class InventoryController {
   InventoryController(this._db, this.householdId);
 
@@ -50,7 +53,6 @@ class InventoryController {
         dirty: const Value(true),
       ),
     );
-    _triggerSync();
   }
 
   Future<void> updateItem(
@@ -71,7 +73,6 @@ class InventoryController {
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
         clientId: existing.clientId,
-        serverId: Value(existing.serverId),
         householdId: existing.householdId,
         name: name,
         category: category.name,
@@ -89,7 +90,6 @@ class InventoryController {
         dirty: const Value(true),
       ),
     );
-    _triggerSync();
   }
 
   /// Inserts many items in a single batch, e.g. from a CSV import. Each
@@ -113,7 +113,6 @@ class InventoryController {
           dirty: const Value(true),
         ),
     ]);
-    _triggerSync();
   }
 
   /// Deducts [amount] from an item's stock — the rotation step: use up
@@ -133,7 +132,6 @@ class InventoryController {
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
         clientId: existing.clientId,
-        serverId: Value(existing.serverId),
         householdId: existing.householdId,
         name: existing.name,
         category: existing.category,
@@ -151,14 +149,12 @@ class InventoryController {
         dirty: const Value(true),
       ),
     );
-    _triggerSync();
   }
 
   Future<void> deleteItem(InventoryItem existing) async {
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
         clientId: existing.clientId,
-        serverId: Value(existing.serverId),
         householdId: existing.householdId,
         name: existing.name,
         category: existing.category,
@@ -177,10 +173,7 @@ class InventoryController {
         deletedAt: Value(DateTime.now().toUtc()),
       ),
     );
-    _triggerSync();
   }
-
-  void _triggerSync() {}
 }
 
 final inventoryControllerProvider = Provider.autoDispose

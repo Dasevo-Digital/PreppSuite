@@ -6,8 +6,8 @@ import 'package:uuid/uuid.dart';
 import '../../../local_db/database.dart';
 import 'budget_providers.dart';
 
-/// Local writes for budget entries, plus nudging sync afterward. See
-/// `InventoryController` for the general shape this follows.
+/// Local writes for budget entries. See `InventoryController` for the
+/// general shape this follows.
 class BudgetController {
   BudgetController(this._db, this.householdId);
 
@@ -34,7 +34,6 @@ class BudgetController {
         dirty: const Value(true),
       ),
     );
-    _triggerSync();
   }
 
   Future<void> updateEntry(
@@ -48,7 +47,6 @@ class BudgetController {
     await _db.upsertBudgetEntry(
       BudgetEntriesCompanion.insert(
         clientId: existing.clientId,
-        serverId: Value(existing.serverId),
         householdId: existing.householdId,
         label: label,
         amountCents: amountCents,
@@ -60,7 +58,6 @@ class BudgetController {
         dirty: const Value(true),
       ),
     );
-    _triggerSync();
   }
 
   Future<void> deleteEntry(BudgetEntry existing) async {
@@ -68,7 +65,6 @@ class BudgetController {
     await _db.upsertBudgetEntry(
       BudgetEntriesCompanion.insert(
         clientId: existing.clientId,
-        serverId: Value(existing.serverId),
         householdId: existing.householdId,
         label: existing.label,
         amountCents: existing.amountCents,
@@ -81,10 +77,7 @@ class BudgetController {
         deletedAt: Value(now),
       ),
     );
-    _triggerSync();
   }
-
-  void _triggerSync() {}
 }
 
 final budgetControllerProvider = Provider.autoDispose

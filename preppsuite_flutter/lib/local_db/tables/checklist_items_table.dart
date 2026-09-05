@@ -1,13 +1,11 @@
 import 'package:drift/drift.dart';
 
-/// Local mirror of the server's `ChecklistItem`. [templateClientId] links to
-/// [ChecklistTemplates.clientId] — the *local* id, not the server id, so an
-/// item created offline can reference its (also not-yet-synced) template
-/// immediately. The sync service is responsible for resolving this to the
-/// template's server id when pushing (see `SyncService.syncChecklists`).
+/// One line on a checklist. [templateClientId] links to
+/// [ChecklistTemplates.clientId], which is stable across devices — so an
+/// item and its template survive a trip through a shared folder together,
+/// in either order.
 class ChecklistItems extends Table {
   TextColumn get clientId => text()();
-  TextColumn get serverId => text().nullable()();
   TextColumn get householdId => text().nullable()();
   TextColumn get templateClientId => text()();
 

@@ -1,16 +1,16 @@
 import 'package:drift/drift.dart';
 
-/// Local mirror of the server's `ChecklistTemplate`. [householdId] is null
-/// for built-in templates shared read-only across all households.
+/// A checklist. [isBuiltIn] marks the templates the app seeds itself;
+/// those carry fixed [clientId]s so two devices seed the same rows rather
+/// than two copies of each.
 class ChecklistTemplates extends Table {
   TextColumn get clientId => text()();
-  TextColumn get serverId => text().nullable()();
   TextColumn get householdId => text().nullable()();
 
   TextColumn get title => text()();
 
   /// Stores a `ChecklistCategory` enum name (see
-  /// `package:preppsuite_client`) as plain text.
+  /// `lib/model/categories.dart`) as plain text.
   TextColumn get category => text()();
   BoolColumn get isBuiltIn => boolean().withDefault(const Constant(false))();
 

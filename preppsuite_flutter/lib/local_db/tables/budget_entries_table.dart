@@ -1,9 +1,8 @@
 import 'package:drift/drift.dart';
 
-/// Local mirror of the server's `BudgetEntry`.
+/// One purchase, for the budget overview.
 class BudgetEntries extends Table {
   TextColumn get clientId => text()();
-  TextColumn get serverId => text().nullable()();
   TextColumn get householdId => text()();
 
   TextColumn get label => text()();

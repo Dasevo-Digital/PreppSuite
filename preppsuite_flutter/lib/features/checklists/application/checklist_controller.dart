@@ -6,8 +6,8 @@ import 'package:uuid/uuid.dart';
 import '../../../local_db/database.dart';
 import 'checklist_providers.dart';
 
-/// Local writes for checklist templates/items, plus nudging sync afterward.
-/// See `InventoryController` for the general shape this follows.
+/// Local writes for checklist templates and items. See
+/// `InventoryController` for the general shape this follows.
 class ChecklistController {
   ChecklistController(this._db, this.householdId);
 
@@ -28,7 +28,6 @@ class ChecklistController {
         dirty: const Value(true),
       ),
     );
-    _triggerSync();
   }
 
   /// Copies [source] (built-in or the household's own) into a new,
@@ -64,7 +63,6 @@ class ChecklistController {
         ),
       );
     }
-    _triggerSync();
   }
 
   Future<void> deleteTemplate(ChecklistTemplate template) async {
@@ -72,7 +70,6 @@ class ChecklistController {
     await _db.upsertChecklistTemplate(
       ChecklistTemplatesCompanion.insert(
         clientId: template.clientId,
-        serverId: Value(template.serverId),
         householdId: Value(template.householdId),
         title: template.title,
         category: template.category,
@@ -87,7 +84,6 @@ class ChecklistController {
     for (final item in items) {
       await _deleteItem(item, now);
     }
-    _triggerSync();
   }
 
   Future<void> addItem({
@@ -108,14 +104,12 @@ class ChecklistController {
         dirty: const Value(true),
       ),
     );
-    _triggerSync();
   }
 
   Future<void> toggleItem(ChecklistItem item) async {
     await _db.upsertChecklistItem(
       ChecklistItemsCompanion.insert(
         clientId: item.clientId,
-        serverId: Value(item.serverId),
         householdId: Value(item.householdId),
         templateClientId: item.templateClientId,
         title: item.title,
@@ -127,19 +121,16 @@ class ChecklistController {
         dirty: const Value(true),
       ),
     );
-    _triggerSync();
   }
 
   Future<void> deleteItem(ChecklistItem item) async {
     await _deleteItem(item, DateTime.now().toUtc());
-    _triggerSync();
   }
 
   Future<void> _deleteItem(ChecklistItem item, DateTime deletedAt) {
     return _db.upsertChecklistItem(
       ChecklistItemsCompanion.insert(
         clientId: item.clientId,
-        serverId: Value(item.serverId),
         householdId: Value(item.householdId),
         templateClientId: item.templateClientId,
         title: item.title,
@@ -153,8 +144,6 @@ class ChecklistController {
       ),
     );
   }
-
-  void _triggerSync() {}
 }
 
 final checklistControllerProvider = Provider.autoDispose

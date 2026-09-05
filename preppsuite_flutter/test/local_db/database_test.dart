@@ -14,7 +14,6 @@ void main() {
 
   InventoryItemsCompanion draft({
     required String clientId,
-    String? serverId,
     String householdId = 'household-1',
     String name = 'Trinkwasser',
     double quantity = 6,
@@ -25,7 +24,6 @@ void main() {
   }) {
     return InventoryItemsCompanion.insert(
       clientId: clientId,
-      serverId: Value(serverId),
       householdId: householdId,
       name: name,
       category: 'water',
@@ -92,34 +90,39 @@ void main() {
   });
 
   test(
-    'markInventoryItemsSynced clears dirty and stamps server id/updatedAt',
+    'markHouseholdPublished only clears rows the snapshot contained',
     () async {
-      await db.upsertInventoryItem(draft(clientId: 'a'));
-      final syncedAt = DateTime.utc(2026, 3);
+      final readAt = DateTime.utc(2026, 3);
+      await db.upsertInventoryItem(
+        draft(clientId: 'in-snapshot', updatedAt: DateTime.utc(2026, 2)),
+      );
+      // Edited after the rows were read, so it is not in the file that was
+      // just written and has to stay dirty.
+      await db.upsertInventoryItem(
+        draft(
+          clientId: 'edited-during-write',
+          updatedAt: DateTime.utc(2026, 4),
+        ),
+      );
 
-      await db.markInventoryItemsSynced([('a', 'server-1', syncedAt)]);
+      await db.markHouseholdPublished('household-1', readAt);
 
-      final dirty = await db.dirtyInventoryItems('household-1');
-      final items = await db.watchInventoryItems('household-1').first;
-
-      expect(dirty, isEmpty);
-      expect(items.single.serverId, 'server-1');
-      // Drift hands back a local-time-flagged DateTime for the same
-      // instant (see AppDatabase.lastPulledAt's doc comment) — compare by
-      // instant, not by ==, which is also strict about the UTC flag.
-      expect(items.single.updatedAt.isAtSameMomentAs(syncedAt), isTrue);
+      expect(
+        (await db.dirtyInventoryItems('household-1')).map((e) => e.clientId),
+        ['edited-during-write'],
+      );
     },
   );
 
   test(
     'sync cursor defaults to null and persists after setLastPulledAt',
     () async {
-      expect(await db.lastPulledAt('inventory'), isNull);
+      expect(await db.lastPulledAt('sharedFolder'), isNull);
 
       final cursor = DateTime.utc(2026, 5);
-      await db.setLastPulledAt('inventory', cursor);
+      await db.setLastPulledAt('sharedFolder', cursor);
 
-      expect(await db.lastPulledAt('inventory'), cursor);
+      expect(await db.lastPulledAt('sharedFolder'), cursor);
     },
   );
 

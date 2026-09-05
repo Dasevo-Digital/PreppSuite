@@ -441,16 +441,6 @@
   "consumeDialogConfirm": "Deduct",
   "consumeDialogAll": "Used up entirely",
   "consumeInvalidAmount": "Amount must be greater than 0 and at most the stock on hand.",
-  "syncStaleTitle": "Changes have not been shared yet",
-  "syncStaleNever": "This app has never reached the server. Check the server address in the settings.",
-  "syncStaleSince": "Last successful sync {age} ago. Until then, changes stay on this device only.",
-  "@syncStaleSince": {
-    "placeholders": {
-      "age": {
-        "type": "String"
-      }
-    }
-  },
   "syncRetryButton": "Try again",
   "syncAgeMinutes": "{count} minutes",
   "@syncAgeMinutes": {
@@ -476,10 +466,6 @@
       }
     }
   },
-  "serverAddressHint": "Address of the server this app syncs with.",
-  "serverAddressInvalid": "That is not a valid address. For example: preppsuite.example.com or 192.168.1.5:8080",
-  "serverAddressSignOutHint": "After a change you will need to sign in again — an account only applies to its own server.",
-  "serverAddressChangeAction": "Change server address",
   "csvExportButton": "Export as CSV",
   "csvExportDialogTitle": "Save supplies as CSV",
   "csvExportSuccessMessage": "{count} items exported",
@@ -495,5 +481,64 @@
   "profileSetupTitle": "Set up your household",
   "profileSetupIntro": "PreppSuite runs entirely on this device. There is no account and no server — just these details, so warnings and supply targets match your situation.",
   "profileSetupSubmit": "Get started",
-  "personCountLabel": "People in the household"
+  "personCountLabel": "People in the household",
+  "settingsSharingTitle": "Shared folder",
+  "sharingIntro": "Supplies, checklists and spending live in a folder several devices can see — a Nextcloud, Syncthing, iCloud Drive or Dropbox directory. PreppSuite only writes files there. What carries them is your choice.",
+  "sharingInactive": "This device shares nothing. Everything stays here.",
+  "sharingActiveFolder": "Folder: {path}",
+  "@sharingActiveFolder": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "sharingChooseFolderAction": "Choose folder",
+  "sharingChangeFolderAction": "Choose a different folder",
+  "sharingLeaveAction": "Stop sharing",
+  "sharingSyncNowAction": "Sync now",
+  "sharingSyncing": "Syncing …",
+  "sharingNeverSynced": "Never synced yet.",
+  "sharingLastSynced": "Last synced {age} ago.",
+  "@sharingLastSynced": {
+    "placeholders": {
+      "age": {
+        "type": "String"
+      }
+    }
+  },
+  "sharingDeviceCount": "{count} devices share this folder.",
+  "@sharingDeviceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharingDeviceCountOne": "Only this device uses the folder so far.",
+  "sharingReceived": "Took {count} entries from other devices.",
+  "@sharingReceived": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sharingUpToDate": "Everything is up to date.",
+  "sharingErrorUnwritable": "This folder cannot be written to. On macOS the permission lasts only until the app quits — just pick the folder again afterwards. On Android the folder picker often returns a path apps are not allowed to use; there, a folder the sync app created itself works.",
+  "sharingErrorUnreadable": "There is already a household in this folder, and it cannot be read. It probably comes from a newer version of PreppSuite.",
+  "sharingErrorVersion": "The files in this folder come from a newer version. Nothing was changed.",
+  "sharingErrorFailed": "The sync failed. The next attempt runs on its own.",
+  "sharingJoinedOther": "This device now belongs to the household “{name}”. Its existing entries came along.",
+  "@sharingJoinedOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "sharingLeaveDialogTitle": "Stop sharing?",
+  "sharingLeaveDialogBody": "This device will stop syncing. Nothing is deleted — not here and not in the folder.",
+  "sharingLeaveDialogConfirm": "Stop",
+  "sharingErrorDifferentHousehold": "This folder belongs to a different household. Nothing was merged — two unrelated sets of data cannot be pulled apart again."
 }

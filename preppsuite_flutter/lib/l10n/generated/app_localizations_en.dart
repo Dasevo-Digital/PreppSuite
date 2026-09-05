@@ -753,18 +753,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Amount must be greater than 0 and at most the stock on hand.';
 
   @override
-  String get syncStaleTitle => 'Changes have not been shared yet';
-
-  @override
-  String get syncStaleNever =>
-      'This app has never reached the server. Check the server address in the settings.';
-
-  @override
-  String syncStaleSince(String age) {
-    return 'Last successful sync $age ago. Until then, changes stay on this device only.';
-  }
-
-  @override
   String get syncRetryButton => 'Try again';
 
   @override
@@ -781,20 +769,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String syncAgeDays(int count) {
     return '$count days';
   }
-
-  @override
-  String get serverAddressHint => 'Address of the server this app syncs with.';
-
-  @override
-  String get serverAddressInvalid =>
-      'That is not a valid address. For example: preppsuite.example.com or 192.168.1.5:8080';
-
-  @override
-  String get serverAddressSignOutHint =>
-      'After a change you will need to sign in again — an account only applies to its own server.';
-
-  @override
-  String get serverAddressChangeAction => 'Change server address';
 
   @override
   String get csvExportButton => 'Export as CSV';
@@ -825,4 +799,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get personCountLabel => 'People in the household';
+
+  @override
+  String get settingsSharingTitle => 'Shared folder';
+
+  @override
+  String get sharingIntro =>
+      'Supplies, checklists and spending live in a folder several devices can see — a Nextcloud, Syncthing, iCloud Drive or Dropbox directory. PreppSuite only writes files there. What carries them is your choice.';
+
+  @override
+  String get sharingInactive =>
+      'This device shares nothing. Everything stays here.';
+
+  @override
+  String sharingActiveFolder(String path) {
+    return 'Folder: $path';
+  }
+
+  @override
+  String get sharingChooseFolderAction => 'Choose folder';
+
+  @override
+  String get sharingChangeFolderAction => 'Choose a different folder';
+
+  @override
+  String get sharingLeaveAction => 'Stop sharing';
+
+  @override
+  String get sharingSyncNowAction => 'Sync now';
+
+  @override
+  String get sharingSyncing => 'Syncing …';
+
+  @override
+  String get sharingNeverSynced => 'Never synced yet.';
+
+  @override
+  String sharingLastSynced(String age) {
+    return 'Last synced $age ago.';
+  }
+
+  @override
+  String sharingDeviceCount(int count) {
+    return '$count devices share this folder.';
+  }
+
+  @override
+  String get sharingDeviceCountOne =>
+      'Only this device uses the folder so far.';
+
+  @override
+  String sharingReceived(int count) {
+    return 'Took $count entries from other devices.';
+  }
+
+  @override
+  String get sharingUpToDate => 'Everything is up to date.';
+
+  @override
+  String get sharingErrorUnwritable =>
+      'This folder cannot be written to. On macOS the permission lasts only until the app quits — just pick the folder again afterwards. On Android the folder picker often returns a path apps are not allowed to use; there, a folder the sync app created itself works.';
+
+  @override
+  String get sharingErrorUnreadable =>
+      'There is already a household in this folder, and it cannot be read. It probably comes from a newer version of PreppSuite.';
+
+  @override
+  String get sharingErrorVersion =>
+      'The files in this folder come from a newer version. Nothing was changed.';
+
+  @override
+  String get sharingErrorFailed =>
+      'The sync failed. The next attempt runs on its own.';
+
+  @override
+  String sharingJoinedOther(String name) {
+    return 'This device now belongs to the household “$name”. Its existing entries came along.';
+  }
+
+  @override
+  String get sharingLeaveDialogTitle => 'Stop sharing?';
+
+  @override
+  String get sharingLeaveDialogBody =>
+      'This device will stop syncing. Nothing is deleted — not here and not in the folder.';
+
+  @override
+  String get sharingLeaveDialogConfirm => 'Stop';
+
+  @override
+  String get sharingErrorDifferentHousehold =>
+      'This folder belongs to a different household. Nothing was merged — two unrelated sets of data cannot be pulled apart again.';
 }

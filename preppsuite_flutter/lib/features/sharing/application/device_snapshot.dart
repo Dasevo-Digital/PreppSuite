@@ -1,0 +1,294 @@
+import 'dart:convert';
+
+import 'package:drift/drift.dart';
+
+import '../../../local_db/database.dart';
+
+/// Everything one device knows, as one file.
+///
+/// A full snapshot rather than a log of changes. That costs a few hundred
+/// kilobytes per device and buys two things worth far more: a device that
+/// was offline for a month needs no catch-up, and a household whose
+/// original device is gone still has every row, because every other device
+/// has been republishing them all along.
+///
+/// Rows travel with their `updatedAt`, and the merge keeps the newer one.
+/// Which means the clocks matter: a device set an hour into the future
+/// wins arguments it should lose. That is the accepted cost of having no
+/// server to arbitrate, and it is why nothing here is deleted outright —
+/// every deletion is a tombstone that can itself be overruled.
+class DeviceSnapshot {
+  const DeviceSnapshot({
+    required this.deviceId,
+    required this.householdId,
+    required this.writtenAt,
+    this.inventoryItems = const [],
+    this.checklistTemplates = const [],
+    this.checklistItems = const [],
+    this.budgetEntries = const [],
+  });
+
+  /// See [HouseholdFile.currentVersion] for how a mismatch is handled: a
+  /// file claiming a newer version is skipped, not guessed at.
+  static const currentVersion = 1;
+
+  final String deviceId;
+  final String householdId;
+  final DateTime writtenAt;
+
+  final List<Map<String, Object?>> inventoryItems;
+  final List<Map<String, Object?>> checklistTemplates;
+  final List<Map<String, Object?>> checklistItems;
+  final List<Map<String, Object?>> budgetEntries;
+
+  String encode() => const JsonEncoder.withIndent('  ').convert({
+    'version': currentVersion,
+    'deviceId': deviceId,
+    'householdId': householdId,
+    'writtenAt': writtenAt.toUtc().toIso8601String(),
+    'inventoryItems': inventoryItems,
+    'checklistTemplates': checklistTemplates,
+    'checklistItems': checklistItems,
+    'budgetEntries': budgetEntries,
+  });
+
+  static DeviceSnapshot? decode(String raw) {
+    try {
+      final json = jsonDecode(raw);
+      if (json is! Map<String, Object?>) return null;
+
+      final version = json['version'];
+      if (version is! int || version > currentVersion) return null;
+
+      final deviceId = json['deviceId'];
+      final householdId = json['householdId'];
+      if (deviceId is! String || deviceId.isEmpty) return null;
+      if (householdId is! String || householdId.isEmpty) return null;
+
+      return DeviceSnapshot(
+        deviceId: deviceId,
+        householdId: householdId,
+        writtenAt: asUtcDate(json['writtenAt']) ?? DateTime.now().toUtc(),
+        inventoryItems: _rows(json['inventoryItems']),
+        checklistTemplates: _rows(json['checklistTemplates']),
+        checklistItems: _rows(json['checklistItems']),
+        budgetEntries: _rows(json['budgetEntries']),
+      );
+    } on FormatException {
+      return null;
+    }
+  }
+
+  static List<Map<String, Object?>> _rows(Object? value) => [
+    if (value is List)
+      for (final entry in value)
+        if (entry is Map<String, Object?>) entry,
+  ];
+}
+
+// --- Row codecs --------------------------------------------------------
+//
+// Written by hand rather than using drift's generated `toJson`. The
+// generated one follows the column list, which would make every future
+// migration a silent change to a file format that other installs — and
+// older app versions — have to keep reading. These name their fields
+// explicitly and skip anything they don't recognize.
+
+Map<String, Object?> encodeInventoryItem(InventoryItem row) => {
+  'clientId': row.clientId,
+  'householdId': row.householdId,
+  'name': row.name,
+  'category': row.category,
+  'barcode': row.barcode,
+  'offProductId': row.offProductId,
+  'quantity': row.quantity,
+  'unit': row.unit,
+  'storageLocation': row.storageLocation,
+  'expirationDate': _date(row.expirationDate),
+  'minQuantity': row.minQuantity,
+  'calories': row.calories,
+  'notes': row.notes,
+  'updatedAt': _date(row.updatedAt),
+  'deletedAt': _date(row.deletedAt),
+  // photoPath is deliberately absent: it points into this device's
+  // documents directory, and the picture itself is not in the folder. A
+  // path that resolves to nothing on the other device is worse than no
+  // path at all. The merge leaves the local value untouched.
+};
+
+/// Returns null when the row is unusable, so one bad entry costs one row
+/// rather than the whole sync.
+InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
+  final clientId = _string(json['clientId']);
+  final householdId = _string(json['householdId']);
+  final name = _string(json['name']);
+  final category = _string(json['category']);
+  final quantity = _double(json['quantity']);
+  final updatedAt = asUtcDate(json['updatedAt']);
+  if (clientId == null ||
+      householdId == null ||
+      name == null ||
+      category == null ||
+      quantity == null ||
+      updatedAt == null) {
+    return null;
+  }
+
+  return InventoryItemsCompanion.insert(
+    clientId: clientId,
+    householdId: householdId,
+    name: name,
+    category: category,
+    barcode: Value(_string(json['barcode'])),
+    offProductId: Value(_string(json['offProductId'])),
+    quantity: quantity,
+    unit: _string(json['unit']) ?? '',
+    storageLocation: _string(json['storageLocation']) ?? '',
+    expirationDate: Value(asUtcDate(json['expirationDate'])),
+    minQuantity: Value(_double(json['minQuantity'])),
+    calories: Value(_int(json['calories'])),
+    notes: Value(_string(json['notes'])),
+    updatedAt: updatedAt,
+    deletedAt: Value(asUtcDate(json['deletedAt'])),
+    // Arrived from elsewhere, so there is nothing of ours to publish.
+    dirty: const Value(false),
+  );
+}
+
+Map<String, Object?> encodeChecklistTemplate(ChecklistTemplate row) => {
+  'clientId': row.clientId,
+  'householdId': row.householdId,
+  'title': row.title,
+  'category': row.category,
+  'isBuiltIn': row.isBuiltIn,
+  'updatedAt': _date(row.updatedAt),
+  'deletedAt': _date(row.deletedAt),
+};
+
+ChecklistTemplatesCompanion? decodeChecklistTemplate(
+  Map<String, Object?> json,
+) {
+  final clientId = _string(json['clientId']);
+  final title = _string(json['title']);
+  final category = _string(json['category']);
+  final updatedAt = asUtcDate(json['updatedAt']);
+  if (clientId == null ||
+      title == null ||
+      category == null ||
+      updatedAt == null) {
+    return null;
+  }
+
+  return ChecklistTemplatesCompanion.insert(
+    clientId: clientId,
+    householdId: Value(_string(json['householdId'])),
+    title: title,
+    category: category,
+    isBuiltIn: Value(json['isBuiltIn'] == true),
+    updatedAt: updatedAt,
+    deletedAt: Value(asUtcDate(json['deletedAt'])),
+    dirty: const Value(false),
+  );
+}
+
+Map<String, Object?> encodeChecklistItem(ChecklistItem row) => {
+  'clientId': row.clientId,
+  'householdId': row.householdId,
+  'templateClientId': row.templateClientId,
+  'title': row.title,
+  'targetQuantity': row.targetQuantity,
+  'isChecked': row.isChecked,
+  'linkedInventoryItemId': row.linkedInventoryItemId,
+  'sortOrder': row.sortOrder,
+  'updatedAt': _date(row.updatedAt),
+  'deletedAt': _date(row.deletedAt),
+};
+
+ChecklistItemsCompanion? decodeChecklistItem(Map<String, Object?> json) {
+  final clientId = _string(json['clientId']);
+  final templateClientId = _string(json['templateClientId']);
+  final title = _string(json['title']);
+  final updatedAt = asUtcDate(json['updatedAt']);
+  if (clientId == null ||
+      templateClientId == null ||
+      title == null ||
+      updatedAt == null) {
+    return null;
+  }
+
+  return ChecklistItemsCompanion.insert(
+    clientId: clientId,
+    householdId: Value(_string(json['householdId'])),
+    templateClientId: templateClientId,
+    title: title,
+    targetQuantity: Value(_double(json['targetQuantity'])),
+    isChecked: Value(json['isChecked'] == true),
+    linkedInventoryItemId: Value(_string(json['linkedInventoryItemId'])),
+    sortOrder: Value(_int(json['sortOrder']) ?? 0),
+    updatedAt: updatedAt,
+    deletedAt: Value(asUtcDate(json['deletedAt'])),
+    dirty: const Value(false),
+  );
+}
+
+Map<String, Object?> encodeBudgetEntry(BudgetEntry row) => {
+  'clientId': row.clientId,
+  'householdId': row.householdId,
+  'label': row.label,
+  'amountCents': row.amountCents,
+  'currency': row.currency,
+  'category': row.category,
+  'purchaseDate': _date(row.purchaseDate),
+  'linkedInventoryItemId': row.linkedInventoryItemId,
+  'updatedAt': _date(row.updatedAt),
+  'deletedAt': _date(row.deletedAt),
+};
+
+BudgetEntriesCompanion? decodeBudgetEntry(Map<String, Object?> json) {
+  final clientId = _string(json['clientId']);
+  final householdId = _string(json['householdId']);
+  final label = _string(json['label']);
+  final amountCents = _int(json['amountCents']);
+  final currency = _string(json['currency']);
+  final category = _string(json['category']);
+  final updatedAt = asUtcDate(json['updatedAt']);
+  if (clientId == null ||
+      householdId == null ||
+      label == null ||
+      amountCents == null ||
+      currency == null ||
+      category == null ||
+      updatedAt == null) {
+    return null;
+  }
+
+  return BudgetEntriesCompanion.insert(
+    clientId: clientId,
+    householdId: householdId,
+    label: label,
+    amountCents: amountCents,
+    currency: currency,
+    category: category,
+    purchaseDate: Value(asUtcDate(json['purchaseDate'])),
+    linkedInventoryItemId: Value(_string(json['linkedInventoryItemId'])),
+    updatedAt: updatedAt,
+    deletedAt: Value(asUtcDate(json['deletedAt'])),
+    dirty: const Value(false),
+  );
+}
+
+/// ISO-8601 in UTC throughout, so a file stays readable and comparable
+/// regardless of which timezone the device that wrote it was in.
+String? _date(DateTime? value) => value?.toUtc().toIso8601String();
+
+DateTime? asUtcDate(Object? value) {
+  if (value is! String) return null;
+  return DateTime.tryParse(value)?.toUtc();
+}
+
+String? _string(Object? value) =>
+    value is String && value.isNotEmpty ? value : null;
+
+int? _int(Object? value) => value is num ? value.toInt() : null;
+
+double? _double(Object? value) => value is num ? value.toDouble() : null;

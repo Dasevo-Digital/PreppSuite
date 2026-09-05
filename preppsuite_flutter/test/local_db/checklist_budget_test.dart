@@ -106,19 +106,39 @@ void main() {
       },
     );
 
+    test('checklistTemplateByClientId finds the row', () async {
+      await db.upsertChecklistTemplate(draftTemplate(clientId: 'a'));
+
+      expect((await db.checklistTemplateByClientId('a'))?.clientId, 'a');
+    });
+
     test(
-      'checklistTemplateByClientId and byServerId find the same row',
+      'claimOrphanChecklistRows adopts rows an older install left without '
+      'a household, so the shared-folder snapshot can see them',
       () async {
-        await db.upsertChecklistTemplate(draftTemplate(clientId: 'a'));
-        await db.markChecklistTemplatesSynced([
-          ('a', 'server-a', DateTime.utc(2026, 3)),
-        ]);
+        await db.upsertChecklistTemplate(
+          draftTemplate(clientId: 'orphan', householdId: null),
+        );
+        await db.upsertChecklistItem(
+          draftItem(
+            clientId: 'orphan-item',
+            templateClientId: 'orphan',
+            householdId: null,
+          ),
+        );
 
-        final byClient = await db.checklistTemplateByClientId('a');
-        final byServer = await db.checklistTemplateByServerId('server-a');
+        expect(await db.checklistTemplatesForSync('household-1'), isEmpty);
 
-        expect(byClient?.clientId, 'a');
-        expect(byServer?.clientId, 'a');
+        await db.claimOrphanChecklistRows('household-1');
+
+        expect(
+          (await db.checklistTemplatesForSync('household-1')).single.clientId,
+          'orphan',
+        );
+        expect(
+          (await db.checklistItemsForSync('household-1')).single.clientId,
+          'orphan-item',
+        );
       },
     );
 
@@ -200,16 +220,14 @@ void main() {
       expect(entries.map((e) => e.clientId), ['b']);
     });
 
-    test('dirtyBudgetEntries and markBudgetEntriesSynced round-trip', () async {
+    test('dirtyBudgetEntries clears once the household is published', () async {
       await db.upsertBudgetEntry(draftBudget(clientId: 'a'));
       expect(
         (await db.dirtyBudgetEntries('household-1')).map((e) => e.clientId),
         ['a'],
       );
 
-      await db.markBudgetEntriesSynced([
-        ('a', 'server-a', DateTime.utc(2026, 4)),
-      ]);
+      await db.markHouseholdPublished('household-1', DateTime.utc(2026, 4));
 
       expect(await db.dirtyBudgetEntries('household-1'), isEmpty);
     });

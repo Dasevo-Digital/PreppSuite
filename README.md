@@ -36,9 +36,9 @@ Mindestbestand liegen.
 allen Ansichten und als Verlauf. Quellen sind das BBK über
 warnung.bund.de – alle sechs Kanäle, von MoWaS und DWD über Katwarn und
 Biwapp bis Hochwasser und Polizei – sowie MeteoAlarm für 18 europäische
-Länder. Der Server fragt alle 15 Minuten ab und filtert BBK-Warnungen bis
-auf Kreisebene, sodass ein Haushalt nicht die Meldungen des halben Landes
-sieht.
+Länder. Abgefragt wird alle 15 Minuten; BBK-Warnungen werden bis auf
+Kreisebene gefiltert, sodass ein Haushalt nicht die Meldungen des halben
+Landes sieht.
 
 Der Abruf läuft in der App selbst, nicht über einen Server – beide Quellen
 sind öffentlich und ohne Schlüssel. Auf Android und iOS läuft er zusätzlich
@@ -55,10 +55,15 @@ die App sagt das an Ort und Stelle auch selbst.
 der WWBOTA-Datenbank, nach Entfernung und nach Belastbarkeit der Angabe
 filterbar.
 
-**Haushalt.** Mehrere Personen teilen sich Bestände, Listen und Budget.
-Beitritt über einen achtstelligen Einladungscode, dessen Zeichenvorrat
-verwechselbare Zeichen auslässt. Wer den Haushalt angelegt hat, kann den
-Code erneuern und Mitglieder entfernen.
+**Teilen.** Mehrere Geräte teilen sich Bestände, Listen und Budget über
+einen Ordner, den sie alle sehen – Nextcloud, Syncthing, iCloud Drive,
+Dropbox. PreppSuite legt dort nur Dateien ab; wer sie transportiert,
+entscheidest du. Kein Konto, kein Einladungscode, kein Dienst dazwischen.
+
+Jedes Gerät schreibt genau eine Datei und liest alle anderen, sodass zwei
+Personen nie dieselbe Datei beschreiben. Bei gleichzeitiger Änderung
+derselben Zeile gewinnt die jüngere. Einzelheiten samt Grenzen in
+[`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md).
 
 Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
 
@@ -109,46 +114,36 @@ er selbst kontrolliert.
 
 ## Aufbau
 
-| Verzeichnis | Inhalt |
-| --- | --- |
-| `preppsuite_server` | Serverpod-Backend: Endpunkte, Dienste, Datenmodelle, Warnfeed-Abruf |
-| `preppsuite_client` | Erzeugter Client. Wird nicht von Hand bearbeitet |
-| `preppsuite_flutter` | Die App |
-| `scripts` | `generate-env.sh` für den ersten Start |
-| `docs` | Warnquellen und Push-Benachrichtigungen im Detail |
+Ein einziges Paket, `preppsuite_flutter`. Darin liegt der Code nach
+Funktion getrennt: `lib/local_db` die Datenbank, `lib/model` die einfachen
+Typen, `lib/features/<name>/application` die Logik und `presentation` die
+Oberfläche.
 
 Die Anwendung liest ausschliesslich aus einer lokalen Datenbank auf dem
-Gerät; der Abgleich mit dem Server läuft daneben und schreibt in dieselbe
-Datenbank. Änderungen bekommen auf dem Gerät eine Kennung, werden als
-offen markiert und beim nächsten Abgleich übertragen; gelöscht wird nur
-als Merker, damit die Löschung auch auf den anderen Geräten ankommt. Bei
-gleichzeitiger Änderung gewinnt die jüngere.
-
-Im Wurzelverzeichnis liegt `docker-compose.yml` für den Betrieb — Server,
-Datenbank und Redis zusammen. Nicht zu verwechseln mit
-`preppsuite_server/docker-compose.yaml`, das nur PostgreSQL und Redis für
-die Entwicklung startet.
+Gerät. Änderungen bekommen dort eine Kennung und werden als offen
+markiert; gelöscht wird nur als Merker, damit die Löschung auch auf den
+anderen Geräten ankommt. Der Abgleich über den gemeinsamen Ordner läuft
+daneben und schreibt in dieselbe Datenbank.
 
 Die Annahmen, die dahinterstehen, sind in [`CLAUDE.md`](CLAUDE.md)
 aufgeschrieben, die Warnquellen in
-[`docs/warning-feeds.md`](docs/warning-feeds.md) und der Push-Weg in
-[`docs/push-notifications.md`](docs/push-notifications.md).
+[`docs/warning-feeds.md`](docs/warning-feeds.md) und das Ordnerformat in
+[`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md).
 
 ## Entwicklung
 
 ```bash
 flutter pub get                                   # im Wurzelverzeichnis
-flutter analyze                                   # alle drei Pakete
+flutter analyze
 dart format --output=none --set-exit-if-changed .
 
-cd preppsuite_flutter && flutter test             # App, ohne Server
-cd preppsuite_server && docker compose up -d && dart test
+cd preppsuite_flutter && flutter test
 ```
 
-Nach jeder Änderung an einer Modellbeschreibung (`*.spy.yaml`):
+Nach jeder Änderung an einer Tabelle:
 
 ```bash
-cd preppsuite_server && serverpod generate
+cd preppsuite_flutter && dart run build_runner build
 ```
 
 ## Lizenz
@@ -166,10 +161,20 @@ Die mitgelieferte Schrift Noto Sans steht unter der SIL Open Font License
 
 Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
 
-- **Teilen zwischen mehreren Personen fehlt derzeit.** Mit dem Server ist es
-  weggefallen; der Ersatz über einen gemeinsamen Cloud-Ordner ist noch nicht
-  gebaut. Der Datenbestand trägt die dafür nötigen Merkmale bereits (stabile
-  Kennungen je Zeile, Änderungsmerker, Löschmarken statt echtem Löschen).
+- **Der gemeinsame Ordner ist unter Android eingeschränkt.** Die
+  Ordnerauswahl gibt dort oft einen Pfad zurück, in den Apps nicht
+  schreiben dürfen. Die App probiert das beim Einrichten aus und sagt es,
+  statt später still nichts zu tun; es funktioniert dann ein Ordner, den
+  die Sync-App selbst angelegt hat. Der saubere Weg wäre ein SAF-Zugang und
+  ist nicht gebaut. Unter macOS gilt die Freigabe eines Ordners nur bis zum
+  Beenden der App – danach muss er erneut gewählt werden, weil die App in
+  der Sandbox läuft. Auf Linux und Windows funktioniert jeder Ordner
+  dauerhaft.
+- Der Abgleich ist kein Echtzeit-Abgleich: alle zwei Minuten, beim Start und
+  beim Zurückkehren in die App – dazu die Laufzeit des Dienstes, der die
+  Dateien transportiert.
+- PreppSuite verschlüsselt den Ordner nicht. Wer ihn lesen kann, liest den
+  Haushalt.
 - MeteoAlarm-Warnungen lassen sich nicht nach Region filtern – ihre
   Gebietsangabe ist freier Text ohne Schlüssel. Sie gelten deshalb für jeden
   Haushalt des Landes. BBK-Warnungen werden bis auf Kreisebene gefiltert;
@@ -184,7 +189,7 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
 - Karten und Wikipedia sind noch nicht offline verfügbar. Beides ist geplant:
   Vektorkarten als PMTiles, Wikipedia als ZIM-Datei.
 - Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen
-  wurden.
+  wurden – im Ordner liegen nur die Daten, nicht die Bilder.
 - Veröffentlicht wird bisher nur eine macOS-Fassung. Android baut durch und
   wurde am fertigen Paket geprüft; die Release-APK ist noch mit dem
   Debug-Schlüssel signiert. Für iOS ist geprüft, dass die App durchbaut;

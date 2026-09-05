@@ -20,17 +20,6 @@ class $InventoryItemsTable extends InventoryItems
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _serverIdMeta = const VerificationMeta(
-    'serverId',
-  );
-  @override
-  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
-    'server_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _householdIdMeta = const VerificationMeta(
     'householdId',
   );
@@ -207,7 +196,6 @@ class $InventoryItemsTable extends InventoryItems
   @override
   List<GeneratedColumn> get $columns => [
     clientId,
-    serverId,
     householdId,
     name,
     category,
@@ -244,12 +232,6 @@ class $InventoryItemsTable extends InventoryItems
       );
     } else if (isInserting) {
       context.missing(_clientIdMeta);
-    }
-    if (data.containsKey('server_id')) {
-      context.handle(
-        _serverIdMeta,
-        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
-      );
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -389,10 +371,6 @@ class $InventoryItemsTable extends InventoryItems
         DriftSqlType.string,
         data['${effectivePrefix}client_id'],
       )!,
-      serverId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}server_id'],
-      ),
       householdId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}household_id'],
@@ -468,13 +446,12 @@ class $InventoryItemsTable extends InventoryItems
 
 class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   final String clientId;
-  final String? serverId;
   final String householdId;
   final String name;
 
-  /// Stores an [InventoryItemCategory] enum name (see
-  /// `package:preppsuite_client`), kept as plain text here so this table
-  /// doesn't need to depend on the generated protocol package.
+  /// Stores an `InventoryItemCategory` enum name (see
+  /// `lib/model/categories.dart`) as plain text — which is why renaming a
+  /// value there silently orphans existing rows.
   final String category;
   final String? barcode;
   final String? offProductId;
@@ -492,17 +469,15 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
 
   /// Path to a locally-stored photo of the item (see
   /// `inventory_photo_service.dart`), relative to the app's documents
-  /// directory. Local-only for now — photo sync is a future server-side
-  /// feature (binary uploads need their own endpoint, not the generic
-  /// JSON push/pull sync channel; see docs/sync-protocol.md's treatment of
-  /// large assets like map tiles for the established precedent).
+  /// directory. Device-local and deliberately never shared: the path means
+  /// nothing on another device, and the picture itself is not in the
+  /// folder. The shared-folder merge leaves this column alone.
   final String? photoPath;
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final bool dirty;
   const InventoryItem({
     required this.clientId,
-    this.serverId,
     required this.householdId,
     required this.name,
     required this.category,
@@ -524,9 +499,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['client_id'] = Variable<String>(clientId);
-    if (!nullToAbsent || serverId != null) {
-      map['server_id'] = Variable<String>(serverId);
-    }
     map['household_id'] = Variable<String>(householdId);
     map['name'] = Variable<String>(name);
     map['category'] = Variable<String>(category);
@@ -565,9 +537,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   InventoryItemsCompanion toCompanion(bool nullToAbsent) {
     return InventoryItemsCompanion(
       clientId: Value(clientId),
-      serverId: serverId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(serverId),
       householdId: Value(householdId),
       name: Value(name),
       category: Value(category),
@@ -610,7 +579,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return InventoryItem(
       clientId: serializer.fromJson<String>(json['clientId']),
-      serverId: serializer.fromJson<String?>(json['serverId']),
       householdId: serializer.fromJson<String>(json['householdId']),
       name: serializer.fromJson<String>(json['name']),
       category: serializer.fromJson<String>(json['category']),
@@ -634,7 +602,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'clientId': serializer.toJson<String>(clientId),
-      'serverId': serializer.toJson<String?>(serverId),
       'householdId': serializer.toJson<String>(householdId),
       'name': serializer.toJson<String>(name),
       'category': serializer.toJson<String>(category),
@@ -656,7 +623,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
 
   InventoryItem copyWith({
     String? clientId,
-    Value<String?> serverId = const Value.absent(),
     String? householdId,
     String? name,
     String? category,
@@ -675,7 +641,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     bool? dirty,
   }) => InventoryItem(
     clientId: clientId ?? this.clientId,
-    serverId: serverId.present ? serverId.value : this.serverId,
     householdId: householdId ?? this.householdId,
     name: name ?? this.name,
     category: category ?? this.category,
@@ -698,7 +663,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   InventoryItem copyWithCompanion(InventoryItemsCompanion data) {
     return InventoryItem(
       clientId: data.clientId.present ? data.clientId.value : this.clientId,
-      serverId: data.serverId.present ? data.serverId.value : this.serverId,
       householdId: data.householdId.present
           ? data.householdId.value
           : this.householdId,
@@ -732,7 +696,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   String toString() {
     return (StringBuffer('InventoryItem(')
           ..write('clientId: $clientId, ')
-          ..write('serverId: $serverId, ')
           ..write('householdId: $householdId, ')
           ..write('name: $name, ')
           ..write('category: $category, ')
@@ -756,7 +719,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   @override
   int get hashCode => Object.hash(
     clientId,
-    serverId,
     householdId,
     name,
     category,
@@ -779,7 +741,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       identical(this, other) ||
       (other is InventoryItem &&
           other.clientId == this.clientId &&
-          other.serverId == this.serverId &&
           other.householdId == this.householdId &&
           other.name == this.name &&
           other.category == this.category &&
@@ -800,7 +761,6 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
 
 class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<String> clientId;
-  final Value<String?> serverId;
   final Value<String> householdId;
   final Value<String> name;
   final Value<String> category;
@@ -820,7 +780,6 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<int> rowid;
   const InventoryItemsCompanion({
     this.clientId = const Value.absent(),
-    this.serverId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.name = const Value.absent(),
     this.category = const Value.absent(),
@@ -841,7 +800,6 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   });
   InventoryItemsCompanion.insert({
     required String clientId,
-    this.serverId = const Value.absent(),
     required String householdId,
     required String name,
     required String category,
@@ -869,7 +827,6 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
        updatedAt = Value(updatedAt);
   static Insertable<InventoryItem> custom({
     Expression<String>? clientId,
-    Expression<String>? serverId,
     Expression<String>? householdId,
     Expression<String>? name,
     Expression<String>? category,
@@ -890,7 +847,6 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   }) {
     return RawValuesInsertable({
       if (clientId != null) 'client_id': clientId,
-      if (serverId != null) 'server_id': serverId,
       if (householdId != null) 'household_id': householdId,
       if (name != null) 'name': name,
       if (category != null) 'category': category,
@@ -913,7 +869,6 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
 
   InventoryItemsCompanion copyWith({
     Value<String>? clientId,
-    Value<String?>? serverId,
     Value<String>? householdId,
     Value<String>? name,
     Value<String>? category,
@@ -934,7 +889,6 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   }) {
     return InventoryItemsCompanion(
       clientId: clientId ?? this.clientId,
-      serverId: serverId ?? this.serverId,
       householdId: householdId ?? this.householdId,
       name: name ?? this.name,
       category: category ?? this.category,
@@ -960,9 +914,6 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     final map = <String, Expression>{};
     if (clientId.present) {
       map['client_id'] = Variable<String>(clientId.value);
-    }
-    if (serverId.present) {
-      map['server_id'] = Variable<String>(serverId.value);
     }
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
@@ -1022,7 +973,6 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   String toString() {
     return (StringBuffer('InventoryItemsCompanion(')
           ..write('clientId: $clientId, ')
-          ..write('serverId: $serverId, ')
           ..write('householdId: $householdId, ')
           ..write('name: $name, ')
           ..write('category: $category, ')
@@ -1061,17 +1011,6 @@ class $ChecklistTemplatesTable extends ChecklistTemplates
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-  );
-  static const VerificationMeta _serverIdMeta = const VerificationMeta(
-    'serverId',
-  );
-  @override
-  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
-    'server_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
   );
   static const VerificationMeta _householdIdMeta = const VerificationMeta(
     'householdId',
@@ -1157,7 +1096,6 @@ class $ChecklistTemplatesTable extends ChecklistTemplates
   @override
   List<GeneratedColumn> get $columns => [
     clientId,
-    serverId,
     householdId,
     title,
     category,
@@ -1185,12 +1123,6 @@ class $ChecklistTemplatesTable extends ChecklistTemplates
       );
     } else if (isInserting) {
       context.missing(_clientIdMeta);
-    }
-    if (data.containsKey('server_id')) {
-      context.handle(
-        _serverIdMeta,
-        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
-      );
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -1256,10 +1188,6 @@ class $ChecklistTemplatesTable extends ChecklistTemplates
         DriftSqlType.string,
         data['${effectivePrefix}client_id'],
       )!,
-      serverId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}server_id'],
-      ),
       householdId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}household_id'],
@@ -1300,12 +1228,11 @@ class $ChecklistTemplatesTable extends ChecklistTemplates
 class ChecklistTemplate extends DataClass
     implements Insertable<ChecklistTemplate> {
   final String clientId;
-  final String? serverId;
   final String? householdId;
   final String title;
 
   /// Stores a `ChecklistCategory` enum name (see
-  /// `package:preppsuite_client`) as plain text.
+  /// `lib/model/categories.dart`) as plain text.
   final String category;
   final bool isBuiltIn;
   final DateTime updatedAt;
@@ -1313,7 +1240,6 @@ class ChecklistTemplate extends DataClass
   final bool dirty;
   const ChecklistTemplate({
     required this.clientId,
-    this.serverId,
     this.householdId,
     required this.title,
     required this.category,
@@ -1326,9 +1252,6 @@ class ChecklistTemplate extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['client_id'] = Variable<String>(clientId);
-    if (!nullToAbsent || serverId != null) {
-      map['server_id'] = Variable<String>(serverId);
-    }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
     }
@@ -1346,9 +1269,6 @@ class ChecklistTemplate extends DataClass
   ChecklistTemplatesCompanion toCompanion(bool nullToAbsent) {
     return ChecklistTemplatesCompanion(
       clientId: Value(clientId),
-      serverId: serverId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(serverId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
@@ -1370,7 +1290,6 @@ class ChecklistTemplate extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ChecklistTemplate(
       clientId: serializer.fromJson<String>(json['clientId']),
-      serverId: serializer.fromJson<String?>(json['serverId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       title: serializer.fromJson<String>(json['title']),
       category: serializer.fromJson<String>(json['category']),
@@ -1385,7 +1304,6 @@ class ChecklistTemplate extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'clientId': serializer.toJson<String>(clientId),
-      'serverId': serializer.toJson<String?>(serverId),
       'householdId': serializer.toJson<String?>(householdId),
       'title': serializer.toJson<String>(title),
       'category': serializer.toJson<String>(category),
@@ -1398,7 +1316,6 @@ class ChecklistTemplate extends DataClass
 
   ChecklistTemplate copyWith({
     String? clientId,
-    Value<String?> serverId = const Value.absent(),
     Value<String?> householdId = const Value.absent(),
     String? title,
     String? category,
@@ -1408,7 +1325,6 @@ class ChecklistTemplate extends DataClass
     bool? dirty,
   }) => ChecklistTemplate(
     clientId: clientId ?? this.clientId,
-    serverId: serverId.present ? serverId.value : this.serverId,
     householdId: householdId.present ? householdId.value : this.householdId,
     title: title ?? this.title,
     category: category ?? this.category,
@@ -1420,7 +1336,6 @@ class ChecklistTemplate extends DataClass
   ChecklistTemplate copyWithCompanion(ChecklistTemplatesCompanion data) {
     return ChecklistTemplate(
       clientId: data.clientId.present ? data.clientId.value : this.clientId,
-      serverId: data.serverId.present ? data.serverId.value : this.serverId,
       householdId: data.householdId.present
           ? data.householdId.value
           : this.householdId,
@@ -1437,7 +1352,6 @@ class ChecklistTemplate extends DataClass
   String toString() {
     return (StringBuffer('ChecklistTemplate(')
           ..write('clientId: $clientId, ')
-          ..write('serverId: $serverId, ')
           ..write('householdId: $householdId, ')
           ..write('title: $title, ')
           ..write('category: $category, ')
@@ -1452,7 +1366,6 @@ class ChecklistTemplate extends DataClass
   @override
   int get hashCode => Object.hash(
     clientId,
-    serverId,
     householdId,
     title,
     category,
@@ -1466,7 +1379,6 @@ class ChecklistTemplate extends DataClass
       identical(this, other) ||
       (other is ChecklistTemplate &&
           other.clientId == this.clientId &&
-          other.serverId == this.serverId &&
           other.householdId == this.householdId &&
           other.title == this.title &&
           other.category == this.category &&
@@ -1478,7 +1390,6 @@ class ChecklistTemplate extends DataClass
 
 class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
   final Value<String> clientId;
-  final Value<String?> serverId;
   final Value<String?> householdId;
   final Value<String> title;
   final Value<String> category;
@@ -1489,7 +1400,6 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
   final Value<int> rowid;
   const ChecklistTemplatesCompanion({
     this.clientId = const Value.absent(),
-    this.serverId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.title = const Value.absent(),
     this.category = const Value.absent(),
@@ -1501,7 +1411,6 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
   });
   ChecklistTemplatesCompanion.insert({
     required String clientId,
-    this.serverId = const Value.absent(),
     this.householdId = const Value.absent(),
     required String title,
     required String category,
@@ -1516,7 +1425,6 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
        updatedAt = Value(updatedAt);
   static Insertable<ChecklistTemplate> custom({
     Expression<String>? clientId,
-    Expression<String>? serverId,
     Expression<String>? householdId,
     Expression<String>? title,
     Expression<String>? category,
@@ -1528,7 +1436,6 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
   }) {
     return RawValuesInsertable({
       if (clientId != null) 'client_id': clientId,
-      if (serverId != null) 'server_id': serverId,
       if (householdId != null) 'household_id': householdId,
       if (title != null) 'title': title,
       if (category != null) 'category': category,
@@ -1542,7 +1449,6 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
 
   ChecklistTemplatesCompanion copyWith({
     Value<String>? clientId,
-    Value<String?>? serverId,
     Value<String?>? householdId,
     Value<String>? title,
     Value<String>? category,
@@ -1554,7 +1460,6 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
   }) {
     return ChecklistTemplatesCompanion(
       clientId: clientId ?? this.clientId,
-      serverId: serverId ?? this.serverId,
       householdId: householdId ?? this.householdId,
       title: title ?? this.title,
       category: category ?? this.category,
@@ -1571,9 +1476,6 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
     final map = <String, Expression>{};
     if (clientId.present) {
       map['client_id'] = Variable<String>(clientId.value);
-    }
-    if (serverId.present) {
-      map['server_id'] = Variable<String>(serverId.value);
     }
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
@@ -1606,7 +1508,6 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
   String toString() {
     return (StringBuffer('ChecklistTemplatesCompanion(')
           ..write('clientId: $clientId, ')
-          ..write('serverId: $serverId, ')
           ..write('householdId: $householdId, ')
           ..write('title: $title, ')
           ..write('category: $category, ')
@@ -1636,17 +1537,6 @@ class $ChecklistItemsTable extends ChecklistItems
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-  );
-  static const VerificationMeta _serverIdMeta = const VerificationMeta(
-    'serverId',
-  );
-  @override
-  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
-    'server_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
   );
   static const VerificationMeta _householdIdMeta = const VerificationMeta(
     'householdId',
@@ -1766,7 +1656,6 @@ class $ChecklistItemsTable extends ChecklistItems
   @override
   List<GeneratedColumn> get $columns => [
     clientId,
-    serverId,
     householdId,
     templateClientId,
     title,
@@ -1797,12 +1686,6 @@ class $ChecklistItemsTable extends ChecklistItems
       );
     } else if (isInserting) {
       context.missing(_clientIdMeta);
-    }
-    if (data.containsKey('server_id')) {
-      context.handle(
-        _serverIdMeta,
-        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
-      );
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -1895,10 +1778,6 @@ class $ChecklistItemsTable extends ChecklistItems
         DriftSqlType.string,
         data['${effectivePrefix}client_id'],
       )!,
-      serverId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}server_id'],
-      ),
       householdId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}household_id'],
@@ -1950,7 +1829,6 @@ class $ChecklistItemsTable extends ChecklistItems
 
 class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
   final String clientId;
-  final String? serverId;
   final String? householdId;
   final String templateClientId;
   final String title;
@@ -1963,7 +1841,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
   final bool dirty;
   const ChecklistItem({
     required this.clientId,
-    this.serverId,
     this.householdId,
     required this.templateClientId,
     required this.title,
@@ -1979,9 +1856,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['client_id'] = Variable<String>(clientId);
-    if (!nullToAbsent || serverId != null) {
-      map['server_id'] = Variable<String>(serverId);
-    }
     if (!nullToAbsent || householdId != null) {
       map['household_id'] = Variable<String>(householdId);
     }
@@ -2006,9 +1880,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
   ChecklistItemsCompanion toCompanion(bool nullToAbsent) {
     return ChecklistItemsCompanion(
       clientId: Value(clientId),
-      serverId: serverId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(serverId),
       householdId: householdId == null && nullToAbsent
           ? const Value.absent()
           : Value(householdId),
@@ -2037,7 +1908,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ChecklistItem(
       clientId: serializer.fromJson<String>(json['clientId']),
-      serverId: serializer.fromJson<String?>(json['serverId']),
       householdId: serializer.fromJson<String?>(json['householdId']),
       templateClientId: serializer.fromJson<String>(json['templateClientId']),
       title: serializer.fromJson<String>(json['title']),
@@ -2057,7 +1927,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'clientId': serializer.toJson<String>(clientId),
-      'serverId': serializer.toJson<String?>(serverId),
       'householdId': serializer.toJson<String?>(householdId),
       'templateClientId': serializer.toJson<String>(templateClientId),
       'title': serializer.toJson<String>(title),
@@ -2075,7 +1944,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
 
   ChecklistItem copyWith({
     String? clientId,
-    Value<String?> serverId = const Value.absent(),
     Value<String?> householdId = const Value.absent(),
     String? templateClientId,
     String? title,
@@ -2088,7 +1956,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
     bool? dirty,
   }) => ChecklistItem(
     clientId: clientId ?? this.clientId,
-    serverId: serverId.present ? serverId.value : this.serverId,
     householdId: householdId.present ? householdId.value : this.householdId,
     templateClientId: templateClientId ?? this.templateClientId,
     title: title ?? this.title,
@@ -2107,7 +1974,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
   ChecklistItem copyWithCompanion(ChecklistItemsCompanion data) {
     return ChecklistItem(
       clientId: data.clientId.present ? data.clientId.value : this.clientId,
-      serverId: data.serverId.present ? data.serverId.value : this.serverId,
       householdId: data.householdId.present
           ? data.householdId.value
           : this.householdId,
@@ -2133,7 +1999,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
   String toString() {
     return (StringBuffer('ChecklistItem(')
           ..write('clientId: $clientId, ')
-          ..write('serverId: $serverId, ')
           ..write('householdId: $householdId, ')
           ..write('templateClientId: $templateClientId, ')
           ..write('title: $title, ')
@@ -2151,7 +2016,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
   @override
   int get hashCode => Object.hash(
     clientId,
-    serverId,
     householdId,
     templateClientId,
     title,
@@ -2168,7 +2032,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
       identical(this, other) ||
       (other is ChecklistItem &&
           other.clientId == this.clientId &&
-          other.serverId == this.serverId &&
           other.householdId == this.householdId &&
           other.templateClientId == this.templateClientId &&
           other.title == this.title &&
@@ -2183,7 +2046,6 @@ class ChecklistItem extends DataClass implements Insertable<ChecklistItem> {
 
 class ChecklistItemsCompanion extends UpdateCompanion<ChecklistItem> {
   final Value<String> clientId;
-  final Value<String?> serverId;
   final Value<String?> householdId;
   final Value<String> templateClientId;
   final Value<String> title;
@@ -2197,7 +2059,6 @@ class ChecklistItemsCompanion extends UpdateCompanion<ChecklistItem> {
   final Value<int> rowid;
   const ChecklistItemsCompanion({
     this.clientId = const Value.absent(),
-    this.serverId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.templateClientId = const Value.absent(),
     this.title = const Value.absent(),
@@ -2212,7 +2073,6 @@ class ChecklistItemsCompanion extends UpdateCompanion<ChecklistItem> {
   });
   ChecklistItemsCompanion.insert({
     required String clientId,
-    this.serverId = const Value.absent(),
     this.householdId = const Value.absent(),
     required String templateClientId,
     required String title,
@@ -2230,7 +2090,6 @@ class ChecklistItemsCompanion extends UpdateCompanion<ChecklistItem> {
        updatedAt = Value(updatedAt);
   static Insertable<ChecklistItem> custom({
     Expression<String>? clientId,
-    Expression<String>? serverId,
     Expression<String>? householdId,
     Expression<String>? templateClientId,
     Expression<String>? title,
@@ -2245,7 +2104,6 @@ class ChecklistItemsCompanion extends UpdateCompanion<ChecklistItem> {
   }) {
     return RawValuesInsertable({
       if (clientId != null) 'client_id': clientId,
-      if (serverId != null) 'server_id': serverId,
       if (householdId != null) 'household_id': householdId,
       if (templateClientId != null) 'template_client_id': templateClientId,
       if (title != null) 'title': title,
@@ -2263,7 +2121,6 @@ class ChecklistItemsCompanion extends UpdateCompanion<ChecklistItem> {
 
   ChecklistItemsCompanion copyWith({
     Value<String>? clientId,
-    Value<String?>? serverId,
     Value<String?>? householdId,
     Value<String>? templateClientId,
     Value<String>? title,
@@ -2278,7 +2135,6 @@ class ChecklistItemsCompanion extends UpdateCompanion<ChecklistItem> {
   }) {
     return ChecklistItemsCompanion(
       clientId: clientId ?? this.clientId,
-      serverId: serverId ?? this.serverId,
       householdId: householdId ?? this.householdId,
       templateClientId: templateClientId ?? this.templateClientId,
       title: title ?? this.title,
@@ -2299,9 +2155,6 @@ class ChecklistItemsCompanion extends UpdateCompanion<ChecklistItem> {
     final map = <String, Expression>{};
     if (clientId.present) {
       map['client_id'] = Variable<String>(clientId.value);
-    }
-    if (serverId.present) {
-      map['server_id'] = Variable<String>(serverId.value);
     }
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
@@ -2345,7 +2198,6 @@ class ChecklistItemsCompanion extends UpdateCompanion<ChecklistItem> {
   String toString() {
     return (StringBuffer('ChecklistItemsCompanion(')
           ..write('clientId: $clientId, ')
-          ..write('serverId: $serverId, ')
           ..write('householdId: $householdId, ')
           ..write('templateClientId: $templateClientId, ')
           ..write('title: $title, ')
@@ -2378,17 +2230,6 @@ class $BudgetEntriesTable extends BudgetEntries
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-  );
-  static const VerificationMeta _serverIdMeta = const VerificationMeta(
-    'serverId',
-  );
-  @override
-  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
-    'server_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
   );
   static const VerificationMeta _householdIdMeta = const VerificationMeta(
     'householdId',
@@ -2503,7 +2344,6 @@ class $BudgetEntriesTable extends BudgetEntries
   @override
   List<GeneratedColumn> get $columns => [
     clientId,
-    serverId,
     householdId,
     label,
     amountCents,
@@ -2534,12 +2374,6 @@ class $BudgetEntriesTable extends BudgetEntries
       );
     } else if (isInserting) {
       context.missing(_clientIdMeta);
-    }
-    if (data.containsKey('server_id')) {
-      context.handle(
-        _serverIdMeta,
-        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
-      );
     }
     if (data.containsKey('household_id')) {
       context.handle(
@@ -2638,10 +2472,6 @@ class $BudgetEntriesTable extends BudgetEntries
         DriftSqlType.string,
         data['${effectivePrefix}client_id'],
       )!,
-      serverId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}server_id'],
-      ),
       householdId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}household_id'],
@@ -2693,7 +2523,6 @@ class $BudgetEntriesTable extends BudgetEntries
 
 class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
   final String clientId;
-  final String? serverId;
   final String householdId;
   final String label;
 
@@ -2710,7 +2539,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
   final bool dirty;
   const BudgetEntry({
     required this.clientId,
-    this.serverId,
     required this.householdId,
     required this.label,
     required this.amountCents,
@@ -2726,9 +2554,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['client_id'] = Variable<String>(clientId);
-    if (!nullToAbsent || serverId != null) {
-      map['server_id'] = Variable<String>(serverId);
-    }
     map['household_id'] = Variable<String>(householdId);
     map['label'] = Variable<String>(label);
     map['amount_cents'] = Variable<int>(amountCents);
@@ -2751,9 +2576,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
   BudgetEntriesCompanion toCompanion(bool nullToAbsent) {
     return BudgetEntriesCompanion(
       clientId: Value(clientId),
-      serverId: serverId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(serverId),
       householdId: Value(householdId),
       label: Value(label),
       amountCents: Value(amountCents),
@@ -2780,7 +2602,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return BudgetEntry(
       clientId: serializer.fromJson<String>(json['clientId']),
-      serverId: serializer.fromJson<String?>(json['serverId']),
       householdId: serializer.fromJson<String>(json['householdId']),
       label: serializer.fromJson<String>(json['label']),
       amountCents: serializer.fromJson<int>(json['amountCents']),
@@ -2800,7 +2621,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'clientId': serializer.toJson<String>(clientId),
-      'serverId': serializer.toJson<String?>(serverId),
       'householdId': serializer.toJson<String>(householdId),
       'label': serializer.toJson<String>(label),
       'amountCents': serializer.toJson<int>(amountCents),
@@ -2818,7 +2638,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
 
   BudgetEntry copyWith({
     String? clientId,
-    Value<String?> serverId = const Value.absent(),
     String? householdId,
     String? label,
     int? amountCents,
@@ -2831,7 +2650,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
     bool? dirty,
   }) => BudgetEntry(
     clientId: clientId ?? this.clientId,
-    serverId: serverId.present ? serverId.value : this.serverId,
     householdId: householdId ?? this.householdId,
     label: label ?? this.label,
     amountCents: amountCents ?? this.amountCents,
@@ -2848,7 +2666,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
   BudgetEntry copyWithCompanion(BudgetEntriesCompanion data) {
     return BudgetEntry(
       clientId: data.clientId.present ? data.clientId.value : this.clientId,
-      serverId: data.serverId.present ? data.serverId.value : this.serverId,
       householdId: data.householdId.present
           ? data.householdId.value
           : this.householdId,
@@ -2874,7 +2691,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
   String toString() {
     return (StringBuffer('BudgetEntry(')
           ..write('clientId: $clientId, ')
-          ..write('serverId: $serverId, ')
           ..write('householdId: $householdId, ')
           ..write('label: $label, ')
           ..write('amountCents: $amountCents, ')
@@ -2892,7 +2708,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
   @override
   int get hashCode => Object.hash(
     clientId,
-    serverId,
     householdId,
     label,
     amountCents,
@@ -2909,7 +2724,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
       identical(this, other) ||
       (other is BudgetEntry &&
           other.clientId == this.clientId &&
-          other.serverId == this.serverId &&
           other.householdId == this.householdId &&
           other.label == this.label &&
           other.amountCents == this.amountCents &&
@@ -2924,7 +2738,6 @@ class BudgetEntry extends DataClass implements Insertable<BudgetEntry> {
 
 class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
   final Value<String> clientId;
-  final Value<String?> serverId;
   final Value<String> householdId;
   final Value<String> label;
   final Value<int> amountCents;
@@ -2938,7 +2751,6 @@ class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
   final Value<int> rowid;
   const BudgetEntriesCompanion({
     this.clientId = const Value.absent(),
-    this.serverId = const Value.absent(),
     this.householdId = const Value.absent(),
     this.label = const Value.absent(),
     this.amountCents = const Value.absent(),
@@ -2953,7 +2765,6 @@ class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
   });
   BudgetEntriesCompanion.insert({
     required String clientId,
-    this.serverId = const Value.absent(),
     required String householdId,
     required String label,
     required int amountCents,
@@ -2974,7 +2785,6 @@ class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
        updatedAt = Value(updatedAt);
   static Insertable<BudgetEntry> custom({
     Expression<String>? clientId,
-    Expression<String>? serverId,
     Expression<String>? householdId,
     Expression<String>? label,
     Expression<int>? amountCents,
@@ -2989,7 +2799,6 @@ class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
   }) {
     return RawValuesInsertable({
       if (clientId != null) 'client_id': clientId,
-      if (serverId != null) 'server_id': serverId,
       if (householdId != null) 'household_id': householdId,
       if (label != null) 'label': label,
       if (amountCents != null) 'amount_cents': amountCents,
@@ -3007,7 +2816,6 @@ class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
 
   BudgetEntriesCompanion copyWith({
     Value<String>? clientId,
-    Value<String?>? serverId,
     Value<String>? householdId,
     Value<String>? label,
     Value<int>? amountCents,
@@ -3022,7 +2830,6 @@ class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
   }) {
     return BudgetEntriesCompanion(
       clientId: clientId ?? this.clientId,
-      serverId: serverId ?? this.serverId,
       householdId: householdId ?? this.householdId,
       label: label ?? this.label,
       amountCents: amountCents ?? this.amountCents,
@@ -3043,9 +2850,6 @@ class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
     final map = <String, Expression>{};
     if (clientId.present) {
       map['client_id'] = Variable<String>(clientId.value);
-    }
-    if (serverId.present) {
-      map['server_id'] = Variable<String>(serverId.value);
     }
     if (householdId.present) {
       map['household_id'] = Variable<String>(householdId.value);
@@ -3089,7 +2893,6 @@ class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
   String toString() {
     return (StringBuffer('BudgetEntriesCompanion(')
           ..write('clientId: $clientId, ')
-          ..write('serverId: $serverId, ')
           ..write('householdId: $householdId, ')
           ..write('label: $label, ')
           ..write('amountCents: $amountCents, ')
@@ -4135,7 +3938,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$InventoryItemsTableCreateCompanionBuilder =
     InventoryItemsCompanion Function({
       required String clientId,
-      Value<String?> serverId,
       required String householdId,
       required String name,
       required String category,
@@ -4157,7 +3959,6 @@ typedef $$InventoryItemsTableCreateCompanionBuilder =
 typedef $$InventoryItemsTableUpdateCompanionBuilder =
     InventoryItemsCompanion Function({
       Value<String> clientId,
-      Value<String?> serverId,
       Value<String> householdId,
       Value<String> name,
       Value<String> category,
@@ -4188,11 +3989,6 @@ class $$InventoryItemsTableFilterComposer
   });
   ColumnFilters<String> get clientId => $composableBuilder(
     column: $table.clientId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get serverId => $composableBuilder(
-    column: $table.serverId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4291,11 +4087,6 @@ class $$InventoryItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get serverId => $composableBuilder(
-    column: $table.serverId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get householdId => $composableBuilder(
     column: $table.householdId,
     builder: (column) => ColumnOrderings(column),
@@ -4388,9 +4179,6 @@ class $$InventoryItemsTableAnnotationComposer
   });
   GeneratedColumn<String> get clientId =>
       $composableBuilder(column: $table.clientId, builder: (column) => column);
-
-  GeneratedColumn<String> get serverId =>
-      $composableBuilder(column: $table.serverId, builder: (column) => column);
 
   GeneratedColumn<String> get householdId => $composableBuilder(
     column: $table.householdId,
@@ -4485,7 +4273,6 @@ class $$InventoryItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> clientId = const Value.absent(),
-                Value<String?> serverId = const Value.absent(),
                 Value<String> householdId = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> category = const Value.absent(),
@@ -4505,7 +4292,6 @@ class $$InventoryItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => InventoryItemsCompanion(
                 clientId: clientId,
-                serverId: serverId,
                 householdId: householdId,
                 name: name,
                 category: category,
@@ -4527,7 +4313,6 @@ class $$InventoryItemsTableTableManager
           createCompanionCallback:
               ({
                 required String clientId,
-                Value<String?> serverId = const Value.absent(),
                 required String householdId,
                 required String name,
                 required String category,
@@ -4547,7 +4332,6 @@ class $$InventoryItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => InventoryItemsCompanion.insert(
                 clientId: clientId,
-                serverId: serverId,
                 householdId: householdId,
                 name: name,
                 category: category,
@@ -4594,7 +4378,6 @@ typedef $$InventoryItemsTableProcessedTableManager =
 typedef $$ChecklistTemplatesTableCreateCompanionBuilder =
     ChecklistTemplatesCompanion Function({
       required String clientId,
-      Value<String?> serverId,
       Value<String?> householdId,
       required String title,
       required String category,
@@ -4607,7 +4390,6 @@ typedef $$ChecklistTemplatesTableCreateCompanionBuilder =
 typedef $$ChecklistTemplatesTableUpdateCompanionBuilder =
     ChecklistTemplatesCompanion Function({
       Value<String> clientId,
-      Value<String?> serverId,
       Value<String?> householdId,
       Value<String> title,
       Value<String> category,
@@ -4629,11 +4411,6 @@ class $$ChecklistTemplatesTableFilterComposer
   });
   ColumnFilters<String> get clientId => $composableBuilder(
     column: $table.clientId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get serverId => $composableBuilder(
-    column: $table.serverId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4687,11 +4464,6 @@ class $$ChecklistTemplatesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get serverId => $composableBuilder(
-    column: $table.serverId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get householdId => $composableBuilder(
     column: $table.householdId,
     builder: (column) => ColumnOrderings(column),
@@ -4739,9 +4511,6 @@ class $$ChecklistTemplatesTableAnnotationComposer
   });
   GeneratedColumn<String> get clientId =>
       $composableBuilder(column: $table.clientId, builder: (column) => column);
-
-  GeneratedColumn<String> get serverId =>
-      $composableBuilder(column: $table.serverId, builder: (column) => column);
 
   GeneratedColumn<String> get householdId => $composableBuilder(
     column: $table.householdId,
@@ -4808,7 +4577,6 @@ class $$ChecklistTemplatesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> clientId = const Value.absent(),
-                Value<String?> serverId = const Value.absent(),
                 Value<String?> householdId = const Value.absent(),
                 Value<String> title = const Value.absent(),
                 Value<String> category = const Value.absent(),
@@ -4819,7 +4587,6 @@ class $$ChecklistTemplatesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ChecklistTemplatesCompanion(
                 clientId: clientId,
-                serverId: serverId,
                 householdId: householdId,
                 title: title,
                 category: category,
@@ -4832,7 +4599,6 @@ class $$ChecklistTemplatesTableTableManager
           createCompanionCallback:
               ({
                 required String clientId,
-                Value<String?> serverId = const Value.absent(),
                 Value<String?> householdId = const Value.absent(),
                 required String title,
                 required String category,
@@ -4843,7 +4609,6 @@ class $$ChecklistTemplatesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ChecklistTemplatesCompanion.insert(
                 clientId: clientId,
-                serverId: serverId,
                 householdId: householdId,
                 title: title,
                 category: category,
@@ -4885,7 +4650,6 @@ typedef $$ChecklistTemplatesTableProcessedTableManager =
 typedef $$ChecklistItemsTableCreateCompanionBuilder =
     ChecklistItemsCompanion Function({
       required String clientId,
-      Value<String?> serverId,
       Value<String?> householdId,
       required String templateClientId,
       required String title,
@@ -4901,7 +4665,6 @@ typedef $$ChecklistItemsTableCreateCompanionBuilder =
 typedef $$ChecklistItemsTableUpdateCompanionBuilder =
     ChecklistItemsCompanion Function({
       Value<String> clientId,
-      Value<String?> serverId,
       Value<String?> householdId,
       Value<String> templateClientId,
       Value<String> title,
@@ -4926,11 +4689,6 @@ class $$ChecklistItemsTableFilterComposer
   });
   ColumnFilters<String> get clientId => $composableBuilder(
     column: $table.clientId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get serverId => $composableBuilder(
-    column: $table.serverId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4999,11 +4757,6 @@ class $$ChecklistItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get serverId => $composableBuilder(
-    column: $table.serverId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get householdId => $composableBuilder(
     column: $table.householdId,
     builder: (column) => ColumnOrderings(column),
@@ -5066,9 +4819,6 @@ class $$ChecklistItemsTableAnnotationComposer
   });
   GeneratedColumn<String> get clientId =>
       $composableBuilder(column: $table.clientId, builder: (column) => column);
-
-  GeneratedColumn<String> get serverId =>
-      $composableBuilder(column: $table.serverId, builder: (column) => column);
 
   GeneratedColumn<String> get householdId => $composableBuilder(
     column: $table.householdId,
@@ -5143,7 +4893,6 @@ class $$ChecklistItemsTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> clientId = const Value.absent(),
-                Value<String?> serverId = const Value.absent(),
                 Value<String?> householdId = const Value.absent(),
                 Value<String> templateClientId = const Value.absent(),
                 Value<String> title = const Value.absent(),
@@ -5157,7 +4906,6 @@ class $$ChecklistItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ChecklistItemsCompanion(
                 clientId: clientId,
-                serverId: serverId,
                 householdId: householdId,
                 templateClientId: templateClientId,
                 title: title,
@@ -5173,7 +4921,6 @@ class $$ChecklistItemsTableTableManager
           createCompanionCallback:
               ({
                 required String clientId,
-                Value<String?> serverId = const Value.absent(),
                 Value<String?> householdId = const Value.absent(),
                 required String templateClientId,
                 required String title,
@@ -5187,7 +4934,6 @@ class $$ChecklistItemsTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ChecklistItemsCompanion.insert(
                 clientId: clientId,
-                serverId: serverId,
                 householdId: householdId,
                 templateClientId: templateClientId,
                 title: title,
@@ -5228,7 +4974,6 @@ typedef $$ChecklistItemsTableProcessedTableManager =
 typedef $$BudgetEntriesTableCreateCompanionBuilder =
     BudgetEntriesCompanion Function({
       required String clientId,
-      Value<String?> serverId,
       required String householdId,
       required String label,
       required int amountCents,
@@ -5244,7 +4989,6 @@ typedef $$BudgetEntriesTableCreateCompanionBuilder =
 typedef $$BudgetEntriesTableUpdateCompanionBuilder =
     BudgetEntriesCompanion Function({
       Value<String> clientId,
-      Value<String?> serverId,
       Value<String> householdId,
       Value<String> label,
       Value<int> amountCents,
@@ -5269,11 +5013,6 @@ class $$BudgetEntriesTableFilterComposer
   });
   ColumnFilters<String> get clientId => $composableBuilder(
     column: $table.clientId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get serverId => $composableBuilder(
-    column: $table.serverId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5342,11 +5081,6 @@ class $$BudgetEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get serverId => $composableBuilder(
-    column: $table.serverId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get householdId => $composableBuilder(
     column: $table.householdId,
     builder: (column) => ColumnOrderings(column),
@@ -5409,9 +5143,6 @@ class $$BudgetEntriesTableAnnotationComposer
   });
   GeneratedColumn<String> get clientId =>
       $composableBuilder(column: $table.clientId, builder: (column) => column);
-
-  GeneratedColumn<String> get serverId =>
-      $composableBuilder(column: $table.serverId, builder: (column) => column);
 
   GeneratedColumn<String> get householdId => $composableBuilder(
     column: $table.householdId,
@@ -5484,7 +5215,6 @@ class $$BudgetEntriesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> clientId = const Value.absent(),
-                Value<String?> serverId = const Value.absent(),
                 Value<String> householdId = const Value.absent(),
                 Value<String> label = const Value.absent(),
                 Value<int> amountCents = const Value.absent(),
@@ -5498,7 +5228,6 @@ class $$BudgetEntriesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => BudgetEntriesCompanion(
                 clientId: clientId,
-                serverId: serverId,
                 householdId: householdId,
                 label: label,
                 amountCents: amountCents,
@@ -5514,7 +5243,6 @@ class $$BudgetEntriesTableTableManager
           createCompanionCallback:
               ({
                 required String clientId,
-                Value<String?> serverId = const Value.absent(),
                 required String householdId,
                 required String label,
                 required int amountCents,
@@ -5528,7 +5256,6 @@ class $$BudgetEntriesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => BudgetEntriesCompanion.insert(
                 clientId: clientId,
-                serverId: serverId,
                 householdId: householdId,
                 label: label,
                 amountCents: amountCents,

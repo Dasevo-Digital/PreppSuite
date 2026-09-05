@@ -1424,24 +1424,6 @@ abstract class AppLocalizations {
   /// **'Amount must be greater than 0 and at most the stock on hand.'**
   String get consumeInvalidAmount;
 
-  /// No description provided for @syncStaleTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Changes have not been shared yet'**
-  String get syncStaleTitle;
-
-  /// No description provided for @syncStaleNever.
-  ///
-  /// In en, this message translates to:
-  /// **'This app has never reached the server. Check the server address in the settings.'**
-  String get syncStaleNever;
-
-  /// No description provided for @syncStaleSince.
-  ///
-  /// In en, this message translates to:
-  /// **'Last successful sync {age} ago. Until then, changes stay on this device only.'**
-  String syncStaleSince(String age);
-
   /// No description provided for @syncRetryButton.
   ///
   /// In en, this message translates to:
@@ -1465,30 +1447,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} days'**
   String syncAgeDays(int count);
-
-  /// No description provided for @serverAddressHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Address of the server this app syncs with.'**
-  String get serverAddressHint;
-
-  /// No description provided for @serverAddressInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'That is not a valid address. For example: preppsuite.example.com or 192.168.1.5:8080'**
-  String get serverAddressInvalid;
-
-  /// No description provided for @serverAddressSignOutHint.
-  ///
-  /// In en, this message translates to:
-  /// **'After a change you will need to sign in again — an account only applies to its own server.'**
-  String get serverAddressSignOutHint;
-
-  /// No description provided for @serverAddressChangeAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Change server address'**
-  String get serverAddressChangeAction;
 
   /// No description provided for @csvExportButton.
   ///
@@ -1543,6 +1501,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'People in the household'**
   String get personCountLabel;
+
+  /// No description provided for @settingsSharingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared folder'**
+  String get settingsSharingTitle;
+
+  /// No description provided for @sharingIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplies, checklists and spending live in a folder several devices can see — a Nextcloud, Syncthing, iCloud Drive or Dropbox directory. PreppSuite only writes files there. What carries them is your choice.'**
+  String get sharingIntro;
+
+  /// No description provided for @sharingInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'This device shares nothing. Everything stays here.'**
+  String get sharingInactive;
+
+  /// No description provided for @sharingActiveFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder: {path}'**
+  String sharingActiveFolder(String path);
+
+  /// No description provided for @sharingChooseFolderAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose folder'**
+  String get sharingChooseFolderAction;
+
+  /// No description provided for @sharingChangeFolderAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a different folder'**
+  String get sharingChangeFolderAction;
+
+  /// No description provided for @sharingLeaveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop sharing'**
+  String get sharingLeaveAction;
+
+  /// No description provided for @sharingSyncNowAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get sharingSyncNowAction;
+
+  /// No description provided for @sharingSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing …'**
+  String get sharingSyncing;
+
+  /// No description provided for @sharingNeverSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Never synced yet.'**
+  String get sharingNeverSynced;
+
+  /// No description provided for @sharingLastSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced {age} ago.'**
+  String sharingLastSynced(String age);
+
+  /// No description provided for @sharingDeviceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} devices share this folder.'**
+  String sharingDeviceCount(int count);
+
+  /// No description provided for @sharingDeviceCountOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this device uses the folder so far.'**
+  String get sharingDeviceCountOne;
+
+  /// No description provided for @sharingReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Took {count} entries from other devices.'**
+  String sharingReceived(int count);
+
+  /// No description provided for @sharingUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is up to date.'**
+  String get sharingUpToDate;
+
+  /// No description provided for @sharingErrorUnwritable.
+  ///
+  /// In en, this message translates to:
+  /// **'This folder cannot be written to. On macOS the permission lasts only until the app quits — just pick the folder again afterwards. On Android the folder picker often returns a path apps are not allowed to use; there, a folder the sync app created itself works.'**
+  String get sharingErrorUnwritable;
+
+  /// No description provided for @sharingErrorUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'There is already a household in this folder, and it cannot be read. It probably comes from a newer version of PreppSuite.'**
+  String get sharingErrorUnreadable;
+
+  /// No description provided for @sharingErrorVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'The files in this folder come from a newer version. Nothing was changed.'**
+  String get sharingErrorVersion;
+
+  /// No description provided for @sharingErrorFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The sync failed. The next attempt runs on its own.'**
+  String get sharingErrorFailed;
+
+  /// No description provided for @sharingJoinedOther.
+  ///
+  /// In en, this message translates to:
+  /// **'This device now belongs to the household “{name}”. Its existing entries came along.'**
+  String sharingJoinedOther(String name);
+
+  /// No description provided for @sharingLeaveDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop sharing?'**
+  String get sharingLeaveDialogTitle;
+
+  /// No description provided for @sharingLeaveDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This device will stop syncing. Nothing is deleted — not here and not in the folder.'**
+  String get sharingLeaveDialogBody;
+
+  /// No description provided for @sharingLeaveDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get sharingLeaveDialogConfirm;
+
+  /// No description provided for @sharingErrorDifferentHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'This folder belongs to a different household. Nothing was merged — two unrelated sets of data cannot be pulled apart again.'**
+  String get sharingErrorDifferentHousehold;
 }
 
 class _AppLocalizationsDelegate

@@ -10,6 +10,7 @@ import '../../household/application/german_states.dart';
 import '../../household/application/household_providers.dart';
 import '../../household/application/warning_feed_countries.dart';
 import '../../inventory/presentation/expiry_reminders_card.dart';
+import '../../sharing/presentation/shared_folder_card.dart';
 import '../../warnings/application/warning_region_filter.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -72,6 +73,13 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           ExpiryRemindersCard(l10n: l10n),
+          const SizedBox(height: 24),
+          Text(
+            l10n.settingsSharingTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          SharedFolderCard(profile: profile, l10n: l10n),
         ],
       ),
     );

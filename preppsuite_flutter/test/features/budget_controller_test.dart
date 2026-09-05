@@ -28,13 +28,12 @@ void main() {
     await db.close();
   });
 
-  /// An entry that has already been pushed once — `dirty` at false with a
-  /// server id, the state in which the dirty bug silently dropped edits.
+  /// An entry that has already been published — `dirty` at false, the
+  /// state in which the dirty bug silently dropped edits.
   Future<BudgetEntry> syncedEntry() async {
     await db.upsertBudgetEntry(
       BudgetEntriesCompanion.insert(
         clientId: 'bud-1',
-        serverId: const Value('srv-bud-1'),
         householdId: householdId,
         label: 'Konserven',
         amountCents: 1250,
@@ -81,9 +80,9 @@ void main() {
       expect(updated.label, 'Konserven (Nachkauf)');
       expect(updated.dirty, isTrue);
       expect(
-        updated.serverId,
-        'srv-bud-1',
-        reason: 'the server identity must survive a local edit',
+        updated.clientId,
+        'bud-1',
+        reason: 'a local edit keeps the row identity the folder matches on',
       );
     });
 

@@ -25,10 +25,10 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
-  /// The tables whose rows are pushed to the server, i.e. the ones with a
-  /// `dirty` column.
+  /// The tables whose rows travel through a shared folder, i.e. the ones
+  /// with a `dirty` column.
   static const _syncableTableNames = [
     'inventory_items',
     'checklist_templates',
@@ -58,11 +58,11 @@ class AppDatabase extends _$AppDatabase {
         // Repairs data left behind by a bug that kept `dirty` at false when
         // an already-synced row was edited, so the change never went out
         // (see the note in CLAUDE.md). Fixing the writes only helps future
-        // edits; what was already lost needs re-offering to the server.
+        // edits; what was already lost needs re-offering.
         //
-        // Safe to do wholesale: the server applies an incoming row only if
-        // its `updatedAt` is newer than what it holds, so rows that are
-        // genuinely stale are simply ignored rather than overwriting
+        // Safe to do wholesale: a row is only ever accepted elsewhere if
+        // its `updatedAt` is newer than what the other side holds, so rows
+        // that are genuinely stale are ignored rather than overwriting
         // anything.
         for (final table in _syncableTableNames) {
           await customStatement('UPDATE $table SET dirty = 1');
@@ -80,6 +80,17 @@ class AppDatabase extends _$AppDatabase {
         await customStatement(
           "DELETE FROM sync_state WHERE entity = 'warning'",
         );
+      }
+      if (from < 8) {
+        // `serverId` held the id a server had assigned to a row. There is
+        // no server, so the column has been dropped rather than left as an
+        // always-null invitation to use it again. SQLite cannot drop a
+        // column in place; `alterTable` recreates each table from the
+        // current definition and copies the columns that still exist.
+        await m.alterTable(TableMigration(inventoryItems));
+        await m.alterTable(TableMigration(checklistTemplates));
+        await m.alterTable(TableMigration(checklistItems));
+        await m.alterTable(TableMigration(budgetEntries));
       }
     },
   );
@@ -123,24 +134,6 @@ class AppDatabase extends _$AppDatabase {
           (t) => t.householdId.equals(householdId) & t.dirty.equals(true),
         ))
         .get();
-  }
-
-  Future<void> markInventoryItemsSynced(
-    List<(String clientId, String serverId, DateTime updatedAt)> synced,
-  ) {
-    return transaction(() async {
-      for (final (clientId, serverId, updatedAt) in synced) {
-        await (update(
-          inventoryItems,
-        )..where((t) => t.clientId.equals(clientId))).write(
-          InventoryItemsCompanion(
-            serverId: Value(serverId),
-            updatedAt: Value(updatedAt),
-            dirty: const Value(false),
-          ),
-        );
-      }
-    });
   }
 
   // --- Checklists -------------------------------------------------------
@@ -205,12 +198,6 @@ class AppDatabase extends _$AppDatabase {
     )..where((t) => t.clientId.equals(clientId))).getSingleOrNull();
   }
 
-  Future<ChecklistTemplate?> checklistTemplateByServerId(String serverId) {
-    return (select(
-      checklistTemplates,
-    )..where((t) => t.serverId.equals(serverId))).getSingleOrNull();
-  }
-
   Future<List<ChecklistTemplate>> dirtyChecklistTemplates(String householdId) {
     return (select(checklistTemplates)..where(
           (t) => t.householdId.equals(householdId) & t.dirty.equals(true),
@@ -223,42 +210,6 @@ class AppDatabase extends _$AppDatabase {
           (t) => t.householdId.equals(householdId) & t.dirty.equals(true),
         ))
         .get();
-  }
-
-  Future<void> markChecklistTemplatesSynced(
-    List<(String clientId, String serverId, DateTime updatedAt)> synced,
-  ) {
-    return transaction(() async {
-      for (final (clientId, serverId, updatedAt) in synced) {
-        await (update(
-          checklistTemplates,
-        )..where((t) => t.clientId.equals(clientId))).write(
-          ChecklistTemplatesCompanion(
-            serverId: Value(serverId),
-            updatedAt: Value(updatedAt),
-            dirty: const Value(false),
-          ),
-        );
-      }
-    });
-  }
-
-  Future<void> markChecklistItemsSynced(
-    List<(String clientId, String serverId, DateTime updatedAt)> synced,
-  ) {
-    return transaction(() async {
-      for (final (clientId, serverId, updatedAt) in synced) {
-        await (update(
-          checklistItems,
-        )..where((t) => t.clientId.equals(clientId))).write(
-          ChecklistItemsCompanion(
-            serverId: Value(serverId),
-            updatedAt: Value(updatedAt),
-            dirty: const Value(false),
-          ),
-        );
-      }
-    });
   }
 
   // --- Budget -------------------------------------------------------
@@ -281,24 +232,6 @@ class AppDatabase extends _$AppDatabase {
           (t) => t.householdId.equals(householdId) & t.dirty.equals(true),
         ))
         .get();
-  }
-
-  Future<void> markBudgetEntriesSynced(
-    List<(String clientId, String serverId, DateTime updatedAt)> synced,
-  ) {
-    return transaction(() async {
-      for (final (clientId, serverId, updatedAt) in synced) {
-        await (update(
-          budgetEntries,
-        )..where((t) => t.clientId.equals(clientId))).write(
-          BudgetEntriesCompanion(
-            serverId: Value(serverId),
-            updatedAt: Value(updatedAt),
-            dirty: const Value(false),
-          ),
-        );
-      }
-    });
   }
 
   // --- Warnings (fetched locally, never pushed) -------------------------
@@ -398,13 +331,234 @@ class AppDatabase extends _$AppDatabase {
     )..where((t) => t.expires.isSmallerThanValue(cutoff))).go();
   }
 
+  // --- Shared-folder sync ----------------------------------------------
+
+  /// Every row of the household, tombstones included.
+  ///
+  /// Deliberately unlike [watchInventoryItems], which hides deleted rows:
+  /// a deletion has to travel to the other devices, and the only thing
+  /// carrying it is the tombstone. Dropping them from the snapshot would
+  /// make every delete undo itself on the next merge.
+  Future<List<InventoryItem>> inventoryItemsForSync(String householdId) {
+    return (select(
+      inventoryItems,
+    )..where((t) => t.householdId.equals(householdId))).get();
+  }
+
+  Future<List<ChecklistTemplate>> checklistTemplatesForSync(
+    String householdId,
+  ) {
+    return (select(
+      checklistTemplates,
+    )..where((t) => t.householdId.equals(householdId))).get();
+  }
+
+  Future<List<ChecklistItem>> checklistItemsForSync(String householdId) {
+    return (select(
+      checklistItems,
+    )..where((t) => t.householdId.equals(householdId))).get();
+  }
+
+  Future<List<BudgetEntry>> budgetEntriesForSync(String householdId) {
+    return (select(
+      budgetEntries,
+    )..where((t) => t.householdId.equals(householdId))).get();
+  }
+
+  /// Gives the household's id to checklist rows that have none.
+  ///
+  /// Installs from before the seeder set it wrote built-in templates with
+  /// a null household — a column a server used to own. Those rows are
+  /// invisible to [checklistTemplatesForSync], which selects by
+  /// household, so a ticked-off item on one device would quietly un-tick
+  /// itself on the other. Runs with the seeder, on every launch, and does
+  /// nothing once there is nothing left to claim.
+  Future<void> claimOrphanChecklistRows(String householdId) {
+    return transaction(() async {
+      await (update(
+        checklistTemplates,
+      )..where((t) => t.householdId.isNull())).write(
+        ChecklistTemplatesCompanion(
+          householdId: Value(householdId),
+          dirty: const Value(true),
+        ),
+      );
+      await (update(
+        checklistItems,
+      )..where((t) => t.householdId.isNull())).write(
+        ChecklistItemsCompanion(
+          householdId: Value(householdId),
+          dirty: const Value(true),
+        ),
+      );
+    });
+  }
+
+  /// Clears `dirty` on everything this device has just published.
+  ///
+  /// [through] is the moment the snapshot was read, not the moment it was
+  /// written: a row edited while the file was being written is not in it
+  /// and must stay dirty, or the edit would never leave this device.
+  Future<void> markHouseholdPublished(
+    String householdId,
+    DateTime through,
+  ) {
+    return transaction(() async {
+      await (update(inventoryItems)..where(
+            (t) =>
+                t.householdId.equals(householdId) &
+                t.updatedAt.isSmallerOrEqualValue(through),
+          ))
+          .write(const InventoryItemsCompanion(dirty: Value(false)));
+      await (update(checklistTemplates)..where(
+            (t) =>
+                t.householdId.equals(householdId) &
+                t.updatedAt.isSmallerOrEqualValue(through),
+          ))
+          .write(const ChecklistTemplatesCompanion(dirty: Value(false)));
+      await (update(checklistItems)..where(
+            (t) =>
+                t.householdId.equals(householdId) &
+                t.updatedAt.isSmallerOrEqualValue(through),
+          ))
+          .write(const ChecklistItemsCompanion(dirty: Value(false)));
+      await (update(budgetEntries)..where(
+            (t) =>
+                t.householdId.equals(householdId) &
+                t.updatedAt.isSmallerOrEqualValue(through),
+          ))
+          .write(const BudgetEntriesCompanion(dirty: Value(false)));
+    });
+  }
+
+  /// Moves every row from one household id to another.
+  ///
+  /// Runs once, when this device joins a folder that already has a
+  /// household in it: the rows it created before joining carry its own
+  /// generated id, and without this they would simply stop being visible.
+  /// They are marked dirty so the next push offers them to the others.
+  Future<void> adoptHouseholdId({
+    required String from,
+    required String to,
+  }) {
+    if (from == to) return Future.value();
+
+    return transaction(() async {
+      await (update(
+        inventoryItems,
+      )..where((t) => t.householdId.equals(from))).write(
+        InventoryItemsCompanion(
+          householdId: Value(to),
+          dirty: const Value(true),
+        ),
+      );
+      await (update(
+        checklistTemplates,
+      )..where((t) => t.householdId.equals(from))).write(
+        ChecklistTemplatesCompanion(
+          householdId: Value(to),
+          dirty: const Value(true),
+        ),
+      );
+      await (update(
+        checklistItems,
+      )..where((t) => t.householdId.equals(from))).write(
+        ChecklistItemsCompanion(
+          householdId: Value(to),
+          dirty: const Value(true),
+        ),
+      );
+      await (update(
+        budgetEntries,
+      )..where((t) => t.householdId.equals(from))).write(
+        BudgetEntriesCompanion(
+          householdId: Value(to),
+          dirty: const Value(true),
+        ),
+      );
+    });
+  }
+
+  /// Applies rows that came from another device, each one only if it is
+  /// newer than what is stored here.
+  ///
+  /// Returns how many rows actually changed, which is what tells the
+  /// caller whether this device has learned anything worth republishing.
+  Future<int> mergeIncomingRows({
+    List<IncomingRow<InventoryItemsCompanion>> inventory = const [],
+    List<IncomingRow<ChecklistTemplatesCompanion>> templates = const [],
+    List<IncomingRow<ChecklistItemsCompanion>> items = const [],
+    List<IncomingRow<BudgetEntriesCompanion>> budget = const [],
+  }) {
+    return transaction(() async {
+      var changed = 0;
+      changed += await _mergeInto(
+        inventoryItems,
+        inventory,
+        (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+      );
+      changed += await _mergeInto(
+        checklistTemplates,
+        templates,
+        (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+      );
+      changed += await _mergeInto(
+        checklistItems,
+        items,
+        (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+      );
+      changed += await _mergeInto(
+        budgetEntries,
+        budget,
+        (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+      );
+      return changed;
+    });
+  }
+
+  /// Last-writer-wins by `updatedAt`, strictly greater.
+  ///
+  /// Strictly, so that replaying the same snapshot twice is free and the
+  /// order the device files happen to be read in cannot change the
+  /// outcome. Ties keep what is already stored: two rows sharing a
+  /// `clientId` and an `updatedAt` are the same row, because a client id
+  /// is generated once, on one device.
+  Future<int> _mergeInto<T extends Table, R, C extends UpdateCompanion<R>>(
+    TableInfo<T, R> table,
+    List<IncomingRow<C>> incoming,
+    ({String clientId, DateTime updatedAt}) Function(R) identify,
+  ) async {
+    if (incoming.isEmpty) return 0;
+
+    final stored = {
+      for (final row in await select(table).get())
+        identify(row).clientId: identify(row).updatedAt.toUtc(),
+    };
+
+    final winners = [
+      for (final candidate in incoming)
+        if (stored[candidate.clientId]?.isBefore(
+              candidate.updatedAt.toUtc(),
+            ) ??
+            true)
+          candidate.companion,
+    ];
+    if (winners.isEmpty) return 0;
+
+    await batch((b) => b.insertAllOnConflictUpdate(table, winners));
+    return winners.length;
+  }
+
   // --- Sync cursor -----------------------------------------------------
 
+  /// When the shared folder was last read successfully. Shown to the user
+  /// and nothing else — the merge is a full comparison every time, so it
+  /// has no cursor to resume from.
+  ///
   /// SQLite round-trips the correct instant but always hands back a
-  /// local-time-flagged [DateTime] (see drift's native `DateTimeColumn`
-  /// behavior); normalize to UTC here since this value both feeds the
-  /// server's `since` comparisons and is compared with `DateTime.utc(...)`
-  /// elsewhere.
+  /// local-time-flagged [DateTime] (see drift's native [DateTimeColumn]
+  /// behavior); normalize to UTC here, since it is compared with
+  /// `DateTime.utc(...)` elsewhere.
   Future<DateTime?> lastPulledAt(String entity) async {
     final row = await (select(
       syncState,
@@ -418,6 +572,11 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 }
+
+/// One row on its way in from another device's snapshot, with the two
+/// fields the merge needs lifted out of the companion so the comparison
+/// does not have to reach into a `Value` it cannot type.
+typedef IncomingRow<C> = ({String clientId, DateTime updatedAt, C companion});
 
 QueryExecutor _openConnection() {
   return driftDatabase(name: 'preppsuite');
