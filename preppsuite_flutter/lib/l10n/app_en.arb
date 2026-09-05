@@ -598,5 +598,65 @@
         "type": "String"
       }
     }
+  },
+  "knowledgeModeTitles": "Titles",
+  "knowledgeModeFullText": "Full text",
+  "knowledgeFullTextNote": "Searches the text of the articles.",
+  "knowledgeIndexMissingTitle": "No full-text index",
+  "knowledgeIndexMissingBody": "Searching the text needs an index. The app builds it once — after that it answers instantly.",
+  "knowledgeIndexCountAction": "Count articles",
+  "knowledgeIndexBuildAction": "Build index",
+  "knowledgeIndexContinueAction": "Keep building",
+  "knowledgeIndexCancelAction": "Stop",
+  "knowledgeIndexDiscardAction": "Discard index",
+  "knowledgeIndexArticles": "{count} articles in this file.",
+  "@knowledgeIndexArticles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeIndexLargeWarning": "That is a lot. Expect an hour or more and several gigabytes on disk. You can stop at any time and keep what was done.",
+  "knowledgeIndexScanning": "Counting articles: {done} of {total}.",
+  "@knowledgeIndexScanning": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeIndexIndexing": "{done} of {total} articles.",
+  "@knowledgeIndexIndexing": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeIndexPartial": "Stopped at {done} of {total} articles. Searches what is already in there.",
+  "@knowledgeIndexPartial": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeIndexReady": "{count} articles indexed.",
+  "@knowledgeIndexReady": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

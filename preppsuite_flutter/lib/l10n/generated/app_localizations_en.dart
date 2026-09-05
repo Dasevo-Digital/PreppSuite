@@ -989,4 +989,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String knowledgeSource(String name) {
     return 'From $name';
   }
+
+  @override
+  String get knowledgeModeTitles => 'Titles';
+
+  @override
+  String get knowledgeModeFullText => 'Full text';
+
+  @override
+  String get knowledgeFullTextNote => 'Searches the text of the articles.';
+
+  @override
+  String get knowledgeIndexMissingTitle => 'No full-text index';
+
+  @override
+  String get knowledgeIndexMissingBody =>
+      'Searching the text needs an index. The app builds it once — after that it answers instantly.';
+
+  @override
+  String get knowledgeIndexCountAction => 'Count articles';
+
+  @override
+  String get knowledgeIndexBuildAction => 'Build index';
+
+  @override
+  String get knowledgeIndexContinueAction => 'Keep building';
+
+  @override
+  String get knowledgeIndexCancelAction => 'Stop';
+
+  @override
+  String get knowledgeIndexDiscardAction => 'Discard index';
+
+  @override
+  String knowledgeIndexArticles(int count) {
+    return '$count articles in this file.';
+  }
+
+  @override
+  String get knowledgeIndexLargeWarning =>
+      'That is a lot. Expect an hour or more and several gigabytes on disk. You can stop at any time and keep what was done.';
+
+  @override
+  String knowledgeIndexScanning(int done, int total) {
+    return 'Counting articles: $done of $total.';
+  }
+
+  @override
+  String knowledgeIndexIndexing(int done, int total) {
+    return '$done of $total articles.';
+  }
+
+  @override
+  String knowledgeIndexPartial(int done, int total) {
+    return 'Stopped at $done of $total articles. Searches what is already in there.';
+  }
+
+  @override
+  String knowledgeIndexReady(int count) {
+    return '$count articles indexed.';
+  }
 }

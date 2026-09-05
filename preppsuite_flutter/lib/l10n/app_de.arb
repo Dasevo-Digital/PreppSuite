@@ -284,5 +284,21 @@
   "knowledgeSearchPrompt": "Tippe einen Anfang ein, um zu suchen.",
   "knowledgeErrorUnreadable": "Die Datei lässt sich nicht lesen. Erwartet wird ein ZIM-Archiv, wie Kiwix es ausliefert.",
   "knowledgeArticleUnsupported": "Artikel lassen sich auf dieser Plattform nicht anzeigen – dafür fehlt die Browser-Komponente. Suchen funktioniert, Lesen nicht.",
-  "knowledgeSource": "Aus {name}"
+  "knowledgeSource": "Aus {name}",
+  "knowledgeModeTitles": "Titel",
+  "knowledgeModeFullText": "Volltext",
+  "knowledgeFullTextNote": "Gesucht wird im Text der Artikel.",
+  "knowledgeIndexMissingTitle": "Kein Volltext-Index",
+  "knowledgeIndexMissingBody": "Die Suche im Text braucht einen Index. Den baut die App einmal auf – danach antwortet sie sofort.",
+  "knowledgeIndexCountAction": "Artikel zählen",
+  "knowledgeIndexBuildAction": "Index aufbauen",
+  "knowledgeIndexContinueAction": "Weiter aufbauen",
+  "knowledgeIndexCancelAction": "Anhalten",
+  "knowledgeIndexDiscardAction": "Index verwerfen",
+  "knowledgeIndexArticles": "{count} Artikel in dieser Datei.",
+  "knowledgeIndexLargeWarning": "Das sind viele. Rechne mit einer Stunde oder mehr und mit mehreren Gigabyte auf der Platte. Anhalten geht jederzeit, das Angefangene bleibt.",
+  "knowledgeIndexScanning": "Artikel werden gezählt: {done} von {total}.",
+  "knowledgeIndexIndexing": "{done} von {total} Artikeln.",
+  "knowledgeIndexPartial": "Angehalten bei {done} von {total} Artikeln. Gesucht wird in dem, was schon drin ist.",
+  "knowledgeIndexReady": "{count} Artikel im Index."
 }

@@ -8,6 +8,7 @@ import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/knowledge_providers.dart';
 import '../application/zim_archive.dart';
 import 'article_screen.dart';
+import 'knowledge_index_panel.dart';
 
 /// Looking things up without a network: search an offline archive by
 /// title, open what it finds.
@@ -27,6 +28,10 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
   /// archive, each step a read from a file measured in gigabytes.
   String _query = '';
   Timer? _debounce;
+
+  /// Titles or text. Titles come from the archive's own index and are
+  /// instant; text needs one the app builds itself.
+  var _mode = _SearchMode.titles;
 
   @override
   void dispose() {
@@ -108,9 +113,27 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                   border: const OutlineInputBorder(),
                 ),
               ),
+              const SizedBox(height: 8),
+              SegmentedButton<_SearchMode>(
+                segments: [
+                  ButtonSegment(
+                    value: _SearchMode.titles,
+                    label: Text(l10n.knowledgeModeTitles),
+                  ),
+                  ButtonSegment(
+                    value: _SearchMode.fullText,
+                    label: Text(l10n.knowledgeModeFullText),
+                  ),
+                ],
+                selected: {_mode},
+                onSelectionChanged: (selection) =>
+                    setState(() => _mode = selection.first),
+              ),
               const SizedBox(height: 6),
               Text(
-                l10n.knowledgeSearchNote,
+                _mode == _SearchMode.titles
+                    ? l10n.knowledgeSearchNote
+                    : l10n.knowledgeFullTextNote,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
               if (state.title != null)
@@ -127,35 +150,58 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
   }
 
   Widget _results(AppLocalizations l10n, KnowledgeState state) {
+    if (_mode == _SearchMode.fullText) {
+      final index = ref.watch(knowledgeIndexProvider).value;
+      // Nothing to search in yet, or a run in progress: the panel is what
+      // belongs on screen, not an empty result list.
+      if (index == null ||
+          !index.isUsable ||
+          index.status == KnowledgeIndexStatus.running) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: KnowledgeIndexPanel(l10n: l10n),
+        );
+      }
+    }
+
     if (_query.trim().isEmpty) {
       return _Centered(text: l10n.knowledgeSearchPrompt);
     }
 
-    return ref
-        .watch(knowledgeSearchProvider(_query))
-        .when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => _Centered(
-            child: Text(l10n.errorGeneric(error.toString())),
-          ),
-          data: (matches) {
-            if (matches.isEmpty) {
-              return _Centered(text: l10n.knowledgeNoResults(_query.trim()));
+    final results = _mode == _SearchMode.titles
+        ? ref.watch(knowledgeSearchProvider(_query))
+        : ref.watch(knowledgeFullTextProvider(_query));
+
+    return results.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => _Centered(
+        child: Text(l10n.errorGeneric(error.toString())),
+      ),
+      data: (matches) {
+        if (matches.isEmpty) {
+          return _Centered(text: l10n.knowledgeNoResults(_query.trim()));
+        }
+
+        return ListView.builder(
+          itemCount: matches.length + 1,
+          itemBuilder: (context, index) {
+            if (index == matches.length) {
+              // A partial index answers about what it has; saying so
+              // beats letting a missing article read as "not in
+              // Wikipedia".
+              return _PartialIndexNote(l10n: l10n, mode: _mode);
             }
 
-            return ListView.builder(
-              itemCount: matches.length,
-              itemBuilder: (context, index) {
-                final entry = matches[index];
-                return ListTile(
-                  leading: const Icon(Icons.article_outlined),
-                  title: Text(entry.title),
-                  onTap: () => _open(l10n, state, entry),
-                );
-              },
+            final entry = matches[index];
+            return ListTile(
+              leading: const Icon(Icons.article_outlined),
+              title: Text(entry.title),
+              onTap: () => _open(l10n, state, entry),
             );
           },
         );
+      },
+    );
   }
 
   Future<void> _open(
@@ -198,7 +244,32 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
   }
 }
 
+enum _SearchMode { titles, fullText }
+
 enum _ArchiveAction { change, forget }
+
+/// Sits under the results when the index is not finished.
+class _PartialIndexNote extends ConsumerWidget {
+  const _PartialIndexNote({required this.l10n, required this.mode});
+
+  final AppLocalizations l10n;
+  final _SearchMode mode;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (mode != _SearchMode.fullText) return const SizedBox.shrink();
+
+    final index = ref.watch(knowledgeIndexProvider).value;
+    if (index?.status != KnowledgeIndexStatus.partial) {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: KnowledgeIndexPanel(l10n: l10n, compact: true),
+    );
+  }
+}
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState({

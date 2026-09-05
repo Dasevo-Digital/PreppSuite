@@ -101,11 +101,21 @@ before anything is stored. Its raster layer is filtered out of the theme —
 that one fetches a shaded relief over HTTP, which has no place on a map
 whose point is working without a network.
 
-**ZIM search is by title, never full text.** The archive's full-text index
-is Xapian, a C++ library with no Dart binding. `searchTitles` binary-searches
-the archive's own title order — version 6 keeps it in an `X/listing` entry,
-version 5 in the header — and capitalizes the query's first letter, because
-that order is by bytes and Wikipedia titles start with a capital.
+**ZIM title search reads the archive's own order; full text is a separate
+index the app builds.** `searchTitles` binary-searches the title order the
+archive carries — version 6 keeps it in an `X/listing` entry, version 5 in
+the header — and capitalizes the query's first letter, because that order
+is by bytes and Wikipedia titles start with a capital. The archive's own
+full-text index is Xapian, a C++ library with no Dart binding, so
+`KnowledgeIndexer` builds an FTS5 one instead, in
+`KnowledgeIndexDatabase` — a database of its own, because it is derived,
+gigabytes large, and belongs to one archive.
+
+**The indexer reads in cluster order, never entry order.** Entries are
+sorted by URL and clusters are not; reading in entry order would
+decompress the same cluster once per article inside it. It also runs on
+the main isolate on purpose: on Android the archive is a `content://`
+document behind a platform channel, which a plain isolate cannot reach.
 
 **PMTiles and ZIM are both read through `ByteRangeSource`, never a `File`
 directly.** A country extract or a Wikipedia archive is gigabytes: neither

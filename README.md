@@ -63,8 +63,8 @@ steht in [`docs/karte-offline.md`](docs/karte-offline.md).
 
 **Wissen offline.** Eine ZIM-Datei – Wikipedia von Kiwix, eine
 Themensammlung oder eigene Lernmaterialien – macht das Nachschlagen
-unabhängig vom Netz. Gesucht wird nach Titeln, gelesen wird der Artikel
-mit Bildern und Formatierung. Einzelheiten in
+unabhängig vom Netz. Gesucht wird nach Titeln oder im Text der Artikel;
+gelesen wird mit Bildern und Formatierung. Einzelheiten in
 [`docs/wissen-offline.md`](docs/wissen-offline.md).
 
 **Teilen.** Mehrere Geräte teilen sich Bestände, Listen und Budget über
@@ -202,9 +202,13 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   fertigen `.pmtiles` aus dem Netz sind meist Protomaps-Schema und werden
   beim Auswählen abgelehnt. Einzelheiten in
   [`docs/karte-offline.md`](docs/karte-offline.md).
-- Die Suche in der Wissensdatei geht über Titel, nicht über den Text. Die
-  Volltextsuche eines ZIM-Archivs steckt in einem Xapian-Index, für den es
-  keine Dart-Anbindung gibt.
+- Die Volltextsuche braucht einen Index, den die App einmal selbst
+  aufbaut – der fertige im Archiv liegt in einem Xapian-Format ohne
+  Dart-Anbindung. Für eine Themensammlung sind das Minuten, für die
+  vollständige Wikipedia eher eine Stunde und mehrere Gigabyte. Anhalten
+  geht jederzeit; das Angefangene bleibt durchsuchbar.
+- Der Index kennt keinen deutschen Wortstamm: „Notvorräte" findet nicht
+  „Notvorrat".
 - Artikel lesen geht auf Android, iOS und macOS. Auf Linux und Windows
   fehlt die Browser-Komponente; suchen lässt sich dort, lesen nicht.
 - Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen

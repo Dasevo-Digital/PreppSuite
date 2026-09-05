@@ -1,0 +1,9 @@
+# Drift generates a "manager" API alongside every database. Nothing here
+# uses it, and for a database with no declared tables it generates a class
+# holding a field it never reads — which `flutter analyze` rightly flags.
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          generate_manager: false

@@ -47,13 +47,42 @@ gewählt ist. Andere Programme auf demselben Gerät könnten ihn in dieser
 Zeit erreichen; zu finden wäre dort die öffentliche Enzyklopädie, die die
 Nutzerin heruntergeladen hat.
 
-## Grenzen
+## Suchen
 
-**Gesucht wird in Titeln, nicht im Text.** Die Volltextsuche eines
-ZIM-Archivs liegt in einem Xapian-Index – eine C++-Bibliothek ohne
-Dart-Anbindung. „Trinkwasseraufbereitung" findet die App über den Namen;
-den Artikel, der das Wort nur erwähnt, findet sie nicht. Der Suchschlitz
-sagt das.
+Zwei Arten, und die Umschaltung steht über der Trefferliste.
+
+**Titel.** Nutzt die Titelreihenfolge, die im Archiv schon liegt. Sofort da,
+nichts vorzubereiten. Findet „Trinkwasseraufbereitung" über den Namen und
+nicht den Artikel, der das Wort nur erwähnt.
+
+**Volltext.** Braucht einen Index, den die App einmal selbst aufbaut.
+
+Warum selbst: im Archiv liegt bereits ein Volltextindex, eine
+Xapian-Datenbank. Sie zu benutzen hieße `libxapian` auf jede Plattform zu
+tragen – eine C++-Bibliothek, deren Bau für Android, macOS, Linux und
+Windows eine dauerhafte Last wäre. Stattdessen baut die App einen eigenen
+Index mit SQLite FTS5.
+
+Der Aufbau läuft einmal, mit Fortschrittsanzeige, und lässt sich jederzeit
+anhalten – was schon drin ist, bleibt durchsuchbar, und beim nächsten Mal
+geht es dort weiter. Gelesen wird dabei in Block-Reihenfolge, nicht in
+Artikel-Reihenfolge: sonst würde derselbe Block für jeden Artikel darin
+noch einmal entpackt.
+
+Der Index ist **contentless** – FTS5 speichert die Begriffe, nicht den
+Text. Der steht ja weiter im Archiv. Zurück kommt die Nummer des Eintrags.
+
+Größenordnungen: eine Themensammlung mit einigen zehntausend Artikeln ist
+in Minuten fertig. Die vollständige deutsche Wikipedia ist eher eine Stunde
+und mehrere Gigabyte; ab fünfzigtausend Artikeln sagt die App das vorher,
+statt einfach loszulaufen.
+
+**Was der Index nicht kann:** SQLite bringt keinen deutschen Stemmer mit.
+„Notvorräte" findet „Notvorräte", aber nicht „Notvorrat". Umlaute sind
+egal – `remove_diacritics` sorgt dafür, dass „Notvorrate" von einer
+Telefontastatur auch trifft.
+
+## Grenzen
 
 **Artikel lesen geht auf Android, iOS und macOS.** Auf Linux und Windows
 fehlt die Browser-Komponente; suchen lässt sich dort, lesen nicht.

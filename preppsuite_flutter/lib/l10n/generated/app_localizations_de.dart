@@ -995,4 +995,64 @@ class AppLocalizationsDe extends AppLocalizations {
   String knowledgeSource(String name) {
     return 'Aus $name';
   }
+
+  @override
+  String get knowledgeModeTitles => 'Titel';
+
+  @override
+  String get knowledgeModeFullText => 'Volltext';
+
+  @override
+  String get knowledgeFullTextNote => 'Gesucht wird im Text der Artikel.';
+
+  @override
+  String get knowledgeIndexMissingTitle => 'Kein Volltext-Index';
+
+  @override
+  String get knowledgeIndexMissingBody =>
+      'Die Suche im Text braucht einen Index. Den baut die App einmal auf – danach antwortet sie sofort.';
+
+  @override
+  String get knowledgeIndexCountAction => 'Artikel zählen';
+
+  @override
+  String get knowledgeIndexBuildAction => 'Index aufbauen';
+
+  @override
+  String get knowledgeIndexContinueAction => 'Weiter aufbauen';
+
+  @override
+  String get knowledgeIndexCancelAction => 'Anhalten';
+
+  @override
+  String get knowledgeIndexDiscardAction => 'Index verwerfen';
+
+  @override
+  String knowledgeIndexArticles(int count) {
+    return '$count Artikel in dieser Datei.';
+  }
+
+  @override
+  String get knowledgeIndexLargeWarning =>
+      'Das sind viele. Rechne mit einer Stunde oder mehr und mit mehreren Gigabyte auf der Platte. Anhalten geht jederzeit, das Angefangene bleibt.';
+
+  @override
+  String knowledgeIndexScanning(int done, int total) {
+    return 'Artikel werden gezählt: $done von $total.';
+  }
+
+  @override
+  String knowledgeIndexIndexing(int done, int total) {
+    return '$done von $total Artikeln.';
+  }
+
+  @override
+  String knowledgeIndexPartial(int done, int total) {
+    return 'Angehalten bei $done von $total Artikeln. Gesucht wird in dem, was schon drin ist.';
+  }
+
+  @override
+  String knowledgeIndexReady(int count) {
+    return '$count Artikel im Index.';
+  }
 }

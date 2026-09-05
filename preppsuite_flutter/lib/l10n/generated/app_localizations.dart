@@ -1807,6 +1807,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'From {name}'**
   String knowledgeSource(String name);
+
+  /// No description provided for @knowledgeModeTitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Titles'**
+  String get knowledgeModeTitles;
+
+  /// No description provided for @knowledgeModeFullText.
+  ///
+  /// In en, this message translates to:
+  /// **'Full text'**
+  String get knowledgeModeFullText;
+
+  /// No description provided for @knowledgeFullTextNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Searches the text of the articles.'**
+  String get knowledgeFullTextNote;
+
+  /// No description provided for @knowledgeIndexMissingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No full-text index'**
+  String get knowledgeIndexMissingTitle;
+
+  /// No description provided for @knowledgeIndexMissingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching the text needs an index. The app builds it once — after that it answers instantly.'**
+  String get knowledgeIndexMissingBody;
+
+  /// No description provided for @knowledgeIndexCountAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Count articles'**
+  String get knowledgeIndexCountAction;
+
+  /// No description provided for @knowledgeIndexBuildAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Build index'**
+  String get knowledgeIndexBuildAction;
+
+  /// No description provided for @knowledgeIndexContinueAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep building'**
+  String get knowledgeIndexContinueAction;
+
+  /// No description provided for @knowledgeIndexCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get knowledgeIndexCancelAction;
+
+  /// No description provided for @knowledgeIndexDiscardAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard index'**
+  String get knowledgeIndexDiscardAction;
+
+  /// No description provided for @knowledgeIndexArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} articles in this file.'**
+  String knowledgeIndexArticles(int count);
+
+  /// No description provided for @knowledgeIndexLargeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'That is a lot. Expect an hour or more and several gigabytes on disk. You can stop at any time and keep what was done.'**
+  String get knowledgeIndexLargeWarning;
+
+  /// No description provided for @knowledgeIndexScanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting articles: {done} of {total}.'**
+  String knowledgeIndexScanning(int done, int total);
+
+  /// No description provided for @knowledgeIndexIndexing.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} articles.'**
+  String knowledgeIndexIndexing(int done, int total);
+
+  /// No description provided for @knowledgeIndexPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped at {done} of {total} articles. Searches what is already in there.'**
+  String knowledgeIndexPartial(int done, int total);
+
+  /// No description provided for @knowledgeIndexReady.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} articles indexed.'**
+  String knowledgeIndexReady(int count);
 }
 
 class _AppLocalizationsDelegate
