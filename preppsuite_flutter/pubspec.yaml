@@ -90,6 +90,12 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.15.1
+  # Runs a test inside the real app on a real device, which is the only
+  # place the Kotlin and Swift storage bridges exist at all. The unit
+  # suite mocks that channel; nothing else checks there is something on
+  # the other end of it.
+  integration_test:
+    sdk: flutter
   drift_dev: ^2.34.0
   flutter_lints: '>=3.0.0 <7.0.0'
   flutter_test:

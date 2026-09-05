@@ -1,7 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 
 import '../../../core/platform_storage.dart';
-import 'saf_sync_folder.dart';
+import 'native_sync_folder.dart';
 import 'sync_folder.dart';
 
 /// Where a shared folder lives, in a form that survives a restart.
@@ -9,12 +9,12 @@ typedef SharedFolderLocation = PickedStorage;
 
 /// Opens the platform's folder picker, or null if the user backed out.
 ///
-/// On Android this goes through the app's own channel rather than
-/// `file_picker`: the point is not the dialog but the *persistable*
-/// permission taken afterwards, which is what lets the folder still be
-/// readable on the next launch.
+/// On Android and iOS this goes through the app's own channel rather than
+/// `file_picker`: the point is not the dialog but what is kept
+/// afterwards — a persisted grant there, a bookmark here — which is what
+/// lets the folder still be readable on the next launch.
 Future<SharedFolderLocation?> pickSharedFolder({String? dialogTitle}) async {
-  if (usesStorageAccessFramework) {
+  if (usesNativeStoragePicker) {
     final picked = await nativeStorageChannel.invokeMapMethod<String, String>(
       'pick',
     );
@@ -37,8 +37,8 @@ Future<SharedFolderLocation?> pickSharedFolder({String? dialogTitle}) async {
 
 /// The right [SyncFolder] for a stored location.
 SyncFolder syncFolderFor(String location) {
-  return location.startsWith('content://')
-      ? SafSyncFolder(location)
+  return isNativeStorageHandle(location)
+      ? NativeSyncFolder(location)
       : IoSyncFolder(location);
 }
 

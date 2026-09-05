@@ -9,13 +9,13 @@ import 'pmtiles_archive.dart';
 /// Opens the platform's file picker for a `.pmtiles` archive, or null if
 /// the user backed out.
 ///
-/// On Android this goes through the app's own channel rather than
+/// On Android and iOS this goes through the app's own channel rather than
 /// `file_picker`, for two reasons: the picker there copies the chosen file
-/// into the app's cache, which for a country extract means several
+/// into the app's own storage, which for a country extract means several
 /// gigabytes written twice; and the copy would be thrown away on the next
 /// cache clear, taking the map with it.
 Future<PickedStorage?> pickMapArchive({String? dialogTitle}) async {
-  if (usesStorageAccessFramework) {
+  if (usesNativeStoragePicker) {
     final picked = await nativeStorageChannel.invokeMapMethod<String, String>(
       'pickFile',
     );
@@ -43,32 +43,33 @@ Future<PickedStorage?> pickMapArchive({String? dialogTitle}) async {
 
 /// Random access to the archive at [location], whatever kind it is.
 Future<ByteRangeSource> openMapArchive(String location) {
-  return location.startsWith('content://')
-      ? SafByteRangeSource.open(location)
+  return isNativeStorageHandle(location)
+      ? NativeByteRangeSource.open(location)
       : FileByteRangeSource.open(File(location));
 }
 
-/// Reads ranges out of a `content://` document through the platform
-/// channel.
+/// Reads ranges out of an archive the app cannot open with `dart:io`.
 ///
 /// The archive is never copied and never fully read: the native side keeps
 /// one descriptor open and answers a few kilobytes at a time, once per
-/// tile, off the main thread.
-class SafByteRangeSource implements ByteRangeSource {
-  SafByteRangeSource._(this.uri);
+/// tile, off the main thread. On iOS the security scope is held open
+/// alongside that descriptor, because it is what the descriptor hangs on.
+class NativeByteRangeSource implements ByteRangeSource {
+  NativeByteRangeSource._(this.uri);
 
   final String uri;
 
-  static Future<SafByteRangeSource> open(String uri) async {
+  static Future<NativeByteRangeSource> open(String uri) async {
     final opened = await nativeStorageChannel.invokeMethod<bool>('openFile', {
       'uri': uri,
     });
     if (opened != true) {
       // The usual cause is a permission that did not survive: a
-      // reinstall, or the user revoking it in the system settings.
+      // reinstall, the user revoking it in the system settings, or a
+      // bookmark whose file has been moved out from under it.
       throw const PmTilesException('cannot open the archive');
     }
-    return SafByteRangeSource._(uri);
+    return NativeByteRangeSource._(uri);
   }
 
   @override

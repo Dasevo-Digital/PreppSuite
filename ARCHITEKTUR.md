@@ -18,6 +18,10 @@ flutter pub get                                     # root
 flutter analyze                                     # root
 dart format --output=none --set-exit-if-changed .   # root
 cd preppsuite_flutter && flutter test
+
+# Only on a device or simulator: the storage bridge is Kotlin and Swift,
+# and nothing else checks there is anyone on the other end of the channel.
+cd preppsuite_flutter && flutter test integration_test/ -d <device>
 ```
 
 Code generation (drift):
@@ -196,11 +200,24 @@ tree; the test suite deliberately targets that layer rather than the UI.
   limit) and opportunistic on iOS. The app never promises the iOS case.
 - NINA delivers the same warnings in ~30 seconds against this app's 15
   minutes. The warning screen says so rather than pretending otherwise.
-- Android reaches the shared folder through the Storage Access Framework
-  (`SafSyncFolder` plus the channel in `MainActivity.kt`), because a
-  `content://` tree is not something `dart:io` can open. Both
-  implementations must produce the identical layout — `deviceFilePath` and
-  friends in `sync_folder.dart` are the single definition of it.
+- Android and iOS both reach picked storage through the same channel
+  (`NativeSyncFolder` and `NativeByteRangeSource` in Dart; `MainActivity.kt`
+  and `StorageBridge.swift` natively), for different reasons: a
+  `content://` tree is not something `dart:io` can open, and an iOS URL
+  works only inside a security scope and only until the process ends. The
+  method names on that channel must stay identical on both sides, and all
+  implementations must produce the identical folder layout —
+  `deviceFilePath` and friends in `sync_folder.dart` are the single
+  definition of it.
+- **The scheme in a stored location is what picks the reader.**
+  `content://` is Android, `bookmark://` an iOS bookmark, anything else a
+  path. Read from the value rather than from the running platform, because
+  a restored backup or a synced preference can carry another platform's
+  handle. `isNativeStorageHandle` is the one place that decides.
+- iOS must never copy a picked archive. `UIDocumentPickerViewController`
+  is created with `asCopy: false`, and `LSSupportsOpeningDocumentsInPlace`
+  is set — a country map extract or a Wikipedia archive is gigabytes, and
+  the copy would land in the container and be swept away with the cache.
 - The macOS build runs **without** the app sandbox, deliberately: under it
   a picked folder's permission dies with the process, and keeping it needs
   security-scoped bookmarks in Swift. The reason is written into

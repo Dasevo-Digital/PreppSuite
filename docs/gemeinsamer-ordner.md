@@ -134,12 +134,34 @@ lässt und übersprungen wird. Die Alternative auf SAF wäre löschen und
 umbenennen — ein Fenster, in dem die Datei ganz fehlt, dazu Anzeigenamen,
 die der Provider umschreiben darf.
 
+**iOS und iPadOS** geben gar keinen Pfad heraus, der weiterarbeitet. Ein
+im Dokumentenwähler gewählter Ordner kommt als *security-scoped* URL
+zurück, deren Zugriff mit dem Prozess stirbt — und anders als unter macOS
+lässt sich die Sandbox hier nicht abschalten.
+
+Was überlebt, ist ein **Bookmark**: ein Datenblock, der sich beim nächsten
+Start wieder in dieselbe URL auflösen lässt. Der Wähler legt einen an und
+gibt Dart ein undurchsichtiges `bookmark://<id>` statt eines Pfades. Das
+Schema ist zugleich das Erkennungszeichen, an dem die Dart-Seite den
+richtigen Leser wählt — derselbe Kniff wie Androids `content://`.
+
+Gelesen und geschrieben wird über `NSFileCoordinator`. Der Ordner ist ja
+gerade der Sinn der Sache und liegt praktisch immer in einer Wolke —
+iCloud Drive, Nextcloud. Ein unkoordinierter Lesezugriff auf eine Datei,
+die ein anderes Gerät eben geschrieben hat, findet sonst einen Platzhalter,
+der noch nicht heruntergeladen ist.
+
+Ein Bookmark überlebt eine Neuinstallation nicht und wird ungültig, wenn
+der Ordner verschoben oder gelöscht wird. Beides fällt bei `ensureWritable`
+auf, genau wie unter Android.
+
 **macOS** läuft ohne Sandbox. Unter der Sandbox stirbt die Freigabe eines
 gewählten Ordners mit dem Prozess; sie zu behalten geht nur über
 *security-scoped bookmarks*, was nativen Swift-Code bräuchte, denn das
 einzige Dart-Paket dafür ist auf Dart 2 stehengeblieben. Die App wird
 ohnehin direkt weitergegeben und nicht über den App Store, wo die Sandbox
-Pflicht wäre. Der Eintrag steht mit Begründung in
+Pflicht wäre. Seit es den Swift-Code für iOS gibt, wäre der Weg zurück
+offen — nötig ist er bisher nicht. Der Eintrag steht mit Begründung in
 `macos/Runner/Release.entitlements`.
 
 **Kein Echtzeit-Abgleich.** Zwischen „ich hake etwas ab" und „die andere

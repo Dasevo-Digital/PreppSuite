@@ -3,27 +3,30 @@ import 'package:path/path.dart' as p;
 import '../../../core/platform_storage.dart';
 import 'sync_folder.dart';
 
-/// A [SyncFolder] reached through Android's Storage Access Framework.
+/// A [SyncFolder] the app cannot reach with `dart:io`.
 ///
-/// Android stopped letting apps open arbitrary paths with scoped storage:
-/// the folder picker returns a `content://` tree, and `dart:io` cannot
-/// open one. Every operation therefore goes through the platform channel
-/// — see `MainActivity.kt`, which holds the whole native side.
+/// Two platforms end up here for different reasons. Android's scoped
+/// storage returns a `content://` tree that `dart:io` cannot open at all.
+/// iOS returns a URL that works only inside a security scope and only
+/// until the process ends, so what is stored is a bookmark and the scope
+/// is entered per operation. Both are answered by the same channel — see
+/// `MainActivity.kt` and `StorageBridge.swift`.
 ///
 /// The layout inside the folder is identical to [IoSyncFolder]'s, so a
 /// phone and a laptop sharing the same Nextcloud directory are sharing the
 /// same folder, not two that merely look alike.
-class SafSyncFolder implements SyncFolder {
-  const SafSyncFolder(this.treeUri);
+class NativeSyncFolder implements SyncFolder {
+  const NativeSyncFolder(this.treeUri);
 
-  /// The `content://` tree the user picked, with a persisted read/write
-  /// grant taken at pick time.
+  /// The handle the picker returned, with whatever permission the
+  /// platform grants alongside it taken at pick time.
   final String treeUri;
 
   @override
   Future<bool> isWritable() async {
-    // Also answers "has the grant survived" — it does not survive a
-    // reinstall, and the user can revoke it in the system settings.
+    // Also answers "has the grant survived" — neither an Android grant
+    // nor an iOS bookmark survives a reinstall, and on Android the user
+    // can revoke it in the system settings.
     final granted = await nativeStorageChannel.invokeMethod<bool>(
       'ensureWritable',
       {

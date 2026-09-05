@@ -76,6 +76,14 @@
 	     actually runs — it can be hours, so the app treats a background
 	     poll as a bonus and never promises it. Android is the platform
 	     where this is dependable. -->
+	<!-- Both are about getting a multi-gigabyte archive onto the device
+	     without copying it. In-place opening is what lets an archive be
+	     read where it lies; file sharing puts the app's own folder into
+	     Files, so one can simply be dropped there. -->
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
