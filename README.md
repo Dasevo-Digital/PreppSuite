@@ -218,6 +218,8 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
 - Veröffentlicht wird bisher nur eine macOS-Fassung. Android baut durch und
   wurde am fertigen Paket geprüft; die Release-APK ist noch mit dem
   Debug-Schlüssel signiert. Für iOS ist geprüft, dass die App durchbaut;
-  ausgeliefert wird sie nicht. Linux und Windows sind angelegt, aber nie
-  gebaut. iOS verlangt mindestens iOS 14 – `workmanager` bringt die Grenze
-  mit. Web bräuchte Umbau: der Foto-Teil verwendet `dart:io`.
+  ausgeliefert wird sie nicht, aber sie läuft auf dem Simulator. iOS
+  verlangt mindestens iOS 14 – `workmanager` bringt die Grenze mit.
+  Linux baut durch, geprüft im Container (`tool/docker/`); ausprobiert auf
+  einem echten Linux-Rechner ist sie nicht. Windows ist nie gebaut worden
+  – dafür steht ein CI-Auftrag bereit, gelaufen ist er noch nicht. Web bräuchte Umbau: der Foto-Teil verwendet `dart:io`.

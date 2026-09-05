@@ -24,6 +24,10 @@ cd preppsuite_flutter && flutter test
 cd preppsuite_flutter && flutter test integration_test/ -d <device>
 ```
 
+Linux is built in a container from here — see [`tool/docker/`](tool/docker/).
+Windows cannot be built on a Mac at all; `.github/workflows/build-desktop.yml`
+is the only path to one.
+
 Code generation (drift):
 
 ```bash

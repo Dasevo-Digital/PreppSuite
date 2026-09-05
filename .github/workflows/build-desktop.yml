@@ -1,0 +1,72 @@
+name: Desktop builds
+
+# The two platforms nobody here can build. Development happens on a Mac,
+# so Linux and Windows are the ones that break unnoticed — a plugin
+# without an implementation, a missing system library, a CMake runner that
+# has fallen behind the Flutter template.
+#
+# The artefacts are kept because they are also the only way to get a build
+# of either onto a machine that can actually run it.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.8'
+
+      # Beyond the usual Flutter toolchain: webkit2gtk and libsoup are what
+      # desktop_webview_window draws articles with, and their absence is a
+      # link error rather than a warning.
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev \
+            libwebkit2gtk-4.1-dev libsoup-3.0-dev
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build
+        working-directory: preppsuite_flutter
+        run: flutter build linux --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preppsuite-linux-x64
+          path: preppsuite_flutter/build/linux/x64/release/bundle
+
+  windows:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.8'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build
+        working-directory: preppsuite_flutter
+        run: flutter build windows --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preppsuite-windows-x64
+          path: preppsuite_flutter/build/windows/x64/runner/Release
