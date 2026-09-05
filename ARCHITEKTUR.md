@@ -213,6 +213,10 @@ tree; the test suite deliberately targets that layer rather than the UI.
   install` and **delete them again after every build**. A build that
   follows another without an intervening `pod install` therefore fails
   with "Build input file cannot be found". Running it again fixes it.
+- `HomeShell` draws its seven destinations two ways — a bar below a phone,
+  a rail beside anything wider — from one list, so a destination cannot
+  reach one and not the other. `shellNavigationFor` in
+  `home/application/` decides, and is the testable half.
 - Anything at the very top of `HomeShell`'s body is under the status bar.
   The shell consumes the top inset itself, once, so the warning banner
   does not sit beneath the clock and the tab below is not handed an inset
