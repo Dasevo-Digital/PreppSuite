@@ -890,4 +890,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get sharingErrorDifferentHousehold =>
       'This folder belongs to a different household. Nothing was merged — two unrelated sets of data cannot be pulled apart again.';
+
+  @override
+  String get mapAttributionOffline =>
+      '© OpenStreetMap contributors · © OpenMapTiles';
+
+  @override
+  String get settingsOfflineMapTitle => 'Offline map';
+
+  @override
+  String get offlineMapIntro =>
+      'Without a map of your own the app fetches tiles from OpenStreetMap, so it needs a connection. A PMTiles file on the device replaces that entirely.';
+
+  @override
+  String get offlineMapInactive =>
+      'No map chosen. Tiles come from the network.';
+
+  @override
+  String offlineMapActive(String name) {
+    return '$name';
+  }
+
+  @override
+  String offlineMapZoomRange(int min, int max) {
+    return 'Zoom levels $min to $max.';
+  }
+
+  @override
+  String get offlineMapChooseAction => 'Choose a map';
+
+  @override
+  String get offlineMapChangeAction => 'Choose a different map';
+
+  @override
+  String get offlineMapForgetAction => 'Back online';
+
+  @override
+  String get offlineMapErrorUnreadable =>
+      'The file cannot be read. A PMTiles version 3 archive is expected.';
+
+  @override
+  String get offlineMapErrorNotVector =>
+      'The archive holds finished image tiles rather than vector data. PreppSuite draws the map itself and needs vector tiles.';
+
+  @override
+  String get offlineMapErrorSchema =>
+      'The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md.';
+
+  @override
+  String get offlineMapHelp => 'Where do I get such a file?';
 }

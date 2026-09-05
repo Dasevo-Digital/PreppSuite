@@ -540,5 +540,35 @@
   "sharingLeaveDialogTitle": "Stop sharing?",
   "sharingLeaveDialogBody": "This device will stop syncing. Nothing is deleted — not here and not in the folder.",
   "sharingLeaveDialogConfirm": "Stop",
-  "sharingErrorDifferentHousehold": "This folder belongs to a different household. Nothing was merged — two unrelated sets of data cannot be pulled apart again."
+  "sharingErrorDifferentHousehold": "This folder belongs to a different household. Nothing was merged — two unrelated sets of data cannot be pulled apart again.",
+  "mapAttributionOffline": "© OpenStreetMap contributors · © OpenMapTiles",
+  "settingsOfflineMapTitle": "Offline map",
+  "offlineMapIntro": "Without a map of your own the app fetches tiles from OpenStreetMap, so it needs a connection. A PMTiles file on the device replaces that entirely.",
+  "offlineMapInactive": "No map chosen. Tiles come from the network.",
+  "offlineMapActive": "{name}",
+  "@offlineMapActive": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineMapZoomRange": "Zoom levels {min} to {max}.",
+  "@offlineMapZoomRange": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "offlineMapChooseAction": "Choose a map",
+  "offlineMapChangeAction": "Choose a different map",
+  "offlineMapForgetAction": "Back online",
+  "offlineMapErrorUnreadable": "The file cannot be read. A PMTiles version 3 archive is expected.",
+  "offlineMapErrorNotVector": "The archive holds finished image tiles rather than vector data. PreppSuite draws the map itself and needs vector tiles.",
+  "offlineMapErrorSchema": "The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md.",
+  "offlineMapHelp": "Where do I get such a file?"
 }

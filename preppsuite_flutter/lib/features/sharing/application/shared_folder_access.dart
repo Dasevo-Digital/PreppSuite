@@ -1,29 +1,11 @@
-import 'dart:io' show Platform;
-
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/services.dart';
 
+import '../../../core/platform_storage.dart';
 import 'saf_sync_folder.dart';
 import 'sync_folder.dart';
 
 /// Where a shared folder lives, in a form that survives a restart.
-///
-/// A filesystem path everywhere except Android, where it is a `content://`
-/// tree — hence [label], because a content URI is not something to show
-/// anyone.
-class SharedFolderLocation {
-  const SharedFolderLocation({required this.value, required this.label});
-
-  final String value;
-  final String label;
-}
-
-/// Android is the one platform where a picked folder is not a path.
-bool get usesStorageAccessFramework {
-  if (kIsWeb) return false;
-  return Platform.isAndroid;
-}
+typedef SharedFolderLocation = PickedStorage;
 
 /// Opens the platform's folder picker, or null if the user backed out.
 ///
@@ -33,8 +15,9 @@ bool get usesStorageAccessFramework {
 /// readable on the next launch.
 Future<SharedFolderLocation?> pickSharedFolder({String? dialogTitle}) async {
   if (usesStorageAccessFramework) {
-    const channel = MethodChannel('preppsuite/shared_folder_saf');
-    final picked = await channel.invokeMapMethod<String, String>('pick');
+    final picked = await nativeStorageChannel.invokeMapMethod<String, String>(
+      'pick',
+    );
     final uri = picked?['uri'];
     if (uri == null) return null;
 
@@ -58,3 +41,7 @@ SyncFolder syncFolderFor(String location) {
       ? SafSyncFolder(location)
       : IoSyncFolder(location);
 }
+
+/// Kept for the callers that only have the raw stored value.
+SharedFolderLocation sharedFolderLocation(String value, String label) =>
+    SharedFolderLocation(value: value, label: label);

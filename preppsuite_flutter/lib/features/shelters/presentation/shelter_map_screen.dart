@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../core/geolocation_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../maps/presentation/base_map_layer.dart';
 import '../application/geo_bounds.dart';
 import '../application/overpass_shelter_client.dart';
 import '../application/shelter_classification.dart';
@@ -221,16 +222,8 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
                         : 5.5,
                   ),
                   children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'de.preppsuite.app',
-                    ),
-                    RichAttributionWidget(
-                      attributions: [
-                        TextSourceAttribution(l10n.shelterAttribution),
-                      ],
-                    ),
+                    const BaseMapLayer(),
+                    BaseMapAttribution(l10n: l10n),
                     MarkerLayer(
                       markers: [
                         if (_center != null)

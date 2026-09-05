@@ -55,6 +55,12 @@ die App sagt das an Ort und Stelle auch selbst.
 der WWBOTA-Datenbank, nach Entfernung und nach Belastbarkeit der Angabe
 filterbar.
 
+**Karte offline.** Wer eine PMTiles-Datei auf dem Gerät hinterlegt, braucht
+für die Karte kein Netz mehr – die App zeichnet sie selbst aus
+Vektorkacheln. Ohne eigene Datei kommen die Kacheln wie bisher von
+OpenStreetMap. Was für eine Datei das sein muss und wie man sie herstellt,
+steht in [`docs/karte-offline.md`](docs/karte-offline.md).
+
 **Teilen.** Mehrere Geräte teilen sich Bestände, Listen und Budget über
 einen Ordner, den sie alle sehen – Nextcloud, Syncthing, iCloud Drive,
 Dropbox. PreppSuite legt dort nur Dateien ab; wer sie transportiert,
@@ -127,8 +133,9 @@ daneben und schreibt in dieselbe Datenbank.
 
 Die Annahmen, die dahinterstehen, sind in [`CLAUDE.md`](CLAUDE.md)
 aufgeschrieben, die Warnquellen in
-[`docs/warning-feeds.md`](docs/warning-feeds.md) und das Ordnerformat in
-[`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md).
+[`docs/warning-feeds.md`](docs/warning-feeds.md), das Ordnerformat in
+[`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md) und die
+Offline-Karte in [`docs/karte-offline.md`](docs/karte-offline.md).
 
 ## Entwicklung
 
@@ -154,6 +161,8 @@ Die Daten stammen aus fremden Quellen und stehen unter deren eigenen
 Bedingungen: Kartenkacheln und Schutzraum-Einträge von OpenStreetMap
 (ODbL, Namensnennung in der Karte), Produktdaten von Open Food Facts
 (ODbL), Warnungen vom BBK und von MeteoAlarm, Ortssuche über Nominatim.
+Das Kartenbild der Offline-Karte stammt von OpenMapTiles (CC-BY 4.0),
+abgeleitet von OSM Liberty.
 Die mitgelieferte Schrift Noto Sans steht unter der SIL Open Font License
 (`preppsuite_flutter/assets/fonts/OFL.txt`).
 
@@ -181,8 +190,12 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   eine Vorgabe der Plattform) und auf iOS nur gelegentlich – dort entscheidet
   das System. Für sofortige Warnungen ist NINA vom BBK die richtige Antwort,
   die App sagt das auch selbst.
-- Karten und Wikipedia sind noch nicht offline verfügbar. Beides ist geplant:
-  Vektorkarten als PMTiles, Wikipedia als ZIM-Datei.
+- Die Offline-Karte kennt ein Kartenbild, hell, ohne Piktogramme an Punkten
+  und ohne Höhenrelief. Sie braucht ein Archiv im OpenMapTiles-Schema; die
+  fertigen `.pmtiles` aus dem Netz sind meist Protomaps-Schema und werden
+  beim Auswählen abgelehnt. Einzelheiten in
+  [`docs/karte-offline.md`](docs/karte-offline.md).
+- Wikipedia ist noch nicht offline verfügbar. Geplant als ZIM-Datei.
 - Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen
   wurden – im Ordner liegen nur die Daten, nicht die Bilder.
 - Veröffentlicht wird bisher nur eine macOS-Fassung. Android baut durch und

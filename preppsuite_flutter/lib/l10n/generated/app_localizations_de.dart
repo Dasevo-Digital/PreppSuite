@@ -896,4 +896,53 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get sharingErrorDifferentHousehold =>
       'Der Ordner gehört zu einem anderen Haushalt. Es wurde nichts zusammengeführt — zwei fremde Datenbestände lassen sich nicht wieder trennen.';
+
+  @override
+  String get mapAttributionOffline =>
+      '© OpenStreetMap contributors · © OpenMapTiles';
+
+  @override
+  String get settingsOfflineMapTitle => 'Karte offline';
+
+  @override
+  String get offlineMapIntro =>
+      'Ohne eigene Karte holt die App ihre Kacheln von OpenStreetMap – also nur mit Verbindung. Eine PMTiles-Datei auf dem Gerät ersetzt das vollständig.';
+
+  @override
+  String get offlineMapInactive =>
+      'Keine Karte gewählt. Die Karte kommt aus dem Netz.';
+
+  @override
+  String offlineMapActive(String name) {
+    return '$name';
+  }
+
+  @override
+  String offlineMapZoomRange(int min, int max) {
+    return 'Zoomstufen $min bis $max.';
+  }
+
+  @override
+  String get offlineMapChooseAction => 'Karte wählen';
+
+  @override
+  String get offlineMapChangeAction => 'Andere Karte wählen';
+
+  @override
+  String get offlineMapForgetAction => 'Wieder online';
+
+  @override
+  String get offlineMapErrorUnreadable =>
+      'Die Datei lässt sich nicht lesen. Erwartet wird ein PMTiles-Archiv der Version 3.';
+
+  @override
+  String get offlineMapErrorNotVector =>
+      'Das Archiv enthält fertige Bildkacheln statt Vektordaten. PreppSuite zeichnet die Karte selbst und braucht Vektorkacheln.';
+
+  @override
+  String get offlineMapErrorSchema =>
+      'Das Archiv benutzt ein anderes Schema als das mitgelieferte Kartenbild. Gebraucht wird ein Archiv im OpenMapTiles-Schema – siehe docs/karte-offline.md.';
+
+  @override
+  String get offlineMapHelp => 'Woher bekomme ich so eine Datei?';
 }

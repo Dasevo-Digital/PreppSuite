@@ -257,5 +257,18 @@
   "sharingLeaveDialogTitle": "Nicht mehr teilen?",
   "sharingLeaveDialogBody": "Dieses Gerät gleicht dann nicht mehr ab. Gelöscht wird nichts — weder hier noch im Ordner.",
   "sharingLeaveDialogConfirm": "Beenden",
-  "sharingErrorDifferentHousehold": "Der Ordner gehört zu einem anderen Haushalt. Es wurde nichts zusammengeführt — zwei fremde Datenbestände lassen sich nicht wieder trennen."
+  "sharingErrorDifferentHousehold": "Der Ordner gehört zu einem anderen Haushalt. Es wurde nichts zusammengeführt — zwei fremde Datenbestände lassen sich nicht wieder trennen.",
+  "mapAttributionOffline": "© OpenStreetMap contributors · © OpenMapTiles",
+  "settingsOfflineMapTitle": "Karte offline",
+  "offlineMapIntro": "Ohne eigene Karte holt die App ihre Kacheln von OpenStreetMap – also nur mit Verbindung. Eine PMTiles-Datei auf dem Gerät ersetzt das vollständig.",
+  "offlineMapInactive": "Keine Karte gewählt. Die Karte kommt aus dem Netz.",
+  "offlineMapActive": "{name}",
+  "offlineMapZoomRange": "Zoomstufen {min} bis {max}.",
+  "offlineMapChooseAction": "Karte wählen",
+  "offlineMapChangeAction": "Andere Karte wählen",
+  "offlineMapForgetAction": "Wieder online",
+  "offlineMapErrorUnreadable": "Die Datei lässt sich nicht lesen. Erwartet wird ein PMTiles-Archiv der Version 3.",
+  "offlineMapErrorNotVector": "Das Archiv enthält fertige Bildkacheln statt Vektordaten. PreppSuite zeichnet die Karte selbst und braucht Vektorkacheln.",
+  "offlineMapErrorSchema": "Das Archiv benutzt ein anderes Schema als das mitgelieferte Kartenbild. Gebraucht wird ein Archiv im OpenMapTiles-Schema – siehe docs/karte-offline.md.",
+  "offlineMapHelp": "Woher bekomme ich so eine Datei?"
 }

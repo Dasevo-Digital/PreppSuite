@@ -1645,6 +1645,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This folder belongs to a different household. Nothing was merged — two unrelated sets of data cannot be pulled apart again.'**
   String get sharingErrorDifferentHousehold;
+
+  /// No description provided for @mapAttributionOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'© OpenStreetMap contributors · © OpenMapTiles'**
+  String get mapAttributionOffline;
+
+  /// No description provided for @settingsOfflineMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline map'**
+  String get settingsOfflineMapTitle;
+
+  /// No description provided for @offlineMapIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a map of your own the app fetches tiles from OpenStreetMap, so it needs a connection. A PMTiles file on the device replaces that entirely.'**
+  String get offlineMapIntro;
+
+  /// No description provided for @offlineMapInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'No map chosen. Tiles come from the network.'**
+  String get offlineMapInactive;
+
+  /// No description provided for @offlineMapActive.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}'**
+  String offlineMapActive(String name);
+
+  /// No description provided for @offlineMapZoomRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom levels {min} to {max}.'**
+  String offlineMapZoomRange(int min, int max);
+
+  /// No description provided for @offlineMapChooseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a map'**
+  String get offlineMapChooseAction;
+
+  /// No description provided for @offlineMapChangeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a different map'**
+  String get offlineMapChangeAction;
+
+  /// No description provided for @offlineMapForgetAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Back online'**
+  String get offlineMapForgetAction;
+
+  /// No description provided for @offlineMapErrorUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The file cannot be read. A PMTiles version 3 archive is expected.'**
+  String get offlineMapErrorUnreadable;
+
+  /// No description provided for @offlineMapErrorNotVector.
+  ///
+  /// In en, this message translates to:
+  /// **'The archive holds finished image tiles rather than vector data. PreppSuite draws the map itself and needs vector tiles.'**
+  String get offlineMapErrorNotVector;
+
+  /// No description provided for @offlineMapErrorSchema.
+  ///
+  /// In en, this message translates to:
+  /// **'The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md.'**
+  String get offlineMapErrorSchema;
+
+  /// No description provided for @offlineMapHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Where do I get such a file?'**
+  String get offlineMapHelp;
 }
 
 class _AppLocalizationsDelegate

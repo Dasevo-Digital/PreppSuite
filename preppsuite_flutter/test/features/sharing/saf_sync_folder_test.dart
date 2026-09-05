@@ -11,7 +11,7 @@ import 'package:preppsuite_flutter/features/sharing/application/sync_folder.dart
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const channel = MethodChannel('preppsuite/shared_folder_saf');
+  const channel = MethodChannel('preppsuite/storage');
   late List<MethodCall> calls;
   Object? reply;
 

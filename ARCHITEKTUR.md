@@ -92,6 +92,19 @@ marked clean. This was a real bug across all three controllers;
 `inventory_controller_test` guards it. The flag now feeds shared-folder sync
 rather than a server.
 
+**The offline map only renders an OpenMapTiles-schema archive.** The style
+is `ProvidedThemes.lightTheme()` from `vector_tile_renderer`, which reads
+layer names like `water` and `transportation`; a Protomaps-schema archive
+holds the same data under different names and would draw nothing.
+`OfflineMapController` checks the archive's own `vector_layers` and refuses
+before anything is stored. Its raster layer is filtered out of the theme —
+that one fetches a shaded relief over HTTP, which has no place on a map
+whose point is working without a network.
+
+**PMTiles is read through `ByteRangeSource`, never a `File` directly.** A
+country extract is gigabytes: it is never copied and never fully read, and
+on Android it is a `content://` document that `dart:io` cannot open at all.
+
 **Adding or removing a drift column means a migration.** Bump
 `schemaVersion` and add the matching branch to `onUpgrade` in the same edit —
 an existing install will not recreate its tables. Removing one needs
@@ -118,6 +131,10 @@ lib/features/<feature>/
   application/     # logic, providers, HTTP clients — where the tests live
   presentation/    # widgets and screens
 ```
+
+`features/maps/` is the offline map: a hand-written PMTiles v3 reader, a
+`VectorTileProvider` over it, and the layer that falls back to
+OpenStreetMap's raster tiles when no archive is configured.
 
 `features/sharing/` is the shared-folder sync. `SyncFolder` is an interface
 over "a directory" with a `dart:io` implementation, so the merge is tested

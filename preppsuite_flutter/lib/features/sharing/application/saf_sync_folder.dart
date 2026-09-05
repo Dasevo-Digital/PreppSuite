@@ -1,10 +1,7 @@
-import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 
+import '../../../core/platform_storage.dart';
 import 'sync_folder.dart';
-
-/// The channel `MainActivity` answers on. Android only.
-const _channel = MethodChannel('preppsuite/shared_folder_saf');
 
 /// A [SyncFolder] reached through Android's Storage Access Framework.
 ///
@@ -27,15 +24,18 @@ class SafSyncFolder implements SyncFolder {
   Future<bool> isWritable() async {
     // Also answers "has the grant survived" — it does not survive a
     // reinstall, and the user can revoke it in the system settings.
-    final granted = await _channel.invokeMethod<bool>('ensureWritable', {
-      'uri': treeUri,
-    });
+    final granted = await nativeStorageChannel.invokeMethod<bool>(
+      'ensureWritable',
+      {
+        'uri': treeUri,
+      },
+    );
     return granted ?? false;
   }
 
   @override
   Future<List<String>> listDeviceIds() async {
-    final names = await _channel.invokeListMethod<String>('list', {
+    final names = await nativeStorageChannel.invokeListMethod<String>('list', {
       'uri': treeUri,
       'path': devicesDirectoryPath,
     });
@@ -61,11 +61,11 @@ class SafSyncFolder implements SyncFolder {
   Future<void> writeHouseholdFile(String contents) =>
       _write(householdFilePath, contents);
 
-  Future<String?> _read(String path) =>
-      _channel.invokeMethod<String>('read', {'uri': treeUri, 'path': path});
+  Future<String?> _read(String path) => nativeStorageChannel
+      .invokeMethod<String>('read', {'uri': treeUri, 'path': path});
 
   Future<void> _write(String path, String contents) =>
-      _channel.invokeMethod<void>('write', {
+      nativeStorageChannel.invokeMethod<void>('write', {
         'uri': treeUri,
         'path': path,
         'contents': contents,
