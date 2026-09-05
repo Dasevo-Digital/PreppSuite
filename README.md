@@ -220,6 +220,7 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   Debug-Schlüssel signiert. Für iOS ist geprüft, dass die App durchbaut;
   ausgeliefert wird sie nicht, aber sie läuft auf dem Simulator. iOS
   verlangt mindestens iOS 14 – `workmanager` bringt die Grenze mit.
-  Linux baut durch, geprüft im Container (`tool/docker/`); ausprobiert auf
-  einem echten Linux-Rechner ist sie nicht. Windows ist nie gebaut worden
-  – dafür steht ein CI-Auftrag bereit, gelaufen ist er noch nicht. Web bräuchte Umbau: der Foto-Teil verwendet `dart:io`.
+  Linux baut durch, geprüft im Container; auf einer echten Maschine
+  fehlten die WebKitGTK-Pakete. Unter Windows baut alles außer den
+  Benachrichtigungen, denen die ATL-Komponente von Visual Studio fehlt.
+  Was beide brauchen, steht in [`docs/desktop-bauen.md`](docs/desktop-bauen.md). Web bräuchte Umbau: der Foto-Teil verwendet `dart:io`.
