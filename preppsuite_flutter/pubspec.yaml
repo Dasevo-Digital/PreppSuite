@@ -60,6 +60,9 @@ dependencies:
   flutter_local_notifications: ^22.3.0
   geolocator: ^14.0.2
   http: ^1.6.0
+  # Parses MeteoAlarm's Atom+CAP feed, which the app now fetches itself
+  # instead of going through a server.
+  xml: ^6.6.1
   flutter_map: ^8.3.1
   latlong2: ^0.10.1
   # Needed directly for scheduling expiry reminders; flutter_local_notifications

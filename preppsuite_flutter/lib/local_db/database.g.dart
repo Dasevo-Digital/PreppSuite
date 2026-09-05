@@ -3111,17 +3111,6 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $WarningsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _serverIdMeta = const VerificationMeta(
-    'serverId',
-  );
-  @override
-  late final GeneratedColumn<String> serverId = GeneratedColumn<String>(
-    'server_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
   static const VerificationMeta _sourceMeta = const VerificationMeta('source');
   @override
   late final GeneratedColumn<String> source = GeneratedColumn<String>(
@@ -3250,9 +3239,23 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _notifiedMeta = const VerificationMeta(
+    'notified',
+  );
+  @override
+  late final GeneratedColumn<bool> notified = GeneratedColumn<bool>(
+    'notified',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("notified" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   @override
   List<GeneratedColumn> get $columns => [
-    serverId,
     source,
     externalId,
     countryCode,
@@ -3265,6 +3268,7 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
     expires,
     sent,
     updatedAt,
+    notified,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3278,14 +3282,6 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
   }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('server_id')) {
-      context.handle(
-        _serverIdMeta,
-        serverId.isAcceptableOrUnknown(data['server_id']!, _serverIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_serverIdMeta);
-    }
     if (data.containsKey('source')) {
       context.handle(
         _sourceMeta,
@@ -3382,19 +3378,21 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('notified')) {
+      context.handle(
+        _notifiedMeta,
+        notified.isAcceptableOrUnknown(data['notified']!, _notifiedMeta),
+      );
+    }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {serverId};
+  Set<GeneratedColumn> get $primaryKey => {source, externalId};
   @override
   Warning map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Warning(
-      serverId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}server_id'],
-      )!,
       source: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}source'],
@@ -3443,6 +3441,10 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      notified: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}notified'],
+      )!,
     );
   }
 
@@ -3453,8 +3455,10 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
 }
 
 class Warning extends DataClass implements Insertable<Warning> {
-  final String serverId;
+  /// A `WarningSource` enum name as plain text.
   final String source;
+
+  /// The feed's own id for this warning.
   final String externalId;
   final String countryCode;
   final String? regionKey;
@@ -3467,9 +3471,17 @@ class Warning extends DataClass implements Insertable<Warning> {
   final DateTime effective;
   final DateTime? expires;
   final DateTime sent;
+
+  /// When this row was last written locally. Drives "what is new since I
+  /// last looked", which is what decides whether to notify.
   final DateTime updatedAt;
+
+  /// True once a notification has gone out for this warning, so a repeated
+  /// poll does not announce the same thing again. Separate from
+  /// [updatedAt] because a warning can be rewritten by its source without
+  /// becoming newsworthy again.
+  final bool notified;
   const Warning({
-    required this.serverId,
     required this.source,
     required this.externalId,
     required this.countryCode,
@@ -3482,11 +3494,11 @@ class Warning extends DataClass implements Insertable<Warning> {
     this.expires,
     required this.sent,
     required this.updatedAt,
+    required this.notified,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['server_id'] = Variable<String>(serverId);
     map['source'] = Variable<String>(source);
     map['external_id'] = Variable<String>(externalId);
     map['country_code'] = Variable<String>(countryCode);
@@ -3505,12 +3517,12 @@ class Warning extends DataClass implements Insertable<Warning> {
     }
     map['sent'] = Variable<DateTime>(sent);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['notified'] = Variable<bool>(notified);
     return map;
   }
 
   WarningsCompanion toCompanion(bool nullToAbsent) {
     return WarningsCompanion(
-      serverId: Value(serverId),
       source: Value(source),
       externalId: Value(externalId),
       countryCode: Value(countryCode),
@@ -3529,6 +3541,7 @@ class Warning extends DataClass implements Insertable<Warning> {
           : Value(expires),
       sent: Value(sent),
       updatedAt: Value(updatedAt),
+      notified: Value(notified),
     );
   }
 
@@ -3538,7 +3551,6 @@ class Warning extends DataClass implements Insertable<Warning> {
   }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Warning(
-      serverId: serializer.fromJson<String>(json['serverId']),
       source: serializer.fromJson<String>(json['source']),
       externalId: serializer.fromJson<String>(json['externalId']),
       countryCode: serializer.fromJson<String>(json['countryCode']),
@@ -3551,13 +3563,13 @@ class Warning extends DataClass implements Insertable<Warning> {
       expires: serializer.fromJson<DateTime?>(json['expires']),
       sent: serializer.fromJson<DateTime>(json['sent']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      notified: serializer.fromJson<bool>(json['notified']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'serverId': serializer.toJson<String>(serverId),
       'source': serializer.toJson<String>(source),
       'externalId': serializer.toJson<String>(externalId),
       'countryCode': serializer.toJson<String>(countryCode),
@@ -3570,11 +3582,11 @@ class Warning extends DataClass implements Insertable<Warning> {
       'expires': serializer.toJson<DateTime?>(expires),
       'sent': serializer.toJson<DateTime>(sent),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'notified': serializer.toJson<bool>(notified),
     };
   }
 
   Warning copyWith({
-    String? serverId,
     String? source,
     String? externalId,
     String? countryCode,
@@ -3587,8 +3599,8 @@ class Warning extends DataClass implements Insertable<Warning> {
     Value<DateTime?> expires = const Value.absent(),
     DateTime? sent,
     DateTime? updatedAt,
+    bool? notified,
   }) => Warning(
-    serverId: serverId ?? this.serverId,
     source: source ?? this.source,
     externalId: externalId ?? this.externalId,
     countryCode: countryCode ?? this.countryCode,
@@ -3601,10 +3613,10 @@ class Warning extends DataClass implements Insertable<Warning> {
     expires: expires.present ? expires.value : this.expires,
     sent: sent ?? this.sent,
     updatedAt: updatedAt ?? this.updatedAt,
+    notified: notified ?? this.notified,
   );
   Warning copyWithCompanion(WarningsCompanion data) {
     return Warning(
-      serverId: data.serverId.present ? data.serverId.value : this.serverId,
       source: data.source.present ? data.source.value : this.source,
       externalId: data.externalId.present
           ? data.externalId.value
@@ -3623,13 +3635,13 @@ class Warning extends DataClass implements Insertable<Warning> {
       expires: data.expires.present ? data.expires.value : this.expires,
       sent: data.sent.present ? data.sent.value : this.sent,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      notified: data.notified.present ? data.notified.value : this.notified,
     );
   }
 
   @override
   String toString() {
     return (StringBuffer('Warning(')
-          ..write('serverId: $serverId, ')
           ..write('source: $source, ')
           ..write('externalId: $externalId, ')
           ..write('countryCode: $countryCode, ')
@@ -3641,14 +3653,14 @@ class Warning extends DataClass implements Insertable<Warning> {
           ..write('effective: $effective, ')
           ..write('expires: $expires, ')
           ..write('sent: $sent, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('notified: $notified')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(
-    serverId,
     source,
     externalId,
     countryCode,
@@ -3661,12 +3673,12 @@ class Warning extends DataClass implements Insertable<Warning> {
     expires,
     sent,
     updatedAt,
+    notified,
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Warning &&
-          other.serverId == this.serverId &&
           other.source == this.source &&
           other.externalId == this.externalId &&
           other.countryCode == this.countryCode &&
@@ -3678,11 +3690,11 @@ class Warning extends DataClass implements Insertable<Warning> {
           other.effective == this.effective &&
           other.expires == this.expires &&
           other.sent == this.sent &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.notified == this.notified);
 }
 
 class WarningsCompanion extends UpdateCompanion<Warning> {
-  final Value<String> serverId;
   final Value<String> source;
   final Value<String> externalId;
   final Value<String> countryCode;
@@ -3695,9 +3707,9 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
   final Value<DateTime?> expires;
   final Value<DateTime> sent;
   final Value<DateTime> updatedAt;
+  final Value<bool> notified;
   final Value<int> rowid;
   const WarningsCompanion({
-    this.serverId = const Value.absent(),
     this.source = const Value.absent(),
     this.externalId = const Value.absent(),
     this.countryCode = const Value.absent(),
@@ -3710,10 +3722,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     this.expires = const Value.absent(),
     this.sent = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.notified = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   WarningsCompanion.insert({
-    required String serverId,
     required String source,
     required String externalId,
     required String countryCode,
@@ -3726,9 +3738,9 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     this.expires = const Value.absent(),
     required DateTime sent,
     required DateTime updatedAt,
+    this.notified = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : serverId = Value(serverId),
-       source = Value(source),
+  }) : source = Value(source),
        externalId = Value(externalId),
        countryCode = Value(countryCode),
        severity = Value(severity),
@@ -3738,7 +3750,6 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
        sent = Value(sent),
        updatedAt = Value(updatedAt);
   static Insertable<Warning> custom({
-    Expression<String>? serverId,
     Expression<String>? source,
     Expression<String>? externalId,
     Expression<String>? countryCode,
@@ -3751,10 +3762,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     Expression<DateTime>? expires,
     Expression<DateTime>? sent,
     Expression<DateTime>? updatedAt,
+    Expression<bool>? notified,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
-      if (serverId != null) 'server_id': serverId,
       if (source != null) 'source': source,
       if (externalId != null) 'external_id': externalId,
       if (countryCode != null) 'country_code': countryCode,
@@ -3767,12 +3778,12 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
       if (expires != null) 'expires': expires,
       if (sent != null) 'sent': sent,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (notified != null) 'notified': notified,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   WarningsCompanion copyWith({
-    Value<String>? serverId,
     Value<String>? source,
     Value<String>? externalId,
     Value<String>? countryCode,
@@ -3785,10 +3796,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     Value<DateTime?>? expires,
     Value<DateTime>? sent,
     Value<DateTime>? updatedAt,
+    Value<bool>? notified,
     Value<int>? rowid,
   }) {
     return WarningsCompanion(
-      serverId: serverId ?? this.serverId,
       source: source ?? this.source,
       externalId: externalId ?? this.externalId,
       countryCode: countryCode ?? this.countryCode,
@@ -3801,6 +3812,7 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
       expires: expires ?? this.expires,
       sent: sent ?? this.sent,
       updatedAt: updatedAt ?? this.updatedAt,
+      notified: notified ?? this.notified,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3808,9 +3820,6 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (serverId.present) {
-      map['server_id'] = Variable<String>(serverId.value);
-    }
     if (source.present) {
       map['source'] = Variable<String>(source.value);
     }
@@ -3847,6 +3856,9 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (notified.present) {
+      map['notified'] = Variable<bool>(notified.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3856,7 +3868,6 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
   @override
   String toString() {
     return (StringBuffer('WarningsCompanion(')
-          ..write('serverId: $serverId, ')
           ..write('source: $source, ')
           ..write('externalId: $externalId, ')
           ..write('countryCode: $countryCode, ')
@@ -3869,6 +3880,7 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
           ..write('expires: $expires, ')
           ..write('sent: $sent, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('notified: $notified, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5556,7 +5568,6 @@ typedef $$BudgetEntriesTableProcessedTableManager =
     >;
 typedef $$WarningsTableCreateCompanionBuilder =
     WarningsCompanion Function({
-      required String serverId,
       required String source,
       required String externalId,
       required String countryCode,
@@ -5569,11 +5580,11 @@ typedef $$WarningsTableCreateCompanionBuilder =
       Value<DateTime?> expires,
       required DateTime sent,
       required DateTime updatedAt,
+      Value<bool> notified,
       Value<int> rowid,
     });
 typedef $$WarningsTableUpdateCompanionBuilder =
     WarningsCompanion Function({
-      Value<String> serverId,
       Value<String> source,
       Value<String> externalId,
       Value<String> countryCode,
@@ -5586,6 +5597,7 @@ typedef $$WarningsTableUpdateCompanionBuilder =
       Value<DateTime?> expires,
       Value<DateTime> sent,
       Value<DateTime> updatedAt,
+      Value<bool> notified,
       Value<int> rowid,
     });
 
@@ -5598,11 +5610,6 @@ class $$WarningsTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<String> get serverId => $composableBuilder(
-    column: $table.serverId,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<String> get source => $composableBuilder(
     column: $table.source,
     builder: (column) => ColumnFilters(column),
@@ -5662,6 +5669,11 @@ class $$WarningsTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<bool> get notified => $composableBuilder(
+    column: $table.notified,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$WarningsTableOrderingComposer
@@ -5673,11 +5685,6 @@ class $$WarningsTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<String> get serverId => $composableBuilder(
-    column: $table.serverId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get source => $composableBuilder(
     column: $table.source,
     builder: (column) => ColumnOrderings(column),
@@ -5737,6 +5744,11 @@ class $$WarningsTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<bool> get notified => $composableBuilder(
+    column: $table.notified,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WarningsTableAnnotationComposer
@@ -5748,9 +5760,6 @@ class $$WarningsTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<String> get serverId =>
-      $composableBuilder(column: $table.serverId, builder: (column) => column);
-
   GeneratedColumn<String> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
 
@@ -5792,6 +5801,9 @@ class $$WarningsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get notified =>
+      $composableBuilder(column: $table.notified, builder: (column) => column);
 }
 
 class $$WarningsTableTableManager
@@ -5822,7 +5834,6 @@ class $$WarningsTableTableManager
               $$WarningsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback:
               ({
-                Value<String> serverId = const Value.absent(),
                 Value<String> source = const Value.absent(),
                 Value<String> externalId = const Value.absent(),
                 Value<String> countryCode = const Value.absent(),
@@ -5835,9 +5846,9 @@ class $$WarningsTableTableManager
                 Value<DateTime?> expires = const Value.absent(),
                 Value<DateTime> sent = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> notified = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => WarningsCompanion(
-                serverId: serverId,
                 source: source,
                 externalId: externalId,
                 countryCode: countryCode,
@@ -5850,11 +5861,11 @@ class $$WarningsTableTableManager
                 expires: expires,
                 sent: sent,
                 updatedAt: updatedAt,
+                notified: notified,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
-                required String serverId,
                 required String source,
                 required String externalId,
                 required String countryCode,
@@ -5867,9 +5878,9 @@ class $$WarningsTableTableManager
                 Value<DateTime?> expires = const Value.absent(),
                 required DateTime sent,
                 required DateTime updatedAt,
+                Value<bool> notified = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => WarningsCompanion.insert(
-                serverId: serverId,
                 source: source,
                 externalId: externalId,
                 countryCode: countryCode,
@@ -5882,6 +5893,7 @@ class $$WarningsTableTableManager
                 expires: expires,
                 sent: sent,
                 updatedAt: updatedAt,
+                notified: notified,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

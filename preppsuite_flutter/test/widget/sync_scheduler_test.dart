@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/budget/application/budget_sync_controller.dart';
 import 'package:preppsuite_flutter/features/checklists/application/checklist_sync_controller.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_sync_controller.dart';
-import 'package:preppsuite_flutter/features/warnings/application/warning_sync_controller.dart';
 import 'package:preppsuite_flutter/sync/sync_scheduler.dart';
 
 /// Counts sync passes instead of performing them. The real controllers
@@ -43,17 +42,6 @@ class _CountingBudget extends BudgetSyncController {
   Future<void> syncNow() async => runs++;
 }
 
-class _CountingWarning extends WarningSyncController {
-  _CountingWarning(super.householdId);
-  static int runs = 0;
-
-  @override
-  AsyncValue<void> build() => const AsyncData(null);
-
-  @override
-  Future<void> syncNow() async => runs++;
-}
-
 void main() {
   const householdId = 'household-1';
 
@@ -61,11 +49,12 @@ void main() {
     _CountingInventory.runs = 0;
     _CountingChecklist.runs = 0;
     _CountingBudget.runs = 0;
-    _CountingWarning.runs = 0;
   });
 
+  // Warnings are deliberately absent: the app fetches them from the public
+  // feeds on its own schedule, so a failing feed no longer looks like a
+  // broken household sync.
   List<int> allRuns() => [
-    _CountingWarning.runs,
     _CountingInventory.runs,
     _CountingChecklist.runs,
     _CountingBudget.runs,
@@ -78,7 +67,6 @@ void main() {
           inventorySyncControllerProvider.overrideWith2(_CountingInventory.new),
           checklistSyncControllerProvider.overrideWith2(_CountingChecklist.new),
           budgetSyncControllerProvider.overrideWith2(_CountingBudget.new),
-          warningSyncControllerProvider.overrideWith2(_CountingWarning.new),
         ],
         child: const MaterialApp(
           home: Scaffold(body: SyncScheduler(householdId: householdId)),
@@ -121,12 +109,12 @@ void main() {
 
   testWidgets('one tick runs every entity exactly once', (tester) async {
     await pumpScheduler(tester);
-    expect(allRuns(), [0, 0, 0, 0], reason: 'nothing before the first tick');
+    expect(allRuns(), [0, 0, 0], reason: 'nothing before the first tick');
 
     await tester.pump(syncInterval);
     await tester.pumpAndSettle();
 
-    expect(allRuns(), [1, 1, 1, 1]);
+    expect(allRuns(), [1, 1, 1]);
   });
 
   testWidgets('further ticks keep the entities in step with each other', (
@@ -139,7 +127,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    expect(allRuns(), [3, 3, 3, 3]);
+    expect(allRuns(), [3, 3, 3]);
   });
 
   testWidgets('stops ticking while the app is in the background', (
@@ -155,7 +143,7 @@ void main() {
     await tester.pump(syncInterval);
     await tester.pumpAndSettle();
 
-    expect(allRuns(), [0, 0, 0, 0]);
+    expect(allRuns(), [0, 0, 0]);
   });
 
   testWidgets('catches up at once when the app comes back', (tester) async {
@@ -165,14 +153,14 @@ void main() {
 
     expect(
       allRuns(),
-      [1, 1, 1, 1],
+      [1, 1, 1],
       reason: 'without waiting out the interval first',
     );
 
     // And the clock runs again from there.
     await tester.pump(syncInterval);
     await tester.pumpAndSettle();
-    expect(allRuns(), [2, 2, 2, 2]);
+    expect(allRuns(), [2, 2, 2]);
   });
 
   testWidgets('cancels its timer when removed', (tester) async {
@@ -182,6 +170,6 @@ void main() {
     // A leftover timer would fail the test outright, and any sync it
     // triggered would run against a disposed container.
     await tester.pump(syncInterval);
-    expect(allRuns(), [0, 0, 0, 0]);
+    expect(allRuns(), [0, 0, 0]);
   });
 }

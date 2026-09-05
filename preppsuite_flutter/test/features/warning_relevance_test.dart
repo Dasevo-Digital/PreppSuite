@@ -16,7 +16,6 @@ void main() {
 
   db.Warning warning({String? regionKey}) {
     return db.Warning(
-      serverId: 'x',
       source: 'bbk',
       externalId: 'x',
       countryCode: 'DE',
@@ -27,6 +26,7 @@ void main() {
       effective: DateTime.utc(2026),
       sent: DateTime.utc(2026),
       updatedAt: DateTime.utc(2026),
+      notified: false,
     );
   }
 

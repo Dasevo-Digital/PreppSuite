@@ -20,10 +20,11 @@ class WarningBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final householdId = household.id!.toString();
-    // Keeps the pull-only warning sync alive for as long as any screen is
-    // showing (this widget lives above all tabs in HomeShell).
-    ref.watch(warningSyncControllerProvider(householdId));
+    // Keeps the warning poll alive for as long as any screen is showing
+    // (this widget lives above all tabs in HomeShell). Keyed by the whole
+    // household rather than its id: the poll needs the country and the
+    // region to know what to fetch.
+    ref.watch(warningSyncControllerProvider(household));
     final l10n = AppLocalizations.of(context)!;
     final warningsAsync = ref.watch(activeWarningsProvider);
     final subscriptions =

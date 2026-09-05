@@ -1,13 +1,15 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:preppsuite_client/preppsuite_client.dart' show Warning;
+import '../local_db/database.dart' show Warning;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../features/inventory/application/expiry_reminder_planner.dart';
 
-/// Local (on-device) notifications for newly-pulled warnings — not a real
-/// push (no FCM/APNs server component), so a notification only fires while
-/// the app is actually running and syncing. See
-/// `WarningSyncController.syncNow` for the trigger point.
+/// On-device notifications.
+///
+/// Warnings are announced from two places that have to produce the same
+/// notification: `WarningSyncController` while a screen is open, and the
+/// Android background worker while the app is closed. Expiry reminders are
+/// scheduled ahead of time and need nothing running at all.
 class NotificationService {
   NotificationService._();
 
@@ -74,7 +76,7 @@ class NotificationService {
     return true;
   }
 
-  Future<void> showWarningNotification(Warning warning) async {
+  Future<void> showLocalWarning(Warning warning) async {
     await _ensureInitialized();
     await _plugin.show(
       // Stable per-warning id so re-notifying the same warning (e.g. after

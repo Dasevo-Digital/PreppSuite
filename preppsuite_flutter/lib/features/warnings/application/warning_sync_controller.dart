@@ -1,21 +1,28 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:preppsuite_client/preppsuite_client.dart'
-    show Warning, WarningSeverity;
+    show Household, WarningRegionSubscription;
 
+import '../../../core/app_database_providers.dart';
 import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
-import 'warning_providers.dart';
-import 'warning_severity_l10n.dart';
+import 'warning_poll_service.dart';
+import 'warning_relevance.dart';
 
-/// Pull-only sync — there's no local write path to debounce after (see
-/// `SyncService.syncWarnings`), just the immediate + 60s periodic cadence
-/// shared with the other entities' sync controllers.
+final warningPollServiceProvider = Provider<WarningPollService>((ref) {
+  return WarningPollService(database: ref.watch(appDatabaseProvider));
+});
+
+/// Fetches the warning feeds and announces what is new.
+///
+/// There is no push or pull any more — the app talks to BBK and MeteoAlarm
+/// directly. The name stays because this is still the thing that keeps the
+/// local warning table current while a screen is open; the Android
+/// background worker runs the same [WarningPollService] on its own
+/// schedule.
 class WarningSyncController extends Notifier<AsyncValue<void>> {
-  WarningSyncController(this.householdId);
+  WarningSyncController(this.household);
 
-  final String householdId;
+  final Household household;
 
   @override
   AsyncValue<void> build() {
@@ -25,32 +32,41 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
 
   Future<void> syncNow() async {
     try {
-      final changes = await ref
-          .read(syncServiceProvider)
-          .syncWarnings(householdId);
-      await _notifyIfEnabled(changes);
+      final service = ref.read(warningPollServiceProvider);
+      await service.poll(
+        countryCode: household.countryCode,
+        kreisSchluessel: household.regionKey,
+      );
+      await _notifyIfEnabled(service);
       state = const AsyncData(null);
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
     }
   }
 
-  /// Only notifies for moderate-or-above warnings — a constant stream of
-  /// "minor" notifications would just train people to ignore them, working
-  /// against the point of a warning notification.
-  Future<void> _notifyIfEnabled(List<Warning> changes) async {
-    if (changes.isEmpty) return;
+  /// Announces only warnings that concern this household's region — the
+  /// same relevance rule the list view sorts by.
+  Future<void> _notifyIfEnabled(WarningPollService service) async {
     if (!ref.read(notificationsEnabledProvider)) return;
 
-    final minRank = warningSeverityRank(WarningSeverity.moderate);
-    for (final warning in changes) {
-      if (warningSeverityRank(warning.severity) < minRank) continue;
-      await NotificationService.instance.showWarningNotification(warning);
+    const subscriptions = <WarningRegionSubscription>[];
+    final pending = await service.pendingNotifications(
+      isRelevant: (warning) => isWarningRelevant(
+        warning: warning,
+        household: household,
+        subscriptions: subscriptions,
+      ),
+    );
+    if (pending.isEmpty) return;
+
+    for (final warning in pending) {
+      await NotificationService.instance.showLocalWarning(warning);
     }
+    await service.markNotified(pending);
   }
 }
 
 final warningSyncControllerProvider =
-    NotifierProvider.family<WarningSyncController, AsyncValue<void>, String>(
+    NotifierProvider.family<WarningSyncController, AsyncValue<void>, Household>(
       WarningSyncController.new,
     );

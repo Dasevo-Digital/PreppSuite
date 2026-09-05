@@ -21,7 +21,6 @@ class SyncService {
   static const _checklistTemplateEntity = 'checklistTemplate';
   static const _checklistItemEntity = 'checklistItem';
   static const _budgetEntity = 'budget';
-  static const _warningEntity = 'warning';
 
   // --- Push devices ------------------------------------------------------
 
@@ -414,50 +413,6 @@ class SyncService {
       updatedAt: entry.updatedAt,
       deletedAt: Value(entry.deletedAt),
       dirty: const Value(false),
-    );
-  }
-
-  // --- Warnings (pull-only, server-generated) -------------------------
-
-  /// Returns the warnings that arrived/changed in this pull (empty if
-  /// nothing new), so callers can react to genuinely new ones — see
-  /// `WarningSyncController.syncNow`, which uses this to fire local
-  /// notifications without needing to separately diff the local DB.
-  Future<List<proto.Warning>> syncWarnings(String householdId) async {
-    final id = proto.UuidValue.fromString(householdId);
-    final since = await _db.lastPulledAt(_warningEntity) ?? DateTime.utc(2000);
-    final changes = await client.warning.pullWarnings(id, since);
-
-    if (changes.isNotEmpty) {
-      var maxUpdatedAt = since;
-      for (final warning in changes) {
-        await _db.upsertWarning(_warningFromProto(warning));
-        if (warning.updatedAt.isAfter(maxUpdatedAt)) {
-          maxUpdatedAt = warning.updatedAt;
-        }
-      }
-      await _db.setLastPulledAt(_warningEntity, maxUpdatedAt);
-    }
-
-    await _db.pruneExpiredWarnings();
-    return changes;
-  }
-
-  WarningsCompanion _warningFromProto(proto.Warning warning) {
-    return WarningsCompanion.insert(
-      serverId: warning.id!.toString(),
-      source: warning.source.name,
-      externalId: warning.externalId,
-      countryCode: warning.countryCode,
-      regionKey: Value(warning.regionKey),
-      severity: warning.severity.name,
-      eventType: warning.eventType,
-      headline: warning.headline,
-      description: Value(warning.description),
-      effective: warning.effective,
-      expires: Value(warning.expires),
-      sent: warning.sent,
-      updatedAt: warning.updatedAt,
     );
   }
 }

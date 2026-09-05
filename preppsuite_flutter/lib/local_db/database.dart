@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   /// The tables whose rows are pushed to the server, i.e. the ones with a
   /// `dirty` column.
@@ -67,6 +67,19 @@ class AppDatabase extends _$AppDatabase {
         for (final table in _syncableTableNames) {
           await customStatement('UPDATE $table SET dirty = 1');
         }
+      }
+      if (from < 7) {
+        // Warnings are now fetched by the app itself, so the row identity
+        // changed from the old server-assigned id to `(source, externalId)`
+        // — which SQLite cannot express as an ALTER. Dropping the table is
+        // the honest move rather than the destructive-sounding one: every
+        // row here is a cache entry that the next poll refills within
+        // minutes, and none of it is data the user created.
+        await m.deleteTable('warnings');
+        await m.createTable(warnings);
+        await customStatement(
+          "DELETE FROM sync_state WHERE entity = 'warning'",
+        );
       }
     },
   );
@@ -288,7 +301,7 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  // --- Warnings (read-only mirror, no push) -----------------------------
+  // --- Warnings (fetched locally, never pushed) -------------------------
 
   /// Not-yet-expired warnings, most recent first. [severity] is stored as
   /// plain text, so it isn't sorted correctly by SQL (alphabetical, not
@@ -314,6 +327,64 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> upsertWarning(WarningsCompanion warning) {
     return into(warnings).insertOnConflictUpdate(warning);
+  }
+
+  /// The warning stored under [source]/[externalId], or null.
+  ///
+  /// The poll needs the previous row to decide whether anything worth
+  /// telling the user about actually changed — a feed reissuing the same
+  /// warning with corrected wording must not notify twice.
+  Future<Warning?> findWarning(String source, String externalId) {
+    return (select(warnings)..where(
+          (t) => t.source.equals(source) & t.externalId.equals(externalId),
+        ))
+        .getSingleOrNull();
+  }
+
+  /// Warnings that have not been announced yet.
+  Future<List<Warning>> unnotifiedWarnings() {
+    return (select(warnings)..where((t) => t.notified.equals(false))).get();
+  }
+
+  Future<void> markWarningsNotified(
+    List<({String source, String externalId})> keys,
+  ) async {
+    await batch((b) {
+      for (final key in keys) {
+        b.update(
+          warnings,
+          const WarningsCompanion(notified: Value(true)),
+          where: (t) =>
+              t.source.equals(key.source) & t.externalId.equals(key.externalId),
+        );
+      }
+    });
+  }
+
+  /// Stamps [expires] on active warnings of [source] that the feed no
+  /// longer lists. Mirrors the rule the server used: the sources carry no
+  /// end time, so a warning is over once it drops out of a complete poll.
+  Future<int> expireMissingWarnings({
+    required String source,
+    required Set<String> seenExternalIds,
+  }) async {
+    final active = await (select(
+      warnings,
+    )..where((t) => t.source.equals(source) & t.expires.isNull())).get();
+
+    final now = DateTime.now().toUtc();
+    var retired = 0;
+    for (final warning in active) {
+      if (seenExternalIds.contains(warning.externalId)) continue;
+      await (update(warnings)..where(
+            (t) =>
+                t.source.equals(warning.source) &
+                t.externalId.equals(warning.externalId),
+          ))
+          .write(WarningsCompanion(expires: Value(now), updatedAt: Value(now)));
+      retired++;
+    }
+    return retired;
   }
 
   /// Keeps the local cache from growing forever — long-expired warnings

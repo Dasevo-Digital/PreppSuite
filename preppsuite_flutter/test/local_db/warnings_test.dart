@@ -13,19 +13,18 @@ void main() {
   tearDown(() => db.close());
 
   WarningsCompanion draft({
-    required String serverId,
+    required String externalId,
     DateTime? expires,
     DateTime? sent,
   }) {
     final sentAt = sent ?? DateTime.utc(2026, 8);
     return WarningsCompanion.insert(
-      serverId: serverId,
       source: 'bbk',
-      externalId: 'ext-$serverId',
+      externalId: externalId,
       countryCode: 'DE',
       severity: 'minor',
       eventType: 'Test',
-      headline: 'Test warning $serverId',
+      headline: 'Test warning $externalId',
       effective: sentAt,
       expires: Value(expires),
       sent: sentAt,
@@ -35,37 +34,36 @@ void main() {
 
   test('watchActiveWarnings excludes expired warnings', () async {
     await db.upsertWarning(
-      draft(serverId: 'a', expires: DateTime.utc(2000)),
+      draft(externalId: 'a', expires: DateTime.utc(2000)),
     );
     await db.upsertWarning(
-      draft(serverId: 'b', expires: DateTime.utc(2100)),
+      draft(externalId: 'b', expires: DateTime.utc(2100)),
     );
-    await db.upsertWarning(draft(serverId: 'c'));
+    await db.upsertWarning(draft(externalId: 'c'));
 
     final active = await db.watchActiveWarnings().first;
 
-    expect(active.map((w) => w.serverId), containsAll(['b', 'c']));
-    expect(active.map((w) => w.serverId), isNot(contains('a')));
+    expect(active.map((w) => w.externalId), containsAll(['b', 'c']));
+    expect(active.map((w) => w.externalId), isNot(contains('a')));
   });
 
   test('watchAllWarnings includes expired warnings', () async {
     await db.upsertWarning(
-      draft(serverId: 'a', expires: DateTime.utc(2000)),
+      draft(externalId: 'a', expires: DateTime.utc(2000)),
     );
 
     final all = await db.watchAllWarnings().first;
 
-    expect(all.map((w) => w.serverId), contains('a'));
+    expect(all.map((w) => w.externalId), contains('a'));
   });
 
-  test('upsertWarning with the same serverId overwrites instead of '
-      'duplicating', () async {
-    await db.upsertWarning(draft(serverId: 'a'));
+  test('upsertWarning with the same source and externalId overwrites '
+      'instead of duplicating', () async {
+    await db.upsertWarning(draft(externalId: 'a'));
     await db.upsertWarning(
       WarningsCompanion.insert(
-        serverId: 'a',
         source: 'bbk',
-        externalId: 'ext-a',
+        externalId: 'a',
         countryCode: 'DE',
         severity: 'extreme',
         eventType: 'Updated',
@@ -86,25 +84,25 @@ void main() {
   test('pruneExpiredWarnings removes only warnings past the retention '
       'window', () async {
     await db.upsertWarning(
-      draft(serverId: 'long-expired', expires: DateTime.utc(2020)),
+      draft(externalId: 'long-expired', expires: DateTime.utc(2020)),
     );
     await db.upsertWarning(
       draft(
-        serverId: 'recently-expired',
+        externalId: 'recently-expired',
         expires: DateTime.now().subtract(const Duration(days: 1)),
       ),
     );
-    await db.upsertWarning(draft(serverId: 'active'));
+    await db.upsertWarning(draft(externalId: 'active'));
 
     await db.pruneExpiredWarnings(retention: const Duration(days: 7));
 
     final remaining = await db.watchAllWarnings().first;
     expect(
-      remaining.map((w) => w.serverId),
+      remaining.map((w) => w.externalId),
       containsAll(['recently-expired', 'active']),
     );
     expect(
-      remaining.map((w) => w.serverId),
+      remaining.map((w) => w.externalId),
       isNot(contains('long-expired')),
     );
   });
