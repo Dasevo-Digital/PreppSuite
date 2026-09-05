@@ -121,12 +121,77 @@ class ZimArchive {
     return _blobFrom(body, blob);
   }
 
+  /// The archive's own full-text index, or null when it carries none.
+  ///
+  /// Two names, because the entry moved: current archives keep it under
+  /// `X`, ones from before the namespace reform under `Z`. Archives built
+  /// with `zimwriterfs` and no indexing step have neither.
+  Future<ZimEntry?> fullTextIndexEntry() async {
+    for (final (namespace, url) in const [
+      ('X', 'fulltext/xapian'),
+      ('Z', '/fulltextIndex/xapian'),
+    ]) {
+      final entry = await findByUrl(namespace, url);
+      if (entry != null && !entry.isRedirect) return entry;
+    }
+    return null;
+  }
+
+  /// Where [entry]'s bytes physically lie in the file, or null when they
+  /// have no such place.
+  ///
+  /// The one thing this reader hands out that is not bytes but a position,
+  /// and it exists for the search index: Xapian opens a database from a
+  /// file descriptor at an offset, so the index can be used where it lies
+  /// rather than unpacked out of a thirty-gigabyte archive.
+  ///
+  /// Null whenever the cluster is compressed, which is most of them — a
+  /// compressed blob exists only after it has been decompressed and has no
+  /// offset to name. Kiwix writes the index uncompressed for this reason.
+  Future<ZimBlobLocation?> directAccessInfo(ZimEntry entry) async {
+    final cluster = entry.clusterNumber;
+    final blob = entry.blobNumber;
+    if (cluster == null || blob == null) return null;
+    if (cluster >= header.clusterCount) return null;
+
+    final start = await _readUint64(
+      header.clusterPointerPosition + cluster * 8,
+    );
+    final info = (await _source.read(start, 1))[0];
+
+    // Zero is what archives predating the field wrote, and meant the same
+    // thing as one: the bytes are stored as they are.
+    final compression = info & 0x0f;
+    if (compression != ZimCompression.none && compression != 0) return null;
+
+    final width = info & 0x10 != 0 ? 8 : 4;
+    final body = start + 1;
+
+    // Read straight from the file rather than through the cluster cache:
+    // an uncompressed index cluster is the size of the index itself, and
+    // caching it would mean holding gigabytes to learn one number.
+    Future<int> offsetAt(int index) async {
+      final bytes = await _source.read(body + index * width, width);
+      final view = ByteData.sublistView(bytes);
+      return width == 8
+          ? view.getUint64(0, Endian.little)
+          : view.getUint32(0, Endian.little);
+    }
+
+    final blobCount = await offsetAt(0) ~/ width - 1;
+    if (blob < 0 || blob >= blobCount) return null;
+
+    final from = await offsetAt(blob);
+    final to = await offsetAt(blob + 1);
+    return ZimBlobLocation(offset: body + from, length: to - from);
+  }
+
   /// Entries whose title starts with [prefix], in title order.
   ///
-  /// Title search, not full-text search. The archive carries a Xapian
-  /// index for the latter, which is a C++ library with no Dart binding —
-  /// so this finds "Wasseraufbereitung" by its name and cannot find the
-  /// article that merely mentions it. The screen says so.
+  /// Title search, not full-text search: this finds "Wasseraufbereitung"
+  /// by its name and cannot find the article that merely mentions it. The
+  /// screen says so. Full text is either the index the app builds or, for
+  /// archives that carry one, `XapianIndex`.
   Future<List<ZimEntry>> searchTitles(String prefix, {int limit = 25}) async {
     if (prefix.isEmpty) return const [];
 
@@ -444,6 +509,17 @@ class _ClusterBody {
   static bool isExtended(Uint8List tagged) => tagged[0] == 1;
 
   static Uint8List data(Uint8List tagged) => Uint8List.sublistView(tagged, 1);
+}
+
+/// A blob's position in the archive file, for a reader that is not this
+/// one.
+class ZimBlobLocation {
+  const ZimBlobLocation({required this.offset, required this.length});
+
+  /// Absolute, from the start of the file.
+  final int offset;
+
+  final int length;
 }
 
 class ZimException implements Exception {

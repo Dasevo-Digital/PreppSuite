@@ -63,6 +63,11 @@ tragen – eine C++-Bibliothek, deren Bau für Android, macOS, Linux und
 Windows eine dauerhafte Last wäre. Stattdessen baut die App einen eigenen
 Index mit SQLite FTS5.
 
+Dass der andere Weg trotzdem geht, ist inzwischen gezeigt – samt dem, was
+er besser kann, nämlich deutsche Wortstämme: siehe
+[Volltextsuche über den Index im Archiv](volltextsuche-xapian.md). In der
+App steckt er noch nicht.
+
 Der Aufbau läuft einmal, mit Fortschrittsanzeige, und lässt sich jederzeit
 anhalten – was schon drin ist, bleibt durchsuchbar, und beim nächsten Mal
 geht es dort weiter. Gelesen wird dabei in Block-Reihenfolge, nicht in

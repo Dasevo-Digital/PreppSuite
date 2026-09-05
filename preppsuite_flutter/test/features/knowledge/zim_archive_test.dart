@@ -245,4 +245,94 @@ void main() {
       expect(await archive.searchTitles(''), isEmpty);
     });
   });
+
+  group('pointing another reader at a blob', () {
+    // Xapian opens the archive's search index from a file offset, so the
+    // reader has to be able to say where a blob physically is — not just
+    // hand over its bytes.
+
+    ZimFixture withIndex({
+      required String namespace,
+      required String url,
+      int compression = 1,
+    }) {
+      return ZimFixture(
+        compression: compression,
+        entries: [
+          const ZimFixtureEntry(
+            namespace: 'C',
+            url: 'Trinkwasser',
+            title: 'Trinkwasser',
+            content: [60, 104, 49, 62],
+          ),
+          ZimFixtureEntry(
+            namespace: namespace,
+            url: url,
+            content: utf8.encode('not really a Xapian database'),
+          ),
+        ],
+      );
+    }
+
+    test('an uncompressed blob is found at the offset it names', () async {
+      final path = writeZim(
+        workspace,
+        withIndex(namespace: 'X', url: 'fulltext/xapian'),
+      );
+      final archive = await ZimArchive.open(
+        await FileByteRangeSource.open(File(path)),
+      );
+      addTearDown(archive.close);
+
+      final entry = (await archive.fullTextIndexEntry())!;
+      final location = (await archive.directAccessInfo(entry))!;
+
+      // Read the file directly at that position: if the arithmetic is off
+      // by a byte, Xapian would be handed the wrong bytes and simply say
+      // the database is corrupt.
+      final raw = File(path).openSync();
+      addTearDown(raw.closeSync);
+      raw.setPositionSync(location.offset);
+
+      expect(raw.readSync(location.length), await archive.readBlob(entry));
+    });
+
+    test('a compressed blob has no place to point at', () async {
+      // The bytes only exist after decompression, so there is no offset
+      // to give. Kiwix writes the index uncompressed for this reason, but
+      // an archive built by hand need not have.
+      final archive = await openFixture(
+        withIndex(namespace: 'X', url: 'fulltext/xapian', compression: 4),
+      );
+
+      expect(
+        await archive.directAccessInfo((await archive.fullTextIndexEntry())!),
+        isNull,
+      );
+    });
+
+    test('the index is found under the name older archives used', () async {
+      final archive = await openFixture(
+        withIndex(namespace: 'Z', url: '/fulltextIndex/xapian'),
+      );
+
+      expect((await archive.fullTextIndexEntry())?.namespace, 'Z');
+    });
+
+    test('an archive built without indexing says it has none', () async {
+      // `zimwriterfs` will happily produce one, and the app has to fall
+      // back to its own index rather than fail.
+      final archive = await openFixture(wikipediaish());
+
+      expect(await archive.fullTextIndexEntry(), isNull);
+    });
+
+    test('a redirect is not mistaken for content', () async {
+      final archive = await openFixture(wikipediaish());
+      final redirect = (await archive.findByUrl('C', 'Wasservorrat'))!;
+
+      expect(redirect.isRedirect, isTrue);
+      expect(await archive.directAccessInfo(redirect), isNull);
+    });
+  });
 }

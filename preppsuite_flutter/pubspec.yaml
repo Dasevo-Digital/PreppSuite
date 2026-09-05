@@ -72,6 +72,9 @@ dependencies:
   # Wikipedia, stylesheets and all; anything less than a browser engine
   # would show them badly.
   webview_flutter: ^4.14.1
+  # The FFI binding to the Xapian shim in native/zim_xapian, which
+  # searches the full-text index a ZIM archive carries inside it.
+  ffi: ^2.1.4
   # Needed directly for scheduling expiry reminders; flutter_local_notifications
   # pulls it in too, but a transitive dependency cannot be imported.
   timezone: ^0.11.0

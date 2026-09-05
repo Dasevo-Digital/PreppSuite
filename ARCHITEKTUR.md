@@ -106,10 +106,22 @@ index the app builds.** `searchTitles` binary-searches the title order the
 archive carries — version 6 keeps it in an `X/listing` entry, version 5 in
 the header — and capitalizes the query's first letter, because that order
 is by bytes and Wikipedia titles start with a capital. The archive's own
-full-text index is Xapian, a C++ library with no Dart binding, so
+full-text index is Xapian, which has no Dart binding, so
 `KnowledgeIndexer` builds an FTS5 one instead, in
 `KnowledgeIndexDatabase` — a database of its own, because it is derived,
-gigabytes large, and belongs to one archive.
+gigabytes large, and belongs to one archive. `XapianIndex` is a second
+route to the same thing through the archive's own index; it is proven but
+not yet wired in, and it needs the native library from
+`native/zim_xapian` — see [`docs/volltextsuche-xapian.md`](docs/volltextsuche-xapian.md).
+
+**`directAccessInfo` is the only thing the ZIM reader hands out that is a
+position rather than bytes,** and it returns null for every compressed
+cluster on purpose. Xapian opens a database from a file offset, so the
+search index can be read where it lies inside a thirty-gigabyte archive —
+but a compressed blob exists only after decompression and has no place in
+the file to point at. It also reads the blob offsets straight from the
+source rather than through the cluster cache, because an uncompressed
+index cluster is the size of the index.
 
 **The indexer reads in cluster order, never entry order.** Entries are
 sorted by URL and clusters are not; reading in entry order would
