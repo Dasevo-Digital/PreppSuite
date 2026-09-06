@@ -1658,4 +1658,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String overviewItemCount(Object count) {
     return '$count entries';
   }
+
+  @override
+  String get photoEditTitle => 'Crop photo';
+
+  @override
+  String get photoEditHint => 'Drag the frame onto the part you want to keep.';
+
+  @override
+  String get photoEditRotateLeft => 'Rotate left';
+
+  @override
+  String get photoEditRotateRight => 'Rotate right';
+
+  @override
+  String get photoEditReset => 'Whole picture';
+
+  @override
+  String get photoEditFailed =>
+      'This picture cannot be edited. It stays as it is.';
+
+  @override
+  String get editPhotoButton => 'Crop photo';
 }

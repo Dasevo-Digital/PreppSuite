@@ -1667,4 +1667,27 @@ class AppLocalizationsDe extends AppLocalizations {
   String overviewItemCount(Object count) {
     return '$count Einträge';
   }
+
+  @override
+  String get photoEditTitle => 'Foto zuschneiden';
+
+  @override
+  String get photoEditHint =>
+      'Ziehe den Rahmen auf den Ausschnitt, den du behalten willst.';
+
+  @override
+  String get photoEditRotateLeft => 'Nach links drehen';
+
+  @override
+  String get photoEditRotateRight => 'Nach rechts drehen';
+
+  @override
+  String get photoEditReset => 'Ganzes Bild';
+
+  @override
+  String get photoEditFailed =>
+      'Dieses Bild lässt sich nicht bearbeiten. Es bleibt unverändert.';
+
+  @override
+  String get editPhotoButton => 'Foto zuschneiden';
 }

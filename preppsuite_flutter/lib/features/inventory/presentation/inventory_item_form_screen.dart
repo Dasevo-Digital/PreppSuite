@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import '../application/inventory_photo_service.dart';
 import '../application/open_food_facts_service.dart';
 import '../application/package_nutrition.dart';
 import 'barcode_scanner_screen.dart';
+import 'photo_editor_screen.dart';
 
 /// A form filled in from somewhere other than an existing row — the
 /// stockpiling table hands one over when a food is added from it.
@@ -214,6 +216,33 @@ class _InventoryItemFormScreenState
     }
   }
 
+  /// Picks a photo and offers to trim it before it is kept.
+  ///
+  /// The editor runs on the copy that was just saved, and backing out of
+  /// it keeps that copy — the picture is already the one the user chose,
+  /// and throwing it away because they decided not to crop would be a
+  /// surprise.
+  Future<void> _addPhoto(Future<String?> Function() pick) async {
+    final picked = await pick();
+    if (picked == null || !mounted) return;
+    await _replacePhoto(picked);
+    if (mounted) await _editPhoto();
+  }
+
+  Future<void> _editPhoto() async {
+    final path = _photoPath;
+    if (path == null) return;
+
+    final edited = await Navigator.of(context).push<Uint8List>(
+      MaterialPageRoute(
+        builder: (_) => PhotoEditorScreen(file: File(path)),
+      ),
+    );
+    if (edited == null || !mounted) return;
+
+    await _replacePhoto(await const InventoryPhotoService().saveBytes(edited));
+  }
+
   Future<void> _removePhoto() async {
     final oldPath = _photoPath;
     setState(() => _photoPath = null);
@@ -236,7 +265,7 @@ class _InventoryItemFormScreenState
                 title: Text(l10n.takePhotoButton),
                 onTap: () async {
                   Navigator.of(context).pop();
-                  await _replacePhoto(await service.pickFromCamera());
+                  await _addPhoto(service.pickFromCamera);
                 },
               ),
             ListTile(
@@ -244,10 +273,18 @@ class _InventoryItemFormScreenState
               title: Text(l10n.chooseFromGalleryButton),
               onTap: () async {
                 Navigator.of(context).pop();
-                await _replacePhoto(await service.pickFromGallery());
+                await _addPhoto(service.pickFromGallery);
               },
             ),
-            if (_photoPath != null)
+            if (_photoPath != null) ...[
+              ListTile(
+                leading: const Icon(Icons.crop),
+                title: Text(l10n.editPhotoButton),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _editPhoto();
+                },
+              ),
               ListTile(
                 leading: const Icon(Icons.delete_outline),
                 title: Text(l10n.removePhotoButton),
@@ -256,6 +293,7 @@ class _InventoryItemFormScreenState
                   _removePhoto();
                 },
               ),
+            ],
           ],
         ),
       ),

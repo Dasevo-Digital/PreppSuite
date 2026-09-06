@@ -51,6 +51,10 @@ dependencies:
   # macOS implementation uses "pickFiles" and works correctly.
   file_picker: ^8.3.7
   image_picker: ^1.2.3
+  # Cropping and rotating a product photo (see `photo_edit.dart`).
+  # `printing` pulls it in too, but a transitive dependency cannot be
+  # imported.
+  image: ^4.8.0
   path: ^1.9.1
   flutter_local_notifications: ^22.3.0
   geolocator: ^14.0.2

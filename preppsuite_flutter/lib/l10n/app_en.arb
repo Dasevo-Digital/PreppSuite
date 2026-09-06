@@ -1040,5 +1040,12 @@
   "overviewNoWarnings": "No warnings for your regions right now.",
   "overviewChecklistLists": "{complete} of {total} lists complete",
   "overviewResourcesTitle": "Resources",
-  "overviewItemCount": "{count} entries"
+  "overviewItemCount": "{count} entries",
+  "photoEditTitle": "Crop photo",
+  "photoEditHint": "Drag the frame onto the part you want to keep.",
+  "photoEditRotateLeft": "Rotate left",
+  "photoEditRotateRight": "Rotate right",
+  "photoEditReset": "Whole picture",
+  "photoEditFailed": "This picture cannot be edited. It stays as it is.",
+  "editPhotoButton": "Crop photo"
 }

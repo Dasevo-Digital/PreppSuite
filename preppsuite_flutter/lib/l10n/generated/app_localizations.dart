@@ -2893,6 +2893,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} entries'**
   String overviewItemCount(Object count);
+
+  /// No description provided for @photoEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop photo'**
+  String get photoEditTitle;
+
+  /// No description provided for @photoEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the frame onto the part you want to keep.'**
+  String get photoEditHint;
+
+  /// No description provided for @photoEditRotateLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate left'**
+  String get photoEditRotateLeft;
+
+  /// No description provided for @photoEditRotateRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate right'**
+  String get photoEditRotateRight;
+
+  /// No description provided for @photoEditReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole picture'**
+  String get photoEditReset;
+
+  /// No description provided for @photoEditFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This picture cannot be edited. It stays as it is.'**
+  String get photoEditFailed;
+
+  /// No description provided for @editPhotoButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop photo'**
+  String get editPhotoButton;
 }
 
 class _AppLocalizationsDelegate

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
@@ -56,6 +57,18 @@ class InventoryPhotoService {
       '${const Uuid().v4()}${extension.isEmpty ? '.jpg' : extension}',
     );
     await File(picked.path).copy(destination);
+    return destination;
+  }
+
+  /// Writes edited bytes as a new photo and returns its path.
+  ///
+  /// A new file rather than the one it came from: the caller only deletes
+  /// the original once this has returned, so a write that fails part-way
+  /// cannot leave the item pointing at half a picture.
+  Future<String> saveBytes(Uint8List bytes) async {
+    final dir = await _photosDirectory();
+    final destination = p.join(dir.path, '${const Uuid().v4()}.jpg');
+    await File(destination).writeAsBytes(bytes, flush: true);
     return destination;
   }
 

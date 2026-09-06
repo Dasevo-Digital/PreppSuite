@@ -379,6 +379,17 @@ tree; the test suite deliberately targets that layer rather than the UI.
   The shell consumes the top inset itself, once, so the warning banner
   does not sit beneath the clock and the tab below is not handed an inset
   nothing used. A second `SafeArea` inside either would double it.
+- The photo editor's crop rectangle is a fraction of the *picture*, not
+  of the box it is drawn in. `_CropArea` therefore sits inside an
+  `AspectRatio` set to the image's own proportions and draws with
+  `BoxFit.fill`; with `contain` the letterboxed margin would count as
+  part of the picture and the crop would land somewhere else than the
+  frame did. Rotation happens before the crop in `applyPhotoEdit` for the
+  same reason: the rectangle was drawn on the turned picture.
+- `img.decodeImage` throws on a truncated file rather than returning
+  null — it sniffs the format by reading a header straight out of the
+  buffer. `applyPhotoEdit` catches, because it runs on a worker isolate
+  and an uncaught throw there loses both the picture and the message.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions
