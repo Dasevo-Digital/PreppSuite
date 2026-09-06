@@ -3,6 +3,7 @@ import '../local_db/database.dart' show Warning;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../features/inventory/application/expiry_reminder_planner.dart';
+import 'notification_capabilities.dart';
 
 /// On-device notifications.
 ///
@@ -40,6 +41,23 @@ class NotificationService {
           requestSoundPermission: false,
         ),
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        // Both desktops refuse to initialise without their own settings,
+        // and the failure is an unhandled exception from the timer that
+        // schedules expiry reminders — not a missing notification. It
+        // took running the app on Linux to see it.
+        //
+        // The action name is the app's own, which is a proper noun and
+        // needs no translation. GNOME and KDE do not display it anyway;
+        // it names the action that clicking the notification triggers.
+        linux: LinuxInitializationSettings(defaultActionName: 'PreppSuite'),
+        windows: WindowsInitializationSettings(
+          appName: 'PreppSuite',
+          // Company.Product form, and stable: Windows ties delivered
+          // notifications to it, so changing it orphans the ones already
+          // scheduled.
+          appUserModelId: 'Status403.PreppSuite',
+          guid: '9E1A6D86-E8D0-4CEB-897C-8D7E50D5BEE7',
+        ),
       ),
     );
   }
@@ -117,6 +135,13 @@ class NotificationService {
     required String Function(ExpiryReminder) title,
     required String Function(ExpiryReminder) body,
   }) async {
+    // Nothing to schedule with where the platform cannot hold a
+    // notification until a date. Returning quietly rather than throwing:
+    // the scheduler runs on a timer behind every tab, so a failure here
+    // is an unhandled exception every few minutes and no notification
+    // either way.
+    if (!supportsScheduledNotifications) return;
+
     await _ensureInitialized();
     await cancelExpiryReminders();
 
@@ -151,6 +176,8 @@ class NotificationService {
   /// untouched. Identified by payload rather than by recomputing ids, so
   /// it still works for reminders scheduled by an earlier app run.
   Future<void> cancelExpiryReminders() async {
+    if (!supportsScheduledNotifications) return;
+
     await _ensureInitialized();
     final pending = await _plugin.pendingNotificationRequests();
     for (final request in pending) {

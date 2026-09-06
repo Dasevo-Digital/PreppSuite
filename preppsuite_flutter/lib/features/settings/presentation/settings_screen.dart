@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../core/locale_provider.dart';
+import '../../../core/notification_capabilities.dart';
 import '../../../core/notifications_provider.dart';
 import '../../../core/theme_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -73,7 +74,17 @@ class SettingsScreen extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          ExpiryRemindersCard(l10n: l10n),
+          // A switch that cannot do anything is worse than an
+          // explanation. Linux has no scheduled notifications at all.
+          if (supportsScheduledNotifications)
+            ExpiryRemindersCard(l10n: l10n)
+          else
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: Text(l10n.settingsExpiryRemindersUnsupported),
+              ),
+            ),
           const SizedBox(height: 24),
           Text(
             l10n.settingsSharingTitle,

@@ -209,6 +209,7 @@
   "expiryReminderBody": "{name} läuft in {days} Tagen ab.",
   "expiryReminderBodyTomorrow": "{name} läuft morgen ab.",
   "settingsExpiryRemindersTitle": "Ablauf-Erinnerungen",
+  "settingsExpiryRemindersUnsupported": "Unter Linux gibt es keine geplanten Benachrichtigungen – der Desktop-Standard kennt nur sofortige. Warnmeldungen kommen trotzdem an.",
   "settingsExpiryRemindersHint": "Erinnerung, bevor ein Vorrat abläuft. Wähle, wie viele Tage vorher.",
   "settingsExpiryRemindersDisabledHint": "Schalte oben die Benachrichtigungen ein, damit Erinnerungen geplant werden.",
   "settingsExpiryRemindersNoneHint": "Keine Vorlaufzeit gewählt — es werden keine Erinnerungen geplant.",

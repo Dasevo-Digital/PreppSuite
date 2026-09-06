@@ -57,14 +57,27 @@ Nachrüsten ohne die Oberfläche:
 
 ## Stand
 
-| | baut | ausprobiert |
+| | baut | gestartet |
 |---|---|---|
 | macOS | ja | ja |
-| Linux | ja, im Container | nein |
-| Windows | alles außer den Benachrichtigungen | nein |
+| Linux | ja, x64 auf echter Maschine | ja |
+| Windows | ja, x64 auf echter Maschine | nein |
 
-Auf der Windows-Testmaschine waren zum Zeitpunkt der Prüfung gebaut:
-`desktop_webview_window_plugin.dll`, `zstandard_windows.dll`,
-`geolocator_windows_plugin.dll`, `file_selector_windows_plugin.dll`,
-`printing_plugin.dll` und `pdfium.dll` — also alles, worauf die Karte, das
-Wissen und der Ordner stehen.
+Auf Linux gebaut und gestartet: die Rail-Navigation steht, das Warnbanner
+läuft mit echten BBK-Meldungen. Auf Windows liegen im Release-Ordner
+`desktop_webview_window_plugin.dll` samt `Webview2Loader.dll`,
+`zstandard_windows.dll`, `sqlite3.dll`, `geolocator`, `file_selector`,
+`printing` und `pdfium` — also alles, worauf Karte, Wissen und Ordner
+stehen. 44,6 MB, gegen 41 MB unter Linux.
+
+## Was das Ausführen gefunden hat
+
+Zwei Dinge, die kein Test gezeigt hätte:
+
+1. `FlutterLocalNotificationsPlugin.initialize` bekam nie Linux- oder
+   Windows-Einstellungen und warf.
+2. Dahinter: **Linux kann gar keine geplanten Benachrichtigungen.** Der
+   Desktop-Standard kennt nur sofortige, also implementiert das Plugin
+   weder `zonedSchedule` noch `pendingNotificationRequests`.
+   Ablauferinnerungen gibt es dort nicht; Warnmeldungen schon, die werden
+   gezeigt und nicht geplant.

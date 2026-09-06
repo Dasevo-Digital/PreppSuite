@@ -711,6 +711,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsExpiryRemindersTitle => 'Ablauf-Erinnerungen';
 
   @override
+  String get settingsExpiryRemindersUnsupported =>
+      'Unter Linux gibt es keine geplanten Benachrichtigungen – der Desktop-Standard kennt nur sofortige. Warnmeldungen kommen trotzdem an.';
+
+  @override
   String get settingsExpiryRemindersHint =>
       'Erinnerung, bevor ein Vorrat abläuft. Wähle, wie viele Tage vorher.';
 

@@ -405,6 +405,7 @@
     }
   },
   "settingsExpiryRemindersTitle": "Expiry reminders",
+  "settingsExpiryRemindersUnsupported": "Linux has no scheduled notifications — the desktop standard only knows immediate ones. Warnings still arrive.",
   "settingsExpiryRemindersHint": "A reminder before a supply expires. Choose how many days ahead.",
   "settingsExpiryRemindersDisabledHint": "Turn on notifications above so reminders can be scheduled.",
   "settingsExpiryRemindersNoneHint": "No lead time selected — no reminders will be scheduled.",

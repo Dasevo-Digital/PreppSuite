@@ -707,6 +707,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsExpiryRemindersTitle => 'Expiry reminders';
 
   @override
+  String get settingsExpiryRemindersUnsupported =>
+      'Linux has no scheduled notifications — the desktop standard only knows immediate ones. Warnings still arrive.';
+
+  @override
   String get settingsExpiryRemindersHint =>
       'A reminder before a supply expires. Choose how many days ahead.';
 

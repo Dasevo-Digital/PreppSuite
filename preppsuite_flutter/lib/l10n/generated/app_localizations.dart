@@ -1352,6 +1352,12 @@ abstract class AppLocalizations {
   /// **'Expiry reminders'**
   String get settingsExpiryRemindersTitle;
 
+  /// No description provided for @settingsExpiryRemindersUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Linux has no scheduled notifications — the desktop standard only knows immediate ones. Warnings still arrive.'**
+  String get settingsExpiryRemindersUnsupported;
+
   /// No description provided for @settingsExpiryRemindersHint.
   ///
   /// In en, this message translates to:

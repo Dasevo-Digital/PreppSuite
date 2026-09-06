@@ -227,6 +227,14 @@ tree; the test suite deliberately targets that layer rather than the UI.
   security-scoped bookmarks in Swift. The reason is written into
   `macos/Runner/Release.entitlements`; put it back only alongside that
   native code.
+- **Linux has no scheduled notifications at all.** The freedesktop
+  specification only knows notifications shown now, so the plugin
+  implements neither `zonedSchedule` nor `pendingNotificationRequests` and
+  throws when either is called — which, from a timer behind every tab, is
+  an unhandled exception every few minutes. `supportsScheduledNotifications`
+  gates both, and the settings screen explains rather than offering a
+  switch that cannot work. Warnings still arrive there; they are shown,
+  not scheduled.
 - iOS needs a deployment target of at least 14.0 — `workmanager-apple`
   brings the floor. It lives in three places in `project.pbxproj` plus
   `ios/Podfile`.
