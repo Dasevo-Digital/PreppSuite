@@ -1700,6 +1700,102 @@ abstract class AppLocalizations {
   /// **'No item with barcode {barcode} in this household.'**
   String consumeScanNotFound(String barcode);
 
+  /// No description provided for @sharingErrorLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This folder is encrypted and this device does not have the passphrase. Nothing is being read or written until you enter it.'**
+  String get sharingErrorLocked;
+
+  /// No description provided for @folderEncryptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt the shared folder'**
+  String get folderEncryptionTitle;
+
+  /// No description provided for @folderEncryptionOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off. Everything in the folder is readable by anyone who can see it — including your sync provider.'**
+  String get folderEncryptionOff;
+
+  /// No description provided for @folderEncryptionOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On. The folder holds only sealed files.'**
+  String get folderEncryptionOn;
+
+  /// No description provided for @folderEncryptionEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on encryption'**
+  String get folderEncryptionEnable;
+
+  /// No description provided for @folderEncryptionUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter passphrase'**
+  String get folderEncryptionUnlock;
+
+  /// No description provided for @folderEncryptionPassphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Passphrase'**
+  String get folderEncryptionPassphrase;
+
+  /// No description provided for @folderEncryptionRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat passphrase'**
+  String get folderEncryptionRepeat;
+
+  /// No description provided for @folderEncryptionMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The two entries are not the same.'**
+  String get folderEncryptionMismatch;
+
+  /// No description provided for @folderEncryptionTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'At least {count} characters. This is the only thing standing between the folder and whoever can read it.'**
+  String folderEncryptionTooShort(int count);
+
+  /// No description provided for @folderEncryptionWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'That passphrase does not open this folder.'**
+  String get folderEncryptionWrong;
+
+  /// No description provided for @folderEncryptionNoRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no way back in without it. PreppSuite cannot reset it, and neither can anyone else — write it down somewhere safe before you continue.'**
+  String get folderEncryptionNoRecovery;
+
+  /// No description provided for @folderEncryptionOtherDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Every other device in this household has to be updated and given the same passphrase. Until it is, it stops seeing new rows.'**
+  String get folderEncryptionOtherDevices;
+
+  /// No description provided for @folderEncryptionEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'The shared folder is now encrypted.'**
+  String get folderEncryptionEnabled;
+
+  /// No description provided for @folderEncryptionUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder unlocked.'**
+  String get folderEncryptionUnlocked;
+
+  /// No description provided for @folderEncryptionWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Deriving the key. This takes a moment on purpose.'**
+  String get folderEncryptionWorking;
+
   /// No description provided for @personCountLabel.
   ///
   /// In en, this message translates to:

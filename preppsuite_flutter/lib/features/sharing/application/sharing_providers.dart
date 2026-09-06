@@ -8,6 +8,7 @@ import '../../household/application/household_providers.dart';
 import 'household_file.dart';
 import 'shared_folder_access.dart';
 import 'shared_folder_store.dart';
+import 'folder_key_store.dart';
 import 'shared_folder_sync_service.dart';
 
 /// Why a folder could not be joined.
@@ -155,7 +156,10 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   /// Reads the folder path from preferences rather than from [state], so
   /// this works before the provider has finished building — the first
   /// sync of a launch happens while the rest of the app is still starting.
-  Future<void> syncNow() async {
+  /// [republish] writes this device's file even when nothing changed —
+  /// for the run right after encryption is switched on, when the file
+  /// already there is still in the clear.
+  Future<void> syncNow({bool republish = false}) async {
     if (_syncing) return;
 
     final folder = await _store.location();
@@ -172,6 +176,11 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
         folder: syncFolderFor(folder.value),
         deviceId: await _store.deviceId(),
         identity: _identityOf(profile),
+        // Null for a plain folder and for one this device has not been
+        // unlocked for; the service turns the second case into
+        // SharedFolderSyncError.locked rather than writing in the clear.
+        key: await const FolderKeyStore().read(profile.id),
+        republish: republish,
       );
       final result = await service.sync();
 

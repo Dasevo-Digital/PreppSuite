@@ -112,6 +112,67 @@ Die Datei wird unter einem Zwischennamen geschrieben und dann umbenannt.
 Sonst bekämen die Sync-Dienste, die den Ordner beobachten, halbe Dateien zu
 verteilen.
 
+## Verschlüsselung
+
+Der Ordner liegt in fremder Hand – Nextcloud, Syncthing, iCloud. Lesen kann
+ihn damit der Anbieter, jeder mit Zugang zum Konto und jeder, der das
+Verzeichnis auf einer geteilten Platte findet. Genau davor schützt die
+Verschlüsselung, und nur davor.
+
+**Sie schützt ausdrücklich nicht vor einem entsperrten Gerät.** Die lokale
+Datenbank ist einfaches SQLite, und der abgeleitete Schlüssel liegt daneben
+im app-privaten Speicher. Ihn stärker zu bewachen als die Daten, die er
+öffnet, wäre Theater.
+
+### Wie es funktioniert
+
+Aus einem Kennwort, das alle Geräte des Haushalts teilen, wird mit
+**Argon2id** ein 256-Bit-Schlüssel abgeleitet (64 MB, drei Durchgänge – die
+OWASP-Empfehlung). Damit werden die Gerätedateien mit **AES-256-GCM**
+versiegelt. Das Kennwort selbst liegt nie im Ordner; dort steht nur, wie
+abzuleiten ist:
+
+```json
+{
+  "version": 2,
+  "householdId": "…",
+  "vault": { "kdf": "argon2id", "salt": "…", "memory": 65536,
+             "iterations": 3, "parallelism": 1 },
+  "check": "…"
+}
+```
+
+Salz und Arbeitsfaktoren sind öffentlich – sie müssen es sein, sonst könnte
+ein zweites Gerät denselben Schlüssel nicht ableiten. `check` ist ein
+verschlüsseltes Prüfwort. Ohne das wäre die einzige Art, ein Kennwort zu
+prüfen, das Öffnen einer Gerätedatei – und die scheitert bei einem falschen
+Kennwort genauso wie bei einem halb heruntergeladenen Download. Jemandem zu
+sagen, sein Kennwort sei falsch, obwohl die Datei kaputt ist, ist der
+schlimmere der beiden Fehler.
+
+### Version 1 bleibt Version 1
+
+Ein unverschlüsselter Ordner wird weiter als `"version": 1` geschrieben, ein
+verschlüsselter als `2`. Die Asymmetrie ist Absicht: eine ältere App
+verweigert eine unbekannte Version. Bei einem verschlüsselten Ordner ist das
+richtig – sie könnte die Dateien ohnehin nicht lesen, und ein lautes „geht
+nicht" ist besser als stilles Überspringen. Bei einem einfachen Ordner wäre
+es falsch. Würde immer `2` geschrieben, wäre jeder Haushalt an dem Tag
+ausgesperrt, an dem ein Mitglied aktualisiert.
+
+### Beim Umschalten
+
+Während umgestellt wird, liegen beide Formen nebeneinander, und beide werden
+gelesen. Ein Gerät ohne Schlüssel meldet `locked` und **schreibt nichts** –
+eine Klartextdatei in einem verschlüsselten Ordner würde die Verschlüsselung
+für alle Zeilen dieses Geräts wieder aufheben.
+
+### Kein Weg zurück
+
+Ist das Kennwort weg, ist der Ordner unlesbar. Es gibt keine Wiederherstellung
+und kein Zurücksetzen – dieselbe Lage wie beim Android-Signaturschlüssel.
+Vor dem Einschalten aufschreiben.
+
 ## Grenzen
 
 **Android** kennt seit Scoped Storage keine frei wählbaren Pfade mehr. Die

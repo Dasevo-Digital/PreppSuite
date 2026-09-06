@@ -933,6 +933,62 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get sharingErrorLocked =>
+      'This folder is encrypted and this device does not have the passphrase. Nothing is being read or written until you enter it.';
+
+  @override
+  String get folderEncryptionTitle => 'Encrypt the shared folder';
+
+  @override
+  String get folderEncryptionOff =>
+      'Off. Everything in the folder is readable by anyone who can see it — including your sync provider.';
+
+  @override
+  String get folderEncryptionOn => 'On. The folder holds only sealed files.';
+
+  @override
+  String get folderEncryptionEnable => 'Turn on encryption';
+
+  @override
+  String get folderEncryptionUnlock => 'Enter passphrase';
+
+  @override
+  String get folderEncryptionPassphrase => 'Passphrase';
+
+  @override
+  String get folderEncryptionRepeat => 'Repeat passphrase';
+
+  @override
+  String get folderEncryptionMismatch => 'The two entries are not the same.';
+
+  @override
+  String folderEncryptionTooShort(int count) {
+    return 'At least $count characters. This is the only thing standing between the folder and whoever can read it.';
+  }
+
+  @override
+  String get folderEncryptionWrong =>
+      'That passphrase does not open this folder.';
+
+  @override
+  String get folderEncryptionNoRecovery =>
+      'There is no way back in without it. PreppSuite cannot reset it, and neither can anyone else — write it down somewhere safe before you continue.';
+
+  @override
+  String get folderEncryptionOtherDevices =>
+      'Every other device in this household has to be updated and given the same passphrase. Until it is, it stops seeing new rows.';
+
+  @override
+  String get folderEncryptionEnabled => 'The shared folder is now encrypted.';
+
+  @override
+  String get folderEncryptionUnlocked => 'Folder unlocked.';
+
+  @override
+  String get folderEncryptionWorking =>
+      'Deriving the key. This takes a moment on purpose.';
+
+  @override
   String get personCountLabel => 'People in the household';
 
   @override

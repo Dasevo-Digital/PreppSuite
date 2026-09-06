@@ -940,6 +940,65 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get sharingErrorLocked =>
+      'Dieser Ordner ist verschlüsselt und dieses Gerät hat das Kennwort nicht. Es wird nichts gelesen und nichts geschrieben, bis du es eingibst.';
+
+  @override
+  String get folderEncryptionTitle => 'Gemeinsamen Ordner verschlüsseln';
+
+  @override
+  String get folderEncryptionOff =>
+      'Aus. Alles im Ordner ist für jeden lesbar, der ihn sehen kann – auch für deinen Anbieter.';
+
+  @override
+  String get folderEncryptionOn =>
+      'An. Im Ordner liegen nur versiegelte Dateien.';
+
+  @override
+  String get folderEncryptionEnable => 'Verschlüsselung einschalten';
+
+  @override
+  String get folderEncryptionUnlock => 'Kennwort eingeben';
+
+  @override
+  String get folderEncryptionPassphrase => 'Kennwort';
+
+  @override
+  String get folderEncryptionRepeat => 'Kennwort wiederholen';
+
+  @override
+  String get folderEncryptionMismatch =>
+      'Die beiden Eingaben sind nicht gleich.';
+
+  @override
+  String folderEncryptionTooShort(int count) {
+    return 'Mindestens $count Zeichen. Das ist das Einzige, was zwischen dem Ordner und jedem steht, der ihn lesen kann.';
+  }
+
+  @override
+  String get folderEncryptionWrong =>
+      'Mit diesem Kennwort lässt sich der Ordner nicht öffnen.';
+
+  @override
+  String get folderEncryptionNoRecovery =>
+      'Ohne das Kennwort gibt es keinen Weg zurück. PreppSuite kann es nicht zurücksetzen und sonst auch niemand – schreib es an einen sicheren Ort, bevor du weitermachst.';
+
+  @override
+  String get folderEncryptionOtherDevices =>
+      'Jedes andere Gerät dieses Haushalts muss aktualisiert werden und dasselbe Kennwort bekommen. Bis dahin sieht es keine neuen Zeilen mehr.';
+
+  @override
+  String get folderEncryptionEnabled =>
+      'Der gemeinsame Ordner ist jetzt verschlüsselt.';
+
+  @override
+  String get folderEncryptionUnlocked => 'Ordner entsperrt.';
+
+  @override
+  String get folderEncryptionWorking =>
+      'Der Schlüssel wird abgeleitet. Das dauert absichtlich einen Moment.';
+
+  @override
   String get personCountLabel => 'Personen im Haushalt';
 
   @override

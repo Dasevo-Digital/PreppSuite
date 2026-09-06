@@ -426,6 +426,19 @@ tree; the test suite deliberately targets that layer rather than the UI.
   reads as 1 and not 0. Its `soon` window is the overview's `soonWindow`,
   re-exported rather than redeclared: the two must never disagree about
   the same item.
+- **An encrypted folder is written as `household.json` version 2, a plain
+  one stays at version 1.** Writing 2 unconditionally would lock every
+  household out of its own folder the day one member updated, because an
+  older app refuses a version it does not know. For an encrypted folder
+  that refusal is right — it could not read the device files anyway — and
+  for a plain one it would be a disaster.
+- **A device without the folder key writes nothing at all**
+  (`SharedFolderSyncError.locked`). Publishing a plaintext device file
+  into an encrypted folder would silently undo the encryption for every
+  row that device owns, and no later sync would put it back. Both shapes
+  are *read*, though: a household does not update every device in the same
+  minute, and dropping the plain files would make rows vanish for
+  everyone until it had.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

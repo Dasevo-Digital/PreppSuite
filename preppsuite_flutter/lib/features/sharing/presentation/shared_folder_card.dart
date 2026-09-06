@@ -7,6 +7,7 @@ import '../../household/application/household_providers.dart';
 import '../application/shared_folder_access.dart';
 import '../application/shared_folder_sync_service.dart';
 import '../application/sharing_providers.dart';
+import 'folder_encryption_section.dart';
 
 /// Settings card for sharing a household across devices.
 ///
@@ -85,6 +86,7 @@ class _Body extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           _StatusLine(state: state, l10n: l10n),
+          const FolderEncryptionSection(),
         ],
         const SizedBox(height: 12),
         Wrap(
@@ -202,6 +204,7 @@ class _StatusLine extends StatelessWidget {
           SharedFolderSyncError.differentHousehold =>
             l10n.sharingErrorDifferentHousehold,
           SharedFolderSyncError.unsupportedVersion => l10n.sharingErrorVersion,
+          SharedFolderSyncError.locked => l10n.sharingErrorLocked,
           SharedFolderSyncError.failed => l10n.sharingErrorFailed,
         },
         style: theme.textTheme.bodySmall?.copyWith(

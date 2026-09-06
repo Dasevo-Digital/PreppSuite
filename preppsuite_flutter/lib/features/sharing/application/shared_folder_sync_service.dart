@@ -1,5 +1,6 @@
 import '../../../local_db/database.dart';
 import 'device_snapshot.dart';
+import 'folder_crypto.dart';
 import 'household_file.dart';
 import 'sync_folder.dart';
 
@@ -20,6 +21,12 @@ enum SharedFolderSyncError {
   /// shape over it could drop fields this app does not know about, so it
   /// does nothing at all.
   unsupportedVersion,
+
+  /// The folder is encrypted and this device holds no key for it, or one
+  /// that no longer opens it. Nothing is read and nothing is written:
+  /// publishing a plaintext file into an encrypted folder would undo the
+  /// encryption for every row this device owns.
+  locked,
 
   /// The folder could be reached but something failed while reading or
   /// writing. Worth retrying; the next run does.
@@ -67,6 +74,8 @@ class SharedFolderSyncService {
     required SyncFolder folder,
     required this.deviceId,
     required this.identity,
+    this.key,
+    this.republish = false,
   }) : _db = database,
        _folder = folder;
 
@@ -81,7 +90,29 @@ class SharedFolderSyncService {
   /// missing.
   final HouseholdFile identity;
 
+  /// The folder's key, if this device has unlocked it.
+  ///
+  /// Null for a plain folder, and null for an encrypted one this device
+  /// has not been given the passphrase for — the second case is the
+  /// [SharedFolderSyncError.locked] one.
+  final FolderKey? key;
+
+  /// Writes this device's file even when nothing changed.
+  ///
+  /// For the run straight after encryption is switched on: this device's
+  /// existing file is still in the clear, and nothing about the rows in it
+  /// is dirty, so the ordinary rule would leave the plaintext lying there
+  /// beside the sealed ones.
+  final bool republish;
+
   String get householdId => identity.householdId;
+
+  /// What the folder itself says, which outranks [identity].
+  ///
+  /// A second device can turn encryption on while this one is running;
+  /// the file in the folder is the truth about that, not the copy this
+  /// device started with.
+  HouseholdFile? _folderIdentity;
 
   /// Named so the "last synced" line in settings has something to read.
   static const syncStateEntity = 'sharedFolder';
@@ -111,10 +142,12 @@ class SharedFolderSyncService {
         foreignFiles++;
 
         final raw = await _folder.readDeviceFile(id);
-        final snapshot = raw == null ? null : DeviceSnapshot.decode(raw);
+        final opened = raw == null ? null : await _open(raw);
+        final snapshot = opened == null ? null : DeviceSnapshot.decode(opened);
         if (snapshot == null) {
-          // Damaged, half-downloaded, or written by a newer version. All
-          // three mean the same thing here: leave it alone and try again.
+          // Damaged, half-downloaded, written by a newer version, or
+          // sealed under a key this device does not hold. All of them
+          // mean the same thing here: leave it alone and try again.
           skippedFiles++;
           continue;
         }
@@ -170,7 +203,28 @@ class SharedFolderSyncService {
     if (stored.householdId != householdId) {
       return SharedFolderSyncError.differentHousehold;
     }
+
+    _folderIdentity = stored;
+    if (stored.isEncrypted && key == null) {
+      return SharedFolderSyncError.locked;
+    }
     return null;
+  }
+
+  /// Whether this run has to seal what it writes.
+  bool get _sealing => (_folderIdentity ?? identity).isEncrypted;
+
+  /// Opens a file from the folder, whichever shape it is in.
+  ///
+  /// Both shapes are accepted on purpose: while a household is switching
+  /// over, the device that turned encryption on has a sealed file in
+  /// there and the others still have plain ones. Refusing the plain ones
+  /// would drop those households' rows until every device had caught up.
+  Future<String?> _open(String raw) async {
+    if (!looksEncrypted(raw)) return raw;
+    final folderKey = key;
+    if (folderKey == null) return null;
+    return decryptFromFolder(raw, folderKey);
   }
 
   Future<int> _apply(DeviceSnapshot snapshot) {
@@ -219,7 +273,10 @@ class SharedFolderSyncService {
     required bool learnedSomething,
     required bool ourFileExists,
   }) async {
-    if (!learnedSomething && ourFileExists && !await _hasUnpublishedRows()) {
+    if (!republish &&
+        !learnedSomething &&
+        ourFileExists &&
+        !await _hasUnpublishedRows()) {
       return false;
     }
 
@@ -250,7 +307,17 @@ class SharedFolderSyncService {
       ],
     );
 
-    await _folder.writeDeviceFile(deviceId, snapshot.encode());
+    final folderKey = key;
+    // Belt and braces against publishing in the clear: the run is already
+    // stopped with `locked` when the folder is sealed and no key is held,
+    // and this refuses to write rather than fall back if that ever fails.
+    if (_sealing && folderKey == null) return false;
+    await _folder.writeDeviceFile(
+      deviceId,
+      _sealing
+          ? await encryptForFolder(snapshot.encode(), folderKey!)
+          : snapshot.encode(),
+    );
     await _db.markHouseholdPublished(householdId, readAt);
     return true;
   }

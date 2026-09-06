@@ -1,39 +1,66 @@
 import 'dart:convert';
 
+import 'folder_crypto.dart';
+
 /// The `household.json` a shared folder is identified by.
 ///
 /// Carries only what every device in the household must agree on: the id
-/// their rows are partitioned by. Name and country ride along as the
-/// values a joining device is offered, not as values it is bound to —
-/// which is what keeps this file single-writer. It is written once, by
-/// whichever device set the folder up, and only read afterwards. Nothing
-/// in it is secret; anyone who can see the folder can already see every
-/// row in it.
+/// their rows are partitioned by, and — once the folder is encrypted —
+/// how to derive the key from the household's passphrase. Name and
+/// country ride along as the values a joining device is offered, not as
+/// values it is bound to, which is what keeps this file single-writer.
+///
+/// Nothing in it is secret. Not even [vault]: a salt and three work
+/// factors are public by design, and writing them down is what lets a
+/// second device derive the same key from the same passphrase. The
+/// passphrase itself never touches the folder.
 class HouseholdFile {
   const HouseholdFile({
     required this.householdId,
     required this.name,
     required this.countryCode,
     required this.createdAt,
+    this.vault,
+    this.check,
   });
 
   /// Bumped only if the layout stops being readable by an older app. A
   /// higher number than this app knows means "do not touch" rather than
   /// "guess" — the folder belongs to a newer install that would lose data
   /// if this one wrote an older shape over it.
-  static const currentVersion = 1;
+  static const currentVersion = 2;
+
+  /// What a folder without encryption is written as.
+  ///
+  /// Version 2 is used *only* once a folder is encrypted, and that
+  /// asymmetry is the whole point. An app that predates encryption
+  /// refuses a version it does not know — which is exactly right for a
+  /// folder whose device files it could not read anyway, and exactly
+  /// wrong for a plain folder it has been sharing happily for months.
+  /// Writing 2 unconditionally would lock every household out of its own
+  /// data on the day one member updated.
+  static const plainVersion = 1;
 
   final String householdId;
   final String name;
   final String countryCode;
   final DateTime createdAt;
 
+  /// How to derive the folder key, or null while the folder is plain.
+  final VaultParameters? vault;
+
+  /// The encrypted token a passphrase is checked against, or null.
+  final String? check;
+
+  bool get isEncrypted => vault != null && check != null;
+
   String encode() => const JsonEncoder.withIndent('  ').convert({
-    'version': currentVersion,
+    'version': isEncrypted ? currentVersion : plainVersion,
     'householdId': householdId,
     'name': name,
     'countryCode': countryCode,
     'createdAt': createdAt.toUtc().toIso8601String(),
+    if (isEncrypted) ...{'vault': vault!.toJson(), 'check': check},
   });
 
   /// Returns null for anything unreadable — a truncated download, a file
@@ -56,6 +83,19 @@ class HouseholdFile {
         return null;
       }
 
+      // A folder that says it is encrypted but cannot say how is not a
+      // folder to guess at: every device file in it would fail to open
+      // and the failure would look like corruption.
+      final rawVault = json['vault'];
+      final check = json['check'];
+      VaultParameters? vault;
+      if (rawVault != null) {
+        if (rawVault is! Map<String, Object?>) return null;
+        vault = VaultParameters.fromJson(rawVault);
+        if (vault == null) return null;
+        if (check is! String || check.isEmpty) return null;
+      }
+
       final created = json['createdAt'];
       return HouseholdFile(
         householdId: id,
@@ -64,6 +104,8 @@ class HouseholdFile {
         createdAt:
             (created is String ? DateTime.tryParse(created) : null)?.toUtc() ??
             DateTime.now().toUtc(),
+        vault: vault,
+        check: vault == null ? null : check as String,
       );
     } on FormatException {
       return null;
