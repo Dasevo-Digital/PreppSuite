@@ -24,10 +24,23 @@ enum InventoryItemCategory {
 }
 
 /// Broad grouping for a checklist template.
+///
+/// Declaration order is display order — the list groups by it, roughly
+/// from "keeps you alive indoors" to "you are leaving". Adding a value is
+/// safe; an older app reading a newer row falls back to [custom] rather
+/// than throwing. Renaming or removing one orphans every row that used
+/// it.
 enum ChecklistCategory {
   water,
   food,
   firstAid,
+  hygiene,
+  energy,
+  information,
+  documents,
+  evacuation,
+  safety,
+  pets,
   custom;
 
   static ChecklistCategory fromName(String name) =>

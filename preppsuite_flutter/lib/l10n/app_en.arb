@@ -1021,5 +1021,9 @@
   "warningFilterSevere": "Severe and up",
   "warningFilterResultCount": "{shown} of {total} warnings",
   "warningFilterClear": "Clear filter",
-  "warningsEmptyFiltered": "None of the {total} warnings match the filter."
+  "warningsEmptyFiltered": "None of the {total} warnings match the filter.",
+  "checklistCategoryInformation": "Staying informed",
+  "checklistCategoryEvacuation": "Emergency luggage",
+  "checklistCategorySafety": "Safety at home",
+  "checklistCategoryPets": "Pets"
 }

@@ -446,5 +446,9 @@
   "warningFilterSevere": "Ab schwer",
   "warningFilterResultCount": "{shown} von {total} Warnungen",
   "warningFilterClear": "Filter zurücksetzen",
-  "warningsEmptyFiltered": "Keine der {total} Warnungen passt zum Filter."
+  "warningsEmptyFiltered": "Keine der {total} Warnungen passt zum Filter.",
+  "checklistCategoryInformation": "Informiert bleiben",
+  "checklistCategoryEvacuation": "Notgepäck",
+  "checklistCategorySafety": "Sicherheit im Haus",
+  "checklistCategoryPets": "Haustiere"
 }

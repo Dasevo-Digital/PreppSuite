@@ -36,13 +36,10 @@ class ChecklistListScreen extends ConsumerWidget {
                   ),
                 ),
               )
-            : ListView.builder(
-                itemCount: templates.length,
-                itemBuilder: (context, index) => _TemplateTile(
-                  template: templates[index],
-                  householdId: householdId,
-                  l10n: l10n,
-                ),
+            : _GroupedTemplateList(
+                templates: templates,
+                householdId: householdId,
+                l10n: l10n,
               ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -116,6 +113,71 @@ class ChecklistListScreen extends ConsumerWidget {
   }
 }
 
+/// The templates under their category headings.
+///
+/// Flat was fine with three lists. With ten it is a wall, and the whole
+/// point of the built-in set is that someone can see at a glance which
+/// area they have not thought about yet.
+class _GroupedTemplateList extends StatelessWidget {
+  const _GroupedTemplateList({
+    required this.templates,
+    required this.householdId,
+    required this.l10n,
+  });
+
+  final List<ChecklistTemplate> templates;
+  final String householdId;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    // Grouped in the enum's declaration order rather than the order rows
+    // happen to come back in, so the sections do not move around when a
+    // template is renamed.
+    final byCategory = <ChecklistCategory, List<ChecklistTemplate>>{};
+    for (final template in templates) {
+      byCategory
+          .putIfAbsent(
+            ChecklistCategory.fromName(template.category),
+            () => [],
+          )
+          .add(template);
+    }
+
+    final sections = [
+      for (final category in ChecklistCategory.values)
+        if (byCategory[category] != null) (category, byCategory[category]!),
+    ];
+
+    return ListView.builder(
+      itemCount: sections.length,
+      itemBuilder: (context, index) {
+        final (category, group) = sections[index];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Text(
+                localizeChecklistCategory(l10n, category),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+            for (final template in group)
+              _TemplateTile(
+                template: template,
+                householdId: householdId,
+                l10n: l10n,
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
 class _TemplateTile extends ConsumerWidget {
   const _TemplateTile({
     required this.template,
@@ -132,6 +194,9 @@ class _TemplateTile extends ConsumerWidget {
     final itemsAsync = ref.watch(checklistItemsProvider(template.clientId));
 
     return ListTile(
+      leading: Icon(
+        checklistCategoryIcon(ChecklistCategory.fromName(template.category)),
+      ),
       title: Row(
         children: [
           Expanded(child: Text(template.title)),

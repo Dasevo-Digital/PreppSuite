@@ -2779,6 +2779,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'None of the {total} warnings match the filter.'**
   String warningsEmptyFiltered(Object total);
+
+  /// No description provided for @checklistCategoryInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Staying informed'**
+  String get checklistCategoryInformation;
+
+  /// No description provided for @checklistCategoryEvacuation.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency luggage'**
+  String get checklistCategoryEvacuation;
+
+  /// No description provided for @checklistCategorySafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety at home'**
+  String get checklistCategorySafety;
+
+  /// No description provided for @checklistCategoryPets.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get checklistCategoryPets;
 }
 
 class _AppLocalizationsDelegate

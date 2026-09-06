@@ -1590,4 +1590,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String warningsEmptyFiltered(Object total) {
     return 'None of the $total warnings match the filter.';
   }
+
+  @override
+  String get checklistCategoryInformation => 'Staying informed';
+
+  @override
+  String get checklistCategoryEvacuation => 'Emergency luggage';
+
+  @override
+  String get checklistCategorySafety => 'Safety at home';
+
+  @override
+  String get checklistCategoryPets => 'Pets';
 }
