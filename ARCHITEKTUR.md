@@ -361,10 +361,20 @@ tree; the test suite deliberately targets that layer rather than the UI.
   install` and **delete them again after every build**. A build that
   follows another without an intervening `pod install` therefore fails
   with "Build input file cannot be found". Running it again fixes it.
-- `HomeShell` draws its seven destinations two ways — a bar below a phone,
-  a rail beside anything wider — from one list, so a destination cannot
-  reach one and not the other. `shellNavigationFor` in
-  `home/application/` decides, and is the testable half.
+- `HomeShell` draws its nine destinations three ways — a bar below a
+  phone, a rail beside anything wider, and a "more" sheet for what the bar
+  has no room for — from one `ShellDestination` list, so a destination
+  cannot reach one and not the others. `shellNavigationFor` and
+  `shellSlotsFor` in `home/application/` decide, and are the testable
+  half. `shellSlotsFor` guarantees the open destination is always on the
+  bar, swapping it into the last slot when it would otherwise be hidden;
+  without that the bar shows no selection while that screen is on display.
+- Warnings are both a banner above every tab and a destination. The banner
+  is the one that must be seen without looking; the screen behind it is
+  where the history, the filter and the ones concerning somewhere else
+  live. The overview card, the destination badge and the banner all count
+  through `isWarningRelevant`, so none of them can report calm while
+  another is red.
 - Anything at the very top of `HomeShell`'s body is under the status bar.
   The shell consumes the top inset itself, once, so the warning banner
   does not sit beneath the clock and the tab below is not handed an inset

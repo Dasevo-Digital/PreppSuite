@@ -1025,5 +1025,20 @@
   "checklistCategoryInformation": "Staying informed",
   "checklistCategoryEvacuation": "Emergency luggage",
   "checklistCategorySafety": "Safety at home",
-  "checklistCategoryPets": "Pets"
+  "checklistCategoryPets": "Pets",
+  "navOverview": "Overview",
+  "navWarnings": "Warnings",
+  "navMore": "More",
+  "overviewSupplyTitle": "Supply for {days} days",
+  "overviewSupplyWater": "{current} of {target} L",
+  "overviewSupplyCalories": "{current} of {target} kcal",
+  "overviewAttentionTitle": "Needs attention",
+  "overviewNothingStored": "Nothing has been added to the inventory yet.",
+  "overviewExpired": "expired",
+  "overviewLowStock": "below minimum",
+  "overviewExpiringSoon": "expires within 30 days",
+  "overviewNoWarnings": "No warnings for your regions right now.",
+  "overviewChecklistLists": "{complete} of {total} lists complete",
+  "overviewResourcesTitle": "Resources",
+  "overviewItemCount": "{count} entries"
 }

@@ -203,6 +203,19 @@ class AppDatabase extends _$AppDatabase {
         .get();
   }
 
+  /// Every item of every list this household has, for the overview's
+  /// "x of y done".
+  ///
+  /// Not the same as watching each template's items and adding them up:
+  /// that is one stream per list, and the overview would rebuild ten
+  /// times for one tick.
+  Stream<List<ChecklistItem>> watchAllChecklistItems(String householdId) {
+    return (select(checklistItems)..where(
+          (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
+        ))
+        .watch();
+  }
+
   Stream<List<ChecklistItem>> watchChecklistItems(String templateClientId) {
     return (select(checklistItems)
           ..where(

@@ -450,5 +450,20 @@
   "checklistCategoryInformation": "Informiert bleiben",
   "checklistCategoryEvacuation": "Notgepäck",
   "checklistCategorySafety": "Sicherheit im Haus",
-  "checklistCategoryPets": "Haustiere"
+  "checklistCategoryPets": "Haustiere",
+  "navOverview": "Übersicht",
+  "navWarnings": "Warnungen",
+  "navMore": "Mehr",
+  "overviewSupplyTitle": "Versorgung für {days} Tage",
+  "overviewSupplyWater": "{current} von {target} L",
+  "overviewSupplyCalories": "{current} von {target} kcal",
+  "overviewAttentionTitle": "Braucht Aufmerksamkeit",
+  "overviewNothingStored": "Im Vorrat ist noch nichts eingetragen.",
+  "overviewExpired": "abgelaufen",
+  "overviewLowStock": "unter Mindestmenge",
+  "overviewExpiringSoon": "läuft in 30 Tagen ab",
+  "overviewNoWarnings": "Zurzeit keine Warnung für deine Regionen.",
+  "overviewChecklistLists": "{complete} von {total} Listen vollständig",
+  "overviewResourcesTitle": "Ressourcen",
+  "overviewItemCount": "{count} Einträge"
 }

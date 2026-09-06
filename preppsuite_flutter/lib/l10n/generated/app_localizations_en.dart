@@ -1602,4 +1602,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checklistCategoryPets => 'Pets';
+
+  @override
+  String get navOverview => 'Overview';
+
+  @override
+  String get navWarnings => 'Warnings';
+
+  @override
+  String get navMore => 'More';
+
+  @override
+  String overviewSupplyTitle(Object days) {
+    return 'Supply for $days days';
+  }
+
+  @override
+  String overviewSupplyWater(Object current, Object target) {
+    return '$current of $target L';
+  }
+
+  @override
+  String overviewSupplyCalories(Object current, Object target) {
+    return '$current of $target kcal';
+  }
+
+  @override
+  String get overviewAttentionTitle => 'Needs attention';
+
+  @override
+  String get overviewNothingStored =>
+      'Nothing has been added to the inventory yet.';
+
+  @override
+  String get overviewExpired => 'expired';
+
+  @override
+  String get overviewLowStock => 'below minimum';
+
+  @override
+  String get overviewExpiringSoon => 'expires within 30 days';
+
+  @override
+  String get overviewNoWarnings => 'No warnings for your regions right now.';
+
+  @override
+  String overviewChecklistLists(Object complete, Object total) {
+    return '$complete of $total lists complete';
+  }
+
+  @override
+  String get overviewResourcesTitle => 'Resources';
+
+  @override
+  String overviewItemCount(Object count) {
+    return '$count entries';
+  }
 }

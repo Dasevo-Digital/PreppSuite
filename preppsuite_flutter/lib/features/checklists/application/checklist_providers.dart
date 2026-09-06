@@ -12,6 +12,15 @@ final checklistTemplatesProvider = StreamProvider.autoDispose
           ref.watch(appDatabaseProvider).watchChecklistTemplates(householdId),
     );
 
+/// Every item of every list, for the overview's progress bar. One stream
+/// rather than one per template, which would rebuild the overview once
+/// per list for a single tick.
+final allChecklistItemsProvider = StreamProvider.autoDispose
+    .family<List<ChecklistItem>, String>(
+      (ref, householdId) =>
+          ref.watch(appDatabaseProvider).watchAllChecklistItems(householdId),
+    );
+
 /// Items of one template, keyed by the template's local clientId.
 final checklistItemsProvider = StreamProvider.autoDispose
     .family<List<ChecklistItem>, String>(

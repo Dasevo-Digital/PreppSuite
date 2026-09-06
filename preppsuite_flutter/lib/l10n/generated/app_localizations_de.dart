@@ -1612,4 +1612,59 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get checklistCategoryPets => 'Haustiere';
+
+  @override
+  String get navOverview => 'Übersicht';
+
+  @override
+  String get navWarnings => 'Warnungen';
+
+  @override
+  String get navMore => 'Mehr';
+
+  @override
+  String overviewSupplyTitle(Object days) {
+    return 'Versorgung für $days Tage';
+  }
+
+  @override
+  String overviewSupplyWater(Object current, Object target) {
+    return '$current von $target L';
+  }
+
+  @override
+  String overviewSupplyCalories(Object current, Object target) {
+    return '$current von $target kcal';
+  }
+
+  @override
+  String get overviewAttentionTitle => 'Braucht Aufmerksamkeit';
+
+  @override
+  String get overviewNothingStored => 'Im Vorrat ist noch nichts eingetragen.';
+
+  @override
+  String get overviewExpired => 'abgelaufen';
+
+  @override
+  String get overviewLowStock => 'unter Mindestmenge';
+
+  @override
+  String get overviewExpiringSoon => 'läuft in 30 Tagen ab';
+
+  @override
+  String get overviewNoWarnings => 'Zurzeit keine Warnung für deine Regionen.';
+
+  @override
+  String overviewChecklistLists(Object complete, Object total) {
+    return '$complete von $total Listen vollständig';
+  }
+
+  @override
+  String get overviewResourcesTitle => 'Ressourcen';
+
+  @override
+  String overviewItemCount(Object count) {
+    return '$count Einträge';
+  }
 }

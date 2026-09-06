@@ -2803,6 +2803,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pets'**
   String get checklistCategoryPets;
+
+  /// No description provided for @navOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get navOverview;
+
+  /// No description provided for @navWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Warnings'**
+  String get navWarnings;
+
+  /// No description provided for @navMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get navMore;
+
+  /// No description provided for @overviewSupplyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supply for {days} days'**
+  String overviewSupplyTitle(Object days);
+
+  /// No description provided for @overviewSupplyWater.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {target} L'**
+  String overviewSupplyWater(Object current, Object target);
+
+  /// No description provided for @overviewSupplyCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {target} kcal'**
+  String overviewSupplyCalories(Object current, Object target);
+
+  /// No description provided for @overviewAttentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get overviewAttentionTitle;
+
+  /// No description provided for @overviewNothingStored.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing has been added to the inventory yet.'**
+  String get overviewNothingStored;
+
+  /// No description provided for @overviewExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'expired'**
+  String get overviewExpired;
+
+  /// No description provided for @overviewLowStock.
+  ///
+  /// In en, this message translates to:
+  /// **'below minimum'**
+  String get overviewLowStock;
+
+  /// No description provided for @overviewExpiringSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'expires within 30 days'**
+  String get overviewExpiringSoon;
+
+  /// No description provided for @overviewNoWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'No warnings for your regions right now.'**
+  String get overviewNoWarnings;
+
+  /// No description provided for @overviewChecklistLists.
+  ///
+  /// In en, this message translates to:
+  /// **'{complete} of {total} lists complete'**
+  String overviewChecklistLists(Object complete, Object total);
+
+  /// No description provided for @overviewResourcesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Resources'**
+  String get overviewResourcesTitle;
+
+  /// No description provided for @overviewItemCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries'**
+  String overviewItemCount(Object count);
 }
 
 class _AppLocalizationsDelegate
