@@ -42,6 +42,16 @@ void main() {
             title: 'Wasservorrat',
             redirectTo: 'C/Trinkwasser',
           ),
+          ZimFixtureEntry(
+            namespace: 'C',
+            url: 'Karte.png',
+            title: 'Karte.png',
+            // Big enough that it cannot go out in one socket buffer, so a
+            // client that walks away is guaranteed to leave the server
+            // writing into a closed connection.
+            content: List<int>.filled(4 * 1024 * 1024, 0x42),
+            mimeType: 1,
+          ),
         ],
       ),
     );
@@ -143,6 +153,28 @@ void main() {
     expect(response.headers.value('content-security-policy'), isNotNull);
     await response.drain<void>();
   });
+
+  test(
+    'a client that walks away mid-transfer does not end the server',
+    () async {
+      // The engine does this every time the reader taps a link while images
+      // are still loading. Dart happens to swallow the socket error, so this
+      // passes against the older shape too — it is not a regression test. It
+      // pins the property down: whatever one request does, the next reader
+      // still gets a page.
+      final socket = await Socket.connect('127.0.0.1', server.port);
+      socket.write('GET /C/Karte.png HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n');
+      await socket.flush();
+      // Wait for delivery to be under way, then leave without reading it.
+      await socket.first;
+      socket.destroy();
+
+      // The one assertion that matters: the next reader still gets a page.
+      final response = await get('/C/Trinkwasser');
+      expect(response.statusCode, HttpStatus.ok);
+      expect(await utf8.decodeStream(response), '<h1>Trinkwasser</h1>');
+    },
+  );
 
   test('the server is reachable only over loopback', () async {
     expect(server.uriFor(await archive.entryAt(0)).host, '127.0.0.1');

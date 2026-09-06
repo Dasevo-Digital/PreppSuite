@@ -50,11 +50,29 @@ class ZimHttpServer {
       try {
         await _respond(request);
       } on Object {
-        // A request that fails must not take the server down with it —
-        // the page would then lose its stylesheet and every later image.
-        request.response.statusCode = HttpStatus.internalServerError;
-      } finally {
+        try {
+          request.response.statusCode = HttpStatus.internalServerError;
+        } on Object {
+          // The headers are already on the wire; there is nothing left to
+          // say about this request. Setting the status now would throw.
+        }
+      }
+
+      // Closing is deliberately outside the catch above and guarded on its
+      // own. It used to sit in a `finally`, from where a throw escapes the
+      // loop, ends `_serve` — which nobody awaits — and leaves the server
+      // listening while answering nothing.
+      //
+      // Measured, not assumed: a client walking away mid-transfer, which
+      // the engine does on every tapped link, does *not* throw here. Dart's
+      // HttpServer swallows that socket error, so the old shape held. The
+      // guard is here so that it does not have to keep holding by accident
+      // — one write added after the headers go out is enough to turn a
+      // single failed request into a reader that never sees another page.
+      try {
         await request.response.close();
+      } on Object {
+        // The client is gone. There was never anyone to deliver to.
       }
     }
   }
