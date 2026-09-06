@@ -1305,4 +1305,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapDownloadResolving => 'Working out the surroundings …';
+
+  @override
+  String get mapDownloadUnfinishedTitle => 'Unfinished download';
+
+  @override
+  String mapDownloadUnfinishedBody(String label, String done, String total) {
+    return '$label — $done of $total tiles are already here.';
+  }
+
+  @override
+  String get mapDownloadResumeAction => 'Resume';
+
+  @override
+  String get mapDownloadDiscardAction => 'Discard';
 }

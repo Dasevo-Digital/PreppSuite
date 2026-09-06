@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 
 import 'map_download_plan.dart';
+import 'pmtiles_archive.dart' show tileIdFor;
 import 'pmtiles_writer.dart';
 import 'tile_source.dart';
 
@@ -177,11 +178,17 @@ class MapAreaDownloader {
   /// ask of a tile server run for other people.
   static const tileLimit = 100000;
 
+  /// Fetches the plan's tiles and assembles the archive at [targetPath].
+  ///
+  /// With [resume] the tiles a previous run already stored are skipped
+  /// and its scratch file is added to rather than replaced. Without it,
+  /// anything half-finished in [workingDirectory] is thrown away first.
   Stream<MapDownloadProgress> download({
     required MapDownloadPlan plan,
     required VectorTileSource source,
     required String targetPath,
     required Directory workingDirectory,
+    bool resume = false,
   }) async* {
     if (plan.maxZoom > source.maxZoom) {
       throw MapDownloadException(
@@ -193,10 +200,21 @@ class MapAreaDownloader {
       throw MapDownloadException('$total tiles is more than $tileLimit');
     }
 
-    final writer = await PmTilesWriter.create(workingDirectory);
-    final queue = plan.tiles().toList();
+    final writer = resume
+        ? await PmTilesWriter.resume(workingDirectory)
+        : await PmTilesWriter.create(workingDirectory);
 
-    var done = 0;
+    final alreadyStored = writer.storedTileIds;
+    final queue = [
+      for (final tile in plan.tiles())
+        if (!alreadyStored.contains(tileIdFor(tile.z, tile.x, tile.y))) tile,
+    ];
+
+    // What a previous run finished counts towards the total, or the bar
+    // would start at zero on a download that is nearly done.
+    final carried = total - queue.length;
+
+    var done = carried;
     var missing = 0;
     var next = 0;
     var complete = false;
@@ -222,18 +240,22 @@ class MapAreaDownloader {
             source.tileUrl(tile.z, tile.x, tile.y),
           );
 
-          if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
-            await writer.add(tile.z, tile.x, tile.y, response.bodyBytes);
-          } else if (response.statusCode == 404 ||
-              response.statusCode == 204 ||
-              response.bodyBytes.isEmpty) {
+          // The status decides first. An empty body is only "nothing to
+          // draw here" when the server said the request was fine —
+          // reading an empty 503 the same way would fill a map with
+          // holes and call it finished.
+          if (response.statusCode == 404 || response.statusCode == 204) {
             // Ordinary rather than an error: a vector set is sparse
             // wherever there is nothing to draw.
             missing++;
-          } else {
+          } else if (response.statusCode != 200) {
             throw MapDownloadException(
               'the tile server answered ${response.statusCode}',
             );
+          } else if (response.bodyBytes.isEmpty) {
+            missing++;
+          } else {
+            await writer.add(tile.z, tile.x, tile.y, response.bodyBytes);
           }
           done++;
         } on Object catch (error, trace) {
@@ -296,10 +318,12 @@ class MapAreaDownloader {
         missing: missing,
       );
     } finally {
-      // Also reached when the subscriber cancels, which stops the
-      // workers at their next tile and takes the scratch file with it.
+      // Also reached when the subscriber cancels, which stops the workers
+      // at their next tile. The working files stay: cancelling is how a
+      // download of an hour gets paused, and throwing the tiles away
+      // would make pausing the same as starting over.
       next = queue.length;
-      if (!complete) await writer.abandon();
+      if (!complete) await writer.close();
     }
   }
 }

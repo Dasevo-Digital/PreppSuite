@@ -210,7 +210,8 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   eigenem Schlüssel). Ein ganzes Land geht gestaffelt – außen gröber, um
   den gewählten Ort herum voll –, flach dagegen nicht: über 100 000
   Kacheln lehnt die App ab, aus Rücksicht auf einen öffentlichen Server.
-  Speicherplatz ist nie die Grenze. Einzelheiten in
+  Speicherplatz ist nie die Grenze. Ein unterbrochener Download wird beim
+  nächsten Start fortgesetzt statt neu begonnen. Einzelheiten in
   [`docs/karte-offline.md`](docs/karte-offline.md).
 - Die Volltextsuche braucht einen Index, den die App einmal selbst
   aufbaut – der fertige im Archiv liegt in einem Xapian-Format ohne

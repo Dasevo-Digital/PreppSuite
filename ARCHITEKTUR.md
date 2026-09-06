@@ -155,6 +155,21 @@ on a second pending write — besides which the offset bookkeeping is only
 correct one tile at a time. The queue also has to survive a failed write,
 or the first bad tile fails every tile after it.
 
+**The tile journal is written after the bytes, never before.** A map
+download survives the app closing because `PmTilesWriter` keeps a journal
+of `tileId offset length` beside its scratch file — but only once the
+bytes are flushed. A journal line describing bytes that are not there
+produces a corrupt archive; bytes no line describes cost one tile, and
+`PmTilesWriter.resume` truncates the scratch to what the journal accounts
+for. That asymmetry is the whole reason the order is fixed.
+
+**Cancelling a map download pauses it.** `MapAreaDownloader` calls
+`writer.close()` rather than `abandon()` on the way out, and the session
+file stays; only `discard()` and starting a new download delete the
+working files. A country is over an hour of tiles, so treating a
+cancellation as "start again" would mean the feature never finished for
+anything larger than a town.
+
 **A map download is a plan of rings, not one area.** `staggeredPlan`
 gives each ring a band of zoom levels — the country coarse on the
 outside, the chosen place at full detail — and searches for the deepest

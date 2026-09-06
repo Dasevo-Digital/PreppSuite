@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/downloads/application/byte_size.dart';
 import 'package:preppsuite_flutter/features/maps/application/map_area_download.dart';
 import 'package:preppsuite_flutter/features/maps/application/map_download_plan.dart';
+import 'package:preppsuite_flutter/features/maps/application/map_download_session.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart';
 import 'package:preppsuite_flutter/features/maps/application/tile_source.dart';
 
@@ -91,6 +93,86 @@ void main() {
       );
 
       stdout.writeln('archive: ${formatByteSize(await File(target).length())}');
+    },
+    timeout: const Timeout(Duration(minutes: 10)),
+    skip: reason,
+  );
+
+  test(
+    'a download interrupted part-way finishes on the second run',
+    () async {
+      final source = await TileSourceClient().load(MapTileProvider.openFreeMap);
+
+      const area = MapArea(
+        minLongitude: 9.70,
+        minLatitude: 52.36,
+        maxLongitude: 9.78,
+        maxLatitude: 52.40,
+        maxZoom: 11,
+      );
+      final plan = MapDownloadPlan.single(area);
+
+      final directory = await Directory.systemTemp.createTemp('ofm_resume');
+      addTearDown(() => directory.delete(recursive: true));
+      final target = '${directory.path}/hannover.pmtiles';
+
+      // Stopped at the first report that shows partial progress, the way
+      // closing the app stops it. Driven by the events rather than by a
+      // timer, or a fast connection would finish the whole thing first.
+      final stopped = Completer<void>();
+      late final StreamSubscription<MapDownloadProgress> subscription;
+      subscription = MapAreaDownloader(concurrency: 1)
+          .download(
+            plan: plan,
+            source: source,
+            targetPath: target,
+            workingDirectory: directory,
+          )
+          .listen((progress) {
+            if (stopped.isCompleted) return;
+            if (progress.done > 0 && progress.done < progress.total) {
+              stopped.complete();
+            }
+          });
+
+      await stopped.future.timeout(const Duration(minutes: 2));
+      await subscription.cancel();
+
+      final stored = await const MapDownloadSessionStore().storedTileCount(
+        directory,
+      );
+      stdout.writeln('nach dem Abbruch: $stored von ${plan.tileCount}');
+      expect(stored, greaterThan(0));
+      expect(stored, lessThan(plan.tileCount));
+      expect(await File(target).exists(), isFalse);
+
+      final progress = await MapAreaDownloader(concurrency: 4)
+          .download(
+            plan: plan,
+            source: source,
+            targetPath: target,
+            workingDirectory: directory,
+            resume: true,
+          )
+          .last;
+      stdout.writeln(
+        'nach dem Fortsetzen: ${progress.done}/${progress.total}, '
+        '${formatByteSize(progress.bytes)}',
+      );
+      expect(progress.done, plan.tileCount);
+
+      // Real tiles are gzip; the journal has to survive that, not just
+      // the text the unit tests use.
+      final archive = await PmTilesArchive.open(
+        await FileByteRangeSource.open(File(target)),
+      );
+      addTearDown(archive.close);
+      for (final tile in area.tiles()) {
+        final bytes = await archive.tile(tile.z, tile.x, tile.y);
+        expect(bytes, isNotNull, reason: '${tile.z}/${tile.x}/${tile.y}');
+        expect(bytes!.length, greaterThan(50));
+      }
+      stdout.writeln('alle ${plan.tileCount} Kacheln lesbar');
     },
     timeout: const Timeout(Duration(minutes: 10)),
     skip: reason,

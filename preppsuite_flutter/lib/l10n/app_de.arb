@@ -368,5 +368,9 @@
   "mapDownloadStep": "{label}: Stufe {from} bis {to}, {count} Kacheln",
   "mapDownloadNoPlan": "Auch gestaffelt passt das nicht. Wähle einen kleineren Ort.",
   "mapDownloadEstimatedTime": "Dauert etwa {minutes} Minuten.",
-  "mapDownloadResolving": "Umgebung wird ermittelt …"
+  "mapDownloadResolving": "Umgebung wird ermittelt …",
+  "mapDownloadUnfinishedTitle": "Unterbrochener Download",
+  "mapDownloadUnfinishedBody": "{label} — {done} von {total} Kacheln sind schon da.",
+  "mapDownloadResumeAction": "Fortsetzen",
+  "mapDownloadDiscardAction": "Verwerfen"
 }

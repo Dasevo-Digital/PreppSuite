@@ -11,16 +11,26 @@ import 'package:preppsuite_flutter/features/maps/application/tile_source.dart';
 /// Answers every tile with its own coordinates, and nothing at all for a
 /// chosen few.
 class _TileServer extends http.BaseClient {
-  _TileServer({this.missing = const {}, this.status = 200});
+  _TileServer({this.missing = const {}, this.status = 200, this.failAfter});
 
   final Set<String> missing;
   final int status;
+
+  /// Serves this many tiles and then breaks, the way a connection
+  /// dropping part-way through an hour looks from here.
+  final int? failAfter;
+
   final requested = <String>[];
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     final path = request.url.path;
     requested.add(path);
+
+    final limit = failAfter;
+    if (limit != null && requested.length > limit) {
+      return http.StreamedResponse(const Stream.empty(), 503);
+    }
 
     if (missing.contains(path)) {
       return http.StreamedResponse(const Stream.empty(), 404);
@@ -196,7 +206,7 @@ void main() {
       expect(await File(target).exists(), isTrue);
     });
 
-    test('a failing server leaves no scratch file behind', () async {
+    test('a failing server produces no archive but keeps the tiles', () async {
       await expectLater(
         MapAreaDownloader(
               httpClient: _TileServer(status: 500),
@@ -212,8 +222,73 @@ void main() {
         throwsA(isA<MapDownloadException>()),
       );
 
+      // Nothing half-built is ever handed over as a map.
       expect(await File('${dir.path}/broken.pmtiles').exists(), isFalse);
-      expect(await File('${dir.path}/tiles.scratch').exists(), isFalse);
+
+      // But the working files stay, so a retry resumes instead of
+      // starting the hour over again.
+      expect(await File('${dir.path}/tiles.scratch').exists(), isTrue);
+    });
+
+    test('a second run fetches only what the first one missed', () async {
+      final target = '${dir.path}/resumed.pmtiles';
+      const area = MapArea(
+        minLongitude: 5.9,
+        minLatitude: 47.3,
+        maxLongitude: 15.0,
+        maxLatitude: 55.1,
+        maxZoom: 6,
+      );
+      expect(area.tileCount, 15);
+
+      // The connection drops after six tiles.
+      final dropping = _TileServer(failAfter: 6);
+      await expectLater(
+        MapAreaDownloader(httpClient: dropping, concurrency: 1)
+            .download(
+              plan: MapDownloadPlan.single(area),
+              source: _source(8),
+              targetPath: target,
+              workingDirectory: dir,
+            )
+            .toList(),
+        throwsA(isA<MapDownloadException>()),
+      );
+
+      final second = _TileServer();
+      final progress =
+          await MapAreaDownloader(
+                httpClient: second,
+                concurrency: 1,
+              )
+              .download(
+                plan: MapDownloadPlan.single(area),
+                source: _source(8),
+                targetPath: target,
+                workingDirectory: dir,
+                resume: true,
+              )
+              .toList();
+
+      // Only the nine that never arrived were asked for again.
+      expect(second.requested, hasLength(9));
+
+      // Nine fetched but fifteen reported done: what the first run
+      // stored counts towards the total, so the bar does not restart at
+      // zero on a download that is nearly finished.
+      expect(progress.last.done, 15);
+
+      final archive = await PmTilesArchive.open(
+        await FileByteRangeSource.open(File(target)),
+      );
+      addTearDown(archive.close);
+      for (final tile in area.tiles()) {
+        expect(
+          await archive.tile(tile.z, tile.x, tile.y),
+          isNotNull,
+          reason: '${tile.z}/${tile.x}/${tile.y}',
+        );
+      }
     });
 
     test('asking for more zoom than the source has is refused', () async {

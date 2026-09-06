@@ -25,6 +25,50 @@ class MapDownloadStep {
   final MapArea area;
 
   int get tileCount => area.tileCount;
+
+  Map<String, Object?> toJson() => {
+    'label': label,
+    'w': area.minLongitude,
+    's': area.minLatitude,
+    'e': area.maxLongitude,
+    'n': area.maxLatitude,
+    'from': area.minZoom,
+    'to': area.maxZoom,
+  };
+
+  /// Null for anything that cannot be read back, which costs the resume
+  /// rather than producing a plan covering somewhere else.
+  static MapDownloadStep? fromJson(Object? json) {
+    if (json is! Map) return null;
+
+    double? number(String key) => (json[key] as num?)?.toDouble();
+    final west = number('w');
+    final south = number('s');
+    final east = number('e');
+    final north = number('n');
+    final from = json['from'];
+    final to = json['to'];
+    if (west == null ||
+        south == null ||
+        east == null ||
+        north == null ||
+        from is! int ||
+        to is! int) {
+      return null;
+    }
+
+    return MapDownloadStep(
+      label: '${json['label'] ?? ''}',
+      area: MapArea(
+        minLongitude: west,
+        minLatitude: south,
+        maxLongitude: east,
+        maxLatitude: north,
+        minZoom: from,
+        maxZoom: to,
+      ),
+    );
+  }
 }
 
 /// What a download covers, ring by ring.
@@ -69,6 +113,26 @@ class MapDownloadPlan {
         if (seen.add(tileIdFor(tile.z, tile.x, tile.y))) yield tile;
       }
     }
+  }
+
+  Map<String, Object?> toJson() => {
+    'steps': [for (final step in steps) step.toJson()],
+  };
+
+  static MapDownloadPlan? fromJson(Object? json) {
+    if (json is! Map) return null;
+    final raw = json['steps'];
+    if (raw is! List || raw.isEmpty) return null;
+
+    final steps = <MapDownloadStep>[];
+    for (final entry in raw) {
+      final step = MapDownloadStep.fromJson(entry);
+      // One unreadable ring would leave a gap in the zoom bands, which
+      // is worse than not resuming at all.
+      if (step == null) return null;
+      steps.add(step);
+    }
+    return MapDownloadPlan(steps);
   }
 
   double _least(double Function(MapDownloadStep) of) =>

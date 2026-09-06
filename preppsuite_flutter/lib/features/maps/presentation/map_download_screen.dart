@@ -326,12 +326,13 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
                   children: [
                     if (download.running)
                       _Running(l10n: l10n, state: download)
-                    else if (download.finishedPath != null)
+                    else if (download.isIdle) ...[
+                      const _Unfinished(),
+                      ..._chooser(l10n, theme),
+                    ] else if (download.finishedPath != null)
                       _Finished(l10n: l10n)
                     else if (download.error != null)
-                      _Failed(l10n: l10n, error: download.error!)
-                    else
-                      ..._chooser(l10n, theme),
+                      _Failed(l10n: l10n, error: download.error!),
                   ],
                 ),
               ),
@@ -553,6 +554,67 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
         label: Text(l10n.mapDownloadAction),
       ),
     ];
+  }
+}
+
+/// Offers to pick up a download a previous run left behind.
+///
+/// Shown above the chooser rather than instead of it: starting something
+/// else has to stay possible, and that is what discarding is for.
+class _Unfinished extends ConsumerWidget {
+  const _Unfinished();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final unfinished = ref.watch(unfinishedDownloadProvider).value;
+    if (unfinished == null) return const SizedBox.shrink();
+
+    final session = unfinished.session;
+    return Card(
+      color: theme.colorScheme.secondaryContainer,
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.mapDownloadUnfinishedTitle,
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              l10n.mapDownloadUnfinishedBody(
+                session.label,
+                '${unfinished.stored}',
+                '${session.plan.tileCount}',
+              ),
+              style: theme.textTheme.bodySmall,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () =>
+                      ref.read(mapDownloadProvider.notifier).discard(),
+                  child: Text(l10n.mapDownloadDiscardAction),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: () => ref
+                      .read(mapDownloadProvider.notifier)
+                      .resumeSession(session),
+                  child: Text(l10n.mapDownloadResumeAction),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

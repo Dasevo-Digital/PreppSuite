@@ -1314,4 +1314,18 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mapDownloadResolving => 'Umgebung wird ermittelt …';
+
+  @override
+  String get mapDownloadUnfinishedTitle => 'Unterbrochener Download';
+
+  @override
+  String mapDownloadUnfinishedBody(String label, String done, String total) {
+    return '$label — $done von $total Kacheln sind schon da.';
+  }
+
+  @override
+  String get mapDownloadResumeAction => 'Fortsetzen';
+
+  @override
+  String get mapDownloadDiscardAction => 'Verwerfen';
 }

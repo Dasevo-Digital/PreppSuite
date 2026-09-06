@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../downloads/application/download_folder.dart';
 import 'map_area_download.dart';
 import 'map_download_plan.dart';
+import 'map_download_session.dart';
 import 'map_source_store.dart';
 import 'offline_map_providers.dart';
 import 'tile_source.dart';
@@ -29,6 +30,20 @@ class MapDownloadState {
   bool get isIdle => !running && error == null && finishedPath == null;
 }
 
+/// The unfinished download waiting to be picked up, if there is one.
+///
+/// A country is over an hour of tiles, so the normal end of a download is
+/// the app being closed, not the archive being finished.
+final unfinishedDownloadProvider =
+    FutureProvider<({MapDownloadSession session, int stored})?>((ref) async {
+      const store = MapDownloadSessionStore();
+      final folder = await const DownloadFolder().current();
+
+      final session = await store.read(folder);
+      if (session == null) return null;
+      return (session: session, stored: await store.storedTileCount(folder));
+    });
+
 /// Builds an offline map for a chosen area.
 class MapDownloadController extends Notifier<MapDownloadState> {
   StreamSubscription<MapDownloadProgress>? _subscription;
@@ -39,35 +54,74 @@ class MapDownloadController extends Notifier<MapDownloadState> {
     return const MapDownloadState();
   }
 
+  /// Begins a new download, discarding anything half-finished.
   Future<void> start({
     required MapDownloadPlan plan,
     required String label,
   }) async {
     if (state.running) return;
 
+    final folder = await const DownloadFolder().current();
+    final stamp = DateTime.now()
+        .toIso8601String()
+        .replaceAll(RegExp(r'[:.]'), '-')
+        .substring(0, 16);
+
+    await _run(
+      session: MapDownloadSession(
+        plan: plan,
+        targetPath:
+            '${folder.path}${Platform.pathSeparator}'
+            'preppsuite-map-z${plan.maxZoom}-$stamp.pmtiles',
+        label: label,
+        startedAt: DateTime.now(),
+      ),
+      folder: folder,
+      resume: false,
+    );
+  }
+
+  /// Picks up the download a previous run left behind.
+  Future<void> resumeSession(MapDownloadSession session) async {
+    if (state.running) return;
+    await _run(
+      session: session,
+      folder: await const DownloadFolder().current(),
+      resume: true,
+    );
+  }
+
+  /// Throws the half-finished download away.
+  Future<void> discard() async {
+    if (state.running) return;
+    final folder = await const DownloadFolder().current();
+    await const MapDownloadSessionStore().clear(folder);
+    ref.invalidate(unfinishedDownloadProvider);
+    state = const MapDownloadState();
+  }
+
+  Future<void> _run({
+    required MapDownloadSession session,
+    required Directory folder,
+    required bool resume,
+  }) async {
     state = const MapDownloadState(running: true);
 
-    final MapTileProvider provider;
+    final plan = session.plan;
+    final target = session.targetPath;
     final VectorTileSource source;
-    final Directory folder;
-    final String target;
 
     try {
       const store = MapSourceStore();
-      provider = await store.provider();
       source = await TileSourceClient().load(
-        provider,
+        await store.provider(),
         apiKey: await store.apiKey(),
       );
 
-      folder = await const DownloadFolder().current();
-      final stamp = DateTime.now()
-          .toIso8601String()
-          .replaceAll(RegExp(r'[:.]'), '-')
-          .substring(0, 16);
-      target =
-          '${folder.path}${Platform.pathSeparator}'
-          'preppsuite-map-z${plan.maxZoom}-$stamp.pmtiles';
+      // Written before the first tile, so a download interrupted at any
+      // point after this can be found again.
+      await const MapDownloadSessionStore().write(folder, session);
+      ref.invalidate(unfinishedDownloadProvider);
     } on Object catch (error) {
       state = MapDownloadState(error: error);
       return;
@@ -79,6 +133,7 @@ class MapDownloadController extends Notifier<MapDownloadState> {
           source: source,
           targetPath: target,
           workingDirectory: folder,
+          resume: resume,
         )
         .listen(
           (progress) => state = MapDownloadState(
@@ -90,11 +145,16 @@ class MapDownloadController extends Notifier<MapDownloadState> {
           },
           onDone: () async {
             if (state.error != null) return;
+
+            // The archive exists, so nothing is left to resume.
+            await const MapDownloadSessionStore().clear(folder);
+            ref.invalidate(unfinishedDownloadProvider);
+
             // Taking it into use is the point of building it; the map
             // switches to the new archive without a further step.
             await ref
                 .read(offlineMapProvider.notifier)
-                .useArchive(location: target, label: label);
+                .useArchive(location: target, label: session.label);
             state = MapDownloadState(
               progress: state.progress,
               finishedPath: target,
@@ -103,9 +163,12 @@ class MapDownloadController extends Notifier<MapDownloadState> {
         );
   }
 
+  /// Stops the transfer. What arrived stays on disk, session and all, so
+  /// the next attempt picks it up instead of starting the hour again.
   Future<void> cancel() async {
     await _subscription?.cancel();
     _subscription = null;
+    ref.invalidate(unfinishedDownloadProvider);
     state = const MapDownloadState();
   }
 

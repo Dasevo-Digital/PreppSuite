@@ -2311,6 +2311,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Working out the surroundings …'**
   String get mapDownloadResolving;
+
+  /// No description provided for @mapDownloadUnfinishedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfinished download'**
+  String get mapDownloadUnfinishedTitle;
+
+  /// No description provided for @mapDownloadUnfinishedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} — {done} of {total} tiles are already here.'**
+  String mapDownloadUnfinishedBody(String label, String done, String total);
+
+  /// No description provided for @mapDownloadResumeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get mapDownloadResumeAction;
+
+  /// No description provided for @mapDownloadDiscardAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get mapDownloadDiscardAction;
 }
 
 class _AppLocalizationsDelegate

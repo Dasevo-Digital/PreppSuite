@@ -745,5 +745,10 @@
   "mapDownloadNoPlan": "Even staggered this does not fit. Choose somewhere smaller.",
   "mapDownloadEstimatedTime": "Takes roughly {minutes} minutes.",
   "@mapDownloadEstimatedTime": {"placeholders": {"minutes": {"type": "String"}}},
-  "mapDownloadResolving": "Working out the surroundings …"
+  "mapDownloadResolving": "Working out the surroundings …",
+  "mapDownloadUnfinishedTitle": "Unfinished download",
+  "mapDownloadUnfinishedBody": "{label} — {done} of {total} tiles are already here.",
+  "@mapDownloadUnfinishedBody": {"placeholders": {"label": {"type": "String"}, "done": {"type": "String"}, "total": {"type": "String"}}},
+  "mapDownloadResumeAction": "Resume",
+  "mapDownloadDiscardAction": "Discard"
 }

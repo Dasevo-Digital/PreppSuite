@@ -108,6 +108,36 @@ Anfragen an einen fremden Server; die Datei darf so groß werden, wie das
 Gerät hergibt. Für eine App, die offline funktionieren muss, ist das die
 richtige Reihenfolge.
 
+### Fortsetzbar über den Programmstart hinweg
+
+Ein Land sind zehntausende Kacheln und über eine Stunde. So lange lässt
+niemand eine App offen – der Normalfall ist deshalb nicht, dass ein
+Download fertig wird, sondern dass er unterbrochen wird.
+
+Neben der Arbeitsdatei liegt ein **Journal**: eine Zeile je Kachel mit
+`Kachelnummer Offset Länge`. Geschrieben wird sie erst, nachdem die Bytes
+auf der Platte sind – nie andersherum, denn eine Journalzeile über Bytes,
+die es nicht gibt, ergäbe ein kaputtes Archiv, während der umgekehrte Fall
+nur eine Kachel kostet.
+
+Beim nächsten Start bietet der Bildschirm oben an, den Download
+fortzusetzen, und sagt dazu, wie viel schon da ist. Dabei passiert
+zweierlei:
+
+- Die Arbeitsdatei wird auf das gekürzt, was das Journal kennt. Ein Lauf,
+  der mitten in einer Kachel abgebrochen wurde, hinterlässt mehr Bytes,
+  als das Journal verantwortet; die überzähligen fliegen raus.
+- Eine halb geschriebene letzte Journalzeile wird verworfen. Die Kachel
+  wird noch einmal geholt.
+
+Was **nicht** übernommen wird: welche Kacheln gleichen Inhalt hatten. Das
+neu aufzubauen hieße, alles bereits Gespeicherte noch einmal zu lesen; der
+Preis dafür, es zu lassen, sind ein paar doppelt abgelegte Kacheln – keine
+falsche Karte.
+
+Abbrechen ist damit dasselbe wie Pausieren. Weggeworfen wird nur, was man
+ausdrücklich verwirft oder was ein neuer Download ersetzt.
+
 ### Grenzen, und warum es sie gibt
 
 Über 100 000 Kacheln lehnt die App ab. Das ist keine technische Grenze,

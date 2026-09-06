@@ -16,11 +16,20 @@ import 'pmtiles_archive.dart';
 /// assembled at the end, because none of the offsets in the header can be
 /// known before the last tile is in. The bytes are never all in memory:
 /// an extract of a city at street level is hundreds of megabytes.
+///
+/// Beside the scratch file lies a journal naming where each tile went.
+/// It is what makes a download of tens of thousands of tiles survive the
+/// app being closed: a country takes longer than anyone leaves an app
+/// open, so losing the work on exit would mean the feature only ever
+/// worked for towns.
 class PmTilesWriter {
-  PmTilesWriter._(this._scratch, this._scratchFile);
+  PmTilesWriter._(this._scratch, this._scratchFile, this._journalFile);
 
   final RandomAccessFile _scratch;
   final File _scratchFile;
+  final File _journalFile;
+
+  IOSink? _journal;
 
   /// One per distinct tile id, sorted only at the end.
   final _entries = <_WriteEntry>[];
@@ -40,13 +49,87 @@ class PmTilesWriter {
   /// placed at a time.
   Future<void> _queue = Future<void>.value();
 
+  static const _scratchName = 'tiles.scratch';
+  static const _journalName = 'tiles.journal';
+
+  static File scratchFileIn(Directory directory) =>
+      File('${directory.path}${Platform.pathSeparator}$_scratchName');
+
+  static File journalFileIn(Directory directory) =>
+      File('${directory.path}${Platform.pathSeparator}$_journalName');
+
+  /// A writer with nothing in it, discarding any half-finished download
+  /// that was there.
   static Future<PmTilesWriter> create(Directory workingDirectory) async {
-    final scratch = File(
-      '${workingDirectory.path}${Platform.pathSeparator}tiles.scratch',
-    );
+    final scratch = scratchFileIn(workingDirectory);
+    final journal = journalFileIn(workingDirectory);
     if (await scratch.exists()) await scratch.delete();
-    return PmTilesWriter._(await scratch.open(mode: FileMode.write), scratch);
+    if (await journal.exists()) await journal.delete();
+
+    final writer = PmTilesWriter._(
+      await scratch.open(mode: FileMode.write),
+      scratch,
+      journal,
+    );
+    writer._openJournal();
+    return writer;
   }
+
+  /// Picks up where a previous run stopped, or starts fresh when there is
+  /// nothing to pick up.
+  ///
+  /// The journal is written after the bytes are flushed, so a run that
+  /// died mid-tile leaves the scratch file longer than the journal
+  /// accounts for. Truncating to what the journal knows is what makes the
+  /// two agree again.
+  ///
+  /// One thing is not carried over: which tiles had identical content.
+  /// Rebuilding that would mean re-reading everything already stored, and
+  /// the cost of not doing it is a few duplicated tiles, not a wrong map.
+  static Future<PmTilesWriter> resume(Directory workingDirectory) async {
+    final scratch = scratchFileIn(workingDirectory);
+    final journal = journalFileIn(workingDirectory);
+
+    if (!await scratch.exists() || !await journal.exists()) {
+      return create(workingDirectory);
+    }
+
+    final entries = <_WriteEntry>[];
+    var end = 0;
+    for (final line in await journal.readAsLines()) {
+      final parts = line.split(' ');
+      if (parts.length != 3) continue;
+      final id = int.tryParse(parts[0]);
+      final offset = int.tryParse(parts[1]);
+      final length = int.tryParse(parts[2]);
+      // A line cut in half by the process ending is the last one and is
+      // simply not there; the tile it described gets fetched again.
+      if (id == null || offset == null || length == null) continue;
+      entries.add(_WriteEntry(tileId: id, offset: offset, length: length));
+      if (offset + length > end) end = offset + length;
+    }
+
+    final handle = await scratch.open(mode: FileMode.append);
+    if (await scratch.length() != end) {
+      await handle.truncate(end);
+      await handle.setPosition(end);
+    }
+
+    final writer = PmTilesWriter._(handle, scratch, journal)
+      .._scratchLength = end
+      .._addressedTiles = entries.length;
+    writer._entries.addAll(entries);
+    writer._openJournal();
+    return writer;
+  }
+
+  void _openJournal() =>
+      _journal = _journalFile.openWrite(mode: FileMode.append);
+
+  /// The tiles already stored, so a resumed download can skip them.
+  Set<int> get storedTileIds => {
+    for (final entry in _entries) entry.tileId,
+  };
 
   /// How many distinct tiles have been stored.
   int get tileCount => _entries.length;
@@ -72,33 +155,45 @@ class PmTilesWriter {
 
     _addressedTiles++;
 
+    final id = tileIdFor(z, x, y);
+
     final existing = _byContent[key];
     if (existing != null) {
       _entries.add(
         _WriteEntry(
-          tileId: tileIdFor(z, x, y),
+          tileId: id,
           offset: existing.offset,
           length: existing.length,
         ),
       );
+      _record(id, existing.offset, existing.length);
       return;
     }
 
     await _scratch.writeFrom(compressed);
+    // Flushed before the journal names it, so a journal line never
+    // describes bytes that are not on disk. The other way round is
+    // recoverable; this way round is a corrupt archive.
+    await _scratch.flush();
+
     final placement = _Placement(_scratchLength, compressed.length);
     _scratchLength += compressed.length;
     _byContent[key] = placement;
 
     _entries.add(
       _WriteEntry(
-        tileId: tileIdFor(z, x, y),
+        tileId: id,
         offset: placement.offset,
         length: placement.length,
       ),
     );
+    _record(id, placement.offset, placement.length);
   }
 
-  /// Assembles the archive at [path] and discards the scratch file.
+  void _record(int tileId, int offset, int length) =>
+      _journal?.writeln('$tileId $offset $length');
+
+  /// Assembles the archive at [path] and discards the working files.
   Future<void> finish({
     required String path,
     required int minZoom,
@@ -113,6 +208,7 @@ class PmTilesWriter {
     await _queue;
     await _scratch.flush();
     await _scratch.close();
+    await _closeJournal();
 
     _entries.sort((a, b) => a.tileId.compareTo(b.tileId));
 
@@ -170,18 +266,36 @@ class PmTilesWriter {
     } finally {
       await sink.close();
       if (await _scratchFile.exists()) await _scratchFile.delete();
+      if (await _journalFile.exists()) await _journalFile.delete();
     }
   }
 
-  /// Throws the scratch file away without producing an archive.
-  Future<void> abandon() async {
+  /// Puts the working files down without deleting them, so the next run
+  /// can pick the download up where it stopped.
+  Future<void> close() async {
     try {
       await _queue;
+      await _scratch.flush();
       await _scratch.close();
     } on FileSystemException {
       // Already closed by a finish that failed part-way; nothing to do.
     }
+    await _closeJournal();
+  }
+
+  /// Throws the half-finished download away for good.
+  Future<void> abandon() async {
+    await close();
     if (await _scratchFile.exists()) await _scratchFile.delete();
+    if (await _journalFile.exists()) await _journalFile.delete();
+  }
+
+  Future<void> _closeJournal() async {
+    final journal = _journal;
+    _journal = null;
+    if (journal == null) return;
+    await journal.flush();
+    await journal.close();
   }
 
   /// The root directory must fit in the first 16,384 bytes of the file,
