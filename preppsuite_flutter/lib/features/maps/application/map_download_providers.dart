@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../downloads/application/download_folder.dart';
 import 'map_area_download.dart';
+import 'map_download_plan.dart';
 import 'map_source_store.dart';
 import 'offline_map_providers.dart';
 import 'tile_source.dart';
@@ -38,7 +39,10 @@ class MapDownloadController extends Notifier<MapDownloadState> {
     return const MapDownloadState();
   }
 
-  Future<void> start({required MapArea area, required String label}) async {
+  Future<void> start({
+    required MapDownloadPlan plan,
+    required String label,
+  }) async {
     if (state.running) return;
 
     state = const MapDownloadState(running: true);
@@ -63,7 +67,7 @@ class MapDownloadController extends Notifier<MapDownloadState> {
           .substring(0, 16);
       target =
           '${folder.path}${Platform.pathSeparator}'
-          'preppsuite-map-z${area.maxZoom}-$stamp.pmtiles';
+          'preppsuite-map-z${plan.maxZoom}-$stamp.pmtiles';
     } on Object catch (error) {
       state = MapDownloadState(error: error);
       return;
@@ -71,7 +75,7 @@ class MapDownloadController extends Notifier<MapDownloadState> {
 
     _subscription = MapAreaDownloader()
         .download(
-          area: area,
+          plan: plan,
           source: source,
           targetPath: target,
           workingDirectory: folder,

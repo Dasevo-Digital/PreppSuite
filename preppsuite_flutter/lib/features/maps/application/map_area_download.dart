@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
+import 'map_download_plan.dart';
 import 'pmtiles_writer.dart';
 import 'tile_source.dart';
 
@@ -39,6 +40,16 @@ class MapArea {
     }
     return count;
   }
+
+  /// The same box over a different range of zoom levels.
+  MapArea band(int from, int to) => MapArea(
+    minLongitude: minLongitude,
+    minLatitude: minLatitude,
+    maxLongitude: maxLongitude,
+    maxLatitude: maxLatitude,
+    minZoom: from,
+    maxZoom: to,
+  );
 
   MapArea withDetail(int detail) => MapArea(
     minLongitude: minLongitude,
@@ -95,12 +106,14 @@ class MapArea {
 /// and being one off means tens of thousands of tiles.
 int? deepestDetailWithin(
   MapArea area, {
-  int limit = MapAreaDownloader.tileLimit,
+  int? limit,
+  int? budget,
   int lowest = 8,
   int highest = 14,
 }) {
+  final ceiling = budget ?? limit ?? MapAreaDownloader.tileLimit;
   for (var detail = highest; detail >= lowest; detail--) {
-    if (area.withDetail(detail).tileCount <= limit) return detail;
+    if (area.withDetail(detail).tileCount <= ceiling) return detail;
   }
   return null;
 }
@@ -165,23 +178,23 @@ class MapAreaDownloader {
   static const tileLimit = 100000;
 
   Stream<MapDownloadProgress> download({
-    required MapArea area,
+    required MapDownloadPlan plan,
     required VectorTileSource source,
     required String targetPath,
     required Directory workingDirectory,
   }) async* {
-    if (area.maxZoom > source.maxZoom) {
+    if (plan.maxZoom > source.maxZoom) {
       throw MapDownloadException(
         'this source only goes to zoom ${source.maxZoom}',
       );
     }
-    final total = area.tileCount;
+    final total = plan.tileCount;
     if (total > tileLimit) {
       throw MapDownloadException('$total tiles is more than $tileLimit');
     }
 
     final writer = await PmTilesWriter.create(workingDirectory);
-    final queue = area.tiles().toList();
+    final queue = plan.tiles().toList();
 
     var done = 0;
     var missing = 0;
@@ -260,12 +273,12 @@ class MapAreaDownloader {
 
       await writer.finish(
         path: targetPath,
-        minZoom: area.minZoom,
-        maxZoom: area.maxZoom,
-        minLongitude: area.minLongitude,
-        minLatitude: area.minLatitude,
-        maxLongitude: area.maxLongitude,
-        maxLatitude: area.maxLatitude,
+        minZoom: plan.minZoom,
+        maxZoom: plan.maxZoom,
+        minLongitude: plan.minLongitude,
+        minLatitude: plan.minLatitude,
+        maxLongitude: plan.maxLongitude,
+        maxLatitude: plan.maxLatitude,
         metadata: {
           'name': 'PreppSuite',
           'format': 'pbf',

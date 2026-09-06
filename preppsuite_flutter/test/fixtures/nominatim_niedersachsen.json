@@ -1,0 +1,29 @@
+[
+    {
+        "place_id": 141782645,
+        "licence": "Data \u00a9 OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+        "osm_type": "relation",
+        "osm_id": 62771,
+        "lat": "52.8398531",
+        "lon": "9.0759620",
+        "category": "boundary",
+        "type": "administrative",
+        "place_rank": 8,
+        "importance": 0.7387181266981588,
+        "addresstype": "state",
+        "name": "Niedersachsen",
+        "display_name": "Niedersachsen, Deutschland",
+        "address": {
+            "state": "Niedersachsen",
+            "ISO3166-2-lvl4": "DE-NI",
+            "country": "Deutschland",
+            "country_code": "de"
+        },
+        "boundingbox": [
+            "51.2950693",
+            "54.1378463",
+            "6.3459138",
+            "11.5981180"
+        ]
+    }
+]

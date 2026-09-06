@@ -13,6 +13,14 @@
         "addresstype": "city",
         "name": "Hannover",
         "display_name": "Hannover, Region Hannover, Niedersachsen, Deutschland",
+        "address": {
+            "city": "Hannover",
+            "county": "Region Hannover",
+            "state": "Niedersachsen",
+            "ISO3166-2-lvl4": "DE-NI",
+            "country": "Deutschland",
+            "country_code": "de"
+        },
         "boundingbox": [
             "52.3048933",
             "52.4543349",
@@ -34,6 +42,14 @@
         "addresstype": "island",
         "name": "Hannover",
         "display_name": "Hannover, Provincia de \u00daltima Esperanza, Region von Magellan und der chilenischen Antarktis, Chile",
+        "address": {
+            "island": "Hannover",
+            "county": "Provincia de \u00daltima Esperanza",
+            "state": "Region von Magellan und der chilenischen Antarktis",
+            "ISO3166-2-lvl4": "CL-MA",
+            "country": "Chile",
+            "country_code": "cl"
+        },
         "boundingbox": [
             "-51.1191756",
             "-50.7087711",

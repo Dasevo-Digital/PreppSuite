@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,11 +8,16 @@ import 'package:latlong2/latlong.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
 import '../application/map_area_download.dart';
+import '../application/map_download_plan.dart';
 import '../application/map_download_providers.dart';
 import '../application/map_source_store.dart';
 import '../application/place_search.dart';
 import '../application/tile_source.dart';
 import 'base_map_layer.dart';
+
+/// Overridden in tests so the screen can be driven against captured
+/// geocoder answers instead of the live service.
+final placeSearchProvider = Provider((ref) => PlaceSearchClient());
 
 /// Picks an area on the map and builds an offline archive of it.
 ///
@@ -37,6 +44,15 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
   /// screen — which is the point: "Niedersachsen" is an area somebody can
   /// mean, and the visible rectangle around it is not.
   PlaceResult? _place;
+
+  /// The rings around [_place], once the geocoder has been asked for
+  /// them. Null while unknown; a place outside a federal country simply
+  /// has no state.
+  PlaceResult? _region;
+  PlaceResult? _country;
+  bool _resolvingRings = false;
+
+  MapDownloadScope _scope = MapDownloadScope.place;
 
   List<PlaceResult>? _results;
   bool _searching = false;
@@ -94,6 +110,14 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
     setState(() => _area = areaAt(_zoom.round()));
   }
 
+  /// Four tiles in flight at a time, each a couple of hundred
+  /// milliseconds. Rounded up to a full minute: this is a figure to
+  /// decide by, not to plan around.
+  static int _minutesFor(int tiles) {
+    final seconds = tiles * 0.2 / 4;
+    return (seconds / 60).ceil().clamp(1, 100000);
+  }
+
   Future<void> _search(AppLocalizations l10n) async {
     setState(() {
       _searching = true;
@@ -102,10 +126,12 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
     });
 
     try {
-      final results = await PlaceSearchClient().search(
-        _searchController.text,
-        language: Localizations.localeOf(context).languageCode,
-      );
+      final results = await ref
+          .read(placeSearchProvider)
+          .search(
+            _searchController.text,
+            language: Localizations.localeOf(context).languageCode,
+          );
       if (!mounted) return;
       setState(() {
         _results = results;
@@ -154,8 +180,78 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
     _usePlace(chosen);
   }
 
+  /// The rings the chosen scope asks for, outermost first.
+  List<MapDownloadRing> _rings() {
+    final place = _place;
+    if (place == null) return const [];
+
+    final rings = <MapDownloadRing>[];
+    if (_scope == MapDownloadScope.country && _country != null) {
+      rings.add(
+        MapDownloadRing(label: _country!.name, box: _country!.areaAt(14)),
+      );
+    }
+    if (_scope != MapDownloadScope.place && _region != null) {
+      rings.add(
+        MapDownloadRing(label: _region!.name, box: _region!.areaAt(14)),
+      );
+    }
+    rings.add(MapDownloadRing(label: place.name, box: place.areaAt(14)));
+    return rings;
+  }
+
+  MapDownloadPlan? _plan() {
+    final place = _place;
+    if (place == null) {
+      final area = _area;
+      return area == null ? null : MapDownloadPlan.single(area);
+    }
+    return staggeredPlan(rings: _rings());
+  }
+
+  /// Asks the geocoder for the state and the country the place sits in.
+  ///
+  /// Two more requests, a second apart, because Nominatim asks for no
+  /// more than one a second — and because its address breakdown gives
+  /// names, not boxes.
+  Future<void> _resolveRings(PlaceResult place) async {
+    setState(() {
+      _region = null;
+      _country = null;
+      _resolvingRings = true;
+    });
+
+    final client = ref.read(placeSearchProvider);
+    final language = Localizations.localeOf(context).languageCode;
+
+    PlaceResult? region;
+    PlaceResult? country;
+    try {
+      final stateName = place.stateName;
+      if (stateName != null && stateName != place.name) {
+        region = await client.resolve(stateName, language: language);
+        await Future<void>.delayed(const Duration(milliseconds: 1100));
+      }
+      final countryName = place.countryName;
+      if (countryName != null && countryName != place.name) {
+        country = await client.resolve(countryName, language: language);
+      }
+    } on Object {
+      // The place itself is still downloadable; only the outer rings are
+      // not on offer.
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _region = region;
+      _country = country;
+      _resolvingRings = false;
+    });
+  }
+
   void _usePlace(PlaceResult place) {
     _place = place;
+    _scope = MapDownloadScope.place;
     // The level was chosen for the last area; this one gets its own.
     _zoomChosen = false;
 
@@ -169,15 +265,22 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
       ),
     );
     _updateArea();
+    unawaited(_resolveRings(place));
   }
 
   Future<void> _start(AppLocalizations l10n) async {
-    final area = _area;
-    if (area == null) return;
+    final plan = _plan();
+    if (plan == null) return;
 
+    final place = _place;
     await ref
         .read(mapDownloadProvider.notifier)
-        .start(area: area, label: l10n.mapDownloadLabel('${area.maxZoom}'));
+        .start(
+          plan: plan,
+          label: place == null
+              ? l10n.mapDownloadLabel('${plan.maxZoom}')
+              : '${place.name} (${plan.maxZoom})',
+        );
   }
 
   @override
@@ -245,6 +348,7 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
     final tooLarge = tiles > MapAreaDownloader.tileLimit;
 
     final place = _place;
+    final plan = _plan();
     final deepest = area == null
         ? null
         : deepestDetailWithin(
@@ -310,70 +414,131 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
           ),
         ],
       ),
+      if (place != null) ...[
+        const SizedBox(height: 8),
+        SegmentedButton<MapDownloadScope>(
+          segments: [
+            ButtonSegment(
+              value: MapDownloadScope.place,
+              label: Text(l10n.mapDownloadScopePlace),
+            ),
+            if (_region != null)
+              ButtonSegment(
+                value: MapDownloadScope.region,
+                label: Text(l10n.mapDownloadScopeRegion),
+              ),
+            if (_country != null)
+              ButtonSegment(
+                value: MapDownloadScope.country,
+                label: Text(l10n.mapDownloadScopeCountry),
+              ),
+          ],
+          selected: {_scope},
+          showSelectedIcon: false,
+          onSelectionChanged: (selection) =>
+              setState(() => _scope = selection.first),
+        ),
+        if (_resolvingRings) ...[
+          const SizedBox(height: 4),
+          Text(l10n.mapDownloadResolving, style: theme.textTheme.bodySmall),
+        ],
+      ],
       const SizedBox(height: 4),
       const _SourcePicker(),
       const SizedBox(height: 8),
-      Row(
-        children: [
-          Text(l10n.mapDownloadZoomLabel, style: theme.textTheme.labelLarge),
-          Expanded(
-            child: Slider(
-              value: _zoom,
-              min: _minDetail,
-              max: _maxDetail,
-              divisions: (_maxDetail - _minDetail).round(),
-              label: '${_zoom.round()}',
-              onChanged: (value) {
-                setState(() {
-                  _zoom = value;
-                  _zoomChosen = true;
-                });
-                _updateArea();
-              },
-            ),
-          ),
-          Text('${_zoom.round()}', style: theme.textTheme.labelLarge),
-        ],
-      ),
-      Text(
-        _zoomChosen ? l10n.mapDownloadZoomHint : l10n.mapDownloadDetailAuto,
-        style: theme.textTheme.bodySmall,
-      ),
-      const SizedBox(height: 8),
-      Text(
-        tooLarge
-            ? l10n.mapDownloadTooLarge('$tiles')
-            // Rough on purpose: a tile of a city centre is many times the
-            // size of one of a field, and neither is known before it is
-            // fetched.
-            : l10n.mapDownloadTileCount(
-                '$tiles',
-                formatByteSize(tiles * 45000),
+      // With a place chosen the plan decides the levels ring by ring, so
+      // a single slider would be describing something that no longer
+      // exists. The viewport keeps it.
+      if (place == null) ...[
+        Row(
+          children: [
+            Text(l10n.mapDownloadZoomLabel, style: theme.textTheme.labelLarge),
+            Expanded(
+              child: Slider(
+                value: _zoom,
+                min: _minDetail,
+                max: _maxDetail,
+                divisions: (_maxDetail - _minDetail).round(),
+                label: '${_zoom.round()}',
+                onChanged: (value) {
+                  setState(() {
+                    _zoom = value;
+                    _zoomChosen = true;
+                  });
+                  _updateArea();
+                },
               ),
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: tooLarge ? theme.colorScheme.error : null,
+            ),
+            Text('${_zoom.round()}', style: theme.textTheme.labelLarge),
+          ],
         ),
-      ),
-      // Says where the ceiling is, not only that one was hit: the levels
-      // differ by a factor of four, so "too many" on its own is no
-      // guidance at all.
-      if (area != null && deepest == null && place != null) ...[
-        const SizedBox(height: 4),
         Text(
-          l10n.mapDownloadPlaceTooLarge(place.name),
-          style: theme.textTheme.bodySmall?.copyWith(
+          _zoomChosen ? l10n.mapDownloadZoomHint : l10n.mapDownloadDetailAuto,
+          style: theme.textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          tooLarge
+              ? l10n.mapDownloadTooLarge('$tiles')
+              // Rough on purpose: a tile of a city centre is many times
+              // the size of one of a field, and neither is known before
+              // it is fetched.
+              : l10n.mapDownloadTileCount(
+                  '$tiles',
+                  formatByteSize(tiles * 45000),
+                ),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: tooLarge ? theme.colorScheme.error : null,
+          ),
+        ),
+        // Says where the ceiling is, not only that one was hit: the
+        // levels differ by a factor of four, so "too many" on its own is
+        // no guidance at all.
+        if (area != null &&
+            deepest != null &&
+            deepest < _maxDetail.round()) ...[
+          const SizedBox(height: 4),
+          Text(
+            l10n.mapDownloadDeepestPossible(
+              '${area.withDetail(_maxDetail.round()).tileCount}',
+              '$deepest',
+            ),
+            style: theme.textTheme.bodySmall,
+          ),
+        ],
+      ] else if (plan == null) ...[
+        Text(
+          l10n.mapDownloadNoPlan,
+          style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.error,
           ),
         ),
-      ] else if (area != null &&
-          deepest != null &&
-          deepest < _maxDetail.round()) ...[
-        const SizedBox(height: 4),
-        Text(
-          l10n.mapDownloadDeepestPossible(
-            '${area.withDetail(_maxDetail.round()).tileCount}',
-            '$deepest',
+      ] else ...[
+        if (plan.steps.length > 1) ...[
+          Text(l10n.mapDownloadStaggered, style: theme.textTheme.bodySmall),
+          const SizedBox(height: 4),
+        ],
+        for (final step in plan.steps)
+          Text(
+            l10n.mapDownloadStep(
+              step.label,
+              '${step.area.minZoom}',
+              '${step.area.maxZoom}',
+              '${step.tileCount}',
+            ),
+            style: theme.textTheme.bodySmall,
           ),
+        const SizedBox(height: 6),
+        Text(
+          l10n.mapDownloadTileCount(
+            '${plan.tileCount}',
+            formatByteSize(plan.tileCount * 45000),
+          ),
+          style: theme.textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          l10n.mapDownloadEstimatedTime('${_minutesFor(plan.tileCount)}'),
           style: theme.textTheme.bodySmall,
         ),
       ],
@@ -381,7 +546,9 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
       Text(l10n.mapDownloadPolite, style: theme.textTheme.bodySmall),
       const SizedBox(height: 12),
       FilledButton.icon(
-        onPressed: tooLarge || tiles == 0 ? null : () => _start(l10n),
+        onPressed: plan == null || plan.tileCount == 0
+            ? null
+            : () => _start(l10n),
         icon: const Icon(Icons.download_outlined),
         label: Text(l10n.mapDownloadAction),
       ),

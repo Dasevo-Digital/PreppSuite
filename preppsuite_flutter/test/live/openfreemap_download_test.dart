@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/downloads/application/byte_size.dart';
 import 'package:preppsuite_flutter/features/maps/application/map_area_download.dart';
+import 'package:preppsuite_flutter/features/maps/application/map_download_plan.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart';
 import 'package:preppsuite_flutter/features/maps/application/tile_source.dart';
 
@@ -44,7 +45,7 @@ void main() {
 
       final progress = await MapAreaDownloader(concurrency: 4)
           .download(
-            area: area,
+            plan: MapDownloadPlan.single(area),
             source: source,
             targetPath: target,
             workingDirectory: directory,

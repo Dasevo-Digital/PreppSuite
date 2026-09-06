@@ -2257,6 +2257,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'At level 14 that would be {count} tiles — too many. Level {level} is the deepest this area goes.'**
   String mapDownloadDeepestPossible(String count, String level);
+
+  /// No description provided for @mapDownloadScopeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scope'**
+  String get mapDownloadScopeLabel;
+
+  /// No description provided for @mapDownloadScopePlace.
+  ///
+  /// In en, this message translates to:
+  /// **'This place only'**
+  String get mapDownloadScopePlace;
+
+  /// No description provided for @mapDownloadScopeRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'With the state'**
+  String get mapDownloadScopeRegion;
+
+  /// No description provided for @mapDownloadScopeCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole country'**
+  String get mapDownloadScopeCountry;
+
+  /// No description provided for @mapDownloadStaggered.
+  ///
+  /// In en, this message translates to:
+  /// **'Staggered: coarser further out, full detail in the middle.'**
+  String get mapDownloadStaggered;
+
+  /// No description provided for @mapDownloadStep.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: level {from} to {to}, {count} tiles'**
+  String mapDownloadStep(String label, String from, String to, String count);
+
+  /// No description provided for @mapDownloadNoPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Even staggered this does not fit. Choose somewhere smaller.'**
+  String get mapDownloadNoPlan;
+
+  /// No description provided for @mapDownloadEstimatedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Takes roughly {minutes} minutes.'**
+  String mapDownloadEstimatedTime(String minutes);
+
+  /// No description provided for @mapDownloadResolving.
+  ///
+  /// In en, this message translates to:
+  /// **'Working out the surroundings …'**
+  String get mapDownloadResolving;
 }
 
 class _AppLocalizationsDelegate

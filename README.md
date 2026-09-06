@@ -207,9 +207,10 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   beim Auswählen abgelehnt. Deshalb baut die App sich das Archiv selbst –
   aus einem Ort, den man beim Namen sucht, oder aus dem Ausschnitt auf der
   Karte, von OpenFreeMap (frei und ohne Schlüssel) oder von MapTiler (mit
-  eigenem Schlüssel). Jedes Bundesland geht auf der tiefsten Stufe, ein
-  ganzes Land nur eine Stufe darunter: über 100 000 Kacheln lehnt sie ab,
-  aus Rücksicht auf einen öffentlichen Server. Einzelheiten in
+  eigenem Schlüssel). Ein ganzes Land geht gestaffelt – außen gröber, um
+  den gewählten Ort herum voll –, flach dagegen nicht: über 100 000
+  Kacheln lehnt die App ab, aus Rücksicht auf einen öffentlichen Server.
+  Speicherplatz ist nie die Grenze. Einzelheiten in
   [`docs/karte-offline.md`](docs/karte-offline.md).
 - Die Volltextsuche braucht einen Index, den die App einmal selbst
   aufbaut – der fertige im Archiv liegt in einem Xapian-Format ohne

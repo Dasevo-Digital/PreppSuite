@@ -68,6 +68,46 @@ Beide beschreiben sich selbst in TileJSON, weshalb es nur einen Client
 gibt. Die Kachel-Adresse wird von dort gelesen und nicht einkompiliert:
 OpenFreeMap datiert seine Pfade und verschiebt sie mit jedem Planetenbau.
 
+### Gestaffelt: ein ganzes Land
+
+Ein Land flach bis Stufe 14 ist nicht zu haben – aber fast keine dieser
+Kacheln sieht je jemand an. Deshalb kennt der Bildschirm drei Umfänge, und
+die beiden größeren staffeln:
+
+| Umfang | was geladen wird |
+|---|---|
+| **Nur der Ort** | der gesuchte Ort, so tief wie er passt |
+| **Mit Bundesland** | das Bundesland außen herum, gröber; der Ort voll |
+| **Ganzes Land** | das Land außen herum, gröber; darin das Bundesland voll |
+
+Die Ringe teilen sich die Stufen auf: der äußerste Ring deckt Stufe 0 bis
+zu einem Schnitt, der nächste von dort bis zum nächsten Schnitt, und der
+innerste bis 14. Wo die Schnitte liegen, sucht die App selbst – so tief
+wie das Budget hergibt, und von innen nach außen bevorzugt, weil
+Detailtiefe dort, wo man steht, mehr wert ist als zwei Bundesländer weiter.
+
+Für „Hannover", Umfang *Ganzes Land*:
+
+| Ring | Stufen | Kacheln |
+|---|---|---:|
+| Deutschland | 0–12 | 20 503 |
+| Niedersachsen | 13–14 | 64 560 |
+| **Summe** | | **85 063** |
+
+Das sind rund 3,8 GB statt 14 GB, und der Unterschied ist kein Verlust:
+ganz Deutschland ist drin, mit jeder Straße in Niedersachsen. Wer weiter
+weg fährt, hat dort Stufe 12 – Ortschaften und Hauptstraßen.
+
+Ein Ring, den sein Nachbar schon vollständig abdeckt, fällt weg. Wer ein
+Bundesland und einen Ort darin wählt und genug Budget für das ganze Land
+auf Stufe 14 hat, bekommt das ganze Bundesland – und nicht eine Stufe
+weniger, damit für den Ort noch eine übrig bleibt.
+
+**Speicherplatz ist dabei nie die Grenze.** Die Grenze ist die Zahl der
+Anfragen an einen fremden Server; die Datei darf so groß werden, wie das
+Gerät hergibt. Für eine App, die offline funktionieren muss, ist das die
+richtige Reihenfolge.
+
 ### Grenzen, und warum es sie gibt
 
 Über 100 000 Kacheln lehnt die App ab. Das ist keine technische Grenze,
@@ -88,8 +128,8 @@ Umgrenzungen, die Nominatim liefert:
 Ein ganzes Land auf Stufe 14 wären rund vierzehn Gigabyte und ebenso viele
 Anfragen wie Kacheln. Das ist nichts, was man einem Kachelserver zumutet,
 der für andere Leute läuft – und es wäre auch nicht zu Ende gebracht,
-bevor die App geschlossen wird. Stufe 13 für ein ganzes Land geht dagegen
-und zeigt in Ortschaften bereits Straßen.
+bevor die App geschlossen wird. Gestaffelt (siehe oben) ist ein ganzes
+Land dagegen zu haben, und Stufe 13 flach ebenfalls.
 
 Die Größenangabe vorab ist grob geschätzt. Eine Kachel Innenstadt ist ein
 Vielfaches einer Kachel Feld, und keine der beiden ist bekannt, bevor sie

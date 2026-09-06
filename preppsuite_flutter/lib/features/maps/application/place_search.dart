@@ -10,6 +10,8 @@ class PlaceResult {
     required this.name,
     required this.description,
     required this.kind,
+    this.stateName,
+    this.countryName,
     required this.minLongitude,
     required this.minLatitude,
     required this.maxLongitude,
@@ -28,6 +30,13 @@ class PlaceResult {
   /// so on. Shown as-is rather than translated, because the list of
   /// possible values is long and open-ended.
   final String kind;
+
+  /// The Bundesland (or equivalent) this place sits in, and the country,
+  /// as Nominatim's address breakdown gives them. They are names, not
+  /// boxes — [PlaceSearchClient.resolve] turns one into the other, which
+  /// is what a staggered download needs to draw its outer rings.
+  final String? stateName;
+  final String? countryName;
 
   final double minLongitude;
   final double minLatitude;
@@ -86,6 +95,7 @@ class PlaceSearchClient {
       'format': 'jsonv2',
       'q': trimmed,
       'limit': '$limit',
+      'addressdetails': '1',
       'accept-language': language,
     });
 
@@ -108,6 +118,13 @@ class PlaceSearchClient {
     ];
   }
 
+  /// The first match for [name], for turning a state or country name
+  /// from an address breakdown back into a box.
+  Future<PlaceResult?> resolve(String name, {String language = 'de'}) async {
+    final results = await search(name, language: language, limit: 1);
+    return results.isEmpty ? null : results.first;
+  }
+
   /// Nominatim gives the box as four strings in the order
   /// `[minLat, maxLat, minLon, maxLon]` — latitudes first, which is the
   /// opposite of every other coordinate pair in this codebase.
@@ -119,10 +136,21 @@ class PlaceSearchClient {
     if (numbers.any((value) => value == null)) return null;
 
     final display = '${entry['display_name'] ?? ''}';
+    final address = entry['address'];
+    String? part(String key) {
+      if (address is! Map) return null;
+      final value = address[key];
+      return value is String && value.isNotEmpty ? value : null;
+    }
+
     return PlaceResult(
       name: '${entry['name'] ?? display}',
       description: display,
       kind: '${entry['addresstype'] ?? entry['type'] ?? ''}',
+      // "state" is missing for city states and for places outside a
+      // federal country; the ring is then simply left out.
+      stateName: part('state') ?? part('county'),
+      countryName: part('country'),
       minLatitude: numbers[0]!,
       maxLatitude: numbers[1]!,
       minLongitude: numbers[2]!,

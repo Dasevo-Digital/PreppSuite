@@ -734,5 +734,16 @@
   "mapDownloadPlaceTooLarge": "{name} is too large even at the coarsest level. Choose somewhere smaller.",
   "@mapDownloadPlaceTooLarge": {"placeholders": {"name": {"type": "String"}}},
   "mapDownloadDeepestPossible": "At level 14 that would be {count} tiles — too many. Level {level} is the deepest this area goes.",
-  "@mapDownloadDeepestPossible": {"placeholders": {"count": {"type": "String"}, "level": {"type": "String"}}}
+  "@mapDownloadDeepestPossible": {"placeholders": {"count": {"type": "String"}, "level": {"type": "String"}}},
+  "mapDownloadScopeLabel": "Scope",
+  "mapDownloadScopePlace": "This place only",
+  "mapDownloadScopeRegion": "With the state",
+  "mapDownloadScopeCountry": "Whole country",
+  "mapDownloadStaggered": "Staggered: coarser further out, full detail in the middle.",
+  "mapDownloadStep": "{label}: level {from} to {to}, {count} tiles",
+  "@mapDownloadStep": {"placeholders": {"label": {"type": "String"}, "from": {"type": "String"}, "to": {"type": "String"}, "count": {"type": "String"}}},
+  "mapDownloadNoPlan": "Even staggered this does not fit. Choose somewhere smaller.",
+  "mapDownloadEstimatedTime": "Takes roughly {minutes} minutes.",
+  "@mapDownloadEstimatedTime": {"placeholders": {"minutes": {"type": "String"}}},
+  "mapDownloadResolving": "Working out the surroundings …"
 }

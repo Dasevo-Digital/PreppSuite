@@ -155,6 +155,21 @@ on a second pending write — besides which the offset bookkeeping is only
 correct one tile at a time. The queue also has to survive a failed write,
 or the first bad tile fails every tile after it.
 
+**A map download is a plan of rings, not one area.** `staggeredPlan`
+gives each ring a band of zoom levels — the country coarse on the
+outside, the chosen place at full detail — and searches for the deepest
+bands that fit the budget, preferring the inner rings. That is what makes
+a whole country possible at all: Germany flat at zoom 14 is 319,812
+tiles, staggered around Hannover it is 85,063 with every street in
+Niedersachsen still in it. A ring its neighbour already covers to the
+deepest level drops out, or the plan would hold a level back for a town
+that its state already contains.
+
+**The tile limit is a request budget, never a storage one.** The app must
+work offline, so the archive may be as large as the device allows; what
+is rationed is how many times a public tile server is asked. Anything
+that reads the limit as "how much disk to use" has it backwards.
+
 **The tile limit is where "a Bundesland at full detail" is decided.** It
 is set to 100,000 so that every German state fits at zoom 14 — the
 largest, Bayern, is 68,028 tiles by Nominatim's bounding box — and a

@@ -13,7 +13,7 @@ void main() {
 
   const searchUrl =
       'https://nominatim.openstreetmap.org/search'
-      '?format=jsonv2&q=Hannover&limit=8&accept-language=de';
+      '?format=jsonv2&q=Hannover&limit=8&addressdetails=1&accept-language=de';
 
   group('searching', () {
     test('reads the box, the name and what kind of place it is', () async {
@@ -28,6 +28,10 @@ void main() {
       expect(city.name, 'Hannover');
       expect(city.kind, 'city');
       expect(city.description, contains('Niedersachsen'));
+
+      // The rings a staggered download draws around it.
+      expect(city.stateName, 'Niedersachsen');
+      expect(city.countryName, 'Deutschland');
 
       // Nominatim gives the box as [minLat, maxLat, minLon, maxLon] —
       // latitudes first, the opposite of every other pair here. Getting

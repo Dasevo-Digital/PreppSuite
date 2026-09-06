@@ -1272,4 +1272,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String mapDownloadDeepestPossible(String count, String level) {
     return 'At level 14 that would be $count tiles — too many. Level $level is the deepest this area goes.';
   }
+
+  @override
+  String get mapDownloadScopeLabel => 'Scope';
+
+  @override
+  String get mapDownloadScopePlace => 'This place only';
+
+  @override
+  String get mapDownloadScopeRegion => 'With the state';
+
+  @override
+  String get mapDownloadScopeCountry => 'Whole country';
+
+  @override
+  String get mapDownloadStaggered =>
+      'Staggered: coarser further out, full detail in the middle.';
+
+  @override
+  String mapDownloadStep(String label, String from, String to, String count) {
+    return '$label: level $from to $to, $count tiles';
+  }
+
+  @override
+  String get mapDownloadNoPlan =>
+      'Even staggered this does not fit. Choose somewhere smaller.';
+
+  @override
+  String mapDownloadEstimatedTime(String minutes) {
+    return 'Takes roughly $minutes minutes.';
+  }
+
+  @override
+  String get mapDownloadResolving => 'Working out the surroundings …';
 }

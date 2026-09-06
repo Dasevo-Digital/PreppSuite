@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:preppsuite_flutter/features/maps/application/map_area_download.dart';
+import 'package:preppsuite_flutter/features/maps/application/map_download_plan.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart';
 import 'package:preppsuite_flutter/features/maps/application/tile_source.dart';
 
@@ -75,7 +76,7 @@ void main() {
       await expectLater(
         MapAreaDownloader(httpClient: _TileServer())
             .download(
-              area: wholeCountry,
+              plan: MapDownloadPlan.single(wholeCountry),
               source: _source(14),
               targetPath: '/dev/null',
               workingDirectory: Directory.systemTemp,
@@ -134,7 +135,7 @@ void main() {
                 concurrency: 2,
               )
               .download(
-                area: _germany,
+                plan: MapDownloadPlan.single(_germany),
                 source: _source(8),
                 targetPath: target,
                 workingDirectory: dir,
@@ -175,13 +176,15 @@ void main() {
                 concurrency: 1,
               )
               .download(
-                area: const MapArea(
-                  minLongitude: 5.9,
-                  minLatitude: 47.3,
-                  maxLongitude: 15.0,
-                  maxLatitude: 55.1,
-                  minZoom: 6,
-                  maxZoom: 6,
+                plan: MapDownloadPlan.single(
+                  const MapArea(
+                    minLongitude: 5.9,
+                    minLatitude: 47.3,
+                    maxLongitude: 15.0,
+                    maxLatitude: 55.1,
+                    minZoom: 6,
+                    maxZoom: 6,
+                  ),
                 ),
                 source: _source(8),
                 targetPath: target,
@@ -200,7 +203,7 @@ void main() {
               concurrency: 2,
             )
             .download(
-              area: _germany,
+              plan: MapDownloadPlan.single(_germany),
               source: _source(8),
               targetPath: '${dir.path}/broken.pmtiles',
               workingDirectory: dir,
@@ -217,7 +220,7 @@ void main() {
       await expectLater(
         MapAreaDownloader(httpClient: _TileServer())
             .download(
-              area: _germany,
+              plan: MapDownloadPlan.single(_germany),
               source: _source(6),
               targetPath: '${dir.path}/too_deep.pmtiles',
               workingDirectory: dir,

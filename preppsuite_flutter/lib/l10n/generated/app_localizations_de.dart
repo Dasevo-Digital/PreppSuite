@@ -1281,4 +1281,37 @@ class AppLocalizationsDe extends AppLocalizations {
   String mapDownloadDeepestPossible(String count, String level) {
     return 'Auf Stufe 14 wären es $count Kacheln — zu viel. Stufe $level ist das Tiefste, was für dieses Gebiet geht.';
   }
+
+  @override
+  String get mapDownloadScopeLabel => 'Umfang';
+
+  @override
+  String get mapDownloadScopePlace => 'Nur der Ort';
+
+  @override
+  String get mapDownloadScopeRegion => 'Mit Bundesland';
+
+  @override
+  String get mapDownloadScopeCountry => 'Ganzes Land';
+
+  @override
+  String get mapDownloadStaggered =>
+      'Gestaffelt: außen gröber, in der Mitte voll.';
+
+  @override
+  String mapDownloadStep(String label, String from, String to, String count) {
+    return '$label: Stufe $from bis $to, $count Kacheln';
+  }
+
+  @override
+  String get mapDownloadNoPlan =>
+      'Auch gestaffelt passt das nicht. Wähle einen kleineren Ort.';
+
+  @override
+  String mapDownloadEstimatedTime(String minutes) {
+    return 'Dauert etwa $minutes Minuten.';
+  }
+
+  @override
+  String get mapDownloadResolving => 'Umgebung wird ermittelt …';
 }

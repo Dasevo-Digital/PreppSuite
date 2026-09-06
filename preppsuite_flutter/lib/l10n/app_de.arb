@@ -359,5 +359,14 @@
   "mapDownloadAreaPlace": "{name} · {kind}",
   "mapDownloadDetailAuto": "Höchste Stufe, die für dieses Gebiet noch geht.",
   "mapDownloadPlaceTooLarge": "{name} ist auch auf der gröbsten Stufe zu groß. Wähle einen kleineren Ort.",
-  "mapDownloadDeepestPossible": "Auf Stufe 14 wären es {count} Kacheln — zu viel. Stufe {level} ist das Tiefste, was für dieses Gebiet geht."
+  "mapDownloadDeepestPossible": "Auf Stufe 14 wären es {count} Kacheln — zu viel. Stufe {level} ist das Tiefste, was für dieses Gebiet geht.",
+  "mapDownloadScopeLabel": "Umfang",
+  "mapDownloadScopePlace": "Nur der Ort",
+  "mapDownloadScopeRegion": "Mit Bundesland",
+  "mapDownloadScopeCountry": "Ganzes Land",
+  "mapDownloadStaggered": "Gestaffelt: außen gröber, in der Mitte voll.",
+  "mapDownloadStep": "{label}: Stufe {from} bis {to}, {count} Kacheln",
+  "mapDownloadNoPlan": "Auch gestaffelt passt das nicht. Wähle einen kleineren Ort.",
+  "mapDownloadEstimatedTime": "Dauert etwa {minutes} Minuten.",
+  "mapDownloadResolving": "Umgebung wird ermittelt …"
 }
