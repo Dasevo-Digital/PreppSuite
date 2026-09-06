@@ -9,7 +9,27 @@ komprimierten Blöcken dahinter.
 
 ## Woher die Datei kommt
 
-Die Sammlung steht auf <https://library.kiwix.org> und im
+Am einfachsten aus der App selbst: **Wissen → Archiv herunterladen** zeigt
+den Katalog von <https://library.kiwix.org>, gefiltert nach Sprache und
+durchsuchbar. Zu jedem Eintrag stehen Größe, Artikelzahl und ob Bilder
+enthalten sind – die drei Zahlen, die entscheiden, ob eine Datei auf das
+Gerät passt. Was fertig geladen ist, wird sofort als Archiv übernommen.
+
+Der Download läuft weiter, solange die App offen bleibt, und lässt sich
+fortsetzen: was angekommen ist, liegt als `.part`-Datei daneben und wird
+beim nächsten Versuch weitergeführt statt neu begonnen. Wohin geladen
+wird, steht in den Einstellungen unter „Ordner für Downloads"; auf dem
+Rechner lässt es sich dort ändern, auf dem Telefon entscheidet die
+Plattform.
+
+Eine Eigenheit des Katalogs, die man kennen sollte, wenn man die Zahlen
+vergleicht: **Kiwix rundet die angegebene Dateigröße auf.** Für eine Datei
+von 6 940 898 Byte nennt der Katalog 6 941 696. Die App prüft deshalb
+gegen die Länge, die der Server beim Abruf selbst nennt, und behandelt die
+Katalogzahl nur als Anzeige.
+
+Von Hand geht es weiterhin: die Sammlung steht auf
+<https://library.kiwix.org> und im
 [Download-Verzeichnis](https://download.kiwix.org/zim/). Für den Zweck
 dieser App sind vor allem interessant:
 

@@ -1073,4 +1073,107 @@ class AppLocalizationsDe extends AppLocalizations {
   String knowledgeIndexReady(int count) {
     return '$count Artikel im Index.';
   }
+
+  @override
+  String get downloadFolderTitle => 'Ordner für Downloads';
+
+  @override
+  String get downloadFolderChange => 'Ordner wählen';
+
+  @override
+  String get downloadFolderReset => 'Zurücksetzen';
+
+  @override
+  String downloadRunningLabel(String name) {
+    return 'Lädt $name';
+  }
+
+  @override
+  String get downloadCancelAction => 'Abbrechen';
+
+  @override
+  String downloadFailedLabel(String error) {
+    return 'Download abgebrochen: $error';
+  }
+
+  @override
+  String downloadFinishedLabel(String name) {
+    return '$name ist fertig geladen.';
+  }
+
+  @override
+  String get downloadRetryAction => 'Erneut versuchen';
+
+  @override
+  String get downloadDismissAction => 'Ausblenden';
+
+  @override
+  String downloadOfSize(String done, String total) {
+    return '$done von $total';
+  }
+
+  @override
+  String get downloadBusyMessage =>
+      'Es läuft schon ein Download. Es geht immer nur einer auf einmal.';
+
+  @override
+  String get downloadStartAction => 'Herunterladen';
+
+  @override
+  String get downloadConfirmTitle => 'Herunterladen?';
+
+  @override
+  String downloadConfirmBody(String name, String size, String folder) {
+    return '$name ist $size groß und wird nach $folder geladen. Das Laden geht weiter, solange die App offen bleibt, und lässt sich später fortsetzen.';
+  }
+
+  @override
+  String get knowledgeDownloadAction => 'Archiv herunterladen';
+
+  @override
+  String get kiwixTitle => 'Kiwix-Bibliothek';
+
+  @override
+  String get kiwixIntro =>
+      'Wikipedia und andere Sammlungen als ZIM-Datei, frei und ohne Konto. Wähle eine Sprache und lade herunter, was du offline haben willst.';
+
+  @override
+  String get kiwixLanguageLabel => 'Sprache';
+
+  @override
+  String get kiwixSearchHint => 'Sammlung suchen';
+
+  @override
+  String get kiwixNoResults =>
+      'Nichts gefunden. Andere Sprache oder anderer Suchbegriff?';
+
+  @override
+  String kiwixLoadError(String error) {
+    return 'Die Bibliothek war nicht erreichbar: $error';
+  }
+
+  @override
+  String kiwixArticleCount(String count) {
+    return '$count Artikel';
+  }
+
+  @override
+  String get kiwixFullTextTag => 'Volltextindex';
+
+  @override
+  String get kiwixFlavourMaxi => 'vollständig';
+
+  @override
+  String get kiwixFlavourMini => 'nur Einleitungen';
+
+  @override
+  String get kiwixFlavourNopic => 'ohne Bilder';
+
+  @override
+  String kiwixResultCount(String shown, String total) {
+    return '$shown von $total';
+  }
+
+  @override
+  String get kiwixLoadMore => 'Mehr laden';
 }

@@ -1067,4 +1067,107 @@ class AppLocalizationsEn extends AppLocalizations {
   String knowledgeIndexReady(int count) {
     return '$count articles indexed.';
   }
+
+  @override
+  String get downloadFolderTitle => 'Download folder';
+
+  @override
+  String get downloadFolderChange => 'Choose folder';
+
+  @override
+  String get downloadFolderReset => 'Reset';
+
+  @override
+  String downloadRunningLabel(String name) {
+    return 'Downloading $name';
+  }
+
+  @override
+  String get downloadCancelAction => 'Cancel';
+
+  @override
+  String downloadFailedLabel(String error) {
+    return 'Download stopped: $error';
+  }
+
+  @override
+  String downloadFinishedLabel(String name) {
+    return '$name has finished downloading.';
+  }
+
+  @override
+  String get downloadRetryAction => 'Try again';
+
+  @override
+  String get downloadDismissAction => 'Dismiss';
+
+  @override
+  String downloadOfSize(String done, String total) {
+    return '$done of $total';
+  }
+
+  @override
+  String get downloadBusyMessage =>
+      'A download is already running. Only one goes at a time.';
+
+  @override
+  String get downloadStartAction => 'Download';
+
+  @override
+  String get downloadConfirmTitle => 'Download?';
+
+  @override
+  String downloadConfirmBody(String name, String size, String folder) {
+    return '$name is $size and will be saved to $folder. It keeps going while the app stays open, and can be resumed later.';
+  }
+
+  @override
+  String get knowledgeDownloadAction => 'Download an archive';
+
+  @override
+  String get kiwixTitle => 'Kiwix library';
+
+  @override
+  String get kiwixIntro =>
+      'Wikipedia and other collections as a ZIM file, free and without an account. Pick a language and download what you want offline.';
+
+  @override
+  String get kiwixLanguageLabel => 'Language';
+
+  @override
+  String get kiwixSearchHint => 'Search collections';
+
+  @override
+  String get kiwixNoResults =>
+      'Nothing found. Another language, or another search term?';
+
+  @override
+  String kiwixLoadError(String error) {
+    return 'The library could not be reached: $error';
+  }
+
+  @override
+  String kiwixArticleCount(String count) {
+    return '$count articles';
+  }
+
+  @override
+  String get kiwixFullTextTag => 'full-text index';
+
+  @override
+  String get kiwixFlavourMaxi => 'complete';
+
+  @override
+  String get kiwixFlavourMini => 'introductions only';
+
+  @override
+  String get kiwixFlavourNopic => 'without pictures';
+
+  @override
+  String kiwixResultCount(String shown, String total) {
+    return '$shown of $total';
+  }
+
+  @override
+  String get kiwixLoadMore => 'Load more';
 }

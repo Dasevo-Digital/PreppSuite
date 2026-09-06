@@ -1933,6 +1933,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} articles indexed.'**
   String knowledgeIndexReady(int count);
+
+  /// No description provided for @downloadFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download folder'**
+  String get downloadFolderTitle;
+
+  /// No description provided for @downloadFolderChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose folder'**
+  String get downloadFolderChange;
+
+  /// No description provided for @downloadFolderReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get downloadFolderReset;
+
+  /// No description provided for @downloadRunningLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {name}'**
+  String downloadRunningLabel(String name);
+
+  /// No description provided for @downloadCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get downloadCancelAction;
+
+  /// No description provided for @downloadFailedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download stopped: {error}'**
+  String downloadFailedLabel(String error);
+
+  /// No description provided for @downloadFinishedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has finished downloading.'**
+  String downloadFinishedLabel(String name);
+
+  /// No description provided for @downloadRetryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get downloadRetryAction;
+
+  /// No description provided for @downloadDismissAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get downloadDismissAction;
+
+  /// No description provided for @downloadOfSize.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total}'**
+  String downloadOfSize(String done, String total);
+
+  /// No description provided for @downloadBusyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A download is already running. Only one goes at a time.'**
+  String get downloadBusyMessage;
+
+  /// No description provided for @downloadStartAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get downloadStartAction;
+
+  /// No description provided for @downloadConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download?'**
+  String get downloadConfirmTitle;
+
+  /// No description provided for @downloadConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is {size} and will be saved to {folder}. It keeps going while the app stays open, and can be resumed later.'**
+  String downloadConfirmBody(String name, String size, String folder);
+
+  /// No description provided for @knowledgeDownloadAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Download an archive'**
+  String get knowledgeDownloadAction;
+
+  /// No description provided for @kiwixTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Kiwix library'**
+  String get kiwixTitle;
+
+  /// No description provided for @kiwixIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Wikipedia and other collections as a ZIM file, free and without an account. Pick a language and download what you want offline.'**
+  String get kiwixIntro;
+
+  /// No description provided for @kiwixLanguageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get kiwixLanguageLabel;
+
+  /// No description provided for @kiwixSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search collections'**
+  String get kiwixSearchHint;
+
+  /// No description provided for @kiwixNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found. Another language, or another search term?'**
+  String get kiwixNoResults;
+
+  /// No description provided for @kiwixLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'The library could not be reached: {error}'**
+  String kiwixLoadError(String error);
+
+  /// No description provided for @kiwixArticleCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} articles'**
+  String kiwixArticleCount(String count);
+
+  /// No description provided for @kiwixFullTextTag.
+  ///
+  /// In en, this message translates to:
+  /// **'full-text index'**
+  String get kiwixFullTextTag;
+
+  /// No description provided for @kiwixFlavourMaxi.
+  ///
+  /// In en, this message translates to:
+  /// **'complete'**
+  String get kiwixFlavourMaxi;
+
+  /// No description provided for @kiwixFlavourMini.
+  ///
+  /// In en, this message translates to:
+  /// **'introductions only'**
+  String get kiwixFlavourMini;
+
+  /// No description provided for @kiwixFlavourNopic.
+  ///
+  /// In en, this message translates to:
+  /// **'without pictures'**
+  String get kiwixFlavourNopic;
+
+  /// No description provided for @kiwixResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{shown} of {total}'**
+  String kiwixResultCount(String shown, String total);
+
+  /// No description provided for @kiwixLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get kiwixLoadMore;
 }
 
 class _AppLocalizationsDelegate

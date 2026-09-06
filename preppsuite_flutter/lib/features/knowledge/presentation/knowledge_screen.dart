@@ -8,7 +8,9 @@ import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/article_viewer.dart';
 import '../application/knowledge_providers.dart';
 import '../application/zim_archive.dart';
+import '../../downloads/presentation/download_banner.dart';
 import 'article_screen.dart';
+import 'kiwix_library_screen.dart';
 import 'knowledge_index_panel.dart';
 
 /// Looking things up without a network: search an offline archive by
@@ -60,11 +62,16 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
           if (async.value?.isConfigured ?? false)
             PopupMenuButton<_ArchiveAction>(
               onSelected: (action) => switch (action) {
+                _ArchiveAction.download => _openLibrary(),
                 _ArchiveAction.change => _choose(l10n),
                 _ArchiveAction.forget =>
                   ref.read(knowledgeProvider.notifier).forget(),
               },
               itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: _ArchiveAction.download,
+                  child: Text(l10n.knowledgeDownloadAction),
+                ),
                 PopupMenuItem(
                   value: _ArchiveAction.change,
                   child: Text(l10n.knowledgeChangeAction),
@@ -93,12 +100,14 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
         state: state,
         l10n: l10n,
         onChoose: () => _choose(l10n),
+        onDownload: _openLibrary,
       );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const DownloadBanner(),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Column(
@@ -240,6 +249,12 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     }
   }
 
+  void _openLibrary() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (context) => const KiwixLibraryScreen()),
+    );
+  }
+
   Future<void> _choose(AppLocalizations l10n) async {
     final picked = await pickMapArchive(dialogTitle: l10n.knowledgeTitle);
     if (picked == null) return;
@@ -257,7 +272,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
 
 enum _SearchMode { titles, fullText }
 
-enum _ArchiveAction { change, forget }
+enum _ArchiveAction { download, change, forget }
 
 /// Sits under the results when the index is not finished.
 class _PartialIndexNote extends ConsumerWidget {
@@ -287,11 +302,13 @@ class _EmptyState extends StatelessWidget {
     required this.state,
     required this.l10n,
     required this.onChoose,
+    required this.onDownload,
   });
 
   final KnowledgeState state;
   final AppLocalizations l10n;
   final VoidCallback onChoose;
+  final VoidCallback onDownload;
 
   @override
   Widget build(BuildContext context) {
@@ -331,14 +348,26 @@ class _EmptyState extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 20),
-            FilledButton.tonalIcon(
-              onPressed: onChoose,
-              icon: const Icon(Icons.folder_open),
-              label: Text(
-                state.isConfigured
-                    ? l10n.knowledgeChangeAction
-                    : l10n.knowledgeChooseAction,
-              ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                FilledButton.icon(
+                  onPressed: onDownload,
+                  icon: const Icon(Icons.cloud_download_outlined),
+                  label: Text(l10n.knowledgeDownloadAction),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: onChoose,
+                  icon: const Icon(Icons.folder_open),
+                  label: Text(
+                    state.isConfigured
+                        ? l10n.knowledgeChangeAction
+                        : l10n.knowledgeChooseAction,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

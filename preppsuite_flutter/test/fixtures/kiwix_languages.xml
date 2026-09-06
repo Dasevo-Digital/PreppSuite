@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:dc="http://purl.org/dc/terms/"
+      xmlns:opds="https://specs.opds.io/opds-1.2"
+      xmlns:thr="http://purl.org/syndication/thread/1.0">
+  <id>b08e2fc2-4771-824a-f59e-6f47e8ba53da</id>
+  <link rel="self"
+        href="/catalog/v2/languages"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <link rel="start"
+        href="/catalog/v2/root.xml"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+  <title>List of languages</title>
+  <updated>2026-09-06T06:04:40Z</updated>
+
+    <entry>
+    <title>Deutsch</title>
+    <dc:language>deu</dc:language>
+    <thr:count>306</thr:count>
+    <link rel="subsection"
+          href="/catalog/v2/entries?lang=deu"
+          type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <updated>2026-09-06T06:04:40Z</updated>
+    <id>2cb220d6-e76f-2f1c-4816-a3df38fb0341</id>
+  </entry>
+  <entry>
+    <title>English</title>
+    <dc:language>eng</dc:language>
+    <thr:count>1298</thr:count>
+    <link rel="subsection"
+          href="/catalog/v2/entries?lang=eng"
+          type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <updated>2026-09-06T06:04:40Z</updated>
+    <id>a1b329f7-a7a2-4921-7cdb-812c1da0ea9f</id>
+  </entry>
+  <entry>
+    <title>français</title>
+    <dc:language>fra</dc:language>
+    <thr:count>515</thr:count>
+    <link rel="subsection"
+          href="/catalog/v2/entries?lang=fra"
+          type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <updated>2026-09-06T06:04:40Z</updated>
+    <id>a439f45a-72a7-8d97-fa91-49240a1c4f85</id>
+  </entry>
+</feed>
