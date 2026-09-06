@@ -978,6 +978,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get knowledgeForgetAction => 'Datei entfernen';
 
   @override
+  String get articleLinkLeavesArchive =>
+      'Dieser Verweis führt aus dem Archiv heraus. PreppSuite zeigt nur, was in der Datei steht.';
+
+  @override
   String get knowledgeSearchHint => 'Nach Titel suchen';
 
   @override

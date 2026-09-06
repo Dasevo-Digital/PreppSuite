@@ -281,6 +281,7 @@
   "knowledgeChooseAction": "Datei wählen",
   "knowledgeChangeAction": "Andere Datei wählen",
   "knowledgeForgetAction": "Datei entfernen",
+  "articleLinkLeavesArchive": "Dieser Verweis führt aus dem Archiv heraus. PreppSuite zeigt nur, was in der Datei steht.",
   "knowledgeSearchHint": "Nach Titel suchen",
   "knowledgeSearchNote": "Gesucht wird in den Titeln, nicht im Text der Artikel.",
   "knowledgeNoResults": "Kein Titel beginnt mit „{query}“.",

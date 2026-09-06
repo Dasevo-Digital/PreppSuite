@@ -112,6 +112,38 @@ void main() {
     await response.drain<void>();
   });
 
+  test(
+    'every response carries a policy that keeps the archive offline',
+    () async {
+      // An archive is whatever file the user picked, and a ZIM can carry
+      // scripts. Under this server's origin those scripts would otherwise be
+      // free to pull code off the internet or post the page back out.
+      for (final path in ['/C/Trinkwasser', '/C/style/main.css']) {
+        final response = await get(path);
+        final policy = response.headers.value('content-security-policy');
+
+        expect(policy, isNotNull, reason: path);
+        expect(policy, contains("default-src 'self'"));
+        // The one that stops fetch() and XMLHttpRequest reaching outward.
+        expect(policy, contains("connect-src 'self'"));
+        // Without these two, one tag would undo the rest: <base> re-points
+        // every relative URL in the page, a form posts wherever it likes.
+        expect(policy, contains("base-uri 'none'"));
+        expect(policy, contains("form-action 'none'"));
+        await response.drain<void>();
+      }
+    },
+  );
+
+  test('a 404 carries the policy too', () async {
+    // Not pedantry: an archive can hand the engine a URL that misses, and
+    // the error page is a document like any other.
+    final response = await get('/C/Rechenschieber');
+
+    expect(response.headers.value('content-security-policy'), isNotNull);
+    await response.drain<void>();
+  });
+
   test('the server is reachable only over loopback', () async {
     expect(server.uriFor(await archive.entryAt(0)).host, '127.0.0.1');
   });

@@ -574,6 +574,7 @@
   "knowledgeChooseAction": "Choose a file",
   "knowledgeChangeAction": "Choose a different file",
   "knowledgeForgetAction": "Remove file",
+  "articleLinkLeavesArchive": "That link points outside the archive. PreppSuite only shows what is in the file.",
   "knowledgeSearchHint": "Search titles",
   "knowledgeSearchNote": "Searches titles, not the text of the articles.",
   "knowledgeNoResults": "No title starts with “{query}”.",

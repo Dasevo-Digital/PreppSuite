@@ -37,6 +37,20 @@ ArticleViewer articleViewerFor(TargetPlatform platform) => switch (platform) {
   TargetPlatform.fuchsia => ArticleViewer.none,
 };
 
+/// Whether [target] is served by the loopback server behind [origin].
+///
+/// Split out from the article screen so the rule can be tested; a
+/// `WebViewController` cannot be. The port is compared as well as the
+/// host, because another app on the device may be serving something else
+/// on a different loopback port, and that is no more part of this archive
+/// than a site on the internet is.
+bool isArchiveUrl(Uri? target, Uri origin) {
+  if (target == null) return false;
+  return target.scheme == origin.scheme &&
+      target.host == origin.host &&
+      target.port == origin.port;
+}
+
 /// Opens [uri] in a browser window of its own.
 ///
 /// False when the system has no engine to open it with. That is a real

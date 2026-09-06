@@ -1784,6 +1784,12 @@ abstract class AppLocalizations {
   /// **'Remove file'**
   String get knowledgeForgetAction;
 
+  /// No description provided for @articleLinkLeavesArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'That link points outside the archive. PreppSuite only shows what is in the file.'**
+  String get articleLinkLeavesArchive;
+
   /// No description provided for @knowledgeSearchHint.
   ///
   /// In en, this message translates to:

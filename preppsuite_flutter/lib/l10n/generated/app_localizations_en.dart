@@ -972,6 +972,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get knowledgeForgetAction => 'Remove file';
 
   @override
+  String get articleLinkLeavesArchive =>
+      'That link points outside the archive. PreppSuite only shows what is in the file.';
+
+  @override
   String get knowledgeSearchHint => 'Search titles';
 
   @override

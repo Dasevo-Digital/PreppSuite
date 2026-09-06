@@ -16,6 +16,9 @@ import 'zim_archive.dart';
 /// reach it. Other apps on the same device can, for as long as an article
 /// is open; what they would find is the public encyclopedia the user
 /// downloaded.
+///
+/// Every response carries [_contentSecurityPolicy], which is what actually
+/// keeps an archive offline — see there.
 class ZimHttpServer {
   ZimHttpServer._(this._server, this._archive);
 
@@ -40,6 +43,10 @@ class ZimHttpServer {
 
   Future<void> _serve() async {
     await for (final request in _server) {
+      request.response.headers.set(
+        'Content-Security-Policy',
+        _contentSecurityPolicy,
+      );
       try {
         await _respond(request);
       } on Object {
@@ -80,6 +87,42 @@ class ZimHttpServer {
       ..headers.set(HttpHeaders.cacheControlHeader, 'max-age=3600')
       ..add(bytes);
   }
+
+  /// Keeps an archive from reaching the network.
+  ///
+  /// An archive is not trusted content. The reader points at whatever file
+  /// the user selected, and a ZIM can carry scripts — real Wikipedia ones
+  /// do. Served from here, those scripts run under the origin of this
+  /// server, which means same-origin access to the whole archive and to
+  /// any other port on loopback. Without a policy they could also pull a
+  /// script off the internet or post what they read back out.
+  ///
+  /// `'unsafe-inline'` and `'unsafe-eval'` stay allowed on purpose. The
+  /// danger here is not an injected script — the archive is untrusted as a
+  /// whole, so there is no boundary inside it to defend — it is the
+  /// archive talking to the network. Forbidding inline scripts would break
+  /// collapsible sections and maths on real articles and buy nothing;
+  /// `default-src 'self'` and `connect-src 'self'` are what close the way
+  /// out.
+  ///
+  /// `base-uri` and `form-action` are listed because `default-src` does
+  /// not cover them: a `<base href="https://...">` would re-point every
+  /// relative URL in the page outward, and a form would post there.
+  ///
+  /// Sent on every response rather than only on HTML, because an SVG
+  /// delivered as `image/svg+xml` carries scripts of its own.
+  static const _contentSecurityPolicy =
+      "default-src 'self' data: blob:; "
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; "
+      "style-src 'self' 'unsafe-inline' data:; "
+      "img-src 'self' data: blob:; "
+      "media-src 'self' data: blob:; "
+      "font-src 'self' data:; "
+      "connect-src 'self'; "
+      "frame-src 'none'; "
+      "object-src 'none'; "
+      "base-uri 'none'; "
+      "form-action 'none'";
 
   static ContentType _contentTypeOf(String mimeType) {
     final parts = mimeType.split(';').first.trim().split('/');
