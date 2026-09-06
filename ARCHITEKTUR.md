@@ -404,6 +404,15 @@ tree; the test suite deliberately targets that layer rather than the UI.
   leftover, until `minSdk` reaches 33. The 33 boundary is apksigner's
   default (rotation goes into a v3.1 block); see README for why it is not
   lowered to 28.
+- **`android/gradlew clean` deletes every platform's build output, not
+  Android's.** `android/build.gradle.kts` redirects
+  `rootProject.layout.buildDirectory` to `preppsuite_flutter/build` — the
+  directory Flutter puts *all* platforms under — and the `clean` task it
+  registers deletes that whole directory. Running it in the middle of
+  assembling a release throws away the macOS and Linux bundles that are
+  already built. Use `flutter clean` if that is what you mean, and
+  otherwise nothing: the Android build has no stale-output problem that
+  needs it.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

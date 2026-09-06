@@ -46,6 +46,26 @@ android {
         versionName = flutter.versionName
     }
 
+    // arm64 is every Android phone of the last several years, arm32 the
+    // older ones minSdk 24 still admits. x86 and x86_64 are the emulator
+    // and reach no device this app is handed to.
+    //
+    // It takes both halves. `flutter build --target-platform` governs
+    // Flutter's own engine libraries and took the package from 96.7 MB to
+    // 69.8 MB; what it leaves behind are the prebuilt .so files plugins
+    // ship inside their AARs — ML Kit's barcode reader is 5.9 MB of
+    // exactly that, and libzstandard, libdartjni and the camera helpers
+    // add the rest. `defaultConfig.ndk.abiFilters` does not remove them
+    // here: the Flutter Gradle plugin sets that property itself, and a
+    // value written in defaultConfig does not survive. Excluding at the
+    // packaging step does, and is checked afterwards in
+    // tool/android_release.sh. Together: 96.7 MB -> 63.1 MB.
+    packaging {
+        jniLibs {
+            excludes += setOf("**/x86/**", "**/x86_64/**")
+        }
+    }
+
     signingConfigs {
         if (hasReleaseKeystore) {
             create("release") {
