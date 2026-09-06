@@ -362,9 +362,14 @@ class _WarningTile extends StatelessWidget {
     final isExpired =
         warning.expires != null && warning.expires!.isBefore(DateTime.now());
 
+    final colors = warningSeverityColors(context, severity);
+
     return ExpansionTile(
       leading: CircleAvatar(
-        backgroundColor: warningSeverityColor(context, severity),
+        backgroundColor: colors.background,
+        // Without this the icon takes `onPrimaryContainer`, which is what
+        // CircleAvatar falls back to under Material 3 — a green, on a red.
+        foregroundColor: colors.foreground,
         child: const Icon(Icons.warning_amber_rounded, size: 18),
       ),
       title: Text(warning.headline),

@@ -30,12 +30,39 @@ String localizeWarningSeverity(
   };
 }
 
-Color warningSeverityColor(BuildContext context, WarningSeverity severity) {
+/// A background for a severity and the foreground that is legible on it.
+typedef WarningSeverityColors = ({Color background, Color foreground});
+
+/// The colours a severity is shown in.
+///
+/// Both halves together, deliberately. This used to hand out a background
+/// alone and leave the text to inherit `onSurface`, which works for the
+/// three container roles and fails badly for the fourth: `error` is a
+/// saturated red, and `onSurface` on it measures 2.64:1 in light mode and
+/// 1.32:1 in dark — against the 4.5:1 that text has to clear. The one
+/// unreadable case was the highest severity there is. A pair cannot be
+/// half-used.
+WarningSeverityColors warningSeverityColors(
+  BuildContext context,
+  WarningSeverity severity,
+) {
   final scheme = Theme.of(context).colorScheme;
   return switch (severity) {
-    WarningSeverity.minor => scheme.secondaryContainer,
-    WarningSeverity.moderate => scheme.tertiaryContainer,
-    WarningSeverity.severe => scheme.errorContainer,
-    WarningSeverity.extreme => scheme.error,
+    WarningSeverity.minor => (
+      background: scheme.secondaryContainer,
+      foreground: scheme.onSecondaryContainer,
+    ),
+    WarningSeverity.moderate => (
+      background: scheme.tertiaryContainer,
+      foreground: scheme.onTertiaryContainer,
+    ),
+    WarningSeverity.severe => (
+      background: scheme.errorContainer,
+      foreground: scheme.onErrorContainer,
+    ),
+    WarningSeverity.extreme => (
+      background: scheme.error,
+      foreground: scheme.onError,
+    ),
   };
 }

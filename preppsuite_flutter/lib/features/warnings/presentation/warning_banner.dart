@@ -54,32 +54,47 @@ class WarningBanner extends ConsumerWidget {
         final mostSevere = sorted.first;
         final severity = warningSeverityFromName(mostSevere.severity);
 
+        final colors = warningSeverityColors(context, severity);
+
         return Material(
-          color: warningSeverityColor(context, severity),
-          child: InkWell(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => WarningListScreen(profile: profile),
+          color: colors.background,
+          // Both of these, or the highest severity is unreadable: `error`
+          // is a saturated red and the inherited `onSurface` sits at
+          // 1.32:1 on it in dark mode. Set on the Material rather than on
+          // each Text, so a widget added here later cannot miss it.
+          textStyle: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: colors.foreground),
+          child: IconTheme.merge(
+            data: IconThemeData(color: colors.foreground),
+            child: InkWell(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => WarningListScreen(profile: profile),
+                ),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: [
-                  const Icon(Icons.warning_amber_rounded),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      mostSevere.headline,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning_amber_rounded),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        mostSevere.headline,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  if (sorted.length > 1) ...[
-                    const SizedBox(width: 8),
-                    Text(l10n.warningBannerMore(sorted.length - 1)),
+                    if (sorted.length > 1) ...[
+                      const SizedBox(width: 8),
+                      Text(l10n.warningBannerMore(sorted.length - 1)),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
