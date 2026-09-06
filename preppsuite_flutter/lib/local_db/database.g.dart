@@ -3128,6 +3128,775 @@ class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
   }
 }
 
+class $HouseholdPlansTable extends HouseholdPlans
+    with TableInfo<$HouseholdPlansTable, HouseholdPlan> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HouseholdPlansTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
+  @override
+  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
+    'client_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _meetingPointNearMeta = const VerificationMeta(
+    'meetingPointNear',
+  );
+  @override
+  late final GeneratedColumn<String> meetingPointNear = GeneratedColumn<String>(
+    'meeting_point_near',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _meetingPointFarMeta = const VerificationMeta(
+    'meetingPointFar',
+  );
+  @override
+  late final GeneratedColumn<String> meetingPointFar = GeneratedColumn<String>(
+    'meeting_point_far',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contactNameMeta = const VerificationMeta(
+    'contactName',
+  );
+  @override
+  late final GeneratedColumn<String> contactName = GeneratedColumn<String>(
+    'contact_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contactPhoneMeta = const VerificationMeta(
+    'contactPhone',
+  );
+  @override
+  late final GeneratedColumn<String> contactPhone = GeneratedColumn<String>(
+    'contact_phone',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _kitLocationMeta = const VerificationMeta(
+    'kitLocation',
+  );
+  @override
+  late final GeneratedColumn<String> kitLocation = GeneratedColumn<String>(
+    'kit_location',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _shutoffLocationMeta = const VerificationMeta(
+    'shutoffLocation',
+  );
+  @override
+  late final GeneratedColumn<String> shutoffLocation = GeneratedColumn<String>(
+    'shutoff_location',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    clientId,
+    householdId,
+    meetingPointNear,
+    meetingPointFar,
+    contactName,
+    contactPhone,
+    kitLocation,
+    shutoffLocation,
+    notes,
+    updatedAt,
+    deletedAt,
+    dirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'household_plans';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HouseholdPlan> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('client_id')) {
+      context.handle(
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_clientIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('meeting_point_near')) {
+      context.handle(
+        _meetingPointNearMeta,
+        meetingPointNear.isAcceptableOrUnknown(
+          data['meeting_point_near']!,
+          _meetingPointNearMeta,
+        ),
+      );
+    }
+    if (data.containsKey('meeting_point_far')) {
+      context.handle(
+        _meetingPointFarMeta,
+        meetingPointFar.isAcceptableOrUnknown(
+          data['meeting_point_far']!,
+          _meetingPointFarMeta,
+        ),
+      );
+    }
+    if (data.containsKey('contact_name')) {
+      context.handle(
+        _contactNameMeta,
+        contactName.isAcceptableOrUnknown(
+          data['contact_name']!,
+          _contactNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('contact_phone')) {
+      context.handle(
+        _contactPhoneMeta,
+        contactPhone.isAcceptableOrUnknown(
+          data['contact_phone']!,
+          _contactPhoneMeta,
+        ),
+      );
+    }
+    if (data.containsKey('kit_location')) {
+      context.handle(
+        _kitLocationMeta,
+        kitLocation.isAcceptableOrUnknown(
+          data['kit_location']!,
+          _kitLocationMeta,
+        ),
+      );
+    }
+    if (data.containsKey('shutoff_location')) {
+      context.handle(
+        _shutoffLocationMeta,
+        shutoffLocation.isAcceptableOrUnknown(
+          data['shutoff_location']!,
+          _shutoffLocationMeta,
+        ),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {clientId};
+  @override
+  HouseholdPlan map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HouseholdPlan(
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      meetingPointNear: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}meeting_point_near'],
+      ),
+      meetingPointFar: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}meeting_point_far'],
+      ),
+      contactName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contact_name'],
+      ),
+      contactPhone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contact_phone'],
+      ),
+      kitLocation: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kit_location'],
+      ),
+      shutoffLocation: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shutoff_location'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $HouseholdPlansTable createAlias(String alias) {
+    return $HouseholdPlansTable(attachedDatabase, alias);
+  }
+}
+
+class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
+  /// The household id, not a generated id. See the class comment.
+  final String clientId;
+  final String householdId;
+
+  /// Where to gather if the house has to be left in a hurry — the corner,
+  /// the neighbour's drive. Somewhere reachable on foot without a plan.
+  final String? meetingPointNear;
+
+  /// Where to gather if the whole area is cleared and the near one cannot
+  /// be reached.
+  final String? meetingPointFar;
+
+  /// Someone outside the region everyone can ring to say where they are.
+  final String? contactName;
+  final String? contactPhone;
+
+  /// Where the emergency luggage is kept, so nobody searches for it in
+  /// the dark.
+  final String? kitLocation;
+
+  /// Where the water, gas and power can be shut off.
+  final String? shutoffLocation;
+  final String? notes;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final bool dirty;
+  const HouseholdPlan({
+    required this.clientId,
+    required this.householdId,
+    this.meetingPointNear,
+    this.meetingPointFar,
+    this.contactName,
+    this.contactPhone,
+    this.kitLocation,
+    this.shutoffLocation,
+    this.notes,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.dirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['client_id'] = Variable<String>(clientId);
+    map['household_id'] = Variable<String>(householdId);
+    if (!nullToAbsent || meetingPointNear != null) {
+      map['meeting_point_near'] = Variable<String>(meetingPointNear);
+    }
+    if (!nullToAbsent || meetingPointFar != null) {
+      map['meeting_point_far'] = Variable<String>(meetingPointFar);
+    }
+    if (!nullToAbsent || contactName != null) {
+      map['contact_name'] = Variable<String>(contactName);
+    }
+    if (!nullToAbsent || contactPhone != null) {
+      map['contact_phone'] = Variable<String>(contactPhone);
+    }
+    if (!nullToAbsent || kitLocation != null) {
+      map['kit_location'] = Variable<String>(kitLocation);
+    }
+    if (!nullToAbsent || shutoffLocation != null) {
+      map['shutoff_location'] = Variable<String>(shutoffLocation);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['dirty'] = Variable<bool>(dirty);
+    return map;
+  }
+
+  HouseholdPlansCompanion toCompanion(bool nullToAbsent) {
+    return HouseholdPlansCompanion(
+      clientId: Value(clientId),
+      householdId: Value(householdId),
+      meetingPointNear: meetingPointNear == null && nullToAbsent
+          ? const Value.absent()
+          : Value(meetingPointNear),
+      meetingPointFar: meetingPointFar == null && nullToAbsent
+          ? const Value.absent()
+          : Value(meetingPointFar),
+      contactName: contactName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contactName),
+      contactPhone: contactPhone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contactPhone),
+      kitLocation: kitLocation == null && nullToAbsent
+          ? const Value.absent()
+          : Value(kitLocation),
+      shutoffLocation: shutoffLocation == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shutoffLocation),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      dirty: Value(dirty),
+    );
+  }
+
+  factory HouseholdPlan.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HouseholdPlan(
+      clientId: serializer.fromJson<String>(json['clientId']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      meetingPointNear: serializer.fromJson<String?>(json['meetingPointNear']),
+      meetingPointFar: serializer.fromJson<String?>(json['meetingPointFar']),
+      contactName: serializer.fromJson<String?>(json['contactName']),
+      contactPhone: serializer.fromJson<String?>(json['contactPhone']),
+      kitLocation: serializer.fromJson<String?>(json['kitLocation']),
+      shutoffLocation: serializer.fromJson<String?>(json['shutoffLocation']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'clientId': serializer.toJson<String>(clientId),
+      'householdId': serializer.toJson<String>(householdId),
+      'meetingPointNear': serializer.toJson<String?>(meetingPointNear),
+      'meetingPointFar': serializer.toJson<String?>(meetingPointFar),
+      'contactName': serializer.toJson<String?>(contactName),
+      'contactPhone': serializer.toJson<String?>(contactPhone),
+      'kitLocation': serializer.toJson<String?>(kitLocation),
+      'shutoffLocation': serializer.toJson<String?>(shutoffLocation),
+      'notes': serializer.toJson<String?>(notes),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+    };
+  }
+
+  HouseholdPlan copyWith({
+    String? clientId,
+    String? householdId,
+    Value<String?> meetingPointNear = const Value.absent(),
+    Value<String?> meetingPointFar = const Value.absent(),
+    Value<String?> contactName = const Value.absent(),
+    Value<String?> contactPhone = const Value.absent(),
+    Value<String?> kitLocation = const Value.absent(),
+    Value<String?> shutoffLocation = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? dirty,
+  }) => HouseholdPlan(
+    clientId: clientId ?? this.clientId,
+    householdId: householdId ?? this.householdId,
+    meetingPointNear: meetingPointNear.present
+        ? meetingPointNear.value
+        : this.meetingPointNear,
+    meetingPointFar: meetingPointFar.present
+        ? meetingPointFar.value
+        : this.meetingPointFar,
+    contactName: contactName.present ? contactName.value : this.contactName,
+    contactPhone: contactPhone.present ? contactPhone.value : this.contactPhone,
+    kitLocation: kitLocation.present ? kitLocation.value : this.kitLocation,
+    shutoffLocation: shutoffLocation.present
+        ? shutoffLocation.value
+        : this.shutoffLocation,
+    notes: notes.present ? notes.value : this.notes,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    dirty: dirty ?? this.dirty,
+  );
+  HouseholdPlan copyWithCompanion(HouseholdPlansCompanion data) {
+    return HouseholdPlan(
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      meetingPointNear: data.meetingPointNear.present
+          ? data.meetingPointNear.value
+          : this.meetingPointNear,
+      meetingPointFar: data.meetingPointFar.present
+          ? data.meetingPointFar.value
+          : this.meetingPointFar,
+      contactName: data.contactName.present
+          ? data.contactName.value
+          : this.contactName,
+      contactPhone: data.contactPhone.present
+          ? data.contactPhone.value
+          : this.contactPhone,
+      kitLocation: data.kitLocation.present
+          ? data.kitLocation.value
+          : this.kitLocation,
+      shutoffLocation: data.shutoffLocation.present
+          ? data.shutoffLocation.value
+          : this.shutoffLocation,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdPlan(')
+          ..write('clientId: $clientId, ')
+          ..write('householdId: $householdId, ')
+          ..write('meetingPointNear: $meetingPointNear, ')
+          ..write('meetingPointFar: $meetingPointFar, ')
+          ..write('contactName: $contactName, ')
+          ..write('contactPhone: $contactPhone, ')
+          ..write('kitLocation: $kitLocation, ')
+          ..write('shutoffLocation: $shutoffLocation, ')
+          ..write('notes: $notes, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    clientId,
+    householdId,
+    meetingPointNear,
+    meetingPointFar,
+    contactName,
+    contactPhone,
+    kitLocation,
+    shutoffLocation,
+    notes,
+    updatedAt,
+    deletedAt,
+    dirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HouseholdPlan &&
+          other.clientId == this.clientId &&
+          other.householdId == this.householdId &&
+          other.meetingPointNear == this.meetingPointNear &&
+          other.meetingPointFar == this.meetingPointFar &&
+          other.contactName == this.contactName &&
+          other.contactPhone == this.contactPhone &&
+          other.kitLocation == this.kitLocation &&
+          other.shutoffLocation == this.shutoffLocation &&
+          other.notes == this.notes &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.dirty == this.dirty);
+}
+
+class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
+  final Value<String> clientId;
+  final Value<String> householdId;
+  final Value<String?> meetingPointNear;
+  final Value<String?> meetingPointFar;
+  final Value<String?> contactName;
+  final Value<String?> contactPhone;
+  final Value<String?> kitLocation;
+  final Value<String?> shutoffLocation;
+  final Value<String?> notes;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> dirty;
+  final Value<int> rowid;
+  const HouseholdPlansCompanion({
+    this.clientId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.meetingPointNear = const Value.absent(),
+    this.meetingPointFar = const Value.absent(),
+    this.contactName = const Value.absent(),
+    this.contactPhone = const Value.absent(),
+    this.kitLocation = const Value.absent(),
+    this.shutoffLocation = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HouseholdPlansCompanion.insert({
+    required String clientId,
+    required String householdId,
+    this.meetingPointNear = const Value.absent(),
+    this.meetingPointFar = const Value.absent(),
+    this.contactName = const Value.absent(),
+    this.contactPhone = const Value.absent(),
+    this.kitLocation = const Value.absent(),
+    this.shutoffLocation = const Value.absent(),
+    this.notes = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : clientId = Value(clientId),
+       householdId = Value(householdId),
+       updatedAt = Value(updatedAt);
+  static Insertable<HouseholdPlan> custom({
+    Expression<String>? clientId,
+    Expression<String>? householdId,
+    Expression<String>? meetingPointNear,
+    Expression<String>? meetingPointFar,
+    Expression<String>? contactName,
+    Expression<String>? contactPhone,
+    Expression<String>? kitLocation,
+    Expression<String>? shutoffLocation,
+    Expression<String>? notes,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? dirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (clientId != null) 'client_id': clientId,
+      if (householdId != null) 'household_id': householdId,
+      if (meetingPointNear != null) 'meeting_point_near': meetingPointNear,
+      if (meetingPointFar != null) 'meeting_point_far': meetingPointFar,
+      if (contactName != null) 'contact_name': contactName,
+      if (contactPhone != null) 'contact_phone': contactPhone,
+      if (kitLocation != null) 'kit_location': kitLocation,
+      if (shutoffLocation != null) 'shutoff_location': shutoffLocation,
+      if (notes != null) 'notes': notes,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HouseholdPlansCompanion copyWith({
+    Value<String>? clientId,
+    Value<String>? householdId,
+    Value<String?>? meetingPointNear,
+    Value<String?>? meetingPointFar,
+    Value<String?>? contactName,
+    Value<String?>? contactPhone,
+    Value<String?>? kitLocation,
+    Value<String?>? shutoffLocation,
+    Value<String?>? notes,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? dirty,
+    Value<int>? rowid,
+  }) {
+    return HouseholdPlansCompanion(
+      clientId: clientId ?? this.clientId,
+      householdId: householdId ?? this.householdId,
+      meetingPointNear: meetingPointNear ?? this.meetingPointNear,
+      meetingPointFar: meetingPointFar ?? this.meetingPointFar,
+      contactName: contactName ?? this.contactName,
+      contactPhone: contactPhone ?? this.contactPhone,
+      kitLocation: kitLocation ?? this.kitLocation,
+      shutoffLocation: shutoffLocation ?? this.shutoffLocation,
+      notes: notes ?? this.notes,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      dirty: dirty ?? this.dirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (clientId.present) {
+      map['client_id'] = Variable<String>(clientId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (meetingPointNear.present) {
+      map['meeting_point_near'] = Variable<String>(meetingPointNear.value);
+    }
+    if (meetingPointFar.present) {
+      map['meeting_point_far'] = Variable<String>(meetingPointFar.value);
+    }
+    if (contactName.present) {
+      map['contact_name'] = Variable<String>(contactName.value);
+    }
+    if (contactPhone.present) {
+      map['contact_phone'] = Variable<String>(contactPhone.value);
+    }
+    if (kitLocation.present) {
+      map['kit_location'] = Variable<String>(kitLocation.value);
+    }
+    if (shutoffLocation.present) {
+      map['shutoff_location'] = Variable<String>(shutoffLocation.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdPlansCompanion(')
+          ..write('clientId: $clientId, ')
+          ..write('householdId: $householdId, ')
+          ..write('meetingPointNear: $meetingPointNear, ')
+          ..write('meetingPointFar: $meetingPointFar, ')
+          ..write('contactName: $contactName, ')
+          ..write('contactPhone: $contactPhone, ')
+          ..write('kitLocation: $kitLocation, ')
+          ..write('shutoffLocation: $shutoffLocation, ')
+          ..write('notes: $notes, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -4137,6 +4906,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ChecklistTemplatesTable(this);
   late final $ChecklistItemsTable checklistItems = $ChecklistItemsTable(this);
   late final $BudgetEntriesTable budgetEntries = $BudgetEntriesTable(this);
+  late final $HouseholdPlansTable householdPlans = $HouseholdPlansTable(this);
   late final $WarningsTable warnings = $WarningsTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
   @override
@@ -4148,6 +4918,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     checklistTemplates,
     checklistItems,
     budgetEntries,
+    householdPlans,
     warnings,
     syncState,
   ];

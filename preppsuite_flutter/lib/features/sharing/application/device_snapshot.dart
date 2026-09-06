@@ -26,6 +26,7 @@ class DeviceSnapshot {
     this.checklistTemplates = const [],
     this.checklistItems = const [],
     this.budgetEntries = const [],
+    this.householdPlans = const [],
   });
 
   /// See [HouseholdFile.currentVersion] for how a mismatch is handled: a
@@ -41,6 +42,11 @@ class DeviceSnapshot {
   final List<Map<String, Object?>> checklistItems;
   final List<Map<String, Object?>> budgetEntries;
 
+  /// At most one, and its clientId is the household id — see
+  /// [HouseholdPlans]. A list all the same, so the shape of the file
+  /// stays the same as every other collection in it.
+  final List<Map<String, Object?>> householdPlans;
+
   String encode() => const JsonEncoder.withIndent('  ').convert({
     'version': currentVersion,
     'deviceId': deviceId,
@@ -50,6 +56,7 @@ class DeviceSnapshot {
     'checklistTemplates': checklistTemplates,
     'checklistItems': checklistItems,
     'budgetEntries': budgetEntries,
+    'householdPlans': householdPlans,
   });
 
   static DeviceSnapshot? decode(String raw) {
@@ -73,6 +80,7 @@ class DeviceSnapshot {
         checklistTemplates: _rows(json['checklistTemplates']),
         checklistItems: _rows(json['checklistItems']),
         budgetEntries: _rows(json['budgetEntries']),
+        householdPlans: _rows(json['householdPlans']),
       );
     } on FormatException {
       return null;
@@ -236,6 +244,47 @@ ChecklistItemsCompanion? decodeChecklistItem(Map<String, Object?> json) {
     isChecked: Value(json['isChecked'] == true),
     linkedInventoryItemId: Value(_string(json['linkedInventoryItemId'])),
     sortOrder: Value(_int(json['sortOrder']) ?? 0),
+    updatedAt: updatedAt,
+    deletedAt: Value(asUtcDate(json['deletedAt'])),
+    dirty: const Value(false),
+  );
+}
+
+Map<String, Object?> encodeHouseholdPlan(HouseholdPlan row) => {
+  'clientId': row.clientId,
+  'householdId': row.householdId,
+  'meetingPointNear': row.meetingPointNear,
+  'meetingPointFar': row.meetingPointFar,
+  'contactName': row.contactName,
+  'contactPhone': row.contactPhone,
+  'kitLocation': row.kitLocation,
+  'shutoffLocation': row.shutoffLocation,
+  'notes': row.notes,
+  'updatedAt': _date(row.updatedAt),
+  'deletedAt': _date(row.deletedAt),
+};
+
+HouseholdPlansCompanion? decodeHouseholdPlan(Map<String, Object?> json) {
+  final clientId = _string(json['clientId']);
+  final householdId = _string(json['householdId']);
+  final updatedAt = asUtcDate(json['updatedAt']);
+  // Every field of the plan itself is optional — a household that only
+  // agreed a meeting point and nothing else has a perfectly good plan.
+  // The three above are what makes the row addressable at all.
+  if (clientId == null || householdId == null || updatedAt == null) {
+    return null;
+  }
+
+  return HouseholdPlansCompanion.insert(
+    clientId: clientId,
+    householdId: householdId,
+    meetingPointNear: Value(_string(json['meetingPointNear'])),
+    meetingPointFar: Value(_string(json['meetingPointFar'])),
+    contactName: Value(_string(json['contactName'])),
+    contactPhone: Value(_string(json['contactPhone'])),
+    kitLocation: Value(_string(json['kitLocation'])),
+    shutoffLocation: Value(_string(json['shutoffLocation'])),
+    notes: Value(_string(json['notes'])),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),
     dirty: const Value(false),

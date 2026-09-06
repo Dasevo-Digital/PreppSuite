@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../application/household_providers.dart';
+import '../application/household_plan_controller.dart';
+import 'household_plan_screen.dart';
 
 /// The household's own details.
 ///
@@ -24,6 +26,32 @@ class HouseholdOverviewScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Card(
+            child: Consumer(
+              builder: (context, ref, _) {
+                final plan = ref.watch(householdPlanProvider(profile.id)).value;
+                return ListTile(
+                  leading: const Icon(Icons.emergency_share_outlined),
+                  title: Text(l10n.householdPlanTitle),
+                  // Says whether there is one, because a plan nobody wrote
+                  // is the case this screen exists to make visible.
+                  subtitle: Text(
+                    plan?.meetingPointNear ??
+                        plan?.contactName ??
+                        l10n.householdPlanEmpty,
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          HouseholdPlanScreen(householdId: profile.id),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
           Card(
             child: Column(
               children: [

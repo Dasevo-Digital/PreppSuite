@@ -4,6 +4,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'tables/budget_entries_table.dart';
 import 'tables/checklist_items_table.dart';
 import 'tables/checklist_templates_table.dart';
+import 'tables/household_plans_table.dart';
 import 'tables/inventory_items_table.dart';
 import 'tables/sync_state_table.dart';
 import 'tables/warnings_table.dart';
@@ -16,6 +17,7 @@ part 'database.g.dart';
     ChecklistTemplates,
     ChecklistItems,
     BudgetEntries,
+    HouseholdPlans,
     Warnings,
     SyncState,
   ],
@@ -25,10 +27,17 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   /// The tables whose rows travel through a shared folder, i.e. the ones
   /// with a `dirty` column.
+  /// The tables that existed at schema 6, for the repair below.
+  ///
+  /// Deliberately not "every syncable table": this list is read by the
+  /// `from < 6` migration, which runs before the later branches create
+  /// anything. Adding `household_plans` here would issue an UPDATE
+  /// against a table that does not exist yet and take the migration down
+  /// on every install older than 6.
   static const _syncableTableNames = [
     'inventory_items',
     'checklist_templates',
@@ -122,8 +131,44 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(inventoryItems, inventoryItems.fatGrams);
         await m.addColumn(inventoryItems, inventoryItems.fiberGrams);
       }
+      if (from < 10) {
+        // A new table, so nothing to convert: an install that never had a
+        // plan simply has none, and the screen says so.
+        await m.createTable(householdPlans);
+      }
     },
   );
+
+  // --- Household plan --------------------------------------------------
+
+  /// The household's plan, or null while there is none.
+  ///
+  /// Selected by [clientId] rather than by household, because for this one
+  /// table they are the same value — see [HouseholdPlans]. A tombstoned
+  /// plan reads as absent, which is what "we deleted it" should look like.
+  Stream<HouseholdPlan?> watchHouseholdPlan(String householdId) {
+    return (select(householdPlans)..where(
+          (t) => t.clientId.equals(householdId) & t.deletedAt.isNull(),
+        ))
+        .watchSingleOrNull();
+  }
+
+  Future<void> upsertHouseholdPlan(HouseholdPlansCompanion plan) {
+    return into(householdPlans).insertOnConflictUpdate(plan);
+  }
+
+  Future<List<HouseholdPlan>> dirtyHouseholdPlans(String householdId) {
+    return (select(householdPlans)..where(
+          (t) => t.householdId.equals(householdId) & t.dirty.equals(true),
+        ))
+        .get();
+  }
+
+  Future<List<HouseholdPlan>> householdPlansForSync(String householdId) {
+    return (select(
+      householdPlans,
+    )..where((t) => t.householdId.equals(householdId))).get();
+  }
 
   // --- Inventory ------------------------------------------------------
 
@@ -497,6 +542,12 @@ class AppDatabase extends _$AppDatabase {
                 t.updatedAt.isSmallerOrEqualValue(through),
           ))
           .write(const BudgetEntriesCompanion(dirty: Value(false)));
+      await (update(householdPlans)..where(
+            (t) =>
+                t.householdId.equals(householdId) &
+                t.updatedAt.isSmallerOrEqualValue(through),
+          ))
+          .write(const HouseholdPlansCompanion(dirty: Value(false)));
     });
   }
 
@@ -545,6 +596,30 @@ class AppDatabase extends _$AppDatabase {
           dirty: const Value(true),
         ),
       );
+
+      // The plan cannot be re-stamped like the rest. Its `clientId` *is*
+      // the household id — that is what makes two devices edit one record
+      // instead of one each — so a plan left under the old key would stop
+      // being the household's plan and start being an orphan that syncs
+      // forever without ever being shown. It is moved to the new key,
+      // keeping its `updatedAt` so the folder's own plan can still win.
+      final plan = await (select(
+        householdPlans,
+      )..where((t) => t.clientId.equals(from))).getSingleOrNull();
+      if (plan != null) {
+        await (delete(
+          householdPlans,
+        )..where((t) => t.clientId.equals(from))).go();
+        await into(householdPlans).insertOnConflictUpdate(
+          plan
+              .toCompanion(false)
+              .copyWith(
+                clientId: Value(to),
+                householdId: Value(to),
+                dirty: const Value(true),
+              ),
+        );
+      }
     });
   }
 
@@ -558,6 +633,7 @@ class AppDatabase extends _$AppDatabase {
     List<IncomingRow<ChecklistTemplatesCompanion>> templates = const [],
     List<IncomingRow<ChecklistItemsCompanion>> items = const [],
     List<IncomingRow<BudgetEntriesCompanion>> budget = const [],
+    List<IncomingRow<HouseholdPlansCompanion>> plans = const [],
   }) {
     return transaction(() async {
       var changed = 0;
@@ -579,6 +655,11 @@ class AppDatabase extends _$AppDatabase {
       changed += await _mergeInto(
         budgetEntries,
         budget,
+        (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+      );
+      changed += await _mergeInto(
+        householdPlans,
+        plans,
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
       );
       return changed;

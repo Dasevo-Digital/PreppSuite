@@ -439,6 +439,17 @@ tree; the test suite deliberately targets that layer rather than the UI.
   are *read*, though: a household does not update every device in the same
   minute, and dropping the plain files would make rows vanish for
   everyone until it had.
+- **`HouseholdPlans.clientId` is the household id, not a generated one.**
+  Every other table follows "a client id is generated once, on one
+  device"; the plan deliberately does not, because it is a single record
+  the whole household edits. Two devices writing the same key let
+  last-writer-wins settle it; generated ids would give each device its own
+  plan and the two would never converge. The price is that
+  `adoptHouseholdId` has to *re-key* this row rather than re-stamp it —
+  keeping its `updatedAt`, so the joined household's own plan can still
+  win — and `_syncableTableNames` must not list it, because that list is
+  read by the schema-6 repair, which runs before schema 10 creates the
+  table.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

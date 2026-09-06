@@ -999,6 +999,75 @@ class AppLocalizationsDe extends AppLocalizations {
       'Der Schlüssel wird abgeleitet. Das dauert absichtlich einen Moment.';
 
   @override
+  String get householdPlanTitle => 'Notfallplan';
+
+  @override
+  String get householdPlanIntro =>
+      'Vereinbart, bevor es nötig ist. Jeder im Haushalt sollte das auswendig können – schreib also nur auf, was du auch laut sagen würdest.';
+
+  @override
+  String get householdPlanEmpty => 'Noch nichts vereinbart.';
+
+  @override
+  String get householdPlanMeetingNear => 'Treffpunkt in der Nähe';
+
+  @override
+  String get householdPlanMeetingNearHint =>
+      'Zu Fuß erreichbar, ohne Absprache – die Ecke, die Einfahrt der Nachbarn.';
+
+  @override
+  String get householdPlanMeetingFar => 'Treffpunkt weiter weg';
+
+  @override
+  String get householdPlanMeetingFarHint =>
+      'Für den Fall, dass die Gegend geräumt wird und der nahe Punkt nicht erreichbar ist.';
+
+  @override
+  String get householdPlanContactName => 'Auswärtiger Kontakt';
+
+  @override
+  String get householdPlanContactNameHint =>
+      'Jemand außerhalb der Region, den alle anrufen. Die Leitungen vor Ort sind als Erstes überlastet; ein Anruf in den Nachbarkreis kommt oft durch, wenn einer über die Straße es nicht tut.';
+
+  @override
+  String get householdPlanContactPhone => 'Dessen Nummer';
+
+  @override
+  String get householdPlanKitLocation => 'Wo das Notgepäck liegt';
+
+  @override
+  String get householdPlanKitLocationHint =>
+      'Damit im Dunkeln niemand danach sucht.';
+
+  @override
+  String get householdPlanShutoff =>
+      'Wo Wasser, Gas und Strom abgestellt werden';
+
+  @override
+  String get householdPlanNotes => 'Sonstiges';
+
+  @override
+  String get householdPlanSaved => 'Plan gespeichert.';
+
+  @override
+  String get householdPlanCleared => 'Plan entfernt.';
+
+  @override
+  String get householdPlanClear => 'Plan entfernen';
+
+  @override
+  String get householdPlanClearConfirm =>
+      'Den Plan für alle Geräte dieses Haushalts entfernen?';
+
+  @override
+  String get householdPlanShared =>
+      'Dieser Plan erreicht über den gemeinsamen Ordner jedes Gerät des Haushalts.';
+
+  @override
+  String get householdPlanNothingEntered =>
+      'Schreib mindestens eine Sache auf, bevor du speicherst.';
+
+  @override
   String get personCountLabel => 'Personen im Haushalt';
 
   @override

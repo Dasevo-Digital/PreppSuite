@@ -989,6 +989,74 @@ class AppLocalizationsEn extends AppLocalizations {
       'Deriving the key. This takes a moment on purpose.';
 
   @override
+  String get householdPlanTitle => 'Emergency plan';
+
+  @override
+  String get householdPlanIntro =>
+      'Agreed before it is needed. Everyone in the household should know these by heart, so write down only what you would actually say out loud.';
+
+  @override
+  String get householdPlanEmpty => 'Nothing agreed yet.';
+
+  @override
+  String get householdPlanMeetingNear => 'Meeting point nearby';
+
+  @override
+  String get householdPlanMeetingNearHint =>
+      'Reachable on foot, without a plan — the corner, the neighbour\'s drive.';
+
+  @override
+  String get householdPlanMeetingFar => 'Meeting point further out';
+
+  @override
+  String get householdPlanMeetingFarHint =>
+      'For when the whole area is cleared and the near one cannot be reached.';
+
+  @override
+  String get householdPlanContactName => 'Out-of-area contact';
+
+  @override
+  String get householdPlanContactNameHint =>
+      'Someone outside the region everyone rings. Local lines are the first to congest; a call to the next county often gets through when one across the street does not.';
+
+  @override
+  String get householdPlanContactPhone => 'Their number';
+
+  @override
+  String get householdPlanKitLocation => 'Where the emergency luggage is';
+
+  @override
+  String get householdPlanKitLocationHint =>
+      'So nobody searches for it in the dark.';
+
+  @override
+  String get householdPlanShutoff => 'Where water, gas and power are shut off';
+
+  @override
+  String get householdPlanNotes => 'Anything else';
+
+  @override
+  String get householdPlanSaved => 'Plan saved.';
+
+  @override
+  String get householdPlanCleared => 'Plan removed.';
+
+  @override
+  String get householdPlanClear => 'Remove plan';
+
+  @override
+  String get householdPlanClearConfirm =>
+      'Remove the plan for every device in this household?';
+
+  @override
+  String get householdPlanShared =>
+      'This plan reaches every device in the household through the shared folder.';
+
+  @override
+  String get householdPlanNothingEntered =>
+      'Write down at least one thing before saving.';
+
+  @override
   String get personCountLabel => 'People in the household';
 
   @override

@@ -1796,6 +1796,126 @@ abstract class AppLocalizations {
   /// **'Deriving the key. This takes a moment on purpose.'**
   String get folderEncryptionWorking;
 
+  /// No description provided for @householdPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency plan'**
+  String get householdPlanTitle;
+
+  /// No description provided for @householdPlanIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Agreed before it is needed. Everyone in the household should know these by heart, so write down only what you would actually say out loud.'**
+  String get householdPlanIntro;
+
+  /// No description provided for @householdPlanEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing agreed yet.'**
+  String get householdPlanEmpty;
+
+  /// No description provided for @householdPlanMeetingNear.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting point nearby'**
+  String get householdPlanMeetingNear;
+
+  /// No description provided for @householdPlanMeetingNearHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reachable on foot, without a plan — the corner, the neighbour\'s drive.'**
+  String get householdPlanMeetingNearHint;
+
+  /// No description provided for @householdPlanMeetingFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting point further out'**
+  String get householdPlanMeetingFar;
+
+  /// No description provided for @householdPlanMeetingFarHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For when the whole area is cleared and the near one cannot be reached.'**
+  String get householdPlanMeetingFarHint;
+
+  /// No description provided for @householdPlanContactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Out-of-area contact'**
+  String get householdPlanContactName;
+
+  /// No description provided for @householdPlanContactNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone outside the region everyone rings. Local lines are the first to congest; a call to the next county often gets through when one across the street does not.'**
+  String get householdPlanContactNameHint;
+
+  /// No description provided for @householdPlanContactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Their number'**
+  String get householdPlanContactPhone;
+
+  /// No description provided for @householdPlanKitLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the emergency luggage is'**
+  String get householdPlanKitLocation;
+
+  /// No description provided for @householdPlanKitLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'So nobody searches for it in the dark.'**
+  String get householdPlanKitLocationHint;
+
+  /// No description provided for @householdPlanShutoff.
+  ///
+  /// In en, this message translates to:
+  /// **'Where water, gas and power are shut off'**
+  String get householdPlanShutoff;
+
+  /// No description provided for @householdPlanNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything else'**
+  String get householdPlanNotes;
+
+  /// No description provided for @householdPlanSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan saved.'**
+  String get householdPlanSaved;
+
+  /// No description provided for @householdPlanCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan removed.'**
+  String get householdPlanCleared;
+
+  /// No description provided for @householdPlanClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove plan'**
+  String get householdPlanClear;
+
+  /// No description provided for @householdPlanClearConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the plan for every device in this household?'**
+  String get householdPlanClearConfirm;
+
+  /// No description provided for @householdPlanShared.
+  ///
+  /// In en, this message translates to:
+  /// **'This plan reaches every device in the household through the shared folder.'**
+  String get householdPlanShared;
+
+  /// No description provided for @householdPlanNothingEntered.
+  ///
+  /// In en, this message translates to:
+  /// **'Write down at least one thing before saving.'**
+  String get householdPlanNothingEntered;
+
   /// No description provided for @personCountLabel.
   ///
   /// In en, this message translates to:

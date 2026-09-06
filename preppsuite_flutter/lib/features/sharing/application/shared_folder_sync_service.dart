@@ -245,6 +245,10 @@ class SharedFolderSyncService {
         for (final json in snapshot.budgetEntries)
           ?_incoming(json, decodeBudgetEntry(json)),
       ],
+      plans: [
+        for (final json in snapshot.householdPlans)
+          ?_incoming(json, decodeHouseholdPlan(json)),
+      ],
     );
   }
 
@@ -305,6 +309,10 @@ class SharedFolderSyncService {
         for (final row in await _db.budgetEntriesForSync(householdId))
           encodeBudgetEntry(row),
       ],
+      householdPlans: [
+        for (final row in await _db.householdPlansForSync(householdId))
+          encodeHouseholdPlan(row),
+      ],
     );
 
     final folderKey = key;
@@ -326,6 +334,7 @@ class SharedFolderSyncService {
     return (await _db.dirtyInventoryItems(householdId)).isNotEmpty ||
         (await _db.dirtyChecklistTemplates(householdId)).isNotEmpty ||
         (await _db.dirtyChecklistItems(householdId)).isNotEmpty ||
-        (await _db.dirtyBudgetEntries(householdId)).isNotEmpty;
+        (await _db.dirtyBudgetEntries(householdId)).isNotEmpty ||
+        (await _db.dirtyHouseholdPlans(householdId)).isNotEmpty;
   }
 }
