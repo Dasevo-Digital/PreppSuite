@@ -28,6 +28,16 @@ class InventoryItems extends Table {
   /// supply calculator (`supply_calculator.dart`).
   IntColumn get calories => integer().nullable()();
 
+  /// Macronutrients for the item's current [quantity], in grams — the
+  /// same "whole item, not per 100 g" convention as [calories], for the
+  /// same reason: a shelf is then a sum. Filled in from the barcode (see
+  /// `open_food_facts_service.dart`) or by hand, and null wherever the
+  /// label does not say, which is most non-food supplies.
+  RealColumn get proteinGrams => real().nullable()();
+  RealColumn get carbohydrateGrams => real().nullable()();
+  RealColumn get fatGrams => real().nullable()();
+  RealColumn get fiberGrams => real().nullable()();
+
   TextColumn get notes => text().nullable()();
 
   /// Path to a locally-stored photo of the item (see

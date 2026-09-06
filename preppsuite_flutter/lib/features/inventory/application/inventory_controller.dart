@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../local_db/database.dart';
 import 'inventory_csv_import.dart';
 import 'inventory_providers.dart';
+import 'package_nutrition.dart';
 
 /// Local writes: create, update, and delete-as-tombstone. The UI never
 /// talks to Drift directly — everything goes through here, which is what
@@ -31,7 +32,7 @@ class InventoryController {
     String? barcode,
     String? offProductId,
     String? photoPath,
-    int? calories,
+    PackageNutrition nutrition = const PackageNutrition(),
   }) async {
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
@@ -48,7 +49,11 @@ class InventoryController {
         barcode: Value(barcode),
         offProductId: Value(offProductId),
         photoPath: Value(photoPath),
-        calories: Value(calories),
+        calories: Value(nutrition.kcal),
+        proteinGrams: Value(nutrition.proteinGrams),
+        carbohydrateGrams: Value(nutrition.carbohydrateGrams),
+        fatGrams: Value(nutrition.fatGrams),
+        fiberGrams: Value(nutrition.fiberGrams),
         updatedAt: DateTime.now().toUtc(),
         dirty: const Value(true),
       ),
@@ -68,7 +73,7 @@ class InventoryController {
     String? barcode,
     String? offProductId,
     String? photoPath,
-    int? calories,
+    PackageNutrition nutrition = const PackageNutrition(),
   }) async {
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
@@ -85,7 +90,11 @@ class InventoryController {
         minQuantity: Value(minQuantity),
         notes: Value(notes),
         photoPath: Value(photoPath),
-        calories: Value(calories),
+        calories: Value(nutrition.kcal),
+        proteinGrams: Value(nutrition.proteinGrams),
+        carbohydrateGrams: Value(nutrition.carbohydrateGrams),
+        fatGrams: Value(nutrition.fatGrams),
+        fiberGrams: Value(nutrition.fiberGrams),
         updatedAt: DateTime.now().toUtc(),
         dirty: const Value(true),
       ),
@@ -145,6 +154,10 @@ class InventoryController {
         notes: Value(existing.notes),
         photoPath: Value(existing.photoPath),
         calories: Value(existing.calories),
+        proteinGrams: Value(existing.proteinGrams),
+        carbohydrateGrams: Value(existing.carbohydrateGrams),
+        fatGrams: Value(existing.fatGrams),
+        fiberGrams: Value(existing.fiberGrams),
         updatedAt: DateTime.now().toUtc(),
         dirty: const Value(true),
       ),
@@ -168,6 +181,10 @@ class InventoryController {
         notes: Value(existing.notes),
         photoPath: Value(existing.photoPath),
         calories: Value(existing.calories),
+        proteinGrams: Value(existing.proteinGrams),
+        carbohydrateGrams: Value(existing.carbohydrateGrams),
+        fatGrams: Value(existing.fatGrams),
+        fiberGrams: Value(existing.fiberGrams),
         updatedAt: DateTime.now().toUtc(),
         dirty: const Value(true),
         deletedAt: Value(DateTime.now().toUtc()),

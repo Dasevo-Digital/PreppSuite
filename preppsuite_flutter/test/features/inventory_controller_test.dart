@@ -5,6 +5,7 @@ import 'package:preppsuite_flutter/model/categories.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_controller.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
+import 'package:preppsuite_flutter/features/inventory/application/package_nutrition.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
 void main() {
@@ -106,6 +107,73 @@ void main() {
       await controller.consumeQuantity(before, 1);
 
       expect((await storedItem()).updatedAt.isAfter(before.updatedAt), isTrue);
+    });
+  });
+
+  group('nutrition', () {
+    const scanned = PackageNutrition(
+      kcal: 1750,
+      proteinGrams: 42.5,
+      carbohydrateGrams: 300,
+      fatGrams: 8,
+      fiberGrams: 15,
+    );
+
+    test('what the scan read is what the row holds', () async {
+      await controller.addItem(
+        name: 'Haferflocken',
+        category: InventoryItemCategory.food,
+        quantity: 1,
+        unit: 'Packung',
+        storageLocation: 'Keller',
+        nutrition: scanned,
+      );
+
+      final item = await storedItem();
+      expect(item.calories, 1750);
+      expect(item.proteinGrams, 42.5);
+      expect(item.carbohydrateGrams, 300);
+      expect(item.fatGrams, 8);
+      expect(item.fiberGrams, 15);
+    });
+
+    test('using some of an item keeps its nutrition', () async {
+      // Consuming rewrites the whole row, so a column the rewrite forgets
+      // is silently emptied — which is how a scanned label would be lost
+      // the first time anyone ate from the packet.
+      await controller.addItem(
+        name: 'Haferflocken',
+        category: InventoryItemCategory.food,
+        quantity: 2,
+        unit: 'Packung',
+        storageLocation: 'Keller',
+        nutrition: scanned,
+      );
+
+      await controller.consumeQuantity(await storedItem(), 1);
+
+      final item = await storedItem();
+      expect(item.quantity, 1);
+      expect(item.calories, 1750);
+      expect(item.proteinGrams, 42.5);
+      expect(item.fiberGrams, 15);
+    });
+
+    test('an item nobody scanned keeps four nulls, not four zeroes', () async {
+      await controller.addItem(
+        name: 'Kerzen',
+        category: InventoryItemCategory.other,
+        quantity: 10,
+        unit: 'Stk',
+        storageLocation: 'Keller',
+      );
+
+      final item = await storedItem();
+      expect(item.calories, isNull);
+      expect(item.proteinGrams, isNull);
+      expect(item.carbohydrateGrams, isNull);
+      expect(item.fatGrams, isNull);
+      expect(item.fiberGrams, isNull);
     });
   });
 

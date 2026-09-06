@@ -16,6 +16,7 @@ import '../application/supply_calculator.dart';
 import 'consume_dialog.dart';
 import 'inventory_csv_import_screen.dart';
 import 'inventory_item_form_screen.dart';
+import 'storage_tips_screen.dart';
 
 class InventoryListScreen extends ConsumerWidget {
   const InventoryListScreen({super.key, required this.householdId});
@@ -32,6 +33,15 @@ class InventoryListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.inventoryTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.menu_book_outlined),
+            tooltip: l10n.storageTipsTitle,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => StorageTipsScreen(householdId: householdId),
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.download),
             tooltip: l10n.csvExportButton,

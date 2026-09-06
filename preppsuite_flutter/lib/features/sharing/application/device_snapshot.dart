@@ -107,6 +107,10 @@ Map<String, Object?> encodeInventoryItem(InventoryItem row) => {
   'expirationDate': _date(row.expirationDate),
   'minQuantity': row.minQuantity,
   'calories': row.calories,
+  'proteinGrams': row.proteinGrams,
+  'carbohydrateGrams': row.carbohydrateGrams,
+  'fatGrams': row.fatGrams,
+  'fiberGrams': row.fiberGrams,
   'notes': row.notes,
   'updatedAt': _date(row.updatedAt),
   'deletedAt': _date(row.deletedAt),
@@ -147,6 +151,13 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
     expirationDate: Value(asUtcDate(json['expirationDate'])),
     minQuantity: Value(_double(json['minQuantity'])),
     calories: Value(_int(json['calories'])),
+    // Absent in files written before these columns existed, which is why
+    // every one of them is nullable and read through a tolerant helper:
+    // an older device's snapshot has to stay readable.
+    proteinGrams: Value(_double(json['proteinGrams'])),
+    carbohydrateGrams: Value(_double(json['carbohydrateGrams'])),
+    fatGrams: Value(_double(json['fatGrams'])),
+    fiberGrams: Value(_double(json['fiberGrams'])),
     notes: Value(_string(json['notes'])),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),

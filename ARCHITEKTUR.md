@@ -207,6 +207,16 @@ an existing install will not recreate its tables. Removing one needs
 place; `migration_to_8_test` writes out the old schema by hand and upgrades
 it for real, which is the only way that path is ever exercised.
 
+**A column added to `inventory_items` has to be named in the schema-8
+branch's `newColumns`.** `alterTable` recreates the table from the
+definition as it stands *today* and copies every column in it — so a
+column added later is one that SELECT reads out of a version-7 table
+which never had it, and the upgrade dies. Naming it in `newColumns`
+makes the rebuild create it empty instead; its own branch then has to
+read `from == 8` rather than `from < 9`, because anything older already
+got it from the rebuild. `migration_to_8_test` and `migration_to_9_test`
+cover the two halves.
+
 **The snapshot format in `device_snapshot.dart` is a contract, not a dump.**
 Row codecs are hand-written rather than drift's generated `toJson` precisely
 so that a migration does not silently change a file format other installs —
@@ -217,6 +227,31 @@ anything it cannot use, which costs one row instead of the whole sync.
 The inventory screen used to keep a second, device-local person count
 beside the household's own, and the two silently disagreed. The supply
 calculator reads the profile.
+
+**The stockpiling tables are a citation, not the app's advice.**
+`storage_plan.dart` reproduces the BLE's two *Vorratstabellen* — mixed
+diet and ovo-lacto-vegetarian, one person and ten days at 2,200 kcal —
+with the amounts and energy figures exactly as printed. Group totals are
+stored as printed rather than summed from the rows, so a transcription
+error shows up instead of being hidden, and `storage_plan_test` checks
+every row's printed total against its own per-100 g figure, which is the
+only thing that can catch a slipped digit in sixty copied numbers. The
+food names live in that file with an English name beside each rather
+than in the `.arb` files, for the same reason the built-in checklists do:
+a table split across sixty translation keys cannot be checked against
+the original. There is **no official vegan table** — the BLE publishes
+two and the app prints no third; the screen names the rows a vegan
+household has to replace instead. `StorageNutrient` is the one thing the
+app adds, and it says so on screen.
+
+**Nutrition figures are totals for the item, never per 100 g.** Open
+Food Facts states per 100 g and the package size as free text; the
+conversion happens once, at scan time, so that adding up a shelf is a
+sum. A null means the label did not say and is never stored as zero —
+the supply calculator adds these up, and a guessed zero is
+indistinguishable from a measured one. A nutrient heavier than the
+package it is in is rejected, which is what catches the common Open Food
+Facts error of a per-package figure typed into the per-100 g field.
 
 **Figures the BBK publishes and figures this app invented are kept
 apart.** `SupplyHead` carries one rate per kind of head and says at each

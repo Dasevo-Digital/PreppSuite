@@ -138,6 +138,51 @@ class $InventoryItemsTable extends InventoryItems
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _proteinGramsMeta = const VerificationMeta(
+    'proteinGrams',
+  );
+  @override
+  late final GeneratedColumn<double> proteinGrams = GeneratedColumn<double>(
+    'protein_grams',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _carbohydrateGramsMeta = const VerificationMeta(
+    'carbohydrateGrams',
+  );
+  @override
+  late final GeneratedColumn<double> carbohydrateGrams =
+      GeneratedColumn<double>(
+        'carbohydrate_grams',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _fatGramsMeta = const VerificationMeta(
+    'fatGrams',
+  );
+  @override
+  late final GeneratedColumn<double> fatGrams = GeneratedColumn<double>(
+    'fat_grams',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fiberGramsMeta = const VerificationMeta(
+    'fiberGrams',
+  );
+  @override
+  late final GeneratedColumn<double> fiberGrams = GeneratedColumn<double>(
+    'fiber_grams',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -207,6 +252,10 @@ class $InventoryItemsTable extends InventoryItems
     expirationDate,
     minQuantity,
     calories,
+    proteinGrams,
+    carbohydrateGrams,
+    fatGrams,
+    fiberGrams,
     notes,
     photoPath,
     updatedAt,
@@ -326,6 +375,36 @@ class $InventoryItemsTable extends InventoryItems
         calories.isAcceptableOrUnknown(data['calories']!, _caloriesMeta),
       );
     }
+    if (data.containsKey('protein_grams')) {
+      context.handle(
+        _proteinGramsMeta,
+        proteinGrams.isAcceptableOrUnknown(
+          data['protein_grams']!,
+          _proteinGramsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('carbohydrate_grams')) {
+      context.handle(
+        _carbohydrateGramsMeta,
+        carbohydrateGrams.isAcceptableOrUnknown(
+          data['carbohydrate_grams']!,
+          _carbohydrateGramsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fat_grams')) {
+      context.handle(
+        _fatGramsMeta,
+        fatGrams.isAcceptableOrUnknown(data['fat_grams']!, _fatGramsMeta),
+      );
+    }
+    if (data.containsKey('fiber_grams')) {
+      context.handle(
+        _fiberGramsMeta,
+        fiberGrams.isAcceptableOrUnknown(data['fiber_grams']!, _fiberGramsMeta),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -415,6 +494,22 @@ class $InventoryItemsTable extends InventoryItems
         DriftSqlType.int,
         data['${effectivePrefix}calories'],
       ),
+      proteinGrams: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}protein_grams'],
+      ),
+      carbohydrateGrams: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}carbohydrate_grams'],
+      ),
+      fatGrams: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}fat_grams'],
+      ),
+      fiberGrams: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}fiber_grams'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -465,6 +560,16 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   /// meaningful for `category: food`. Powers the "Vorräte für X Tage"
   /// supply calculator (`supply_calculator.dart`).
   final int? calories;
+
+  /// Macronutrients for the item's current [quantity], in grams — the
+  /// same "whole item, not per 100 g" convention as [calories], for the
+  /// same reason: a shelf is then a sum. Filled in from the barcode (see
+  /// `open_food_facts_service.dart`) or by hand, and null wherever the
+  /// label does not say, which is most non-food supplies.
+  final double? proteinGrams;
+  final double? carbohydrateGrams;
+  final double? fatGrams;
+  final double? fiberGrams;
   final String? notes;
 
   /// Path to a locally-stored photo of the item (see
@@ -489,6 +594,10 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     this.expirationDate,
     this.minQuantity,
     this.calories,
+    this.proteinGrams,
+    this.carbohydrateGrams,
+    this.fatGrams,
+    this.fiberGrams,
     this.notes,
     this.photoPath,
     required this.updatedAt,
@@ -519,6 +628,18 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     }
     if (!nullToAbsent || calories != null) {
       map['calories'] = Variable<int>(calories);
+    }
+    if (!nullToAbsent || proteinGrams != null) {
+      map['protein_grams'] = Variable<double>(proteinGrams);
+    }
+    if (!nullToAbsent || carbohydrateGrams != null) {
+      map['carbohydrate_grams'] = Variable<double>(carbohydrateGrams);
+    }
+    if (!nullToAbsent || fatGrams != null) {
+      map['fat_grams'] = Variable<double>(fatGrams);
+    }
+    if (!nullToAbsent || fiberGrams != null) {
+      map['fiber_grams'] = Variable<double>(fiberGrams);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -558,6 +679,18 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       calories: calories == null && nullToAbsent
           ? const Value.absent()
           : Value(calories),
+      proteinGrams: proteinGrams == null && nullToAbsent
+          ? const Value.absent()
+          : Value(proteinGrams),
+      carbohydrateGrams: carbohydrateGrams == null && nullToAbsent
+          ? const Value.absent()
+          : Value(carbohydrateGrams),
+      fatGrams: fatGrams == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fatGrams),
+      fiberGrams: fiberGrams == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fiberGrams),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -590,6 +723,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       expirationDate: serializer.fromJson<DateTime?>(json['expirationDate']),
       minQuantity: serializer.fromJson<double?>(json['minQuantity']),
       calories: serializer.fromJson<int?>(json['calories']),
+      proteinGrams: serializer.fromJson<double?>(json['proteinGrams']),
+      carbohydrateGrams: serializer.fromJson<double?>(
+        json['carbohydrateGrams'],
+      ),
+      fatGrams: serializer.fromJson<double?>(json['fatGrams']),
+      fiberGrams: serializer.fromJson<double?>(json['fiberGrams']),
       notes: serializer.fromJson<String?>(json['notes']),
       photoPath: serializer.fromJson<String?>(json['photoPath']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -613,6 +752,10 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'expirationDate': serializer.toJson<DateTime?>(expirationDate),
       'minQuantity': serializer.toJson<double?>(minQuantity),
       'calories': serializer.toJson<int?>(calories),
+      'proteinGrams': serializer.toJson<double?>(proteinGrams),
+      'carbohydrateGrams': serializer.toJson<double?>(carbohydrateGrams),
+      'fatGrams': serializer.toJson<double?>(fatGrams),
+      'fiberGrams': serializer.toJson<double?>(fiberGrams),
       'notes': serializer.toJson<String?>(notes),
       'photoPath': serializer.toJson<String?>(photoPath),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -634,6 +777,10 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     Value<DateTime?> expirationDate = const Value.absent(),
     Value<double?> minQuantity = const Value.absent(),
     Value<int?> calories = const Value.absent(),
+    Value<double?> proteinGrams = const Value.absent(),
+    Value<double?> carbohydrateGrams = const Value.absent(),
+    Value<double?> fatGrams = const Value.absent(),
+    Value<double?> fiberGrams = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<String?> photoPath = const Value.absent(),
     DateTime? updatedAt,
@@ -654,6 +801,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
         : this.expirationDate,
     minQuantity: minQuantity.present ? minQuantity.value : this.minQuantity,
     calories: calories.present ? calories.value : this.calories,
+    proteinGrams: proteinGrams.present ? proteinGrams.value : this.proteinGrams,
+    carbohydrateGrams: carbohydrateGrams.present
+        ? carbohydrateGrams.value
+        : this.carbohydrateGrams,
+    fatGrams: fatGrams.present ? fatGrams.value : this.fatGrams,
+    fiberGrams: fiberGrams.present ? fiberGrams.value : this.fiberGrams,
     notes: notes.present ? notes.value : this.notes,
     photoPath: photoPath.present ? photoPath.value : this.photoPath,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -684,6 +837,16 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ? data.minQuantity.value
           : this.minQuantity,
       calories: data.calories.present ? data.calories.value : this.calories,
+      proteinGrams: data.proteinGrams.present
+          ? data.proteinGrams.value
+          : this.proteinGrams,
+      carbohydrateGrams: data.carbohydrateGrams.present
+          ? data.carbohydrateGrams.value
+          : this.carbohydrateGrams,
+      fatGrams: data.fatGrams.present ? data.fatGrams.value : this.fatGrams,
+      fiberGrams: data.fiberGrams.present
+          ? data.fiberGrams.value
+          : this.fiberGrams,
       notes: data.notes.present ? data.notes.value : this.notes,
       photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -707,6 +870,10 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ..write('expirationDate: $expirationDate, ')
           ..write('minQuantity: $minQuantity, ')
           ..write('calories: $calories, ')
+          ..write('proteinGrams: $proteinGrams, ')
+          ..write('carbohydrateGrams: $carbohydrateGrams, ')
+          ..write('fatGrams: $fatGrams, ')
+          ..write('fiberGrams: $fiberGrams, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
           ..write('updatedAt: $updatedAt, ')
@@ -717,7 +884,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     clientId,
     householdId,
     name,
@@ -730,12 +897,16 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     expirationDate,
     minQuantity,
     calories,
+    proteinGrams,
+    carbohydrateGrams,
+    fatGrams,
+    fiberGrams,
     notes,
     photoPath,
     updatedAt,
     deletedAt,
     dirty,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -752,6 +923,10 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           other.expirationDate == this.expirationDate &&
           other.minQuantity == this.minQuantity &&
           other.calories == this.calories &&
+          other.proteinGrams == this.proteinGrams &&
+          other.carbohydrateGrams == this.carbohydrateGrams &&
+          other.fatGrams == this.fatGrams &&
+          other.fiberGrams == this.fiberGrams &&
           other.notes == this.notes &&
           other.photoPath == this.photoPath &&
           other.updatedAt == this.updatedAt &&
@@ -772,6 +947,10 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<DateTime?> expirationDate;
   final Value<double?> minQuantity;
   final Value<int?> calories;
+  final Value<double?> proteinGrams;
+  final Value<double?> carbohydrateGrams;
+  final Value<double?> fatGrams;
+  final Value<double?> fiberGrams;
   final Value<String?> notes;
   final Value<String?> photoPath;
   final Value<DateTime> updatedAt;
@@ -791,6 +970,10 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.expirationDate = const Value.absent(),
     this.minQuantity = const Value.absent(),
     this.calories = const Value.absent(),
+    this.proteinGrams = const Value.absent(),
+    this.carbohydrateGrams = const Value.absent(),
+    this.fatGrams = const Value.absent(),
+    this.fiberGrams = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -811,6 +994,10 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.expirationDate = const Value.absent(),
     this.minQuantity = const Value.absent(),
     this.calories = const Value.absent(),
+    this.proteinGrams = const Value.absent(),
+    this.carbohydrateGrams = const Value.absent(),
+    this.fatGrams = const Value.absent(),
+    this.fiberGrams = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
     required DateTime updatedAt,
@@ -838,6 +1025,10 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<DateTime>? expirationDate,
     Expression<double>? minQuantity,
     Expression<int>? calories,
+    Expression<double>? proteinGrams,
+    Expression<double>? carbohydrateGrams,
+    Expression<double>? fatGrams,
+    Expression<double>? fiberGrams,
     Expression<String>? notes,
     Expression<String>? photoPath,
     Expression<DateTime>? updatedAt,
@@ -858,6 +1049,10 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       if (expirationDate != null) 'expiration_date': expirationDate,
       if (minQuantity != null) 'min_quantity': minQuantity,
       if (calories != null) 'calories': calories,
+      if (proteinGrams != null) 'protein_grams': proteinGrams,
+      if (carbohydrateGrams != null) 'carbohydrate_grams': carbohydrateGrams,
+      if (fatGrams != null) 'fat_grams': fatGrams,
+      if (fiberGrams != null) 'fiber_grams': fiberGrams,
       if (notes != null) 'notes': notes,
       if (photoPath != null) 'photo_path': photoPath,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -880,6 +1075,10 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Value<DateTime?>? expirationDate,
     Value<double?>? minQuantity,
     Value<int?>? calories,
+    Value<double?>? proteinGrams,
+    Value<double?>? carbohydrateGrams,
+    Value<double?>? fatGrams,
+    Value<double?>? fiberGrams,
     Value<String?>? notes,
     Value<String?>? photoPath,
     Value<DateTime>? updatedAt,
@@ -900,6 +1099,10 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       expirationDate: expirationDate ?? this.expirationDate,
       minQuantity: minQuantity ?? this.minQuantity,
       calories: calories ?? this.calories,
+      proteinGrams: proteinGrams ?? this.proteinGrams,
+      carbohydrateGrams: carbohydrateGrams ?? this.carbohydrateGrams,
+      fatGrams: fatGrams ?? this.fatGrams,
+      fiberGrams: fiberGrams ?? this.fiberGrams,
       notes: notes ?? this.notes,
       photoPath: photoPath ?? this.photoPath,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -948,6 +1151,18 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     if (calories.present) {
       map['calories'] = Variable<int>(calories.value);
     }
+    if (proteinGrams.present) {
+      map['protein_grams'] = Variable<double>(proteinGrams.value);
+    }
+    if (carbohydrateGrams.present) {
+      map['carbohydrate_grams'] = Variable<double>(carbohydrateGrams.value);
+    }
+    if (fatGrams.present) {
+      map['fat_grams'] = Variable<double>(fatGrams.value);
+    }
+    if (fiberGrams.present) {
+      map['fiber_grams'] = Variable<double>(fiberGrams.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -984,6 +1199,10 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
           ..write('expirationDate: $expirationDate, ')
           ..write('minQuantity: $minQuantity, ')
           ..write('calories: $calories, ')
+          ..write('proteinGrams: $proteinGrams, ')
+          ..write('carbohydrateGrams: $carbohydrateGrams, ')
+          ..write('fatGrams: $fatGrams, ')
+          ..write('fiberGrams: $fiberGrams, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
           ..write('updatedAt: $updatedAt, ')

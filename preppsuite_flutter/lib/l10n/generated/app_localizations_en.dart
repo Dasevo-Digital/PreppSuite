@@ -1388,4 +1388,171 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get householdAdultsLabel => 'Adults';
+
+  @override
+  String get storageTipsTitle => 'Storage tips';
+
+  @override
+  String get storageTipsIntro =>
+      'The BBK recommends a ten-day supply and, for the amounts, points at the stockpiling tables of the Federal Office for Agriculture and Food. They are here — scaled to your household.';
+
+  @override
+  String storagePeopleLine(Object count) {
+    return 'For $count people — from the household';
+  }
+
+  @override
+  String storageDaysLabel(Object days) {
+    return '$days days';
+  }
+
+  @override
+  String get storageFewerDays => 'One day fewer';
+
+  @override
+  String get storageMoreDays => 'One day more';
+
+  @override
+  String get storageScaledNote =>
+      'The table is printed for one person and ten days. Every amount here is converted.';
+
+  @override
+  String get storageDietMixed => 'Mixed diet';
+
+  @override
+  String get storageDietVegetarian => 'Vegetarian';
+
+  @override
+  String storageAmountGrams(Object value) {
+    return '$value g';
+  }
+
+  @override
+  String storageAmountKilograms(Object value) {
+    return '$value kg';
+  }
+
+  @override
+  String storageAmountLiters(Object value) {
+    return '$value l';
+  }
+
+  @override
+  String storageAmountPieces(Object count) {
+    return '$count pcs';
+  }
+
+  @override
+  String storageKcal(Object kcal) {
+    return '$kcal kcal';
+  }
+
+  @override
+  String storageVariantLine(Object kcal, Object name) {
+    return 'or $name: $kcal kcal';
+  }
+
+  @override
+  String get storageAddToInventory => 'Add to inventory';
+
+  @override
+  String get storageFromTableNote => 'Taken from the BLE stockpiling table.';
+
+  @override
+  String get storageUnitGram => 'g';
+
+  @override
+  String get storageUnitLiter => 'l';
+
+  @override
+  String get storageUnitPiece => 'pcs';
+
+  @override
+  String get storageNutrientProtein => 'Protein';
+
+  @override
+  String get storageNutrientFiber => 'Fibre';
+
+  @override
+  String get storageNutrientIron => 'Iron';
+
+  @override
+  String get storageNutrientVitaminB12 => 'Vitamin B12';
+
+  @override
+  String get storageNutrientHealthyFats => 'Healthy fats';
+
+  @override
+  String get storageNutrientFluid => 'Fluid';
+
+  @override
+  String get storageNutrientLegendTitle => 'What the markers mean';
+
+  @override
+  String get storageNutrientLegendBody =>
+      'The markers on the foods are not in the official table — they are this app\'s own reading. They show what a food is mainly there for, so you can see what leaves with a group you drop. Orientation, not dietary advice.';
+
+  @override
+  String get storageTipsGeneralTitle => 'General tips';
+
+  @override
+  String get storageTipRotate =>
+      'Rotate the stock: always use the oldest first and replace it. Then nothing expires and nothing was bought for the bin.';
+
+  @override
+  String get storageTipCoolDryDark =>
+      'Store cool, dry and dark, ideally in tightly closing containers.';
+
+  @override
+  String get storageTipEatWhatYouStore =>
+      'Only store what you actually eat. A supply nobody likes is never used up and eventually thrown away.';
+
+  @override
+  String get storageTipNoPower =>
+      'Count on a power cut: plan nothing that has to be refrigerated or frozen.';
+
+  @override
+  String get storageTipReadyToEat =>
+      'Choose part of it so that it can be eaten without cooking — in case the gas or the hob goes too.';
+
+  @override
+  String get storageTipCanOpener =>
+      'Remember a tin opener that works without electricity.';
+
+  @override
+  String get storageTipSpecialNeeds =>
+      'Small children, pets, medication and special diets belong on the list too. The table does not cover them.';
+
+  @override
+  String get storageVeganTitle => 'Vegan?';
+
+  @override
+  String get storageVeganBody =>
+      'There is no official vegan table — the BLE publishes these two and no third, and the app does not invent one. On a vegan diet, two lines of the vegetarian table are replaced: 2.5 kg of milk and dairy, and the five eggs. Fortified plant drinks and soy products cover protein and calcium. For vitamin B12, iodine, iron and omega-3 the DGE issues an explicit warning on a vegan diet — B12 can only be covered reliably by a supplement, and that then belongs in the supply like everything else.';
+
+  @override
+  String get storageSourceTitle => 'Where the numbers come from';
+
+  @override
+  String get storageSourceBody =>
+      'On its \"Bevorraten\" page the BBK gives ten days and 1.5 litres of fluid plus 0.5 litres for cooking a day; for the amounts it points at the stockpiling tables of the Federal Office for Agriculture and Food (BLE, 2024, ernaehrungsvorsorge.de). Every line here comes from there: a basic supply for one person and ten days at an average 2,200 kcal a day, once as a mixed diet and once ovo-lacto-vegetarian. The energy figures are from the Bundeslebensmittelschlüssel 3.02 of the Max Rubner Institute; the amounts follow the DGE, ÖGE and SGE reference values. Scaling is linear in people and days. The markers on the foods are this app\'s addition and appear in no official table.';
+
+  @override
+  String get nutritionSectionTitle => 'Nutrition';
+
+  @override
+  String get nutritionSectionHint =>
+      'For the whole amount, not per 100 g. Scanning a barcode fills in whatever the label states.';
+
+  @override
+  String get proteinLabel => 'Protein';
+
+  @override
+  String get carbohydrateLabel => 'Carbohydrates';
+
+  @override
+  String get fatLabel => 'Fat';
+
+  @override
+  String get fiberLabel => 'Fibre';
 }

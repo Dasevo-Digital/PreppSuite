@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   /// The tables whose rows travel through a shared folder, i.e. the ones
   /// with a `dirty` column.
@@ -87,10 +87,40 @@ class AppDatabase extends _$AppDatabase {
         // always-null invitation to use it again. SQLite cannot drop a
         // column in place; `alterTable` recreates each table from the
         // current definition and copies the columns that still exist.
-        await m.alterTable(TableMigration(inventoryItems));
+        //
+        // "Current definition" is the trap here: the rebuild copies every
+        // column the table has *today*, so a column added in a later
+        // schema is one this SELECT reads out of a version-7 table that
+        // never had it. Every such column therefore has to be named in
+        // `newColumns` below — and its own branch has to skip installs
+        // older than 8, which already got it here.
+        await m.alterTable(
+          TableMigration(
+            inventoryItems,
+            newColumns: [
+              inventoryItems.proteinGrams,
+              inventoryItems.carbohydrateGrams,
+              inventoryItems.fatGrams,
+              inventoryItems.fiberGrams,
+            ],
+          ),
+        );
         await m.alterTable(TableMigration(checklistTemplates));
         await m.alterTable(TableMigration(checklistItems));
         await m.alterTable(TableMigration(budgetEntries));
+      }
+      if (from == 8) {
+        // Macronutrients off a scanned label. Added rather than derived:
+        // Open Food Facts states them per 100 g and the package size in
+        // free text, so the conversion happens once, at scan time, and an
+        // item whose label said nothing keeps four nulls forever.
+        //
+        // `== 8` and not `< 9`: anything older came through the rebuild
+        // above, which already created these columns.
+        await m.addColumn(inventoryItems, inventoryItems.proteinGrams);
+        await m.addColumn(inventoryItems, inventoryItems.carbohydrateGrams);
+        await m.addColumn(inventoryItems, inventoryItems.fatGrams);
+        await m.addColumn(inventoryItems, inventoryItems.fiberGrams);
       }
     },
   );

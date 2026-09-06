@@ -2443,6 +2443,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Adults'**
   String get householdAdultsLabel;
+
+  /// No description provided for @storageTipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage tips'**
+  String get storageTipsTitle;
+
+  /// No description provided for @storageTipsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The BBK recommends a ten-day supply and, for the amounts, points at the stockpiling tables of the Federal Office for Agriculture and Food. They are here — scaled to your household.'**
+  String get storageTipsIntro;
+
+  /// No description provided for @storagePeopleLine.
+  ///
+  /// In en, this message translates to:
+  /// **'For {count} people — from the household'**
+  String storagePeopleLine(Object count);
+
+  /// No description provided for @storageDaysLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String storageDaysLabel(Object days);
+
+  /// No description provided for @storageFewerDays.
+  ///
+  /// In en, this message translates to:
+  /// **'One day fewer'**
+  String get storageFewerDays;
+
+  /// No description provided for @storageMoreDays.
+  ///
+  /// In en, this message translates to:
+  /// **'One day more'**
+  String get storageMoreDays;
+
+  /// No description provided for @storageScaledNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The table is printed for one person and ten days. Every amount here is converted.'**
+  String get storageScaledNote;
+
+  /// No description provided for @storageDietMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed diet'**
+  String get storageDietMixed;
+
+  /// No description provided for @storageDietVegetarian.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetarian'**
+  String get storageDietVegetarian;
+
+  /// No description provided for @storageAmountGrams.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} g'**
+  String storageAmountGrams(Object value);
+
+  /// No description provided for @storageAmountKilograms.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} kg'**
+  String storageAmountKilograms(Object value);
+
+  /// No description provided for @storageAmountLiters.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} l'**
+  String storageAmountLiters(Object value);
+
+  /// No description provided for @storageAmountPieces.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} pcs'**
+  String storageAmountPieces(Object count);
+
+  /// No description provided for @storageKcal.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal'**
+  String storageKcal(Object kcal);
+
+  /// No description provided for @storageVariantLine.
+  ///
+  /// In en, this message translates to:
+  /// **'or {name}: {kcal} kcal'**
+  String storageVariantLine(Object kcal, Object name);
+
+  /// No description provided for @storageAddToInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to inventory'**
+  String get storageAddToInventory;
+
+  /// No description provided for @storageFromTableNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken from the BLE stockpiling table.'**
+  String get storageFromTableNote;
+
+  /// No description provided for @storageUnitGram.
+  ///
+  /// In en, this message translates to:
+  /// **'g'**
+  String get storageUnitGram;
+
+  /// No description provided for @storageUnitLiter.
+  ///
+  /// In en, this message translates to:
+  /// **'l'**
+  String get storageUnitLiter;
+
+  /// No description provided for @storageUnitPiece.
+  ///
+  /// In en, this message translates to:
+  /// **'pcs'**
+  String get storageUnitPiece;
+
+  /// No description provided for @storageNutrientProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein'**
+  String get storageNutrientProtein;
+
+  /// No description provided for @storageNutrientFiber.
+  ///
+  /// In en, this message translates to:
+  /// **'Fibre'**
+  String get storageNutrientFiber;
+
+  /// No description provided for @storageNutrientIron.
+  ///
+  /// In en, this message translates to:
+  /// **'Iron'**
+  String get storageNutrientIron;
+
+  /// No description provided for @storageNutrientVitaminB12.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitamin B12'**
+  String get storageNutrientVitaminB12;
+
+  /// No description provided for @storageNutrientHealthyFats.
+  ///
+  /// In en, this message translates to:
+  /// **'Healthy fats'**
+  String get storageNutrientHealthyFats;
+
+  /// No description provided for @storageNutrientFluid.
+  ///
+  /// In en, this message translates to:
+  /// **'Fluid'**
+  String get storageNutrientFluid;
+
+  /// No description provided for @storageNutrientLegendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What the markers mean'**
+  String get storageNutrientLegendTitle;
+
+  /// No description provided for @storageNutrientLegendBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The markers on the foods are not in the official table — they are this app\'s own reading. They show what a food is mainly there for, so you can see what leaves with a group you drop. Orientation, not dietary advice.'**
+  String get storageNutrientLegendBody;
+
+  /// No description provided for @storageTipsGeneralTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'General tips'**
+  String get storageTipsGeneralTitle;
+
+  /// No description provided for @storageTipRotate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rotate the stock: always use the oldest first and replace it. Then nothing expires and nothing was bought for the bin.'**
+  String get storageTipRotate;
+
+  /// No description provided for @storageTipCoolDryDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Store cool, dry and dark, ideally in tightly closing containers.'**
+  String get storageTipCoolDryDark;
+
+  /// No description provided for @storageTipEatWhatYouStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Only store what you actually eat. A supply nobody likes is never used up and eventually thrown away.'**
+  String get storageTipEatWhatYouStore;
+
+  /// No description provided for @storageTipNoPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Count on a power cut: plan nothing that has to be refrigerated or frozen.'**
+  String get storageTipNoPower;
+
+  /// No description provided for @storageTipReadyToEat.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose part of it so that it can be eaten without cooking — in case the gas or the hob goes too.'**
+  String get storageTipReadyToEat;
+
+  /// No description provided for @storageTipCanOpener.
+  ///
+  /// In en, this message translates to:
+  /// **'Remember a tin opener that works without electricity.'**
+  String get storageTipCanOpener;
+
+  /// No description provided for @storageTipSpecialNeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Small children, pets, medication and special diets belong on the list too. The table does not cover them.'**
+  String get storageTipSpecialNeeds;
+
+  /// No description provided for @storageVeganTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegan?'**
+  String get storageVeganTitle;
+
+  /// No description provided for @storageVeganBody.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no official vegan table — the BLE publishes these two and no third, and the app does not invent one. On a vegan diet, two lines of the vegetarian table are replaced: 2.5 kg of milk and dairy, and the five eggs. Fortified plant drinks and soy products cover protein and calcium. For vitamin B12, iodine, iron and omega-3 the DGE issues an explicit warning on a vegan diet — B12 can only be covered reliably by a supplement, and that then belongs in the supply like everything else.'**
+  String get storageVeganBody;
+
+  /// No description provided for @storageSourceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the numbers come from'**
+  String get storageSourceTitle;
+
+  /// No description provided for @storageSourceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'On its \"Bevorraten\" page the BBK gives ten days and 1.5 litres of fluid plus 0.5 litres for cooking a day; for the amounts it points at the stockpiling tables of the Federal Office for Agriculture and Food (BLE, 2024, ernaehrungsvorsorge.de). Every line here comes from there: a basic supply for one person and ten days at an average 2,200 kcal a day, once as a mixed diet and once ovo-lacto-vegetarian. The energy figures are from the Bundeslebensmittelschlüssel 3.02 of the Max Rubner Institute; the amounts follow the DGE, ÖGE and SGE reference values. Scaling is linear in people and days. The markers on the foods are this app\'s addition and appear in no official table.'**
+  String get storageSourceBody;
+
+  /// No description provided for @nutritionSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition'**
+  String get nutritionSectionTitle;
+
+  /// No description provided for @nutritionSectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For the whole amount, not per 100 g. Scanning a barcode fills in whatever the label states.'**
+  String get nutritionSectionHint;
+
+  /// No description provided for @proteinLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Protein'**
+  String get proteinLabel;
+
+  /// No description provided for @carbohydrateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Carbohydrates'**
+  String get carbohydrateLabel;
+
+  /// No description provided for @fatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat'**
+  String get fatLabel;
+
+  /// No description provided for @fiberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fibre'**
+  String get fiberLabel;
 }
 
 class _AppLocalizationsDelegate

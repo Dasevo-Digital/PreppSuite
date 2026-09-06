@@ -1397,4 +1397,172 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get householdAdultsLabel => 'Erwachsene';
+
+  @override
+  String get storageTipsTitle => 'Tipps zum Einlagern';
+
+  @override
+  String get storageTipsIntro =>
+      'Das BBK empfiehlt einen Vorrat für zehn Tage und verweist für die Mengen auf die Vorratstabellen der Bundesanstalt für Landwirtschaft und Ernährung. Die stehen hier — umgerechnet auf deinen Haushalt.';
+
+  @override
+  String storagePeopleLine(Object count) {
+    return 'Für $count Personen — laut Haushalt';
+  }
+
+  @override
+  String storageDaysLabel(Object days) {
+    return '$days Tage';
+  }
+
+  @override
+  String get storageFewerDays => 'Ein Tag weniger';
+
+  @override
+  String get storageMoreDays => 'Ein Tag mehr';
+
+  @override
+  String get storageScaledNote =>
+      'Gedruckt ist die Tabelle für eine Person und zehn Tage. Alle Mengen hier sind umgerechnet.';
+
+  @override
+  String get storageDietMixed => 'Mischkost';
+
+  @override
+  String get storageDietVegetarian => 'Vegetarisch';
+
+  @override
+  String storageAmountGrams(Object value) {
+    return '$value g';
+  }
+
+  @override
+  String storageAmountKilograms(Object value) {
+    return '$value kg';
+  }
+
+  @override
+  String storageAmountLiters(Object value) {
+    return '$value l';
+  }
+
+  @override
+  String storageAmountPieces(Object count) {
+    return '$count Stück';
+  }
+
+  @override
+  String storageKcal(Object kcal) {
+    return '$kcal kcal';
+  }
+
+  @override
+  String storageVariantLine(Object kcal, Object name) {
+    return 'oder $name: $kcal kcal';
+  }
+
+  @override
+  String get storageAddToInventory => 'In den Vorrat übernehmen';
+
+  @override
+  String get storageFromTableNote =>
+      'Aus der Vorratstabelle des BLE übernommen.';
+
+  @override
+  String get storageUnitGram => 'g';
+
+  @override
+  String get storageUnitLiter => 'l';
+
+  @override
+  String get storageUnitPiece => 'Stück';
+
+  @override
+  String get storageNutrientProtein => 'Eiweiß';
+
+  @override
+  String get storageNutrientFiber => 'Ballaststoffe';
+
+  @override
+  String get storageNutrientIron => 'Eisen';
+
+  @override
+  String get storageNutrientVitaminB12 => 'Vitamin B12';
+
+  @override
+  String get storageNutrientHealthyFats => 'Gesunde Fette';
+
+  @override
+  String get storageNutrientFluid => 'Flüssigkeit';
+
+  @override
+  String get storageNutrientLegendTitle => 'Was die Marker bedeuten';
+
+  @override
+  String get storageNutrientLegendBody =>
+      'Die Marker an den Lebensmitteln stehen nicht in der amtlichen Tabelle — sie sind die Einordnung dieser App. Sie zeigen, wofür ein Lebensmittel im Vorrat vor allem da ist, damit du siehst, was mit einer weggelassenen Gruppe verschwindet. Eine Orientierung, keine Ernährungsberatung.';
+
+  @override
+  String get storageTipsGeneralTitle => 'Allgemeine Tipps';
+
+  @override
+  String get storageTipRotate =>
+      'Rollierend bevorraten: immer das Älteste zuerst verbrauchen und wieder auffüllen. So ist nichts abgelaufen und nichts umsonst gekauft.';
+
+  @override
+  String get storageTipCoolDryDark =>
+      'Kühl, trocken und dunkel lagern, am besten in dicht schließenden Behältern.';
+
+  @override
+  String get storageTipEatWhatYouStore =>
+      'Nur einlagern, was ihr wirklich esst. Ein Vorrat, den niemand mag, wird nicht verbraucht und irgendwann weggeworfen.';
+
+  @override
+  String get storageTipNoPower =>
+      'Mit Stromausfall rechnen: nichts einplanen, was gekühlt oder tiefgefroren werden muss.';
+
+  @override
+  String get storageTipReadyToEat =>
+      'Einen Teil so wählen, dass er ohne Kochen essbar ist — falls auch Gas oder Herd ausfallen.';
+
+  @override
+  String get storageTipCanOpener =>
+      'An einen Dosenöffner denken, der ohne Strom funktioniert.';
+
+  @override
+  String get storageTipSpecialNeeds =>
+      'Kleinkinder, Haustiere, Medikamente und besondere Ernährungsformen gehören mit auf die Liste. Die Tabelle deckt sie nicht ab.';
+
+  @override
+  String get storageVeganTitle => 'Vegan?';
+
+  @override
+  String get storageVeganBody =>
+      'Eine vegane Vorratstabelle gibt es amtlich nicht — das BLE veröffentlicht nur diese beiden, und die App erfindet keine dritte. Wer vegan lebt, ersetzt in der vegetarischen Tabelle zwei Zeilen: 2,5 kg Milch und Milcherzeugnisse sowie die fünf Eier. Angereicherte Pflanzendrinks und Sojaprodukte decken Eiweiß und Kalzium ab. Auf Vitamin B12, Jod, Eisen und Omega-3-Fettsäuren weist die DGE bei veganer Ernährung ausdrücklich hin — B12 ist nur über ein Präparat sicher zu decken, und das gehört dann in den Vorrat wie alles andere auch.';
+
+  @override
+  String get storageSourceTitle => 'Woher die Zahlen kommen';
+
+  @override
+  String get storageSourceBody =>
+      'Das BBK nennt auf seiner Seite „Bevorraten“ zehn Tage und 1,5 Liter Flüssigkeit plus 0,5 Liter zum Kochen am Tag; für die Mengen verweist es auf die Vorratstabellen der Bundesanstalt für Landwirtschaft und Ernährung (BLE, 2024, ernaehrungsvorsorge.de). Von dort stammt jede Zeile hier: Grundnahrungsmittelvorrat für eine Person und zehn Tage bei durchschnittlich 2.200 kcal am Tag, einmal als Mischkost und einmal ovo-lacto-vegetarisch. Die Energiewerte kommen aus dem Bundeslebensmittelschlüssel 3.02 des Max-Rubner-Instituts, die Mengen lehnen sich an die Referenzwerte von DGE, ÖGE und SGE an. Umgerechnet wird linear auf Personenzahl und Tage. Die Marker an den Lebensmitteln sind die Zutat dieser App und stehen so in keiner amtlichen Tabelle.';
+
+  @override
+  String get nutritionSectionTitle => 'Nährwerte';
+
+  @override
+  String get nutritionSectionHint =>
+      'Jeweils für die ganze Menge, nicht je 100 g. Beim Scannen trägt die App ein, was auf dem Etikett steht.';
+
+  @override
+  String get proteinLabel => 'Eiweiß';
+
+  @override
+  String get carbohydrateLabel => 'Kohlenhydrate';
+
+  @override
+  String get fatLabel => 'Fett';
+
+  @override
+  String get fiberLabel => 'Ballaststoffe';
 }

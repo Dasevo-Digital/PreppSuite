@@ -32,6 +32,34 @@ void main() {
       expect(companion.updatedAt.value, DateTime.utc(2026));
     });
 
+    test('the macronutrients travel between devices', () {
+      // Added to the format after it was already in use, so both halves
+      // matter: a device that has them must send them, and one that never
+      // saw the columns must still be readable.
+      final companion = decodeInventoryItem(
+        water(
+          overrides: {
+            'proteinGrams': 42.5,
+            'carbohydrateGrams': 300.0,
+            'fatGrams': 8.0,
+            'fiberGrams': 15.0,
+          },
+        ),
+      )!;
+
+      expect(companion.proteinGrams.value, 42.5);
+      expect(companion.carbohydrateGrams.value, 300.0);
+      expect(companion.fatGrams.value, 8.0);
+      expect(companion.fiberGrams.value, 15.0);
+    });
+
+    test('a snapshot written before those columns still decodes', () {
+      final companion = decodeInventoryItem(water())!;
+
+      expect(companion.proteinGrams.value, isNull);
+      expect(companion.fiberGrams.value, isNull);
+    });
+
     test('a row that arrived from elsewhere is not marked for publishing', () {
       // Otherwise every device would republish everything it received on
       // the next run, forever, and the folder would never go quiet.

@@ -87,17 +87,53 @@ int? estimatePackageKcal({
   required double? kcalPer100,
   required String? quantityText,
 }) {
-  if (kcalPer100 == null || kcalPer100 <= 0) return null;
+  // A single package above this is almost certainly a misread label rather
+  // than real food — better no number than a nonsensical one.
+  final total = estimatePackageTotal(
+    per100: kcalPer100,
+    quantityText: quantityText,
+    implausibleAbove: 100000,
+  );
+  return total?.round();
+}
+
+/// Total grams of a nutrient in a package — protein, fat, carbohydrate,
+/// fibre — or `null` when the label does not say.
+///
+/// The plausibility check here is the package itself: a nutrient cannot
+/// weigh more than the food it is in. That catches the common Open Food
+/// Facts data error of a per-100 g figure entered as a per-package one,
+/// which would otherwise put 500 g of protein in a tin of tuna.
+double? estimatePackageNutrientGrams({
+  required double? gramsPer100,
+  required String? quantityText,
+}) {
+  final size = parsePackageSize(quantityText);
+  if (size == null) return null;
+
+  return estimatePackageTotal(
+    per100: gramsPer100,
+    quantityText: quantityText,
+    implausibleAbove: size.amount,
+  );
+}
+
+/// The arithmetic both of the above share: a per-100 figure times the
+/// package size, rejected when it is missing, non-positive, or larger
+/// than [implausibleAbove].
+double? estimatePackageTotal({
+  required double? per100,
+  required String? quantityText,
+  required double implausibleAbove,
+}) {
+  if (per100 == null || per100 <= 0) return null;
 
   final size = parsePackageSize(quantityText);
   if (size == null) return null;
 
-  final total = kcalPer100 * size.amount / 100;
+  final total = per100 * size.amount / 100;
   if (total <= 0 || !total.isFinite) return null;
+  if (total > implausibleAbove) return null;
 
-  // A single package above this is almost certainly a misread label rather
-  // than real food — better no number than a nonsensical one.
-  if (total > 100000) return null;
-
-  return total.round();
+  return total;
 }

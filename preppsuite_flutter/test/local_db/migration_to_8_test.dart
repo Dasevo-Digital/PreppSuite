@@ -127,6 +127,14 @@ void main() {
       reason: 'a column after server_id must not have shifted',
     );
     expect(
+      items.single.proteinGrams,
+      isNull,
+      reason:
+          'the rebuild copies the table as defined today, so a column '
+          'added after schema 8 has to arrive empty rather than being '
+          'read out of a version-7 table that never had it',
+    );
+    expect(
       (await db.budgetEntriesForSync('household-1')).single.label,
       'Konserven',
     );

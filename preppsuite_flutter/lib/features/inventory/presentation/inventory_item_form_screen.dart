@@ -11,17 +11,43 @@ import '../application/inventory_category_l10n.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_photo_service.dart';
 import '../application/open_food_facts_service.dart';
+import '../application/package_nutrition.dart';
 import 'barcode_scanner_screen.dart';
+
+/// A form filled in from somewhere other than an existing row — the
+/// stockpiling table hands one over when a food is added from it.
+class InventoryItemDraft {
+  const InventoryItemDraft({
+    required this.name,
+    required this.quantity,
+    required this.unit,
+    this.category = InventoryItemCategory.food,
+    this.nutrition = const PackageNutrition(),
+    this.notes,
+  });
+
+  final String name;
+  final double quantity;
+  final String unit;
+  final InventoryItemCategory category;
+  final PackageNutrition nutrition;
+  final String? notes;
+}
 
 class InventoryItemFormScreen extends ConsumerStatefulWidget {
   const InventoryItemFormScreen({
     super.key,
     required this.householdId,
     this.existing,
+    this.draft,
   });
 
   final String householdId;
   final InventoryItem? existing;
+
+  /// Ignored when [existing] is set — editing a row always wins over a
+  /// suggestion.
+  final InventoryItemDraft? draft;
 
   @override
   ConsumerState<InventoryItemFormScreen> createState() =>
@@ -37,6 +63,10 @@ class _InventoryItemFormScreenState
   late final TextEditingController _storageLocationController;
   late final TextEditingController _minQuantityController;
   late final TextEditingController _caloriesController;
+  late final TextEditingController _proteinController;
+  late final TextEditingController _carbohydrateController;
+  late final TextEditingController _fatController;
+  late final TextEditingController _fiberController;
   late final TextEditingController _notesController;
   late InventoryItemCategory _category;
   DateTime? _expirationDate;
@@ -58,11 +88,24 @@ class _InventoryItemFormScreenState
   void initState() {
     super.initState();
     final existing = widget.existing;
-    _nameController = TextEditingController(text: existing?.name ?? '');
-    _quantityController = TextEditingController(
-      text: existing != null ? _formatNumber(existing.quantity) : '',
+    final draft = existing == null ? widget.draft : null;
+    final nutrition = existing != null
+        ? PackageNutrition.ofItem(existing)
+        : draft?.nutrition ?? const PackageNutrition();
+
+    _nameController = TextEditingController(
+      text: existing?.name ?? draft?.name ?? '',
     );
-    _unitController = TextEditingController(text: existing?.unit ?? '');
+    _quantityController = TextEditingController(
+      text: switch ((existing, draft)) {
+        (final InventoryItem item, _) => _formatNumber(item.quantity),
+        (_, final InventoryItemDraft d) => _formatNumber(d.quantity),
+        _ => '',
+      },
+    );
+    _unitController = TextEditingController(
+      text: existing?.unit ?? draft?.unit ?? '',
+    );
     _storageLocationController = TextEditingController(
       text: existing?.storageLocation ?? '',
     );
@@ -72,17 +115,32 @@ class _InventoryItemFormScreenState
           : '',
     );
     _caloriesController = TextEditingController(
-      text: existing?.calories != null ? '${existing!.calories}' : '',
+      text: nutrition.kcal != null ? '${nutrition.kcal}' : '',
     );
-    _notesController = TextEditingController(text: existing?.notes ?? '');
+    _proteinController = _gramsController(nutrition.proteinGrams);
+    _carbohydrateController = _gramsController(nutrition.carbohydrateGrams);
+    _fatController = _gramsController(nutrition.fatGrams);
+    _fiberController = _gramsController(nutrition.fiberGrams);
+    _notesController = TextEditingController(
+      text: existing?.notes ?? draft?.notes ?? '',
+    );
     _category = existing != null
         ? InventoryItemCategoryX.fromName(existing.category)
-        : InventoryItemCategory.food;
+        : draft?.category ?? InventoryItemCategory.food;
     _expirationDate = existing?.expirationDate;
     _barcode = existing?.barcode;
     _offProductId = existing?.offProductId;
     _photoPath = existing?.photoPath;
   }
+
+  /// Grams are shown to one decimal: Open Food Facts reports them to two
+  /// or three, and "12,7 g" is as precise as a shelf ever needs.
+  TextEditingController _gramsController(double? grams) =>
+      TextEditingController(
+        text: grams == null ? '' : _formatNumber(_roundGrams(grams)),
+      );
+
+  static double _roundGrams(double grams) => (grams * 10).round() / 10;
 
   @override
   void dispose() {
@@ -92,6 +150,10 @@ class _InventoryItemFormScreenState
     _storageLocationController.dispose();
     _minQuantityController.dispose();
     _caloriesController.dispose();
+    _proteinController.dispose();
+    _carbohydrateController.dispose();
+    _fatController.dispose();
+    _fiberController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -129,13 +191,7 @@ class _InventoryItemFormScreenState
       if (product != null) {
         _nameController.text = product.name;
         _offProductId = product.barcode;
-
-        // Only ever fills an empty field: a value already typed in is the
-        // user's own correction and outranks the estimate from the label.
-        final kcal = product.totalKcal;
-        if (kcal != null && _caloriesController.text.trim().isEmpty) {
-          _caloriesController.text = '$kcal';
-        }
+        _fillNutrition(product.nutrition);
       }
     });
 
@@ -206,6 +262,53 @@ class _InventoryItemFormScreenState
     );
   }
 
+  /// Writes what the label says into the nutrition fields.
+  ///
+  /// Only ever fills an empty one: a value already typed in is the user's
+  /// own correction, and it outranks a figure derived from a per-100 g
+  /// number and a free-text package size.
+  void _fillNutrition(PackageNutrition nutrition) {
+    void fill(TextEditingController controller, String? value) {
+      if (value != null && controller.text.trim().isEmpty) {
+        controller.text = value;
+      }
+    }
+
+    final kcal = nutrition.kcal;
+    fill(_caloriesController, kcal == null ? null : '$kcal');
+    fill(_proteinController, _grams(nutrition.proteinGrams));
+    fill(_carbohydrateController, _grams(nutrition.carbohydrateGrams));
+    fill(_fatController, _grams(nutrition.fatGrams));
+    fill(_fiberController, _grams(nutrition.fiberGrams));
+  }
+
+  String? _grams(double? value) =>
+      value == null ? null : _formatNumber(_roundGrams(value));
+
+  /// Reads the nutrition fields back. An empty field means "not known"
+  /// and is stored as null rather than zero — the supply calculator adds
+  /// these up, and a guessed zero would be indistinguishable from a real
+  /// one.
+  PackageNutrition _readNutrition() {
+    int? asInt(TextEditingController c) {
+      final text = c.text.trim();
+      return text.isEmpty ? null : int.parse(text);
+    }
+
+    double? asDouble(TextEditingController c) {
+      final text = c.text.trim().replaceAll(',', '.');
+      return text.isEmpty ? null : double.parse(text);
+    }
+
+    return PackageNutrition(
+      kcal: asInt(_caloriesController),
+      proteinGrams: asDouble(_proteinController),
+      carbohydrateGrams: asDouble(_carbohydrateController),
+      fatGrams: asDouble(_fatController),
+      fiberGrams: asDouble(_fiberController),
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -218,8 +321,7 @@ class _InventoryItemFormScreenState
     final minQuantity = minQuantityText.isEmpty
         ? null
         : double.parse(minQuantityText);
-    final caloriesText = _caloriesController.text.trim();
-    final calories = caloriesText.isEmpty ? null : int.parse(caloriesText);
+    final nutrition = _readNutrition();
     final notes = _notesController.text.trim();
 
     if (_isEditing) {
@@ -236,7 +338,7 @@ class _InventoryItemFormScreenState
         barcode: _barcode,
         offProductId: _offProductId,
         photoPath: _photoPath,
-        calories: calories,
+        nutrition: nutrition,
       );
     } else {
       await controller.addItem(
@@ -251,7 +353,7 @@ class _InventoryItemFormScreenState
         barcode: _barcode,
         offProductId: _offProductId,
         photoPath: _photoPath,
-        calories: calories,
+        nutrition: nutrition,
       );
     }
 
@@ -425,7 +527,17 @@ class _InventoryItemFormScreenState
                       validator: _numberValidator(l10n, required: false),
                     ),
                     if (_category == InventoryItemCategory.food) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
+                      Text(
+                        l10n.nutritionSectionTitle,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.nutritionSectionHint,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 12),
                       TextFormField(
                         controller: _caloriesController,
                         decoration: InputDecoration(
@@ -439,6 +551,46 @@ class _InventoryItemFormScreenState
                               ? l10n.invalidNumber
                               : null;
                         },
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _GramsField(
+                              controller: _proteinController,
+                              label: l10n.proteinLabel,
+                              validator: _gramsValidator(l10n),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _GramsField(
+                              controller: _carbohydrateController,
+                              label: l10n.carbohydrateLabel,
+                              validator: _gramsValidator(l10n),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _GramsField(
+                              controller: _fatController,
+                              label: l10n.fatLabel,
+                              validator: _gramsValidator(l10n),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _GramsField(
+                              controller: _fiberController,
+                              label: l10n.fiberLabel,
+                              validator: _gramsValidator(l10n),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                     const SizedBox(height: 16),
@@ -479,6 +631,42 @@ class _InventoryItemFormScreenState
       }
       return double.tryParse(trimmed) == null ? l10n.invalidNumber : null;
     };
+  }
+
+  /// Accepts a comma as the decimal mark, because a German keyboard puts
+  /// one there and `double.parse` does not take it.
+  String? Function(String?) _gramsValidator(AppLocalizations l10n) {
+    return (value) {
+      final trimmed = (value ?? '').trim().replaceAll(',', '.');
+      if (trimmed.isEmpty) return null;
+      final parsed = double.tryParse(trimmed);
+      if (parsed == null || parsed < 0) return l10n.invalidNumber;
+      return null;
+    };
+  }
+}
+
+/// One of the four macronutrient fields, all of which are grams for the
+/// whole item and all of which may be left blank.
+class _GramsField extends StatelessWidget {
+  const _GramsField({
+    required this.controller,
+    required this.label,
+    required this.validator,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final String? Function(String?) validator;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(labelText: label, suffixText: 'g'),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      validator: validator,
+    );
   }
 }
 

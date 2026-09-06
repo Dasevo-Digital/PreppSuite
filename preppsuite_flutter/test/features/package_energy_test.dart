@@ -51,6 +51,47 @@ void main() {
     });
   });
 
+  group('estimatePackageNutrientGrams', () {
+    test('turns a per-100 g figure into a package total', () {
+      expect(
+        estimatePackageNutrientGrams(gramsPer100: 25.5, quantityText: '200 g'),
+        closeTo(51, 0.001),
+      );
+    });
+
+    test('a nutrient heavier than the package itself is rejected', () {
+      // The common Open Food Facts data error: a per-package figure typed
+      // into the per-100 g field. Taken at face value it would put 250 g
+      // of protein in a 500 g tin, and every shelf total after it would
+      // be wrong by that much.
+      expect(
+        estimatePackageNutrientGrams(gramsPer100: 120, quantityText: '500 g'),
+        isNull,
+      );
+    });
+
+    test('missing either half means no number at all', () {
+      expect(
+        estimatePackageNutrientGrams(gramsPer100: null, quantityText: '500 g'),
+        isNull,
+      );
+      expect(
+        estimatePackageNutrientGrams(gramsPer100: 12, quantityText: '6 Stück'),
+        isNull,
+      );
+    });
+
+    test('a label stating zero is treated as no figure', () {
+      // Zero and "not filled in" are the same thing here: Open Food Facts
+      // stores an empty field as 0, and a stored 0 would read as a
+      // measured one.
+      expect(
+        estimatePackageNutrientGrams(gramsPer100: 0, quantityText: '500 g'),
+        isNull,
+      );
+    });
+  });
+
   group('estimatePackageKcal', () {
     test('scales energy per 100 g up to the package', () {
       // 350 kcal/100 g in a 500 g bag = 1750 kcal.

@@ -660,21 +660,60 @@
   "downloadFolderChange": "Choose folder",
   "downloadFolderReset": "Reset",
   "downloadRunningLabel": "Downloading {name}",
-  "@downloadRunningLabel": {"placeholders": {"name": {"type": "String"}}},
+  "@downloadRunningLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "downloadCancelAction": "Cancel",
   "downloadFailedLabel": "Download stopped: {error}",
-  "@downloadFailedLabel": {"placeholders": {"error": {"type": "String"}}},
+  "@downloadFailedLabel": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "downloadFinishedLabel": "{name} has finished downloading.",
-  "@downloadFinishedLabel": {"placeholders": {"name": {"type": "String"}}},
+  "@downloadFinishedLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "downloadRetryAction": "Try again",
   "downloadDismissAction": "Dismiss",
   "downloadOfSize": "{done} of {total}",
-  "@downloadOfSize": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
+  "@downloadOfSize": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "downloadBusyMessage": "A download is already running. Only one goes at a time.",
   "downloadStartAction": "Download",
   "downloadConfirmTitle": "Download?",
   "downloadConfirmBody": "{name} is {size} and will be saved to {folder}. It keeps going while the app stays open, and can be resumed later.",
-  "@downloadConfirmBody": {"placeholders": {"name": {"type": "String"}, "size": {"type": "String"}, "folder": {"type": "String"}}},
+  "@downloadConfirmBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      },
+      "folder": {
+        "type": "String"
+      }
+    }
+  },
   "knowledgeDownloadAction": "Download an archive",
   "kiwixTitle": "Kiwix library",
   "kiwixIntro": "Wikipedia and other collections as a ZIM file, free and without an account. Pick a language and download what you want offline.",
@@ -682,15 +721,36 @@
   "kiwixSearchHint": "Search collections",
   "kiwixNoResults": "Nothing found. Another language, or another search term?",
   "kiwixLoadError": "The library could not be reached: {error}",
-  "@kiwixLoadError": {"placeholders": {"error": {"type": "String"}}},
+  "@kiwixLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "kiwixArticleCount": "{count} articles",
-  "@kiwixArticleCount": {"placeholders": {"count": {"type": "String"}}},
+  "@kiwixArticleCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "kiwixFullTextTag": "full-text index",
   "kiwixFlavourMaxi": "complete",
   "kiwixFlavourMini": "introductions only",
   "kiwixFlavourNopic": "without pictures",
   "kiwixResultCount": "{shown} of {total}",
-  "@kiwixResultCount": {"placeholders": {"shown": {"type": "String"}, "total": {"type": "String"}}},
+  "@kiwixResultCount": {
+    "placeholders": {
+      "shown": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "kiwixLoadMore": "Load more",
   "mapDownloadAction": "Download a map",
   "mapDownloadTitle": "Download map area",
@@ -698,14 +758,47 @@
   "mapDownloadZoomLabel": "Detail",
   "mapDownloadZoomHint": "Level 12 shows towns and main roads, level 14 individual streets and buildings.",
   "mapDownloadTileCount": "{count} tiles, roughly {size}",
-  "@mapDownloadTileCount": {"placeholders": {"count": {"type": "String"}, "size": {"type": "String"}}},
+  "@mapDownloadTileCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadTooLarge": "{count} tiles is too many. Shrink the area or the detail level.",
-  "@mapDownloadTooLarge": {"placeholders": {"count": {"type": "String"}}},
+  "@mapDownloadTooLarge": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadRunning": "{done} of {total} tiles, {size} downloaded",
-  "@mapDownloadRunning": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}, "size": {"type": "String"}}},
+  "@mapDownloadRunning": {
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadFinished": "The map is ready and now in use.",
   "mapDownloadFailed": "The download failed: {error}",
-  "@mapDownloadFailed": {"placeholders": {"error": {"type": "String"}}},
+  "@mapDownloadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadSourceLabel": "Map source",
   "mapDownloadSourceOpenFreeMap": "OpenFreeMap (free, no key)",
   "mapDownloadSourceMapTiler": "MapTiler (needs an account and a key)",
@@ -714,58 +807,209 @@
   "mapDownloadApiKeyMissing": "This source needs a key.",
   "mapDownloadPolite": "The tiles come from a public server other people use too. Take no more than you need.",
   "mapDownloadLabel": "Own area, level {zoom}",
-  "@mapDownloadLabel": {"placeholders": {"zoom": {"type": "String"}}},
+  "@mapDownloadLabel": {
+    "placeholders": {
+      "zoom": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadSearchHint": "Town, district, state or country",
   "mapDownloadSearchNoResults": "Nothing found. Another name?",
   "mapDownloadSearchFailed": "The place search could not be reached: {error}",
-  "@mapDownloadSearchFailed": {"placeholders": {"error": {"type": "String"}}},
+  "@mapDownloadSearchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadAreaViewport": "Visible area",
   "mapDownloadAreaPlace": "{name} · {kind}",
-  "@mapDownloadAreaPlace": {"placeholders": {"name": {"type": "String"}, "kind": {"type": "String"}}},
+  "@mapDownloadAreaPlace": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "kind": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadDetailAuto": "The deepest level this area still fits at.",
   "mapDownloadPlaceTooLarge": "{name} is too large even at the coarsest level. Choose somewhere smaller.",
-  "@mapDownloadPlaceTooLarge": {"placeholders": {"name": {"type": "String"}}},
+  "@mapDownloadPlaceTooLarge": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadDeepestPossible": "At level 14 that would be {count} tiles — too many. Level {level} is the deepest this area goes.",
-  "@mapDownloadDeepestPossible": {"placeholders": {"count": {"type": "String"}, "level": {"type": "String"}}},
+  "@mapDownloadDeepestPossible": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadScopeLabel": "Scope",
   "mapDownloadScopePlace": "This place only",
   "mapDownloadScopeRegion": "With the state",
   "mapDownloadScopeCountry": "Whole country",
   "mapDownloadStaggered": "Staggered: coarser further out, full detail in the middle.",
   "mapDownloadStep": "{label}: level {from} to {to}, {count} tiles",
-  "@mapDownloadStep": {"placeholders": {"label": {"type": "String"}, "from": {"type": "String"}, "to": {"type": "String"}, "count": {"type": "String"}}},
+  "@mapDownloadStep": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadNoPlan": "Even staggered this does not fit. Choose somewhere smaller.",
   "mapDownloadEstimatedTime": "Takes roughly {minutes} minutes.",
-  "@mapDownloadEstimatedTime": {"placeholders": {"minutes": {"type": "String"}}},
+  "@mapDownloadEstimatedTime": {
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadResolving": "Working out the surroundings …",
   "mapDownloadUnfinishedTitle": "Unfinished download",
   "mapDownloadUnfinishedBody": "{label} — {done} of {total} tiles are already here.",
-  "@mapDownloadUnfinishedBody": {"placeholders": {"label": {"type": "String"}, "done": {"type": "String"}, "total": {"type": "String"}}},
+  "@mapDownloadUnfinishedBody": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "mapDownloadResumeAction": "Resume",
   "mapDownloadDiscardAction": "Discard",
   "settingsLocationServicesOff": "Location services are switched off. Turn them on in the system settings.",
   "settingsLocationDeniedForever": "Location access is denied for PreppSuite. The system will not ask again — allow it in the system settings.",
   "settingsLocationDenied": "This needs access to your location. Pick the federal state from the list instead.",
   "settingsLocationUnavailable": "Location is not available on this device: {detail}",
-  "@settingsLocationUnavailable": {"placeholders": {"detail": {"type": "String"}}},
+  "@settingsLocationUnavailable": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
   "mapZoomIn": "Zoom in",
   "mapZoomOut": "Zoom out",
   "supplyCalculatorHouseholdLine": "{who} — from the household",
-  "@supplyCalculatorHouseholdLine": {"placeholders": {"who": {"type": "String"}}},
+  "@supplyCalculatorHouseholdLine": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
   "supplyCalculatorEditHousehold": "Change in the household",
   "supplyCalculatorAdults": "{count} adults",
-  "@supplyCalculatorAdults": {"placeholders": {"count": {"type": "String"}}},
+  "@supplyCalculatorAdults": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "supplyCalculatorChildren": "{count} children",
-  "@supplyCalculatorChildren": {"placeholders": {"count": {"type": "String"}}},
+  "@supplyCalculatorChildren": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "supplyCalculatorDogs": "{count} dogs",
-  "@supplyCalculatorDogs": {"placeholders": {"count": {"type": "String"}}},
+  "@supplyCalculatorDogs": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "supplyCalculatorCats": "{count} cats",
-  "@supplyCalculatorCats": {"placeholders": {"count": {"type": "String"}}},
+  "@supplyCalculatorCats": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
   "supplyCalculatorPetFoodNote": "Pet food is not counted in the calories — dogs and cats need a supply of their own. Their drinking water is included.",
   "supplyCalculatorSourceTitle": "Where the numbers come from",
   "supplyCalculatorSourceBody": "For adults the BBK states 1.5 litres of fluid a day plus 0.5 litres for cooking, and around 2200 kcal. For children and pets it states no figures at all, only the reminder to think of them. What the app uses instead is its own conservative estimate: children get the same amount of water as adults, because running short of water is the worse mistake, and 1400 kcal. For dogs and cats only water is counted, at the veterinary rule of thumb of about 60 ml per kilogram — 1.2 litres for a 20 kg dog, 0.25 litres for a 4 kg cat. For exact planning, use the BMEL's Vorratskalkulator.",
   "householdChildrenLabel": "Children",
   "householdDogsLabel": "Dogs",
   "householdCatsLabel": "Cats",
-  "householdAdultsLabel": "Adults"
+  "householdAdultsLabel": "Adults",
+  "storageTipsTitle": "Storage tips",
+  "storageTipsIntro": "The BBK recommends a ten-day supply and, for the amounts, points at the stockpiling tables of the Federal Office for Agriculture and Food. They are here — scaled to your household.",
+  "storagePeopleLine": "For {count} people — from the household",
+  "storageDaysLabel": "{days} days",
+  "storageFewerDays": "One day fewer",
+  "storageMoreDays": "One day more",
+  "storageScaledNote": "The table is printed for one person and ten days. Every amount here is converted.",
+  "storageDietMixed": "Mixed diet",
+  "storageDietVegetarian": "Vegetarian",
+  "storageAmountGrams": "{value} g",
+  "storageAmountKilograms": "{value} kg",
+  "storageAmountLiters": "{value} l",
+  "storageAmountPieces": "{count} pcs",
+  "storageKcal": "{kcal} kcal",
+  "storageVariantLine": "or {name}: {kcal} kcal",
+  "storageAddToInventory": "Add to inventory",
+  "storageFromTableNote": "Taken from the BLE stockpiling table.",
+  "storageUnitGram": "g",
+  "storageUnitLiter": "l",
+  "storageUnitPiece": "pcs",
+  "storageNutrientProtein": "Protein",
+  "storageNutrientFiber": "Fibre",
+  "storageNutrientIron": "Iron",
+  "storageNutrientVitaminB12": "Vitamin B12",
+  "storageNutrientHealthyFats": "Healthy fats",
+  "storageNutrientFluid": "Fluid",
+  "storageNutrientLegendTitle": "What the markers mean",
+  "storageNutrientLegendBody": "The markers on the foods are not in the official table — they are this app's own reading. They show what a food is mainly there for, so you can see what leaves with a group you drop. Orientation, not dietary advice.",
+  "storageTipsGeneralTitle": "General tips",
+  "storageTipRotate": "Rotate the stock: always use the oldest first and replace it. Then nothing expires and nothing was bought for the bin.",
+  "storageTipCoolDryDark": "Store cool, dry and dark, ideally in tightly closing containers.",
+  "storageTipEatWhatYouStore": "Only store what you actually eat. A supply nobody likes is never used up and eventually thrown away.",
+  "storageTipNoPower": "Count on a power cut: plan nothing that has to be refrigerated or frozen.",
+  "storageTipReadyToEat": "Choose part of it so that it can be eaten without cooking — in case the gas or the hob goes too.",
+  "storageTipCanOpener": "Remember a tin opener that works without electricity.",
+  "storageTipSpecialNeeds": "Small children, pets, medication and special diets belong on the list too. The table does not cover them.",
+  "storageVeganTitle": "Vegan?",
+  "storageVeganBody": "There is no official vegan table — the BLE publishes these two and no third, and the app does not invent one. On a vegan diet, two lines of the vegetarian table are replaced: 2.5 kg of milk and dairy, and the five eggs. Fortified plant drinks and soy products cover protein and calcium. For vitamin B12, iodine, iron and omega-3 the DGE issues an explicit warning on a vegan diet — B12 can only be covered reliably by a supplement, and that then belongs in the supply like everything else.",
+  "storageSourceTitle": "Where the numbers come from",
+  "storageSourceBody": "On its \"Bevorraten\" page the BBK gives ten days and 1.5 litres of fluid plus 0.5 litres for cooking a day; for the amounts it points at the stockpiling tables of the Federal Office for Agriculture and Food (BLE, 2024, ernaehrungsvorsorge.de). Every line here comes from there: a basic supply for one person and ten days at an average 2,200 kcal a day, once as a mixed diet and once ovo-lacto-vegetarian. The energy figures are from the Bundeslebensmittelschlüssel 3.02 of the Max Rubner Institute; the amounts follow the DGE, ÖGE and SGE reference values. Scaling is linear in people and days. The markers on the foods are this app's addition and appear in no official table.",
+  "nutritionSectionTitle": "Nutrition",
+  "nutritionSectionHint": "For the whole amount, not per 100 g. Scanning a barcode fills in whatever the label states.",
+  "proteinLabel": "Protein",
+  "carbohydrateLabel": "Carbohydrates",
+  "fatLabel": "Fat",
+  "fiberLabel": "Fibre"
 }
