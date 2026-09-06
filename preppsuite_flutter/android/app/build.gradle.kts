@@ -53,6 +53,21 @@ android {
                 keyPassword = keystoreProperties["keyPassword"] as String
                 storeFile = file(keystoreProperties["storeFile"] as String)
                 storePassword = keystoreProperties["storePassword"] as String
+                // minSdk is 24, so v2 is the oldest scheme any device we
+                // support reads, and v1 (JAR signing) buys nothing but size.
+                // v3 is what carries the rotation proof that lets the key
+                // below replace the debug key on an existing install.
+                //
+                // Careful: the Android Gradle Plugin cannot attach a
+                // SigningCertificateLineage, so the v3 block it writes names
+                // this key alone. Every device still holding a 0.10.0 install
+                // rejects that. tool/android_release.sh re-signs the output
+                // with android/signing-lineage.bin, and only that script's
+                // APK may be handed out.
+                enableV1Signing = false
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = false
             }
         }
     }

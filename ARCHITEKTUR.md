@@ -390,6 +390,20 @@ tree; the test suite deliberately targets that layer rather than the UI.
   null — it sniffs the format by reading a header straight out of the
   buffer. `applyPhotoEdit` catches, because it runs on a worker isolate
   and an uncaught throw there loses both the picture and the message.
+- **The distributable Android package is not what `flutter build apk`
+  produces.** Since 0.11.0 the APK carries a signing-certificate lineage
+  (`android/signing-lineage.bin`) proving the old debug key authorised the
+  release key, which is the only thing that lets an existing 0.8.0-0.10.0
+  install update instead of being uninstalled. The Android Gradle Plugin
+  cannot attach a lineage, so `tool/android_release.sh` re-signs the Gradle
+  output with apksigner and refuses to leave behind an APK where the
+  certificate per SDK range is not exactly: debug for API 24-32, release for
+  API 33+. Handing out the plain Gradle APK is not a cosmetic mistake — it
+  breaks the update path silently and costs the user their local data.
+  Consequence: `~/.android/debug.keystore` is part of the signature, not a
+  leftover, until `minSdk` reaches 33. The 33 boundary is apksigner's
+  default (rotation goes into a v3.1 block); see README for why it is not
+  lowered to 28.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

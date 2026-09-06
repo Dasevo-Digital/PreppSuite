@@ -113,9 +113,8 @@ keytool -genkeypair -v -keystore ~/.android-keystores/preppsuite-release.jks \
 
 Dazu `preppsuite_flutter/android/key.properties` mit `storeFile`,
 `storePassword`, `keyPassword` und `keyAlias` anlegen – die Datei ist
-ignoriert und bleibt lokal. Danach signiert `flutter build apk --release` von
-selbst richtig; fehlt sie, warnt der Build und fällt auf den Debug-Schlüssel
-zurück.
+ignoriert und bleibt lokal. Fehlt sie, warnt der Build und fällt auf den
+Debug-Schlüssel zurück.
 
 **Der Schlüssel ist unersetzlich.** Geht er verloren, lässt sich für alle, die
 die App installiert haben, nie wieder eine Aktualisierung veröffentlichen.
@@ -123,6 +122,47 @@ Keystore und Passwörter gehören an zwei getrennte gesicherte Orte.
 
 Für die Weitergabe über *Releases* lohnt sich `--split-per-abi`: getrennte
 Pakete je Prozessorarchitektur, jedes rund ein Drittel der Größe.
+
+#### Schlüsselwechsel: warum `flutter build apk` allein nicht reicht
+
+Bis 0.10.0 trug die APK den Debug-Schlüssel. Android verweigert eine
+Aktualisierung, deren Zertifikat von dem der Installation abweicht – ein
+schlichter Wechsel hätte alle Bestandsinstallationen zum Deinstallieren
+gezwungen, mitsamt ihrer Daten.
+
+Der Ausweg heißt *Signaturschema v3*: `android/signing-lineage.bin` ist ein
+vom Debug-Schlüssel unterschriebener Nachweis, dass er den heutigen Schlüssel
+als Nachfolger anerkennt. Steckt der im Paket, nimmt Android die
+Aktualisierung an.
+
+Das Android-Gradle-Plugin kann diesen Nachweis **nicht** anhängen. Deshalb
+wird die weiterzugebende APK nicht von `flutter build apk --release` gebaut,
+sondern von:
+
+```bash
+./tool/android_release.sh
+```
+
+Das Skript baut, signiert mit der Lineage nach und weist nach, welches
+Zertifikat in welcher Spanne gilt, bevor es etwas ablegt:
+
+| Android | Schema | Zertifikat |
+|---|---|---|
+| 7 bis 12 (API 24–32) | v2 | `CN=Android Debug` |
+| 13 und neuer (API 33+) | v3.1 | `CN=PreppSuite` |
+
+**Die Grenze liegt bei 13, nicht bei 9.** apksigner legt eine Rotation
+standardmäßig in einen *v3.1*-Block, und den liest erst Android 13. Android 9
+bis 12 ließen sich mit `--rotation-min-sdk-version 28` erreichen – aber deren
+Rotationsbehandlung ist gerade der Grund, aus dem es v3.1 gibt, und eine
+fehlgeschlagene Installation hat bei einer selbst verteilten App keinen
+Rückweg. Bewusst auf der sicheren Vorgabe belassen.
+
+Beides zusammen heißt: solange `minSdk` bei 24 liegt, ist der Debug-Keystore
+(`~/.android/debug.keystore`) **kein Überbleibsel, sondern Teil der
+Signatur.** Er gehört gesichert wie der eigentliche Schlüssel; geht er
+verloren, ist für Android 7 bis 12 keine Aktualisierung mehr möglich. Erst ein
+`minSdk` von 33 macht ihn entbehrlich.
 
 Die App trägt die Kennung `de.status403.preppsuite`. Wer eine eigene Fassung
 über den App Store verteilen will, braucht eine eigene unter einer Domain, die
