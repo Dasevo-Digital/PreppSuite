@@ -437,5 +437,14 @@
   "carbohydrateLabel": "Kohlenhydrate",
   "fatLabel": "Fett",
   "fiberLabel": "Ballaststoffe",
-  "supplyCalculatorSeniorNote": "Ab 65 Jahren empfiehlt die DGE 2 Liter Trinken am Tag statt 1,5 — für ältere Menschen im Haushalt also einen halben Liter je Person und Tag mehr einplanen."
+  "supplyCalculatorSeniorNote": "Ab 65 Jahren empfiehlt die DGE 2 Liter Trinken am Tag statt 1,5 — für ältere Menschen im Haushalt also einen halben Liter je Person und Tag mehr einplanen.",
+  "warningFilterSearchHint": "Ort, Region oder Stichwort",
+  "warningFilterSearchClear": "Suche löschen",
+  "warningFilterActive": "Akut",
+  "warningFilterExpired": "Abgelaufen",
+  "warningFilterMyRegions": "Meine Regionen",
+  "warningFilterSevere": "Ab schwer",
+  "warningFilterResultCount": "{shown} von {total} Warnungen",
+  "warningFilterClear": "Filter zurücksetzen",
+  "warningsEmptyFiltered": "Keine der {total} Warnungen passt zum Filter."
 }

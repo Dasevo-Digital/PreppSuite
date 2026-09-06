@@ -1012,5 +1012,14 @@
   "carbohydrateLabel": "Carbohydrates",
   "fatLabel": "Fat",
   "fiberLabel": "Fibre",
-  "supplyCalculatorSeniorNote": "From 65 the DGE recommends 2 litres of drinking a day rather than 1.5 — so plan half a litre more per person and day for older people in the household."
+  "supplyCalculatorSeniorNote": "From 65 the DGE recommends 2 litres of drinking a day rather than 1.5 — so plan half a litre more per person and day for older people in the household.",
+  "warningFilterSearchHint": "Place, region or keyword",
+  "warningFilterSearchClear": "Clear search",
+  "warningFilterActive": "Active",
+  "warningFilterExpired": "Expired",
+  "warningFilterMyRegions": "My regions",
+  "warningFilterSevere": "Severe and up",
+  "warningFilterResultCount": "{shown} of {total} warnings",
+  "warningFilterClear": "Clear filter",
+  "warningsEmptyFiltered": "None of the {total} warnings match the filter."
 }

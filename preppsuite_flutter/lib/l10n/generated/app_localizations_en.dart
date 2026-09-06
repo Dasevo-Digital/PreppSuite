@@ -1559,4 +1559,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get supplyCalculatorSeniorNote =>
       'From 65 the DGE recommends 2 litres of drinking a day rather than 1.5 — so plan half a litre more per person and day for older people in the household.';
+
+  @override
+  String get warningFilterSearchHint => 'Place, region or keyword';
+
+  @override
+  String get warningFilterSearchClear => 'Clear search';
+
+  @override
+  String get warningFilterActive => 'Active';
+
+  @override
+  String get warningFilterExpired => 'Expired';
+
+  @override
+  String get warningFilterMyRegions => 'My regions';
+
+  @override
+  String get warningFilterSevere => 'Severe and up';
+
+  @override
+  String warningFilterResultCount(Object shown, Object total) {
+    return '$shown of $total warnings';
+  }
+
+  @override
+  String get warningFilterClear => 'Clear filter';
+
+  @override
+  String warningsEmptyFiltered(Object total) {
+    return 'None of the $total warnings match the filter.';
+  }
 }

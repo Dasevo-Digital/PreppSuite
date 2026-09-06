@@ -1569,4 +1569,35 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get supplyCalculatorSeniorNote =>
       'Ab 65 Jahren empfiehlt die DGE 2 Liter Trinken am Tag statt 1,5 — für ältere Menschen im Haushalt also einen halben Liter je Person und Tag mehr einplanen.';
+
+  @override
+  String get warningFilterSearchHint => 'Ort, Region oder Stichwort';
+
+  @override
+  String get warningFilterSearchClear => 'Suche löschen';
+
+  @override
+  String get warningFilterActive => 'Akut';
+
+  @override
+  String get warningFilterExpired => 'Abgelaufen';
+
+  @override
+  String get warningFilterMyRegions => 'Meine Regionen';
+
+  @override
+  String get warningFilterSevere => 'Ab schwer';
+
+  @override
+  String warningFilterResultCount(Object shown, Object total) {
+    return '$shown von $total Warnungen';
+  }
+
+  @override
+  String get warningFilterClear => 'Filter zurücksetzen';
+
+  @override
+  String warningsEmptyFiltered(Object total) {
+    return 'Keine der $total Warnungen passt zum Filter.';
+  }
 }

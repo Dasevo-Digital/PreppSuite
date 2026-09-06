@@ -2725,6 +2725,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'From 65 the DGE recommends 2 litres of drinking a day rather than 1.5 — so plan half a litre more per person and day for older people in the household.'**
   String get supplyCalculatorSeniorNote;
+
+  /// No description provided for @warningFilterSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Place, region or keyword'**
+  String get warningFilterSearchHint;
+
+  /// No description provided for @warningFilterSearchClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get warningFilterSearchClear;
+
+  /// No description provided for @warningFilterActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get warningFilterActive;
+
+  /// No description provided for @warningFilterExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get warningFilterExpired;
+
+  /// No description provided for @warningFilterMyRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'My regions'**
+  String get warningFilterMyRegions;
+
+  /// No description provided for @warningFilterSevere.
+  ///
+  /// In en, this message translates to:
+  /// **'Severe and up'**
+  String get warningFilterSevere;
+
+  /// No description provided for @warningFilterResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{shown} of {total} warnings'**
+  String warningFilterResultCount(Object shown, Object total);
+
+  /// No description provided for @warningFilterClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filter'**
+  String get warningFilterClear;
+
+  /// No description provided for @warningsEmptyFiltered.
+  ///
+  /// In en, this message translates to:
+  /// **'None of the {total} warnings match the filter.'**
+  String warningsEmptyFiltered(Object total);
 }
 
 class _AppLocalizationsDelegate
