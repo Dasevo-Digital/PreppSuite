@@ -382,6 +382,15 @@ class _HouseholdLine extends StatelessWidget {
             style: theme.textTheme.bodySmall,
           ),
         ],
+        // Shown to everyone, because age is not in the profile and the
+        // app therefore cannot know whether it applies. A line that says
+        // "add more if this is you" is the honest version of a number the
+        // app would otherwise have to guess at.
+        const SizedBox(height: 4),
+        Text(
+          l10n.supplyCalculatorSeniorNote,
+          style: theme.textTheme.bodySmall,
+        ),
       ],
     );
   }

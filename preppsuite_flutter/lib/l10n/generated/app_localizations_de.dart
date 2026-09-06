@@ -1384,7 +1384,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get supplyCalculatorSourceBody =>
-      'Für Erwachsene nennt das BBK 1,5 Liter Flüssigkeit am Tag plus 0,5 Liter zum Kochen und rund 2200 kcal. Für Kinder und Haustiere nennt es keine Zahlen, sondern nur den Hinweis, an sie zu denken. Was die App dafür ansetzt, ist ihre eigene, vorsichtige Schätzung: Kinder bekommen dieselbe Wassermenge wie Erwachsene, weil zu wenig Wasser der schlimmere Fehler ist, und 1400 kcal. Für Hunde und Katzen wird nur Wasser gerechnet, nach der tierärztlichen Faustregel von etwa 60 ml je Kilogramm — 1,2 Liter für einen Hund von 20 kg, 0,25 Liter für eine Katze von 4 kg. Wer es genau braucht: der Vorratskalkulator des BMEL.';
+      'Für Erwachsene nennt das BBK 1,5 Liter Flüssigkeit am Tag plus 0,5 Liter zum Kochen und rund 2200 kcal. Für Kinder nennt das BBK selbst keine Zahl, verweist aber auf die Bundesanstalt für Landwirtschaft und Ernährung, und deren Vorratstabelle sagt es in einer Fußnote: Kinder bis 12 Jahre (keine Säuglinge) brauchen im Schnitt 1 Liter am Tag, nach DGE und Max-Rubner-Institut. Die App rechnet damit — 1 Liter plus die 0,5 Liter zum Kochen. Ab 65 Jahren empfiehlt dieselbe Fußnote 2 Liter am Tag; das Alter steht nicht im Haushaltsprofil, deshalb steht dazu nur ein Hinweis auf dem Vorratsbildschirm. Die 1400 kcal für Kinder sind weiterhin die eigene, vorsichtige Schätzung dieser App — dafür gibt es keine amtliche Zahl. Für Hunde und Katzen wird nur Wasser gerechnet, nach der tierärztlichen Faustregel von etwa 60 ml je Kilogramm — 1,2 Liter für einen Hund von 20 kg, 0,25 Liter für eine Katze von 4 kg. Wer es genau braucht: der Vorratskalkulator des BMEL.';
 
   @override
   String get householdChildrenLabel => 'Kinder';
@@ -1565,4 +1565,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get fiberLabel => 'Ballaststoffe';
+
+  @override
+  String get supplyCalculatorSeniorNote =>
+      'Ab 65 Jahren empfiehlt die DGE 2 Liter Trinken am Tag statt 1,5 — für ältere Menschen im Haushalt also einen halben Liter je Person und Tag mehr einplanen.';
 }

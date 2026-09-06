@@ -53,9 +53,8 @@ void main() {
       expect(result.waterCurrentLiters, 6.5);
     });
 
-    // The BBK publishes figures for adults only; what the app adds for
-    // children and animals is its own, and the point of these numbers
-    // being in one enum is that they can be checked here.
+    // Which figure is official and which is the app's own is the whole
+    // point of these living in one enum — so they are checked here.
     test('children and pets are counted, each on its own terms', () {
       final result = calculateSupply(
         items: const [],
@@ -68,8 +67,13 @@ void main() {
         days: 10,
       );
 
-      // Water: four humans at 2 L, a 20 kg dog at 1.2, a 4 kg cat at 0.25.
-      expect(result.waterTargetLiters, closeTo((4 * 2.0 + 1.45) * 10, 0.001));
+      // Water: two adults at 2 L (BBK's 1.5 drinking + 0.5 cooking), two
+      // children at 1.5 (the BLE footnote's 1 L drinking + the same 0.5),
+      // a 20 kg dog at 1.2 and a 4 kg cat at 0.25.
+      expect(
+        result.waterTargetLiters,
+        closeTo((2 * 2.0 + 2 * 1.5 + 1.45) * 10, 0.001),
+      );
 
       // Calories: humans only. Pet food is not human food, and counting
       // it here would say the household is fed when it is not.

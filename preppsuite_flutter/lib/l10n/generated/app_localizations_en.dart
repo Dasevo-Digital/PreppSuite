@@ -1375,7 +1375,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supplyCalculatorSourceBody =>
-      'For adults the BBK states 1.5 litres of fluid a day plus 0.5 litres for cooking, and around 2200 kcal. For children and pets it states no figures at all, only the reminder to think of them. What the app uses instead is its own conservative estimate: children get the same amount of water as adults, because running short of water is the worse mistake, and 1400 kcal. For dogs and cats only water is counted, at the veterinary rule of thumb of about 60 ml per kilogram — 1.2 litres for a 20 kg dog, 0.25 litres for a 4 kg cat. For exact planning, use the BMEL\'s Vorratskalkulator.';
+      'For adults the BBK states 1.5 litres of fluid a day plus 0.5 litres for cooking, and around 2200 kcal. For children the BBK itself states nothing, but points at the Federal Office for Agriculture and Food, whose stockpiling table says it in a footnote: children up to 12 (not infants) need an average of 1 litre a day, per the DGE and the Max Rubner Institute. The app uses that — 1 litre plus the same 0.5 litres for cooking. From 65 the same footnote recommends 2 litres a day; age is not in the household profile, so that appears only as a note on the inventory screen. The 1400 kcal for a child remain this app\'s own cautious estimate — there is no official figure. For dogs and cats only water is counted, at the veterinary rule of thumb of roughly 60 ml per kilogram: 1.2 litres for a 20 kg dog, 0.25 litres for a 4 kg cat. For anything exact, the BMEL\'s Vorratskalkulator.';
 
   @override
   String get householdChildrenLabel => 'Children';
@@ -1555,4 +1555,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fiberLabel => 'Fibre';
+
+  @override
+  String get supplyCalculatorSeniorNote =>
+      'From 65 the DGE recommends 2 litres of drinking a day rather than 1.5 — so plan half a litre more per person and day for older people in the household.';
 }

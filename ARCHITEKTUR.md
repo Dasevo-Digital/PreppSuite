@@ -253,14 +253,20 @@ indistinguishable from a measured one. A nutrient heavier than the
 package it is in is rejected, which is what catches the common Open Food
 Facts error of a per-package figure typed into the per-100 g field.
 
-**Figures the BBK publishes and figures this app invented are kept
+**Figures that are official and figures this app invented are kept
 apart.** `SupplyHead` carries one rate per kind of head and says at each
-where it came from: the BBK states 1.5 + 0.5 litres and ~2200 kcal for an
-adult and *nothing at all* for children or animals — only the reminder
-that they exist — so what the app uses for those is labelled as its own
-estimate, in the code and on screen. Pet food is never added to the
-calorie target: those are human calories, and counting dog food in them
-would report a household as fed when it is not.
+where it came from. The BBK's page states 1.5 + 0.5 litres and ~2200 kcal
+for an adult and nothing for children or animals; its own pointer, the
+BLE stockpiling table, does carry a children's figure in a footnote — 1
+litre of drinking a day up to age 12, per DGE and MRI — and that is what
+the app uses, plus the same 0.5 for cooking. The 1400 kcal for a child
+and the veterinary water rates are still the app's own, labelled as such
+in the code and on screen. The same footnote's 2 litres from age 65 is a
+note on the inventory screen rather than a fifth head: age is not in the
+profile, and asking for it to adjust one number would be a poor trade.
+Pet food is never added to the calorie target: those are human calories,
+and counting dog food in them would report a household as fed when it is
+not.
 
 **No hard-coded user-facing strings.** Every one goes through
 `AppLocalizations` with entries in both `app_de.arb` and `app_en.arb`.

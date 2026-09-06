@@ -5,23 +5,37 @@ import 'inventory_category_l10n.dart';
 
 /// What one head costs a day.
 ///
-/// Every figure here is either the BBK's or plainly labelled as this
-/// app's own. The distinction matters: the BBK publishes numbers for an
-/// adult and, for children and animals, only the reminder that they exist
-/// — "Haben Sie Vorräte für (Klein-)Kinder oder Haustiere, die Sie in
-/// einem Notfall auch versorgen müssen?" — and points at the BMEL's
-/// Vorratskalkulator for anything exact. Dressing an invented number up
-/// as an official one would be the worst thing this screen could do.
+/// Every figure here is either official or plainly labelled as this app's
+/// own, and keeping them in one enum is what makes that checkable. The
+/// BBK's own page states a figure for adults and, for children and
+/// animals, only the reminder that they exist — "Haben Sie Vorräte für
+/// (Klein-)Kinder oder Haustiere, die Sie in einem Notfall auch versorgen
+/// müssen?" — and then points at the BLE. The BLE's *Vorratstabelle* does
+/// carry a children's figure, in its footnotes, and that is where the
+/// number below comes from. Dressing an invented number up as an official
+/// one would be the worst thing this screen could do.
 enum SupplyHead {
   /// BBK: at least 1.5 litres of fluid a day, plus 0.5 litres for
   /// cooking, and around 2200 kcal.
   adult(litersPerDay: 2.0, kcalPerDay: 2200),
 
-  /// Water deliberately at the adult rate. The BBK's 1.5 + 0.5 is already
-  /// a minimum, and running short of water is the worse mistake of the
-  /// two. The energy figure is this app's own conservative estimate, not
-  /// anybody's recommendation.
-  child(litersPerDay: 2.0, kcalPerDay: 1400),
+  /// 1 litre of drinking plus the same 0.5 litres for cooking.
+  ///
+  /// The litre is official after all: the BLE's stockpiling table cites
+  /// the DGE and the Max Rubner-Institut for "Kinder (nicht Säuglinge) im
+  /// Alter von bis zu 12 Jahren haben einen durchschnittlichen
+  /// Getränkebedarf in Höhe von 1 Liter pro Person und Tag". This was 2.0
+  /// as the app's own cautious guess, which overstated the water target
+  /// for every household with children.
+  ///
+  /// The same footnote recommends 2 litres of drinking a day from 65, i.e.
+  /// 2.5 with cooking. There is no head for that: age is not in the
+  /// household profile, and asking for it to adjust one number would be a
+  /// poor trade. The screen says so instead.
+  ///
+  /// The energy figure is still this app's own conservative estimate —
+  /// nobody official publishes one.
+  child(litersPerDay: 1.5, kcalPerDay: 1400),
 
   /// Water only, at the veterinary rule of thumb of roughly 60 ml per
   /// kilogram a day, taken at 20 kg. Pet food is not counted in the
