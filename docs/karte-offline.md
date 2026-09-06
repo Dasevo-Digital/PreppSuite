@@ -22,7 +22,48 @@ Der dritte Punkt ist der, an dem die meisten Downloads scheitern: die
 fertigen `.pmtiles`, die man im Netz findet, sind überwiegend
 Protomaps-Schema.
 
-## Eine Datei herstellen
+## In der App laden
+
+Deshalb baut die App sich die Datei selbst. **Einstellungen → Offline-Karte
+→ Karte herunterladen** zeigt eine Karte; verschoben wird sie auf das
+Gebiet, das offline gebraucht wird, und geladen wird genau der sichtbare
+Ausschnitt. Ein Schieberegler bestimmt, wie tief: Stufe 12 zeigt
+Ortschaften und Hauptstraßen, Stufe 14 einzelne Straßen und Gebäude. Die
+Kachelzahl steht daneben, bevor irgendetwas passiert.
+
+Was dabei entsteht, ist ein echtes PMTiles-v3-Archiv, geschrieben von
+`pmtiles_writer.dart` – dem Gegenstück zum Leser, und aus demselben Grund
+von Hand: das `pmtiles`-Paket braucht eine Protobuf-Fassung, die
+`vector_tile_renderer` nicht haben kann. Gleiche Kacheln werden nur einmal
+abgelegt, was bei leerem Wasser den Unterschied macht.
+
+### Zwei Quellen
+
+- **OpenFreeMap** – frei, ohne Konto, ohne Schlüssel, im
+  OpenMapTiles-Schema aus OpenStreetMap-Daten. Die Voreinstellung.
+- **MapTiler** – braucht ein Konto; der Schlüssel wird in den
+  Einstellungen eingetragen und bleibt auf dem Gerät. Der Kachelsatz
+  `tiles/v3` ist ebenfalls OpenMapTiles-Schema.
+
+Beide beschreiben sich selbst in TileJSON, weshalb es nur einen Client
+gibt. Die Kachel-Adresse wird von dort gelesen und nicht einkompiliert:
+OpenFreeMap datiert seine Pfade und verschiebt sie mit jedem Planetenbau.
+
+### Grenzen, und warum es sie gibt
+
+Über 60 000 Kacheln lehnt die App ab. Das ist keine technische Grenze,
+sondern eine Anstandsgrenze: die Kacheln kommen von einem öffentlichen
+Server, den andere mitbenutzen, und ein Download dieser Länge wäre ohnehin
+nicht zu Ende gebracht, bevor die App geschlossen wird. Zum Vergleich –
+ganz Deutschland bis Stufe 12 sind rund 20 000 Kacheln und geht; bis Stufe
+14 wären es über 315 000 und geht nicht. Ein Kreis oder eine Stadt bis
+Stufe 14 dagegen ist eine Sache von Minuten.
+
+Die Größenangabe vorab ist grob geschätzt. Eine Kachel Innenstadt ist ein
+Vielfaches einer Kachel Feld, und keine der beiden ist bekannt, bevor sie
+geladen ist.
+
+## Eine Datei selbst herstellen
 
 [Planetiler](https://github.com/onthegomap/planetiler) erzeugt aus
 OpenStreetMap-Daten ein Archiv im richtigen Schema und schreibt PMTiles

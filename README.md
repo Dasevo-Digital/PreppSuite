@@ -55,17 +55,20 @@ die App sagt das an Ort und Stelle auch selbst.
 der WWBOTA-Datenbank, nach Entfernung und nach Belastbarkeit der Angabe
 filterbar.
 
-**Karte offline.** Wer eine PMTiles-Datei auf dem Gerät hinterlegt, braucht
-für die Karte kein Netz mehr – die App zeichnet sie selbst aus
-Vektorkacheln. Ohne eigene Datei kommen die Kacheln wie bisher von
-OpenStreetMap. Was für eine Datei das sein muss und wie man sie herstellt,
-steht in [`docs/karte-offline.md`](docs/karte-offline.md).
+**Karte offline.** Die Karte lässt sich in der App herunterladen: Ausschnitt
+auf der Karte einstellen, Detailstufe wählen, laden – fertig ist ein
+PMTiles-Archiv auf dem Gerät, und die Karte braucht kein Netz mehr. Die
+Kacheln kommen von OpenFreeMap, frei und ohne Schlüssel, wahlweise auch von
+MapTiler mit eigenem Konto. Eine selbst gebaute Datei geht weiterhin. Ohne
+Archiv kommen die Kacheln wie bisher von OpenStreetMap. Einzelheiten in
+[`docs/karte-offline.md`](docs/karte-offline.md).
 
 **Wissen offline.** Eine ZIM-Datei – Wikipedia von Kiwix, eine
 Themensammlung oder eigene Lernmaterialien – macht das Nachschlagen
-unabhängig vom Netz. Gesucht wird nach Titeln oder im Text der Artikel;
-gelesen wird mit Bildern und Formatierung. Einzelheiten in
-[`docs/wissen-offline.md`](docs/wissen-offline.md).
+unabhängig vom Netz. Der Kiwix-Katalog wird in der App durchsucht, nach
+Sprache gefiltert und von dort geladen. Gesucht wird nach Titeln oder im
+Text der Artikel; gelesen wird mit Bildern und Formatierung. Einzelheiten
+in [`docs/wissen-offline.md`](docs/wissen-offline.md).
 
 **Teilen.** Mehrere Geräte teilen sich Bestände, Listen und Budget über
 einen Ordner, den sie alle sehen – Nextcloud, Syncthing, iCloud Drive,
@@ -200,8 +203,11 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
 - Die Offline-Karte kennt ein Kartenbild, hell, ohne Piktogramme an Punkten
   und ohne Höhenrelief. Sie braucht ein Archiv im OpenMapTiles-Schema; die
   fertigen `.pmtiles` aus dem Netz sind meist Protomaps-Schema und werden
-  beim Auswählen abgelehnt. Einzelheiten in
-  [`docs/karte-offline.md`](docs/karte-offline.md).
+  beim Auswählen abgelehnt. Deshalb baut die App sich das Archiv selbst –
+  aus dem Ausschnitt, den man auf der Karte einstellt, von OpenFreeMap
+  (frei und ohne Schlüssel) oder von MapTiler (mit eigenem Schlüssel). Über
+  60 000 Kacheln lehnt sie ab, aus Rücksicht auf einen öffentlichen Server.
+  Einzelheiten in [`docs/karte-offline.md`](docs/karte-offline.md).
 - Die Volltextsuche braucht einen Index, den die App einmal selbst
   aufbaut – der fertige im Archiv liegt in einem Xapian-Format ohne
   Dart-Anbindung. Für eine Themensammlung sind das Minuten, für die

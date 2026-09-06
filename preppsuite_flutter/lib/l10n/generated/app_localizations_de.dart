@@ -1176,4 +1176,76 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get kiwixLoadMore => 'Mehr laden';
+
+  @override
+  String get mapDownloadAction => 'Karte herunterladen';
+
+  @override
+  String get mapDownloadTitle => 'Kartenausschnitt laden';
+
+  @override
+  String get mapDownloadIntro =>
+      'Verschiebe die Karte auf das Gebiet, das du offline brauchst. Geladen wird genau der sichtbare Ausschnitt.';
+
+  @override
+  String get mapDownloadZoomLabel => 'Detailstufe';
+
+  @override
+  String get mapDownloadZoomHint =>
+      'Stufe 12 zeigt Ortschaften und Hauptstraßen, Stufe 14 einzelne Straßen und Gebäude.';
+
+  @override
+  String mapDownloadTileCount(String count, String size) {
+    return '$count Kacheln, ungefähr $size';
+  }
+
+  @override
+  String mapDownloadTooLarge(String count) {
+    return '$count Kacheln sind zu viel. Verkleinere das Gebiet oder die Detailstufe.';
+  }
+
+  @override
+  String mapDownloadRunning(String done, String total, String size) {
+    return '$done von $total Kacheln, $size geladen';
+  }
+
+  @override
+  String get mapDownloadFinished =>
+      'Die Karte ist fertig und wird jetzt verwendet.';
+
+  @override
+  String mapDownloadFailed(String error) {
+    return 'Der Download ist gescheitert: $error';
+  }
+
+  @override
+  String get mapDownloadSourceLabel => 'Kartenquelle';
+
+  @override
+  String get mapDownloadSourceOpenFreeMap =>
+      'OpenFreeMap (frei, ohne Schlüssel)';
+
+  @override
+  String get mapDownloadSourceMapTiler =>
+      'MapTiler (Konto und Schlüssel nötig)';
+
+  @override
+  String get mapDownloadApiKeyLabel => 'API-Schlüssel';
+
+  @override
+  String get mapDownloadApiKeyHint =>
+      'Aus deinem MapTiler-Konto. Bleibt auf dem Gerät.';
+
+  @override
+  String get mapDownloadApiKeyMissing =>
+      'Für diese Quelle fehlt der Schlüssel.';
+
+  @override
+  String get mapDownloadPolite =>
+      'Die Kacheln kommen von einem öffentlichen Server, den andere mitbenutzen. Nimm nicht mehr, als du brauchst.';
+
+  @override
+  String mapDownloadLabel(String zoom) {
+    return 'Eigener Ausschnitt, Stufe $zoom';
+  }
 }

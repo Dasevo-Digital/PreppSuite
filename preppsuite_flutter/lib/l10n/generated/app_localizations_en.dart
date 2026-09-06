@@ -1170,4 +1170,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get kiwixLoadMore => 'Load more';
+
+  @override
+  String get mapDownloadAction => 'Download a map';
+
+  @override
+  String get mapDownloadTitle => 'Download map area';
+
+  @override
+  String get mapDownloadIntro =>
+      'Move the map to the area you need offline. Exactly what you can see is what gets downloaded.';
+
+  @override
+  String get mapDownloadZoomLabel => 'Detail';
+
+  @override
+  String get mapDownloadZoomHint =>
+      'Level 12 shows towns and main roads, level 14 individual streets and buildings.';
+
+  @override
+  String mapDownloadTileCount(String count, String size) {
+    return '$count tiles, roughly $size';
+  }
+
+  @override
+  String mapDownloadTooLarge(String count) {
+    return '$count tiles is too many. Shrink the area or the detail level.';
+  }
+
+  @override
+  String mapDownloadRunning(String done, String total, String size) {
+    return '$done of $total tiles, $size downloaded';
+  }
+
+  @override
+  String get mapDownloadFinished => 'The map is ready and now in use.';
+
+  @override
+  String mapDownloadFailed(String error) {
+    return 'The download failed: $error';
+  }
+
+  @override
+  String get mapDownloadSourceLabel => 'Map source';
+
+  @override
+  String get mapDownloadSourceOpenFreeMap => 'OpenFreeMap (free, no key)';
+
+  @override
+  String get mapDownloadSourceMapTiler =>
+      'MapTiler (needs an account and a key)';
+
+  @override
+  String get mapDownloadApiKeyLabel => 'API key';
+
+  @override
+  String get mapDownloadApiKeyHint =>
+      'From your MapTiler account. Stays on this device.';
+
+  @override
+  String get mapDownloadApiKeyMissing => 'This source needs a key.';
+
+  @override
+  String get mapDownloadPolite =>
+      'The tiles come from a public server other people use too. Take no more than you need.';
+
+  @override
+  String mapDownloadLabel(String zoom) {
+    return 'Own area, level $zoom';
+  }
 }

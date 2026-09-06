@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/map_archive_access.dart';
 import '../application/offline_map_providers.dart';
+import 'map_download_screen.dart';
 
 /// Settings card for the offline map.
 ///
@@ -88,6 +89,15 @@ class _Body extends ConsumerWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
+            FilledButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => const MapDownloadScreen(),
+                ),
+              ),
+              icon: const Icon(Icons.cloud_download_outlined),
+              label: Text(l10n.mapDownloadAction),
+            ),
             FilledButton.tonalIcon(
               onPressed: () => _choose(context, ref),
               icon: const Icon(Icons.map_outlined),

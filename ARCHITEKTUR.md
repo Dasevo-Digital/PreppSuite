@@ -142,6 +142,26 @@ directly.** A country extract or a Wikipedia archive is gigabytes: neither
 is ever copied or fully read, and on Android both are `content://`
 documents that `dart:io` cannot open at all.
 
+**A downloaded archive is validated against the server's length, never
+the catalogue's.** Kiwix's OPDS catalogue rounds its stated file sizes up
+— it offers 6,941,696 bytes for a file of 6,940,898 — so checking against
+that figure rejects every download it describes. `estimatedLength` is
+shown and nothing else; what a finished file has to match is the length in
+the server's own `Content-Length` or `Content-Range`.
+
+**`PmTilesWriter.add` serializes its writes, and has to.** The area
+downloader fetches several tiles at once, and a `RandomAccessFile` throws
+on a second pending write — besides which the offset bookkeeping is only
+correct one tile at a time. The queue also has to survive a failed write,
+or the first bad tile fails every tile after it.
+
+**A downloaded map must copy the source's `vector_layers` into the
+archive's metadata.** That list is how `_schemaLooksRight` tells an
+OpenMapTiles archive from a Protomaps one, and without it the app refuses
+the archive it just built. It is also why the tile source has to be one
+that speaks OpenMapTiles — OpenFreeMap and MapTiler's `tiles/v3` do; the
+`.pmtiles` files circulating on the web mostly do not.
+
 **Adding or removing a drift column means a migration.** Bump
 `schemaVersion` and add the matching branch to `onUpgrade` in the same edit —
 an existing install will not recreate its tables. Removing one needs
@@ -181,6 +201,12 @@ is also what makes the platform split cheap: `articleViewer` picks an
 embedded panel where `webview_flutter` reaches an engine and a window of
 its own on Linux and Windows, where it does not, and both are handed the
 same URL.
+
+`features/downloads/` is the shared machinery for fetching things that
+are measured in gigabytes: a resumable HTTP download, where the files
+land, and the banner both features show. It knows nothing about maps or
+archives — the caller passes a callback for what to do with the finished
+file.
 
 `features/sharing/` is the shared-folder sync. `SyncFolder` is an interface
 over "a directory" with a `dart:io` implementation, so the merge is tested

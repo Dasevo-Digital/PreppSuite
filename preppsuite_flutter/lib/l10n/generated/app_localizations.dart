@@ -2101,6 +2101,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Load more'**
   String get kiwixLoadMore;
+
+  /// No description provided for @mapDownloadAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Download a map'**
+  String get mapDownloadAction;
+
+  /// No description provided for @mapDownloadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download map area'**
+  String get mapDownloadTitle;
+
+  /// No description provided for @mapDownloadIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the map to the area you need offline. Exactly what you can see is what gets downloaded.'**
+  String get mapDownloadIntro;
+
+  /// No description provided for @mapDownloadZoomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Detail'**
+  String get mapDownloadZoomLabel;
+
+  /// No description provided for @mapDownloadZoomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Level 12 shows towns and main roads, level 14 individual streets and buildings.'**
+  String get mapDownloadZoomHint;
+
+  /// No description provided for @mapDownloadTileCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tiles, roughly {size}'**
+  String mapDownloadTileCount(String count, String size);
+
+  /// No description provided for @mapDownloadTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} tiles is too many. Shrink the area or the detail level.'**
+  String mapDownloadTooLarge(String count);
+
+  /// No description provided for @mapDownloadRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} tiles, {size} downloaded'**
+  String mapDownloadRunning(String done, String total, String size);
+
+  /// No description provided for @mapDownloadFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'The map is ready and now in use.'**
+  String get mapDownloadFinished;
+
+  /// No description provided for @mapDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The download failed: {error}'**
+  String mapDownloadFailed(String error);
+
+  /// No description provided for @mapDownloadSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Map source'**
+  String get mapDownloadSourceLabel;
+
+  /// No description provided for @mapDownloadSourceOpenFreeMap.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenFreeMap (free, no key)'**
+  String get mapDownloadSourceOpenFreeMap;
+
+  /// No description provided for @mapDownloadSourceMapTiler.
+  ///
+  /// In en, this message translates to:
+  /// **'MapTiler (needs an account and a key)'**
+  String get mapDownloadSourceMapTiler;
+
+  /// No description provided for @mapDownloadApiKeyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get mapDownloadApiKeyLabel;
+
+  /// No description provided for @mapDownloadApiKeyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'From your MapTiler account. Stays on this device.'**
+  String get mapDownloadApiKeyHint;
+
+  /// No description provided for @mapDownloadApiKeyMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This source needs a key.'**
+  String get mapDownloadApiKeyMissing;
+
+  /// No description provided for @mapDownloadPolite.
+  ///
+  /// In en, this message translates to:
+  /// **'The tiles come from a public server other people use too. Take no more than you need.'**
+  String get mapDownloadPolite;
+
+  /// No description provided for @mapDownloadLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Own area, level {zoom}'**
+  String mapDownloadLabel(String zoom);
 }
 
 class _AppLocalizationsDelegate

@@ -1,0 +1,260 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:math';
+
+import 'package:http/http.dart' as http;
+
+import 'pmtiles_writer.dart';
+import 'tile_source.dart';
+
+/// A rectangle of the world at a range of zoom levels.
+class MapArea {
+  const MapArea({
+    required this.minLongitude,
+    required this.minLatitude,
+    required this.maxLongitude,
+    required this.maxLatitude,
+    required this.maxZoom,
+    this.minZoom = 0,
+  });
+
+  final double minLongitude;
+  final double minLatitude;
+  final double maxLongitude;
+  final double maxLatitude;
+
+  /// Always fetched from zoom 0 by default: the low levels are a handful
+  /// of tiles and without them the map is blank until it is zoomed in.
+  final int minZoom;
+
+  final int maxZoom;
+
+  /// How many tiles this comes to — the number that decides whether an
+  /// area is reasonable to ask a free tile server for.
+  int get tileCount {
+    var count = 0;
+    for (var z = minZoom; z <= maxZoom; z++) {
+      final range = _rangeAt(z);
+      count += (range.maxX - range.minX + 1) * (range.maxY - range.minY + 1);
+    }
+    return count;
+  }
+
+  /// Every tile in the area, low zoom levels first.
+  Iterable<({int z, int x, int y})> tiles() sync* {
+    for (var z = minZoom; z <= maxZoom; z++) {
+      final range = _rangeAt(z);
+      for (var x = range.minX; x <= range.maxX; x++) {
+        for (var y = range.minY; y <= range.maxY; y++) {
+          yield (z: z, x: x, y: y);
+        }
+      }
+    }
+  }
+
+  ({int minX, int minY, int maxX, int maxY}) _rangeAt(int zoom) {
+    final side = 1 << zoom;
+    int clamp(int value) => value < 0 ? 0 : (value >= side ? side - 1 : value);
+
+    // Y grows southwards, so the northern edge gives the smaller index.
+    return (
+      minX: clamp(_longitudeToX(minLongitude, zoom)),
+      maxX: clamp(_longitudeToX(maxLongitude, zoom)),
+      minY: clamp(_latitudeToY(maxLatitude, zoom)),
+      maxY: clamp(_latitudeToY(minLatitude, zoom)),
+    );
+  }
+
+  static int _longitudeToX(double longitude, int zoom) =>
+      ((longitude + 180) / 360 * (1 << zoom)).floor();
+
+  static int _latitudeToY(double latitude, int zoom) {
+    // Web Mercator, which is what every {z}/{x}/{y} scheme means.
+    final clamped = latitude.clamp(-85.05112878, 85.05112878);
+    final radians = clamped * pi / 180;
+    return ((1 - log(tan(radians) + 1 / cos(radians)) / pi) / 2 * (1 << zoom))
+        .floor();
+  }
+}
+
+/// How far a map download has got.
+class MapDownloadProgress {
+  const MapDownloadProgress({
+    required this.done,
+    required this.total,
+    required this.bytes,
+    required this.missing,
+  });
+
+  final int done;
+  final int total;
+
+  /// Tile bytes stored so far, so the size can be shown as it grows —
+  /// there is no way to know it in advance.
+  final int bytes;
+
+  /// Tiles the server had nothing for. Ordinary rather than an error: a
+  /// vector set is sparse where there is nothing to draw.
+  final int missing;
+
+  double get fraction => total == 0 ? 0 : done / total;
+}
+
+class MapDownloadException implements Exception {
+  const MapDownloadException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'MapDownloadException: $message';
+}
+
+/// Builds an offline map archive by fetching an area's tiles.
+///
+/// There is no ready-made archive to download in the schema this app
+/// draws — the ones circulating are Protomaps schema and would come out
+/// blank. So the archive is assembled here from a tile server that speaks
+/// OpenMapTiles, which is also the only way to get an extract of exactly
+/// the area someone cares about.
+class MapAreaDownloader {
+  MapAreaDownloader({http.Client? httpClient, this.concurrency = 4})
+    : _httpClient = httpClient ?? http.Client();
+
+  final http.Client _httpClient;
+
+  /// How many tiles are in flight at once. Small on purpose: these are
+  /// public servers run for other people too, and the download is
+  /// measured in thousands of requests.
+  final int concurrency;
+
+  /// Above this an area is refused rather than started. A free tile
+  /// server is not a bulk export, and a download this long would not
+  /// finish before the app was closed anyway.
+  static const tileLimit = 60000;
+
+  Stream<MapDownloadProgress> download({
+    required MapArea area,
+    required VectorTileSource source,
+    required String targetPath,
+    required Directory workingDirectory,
+  }) async* {
+    if (area.maxZoom > source.maxZoom) {
+      throw MapDownloadException(
+        'this source only goes to zoom ${source.maxZoom}',
+      );
+    }
+    final total = area.tileCount;
+    if (total > tileLimit) {
+      throw MapDownloadException('$total tiles is more than $tileLimit');
+    }
+
+    final writer = await PmTilesWriter.create(workingDirectory);
+    final queue = area.tiles().toList();
+
+    var done = 0;
+    var missing = 0;
+    var next = 0;
+    var complete = false;
+
+    Object? failure;
+    StackTrace? failureTrace;
+
+    // A handful of workers off one queue: a tile request is almost all
+    // waiting, so one at a time would take many times as long — and many
+    // at once would be rude to a server run for other people too.
+    //
+    // A worker keeps its own failure rather than throwing, so that one
+    // bad tile stops the others instead of leaving their futures
+    // unhandled.
+    Future<void> worker() async {
+      while (true) {
+        final index = next++;
+        if (index >= queue.length) return;
+        final tile = queue[index];
+
+        try {
+          final response = await _httpClient.get(
+            source.tileUrl(tile.z, tile.x, tile.y),
+          );
+
+          if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
+            await writer.add(tile.z, tile.x, tile.y, response.bodyBytes);
+          } else if (response.statusCode == 404 ||
+              response.statusCode == 204 ||
+              response.bodyBytes.isEmpty) {
+            // Ordinary rather than an error: a vector set is sparse
+            // wherever there is nothing to draw.
+            missing++;
+          } else {
+            throw MapDownloadException(
+              'the tile server answered ${response.statusCode}',
+            );
+          }
+          done++;
+        } on Object catch (error, trace) {
+          failure ??= error;
+          failureTrace ??= trace;
+          next = queue.length;
+          return;
+        }
+      }
+    }
+
+    try {
+      var running = true;
+      final workers = Future.wait([
+        for (var i = 0; i < concurrency; i++) worker(),
+      ]).whenComplete(() => running = false);
+
+      while (running) {
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        yield MapDownloadProgress(
+          done: done,
+          total: total,
+          bytes: writer.dataLength,
+          missing: missing,
+        );
+      }
+      await workers;
+
+      if (failure != null) {
+        Error.throwWithStackTrace(failure!, failureTrace!);
+      }
+      if (writer.tileCount == 0) {
+        throw const MapDownloadException(
+          'the server had no tiles for this area',
+        );
+      }
+
+      await writer.finish(
+        path: targetPath,
+        minZoom: area.minZoom,
+        maxZoom: area.maxZoom,
+        minLongitude: area.minLongitude,
+        minLatitude: area.minLatitude,
+        maxLongitude: area.maxLongitude,
+        maxLatitude: area.maxLatitude,
+        metadata: {
+          'name': 'PreppSuite',
+          'format': 'pbf',
+          'type': 'baselayer',
+          'vector_layers': source.vectorLayers,
+          if (source.attribution != null) 'attribution': source.attribution,
+        },
+      );
+      complete = true;
+
+      yield MapDownloadProgress(
+        done: done,
+        total: total,
+        bytes: writer.dataLength,
+        missing: missing,
+      );
+    } finally {
+      // Also reached when the subscriber cancels, which stops the
+      // workers at their next tile and takes the scratch file with it.
+      next = queue.length;
+      if (!complete) await writer.abandon();
+    }
+  }
+}
