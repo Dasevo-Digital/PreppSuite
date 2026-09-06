@@ -115,6 +115,12 @@ endforeach(bundled_library)
 #
 # The same plugin gets this right on Windows. Carried here until Linux
 # does too.
+# The runner loads this at startup to set the window icon; see
+# set_window_icon() in my_application.cc.
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/runner/resources/app_icon.png"
+  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
+  COMPONENT Runtime)
+
 install(FILES "$<TARGET_FILE:zstandard_linux>"
   DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
   COMPONENT Runtime)

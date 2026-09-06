@@ -585,6 +585,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter a 5-digit Kreisschlüssel.';
 
   @override
+  String get settingsKreisSchluesselHelper =>
+      'Five digits, e.g. 03241 for the Hannover region.';
+
+  @override
+  String get settingsBundeslandLabel => 'Federal state';
+
+  @override
+  String get settingsBundeslandRequired => 'Choose a federal state.';
+
+  @override
   String get settingsRegionLabelLabel => 'Label';
 
   @override

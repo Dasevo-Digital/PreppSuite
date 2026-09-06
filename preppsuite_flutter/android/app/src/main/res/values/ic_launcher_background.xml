@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The app's seed colour; the launcher masks and shades this itself,
+         so it is flat where the other platforms carry a gradient. -->
+    <color name="ic_launcher_background">#2E7D32</color>
+</resources>

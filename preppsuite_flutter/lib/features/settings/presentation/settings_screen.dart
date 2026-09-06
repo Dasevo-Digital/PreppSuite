@@ -337,7 +337,7 @@ class _AdditionalRegionsCard extends ConsumerWidget {
                       ? Icons.location_city
                       : Icons.map_outlined,
                 ),
-                title: Text(region.value),
+                title: Text(_regionTitle(region)),
                 subtitle: Text(
                   region.kind == WarningRegionKind.kreis
                       ? l10n.settingsRegionTypeKreis
@@ -371,6 +371,13 @@ class _AdditionalRegionsCard extends ConsumerWidget {
   }
 }
 
+/// "NI" is what gets stored and what the BBK feed says; it is not what
+/// anyone calls the place they live.
+String _regionTitle(WarningRegion region) {
+  if (region.kind == WarningRegionKind.kreis) return region.value;
+  return germanStateByBbkCode(region.value)?.nameDe ?? region.value;
+}
+
 class _AddRegionDialog extends ConsumerStatefulWidget {
   const _AddRegionDialog();
 
@@ -379,43 +386,48 @@ class _AddRegionDialog extends ConsumerStatefulWidget {
 }
 
 class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
-  final _valueController = TextEditingController();
+  final _kreisController = TextEditingController();
   WarningRegionKind _kind = WarningRegionKind.kreis;
+
+  /// Picked from a list rather than typed. There are sixteen of them and
+  /// what gets stored is a two-letter code nobody knows by heart — asking
+  /// for it in a text field only ever produced a rejected form.
+  GermanState? _state;
+
   String? _error;
   bool _locating = false;
 
   @override
   void dispose() {
-    _valueController.dispose();
+    _kreisController.dispose();
     super.dispose();
   }
 
   Future<void> _add(AppLocalizations l10n) async {
-    final value = _valueController.text.trim();
+    final WarningRegion region;
 
-    // A Kreisschlüssel is exactly five digits; anything else silently
-    // matches nothing, which looks like the feature being broken rather
-    // than the input being wrong.
-    final valid = switch (_kind) {
-      WarningRegionKind.kreis => RegExp(r'^\d{5}$').hasMatch(value),
-      WarningRegionKind.bundesland =>
-        germanStateByBbkCode(value.toUpperCase()) != null,
-    };
-    if (!valid) {
-      setState(() => _error = l10n.settingsKreisSchluesselInvalid);
-      return;
+    switch (_kind) {
+      case WarningRegionKind.kreis:
+        final value = _kreisController.text.trim();
+        // A Kreisschlüssel is exactly five digits; anything else silently
+        // matches nothing, which looks like the feature being broken
+        // rather than the input being wrong.
+        if (!RegExp(r'^\d{5}$').hasMatch(value)) {
+          setState(() => _error = l10n.settingsKreisSchluesselInvalid);
+          return;
+        }
+        region = WarningRegion(kind: _kind, value: value);
+
+      case WarningRegionKind.bundesland:
+        final state = _state;
+        if (state == null) {
+          setState(() => _error = l10n.settingsBundeslandRequired);
+          return;
+        }
+        region = WarningRegion(kind: _kind, value: state.bbkCode);
     }
 
-    await ref
-        .read(householdProfileProvider.notifier)
-        .addRegion(
-          WarningRegion(
-            kind: _kind,
-            value: _kind == WarningRegionKind.bundesland
-                ? value.toUpperCase()
-                : value,
-          ),
-        );
+    await ref.read(householdProfileProvider.notifier).addRegion(region);
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -437,7 +449,7 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
           _error = l10n.settingsLocationNoMatchMessage;
         } else {
           _kind = WarningRegionKind.bundesland;
-          _valueController.text = state.bbkCode;
+          _state = state;
         }
       });
     } on LocationUnavailableException catch (error) {
@@ -471,19 +483,44 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
               ),
             ],
             selected: {_kind},
-            onSelectionChanged: (selection) =>
-                setState(() => _kind = selection.first),
+            onSelectionChanged: (selection) => setState(() {
+              _kind = selection.first;
+              // The old error belongs to the other kind of input.
+              _error = null;
+            }),
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: _valueController,
-            decoration: InputDecoration(
-              labelText: _kind == WarningRegionKind.kreis
-                  ? l10n.settingsKreisSchluesselLabel
-                  : l10n.settingsRegionLabelLabel,
-              errorText: _error,
+          if (_kind == WarningRegionKind.kreis)
+            TextField(
+              controller: _kreisController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: l10n.settingsKreisSchluesselLabel,
+                helperText: l10n.settingsKreisSchluesselHelper,
+                errorText: _error,
+              ),
+            )
+          else
+            DropdownButtonFormField<GermanState>(
+              // A FormField reads `initialValue` once and never again, so
+              // the state the location button finds would not show up
+              // without rebuilding the field around it.
+              key: ValueKey(_state?.bbkCode),
+              initialValue: _state,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: l10n.settingsBundeslandLabel,
+                errorText: _error,
+              ),
+              items: [
+                for (final state in germanStates)
+                  DropdownMenuItem(value: state, child: Text(state.nameDe)),
+              ],
+              onChanged: (value) => setState(() {
+                _state = value;
+                _error = null;
+              }),
             ),
-          ),
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerLeft,

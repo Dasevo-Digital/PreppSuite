@@ -587,6 +587,16 @@ class AppLocalizationsDe extends AppLocalizations {
       'Bitte einen 5-stelligen Kreisschlüssel eingeben.';
 
   @override
+  String get settingsKreisSchluesselHelper =>
+      'Fünf Ziffern, z. B. 03241 für die Region Hannover.';
+
+  @override
+  String get settingsBundeslandLabel => 'Bundesland';
+
+  @override
+  String get settingsBundeslandRequired => 'Bitte ein Bundesland auswählen.';
+
+  @override
   String get settingsRegionLabelLabel => 'Bezeichnung';
 
   @override

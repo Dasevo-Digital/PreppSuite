@@ -1154,6 +1154,24 @@ abstract class AppLocalizations {
   /// **'Enter a 5-digit Kreisschlüssel.'**
   String get settingsKreisSchluesselInvalid;
 
+  /// No description provided for @settingsKreisSchluesselHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Five digits, e.g. 03241 for the Hannover region.'**
+  String get settingsKreisSchluesselHelper;
+
+  /// No description provided for @settingsBundeslandLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Federal state'**
+  String get settingsBundeslandLabel;
+
+  /// No description provided for @settingsBundeslandRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a federal state.'**
+  String get settingsBundeslandRequired;
+
   /// No description provided for @settingsRegionLabelLabel.
   ///
   /// In en, this message translates to:

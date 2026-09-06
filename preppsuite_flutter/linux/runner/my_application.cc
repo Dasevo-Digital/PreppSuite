@@ -14,6 +14,25 @@ struct _MyApplication {
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
+// The window icon, loaded from beside the executable.
+//
+// A tarball is unpacked wherever the user likes, so there is no install
+// prefix to compile in and no icon theme to look the name up in: the file
+// travels with the binary and is found relative to it.
+static void set_window_icon(GtkWindow* window) {
+  g_autofree gchar* executable = g_file_read_link("/proc/self/exe", nullptr);
+  if (executable == nullptr) {
+    return;
+  }
+  g_autofree gchar* directory = g_path_get_dirname(executable);
+  g_autofree gchar* icon =
+      g_build_filename(directory, "data", "app_icon.png", nullptr);
+
+  // Missing is not worth complaining about: the app runs fine with the
+  // toolkit's default icon.
+  gtk_window_set_icon_from_file(window, icon, nullptr);
+}
+
 // Called when first Flutter frame received.
 static void first_frame_cb(MyApplication* self, FlView* view) {
   gtk_widget_show(gtk_widget_get_toplevel(GTK_WIDGET(view)));
@@ -45,13 +64,14 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "preppsuite_flutter");
+    gtk_header_bar_set_title(header_bar, "PreppSuite");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "preppsuite_flutter");
+    gtk_window_set_title(window, "PreppSuite");
   }
 
+  set_window_icon(window);
   gtk_window_set_default_size(window, 1280, 720);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
