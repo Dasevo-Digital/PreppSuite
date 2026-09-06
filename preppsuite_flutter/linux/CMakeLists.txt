@@ -106,6 +106,19 @@ foreach(bundled_library ${PLUGIN_BUNDLED_LIBRARIES})
     COMPONENT Runtime)
 endforeach(bundled_library)
 
+# The zstandard plugin builds libzstandard_linux.so and links its plugin
+# against it, but declares its bundled libraries as an empty list — so
+# Flutter never copies it into the bundle, and the app fails to start
+# anywhere but the build tree it was compiled in. The failure is a loader
+# error before any Dart runs, and it is invisible until the bundle is
+# moved, which is to say until it is shipped.
+#
+# The same plugin gets this right on Windows. Carried here until Linux
+# does too.
+install(FILES "$<TARGET_FILE:zstandard_linux>"
+  DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime)
+
 # Copy the native assets provided by the build.dart from all packages.
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
 install(DIRECTORY "${NATIVE_ASSETS_DIR}"
