@@ -1337,4 +1337,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapZoomOut => 'Zoom out';
+
+  @override
+  String supplyCalculatorHouseholdLine(String who) {
+    return '$who — from the household';
+  }
+
+  @override
+  String get supplyCalculatorEditHousehold => 'Change in the household';
+
+  @override
+  String supplyCalculatorAdults(String count) {
+    return '$count adults';
+  }
+
+  @override
+  String supplyCalculatorChildren(String count) {
+    return '$count children';
+  }
+
+  @override
+  String supplyCalculatorDogs(String count) {
+    return '$count dogs';
+  }
+
+  @override
+  String supplyCalculatorCats(String count) {
+    return '$count cats';
+  }
+
+  @override
+  String get supplyCalculatorPetFoodNote =>
+      'Pet food is not counted in the calories — dogs and cats need a supply of their own. Their drinking water is included.';
+
+  @override
+  String get supplyCalculatorSourceTitle => 'Where the numbers come from';
+
+  @override
+  String get supplyCalculatorSourceBody =>
+      'For adults the BBK states 1.5 litres of fluid a day plus 0.5 litres for cooking, and around 2200 kcal. For children and pets it states no figures at all, only the reminder to think of them. What the app uses instead is its own conservative estimate: children get the same amount of water as adults, because running short of water is the worse mistake, and 1400 kcal. For dogs and cats only water is counted, at the veterinary rule of thumb of about 60 ml per kilogram — 1.2 litres for a 20 kg dog, 0.25 litres for a 4 kg cat. For exact planning, use the BMEL\'s Vorratskalkulator.';
+
+  @override
+  String get householdChildrenLabel => 'Children';
+
+  @override
+  String get householdDogsLabel => 'Dogs';
+
+  @override
+  String get householdCatsLabel => 'Cats';
+
+  @override
+  String get householdAdultsLabel => 'Adults';
 }

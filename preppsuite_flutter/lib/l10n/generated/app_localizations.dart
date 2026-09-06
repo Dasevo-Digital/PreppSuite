@@ -2365,6 +2365,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Zoom out'**
   String get mapZoomOut;
+
+  /// No description provided for @supplyCalculatorHouseholdLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{who} — from the household'**
+  String supplyCalculatorHouseholdLine(String who);
+
+  /// No description provided for @supplyCalculatorEditHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Change in the household'**
+  String get supplyCalculatorEditHousehold;
+
+  /// No description provided for @supplyCalculatorAdults.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} adults'**
+  String supplyCalculatorAdults(String count);
+
+  /// No description provided for @supplyCalculatorChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} children'**
+  String supplyCalculatorChildren(String count);
+
+  /// No description provided for @supplyCalculatorDogs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} dogs'**
+  String supplyCalculatorDogs(String count);
+
+  /// No description provided for @supplyCalculatorCats.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cats'**
+  String supplyCalculatorCats(String count);
+
+  /// No description provided for @supplyCalculatorPetFoodNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet food is not counted in the calories — dogs and cats need a supply of their own. Their drinking water is included.'**
+  String get supplyCalculatorPetFoodNote;
+
+  /// No description provided for @supplyCalculatorSourceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the numbers come from'**
+  String get supplyCalculatorSourceTitle;
+
+  /// No description provided for @supplyCalculatorSourceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'For adults the BBK states 1.5 litres of fluid a day plus 0.5 litres for cooking, and around 2200 kcal. For children and pets it states no figures at all, only the reminder to think of them. What the app uses instead is its own conservative estimate: children get the same amount of water as adults, because running short of water is the worse mistake, and 1400 kcal. For dogs and cats only water is counted, at the veterinary rule of thumb of about 60 ml per kilogram — 1.2 litres for a 20 kg dog, 0.25 litres for a 4 kg cat. For exact planning, use the BMEL\'s Vorratskalkulator.'**
+  String get supplyCalculatorSourceBody;
+
+  /// No description provided for @householdChildrenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Children'**
+  String get householdChildrenLabel;
+
+  /// No description provided for @householdDogsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dogs'**
+  String get householdDogsLabel;
+
+  /// No description provided for @householdCatsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cats'**
+  String get householdCatsLabel;
+
+  /// No description provided for @householdAdultsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Adults'**
+  String get householdAdultsLabel;
 }
 
 class _AppLocalizationsDelegate

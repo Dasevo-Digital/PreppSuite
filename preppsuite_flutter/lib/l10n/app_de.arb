@@ -377,5 +377,18 @@
   "settingsLocationDenied": "Ohne Zugriff auf den Standort geht es nicht. Wähle das Bundesland stattdessen aus der Liste.",
   "settingsLocationUnavailable": "Der Standort ist auf diesem Gerät nicht zu haben: {detail}",
   "mapZoomIn": "Hineinzoomen",
-  "mapZoomOut": "Herauszoomen"
+  "mapZoomOut": "Herauszoomen",
+  "supplyCalculatorHouseholdLine": "{who} — laut Haushalt",
+  "supplyCalculatorEditHousehold": "Im Haushalt ändern",
+  "supplyCalculatorAdults": "{count} Erwachsene",
+  "supplyCalculatorChildren": "{count} Kinder",
+  "supplyCalculatorDogs": "{count} Hunde",
+  "supplyCalculatorCats": "{count} Katzen",
+  "supplyCalculatorPetFoodNote": "Tierfutter zählt nicht in die Kalorien — Hunde und Katzen brauchen ihren eigenen Vorrat. Ihr Trinkwasser ist eingerechnet.",
+  "supplyCalculatorSourceTitle": "Woher die Zahlen kommen",
+  "supplyCalculatorSourceBody": "Für Erwachsene nennt das BBK 1,5 Liter Flüssigkeit am Tag plus 0,5 Liter zum Kochen und rund 2200 kcal. Für Kinder und Haustiere nennt es keine Zahlen, sondern nur den Hinweis, an sie zu denken. Was die App dafür ansetzt, ist ihre eigene, vorsichtige Schätzung: Kinder bekommen dieselbe Wassermenge wie Erwachsene, weil zu wenig Wasser der schlimmere Fehler ist, und 1400 kcal. Für Hunde und Katzen wird nur Wasser gerechnet, nach der tierärztlichen Faustregel von etwa 60 ml je Kilogramm — 1,2 Liter für einen Hund von 20 kg, 0,25 Liter für eine Katze von 4 kg. Wer es genau braucht: der Vorratskalkulator des BMEL.",
+  "householdChildrenLabel": "Kinder",
+  "householdDogsLabel": "Hunde",
+  "householdCatsLabel": "Katzen",
+  "householdAdultsLabel": "Erwachsene"
 }

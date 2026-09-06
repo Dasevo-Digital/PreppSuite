@@ -3,12 +3,86 @@ import '../../../model/categories.dart';
 import '../../../local_db/database.dart';
 import 'inventory_category_l10n.dart';
 
-/// Official BBK ("Bundesamt für Bevölkerungsschutz und Katastrophenhilfe")
-/// recommendation: 2 liters of drinking water per person per day.
-const litersPerPersonPerDay = 2.0;
+/// What one head costs a day.
+///
+/// Every figure here is either the BBK's or plainly labelled as this
+/// app's own. The distinction matters: the BBK publishes numbers for an
+/// adult and, for children and animals, only the reminder that they exist
+/// — "Haben Sie Vorräte für (Klein-)Kinder oder Haustiere, die Sie in
+/// einem Notfall auch versorgen müssen?" — and points at the BMEL's
+/// Vorratskalkulator for anything exact. Dressing an invented number up
+/// as an official one would be the worst thing this screen could do.
+enum SupplyHead {
+  /// BBK: at least 1.5 litres of fluid a day, plus 0.5 litres for
+  /// cooking, and around 2200 kcal.
+  adult(litersPerDay: 2.0, kcalPerDay: 2200),
 
-/// Official BBK recommendation: ~2200 kcal per person per day.
+  /// Water deliberately at the adult rate. The BBK's 1.5 + 0.5 is already
+  /// a minimum, and running short of water is the worse mistake of the
+  /// two. The energy figure is this app's own conservative estimate, not
+  /// anybody's recommendation.
+  child(litersPerDay: 2.0, kcalPerDay: 1400),
+
+  /// Water only, at the veterinary rule of thumb of roughly 60 ml per
+  /// kilogram a day, taken at 20 kg. Pet food is not counted in the
+  /// calories — those are human ones, and a dog cannot live on them.
+  dog(litersPerDay: 1.2, kcalPerDay: 0),
+
+  /// The same rule of thumb at 4 kg.
+  cat(litersPerDay: 0.25, kcalPerDay: 0);
+
+  const SupplyHead({required this.litersPerDay, required this.kcalPerDay});
+
+  final double litersPerDay;
+  final int kcalPerDay;
+
+  /// Whether this head's food has to be stocked separately rather than
+  /// counted in the calorie target.
+  bool get eatsPetFood => this == SupplyHead.dog || this == SupplyHead.cat;
+}
+
+/// Kept for the tests and callers that predate [SupplyHead].
+const litersPerPersonPerDay = 2.0;
 const kcalPerPersonPerDay = 2200;
+
+/// How many of each kind of head a household feeds.
+class SupplyHousehold {
+  const SupplyHousehold({
+    this.adults = 1,
+    this.children = 0,
+    this.dogs = 0,
+    this.cats = 0,
+  });
+
+  final int adults;
+  final int children;
+  final int dogs;
+  final int cats;
+
+  int countOf(SupplyHead head) => switch (head) {
+    SupplyHead.adult => adults,
+    SupplyHead.child => children,
+    SupplyHead.dog => dogs,
+    SupplyHead.cat => cats,
+  };
+
+  /// The kinds actually present, so the breakdown shows only what this
+  /// household has.
+  Iterable<SupplyHead> get present =>
+      SupplyHead.values.where((head) => countOf(head) > 0);
+
+  bool get hasPets => dogs > 0 || cats > 0;
+
+  double get litersPerDay => SupplyHead.values.fold(
+    0,
+    (total, head) => total + countOf(head) * head.litersPerDay,
+  );
+
+  int get kcalPerDay => SupplyHead.values.fold(
+    0,
+    (total, head) => total + countOf(head) * head.kcalPerDay,
+  );
+}
 
 /// Target vs. current stock for the "Vorräte für X Tage" calculator.
 /// Deliberately covers only drinking water and calories — the reference
@@ -33,8 +107,8 @@ class SupplyCalculatorResult {
 
 SupplyCalculatorResult calculateSupply({
   required List<InventoryItem> items,
-  required int personCount,
   required int days,
+  SupplyHousehold household = const SupplyHousehold(),
 }) {
   var waterCurrent = 0.0;
   var caloriesCurrent = 0;
@@ -51,9 +125,9 @@ SupplyCalculatorResult calculateSupply({
   }
 
   return SupplyCalculatorResult(
-    waterTargetLiters: personCount * days * litersPerPersonPerDay,
+    waterTargetLiters: household.litersPerDay * days,
     waterCurrentLiters: waterCurrent,
-    caloriesTarget: personCount * days * kcalPerPersonPerDay,
+    caloriesTarget: household.kcalPerDay * days,
     caloriesCurrent: caloriesCurrent,
   );
 }

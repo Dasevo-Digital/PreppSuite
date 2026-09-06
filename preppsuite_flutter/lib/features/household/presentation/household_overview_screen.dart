@@ -42,10 +42,50 @@ class HouseholdOverviewScreen extends ConsumerWidget {
                   title: Text(l10n.regionKeyLabel),
                   subtitle: Text(profile.regionKey ?? l10n.settingsNoRegionSet),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.people_outline),
-                  title: Text(l10n.personCountLabel),
-                  trailing: _PersonCountStepper(profile: profile),
+                // Everyone the supply calculator has to plan for lives
+                // here, and only here. The inventory screen used to keep
+                // a second person count of its own.
+                _CountTile(
+                  icon: Icons.people_outline,
+                  label: l10n.householdAdultsLabel,
+                  value: profile.personCount,
+                  minimum: 1,
+                  onChanged: (value) => _save(
+                    ref,
+                    profile.copyWith(personCount: value),
+                  ),
+                ),
+                _CountTile(
+                  icon: Icons.child_care_outlined,
+                  label: l10n.householdChildrenLabel,
+                  value: profile.children,
+                  onChanged: (value) =>
+                      _save(ref, profile.copyWith(children: value)),
+                ),
+                _CountTile(
+                  icon: Icons.pets_outlined,
+                  label: l10n.householdDogsLabel,
+                  value: profile.dogs,
+                  onChanged: (value) =>
+                      _save(ref, profile.copyWith(dogs: value)),
+                ),
+                _CountTile(
+                  icon: Icons.pets,
+                  label: l10n.householdCatsLabel,
+                  value: profile.cats,
+                  onChanged: (value) =>
+                      _save(ref, profile.copyWith(cats: value)),
+                ),
+                ExpansionTile(
+                  leading: const Icon(Icons.info_outline),
+                  title: Text(l10n.supplyCalculatorSourceTitle),
+                  childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  children: [
+                    Text(
+                      l10n.supplyCalculatorSourceBody,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -56,35 +96,46 @@ class HouseholdOverviewScreen extends ConsumerWidget {
   }
 }
 
-class _PersonCountStepper extends ConsumerWidget {
-  const _PersonCountStepper({required this.profile});
+void _save(WidgetRef ref, HouseholdProfile profile) =>
+    ref.read(householdProfileProvider.notifier).save(profile);
 
-  final HouseholdProfile profile;
+class _CountTile extends StatelessWidget {
+  const _CountTile({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    this.minimum = 0,
+  });
+
+  final IconData icon;
+  final String label;
+  final int value;
+  final int minimum;
+  final ValueChanged<int> onChanged;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    Future<void> setCount(int value) => ref
-        .read(householdProfileProvider.notifier)
-        .save(profile.copyWith(personCount: value));
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.remove_circle_outline),
-          onPressed: profile.personCount > 1
-              ? () => setCount(profile.personCount - 1)
-              : null,
-        ),
-        Text(
-          '${profile.personCount}',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        IconButton(
-          icon: const Icon(Icons.add_circle_outline),
-          onPressed: () => setCount(profile.personCount + 1),
-        ),
-      ],
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(label),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.remove_circle_outline),
+            onPressed: value > minimum ? () => onChanged(value - 1) : null,
+          ),
+          Text(
+            '$value',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline),
+            onPressed: () => onChanged(value + 1),
+          ),
+        ],
+      ),
     );
   }
 }

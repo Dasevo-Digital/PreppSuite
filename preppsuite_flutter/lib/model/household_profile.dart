@@ -13,6 +13,9 @@ class HouseholdProfile {
     required this.countryCode,
     this.regionKey,
     this.personCount = 1,
+    this.children = 0,
+    this.dogs = 0,
+    this.cats = 0,
     this.extraRegions = const [],
   });
 
@@ -29,8 +32,18 @@ class HouseholdProfile {
   /// which is as precise as the BBK feed gets.
   final String? regionKey;
 
-  /// Drives the supply calculator's targets.
+  /// Adults. Drives the supply calculator's targets.
   final int personCount;
+
+  /// The others in the household who also have to be fed and watered.
+  ///
+  /// Separate counts rather than one number because the BBK's figures are
+  /// per adult and it publishes none for children or animals — see
+  /// `supply_calculator.dart`, which is where what each of them costs a
+  /// day is written down and attributed.
+  final int children;
+  final int dogs;
+  final int cats;
 
   /// Regions followed beyond the own one.
   final List<WarningRegion> extraRegions;
@@ -47,6 +60,9 @@ class HouseholdProfile {
     String? regionKey,
     bool clearRegionKey = false,
     int? personCount,
+    int? children,
+    int? dogs,
+    int? cats,
     List<WarningRegion>? extraRegions,
   }) {
     return HouseholdProfile(
@@ -55,6 +71,9 @@ class HouseholdProfile {
       countryCode: countryCode ?? this.countryCode,
       regionKey: clearRegionKey ? null : (regionKey ?? this.regionKey),
       personCount: personCount ?? this.personCount,
+      children: children ?? this.children,
+      dogs: dogs ?? this.dogs,
+      cats: cats ?? this.cats,
       extraRegions: extraRegions ?? this.extraRegions,
     );
   }
@@ -65,6 +84,9 @@ class HouseholdProfile {
     'countryCode': countryCode,
     'regionKey': regionKey,
     'personCount': personCount,
+    'children': children,
+    'dogs': dogs,
+    'cats': cats,
     'extraRegions': [for (final r in extraRegions) r.encode()],
   };
 
@@ -89,6 +111,11 @@ class HouseholdProfile {
       countryCode: country,
       regionKey: region is String && region.isNotEmpty ? region : null,
       personCount: people is int && people > 0 ? people : 1,
+      // Absent in profiles written before these existed, which is the
+      // normal case on an upgrade rather than an error.
+      children: _count(json['children']),
+      dogs: _count(json['dogs']),
+      cats: _count(json['cats']),
       extraRegions: [
         if (extra is List)
           for (final entry in extra)
@@ -96,4 +123,6 @@ class HouseholdProfile {
       ],
     );
   }
+
+  static int _count(Object? value) => value is int && value > 0 ? value : 0;
 }

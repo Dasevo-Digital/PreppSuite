@@ -5,9 +5,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/person_count_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
+import '../../household/application/household_providers.dart';
 import '../application/inventory_category_l10n.dart';
 import '../application/inventory_csv_export.dart';
 import '../application/inventory_controller.dart';
@@ -251,11 +251,20 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
     final l10n = AppLocalizations.of(context)!;
     final items =
         ref.watch(inventoryItemsProvider(widget.householdId)).value ?? const [];
-    final personCount = ref.watch(personCountProvider);
+    // Who lives here is a property of the household, not of this screen.
+    // It used to be a second, device-local number kept beside the
+    // household's own, and the two silently disagreed.
+    final profile = ref.watch(householdProfileProvider).value;
+    final household = SupplyHousehold(
+      adults: profile?.personCount ?? 1,
+      children: profile?.children ?? 0,
+      dogs: profile?.dogs ?? 0,
+      cats: profile?.cats ?? 0,
+    );
     final result = calculateSupply(
       items: items,
-      personCount: personCount,
       days: _days,
+      household: household,
     );
 
     return Card(
@@ -265,13 +274,7 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Stepper(
-              label: l10n.supplyCalculatorPersonCountLabel,
-              value: personCount,
-              minValue: 1,
-              onChanged: (value) =>
-                  ref.read(personCountProvider.notifier).setPersonCount(value),
-            ),
+            _HouseholdLine(household: household, l10n: l10n),
             const SizedBox(height: 8),
             _Stepper(
               label: l10n.supplyCalculatorDaysLabel(_days),
@@ -307,6 +310,69 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Says who the targets are for and where that is decided.
+///
+/// A line rather than a control: the counts belong to the household, and
+/// two places to set them is how they came to disagree in the first
+/// place.
+class _HouseholdLine extends StatelessWidget {
+  const _HouseholdLine({required this.household, required this.l10n});
+
+  final SupplyHousehold household;
+  final AppLocalizations l10n;
+
+  String _who() {
+    final parts = [
+      for (final head in household.present)
+        switch (head) {
+          SupplyHead.adult => l10n.supplyCalculatorAdults(
+            '${household.adults}',
+          ),
+          SupplyHead.child => l10n.supplyCalculatorChildren(
+            '${household.children}',
+          ),
+          SupplyHead.dog => l10n.supplyCalculatorDogs('${household.dogs}'),
+          SupplyHead.cat => l10n.supplyCalculatorCats('${household.cats}'),
+        },
+    ];
+    return parts.join(', ');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.groups_outlined,
+              size: 18,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                l10n.supplyCalculatorHouseholdLine(_who()),
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+          ],
+        ),
+        if (household.hasPets) ...[
+          const SizedBox(height: 4),
+          Text(
+            l10n.supplyCalculatorPetFoodNote,
+            style: theme.textTheme.bodySmall,
+          ),
+        ],
+      ],
     );
   }
 }

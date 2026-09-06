@@ -110,4 +110,53 @@ void main() {
       expect(await const HouseholdProfileStore().load(), isNull);
     });
   });
+
+  group('children and animals', () {
+    test('survive the round trip through preferences', () {
+      const profile = HouseholdProfile(
+        id: 'h',
+        name: 'Zuhause',
+        countryCode: 'DE',
+        personCount: 2,
+        children: 3,
+        dogs: 1,
+        cats: 2,
+      );
+
+      final back = HouseholdProfile.fromJson(profile.toJson())!;
+      expect(back.personCount, 2);
+      expect(back.children, 3);
+      expect(back.dogs, 1);
+      expect(back.cats, 2);
+    });
+
+    // A profile written before these fields existed is the normal case on
+    // an upgrade, not a corrupt one.
+    test('are zero in a profile that predates them', () {
+      final back = HouseholdProfile.fromJson({
+        'id': 'h',
+        'name': 'Zuhause',
+        'countryCode': 'DE',
+        'personCount': 2,
+      })!;
+
+      expect(back.personCount, 2);
+      expect(back.children, 0);
+      expect(back.dogs, 0);
+      expect(back.cats, 0);
+    });
+
+    test('nonsense counts read as none', () {
+      final back = HouseholdProfile.fromJson({
+        'id': 'h',
+        'name': 'Zuhause',
+        'countryCode': 'DE',
+        'children': -4,
+        'dogs': 'zwei',
+      })!;
+
+      expect(back.children, 0);
+      expect(back.dogs, 0);
+    });
+  });
 }

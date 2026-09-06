@@ -213,6 +213,20 @@ so that a migration does not silently change a file format other installs —
 and older app versions — have to keep reading. A decode returns null for
 anything it cannot use, which costs one row instead of the whole sync.
 
+**Who the household feeds lives in `HouseholdProfile`, nowhere else.**
+The inventory screen used to keep a second, device-local person count
+beside the household's own, and the two silently disagreed. The supply
+calculator reads the profile.
+
+**Figures the BBK publishes and figures this app invented are kept
+apart.** `SupplyHead` carries one rate per kind of head and says at each
+where it came from: the BBK states 1.5 + 0.5 litres and ~2200 kcal for an
+adult and *nothing at all* for children or animals — only the reminder
+that they exist — so what the app uses for those is labelled as its own
+estimate, in the code and on screen. Pet food is never added to the
+calorie target: those are human calories, and counting dog food in them
+would report a household as fed when it is not.
+
 **No hard-coded user-facing strings.** Every one goes through
 `AppLocalizations` with entries in both `app_de.arb` and `app_en.arb`.
 Enum-to-label mapping lives in the feature's `*_l10n.dart` helper.
