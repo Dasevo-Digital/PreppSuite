@@ -4,6 +4,7 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'tables/budget_entries_table.dart';
 import 'tables/checklist_items_table.dart';
 import 'tables/checklist_templates_table.dart';
+import 'tables/household_members_table.dart';
 import 'tables/household_plans_table.dart';
 import 'tables/inventory_items_table.dart';
 import 'tables/sync_state_table.dart';
@@ -17,6 +18,7 @@ part 'database.g.dart';
     ChecklistTemplates,
     ChecklistItems,
     BudgetEntries,
+    HouseholdMembers,
     HouseholdPlans,
     Warnings,
     SyncState,
@@ -27,7 +29,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   /// The tables whose rows travel through a shared folder, i.e. the ones
   /// with a `dirty` column.
@@ -136,8 +138,45 @@ class AppDatabase extends _$AppDatabase {
         // plan simply has none, and the screen says so.
         await m.createTable(householdPlans);
       }
+      if (from < 11) {
+        // Likewise. A household that never wrote a card has no cards, and
+        // the head counts in the profile keep working on their own.
+        await m.createTable(householdMembers);
+      }
     },
   );
+
+  // --- Household members ------------------------------------------------
+
+  /// The household's people, in the order they were put in.
+  Stream<List<HouseholdMember>> watchHouseholdMembers(String householdId) {
+    return (select(householdMembers)
+          ..where(
+            (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
+          )
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.sortOrder),
+            (t) => OrderingTerm.asc(t.name),
+          ]))
+        .watch();
+  }
+
+  Future<void> upsertHouseholdMember(HouseholdMembersCompanion member) {
+    return into(householdMembers).insertOnConflictUpdate(member);
+  }
+
+  Future<List<HouseholdMember>> dirtyHouseholdMembers(String householdId) {
+    return (select(householdMembers)..where(
+          (t) => t.householdId.equals(householdId) & t.dirty.equals(true),
+        ))
+        .get();
+  }
+
+  Future<List<HouseholdMember>> householdMembersForSync(String householdId) {
+    return (select(
+      householdMembers,
+    )..where((t) => t.householdId.equals(householdId))).get();
+  }
 
   // --- Household plan --------------------------------------------------
 
@@ -548,6 +587,12 @@ class AppDatabase extends _$AppDatabase {
                 t.updatedAt.isSmallerOrEqualValue(through),
           ))
           .write(const HouseholdPlansCompanion(dirty: Value(false)));
+      await (update(householdMembers)..where(
+            (t) =>
+                t.householdId.equals(householdId) &
+                t.updatedAt.isSmallerOrEqualValue(through),
+          ))
+          .write(const HouseholdMembersCompanion(dirty: Value(false)));
     });
   }
 
@@ -597,6 +642,15 @@ class AppDatabase extends _$AppDatabase {
         ),
       );
 
+      await (update(
+        householdMembers,
+      )..where((t) => t.householdId.equals(from))).write(
+        HouseholdMembersCompanion(
+          householdId: Value(to),
+          dirty: const Value(true),
+        ),
+      );
+
       // The plan cannot be re-stamped like the rest. Its `clientId` *is*
       // the household id — that is what makes two devices edit one record
       // instead of one each — so a plan left under the old key would stop
@@ -634,6 +688,7 @@ class AppDatabase extends _$AppDatabase {
     List<IncomingRow<ChecklistItemsCompanion>> items = const [],
     List<IncomingRow<BudgetEntriesCompanion>> budget = const [],
     List<IncomingRow<HouseholdPlansCompanion>> plans = const [],
+    List<IncomingRow<HouseholdMembersCompanion>> members = const [],
   }) {
     return transaction(() async {
       var changed = 0;
@@ -660,6 +715,11 @@ class AppDatabase extends _$AppDatabase {
       changed += await _mergeInto(
         householdPlans,
         plans,
+        (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+      );
+      changed += await _mergeInto(
+        householdMembers,
+        members,
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
       );
       return changed;

@@ -1068,6 +1068,96 @@ class AppLocalizationsDe extends AppLocalizations {
       'Schreib mindestens eine Sache auf, bevor du speicherst.';
 
   @override
+  String get emergencyCardsTitle => 'Notfallkarten';
+
+  @override
+  String get emergencyCardsIntro =>
+      'Was ein Rettungsdienst wissen will, für jede Person im Haushalt. Nötig ist nur der Name – eine Karte, auf der nichts steht außer einem Namen und einer Allergie, ist es wert.';
+
+  @override
+  String get emergencyCardsEmpty => 'Noch keine Karten.';
+
+  @override
+  String emergencyCardsCount(int count) {
+    return '$count Personen';
+  }
+
+  @override
+  String get emergencyCardAdd => 'Person hinzufügen';
+
+  @override
+  String get emergencyCardEdit => 'Karte bearbeiten';
+
+  @override
+  String get emergencyCardName => 'Name';
+
+  @override
+  String get emergencyCardBirthYear => 'Geburtsjahr';
+
+  @override
+  String get emergencyCardBirthYearHint =>
+      'Nur das Jahr. Der Rettungsdienst muss ungefähr wissen, wen er vor sich hat, nicht wann Geburtstag ist.';
+
+  @override
+  String get emergencyCardBloodType => 'Blutgruppe';
+
+  @override
+  String get emergencyCardAllergies => 'Allergien';
+
+  @override
+  String get emergencyCardMedication => 'Dauermedikation';
+
+  @override
+  String get emergencyCardMedicationHint =>
+      'Das, was in den Vorrat gehört, und das, was niemand raten sollte.';
+
+  @override
+  String get emergencyCardConditions => 'Vorerkrankungen';
+
+  @override
+  String get emergencyCardInsurance => 'Krankenversicherung';
+
+  @override
+  String get emergencyCardDoctor => 'Ärztin oder Arzt';
+
+  @override
+  String get emergencyCardContact => 'Wen man wegen dieser Person anruft';
+
+  @override
+  String get emergencyCardNotes => 'Sonstiges';
+
+  @override
+  String get emergencyCardNameRequired => 'Eine Karte braucht einen Namen.';
+
+  @override
+  String get emergencyCardSaved => 'Karte gespeichert.';
+
+  @override
+  String get emergencyCardRemoved => 'Karte entfernt.';
+
+  @override
+  String get emergencyCardRemove => 'Karte entfernen';
+
+  @override
+  String emergencyCardRemoveConfirm(String name) {
+    return 'Die Karte von $name auf allen Geräten dieses Haushalts entfernen?';
+  }
+
+  @override
+  String get emergencyCardsHealthWarning =>
+      'Das sind Gesundheitsdaten, und sie wandern über den gemeinsamen Ordner auf jedes Gerät. Verschlüssele den Ordner, bevor du sie hineinschreibst.';
+
+  @override
+  String get emergencyCardsHealthEncrypted =>
+      'Das sind Gesundheitsdaten. Der gemeinsame Ordner, über den sie wandern, ist verschlüsselt.';
+
+  @override
+  String get emergencyCardsGoToEncryption => 'Ordner-Einstellungen';
+
+  @override
+  String get emergencyCardBirthYearInvalid => 'Das ist kein Jahr.';
+
+  @override
   String get personCountLabel => 'Personen im Haushalt';
 
   @override

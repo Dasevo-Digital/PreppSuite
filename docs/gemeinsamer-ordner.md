@@ -112,6 +112,16 @@ Die Datei wird unter einem Zwischennamen geschrieben und dann umbenannt.
 Sonst bekämen die Sync-Dienste, die den Ordner beobachten, halbe Dateien zu
 verteilen.
 
+## Was seit 0.12 mitreist
+
+Neben Vorrat, Checklisten und Budget liegen zwei weitere Sätze im Ordner:
+
+- **Der Notfallplan** – ein Datensatz je Haushalt. Seine `clientId` ist die
+  Haushalts-Kennung, damit alle Geräte denselben Datensatz bearbeiten statt
+  je einen eigenen.
+- **Die Notfallkarten** – eine Zeile je Person. Das sind **Gesundheitsdaten**;
+  der Bildschirm sagt vor der Eingabe, ob der Ordner verschlüsselt ist.
+
 ## Verschlüsselung
 
 Der Ordner liegt in fremder Hand – Nextcloud, Syncthing, iCloud. Lesen kann

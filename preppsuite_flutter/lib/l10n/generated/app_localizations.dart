@@ -1916,6 +1916,168 @@ abstract class AppLocalizations {
   /// **'Write down at least one thing before saving.'**
   String get householdPlanNothingEntered;
 
+  /// No description provided for @emergencyCardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency cards'**
+  String get emergencyCardsTitle;
+
+  /// No description provided for @emergencyCardsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'What an ambulance would want to know, for each person in the household. Only the name is needed — a card that says nothing but a name and an allergy is worth having.'**
+  String get emergencyCardsIntro;
+
+  /// No description provided for @emergencyCardsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No cards yet.'**
+  String get emergencyCardsEmpty;
+
+  /// No description provided for @emergencyCardsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} people'**
+  String emergencyCardsCount(int count);
+
+  /// No description provided for @emergencyCardAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add person'**
+  String get emergencyCardAdd;
+
+  /// No description provided for @emergencyCardEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit card'**
+  String get emergencyCardEdit;
+
+  /// No description provided for @emergencyCardName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get emergencyCardName;
+
+  /// No description provided for @emergencyCardBirthYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year of birth'**
+  String get emergencyCardBirthYear;
+
+  /// No description provided for @emergencyCardBirthYearHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The year only. A paramedic needs roughly who they are treating, not a birthday.'**
+  String get emergencyCardBirthYearHint;
+
+  /// No description provided for @emergencyCardBloodType.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood type'**
+  String get emergencyCardBloodType;
+
+  /// No description provided for @emergencyCardAllergies.
+  ///
+  /// In en, this message translates to:
+  /// **'Allergies'**
+  String get emergencyCardAllergies;
+
+  /// No description provided for @emergencyCardMedication.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular medication'**
+  String get emergencyCardMedication;
+
+  /// No description provided for @emergencyCardMedicationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The thing to keep in the stores, and the thing nobody should have to guess at.'**
+  String get emergencyCardMedicationHint;
+
+  /// No description provided for @emergencyCardConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Conditions'**
+  String get emergencyCardConditions;
+
+  /// No description provided for @emergencyCardInsurance.
+  ///
+  /// In en, this message translates to:
+  /// **'Health insurance'**
+  String get emergencyCardInsurance;
+
+  /// No description provided for @emergencyCardDoctor.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor'**
+  String get emergencyCardDoctor;
+
+  /// No description provided for @emergencyCardContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Who to call about this person'**
+  String get emergencyCardContact;
+
+  /// No description provided for @emergencyCardNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything else'**
+  String get emergencyCardNotes;
+
+  /// No description provided for @emergencyCardNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'A card needs a name.'**
+  String get emergencyCardNameRequired;
+
+  /// No description provided for @emergencyCardSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Card saved.'**
+  String get emergencyCardSaved;
+
+  /// No description provided for @emergencyCardRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Card removed.'**
+  String get emergencyCardRemoved;
+
+  /// No description provided for @emergencyCardRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove card'**
+  String get emergencyCardRemove;
+
+  /// No description provided for @emergencyCardRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove the card for {name} from every device in this household?'**
+  String emergencyCardRemoveConfirm(String name);
+
+  /// No description provided for @emergencyCardsHealthWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This is health data, and it travels through the shared folder to every device. Encrypt the folder before you put it in.'**
+  String get emergencyCardsHealthWarning;
+
+  /// No description provided for @emergencyCardsHealthEncrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'This is health data. The shared folder it travels through is encrypted.'**
+  String get emergencyCardsHealthEncrypted;
+
+  /// No description provided for @emergencyCardsGoToEncryption.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder settings'**
+  String get emergencyCardsGoToEncryption;
+
+  /// No description provided for @emergencyCardBirthYearInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a year.'**
+  String get emergencyCardBirthYearInvalid;
+
   /// No description provided for @personCountLabel.
   ///
   /// In en, this message translates to:

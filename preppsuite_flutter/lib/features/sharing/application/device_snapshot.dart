@@ -27,6 +27,7 @@ class DeviceSnapshot {
     this.checklistItems = const [],
     this.budgetEntries = const [],
     this.householdPlans = const [],
+    this.householdMembers = const [],
   });
 
   /// See [HouseholdFile.currentVersion] for how a mismatch is handled: a
@@ -47,6 +48,11 @@ class DeviceSnapshot {
   /// stays the same as every other collection in it.
   final List<Map<String, Object?>> householdPlans;
 
+  /// The people, and what an ambulance would want to know about
+  /// them. Health data — see [HouseholdMembers] and the note on
+  /// encryption in `folder_crypto.dart`.
+  final List<Map<String, Object?>> householdMembers;
+
   String encode() => const JsonEncoder.withIndent('  ').convert({
     'version': currentVersion,
     'deviceId': deviceId,
@@ -57,6 +63,7 @@ class DeviceSnapshot {
     'checklistItems': checklistItems,
     'budgetEntries': budgetEntries,
     'householdPlans': householdPlans,
+    'householdMembers': householdMembers,
   });
 
   static DeviceSnapshot? decode(String raw) {
@@ -81,6 +88,7 @@ class DeviceSnapshot {
         checklistItems: _rows(json['checklistItems']),
         budgetEntries: _rows(json['budgetEntries']),
         householdPlans: _rows(json['householdPlans']),
+        householdMembers: _rows(json['householdMembers']),
       );
     } on FormatException {
       return null;
@@ -243,6 +251,58 @@ ChecklistItemsCompanion? decodeChecklistItem(Map<String, Object?> json) {
     targetQuantity: Value(_double(json['targetQuantity'])),
     isChecked: Value(json['isChecked'] == true),
     linkedInventoryItemId: Value(_string(json['linkedInventoryItemId'])),
+    sortOrder: Value(_int(json['sortOrder']) ?? 0),
+    updatedAt: updatedAt,
+    deletedAt: Value(asUtcDate(json['deletedAt'])),
+    dirty: const Value(false),
+  );
+}
+
+Map<String, Object?> encodeHouseholdMember(HouseholdMember row) => {
+  'clientId': row.clientId,
+  'householdId': row.householdId,
+  'name': row.name,
+  'birthYear': row.birthYear,
+  'bloodType': row.bloodType,
+  'allergies': row.allergies,
+  'medication': row.medication,
+  'conditions': row.conditions,
+  'insurance': row.insurance,
+  'doctor': row.doctor,
+  'emergencyContact': row.emergencyContact,
+  'notes': row.notes,
+  'sortOrder': row.sortOrder,
+  'updatedAt': _date(row.updatedAt),
+  'deletedAt': _date(row.deletedAt),
+};
+
+HouseholdMembersCompanion? decodeHouseholdMember(Map<String, Object?> json) {
+  final clientId = _string(json['clientId']);
+  final householdId = _string(json['householdId']);
+  final name = _string(json['name']);
+  final updatedAt = asUtcDate(json['updatedAt']);
+  // A card without a name is not a card. Everything medical is optional:
+  // one that says only "Lena, allergic to penicillin" is worth keeping.
+  if (clientId == null ||
+      householdId == null ||
+      name == null ||
+      updatedAt == null) {
+    return null;
+  }
+
+  return HouseholdMembersCompanion.insert(
+    clientId: clientId,
+    householdId: householdId,
+    name: name,
+    birthYear: Value(_int(json['birthYear'])),
+    bloodType: Value(_string(json['bloodType'])),
+    allergies: Value(_string(json['allergies'])),
+    medication: Value(_string(json['medication'])),
+    conditions: Value(_string(json['conditions'])),
+    insurance: Value(_string(json['insurance'])),
+    doctor: Value(_string(json['doctor'])),
+    emergencyContact: Value(_string(json['emergencyContact'])),
+    notes: Value(_string(json['notes'])),
     sortOrder: Value(_int(json['sortOrder']) ?? 0),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),

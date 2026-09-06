@@ -1057,6 +1057,96 @@ class AppLocalizationsEn extends AppLocalizations {
       'Write down at least one thing before saving.';
 
   @override
+  String get emergencyCardsTitle => 'Emergency cards';
+
+  @override
+  String get emergencyCardsIntro =>
+      'What an ambulance would want to know, for each person in the household. Only the name is needed — a card that says nothing but a name and an allergy is worth having.';
+
+  @override
+  String get emergencyCardsEmpty => 'No cards yet.';
+
+  @override
+  String emergencyCardsCount(int count) {
+    return '$count people';
+  }
+
+  @override
+  String get emergencyCardAdd => 'Add person';
+
+  @override
+  String get emergencyCardEdit => 'Edit card';
+
+  @override
+  String get emergencyCardName => 'Name';
+
+  @override
+  String get emergencyCardBirthYear => 'Year of birth';
+
+  @override
+  String get emergencyCardBirthYearHint =>
+      'The year only. A paramedic needs roughly who they are treating, not a birthday.';
+
+  @override
+  String get emergencyCardBloodType => 'Blood type';
+
+  @override
+  String get emergencyCardAllergies => 'Allergies';
+
+  @override
+  String get emergencyCardMedication => 'Regular medication';
+
+  @override
+  String get emergencyCardMedicationHint =>
+      'The thing to keep in the stores, and the thing nobody should have to guess at.';
+
+  @override
+  String get emergencyCardConditions => 'Conditions';
+
+  @override
+  String get emergencyCardInsurance => 'Health insurance';
+
+  @override
+  String get emergencyCardDoctor => 'Doctor';
+
+  @override
+  String get emergencyCardContact => 'Who to call about this person';
+
+  @override
+  String get emergencyCardNotes => 'Anything else';
+
+  @override
+  String get emergencyCardNameRequired => 'A card needs a name.';
+
+  @override
+  String get emergencyCardSaved => 'Card saved.';
+
+  @override
+  String get emergencyCardRemoved => 'Card removed.';
+
+  @override
+  String get emergencyCardRemove => 'Remove card';
+
+  @override
+  String emergencyCardRemoveConfirm(String name) {
+    return 'Remove the card for $name from every device in this household?';
+  }
+
+  @override
+  String get emergencyCardsHealthWarning =>
+      'This is health data, and it travels through the shared folder to every device. Encrypt the folder before you put it in.';
+
+  @override
+  String get emergencyCardsHealthEncrypted =>
+      'This is health data. The shared folder it travels through is encrypted.';
+
+  @override
+  String get emergencyCardsGoToEncryption => 'Folder settings';
+
+  @override
+  String get emergencyCardBirthYearInvalid => 'That is not a year.';
+
+  @override
   String get personCountLabel => 'People in the household';
 
   @override

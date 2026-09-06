@@ -450,6 +450,13 @@ tree; the test suite deliberately targets that layer rather than the UI.
   win — and `_syncableTableNames` must not list it, because that list is
   read by the schema-6 repair, which runs before schema 10 creates the
   table.
+- **`HouseholdMembers` is health data and the only table that is.** It
+  travels through the shared folder like every other row, which is why
+  the folder can be encrypted at all — the emergency-card screen says
+  which of the two states the household is in before anyone types a
+  diagnosis into it. Unlike the plan, its client ids are generated: these
+  are many rows, each created on one device, so `adoptHouseholdId`
+  re-stamps them the ordinary way.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

@@ -3128,6 +3128,937 @@ class BudgetEntriesCompanion extends UpdateCompanion<BudgetEntry> {
   }
 }
 
+class $HouseholdMembersTable extends HouseholdMembers
+    with TableInfo<$HouseholdMembersTable, HouseholdMember> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HouseholdMembersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
+  @override
+  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
+    'client_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _birthYearMeta = const VerificationMeta(
+    'birthYear',
+  );
+  @override
+  late final GeneratedColumn<int> birthYear = GeneratedColumn<int>(
+    'birth_year',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _bloodTypeMeta = const VerificationMeta(
+    'bloodType',
+  );
+  @override
+  late final GeneratedColumn<String> bloodType = GeneratedColumn<String>(
+    'blood_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _allergiesMeta = const VerificationMeta(
+    'allergies',
+  );
+  @override
+  late final GeneratedColumn<String> allergies = GeneratedColumn<String>(
+    'allergies',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _medicationMeta = const VerificationMeta(
+    'medication',
+  );
+  @override
+  late final GeneratedColumn<String> medication = GeneratedColumn<String>(
+    'medication',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _conditionsMeta = const VerificationMeta(
+    'conditions',
+  );
+  @override
+  late final GeneratedColumn<String> conditions = GeneratedColumn<String>(
+    'conditions',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _insuranceMeta = const VerificationMeta(
+    'insurance',
+  );
+  @override
+  late final GeneratedColumn<String> insurance = GeneratedColumn<String>(
+    'insurance',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _doctorMeta = const VerificationMeta('doctor');
+  @override
+  late final GeneratedColumn<String> doctor = GeneratedColumn<String>(
+    'doctor',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _emergencyContactMeta = const VerificationMeta(
+    'emergencyContact',
+  );
+  @override
+  late final GeneratedColumn<String> emergencyContact = GeneratedColumn<String>(
+    'emergency_contact',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    clientId,
+    householdId,
+    name,
+    birthYear,
+    bloodType,
+    allergies,
+    medication,
+    conditions,
+    insurance,
+    doctor,
+    emergencyContact,
+    notes,
+    sortOrder,
+    updatedAt,
+    deletedAt,
+    dirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'household_members';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HouseholdMember> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('client_id')) {
+      context.handle(
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_clientIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('birth_year')) {
+      context.handle(
+        _birthYearMeta,
+        birthYear.isAcceptableOrUnknown(data['birth_year']!, _birthYearMeta),
+      );
+    }
+    if (data.containsKey('blood_type')) {
+      context.handle(
+        _bloodTypeMeta,
+        bloodType.isAcceptableOrUnknown(data['blood_type']!, _bloodTypeMeta),
+      );
+    }
+    if (data.containsKey('allergies')) {
+      context.handle(
+        _allergiesMeta,
+        allergies.isAcceptableOrUnknown(data['allergies']!, _allergiesMeta),
+      );
+    }
+    if (data.containsKey('medication')) {
+      context.handle(
+        _medicationMeta,
+        medication.isAcceptableOrUnknown(data['medication']!, _medicationMeta),
+      );
+    }
+    if (data.containsKey('conditions')) {
+      context.handle(
+        _conditionsMeta,
+        conditions.isAcceptableOrUnknown(data['conditions']!, _conditionsMeta),
+      );
+    }
+    if (data.containsKey('insurance')) {
+      context.handle(
+        _insuranceMeta,
+        insurance.isAcceptableOrUnknown(data['insurance']!, _insuranceMeta),
+      );
+    }
+    if (data.containsKey('doctor')) {
+      context.handle(
+        _doctorMeta,
+        doctor.isAcceptableOrUnknown(data['doctor']!, _doctorMeta),
+      );
+    }
+    if (data.containsKey('emergency_contact')) {
+      context.handle(
+        _emergencyContactMeta,
+        emergencyContact.isAcceptableOrUnknown(
+          data['emergency_contact']!,
+          _emergencyContactMeta,
+        ),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {clientId};
+  @override
+  HouseholdMember map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HouseholdMember(
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      birthYear: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}birth_year'],
+      ),
+      bloodType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}blood_type'],
+      ),
+      allergies: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}allergies'],
+      ),
+      medication: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}medication'],
+      ),
+      conditions: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conditions'],
+      ),
+      insurance: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}insurance'],
+      ),
+      doctor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}doctor'],
+      ),
+      emergencyContact: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}emergency_contact'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $HouseholdMembersTable createAlias(String alias) {
+    return $HouseholdMembersTable(attachedDatabase, alias);
+  }
+}
+
+class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
+  final String clientId;
+  final String householdId;
+  final String name;
+
+  /// Year only, not a date. It is asked for so a paramedic knows roughly
+  /// who they are treating; a birthday would be more than the reason
+  /// needs, and this app does not collect more than it uses.
+  final int? birthYear;
+  final String? bloodType;
+  final String? allergies;
+
+  /// What they take regularly — the thing a household has to keep in the
+  /// stores and the thing that must not be guessed at in an emergency.
+  final String? medication;
+  final String? conditions;
+  final String? insurance;
+  final String? doctor;
+
+  /// Who to call about this person specifically.
+  final String? emergencyContact;
+  final String? notes;
+
+  /// Keeps the cards in the order the household put them in rather than
+  /// alphabetically, which would put a child before a parent for no
+  /// reason anyone chose.
+  final int sortOrder;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final bool dirty;
+  const HouseholdMember({
+    required this.clientId,
+    required this.householdId,
+    required this.name,
+    this.birthYear,
+    this.bloodType,
+    this.allergies,
+    this.medication,
+    this.conditions,
+    this.insurance,
+    this.doctor,
+    this.emergencyContact,
+    this.notes,
+    required this.sortOrder,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.dirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['client_id'] = Variable<String>(clientId);
+    map['household_id'] = Variable<String>(householdId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || birthYear != null) {
+      map['birth_year'] = Variable<int>(birthYear);
+    }
+    if (!nullToAbsent || bloodType != null) {
+      map['blood_type'] = Variable<String>(bloodType);
+    }
+    if (!nullToAbsent || allergies != null) {
+      map['allergies'] = Variable<String>(allergies);
+    }
+    if (!nullToAbsent || medication != null) {
+      map['medication'] = Variable<String>(medication);
+    }
+    if (!nullToAbsent || conditions != null) {
+      map['conditions'] = Variable<String>(conditions);
+    }
+    if (!nullToAbsent || insurance != null) {
+      map['insurance'] = Variable<String>(insurance);
+    }
+    if (!nullToAbsent || doctor != null) {
+      map['doctor'] = Variable<String>(doctor);
+    }
+    if (!nullToAbsent || emergencyContact != null) {
+      map['emergency_contact'] = Variable<String>(emergencyContact);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['dirty'] = Variable<bool>(dirty);
+    return map;
+  }
+
+  HouseholdMembersCompanion toCompanion(bool nullToAbsent) {
+    return HouseholdMembersCompanion(
+      clientId: Value(clientId),
+      householdId: Value(householdId),
+      name: Value(name),
+      birthYear: birthYear == null && nullToAbsent
+          ? const Value.absent()
+          : Value(birthYear),
+      bloodType: bloodType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bloodType),
+      allergies: allergies == null && nullToAbsent
+          ? const Value.absent()
+          : Value(allergies),
+      medication: medication == null && nullToAbsent
+          ? const Value.absent()
+          : Value(medication),
+      conditions: conditions == null && nullToAbsent
+          ? const Value.absent()
+          : Value(conditions),
+      insurance: insurance == null && nullToAbsent
+          ? const Value.absent()
+          : Value(insurance),
+      doctor: doctor == null && nullToAbsent
+          ? const Value.absent()
+          : Value(doctor),
+      emergencyContact: emergencyContact == null && nullToAbsent
+          ? const Value.absent()
+          : Value(emergencyContact),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      sortOrder: Value(sortOrder),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      dirty: Value(dirty),
+    );
+  }
+
+  factory HouseholdMember.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HouseholdMember(
+      clientId: serializer.fromJson<String>(json['clientId']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      name: serializer.fromJson<String>(json['name']),
+      birthYear: serializer.fromJson<int?>(json['birthYear']),
+      bloodType: serializer.fromJson<String?>(json['bloodType']),
+      allergies: serializer.fromJson<String?>(json['allergies']),
+      medication: serializer.fromJson<String?>(json['medication']),
+      conditions: serializer.fromJson<String?>(json['conditions']),
+      insurance: serializer.fromJson<String?>(json['insurance']),
+      doctor: serializer.fromJson<String?>(json['doctor']),
+      emergencyContact: serializer.fromJson<String?>(json['emergencyContact']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'clientId': serializer.toJson<String>(clientId),
+      'householdId': serializer.toJson<String>(householdId),
+      'name': serializer.toJson<String>(name),
+      'birthYear': serializer.toJson<int?>(birthYear),
+      'bloodType': serializer.toJson<String?>(bloodType),
+      'allergies': serializer.toJson<String?>(allergies),
+      'medication': serializer.toJson<String?>(medication),
+      'conditions': serializer.toJson<String?>(conditions),
+      'insurance': serializer.toJson<String?>(insurance),
+      'doctor': serializer.toJson<String?>(doctor),
+      'emergencyContact': serializer.toJson<String?>(emergencyContact),
+      'notes': serializer.toJson<String?>(notes),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+    };
+  }
+
+  HouseholdMember copyWith({
+    String? clientId,
+    String? householdId,
+    String? name,
+    Value<int?> birthYear = const Value.absent(),
+    Value<String?> bloodType = const Value.absent(),
+    Value<String?> allergies = const Value.absent(),
+    Value<String?> medication = const Value.absent(),
+    Value<String?> conditions = const Value.absent(),
+    Value<String?> insurance = const Value.absent(),
+    Value<String?> doctor = const Value.absent(),
+    Value<String?> emergencyContact = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+    int? sortOrder,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? dirty,
+  }) => HouseholdMember(
+    clientId: clientId ?? this.clientId,
+    householdId: householdId ?? this.householdId,
+    name: name ?? this.name,
+    birthYear: birthYear.present ? birthYear.value : this.birthYear,
+    bloodType: bloodType.present ? bloodType.value : this.bloodType,
+    allergies: allergies.present ? allergies.value : this.allergies,
+    medication: medication.present ? medication.value : this.medication,
+    conditions: conditions.present ? conditions.value : this.conditions,
+    insurance: insurance.present ? insurance.value : this.insurance,
+    doctor: doctor.present ? doctor.value : this.doctor,
+    emergencyContact: emergencyContact.present
+        ? emergencyContact.value
+        : this.emergencyContact,
+    notes: notes.present ? notes.value : this.notes,
+    sortOrder: sortOrder ?? this.sortOrder,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    dirty: dirty ?? this.dirty,
+  );
+  HouseholdMember copyWithCompanion(HouseholdMembersCompanion data) {
+    return HouseholdMember(
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      name: data.name.present ? data.name.value : this.name,
+      birthYear: data.birthYear.present ? data.birthYear.value : this.birthYear,
+      bloodType: data.bloodType.present ? data.bloodType.value : this.bloodType,
+      allergies: data.allergies.present ? data.allergies.value : this.allergies,
+      medication: data.medication.present
+          ? data.medication.value
+          : this.medication,
+      conditions: data.conditions.present
+          ? data.conditions.value
+          : this.conditions,
+      insurance: data.insurance.present ? data.insurance.value : this.insurance,
+      doctor: data.doctor.present ? data.doctor.value : this.doctor,
+      emergencyContact: data.emergencyContact.present
+          ? data.emergencyContact.value
+          : this.emergencyContact,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdMember(')
+          ..write('clientId: $clientId, ')
+          ..write('householdId: $householdId, ')
+          ..write('name: $name, ')
+          ..write('birthYear: $birthYear, ')
+          ..write('bloodType: $bloodType, ')
+          ..write('allergies: $allergies, ')
+          ..write('medication: $medication, ')
+          ..write('conditions: $conditions, ')
+          ..write('insurance: $insurance, ')
+          ..write('doctor: $doctor, ')
+          ..write('emergencyContact: $emergencyContact, ')
+          ..write('notes: $notes, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    clientId,
+    householdId,
+    name,
+    birthYear,
+    bloodType,
+    allergies,
+    medication,
+    conditions,
+    insurance,
+    doctor,
+    emergencyContact,
+    notes,
+    sortOrder,
+    updatedAt,
+    deletedAt,
+    dirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HouseholdMember &&
+          other.clientId == this.clientId &&
+          other.householdId == this.householdId &&
+          other.name == this.name &&
+          other.birthYear == this.birthYear &&
+          other.bloodType == this.bloodType &&
+          other.allergies == this.allergies &&
+          other.medication == this.medication &&
+          other.conditions == this.conditions &&
+          other.insurance == this.insurance &&
+          other.doctor == this.doctor &&
+          other.emergencyContact == this.emergencyContact &&
+          other.notes == this.notes &&
+          other.sortOrder == this.sortOrder &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.dirty == this.dirty);
+}
+
+class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
+  final Value<String> clientId;
+  final Value<String> householdId;
+  final Value<String> name;
+  final Value<int?> birthYear;
+  final Value<String?> bloodType;
+  final Value<String?> allergies;
+  final Value<String?> medication;
+  final Value<String?> conditions;
+  final Value<String?> insurance;
+  final Value<String?> doctor;
+  final Value<String?> emergencyContact;
+  final Value<String?> notes;
+  final Value<int> sortOrder;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> dirty;
+  final Value<int> rowid;
+  const HouseholdMembersCompanion({
+    this.clientId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.birthYear = const Value.absent(),
+    this.bloodType = const Value.absent(),
+    this.allergies = const Value.absent(),
+    this.medication = const Value.absent(),
+    this.conditions = const Value.absent(),
+    this.insurance = const Value.absent(),
+    this.doctor = const Value.absent(),
+    this.emergencyContact = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HouseholdMembersCompanion.insert({
+    required String clientId,
+    required String householdId,
+    required String name,
+    this.birthYear = const Value.absent(),
+    this.bloodType = const Value.absent(),
+    this.allergies = const Value.absent(),
+    this.medication = const Value.absent(),
+    this.conditions = const Value.absent(),
+    this.insurance = const Value.absent(),
+    this.doctor = const Value.absent(),
+    this.emergencyContact = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : clientId = Value(clientId),
+       householdId = Value(householdId),
+       name = Value(name),
+       updatedAt = Value(updatedAt);
+  static Insertable<HouseholdMember> custom({
+    Expression<String>? clientId,
+    Expression<String>? householdId,
+    Expression<String>? name,
+    Expression<int>? birthYear,
+    Expression<String>? bloodType,
+    Expression<String>? allergies,
+    Expression<String>? medication,
+    Expression<String>? conditions,
+    Expression<String>? insurance,
+    Expression<String>? doctor,
+    Expression<String>? emergencyContact,
+    Expression<String>? notes,
+    Expression<int>? sortOrder,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? dirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (clientId != null) 'client_id': clientId,
+      if (householdId != null) 'household_id': householdId,
+      if (name != null) 'name': name,
+      if (birthYear != null) 'birth_year': birthYear,
+      if (bloodType != null) 'blood_type': bloodType,
+      if (allergies != null) 'allergies': allergies,
+      if (medication != null) 'medication': medication,
+      if (conditions != null) 'conditions': conditions,
+      if (insurance != null) 'insurance': insurance,
+      if (doctor != null) 'doctor': doctor,
+      if (emergencyContact != null) 'emergency_contact': emergencyContact,
+      if (notes != null) 'notes': notes,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HouseholdMembersCompanion copyWith({
+    Value<String>? clientId,
+    Value<String>? householdId,
+    Value<String>? name,
+    Value<int?>? birthYear,
+    Value<String?>? bloodType,
+    Value<String?>? allergies,
+    Value<String?>? medication,
+    Value<String?>? conditions,
+    Value<String?>? insurance,
+    Value<String?>? doctor,
+    Value<String?>? emergencyContact,
+    Value<String?>? notes,
+    Value<int>? sortOrder,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? dirty,
+    Value<int>? rowid,
+  }) {
+    return HouseholdMembersCompanion(
+      clientId: clientId ?? this.clientId,
+      householdId: householdId ?? this.householdId,
+      name: name ?? this.name,
+      birthYear: birthYear ?? this.birthYear,
+      bloodType: bloodType ?? this.bloodType,
+      allergies: allergies ?? this.allergies,
+      medication: medication ?? this.medication,
+      conditions: conditions ?? this.conditions,
+      insurance: insurance ?? this.insurance,
+      doctor: doctor ?? this.doctor,
+      emergencyContact: emergencyContact ?? this.emergencyContact,
+      notes: notes ?? this.notes,
+      sortOrder: sortOrder ?? this.sortOrder,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      dirty: dirty ?? this.dirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (clientId.present) {
+      map['client_id'] = Variable<String>(clientId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (birthYear.present) {
+      map['birth_year'] = Variable<int>(birthYear.value);
+    }
+    if (bloodType.present) {
+      map['blood_type'] = Variable<String>(bloodType.value);
+    }
+    if (allergies.present) {
+      map['allergies'] = Variable<String>(allergies.value);
+    }
+    if (medication.present) {
+      map['medication'] = Variable<String>(medication.value);
+    }
+    if (conditions.present) {
+      map['conditions'] = Variable<String>(conditions.value);
+    }
+    if (insurance.present) {
+      map['insurance'] = Variable<String>(insurance.value);
+    }
+    if (doctor.present) {
+      map['doctor'] = Variable<String>(doctor.value);
+    }
+    if (emergencyContact.present) {
+      map['emergency_contact'] = Variable<String>(emergencyContact.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HouseholdMembersCompanion(')
+          ..write('clientId: $clientId, ')
+          ..write('householdId: $householdId, ')
+          ..write('name: $name, ')
+          ..write('birthYear: $birthYear, ')
+          ..write('bloodType: $bloodType, ')
+          ..write('allergies: $allergies, ')
+          ..write('medication: $medication, ')
+          ..write('conditions: $conditions, ')
+          ..write('insurance: $insurance, ')
+          ..write('doctor: $doctor, ')
+          ..write('emergencyContact: $emergencyContact, ')
+          ..write('notes: $notes, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $HouseholdPlansTable extends HouseholdPlans
     with TableInfo<$HouseholdPlansTable, HouseholdPlan> {
   @override
@@ -4906,6 +5837,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ChecklistTemplatesTable(this);
   late final $ChecklistItemsTable checklistItems = $ChecklistItemsTable(this);
   late final $BudgetEntriesTable budgetEntries = $BudgetEntriesTable(this);
+  late final $HouseholdMembersTable householdMembers = $HouseholdMembersTable(
+    this,
+  );
   late final $HouseholdPlansTable householdPlans = $HouseholdPlansTable(this);
   late final $WarningsTable warnings = $WarningsTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
@@ -4918,6 +5852,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     checklistTemplates,
     checklistItems,
     budgetEntries,
+    householdMembers,
     householdPlans,
     warnings,
     syncState,

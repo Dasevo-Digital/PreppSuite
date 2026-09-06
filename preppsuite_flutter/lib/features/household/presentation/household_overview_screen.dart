@@ -6,6 +6,8 @@ import '../../../model/household_profile.dart';
 import '../application/household_providers.dart';
 import '../application/household_plan_controller.dart';
 import 'household_plan_screen.dart';
+import '../application/household_member_controller.dart';
+import 'emergency_cards_screen.dart';
 
 /// The household's own details.
 ///
@@ -45,6 +47,32 @@ class HouseholdOverviewScreen extends ConsumerWidget {
                     MaterialPageRoute(
                       builder: (_) =>
                           HouseholdPlanScreen(householdId: profile.id),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Consumer(
+              builder: (context, ref, _) {
+                final members =
+                    ref.watch(householdMembersProvider(profile.id)).value ??
+                    const [];
+                return ListTile(
+                  leading: const Icon(Icons.medical_information_outlined),
+                  title: Text(l10n.emergencyCardsTitle),
+                  subtitle: Text(
+                    members.isEmpty
+                        ? l10n.emergencyCardsEmpty
+                        : l10n.emergencyCardsCount(members.length),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          EmergencyCardsScreen(householdId: profile.id),
                     ),
                   ),
                 );
