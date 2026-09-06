@@ -351,5 +351,13 @@
   "mapDownloadApiKeyHint": "Aus deinem MapTiler-Konto. Bleibt auf dem Gerät.",
   "mapDownloadApiKeyMissing": "Für diese Quelle fehlt der Schlüssel.",
   "mapDownloadPolite": "Die Kacheln kommen von einem öffentlichen Server, den andere mitbenutzen. Nimm nicht mehr, als du brauchst.",
-  "mapDownloadLabel": "Eigener Ausschnitt, Stufe {zoom}"
+  "mapDownloadLabel": "Eigener Ausschnitt, Stufe {zoom}",
+  "mapDownloadSearchHint": "Ort, Kreis, Bundesland oder Land",
+  "mapDownloadSearchNoResults": "Nichts gefunden. Anderer Name?",
+  "mapDownloadSearchFailed": "Die Ortssuche war nicht erreichbar: {error}",
+  "mapDownloadAreaViewport": "Sichtbarer Ausschnitt",
+  "mapDownloadAreaPlace": "{name} · {kind}",
+  "mapDownloadDetailAuto": "Höchste Stufe, die für dieses Gebiet noch geht.",
+  "mapDownloadPlaceTooLarge": "{name} ist auch auf der gröbsten Stufe zu groß. Wähle einen kleineren Ort.",
+  "mapDownloadDeepestPossible": "Auf Stufe 14 wären es {count} Kacheln — zu viel. Stufe {level} ist das Tiefste, was für dieses Gebiet geht."
 }

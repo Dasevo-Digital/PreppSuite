@@ -722,5 +722,17 @@
   "mapDownloadApiKeyMissing": "This source needs a key.",
   "mapDownloadPolite": "The tiles come from a public server other people use too. Take no more than you need.",
   "mapDownloadLabel": "Own area, level {zoom}",
-  "@mapDownloadLabel": {"placeholders": {"zoom": {"type": "String"}}}
+  "@mapDownloadLabel": {"placeholders": {"zoom": {"type": "String"}}},
+  "mapDownloadSearchHint": "Town, district, state or country",
+  "mapDownloadSearchNoResults": "Nothing found. Another name?",
+  "mapDownloadSearchFailed": "The place search could not be reached: {error}",
+  "@mapDownloadSearchFailed": {"placeholders": {"error": {"type": "String"}}},
+  "mapDownloadAreaViewport": "Visible area",
+  "mapDownloadAreaPlace": "{name} · {kind}",
+  "@mapDownloadAreaPlace": {"placeholders": {"name": {"type": "String"}, "kind": {"type": "String"}}},
+  "mapDownloadDetailAuto": "The deepest level this area still fits at.",
+  "mapDownloadPlaceTooLarge": "{name} is too large even at the coarsest level. Choose somewhere smaller.",
+  "@mapDownloadPlaceTooLarge": {"placeholders": {"name": {"type": "String"}}},
+  "mapDownloadDeepestPossible": "At level 14 that would be {count} tiles — too many. Level {level} is the deepest this area goes.",
+  "@mapDownloadDeepestPossible": {"placeholders": {"count": {"type": "String"}, "level": {"type": "String"}}}
 }

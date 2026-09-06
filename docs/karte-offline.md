@@ -25,11 +25,30 @@ Protomaps-Schema.
 ## In der App laden
 
 Deshalb baut die App sich die Datei selbst. **Einstellungen → Offline-Karte
-→ Karte herunterladen** zeigt eine Karte; verschoben wird sie auf das
-Gebiet, das offline gebraucht wird, und geladen wird genau der sichtbare
-Ausschnitt. Ein Schieberegler bestimmt, wie tief: Stufe 12 zeigt
-Ortschaften und Hauptstraßen, Stufe 14 einzelne Straßen und Gebäude. Die
-Kachelzahl steht daneben, bevor irgendetwas passiert.
+→ Karte herunterladen.**
+
+Das Gebiet lässt sich auf zwei Arten bestimmen:
+
+- **Nach Namen suchen** – Ort, Kreis, Bundesland oder Land. Die Suche geht
+  an Nominatim, den Geokodierer von OpenStreetMap, und was zurückkommt,
+  ist die Umgrenzung des Ortes. „Niedersachsen" ist damit ein Gebiet, das
+  man meinen kann, statt eines Rechtecks, das man mit der Hand darum legen
+  müsste.
+- **Die Karte verschieben** – dann ist das Gebiet der sichtbare
+  Ausschnitt. Ein Griff an die Karte schaltet von einem gesuchten Ort
+  wieder hierher zurück.
+
+Ein Schieberegler bestimmt, wie tief: Stufe 12 zeigt Ortschaften und
+Hauptstraßen, Stufe 14 einzelne Straßen und Gebäude. Solange er nicht
+angefasst wurde, wählt die App **die tiefste Stufe, die für dieses Gebiet
+noch geht** – und sagt, wenn das nicht 14 ist, wie viele Kacheln 14 wären.
+Die Kachelzahl steht ohnehin daneben, bevor irgendetwas passiert.
+
+Was die Suche liefert, ist ein umschließendes Rechteck, nicht die
+Landesgrenze. Wer Niedersachsen lädt, bekommt die Ecken der Nachbarn mit.
+Gegen die echte Kontur zu schneiden hieße, das Polygon mitzuführen und
+jede Kachel dagegen zu prüfen – bei einem Rechteck, das dem Land ungefähr
+entspricht, für wenig Ersparnis.
 
 Was dabei entsteht, ist ein echtes PMTiles-v3-Archiv, geschrieben von
 `pmtiles_writer.dart` – dem Gegenstück zum Leser, und aus demselben Grund
@@ -51,13 +70,26 @@ OpenFreeMap datiert seine Pfade und verschiebt sie mit jedem Planetenbau.
 
 ### Grenzen, und warum es sie gibt
 
-Über 60 000 Kacheln lehnt die App ab. Das ist keine technische Grenze,
+Über 100 000 Kacheln lehnt die App ab. Das ist keine technische Grenze,
 sondern eine Anstandsgrenze: die Kacheln kommen von einem öffentlichen
-Server, den andere mitbenutzen, und ein Download dieser Länge wäre ohnehin
-nicht zu Ende gebracht, bevor die App geschlossen wird. Zum Vergleich –
-ganz Deutschland bis Stufe 12 sind rund 20 000 Kacheln und geht; bis Stufe
-14 wären es über 315 000 und geht nicht. Ein Kreis oder eine Stadt bis
-Stufe 14 dagegen ist eine Sache von Minuten.
+Server, den andere mitbenutzen.
+
+Die Zahl ist so gewählt, dass **jedes deutsche Bundesland auf der tiefsten
+Stufe hineinpasst** und **ein ganzes Land nicht**. Gemessen an den
+Umgrenzungen, die Nominatim liefert:
+
+| Gebiet | Kacheln bis Stufe 14 | tiefste mögliche Stufe |
+|---|---:|---:|
+| Hannover (Stadt) | 264 | 14 |
+| Bayern | 68 028 | 14 |
+| Niedersachsen | 68 913 | 14 |
+| Deutschland | 319 812 | **13** (80 563 Kacheln) |
+
+Ein ganzes Land auf Stufe 14 wären rund vierzehn Gigabyte und ebenso viele
+Anfragen wie Kacheln. Das ist nichts, was man einem Kachelserver zumutet,
+der für andere Leute läuft – und es wäre auch nicht zu Ende gebracht,
+bevor die App geschlossen wird. Stufe 13 für ein ganzes Land geht dagegen
+und zeigt in Ortschaften bereits Straßen.
 
 Die Größenangabe vorab ist grob geschätzt. Eine Kachel Innenstadt ist ein
 Vielfaches einer Kachel Feld, und keine der beiden ist bekannt, bevor sie

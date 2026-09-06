@@ -40,6 +40,15 @@ class MapArea {
     return count;
   }
 
+  MapArea withDetail(int detail) => MapArea(
+    minLongitude: minLongitude,
+    minLatitude: minLatitude,
+    maxLongitude: maxLongitude,
+    maxLatitude: maxLatitude,
+    minZoom: minZoom,
+    maxZoom: detail,
+  );
+
   /// Every tile in the area, low zoom levels first.
   Iterable<({int z, int x, int y})> tiles() sync* {
     for (var z = minZoom; z <= maxZoom; z++) {
@@ -75,6 +84,25 @@ class MapArea {
     return ((1 - log(tan(radians) + 1 / cos(radians)) / pi) / 2 * (1 << zoom))
         .floor();
   }
+}
+
+/// The deepest detail level [area] still fits [limit] at, or null if even
+/// [lowest] is too much.
+///
+/// This is what makes "a whole Bundesland at the highest detail level" a
+/// question with an answer rather than a slider to guess at: the levels
+/// differ by a factor of four each, so the one that fits is never obvious
+/// and being one off means tens of thousands of tiles.
+int? deepestDetailWithin(
+  MapArea area, {
+  int limit = MapAreaDownloader.tileLimit,
+  int lowest = 8,
+  int highest = 14,
+}) {
+  for (var detail = highest; detail >= lowest; detail--) {
+    if (area.withDetail(detail).tileCount <= limit) return detail;
+  }
+  return null;
 }
 
 /// How far a map download has got.
@@ -127,10 +155,14 @@ class MapAreaDownloader {
   /// measured in thousands of requests.
   final int concurrency;
 
-  /// Above this an area is refused rather than started. A free tile
-  /// server is not a bulk export, and a download this long would not
-  /// finish before the app was closed anyway.
-  static const tileLimit = 60000;
+  /// Above this an area is refused rather than started.
+  ///
+  /// Set so that every German Bundesland fits at the deepest level the
+  /// sources offer — the largest, Bayern, comes to 68,028 tiles at zoom
+  /// 14 — and a whole country does not: Germany would be 317,618, some
+  /// fourteen gigabytes and as many requests, which is not something to
+  /// ask of a tile server run for other people.
+  static const tileLimit = 100000;
 
   Stream<MapDownloadProgress> download({
     required MapArea area,

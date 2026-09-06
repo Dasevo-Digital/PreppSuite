@@ -1239,4 +1239,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String mapDownloadLabel(String zoom) {
     return 'Own area, level $zoom';
   }
+
+  @override
+  String get mapDownloadSearchHint => 'Town, district, state or country';
+
+  @override
+  String get mapDownloadSearchNoResults => 'Nothing found. Another name?';
+
+  @override
+  String mapDownloadSearchFailed(String error) {
+    return 'The place search could not be reached: $error';
+  }
+
+  @override
+  String get mapDownloadAreaViewport => 'Visible area';
+
+  @override
+  String mapDownloadAreaPlace(String name, String kind) {
+    return '$name · $kind';
+  }
+
+  @override
+  String get mapDownloadDetailAuto =>
+      'The deepest level this area still fits at.';
+
+  @override
+  String mapDownloadPlaceTooLarge(String name) {
+    return '$name is too large even at the coarsest level. Choose somewhere smaller.';
+  }
+
+  @override
+  String mapDownloadDeepestPossible(String count, String level) {
+    return 'At level 14 that would be $count tiles — too many. Level $level is the deepest this area goes.';
+  }
 }

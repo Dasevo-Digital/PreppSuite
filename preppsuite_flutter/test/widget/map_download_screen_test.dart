@@ -44,6 +44,24 @@ void main() {
     expect(find.textContaining('öffentlichen Server'), findsOneWidget);
   });
 
+  testWidgets('offers a place to search for, not only the viewport', (
+    tester,
+  ) async {
+    await show(tester);
+
+    expect(find.text('Ort, Kreis, Bundesland oder Land'), findsOneWidget);
+
+    // Until something is searched for, the area is what is on screen,
+    // and the screen says which of the two it is.
+    expect(find.text('Sichtbarer Ausschnitt'), findsOneWidget);
+
+    // The level was picked for the area rather than left at a default.
+    expect(
+      find.text('Höchste Stufe, die für dieses Gebiet noch geht.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('the download button is there and enabled for a small area', (
     tester,
   ) async {

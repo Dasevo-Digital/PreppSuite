@@ -155,6 +155,14 @@ on a second pending write — besides which the offset bookkeeping is only
 correct one tile at a time. The queue also has to survive a failed write,
 or the first bad tile fails every tile after it.
 
+**The tile limit is where "a Bundesland at full detail" is decided.** It
+is set to 100,000 so that every German state fits at zoom 14 — the
+largest, Bayern, is 68,028 tiles by Nominatim's bounding box — and a
+country does not: Germany would be 319,812, some fourteen gigabytes and
+as many requests as tiles, against a server run for other people. Moving
+it changes which places the feature can promise, so move it with the
+numbers in `docs/karte-offline.md`.
+
 **A downloaded map must copy the source's `vector_layers` into the
 archive's metadata.** That list is how `_schemaLooksRight` tells an
 OpenMapTiles archive from a Protomaps one, and without it the app refuses

@@ -55,8 +55,9 @@ die App sagt das an Ort und Stelle auch selbst.
 der WWBOTA-Datenbank, nach Entfernung und nach Belastbarkeit der Angabe
 filterbar.
 
-**Karte offline.** Die Karte lässt sich in der App herunterladen: Ausschnitt
-auf der Karte einstellen, Detailstufe wählen, laden – fertig ist ein
+**Karte offline.** Die Karte lässt sich in der App herunterladen: Ort
+suchen – Stadt, Kreis, Bundesland oder Land – oder den Ausschnitt auf der
+Karte einstellen, Detailstufe wählen, laden. Fertig ist ein
 PMTiles-Archiv auf dem Gerät, und die Karte braucht kein Netz mehr. Die
 Kacheln kommen von OpenFreeMap, frei und ohne Schlüssel, wahlweise auch von
 MapTiler mit eigenem Konto. Eine selbst gebaute Datei geht weiterhin. Ohne
@@ -204,10 +205,12 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   und ohne Höhenrelief. Sie braucht ein Archiv im OpenMapTiles-Schema; die
   fertigen `.pmtiles` aus dem Netz sind meist Protomaps-Schema und werden
   beim Auswählen abgelehnt. Deshalb baut die App sich das Archiv selbst –
-  aus dem Ausschnitt, den man auf der Karte einstellt, von OpenFreeMap
-  (frei und ohne Schlüssel) oder von MapTiler (mit eigenem Schlüssel). Über
-  60 000 Kacheln lehnt sie ab, aus Rücksicht auf einen öffentlichen Server.
-  Einzelheiten in [`docs/karte-offline.md`](docs/karte-offline.md).
+  aus einem Ort, den man beim Namen sucht, oder aus dem Ausschnitt auf der
+  Karte, von OpenFreeMap (frei und ohne Schlüssel) oder von MapTiler (mit
+  eigenem Schlüssel). Jedes Bundesland geht auf der tiefsten Stufe, ein
+  ganzes Land nur eine Stufe darunter: über 100 000 Kacheln lehnt sie ab,
+  aus Rücksicht auf einen öffentlichen Server. Einzelheiten in
+  [`docs/karte-offline.md`](docs/karte-offline.md).
 - Die Volltextsuche braucht einen Index, den die App einmal selbst
   aufbaut – der fertige im Archiv liegt in einem Xapian-Format ohne
   Dart-Anbindung. Für eine Themensammlung sind das Minuten, für die

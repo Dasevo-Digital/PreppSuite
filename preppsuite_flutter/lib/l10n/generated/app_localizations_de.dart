@@ -1248,4 +1248,37 @@ class AppLocalizationsDe extends AppLocalizations {
   String mapDownloadLabel(String zoom) {
     return 'Eigener Ausschnitt, Stufe $zoom';
   }
+
+  @override
+  String get mapDownloadSearchHint => 'Ort, Kreis, Bundesland oder Land';
+
+  @override
+  String get mapDownloadSearchNoResults => 'Nichts gefunden. Anderer Name?';
+
+  @override
+  String mapDownloadSearchFailed(String error) {
+    return 'Die Ortssuche war nicht erreichbar: $error';
+  }
+
+  @override
+  String get mapDownloadAreaViewport => 'Sichtbarer Ausschnitt';
+
+  @override
+  String mapDownloadAreaPlace(String name, String kind) {
+    return '$name · $kind';
+  }
+
+  @override
+  String get mapDownloadDetailAuto =>
+      'Höchste Stufe, die für dieses Gebiet noch geht.';
+
+  @override
+  String mapDownloadPlaceTooLarge(String name) {
+    return '$name ist auch auf der gröbsten Stufe zu groß. Wähle einen kleineren Ort.';
+  }
+
+  @override
+  String mapDownloadDeepestPossible(String count, String level) {
+    return 'Auf Stufe 14 wären es $count Kacheln — zu viel. Stufe $level ist das Tiefste, was für dieses Gebiet geht.';
+  }
 }

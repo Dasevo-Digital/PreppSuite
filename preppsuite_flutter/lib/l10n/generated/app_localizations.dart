@@ -2209,6 +2209,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Own area, level {zoom}'**
   String mapDownloadLabel(String zoom);
+
+  /// No description provided for @mapDownloadSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Town, district, state or country'**
+  String get mapDownloadSearchHint;
+
+  /// No description provided for @mapDownloadSearchNoResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found. Another name?'**
+  String get mapDownloadSearchNoResults;
+
+  /// No description provided for @mapDownloadSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The place search could not be reached: {error}'**
+  String mapDownloadSearchFailed(String error);
+
+  /// No description provided for @mapDownloadAreaViewport.
+  ///
+  /// In en, this message translates to:
+  /// **'Visible area'**
+  String get mapDownloadAreaViewport;
+
+  /// No description provided for @mapDownloadAreaPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {kind}'**
+  String mapDownloadAreaPlace(String name, String kind);
+
+  /// No description provided for @mapDownloadDetailAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'The deepest level this area still fits at.'**
+  String get mapDownloadDetailAuto;
+
+  /// No description provided for @mapDownloadPlaceTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is too large even at the coarsest level. Choose somewhere smaller.'**
+  String mapDownloadPlaceTooLarge(String name);
+
+  /// No description provided for @mapDownloadDeepestPossible.
+  ///
+  /// In en, this message translates to:
+  /// **'At level 14 that would be {count} tiles — too many. Level {level} is the deepest this area goes.'**
+  String mapDownloadDeepestPossible(String count, String level);
 }
 
 class _AppLocalizationsDelegate

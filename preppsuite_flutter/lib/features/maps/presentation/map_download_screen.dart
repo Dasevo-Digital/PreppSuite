@@ -8,6 +8,7 @@ import '../../downloads/application/byte_size.dart';
 import '../application/map_area_download.dart';
 import '../application/map_download_providers.dart';
 import '../application/map_source_store.dart';
+import '../application/place_search.dart';
 import '../application/tile_source.dart';
 import 'base_map_layer.dart';
 
@@ -26,7 +27,20 @@ class MapDownloadScreen extends ConsumerStatefulWidget {
 class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
   final _controller = MapController();
 
+  final _searchController = TextEditingController();
+
   double _zoom = 13;
+
+  /// The place the area comes from, if one was searched for.
+  ///
+  /// A named place is a box of its own, not whatever happens to be on
+  /// screen — which is the point: "Niedersachsen" is an area somebody can
+  /// mean, and the visible rectangle around it is not.
+  PlaceResult? _place;
+
+  List<PlaceResult>? _results;
+  bool _searching = false;
+  Object? _searchError;
 
   /// Until the slider is touched, the detail level follows the map.
   ///
@@ -42,6 +56,7 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
 
   @override
   void dispose() {
+    _searchController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -50,30 +65,110 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
   static const _maxDetail = 14.0;
 
   void _updateArea() {
+    final place = _place;
     final bounds = _controller.camera.visibleBounds;
 
-    MapArea areaAt(int detail) => MapArea(
-      minLongitude: bounds.west,
-      minLatitude: bounds.south,
-      maxLongitude: bounds.east,
-      maxLatitude: bounds.north,
-      maxZoom: detail,
-    );
+    MapArea areaAt(int detail) =>
+        place?.areaAt(detail) ??
+        MapArea(
+          minLongitude: bounds.west,
+          minLatitude: bounds.south,
+          maxLongitude: bounds.east,
+          maxLatitude: bounds.north,
+          maxZoom: detail,
+        );
 
     if (!_zoomChosen) {
-      // The deepest level this area still fits in, so the screen opens
-      // on something that can actually be downloaded.
-      var suggestion = _minDetail;
-      for (var detail = _maxDetail; detail >= _minDetail; detail--) {
-        if (areaAt(detail.round()).tileCount <= MapAreaDownloader.tileLimit) {
-          suggestion = detail;
-          break;
-        }
-      }
-      _zoom = suggestion;
+      // The deepest level this area still fits in, so the screen opens —
+      // and a searched place lands — on something downloadable.
+      _zoom =
+          (deepestDetailWithin(
+                    areaAt(_maxDetail.round()),
+                    lowest: _minDetail.round(),
+                    highest: _maxDetail.round(),
+                  ) ??
+                  _minDetail.round())
+              .toDouble();
     }
 
     setState(() => _area = areaAt(_zoom.round()));
+  }
+
+  Future<void> _search(AppLocalizations l10n) async {
+    setState(() {
+      _searching = true;
+      _searchError = null;
+      _results = null;
+    });
+
+    try {
+      final results = await PlaceSearchClient().search(
+        _searchController.text,
+        language: Localizations.localeOf(context).languageCode,
+      );
+      if (!mounted) return;
+      setState(() {
+        _results = results;
+        _searching = false;
+      });
+      if (results.isNotEmpty) await _offerResults(results, l10n);
+    } on Object catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _searchError = error;
+        _searching = false;
+      });
+    }
+  }
+
+  Future<void> _offerResults(
+    List<PlaceResult> results,
+    AppLocalizations l10n,
+  ) async {
+    final chosen = await showModalBottomSheet<PlaceResult>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            for (final result in results)
+              ListTile(
+                title: Text(result.name),
+                subtitle: Text(
+                  result.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                trailing: Text(
+                  '${result.areaAt(_maxDetail.round()).tileCount}',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                onTap: () => Navigator.of(context).pop(result),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (chosen == null || !mounted) return;
+    _usePlace(chosen);
+  }
+
+  void _usePlace(PlaceResult place) {
+    _place = place;
+    // The level was chosen for the last area; this one gets its own.
+    _zoomChosen = false;
+
+    _controller.fitCamera(
+      CameraFit.bounds(
+        bounds: LatLngBounds(
+          LatLng(place.minLatitude, place.minLongitude),
+          LatLng(place.maxLatitude, place.maxLongitude),
+        ),
+        padding: const EdgeInsets.all(24),
+      ),
+    );
+    _updateArea();
   }
 
   Future<void> _start(AppLocalizations l10n) async {
@@ -102,7 +197,13 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
                 initialCenter: const LatLng(51.16, 10.45),
                 initialZoom: 6,
                 onMapReady: _updateArea,
-                onPositionChanged: (_, _) => _updateArea(),
+                onPositionChanged: (_, hasGesture) {
+                  // Moving the map by hand means the area is whatever is
+                  // on screen again; moving it to fit a searched place
+                  // does not, which is what `hasGesture` separates.
+                  if (hasGesture) _place = null;
+                  _updateArea();
+                },
               ),
               children: [
                 const BaseMapLayer(),
@@ -143,9 +244,73 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
     final tiles = area?.tileCount ?? 0;
     final tooLarge = tiles > MapAreaDownloader.tileLimit;
 
+    final place = _place;
+    final deepest = area == null
+        ? null
+        : deepestDetailWithin(
+            area,
+            lowest: _minDetail.round(),
+            highest: _maxDetail.round(),
+          );
+
     return [
-      Text(l10n.mapDownloadIntro, style: theme.textTheme.bodySmall),
+      TextField(
+        controller: _searchController,
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          labelText: l10n.mapDownloadSearchHint,
+          prefixIcon: const Icon(Icons.search),
+          border: const OutlineInputBorder(),
+          isDense: true,
+          suffixIcon: _searching
+              ? const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : IconButton(
+                  icon: const Icon(Icons.arrow_forward),
+                  onPressed: () => _search(l10n),
+                ),
+        ),
+        onSubmitted: (_) => _search(l10n),
+      ),
+      if (_searchError != null) ...[
+        const SizedBox(height: 4),
+        Text(
+          l10n.mapDownloadSearchFailed(_searchError.toString()),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.error,
+          ),
+        ),
+      ] else if (_results != null && _results!.isEmpty) ...[
+        const SizedBox(height: 4),
+        Text(l10n.mapDownloadSearchNoResults, style: theme.textTheme.bodySmall),
+      ],
       const SizedBox(height: 8),
+      Row(
+        children: [
+          Icon(
+            place == null ? Icons.crop_free : Icons.place_outlined,
+            size: 18,
+            color: theme.colorScheme.primary,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              place == null
+                  ? l10n.mapDownloadAreaViewport
+                  : l10n.mapDownloadAreaPlace(place.name, place.kind),
+              style: theme.textTheme.titleSmall,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 4),
       const _SourcePicker(),
       const SizedBox(height: 8),
       Row(
@@ -170,7 +335,10 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
           Text('${_zoom.round()}', style: theme.textTheme.labelLarge),
         ],
       ),
-      Text(l10n.mapDownloadZoomHint, style: theme.textTheme.bodySmall),
+      Text(
+        _zoomChosen ? l10n.mapDownloadZoomHint : l10n.mapDownloadDetailAuto,
+        style: theme.textTheme.bodySmall,
+      ),
       const SizedBox(height: 8),
       Text(
         tooLarge
@@ -186,6 +354,29 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
           color: tooLarge ? theme.colorScheme.error : null,
         ),
       ),
+      // Says where the ceiling is, not only that one was hit: the levels
+      // differ by a factor of four, so "too many" on its own is no
+      // guidance at all.
+      if (area != null && deepest == null && place != null) ...[
+        const SizedBox(height: 4),
+        Text(
+          l10n.mapDownloadPlaceTooLarge(place.name),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.error,
+          ),
+        ),
+      ] else if (area != null &&
+          deepest != null &&
+          deepest < _maxDetail.round()) ...[
+        const SizedBox(height: 4),
+        Text(
+          l10n.mapDownloadDeepestPossible(
+            '${area.withDetail(_maxDetail.round()).tileCount}',
+            '$deepest',
+          ),
+          style: theme.textTheme.bodySmall,
+        ),
+      ],
       const SizedBox(height: 4),
       Text(l10n.mapDownloadPolite, style: theme.textTheme.bodySmall),
       const SizedBox(height: 12),
