@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/presentation/base_map_layer.dart';
+import '../../maps/presentation/map_zoom_buttons.dart';
 import '../application/geo_bounds.dart';
 import '../application/overpass_shelter_client.dart';
 import '../application/shelter_classification.dart';
@@ -223,6 +224,7 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
                   ),
                   children: [
                     const BaseMapLayer(),
+                    MapZoomButtons(controller: _mapController),
                     BaseMapAttribution(l10n: l10n),
                     MarkerLayer(
                       markers: [

@@ -611,11 +611,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsUseLocationButton => 'Determine state via location';
 
   @override
-  String settingsLocationErrorMessage(String error) {
-    return 'Couldn\'t determine your location: $error';
-  }
-
-  @override
   String get settingsLocationNoMatchMessage =>
       'Couldn\'t match your location to a German state.';
 
@@ -1319,4 +1314,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapDownloadDiscardAction => 'Discard';
+
+  @override
+  String get settingsLocationServicesOff =>
+      'Location services are switched off. Turn them on in the system settings.';
+
+  @override
+  String get settingsLocationDeniedForever =>
+      'Location access is denied for PreppSuite. The system will not ask again — allow it in the system settings.';
+
+  @override
+  String get settingsLocationDenied =>
+      'This needs access to your location. Pick the federal state from the list instead.';
+
+  @override
+  String settingsLocationUnavailable(String detail) {
+    return 'Location is not available on this device: $detail';
+  }
+
+  @override
+  String get mapZoomIn => 'Zoom in';
+
+  @override
+  String get mapZoomOut => 'Zoom out';
 }

@@ -28,6 +28,12 @@
 	<string>PreppSuite verwendet die Kamera, um Barcodes von Vorratsartikeln zu scannen.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.</string>
+	<!-- macOS asks for this key by name: geolocator only calls
+	     requestAlwaysAuthorization when NSLocationUsageDescription is
+	     present, and without it no permission dialog ever appears. The
+	     WhenInUse key above is the one iOS reads. -->
+	<key>NSLocationUsageDescription</key>
+	<string>PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>

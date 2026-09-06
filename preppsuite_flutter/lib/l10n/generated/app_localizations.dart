@@ -1202,12 +1202,6 @@ abstract class AppLocalizations {
   /// **'Determine state via location'**
   String get settingsUseLocationButton;
 
-  /// No description provided for @settingsLocationErrorMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Couldn\'t determine your location: {error}'**
-  String settingsLocationErrorMessage(String error);
-
   /// No description provided for @settingsLocationNoMatchMessage.
   ///
   /// In en, this message translates to:
@@ -2335,6 +2329,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Discard'**
   String get mapDownloadDiscardAction;
+
+  /// No description provided for @settingsLocationServicesOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Location services are switched off. Turn them on in the system settings.'**
+  String get settingsLocationServicesOff;
+
+  /// No description provided for @settingsLocationDeniedForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Location access is denied for PreppSuite. The system will not ask again — allow it in the system settings.'**
+  String get settingsLocationDeniedForever;
+
+  /// No description provided for @settingsLocationDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'This needs access to your location. Pick the federal state from the list instead.'**
+  String get settingsLocationDenied;
+
+  /// No description provided for @settingsLocationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Location is not available on this device: {detail}'**
+  String settingsLocationUnavailable(String detail);
+
+  /// No description provided for @mapZoomIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get mapZoomIn;
+
+  /// No description provided for @mapZoomOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get mapZoomOut;
 }
 
 class _AppLocalizationsDelegate

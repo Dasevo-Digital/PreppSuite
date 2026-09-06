@@ -14,6 +14,7 @@ import '../application/map_source_store.dart';
 import '../application/place_search.dart';
 import '../application/tile_source.dart';
 import 'base_map_layer.dart';
+import 'map_zoom_buttons.dart';
 
 /// Overridden in tests so the screen can be driven against captured
 /// geocoder answers instead of the live service.
@@ -310,6 +311,7 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
               ),
               children: [
                 const BaseMapLayer(),
+                MapZoomButtons(controller: _controller),
                 BaseMapAttribution(l10n: l10n),
               ],
             ),
@@ -318,22 +320,33 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
             elevation: 8,
             child: SafeArea(
               top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (download.running)
-                      _Running(l10n: l10n, state: download)
-                    else if (download.isIdle) ...[
-                      const _Unfinished(),
-                      ..._chooser(l10n, theme),
-                    ] else if (download.finishedPath != null)
-                      _Finished(l10n: l10n)
-                    else if (download.error != null)
-                      _Failed(l10n: l10n, error: download.error!),
-                  ],
+              // The panel is tall — search, scope, source, the plan ring
+              // by ring — and on a phone it would take the whole screen
+              // and leave the map a strip. Capped and scrollable instead,
+              // so the map always keeps most of the height.
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.sizeOf(context).height * 0.55,
+                ),
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (download.running)
+                          _Running(l10n: l10n, state: download)
+                        else if (download.isIdle) ...[
+                          const _Unfinished(),
+                          ..._chooser(l10n, theme),
+                        ] else if (download.finishedPath != null)
+                          _Finished(l10n: l10n)
+                        else if (download.error != null)
+                          _Failed(l10n: l10n, error: download.error!),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

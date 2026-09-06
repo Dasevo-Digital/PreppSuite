@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/geolocation_service.dart';
+import '../../../core/location_capabilities.dart';
 import '../../../core/locale_provider.dart';
 import '../../../core/notification_capabilities.dart';
 import '../../../core/notifications_provider.dart';
@@ -460,11 +461,18 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
           _state = state;
         }
       });
-    } on LocationUnavailableException catch (error) {
+    } on LocationUnavailableException catch (refusal) {
       if (!mounted) return;
       setState(() {
         _locating = false;
-        _error = l10n.settingsLocationErrorMessage(error.toString());
+        _error = switch (refusal.reason) {
+          LocationRefusal.servicesOff => l10n.settingsLocationServicesOff,
+          LocationRefusal.deniedForever => l10n.settingsLocationDeniedForever,
+          LocationRefusal.denied => l10n.settingsLocationDenied,
+          LocationRefusal.unavailable => l10n.settingsLocationUnavailable(
+            refusal.detail ?? '',
+          ),
+        };
       });
     }
   }
@@ -529,15 +537,19 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
                 _error = null;
               }),
             ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              onPressed: _locating ? null : () => _useLocation(l10n),
-              icon: const Icon(Icons.my_location),
-              label: Text(l10n.settingsUseLocationButton),
+          // Linux has no location implementation at all, so the button
+          // would only ever produce an error.
+          if (supportsDeviceLocation) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: _locating ? null : () => _useLocation(l10n),
+                icon: const Icon(Icons.my_location),
+                label: Text(l10n.settingsUseLocationButton),
+              ),
             ),
-          ),
+          ],
         ],
       ),
       actions: [

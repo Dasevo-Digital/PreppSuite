@@ -184,7 +184,6 @@
   "settingsNotificationsToggleLabel": "Bei neuen Warnungen benachrichtigen",
   "settingsNotificationsToggleHint": "Nur lokale Benachrichtigungen, solange die App läuft — kein Push-Server.",
   "settingsUseLocationButton": "Bundesland per Standort ermitteln",
-  "settingsLocationErrorMessage": "Standort konnte nicht ermittelt werden: {error}",
   "settingsLocationNoMatchMessage": "Aus deinem Standort konnte kein Bundesland ermittelt werden.",
   "settingsLocationSuccessMessage": "{state} als weitere Region hinzugefügt.",
   "shelterMapTitle": "Schutzräume",
@@ -372,5 +371,11 @@
   "mapDownloadUnfinishedTitle": "Unterbrochener Download",
   "mapDownloadUnfinishedBody": "{label} — {done} von {total} Kacheln sind schon da.",
   "mapDownloadResumeAction": "Fortsetzen",
-  "mapDownloadDiscardAction": "Verwerfen"
+  "mapDownloadDiscardAction": "Verwerfen",
+  "settingsLocationServicesOff": "Die Ortungsdienste sind ausgeschaltet. Schalte sie in den Systemeinstellungen ein.",
+  "settingsLocationDeniedForever": "Der Zugriff auf den Standort ist für PreppSuite abgelehnt. Das System fragt nicht noch einmal — erlaube ihn in den Systemeinstellungen.",
+  "settingsLocationDenied": "Ohne Zugriff auf den Standort geht es nicht. Wähle das Bundesland stattdessen aus der Liste.",
+  "settingsLocationUnavailable": "Der Standort ist auf diesem Gerät nicht zu haben: {detail}",
+  "mapZoomIn": "Hineinzoomen",
+  "mapZoomOut": "Herauszoomen"
 }

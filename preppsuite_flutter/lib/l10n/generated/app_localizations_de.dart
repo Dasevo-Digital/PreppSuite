@@ -614,11 +614,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsUseLocationButton => 'Bundesland per Standort ermitteln';
 
   @override
-  String settingsLocationErrorMessage(String error) {
-    return 'Standort konnte nicht ermittelt werden: $error';
-  }
-
-  @override
   String get settingsLocationNoMatchMessage =>
       'Aus deinem Standort konnte kein Bundesland ermittelt werden.';
 
@@ -1328,4 +1323,27 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mapDownloadDiscardAction => 'Verwerfen';
+
+  @override
+  String get settingsLocationServicesOff =>
+      'Die Ortungsdienste sind ausgeschaltet. Schalte sie in den Systemeinstellungen ein.';
+
+  @override
+  String get settingsLocationDeniedForever =>
+      'Der Zugriff auf den Standort ist für PreppSuite abgelehnt. Das System fragt nicht noch einmal — erlaube ihn in den Systemeinstellungen.';
+
+  @override
+  String get settingsLocationDenied =>
+      'Ohne Zugriff auf den Standort geht es nicht. Wähle das Bundesland stattdessen aus der Liste.';
+
+  @override
+  String settingsLocationUnavailable(String detail) {
+    return 'Der Standort ist auf diesem Gerät nicht zu haben: $detail';
+  }
+
+  @override
+  String get mapZoomIn => 'Hineinzoomen';
+
+  @override
+  String get mapZoomOut => 'Herauszoomen';
 }

@@ -6,16 +6,38 @@ import 'package:latlong2/latlong.dart';
 
 import '../features/household/application/german_states.dart';
 
+/// Why the device's location could not be had.
+enum LocationRefusal {
+  /// Location is switched off for the whole device.
+  servicesOff,
+
+  /// Refused for this app, and the system will not ask again — the only
+  /// way back is the system settings, which the app has to say.
+  deniedForever,
+
+  /// Refused this time.
+  denied,
+
+  /// Everything else: no implementation on this platform, a missing
+  /// Info.plist key, a location manager that answered nothing.
+  unavailable,
+}
+
 /// Thrown when the device's location can't be determined at all
 /// (permission denied, services disabled) — as opposed to a successful
 /// lookup that just couldn't be matched to a known state, which returns
 /// `null` from [GeolocationService.determineBundesland] instead.
 class LocationUnavailableException implements Exception {
-  const LocationUnavailableException(this.message);
-  final String message;
+  const LocationUnavailableException(this.reason, [this.detail]);
+
+  final LocationRefusal reason;
+
+  /// The platform's own words, for the cases where there is nothing
+  /// better to say.
+  final String? detail;
 
   @override
-  String toString() => message;
+  String toString() => detail ?? reason.name;
 }
 
 /// Determines the user's Bundesland from device location — a deliberately
@@ -81,27 +103,53 @@ class GeolocationService {
     return LatLng(lat, lon);
   }
 
+  /// Asks for the position, turning every way this can fail into a
+  /// [LocationUnavailableException].
+  ///
+  /// Everything is wrapped, not just the cases this code raises itself: a
+  /// missing Info.plist key or a platform without an implementation comes
+  /// back as a plain platform error, and an uncaught one of those is a
+  /// button that looks like nothing happened when it was pressed.
   Future<Position> _getPosition() async {
-    if (!await Geolocator.isLocationServiceEnabled()) {
-      throw const LocationUnavailableException(
-        'Location services are disabled.',
+    try {
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        throw const LocationUnavailableException(LocationRefusal.servicesOff);
+      }
+
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      switch (permission) {
+        case LocationPermission.deniedForever:
+          throw const LocationUnavailableException(
+            LocationRefusal.deniedForever,
+          );
+        case LocationPermission.denied:
+          throw const LocationUnavailableException(LocationRefusal.denied);
+        case LocationPermission.unableToDetermine:
+          throw const LocationUnavailableException(
+            LocationRefusal.unavailable,
+          );
+        case LocationPermission.whileInUse:
+        case LocationPermission.always:
+          break;
+      }
+
+      return await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+        ),
+      );
+    } on LocationUnavailableException {
+      rethrow;
+    } on Object catch (error) {
+      throw LocationUnavailableException(
+        LocationRefusal.unavailable,
+        error.toString(),
       );
     }
-
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      throw const LocationUnavailableException('Location permission denied.');
-    }
-
-    return Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.low,
-      ),
-    );
   }
 
   Future<String?> _reverseGeocodeState(Position position) async {

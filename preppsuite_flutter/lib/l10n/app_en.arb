@@ -325,14 +325,6 @@
   "settingsNotificationsToggleLabel": "Notify me about new warnings",
   "settingsNotificationsToggleHint": "Local notifications only, while the app is running — no push server.",
   "settingsUseLocationButton": "Determine state via location",
-  "settingsLocationErrorMessage": "Couldn't determine your location: {error}",
-  "@settingsLocationErrorMessage": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "settingsLocationNoMatchMessage": "Couldn't match your location to a German state.",
   "settingsLocationSuccessMessage": "{state} added as an additional region.",
   "@settingsLocationSuccessMessage": {
@@ -750,5 +742,12 @@
   "mapDownloadUnfinishedBody": "{label} — {done} of {total} tiles are already here.",
   "@mapDownloadUnfinishedBody": {"placeholders": {"label": {"type": "String"}, "done": {"type": "String"}, "total": {"type": "String"}}},
   "mapDownloadResumeAction": "Resume",
-  "mapDownloadDiscardAction": "Discard"
+  "mapDownloadDiscardAction": "Discard",
+  "settingsLocationServicesOff": "Location services are switched off. Turn them on in the system settings.",
+  "settingsLocationDeniedForever": "Location access is denied for PreppSuite. The system will not ask again — allow it in the system settings.",
+  "settingsLocationDenied": "This needs access to your location. Pick the federal state from the list instead.",
+  "settingsLocationUnavailable": "Location is not available on this device: {detail}",
+  "@settingsLocationUnavailable": {"placeholders": {"detail": {"type": "String"}}},
+  "mapZoomIn": "Zoom in",
+  "mapZoomOut": "Zoom out"
 }
