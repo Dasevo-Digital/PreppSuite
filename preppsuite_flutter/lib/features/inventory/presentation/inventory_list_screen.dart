@@ -411,16 +411,26 @@ class _Stepper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Row(
       children: [
         Expanded(child: Text(label)),
         IconButton(
           icon: const Icon(Icons.remove_circle_outline),
+          tooltip: l10n.stepperDecrease(label),
           onPressed: value > minValue ? () => onChanged(value - 1) : null,
         ),
-        Text('$value', style: Theme.of(context).textTheme.titleMedium),
+        Text(
+          '$value',
+          style: Theme.of(context).textTheme.titleMedium,
+          // Read on its own, the number is just a number. The label sits
+          // three widgets away and a screen reader does not connect them.
+          semanticsLabel: l10n.stepperValue(label, value),
+        ),
         IconButton(
           icon: const Icon(Icons.add_circle_outline),
+          tooltip: l10n.stepperIncrease(label),
           onPressed: () => onChanged(value + 1),
         ),
       ],

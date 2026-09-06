@@ -75,6 +75,9 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
                     ),
                     secondary: IconButton(
                       icon: const Icon(Icons.delete_outline),
+                      // Names the row it belongs to: in a list of forty
+                      // items, forty buttons called "delete" are useless.
+                      tooltip: l10n.deleteItemAction(item.title),
                       onPressed: () => controller.deleteItem(item),
                     ),
                   );

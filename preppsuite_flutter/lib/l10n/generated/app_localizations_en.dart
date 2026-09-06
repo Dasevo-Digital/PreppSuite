@@ -807,6 +807,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSetupSubmit => 'Get started';
 
   @override
+  String stepperDecrease(String label) {
+    return 'One fewer: $label';
+  }
+
+  @override
+  String stepperIncrease(String label) {
+    return 'One more: $label';
+  }
+
+  @override
+  String stepperValue(String label, int value) {
+    return '$label: $value';
+  }
+
+  @override
+  String deleteItemAction(String item) {
+    return 'Delete “$item”';
+  }
+
+  @override
+  String get mapDownloadSearchAction => 'Search for this place';
+
+  @override
+  String warningBannerSeverity(String severity, String headline) {
+    return '$severity: $headline';
+  }
+
+  @override
   String get personCountLabel => 'People in the household';
 
   @override

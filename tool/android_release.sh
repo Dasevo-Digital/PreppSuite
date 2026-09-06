@@ -59,11 +59,18 @@ readonly KEY_ALIAS="$(prop keyAlias)"
 readonly BUILT="$APP_DIR/build/app/outputs/flutter-apk/app-release.apk"
 readonly SIGNED="$APP_DIR/build/app/outputs/flutter-apk/app-release-rotated.apk"
 
-echo "== 1/4 bauen =="
-( cd "$APP_DIR" && flutter build apk --release )
+# arm64 is every Android phone made in the last several years, arm32 the
+# handful of older ones minSdk 24 still admits. x86 and x86_64 are the
+# emulator: they were a third of a 96.7 MB package and reach no real device
+# this app is handed to.
+readonly TARGET_PLATFORMS=android-arm,android-arm64
+
+echo "== 1/5 bauen =="
+( cd "$APP_DIR" && flutter build apk --release \
+    --target-platform "$TARGET_PLATFORMS" )
 [ -s "$BUILT" ] || die "Gradle hat kein APK abgelegt: $BUILT"
 
-echo "== 2/4 mit Lineage neu signieren =="
+echo "== 2/5 mit Lineage neu signieren =="
 rm -f "$SIGNED"
 "$APKSIGNER" sign \
   --lineage "$LINEAGE" \
@@ -78,7 +85,7 @@ rm -f "$SIGNED"
   --out "$SIGNED" "$BUILT"
 [ -s "$SIGNED" ] || die "apksigner hat nichts abgelegt."
 
-echo "== 3/4 pruefen =="
+echo "== 3/5 signatur pruefen =="
 verify_at() {
   "$APKSIGNER" verify --print-certs --min-sdk-version "$1" --max-sdk-version "$2" "$SIGNED"
 }
@@ -109,7 +116,17 @@ grep -qi "$DEBUG_SHA256" <<<"$lineage_out" && grep -qi "$RELEASE_SHA256" <<<"$li
 grep -qi "Has installed data capability: true" <<<"$lineage_out" \
   || die "Der alte Signierer darf keine bestehende Installation abloesen."
 
-echo "== 4/4 fertig =="
+echo "== 4/5 architekturen pruefen =="
+# A silent return of the emulator architectures would put 32 MB back into a
+# package nobody can check by looking at it.
+abis="$(unzip -Z1 "$SIGNED" 'lib/*' | cut -d/ -f2 | sort -u | tr '\n' ' ')"
+echo "   enthalten: $abis"
+case "$abis" in
+  *x86*) die "Das Paket enthaelt wieder eine x86-Architektur: $abis" ;;
+esac
+grep -q "arm64-v8a" <<<"$abis" || die "arm64-v8a fehlt im Paket."
+
+echo "== 5/5 fertig =="
 echo
 echo "API 24-32:"; grep -i "certificate DN:\|certificate SHA-256 digest:" <<<"$old_out" | sed 's/^/  /'
 echo "API 33+:"

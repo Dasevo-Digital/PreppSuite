@@ -120,8 +120,10 @@ Debug-Schlüssel zurück.
 die App installiert haben, nie wieder eine Aktualisierung veröffentlichen.
 Keystore und Passwörter gehören an zwei getrennte gesicherte Orte.
 
-Für die Weitergabe über *Releases* lohnt sich `--split-per-abi`: getrennte
-Pakete je Prozessorarchitektur, jedes rund ein Drittel der Größe.
+Das Paket enthält nur `arm64-v8a` und `armeabi-v7a`. x86 und x86_64 sind der
+Emulator und waren ein Drittel der Dateigröße, ohne je auf einem Gerät zu
+landen, an das diese App weitergegeben wird — `tool/android_release.sh`
+baut mit `--target-platform` und bricht ab, falls sie zurückkehren.
 
 #### Schlüsselwechsel: warum `flutter build apk` allein nicht reicht
 

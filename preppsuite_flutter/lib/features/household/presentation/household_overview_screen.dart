@@ -116,6 +116,8 @@ class _CountTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
@@ -124,14 +126,17 @@ class _CountTile extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.remove_circle_outline),
+            tooltip: l10n.stepperDecrease(label),
             onPressed: value > minimum ? () => onChanged(value - 1) : null,
           ),
           Text(
             '$value',
             style: Theme.of(context).textTheme.titleMedium,
+            semanticsLabel: l10n.stepperValue(label, value),
           ),
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
+            tooltip: l10n.stepperIncrease(label),
             onPressed: () => onChanged(value + 1),
           ),
         ],

@@ -391,6 +391,9 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
                 )
               : IconButton(
                   icon: const Icon(Icons.arrow_forward),
+                  // An arrow says nothing on its own, and a screen reader
+                  // reads an IconButton by its tooltip.
+                  tooltip: l10n.mapDownloadSearchAction,
                   onPressed: () => _search(l10n),
                 ),
         ),

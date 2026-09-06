@@ -1514,6 +1514,42 @@ abstract class AppLocalizations {
   /// **'Get started'**
   String get profileSetupSubmit;
 
+  /// Screen-reader name of the minus button beside a counter.
+  ///
+  /// In en, this message translates to:
+  /// **'One fewer: {label}'**
+  String stepperDecrease(String label);
+
+  /// Screen-reader name of the plus button beside a counter.
+  ///
+  /// In en, this message translates to:
+  /// **'One more: {label}'**
+  String stepperIncrease(String label);
+
+  /// Spoken form of a counter, so the number is not read on its own.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {value}'**
+  String stepperValue(String label, int value);
+
+  /// No description provided for @deleteItemAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{item}”'**
+  String deleteItemAction(String item);
+
+  /// No description provided for @mapDownloadSearchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for this place'**
+  String get mapDownloadSearchAction;
+
+  /// Banner line, so severity is a word and not only a colour.
+  ///
+  /// In en, this message translates to:
+  /// **'{severity}: {headline}'**
+  String warningBannerSeverity(String severity, String headline);
+
   /// No description provided for @personCountLabel.
   ///
   /// In en, this message translates to:

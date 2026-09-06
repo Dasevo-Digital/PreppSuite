@@ -813,6 +813,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get profileSetupSubmit => 'Los geht\'s';
 
   @override
+  String stepperDecrease(String label) {
+    return 'Einer weniger: $label';
+  }
+
+  @override
+  String stepperIncrease(String label) {
+    return 'Einer mehr: $label';
+  }
+
+  @override
+  String stepperValue(String label, int value) {
+    return '$label: $value';
+  }
+
+  @override
+  String deleteItemAction(String item) {
+    return '„$item“ löschen';
+  }
+
+  @override
+  String get mapDownloadSearchAction => 'Diesen Ort suchen';
+
+  @override
+  String warningBannerSeverity(String severity, String headline) {
+    return '$severity: $headline';
+  }
+
+  @override
   String get personCountLabel => 'Personen im Haushalt';
 
   @override

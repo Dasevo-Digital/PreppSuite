@@ -120,6 +120,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         Expanded(child: Text(l10n.personCountLabel)),
                         IconButton(
                           icon: const Icon(Icons.remove_circle_outline),
+                          tooltip: l10n.stepperDecrease(l10n.personCountLabel),
                           onPressed: _personCount > 1
                               ? () => setState(() => _personCount--)
                               : null,
@@ -127,9 +128,14 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         Text(
                           '$_personCount',
                           style: Theme.of(context).textTheme.titleMedium,
+                          semanticsLabel: l10n.stepperValue(
+                            l10n.personCountLabel,
+                            _personCount,
+                          ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.add_circle_outline),
+                          tooltip: l10n.stepperIncrease(l10n.personCountLabel),
                           onPressed: () => setState(() => _personCount++),
                         ),
                       ],

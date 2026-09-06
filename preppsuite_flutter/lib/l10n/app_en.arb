@@ -477,6 +477,31 @@
   "profileSetupTitle": "Set up your household",
   "profileSetupIntro": "PreppSuite runs entirely on this device. There is no account and no server — just these details, so warnings and supply targets match your situation.",
   "profileSetupSubmit": "Get started",
+  "stepperDecrease": "One fewer: {label}",
+  "@stepperDecrease": {
+    "description": "Screen-reader name of the minus button beside a counter.",
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "stepperIncrease": "One more: {label}",
+  "@stepperIncrease": {
+    "description": "Screen-reader name of the plus button beside a counter.",
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "stepperValue": "{label}: {value}",
+  "@stepperValue": {
+    "description": "Spoken form of a counter, so the number is not read on its own.",
+    "placeholders": { "label": { "type": "String" }, "value": { "type": "int" } }
+  },
+  "deleteItemAction": "Delete “{item}”",
+  "@deleteItemAction": {
+    "placeholders": { "item": { "type": "String" } }
+  },
+  "mapDownloadSearchAction": "Search for this place",
+  "warningBannerSeverity": "{severity}: {headline}",
+  "@warningBannerSeverity": {
+    "description": "Banner line, so severity is a word and not only a colour.",
+    "placeholders": { "severity": { "type": "String" }, "headline": { "type": "String" } }
+  },
   "personCountLabel": "People in the household",
   "settingsSharingTitle": "Shared folder",
   "sharingIntro": "Supplies, checklists and spending live in a folder several devices can see — a Nextcloud, Syncthing, iCloud Drive or Dropbox directory. PreppSuite only writes files there. What carries them is your choice.",

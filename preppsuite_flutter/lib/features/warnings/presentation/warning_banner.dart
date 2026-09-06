@@ -83,8 +83,16 @@ class WarningBanner extends ConsumerWidget {
                     const Icon(Icons.warning_amber_rounded),
                     const SizedBox(width: 12),
                     Expanded(
+                      // The severity is spelled out rather than left to the
+                      // colour. Red-green colour blindness is common enough
+                      // that a civil-protection banner cannot encode
+                      // "extreme" versus "minor" in hue alone — and a
+                      // screen reader reads no colour at all.
                       child: Text(
-                        mostSevere.headline,
+                        l10n.warningBannerSeverity(
+                          localizeWarningSeverity(l10n, severity),
+                          mostSevere.headline,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
