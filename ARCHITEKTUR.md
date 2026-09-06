@@ -413,6 +413,19 @@ tree; the test suite deliberately targets that layer rather than the UI.
   already built. Use `flutter clean` if that is what you mean, and
   otherwise nothing: the Android build has no stale-output problem that
   needs it.
+- **The shopping list answers two different questions and keeps them
+  apart.** The gap to the household target (`calculateSupply`) says
+  whether the stores would carry everyone through the planned days; the
+  per-item lines say what goes in a basket, and only an item whose
+  household gave it a `minQuantity` can be short of one. An item without a
+  minimum is unanswered, not empty — counting it as missing would fill the
+  list with everything ever entered.
+- **The rotation queue leaves out what cannot be rotated.** No expiry date
+  (salt) and nothing left (quantity zero) are both excluded, and days are
+  counted as calendar days rather than elapsed hours so "tomorrow morning"
+  reads as 1 and not 0. Its `soon` window is the overview's `soonWindow`,
+  re-exported rather than redeclared: the two must never disagree about
+  the same item.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

@@ -841,6 +841,105 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get shoppingListTitle => 'Einkaufsliste';
+
+  @override
+  String shoppingListTargetHeading(int days) {
+    return 'Gegen das Ziel für $days Tage';
+  }
+
+  @override
+  String shoppingListTargetMet(int days) {
+    return 'Wasser und Energie sind für $days Tage gedeckt.';
+  }
+
+  @override
+  String shoppingListWaterGap(String liters) {
+    return '$liters l Wasser fehlen noch';
+  }
+
+  @override
+  String shoppingListEnergyGap(String kcal) {
+    return '$kcal kcal an Lebensmitteln fehlen noch';
+  }
+
+  @override
+  String shoppingListDaysCovered(int covered, int days) {
+    return 'Der Vorrat reicht derzeit $covered von $days Tagen.';
+  }
+
+  @override
+  String get shoppingListDaysUnknown =>
+      'Im Haushalt lebt niemand, also gibt es nichts zu rechnen.';
+
+  @override
+  String get shoppingListItemsHeading => 'Unter der Mindestmenge';
+
+  @override
+  String get shoppingListItemsEmpty =>
+      'Nichts liegt unter seiner Mindestmenge.';
+
+  @override
+  String get shoppingListNoMinimums =>
+      'Hier steht nur, wofür du eine Mindestmenge angegeben hast. Trag an einem Artikel eine ein, dann wird er überwacht.';
+
+  @override
+  String shoppingListShortfall(String amount, String unit, String minimum) {
+    return '$amount $unit fehlen auf $minimum';
+  }
+
+  @override
+  String get shoppingListCopy => 'Liste kopieren';
+
+  @override
+  String get shoppingListCopied => 'Einkaufsliste kopiert.';
+
+  @override
+  String get shoppingListEmpty =>
+      'Nichts einzukaufen: das Ziel ist erreicht und jeder Artikel liegt über seiner Mindestmenge.';
+
+  @override
+  String get rotationTitle => 'Als Nächstes verbrauchen';
+
+  @override
+  String get rotationExpiredHeading => 'Über dem Datum';
+
+  @override
+  String get rotationSoonHeading => 'Bald verbrauchen';
+
+  @override
+  String get rotationLaterHeading => 'Hält noch';
+
+  @override
+  String rotationExpiredSince(int days) {
+    return 'seit $days Tagen';
+  }
+
+  @override
+  String get rotationExpiresToday => 'heute';
+
+  @override
+  String rotationDaysLeft(int days) {
+    return 'noch $days Tage';
+  }
+
+  @override
+  String get rotationEmpty =>
+      'Hier ist nichts zu drehen. Aufgeführt wird nur, was ein Datum trägt und wovon noch etwas da ist.';
+
+  @override
+  String get rotationHint =>
+      'Salz und Ähnliches tragen kein Datum und bleiben bewusst draußen – sie würden die Zeilen zudecken, die eines haben.';
+
+  @override
+  String get consumeScanAction => 'Verbrauch scannen';
+
+  @override
+  String consumeScanNotFound(String barcode) {
+    return 'Kein Artikel mit dem Barcode $barcode in diesem Haushalt.';
+  }
+
+  @override
   String get personCountLabel => 'Personen im Haushalt';
 
   @override

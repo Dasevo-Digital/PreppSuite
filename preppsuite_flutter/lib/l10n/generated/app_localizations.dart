@@ -1550,6 +1550,156 @@ abstract class AppLocalizations {
   /// **'{severity}: {headline}'**
   String warningBannerSeverity(String severity, String headline);
 
+  /// No description provided for @shoppingListTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list'**
+  String get shoppingListTitle;
+
+  /// No description provided for @shoppingListTargetHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Against the target for {days} days'**
+  String shoppingListTargetHeading(int days);
+
+  /// No description provided for @shoppingListTargetMet.
+  ///
+  /// In en, this message translates to:
+  /// **'Water and energy are covered for {days} days.'**
+  String shoppingListTargetMet(int days);
+
+  /// No description provided for @shoppingListWaterGap.
+  ///
+  /// In en, this message translates to:
+  /// **'{liters} l of water still to buy'**
+  String shoppingListWaterGap(String liters);
+
+  /// No description provided for @shoppingListEnergyGap.
+  ///
+  /// In en, this message translates to:
+  /// **'{kcal} kcal of food still to buy'**
+  String shoppingListEnergyGap(String kcal);
+
+  /// No description provided for @shoppingListDaysCovered.
+  ///
+  /// In en, this message translates to:
+  /// **'The stores currently last {covered} of {days} days.'**
+  String shoppingListDaysCovered(int covered, int days);
+
+  /// No description provided for @shoppingListDaysUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'No people in the household, so there is nothing to work out.'**
+  String get shoppingListDaysUnknown;
+
+  /// No description provided for @shoppingListItemsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Below the minimum'**
+  String get shoppingListItemsHeading;
+
+  /// No description provided for @shoppingListItemsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is below its minimum.'**
+  String get shoppingListItemsEmpty;
+
+  /// No description provided for @shoppingListNoMinimums.
+  ///
+  /// In en, this message translates to:
+  /// **'Only items you gave a minimum quantity appear here. Set one on an item and it will be watched.'**
+  String get shoppingListNoMinimums;
+
+  /// No description provided for @shoppingListShortfall.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} {unit} short of {minimum}'**
+  String shoppingListShortfall(String amount, String unit, String minimum);
+
+  /// No description provided for @shoppingListCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy list'**
+  String get shoppingListCopy;
+
+  /// No description provided for @shoppingListCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list copied.'**
+  String get shoppingListCopied;
+
+  /// No description provided for @shoppingListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to buy: the target is met and every item is above its minimum.'**
+  String get shoppingListEmpty;
+
+  /// No description provided for @rotationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use next'**
+  String get rotationTitle;
+
+  /// No description provided for @rotationExpiredHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Past its date'**
+  String get rotationExpiredHeading;
+
+  /// No description provided for @rotationSoonHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Use soon'**
+  String get rotationSoonHeading;
+
+  /// No description provided for @rotationLaterHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps for now'**
+  String get rotationLaterHeading;
+
+  /// No description provided for @rotationExpiredSince.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days past'**
+  String rotationExpiredSince(int days);
+
+  /// No description provided for @rotationExpiresToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get rotationExpiresToday;
+
+  /// No description provided for @rotationDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left'**
+  String rotationDaysLeft(int days);
+
+  /// No description provided for @rotationEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here to rotate. Only items with a date and something left in them are listed.'**
+  String get rotationEmpty;
+
+  /// No description provided for @rotationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Salt and the like carry no date and are left out on purpose — they would bury the rows that do have one.'**
+  String get rotationHint;
+
+  /// No description provided for @consumeScanAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to use'**
+  String get consumeScanAction;
+
+  /// No description provided for @consumeScanNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No item with barcode {barcode} in this household.'**
+  String consumeScanNotFound(String barcode);
+
   /// No description provided for @personCountLabel.
   ///
   /// In en, this message translates to:

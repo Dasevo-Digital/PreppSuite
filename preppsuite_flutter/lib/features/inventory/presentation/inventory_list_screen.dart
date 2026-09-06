@@ -12,11 +12,16 @@ import '../application/inventory_category_l10n.dart';
 import '../application/inventory_csv_export.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_providers.dart';
+import 'barcode_scanner_screen.dart';
+import 'rotation_screen.dart';
+import 'shopping_list_screen.dart';
 import '../application/supply_calculator.dart';
 import 'consume_dialog.dart';
 import 'inventory_csv_import_screen.dart';
 import 'inventory_item_form_screen.dart';
 import 'storage_tips_screen.dart';
+
+enum _InventoryMenuAction { consumeByScan, storageTips, exportCsv, importCsv }
 
 class InventoryListScreen extends ConsumerWidget {
   const InventoryListScreen({super.key, required this.householdId});
@@ -32,39 +37,61 @@ class InventoryListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.inventoryTitle),
+        // The two errands come first as their own buttons; everything
+        // else is a thing you do once in a while and lives in the menu.
+        // Five icons in a row would make none of them findable.
         actions: [
           IconButton(
-            icon: const Icon(Icons.menu_book_outlined),
-            tooltip: l10n.storageTipsTitle,
+            icon: const Icon(Icons.shopping_cart_outlined),
+            tooltip: l10n.shoppingListTitle,
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => StorageTipsScreen(householdId: householdId),
+                builder: (_) => ShoppingListScreen(householdId: householdId),
               ),
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.download),
-            tooltip: l10n.csvExportButton,
-            onPressed: () => _exportCsv(context, ref, householdId, l10n),
+            icon: const Icon(Icons.schedule),
+            tooltip: l10n.rotationTitle,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => RotationScreen(householdId: householdId),
+              ),
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.upload_file),
-            tooltip: l10n.csvImportButton,
-            onPressed: () async {
-              final imported = await Navigator.of(context).push<int>(
-                MaterialPageRoute(
-                  builder: (_) =>
-                      InventoryCsvImportScreen(householdId: householdId),
+          PopupMenuButton<_InventoryMenuAction>(
+            onSelected: (action) =>
+                _runMenuAction(context, ref, householdId, l10n, action),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: _InventoryMenuAction.consumeByScan,
+                child: ListTile(
+                  leading: const Icon(Icons.qr_code_scanner),
+                  title: Text(l10n.consumeScanAction),
                 ),
-              );
-              if (imported != null && context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n.csvImportSuccessMessage(imported)),
-                  ),
-                );
-              }
-            },
+              ),
+              PopupMenuItem(
+                value: _InventoryMenuAction.storageTips,
+                child: ListTile(
+                  leading: const Icon(Icons.menu_book_outlined),
+                  title: Text(l10n.storageTipsTitle),
+                ),
+              ),
+              PopupMenuItem(
+                value: _InventoryMenuAction.exportCsv,
+                child: ListTile(
+                  leading: const Icon(Icons.download),
+                  title: Text(l10n.csvExportButton),
+                ),
+              ),
+              PopupMenuItem(
+                value: _InventoryMenuAction.importCsv,
+                child: ListTile(
+                  leading: const Icon(Icons.upload_file),
+                  title: Text(l10n.csvImportButton),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -106,6 +133,85 @@ class InventoryListScreen extends ConsumerWidget {
         label: Text(l10n.addItemButton),
       ),
     );
+  }
+
+  Future<void> _runMenuAction(
+    BuildContext context,
+    WidgetRef ref,
+    String householdId,
+    AppLocalizations l10n,
+    _InventoryMenuAction action,
+  ) async {
+    switch (action) {
+      case _InventoryMenuAction.consumeByScan:
+        await _consumeByScan(context, ref, householdId, l10n);
+      case _InventoryMenuAction.storageTips:
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => StorageTipsScreen(householdId: householdId),
+          ),
+        );
+      case _InventoryMenuAction.exportCsv:
+        await _exportCsv(context, ref, householdId, l10n);
+      case _InventoryMenuAction.importCsv:
+        final imported = await Navigator.of(context).push<int>(
+          MaterialPageRoute(
+            builder: (_) => InventoryCsvImportScreen(householdId: householdId),
+          ),
+        );
+        if (imported != null && context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.csvImportSuccessMessage(imported))),
+          );
+        }
+    }
+  }
+
+  /// Books a consumption from the barcode, the way it was added.
+  ///
+  /// Adding a tin by scanning and then deducting it by hand through a form
+  /// is the asymmetry that makes a stock drift away from the shelf: one
+  /// direction takes a second, the other takes a minute, so only one of
+  /// them gets done.
+  Future<void> _consumeByScan(
+    BuildContext context,
+    WidgetRef ref,
+    String householdId,
+    AppLocalizations l10n,
+  ) async {
+    final barcode =
+        await Navigator.of(
+          context,
+        ).push<String>(
+          MaterialPageRoute(builder: (_) => const BarcodeScannerScreen()),
+        );
+    if (barcode == null || !context.mounted) return;
+
+    final item = await ref
+        .read(appDatabaseProvider)
+        .findInventoryItemByBarcode(householdId, barcode);
+    if (!context.mounted) return;
+
+    if (item == null) {
+      // Naming the code matters: it is the one piece of the failure the
+      // reader can check against the packet in their hand.
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(content: Text(l10n.consumeScanNotFound(barcode))),
+        );
+      return;
+    }
+
+    final amount = await showDialog<double>(
+      context: context,
+      builder: (_) => ConsumeDialog(item: item, l10n: l10n),
+    );
+    if (amount == null) return;
+
+    await ref
+        .read(inventoryControllerProvider(householdId))
+        .consumeQuantity(item, amount);
   }
 
   /// Writes the whole inventory out as CSV, in the format the importer

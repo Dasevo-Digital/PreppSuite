@@ -136,6 +136,32 @@ class AppDatabase extends _$AppDatabase {
         .watch();
   }
 
+  /// The item this household keeps under [barcode], or null.
+  ///
+  /// For booking a consumption by scanning: the same code that adds a tin
+  /// is the one that takes it out again. Deleted rows are excluded — a
+  /// tombstone still carries its barcode, and reviving one silently
+  /// through a scan would undo a deliberate delete.
+  ///
+  /// The newest match wins if a household has the same code on two rows,
+  /// which happens when a second pack is entered as its own item rather
+  /// than added to the first.
+  Future<InventoryItem?> findInventoryItemByBarcode(
+    String householdId,
+    String barcode,
+  ) {
+    return (select(inventoryItems)
+          ..where(
+            (t) =>
+                t.householdId.equals(householdId) &
+                t.deletedAt.isNull() &
+                t.barcode.equals(barcode),
+          )
+          ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)])
+          ..limit(1))
+        .getSingleOrNull();
+  }
+
   /// Items below their configured minimum — used by the "missing
   /// equipment" PDF report.
   Future<List<InventoryItem>> lowStockInventoryItems(String householdId) {
