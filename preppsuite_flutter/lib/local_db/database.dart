@@ -57,7 +57,7 @@ class AppDatabase extends _$AppDatabase {
       if (from < 6) {
         // Repairs data left behind by a bug that kept `dirty` at false when
         // an already-synced row was edited, so the change never went out
-        // (see the note in CLAUDE.md). Fixing the writes only helps future
+        // (see the note in ARCHITEKTUR.md). Fixing the writes only helps
         // edits; what was already lost needs re-offering.
         //
         // Safe to do wholesale: a row is only ever accepted elsewhere if

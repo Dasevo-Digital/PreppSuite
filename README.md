@@ -141,7 +141,8 @@ markiert; gelöscht wird nur als Merker, damit die Löschung auch auf den
 anderen Geräten ankommt. Der Abgleich über den gemeinsamen Ordner läuft
 daneben und schreibt in dieselbe Datenbank.
 
-Die Annahmen, die dahinterstehen, sind in [`CLAUDE.md`](CLAUDE.md)
+Die Annahmen, die dahinterstehen, sind in
+[`ARCHITEKTUR.md`](ARCHITEKTUR.md)
 aufgeschrieben, die Warnquellen in
 [`docs/warning-feeds.md`](docs/warning-feeds.md), das Ordnerformat in
 [`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md), die
