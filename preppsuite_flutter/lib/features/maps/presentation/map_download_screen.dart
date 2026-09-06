@@ -26,9 +26,17 @@ class MapDownloadScreen extends ConsumerStatefulWidget {
 class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
   final _controller = MapController();
 
-  /// Deep enough for streets to appear, shallow enough that a screenful
-  /// is a few hundred tiles rather than tens of thousands.
   double _zoom = 13;
+
+  /// Until the slider is touched, the detail level follows the map.
+  ///
+  /// Opening on the whole country with the slider at 13 would mean six
+  /// figures of tiles and a download button that is disabled before
+  /// anyone has done anything — a screen that starts by saying no. Once
+  /// a level has been chosen deliberately it stays chosen, even if that
+  /// makes the area too large: that message is then an answer to
+  /// something the user did.
+  bool _zoomChosen = false;
 
   MapArea? _area;
 
@@ -38,18 +46,34 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
     super.dispose();
   }
 
+  static const _minDetail = 8.0;
+  static const _maxDetail = 14.0;
+
   void _updateArea() {
-    final camera = _controller.camera;
-    final bounds = camera.visibleBounds;
-    setState(() {
-      _area = MapArea(
-        minLongitude: bounds.west,
-        minLatitude: bounds.south,
-        maxLongitude: bounds.east,
-        maxLatitude: bounds.north,
-        maxZoom: _zoom.round(),
-      );
-    });
+    final bounds = _controller.camera.visibleBounds;
+
+    MapArea areaAt(int detail) => MapArea(
+      minLongitude: bounds.west,
+      minLatitude: bounds.south,
+      maxLongitude: bounds.east,
+      maxLatitude: bounds.north,
+      maxZoom: detail,
+    );
+
+    if (!_zoomChosen) {
+      // The deepest level this area still fits in, so the screen opens
+      // on something that can actually be downloaded.
+      var suggestion = _minDetail;
+      for (var detail = _maxDetail; detail >= _minDetail; detail--) {
+        if (areaAt(detail.round()).tileCount <= MapAreaDownloader.tileLimit) {
+          suggestion = detail;
+          break;
+        }
+      }
+      _zoom = suggestion;
+    }
+
+    setState(() => _area = areaAt(_zoom.round()));
   }
 
   Future<void> _start(AppLocalizations l10n) async {
@@ -130,12 +154,15 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
           Expanded(
             child: Slider(
               value: _zoom,
-              min: 8,
-              max: 14,
-              divisions: 6,
+              min: _minDetail,
+              max: _maxDetail,
+              divisions: (_maxDetail - _minDetail).round(),
               label: '${_zoom.round()}',
               onChanged: (value) {
-                setState(() => _zoom = value);
+                setState(() {
+                  _zoom = value;
+                  _zoomChosen = true;
+                });
                 _updateArea();
               },
             ),

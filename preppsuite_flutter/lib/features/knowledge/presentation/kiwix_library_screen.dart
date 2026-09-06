@@ -9,10 +9,12 @@ import '../../downloads/presentation/download_banner.dart';
 import '../application/kiwix_catalogue.dart';
 import '../application/knowledge_providers.dart';
 
-final _catalogueProvider = Provider((ref) => KiwixCatalogue());
+/// Overridden in tests so the screen can be shown against a captured
+/// catalogue instead of the live library.
+final kiwixCatalogueProvider = Provider((ref) => KiwixCatalogue());
 
 final _languagesProvider = FutureProvider(
-  (ref) => ref.read(_catalogueProvider).languages(),
+  (ref) => ref.read(kiwixCatalogueProvider).languages(),
 );
 
 /// Browses the public Kiwix library and downloads an archive from it.
@@ -74,7 +76,7 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
     setState(() => _loading = true);
     try {
       final page = await ref
-          .read(_catalogueProvider)
+          .read(kiwixCatalogueProvider)
           .entries(
             language: _language,
             query: _query,
