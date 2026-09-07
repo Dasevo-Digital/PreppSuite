@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,6 +57,7 @@ class BaseMapLayer extends ConsumerWidget {
         // staggered download deliberately stops at a shallower zoom
         // outside the chosen region, and 3 is the most the library allows.
         maximumTileSubstitutionDifference: 3,
+        concurrency: _renderConcurrency,
       );
     }
 
@@ -64,6 +67,22 @@ class BaseMapLayer extends ConsumerWidget {
     );
   }
 }
+
+/// How many isolates render tiles.
+///
+/// The library's default is 4, and that is what a screenful takes seven
+/// seconds to fill on. Measured from the tile cache's own timestamps:
+/// about three finished tiles a second at the busiest, while a window at
+/// low zoom wants twenty — which is why the map arrived in visible
+/// instalments rather than at once.
+///
+/// The work is parsing and drawing, both of which the isolates do in
+/// parallel, so the machine's own width is the right measure. Half the
+/// cores, never fewer than the default and never more than eight: past
+/// that the tiles are not the bottleneck any more and each isolate still
+/// costs memory. A phone reports few enough cores to land on the default
+/// by itself.
+int get _renderConcurrency => (Platform.numberOfProcessors ~/ 2).clamp(4, 8);
 
 /// Whether the map is currently drawing from the archive.
 ///
