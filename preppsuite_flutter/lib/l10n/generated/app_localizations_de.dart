@@ -1696,6 +1696,31 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get navMap => 'Karte';
+
+  @override
+  String get mapMyLocationAction => 'Mein Standort';
+
+  @override
+  String get mapSourceOffline => 'Offline';
+
+  @override
+  String get mapSourceOnline => 'Online';
+
+  @override
+  String mapSourceOfflineDetail(String name, int min, int max) {
+    return 'Gezeichnet aus $name, Stufe $min bis $max.';
+  }
+
+  @override
+  String get mapSourceOnlineDetail =>
+      'Die Kacheln kommen von OpenStreetMap. Dafür braucht es eine Verbindung.';
+
+  @override
+  String get mapSourceNoArchive =>
+      'Noch keine Karte auf dem Gerät. Bis eine geladen ist, kommen die Kacheln von OpenStreetMap und brauchen eine Verbindung.';
+
+  @override
   String get mapZoomIn => 'Hineinzoomen';
 
   @override

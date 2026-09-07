@@ -9,6 +9,7 @@ import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/presentation/expiry_reminder_scheduler.dart';
 import '../../inventory/presentation/inventory_list_screen.dart';
 import '../../knowledge/presentation/knowledge_screen.dart';
+import '../../maps/presentation/map_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../../shelters/presentation/shelter_map_screen.dart';
 import '../../warnings/application/warning_providers.dart';
@@ -26,7 +27,7 @@ import 'overview_screen.dart';
 /// screen behind it shows the history, the filters and the ones that
 /// concern somewhere else.
 ///
-/// Nine destinations do not fit across a phone. `shellSlotsFor` decides
+/// Ten destinations do not fit across a phone. `shellSlotsFor` decides
 /// which ones the bar shows and which go behind "more"; the rail, which
 /// has the room, shows all of them.
 ///
@@ -116,6 +117,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       ),
       ShellDestination.warnings => WarningListScreen(profile: widget.profile),
       ShellDestination.shelters => const ShelterMapScreen(),
+      ShellDestination.map => const MapScreen(),
       ShellDestination.knowledge => const KnowledgeScreen(),
       ShellDestination.budget => BudgetListScreen(householdId: householdId),
       ShellDestination.household => HouseholdOverviewScreen(
@@ -189,7 +191,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
 
   /// The rail, made to scroll rather than overflow.
   ///
-  /// Nine destinations do not fit above each other in a window someone
+  /// Ten destinations do not fit above each other in a window someone
   /// has dragged short, and a rail has no scrolling of its own. The
   /// minimum height is what keeps its background filling the side when
   /// they do fit.
@@ -250,6 +252,11 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         icon: const Icon(Icons.shield_outlined),
         selectedIcon: const Icon(Icons.shield),
         label: l10n.navShelters,
+      ),
+      ShellDestination.map => _Entry(
+        icon: const Icon(Icons.map_outlined),
+        selectedIcon: const Icon(Icons.map),
+        label: l10n.navMap,
       ),
       ShellDestination.knowledge => _Entry(
         icon: const Icon(Icons.menu_book_outlined),

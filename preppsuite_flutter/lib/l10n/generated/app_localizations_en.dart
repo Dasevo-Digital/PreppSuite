@@ -1682,6 +1682,31 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get navMap => 'Map';
+
+  @override
+  String get mapMyLocationAction => 'My location';
+
+  @override
+  String get mapSourceOffline => 'Offline';
+
+  @override
+  String get mapSourceOnline => 'Online';
+
+  @override
+  String mapSourceOfflineDetail(String name, int min, int max) {
+    return 'Drawing from $name, zoom $min to $max.';
+  }
+
+  @override
+  String get mapSourceOnlineDetail =>
+      'Drawing tiles from OpenStreetMap. Needs a connection.';
+
+  @override
+  String get mapSourceNoArchive =>
+      'No map on this device yet. Until one is downloaded, the tiles come from OpenStreetMap and need a connection.';
+
+  @override
   String get mapZoomIn => 'Zoom in';
 
   @override

@@ -2930,6 +2930,48 @@ abstract class AppLocalizations {
   /// **'Location is not available on this device: {detail}'**
   String settingsLocationUnavailable(String detail);
 
+  /// No description provided for @navMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get navMap;
+
+  /// No description provided for @mapMyLocationAction.
+  ///
+  /// In en, this message translates to:
+  /// **'My location'**
+  String get mapMyLocationAction;
+
+  /// No description provided for @mapSourceOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get mapSourceOffline;
+
+  /// No description provided for @mapSourceOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get mapSourceOnline;
+
+  /// No description provided for @mapSourceOfflineDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing from {name}, zoom {min} to {max}.'**
+  String mapSourceOfflineDetail(String name, int min, int max);
+
+  /// No description provided for @mapSourceOnlineDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Drawing tiles from OpenStreetMap. Needs a connection.'**
+  String get mapSourceOnlineDetail;
+
+  /// No description provided for @mapSourceNoArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'No map on this device yet. Until one is downloaded, the tiles come from OpenStreetMap and need a connection.'**
+  String get mapSourceNoArchive;
+
   /// No description provided for @mapZoomIn.
   ///
   /// In en, this message translates to:

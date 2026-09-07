@@ -35,6 +35,7 @@ enum ShellDestination {
   checklists,
   warnings,
   shelters,
+  map,
   knowledge,
   budget,
   household,
@@ -43,9 +44,9 @@ enum ShellDestination {
 
 /// How many slots a bottom bar gets before the rest move behind "more".
 ///
-/// Material's own limit. Nine destinations across a phone leaves about
+/// Material's own limit. Ten destinations across a phone leaves about
 /// forty pixels each, which is neither readable nor tappable — and the
-/// rail, which has the room, still shows all nine.
+/// rail, which has the room, still shows all ten.
 const barSlotLimit = 5;
 
 /// Which destinations a bar shows, and which are behind the "more" button.

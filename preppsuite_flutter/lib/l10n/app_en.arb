@@ -1053,6 +1053,26 @@
       }
     }
   },
+  "navMap": "Map",
+  "mapMyLocationAction": "My location",
+  "mapSourceOffline": "Offline",
+  "mapSourceOnline": "Online",
+  "mapSourceOfflineDetail": "Drawing from {name}, zoom {min} to {max}.",
+  "@mapSourceOfflineDetail": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "mapSourceOnlineDetail": "Drawing tiles from OpenStreetMap. Needs a connection.",
+  "mapSourceNoArchive": "No map on this device yet. Until one is downloaded, the tiles come from OpenStreetMap and need a connection.",
   "mapZoomIn": "Zoom in",
   "mapZoomOut": "Zoom out",
   "supplyCalculatorHouseholdLine": "{who} — from the household",

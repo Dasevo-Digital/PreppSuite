@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../application/map_source_preference.dart';
 import '../application/offline_map_providers.dart';
 import '../application/pmtiles_tile_provider.dart';
 
@@ -13,12 +14,19 @@ import '../application/pmtiles_tile_provider.dart';
 /// The fallback is the point: an offline map is a large download that most
 /// people will not have made, and a preparedness app whose map is blank
 /// until they do would be worse than one that simply needs a connection.
+///
+/// The user can also send it to the network with an archive open, which
+/// is what [mapSourceProvider] carries: an extract ends at the edge of
+/// what was downloaded, and looking past that edge should not mean
+/// forgetting the archive to do it.
 class BaseMapLayer extends ConsumerWidget {
   const BaseMapLayer({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final archive = ref.watch(offlineMapProvider).value?.archive;
+    final archive = usesOfflineMap(ref)
+        ? ref.watch(offlineMapProvider).value?.archive
+        : null;
 
     if (archive != null) {
       return VectorTileLayer(
@@ -38,6 +46,17 @@ class BaseMapLayer extends ConsumerWidget {
   }
 }
 
+/// Whether the map is currently drawing from the archive.
+///
+/// One reading of the two providers, in one place: the layer needs it to
+/// pick a source, the attribution to name it, and the map screen to say
+/// so — and all three saying something different would be worse than any
+/// one of them being wrong.
+bool usesOfflineMap(WidgetRef ref) {
+  if (ref.watch(mapSourceProvider) == MapSourcePreference.online) return false;
+  return ref.watch(offlineMapProvider).value?.isReady ?? false;
+}
+
 /// Credit for whichever map is actually being shown.
 ///
 /// Both sources ask for it in their terms, and they are not the same
@@ -50,7 +69,7 @@ class BaseMapAttribution extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final offline = ref.watch(offlineMapProvider).value?.isReady ?? false;
+    final offline = usesOfflineMap(ref);
 
     return RichAttributionWidget(
       attributions: [
