@@ -147,17 +147,41 @@ class FileByteRangeSource implements ByteRangeSource {
 
   final RandomAccessFile _handle;
 
+  /// The read in flight, if any.
+  ///
+  /// Reads have to be taken one at a time. `dart:io` refuses a second
+  /// asynchronous operation on a handle while one is pending, and a seek
+  /// followed by a read is two of them — so without this queue every
+  /// caller but the first gets `FileSystemException: An async operation
+  /// is currently pending`. That is not a rare collision: the map
+  /// renderer asks for a dozen tiles at once, and an article pulls its
+  /// HTML, its stylesheet and its images together. One would arrive and
+  /// the rest would fail.
+  ///
+  /// The two native sources do the same thing on their side of the
+  /// channel — a single-threaded executor on Android, a serial queue on
+  /// iOS — which is why this only ever went wrong on the desktop.
+  Future<void> _pending = Future.value();
+
   static Future<FileByteRangeSource> open(File file) async =>
       FileByteRangeSource._(await file.open());
 
   @override
-  Future<Uint8List> read(int offset, int length) async {
-    await _handle.setPosition(offset);
-    return _handle.read(length);
+  Future<Uint8List> read(int offset, int length) {
+    final result = _pending.then((_) async {
+      await _handle.setPosition(offset);
+      return _handle.read(length);
+    });
+    // The queue swallows what it hands on, or one failed read would fail
+    // every read waiting behind it.
+    _pending = result.then((_) {}, onError: (_) {});
+    return result;
   }
 
+  /// Closes once the reads already queued have finished — closing under
+  /// them would turn a tidy shutdown into a handful of exceptions.
   @override
-  Future<void> close() => _handle.close();
+  Future<void> close() => _pending.then((_) => _handle.close());
 }
 
 class PmTilesException implements Exception {

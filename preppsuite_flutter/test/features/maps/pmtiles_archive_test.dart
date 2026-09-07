@@ -201,4 +201,73 @@ void main() {
       );
     });
   });
+
+  /// The map renderer asks for a screenful of tiles at once and the
+  /// article view for a page's HTML, stylesheet and images together.
+  /// Before the source queued its reads, `dart:io` refused every one of
+  /// them but the first — the offline map drew a single tile and an
+  /// article came up blank.
+  group('reads that overlap', () {
+    late Directory workspace;
+
+    setUp(() {
+      workspace = Directory.systemTemp.createTempSync('preppsuite-parallel');
+    });
+
+    tearDown(() => workspace.deleteSync(recursive: true));
+
+    test('the source answers every one of them, and correctly', () async {
+      final file = File('${workspace.path}/bytes.bin')
+        ..writeAsBytesSync(
+          Uint8List.fromList([for (var i = 0; i < 256; i++) i]),
+        );
+      final source = await FileByteRangeSource.open(file);
+      addTearDown(source.close);
+
+      final reads = await Future.wait([
+        for (var offset = 0; offset < 256; offset += 16) source.read(offset, 4),
+      ]);
+
+      // Each read starts where the byte equals the offset, so a read that
+      // was served from another one's position is visible in the value.
+      for (var i = 0; i < reads.length; i++) {
+        expect(reads[i], [i * 16, i * 16 + 1, i * 16 + 2, i * 16 + 3]);
+      }
+    });
+
+    test('a whole screenful of tiles comes back', () async {
+      final tiles = {
+        for (var x = 0; x < 8; x++)
+          for (var y = 0; y < 8; y++) (3, x, y): 'tile $x/$y',
+      };
+      final file = File('${workspace.path}/many.pmtiles')
+        ..writeAsBytesSync(buildArchive(minZoom: 3, maxZoom: 3, tiles: tiles));
+      final archive = await PmTilesArchive.open(
+        await FileByteRangeSource.open(file),
+      );
+      addTearDown(archive.close);
+
+      final fetched = await Future.wait([
+        for (final (z, x, y) in tiles.keys) archive.tile(z, x, y),
+      ]);
+
+      expect(
+        fetched.map((bytes) => utf8.decode(bytes!)),
+        containsAll(tiles.values),
+      );
+    });
+
+    test('one failed read does not take the queue with it', () async {
+      final file = File('${workspace.path}/short.bin')
+        ..writeAsBytesSync(Uint8List.fromList([1, 2, 3, 4]));
+      final source = await FileByteRangeSource.open(file);
+      addTearDown(source.close);
+
+      final failing = source.read(-1, 4);
+      final following = source.read(0, 4);
+
+      await expectLater(failing, throwsA(isA<Object>()));
+      expect(await following, [1, 2, 3, 4]);
+    });
+  });
 }

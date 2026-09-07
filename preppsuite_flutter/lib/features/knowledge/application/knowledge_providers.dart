@@ -113,19 +113,25 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
 
   Future<KnowledgeState> _open(String location, String label) async {
     ZimArchive? archive;
+    ZimHttpServer? server;
     try {
       // Same reader as the map archive: a file that is never copied, read
       // in ranges, and on Android reached through the Storage Access
       // Framework rather than as a path.
       archive = await ZimArchive.open(await openMapArchive(location));
+      // Held in locals rather than built inline in the state, so that a
+      // failure after the server is listening still has something to
+      // close it by. A rejected archive used to leave its port bound.
+      server = await ZimHttpServer.start(archive);
 
       return KnowledgeState(
         label: label,
         archive: archive,
-        server: await ZimHttpServer.start(archive),
+        server: server,
         title: await archive.metadata('Title'),
       );
     } on Object {
+      await server?.close();
       await archive?.close();
       return KnowledgeState(
         label: label,
