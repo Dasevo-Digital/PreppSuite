@@ -712,7 +712,7 @@
   },
   "knowledgeSearchPrompt": "Type a beginning to search.",
   "knowledgeSuggestionsTitle": "Where to start",
-  "knowledgeSuggestionsBody": "PreppSuite keeps one archive open at a time. You can change it whenever you like — the files stay where they are.",
+  "knowledgeSuggestionsBody": "You can keep several archives side by side and switch with one tap. The files stay where they are.",
   "knowledgeSuggestionWikibooks": "Textbooks, including a full secondary-school maths course.",
   "knowledgeSuggestionKlexikon": "An encyclopedia written for primary-school children.",
   "knowledgeSuggestionPhet": "Interactive physics, chemistry and maths experiments.",
@@ -721,6 +721,17 @@
   "knowledgeSuggestionMedicine": "Wikipedia's medical articles alone, at a fraction of the size.",
   "knowledgeSuggestionIfixit": "Repair instructions for appliances and electronics, with pictures.",
   "knowledgeSuggestionKhan": "The school curriculum end to end — English only, no German archive exists.",
+  "knowledgeAddAction": "Add another archive",
+  "knowledgeRemoveAction": "Remove this archive",
+  "knowledgeLibraryLabel": "Archives on this device",
+  "knowledgeSwitchFailed": "{name} cannot be opened. The file may have moved.",
+  "@knowledgeSwitchFailed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "knowledgeErrorUnreadable": "The file cannot be read. A ZIM archive is expected, of the kind Kiwix publishes.",
   "knowledgeArticleUnsupported": "Articles cannot be shown on this platform — the browser component is missing. Searching works, reading does not.",
   "knowledgeArticleNoEngine": "The system's browser component is missing. On Linux that is WebKitGTK (package libwebkit2gtk-4.1), on Windows the WebView2 runtime.",

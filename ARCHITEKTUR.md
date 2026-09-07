@@ -288,7 +288,10 @@ OpenStreetMap's raster tiles when no archive is configured.
 
 `features/knowledge/` is the offline encyclopedia: a hand-written ZIM
 reader, a loopback HTTP server in front of it, and a WebView pointed at
-that. The server is what makes links, images and stylesheets inside an
+that. Several archives stay registered and one is open at a time, so the
+reader, the server and the full-text index all belong to whichever that
+is — the index is a database file named after the archive's id, which is
+what lets switching keep it. The server is what makes links, images and stylesheets inside an
 article resolve without any code — they come back to the same origin. It
 is also what makes the platform split cheap: `articleViewer` picks an
 embedded panel where `webview_flutter` reaches an engine and a window of

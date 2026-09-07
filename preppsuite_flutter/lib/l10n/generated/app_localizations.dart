@@ -2387,7 +2387,7 @@ abstract class AppLocalizations {
   /// No description provided for @knowledgeSuggestionsBody.
   ///
   /// In en, this message translates to:
-  /// **'PreppSuite keeps one archive open at a time. You can change it whenever you like — the files stay where they are.'**
+  /// **'You can keep several archives side by side and switch with one tap. The files stay where they are.'**
   String get knowledgeSuggestionsBody;
 
   /// No description provided for @knowledgeSuggestionWikibooks.
@@ -2437,6 +2437,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The school curriculum end to end — English only, no German archive exists.'**
   String get knowledgeSuggestionKhan;
+
+  /// No description provided for @knowledgeAddAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another archive'**
+  String get knowledgeAddAction;
+
+  /// No description provided for @knowledgeRemoveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this archive'**
+  String get knowledgeRemoveAction;
+
+  /// No description provided for @knowledgeLibraryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Archives on this device'**
+  String get knowledgeLibraryLabel;
+
+  /// No description provided for @knowledgeSwitchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} cannot be opened. The file may have moved.'**
+  String knowledgeSwitchFailed(String name);
 
   /// No description provided for @knowledgeErrorUnreadable.
   ///

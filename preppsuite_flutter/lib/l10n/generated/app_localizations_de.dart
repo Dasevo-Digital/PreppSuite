@@ -1346,7 +1346,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get knowledgeSuggestionsBody =>
-      'PreppSuite hat ein Archiv zur Zeit geöffnet. Wechseln kannst du jederzeit — die Dateien bleiben, wo sie sind.';
+      'Du kannst mehrere Archive nebeneinander behalten und mit einem Tipp wechseln. Die Dateien bleiben, wo sie sind.';
 
   @override
   String get knowledgeSuggestionWikibooks =>
@@ -1378,6 +1378,20 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get knowledgeSuggestionKhan =>
       'Der Schulstoff von vorn bis hinten — nur auf Englisch, ein deutsches Archiv gibt es nicht.';
+
+  @override
+  String get knowledgeAddAction => 'Weiteres Archiv hinzufügen';
+
+  @override
+  String get knowledgeRemoveAction => 'Dieses Archiv entfernen';
+
+  @override
+  String get knowledgeLibraryLabel => 'Archive auf diesem Gerät';
+
+  @override
+  String knowledgeSwitchFailed(String name) {
+    return '$name lässt sich nicht öffnen. Vielleicht ist die Datei verschoben worden.';
+  }
 
   @override
   String get knowledgeErrorUnreadable =>

@@ -1335,7 +1335,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeSuggestionsBody =>
-      'PreppSuite keeps one archive open at a time. You can change it whenever you like — the files stay where they are.';
+      'You can keep several archives side by side and switch with one tap. The files stay where they are.';
 
   @override
   String get knowledgeSuggestionWikibooks =>
@@ -1367,6 +1367,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get knowledgeSuggestionKhan =>
       'The school curriculum end to end — English only, no German archive exists.';
+
+  @override
+  String get knowledgeAddAction => 'Add another archive';
+
+  @override
+  String get knowledgeRemoveAction => 'Remove this archive';
+
+  @override
+  String get knowledgeLibraryLabel => 'Archives on this device';
+
+  @override
+  String knowledgeSwitchFailed(String name) {
+    return '$name cannot be opened. The file may have moved.';
+  }
 
   @override
   String get knowledgeErrorUnreadable =>

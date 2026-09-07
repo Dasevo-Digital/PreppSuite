@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'zim_store.dart' show legacyArchiveId;
 
 part 'knowledge_index_database.g.dart';
 
@@ -15,9 +20,39 @@ part 'knowledge_index_database.g.dart';
 /// whole schema.
 @DriftDatabase(tables: [])
 class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
-  KnowledgeIndexDatabase() : super(driftDatabase(name: 'preppsuite_knowledge'));
+  KnowledgeIndexDatabase(String archiveId)
+    : super(driftDatabase(name: fileNameFor(archiveId)));
 
   KnowledgeIndexDatabase.forTesting(super.executor);
+
+  /// One file per archive, so switching between them keeps both indexes.
+  ///
+  /// The archive carried over from the single-archive version is the
+  /// exception: its index is already on disk under the unsuffixed name,
+  /// and rebuilding one over a whole encyclopedia is hours. It keeps the
+  /// name it has.
+  static String fileNameFor(String archiveId) => archiveId == legacyArchiveId
+      ? 'preppsuite_knowledge'
+      : 'preppsuite_knowledge_$archiveId';
+
+  /// Deletes the index belonging to [archiveId], for an archive that has
+  /// been taken out of the library.
+  ///
+  /// The file rather than the contents: nothing will ever reach this index
+  /// again, and it is the largest thing the app writes. `drift_flutter`
+  /// puts it in the documents directory under the name above; the two
+  /// journal files beside it go with it.
+  static Future<void> deleteFor(String archiveId) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final base =
+        '${directory.path}${Platform.pathSeparator}'
+        '${fileNameFor(archiveId)}.sqlite';
+
+    for (final path in [base, '$base-wal', '$base-shm']) {
+      final file = File(path);
+      if (await file.exists()) await file.delete();
+    }
+  }
 
   @override
   int get schemaVersion => 1;

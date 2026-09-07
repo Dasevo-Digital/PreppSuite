@@ -7,6 +7,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/article_viewer.dart';
 import '../application/knowledge_providers.dart';
+import '../application/zim_store.dart';
 import '../application/recommended_archives.dart';
 import '../application/zim_archive.dart';
 import '../../downloads/presentation/download_banner.dart';
@@ -64,9 +65,8 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
             PopupMenuButton<_ArchiveAction>(
               onSelected: (action) => switch (action) {
                 _ArchiveAction.download => _openLibrary(),
-                _ArchiveAction.change => _choose(l10n),
-                _ArchiveAction.forget =>
-                  ref.read(knowledgeProvider.notifier).forget(),
+                _ArchiveAction.add => _choose(l10n),
+                _ArchiveAction.remove => _remove(async.value),
               },
               itemBuilder: (context) => [
                 PopupMenuItem(
@@ -74,12 +74,12 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                   child: Text(l10n.knowledgeDownloadAction),
                 ),
                 PopupMenuItem(
-                  value: _ArchiveAction.change,
-                  child: Text(l10n.knowledgeChangeAction),
+                  value: _ArchiveAction.add,
+                  child: Text(l10n.knowledgeAddAction),
                 ),
                 PopupMenuItem(
-                  value: _ArchiveAction.forget,
-                  child: Text(l10n.knowledgeForgetAction),
+                  value: _ArchiveAction.remove,
+                  child: Text(l10n.knowledgeRemoveAction),
                 ),
               ],
             ),
@@ -97,11 +97,21 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
 
   Widget _body(AppLocalizations l10n, KnowledgeState state) {
     if (!state.isReady) {
-      return _EmptyState(
-        state: state,
-        l10n: l10n,
-        onChoose: () => _choose(l10n),
-        onDownload: _openLibrary,
+      // The switcher stays: when one archive fails to open and others are
+      // there, getting to them is the first thing somebody wants.
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _ArchiveSwitcher(state: state, l10n: l10n),
+          Expanded(
+            child: _EmptyState(
+              state: state,
+              l10n: l10n,
+              onChoose: () => _choose(l10n),
+              onDownload: _openLibrary,
+            ),
+          ),
+        ],
       );
     }
 
@@ -109,6 +119,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const DownloadBanner(),
+        _ArchiveSwitcher(state: state, l10n: l10n),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Column(
@@ -256,6 +267,12 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     );
   }
 
+  Future<void> _remove(KnowledgeState? state) async {
+    final id = state?.selectedId;
+    if (id == null) return;
+    await ref.read(knowledgeProvider.notifier).remove(id);
+  }
+
   Future<void> _choose(AppLocalizations l10n) async {
     final picked = await pickMapArchive(dialogTitle: l10n.knowledgeTitle);
     if (picked == null) return;
@@ -271,9 +288,63 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
   }
 }
 
+/// One row of the library, so switching is a tap.
+///
+/// Hidden while there is only one archive: a chooser with a single choice
+/// is a line of clutter above every search.
+class _ArchiveSwitcher extends ConsumerWidget {
+  const _ArchiveSwitcher({required this.state, required this.l10n});
+
+  final KnowledgeState state;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (state.library.length < 2) return const SizedBox.shrink();
+
+    return SizedBox(
+      height: 48,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        children: [
+          for (final archive in state.library)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                label: Text(archive.label),
+                selected: archive.id == state.selectedId,
+                onSelected: (_) => _switch(context, ref, archive),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _switch(
+    BuildContext context,
+    WidgetRef ref,
+    StoredArchive archive,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final problem = await ref
+        .read(knowledgeProvider.notifier)
+        .select(archive.id);
+    if (problem == null) return;
+
+    // The entry stays in the library — an unplugged disk comes back — so
+    // the failure has to be said out loud rather than left to a chip that
+    // silently refuses to become selected.
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.knowledgeSwitchFailed(archive.label))),
+    );
+  }
+}
+
 enum _SearchMode { titles, fullText }
 
-enum _ArchiveAction { download, change, forget }
+enum _ArchiveAction { download, add, remove }
 
 /// Sits under the results when the index is not finished.
 class _PartialIndexNote extends ConsumerWidget {

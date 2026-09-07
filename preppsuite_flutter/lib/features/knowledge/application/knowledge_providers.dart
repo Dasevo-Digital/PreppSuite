@@ -17,15 +17,24 @@ enum KnowledgeProblem {
 
 class KnowledgeState {
   const KnowledgeState({
-    this.label,
+    this.library = const [],
+    this.selectedId,
     this.archive,
     this.server,
     this.title,
     this.problem,
   });
 
-  /// What to call the chosen file.
-  final String? label;
+  /// Every archive the device knows about, in the order they were added.
+  ///
+  /// They stay registered; only one is open at a time. Opening a ZIM costs
+  /// a header and a mime list — switching is a moment — but each open one
+  /// holds a file handle and a listening port, and a library is meant to
+  /// be allowed to grow.
+  final List<StoredArchive> library;
+
+  /// Which entry of [library] is open, if any.
+  final String? selectedId;
 
   final ZimArchive? archive;
 
@@ -38,9 +47,20 @@ class KnowledgeState {
 
   final KnowledgeProblem? problem;
 
+  StoredArchive? get selected {
+    for (final archive in library) {
+      if (archive.id == selectedId) return archive;
+    }
+    return null;
+  }
+
+  /// What to call the open file.
+  String? get label => selected?.label;
+
   bool get isReady => archive != null && server != null;
 
-  bool get isConfigured => label != null;
+  /// Whether anything has been added, whether or not it opens.
+  bool get isConfigured => library.isNotEmpty;
 
   /// Identifies the archive an index was built from.
   ///
@@ -50,14 +70,18 @@ class KnowledgeState {
   /// never used against the wrong file.
   String? get fingerprint {
     final header = archive?.header;
-    if (header == null || label == null) return null;
-    return '$label|${header.entryCount}|${header.clusterCount}';
+    final name = label;
+    if (header == null || name == null) return null;
+    return '$name|${header.entryCount}|${header.clusterCount}';
   }
 }
 
 class KnowledgeController extends AsyncNotifier<KnowledgeState> {
   static const _store = ZimStore();
 
+  /// The archive currently open, held here rather than read back out of
+  /// [state] so that closing it does not depend on the state still being
+  /// readable.
   ZimArchive? _currentArchive;
   ZimHttpServer? _currentServer;
 
@@ -65,25 +89,155 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
   Future<KnowledgeState> build() async {
     ref.onDispose(_closeCurrent);
 
-    final stored = await _store.archive();
-    if (stored == null) return const KnowledgeState();
+    final stored = await _store.library();
+    if (stored.archives.isEmpty) return const KnowledgeState();
 
-    final opened = await _open(stored.location, stored.label);
+    // A selection that names nothing falls back to the first entry rather
+    // than opening a library with nothing in it.
+    final wanted = stored.archives.firstWhere(
+      (archive) => archive.id == stored.selectedId,
+      orElse: () => stored.archives.first,
+    );
+
+    final opened = await _open(stored.archives, wanted);
     _currentArchive = opened.archive;
     _currentServer = opened.server;
     return opened;
   }
 
-  /// Takes the archive at [location] into use, or explains why it cannot
-  /// be. A rejected file leaves a working archive exactly where it was.
+  /// Adds the archive at [location] to the library and opens it, or
+  /// explains why it cannot be opened.
+  ///
+  /// A rejected file leaves the library and the open archive exactly where
+  /// they were — trying a second archive and failing should not cost the
+  /// first one. Adding a file that is already in the library re-opens that
+  /// entry rather than making a second one, so a download that is started
+  /// twice does not show up twice.
   Future<KnowledgeProblem?> useArchive({
     required String location,
     required String label,
   }) async {
-    final opened = await _open(location, label);
-    if (opened.problem != null) return opened.problem;
+    final current = state.value ?? const KnowledgeState();
 
-    await _store.save(location: location, label: label);
+    final existing = _entryAt(current.library, location);
+    final entry =
+        existing ??
+        StoredArchive(id: ZimStore.newId(), location: location, label: label);
+
+    final library = existing == null
+        ? [...current.library, entry]
+        : current.library;
+
+    return _switchTo(library, entry);
+  }
+
+  /// Opens an archive that is already in the library.
+  Future<KnowledgeProblem?> select(String id) async {
+    final current = state.value ?? const KnowledgeState();
+    if (id == current.selectedId && current.isReady) return null;
+
+    for (final entry in current.library) {
+      if (entry.id == id) return _switchTo(current.library, entry);
+    }
+    return null;
+  }
+
+  /// The entry pointing at [location], or null.
+  static StoredArchive? _entryAt(
+    List<StoredArchive> library,
+    String location,
+  ) {
+    for (final archive in library) {
+      if (archive.location == location) return archive;
+    }
+    return null;
+  }
+
+  /// Takes an archive out of the library. The file itself is left alone —
+  /// the app never owned it.
+  ///
+  /// Its full-text index is dropped, because nothing would ever reach it
+  /// again and it is the largest thing the app writes.
+  Future<void> remove(String id) async {
+    final current = state.value ?? const KnowledgeState();
+    final library = [
+      for (final archive in current.library)
+        if (archive.id != id) archive,
+    ];
+    if (library.length == current.library.length) return;
+
+    unawaited(_discardIndexFor(id));
+
+    if (library.isEmpty) {
+      await _store.save(const [], selectedId: null);
+      _closeCurrent();
+      state = const AsyncData(KnowledgeState());
+      return;
+    }
+
+    // Removing the open one moves to whatever is left; removing another
+    // leaves the open one alone.
+    if (id != current.selectedId) {
+      await _store.save(library, selectedId: current.selectedId);
+      state = AsyncData(
+        KnowledgeState(
+          library: library,
+          selectedId: current.selectedId,
+          archive: current.archive,
+          server: current.server,
+          title: current.title,
+          problem: current.problem,
+        ),
+      );
+      return;
+    }
+
+    await _switchTo(library, library.first);
+  }
+
+  /// Removes every archive from the library.
+  Future<void> forget() async {
+    for (final archive in state.value?.library ?? const <StoredArchive>[]) {
+      unawaited(_discardIndexFor(archive.id));
+    }
+    await _store.save(const [], selectedId: null);
+    _closeCurrent();
+    state = const AsyncData(KnowledgeState());
+  }
+
+  /// Opens [entry], and only on success writes the library and swaps the
+  /// open archive for it.
+  Future<KnowledgeProblem?> _switchTo(
+    List<StoredArchive> library,
+    StoredArchive entry,
+  ) async {
+    final before = state.value ?? const KnowledgeState();
+    final known = before.library.any((archive) => archive.id == entry.id);
+
+    final opened = await _open(library, entry);
+    if (opened.problem != null) {
+      // A file being added for the first time is simply refused. One that
+      // was already in the library stays in it — an unplugged disk comes
+      // back, and the alternative is making the user find the file again —
+      // but the archive that is open stays open, and the problem is
+      // reported so the screen can say what happened.
+      if (!known) return opened.problem;
+
+      await _store.save(library, selectedId: before.selectedId);
+      state = AsyncData(
+        KnowledgeState(
+          library: library,
+          selectedId: before.selectedId,
+          archive: before.archive,
+          server: before.server,
+          title: before.title,
+          problem: opened.problem,
+        ),
+      );
+      return opened.problem;
+    }
+
+    await _store.save(library, selectedId: entry.id);
 
     final previousArchive = _currentArchive;
     final previousServer = _currentServer;
@@ -96,10 +250,14 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     return null;
   }
 
-  Future<void> forget() async {
-    await _store.clear();
-    _closeCurrent();
-    state = const AsyncData(KnowledgeState());
+  Future<void> _discardIndexFor(String id) async {
+    try {
+      await KnowledgeIndexDatabase.deleteFor(id);
+    } on Object {
+      // An index that cannot be deleted is one nothing reaches anyway.
+      // This runs unawaited, so an error escaping here would surface far
+      // from anything the user did.
+    }
   }
 
   void _closeCurrent() {
@@ -111,21 +269,25 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     if (archive != null) unawaited(archive.close());
   }
 
-  Future<KnowledgeState> _open(String location, String label) async {
+  Future<KnowledgeState> _open(
+    List<StoredArchive> library,
+    StoredArchive entry,
+  ) async {
     ZimArchive? archive;
     ZimHttpServer? server;
     try {
       // Same reader as the map archive: a file that is never copied, read
       // in ranges, and on Android reached through the Storage Access
       // Framework rather than as a path.
-      archive = await ZimArchive.open(await openMapArchive(location));
+      archive = await ZimArchive.open(await openMapArchive(entry.location));
       // Held in locals rather than built inline in the state, so that a
       // failure after the server is listening still has something to
       // close it by. A rejected archive used to leave its port bound.
       server = await ZimHttpServer.start(archive);
 
       return KnowledgeState(
-        label: label,
+        library: library,
+        selectedId: entry.id,
         archive: archive,
         server: server,
         title: await archive.metadata('Title'),
@@ -134,16 +296,28 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
       await server?.close();
       await archive?.close();
       return KnowledgeState(
-        label: label,
+        library: library,
+        selectedId: entry.id,
         problem: KnowledgeProblem.unreadable,
       );
     }
   }
 }
 
-/// The full-text index, opened once and closed with the app.
-final knowledgeIndexDatabaseProvider = Provider<KnowledgeIndexDatabase>((ref) {
-  final database = KnowledgeIndexDatabase();
+/// The full-text index of whichever archive is open, or null when none
+/// is.
+///
+/// One database file per archive, named after its id. Before that they
+/// shared one file and switching threw the index away — which was fine
+/// while there was one archive and is not fine now that switching is the
+/// point.
+final knowledgeIndexDatabaseProvider = Provider<KnowledgeIndexDatabase?>((ref) {
+  final id = ref.watch(
+    knowledgeProvider.select((state) => state.value?.selectedId),
+  );
+  if (id == null) return null;
+
+  final database = KnowledgeIndexDatabase(id);
   ref.onDispose(database.close);
   return database;
 });
@@ -209,7 +383,7 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
     if (fingerprint == null) return const KnowledgeIndexState();
 
     final index = ref.watch(knowledgeIndexDatabaseProvider);
-    if (await index.indexedArchive() != fingerprint) {
+    if (index == null || await index.indexedArchive() != fingerprint) {
       return const KnowledgeIndexState();
     }
 
@@ -227,7 +401,10 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
     final archive = ref.read(knowledgeProvider).value?.archive;
     if (archive == null) return null;
 
-    final plan = await _indexerFor(archive).plan();
+    final indexer = _indexerFor(archive);
+    if (indexer == null) return null;
+
+    final plan = await indexer.plan();
     state = AsyncData(
       (state.value ?? const KnowledgeIndexState()).copyWith(
         articleCount: plan.articleCount,
@@ -245,6 +422,7 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
 
     _cancelled = false;
     final indexer = _indexerFor(archive);
+    if (indexer == null) return;
 
     void report(IndexProgress progress) {
       if (!ref.mounted) return;
@@ -288,15 +466,18 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
 
   Future<void> discard() async {
     _cancelled = true;
-    await ref.read(knowledgeIndexDatabaseProvider).discard();
+    await ref.read(knowledgeIndexDatabaseProvider)?.discard();
     if (!ref.mounted) return;
     state = const AsyncData(KnowledgeIndexState());
   }
 
-  KnowledgeIndexer _indexerFor(ZimArchive archive) => KnowledgeIndexer(
-    archive: archive,
-    index: ref.read(knowledgeIndexDatabaseProvider),
-  );
+  /// Null when no archive is open, which is also when there is nothing to
+  /// index.
+  KnowledgeIndexer? _indexerFor(ZimArchive archive) {
+    final index = ref.read(knowledgeIndexDatabaseProvider);
+    if (index == null) return null;
+    return KnowledgeIndexer(archive: archive, index: index);
+  }
 }
 
 final knowledgeIndexProvider =
@@ -313,6 +494,8 @@ final knowledgeFullTextProvider = FutureProvider.autoDispose
       if (query.trim().isEmpty) return const [];
 
       final index = ref.watch(knowledgeIndexDatabaseProvider);
+      if (index == null) return const [];
+
       return [
         for (final entryIndex in await index.search(query.trim()))
           await archive.entryAt(entryIndex),

@@ -64,8 +64,25 @@ Diese Liste steht auch in der App, auf der leeren Wissen-Seite: jeder
 Eintrag öffnet die Bibliothek auf der passenden Suche, weil die
 Dateinamen ein Datum tragen und sich alle paar Monate ändern.
 
-**Ein Archiv zur Zeit.** PreppSuite hält genau ein ZIM offen; wechseln
-geht jederzeit, gleichzeitig geht nicht.
+### Mehrere Archive nebeneinander
+
+Die Archive bleiben alle eingetragen. Über der Suche steht eine Reihe von
+Schaltern, einer je Archiv; ein Tipp wechselt. Geöffnet ist immer genau
+eines — ein ZIM offenzuhalten kostet einen Dateigriff und einen Port, und
+die Bibliothek soll wachsen dürfen. Das Umschalten selbst ist ein Moment:
+gelesen werden dabei nur Kopf und Mime-Liste.
+
+Der Volltextindex, den die App selbst baut, gehört jeweils zu einem
+Archiv und liegt in einer eigenen Datei, `preppsuite_knowledge_<id>`.
+Umschalten wirft ihn also nicht mehr weg. Nimmt man ein Archiv aus der
+Bibliothek, wird seine Indexdatei gelöscht — sie ist das Größte, was die
+App überhaupt schreibt.
+
+Das Archiv aus der Zeit vor der Bibliothek behält seinen Index unter dem
+alten Namen `preppsuite_knowledge`: über einer ganzen Enzyklopädie neu zu
+indizieren sind Stunden.
+
+**Gesucht wird im geöffneten Archiv**, nicht über alle hinweg.
 
 Es muss nicht Wikipedia sein. Jede ZIM-Datei geht, auch selbst gebaute:
 [`zimwriterfs`](https://github.com/openzim/zim-tools) macht aus einem
