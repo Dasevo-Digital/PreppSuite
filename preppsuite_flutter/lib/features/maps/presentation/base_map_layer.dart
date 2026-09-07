@@ -36,6 +36,25 @@ class BaseMapLayer extends ConsumerWidget {
         tileProviders: TileProviders({
           'openmaptiles': PmTilesVectorTileProvider(archive),
         }),
+        // Measured on a real 1.5 GB German extract: a tile is 60-400 KB
+        // around zoom 10-14 and 0.5-1.5 MB below zoom 5, where one tile
+        // carries a continent. The default 10 MB of raw tiles holds about
+        // a dozen of the small ones and fewer than ten of the large, so
+        // panning one window width throws away everything just left
+        // behind — and every tile coming back has to be read and parsed
+        // again. That is what makes an offline map feel like dragging a
+        // picture around.
+        memoryTileCacheMaxSize: 48 * 1024 * 1024,
+        // The parsed tiles, which are the expensive ones. A desktop
+        // window at 512-pixel tiles holds a dozen to twenty at once; the
+        // default of 20 means the cache is full before anything has been
+        // panned at all.
+        memoryTileDataCacheMaxSize: 80,
+        // Show a coarser tile rather than nothing while the right one is
+        // still being read — and where there is no right one at all. A
+        // staggered download deliberately stops at a shallower zoom
+        // outside the chosen region, and 3 is the most the library allows.
+        maximumTileSubstitutionDifference: 3,
       );
     }
 

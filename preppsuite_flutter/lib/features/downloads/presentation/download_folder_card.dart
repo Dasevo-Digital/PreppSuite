@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/platform_storage.dart';
@@ -56,7 +57,7 @@ class DownloadFolderCard extends ConsumerWidget {
                       child: Text(l10n.downloadFolderReset),
                     ),
                     FilledButton.tonalIcon(
-                      onPressed: () => _choose(ref),
+                      onPressed: () => _choose(context, ref),
                       icon: const Icon(Icons.folder_open),
                       label: Text(l10n.downloadFolderChange),
                     ),
@@ -69,7 +70,7 @@ class DownloadFolderCard extends ConsumerWidget {
     );
   }
 
-  Future<void> _choose(WidgetRef ref) async {
+  Future<void> _choose(BuildContext context, WidgetRef ref) async {
     final String path;
     String? handle;
 
@@ -77,10 +78,24 @@ class DownloadFolderCard extends ConsumerWidget {
       // The panel and the bookmark have to happen in one native call:
       // the permission hangs on the URL the panel hands back, not on its
       // path, and a path passed through Dart has already lost it.
-      final picked = await nativeStorageChannel.invokeMapMethod<String, String>(
-        'pick',
-        {'dialogTitle': l10n.downloadFolderTitle},
-      );
+      final Map<String, String>? picked;
+      try {
+        picked = await nativeStorageChannel.invokeMapMethod<String, String>(
+          'pick',
+          {'dialogTitle': l10n.downloadFolderTitle},
+        );
+      } on PlatformException catch (error) {
+        // A folder the sandbox will not hand over permanently. Saying so
+        // beats a button that closes a panel and changes nothing.
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.errorGeneric(error.message ?? error.code)),
+            ),
+          );
+        }
+        return;
+      }
       final chosen = picked?['path'];
       if (chosen == null) return;
       path = chosen;

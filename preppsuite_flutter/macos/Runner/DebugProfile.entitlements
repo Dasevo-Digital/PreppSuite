@@ -10,6 +10,12 @@
 	<true/>
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
+
+	<!-- Apple documents this as the requirement for creating app-scoped
+	     security-scoped bookmarks — the ones that survive a restart, which
+	     is the entire point of picking a folder here. -->
+	<key>com.apple.security.files.bookmarks.app-scope</key>
+	<true/>
 	<key>com.apple.security.files.downloads.read-write</key>
 	<true/>
 	<key>com.apple.security.network.client</key>

@@ -69,7 +69,10 @@ final class StorageBridge: NSObject {
     }
   }
 
-  @discardableResult
+  /// Deliberately NOT @discardableResult: the returned bridge must be
+  /// held by the caller. The handler below captures it weakly, so a
+  /// discarded result is deallocated immediately and every call is
+  /// dropped without a trace — which is exactly what happened once.
   static func register(with registrar: FlutterPluginRegistrar) -> StorageBridge {
     let bridge = StorageBridge(messenger: registrar.messenger)
     bridge.channel.setMethodCallHandler { [weak bridge] call, result in
@@ -139,10 +142,25 @@ final class StorageBridge: NSObject {
 
       panel.begin { response in
         guard response == .OK, let url = panel.url else {
+          // Cancelled. Told apart from a failure below, because the two
+          // look identical from Dart and only one of them is a bug.
           result(nil)
           return
         }
-        result(self.remember(url))
+        do {
+          result(try self.remember(url))
+        } catch {
+          // Silence here is what makes this impossible to diagnose: the
+          // panel closes, nothing changes, and nobody learns why. The
+          // Dart side turns this into a message on screen.
+          NSLog("PreppSuite: bookmark for %@ failed: %@",
+                url.path, String(describing: error))
+          result(FlutterError(
+            code: "bookmark-failed",
+            message: String(describing: error),
+            details: url.path
+          ))
+        }
       }
     }
   }
@@ -152,12 +170,12 @@ final class StorageBridge: NSObject {
   /// Made here and now, while the URL is the one the panel handed over:
   /// that object carries the permission, and nothing reconstructed from
   /// its path does.
-  private func remember(_ url: URL) -> [String: String]? {
-    guard let data = try? url.bookmarkData(
+  private func remember(_ url: URL) throws -> [String: String] {
+    let data = try url.bookmarkData(
       options: .withSecurityScope,
       includingResourceValuesForKeys: nil,
       relativeTo: nil
-    ) else { return nil }
+    )
 
     let identifier = UUID().uuidString
     var store = UserDefaults.standard.dictionary(forKey: Self.bookmarksKey) as? [String: Data] ?? [:]

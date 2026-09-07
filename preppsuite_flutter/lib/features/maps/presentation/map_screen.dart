@@ -10,6 +10,7 @@ import 'base_map_layer.dart';
 import 'map_download_screen.dart';
 import 'map_source_bar.dart';
 import 'map_zoom_buttons.dart';
+import 'swipe_zoom.dart';
 
 /// Roughly the centre of Germany, so the map opens on something before a
 /// position or a search has resolved.
@@ -131,34 +132,38 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
           ),
           Expanded(
-            child: FlutterMap(
-              mapController: _mapController,
-              options: const MapOptions(
-                initialCenter: _germanyCentre,
-                initialZoom: 5.5,
-              ),
-              children: [
-                const BaseMapLayer(),
-                if (_position case final position?)
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: position,
-                        width: 20,
-                        height: 20,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: theme.colorScheme.primary,
-                            border: Border.all(color: Colors.white, width: 2),
+            child: SwipeZoom(
+              // A Magic Mouse has no wheel; see swipe_zoom.dart.
+              controller: _mapController,
+              child: FlutterMap(
+                mapController: _mapController,
+                options: const MapOptions(
+                  initialCenter: _germanyCentre,
+                  initialZoom: 5.5,
+                ),
+                children: [
+                  const BaseMapLayer(),
+                  if (_position case final position?)
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: position,
+                          width: 20,
+                          height: 20,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: theme.colorScheme.primary,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                MapZoomButtons(controller: _mapController),
-                BaseMapAttribution(l10n: l10n),
-              ],
+                      ],
+                    ),
+                  MapZoomButtons(controller: _mapController),
+                  BaseMapAttribution(l10n: l10n),
+                ],
+              ),
             ),
           ),
           MapSourceBar(state: offlineState, l10n: l10n),

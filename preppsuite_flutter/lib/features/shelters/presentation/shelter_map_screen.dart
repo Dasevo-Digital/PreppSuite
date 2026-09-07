@@ -12,6 +12,7 @@ import '../application/geo_bounds.dart';
 import '../application/overpass_shelter_client.dart';
 import '../application/shelter_classification.dart';
 import '../application/wwbota_client.dart';
+import '../../maps/presentation/swipe_zoom.dart';
 
 /// Roughly the center of Germany — used as the map's fallback view before
 /// any location/search has resolved, so the map isn't blank.
@@ -214,54 +215,58 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
             height: 260,
             child: Stack(
               children: [
-                FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: _center ?? _germanyFallbackCenter,
-                    initialZoom: _center != null
-                        ? _zoomForRadius(_radiusKm)
-                        : 5.5,
-                  ),
-                  children: [
-                    const BaseMapLayer(),
-                    MapZoomButtons(controller: _mapController),
-                    BaseMapAttribution(l10n: l10n),
-                    MarkerLayer(
-                      markers: [
-                        if (_center != null)
-                          Marker(
-                            point: _center!,
-                            width: 20,
-                            height: 20,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: colorScheme.primary,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 2,
+                SwipeZoom(
+                  // A Magic Mouse has no wheel; see swipe_zoom.dart.
+                  controller: _mapController,
+                  child: FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter: _center ?? _germanyFallbackCenter,
+                      initialZoom: _center != null
+                          ? _zoomForRadius(_radiusKm)
+                          : 5.5,
+                    ),
+                    children: [
+                      const BaseMapLayer(),
+                      MapZoomButtons(controller: _mapController),
+                      BaseMapAttribution(l10n: l10n),
+                      MarkerLayer(
+                        markers: [
+                          if (_center != null)
+                            Marker(
+                              point: _center!,
+                              width: 20,
+                              height: 20,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: colorScheme.primary,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        for (final shelter in visibleShelters)
-                          Marker(
-                            point: LatLng(shelter.lat, shelter.lon),
-                            width: 28,
-                            height: 28,
-                            child: Tooltip(
-                              message:
-                                  '${shelter.name} · ${shelter.sourceLabel}',
-                              child: Icon(
-                                Icons.shield,
-                                color: _colorFor(shelter.confidence),
-                                size: 28,
+                          for (final shelter in visibleShelters)
+                            Marker(
+                              point: LatLng(shelter.lat, shelter.lon),
+                              width: 28,
+                              height: 28,
+                              child: Tooltip(
+                                message:
+                                    '${shelter.name} · ${shelter.sourceLabel}',
+                                child: Icon(
+                                  Icons.shield,
+                                  color: _colorFor(shelter.confidence),
+                                  size: 28,
+                                ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 if (_center == null && !_isLoading)
                   Center(

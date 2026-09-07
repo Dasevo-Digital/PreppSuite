@@ -15,6 +15,7 @@ import '../application/place_search.dart';
 import '../application/tile_source.dart';
 import 'base_map_layer.dart';
 import 'map_zoom_buttons.dart';
+import 'swipe_zoom.dart';
 
 /// Overridden in tests so the screen can be driven against captured
 /// geocoder answers instead of the live service.
@@ -295,25 +296,29 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
       body: Column(
         children: [
           Expanded(
-            child: FlutterMap(
-              mapController: _controller,
-              options: MapOptions(
-                initialCenter: const LatLng(51.16, 10.45),
-                initialZoom: 6,
-                onMapReady: _updateArea,
-                onPositionChanged: (_, hasGesture) {
-                  // Moving the map by hand means the area is whatever is
-                  // on screen again; moving it to fit a searched place
-                  // does not, which is what `hasGesture` separates.
-                  if (hasGesture) _place = null;
-                  _updateArea();
-                },
+            child: SwipeZoom(
+              // A Magic Mouse has no wheel; see swipe_zoom.dart.
+              controller: _controller,
+              child: FlutterMap(
+                mapController: _controller,
+                options: MapOptions(
+                  initialCenter: const LatLng(51.16, 10.45),
+                  initialZoom: 6,
+                  onMapReady: _updateArea,
+                  onPositionChanged: (_, hasGesture) {
+                    // Moving the map by hand means the area is whatever is
+                    // on screen again; moving it to fit a searched place
+                    // does not, which is what `hasGesture` separates.
+                    if (hasGesture) _place = null;
+                    _updateArea();
+                  },
+                ),
+                children: [
+                  const BaseMapLayer(),
+                  MapZoomButtons(controller: _controller),
+                  BaseMapAttribution(l10n: l10n),
+                ],
               ),
-              children: [
-                const BaseMapLayer(),
-                MapZoomButtons(controller: _controller),
-                BaseMapAttribution(l10n: l10n),
-              ],
             ),
           ),
           Material(
