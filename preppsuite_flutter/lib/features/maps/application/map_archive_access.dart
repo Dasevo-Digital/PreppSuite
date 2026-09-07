@@ -18,6 +18,8 @@ Future<PickedStorage?> pickMapArchive({String? dialogTitle}) async {
   if (usesNativeStoragePicker) {
     final picked = await nativeStorageChannel.invokeMapMethod<String, String>(
       'pickFile',
+      // Only the macOS panel shows it; Android and iOS ignore it.
+      {'dialogTitle': dialogTitle},
     );
     final uri = picked?['uri'];
     if (uri == null) return null;

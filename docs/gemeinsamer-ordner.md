@@ -226,14 +226,36 @@ Ein Bookmark überlebt eine Neuinstallation nicht und wird ungültig, wenn
 der Ordner verschoben oder gelöscht wird. Beides fällt bei `ensureWritable`
 auf, genau wie unter Android.
 
-**macOS** läuft ohne Sandbox. Unter der Sandbox stirbt die Freigabe eines
-gewählten Ordners mit dem Prozess; sie zu behalten geht nur über
-*security-scoped bookmarks*, was nativen Swift-Code bräuchte, denn das
-einzige Dart-Paket dafür ist auf Dart 2 stehengeblieben. Die App wird
-ohnehin direkt weitergegeben und nicht über den App Store, wo die Sandbox
-Pflicht wäre. Seit es den Swift-Code für iOS gibt, wäre der Weg zurück
-offen — nötig ist er bisher nicht. Der Eintrag steht mit Begründung in
-`macos/Runner/Release.entitlements`.
+**macOS** läuft mit Sandbox — seit 0.14.0. Vorher lief es ohne, weil die
+Freigabe eines gewählten Ordners unter der Sandbox mit dem Prozess stirbt
+und sie zu behalten nativen Swift-Code braucht; das einzige Dart-Paket
+dafür ist auf Dart 2 stehengeblieben.
+
+Genau dieser Swift-Code existiert seit der iOS-Umsetzung, und der Weg
+zurück stand in dieser Datei schon als offen vermerkt. Gegangen wurde er
+aus einem Grund, der mit dem gemeinsamen Ordner nur mittelbar zu tun hat:
+**ohne Sandbox fragte macOS nach jeder neuen Fassung erneut nach dem
+Zugriff auf Dokumente und Downloads.** Erlaubnisse hängen dort an der
+Code-Signatur, und eine ad-hoc-Signatur ist bei jedem Bau eine andere. Eine
+App in der Sandbox wird nach diesen Ordnern überhaupt nicht gefragt: sie
+bekommt, was der Nutzer im Wähler aussucht, und das Bookmark liegt im
+Container, der das Ersetzen der App überlebt.
+
+`macos/Runner/StorageBridge.swift` ist deshalb die AppKit-Entsprechung der
+iOS-Datei — dieselben Methodennamen, dasselbe `bookmark://`-Schema,
+derselbe Dart-Code darüber. Der einzige Teil, der sich nicht übernehmen
+ließ, ist der Wähler: **Auswahl und Bookmark müssen in einem einzigen
+nativen Aufruf passieren**, weil die Freigabe am `NSURL`-Objekt hängt, das
+`NSOpenPanel` zurückgibt, und nicht an dessen Pfad. Ein durch Dart
+gereichter Pfad, aus dem später wieder eine URL gebaut wird, hat sie
+verloren; `bookmarkData(.withSecurityScope)` scheitert dann. Deshalb geht
+das nicht über `file_picker`.
+
+Was der Wechsel einmalig kostet: Ein Archiv oder Ordner, der vor 0.14.0 als
+blanker Pfad gespeichert war, liegt außerhalb der Sandbox und muss einmal
+neu ausgewählt werden. Betroffen ist nur, was außerhalb von
+`~/Downloads` liegt — dieser Ordner ist per Berechtigung weiter erreichbar,
+und dort landen die Downloads der App von sich aus.
 
 **Kein Echtzeit-Abgleich.** Zwischen „ich hake etwas ab" und „die andere
 Person sieht es" liegen der Zwei-Minuten-Takt und die Laufzeit des

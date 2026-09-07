@@ -36,11 +36,11 @@ class DownloadFolderCard extends ConsumerWidget {
               _ => '…',
             }),
           ),
-          // Only where there is a folder picker worth the name. On
-          // Android and iOS the sensible place is decided by the platform
-          // and picking another one would need the storage bridge for
-          // something that is not worth the moving parts.
-          if (!usesNativeStoragePicker)
+          // Only where there is a folder picker worth the name — see
+          // supportsChosenDownloadFolder. macOS has one and also goes
+          // through the storage bridge, so this cannot be read off
+          // usesNativeStoragePicker.
+          if (supportsChosenDownloadFolder)
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
@@ -70,13 +70,31 @@ class DownloadFolderCard extends ConsumerWidget {
   }
 
   Future<void> _choose(WidgetRef ref) async {
-    final path = await FilePicker.platform.getDirectoryPath(
-      dialogTitle: l10n.downloadFolderTitle,
-    );
-    if (path == null) return;
+    final String path;
+    String? handle;
+
+    if (usesStorageBookmarks) {
+      // The panel and the bookmark have to happen in one native call:
+      // the permission hangs on the URL the panel hands back, not on its
+      // path, and a path passed through Dart has already lost it.
+      final picked = await nativeStorageChannel.invokeMapMethod<String, String>(
+        'pick',
+        {'dialogTitle': l10n.downloadFolderTitle},
+      );
+      final chosen = picked?['path'];
+      if (chosen == null) return;
+      path = chosen;
+      handle = picked?['uri'];
+    } else {
+      final chosen = await FilePicker.platform.getDirectoryPath(
+        dialogTitle: l10n.downloadFolderTitle,
+      );
+      if (chosen == null) return;
+      path = chosen;
+    }
 
     await Directory(path).create(recursive: true);
-    await const DownloadFolder().use(path);
+    await const DownloadFolder().use(path, handle: handle);
     ref.invalidate(downloadFolderProvider);
   }
 }

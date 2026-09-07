@@ -471,6 +471,36 @@ tree; the test suite deliberately targets that layer rather than the UI.
   diagnosis into it. Unlike the plan, its client ids are generated: these
   are many rows, each created on one device, so `adoptHouseholdId`
   re-stamps them the ordinary way.
+- **macOS ties every permission to the code signature, not to the bundle
+  id.** The designated requirement of an ad-hoc signed app is a `cdhash`
+  — a fingerprint of that exact binary — so every build is a different
+  app as far as TCC is concerned, and folder and location access get
+  asked for again after each update. A real signing identity is the only
+  thing that fixes it for camera and location; the sandbox is what fixes
+  it for folders. `tool/macos_sign.sh --identity <name>` takes one when
+  there is one.
+- **The macOS build runs sandboxed since 0.14.0**, with
+  `macos/Runner/StorageBridge.swift` as the AppKit twin of the iOS file —
+  same method names, same `bookmark://` scheme, same Dart above it. The
+  panel is the one part that cannot be shared: picking and writing the
+  bookmark must happen in a single native call, because the permission
+  hangs on the `NSURL` the panel returns and not on its path.
+- **Apple's automatic container migration only runs when the system
+  creates the container.** A container left over from an earlier
+  sandboxed launch makes it skip silently, and the app then starts on an
+  empty household while the real one sits outside, unreachable. That is
+  not hypothetical — it is what the development machine looked like.
+  `macos/Runner/SandboxMigration.swift` does it explicitly instead, before
+  the engine runs any Dart, because the Dart-side migration would
+  otherwise settle for the container's empty Documents folder first.
+- **`flutter build macos` puts `com.apple.security.get-task-allow` in the
+  Release bundle** — a debug entitlement that would be rejected by
+  notarization. `tool/macos_sign.sh` re-signs from `Release.entitlements`
+  and strips it, which is one more reason to run it on anything shipped.
+- **`FileHandle.read(upToCount:)` and `seek(toOffset:)` need macOS
+  10.15.4**, and the deployment target is 10.15. `StorageBridge` keeps the
+  older non-throwing pair behind an `#available` for those four point
+  releases rather than raising the minimum.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

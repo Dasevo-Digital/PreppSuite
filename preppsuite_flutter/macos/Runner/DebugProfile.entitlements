@@ -2,16 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- The sandbox is deliberately off. PreppSuite is handed out
-	     directly, not through the App Store, and it has to keep reading a
-	     folder the user picked once — a Nextcloud or Syncthing directory —
-	     on every later launch. Under the sandbox that permission dies with
-	     the process: the only way to hold on to it is a security-scoped
-	     bookmark, which needs native Swift and whose one Dart package
-	     stopped at Dart 2. See docs/gemeinsamer-ordner.md. -->
+	<!-- Same set as Release.entitlements — see the reasoning there — plus
+	     what a debug build needs of its own. -->
 	<key>com.apple.security.app-sandbox</key>
-	<false/>
+	<true/>
 	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<key>com.apple.security.files.downloads.read-write</key>
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
@@ -19,11 +18,24 @@
 	<true/>
 	<key>com.apple.security.device.camera</key>
 	<true/>
-	<key>com.apple.security.print</key>
-	<true/>
-	<key>com.apple.security.files.user-selected.read-write</key>
-	<true/>
 	<key>com.apple.security.personal-information.location</key>
 	<true/>
+	<key>com.apple.security.print</key>
+	<true/>
+
+	<!-- Only so the app can read what an unsandboxed version of itself left
+	     behind: the household database and the settings from 0.13.1 and
+	     earlier. See macos/Runner/SandboxMigration.swift. macOS migrates
+	     these two places by itself, but only when it creates the container,
+	     and a container may already exist from an earlier sandboxed launch
+	     — then it silently does nothing and the household is lost.
+
+	     These go away once no installation predating 0.14.0 is left. They
+	     grant nothing beyond this app's own two files. -->
+	<key>com.apple.security.temporary-exception.files.home-relative-path.read-only</key>
+	<array>
+		<string>/Library/Application Support/de.status403.preppsuite/</string>
+		<string>/Library/Preferences/de.status403.preppsuite.plist</string>
+	</array>
 </dict>
 </plist>
