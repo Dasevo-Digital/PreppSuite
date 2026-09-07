@@ -17,6 +17,8 @@ String localizeChecklistCategory(
     ChecklistCategory.documents => l10n.categoryDocuments,
     ChecklistCategory.evacuation => l10n.checklistCategoryEvacuation,
     ChecklistCategory.safety => l10n.checklistCategorySafety,
+    ChecklistCategory.hazards => l10n.checklistCategoryHazards,
+    ChecklistCategory.wellbeing => l10n.checklistCategoryWellbeing,
     ChecklistCategory.pets => l10n.checklistCategoryPets,
     ChecklistCategory.custom => l10n.checklistCategoryCustom,
   };
@@ -33,6 +35,8 @@ IconData checklistCategoryIcon(ChecklistCategory category) {
     ChecklistCategory.documents => Icons.description_outlined,
     ChecklistCategory.evacuation => Icons.backpack_outlined,
     ChecklistCategory.safety => Icons.local_fire_department_outlined,
+    ChecklistCategory.hazards => Icons.storm_outlined,
+    ChecklistCategory.wellbeing => Icons.psychology_outlined,
     ChecklistCategory.pets => Icons.pets_outlined,
     ChecklistCategory.custom => Icons.checklist_outlined,
   };

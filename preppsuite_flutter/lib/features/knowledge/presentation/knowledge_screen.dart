@@ -7,6 +7,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/article_viewer.dart';
 import '../application/knowledge_providers.dart';
+import '../application/recommended_archives.dart';
 import '../application/zim_archive.dart';
 import '../../downloads/presentation/download_banner.dart';
 import 'article_screen.dart';
@@ -314,7 +315,7 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Center(
+    return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
@@ -369,9 +370,53 @@ class _EmptyState extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 28),
+            _Suggestions(l10n: l10n),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// What to download first.
+///
+/// The library search is no help to somebody who does not already know
+/// that the German school maths course lives in Wikibooks. Each row opens
+/// the library on that search, in that archive's language.
+class _Suggestions extends StatelessWidget {
+  const _Suggestions({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.knowledgeSuggestionsTitle, style: theme.textTheme.titleSmall),
+        const SizedBox(height: 4),
+        Text(l10n.knowledgeSuggestionsBody, style: theme.textTheme.bodySmall),
+        const SizedBox(height: 8),
+        for (final archive in RecommendedArchive.values)
+          ListTile(
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+            title: Text(archive.name),
+            subtitle: Text(recommendedArchiveDescription(l10n, archive)),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => KiwixLibraryScreen(
+                  initialQuery: archive.query,
+                  initialLanguage: archive.language,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

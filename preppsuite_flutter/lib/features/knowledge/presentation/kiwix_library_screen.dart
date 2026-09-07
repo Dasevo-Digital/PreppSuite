@@ -23,7 +23,19 @@ final _languagesProvider = FutureProvider(
 /// which meant a browser, a mirror listing and a file manager before the
 /// feature could be used at all.
 class KiwixLibraryScreen extends ConsumerStatefulWidget {
-  const KiwixLibraryScreen({super.key});
+  const KiwixLibraryScreen({
+    super.key,
+    this.initialQuery,
+    this.initialLanguage,
+  });
+
+  /// What to search for on opening, when the screen was reached from a
+  /// suggestion rather than from the menu.
+  final String? initialQuery;
+
+  /// ISO 639-3. A suggestion names its own language, because half of them
+  /// only exist in one.
+  final String? initialLanguage;
 
   @override
   ConsumerState<KiwixLibraryScreen> createState() => _KiwixLibraryScreenState();
@@ -45,7 +57,11 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_language == null) {
-      _language = _isoThreeFor(Localizations.localeOf(context).languageCode);
+      _language =
+          widget.initialLanguage ??
+          _isoThreeFor(Localizations.localeOf(context).languageCode);
+      _query = widget.initialQuery ?? '';
+      _queryController.text = _query;
       _reload();
     }
   }

@@ -40,6 +40,8 @@ enum ChecklistCategory {
   documents,
   evacuation,
   safety,
+  hazards,
+  wellbeing,
   pets,
   custom;
 

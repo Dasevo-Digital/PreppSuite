@@ -2378,6 +2378,66 @@ abstract class AppLocalizations {
   /// **'Type a beginning to search.'**
   String get knowledgeSearchPrompt;
 
+  /// No description provided for @knowledgeSuggestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to start'**
+  String get knowledgeSuggestionsTitle;
+
+  /// No description provided for @knowledgeSuggestionsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'PreppSuite keeps one archive open at a time. You can change it whenever you like — the files stay where they are.'**
+  String get knowledgeSuggestionsBody;
+
+  /// No description provided for @knowledgeSuggestionWikibooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Textbooks, including a full secondary-school maths course.'**
+  String get knowledgeSuggestionWikibooks;
+
+  /// No description provided for @knowledgeSuggestionKlexikon.
+  ///
+  /// In en, this message translates to:
+  /// **'An encyclopedia written for primary-school children.'**
+  String get knowledgeSuggestionKlexikon;
+
+  /// No description provided for @knowledgeSuggestionPhet.
+  ///
+  /// In en, this message translates to:
+  /// **'Interactive physics, chemistry and maths experiments.'**
+  String get knowledgeSuggestionPhet;
+
+  /// No description provided for @knowledgeSuggestionWikiversity.
+  ///
+  /// In en, this message translates to:
+  /// **'Course and teaching material.'**
+  String get knowledgeSuggestionWikiversity;
+
+  /// No description provided for @knowledgeSuggestionWikipedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything else. The largest of these by far.'**
+  String get knowledgeSuggestionWikipedia;
+
+  /// No description provided for @knowledgeSuggestionMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Wikipedia\'s medical articles alone, at a fraction of the size.'**
+  String get knowledgeSuggestionMedicine;
+
+  /// No description provided for @knowledgeSuggestionIfixit.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair instructions for appliances and electronics, with pictures.'**
+  String get knowledgeSuggestionIfixit;
+
+  /// No description provided for @knowledgeSuggestionKhan.
+  ///
+  /// In en, this message translates to:
+  /// **'The school curriculum end to end — English only, no German archive exists.'**
+  String get knowledgeSuggestionKhan;
+
   /// No description provided for @knowledgeErrorUnreadable.
   ///
   /// In en, this message translates to:
@@ -3415,6 +3475,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Safety at home'**
   String get checklistCategorySafety;
+
+  /// No description provided for @checklistCategoryHazards.
+  ///
+  /// In en, this message translates to:
+  /// **'Natural hazards'**
+  String get checklistCategoryHazards;
+
+  /// No description provided for @checklistCategoryWellbeing.
+  ///
+  /// In en, this message translates to:
+  /// **'Fears and worries'**
+  String get checklistCategoryWellbeing;
 
   /// No description provided for @checklistCategoryPets.
   ///

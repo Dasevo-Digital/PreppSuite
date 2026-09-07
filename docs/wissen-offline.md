@@ -41,6 +41,32 @@ dieser App sind vor allem interessant:
   Anleitungssammlungen von WikiHow und Appropedia. Deutlich kleiner, und
   näher an dem, wofür man diese App öffnet.
 
+### Schule, wenn längere Zeit keine ist
+
+Setzt das öffentliche Leben für eine Saison aus, fehlt einem Haushalt nach
+Essen und Wärme als Nächstes ein Ort, an dem die Kinder weiterlernen. Die
+naheliegende Antwort — Khan Academy — gibt es bei Kiwix nur auf Englisch,
+Spanisch und Französisch; ein deutsches Archiv existiert nicht. Auf
+Deutsch gibt es dafür:
+
+- **`wikibooks_de_all_maxi`** – Lehrbücher, darunter *Mathe für
+  Nicht-Freaks*, ein vollständiger Kurs von der Mittelstufe bis ins
+  Grundstudium. Etwa 3,5 GB.
+- **`klexikon_de_all`** – das Kinderlexikon, geschrieben für die
+  Grundschule und ohne Hilfe lesbar.
+- **`phet_de_all`** – interaktive Versuche für Physik, Chemie und
+  Mathematik. Sie laufen im Archiv selbst, ohne Netz.
+- **`wikiversity_de_all`** – Kurs- und Unterrichtsmaterial.
+- **`ifixit_de_all`** – Reparaturanleitungen mit Bildern; keine Schule,
+  aber dieselbe Lage.
+
+Diese Liste steht auch in der App, auf der leeren Wissen-Seite: jeder
+Eintrag öffnet die Bibliothek auf der passenden Suche, weil die
+Dateinamen ein Datum tragen und sich alle paar Monate ändern.
+
+**Ein Archiv zur Zeit.** PreppSuite hält genau ein ZIM offen; wechseln
+geht jederzeit, gleichzeitig geht nicht.
+
 Es muss nicht Wikipedia sein. Jede ZIM-Datei geht, auch selbst gebaute:
 [`zimwriterfs`](https://github.com/openzim/zim-tools) macht aus einem
 Ordner mit HTML-Dateien eine – der Weg, eigene Lernmaterialien

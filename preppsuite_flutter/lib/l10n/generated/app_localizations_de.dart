@@ -1342,6 +1342,44 @@ class AppLocalizationsDe extends AppLocalizations {
   String get knowledgeSearchPrompt => 'Tippe einen Anfang ein, um zu suchen.';
 
   @override
+  String get knowledgeSuggestionsTitle => 'Womit anfangen';
+
+  @override
+  String get knowledgeSuggestionsBody =>
+      'PreppSuite hat ein Archiv zur Zeit geöffnet. Wechseln kannst du jederzeit — die Dateien bleiben, wo sie sind.';
+
+  @override
+  String get knowledgeSuggestionWikibooks =>
+      'Lehrbücher, darunter ein vollständiger Mathematikkurs bis zum Abitur.';
+
+  @override
+  String get knowledgeSuggestionKlexikon =>
+      'Ein Lexikon, geschrieben für Grundschulkinder.';
+
+  @override
+  String get knowledgeSuggestionPhet =>
+      'Interaktive Versuche für Physik, Chemie und Mathematik.';
+
+  @override
+  String get knowledgeSuggestionWikiversity => 'Kurs- und Unterrichtsmaterial.';
+
+  @override
+  String get knowledgeSuggestionWikipedia =>
+      'Alles Übrige. Mit Abstand das größte hier.';
+
+  @override
+  String get knowledgeSuggestionMedicine =>
+      'Nur die medizinischen Artikel der Wikipedia, für einen Bruchteil des Platzes.';
+
+  @override
+  String get knowledgeSuggestionIfixit =>
+      'Reparaturanleitungen für Geräte und Elektronik, mit Bildern.';
+
+  @override
+  String get knowledgeSuggestionKhan =>
+      'Der Schulstoff von vorn bis hinten — nur auf Englisch, ein deutsches Archiv gibt es nicht.';
+
+  @override
   String get knowledgeErrorUnreadable =>
       'Die Datei lässt sich nicht lesen. Erwartet wird ein ZIM-Archiv, wie Kiwix es ausliefert.';
 
@@ -1988,6 +2026,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get checklistCategorySafety => 'Sicherheit im Haus';
+
+  @override
+  String get checklistCategoryHazards => 'Naturgefahren';
+
+  @override
+  String get checklistCategoryWellbeing => 'Ängste und Sorgen';
 
   @override
   String get checklistCategoryPets => 'Haustiere';

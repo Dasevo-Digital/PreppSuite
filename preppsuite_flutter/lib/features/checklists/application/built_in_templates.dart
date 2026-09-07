@@ -400,4 +400,309 @@ const builtInTemplates = [
       ),
     ],
   ),
+  // Die folgenden Listen bilden die Zweige nach, die der BBK-Ratgeber
+  // unter "Vorsorge" fuehrt und die hier fehlten: die Naturgefahren,
+  // das Schutzsuchen im eigenen Haus, der Umgang mit der Lage, und
+  // die Menschen, deren Bedarf keine der anderen Listen trifft.
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000011',
+    'Hochwasser und Starkregen',
+    ChecklistCategory.hazards,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001101',
+        'Auf der Hochwassergefahrenkarte des Landes nachsehen, ob die '
+            'Adresse betroffen sein kann',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001102',
+        'Rückstauklappen in den Abwasserleitungen — einmal im Jahr geprüft',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001103',
+        'Kellerfenster und Lichtschächte gegen eindringendes Wasser sichern',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001104',
+        'Öltank und Heizungsanlage gegen Auftrieb sichern',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001105',
+        'Elementarschadenversicherung prüfen — Hochwasser ist in der '
+            'Wohngebäudeversicherung nicht enthalten',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001106',
+        'Nichts Unersetzliches im Keller lagern',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001107',
+        'Tauchpumpe, Schläuche und Sandsäcke griffbereit',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001108',
+        'Wissen, wo der Stromkreis für den Keller abgeschaltet wird',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001109',
+        'Bei Hochwasser den Keller nicht betreten — Strom im Wasser, und '
+            'Räume laufen schneller voll, als man herauskommt',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001110',
+        'Pegelstände und Warnungen verfolgen: NINA und der Warndienst des '
+            'Landes',
+      ),
+    ],
+  ),
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000012',
+    'Hitze und Dürre',
+    ChecklistCategory.hazards,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001201',
+        'Nachts und früh am Morgen lüften, tagsüber Fenster und Rollläden '
+            'geschlossen halten',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001202',
+        'Mehr trinken als sonst, auch ohne Durst',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001203',
+        'Leichte Mahlzeiten, wenig Alkohol',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001204',
+        'Anstrengendes in die kühlen Stunden legen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001205',
+        'Medikamente kühl lagern — viele vertragen keine 25 Grad; der '
+            'Beipackzettel sagt es',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001206',
+        'Bei Hitze wirken manche Medikamente anders — einmal mit der '
+            'Hausarztpraxis durchgehen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001207',
+        'Einen kühlen Raum in der Wohnung bestimmen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001208',
+        'Nach älteren und alleinlebenden Nachbarn sehen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001209',
+        'Kinder und Tiere nie im Auto lassen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001210',
+        'Anzeichen eines Hitzschlags kennen: Kopfschmerz, Übelkeit, '
+            'Verwirrtheit, heiße trockene Haut',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001211',
+        'Bei Trockenheit im Wald kein Feuer, nicht rauchen, nicht auf '
+            'trockenem Gras parken',
+      ),
+    ],
+  ),
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000013',
+    'Sturm, Kälte und Schnee',
+    ChecklistCategory.hazards,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001301',
+        'Lose Gegenstände auf Balkon, Terrasse und im Garten sichern, bevor '
+            'der Sturm da ist',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001302',
+        'Bei Sturm im Haus bleiben, Fenster und Türen schließen, nicht '
+            'unter Bäume stellen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001303',
+        'Dach, Dachrinnen und Bäume am Haus regelmäßig prüfen lassen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001304',
+        'Schneelast auf Flachdach, Carport und Wintergarten im Blick '
+            'behalten',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001305',
+        'Heizung vor dem Winter warten lassen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001306',
+        'Wasserleitungen in unbeheizten Räumen gegen Frost schützen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001307',
+        'Für den Heizungsausfall: warme Kleidung, Decken, Schlafsäcke — und '
+            'Brennstoff, wenn ein Ofen da ist',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001308',
+        'Streugut und Schneeschaufel',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001309',
+        'Im Auto: Decke, Schaufel, warme Sachen — und im Winter nicht mit '
+            'fast leerem Tank fahren',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001310',
+        'Nach dem Sturm: heruntergefallene Leitungen melden, nie selbst '
+            'anfassen',
+      ),
+    ],
+  ),
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000014',
+    'Schutz suchen',
+    ChecklistCategory.safety,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001401',
+        'Den sichersten Raum der Wohnung bestimmen: innenliegend, ohne '
+            'Fenster, möglichst im Kern des Gebäudes',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001402',
+        'Bei Sturm und Unwetter: unteres Geschoss, weg von Fenstern',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001403',
+        'Bei Hochwasser: nach oben, nie in den Keller',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001404',
+        'Bei einem Gefahrstoffaustritt: hinein, Fenster und Türen '
+            'schließen, Lüftung und Klimaanlage aus, Radio an',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001405',
+        'Bei Explosion oder Erschütterung: weg von Glas und Fensterfronten',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001406',
+        'Wissen, welches feste Gebäude in der Nähe Schutz böte',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001407',
+        'Fluchtwege aus dem Gebäude kennen, auch im Dunkeln',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001408',
+        'Treffpunkt für den Fall, dass der Haushalt getrennt wird — er '
+            'steht auch im Notfallplan',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001409',
+        'Wissen, wer in der Nachbarschaft helfen kann und wer Hilfe braucht',
+      ),
+    ],
+  ),
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000015',
+    'Mit Ängsten und Sorgen umgehen',
+    ChecklistCategory.wellbeing,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001501',
+        'Feste Zeiten für Nachrichten, dazwischen bewusst abschalten',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001502',
+        'Nur verlässliche Quellen: amtliche Warnungen und öffentlich- '
+            'rechtlicher Rundfunk',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001503',
+        'Tagesstruktur halten — Schlaf, Mahlzeiten, Bewegung',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001504',
+        'Mit anderen sprechen, statt allein zu grübeln',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001505',
+        'Mit Kindern altersgerecht sprechen, Fragen ernst nehmen und nicht '
+            'beschwichtigen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001506',
+        'Kindern zeigen, was der Haushalt vorbereitet hat — Vorbereitung '
+            'nimmt Angst',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001507',
+        'Auf Anzeichen achten: Schlaflosigkeit, Reizbarkeit, Rückzug',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001508',
+        'Telefonseelsorge: 0800 111 0 111 und 0800 111 0 222, rund um die '
+            'Uhr und kostenfrei',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001509',
+        'Wissen, wer im Haushalt in einer Krise besonders auf Beistand '
+            'angewiesen ist',
+      ),
+    ],
+  ),
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000016',
+    'Säuglinge, Pflege und Barrierefreiheit',
+    ChecklistCategory.firstAid,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001601',
+        'Säuglingsnahrung und abgekochtes Wasser für zehn Tage',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001602',
+        'Windeln, Feuchttücher, Wickelunterlage',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001603',
+        'Pflegehilfsmittel für zehn Tage: Inkontinenzmaterial, '
+            'Verbandsstoffe, Desinfektion',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001604',
+        'Ersatzbatterien und Ladegeräte für Hörgerät, Rollstuhl, Pflegebett',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001605',
+        'Für jedes Gerät, das Strom braucht, die handbetriebene Alternative '
+            'klären',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001606',
+        'Medikamentenplan und Pflegeunterlagen in der Dokumentenmappe',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001607',
+        'Klären, wer beim Verlassen der Wohnung hilft, wenn der Aufzug '
+            'steht',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001608',
+        'Nachbarn und Pflegedienst wissen lassen, wer im Haus Hilfe braucht',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001609',
+        'Für jede Person eine Notfallkarte ausfüllen — in PreppSuite unter '
+            'Haushalt',
+      ),
+    ],
+  ),
 ];
