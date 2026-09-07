@@ -23,7 +23,17 @@ import Foundation
 /// installation is coming from before 0.14.0 any more.
 enum SandboxMigration {
   private static let doneKey = "preppsuite.sandboxMigrationDone"
-  private static let bundleId = "de.status403.preppsuite"
+
+  /// Read from the running bundle, never written down.
+  ///
+  /// `PreppSuite Test.app` is the same build under
+  /// `de.status403.preppsuite.test`, and the whole point of it is that it
+  /// cannot touch the real household. A hardcoded identifier here would
+  /// have the test copy adopt the production data on its first launch —
+  /// quietly, and exactly once, which is the worst way to find out.
+  private static var bundleId: String {
+    Bundle.main.bundleIdentifier ?? "de.status403.preppsuite"
+  }
 
   static func runIfNeeded() {
     let defaults = UserDefaults.standard

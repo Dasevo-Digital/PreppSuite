@@ -10,7 +10,10 @@
 #
 # Both come from the same build. The test one differs in exactly two
 # fields — its identifier and its name — which is enough for macOS to give
-# it a database, a preferences file and a shared folder of its own.
+# it a sandbox container of its own: its own database, its own settings,
+# its own shared folder. The migration inside the app reads the identifier
+# from the running bundle, so the test copy looks for a predecessor of its
+# own and never finds the real household.
 #
 # It also takes the app out of the build directory afterwards. A .app
 # sitting in `build/` is indexed by Spotlight like any other, and a menu
@@ -59,18 +62,20 @@ for id in de.status403.preppsuite "$TEST_ID"; do
   osascript -e "quit app id \"$id\"" >/dev/null 2>&1 || true
 done
 
+# Both are signed from the repository's Release.entitlements rather than
+# from whatever the source bundle happens to carry. That is deliberate:
+# `flutter build macos` writes get-task-allow into the Release bundle, a
+# debug entitlement that lets any process attach to the app. Signing from
+# the file drops it.
+sign="$REPO_ROOT/tool/macos_sign.sh"
+[ -x "$sign" ] || die "tool/macos_sign.sh fehlt"
+
 echo "== $PROD_APP =="
 rm -rf "$PROD_APP"
 ditto "$source" "$PROD_APP"
+"$sign" "$PROD_APP" >/dev/null || die "$PROD_APP liess sich nicht signieren"
 
 echo "== $TEST_APP =="
-# The entitlements have to be carried over by hand: re-signing without
-# them would silently drop the camera, the location and the file access,
-# and the test app would fail at exactly the features worth testing.
-entitlements="$workspace/entitlements.plist"
-codesign -d --entitlements :- "$source" 2>/dev/null > "$entitlements" \
-  || die "die Berechtigungen des Bündels sind nicht lesbar"
-
 rm -rf "$TEST_APP"
 ditto "$source" "$TEST_APP"
 /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $TEST_ID" \
@@ -81,10 +86,7 @@ ditto "$source" "$TEST_APP"
 # Editing Info.plist invalidates the signature, and macOS kills a bundle
 # whose signature does not match rather than explaining itself. Ad-hoc,
 # like the build itself: there is no Developer ID here.
-codesign --force --deep --sign - --entitlements "$entitlements" \
-  "$TEST_APP" >/dev/null 2>&1 || die "das Test-Bündel liess sich nicht signieren"
-codesign --verify --deep --strict "$TEST_APP" \
-  || die "die Signatur des Test-Bündels hält nicht"
+"$sign" "$TEST_APP" >/dev/null || die "das Test-Bündel liess sich nicht signieren"
 
 # Nothing should be left where Spotlight would offer it as a third app.
 if [ -d "$BUILD_APP" ] && [ "$BUILD_APP" != "$source" ]; then

@@ -57,6 +57,8 @@
 	<array>
 		<string>/Library/Application Support/de.status403.preppsuite/</string>
 		<string>/Library/Preferences/de.status403.preppsuite.plist</string>
+		<string>/Library/Application Support/de.status403.preppsuite.test/</string>
+		<string>/Library/Preferences/de.status403.preppsuite.test.plist</string>
 	</array>
 </dict>
 </plist>
