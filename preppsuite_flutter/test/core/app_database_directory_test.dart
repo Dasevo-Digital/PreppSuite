@@ -109,6 +109,18 @@ void main() {
     );
   });
 
+  test('a documents folder that cannot be read is not fatal', () async {
+    // On macOS without the sandbox, reading the user's own documents
+    // folder needs their permission. Declined, listing it throws — and
+    // this runs while the database directory is being resolved, so an
+    // error escaping here would leave the app with no database at all.
+    final gone = Directory('${legacy.path}/weg');
+
+    await adoptLegacyDatabases(legacy: gone, target: target);
+
+    expect(target.listSync(), isEmpty);
+  });
+
   test('the same directory twice does nothing at all', () async {
     write(legacy, 'preppsuite.sqlite', 'haushalt');
 

@@ -62,23 +62,45 @@ Future<void> adoptLegacyDatabases({
   required Directory legacy,
   required Directory target,
 }) async {
-  if (legacy.path == target.path || !await legacy.exists()) return;
+  if (legacy.path == target.path) return;
 
-  await for (final entry in legacy.list(followLinks: false)) {
+  final List<FileSystemEntity> entries;
+  try {
+    if (!await legacy.exists()) return;
+    entries = await legacy.list(followLinks: false).toList();
+  } on Object {
+    // On macOS without the sandbox, the documents folder is the user's
+    // own and reading it needs their permission. Declined, or asked for
+    // while nobody was looking, listing it throws — and that must not
+    // reach the caller: it is the database directory being resolved, and
+    // failing here would leave the app with no database at all rather
+    // than with an empty one.
+    //
+    // Nothing is lost. The old file stays where it is, and the app is
+    // usable; the alternative was an app that would not start.
+    return;
+  }
+
+  for (final entry in entries) {
     if (entry is! File) continue;
 
     final name = entry.uri.pathSegments.last;
     if (!_isOurDatabase(name)) continue;
 
     final destination = '${target.path}${Platform.pathSeparator}$name';
-    if (await File(destination).exists()) continue;
 
     try {
+      if (await File(destination).exists()) continue;
       await entry.rename(destination);
     } on FileSystemException {
-      // Rename cannot cross a volume boundary. Copying and deleting can.
-      await entry.copy(destination);
-      await entry.delete();
+      // Rename cannot cross a volume boundary. Copying and deleting can,
+      // and if even that fails the old file simply stays put.
+      try {
+        await entry.copy(destination);
+        await entry.delete();
+      } on Object {
+        continue;
+      }
     }
   }
 }
