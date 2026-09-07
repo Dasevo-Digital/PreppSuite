@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 
+import '../../../core/app_database_directory.dart';
 import 'zim_store.dart' show legacyArchiveId;
 
 part 'knowledge_index_database.g.dart';
@@ -21,7 +21,12 @@ part 'knowledge_index_database.g.dart';
 @DriftDatabase(tables: [])
 class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   KnowledgeIndexDatabase(String archiveId)
-    : super(driftDatabase(name: fileNameFor(archiveId)));
+    : super(
+        driftDatabase(
+          name: fileNameFor(archiveId),
+          native: DriftNativeOptions(databaseDirectory: appDatabaseDirectory),
+        ),
+      );
 
   KnowledgeIndexDatabase.forTesting(super.executor);
 
@@ -43,7 +48,7 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   /// puts it in the documents directory under the name above; the two
   /// journal files beside it go with it.
   static Future<void> deleteFor(String archiveId) async {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await appDatabaseDirectory();
     final base =
         '${directory.path}${Platform.pathSeparator}'
         '${fileNameFor(archiveId)}.sqlite';
