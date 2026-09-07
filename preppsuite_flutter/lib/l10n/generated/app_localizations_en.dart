@@ -1682,6 +1682,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapDownloadScopeCountry => 'Whole country';
 
   @override
+  String get mapDownloadWorldBase => 'World';
+
+  @override
+  String get mapDownloadScopeContinent => 'Whole continent';
+
+  @override
+  String get mapContinentEurope => 'Europe';
+
+  @override
+  String get mapContinentAfrica => 'Africa';
+
+  @override
+  String get mapContinentAsia => 'Asia';
+
+  @override
+  String get mapContinentNorthAmerica => 'North America';
+
+  @override
+  String get mapContinentSouthAmerica => 'South America';
+
+  @override
+  String get mapContinentOceania => 'Oceania';
+
+  @override
   String get mapDownloadStaggered =>
       'Staggered: coarser further out, full detail in the middle.';
 

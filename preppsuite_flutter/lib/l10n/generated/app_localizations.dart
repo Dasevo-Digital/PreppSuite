@@ -2936,6 +2936,54 @@ abstract class AppLocalizations {
   /// **'Whole country'**
   String get mapDownloadScopeCountry;
 
+  /// Label for the whole-planet base band of a map download
+  ///
+  /// In en, this message translates to:
+  /// **'World'**
+  String get mapDownloadWorldBase;
+
+  /// Download scope covering the continent the place sits in
+  ///
+  /// In en, this message translates to:
+  /// **'Whole continent'**
+  String get mapDownloadScopeContinent;
+
+  /// Continent name
+  ///
+  /// In en, this message translates to:
+  /// **'Europe'**
+  String get mapContinentEurope;
+
+  /// Continent name
+  ///
+  /// In en, this message translates to:
+  /// **'Africa'**
+  String get mapContinentAfrica;
+
+  /// Continent name
+  ///
+  /// In en, this message translates to:
+  /// **'Asia'**
+  String get mapContinentAsia;
+
+  /// Continent name
+  ///
+  /// In en, this message translates to:
+  /// **'North America'**
+  String get mapContinentNorthAmerica;
+
+  /// Continent name
+  ///
+  /// In en, this message translates to:
+  /// **'South America'**
+  String get mapContinentSouthAmerica;
+
+  /// Continent name
+  ///
+  /// In en, this message translates to:
+  /// **'Oceania'**
+  String get mapContinentOceania;
+
   /// No description provided for @mapDownloadStaggered.
   ///
   /// In en, this message translates to:

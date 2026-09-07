@@ -1696,6 +1696,30 @@ class AppLocalizationsDe extends AppLocalizations {
   String get mapDownloadScopeCountry => 'Ganzes Land';
 
   @override
+  String get mapDownloadWorldBase => 'Welt';
+
+  @override
+  String get mapDownloadScopeContinent => 'Ganzer Kontinent';
+
+  @override
+  String get mapContinentEurope => 'Europa';
+
+  @override
+  String get mapContinentAfrica => 'Afrika';
+
+  @override
+  String get mapContinentAsia => 'Asien';
+
+  @override
+  String get mapContinentNorthAmerica => 'Nordamerika';
+
+  @override
+  String get mapContinentSouthAmerica => 'Südamerika';
+
+  @override
+  String get mapContinentOceania => 'Ozeanien';
+
+  @override
   String get mapDownloadStaggered =>
       'Gestaffelt: außen gröber, in der Mitte voll.';
 

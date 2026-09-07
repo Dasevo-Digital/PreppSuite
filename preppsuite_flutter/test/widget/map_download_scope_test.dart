@@ -84,17 +84,19 @@ void main() {
     await tester.tap(find.text('Ganzes Land'));
     await tester.pump();
 
-    // The staggered plan, ring by ring: the country coarse, the state at
-    // full detail. 20,503 + 64,560 tiles.
+    // The staggered plan, ring by ring: the whole planet at the levels
+    // where one tile fills a window, then the country coarse, then the
+    // state at full detail. 341 + 20,498 + 64,560 tiles.
+    expect(find.text('Welt: Stufe 0 bis 4, 341 Kacheln'), findsOneWidget);
     expect(
-      find.text('Deutschland: Stufe 0 bis 12, 20503 Kacheln'),
+      find.text('Deutschland: Stufe 5 bis 12, 20498 Kacheln'),
       findsOneWidget,
     );
     expect(
       find.text('Niedersachsen: Stufe 13 bis 14, 64560 Kacheln'),
       findsOneWidget,
     );
-    expect(find.textContaining('85063 Kacheln'), findsOneWidget);
+    expect(find.textContaining('85399 Kacheln'), findsOneWidget);
 
     // And it is downloadable, which is the whole claim.
     final button = find.widgetWithText(FilledButton, 'Karte herunterladen');

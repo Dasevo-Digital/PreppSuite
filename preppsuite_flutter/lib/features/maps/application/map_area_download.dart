@@ -42,6 +42,28 @@ class MapArea {
     return count;
   }
 
+  /// The whole planet, at the zoom levels worth having everywhere.
+  ///
+  /// Without this a download only ever holds the tiles its own box
+  /// touched — and at zoom 3 a single tile already spans Barcelona to
+  /// Warsaw. Zoomed out, the map was one square floating in empty grey,
+  /// with nothing beside it to draw.
+  ///
+  /// It is affordable precisely because it is the low levels: zoom 0 to
+  /// 4 is 341 tiles for the entire world, against a budget of a hundred
+  /// thousand. The cut is at 4 because that is roughly where one tile
+  /// stops filling a desktop window on its own.
+  static const worldBaseZoom = 4;
+
+  static MapArea world({int from = 0, int to = worldBaseZoom}) => MapArea(
+    minLongitude: -180,
+    minLatitude: -85.05,
+    maxLongitude: 180,
+    maxLatitude: 85.05,
+    minZoom: from,
+    maxZoom: to,
+  );
+
   /// The same box over a different range of zoom levels.
   MapArea band(int from, int to) => MapArea(
     minLongitude: minLongitude,

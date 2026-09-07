@@ -38,6 +38,34 @@ Das Gebiet lässt sich auf zwei Arten bestimmen:
   Ausschnitt. Ein Griff an die Karte schaltet von einem gesuchten Ort
   wieder hierher zurück.
 
+### Wie weit hinaus
+
+Ist ein Ort gesucht, bietet die App Ringe an: **nur der Ort**, **mit
+Bundesland**, **ganzes Land**, **ganzer Kontinent**. Sie werden gestaffelt
+geladen — der äußerste Ring grob, der innerste in voller Tiefe, mit
+lückenlos aneinandergrenzenden Zoomstufen. Für Hannover mit Europa
+ergibt das:
+
+| Ring | Stufen | Kacheln |
+|---|---|---|
+| Welt | 0–4 | 341 |
+| Europa | 5–9 | 13.184 |
+| Deutschland | 10–12 | 20.132 |
+| Niedersachsen | 13–14 | 64.560 |
+
+Bundesland und Land kommen vom Geokodierer. **Der Kontinent nicht** — er
+steht als Rechteck in `continents.dart`. „Europa" ist nichts, worauf
+Nominatim brauchbar antwortet, und der Umriss eines Erdteils ändert sich
+nicht; das Netz nach einer Konstanten zu fragen hieße, einer Funktion, die
+gerade ohne Netz arbeiten soll, eine Anfrage einzubauen, die scheitern
+kann.
+
+**Die Welt ist immer dabei, Stufe 0 bis 4.** Ohne sie hält ein Archiv nur
+die Kacheln, die sein eigener Kasten berührt — und bei Stufe 3 deckt eine
+einzige Kachel schon Barcelona bis Warschau ab. Herausgezoomt stand dann
+ein Quadrat im leeren Grau, ohne Nachbarn zum Zeichnen. 341 Kacheln
+kaufen eine Karte, die überall vollständig aussieht.
+
 Ein Schieberegler bestimmt, wie tief: Stufe 12 zeigt Ortschaften und
 Hauptstraßen, Stufe 14 einzelne Straßen und Gebäude. Solange er nicht
 angefasst wurde, wählt die App **die tiefste Stufe, die für dieses Gebiet

@@ -12,6 +12,13 @@ enum MapDownloadScope {
   /// The place, the state and the whole country, staggered — the country
   /// coarse, the place at full detail.
   country,
+
+  /// The country's continent as well, coarsest of all.
+  ///
+  /// Worth having for a map that is meant to survive a long time without
+  /// a connection: the country ends at a border, and a border is not
+  /// where a journey does.
+  continent,
 }
 
 /// One ring of a staggered download: an area and the zoom levels it
@@ -172,20 +179,33 @@ MapDownloadPlan? staggeredPlan({
   required List<MapDownloadRing> rings,
   int budget = MapAreaDownloader.tileLimit,
   int deepest = 14,
+  String worldLabel = 'world',
 }) {
   if (rings.isEmpty) return null;
+
+  // The whole planet at the lowest levels, always, ahead of everything
+  // else. Without it a zoomed-out map is a single tile floating in grey:
+  // the rings only ever fetch what their own box touches, and at zoom 3
+  // one tile already spans Barcelona to Warsaw. 341 tiles buys a map
+  // that is whole wherever it is pointed.
+  final base = MapDownloadStep(label: worldLabel, area: MapArea.world());
+  const shallowest = MapArea.worldBaseZoom + 1;
 
   if (rings.length == 1) {
     final ring = rings.single;
     final detail = deepestDetailWithin(
       ring.box.withDetail(deepest),
-      budget: budget,
-      lowest: 0,
+      budget: budget - base.tileCount,
+      lowest: shallowest,
       highest: deepest,
     );
     if (detail == null) return null;
     return MapDownloadPlan([
-      MapDownloadStep(label: ring.label, area: ring.box.band(0, detail)),
+      base,
+      MapDownloadStep(
+        label: ring.label,
+        area: ring.box.band(shallowest, detail),
+      ),
     ]);
   }
 
@@ -196,7 +216,7 @@ MapDownloadPlan? staggeredPlan({
   // arrangement that fits is the one with the most detail nearest the
   // middle.
   for (final cuts in _cutCombinations(rings.length - 1, deepest)) {
-    final plan = _planFor(rings, cuts, deepest);
+    final plan = _planFor(rings, cuts, deepest, base, shallowest);
     if (plan.tileCount <= budget) {
       best = plan;
       break;
@@ -210,9 +230,11 @@ MapDownloadPlan _planFor(
   List<MapDownloadRing> rings,
   List<int> cuts,
   int deepest,
+  MapDownloadStep base,
+  int shallowest,
 ) {
-  final steps = <MapDownloadStep>[];
-  var from = 0;
+  final steps = <MapDownloadStep>[base];
+  var from = shallowest;
 
   for (var i = 0; i < rings.length; i++) {
     final to = i == rings.length - 1 ? deepest : cuts[i];

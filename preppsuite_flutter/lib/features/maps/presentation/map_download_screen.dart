@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
+import '../application/continents.dart';
 import '../application/map_area_download.dart';
 import '../application/map_download_plan.dart';
 import '../application/map_download_providers.dart';
@@ -182,13 +183,46 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
     _usePlace(chosen);
   }
 
+  /// The continent the chosen place sits on, if it sits on one.
+  ///
+  /// Read from a table rather than the geocoder — see continents.dart.
+  Continent? get _continent {
+    final place = _place;
+    if (place == null) return null;
+    // A place is a box here, not a point; its middle is what decides.
+    return continentFor(
+      (place.minLatitude + place.maxLatitude) / 2,
+      (place.minLongitude + place.maxLongitude) / 2,
+    );
+  }
+
+  String _continentLabel(Continent continent) {
+    final l10n = AppLocalizations.of(context)!;
+    return switch (continent) {
+      Continent.europe => l10n.mapContinentEurope,
+      Continent.africa => l10n.mapContinentAfrica,
+      Continent.asia => l10n.mapContinentAsia,
+      Continent.northAmerica => l10n.mapContinentNorthAmerica,
+      Continent.southAmerica => l10n.mapContinentSouthAmerica,
+      Continent.oceania => l10n.mapContinentOceania,
+    };
+  }
+
   /// The rings the chosen scope asks for, outermost first.
   List<MapDownloadRing> _rings() {
     final place = _place;
     if (place == null) return const [];
 
     final rings = <MapDownloadRing>[];
-    if (_scope == MapDownloadScope.country && _country != null) {
+    if (_scope == MapDownloadScope.continent && _continent != null) {
+      rings.add(
+        MapDownloadRing(
+          label: _continentLabel(_continent!),
+          box: _continent!.areaAt(14),
+        ),
+      );
+    }
+    if (_scope.index >= MapDownloadScope.country.index && _country != null) {
       rings.add(
         MapDownloadRing(label: _country!.name, box: _country!.areaAt(14)),
       );
@@ -208,7 +242,10 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
       final area = _area;
       return area == null ? null : MapDownloadPlan.single(area);
     }
-    return staggeredPlan(rings: _rings());
+    return staggeredPlan(
+      rings: _rings(),
+      worldLabel: AppLocalizations.of(context)!.mapDownloadWorldBase,
+    );
   }
 
   /// Asks the geocoder for the state and the country the place sits in.
@@ -453,6 +490,11 @@ class _MapDownloadScreenState extends ConsumerState<MapDownloadScreen> {
               ButtonSegment(
                 value: MapDownloadScope.country,
                 label: Text(l10n.mapDownloadScopeCountry),
+              ),
+            if (_country != null && _continent != null)
+              ButtonSegment(
+                value: MapDownloadScope.continent,
+                label: Text(l10n.mapDownloadScopeContinent),
               ),
           ],
           selected: {_scope},
