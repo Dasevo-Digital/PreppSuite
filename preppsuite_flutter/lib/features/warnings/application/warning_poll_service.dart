@@ -2,6 +2,7 @@ import '../../../model/categories.dart';
 
 import '../../../local_db/database.dart';
 import 'bbk_client.dart';
+import 'dwd_areas.dart';
 import 'meteoalarm_client.dart';
 import 'warning_ingest.dart';
 import 'warning_severity_l10n.dart';
@@ -112,8 +113,23 @@ class WarningPollService {
     if (slug != null) {
       final warnings = await _meteoAlarm.fetchCountry(slug);
       fetched += warnings.length;
+      // Only Germany can place these areas — the list behind it is the
+      // DWD's. A table that will not load must not cost the warnings
+      // themselves: without it they simply concern the whole country.
+      DwdAreas? areas;
+      if (countryCode == 'DE') {
+        try {
+          areas = await DwdAreas.load();
+        } on Object {
+          areas = null;
+        }
+      }
       newsworthy.addAll(
-        await _ingest.ingestMeteoAlarm(warnings, countryCode: countryCode),
+        await _ingest.ingestMeteoAlarm(
+          warnings,
+          countryCode: countryCode,
+          areas: areas,
+        ),
       );
     }
 

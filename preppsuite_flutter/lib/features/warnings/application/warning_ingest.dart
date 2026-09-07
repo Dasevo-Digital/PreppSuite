@@ -4,6 +4,7 @@ import '../../../model/categories.dart';
 import '../../../local_db/database.dart';
 import 'bbk_client.dart';
 import '../../household/application/german_states.dart';
+import 'dwd_areas.dart';
 import 'meteoalarm_client.dart';
 import 'warning_severity_l10n.dart';
 
@@ -55,9 +56,14 @@ class WarningIngest {
     return notifiable;
   }
 
+  /// [areas] turns MeteoAlarm's area names into keys the region filter
+  /// can match. Only Germany has one; elsewhere the names stay unplaced
+  /// and the warnings count for the whole country, which is what they did
+  /// before and is the safe reading.
   Future<List<NotifiableWarning>> ingestMeteoAlarm(
     List<MeteoAlarmRawWarning> warnings, {
     required String countryCode,
+    DwdAreas? areas,
   }) async {
     final notifiable = <NotifiableWarning>[];
 
@@ -71,7 +77,16 @@ class WarningIngest {
         source: WarningSource.meteoalarm,
         externalId: warning.identifier,
         countryCode: countryCode,
-        regionKey: warning.areaDesc.isEmpty ? null : warning.areaDesc,
+        // Never the area description itself. It is words, and the
+        // region filter compares keys — a key it cannot match does not
+        // read as "somewhere else", it reads as nowhere, and the warning
+        // is dropped. Measured against a live feed: 121 severe-weather
+        // warnings, not one of which reached a household that had set a
+        // region. Null instead means "concerns everyone", which is the
+        // safe reading for a warning that cannot be placed.
+        regionKey: warning.areaDesc.isEmpty
+            ? null
+            : areas?.regionKeyFor(warning.areaDesc),
         severity: _parseSeverity(warning.severity),
         eventType: warning.event,
         headline: warning.title,

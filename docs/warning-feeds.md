@@ -108,12 +108,48 @@ nicht erreichbar" ist dafür entscheidend — deshalb liefert
 fehlgeschlagenen Abruf unterbleibt das Beenden. Sonst würde eine einzelne
 schlechte Antwort sämtliche aktiven Warnungen stillschweigend zurückziehen.
 
+## MeteoAlarm-Gebiete auf Kreise abbilden
+
+`areaDesc` nennt Gebiete in Worten — „Kreis Ahrweiler", „Stadt Ulm" —,
+ein Haushalt folgt fünfstelligen Kreisschlüsseln. Bis 0.14.0 wanderte der
+Text unverändert in `regionKey`. Er konnte dort nur scheitern, und ein
+Schlüssel, der nicht passt, liest sich nicht als „woanders", sondern als
+„nirgends": `isWarningRelevant` verwarf jede dieser Warnungen.
+
+**Gemessen an einem echten Feed:** 121 Unwetterwarnungen, von denen keine
+einzige einen Haushalt erreichte, der eine Region eingestellt hatte.
+
+Die Brücke ist die **Warnzellenliste des DWD**, die dieselben Gebiete
+benennt — alle achtzig Namen des Feeds trafen sie exakt — und deren
+Zellkennung den Kreisschlüssel trägt: eine Zelle, die mit `1` oder `8`
+beginnt, ist `1`/`8`, dann fünf Stellen Kreis, dann drei weitere.
+`tool/dwd_warncells.py` erzeugt daraus `assets/dwd_warncells.csv`
+(11.728 Gebiete, 365 KB).
+
+`DwdAreas.regionKeyFor` liefert:
+
+1. den **Kreisschlüssel**, wo die Zelle einen trägt,
+2. sonst den Basisnamen vor einem `" - "` — der Feed teilt Kreise in
+   Abschnitte („Kreis Aurich - Küste"), die selbst keinen Schlüssel
+   haben, deren Kreis aber schon,
+3. sonst das **Bundesland**,
+4. sonst `null`, also „betrifft alle".
+
+Punkt 4 ist kein Fehlschlag, sondern Absicht. See- und Küstengebiete
+(„Elbe von Hamburg bis Cuxhaven") haben weder Kreis noch Land; sie zu
+verwerfen wäre genau der Fehler, den diese Zuordnung behebt.
+
+Mit dem gemessenen Feed sieht ein Haushalt in Braunschweig **9 von 121**
+Warnungen statt keiner — acht davon die nicht zuzuordnenden Seegebiete.
+
 ## Bekannte Einschränkungen
 
-- **MeteoAlarm-Warnungen werden nicht nach Region gefiltert.** Ihr
-  `regionKey` ist freier `areaDesc`-Text ohne Schlüssel, der sich mit
-  einem Kreis- oder Bundeslandschlüssel vergleichen liesse. Sie gelten
-  daher für jeden Haushalt des Landes als relevant.
+- **MeteoAlarm-Warnungen außerhalb Deutschlands werden nicht nach Region
+  gefiltert.** Ihr `areaDesc` ist Freitext ohne Schlüssel. Ihr
+  `regionKey` bleibt deshalb `null` — was „betrifft alle" heißt und die
+  sichere Lesart ist.
+
+  Für Deutschland gibt es seit 0.15.0 eine Zuordnung, siehe unten.
 - **Kein Ablaufdatum aus der Quelle.** Weder `mapData.json` noch
   `dashboard/{ARS}.json` liefert eines — das `valid`-Feld des Dashboards
   ist ein Boolescher Wert, kein Zeitpunkt. Ersatzweise beendet der Poller

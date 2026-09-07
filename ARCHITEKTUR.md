@@ -28,6 +28,12 @@ Linux is built in a container from here — see [`tool/docker/`](tool/docker/).
 Windows cannot be built on a Mac at all; `.github/workflows/build-desktop.yml`
 is the only path to one.
 
+Generated data assets:
+
+```bash
+tool/dwd_warncells.py    # assets/dwd_warncells.csv, when the DWD list changes
+```
+
 Code generation (drift):
 
 ```bash
@@ -501,6 +507,14 @@ tree; the test suite deliberately targets that layer rather than the UI.
   10.15.4**, and the deployment target is 10.15. `StorageBridge` keeps the
   older non-throwing pair behind an `#available` for those four point
   releases rather than raising the minimum.
+- **A `regionKey` must never be free text.** The region filter compares
+  keys, and a key it cannot match does not read as "somewhere else" — it
+  reads as nowhere, and the warning is dropped. MeteoAlarm's `areaDesc`
+  went in unchanged until 0.15.0, which cost every severe-weather warning
+  it carries: measured against a live feed, 121 of them, none reaching a
+  household that had set a region. `DwdAreas` now maps the name to a
+  district key, and `null` — "concerns everyone" — is the fallback,
+  because for a civil-protection alert too many people is the safe error.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions
