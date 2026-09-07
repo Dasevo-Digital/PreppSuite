@@ -15,11 +15,11 @@
 # from the running bundle, so the test copy looks for a predecessor of its
 # own and never finds the real household.
 #
-# It also takes the app out of the build directory afterwards. A .app
-# sitting in `build/` is indexed by Spotlight like any other, and a menu
-# offering three PreppSuites, two of which are staging copies, is worse
-# than useless when somebody is looking for the one with their inventory
-# in it.
+# It also runs tool/macos_spotlight_clean.sh afterwards, so the machine is
+# left knowing these two and nothing else. A .app sitting in `build/` is
+# indexed like any other, and a menu offering three PreppSuites, two of
+# which are staging copies, is worse than useless when somebody is looking
+# for the one with their inventory in it.
 #
 # Usage:
 #   tool/macos_install.sh                        # the last build
@@ -88,12 +88,11 @@ ditto "$source" "$TEST_APP"
 # like the build itself: there is no Developer ID here.
 "$sign" "$TEST_APP" >/dev/null || die "das Test-Bündel liess sich nicht signieren"
 
-# Nothing should be left where Spotlight would offer it as a third app.
-if [ -d "$BUILD_APP" ] && [ "$BUILD_APP" != "$source" ]; then
-  rm -rf "$BUILD_APP"
-elif [ -d "$BUILD_APP" ]; then
-  rm -rf "$BUILD_APP"
-fi
+# Nothing should be left where Spotlight would offer it as a third app,
+# and removing the bundle is only half of that: Launch Services keeps its
+# entry afterwards and goes on offering it. The cleanup does both.
+echo
+"$REPO_ROOT/tool/macos_spotlight_clean.sh"
 
 echo
 echo "== installiert =="

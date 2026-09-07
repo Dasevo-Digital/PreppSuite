@@ -507,6 +507,16 @@ tree; the test suite deliberately targets that layer rather than the UI.
   10.15.4**, and the deployment target is 10.15. `StorageBridge` keeps the
   older non-throwing pair behind an `#available` for those four point
   releases rather than raising the minimum.
+- **Spotlight's app results come from Launch Services, not from the
+  disk.** Deleting a copy of the app does not remove it from the search:
+  the database keeps an entry per bundle it has ever seen and goes on
+  offering it. Seventeen of the twenty PreppSuites registered on the
+  development machine pointed at paths that no longer existed — old
+  release folders, the Trash, an external volume. `lsregister -u <path>`
+  removes one, and `tool/macos_spotlight_clean.sh` does the sweep;
+  `tool/macos_install.sh` runs it. `.metadata_never_index` is not an
+  alternative — on macOS 26 the marker is ignored, verified with a probe
+  file next to it — so a build must be removed rather than hidden.
 - **A `regionKey` must never be free text.** The region filter compares
   keys, and a key it cannot match does not read as "somewhere else" — it
   reads as nowhere, and the warning is dropped. MeteoAlarm's `areaDesc`
