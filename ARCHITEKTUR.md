@@ -407,6 +407,17 @@ tree; the test suite deliberately targets that layer rather than the UI.
   leftover, until `minSdk` reaches 33. The 33 boundary is apksigner's
   default (rotation goes into a v3.1 block); see README for why it is not
   lowered to 28.
+- **The first Windows build in a fresh checkout can produce a plugin DLL
+  that will not load.** Seen while packaging 0.13.0: the build reported
+  success, and the app died at startup with `0xC0000142`
+  (`STATUS_DLL_INIT_FAILED`) before any Flutter code ran, so there is no
+  log and no crash report. Swapping the rebuilt DLLs one at a time found
+  `desktop_webview_window_plugin.dll`; the build had also printed "Nuget.exe
+  not found, trying to download or use cached version", which is how it
+  fetches the WebView2 package. `flutter clean` and a second build produced
+  a working DLL from the same source. Nothing detects this except starting
+  the binary — which is why every desktop package is launched before it
+  ships, not merely compiled.
 - **`android/gradlew clean` deletes every platform's build output, not
   Android's.** `android/build.gradle.kts` redirects
   `rootProject.layout.buildDirectory` to `preppsuite_flutter/build` — the
