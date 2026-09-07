@@ -803,6 +803,16 @@
       }
     }
   },
+  "knowledgeIndexBuiltInTitle": "The archive brings its own index",
+  "knowledgeIndexBuiltIn": "{count} articles, searchable right away. The archive carries its own full-text index, so there is nothing to build.",
+  "@knowledgeIndexBuiltIn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeIndexBuiltInStemming": "Queries match word stems: \"supplies\" also finds \"supply\".",
   "downloadFolderTitle": "Download folder",
   "downloadFolderChange": "Choose folder",
   "downloadFolderReset": "Reset",

@@ -256,13 +256,16 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   Speicherplatz ist nie die Grenze. Ein unterbrochener Download wird beim
   nächsten Start fortgesetzt statt neu begonnen. Einzelheiten in
   [`docs/karte-offline.md`](docs/karte-offline.md).
-- Die Volltextsuche braucht einen Index, den die App einmal selbst
-  aufbaut – der fertige im Archiv liegt in einem Xapian-Format ohne
-  Dart-Anbindung. Für eine Themensammlung sind das Minuten, für die
-  vollständige Wikipedia eher eine Stunde und mehrere Gigabyte. Anhalten
-  geht jederzeit; das Angefangene bleibt durchsuchbar.
-- Der Index kennt keinen deutschen Wortstamm: „Notvorräte" findet nicht
-  „Notvorrat".
+- Die Volltextsuche nutzt seit 0.15.0 den Index, den ein Kiwix-Archiv
+  ohnehin mitbringt – aber vorerst nur unter macOS, weil dafür eine
+  C++-Bibliothek im Programm stecken muss. Gemessen an der vollständigen
+  deutschen Wikipedia: 3,2 Millionen Artikel, nichts aufzubauen, eine
+  Suche in wenigen Millisekunden, und „Notvorräte" findet „Notvorrat".
+- Überall sonst – und bei Archiven ohne eigenen Index – baut die App
+  weiterhin einen eigenen auf. Für eine Themensammlung sind das Minuten,
+  für die vollständige Wikipedia eher eine Stunde und mehrere Gigabyte.
+  Anhalten geht jederzeit; das Angefangene bleibt durchsuchbar. Dieser
+  Index kennt keinen deutschen Wortstamm.
 - Artikel öffnen unter Linux und Windows ein eigenes Fenster statt eines
   Bereichs in der App, und brauchen dort die Browser-Komponente des
   Systems: WebView2 unter Windows, `libwebkit2gtk-4.1-0` unter Linux.

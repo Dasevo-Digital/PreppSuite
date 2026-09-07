@@ -119,14 +119,19 @@ whose point is working without a network.
 index the app builds.** `searchTitles` binary-searches the title order the
 archive carries — version 6 keeps it in an `X/listing` entry, version 5 in
 the header — and capitalizes the query's first letter, because that order
-is by bytes and Wikipedia titles start with a capital. The archive's own
-full-text index is Xapian, which has no Dart binding, so
-`KnowledgeIndexer` builds an FTS5 one instead, in
-`KnowledgeIndexDatabase` — a database of its own, because it is derived,
-gigabytes large, and belongs to one archive. `XapianIndex` is a second
-route to the same thing through the archive's own index; it is proven but
-not yet wired in, and it needs the native library from
-`native/zim_xapian` — see [`docs/volltextsuche-xapian.md`](docs/volltextsuche-xapian.md).
+is by bytes and Wikipedia titles start with a capital.
+
+**Full text has two indexes, and the archive's own is asked first.**
+`builtInIndexProvider` opens the Xapian database lying inside a Kiwix
+archive; `knowledgeFullTextProvider` uses it when it is there and falls
+back to `KnowledgeIndexDatabase` — the FTS5 index `KnowledgeIndexer`
+builds — when it is not. Four ordinary things send it down the fallback:
+no native library in this build (only macOS carries one), an archive with
+no index, an index in a compressed cluster, and a location that is not a
+path, which is Android. The wrapper is `XapianSearcher`, which keeps
+`XapianIndex` on an isolate of its own: the binding blocks, and one Xapian
+database tolerates exactly one user at a time — the message queue is the
+lock. See [`docs/volltextsuche-xapian.md`](docs/volltextsuche-xapian.md).
 
 **`directAccessInfo` is the only thing the ZIM reader hands out that is a
 position rather than bytes,** and it returns null for every compressed

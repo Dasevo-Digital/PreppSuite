@@ -2582,6 +2582,24 @@ abstract class AppLocalizations {
   /// **'{count} articles indexed.'**
   String knowledgeIndexReady(int count);
 
+  /// No description provided for @knowledgeIndexBuiltInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The archive brings its own index'**
+  String get knowledgeIndexBuiltInTitle;
+
+  /// No description provided for @knowledgeIndexBuiltIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} articles, searchable right away. The archive carries its own full-text index, so there is nothing to build.'**
+  String knowledgeIndexBuiltIn(int count);
+
+  /// No description provided for @knowledgeIndexBuiltInStemming.
+  ///
+  /// In en, this message translates to:
+  /// **'Queries match word stems: \"supplies\" also finds \"supply\".'**
+  String get knowledgeIndexBuiltInStemming;
+
   /// No description provided for @downloadFolderTitle.
   ///
   /// In en, this message translates to:

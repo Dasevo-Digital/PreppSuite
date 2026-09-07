@@ -1471,6 +1471,18 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get knowledgeIndexBuiltInTitle => 'Eigener Index im Archiv';
+
+  @override
+  String knowledgeIndexBuiltIn(int count) {
+    return '$count Artikel, sofort durchsuchbar. Das Archiv bringt seinen Volltextindex mit – es ist nichts aufzubauen.';
+  }
+
+  @override
+  String get knowledgeIndexBuiltInStemming =>
+      'Gesucht wird nach Wortstämmen: „Notvorräte“ findet auch „Notvorrat“.';
+
+  @override
   String get downloadFolderTitle => 'Ordner für Downloads';
 
   @override

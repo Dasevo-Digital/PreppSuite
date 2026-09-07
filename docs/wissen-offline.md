@@ -126,18 +126,24 @@ Zwei Arten, und die Umschaltung steht über der Trefferliste.
 nichts vorzubereiten. Findet „Trinkwasseraufbereitung" über den Namen und
 nicht den Artikel, der das Wort nur erwähnt.
 
-**Volltext.** Braucht einen Index, den die App einmal selbst aufbaut.
+**Volltext.** Zwei Wege, und welcher greift, entscheidet das Archiv.
 
-Warum selbst: im Archiv liegt bereits ein Volltextindex, eine
-Xapian-Datenbank. Sie zu benutzen hieße `libxapian` auf jede Plattform zu
-tragen – eine C++-Bibliothek, deren Bau für Android, macOS, Linux und
-Windows eine dauerhafte Last wäre. Stattdessen baut die App einen eigenen
-Index mit SQLite FTS5.
+Ein Kiwix-Archiv bringt seinen eigenen Volltextindex mit, eine
+Xapian-Datenbank, die unkomprimiert im Archiv liegt. Seit 0.15.0 nutzt die
+App sie, wo sie kann: nichts aufzubauen, keine Wartezeit, und gesucht wird
+nach Wortstämmen – „Notvorräte" findet „Notvorrat". An der vollständigen
+deutschen Wikipedia gemessen: 3,2 Millionen Artikel, der Index öffnet in
+vier Millisekunden, eine Suche dauert null bis vier.
 
-Dass der andere Weg trotzdem geht, ist inzwischen gezeigt – samt dem, was
-er besser kann, nämlich deutsche Wortstämme: siehe
-[Volltextsuche über den Index im Archiv](volltextsuche-xapian.md). In der
-App steckt er noch nicht.
+Das geht vorerst nur unter macOS. Dahinter steckt `libxapian`, eine
+C++-Bibliothek, die je Plattform gebaut und mitgeliefert werden muss;
+Einzelheiten in
+[Volltextsuche über den Index im Archiv](volltextsuche-xapian.md).
+
+Wo dieser Weg nicht offen steht – auf den übrigen Plattformen, und bei
+Archiven ohne eigenen Index, etwa selbst gebauten – baut die App wie
+bisher einen eigenen Index mit SQLite FTS5 auf. Der kennt keine
+Wortstämme, sondern sucht nach Wortanfang.
 
 Der Aufbau läuft einmal, mit Fortschrittsanzeige, und lässt sich jederzeit
 anhalten – was schon drin ist, bleibt durchsuchbar, und beim nächsten Mal

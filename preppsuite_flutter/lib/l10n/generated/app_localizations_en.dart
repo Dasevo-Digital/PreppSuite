@@ -1460,6 +1460,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get knowledgeIndexBuiltInTitle => 'The archive brings its own index';
+
+  @override
+  String knowledgeIndexBuiltIn(int count) {
+    return '$count articles, searchable right away. The archive carries its own full-text index, so there is nothing to build.';
+  }
+
+  @override
+  String get knowledgeIndexBuiltInStemming =>
+      'Queries match word stems: \"supplies\" also finds \"supply\".';
+
+  @override
   String get downloadFolderTitle => 'Download folder';
 
   @override

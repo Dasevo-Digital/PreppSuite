@@ -159,9 +159,9 @@ _Bindings? _cached;
 
 _Bindings get _bindings => _cached ??= _Bindings(_openLibrary());
 
-/// Looks in the three places the library can be, in the order it is most
-/// likely to be found: told to us, bundled with the app, or sitting in
-/// the build directory of a working copy.
+/// Looks in the four places the library can be, in the order it is most
+/// likely to be found: told to us, bundled with the app, on the loader's
+/// own search path, or sitting in the build directory of a working copy.
 DynamicLibrary _openLibrary() {
   final name = Platform.isWindows
       ? 'zim_xapian.dll'
@@ -171,6 +171,7 @@ DynamicLibrary _openLibrary() {
 
   final candidates = [
     ?Platform.environment['ZIM_XAPIAN_LIBRARY'],
+    ?_bundled(name),
     name,
     'native/zim_xapian/build/$name',
   ];
@@ -183,6 +184,17 @@ DynamicLibrary _openLibrary() {
     }
   }
   throw XapianException('$name was not found');
+}
+
+/// Where a shipped copy lies inside the app bundle.
+///
+/// By full path rather than by name: the loader resolves a bare name
+/// against its own search paths, and `@rpath` is not one of them for
+/// `dlopen`. Null where there is no bundle to look in.
+String? _bundled(String name) {
+  if (!Platform.isMacOS) return null;
+  final contents = File(Platform.resolvedExecutable).parent.parent;
+  return '${contents.path}/Frameworks/$name';
 }
 
 /// Hand-written rather than generated: eleven functions, no structs and
