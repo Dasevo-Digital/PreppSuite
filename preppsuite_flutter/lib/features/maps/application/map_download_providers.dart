@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/platform_storage.dart';
 import '../../downloads/application/download_folder.dart';
 import 'map_area_download.dart';
 import 'map_download_plan.dart';
@@ -152,9 +153,22 @@ class MapDownloadController extends Notifier<MapDownloadState> {
 
             // Taking it into use is the point of building it; the map
             // switches to the new archive without a further step.
+            //
+            // What gets remembered is a handle where the platform has
+            // them, not the path. The path works for the rest of this
+            // run — the download folder's scope is open — and is unusable
+            // on the next launch, which is how a finished download turned
+            // into one the user had to go and find again by hand.
+            final remembered = await rememberStoragePath(
+              target,
+              label: session.label,
+            );
             await ref
                 .read(offlineMapProvider.notifier)
-                .useArchive(location: target, label: session.label);
+                .useArchive(
+                  location: remembered?.value ?? target,
+                  label: session.label,
+                );
             state = MapDownloadState(
               progress: state.progress,
               finishedPath: target,

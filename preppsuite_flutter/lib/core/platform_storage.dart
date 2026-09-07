@@ -86,3 +86,35 @@ Future<String?> resolveStoragePath(String handle) async {
     return null;
   }
 }
+
+/// Turns a path the app can currently reach into a handle that survives
+/// a restart.
+///
+/// For the files the app writes itself: a download lands in a folder the
+/// user picked, and the app can reach it at that moment — but a bare path
+/// into that folder is unusable on the next launch, when no security
+/// scope is open. Making the bookmark while the door is still open is
+/// what turns a finished download into one that is still there tomorrow.
+///
+/// Returns null where there is nothing to do, which is every platform but
+/// macOS, and on failure. Callers fall back to the plain path: it still
+/// works for the rest of this run.
+Future<PickedStorage?> rememberStoragePath(
+  String path, {
+  required String label,
+}) async {
+  if (!usesStorageBookmarks) return null;
+  try {
+    final result = await nativeStorageChannel.invokeMapMethod<String, String>(
+      'remember',
+      {'path': path},
+    );
+    final uri = result?['uri'];
+    if (uri == null) return null;
+    return PickedStorage(value: uri, label: label);
+  } on PlatformException {
+    return null;
+  } on MissingPluginException {
+    return null;
+  }
+}

@@ -98,6 +98,8 @@ final class StorageBridge: NSObject {
       pick(folder: false, message: arguments["dialogTitle"] as? String, result)
     case "resolvePath":
       result(resolvePath(arguments["uri"] as? String ?? ""))
+    case "remember":
+      remember(path: arguments["path"] as? String ?? "", result)
     case "openFile":
       result(openFile(arguments["uri"] as? String ?? ""))
     case "readRange":
@@ -190,6 +192,28 @@ final class StorageBridge: NSObject {
       "label": url.lastPathComponent,
       "path": url.path,
     ]
+  }
+
+  /// Makes a handle for a file the app already has access to.
+  ///
+  /// The app writes its own downloads into a folder the user picked, so
+  /// it can reach the finished file right then — but only right then. A
+  /// plain path into that folder is unusable on the next launch, when no
+  /// scope is open, and the download would have to be hunted down by
+  /// hand. So the path is turned into a bookmark while the door is still
+  /// open, exactly as if it had been picked in a panel.
+  private func remember(path: String, _ result: @escaping FlutterResult) {
+    let url = URL(fileURLWithPath: path)
+    guard FileManager.default.fileExists(atPath: url.path) else {
+      result(nil)
+      return
+    }
+    do {
+      result(try remember(url))
+    } catch {
+      NSLog("PreppSuite: bookmark for %@ failed: %@", path, String(describing: error))
+      result(nil)
+    }
   }
 
   // MARK: - Bookmarks

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 
 import '../../../core/platform_storage.dart';
+import '../../downloads/application/download_folder.dart';
 import 'pmtiles_archive.dart';
 
 /// Opens the platform's file picker for a `.pmtiles` archive, or null if
@@ -44,10 +45,30 @@ Future<PickedStorage?> pickMapArchive({String? dialogTitle}) async {
 }
 
 /// Random access to the archive at [location], whatever kind it is.
-Future<ByteRangeSource> openMapArchive(String location) {
-  return isNativeStorageHandle(location)
-      ? NativeByteRangeSource.open(location)
-      : FileByteRangeSource.open(File(location));
+///
+/// A plain path needs one thing first where the app runs sandboxed: the
+/// download folder's security scope has to be open, or `dart:io` cannot
+/// touch anything in it. That covers the archives this app wrote itself
+/// under an older version, which are remembered as paths and would
+/// otherwise be unopenable on every launch after the one that made them.
+/// Newer downloads remember a handle and never come through here.
+Future<ByteRangeSource> openMapArchive(String location) async {
+  if (isNativeStorageHandle(location)) {
+    return NativeByteRangeSource.open(location);
+  }
+  if (usesStorageBookmarks) {
+    try {
+      // Opens the scope as a side effect. What it answers does not
+      // matter: the path being opened is the one that was stored, not
+      // this one.
+      await const DownloadFolder().current();
+    } on Object {
+      // No folder to be had — no download folder set, no platform
+      // underneath. That is not a reason to refuse an archive that may
+      // well be readable; let the open below decide.
+    }
+  }
+  return FileByteRangeSource.open(File(location));
 }
 
 /// Reads ranges out of an archive the app cannot open with `dart:io`.

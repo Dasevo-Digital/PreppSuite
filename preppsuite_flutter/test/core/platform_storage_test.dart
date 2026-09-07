@@ -68,6 +68,33 @@ void main() {
     );
   });
 
+  test('a path the app can reach becomes a handle', () async {
+    if (!usesStorageBookmarks) return;
+
+    reply = {'uri': 'bookmark://fresh', 'label': 'ignoriert'};
+    final remembered = await rememberStoragePath(
+      '/Users/me/Downloads/PreppSuite/map.pmtiles',
+      label: 'Niedersachsen (14)',
+    );
+
+    expect(remembered!.value, 'bookmark://fresh');
+    // The label is the caller's, not the file name: "Niedersachsen (14)"
+    // is something to recognise, "preppsuite-map-z14-2026-09-07T09-47"
+    // is two of those apart by a timestamp.
+    expect(remembered.label, 'Niedersachsen (14)');
+    expect(calls.single.method, 'remember');
+  });
+
+  test('a bookmark that cannot be made leaves the caller the path', () async {
+    if (!usesStorageBookmarks) return;
+
+    reply = null;
+    expect(
+      await rememberStoragePath('/tmp/map.pmtiles', label: 'X'),
+      isNull,
+    );
+  });
+
   test('a native side that is not there is not fatal', () async {
     if (!usesStorageBookmarks) return;
 
