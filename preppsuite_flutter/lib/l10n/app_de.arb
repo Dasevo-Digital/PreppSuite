@@ -407,6 +407,7 @@
   "downloadCancelAction": "Abbrechen",
   "downloadFailedLabel": "Download abgebrochen: {error}",
   "downloadFinishedLabel": "{name} ist fertig geladen.",
+  "downloadNotOpenedLabel": "{name} ist geladen, lässt sich aber nicht öffnen: {reason}",
   "downloadRetryAction": "Erneut versuchen",
   "downloadDismissAction": "Ausblenden",
   "downloadOfSize": "{done} von {total}",

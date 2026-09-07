@@ -40,6 +40,7 @@ class ArchiveDownloadState {
     this.progress,
     this.error,
     this.finishedPath,
+    this.takeUpProblem,
   });
 
   final ArchiveDownloadRequest? request;
@@ -48,6 +49,15 @@ class ArchiveDownloadState {
 
   /// Set once the file is whole and in place.
   final String? finishedPath;
+
+  /// Why the finished file could not be taken into use, in words the
+  /// user can read — or null when it was.
+  ///
+  /// A download that arrives and is then refused used to say nothing at
+  /// all: the banner reported success and the feature went on showing
+  /// no archive. Whatever hands the file over decides the wording, since
+  /// only it knows what the file was supposed to be.
+  final String? takeUpProblem;
 
   bool get isRunning =>
       request != null && finishedPath == null && error == null;
@@ -62,14 +72,16 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
     return const ArchiveDownloadState();
   }
 
-  /// Fetches [request] and hands the finished file to [onFinished].
+  /// Fetches [request] and hands the finished file to [onFinished],
+  /// which returns null if it took the file into use and otherwise a
+  /// sentence saying why it could not.
   ///
   /// The callback rather than a direct call into a feature's controller:
   /// a map and an encyclopedia are downloaded the same way and stored in
   /// different places, and this has no business knowing which.
   Future<void> start(
     ArchiveDownloadRequest request, {
-    required Future<void> Function(String path, String label) onFinished,
+    required Future<String?> Function(String path, String label) onFinished,
   }) async {
     if (state.isRunning) return;
 
@@ -84,7 +96,7 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
     final existing = File(target);
     if (await existing.exists()) {
       state = ArchiveDownloadState(request: request, finishedPath: target);
-      await onFinished(target, request.label);
+      await _takeUp(request, target, onFinished);
       return;
     }
 
@@ -111,9 +123,32 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
               progress: state.progress,
               finishedPath: target,
             );
-            await onFinished(target, request.label);
+            await _takeUp(request, target, onFinished);
           },
         );
+  }
+
+  /// Hands the finished file over and keeps whatever came back.
+  ///
+  /// The state is written twice — finished, then finished-and-taken-up —
+  /// because opening a fifty-gigabyte archive is not instant and the
+  /// banner should say the download is done while that happens.
+  Future<void> _takeUp(
+    ArchiveDownloadRequest request,
+    String target,
+    Future<String?> Function(String path, String label) onFinished,
+  ) async {
+    final problem = await onFinished(target, request.label);
+    // A second download may have been started while this one was being
+    // opened; its state is the current one and must not be overwritten.
+    if (state.finishedPath != target) return;
+
+    state = ArchiveDownloadState(
+      request: request,
+      progress: state.progress,
+      finishedPath: target,
+      takeUpProblem: problem,
+    );
   }
 
   /// Stops the transfer. What has arrived stays on disk and the next

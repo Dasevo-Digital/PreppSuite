@@ -810,6 +810,17 @@
       }
     }
   },
+  "downloadNotOpenedLabel": "{name} has downloaded, but cannot be opened: {reason}",
+  "@downloadNotOpenedLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "downloadRetryAction": "Try again",
   "downloadDismissAction": "Dismiss",
   "downloadOfSize": "{done} of {total}",

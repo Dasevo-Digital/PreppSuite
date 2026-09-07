@@ -145,9 +145,27 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
           ),
           // Taking it into use straight away is the point of downloading
           // it; there is no second step worth asking about.
-          onFinished: (path, label) => ref
-              .read(knowledgeProvider.notifier)
-              .useArchive(location: path, label: label),
+          onFinished: (path, label) async {
+            final problem = await ref
+                .read(knowledgeProvider.notifier)
+                .useArchive(location: path, label: label);
+
+            if (problem != null) {
+              return switch (problem) {
+                KnowledgeProblem.unreadable => l10n.knowledgeErrorUnreadable,
+              };
+            }
+
+            // Back to the encyclopedia, where the archive now is: the
+            // library was the way there, not the destination. Only from
+            // on top of the stack — a download can finish long after the
+            // user has gone somewhere else, and the banner says so
+            // wherever they are.
+            if (mounted && (ModalRoute.of(context)?.isCurrent ?? false)) {
+              Navigator.of(context).pop();
+            }
+            return null;
+          },
         );
   }
 

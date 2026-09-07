@@ -2540,6 +2540,12 @@ abstract class AppLocalizations {
   /// **'{name} has finished downloading.'**
   String downloadFinishedLabel(String name);
 
+  /// No description provided for @downloadNotOpenedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has downloaded, but cannot be opened: {reason}'**
+  String downloadNotOpenedLabel(String name, String reason);
+
   /// No description provided for @downloadRetryAction.
   ///
   /// In en, this message translates to:

@@ -1446,6 +1446,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String downloadNotOpenedLabel(String name, String reason) {
+    return '$name ist geladen, lässt sich aber nicht öffnen: $reason';
+  }
+
+  @override
   String get downloadRetryAction => 'Erneut versuchen';
 
   @override

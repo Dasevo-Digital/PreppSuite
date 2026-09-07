@@ -45,13 +45,20 @@ class DownloadBanner extends ConsumerWidget {
     }
 
     if (state.finishedPath != null) {
+      // Three states, not two: still opening, open, and downloaded but
+      // refused. The last one used to read like the second.
+      final problem = state.takeUpProblem;
       return _Frame(
-        colour: theme.colorScheme.secondaryContainer,
+        colour: problem == null
+            ? theme.colorScheme.secondaryContainer
+            : theme.colorScheme.errorContainer,
         child: Row(
           children: [
             Expanded(
               child: Text(
-                l10n.downloadFinishedLabel(request.label),
+                problem == null
+                    ? l10n.downloadFinishedLabel(request.label)
+                    : l10n.downloadNotOpenedLabel(request.label, problem),
                 style: theme.textTheme.bodySmall,
               ),
             ),
