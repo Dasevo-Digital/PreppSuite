@@ -111,4 +111,11 @@ void main() {
     await show(tester);
     await expectAccessible(tester);
   });
+
+  testWidgets('the download scope survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await show(tester);
+  });
 }

@@ -158,6 +158,13 @@ void main() {
     await openDialog(tester, item());
     await expectAccessible(tester);
   });
+
+  testWidgets('the deduction dialog survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await openDialog(tester, item());
+  });
 }
 
 /// Mutable holder for what the dialog popped: [value] is the amount, and

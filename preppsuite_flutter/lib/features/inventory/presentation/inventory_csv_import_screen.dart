@@ -469,6 +469,7 @@ class _EditRowDialogState extends State<_EditRowDialog> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<InventoryItemCategory>(
+                  isExpanded: true,
                   initialValue: _category,
                   decoration: InputDecoration(labelText: l10n.categoryLabel),
                   items: [

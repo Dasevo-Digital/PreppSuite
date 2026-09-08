@@ -80,4 +80,11 @@ void main() {
     await show(tester);
     await expectAccessible(tester);
   });
+
+  testWidgets('the map download screen survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await show(tester);
+  });
 }

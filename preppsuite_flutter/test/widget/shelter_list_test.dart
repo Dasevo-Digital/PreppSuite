@@ -155,4 +155,9 @@ void main() {
     await show(tester, shelters: [near, far]);
     await expectAccessible(tester);
   });
+
+  testWidgets('the list survives twice the font size', (tester) async {
+    useLargeText(tester);
+    await show(tester, shelters: [near, far]);
+  });
 }

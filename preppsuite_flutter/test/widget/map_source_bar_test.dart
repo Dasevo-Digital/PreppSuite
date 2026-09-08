@@ -155,4 +155,11 @@ void main() {
     await show(tester, state: await openArchive(tester, 'Niedersachsen'));
     await expectAccessible(tester);
   });
+
+  testWidgets('the source bar survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await show(tester, state: await openArchive(tester, 'Niedersachsen'));
+  });
 }

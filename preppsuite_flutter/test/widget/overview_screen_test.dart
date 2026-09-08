@@ -210,6 +210,17 @@ void main() {
     await expectAccessible(tester);
   });
 
+  testWidgets('the overview survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await pumpOverview(
+      tester,
+      items: [item()],
+      warnings: [warning(regionKey: '03241')],
+    );
+  });
+
   testWidgets('a supply gauge is read out as one thing, not three', (
     tester,
   ) async {

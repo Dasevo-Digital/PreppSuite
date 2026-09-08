@@ -128,4 +128,11 @@ void main() {
     await pumpTips(tester, adults: 2, children: 1);
     await expectAccessible(tester);
   });
+
+  testWidgets('the storage table survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await pumpTips(tester, adults: 2, children: 1);
+  });
 }

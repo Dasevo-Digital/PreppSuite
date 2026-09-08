@@ -82,6 +82,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
+                      isExpanded: true,
                       initialValue: _countryCode,
                       decoration: InputDecoration(
                         labelText: l10n.countryLabel,

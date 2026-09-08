@@ -65,3 +65,20 @@ List<SemanticsNode> liveRegions(WidgetTester tester) {
   walk(tester.binding.rootElement!.renderObject!.debugSemantics!);
   return found;
 }
+
+/// Renders everything after this at twice the font size, as a system-wide
+/// accessibility setting does.
+///
+/// Call it *before* pumping. Flutter reports an overflowing Row or Column
+/// as an error during layout, which the test framework turns into a
+/// failure — so a screen that pumps clean at this scale is a screen whose
+/// text has somewhere to go. It does not prove the result is pretty, only
+/// that nothing is cut off or hidden behind an edge.
+///
+/// Two hundred per cent is the top of what Android and iOS offer without
+/// entering their separate large-display modes, so it is the worst case a
+/// screen has to survive rather than an unreasonable one.
+void useLargeText(WidgetTester tester, {double scale = 2.0}) {
+  tester.platformDispatcher.textScaleFactorTestValue = scale;
+  addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+}

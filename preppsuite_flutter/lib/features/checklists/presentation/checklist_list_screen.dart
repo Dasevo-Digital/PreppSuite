@@ -74,6 +74,7 @@ class ChecklistListScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<ChecklistCategory>(
+                isExpanded: true,
                 initialValue: category,
                 decoration: InputDecoration(labelText: l10n.categoryLabel),
                 items: [

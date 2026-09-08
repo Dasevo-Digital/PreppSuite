@@ -57,4 +57,11 @@ void main() {
     await pumpScreen(tester, 'DE');
     await expectAccessible(tester);
   });
+
+  testWidgets('the NINA hint survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await pumpScreen(tester, 'DE');
+  });
 }

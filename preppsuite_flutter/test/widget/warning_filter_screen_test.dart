@@ -150,4 +150,11 @@ void main() {
     await pumpScreen(tester, [storm, past]);
     await expectAccessible(tester);
   });
+
+  testWidgets('the warning list survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await pumpScreen(tester, [storm, past]);
+  });
 }

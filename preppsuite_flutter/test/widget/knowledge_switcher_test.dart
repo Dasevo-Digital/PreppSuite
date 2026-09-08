@@ -114,4 +114,14 @@ void main() {
     );
     await expectAccessible(tester);
   });
+
+  testWidgets('the archive switcher survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await show(
+      tester,
+      const KnowledgeState(library: [_wikibooks, _klexikon], selectedId: 'b'),
+    );
+  });
 }

@@ -476,6 +476,7 @@ class _InventoryItemFormScreenState
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<InventoryItemCategory>(
+                      isExpanded: true,
                       initialValue: _category,
                       decoration: InputDecoration(
                         labelText: l10n.categoryLabel,
@@ -722,6 +723,10 @@ class _PhotoPicker extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final photoPath = this.photoPath;
 
+    final side = MediaQuery.textScalerOf(
+      context,
+    ).clamp(maxScaleFactor: 1.5).scale(120);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -730,8 +735,14 @@ class _PhotoPicker extends StatelessWidget {
         image: photoPath != null,
         button: true,
         child: Container(
-          width: 120,
-          height: 120,
+          // A square by design — it stands in for a photograph, and a
+          // photograph does not get bigger with the system font. But it
+          // holds a label as well, so it has to give a little: at twice the
+          // font size the icon and two lines of text were 6 pixels taller
+          // than the tile and got clipped. Capped at 1.5, because past that
+          // a thumbnail starts taking over the form it belongs to.
+          width: side,
+          height: side,
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),

@@ -187,4 +187,11 @@ void main() {
     await pumpList(tester, [item(minQuantity: 9)]);
     await expectAccessible(tester);
   });
+
+  testWidgets('the inventory list survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await pumpList(tester, [item(minQuantity: 9)]);
+  });
 }

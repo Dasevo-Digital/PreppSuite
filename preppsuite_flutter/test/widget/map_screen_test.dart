@@ -79,4 +79,9 @@ void main() {
       contrastExemption: 'the disabled map-source segment',
     );
   });
+
+  testWidgets('the map survives twice the font size', (tester) async {
+    useLargeText(tester);
+    await show(tester);
+  });
 }

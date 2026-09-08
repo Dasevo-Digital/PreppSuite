@@ -91,4 +91,11 @@ void main() {
     await show(tester, unfinished: (session: session, stored: 8123));
     await expectAccessible(tester);
   });
+
+  testWidgets('the resume offer survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await show(tester, unfinished: (session: session, stored: 8123));
+  });
 }

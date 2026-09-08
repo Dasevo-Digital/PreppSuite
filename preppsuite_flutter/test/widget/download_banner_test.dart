@@ -95,6 +95,19 @@ void main() {
     await expectAccessible(tester);
   });
 
+  testWidgets('the download banner survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await show(
+      tester,
+      ArchiveDownloadState(
+        request: request,
+        finishedPath: '/tmp/wikipedia_de_all_nopic.zim',
+      ),
+    );
+  });
+
   testWidgets('the bar tells a screen reader how far along it is', (
     tester,
   ) async {

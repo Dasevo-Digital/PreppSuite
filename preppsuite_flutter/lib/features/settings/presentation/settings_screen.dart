@@ -123,6 +123,11 @@ class _LanguagePicker extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final current = ref.watch(localeOverrideProvider);
 
+    // No `isExpanded` here, unlike the form fields: this one sits in a
+    // ListTile's trailing slot, which offers unbounded width, and asking
+    // to fill unbounded width is an assertion rather than a wide button.
+    // It sizes to its longest option instead, which for three language
+    // names is short enough to survive a large font.
     return DropdownButton<Locale?>(
       value: current,
       underline: const SizedBox.shrink(),
@@ -283,6 +288,7 @@ class _EditRegionDialogState extends ConsumerState<_EditRegionDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             DropdownButtonFormField<String>(
+              isExpanded: true,
               initialValue: _countryCode,
               decoration: InputDecoration(labelText: l10n.countryLabel),
               items: [

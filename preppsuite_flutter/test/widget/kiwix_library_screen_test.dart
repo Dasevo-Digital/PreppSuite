@@ -93,4 +93,20 @@ void main() {
     );
     await expectAccessible(tester);
   });
+
+  testWidgets('the Kiwix library survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await show(
+      tester,
+      catalogue: KiwixCatalogue(
+        httpClient: FixtureHttpClient({
+          'https://library.kiwix.org/catalog/v2/entries'
+                  '?lang=deu&start=0&count=25':
+              entriesXml,
+        }),
+      ),
+    );
+  });
 }

@@ -113,4 +113,11 @@ void main() {
     await pumpCard(tester);
     await expectAccessible(tester);
   });
+
+  testWidgets('the reminder card survives twice the font size', (
+    tester,
+  ) async {
+    useLargeText(tester);
+    await pumpCard(tester);
+  });
 }

@@ -169,6 +169,7 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: DropdownButtonFormField<String>(
+                            isExpanded: true,
                             initialValue: _currency,
                             decoration: InputDecoration(
                               labelText: l10n.currencyLabel,
@@ -191,6 +192,7 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<InventoryItemCategory>(
+                      isExpanded: true,
                       initialValue: _category,
                       decoration: InputDecoration(
                         labelText: l10n.categoryLabel,

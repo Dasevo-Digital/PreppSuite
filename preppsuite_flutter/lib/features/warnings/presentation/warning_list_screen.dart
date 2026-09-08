@@ -51,12 +51,7 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
             searchController: _searchController,
             onChanged: (filter) => setState(() => _filter = filter),
           ),
-          Expanded(
-            child: _buildList(context, l10n, warningsAsync),
-          ),
-          // NINA is the BBK's app and only covers Germany — recommending it
-          // to an Austrian household would be wrong.
-          if (profile.countryCode == 'DE') _NinaHint(l10n: l10n),
+          Expanded(child: _buildList(context, l10n, warningsAsync)),
         ],
       ),
     );
@@ -67,14 +62,32 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
     AppLocalizations l10n,
     AsyncValue<List<Warning>> warningsAsync,
   ) {
+    // NINA is the BBK's app and only covers Germany — recommending it to
+    // an Austrian household would be wrong.
+    //
+    // It scrolls with the list rather than sitting pinned below it. Pinned,
+    // it and the filter bar together took the whole screen at twice the
+    // system font size: the list got nothing and the card overflowed by 62
+    // pixels. The filter bar has to stay — a warning list that is quietly
+    // filtered is dangerous — so the advisory is the one that gives way.
+    final hint = profile.countryCode == 'DE' ? _NinaHint(l10n: l10n) : null;
+
+    /// A message with the advisory under it, scrollable as a pair.
+    ///
+    /// Not vertically centred any more: centring means filling the
+    /// viewport, which pushed the card below the fold — and a hint nobody
+    /// scrolls to is a hint nobody reads.
+    Widget messageWithHint(Widget message) =>
+        ListView(children: [message, ?hint]);
+
     return warningsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stackTrace) =>
           Center(child: Text(describeError(l10n, error))),
       data: (all) {
         if (all.isEmpty) {
-          return Center(
-            child: Padding(
+          return messageWithHint(
+            Padding(
               padding: const EdgeInsets.all(32),
               child: Text(
                 l10n.warningsEmpty,
@@ -95,8 +108,8 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
           // Distinct from "nothing has come in": one is the feeds being
           // quiet, the other is this screen hiding what did arrive, and a
           // list that cannot tell them apart looks broken.
-          return Center(
-            child: Padding(
+          return messageWithHint(
+            Padding(
               padding: const EdgeInsets.all(32),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -146,20 +159,21 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
             return b.sent.compareTo(a.sent);
           });
 
+        final leading = _filter.isEmpty ? 0 : 1;
+
         return ListView.builder(
-          itemCount: sorted.length + (_filter.isEmpty ? 0 : 1),
+          itemCount: leading + sorted.length + (hint == null ? 0 : 1),
           itemBuilder: (context, index) {
-            if (!_filter.isEmpty) {
-              if (index == 0) {
-                return _ResultCount(
-                  shown: sorted.length,
-                  total: all.length,
-                  onClear: _clearFilter,
-                );
-              }
-              return _WarningTile(warning: sorted[index - 1], l10n: l10n);
+            if (leading == 1 && index == 0) {
+              return _ResultCount(
+                shown: sorted.length,
+                total: all.length,
+                onClear: _clearFilter,
+              );
             }
-            return _WarningTile(warning: sorted[index], l10n: l10n);
+            final at = index - leading;
+            if (at == sorted.length) return hint!;
+            return _WarningTile(warning: sorted[at], l10n: l10n);
           },
         );
       },
