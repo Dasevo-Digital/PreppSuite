@@ -6,6 +6,8 @@ import 'package:preppsuite_flutter/features/knowledge/application/zim_store.dart
 import 'package:preppsuite_flutter/features/knowledge/presentation/knowledge_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 
+import 'accessibility.dart';
+
 const _wikibooks = StoredArchive(
   id: 'a',
   location: '/tmp/wikibooks.zim',
@@ -101,5 +103,15 @@ void main() {
     );
 
     expect(find.byType(ChoiceChip), findsNothing);
+  });
+
+  testWidgets('the archive switcher meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      const KnowledgeState(library: [_wikibooks, _klexikon], selectedId: 'b'),
+    );
+    await expectAccessible(tester);
   });
 }

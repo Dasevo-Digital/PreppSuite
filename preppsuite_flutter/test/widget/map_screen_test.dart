@@ -7,6 +7,8 @@ import 'package:preppsuite_flutter/features/maps/presentation/map_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'accessibility.dart';
+
 class _NoOfflineMap extends OfflineMapController {
   @override
   Future<OfflineMapState> build() async => const OfflineMapState();
@@ -63,5 +65,18 @@ void main() {
 
     expect(find.byTooltip('Karte herunterladen'), findsOneWidget);
     expect(find.byTooltip('Mein Standort'), findsOneWidget);
+  });
+
+  testWidgets('the map meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await show(tester);
+    await expectAccessible(
+      tester,
+      // No archive here, so the source bar's "offline" segment is disabled
+      // and Material greys its label. `map_source_bar_test` checks the
+      // contrast of that bar with an archive open, where it is live.
+      contrastExemption: 'the disabled map-source segment',
+    );
   });
 }

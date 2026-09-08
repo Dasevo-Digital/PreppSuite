@@ -5,6 +5,8 @@ import 'package:preppsuite_flutter/features/downloads/application/download_provi
 import 'package:preppsuite_flutter/features/downloads/presentation/download_banner.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 
+import 'accessibility.dart';
+
 /// A download that arrives and is then refused is the case that used to
 /// go unsaid: the banner reported success, the feature went on showing no
 /// archive, and nothing anywhere named the reason.
@@ -77,5 +79,18 @@ void main() {
     await show(tester, const ArchiveDownloadState());
 
     expect(find.byType(Text), findsNothing);
+  });
+
+  testWidgets('the download banner meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      ArchiveDownloadState(
+        request: request,
+        finishedPath: '/tmp/wikipedia_de_all_nopic.zim',
+      ),
+    );
+    await expectAccessible(tester);
   });
 }

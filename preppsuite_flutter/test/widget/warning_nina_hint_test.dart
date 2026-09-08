@@ -6,6 +6,8 @@ import 'package:preppsuite_flutter/features/warnings/presentation/warning_list_s
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
 
+import 'accessibility.dart';
+
 void main() {
   HouseholdProfile profile(String countryCode) => HouseholdProfile(
     id: 'household-1',
@@ -47,5 +49,12 @@ void main() {
     await pumpScreen(tester, 'AT');
 
     expect(find.textContaining('NINA'), findsNothing);
+  });
+
+  testWidgets('the NINA hint meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await pumpScreen(tester, 'DE');
+    await expectAccessible(tester);
   });
 }

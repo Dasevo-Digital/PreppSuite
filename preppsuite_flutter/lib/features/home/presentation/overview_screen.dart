@@ -461,16 +461,20 @@ class _CategoryChip extends StatelessWidget {
     final theme = Theme.of(context);
     final empty = count == 0;
 
+    // `outline` is the token for borders and sits below the contrast a
+    // label needs — at 12pt it measures 4.33:1 against the chip, under the
+    // 4.5:1 WCAG asks for. `onSurfaceVariant` is the muted *text* token and
+    // still reads as the quieter of the two states.
     return Chip(
       visualDensity: VisualDensity.compact,
       avatar: Icon(
         categoryIcon(category),
         size: 16,
-        color: empty ? theme.colorScheme.outline : null,
+        color: empty ? theme.colorScheme.onSurfaceVariant : null,
       ),
       label: Text('${localizeCategory(l10n, category)} · $count'),
       labelStyle: theme.textTheme.labelMedium?.copyWith(
-        color: empty ? theme.colorScheme.outline : null,
+        color: empty ? theme.colorScheme.onSurfaceVariant : null,
       ),
     );
   }

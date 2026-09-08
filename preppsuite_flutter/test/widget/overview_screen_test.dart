@@ -10,6 +10,8 @@ import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
 
+import 'accessibility.dart';
+
 /// The counting is settled in `test/features/home/home_overview_test.dart`.
 /// What is left here is whether the cards show it, and whether tapping one
 /// leads where it says it does.
@@ -195,5 +197,16 @@ void main() {
     await tester.tap(find.text('Ressourcen'));
     await tester.pumpAndSettle();
     expect(navigated.last, ShellDestination.inventory);
+  });
+
+  testWidgets('the overview meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await pumpOverview(
+      tester,
+      items: [item()],
+      warnings: [warning(regionKey: '03241')],
+    );
+    await expectAccessible(tester);
   });
 }

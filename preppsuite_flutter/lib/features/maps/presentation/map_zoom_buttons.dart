@@ -35,15 +35,19 @@ class MapZoomButtons extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
 
-    // Compact on purpose: the control sits over the map in whatever
-    // height is left for it, and a short map — a small window, a phone in
-    // landscape — must not make it overflow its own corner.
+    // 48 is the floor both Material and the accessibility guidelines put
+    // under a tap target, and this is a control used one-handed, outdoors,
+    // possibly with gloves on. It was 38x34 before, which is small enough
+    // that a miss lands on the map and pans it instead.
+    //
+    // The pair costs 97 logical pixels of height with the divider, which
+    // still leaves room in the corner of a short map — a small window, a
+    // phone in landscape — for the control not to overflow.
     Widget button(IconData icon, String tooltip, double amount) => IconButton(
       icon: Icon(icon, size: 20),
       tooltip: tooltip,
-      visualDensity: VisualDensity.compact,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 38, height: 34),
+      constraints: const BoxConstraints.tightFor(width: 48, height: 48),
       onPressed: () => _by(amount),
     );
 

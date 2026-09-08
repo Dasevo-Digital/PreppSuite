@@ -10,6 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/fixture_http_client.dart';
 
+import 'accessibility.dart';
+
 /// Searching a town and then choosing how far out to download — the path
 /// that turns "a whole country" from impossible into a number.
 void main() {
@@ -101,5 +103,12 @@ void main() {
     // And it is downloadable, which is the whole claim.
     final button = find.widgetWithText(FilledButton, 'Karte herunterladen');
     expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
+  });
+
+  testWidgets('the download scope meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await show(tester);
+    await expectAccessible(tester);
   });
 }

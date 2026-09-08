@@ -7,6 +7,8 @@ import 'package:preppsuite_flutter/core/notifications_provider.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'accessibility.dart';
+
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
@@ -103,5 +105,12 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('the reminder card meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await pumpCard(tester);
+    await expectAccessible(tester);
   });
 }

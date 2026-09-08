@@ -303,11 +303,15 @@ class _ArchiveSwitcher extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (state.library.length < 2) return const SizedBox.shrink();
 
+    // A horizontal list has to be given a height, and 48 with 6 of padding
+    // above and below left the chips 36 tall — under the 48 a tap target
+    // needs. 56 gives them their full height back and leaves the row room
+    // to grow a little when the system font is enlarged.
     return SizedBox(
-      height: 48,
+      height: 56,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         children: [
           for (final archive in state.library)
             Padding(

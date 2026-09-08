@@ -7,6 +7,8 @@ import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
 
+import 'accessibility.dart';
+
 /// Whether the filter narrows the list is settled in
 /// `test/features/warning_filter_test.dart`, without a widget tree. What
 /// is left here is the part only the screen can get wrong: that the chips
@@ -140,5 +142,12 @@ void main() {
     await pumpScreen(tester, const []);
 
     expect(find.textContaining('Keine der'), findsNothing);
+  });
+
+  testWidgets('the warning list meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await pumpScreen(tester, [storm, past]);
+    await expectAccessible(tester);
   });
 }

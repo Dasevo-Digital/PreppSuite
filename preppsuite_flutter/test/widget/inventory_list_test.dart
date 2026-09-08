@@ -10,6 +10,8 @@ import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'accessibility.dart';
+
 /// Records what the screen asked for instead of writing it. The write
 /// itself is covered without a widget tree in
 /// `test/features/inventory_controller_test.dart` — here the question is
@@ -177,5 +179,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(consumed, isEmpty);
+  });
+
+  testWidgets('the inventory list meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await pumpList(tester, [item(minQuantity: 9)]);
+    await expectAccessible(tester);
   });
 }

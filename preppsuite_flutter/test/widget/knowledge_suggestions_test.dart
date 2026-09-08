@@ -6,6 +6,8 @@ import 'package:preppsuite_flutter/features/knowledge/application/recommended_ar
 import 'package:preppsuite_flutter/features/knowledge/presentation/knowledge_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 
+import 'accessibility.dart';
+
 class _NoArchive extends KnowledgeController {
   @override
   Future<KnowledgeState> build() async => const KnowledgeState();
@@ -72,5 +74,12 @@ void main() {
       expect(archive.query.trim(), isNotEmpty, reason: archive.name);
       expect(archive.language, hasLength(3), reason: archive.name);
     }
+  });
+
+  testWidgets('the suggestions meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await show(tester);
+    await expectAccessible(tester);
   });
 }

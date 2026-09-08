@@ -6,6 +6,8 @@ import 'package:preppsuite_flutter/features/inventory/presentation/storage_tips_
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
 
+import 'accessibility.dart';
+
 /// Stands in for the real profile, which loads from preferences.
 class _FixedProfile extends HouseholdProfileController {
   _FixedProfile(this.profile);
@@ -118,5 +120,12 @@ void main() {
 
     expect(find.text('Hartkäse'), findsOneWidget);
     expect(find.textContaining('1 kg · 3780 kcal'), findsOneWidget);
+  });
+
+  testWidgets('the storage table meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await pumpTips(tester, adults: 2, children: 1);
+    await expectAccessible(tester);
   });
 }

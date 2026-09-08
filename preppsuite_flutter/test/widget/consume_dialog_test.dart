@@ -4,6 +4,8 @@ import 'package:preppsuite_flutter/features/inventory/presentation/consume_dialo
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
+import 'accessibility.dart';
+
 void main() {
   InventoryItem item({double quantity = 5, String unit = 'Stk'}) {
     return InventoryItem(
@@ -148,6 +150,13 @@ void main() {
     expect(find.byType(ConsumeDialog), findsNothing);
     expect(result.closed, isTrue);
     expect(result.value, isNull);
+  });
+
+  testWidgets('the deduction dialog meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await openDialog(tester, item());
+    await expectAccessible(tester);
   });
 }
 

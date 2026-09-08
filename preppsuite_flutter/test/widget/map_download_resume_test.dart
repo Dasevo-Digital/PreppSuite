@@ -9,6 +9,8 @@ import 'package:preppsuite_flutter/features/maps/presentation/map_download_scree
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'accessibility.dart';
+
 /// What somebody sees on opening the screen after the app was closed
 /// part-way through a country.
 void main() {
@@ -81,5 +83,12 @@ void main() {
     expect(find.text('Unterbrochener Download'), findsNothing);
     expect(find.text('Fortsetzen'), findsNothing);
     expect(find.text('Sichtbarer Ausschnitt'), findsOneWidget);
+  });
+
+  testWidgets('the resume offer meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await show(tester, unfinished: (session: session, stored: 8123));
+    await expectAccessible(tester);
   });
 }

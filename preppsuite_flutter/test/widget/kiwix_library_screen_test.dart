@@ -9,6 +9,8 @@ import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 
 import '../features/fixture_http_client.dart';
 
+import 'accessibility.dart';
+
 /// The download screen against a captured catalogue, because what it puts
 /// in front of somebody — the size above all — is what decides whether
 /// they start a download their device cannot hold.
@@ -74,5 +76,21 @@ void main() {
       find.textContaining('Die Bibliothek war nicht erreichbar'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('the Kiwix library meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      catalogue: KiwixCatalogue(
+        httpClient: FixtureHttpClient({
+          'https://library.kiwix.org/catalog/v2/entries'
+                  '?lang=deu&start=0&count=25':
+              entriesXml,
+        }),
+      ),
+    );
+    await expectAccessible(tester);
   });
 }

@@ -12,6 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/maps/pmtiles_fixture.dart';
 
+import 'accessibility.dart';
+
 class _FixedOfflineMap extends OfflineMapController {
   _FixedOfflineMap(this.fixed);
 
@@ -140,5 +142,17 @@ void main() {
 
     expect(find.textContaining('kommen von OpenStreetMap'), findsOneWidget);
     expect(find.textContaining('Gezeichnet aus'), findsNothing);
+  });
+
+  testWidgets('the source bar meets the accessibility guidelines', (
+    tester,
+  ) async {
+    // With an archive, so both segments are enabled. Without one the
+    // "offline" segment is disabled and Material greys its label down to
+    // 2.26:1 — which `textContrastGuideline` reports and WCAG 1.4.3 does
+    // not require: text in an inactive component is exempt. The line above
+    // the button says why it is off, which is the part that matters.
+    await show(tester, state: await openArchive(tester, 'Niedersachsen'));
+    await expectAccessible(tester);
   });
 }

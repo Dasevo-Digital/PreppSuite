@@ -5,6 +5,8 @@ import 'package:preppsuite_flutter/features/maps/presentation/map_download_scree
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'accessibility.dart';
+
 /// The area picker. What matters is that it names a tile count before
 /// anything is fetched — that number is the only warning somebody gets
 /// before committing a phone to a download.
@@ -70,5 +72,12 @@ void main() {
     final button = find.widgetWithText(FilledButton, 'Karte herunterladen');
     expect(button, findsOneWidget);
     expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
+  });
+
+  testWidgets('the map download screen meets the accessibility guidelines', (
+    tester,
+  ) async {
+    await show(tester);
+    await expectAccessible(tester);
   });
 }
