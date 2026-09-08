@@ -16,6 +16,38 @@ on:
   workflow_dispatch:
 
 jobs:
+  # The Xapian shim for Windows, cross-built here rather than on the
+  # Windows runner: xapian-core 1.4 ships no MSVC project files any more,
+  # while its configure handles mingw deliberately. One toolchain to keep
+  # instead of two, and the Windows job only has to pick the file up.
+  xapian-windows:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Only what the compile needs, not the finished library: relinking
+      # the shim takes seconds, building xapian-core takes ten minutes.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            preppsuite_flutter/native/zim_xapian/build/vendor
+            preppsuite_flutter/native/zim_xapian/build/xapian-windows-x64
+          key: xapian-windows-${{ hashFiles('preppsuite_flutter/native/zim_xapian/xapian_source.sh') }}
+
+      - name: Install mingw-w64
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64 libz-mingw-w64-dev
+
+      - name: Build
+        run: preppsuite_flutter/native/zim_xapian/build_windows.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zim-xapian-windows
+          path: preppsuite_flutter/native/zim_xapian/build/zim_xapian.dll
+
   linux:
     runs-on: ubuntu-latest
 
@@ -35,7 +67,21 @@ jobs:
           sudo apt-get install -y \
             clang cmake ninja-build pkg-config \
             libgtk-3-dev liblzma-dev libstdc++-12-dev \
-            libwebkit2gtk-4.1-dev libsoup-3.0-dev
+            libwebkit2gtk-4.1-dev libsoup-3.0-dev \
+            zlib1g-dev uuid-dev
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            preppsuite_flutter/native/zim_xapian/build/vendor
+            preppsuite_flutter/native/zim_xapian/build/xapian-linux-x86_64
+          key: xapian-linux-${{ hashFiles('preppsuite_flutter/native/zim_xapian/xapian_source.sh') }}
+
+      # Before the app, because CMake only bundles the library if it is
+      # already there — and skipping it silently costs the full-text
+      # search, which is the sort of thing nobody notices in an artefact.
+      - name: Build Xapian shim
+        run: preppsuite_flutter/native/zim_xapian/build_linux.sh
 
       - name: Install dependencies
         run: flutter pub get
@@ -51,6 +97,7 @@ jobs:
 
   windows:
     runs-on: windows-latest
+    needs: xapian-windows
 
     steps:
       - uses: actions/checkout@v4
@@ -58,6 +105,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.44.8'
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: zim-xapian-windows
+          path: preppsuite_flutter/native/zim_xapian/build
 
       - name: Install dependencies
         run: flutter pub get

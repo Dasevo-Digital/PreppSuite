@@ -8,10 +8,11 @@ Das ist ein anderer Weg als der, den die App bisher geht: `KnowledgeIndexer`
 baut sich einen eigenen SQLite-FTS5-Index. Beide bleiben. Welcher greift,
 entscheidet das Archiv.
 
-**Stand seit 0.15.0: in der App, unter macOS.** Wo die Bibliothek
-mitgeliefert wird und das Archiv einen Index trägt, sucht die App darin.
-Sonst fällt sie auf ihren eigenen zurück, ohne dass jemand etwas
-umstellen muss. Was für die übrigen Plattformen noch fehlt, steht unten.
+**Stand seit 0.15.0: in der App, unter macOS und Linux.** Wo die
+Bibliothek mitgeliefert wird und das Archiv einen Index trägt, sucht die
+App darin. Sonst fällt sie auf ihren eigenen zurück, ohne dass jemand
+etwas umstellen muss. Was für die übrigen Plattformen noch fehlt, steht
+unten.
 
 An der vollständigen deutschen Wikipedia gemessen, 50 GB:
 
@@ -130,21 +131,54 @@ aufhört.
 
 ## Bauen
 
+Ein Skript je Plattform, eine gemeinsame Quelle: `xapian_source.sh` hält
+Fassung und Prüfsumme, damit drei Skripte nicht drei verschiedene
+Tarballs anheften können. Jedes lädt xapian-core 1.4.32, prüft die
+Prüfsumme **vor** dem Auspacken, baut es statisch und bindet die Schicht
+dagegen.
+
 ```bash
-preppsuite_flutter/native/zim_xapian/build_macos.sh
+native/zim_xapian/build_macos.sh    # universal, arm64 + x86_64, 3,2 MB
+native/zim_xapian/build_linux.sh    # 1,9 MB
+native/zim_xapian/build_windows.sh  # von Linux aus, mit mingw-w64
 ```
-
-Das Skript lädt xapian-core 1.4.32 als Quelltext, prüft die Prüfsumme,
-baut es statisch für arm64 und x86_64 und bindet die Schicht dagegen. Es
-braucht kein Homebrew; heraus kommen 3,2 MB, die nur noch an `libz`,
-`libc++` und `libSystem` hängen – alles, was macOS ohnehin mitbringt.
-
-Xcode legt die Datei anschließend in `Contents/Frameworks` des Bündels
-und signiert sie (Bauphase „Embed Xapian“). Fehlt sie, warnt die Phase und
-der Bau läuft weiter: die App muss auch ohne sie übersetzen.
 
 Warum 1.4 und nicht das neuere 2.x: 1.4 ist die stabile Reihe und die,
 in der Glass geschrieben und gelesen wird.
+
+**macOS.** Braucht kein Homebrew. Heraus kommen 3,2 MB, die nur noch an
+`libz`, `libc++` und `libSystem` hängen. Xcode legt die Datei in
+`Contents/Frameworks` und signiert sie (Bauphase „Embed Xapian“).
+
+**Linux.** Braucht `zlib1g-dev` und `uuid-dev`; welchen C++-Compiler die
+Maschine hat, sucht das Skript sich selbst, weil die Flutter-Kette clang
+mitbringt und g++ nicht unbedingt da ist. CMake legt die `.so` nach
+`bundle/lib/`. Zwei Linkerschalter sind nicht Kosmetik: `--no-undefined`
+macht eine vergessene Bibliothek zum Fehler beim Bauen statt zu einem
+Programm, das startet und dann nichts öffnen kann — `-luuid` war einmal
+vergessen. Und `--version-script` sorgt dafür, dass nur die elf
+`zx_`-Funktionen herausschauen: unter ELF reicht `-fvisibility=hidden`
+nicht, weil die Template-Instanzen aus den libstdc++-Kopfdateien schwache
+Symbole mit voller Sichtbarkeit sind.
+
+**Windows.** Nicht mit MSVC: xapian-core 1.4 hat sein `win32`-Verzeichnis
+verloren, dafür behandelt sein `configure` mingw an einem Dutzend
+Stellen. Das Skript läuft deshalb auf einer Linux-Maschine
+(`mingw-w64`, `libz-mingw-w64-dev`), und die fertige `zim_xapian.dll`
+wird herübergereicht. CMake legt sie neben die `.exe`.
+
+Fehlt die Bibliothek, warnt der Bau und läuft weiter: die App muss auch
+ohne sie übersetzen.
+
+### Zwei Fallen unter Windows
+
+Beide sind in der Schicht abgefangen, beide wären still gewesen:
+
+- Eine Datei ohne `O_BINARY` wird im Textmodus gelesen, und der schreibt
+  Bytes unterwegs um. Für eine Datenbank tödlich.
+- `lseek` nimmt dort einen 32-Bit-Offset. Der Index der vollständigen
+  Wikipedia fängt bei Byte 47 677 531 029 an — der Sprung wäre irgendwo
+  gelandet, ohne Fehler.
 
 Testen gegen ein echtes Archiv:
 
@@ -162,11 +196,8 @@ der Nachbau gelesen wurde.
 
 ## Was noch fehlt
 
-Alles Übrige ist eine Plattformfrage. Der Weg selbst steht.
-
-1. **Linux und Windows.** Dasselbe Skript in anderer Sprache: xapian-core
-   statisch bauen, die Schicht dagegen binden, die Datei neben die
-   ausführbare legen. Einzige Abhängigkeit ist zlib.
+1. **Windows ausprobieren.** Das Skript steht, gebaut und gestartet ist
+   es noch nicht.
 2. **Android**, aufwendiger: je ABI bauen (arm64-v8a, armeabi-v7a,
    x86_64) und über `jniLibs` einbinden, rund 3–6 MB je ABI;
    [kiwix-build](https://github.com/kiwix/kiwix-build) hat ein Rezept.
@@ -177,6 +208,11 @@ Alles Übrige ist eine Plattformfrage. Der Weg selbst steht.
 3. **iOS** ist offen: die Bibliothek ließe sich bauen, aber Archive liegen
    dort im Speicher der App, und ob eine 50-GB-Datei dorthin gehört, ist
    keine Frage an diese Seite.
+
+Für Android ist ein **deutscher Stemmer in Dart** vermutlich der bessere
+Handel: er kostet einen Bruchteil und hilft auch jedem Archiv ohne
+eigenen Index, auf allen Plattformen. Er nimmt nur die eine Hälfte des
+Gewinns mit — den Indexlauf spart er nicht.
 
 ## Das Risiko, das bleibt
 

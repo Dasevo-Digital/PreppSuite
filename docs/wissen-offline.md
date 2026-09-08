@@ -135,7 +135,7 @@ nach Wortstämmen – „Notvorräte" findet „Notvorrat". An der vollständige
 deutschen Wikipedia gemessen: 3,2 Millionen Artikel, der Index öffnet in
 vier Millisekunden, eine Suche dauert null bis vier.
 
-Das geht vorerst nur unter macOS. Dahinter steckt `libxapian`, eine
+Das geht vorerst unter macOS und Linux. Dahinter steckt `libxapian`, eine
 C++-Bibliothek, die je Plattform gebaut und mitgeliefert werden muss;
 Einzelheiten in
 [Volltextsuche über den Index im Archiv](volltextsuche-xapian.md).

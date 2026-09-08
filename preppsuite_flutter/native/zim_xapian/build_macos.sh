@@ -20,52 +20,22 @@ set -euo pipefail
 
 readonly HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly BUILD="$HERE/build"
-
-# 1.4 is the stable series and the one that writes and reads glass, the
-# format Kiwix's indexes are in. 2.x still reads glass but is a
-# development series; there is nothing here that wants it.
-readonly XAPIAN_VERSION=1.4.32
-readonly XAPIAN_SHA256=c4fd64e81127311756adf5579268d14a79f285ce8ac4ead0930c96195897aece
-# Upstream's own host was unreachable from here; Debian's pool carries the
-# unmodified upstream tarball, and the checksum above is the one its
-# signed .dsc lists.
-readonly XAPIAN_URL="http://deb.debian.org/debian/pool/main/x/xapian-core/xapian-core_${XAPIAN_VERSION}.orig.tar.xz"
+# shellcheck source=xapian_source.sh
+. "$HERE/xapian_source.sh"
 
 # Matches the Runner's own target. A library built for something newer
 # would load on this machine and refuse on an older one.
 export MACOSX_DEPLOYMENT_TARGET=10.15
 
 [ "${1:-}" = "--clean" ] && rm -rf "$BUILD"
-mkdir -p "$BUILD/vendor"
+mkdir -p "$BUILD"
 
-tarball="$BUILD/vendor/xapian-core-$XAPIAN_VERSION.tar.xz"
-source_dir="$BUILD/vendor/xapian-core-$XAPIAN_VERSION"
-
-if [ ! -d "$source_dir" ]; then
-  if [ ! -f "$tarball" ]; then
-    echo "== xapian-core $XAPIAN_VERSION laden =="
-    curl -fsSL --retry 3 -o "$tarball.part" "$XAPIAN_URL"
-    mv "$tarball.part" "$tarball"
-  fi
-
-  # Checked before unpacking, not after: a tarball is a list of paths to
-  # write, and this one is fetched over plain HTTP from a mirror.
-  actual="$(shasum -a 256 "$tarball" | cut -d' ' -f1)"
-  if [ "$actual" != "$XAPIAN_SHA256" ]; then
-    echo "FEHLER: Pruefsumme passt nicht" >&2
-    echo "  erwartet: $XAPIAN_SHA256" >&2
-    echo "  bekommen: $actual" >&2
-    exit 1
-  fi
-
-  echo "== auspacken =="
-  tar -xJf "$tarball" -C "$BUILD/vendor"
-fi
+source_dir="$(xapian_source "$BUILD")"
 
 # One prefix per architecture, because the two static libraries cannot
 # share a directory and configure writes a config header per build.
 for arch in arm64 x86_64; do
-  prefix="$BUILD/xapian-$arch"
+  prefix="$BUILD/xapian-macos-$arch"
   if [ -f "$prefix/lib/libxapian.a" ]; then
     echo "== xapian $arch liegt schon =="
     continue
@@ -83,9 +53,7 @@ for arch in arm64 x86_64; do
     "$source_dir/configure" \
       --host="$arch-apple-darwin" \
       --prefix="$prefix" \
-      --enable-static --disable-shared \
-      --disable-documentation \
-      --disable-backend-inmemory --disable-backend-remote \
+      "${XAPIAN_FLAGS[@]}" \
       CC="clang -arch $arch" \
       CXX="clang++ -arch $arch" \
       CXXFLAGS="-O2 -fvisibility=hidden -fvisibility-inlines-hidden" \
@@ -98,7 +66,7 @@ done
 
 # The shim itself, once per architecture, then joined.
 for arch in arm64 x86_64; do
-  prefix="$BUILD/xapian-$arch"
+  prefix="$BUILD/xapian-macos-$arch"
   echo "== Schicht $arch bauen =="
   clang++ -std=c++17 -O2 -arch "$arch" \
     -fvisibility=hidden -fvisibility-inlines-hidden \
@@ -115,6 +83,11 @@ lipo -create \
   "$BUILD/libzim_xapian-arm64.dylib" \
   "$BUILD/libzim_xapian-x86_64.dylib" \
   -output "$BUILD/libzim_xapian.dylib"
+
+echo "== Selbsttest bauen =="
+cc -O2 -Wall -Wextra -I"$HERE" \
+  -o "$BUILD/selftest" "$HERE/selftest.c" \
+  -L"$BUILD" -lzim_xapian -Wl,-rpath,'@loader_path'
 
 echo
 echo "== fertig =="

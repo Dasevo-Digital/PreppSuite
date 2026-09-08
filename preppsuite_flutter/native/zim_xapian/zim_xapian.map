@@ -1,0 +1,13 @@
+# Only the C surface leaves the library.
+#
+# ELF needs saying twice: -fvisibility=hidden hides what we compile, but
+# the template instantiations libstdc++'s headers pull in are weak symbols
+# with default visibility, and they end up in the dynamic table where they
+# can interpose on the host program's own. Mach-O and PE have no such
+# problem, so this file is Linux's alone.
+{
+  global:
+    zx_*;
+  local:
+    *;
+};

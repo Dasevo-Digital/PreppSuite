@@ -257,12 +257,12 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   nächsten Start fortgesetzt statt neu begonnen. Einzelheiten in
   [`docs/karte-offline.md`](docs/karte-offline.md).
 - Die Volltextsuche nutzt seit 0.15.0 den Index, den ein Kiwix-Archiv
-  ohnehin mitbringt – aber vorerst nur unter macOS, weil dafür eine
+  ohnehin mitbringt – vorerst unter macOS und Linux, weil dafür eine
   C++-Bibliothek im Programm stecken muss. Gemessen an der vollständigen
   deutschen Wikipedia: 3,2 Millionen Artikel, nichts aufzubauen, eine
   Suche in wenigen Millisekunden, und „Notvorräte" findet „Notvorrat".
-- Überall sonst – und bei Archiven ohne eigenen Index – baut die App
-  weiterhin einen eigenen auf. Für eine Themensammlung sind das Minuten,
+- Unter Windows und Android – und bei Archiven ohne eigenen Index – baut
+  die App weiterhin einen eigenen auf. Für eine Themensammlung sind das Minuten,
   für die vollständige Wikipedia eher eine Stunde und mehrere Gigabyte.
   Anhalten geht jederzeit; das Angefangene bleibt durchsuchbar. Dieser
   Index kennt keinen deutschen Wortstamm.

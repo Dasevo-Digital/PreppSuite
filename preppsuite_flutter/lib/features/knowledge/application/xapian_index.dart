@@ -186,15 +186,21 @@ DynamicLibrary _openLibrary() {
   throw XapianException('$name was not found');
 }
 
-/// Where a shipped copy lies inside the app bundle.
+/// Where a shipped copy lies, for each platform's idea of "next to the
+/// program".
 ///
 /// By full path rather than by name: the loader resolves a bare name
-/// against its own search paths, and `@rpath` is not one of them for
-/// `dlopen`. Null where there is no bundle to look in.
+/// against its own search paths, and neither `@rpath` nor `$ORIGIN` is
+/// one of them for `dlopen`. Null on the platforms that ship no copy.
 String? _bundled(String name) {
-  if (!Platform.isMacOS) return null;
-  final contents = File(Platform.resolvedExecutable).parent.parent;
-  return '${contents.path}/Frameworks/$name';
+  final beside = File(Platform.resolvedExecutable).parent;
+  if (Platform.isMacOS) {
+    // .../PreppSuite.app/Contents/MacOS/PreppSuite -> Contents/Frameworks
+    return '${beside.parent.path}/Frameworks/$name';
+  }
+  if (Platform.isLinux) return '${beside.path}/lib/$name';
+  if (Platform.isWindows) return '${beside.path}\\$name';
+  return null;
 }
 
 /// Hand-written rather than generated: eleven functions, no structs and

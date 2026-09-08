@@ -1,7 +1,12 @@
 #include "zim_xapian.h"
 
 #include <fcntl.h>
+
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 #include <cstdlib>
 #include <map>
@@ -12,6 +17,31 @@
 #include <xapian.h>
 
 namespace {
+
+// Opening the archive, in the two ways the platforms spell it.
+//
+// Two things go wrong on Windows if this is left as plain POSIX. A file
+// opened without O_BINARY is read in text mode, which rewrites bytes on
+// the way past - fatal for a database. And `lseek` there takes a 32-bit
+// offset, while the index in a full Wikipedia starts at byte
+// 47 677 531 029: the seek would silently land somewhere else entirely.
+#ifdef _WIN32
+inline int zx_open_read(const char* path) {
+  return ::_open(path, _O_RDONLY | _O_BINARY);
+}
+inline int64_t zx_seek(int fd, int64_t offset) {
+  return ::_lseeki64(fd, offset, SEEK_SET);
+}
+inline void zx_close_fd(int fd) { ::_close(fd); }
+#else
+inline int zx_open_read(const char* path) { return ::open(path, O_RDONLY); }
+inline int64_t zx_seek(int fd, int64_t offset) {
+  // off_t is 64 bit everywhere this is built, which the build scripts
+  // guarantee on 32-bit systems with _FILE_OFFSET_BITS=64.
+  return ::lseek(fd, static_cast<off_t>(offset), SEEK_SET);
+}
+inline void zx_close_fd(int fd) { ::close(fd); }
+#endif
 
 struct Result {
   std::string path;
@@ -134,8 +164,8 @@ ZxSearcher* open_descriptor(int fd, int64_t offset) {
     return searcher;
   }
 
-  if (lseek(fd, static_cast<off_t>(offset), SEEK_SET) < 0) {
-    close(fd);
+  if (zx_seek(fd, offset) < 0) {
+    zx_close_fd(fd);
     searcher->error = "the index does not start where the archive says";
     return searcher;
   }
@@ -173,7 +203,7 @@ std::string value_of(const ZxSearcher* searcher, const Xapian::Document& documen
 extern "C" {
 
 ZxSearcher* zx_open_path(const char* path, int64_t offset) {
-  return open_descriptor(open(path, O_RDONLY), offset);
+  return open_descriptor(zx_open_read(path), offset);
 }
 
 ZxSearcher* zx_open_fd(int fd, int64_t offset) {

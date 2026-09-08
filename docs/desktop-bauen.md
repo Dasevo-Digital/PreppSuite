@@ -9,7 +9,8 @@ etwas, das nicht mitkommt.
 ```bash
 sudo apt install clang cmake ninja-build pkg-config \
   libgtk-3-dev liblzma-dev \
-  libwebkit2gtk-4.1-dev libsoup-3.0-dev
+  libwebkit2gtk-4.1-dev libsoup-3.0-dev \
+  zlib1g-dev uuid-dev
 ```
 
 Die letzten beiden sind für das Artikelfenster. Ohne sie bricht CMake ab —
@@ -23,6 +24,19 @@ libsoup-3.0 noch 2.4 — KDE benutzt Qt und braucht es nirgends. Unter GNOME
 liegt es meist ohnehin da. Das betrifft nicht nur den Bau: zum **Lesen**
 von Artikeln braucht die fertige App `libwebkit2gtk-4.1-0` auf dem
 Zielrechner.
+
+`zlib1g-dev` und `uuid-dev` sind für die Volltextsuche im Archiv da —
+das ist, woran xapian-core hängt. Die Bibliothek dafür entsteht vor dem
+Bau der App:
+
+```bash
+preppsuite_flutter/native/zim_xapian/build_linux.sh
+```
+
+Das baut `libzim_xapian.so`; CMake legt sie dann nach `bundle/lib/`. Ohne
+sie läuft alles weiter, nur sucht die App im selbst gebauten Index statt
+im Index des Archivs — siehe
+[Volltextsuche über den Index im Archiv](volltextsuche-xapian.md).
 
 Ohne Linux-Maschine geht es auch im Container, siehe
 [`tool/docker/`](../tool/docker/). Auf Apple-Silicon kommt dabei arm64
@@ -54,6 +68,19 @@ Nachrüsten ohne die Oberfläche:
   modify --installPath "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools" ^
   --add Microsoft.VisualStudio.Component.VC.ATL --quiet --norestart
 ```
+
+Die Xapian-Bibliothek entsteht dagegen **nicht** hier, sondern auf einer
+Linux-Maschine — xapian-core 1.4 bringt keine MSVC-Projektdateien mehr
+mit:
+
+```bash
+sudo apt install mingw-w64 libz-mingw-w64-dev
+preppsuite_flutter/native/zim_xapian/build_windows.sh
+```
+
+Die entstandene `zim_xapian.dll` gehört vor dem Bau nach
+`preppsuite_flutter/native/zim_xapian/build/`; CMake legt sie dann neben
+die `.exe`.
 
 ## Stand
 
