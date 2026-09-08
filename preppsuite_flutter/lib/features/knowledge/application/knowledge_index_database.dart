@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import '../../../core/app_database_directory.dart';
+import 'german_stemmer.dart';
 import 'zim_store.dart' show legacyArchiveId;
 
 part 'knowledge_index_database.g.dart';
@@ -102,9 +103,25 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
 
   Future<bool> isComplete() async => await _state('complete') == '1';
 
+  /// Which stemmer this index was built with, or null for none.
+  ///
+  /// Written into the index rather than worked out again at search time,
+  /// because the two have to agree and there is no way to notice when
+  /// they do not: a query stemmed differently than the text simply finds
+  /// nothing, which reads exactly like an article that is not there.
+  ///
+  /// Indexes from before 0.15.0 have no such entry and answer null, which
+  /// is the truth about them — they keep working unstemmed until they are
+  /// rebuilt.
+  Future<String?> stemmerName() => _state('stemmer');
+
   /// Clears everything and starts an index for [archive] over [total]
   /// articles.
-  Future<void> beginIndex(String archive, int total) async {
+  Future<void> beginIndex(
+    String archive,
+    int total, {
+    String stemmer = 'none',
+  }) async {
     await customStatement('DROP TABLE IF EXISTS articles');
     await customStatement('DELETE FROM index_state');
     await _createSchema();
@@ -113,6 +130,7 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
     await _setState('total', '$total');
     await _setState('position', '0');
     await _setState('complete', '0');
+    await _setState('stemmer', stemmer);
   }
 
   /// Writes a batch of articles and moves the resume point.
@@ -153,7 +171,10 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   /// contentless index enough: the result is a list of places to look in
   /// the archive.
   Future<List<int>> search(String query, {int limit = 30}) async {
-    final expression = fts5QueryFor(query);
+    final expression = fts5QueryFor(
+      query,
+      stem: stemmerNamed(await stemmerName()),
+    );
     if (expression == null) return const [];
 
     final rows = await customSelect(
@@ -189,11 +210,21 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
 /// throw or mean something the user did not ask for. The last term gets a
 /// prefix star, because people search while still typing it.
 ///
+/// [stem] must be the same one the index was built with, or the terms
+/// will not be the ones in it. Prefix search survives stemming: a stem
+/// only ever loses letters from the end, so what is left is still a
+/// prefix of the word that was typed.
+///
 /// Returns null when nothing usable is left.
-String? fts5QueryFor(String query) {
+String? fts5QueryFor(String query, {String Function(String)? stem}) {
   final terms = [
     for (final term in query.split(RegExp(r'[^\p{L}\p{N}]+', unicode: true)))
-      if (term.isNotEmpty) term,
+      if (term.isNotEmpty)
+        // Lowercased only on the way into the stemmer, which is defined
+        // for lowercase words. Without one the term goes in as typed:
+        // FTS5 folds case itself, and an index built before there was a
+        // stemmer should be queried exactly as it was.
+        stem == null ? term : stem(term.toLowerCase()),
   ];
   if (terms.isEmpty) return null;
 

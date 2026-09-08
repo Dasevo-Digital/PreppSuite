@@ -522,6 +522,21 @@ tree; the test suite deliberately targets that layer rather than the UI.
   `tool/macos_install.sh` runs it. `.metadata_never_index` is not an
   alternative — on macOS 26 the marker is ignored, verified with a probe
   file next to it — so a build must be removed rather than hidden.
+- **An index records how it was built.** `KnowledgeIndexDatabase` keeps
+  the stemmer's name in its own state, and `search` reads it back rather
+  than working it out again. A query stemmed differently than the text
+  finds nothing, and nothing reads exactly like an article that is not
+  there — there is no error to notice. It also settles the upgrade: an
+  index from before 0.15.0 answers null, is searched unstemmed, and goes
+  on working instead of being thrown away, which for a whole Wikipedia
+  would be an hour of rebuilding.
+- **The two stemmers have to agree.** Where an archive carries its own
+  index, Xapian stems; where it does not, `germanStem` does. The same
+  search finding different articles depending on the platform would be
+  the worst kind of difference, so the Dart one is a transcription of
+  `german.sbl` rather than an approximation, and it is measured against
+  Xapian's output over a whole German dictionary — 356 006 words, no
+  disagreement. `tool/german_stems.sh` regenerates the fixture.
 - **A `regionKey` must never be free text.** The region filter compares
   keys, and a key it cannot match does not read as "somewhere else" — it
   reads as nowhere, and the warning is dropped. MeteoAlarm's `areaDesc`

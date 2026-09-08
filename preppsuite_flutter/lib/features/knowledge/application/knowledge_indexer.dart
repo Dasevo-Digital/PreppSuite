@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'german_stemmer.dart';
 import 'html_to_text.dart';
 import 'knowledge_index_database.dart';
 import 'zim_archive.dart';
@@ -134,8 +135,21 @@ class KnowledgeIndexer {
     final resumable =
         await index.indexedArchive() == fingerprint &&
         !await index.isComplete();
+
+    // A run that is being resumed keeps the scheme it started under, even
+    // if the archive would be read differently today. Half an index of
+    // stems and half of whole words would find neither.
+    final stemmerName = resumable
+        ? await index.stemmerName()
+        : stemmerNameFor(await archive.metadata('Language'));
+    final stem = stemmerNamed(stemmerName);
+
     if (!resumable) {
-      await index.beginIndex(fingerprint, plan.articleCount);
+      await index.beginIndex(
+        fingerprint,
+        plan.articleCount,
+        stemmer: stemmerName ?? 'none',
+      );
     }
 
     final total = plan.articleCount;
@@ -157,7 +171,10 @@ class KnowledgeIndexer {
           utf8.decode(await archive.readBlob(entry), allowMalformed: true),
         );
         if (text.isNotEmpty) {
-          batch.add((entryIndex: entryIndex, text: text));
+          batch.add((
+            entryIndex: entryIndex,
+            text: stem == null ? text : stemText(text, stem),
+          ));
         }
       } on Object {
         // One unreadable article is not worth abandoning the index for.

@@ -261,8 +261,10 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   vollständigen deutschen Wikipedia: 3,2 Millionen Artikel, nichts
   aufzubauen, eine Suche in wenigen Millisekunden, und „Notvorräte"
   findet „Notvorrat".
-- Unter Android – und bei Archiven ohne eigenen Index – baut
-  die App weiterhin einen eigenen auf. Für eine Themensammlung sind das Minuten,
+- Unter Android – und bei Archiven ohne eigenen Index – baut die App
+  weiterhin einen eigenen auf. Der kennt seit 0.15.0 ebenfalls deutsche
+  Wortstämme, über denselben Algorithmus in Dart statt über eine
+  C++-Bibliothek. Für eine Themensammlung sind das Minuten,
   für die vollständige Wikipedia eher eine Stunde und mehrere Gigabyte.
   Anhalten geht jederzeit; das Angefangene bleibt durchsuchbar. Dieser
   Index kennt keinen deutschen Wortstamm.

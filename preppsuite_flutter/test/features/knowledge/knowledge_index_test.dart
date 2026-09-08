@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/german_stemmer.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_index_database.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_indexer.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/zim_archive.dart';
@@ -49,6 +50,79 @@ void main() {
         await archive.entryAt(entryIndex),
     ];
   }
+
+  /// What an archive says its language is, which is what decides whether
+  /// the index is stemmed.
+  ZimFixtureEntry language(String tag) {
+    return ZimFixtureEntry(
+      namespace: 'M',
+      url: 'Language',
+      content: utf8.encode(tag),
+    );
+  }
+
+  group('a German archive', () {
+    test('a plural finds the article that only has the singular', () async {
+      // The gap the stemmer closes, and the reason it exists at all: FTS5
+      // matches by prefix, so without stemming a plural would never reach
+      // an article that only ever says the singular.
+      final archive = await archiveWith([
+        language('deu'),
+        article('Vorrat', '<p>Der Notvorrat gehoert in den Keller.</p>'),
+        article('Wasser', '<p>Trinkwasser lagert man kuehl.</p>'),
+      ]);
+
+      final indexer = KnowledgeIndexer(archive: archive, index: index);
+      await indexer.run(await indexer.plan(), fingerprint: 'de');
+
+      expect(await index.stemmerName(), 'german');
+      for (final query in const ['Notvorräte', 'Notvorrate', 'Notvorrat']) {
+        expect(
+          [for (final hit in await hits(archive, query)) hit.title],
+          ['Vorrat'],
+          reason: query,
+        );
+      }
+    });
+
+    test('an archive in another language is left unstemmed', () async {
+      // A German stemmer let loose on English would take words apart
+      // along rules that do not apply to them.
+      final archive = await archiveWith([
+        language('eng'),
+        article('Water', '<p>Drinking water keeps.</p>'),
+      ]);
+
+      final indexer = KnowledgeIndexer(archive: archive, index: index);
+      await indexer.run(await indexer.plan(), fingerprint: 'en');
+
+      expect(await index.stemmerName(), 'none');
+      expect(
+        [for (final hit in await hits(archive, 'drinking')) hit.title],
+        ['Water'],
+      );
+    });
+
+    test('an index that was built unstemmed stays that way', () async {
+      // Every index from before 0.15.0. Rebuilding one over a whole
+      // encyclopedia is an hour, so it keeps answering as it always did
+      // rather than being quietly thrown away.
+      final archive = await archiveWith([
+        language('deu'),
+        article('Vorrat', '<p>Der Notvorrat gehoert in den Keller.</p>'),
+      ]);
+
+      await index.beginIndex('alt', 1);
+      await index.addArticles([
+        (entryIndex: 1, text: 'Der Notvorrat gehoert in den Keller.'),
+      ], position: 1);
+      await index.markComplete();
+
+      expect(await index.stemmerName(), 'none');
+      expect(await hits(archive, 'Notvorrat'), isNotEmpty);
+      expect(await hits(archive, 'Notvorraete'), isEmpty);
+    });
+  });
 
   group('the query expression', () {
     test('every term is quoted so nothing is read as syntax', () {

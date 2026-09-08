@@ -214,10 +214,12 @@ der Nachbau gelesen wurde.
    dort im Speicher der App, und ob eine 50-GB-Datei dorthin gehört, ist
    keine Frage an diese Seite.
 
-Für Android ist ein **deutscher Stemmer in Dart** vermutlich der bessere
-Handel: er kostet einen Bruchteil und hilft auch jedem Archiv ohne
-eigenen Index, auf allen Plattformen. Er nimmt nur die eine Hälfte des
-Gewinns mit — den Indexlauf spart er nicht.
+Für Android ist der **deutsche Stemmer in Dart** seit 0.15.0 der Ersatz,
+und er war der bessere Handel: ein Bruchteil der Arbeit, kein Megabyte im
+APK, und er hilft auch jedem Archiv ohne eigenen Index auf allen
+Plattformen. Er nimmt nur die eine Hälfte des Gewinns mit — den Indexlauf
+spart er nicht. Siehe
+[Wissen offline](wissen-offline.md).
 
 ## Das Risiko, das bleibt
 

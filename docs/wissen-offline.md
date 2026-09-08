@@ -140,10 +140,26 @@ C++-Bibliothek, die je Plattform gebaut und mitgeliefert werden muss –
 unter Android fehlt sie noch; Einzelheiten in
 [Volltextsuche über den Index im Archiv](volltextsuche-xapian.md).
 
-Wo dieser Weg nicht offen steht – auf den übrigen Plattformen, und bei
-Archiven ohne eigenen Index, etwa selbst gebauten – baut die App wie
-bisher einen eigenen Index mit SQLite FTS5 auf. Der kennt keine
-Wortstämme, sondern sucht nach Wortanfang.
+Wo dieser Weg nicht offen steht – unter Android, und bei Archiven ohne
+eigenen Index, etwa selbst gebauten – baut die App wie bisher einen
+eigenen Index mit SQLite FTS5 auf.
+
+**Auch der kennt seit 0.15.0 deutsche Wortstämme.** Nicht über eine
+Bibliothek, sondern über denselben Algorithmus in Dart: gestemmt wird
+beim Aufbau und bei der Suche, und „Notvorräte" findet damit auch dort
+„Notvorrat". Geprüft ist er gegen Xapians eigenen Stemmer über ein ganzes
+deutsches Wörterbuch, 356 006 Wörter, ohne eine einzige Abweichung.
+
+Welcher Stemmer benutzt wurde, steht **im Index selbst**. Das ist keine
+Umständlichkeit: eine Anfrage, die anders gestemmt wird als der Text,
+findet nichts – und das liest sich genau wie ein Artikel, den es nicht
+gibt. Ein Index von vor 0.15.0 sagt „keiner" und wird weiter ungestemmt
+durchsucht, statt stillschweigend weggeworfen zu werden; für eine ganze
+Wikipedia wäre das eine Stunde Neuaufbau.
+
+Gestemmt wird nur, wenn das Archiv sich selbst als deutsch ausweist. Ein
+deutscher Stemmer auf englischem Text zerlegt Wörter nach Regeln, die
+für sie nicht gelten.
 
 Der Aufbau läuft einmal, mit Fortschrittsanzeige, und lässt sich jederzeit
 anhalten – was schon drin ist, bleibt durchsuchbar, und beim nächsten Mal
