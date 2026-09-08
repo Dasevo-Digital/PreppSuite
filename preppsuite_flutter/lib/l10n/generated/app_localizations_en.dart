@@ -100,6 +100,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get errorNoConnection =>
+      'No connection. Check the network and try again.';
+
+  @override
+  String get errorArchiveUnreadable =>
+      'The archive could not be read. The file may have moved, or the disk it is on is not attached.';
+
+  @override
+  String get errorFileUnreadable => 'The file could not be reached.';
+
+  @override
+  String get errorDownloadFailed =>
+      'The download stopped. Starting it again picks up where it left off.';
+
+  @override
+  String get errorServiceUnavailable =>
+      'The service did not answer. That is not on you — try again later.';
+
+  @override
+  String get errorDatabase =>
+      'The app\'s database reported a problem. Restarting usually clears it.';
+
+  @override
+  String get errorPlatformRefused =>
+      'The system refused. Check in the settings whether PreppSuite has permission for it.';
+
+  @override
   String get errorInvalidInviteCode => 'This invite code is not valid.';
 
   @override

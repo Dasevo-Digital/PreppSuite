@@ -14,10 +14,17 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
+    <!-- No cloud backup. Preferences hold the key to the shared folder and
+         the database holds the household itself, and both would otherwise
+         go to Google by default, without anybody being asked.
+         allowBackup covers Android 11 and earlier; dataExtractionRules is
+         what 12 and later read. -->
     <application
         android:label="PreppSuite"
         android:name="${applicationName}"
         android:networkSecurityConfig="@xml/network_security_config"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

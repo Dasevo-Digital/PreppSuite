@@ -5,6 +5,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/checklist_controller.dart';
 import '../application/checklist_providers.dart';
+import '../../../core/error_text.dart';
 
 class ChecklistDetailScreen extends ConsumerStatefulWidget {
   const ChecklistDetailScreen({
@@ -57,7 +58,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
             child: itemsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stackTrace) =>
-                  Center(child: Text(l10n.errorGeneric(error.toString()))),
+                  Center(child: Text(describeError(l10n, error))),
               data: (items) => ListView.builder(
                 itemCount: items.length,
                 itemBuilder: (context, index) {

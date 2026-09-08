@@ -134,6 +134,21 @@ Datenbank ist einfaches SQLite, und der abgeleitete Schlüssel liegt daneben
 im app-privaten Speicher. Ihn stärker zu bewachen als die Daten, die er
 öffnet, wäre Theater.
 
+**Es gab lange eine zweite fremde Hand, über die nie jemand entschieden
+hat.** Android sichert app-private Daten standardmäßig zu Google – also
+auch die Einstellungsdatei mit dem Ordnerschlüssel und die Datenbank mit
+dem Haushalt darin. Seit 0.15.0 ist das ausgeschaltet
+(`android:allowBackup="false"` und `data_extraction_rules.xml`). Preis:
+ein neues Telefon fängt ohne den gemeinsamen Ordner leer an – und der
+Ordner ist genau der Weg, den diese App dafür vorsieht. Die
+Geräte-zu-Gerät-Übertragung bleibt erlaubt; das ist ein Kabel zwischen
+zwei Telefonen in denselben Händen.
+
+Unter iOS gilt dasselbe für die Archive: sie liegen im Documents-Ordner
+der App, den iOS nach iCloud sichert. Jede heruntergeladene Datei wird
+deshalb mit `NSURLIsExcludedFromBackupKey` markiert, sonst wanderte eine
+fünfzig Gigabyte große Wikipedia in die iCloud des Nutzers.
+
 ### Wie es funktioniert
 
 Aus einem Kennwort, das alle Geräte des Haushalts teilen, wird mit

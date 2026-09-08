@@ -8,6 +8,7 @@ import '../application/shared_folder_access.dart';
 import '../application/shared_folder_sync_service.dart';
 import '../application/sharing_providers.dart';
 import 'folder_encryption_section.dart';
+import '../../../core/error_text.dart';
 
 /// Settings card for sharing a household across devices.
 ///
@@ -44,7 +45,7 @@ class SharedFolderCard extends ConsumerWidget {
                 child: LinearProgressIndicator(),
               ),
               AsyncError(:final error) => Text(
-                l10n.errorGeneric(error.toString()),
+                describeError(l10n, error),
               ),
               _ => _Body(
                 state: async.requireValue,

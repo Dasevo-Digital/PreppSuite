@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/household_plan_controller.dart';
+import '../../../core/error_text.dart';
 
 /// The household's emergency plan.
 ///
@@ -75,7 +76,7 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
       ),
       body: planAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(l10n.errorGeneric('$error'))),
+        error: (error, _) => Center(child: Text(describeError(l10n, error))),
         data: (plan) {
           _fillOnce(plan);
 

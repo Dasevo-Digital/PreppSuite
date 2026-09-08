@@ -272,6 +272,48 @@ abstract class AppLocalizations {
   /// **'Something went wrong: {error}'**
   String errorGeneric(String error);
 
+  /// No description provided for @errorNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Check the network and try again.'**
+  String get errorNoConnection;
+
+  /// No description provided for @errorArchiveUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The archive could not be read. The file may have moved, or the disk it is on is not attached.'**
+  String get errorArchiveUnreadable;
+
+  /// No description provided for @errorFileUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be reached.'**
+  String get errorFileUnreadable;
+
+  /// No description provided for @errorDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The download stopped. Starting it again picks up where it left off.'**
+  String get errorDownloadFailed;
+
+  /// No description provided for @errorServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The service did not answer. That is not on you — try again later.'**
+  String get errorServiceUnavailable;
+
+  /// No description provided for @errorDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'The app\'s database reported a problem. Restarting usually clears it.'**
+  String get errorDatabase;
+
+  /// No description provided for @errorPlatformRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The system refused. Check in the settings whether PreppSuite has permission for it.'**
+  String get errorPlatformRefused;
+
   /// No description provided for @errorInvalidInviteCode.
   ///
   /// In en, this message translates to:

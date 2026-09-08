@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:preppsuite_flutter/features/knowledge/application/german_stemmer.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_index_database.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_indexer.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/zim_archive.dart';

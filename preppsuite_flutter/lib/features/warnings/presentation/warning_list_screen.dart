@@ -9,6 +9,7 @@ import '../application/warning_filter.dart';
 import '../application/warning_providers.dart';
 import '../application/warning_relevance.dart';
 import '../application/warning_severity_l10n.dart';
+import '../../../core/error_text.dart';
 
 class WarningListScreen extends ConsumerStatefulWidget {
   const WarningListScreen({super.key, required this.profile});
@@ -69,7 +70,7 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
     return warningsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, stackTrace) =>
-          Center(child: Text(l10n.errorGeneric(error.toString()))),
+          Center(child: Text(describeError(l10n, error))),
       data: (all) {
         if (all.isEmpty) {
           return Center(

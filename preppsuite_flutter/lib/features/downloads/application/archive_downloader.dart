@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+import '../../../core/platform_storage.dart';
+
 /// How far a download has got.
 class DownloadProgress {
   const DownloadProgress({required this.received, required this.total});
@@ -78,6 +80,9 @@ class ArchiveDownloader {
     await target.parent.create(recursive: true);
 
     var received = await partial.exists() ? await partial.length() : 0;
+    // Marked before a byte is written, so an interrupted download is not
+    // backed up either — those are the large ones that sit around longest.
+    await excludeFromBackup(partial.path);
 
     final request = http.Request('GET', url);
     if (received > 0) request.headers['range'] = 'bytes=$received-';
@@ -152,6 +157,10 @@ class ArchiveDownloader {
     }
 
     await partial.rename(targetPath);
+    // Again under the final name. The flag is an extended attribute and
+    // survives a rename on the same volume, but this is the state that
+    // has to be right, and it costs one call.
+    await excludeFromBackup(targetPath);
     yield DownloadProgress(received: onDisk, total: onDisk);
   }
 

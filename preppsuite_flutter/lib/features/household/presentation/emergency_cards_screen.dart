@@ -6,6 +6,7 @@ import '../../../local_db/database.dart';
 import '../../sharing/presentation/folder_encryption_section.dart';
 import '../application/household_member_controller.dart';
 import 'emergency_card_form_screen.dart';
+import '../../../core/error_text.dart';
 
 /// The household's people, and what an ambulance would want to know.
 class EmergencyCardsScreen extends ConsumerWidget {
@@ -23,7 +24,7 @@ class EmergencyCardsScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.emergencyCardsTitle)),
       body: membersAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(l10n.errorGeneric('$error'))),
+        error: (error, _) => Center(child: Text(describeError(l10n, error))),
         data: (members) => ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
           children: [

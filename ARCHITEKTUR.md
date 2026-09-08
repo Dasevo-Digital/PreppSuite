@@ -522,6 +522,22 @@ tree; the test suite deliberately targets that layer rather than the UI.
   `tool/macos_install.sh` runs it. `.metadata_never_index` is not an
   alternative — on macOS 26 the marker is ignored, verified with a probe
   file next to it — so a build must be removed rather than hidden.
+- **Nothing of this app goes into a cloud backup.** Android's is on by
+  default and would have taken the shared folder's key out of
+  `SharedPreferences` along with the household database — a second copy
+  somewhere the household does not control, which is the exact thing
+  `folder_crypto.dart` exists to prevent. `allowBackup="false"` plus
+  `data_extraction_rules.xml` close it; device-to-device transfer stays
+  allowed, because that is a cable between two phones in the same hands.
+  On iOS the equivalent is per-file: `excludeFromBackup` marks every
+  download, or a fifty-gigabyte encyclopedia would be uploaded to
+  somebody's iCloud.
+- **A failure reaches the screen as a sentence, not as a type.**
+  `describeError` maps the failures that actually happen — no network, an
+  archive that moved, a refused permission, a database complaint — onto
+  plain language, and keeps `error.toString()` only for the ones nobody
+  named. This app is opened when something has already gone wrong, which
+  is the worst moment for "SqliteException(11)".
 - **An index records how it was built.** `KnowledgeIndexDatabase` keeps
   the stemmer's name in its own state, and `search` reads it back rather
   than working it out again. A query stemmed differently than the text

@@ -45,8 +45,10 @@ void main() {
       addTearDown(searcher.close);
 
       stdout.writeln('Archiv       ${size ~/ (1024 * 1024)} MB');
-      stdout.writeln('Index        ${where.length ~/ (1024 * 1024)} MB '
-          'ab Byte ${where.offset}');
+      stdout.writeln(
+        'Index        ${where.length ~/ (1024 * 1024)} MB '
+        'ab Byte ${where.offset}',
+      );
       stdout.writeln('Dokumente    ${searcher.documentCount}');
       stdout.writeln('Sprache      ${searcher.language}');
       stdout.writeln('Oeffnen      ${opening.elapsedMilliseconds} ms');

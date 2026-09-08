@@ -100,6 +100,8 @@ final class StorageBridge: NSObject {
       result(nil)
     case "ensureWritable":
       result(ensureWritable(arguments["uri"] as? String ?? ""))
+    case "excludeFromBackup":
+      result(excludeFromBackup(arguments["path"] as? String ?? ""))
     case "list":
       result(list(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? ""))
     case "read":
@@ -198,6 +200,31 @@ final class StorageBridge: NSObject {
   }
 
   // MARK: - Folder operations
+
+  /// Keeps a file out of iCloud's backup.
+  ///
+  /// An archive lands in this app's Documents folder, which iOS backs up
+  /// by default — so without this a multi-gigabyte encyclopedia would be
+  /// uploaded to the user's iCloud, over their connection and against
+  /// their storage quota. Apple asks for this flag on anything that can
+  /// simply be downloaded again.
+  ///
+  /// Takes a plain path rather than a bookmark: what this marks is a file
+  /// the app wrote itself, inside its own container, where there is no
+  /// security scope to open.
+  private func excludeFromBackup(_ path: String) -> Bool {
+    guard !path.isEmpty else { return false }
+
+    var url = URL(fileURLWithPath: path)
+    var values = URLResourceValues()
+    values.isExcludedFromBackup = true
+    do {
+      try url.setResourceValues(values)
+      return true
+    } catch {
+      return false
+    }
+  }
 
   private func ensureWritable(_ uri: String) -> Bool {
     return withAccess(uri) { root in

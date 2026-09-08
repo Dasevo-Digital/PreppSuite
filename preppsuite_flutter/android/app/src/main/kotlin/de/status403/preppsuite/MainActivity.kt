@@ -1,4 +1,4 @@
-package com.example.preppsuite_flutter
+package de.status403.preppsuite
 
 import android.content.Intent
 import android.net.Uri

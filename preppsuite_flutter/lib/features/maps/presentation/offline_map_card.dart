@@ -5,6 +5,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/map_archive_access.dart';
 import '../application/offline_map_providers.dart';
 import 'map_download_screen.dart';
+import '../../../core/error_text.dart';
 
 /// Settings card for the offline map.
 ///
@@ -35,7 +36,7 @@ class OfflineMapCard extends ConsumerWidget {
                 child: LinearProgressIndicator(),
               ),
               AsyncError(:final error) => Text(
-                l10n.errorGeneric(error.toString()),
+                describeError(l10n, error),
               ),
               _ => _Body(state: async.requireValue, l10n: l10n),
             },

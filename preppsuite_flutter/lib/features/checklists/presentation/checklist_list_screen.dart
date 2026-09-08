@@ -8,6 +8,7 @@ import '../application/checklist_category_l10n.dart';
 import '../application/checklist_controller.dart';
 import '../application/checklist_providers.dart';
 import 'checklist_detail_screen.dart';
+import '../../../core/error_text.dart';
 
 class ChecklistListScreen extends ConsumerWidget {
   const ChecklistListScreen({super.key, required this.householdId});
@@ -24,7 +25,7 @@ class ChecklistListScreen extends ConsumerWidget {
       body: templatesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>
-            Center(child: Text(l10n.errorGeneric(error.toString()))),
+            Center(child: Text(describeError(l10n, error))),
         data: (templates) => templates.isEmpty
             ? Center(
                 child: Padding(

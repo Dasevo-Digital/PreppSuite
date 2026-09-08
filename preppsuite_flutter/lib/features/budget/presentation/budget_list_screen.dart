@@ -10,6 +10,7 @@ import '../../inventory/application/inventory_category_l10n.dart';
 import '../application/budget_providers.dart';
 import '../application/missing_equipment_report.dart';
 import 'budget_entry_form_screen.dart';
+import '../../../core/error_text.dart';
 
 class BudgetListScreen extends ConsumerWidget {
   const BudgetListScreen({super.key, required this.householdId});
@@ -35,7 +36,7 @@ class BudgetListScreen extends ConsumerWidget {
       body: entriesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>
-            Center(child: Text(l10n.errorGeneric(error.toString()))),
+            Center(child: Text(describeError(l10n, error))),
         data: (entries) => entries.isEmpty
             ? Center(
                 child: Padding(

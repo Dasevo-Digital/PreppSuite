@@ -20,6 +20,7 @@ import 'consume_dialog.dart';
 import 'inventory_csv_import_screen.dart';
 import 'inventory_item_form_screen.dart';
 import 'storage_tips_screen.dart';
+import '../../../core/error_text.dart';
 
 enum _InventoryMenuAction { consumeByScan, storageTips, exportCsv, importCsv }
 
@@ -102,7 +103,7 @@ class InventoryListScreen extends ConsumerWidget {
             child: itemsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stackTrace) =>
-                  Center(child: Text(l10n.errorGeneric(error.toString()))),
+                  Center(child: Text(describeError(l10n, error))),
               data: (items) => items.isEmpty
                   ? Center(
                       child: Padding(

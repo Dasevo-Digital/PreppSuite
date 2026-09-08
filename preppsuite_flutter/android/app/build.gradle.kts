@@ -22,7 +22,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.preppsuite_flutter"
+    namespace = "de.status403.preppsuite"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 

@@ -9,6 +9,7 @@ import '../../../core/platform_storage.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/download_folder.dart';
 import '../application/download_providers.dart';
+import '../../../core/error_text.dart';
 
 /// Where downloaded maps and archives are put.
 ///
@@ -33,7 +34,7 @@ class DownloadFolderCard extends ConsumerWidget {
             title: Text(l10n.downloadFolderTitle),
             subtitle: Text(switch (folder) {
               AsyncData(:final value) => value.path,
-              AsyncError(:final error) => l10n.errorGeneric(error.toString()),
+              AsyncError(:final error) => describeError(l10n, error),
               _ => '…',
             }),
           ),
@@ -90,7 +91,7 @@ class DownloadFolderCard extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.errorGeneric(error.message ?? error.code)),
+              content: Text(describeError(l10n, error)),
             ),
           );
         }

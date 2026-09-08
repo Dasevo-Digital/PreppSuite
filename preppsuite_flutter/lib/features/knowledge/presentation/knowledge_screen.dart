@@ -14,6 +14,7 @@ import '../../downloads/presentation/download_banner.dart';
 import 'article_screen.dart';
 import 'kiwix_library_screen.dart';
 import 'knowledge_index_panel.dart';
+import '../../../core/error_text.dart';
 
 /// Looking things up without a network: search an offline archive by
 /// title, open what it finds.
@@ -88,7 +89,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       body: switch (async) {
         AsyncLoading() => const Center(child: CircularProgressIndicator()),
         AsyncError(:final error) => Center(
-          child: Text(l10n.errorGeneric(error.toString())),
+          child: Text(describeError(l10n, error)),
         ),
         _ => _body(l10n, async.requireValue),
       },
@@ -197,7 +198,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     return results.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _Centered(
-        child: Text(l10n.errorGeneric(error.toString())),
+        child: Text(describeError(l10n, error)),
       ),
       data: (matches) {
         if (matches.isEmpty) {

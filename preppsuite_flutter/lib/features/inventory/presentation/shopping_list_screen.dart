@@ -9,6 +9,7 @@ import '../application/inventory_providers.dart';
 import '../application/shopping_list.dart';
 import '../application/supply_calculator.dart';
 import 'inventory_item_form_screen.dart';
+import '../../../core/error_text.dart';
 
 /// What to buy.
 ///
@@ -43,7 +44,7 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
       appBar: AppBar(title: Text(l10n.shoppingListTitle)),
       body: itemsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(l10n.errorGeneric('$error'))),
+        error: (error, _) => Center(child: Text(describeError(l10n, error))),
         data: (items) {
           final list = buildShoppingList(
             items: items,

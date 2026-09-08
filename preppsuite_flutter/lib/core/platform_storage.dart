@@ -32,6 +32,35 @@ bool get usesNativeStoragePicker {
   return Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
 }
 
+/// Keeps [path] out of the device's own cloud backup.
+///
+/// iOS backs up an app's Documents folder to iCloud, and that is where an
+/// archive lands — so without this a fifty-gigabyte encyclopedia would be
+/// uploaded to the user's iCloud account, over their connection, against
+/// their storage. Apple asks for exactly this flag on anything that can
+/// be downloaded again, and an offline archive is the clearest case of
+/// it there is.
+///
+/// A quiet no-op everywhere else. Android's own backup is switched off in
+/// the manifest, and on the desktops the file sits in a folder the user
+/// chose, where what happens to it is theirs to decide.
+///
+/// Failure is not reported: the download it belongs to has already
+/// succeeded, and the file being in a backup is not a reason to tell
+/// somebody their archive did not arrive.
+Future<void> excludeFromBackup(String path) async {
+  if (kIsWeb || !Platform.isIOS) return;
+  try {
+    await nativeStorageChannel.invokeMethod<bool>('excludeFromBackup', {
+      'path': path,
+    });
+  } on PlatformException {
+    return;
+  } on MissingPluginException {
+    return;
+  }
+}
+
 /// Something the user picked, in a form that survives a restart.
 ///
 /// [value] is a filesystem path on Linux and Windows. On Android it is a

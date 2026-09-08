@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Nothing of this app goes into a cloud backup.
+
+  What it holds is a household's inventory, its emergency cards with names
+  and medication on them, and the key that opens the shared folder. The
+  app's own answer to "how do I get this onto another device" is that
+  folder, and it is encrypted precisely because a copy of the data
+  somewhere the household does not control is the thing to avoid. Google's
+  backup would be a second such place, switched on by default and never
+  mentioned to anyone.
+
+  Device transfer is deliberately not excluded here. That is a cable
+  between two phones in the same hands, started by the person holding
+  them — the same trust as typing the passphrase, and it keeps a new
+  phone from starting empty.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+</data-extraction-rules>

@@ -36,6 +36,13 @@
       }
     }
   },
+  "errorNoConnection": "No connection. Check the network and try again.",
+  "errorArchiveUnreadable": "The archive could not be read. The file may have moved, or the disk it is on is not attached.",
+  "errorFileUnreadable": "The file could not be reached.",
+  "errorDownloadFailed": "The download stopped. Starting it again picks up where it left off.",
+  "errorServiceUnavailable": "The service did not answer. That is not on you — try again later.",
+  "errorDatabase": "The app's database reported a problem. Restarting usually clears it.",
+  "errorPlatformRefused": "The system refused. Check in the settings whether PreppSuite has permission for it.",
   "errorInvalidInviteCode": "This invite code is not valid.",
   "errorAlreadyInHousehold": "You already belong to a household.",
   "errorNotOwner": "Only the household's owner can do this.",

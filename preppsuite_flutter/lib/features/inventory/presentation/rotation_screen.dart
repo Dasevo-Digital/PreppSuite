@@ -9,6 +9,7 @@ import '../application/inventory_providers.dart';
 import '../application/rotation.dart';
 import 'consume_dialog.dart';
 import 'inventory_item_form_screen.dart';
+import '../../../core/error_text.dart';
 
 /// What to use next.
 ///
@@ -30,7 +31,7 @@ class RotationScreen extends ConsumerWidget {
       appBar: AppBar(title: Text(l10n.rotationTitle)),
       body: itemsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(l10n.errorGeneric('$error'))),
+        error: (error, _) => Center(child: Text(describeError(l10n, error))),
         data: (items) {
           final rotation = buildRotation(items);
           if (rotation.isEmpty) {

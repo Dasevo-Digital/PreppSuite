@@ -8,6 +8,7 @@ import '../../home/presentation/home_shell.dart';
 import '../../sharing/application/sharing_providers.dart';
 import '../application/household_providers.dart';
 import 'profile_setup_screen.dart';
+import '../../../core/error_text.dart';
 
 /// Shows first-run setup until a profile exists, then the app.
 ///
@@ -61,7 +62,7 @@ class _HouseholdGateState extends ConsumerState<HouseholdGate> {
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (error, stackTrace) => Scaffold(
-        body: Center(child: Text(l10n.errorGeneric(error.toString()))),
+        body: Center(child: Text(describeError(l10n, error))),
       ),
       data: (profile) {
         if (profile == null) return const ProfileSetupScreen();
