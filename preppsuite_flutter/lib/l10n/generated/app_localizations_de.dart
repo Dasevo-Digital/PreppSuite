@@ -724,6 +724,66 @@ class AppLocalizationsDe extends AppLocalizations {
       'Noch keine Standortdaten geladen. Nutze den Standort- oder die Ortssuche.';
 
   @override
+  String get shelterListHeading => 'Gefundene Schutzräume';
+
+  @override
+  String get shelterListEmpty =>
+      'In diesem Umkreis nichts gefunden. Versuch einen größeren Umkreis oder einen anderen Ort.';
+
+  @override
+  String shelterDistanceMeters(int meters, String direction) {
+    return '$meters m $direction';
+  }
+
+  @override
+  String shelterDistanceKilometers(String km, String direction) {
+    return '$km km $direction';
+  }
+
+  @override
+  String shelterListSubtitle(
+    String distance,
+    String confidence,
+    String source,
+  ) {
+    return '$distance · $confidence · $source';
+  }
+
+  @override
+  String get shelterDirectionNorth => 'nördlich';
+
+  @override
+  String get shelterDirectionNorthEast => 'nordöstlich';
+
+  @override
+  String get shelterDirectionEast => 'östlich';
+
+  @override
+  String get shelterDirectionSouthEast => 'südöstlich';
+
+  @override
+  String get shelterDirectionSouth => 'südlich';
+
+  @override
+  String get shelterDirectionSouthWest => 'südwestlich';
+
+  @override
+  String get shelterDirectionWest => 'westlich';
+
+  @override
+  String get shelterDirectionNorthWest => 'nordwestlich';
+
+  @override
+  String shelterShowOnMap(String name) {
+    return '$name auf der Karte zeigen';
+  }
+
+  @override
+  String shelterMarkerTooltip(String name, String confidence, String source) {
+    return '$name · $confidence · $source';
+  }
+
+  @override
   String get shelterAttribution => '© OpenStreetMap contributors';
 
   @override

@@ -385,6 +385,84 @@
   "shelterWwbotaErrorMessage": "WWBOTA/DLBOTA could not be loaded.",
   "shelterOverpassErrorMessage": "OpenStreetMap/Overpass could not be loaded.",
   "shelterEmptyPrompt": "No location loaded yet. Use your current location or search for a place.",
+  "shelterListHeading": "Shelters found",
+  "@shelterListHeading": {},
+  "shelterListEmpty": "Nothing in this radius. Try a wider one, or a different place.",
+  "@shelterListEmpty": {},
+  "shelterDistanceMeters": "{meters} m {direction}",
+  "@shelterDistanceMeters": {
+    "placeholders": {
+      "meters": {
+        "type": "int"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
+  "shelterDistanceKilometers": "{km} km {direction}",
+  "@shelterDistanceKilometers": {
+    "placeholders": {
+      "km": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
+  "shelterListSubtitle": "{distance} \u00b7 {confidence} \u00b7 {source}",
+  "@shelterListSubtitle": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "confidence": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "shelterDirectionNorth": "north",
+  "@shelterDirectionNorth": {},
+  "shelterDirectionNorthEast": "north-east",
+  "@shelterDirectionNorthEast": {},
+  "shelterDirectionEast": "east",
+  "@shelterDirectionEast": {},
+  "shelterDirectionSouthEast": "south-east",
+  "@shelterDirectionSouthEast": {},
+  "shelterDirectionSouth": "south",
+  "@shelterDirectionSouth": {},
+  "shelterDirectionSouthWest": "south-west",
+  "@shelterDirectionSouthWest": {},
+  "shelterDirectionWest": "west",
+  "@shelterDirectionWest": {},
+  "shelterDirectionNorthWest": "north-west",
+  "@shelterDirectionNorthWest": {},
+  "shelterShowOnMap": "Show {name} on the map",
+  "@shelterShowOnMap": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shelterMarkerTooltip": "{name} \u00b7 {confidence} \u00b7 {source}",
+  "@shelterMarkerTooltip": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "confidence": {
+        "type": "String"
+      },
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "shelterAttribution": "© OpenStreetMap contributors",
   "expiryReminderTitle": "Supply expiring soon",
   "expiryReminderBody": "{name} expires in {days} days.",

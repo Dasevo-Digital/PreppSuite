@@ -1376,6 +1376,96 @@ abstract class AppLocalizations {
   /// **'No location loaded yet. Use your current location or search for a place.'**
   String get shelterEmptyPrompt;
 
+  /// No description provided for @shelterListHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Shelters found'**
+  String get shelterListHeading;
+
+  /// No description provided for @shelterListEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in this radius. Try a wider one, or a different place.'**
+  String get shelterListEmpty;
+
+  /// No description provided for @shelterDistanceMeters.
+  ///
+  /// In en, this message translates to:
+  /// **'{meters} m {direction}'**
+  String shelterDistanceMeters(int meters, String direction);
+
+  /// No description provided for @shelterDistanceKilometers.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km {direction}'**
+  String shelterDistanceKilometers(String km, String direction);
+
+  /// No description provided for @shelterListSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance} · {confidence} · {source}'**
+  String shelterListSubtitle(String distance, String confidence, String source);
+
+  /// No description provided for @shelterDirectionNorth.
+  ///
+  /// In en, this message translates to:
+  /// **'north'**
+  String get shelterDirectionNorth;
+
+  /// No description provided for @shelterDirectionNorthEast.
+  ///
+  /// In en, this message translates to:
+  /// **'north-east'**
+  String get shelterDirectionNorthEast;
+
+  /// No description provided for @shelterDirectionEast.
+  ///
+  /// In en, this message translates to:
+  /// **'east'**
+  String get shelterDirectionEast;
+
+  /// No description provided for @shelterDirectionSouthEast.
+  ///
+  /// In en, this message translates to:
+  /// **'south-east'**
+  String get shelterDirectionSouthEast;
+
+  /// No description provided for @shelterDirectionSouth.
+  ///
+  /// In en, this message translates to:
+  /// **'south'**
+  String get shelterDirectionSouth;
+
+  /// No description provided for @shelterDirectionSouthWest.
+  ///
+  /// In en, this message translates to:
+  /// **'south-west'**
+  String get shelterDirectionSouthWest;
+
+  /// No description provided for @shelterDirectionWest.
+  ///
+  /// In en, this message translates to:
+  /// **'west'**
+  String get shelterDirectionWest;
+
+  /// No description provided for @shelterDirectionNorthWest.
+  ///
+  /// In en, this message translates to:
+  /// **'north-west'**
+  String get shelterDirectionNorthWest;
+
+  /// No description provided for @shelterShowOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {name} on the map'**
+  String shelterShowOnMap(String name);
+
+  /// No description provided for @shelterMarkerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {confidence} · {source}'**
+  String shelterMarkerTooltip(String name, String confidence, String source);
+
   /// No description provided for @shelterAttribution.
   ///
   /// In en, this message translates to:

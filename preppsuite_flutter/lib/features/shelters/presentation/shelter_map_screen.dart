@@ -11,8 +11,10 @@ import '../../maps/presentation/map_zoom_buttons.dart';
 import '../application/geo_bounds.dart';
 import '../application/overpass_shelter_client.dart';
 import '../application/shelter_classification.dart';
+import '../application/shelter_l10n.dart';
 import '../application/wwbota_client.dart';
 import '../../maps/presentation/swipe_zoom.dart';
+import 'shelter_list.dart';
 
 /// Roughly the center of Germany — used as the map's fallback view before
 /// any location/search has resolved, so the map isn't blank.
@@ -253,9 +255,20 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
                               point: LatLng(shelter.lat, shelter.lon),
                               width: 28,
                               height: 28,
+                              // The grade belongs in the words, not only in
+                              // the colour: three shields that differ in
+                              // nothing but green, amber and red are three
+                              // identical shields to anyone who cannot tell
+                              // those apart.
                               child: Tooltip(
-                                message:
-                                    '${shelter.name} · ${shelter.sourceLabel}',
+                                message: l10n.shelterMarkerTooltip(
+                                  shelter.name,
+                                  localizeShelterConfidence(
+                                    l10n,
+                                    shelter.confidence,
+                                  ),
+                                  shelter.sourceLabel,
+                                ),
                                 child: Icon(
                                   Icons.shield,
                                   color: _colorFor(shelter.confidence),
@@ -317,14 +330,7 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
                         ChoiceChip(
                           label: Text(
                             l10n.shelterFilterCount(
-                              switch (confidence) {
-                                ShelterConfidence.green =>
-                                  l10n.shelterLegendGreenLabel,
-                                ShelterConfidence.yellow =>
-                                  l10n.shelterLegendYellowLabel,
-                                ShelterConfidence.red =>
-                                  l10n.shelterLegendRedLabel,
-                              },
+                              localizeShelterConfidence(l10n, confidence),
                               counts[confidence] ?? 0,
                             ),
                           ),
@@ -333,6 +339,17 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
                               setState(() => _filter = confidence),
                         ),
                     ],
+                  ),
+                  const SizedBox(height: 12),
+                  ShelterList(
+                    shelters: visibleShelters,
+                    center: _center,
+                    l10n: l10n,
+                    colorFor: _colorFor,
+                    onShow: (shelter) => _mapController.move(
+                      LatLng(shelter.lat, shelter.lon),
+                      14,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Row(
