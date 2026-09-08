@@ -15,6 +15,10 @@ void main() {
   setUp(() async {
     dir = await Directory.systemTemp.createTemp('pmtiles_resume');
   });
+  // Every writer a test opens has to be closed, even one it only inspects:
+  // Windows refuses to delete a file another handle still holds, so a
+  // forgotten close fails this tearDown rather than the test body — and
+  // that reads like a broken archive instead of a leaked descriptor.
   tearDown(() => dir.delete(recursive: true));
 
   Uint8List tileFor(int z, int x, int y) =>
@@ -110,6 +114,7 @@ void main() {
     await journal.writeAsString('${text.substring(0, text.length - 6)}\n');
 
     final second = await PmTilesWriter.resume(dir);
+    addTearDown(second.close);
     expect(second.tileCount, 9);
   });
 
@@ -119,6 +124,7 @@ void main() {
     await first.close();
 
     final second = await PmTilesWriter.create(dir);
+    addTearDown(second.close);
     expect(second.tileCount, 0);
     expect(second.storedTileIds, isEmpty);
   });
@@ -134,6 +140,7 @@ void main() {
 
   test('resuming where there is nothing simply starts', () async {
     final writer = await PmTilesWriter.resume(dir);
+    addTearDown(writer.close);
     expect(writer.tileCount, 0);
     await writer.add(6, 1, 20, tileFor(6, 1, 20));
     expect(writer.tileCount, 1);

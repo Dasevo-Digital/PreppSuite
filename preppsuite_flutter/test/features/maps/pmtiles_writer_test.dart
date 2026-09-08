@@ -115,25 +115,38 @@ void main() {
   // Above roughly two thousand entries the root no longer fits in the
   // first 16 KB and the writer has to cut leaf directories, which is a
   // different path through both writer and reader.
-  test('an archive too large for one directory still reads', () async {
-    final coordinates = [
-      for (var x = 0; x < 120; x++)
-        for (var y = 0; y < 120; y++) (12, 2140 + x, 1370 + y),
-    ];
-    expect(coordinates, hasLength(14400));
+  test(
+    'an archive too large for one directory still reads',
+    () async {
+      final coordinates = [
+        for (var x = 0; x < 120; x++)
+          for (var y = 0; y < 120; y++) (12, 2140 + x, 1370 + y),
+      ];
+      expect(coordinates, hasLength(14400));
 
-    final archive = await writeAndOpen(coordinates);
-    addTearDown(archive.close);
+      final archive = await writeAndOpen(coordinates);
+      addTearDown(archive.close);
 
-    for (final (z, x, y) in [
-      coordinates.first,
-      coordinates[7231],
-      coordinates.last,
-    ]) {
-      expect(await archive.tile(z, x, y), tileFor(z, x, y), reason: '$z/$x/$y');
-    }
-    expect(await archive.tile(12, 2139, 1370), isNull);
-  });
+      for (final (z, x, y) in [
+        coordinates.first,
+        coordinates[7231],
+        coordinates.last,
+      ]) {
+        expect(
+          await archive.tile(z, x, y),
+          tileFor(z, x, y),
+          reason: '$z/$x/$y',
+        );
+      }
+      expect(await archive.tile(12, 2139, 1370), isNull);
+      // 14 400 tiles is the point of this test — that is what forces a second
+      // leaf directory — and writing them takes longer than the 30 seconds a
+      // test gets by default on a slower machine. It ran out on Windows, and
+      // a timeout there also strands the open archive, so the tearDown failed
+      // afterwards and the whole thing read like a file-handle bug.
+    },
+    timeout: const Timeout(Duration(minutes: 3)),
+  );
 
   test('identical tiles are stored once', () async {
     final writer = await PmTilesWriter.create(dir);
