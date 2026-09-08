@@ -7,6 +7,8 @@ import 'package:preppsuite_flutter/features/knowledge/application/zim_archive.da
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart'
     show FileByteRangeSource;
 
+import 'archive_words.dart';
+
 /// The isolate around the index, against a real archive.
 ///
 /// Same reason as next door for needing one: a Xapian database is a C++
@@ -29,6 +31,11 @@ void main() {
       late ZimArchive archive;
       late ZimBlobLocation where;
 
+      /// Words this archive really contains, so that these tests say
+      /// something about the isolate rather than about which language
+      /// somebody happened to have on disk.
+      late List<String> words;
+
       setUpAll(() async {
         archive = await ZimArchive.open(
           await FileByteRangeSource.open(File(archivePath!)),
@@ -36,6 +43,19 @@ void main() {
         final entry = await archive.fullTextIndexEntry();
         expect(entry, isNotNull, reason: 'this archive carries no index');
         where = (await archive.directAccessInfo(entry!))!;
+
+        final searcher = await XapianSearcher.open(archivePath, where);
+        words = await wordsInIndex(
+          archive,
+          matches: (word) async =>
+              (await searcher.search(word, limit: 1)).hits.isNotEmpty,
+        );
+        await searcher.close();
+        expect(
+          words,
+          isNotEmpty,
+          reason: 'the index answered nothing about any of its own titles',
+        );
       });
 
       tearDownAll(() => archive.close());
@@ -52,7 +72,7 @@ void main() {
         final searcher = await XapianSearcher.open(archivePath!, where);
         addTearDown(searcher.close);
 
-        final found = await searcher.search('Wasser', limit: 5);
+        final found = await searcher.search(words.first, limit: 5);
 
         expect(found.hits, isNotEmpty);
         expect(found.estimate, greaterThan(0));
@@ -73,8 +93,8 @@ void main() {
         // What matters is that each caller gets its own answer back and
         // not somebody else's.
         final answers = await Future.wait([
-          searcher.search('Wasser', limit: 3),
-          searcher.search('Feuer', limit: 3),
+          searcher.search(words.first, limit: 3),
+          searcher.search(words.last, limit: 3),
           searcher.search('zzzzqqqxyz', limit: 3),
         ]);
 
@@ -100,7 +120,7 @@ void main() {
         await searcher.close();
 
         expect(
-          searcher.search('Wasser'),
+          searcher.search(words.first),
           throwsA(isA<XapianException>()),
         );
       });

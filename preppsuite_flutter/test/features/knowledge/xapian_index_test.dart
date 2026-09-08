@@ -6,6 +6,8 @@ import 'package:preppsuite_flutter/features/knowledge/application/zim_archive.da
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart'
     show FileByteRangeSource;
 
+import 'archive_words.dart';
+
 /// Runs against a real Kiwix archive, because nothing else can.
 ///
 /// The fixture writer next door can produce a ZIM, but not a Xapian
@@ -29,6 +31,10 @@ void main() {
       late ZimArchive archive;
       late XapianIndex index;
 
+      /// Words this archive really contains, rather than words the person
+      /// writing the test happened to know.
+      late List<String> words;
+
       setUpAll(() async {
         archive = await ZimArchive.open(
           await FileByteRangeSource.open(File(archivePath!)),
@@ -45,6 +51,16 @@ void main() {
 
         index = XapianIndex.openFile(archivePath, location!);
         expect(index.problem, isNull);
+
+        words = await wordsInIndex(
+          archive,
+          matches: (word) async => index.search(word, limit: 1).isNotEmpty,
+        );
+        expect(
+          words,
+          isNotEmpty,
+          reason: 'the index answered nothing about any of its own titles',
+        );
       });
 
       tearDownAll(() async {
@@ -57,14 +73,14 @@ void main() {
       });
 
       test('a word in an article body finds that article', () {
-        final hits = index.search('Wasser', limit: 5);
+        final hits = index.search(words.first, limit: 5);
 
         expect(hits, isNotEmpty);
         expect(index.estimatedMatches, greaterThan(0));
       });
 
       test('every hit names an entry the archive actually holds', () async {
-        for (final hit in index.search('Sauerstoff', limit: 5)) {
+        for (final hit in index.search(words.last, limit: 5)) {
           final entry = await archive.findByUrl(hit.namespace, hit.url);
           expect(
             entry,
@@ -79,6 +95,15 @@ void main() {
         // index the app builds itself: that one matches by prefix, so a
         // plural finds the singular only by accident of spelling.
         expect(index.language, isNotNull);
+
+        // The pair below is German, so this one test is the exception to
+        // taking the query out of the archive: an inflected form and its
+        // stem cannot be picked at random, they have to be a real pair in
+        // a language somebody knows.
+        if (!(index.language ?? '').startsWith('de')) {
+          markTestSkipped('this archive is not German (${index.language})');
+          return;
+        }
 
         final singular = index.search('Element', limit: 20);
         final plural = index.search('Elemente', limit: 20);
