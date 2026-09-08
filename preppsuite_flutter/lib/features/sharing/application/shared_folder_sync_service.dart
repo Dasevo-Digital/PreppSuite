@@ -28,6 +28,9 @@ enum SharedFolderSyncError {
   /// encryption for every row this device owns.
   locked,
 
+  /// Previously encrypted metadata is missing or has been downgraded.
+  encryptionChanged,
+
   /// The folder could be reached but something failed while reading or
   /// writing. Worth retrying; the next run does.
   failed,
@@ -76,6 +79,8 @@ class SharedFolderSyncService {
     required this.identity,
     this.key,
     this.republish = false,
+    this.requireEncryption = false,
+    this.onEncryptedFolder,
   }) : _db = database,
        _folder = folder;
 
@@ -104,6 +109,14 @@ class SharedFolderSyncService {
   /// is dirty, so the ordinary rule would leave the plaintext lying there
   /// beside the sealed ones.
   final bool republish;
+  final bool requireEncryption;
+  final Future<void> Function()? onEncryptedFolder;
+
+  bool get _mustRemainEncrypted =>
+      requireEncryption ||
+      key != null ||
+      identity.isEncrypted ||
+      (_folderIdentity?.isEncrypted ?? false);
 
   String get householdId => identity.householdId;
 
@@ -156,6 +169,13 @@ class SharedFolderSyncService {
         received += await _apply(snapshot);
       }
 
+      final beforePublishError = await _checkIdentity();
+      if (beforePublishError != null) {
+        return SharedFolderSyncResult(
+          received: received,
+          error: beforePublishError,
+        );
+      }
       final published = await _publishIfNeeded(
         learnedSomething: received > 0,
         ourFileExists: deviceIds.contains(deviceId),
@@ -194,6 +214,7 @@ class SharedFolderSyncService {
   Future<SharedFolderSyncError?> _checkIdentity() async {
     final raw = await _folder.readHouseholdFile();
     if (raw == null) {
+      if (_mustRemainEncrypted) return SharedFolderSyncError.encryptionChanged;
       await _folder.writeHouseholdFile(identity.encode());
       return null;
     }
@@ -204,9 +225,17 @@ class SharedFolderSyncService {
       return SharedFolderSyncError.differentHousehold;
     }
 
+    if (!stored.isEncrypted && _mustRemainEncrypted) {
+      return SharedFolderSyncError.encryptionChanged;
+    }
     _folderIdentity = stored;
-    if (stored.isEncrypted && key == null) {
-      return SharedFolderSyncError.locked;
+    if (stored.isEncrypted) {
+      await onEncryptedFolder?.call();
+      final folderKey = key;
+      if (folderKey == null ||
+          !await checkFolderKey(folderKey, stored.check!)) {
+        return SharedFolderSyncError.locked;
+      }
     }
     return null;
   }
@@ -281,16 +310,21 @@ class SharedFolderSyncService {
     required bool learnedSomething,
     required bool ourFileExists,
   }) async {
+    // Re-offer clean rows once after upgrading the conflict rule. The old
+    // second-granularity acknowledgement could mark an unpublished edit
+    // clean, so dirty alone cannot recover every existing installation.
+    final repairEntity = 'sharedFolderVersion2:$householdId:$deviceId';
+    final needsRepair = await _db.lastPulledAt(repairEntity) == null;
     if (!republish &&
+        !needsRepair &&
         !learnedSomething &&
         ourFileExists &&
         !await _hasUnpublishedRows()) {
       return false;
     }
 
-    // Taken before the rows are read, so an edit made while the file is
-    // being written stays dirty and goes out on the next run instead of
-    // being marked published without ever having been in a snapshot.
+    // Informational only. Acknowledgement below uses each included row's
+    // version, not this wall-clock instant.
     final readAt = DateTime.now().toUtc();
 
     final snapshot = DeviceSnapshot(
@@ -334,7 +368,23 @@ class SharedFolderSyncService {
           ? await encryptForFolder(snapshot.encode(), folderKey!)
           : snapshot.encode(),
     );
-    await _db.markHouseholdPublished(householdId, readAt);
+    List<PublishedRow> versions(List<Map<String, Object?>> rows) => [
+      for (final row in rows)
+        (
+          clientId: row['clientId'] as String,
+          updatedAt: asUtcDate(row['updatedAt'])!,
+        ),
+    ];
+    await _db.markHouseholdPublished(
+      householdId,
+      inventory: versions(snapshot.inventoryItems),
+      templates: versions(snapshot.checklistTemplates),
+      items: versions(snapshot.checklistItems),
+      budget: versions(snapshot.budgetEntries),
+      plans: versions(snapshot.householdPlans),
+      members: versions(snapshot.householdMembers),
+    );
+    await _db.setLastPulledAt(repairEntity, DateTime.now().toUtc());
     return true;
   }
 

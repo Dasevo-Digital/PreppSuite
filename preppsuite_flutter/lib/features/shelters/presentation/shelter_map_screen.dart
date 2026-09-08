@@ -9,6 +9,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/presentation/base_map_layer.dart';
 import '../../maps/presentation/map_zoom_buttons.dart';
 import '../application/geo_bounds.dart';
+import '../application/shelter_search.dart';
 import '../application/overpass_shelter_client.dart';
 import '../application/shelter_classification.dart';
 import '../application/shelter_l10n.dart';
@@ -43,26 +44,41 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
   bool _overpassFailed = false;
   String? _locationError;
 
-  @override
-  void initState() {
-    super.initState();
-    _useCurrentLocation();
-  }
+  int _lookupGeneration = 0;
+  late final _shelterSearch = ShelterSearch(
+    wwbota: (bounds) async =>
+        classifyWwbota(await _wwbotaClient.fetchBunkers(bounds)),
+    overpass: (bounds) async =>
+        classifyOverpassFeatures(await _overpassClient.fetchShelters(bounds)),
+  );
 
   @override
   void dispose() {
+    _lookupGeneration++;
+    _shelterSearch.cancel();
+    _mapController.dispose();
     _searchController.dispose();
+    _geolocationService.close();
+    _wwbotaClient.close();
+    _overpassClient.close();
     super.dispose();
   }
 
   Future<void> _useCurrentLocation() async {
-    setState(() => _locationError = null);
+    final generation = ++_lookupGeneration;
+    _shelterSearch.cancel();
+    setState(() {
+      _locationError = null;
+      _isLoading = false;
+    });
     try {
       final position = await _geolocationService.getCurrentLatLng();
-      if (!mounted) return;
+      if (!mounted || generation != _lookupGeneration) return;
       _setCenter(position);
     } on LocationUnavailableException catch (error) {
-      if (mounted) setState(() => _locationError = '$error');
+      if (mounted && generation == _lookupGeneration) {
+        setState(() => _locationError = '$error');
+      }
     }
   }
 
@@ -70,16 +86,32 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
     final query = _searchController.text.trim();
     if (query.isEmpty) return;
 
-    final result = await _geolocationService.searchPlace(query);
-    if (!mounted) return;
-    if (result == null) {
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.shelterSearchNoResult)));
-      return;
+    final generation = ++_lookupGeneration;
+    _shelterSearch.cancel();
+    setState(() {
+      _isLoading = false;
+      _locationError = null;
+    });
+    try {
+      final result = await _geolocationService.searchPlace(query);
+      if (!mounted || generation != _lookupGeneration) return;
+      if (result == null) {
+        setState(
+          () => _locationError = AppLocalizations.of(
+            context,
+          )!.shelterSearchNoResult,
+        );
+        return;
+      }
+      _setCenter(result);
+    } catch (_) {
+      if (mounted && generation == _lookupGeneration) {
+        setState(
+          () =>
+              _locationError = AppLocalizations.of(context)!.searchUnavailable,
+        );
+      }
     }
-    _setCenter(result);
   }
 
   void _setCenter(LatLng center) {
@@ -92,33 +124,16 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
     final center = _center;
     if (center == null) return;
 
-    setState(() => _isLoading = true);
-    final bounds = boundingBoxForRadius(center, _radiusKm);
-
-    final combined = <ClassifiedShelter>[];
-    var wwbotaFailed = false;
-    var overpassFailed = false;
-
-    try {
-      final bunkers = await _wwbotaClient.fetchBunkers(bounds);
-      combined.addAll(classifyWwbota(bunkers));
-    } catch (_) {
-      wwbotaFailed = true;
-    }
-
-    try {
-      final features = await _overpassClient.fetchShelters(bounds);
-      combined.addAll(classifyOverpassFeatures(features));
-    } catch (_) {
-      overpassFailed = true;
-    }
-
-    if (!mounted) return;
-    setState(() {
-      _shelters = combined;
-      _wwbotaFailed = wwbotaFailed;
-      _overpassFailed = overpassFailed;
-      _isLoading = false;
+    await _shelterSearch.search(boundingBoxForRadius(center, _radiusKm), (
+      result,
+    ) {
+      if (!mounted) return;
+      setState(() {
+        _shelters = result.shelters;
+        _wwbotaFailed = result.wwbotaFailed;
+        _overpassFailed = result.overpassFailed;
+        _isLoading = result.pending > 0;
+      });
     });
   }
 

@@ -2183,8 +2183,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String overviewSupplyCalories(Object current, Object target) {
-    return '$current of $target kcal';
+  String overviewSupplyCalories(int current, int target) {
+    final intl.NumberFormat currentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String currentString = currentNumberFormat.format(current);
+    final intl.NumberFormat targetNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String targetString = targetNumberFormat.format(target);
+
+    return '$currentString of $targetString kcal';
   }
 
   @override
@@ -2240,4 +2247,95 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editPhotoButton => 'Crop photo';
+
+  @override
+  String get sharingErrorEncryptionChanged =>
+      'Sync stopped: encryption metadata is missing or was reset. Restore the encrypted household.json from a backup. No unencrypted household data was written.';
+
+  @override
+  String get searchUnavailable =>
+      'Search is currently unavailable. Please try again.';
+
+  @override
+  String get inventoryFilters => 'Filter and sort';
+
+  @override
+  String get inventoryFilterCategory => 'Category';
+
+  @override
+  String get inventoryFilterLocation => 'Storage location';
+
+  @override
+  String get inventoryFilterStatus => 'Stock status';
+
+  @override
+  String get inventoryFilterAll => 'All';
+
+  @override
+  String get inventoryNoLocation => 'No storage location';
+
+  @override
+  String get inventoryExpiringSoon => 'Expires in the next 7 days';
+
+  @override
+  String get inventorySortLabel => 'Sort by';
+
+  @override
+  String get inventorySortName => 'Name';
+
+  @override
+  String get inventorySortExpiry => 'Expiry date';
+
+  @override
+  String get inventorySortAttention => 'Needs attention';
+
+  @override
+  String get inventoryApplyFilters => 'Apply';
+
+  @override
+  String get inventoryResetFilters => 'Reset filters';
+
+  @override
+  String get inventoryFiltersActive => 'Filters active';
+
+  @override
+  String get inventorySearchHint => 'Search supplies';
+
+  @override
+  String get inventoryClearSearch => 'Clear search';
+
+  @override
+  String get inventoryNoMatches =>
+      'No matching supplies. Adjust your search or filters.';
+
+  @override
+  String get unsavedChangesTitle => 'Discard changes?';
+
+  @override
+  String get unsavedChangesMessage => 'Your changes have not been saved yet.';
+
+  @override
+  String get keepEditing => 'Keep editing';
+
+  @override
+  String get discardChanges => 'Discard';
+
+  @override
+  String get inventoryItemDeleted => 'Supply deleted';
+
+  @override
+  String get undoAction => 'Undo';
+
+  @override
+  String get overviewStartTitle => 'Your first step towards preparedness';
+
+  @override
+  String get overviewStartHint =>
+      'Add water or food to see how long your household supplies will last.';
+
+  @override
+  String get overviewAddFirst => 'Add your first supply';
+
+  @override
+  String get overviewOpen => 'Open';
 }

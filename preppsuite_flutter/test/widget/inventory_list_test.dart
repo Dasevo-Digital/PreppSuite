@@ -146,7 +146,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ConsumeDialog), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField), '2');
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(ConsumeDialog),
+        matching: find.byType(TextField),
+      ),
+      '2',
+    );
     await tester.tap(find.text('Abbuchen'));
     await tester.pumpAndSettle();
 

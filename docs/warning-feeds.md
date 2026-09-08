@@ -99,14 +99,16 @@ fünfstelligen Kreisschlüssel als `regionKey` statt des groben
 Bundeslandkürzels. `WarningService.isWarningRelevant` entscheidet damit
 je Haushalt, was überhaupt ausgeliefert wird.
 
-Da keine Quelle ein Ablaufdatum liefert, beendet der Poller Warnungen
-selbst: Was in einem Durchlauf, in dem **alle** Quellen geantwortet haben,
+Da die BBK-Endpunkte kein Ablaufdatum liefern, beendet der Poller deren
+Warnungen selbst: Was in einem vollständigen **BBK-Abruf**
 nicht mehr auftaucht, bekommt `expires` auf den Zeitpunkt der Feststellung.
 Die Unterscheidung zwischen „Quelle sagt: nichts aktiv" und „Quelle war
 nicht erreichbar" ist dafür entscheidend — deshalb liefert
 `BbkClient.fetchAll` ein `complete`-Kennzeichen, und bei einem einzigen
 fehlgeschlagenen Abruf unterbleibt das Beenden. Sonst würde eine einzelne
 schlechte Antwort sämtliche aktiven Warnungen stillschweigend zurückziehen.
+MeteoAlarm-Meldungen übernehmen hingegen `cap:expires` aus dem Feed und
+laufen anhand dieses Zeitpunkts ab.
 
 ## MeteoAlarm-Gebiete auf Kreise abbilden
 
@@ -150,7 +152,7 @@ Warnungen statt keiner — acht davon die nicht zuzuordnenden Seegebiete.
   sichere Lesart ist.
 
   Für Deutschland gibt es seit 0.15.0 eine Zuordnung, siehe unten.
-- **Kein Ablaufdatum aus der Quelle.** Weder `mapData.json` noch
+- **Kein Ablaufdatum aus den BBK-Endpunkten.** Weder `mapData.json` noch
   `dashboard/{ARS}.json` liefert eines — das `valid`-Feld des Dashboards
   ist ein Boolescher Wert, kein Zeitpunkt. Ersatzweise beendet der Poller
   Warnungen, die aus einem vollständigen Abruf verschwunden sind (siehe

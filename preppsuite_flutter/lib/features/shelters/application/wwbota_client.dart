@@ -32,9 +32,14 @@ class WwbotaBunker {
 /// scope as the BBK warning integration).
 class WwbotaClient {
   WwbotaClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _ownsClient = httpClient == null,
+      _httpClient = httpClient ?? http.Client();
 
   final http.Client _httpClient;
+  final bool _ownsClient;
+  void close() {
+    if (_ownsClient) _httpClient.close();
+  }
 
   static const _baseUrl = 'https://api.wwbota.org';
 
@@ -49,8 +54,14 @@ class WwbotaClient {
       },
     );
 
-    final response = await _httpClient.get(uri);
-    if (response.statusCode != 200) return [];
+    final response = await _httpClient
+        .get(uri)
+        .timeout(const Duration(seconds: 20));
+    if (response.statusCode != 200) {
+      throw http.ClientException(
+        'Shelter service returned ${response.statusCode}',
+      );
+    }
 
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
     if (decoded is! List) return [];

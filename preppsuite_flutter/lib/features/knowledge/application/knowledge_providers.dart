@@ -3,6 +3,7 @@ import 'dart:async' show unawaited;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/platform_storage.dart';
+import '../../../core/memory_pressure_listener.dart';
 import '../../maps/application/map_archive_access.dart' show openMapArchive;
 import 'knowledge_index_database.dart';
 import 'knowledge_indexer.dart';
@@ -91,6 +92,10 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
   @override
   Future<KnowledgeState> build() async {
     ref.onDispose(_closeCurrent);
+    final memory = MemoryPressureListener(
+      () => _currentArchive?.clearClusterCache(),
+    );
+    ref.onDispose(memory.dispose);
 
     final stored = await _store.library();
     if (stored.archives.isEmpty) return const KnowledgeState();

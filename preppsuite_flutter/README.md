@@ -1,15 +1,18 @@
-# preppsuite_flutter
+# PreppSuite Flutter
 
-A new Flutter project with Serverpod.
+Lokale Vorrats- und Notfallplanung mit Flutter, Riverpod und Drift/SQLite.
+Die Anwendung benötigt weder Server noch Konto.
 
-## Getting Started
+Abhängigkeiten im Workspace-Wurzelverzeichnis installieren:
 
-This project is a starting point for a Flutter application that is using
-Serverpod.
+```bash
+flutter pub get
+cd preppsuite_flutter
+flutter run
+flutter test
+```
 
-A great starting point for learning Serverpod is our documentation site at:
-[https://docs.serverpod.dev](https://docs.serverpod.dev).
-
-To run the project, first make sure that the server is running, then do:
-
-    flutter run
+Funktionsumfang und Einrichtung stehen in der [Projekt-README](../README.md),
+Architekturregeln in [ARCHITEKTUR.md](../ARCHITEKTUR.md).
+Native Speicher- und Webview-Tests laufen in der mobilen CI und lokal mit
+`flutter test integration_test/ -d <device>` auf Android oder iOS.

@@ -3756,7 +3756,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{current} of {target} kcal'**
-  String overviewSupplyCalories(Object current, Object target);
+  String overviewSupplyCalories(int current, int target);
 
   /// No description provided for @overviewAttentionTitle.
   ///
@@ -3853,6 +3853,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Crop photo'**
   String get editPhotoButton;
+
+  /// No description provided for @sharingErrorEncryptionChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync stopped: encryption metadata is missing or was reset. Restore the encrypted household.json from a backup. No unencrypted household data was written.'**
+  String get sharingErrorEncryptionChanged;
+
+  /// No description provided for @searchUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Search is currently unavailable. Please try again.'**
+  String get searchUnavailable;
+
+  /// No description provided for @inventoryFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter and sort'**
+  String get inventoryFilters;
+
+  /// No description provided for @inventoryFilterCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get inventoryFilterCategory;
+
+  /// No description provided for @inventoryFilterLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage location'**
+  String get inventoryFilterLocation;
+
+  /// No description provided for @inventoryFilterStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock status'**
+  String get inventoryFilterStatus;
+
+  /// No description provided for @inventoryFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get inventoryFilterAll;
+
+  /// No description provided for @inventoryNoLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'No storage location'**
+  String get inventoryNoLocation;
+
+  /// No description provided for @inventoryExpiringSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires in the next 7 days'**
+  String get inventoryExpiringSoon;
+
+  /// No description provided for @inventorySortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort by'**
+  String get inventorySortLabel;
+
+  /// No description provided for @inventorySortName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get inventorySortName;
+
+  /// No description provided for @inventorySortExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry date'**
+  String get inventorySortExpiry;
+
+  /// No description provided for @inventorySortAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get inventorySortAttention;
+
+  /// No description provided for @inventoryApplyFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get inventoryApplyFilters;
+
+  /// No description provided for @inventoryResetFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset filters'**
+  String get inventoryResetFilters;
+
+  /// No description provided for @inventoryFiltersActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters active'**
+  String get inventoryFiltersActive;
+
+  /// No description provided for @inventorySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search supplies'**
+  String get inventorySearchHint;
+
+  /// No description provided for @inventoryClearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get inventoryClearSearch;
+
+  /// No description provided for @inventoryNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching supplies. Adjust your search or filters.'**
+  String get inventoryNoMatches;
+
+  /// No description provided for @unsavedChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get unsavedChangesTitle;
+
+  /// No description provided for @unsavedChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your changes have not been saved yet.'**
+  String get unsavedChangesMessage;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// No description provided for @discardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardChanges;
+
+  /// No description provided for @inventoryItemDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Supply deleted'**
+  String get inventoryItemDeleted;
+
+  /// No description provided for @undoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undoAction;
+
+  /// No description provided for @overviewStartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first step towards preparedness'**
+  String get overviewStartTitle;
+
+  /// No description provided for @overviewStartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add water or food to see how long your household supplies will last.'**
+  String get overviewStartHint;
+
+  /// No description provided for @overviewAddFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first supply'**
+  String get overviewAddFirst;
+
+  /// No description provided for @overviewOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get overviewOpen;
 }
 
 class _AppLocalizationsDelegate

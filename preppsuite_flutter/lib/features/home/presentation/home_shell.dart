@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/feature_activity.dart';
 import '../../../model/household_profile.dart';
 import '../../budget/presentation/budget_list_screen.dart';
 import '../../checklists/presentation/checklist_list_screen.dart';
@@ -45,6 +46,7 @@ class HomeShell extends ConsumerStatefulWidget {
 
 class _HomeShellState extends ConsumerState<HomeShell> {
   ShellDestination _selected = ShellDestination.overview;
+  final _visited = {ShellDestination.overview};
 
   @override
   Widget build(BuildContext context) {
@@ -54,14 +56,21 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     final navigation = shellNavigationFor(MediaQuery.sizeOf(context).width);
     final slots = shellSlotsFor(navigation: navigation, selected: _selected);
 
-    // Kept alive across switches rather than rebuilt: the map holds an
-    // open archive and the article view a web engine, and both are
-    // expensive to lose on a tab change.
+    // Build destinations on first use and retain their navigation state.
+    // Inactive maps release renderers through FeatureActivity.
     final content = IndexedStack(
       index: _selected.index,
       children: [
         for (final destination in ShellDestination.values)
-          _screenFor(destination, householdId),
+          _visited.contains(destination)
+              ? FeatureActivity(
+                  active: destination == _selected,
+                  child: TickerMode(
+                    enabled: destination == _selected,
+                    child: _screenFor(destination, householdId),
+                  ),
+                )
+              : const SizedBox.shrink(),
       ],
     );
 
@@ -127,8 +136,10 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     };
   }
 
-  void _select(ShellDestination destination) =>
-      setState(() => _selected = destination);
+  void _select(ShellDestination destination) => setState(() {
+    _selected = destination;
+    _visited.add(destination);
+  });
 
   Widget _bar(AppLocalizations l10n, ShellSlots slots) {
     final entries = [

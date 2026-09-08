@@ -92,7 +92,6 @@ void main() {
   test(
     'markHouseholdPublished only clears rows the snapshot contained',
     () async {
-      final readAt = DateTime.utc(2026, 3);
       await db.upsertInventoryItem(
         draft(clientId: 'in-snapshot', updatedAt: DateTime.utc(2026, 2)),
       );
@@ -105,7 +104,13 @@ void main() {
         ),
       );
 
-      await db.markHouseholdPublished('household-1', readAt);
+      await db.markHouseholdPublished(
+        'household-1',
+        inventory: [
+          (clientId: 'in-snapshot', updatedAt: DateTime.utc(2026, 2)),
+          (clientId: 'edited-during-write', updatedAt: DateTime.utc(2026, 2)),
+        ],
+      );
 
       expect(
         (await db.dirtyInventoryItems('household-1')).map((e) => e.clientId),

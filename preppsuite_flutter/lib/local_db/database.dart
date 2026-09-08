@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
@@ -164,7 +166,12 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> upsertHouseholdMember(HouseholdMembersCompanion member) {
-    return into(householdMembers).insertOnConflictUpdate(member);
+    return _writeLocal(
+      householdMembers,
+      member.clientId.value,
+      member.updatedAt.value,
+      (timestamp) => member.copyWith(updatedAt: Value(timestamp)),
+    );
   }
 
   Future<List<HouseholdMember>> dirtyHouseholdMembers(String householdId) {
@@ -195,7 +202,12 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> upsertHouseholdPlan(HouseholdPlansCompanion plan) {
-    return into(householdPlans).insertOnConflictUpdate(plan);
+    return _writeLocal(
+      householdPlans,
+      plan.clientId.value,
+      plan.updatedAt.value,
+      (timestamp) => plan.copyWith(updatedAt: Value(timestamp)),
+    );
   }
 
   Future<List<HouseholdPlan>> dirtyHouseholdPlans(String householdId) {
@@ -262,13 +274,22 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> upsertInventoryItem(InventoryItemsCompanion item) {
-    return into(inventoryItems).insertOnConflictUpdate(item);
+    return _writeLocal(
+      inventoryItems,
+      item.clientId.value,
+      item.updatedAt.value,
+      (timestamp) => item.copyWith(updatedAt: Value(timestamp)),
+    );
   }
 
   /// Used by CSV import so hundreds of rows commit as a single batch
   /// instead of one write (and one sync nudge) per row.
   Future<void> upsertInventoryItems(List<InventoryItemsCompanion> items) {
-    return batch((b) => b.insertAllOnConflictUpdate(inventoryItems, items));
+    return transaction(() async {
+      for (final item in items) {
+        await upsertInventoryItem(item);
+      }
+    });
   }
 
   Future<List<InventoryItem>> dirtyInventoryItems(String householdId) {
@@ -340,11 +361,21 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> upsertChecklistTemplate(ChecklistTemplatesCompanion template) {
-    return into(checklistTemplates).insertOnConflictUpdate(template);
+    return _writeLocal(
+      checklistTemplates,
+      template.clientId.value,
+      template.updatedAt.value,
+      (timestamp) => template.copyWith(updatedAt: Value(timestamp)),
+    );
   }
 
   Future<void> upsertChecklistItem(ChecklistItemsCompanion item) {
-    return into(checklistItems).insertOnConflictUpdate(item);
+    return _writeLocal(
+      checklistItems,
+      item.clientId.value,
+      item.updatedAt.value,
+      (timestamp) => item.copyWith(updatedAt: Value(timestamp)),
+    );
   }
 
   Future<ChecklistTemplate?> checklistTemplateByClientId(String clientId) {
@@ -379,7 +410,12 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> upsertBudgetEntry(BudgetEntriesCompanion entry) {
-    return into(budgetEntries).insertOnConflictUpdate(entry);
+    return _writeLocal(
+      budgetEntries,
+      entry.clientId.value,
+      entry.updatedAt.value,
+      (timestamp) => entry.copyWith(updatedAt: Value(timestamp)),
+    );
   }
 
   Future<List<BudgetEntry>> dirtyBudgetEntries(String householdId) {
@@ -549,52 +585,68 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Clears `dirty` on everything this device has just published.
-  ///
-  /// [through] is the moment the snapshot was read, not the moment it was
-  /// written: a row edited while the file was being written is not in it
-  /// and must stay dirty, or the edit would never leave this device.
+  /// Acknowledges exactly the row versions present in the published file.
+  /// A wall-clock cutoff is insufficient: edits can share a second, and
+  /// logical timestamps may lead the clock after several rapid edits.
   Future<void> markHouseholdPublished(
-    String householdId,
-    DateTime through,
+    String householdId, {
+    List<PublishedRow> inventory = const [],
+    List<PublishedRow> templates = const [],
+    List<PublishedRow> items = const [],
+    List<PublishedRow> budget = const [],
+    List<PublishedRow> plans = const [],
+    List<PublishedRow> members = const [],
+  }) {
+    return transaction(() async {
+      for (final (table, rows)
+          in <(TableInfo<Table, Object?>, List<PublishedRow>)>[
+            (inventoryItems, inventory),
+            (checklistTemplates, templates),
+            (checklistItems, items),
+            (budgetEntries, budget),
+            (householdPlans, plans),
+            (householdMembers, members),
+          ]) {
+        for (final row in rows) {
+          await customUpdate(
+            'UPDATE "${table.actualTableName}" SET dirty = 0 '
+            'WHERE household_id = ? AND client_id = ? AND updated_at = ?',
+            variables: [
+              Variable(householdId),
+              Variable(row.clientId),
+              Variable(row.updatedAt.millisecondsSinceEpoch ~/ 1000),
+            ],
+            updates: {table},
+          );
+        }
+      }
+    });
+  }
+
+  /// `updatedAt` doubles as a logical version at SQLite's second precision.
+  /// Local edits always advance beyond the version actually stored, even
+  /// after a rapid second edit or a clock correction. The transaction
+  /// serializes competing local writers. Remote merges bypass this path.
+  Future<void> _writeLocal<T extends Table, R>(
+    TableInfo<T, R> table,
+    String clientId,
+    DateTime requested,
+    Insertable<R> Function(DateTime) companion,
   ) {
     return transaction(() async {
-      await (update(inventoryItems)..where(
-            (t) =>
-                t.householdId.equals(householdId) &
-                t.updatedAt.isSmallerOrEqualValue(through),
-          ))
-          .write(const InventoryItemsCompanion(dirty: Value(false)));
-      await (update(checklistTemplates)..where(
-            (t) =>
-                t.householdId.equals(householdId) &
-                t.updatedAt.isSmallerOrEqualValue(through),
-          ))
-          .write(const ChecklistTemplatesCompanion(dirty: Value(false)));
-      await (update(checklistItems)..where(
-            (t) =>
-                t.householdId.equals(householdId) &
-                t.updatedAt.isSmallerOrEqualValue(through),
-          ))
-          .write(const ChecklistItemsCompanion(dirty: Value(false)));
-      await (update(budgetEntries)..where(
-            (t) =>
-                t.householdId.equals(householdId) &
-                t.updatedAt.isSmallerOrEqualValue(through),
-          ))
-          .write(const BudgetEntriesCompanion(dirty: Value(false)));
-      await (update(householdPlans)..where(
-            (t) =>
-                t.householdId.equals(householdId) &
-                t.updatedAt.isSmallerOrEqualValue(through),
-          ))
-          .write(const HouseholdPlansCompanion(dirty: Value(false)));
-      await (update(householdMembers)..where(
-            (t) =>
-                t.householdId.equals(householdId) &
-                t.updatedAt.isSmallerOrEqualValue(through),
-          ))
-          .write(const HouseholdMembersCompanion(dirty: Value(false)));
+      final existing = await customSelect(
+        'SELECT updated_at FROM "${table.actualTableName}" WHERE client_id = ?',
+        variables: [Variable(clientId)],
+        readsFrom: {table},
+      ).getSingleOrNull();
+      var seconds = requested.millisecondsSinceEpoch ~/ 1000;
+      final previous = existing?.read<int>('updated_at');
+      if (previous != null && seconds <= previous) seconds = previous + 1;
+      await into(table).insertOnConflictUpdate(
+        companion(
+          DateTime.fromMillisecondsSinceEpoch(seconds * 1000, isUtc: true),
+        ),
+      );
     });
   }
 
@@ -698,67 +750,97 @@ class AppDatabase extends _$AppDatabase {
         inventoryItems,
         inventory,
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+        (row) => row.toCompanion(false),
       );
       changed += await _mergeInto(
         checklistTemplates,
         templates,
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+        (row) => row.toCompanion(false),
       );
       changed += await _mergeInto(
         checklistItems,
         items,
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+        (row) => row.toCompanion(false),
       );
       changed += await _mergeInto(
         budgetEntries,
         budget,
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+        (row) => row.toCompanion(false),
       );
       changed += await _mergeInto(
         householdPlans,
         plans,
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+        (row) => row.toCompanion(false),
       );
       changed += await _mergeInto(
         householdMembers,
         members,
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+        (row) => row.toCompanion(false),
       );
       return changed;
     });
   }
 
-  /// Last-writer-wins by `updatedAt`, strictly greater.
-  ///
-  /// Strictly, so that replaying the same snapshot twice is free and the
-  /// order the device files happen to be read in cannot change the
-  /// outcome. Ties keep what is already stored: two rows sharing a
-  /// `clientId` and an `updatedAt` are the same row, because a client id
-  /// is generated once, on one device.
+  /// Orders versions by timestamp, then by the canonical shared contents.
+  /// Equal timestamps do not imply equal contents: two devices can edit a
+  /// shared clientId independently. Tombstones win ties over live rows.
+  /// Local-only columns never participate, and identical replays are free.
   Future<int> _mergeInto<T extends Table, R, C extends UpdateCompanion<R>>(
     TableInfo<T, R> table,
     List<IncomingRow<C>> incoming,
     ({String clientId, DateTime updatedAt}) Function(R) identify,
+    C Function(R) companionOf,
   ) async {
     if (incoming.isEmpty) return 0;
-
     final stored = {
       for (final row in await select(table).get())
-        identify(row).clientId: identify(row).updatedAt.toUtc(),
+        identify(row).clientId: (
+          seconds: identify(row).updatedAt.millisecondsSinceEpoch ~/ 1000,
+          contents: _sharedContents(companionOf(row)),
+        ),
     };
+    var changed = 0;
+    for (final candidate in incoming) {
+      final version = (
+        seconds: candidate.updatedAt.millisecondsSinceEpoch ~/ 1000,
+        contents: _sharedContents(candidate.companion),
+      );
+      final previous = stored[candidate.clientId];
+      if (previous != null &&
+          (version.seconds < previous.seconds ||
+              (version.seconds == previous.seconds &&
+                  version.contents.compareTo(previous.contents) <= 0))) {
+        continue;
+      }
+      await into(table).insertOnConflictUpdate(candidate.companion);
+      // Also compare against rows accepted earlier in this same snapshot.
+      stored[candidate.clientId] = version;
+      changed++;
+    }
+    return changed;
+  }
 
-    final winners = [
-      for (final candidate in incoming)
-        if (stored[candidate.clientId]?.isBefore(
-              candidate.updatedAt.toUtc(),
-            ) ??
-            true)
-          candidate.companion,
-    ];
-    if (winners.isEmpty) return 0;
+  static String _sharedContents(UpdateCompanion<Object?> companion) {
+    final columns = companion.toColumns(false)
+      ..remove('dirty')
+      ..remove('photo_path')
+      ..remove('updated_at');
+    final names = columns.keys.toList()..sort();
+    Object? valueOf(String name) {
+      final value = (columns[name] as Variable).value;
+      return value is DateTime ? value.millisecondsSinceEpoch ~/ 1000 : value;
+    }
 
-    await batch((b) => b.insertAllOnConflictUpdate(table, winners));
-    return winners.length;
+    final deleted =
+        columns.containsKey('deleted_at') && valueOf('deleted_at') != null;
+    return '${deleted ? 1 : 0}${jsonEncode({
+      for (final name in names) name: valueOf(name),
+    })}';
   }
 
   // --- Sync cursor -----------------------------------------------------
@@ -798,3 +880,6 @@ QueryExecutor _openConnection() {
     native: DriftNativeOptions(databaseDirectory: appDatabaseDirectory),
   );
 }
+
+/// Identity of one immutable version acknowledged by a successful upload.
+typedef PublishedRow = ({String clientId, DateTime updatedAt});

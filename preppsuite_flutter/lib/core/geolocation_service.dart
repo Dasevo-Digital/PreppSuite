@@ -48,9 +48,14 @@ class LocationUnavailableException implements Exception {
 /// the user.
 class GeolocationService {
   GeolocationService({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _ownsClient = httpClient == null,
+      _httpClient = httpClient ?? http.Client();
 
   final http.Client _httpClient;
+  final bool _ownsClient;
+  void close() {
+    if (_ownsClient) _httpClient.close();
+  }
 
   /// Returns the matched [GermanState], or `null` if the position resolved
   /// but Nominatim's state name didn't match any of [germanStates] (e.g.
@@ -86,11 +91,18 @@ class GeolocationService {
       'accept-language': 'de',
     });
 
-    final response = await _httpClient.get(
-      uri,
-      headers: {'User-Agent': 'PreppSuite/1.0'},
-    );
-    if (response.statusCode != 200) return null;
+    final response = await _httpClient
+        .get(
+          uri,
+          headers: {'User-Agent': 'PreppSuite/1.0'},
+        )
+        .timeout(const Duration(seconds: 15));
+    if (response.statusCode != 200) {
+      throw http.ClientException(
+        'Geocoding failed (${response.statusCode})',
+        uri,
+      );
+    }
 
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
     if (decoded is! List || decoded.isEmpty) return null;
@@ -140,6 +152,7 @@ class GeolocationService {
       return await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 15),
         ),
       );
     } on LocationUnavailableException {
@@ -160,12 +173,14 @@ class GeolocationService {
       'accept-language': 'de',
     });
 
-    final response = await _httpClient.get(
-      uri,
-      // Nominatim's usage policy requires an identifying User-Agent for
-      // non-browser clients.
-      headers: {'User-Agent': 'PreppSuite/1.0'},
-    );
+    final response = await _httpClient
+        .get(
+          uri,
+          // Nominatim's usage policy requires an identifying User-Agent for
+          // non-browser clients.
+          headers: {'User-Agent': 'PreppSuite/1.0'},
+        )
+        .timeout(const Duration(seconds: 15));
     if (response.statusCode != 200) return null;
 
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));

@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../model/categories.dart';
 import 'package:uuid/uuid.dart';
@@ -161,6 +161,27 @@ class InventoryController {
         updatedAt: DateTime.now().toUtc(),
         dirty: const Value(true),
       ),
+    );
+  }
+
+  /// Undo restores the latest stored fields, not an old form snapshot.
+  Future<void> restoreItem(String clientId) async {
+    final row =
+        await (_db.select(_db.inventoryItems)..where(
+              (t) =>
+                  t.clientId.equals(clientId) &
+                  t.householdId.equals(householdId),
+            ))
+            .getSingleOrNull();
+    if (row == null || row.deletedAt == null) return;
+    await _db.upsertInventoryItem(
+      row
+          .toCompanion(false)
+          .copyWith(
+            deletedAt: const Value(null),
+            updatedAt: Value(DateTime.now().toUtc()),
+            dirty: const Value(true),
+          ),
     );
   }
 

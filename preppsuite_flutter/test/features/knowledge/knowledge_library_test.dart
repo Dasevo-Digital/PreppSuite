@@ -16,6 +16,7 @@ import 'zim_fixture.dart';
 /// which meant that keeping the school material and the encyclopedia meant
 /// finding one of them again every time.
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late Directory workspace;
 
   setUp(() {

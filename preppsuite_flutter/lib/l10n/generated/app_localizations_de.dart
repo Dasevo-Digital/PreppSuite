@@ -2198,8 +2198,15 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String overviewSupplyCalories(Object current, Object target) {
-    return '$current von $target kcal';
+  String overviewSupplyCalories(int current, int target) {
+    final intl.NumberFormat currentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String currentString = currentNumberFormat.format(current);
+    final intl.NumberFormat targetNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String targetString = targetNumberFormat.format(target);
+
+    return '$currentString von $targetString kcal';
   }
 
   @override
@@ -2255,4 +2262,96 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get editPhotoButton => 'Foto zuschneiden';
+
+  @override
+  String get sharingErrorEncryptionChanged =>
+      'Der Abgleich wurde gestoppt: Die Verschlüsselungsdaten fehlen oder wurden zurückgesetzt. Stelle die verschlüsselte household.json aus einer Sicherung wieder her. Es wurden keine unverschlüsselten Haushaltsdaten geschrieben.';
+
+  @override
+  String get searchUnavailable =>
+      'Die Suche ist gerade nicht erreichbar. Bitte versuche es erneut.';
+
+  @override
+  String get inventoryFilters => 'Filtern und sortieren';
+
+  @override
+  String get inventoryFilterCategory => 'Kategorie';
+
+  @override
+  String get inventoryFilterLocation => 'Lagerort';
+
+  @override
+  String get inventoryFilterStatus => 'Bestandsstatus';
+
+  @override
+  String get inventoryFilterAll => 'Alle';
+
+  @override
+  String get inventoryNoLocation => 'Ohne Lagerort';
+
+  @override
+  String get inventoryExpiringSoon => 'Läuft in den nächsten 7 Tagen ab';
+
+  @override
+  String get inventorySortLabel => 'Sortieren nach';
+
+  @override
+  String get inventorySortName => 'Name';
+
+  @override
+  String get inventorySortExpiry => 'Ablaufdatum';
+
+  @override
+  String get inventorySortAttention => 'Handlungsbedarf';
+
+  @override
+  String get inventoryApplyFilters => 'Anwenden';
+
+  @override
+  String get inventoryResetFilters => 'Filter zurücksetzen';
+
+  @override
+  String get inventoryFiltersActive => 'Filter aktiv';
+
+  @override
+  String get inventorySearchHint => 'Vorräte durchsuchen';
+
+  @override
+  String get inventoryClearSearch => 'Suche leeren';
+
+  @override
+  String get inventoryNoMatches =>
+      'Keine passenden Vorräte. Passe die Suche oder die Filter an.';
+
+  @override
+  String get unsavedChangesTitle => 'Änderungen verwerfen?';
+
+  @override
+  String get unsavedChangesMessage =>
+      'Deine Änderungen sind noch nicht gespeichert.';
+
+  @override
+  String get keepEditing => 'Weiter bearbeiten';
+
+  @override
+  String get discardChanges => 'Verwerfen';
+
+  @override
+  String get inventoryItemDeleted => 'Vorrat gelöscht';
+
+  @override
+  String get undoAction => 'Rückgängig';
+
+  @override
+  String get overviewStartTitle => 'Dein erster Schritt zur Vorsorge';
+
+  @override
+  String get overviewStartHint =>
+      'Trage Wasser oder Lebensmittel ein. So siehst du, wie lange dein Haushalt versorgt ist.';
+
+  @override
+  String get overviewAddFirst => 'Ersten Vorrat anlegen';
+
+  @override
+  String get overviewOpen => 'Öffnen';
 }

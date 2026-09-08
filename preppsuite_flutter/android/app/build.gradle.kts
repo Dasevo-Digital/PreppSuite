@@ -60,11 +60,6 @@ android {
     // value written in defaultConfig does not survive. Excluding at the
     // packaging step does, and is checked afterwards in
     // tool/android_release.sh. Together: 96.7 MB -> 63.1 MB.
-    packaging {
-        jniLibs {
-            excludes += setOf("**/x86/**", "**/x86_64/**")
-        }
-    }
 
     signingConfigs {
         if (hasReleaseKeystore) {
@@ -107,6 +102,16 @@ android {
                 signingConfigs.getByName("debug")
             }
         }
+    }
+}
+
+// Debug builds must retain the emulator ABI, including native plugin libs.
+// Distribution keeps exactly the existing ARM-only release packaging.
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        variant.packaging.jniLibs.excludes.addAll(
+            setOf("**/x86/**", "**/x86_64/**")
+        )
     }
 }
 

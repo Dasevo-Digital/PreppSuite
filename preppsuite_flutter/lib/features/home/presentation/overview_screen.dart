@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,6 +9,7 @@ import '../../../model/categories.dart';
 import '../../../model/household_profile.dart';
 import '../../inventory/application/inventory_category_l10n.dart';
 import '../../inventory/application/inventory_providers.dart';
+import '../../inventory/presentation/inventory_item_form_screen.dart';
 import '../../inventory/application/supply_calculator.dart';
 import '../../checklists/application/checklist_providers.dart';
 import '../../warnings/application/warning_providers.dart';
@@ -34,41 +36,91 @@ class OverviewScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final items =
-        ref.watch(inventoryItemsProvider(profile.id)).value ?? const [];
+    final inventory = ref.watch(inventoryItemsProvider(profile.id));
+    final items = inventory.value ?? const <InventoryItem>[];
     final overview = summarizeInventory(items);
 
+    final cards = <Widget>[
+      _AttentionCard(
+        overview: overview,
+        onOpen: () => onNavigate(ShellDestination.inventory),
+      ),
+      _WarningCard(
+        profile: profile,
+        onOpen: () => onNavigate(ShellDestination.warnings),
+      ),
+      _ChecklistCard(
+        householdId: profile.id,
+        onOpen: () => onNavigate(ShellDestination.checklists),
+      ),
+      _ResourceCard(
+        overview: overview,
+        onOpen: () => onNavigate(ShellDestination.inventory),
+      ),
+    ];
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navOverview)),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-        children: [
-          _SupplyCard(
-            profile: profile,
-            items: items,
-            onOpen: () => onNavigate(ShellDestination.inventory),
-          ),
-          const SizedBox(height: 12),
-          _AttentionCard(
-            overview: overview,
-            onOpen: () => onNavigate(ShellDestination.inventory),
-          ),
-          const SizedBox(height: 12),
-          _WarningCard(
-            profile: profile,
-            onOpen: () => onNavigate(ShellDestination.warnings),
-          ),
-          const SizedBox(height: 12),
-          _ChecklistCard(
-            householdId: profile.id,
-            onOpen: () => onNavigate(ShellDestination.checklists),
-          ),
-          const SizedBox(height: 12),
-          _ResourceCard(
-            overview: overview,
-            onOpen: () => onNavigate(ShellDestination.inventory),
-          ),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final wide =
+              constraints.maxWidth >= 1000 &&
+              MediaQuery.textScalerOf(context).scale(16) <= 22;
+          final width = constraints.maxWidth - 32;
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+            children: [
+              if (inventory.hasValue && items.isEmpty) ...[
+                Card(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.overviewStartTitle,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(l10n.overviewStartHint),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          icon: const Icon(Icons.add),
+                          label: Text(l10n.overviewAddFirst),
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => InventoryItemFormScreen(
+                                householdId: profile.id,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+              _SupplyCard(
+                profile: profile,
+                items: items,
+                onOpen: () => onNavigate(ShellDestination.inventory),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  for (final card in cards)
+                    SizedBox(
+                      width: wide ? (width - 12) / 2 : width,
+                      child: card,
+                    ),
+                ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -129,6 +181,26 @@ class _OverviewCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               child,
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.overviewOpen,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -181,8 +253,14 @@ class _SupplyCard extends StatelessWidget {
             current: result.waterCurrentLiters,
             target: result.waterTargetLiters,
             text: l10n.overviewSupplyWater(
-              result.waterCurrentLiters.toStringAsFixed(1),
-              result.waterTargetLiters.toStringAsFixed(1),
+              NumberFormat.decimalPatternDigits(
+                locale: l10n.localeName,
+                decimalDigits: 1,
+              ).format(result.waterCurrentLiters),
+              NumberFormat.decimalPatternDigits(
+                locale: l10n.localeName,
+                decimalDigits: 1,
+              ).format(result.waterTargetLiters),
             ),
           ),
           const SizedBox(height: 12),
@@ -231,9 +309,12 @@ class _Meter extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            spacing: 12,
+            runSpacing: 4,
             children: [
-              Expanded(child: Text(label, style: theme.textTheme.labelLarge)),
+              Text(label, style: theme.textTheme.labelLarge),
               Text(
                 text,
                 style: theme.textTheme.labelMedium?.copyWith(

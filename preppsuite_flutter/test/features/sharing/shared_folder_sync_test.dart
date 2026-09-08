@@ -102,6 +102,130 @@ void main() {
     expect((await storedWater(laptop))?.quantity, 24);
   });
 
+  test('equal-time edits converge independently of sync order', () async {
+    final time = DateTime.utc(2026, 2);
+    await phone.upsertInventoryItem(water(quantity: 12, updatedAt: time));
+    await laptop.upsertInventoryItem(water(quantity: 24, updatedAt: time));
+    for (var i = 0; i < 3; i++) {
+      await serviceFor(phone, 'phone').sync();
+      await serviceFor(laptop, 'laptop').sync();
+    }
+    expect(
+      (await storedWater(phone))?.quantity,
+      (await storedWater(laptop))?.quantity,
+    );
+    final writes = folder.deviceWrites;
+    await serviceFor(phone, 'phone').sync();
+    await serviceFor(laptop, 'laptop').sync();
+    expect(folder.deviceWrites, writes);
+  });
+
+  test('a second edit in the same second reaches another device', () async {
+    final time = DateTime.utc(2026, 2);
+    await phone.upsertInventoryItem(water(quantity: 24, updatedAt: time));
+    await serviceFor(phone, 'phone').sync();
+    await serviceFor(laptop, 'laptop').sync();
+    await phone.upsertInventoryItem(
+      water(
+        quantity: 12,
+        updatedAt: time.add(const Duration(milliseconds: 100)),
+      ),
+    );
+    await serviceFor(phone, 'phone').sync();
+    await serviceFor(laptop, 'laptop').sync();
+    expect((await storedWater(laptop))?.quantity, 12);
+  });
+
+  test(
+    'an edit after the clock moves backwards reaches another device',
+    () async {
+      await phone.upsertInventoryItem(
+        water(quantity: 24, updatedAt: DateTime.utc(2026, 3)),
+      );
+      await serviceFor(phone, 'phone').sync();
+      await serviceFor(laptop, 'laptop').sync();
+      await phone.upsertInventoryItem(
+        water(quantity: 12, updatedAt: DateTime.utc(2026, 2)),
+      );
+      await serviceFor(phone, 'phone').sync();
+      await serviceFor(laptop, 'laptop').sync();
+      expect((await storedWater(laptop))?.quantity, 12);
+    },
+  );
+
+  test(
+    'a tombstone wins an equal-time edit without losing the local photo',
+    () async {
+      final time = DateTime.utc(2026, 2);
+      await phone.upsertInventoryItem(
+        water(updatedAt: time, deletedAt: time, photoPath: 'phone.jpg'),
+      );
+      await laptop.upsertInventoryItem(
+        water(updatedAt: time, name: 'Z edited', photoPath: 'laptop.jpg'),
+      );
+      for (var i = 0; i < 3; i++) {
+        await serviceFor(laptop, 'laptop').sync();
+        await serviceFor(phone, 'phone').sync();
+      }
+      expect((await storedWater(phone))?.deletedAt?.toUtc(), time);
+      expect((await storedWater(laptop))?.deletedAt?.toUtc(), time);
+      expect((await storedWater(phone))?.photoPath, 'phone.jpg');
+      expect((await storedWater(laptop))?.photoPath, 'laptop.jpg');
+    },
+  );
+
+  test(
+    'acknowledgement preserves an edit made during the file write',
+    () async {
+      final editingFolder = _EditingFolder()..householdFile = identity.encode();
+      folder = editingFolder;
+      final time = DateTime.now().toUtc().add(const Duration(days: 2));
+      await phone.upsertInventoryItem(water(quantity: 24, updatedAt: time));
+      editingFolder.onWrite = () async {
+        await phone.upsertInventoryItem(water(quantity: 12, updatedAt: time));
+      };
+      await serviceFor(phone, 'phone').sync();
+      expect(await phone.dirtyInventoryItems(householdId), hasLength(1));
+      await serviceFor(laptop, 'laptop').sync();
+      expect((await storedWater(laptop))?.quantity, 24);
+      await serviceFor(phone, 'phone').sync();
+      expect(await phone.dirtyInventoryItems(householdId), isEmpty);
+      await serviceFor(laptop, 'laptop').sync();
+      expect((await storedWater(laptop))?.quantity, 12);
+      final writes = folder.deviceWrites;
+      await serviceFor(phone, 'phone').sync();
+      expect(folder.deviceWrites, writes);
+    },
+  );
+
+  test(
+    'the first upgraded sync republishes a legacy clean edit once',
+    () async {
+      final time = DateTime.utc(2026, 2);
+      await phone.upsertInventoryItem(water(quantity: 12, updatedAt: time));
+      folder.deviceFiles['phone'] = DeviceSnapshot(
+        deviceId: 'phone',
+        householdId: householdId,
+        writtenAt: time,
+        inventoryItems: [encodeInventoryItem((await storedWater(phone))!)],
+      ).encode();
+      // Simulate the old write/ack race: SQLite holds the edit, but the
+      // existing snapshot does not and dirty was incorrectly cleared.
+      await phone
+          .into(phone.inventoryItems)
+          .insertOnConflictUpdate(
+            water(
+              quantity: 24,
+              updatedAt: time,
+            ).copyWith(dirty: const Value(false)),
+          );
+      expect((await serviceFor(phone, 'phone').sync()).published, isTrue);
+      await serviceFor(laptop, 'laptop').sync();
+      expect((await storedWater(laptop))?.quantity, 24);
+      expect((await serviceFor(phone, 'phone').sync()).published, isFalse);
+    },
+  );
+
   test(
     'a deletion travels rather than being undone by the other device',
     () async {
@@ -259,4 +383,16 @@ void main() {
 
     expect(result.error, SharedFolderSyncError.unsupportedVersion);
   });
+}
+
+class _EditingFolder extends InMemorySyncFolder {
+  Future<void> Function()? onWrite;
+
+  @override
+  Future<void> writeDeviceFile(String deviceId, String contents) async {
+    final callback = onWrite;
+    onWrite = null;
+    await callback?.call();
+    await super.writeDeviceFile(deviceId, contents);
+  }
 }

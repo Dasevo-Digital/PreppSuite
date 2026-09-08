@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -7,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/error_text.dart';
 import '../../../local_db/database.dart';
 import '../application/inventory_category_l10n.dart';
 import '../application/inventory_controller.dart';
@@ -77,6 +80,67 @@ class _InventoryItemFormScreenState
   String? _photoPath;
   bool _isSubmitting = false;
   bool _isScanning = false;
+  bool _allowPop = false;
+  bool _discardDialogOpen = false;
+  late String _initialSignature;
+  final _sessionPhotos = <String>{};
+  List<TextEditingController> get _controllers => [
+    _nameController,
+    _quantityController,
+    _unitController,
+    _storageLocationController,
+    _minQuantityController,
+    _caloriesController,
+    _proteinController,
+    _carbohydrateController,
+    _fatController,
+    _fiberController,
+    _notesController,
+  ];
+  String get _signature => jsonEncode([
+    for (final controller in _controllers) controller.text,
+    _category.name,
+    _expirationDate?.toIso8601String(),
+    _barcode,
+    _offProductId,
+    _photoPath,
+  ]);
+  bool get _hasChanges => _signature != _initialSignature;
+  void _onFieldChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _finish() async {
+    if (!mounted) return;
+    setState(() => _allowPop = true);
+    await WidgetsBinding.instance.endOfFrame;
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _requestLeave() async {
+    if (_isSubmitting || _discardDialogOpen) return;
+    final l10n = AppLocalizations.of(context)!;
+    _discardDialogOpen = true;
+    final discard = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.unsavedChangesTitle),
+        content: Text(l10n.unsavedChangesMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.keepEditing),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.discardChanges),
+          ),
+        ],
+      ),
+    );
+    _discardDialogOpen = false;
+    if (discard == true && mounted) await _finish();
+  }
 
   /// Camera capture needs a platform delegate `image_picker` doesn't wire
   /// up on desktop (see `InventoryPhotoService.pickFromCamera`) — offer it
@@ -133,6 +197,10 @@ class _InventoryItemFormScreenState
     _barcode = existing?.barcode;
     _offProductId = existing?.offProductId;
     _photoPath = existing?.photoPath;
+    _initialSignature = _signature;
+    for (final controller in _controllers) {
+      controller.addListener(_onFieldChanged);
+    }
   }
 
   /// Grams are shown to one decimal: Open Food Facts reports them to two
@@ -146,6 +214,9 @@ class _InventoryItemFormScreenState
 
   @override
   void dispose() {
+    for (final path in _sessionPhotos) {
+      unawaited(const InventoryPhotoService().delete(path));
+    }
     _nameController.dispose();
     _quantityController.dispose();
     _unitController.dispose();
@@ -207,11 +278,15 @@ class _InventoryItemFormScreenState
 
   Future<void> _replacePhoto(String? newPath) async {
     if (newPath == null) return;
+    if (!mounted) {
+      await const InventoryPhotoService().delete(newPath);
+      return;
+    }
     final oldPath = _photoPath;
+    if (newPath != widget.existing?.photoPath) _sessionPhotos.add(newPath);
     setState(() => _photoPath = newPath);
-    // Only delete the old file once the new one is confirmed in place, so a
-    // failed pick never loses an existing photo.
-    if (oldPath != null && oldPath != newPath) {
+    // Persisted photos remain available if the user discards this form.
+    if (oldPath != newPath && _sessionPhotos.remove(oldPath)) {
       await const InventoryPhotoService().delete(oldPath);
     }
   }
@@ -224,7 +299,7 @@ class _InventoryItemFormScreenState
   /// surprise.
   Future<void> _addPhoto(Future<String?> Function() pick) async {
     final picked = await pick();
-    if (picked == null || !mounted) return;
+    if (picked == null) return;
     await _replacePhoto(picked);
     if (mounted) await _editPhoto();
   }
@@ -246,7 +321,9 @@ class _InventoryItemFormScreenState
   Future<void> _removePhoto() async {
     final oldPath = _photoPath;
     setState(() => _photoPath = null);
-    await const InventoryPhotoService().delete(oldPath);
+    if (_sessionPhotos.remove(oldPath)) {
+      await const InventoryPhotoService().delete(oldPath);
+    }
   }
 
   Future<void> _showPhotoOptions() async {
@@ -351,305 +428,373 @@ class _InventoryItemFormScreenState
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
-    final controller = ref.read(
-      inventoryControllerProvider(widget.householdId),
-    );
-    final quantity = double.parse(_quantityController.text.trim());
-    final minQuantityText = _minQuantityController.text.trim();
-    final minQuantity = minQuantityText.isEmpty
-        ? null
-        : double.parse(minQuantityText);
-    final nutrition = _readNutrition();
-    final notes = _notesController.text.trim();
+    try {
+      final controller = ref.read(
+        inventoryControllerProvider(widget.householdId),
+      );
+      final quantity = double.parse(_quantityController.text.trim());
+      final minQuantityText = _minQuantityController.text.trim();
+      final minQuantity = minQuantityText.isEmpty
+          ? null
+          : double.parse(minQuantityText);
+      final nutrition = _readNutrition();
+      final notes = _notesController.text.trim();
 
-    if (_isEditing) {
-      await controller.updateItem(
-        widget.existing!,
-        name: _nameController.text.trim(),
-        category: _category,
-        quantity: quantity,
-        unit: _unitController.text.trim(),
-        storageLocation: _storageLocationController.text.trim(),
-        expirationDate: _expirationDate,
-        minQuantity: minQuantity,
-        notes: notes.isEmpty ? null : notes,
-        barcode: _barcode,
-        offProductId: _offProductId,
-        photoPath: _photoPath,
-        nutrition: nutrition,
-      );
-    } else {
-      await controller.addItem(
-        name: _nameController.text.trim(),
-        category: _category,
-        quantity: quantity,
-        unit: _unitController.text.trim(),
-        storageLocation: _storageLocationController.text.trim(),
-        expirationDate: _expirationDate,
-        minQuantity: minQuantity,
-        notes: notes.isEmpty ? null : notes,
-        barcode: _barcode,
-        offProductId: _offProductId,
-        photoPath: _photoPath,
-        nutrition: nutrition,
-      );
+      if (_isEditing) {
+        await controller.updateItem(
+          widget.existing!,
+          name: _nameController.text.trim(),
+          category: _category,
+          quantity: quantity,
+          unit: _unitController.text.trim(),
+          storageLocation: _storageLocationController.text.trim(),
+          expirationDate: _expirationDate,
+          minQuantity: minQuantity,
+          notes: notes.isEmpty ? null : notes,
+          barcode: _barcode,
+          offProductId: _offProductId,
+          photoPath: _photoPath,
+          nutrition: nutrition,
+        );
+      } else {
+        await controller.addItem(
+          name: _nameController.text.trim(),
+          category: _category,
+          quantity: quantity,
+          unit: _unitController.text.trim(),
+          storageLocation: _storageLocationController.text.trim(),
+          expirationDate: _expirationDate,
+          minQuantity: minQuantity,
+          notes: notes.isEmpty ? null : notes,
+          barcode: _barcode,
+          offProductId: _offProductId,
+          photoPath: _photoPath,
+          nutrition: nutrition,
+        );
+      }
+
+      _sessionPhotos.remove(_photoPath);
+      final originalPhoto = widget.existing?.photoPath;
+      if (originalPhoto != null && originalPhoto != _photoPath) {
+        await const InventoryPhotoService().delete(originalPhoto);
+      }
+      await _finish();
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(describeError(AppLocalizations.of(context)!, error)),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
-
-    if (mounted) Navigator.of(context).pop();
   }
 
   Future<void> _delete() async {
+    if (_isSubmitting) return;
     final controller = ref.read(
       inventoryControllerProvider(widget.householdId),
     );
-    await controller.deleteItem(widget.existing!);
-    if (mounted) Navigator.of(context).pop();
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _isSubmitting = true);
+    try {
+      await controller.deleteItem(widget.existing!);
+      await _finish();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.inventoryItemDeleted),
+          duration: const Duration(seconds: 8),
+          action: SnackBarAction(
+            label: l10n.undoAction,
+            onPressed: () async {
+              try {
+                await controller.restoreItem(widget.existing!.clientId);
+              } catch (error) {
+                messenger.showSnackBar(
+                  SnackBar(content: Text(describeError(l10n, error))),
+                );
+              }
+            },
+          ),
+        ),
+      );
+    } catch (error) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(describeError(l10n, error))),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? l10n.editItemTitle : l10n.addItemTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.qr_code_scanner),
-            tooltip: l10n.scanBarcodeButton,
-            onPressed: _isSubmitting ? null : _scanBarcode,
+    return PopScope(
+      canPop: _allowPop || (!_hasChanges && !_isSubmitting),
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) unawaited(_requestLeave());
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: BackButton(
+            onPressed: () async {
+              if (_isSubmitting) return;
+              if (_hasChanges) {
+                await _requestLeave();
+              } else {
+                await _finish();
+              }
+            },
           ),
-          if (_isEditing)
+          title: Text(_isEditing ? l10n.editItemTitle : l10n.addItemTitle),
+          actions: [
             IconButton(
-              icon: const Icon(Icons.delete_outline),
-              tooltip: l10n.deleteButton,
-              onPressed: _isSubmitting ? null : _delete,
+              icon: const Icon(Icons.qr_code_scanner),
+              tooltip: l10n.scanBarcodeButton,
+              onPressed: _isSubmitting ? null : _scanBarcode,
             ),
-        ],
-      ),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: _PhotoPicker(
-                        photoPath: _photoPath,
-                        onTap: _isSubmitting ? null : _showPhotoOptions,
+            if (_isEditing)
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                tooltip: l10n.deleteButton,
+                onPressed: _isSubmitting ? null : _delete,
+              ),
+          ],
+        ),
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: _PhotoPicker(
+                          photoPath: _photoPath,
+                          onTap: _isSubmitting ? null : _showPhotoOptions,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    if (_barcode != null) ...[
-                      Chip(
-                        avatar: _isScanning
+                      const SizedBox(height: 24),
+                      if (_barcode != null) ...[
+                        Chip(
+                          avatar: _isScanning
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.qr_code, size: 18),
+                          label: Text(l10n.scannedBarcodeLabel(_barcode!)),
+                          onDeleted: () => setState(() {
+                            _barcode = null;
+                            _offProductId = null;
+                          }),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: l10n.itemNameLabel,
+                        ),
+                        validator: (value) =>
+                            (value == null || value.trim().isEmpty)
+                            ? l10n.fieldRequired
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+                      DropdownButtonFormField<InventoryItemCategory>(
+                        isExpanded: true,
+                        initialValue: _category,
+                        decoration: InputDecoration(
+                          labelText: l10n.categoryLabel,
+                        ),
+                        items: [
+                          for (final category in InventoryItemCategory.values)
+                            DropdownMenuItem(
+                              value: category,
+                              child: Text(localizeCategory(l10n, category)),
+                            ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) setState(() => _category = value);
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _quantityController,
+                              decoration: InputDecoration(
+                                labelText: l10n.quantityLabel,
+                              ),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              validator: _numberValidator(l10n, required: true),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _unitController,
+                              decoration: InputDecoration(
+                                labelText: l10n.unitLabel,
+                              ),
+                              validator: (value) =>
+                                  (value == null || value.trim().isEmpty)
+                                  ? l10n.fieldRequired
+                                  : null,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _storageLocationController,
+                        decoration: InputDecoration(
+                          labelText: l10n.storageLocationLabel,
+                        ),
+                        validator: (value) =>
+                            (value == null || value.trim().isEmpty)
+                            ? l10n.fieldRequired
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(l10n.expirationDateLabel),
+                        subtitle: Text(
+                          _expirationDate == null
+                              ? '—'
+                              : MaterialLocalizations.of(
+                                  context,
+                                ).formatMediumDate(_expirationDate!),
+                        ),
+                        trailing: _expirationDate == null
+                            ? null
+                            : IconButton(
+                                icon: const Icon(Icons.clear),
+                                tooltip: l10n.clearDateButton,
+                                onPressed: () =>
+                                    setState(() => _expirationDate = null),
+                              ),
+                        onTap: _pickExpirationDate,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _minQuantityController,
+                        decoration: InputDecoration(
+                          labelText: l10n.minQuantityLabel,
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        validator: _numberValidator(l10n, required: false),
+                      ),
+                      if (_category == InventoryItemCategory.food) ...[
+                        const SizedBox(height: 24),
+                        Text(
+                          l10n.nutritionSectionTitle,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.nutritionSectionHint,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _caloriesController,
+                          decoration: InputDecoration(
+                            labelText: l10n.caloriesLabel,
+                          ),
+                          keyboardType: TextInputType.number,
+                          validator: (value) {
+                            final trimmed = value?.trim() ?? '';
+                            if (trimmed.isEmpty) return null;
+                            return int.tryParse(trimmed) == null
+                                ? l10n.invalidNumber
+                                : null;
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _GramsField(
+                                controller: _proteinController,
+                                label: l10n.proteinLabel,
+                                validator: _gramsValidator(l10n),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _GramsField(
+                                controller: _carbohydrateController,
+                                label: l10n.carbohydrateLabel,
+                                validator: _gramsValidator(l10n),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _GramsField(
+                                controller: _fatController,
+                                label: l10n.fatLabel,
+                                validator: _gramsValidator(l10n),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _GramsField(
+                                controller: _fiberController,
+                                label: l10n.fiberLabel,
+                                validator: _gramsValidator(l10n),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _notesController,
+                        decoration: InputDecoration(labelText: l10n.notesLabel),
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton(
+                        onPressed: _isSubmitting ? null : _submit,
+                        child: _isSubmitting
                             ? const SizedBox(
-                                width: 16,
-                                height: 16,
+                                width: 20,
+                                height: 20,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Icon(Icons.qr_code, size: 18),
-                        label: Text(l10n.scannedBarcodeLabel(_barcode!)),
-                        onDeleted: () => setState(() {
-                          _barcode = null;
-                          _offProductId = null;
-                        }),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: l10n.itemNameLabel,
-                      ),
-                      validator: (value) =>
-                          (value == null || value.trim().isEmpty)
-                          ? l10n.fieldRequired
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<InventoryItemCategory>(
-                      isExpanded: true,
-                      initialValue: _category,
-                      decoration: InputDecoration(
-                        labelText: l10n.categoryLabel,
-                      ),
-                      items: [
-                        for (final category in InventoryItemCategory.values)
-                          DropdownMenuItem(
-                            value: category,
-                            child: Text(localizeCategory(l10n, category)),
-                          ),
-                      ],
-                      onChanged: (value) {
-                        if (value != null) setState(() => _category = value);
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: _quantityController,
-                            decoration: InputDecoration(
-                              labelText: l10n.quantityLabel,
-                            ),
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            validator: _numberValidator(l10n, required: true),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _unitController,
-                            decoration: InputDecoration(
-                              labelText: l10n.unitLabel,
-                            ),
-                            validator: (value) =>
-                                (value == null || value.trim().isEmpty)
-                                ? l10n.fieldRequired
-                                : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _storageLocationController,
-                      decoration: InputDecoration(
-                        labelText: l10n.storageLocationLabel,
-                      ),
-                      validator: (value) =>
-                          (value == null || value.trim().isEmpty)
-                          ? l10n.fieldRequired
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Text(l10n.expirationDateLabel),
-                      subtitle: Text(
-                        _expirationDate == null
-                            ? '—'
-                            : MaterialLocalizations.of(
-                                context,
-                              ).formatMediumDate(_expirationDate!),
-                      ),
-                      trailing: _expirationDate == null
-                          ? null
-                          : IconButton(
-                              icon: const Icon(Icons.clear),
-                              tooltip: l10n.clearDateButton,
-                              onPressed: () =>
-                                  setState(() => _expirationDate = null),
-                            ),
-                      onTap: _pickExpirationDate,
-                    ),
-                    const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _minQuantityController,
-                      decoration: InputDecoration(
-                        labelText: l10n.minQuantityLabel,
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      validator: _numberValidator(l10n, required: false),
-                    ),
-                    if (_category == InventoryItemCategory.food) ...[
-                      const SizedBox(height: 24),
-                      Text(
-                        l10n.nutritionSectionTitle,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.nutritionSectionHint,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _caloriesController,
-                        decoration: InputDecoration(
-                          labelText: l10n.caloriesLabel,
-                        ),
-                        keyboardType: TextInputType.number,
-                        validator: (value) {
-                          final trimmed = value?.trim() ?? '';
-                          if (trimmed.isEmpty) return null;
-                          return int.tryParse(trimmed) == null
-                              ? l10n.invalidNumber
-                              : null;
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _GramsField(
-                              controller: _proteinController,
-                              label: l10n.proteinLabel,
-                              validator: _gramsValidator(l10n),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _GramsField(
-                              controller: _carbohydrateController,
-                              label: l10n.carbohydrateLabel,
-                              validator: _gramsValidator(l10n),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _GramsField(
-                              controller: _fatController,
-                              label: l10n.fatLabel,
-                              validator: _gramsValidator(l10n),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _GramsField(
-                              controller: _fiberController,
-                              label: l10n.fiberLabel,
-                              validator: _gramsValidator(l10n),
-                            ),
-                          ),
-                        ],
+                            : Text(l10n.saveButton),
                       ),
                     ],
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _notesController,
-                      decoration: InputDecoration(labelText: l10n.notesLabel),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: _isSubmitting ? null : _submit,
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(l10n.saveButton),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -750,7 +895,7 @@ class _PhotoPicker extends StatelessWidget {
             border: Border.all(color: colorScheme.outlineVariant),
           ),
           child: photoPath != null
-              ? Image.file(File(photoPath), fit: BoxFit.cover)
+              ? Image.file(File(photoPath), fit: BoxFit.cover, cacheWidth: 600)
               : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

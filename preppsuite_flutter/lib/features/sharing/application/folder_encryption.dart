@@ -65,7 +65,13 @@ class FolderEncryption {
       if (raw == null) return FolderEncryptionError.noFolder;
 
       final stored = HouseholdFile.decode(raw);
-      if (stored == null) return FolderEncryptionError.failed;
+      if (stored == null || stored.householdId != householdId) {
+        return FolderEncryptionError.failed;
+      }
+      if (await _keyStore.requiresEncryption(householdId) &&
+          !stored.isEncrypted) {
+        return FolderEncryptionError.failed;
+      }
       if (stored.isEncrypted) return FolderEncryptionError.alreadyEncrypted;
 
       final parameters = VaultParameters(salt: newSalt());
@@ -103,7 +109,9 @@ class FolderEncryption {
       if (raw == null) return FolderEncryptionError.noFolder;
 
       final stored = HouseholdFile.decode(raw);
-      if (stored == null || !stored.isEncrypted) {
+      if (stored == null ||
+          stored.householdId != householdId ||
+          !stored.isEncrypted) {
         return FolderEncryptionError.failed;
       }
 

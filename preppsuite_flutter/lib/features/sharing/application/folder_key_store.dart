@@ -18,6 +18,23 @@ import 'folder_crypto.dart';
 class FolderKeyStore {
   const FolderKeyStore();
 
+  static String _requiredKey(String id) => 'folderEncryptionRequired.$id';
+
+  /// Sticky even after forgetting a key or leaving the folder.
+  Future<bool> requiresEncryption(String householdId) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_requiredKey(householdId)) == true ||
+        prefs.containsKey(_keyFor(householdId));
+  }
+
+  Future<void> rememberEncryption(String householdId) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(_requiredKey(householdId)) == true) return;
+    if (!await prefs.setBool(_requiredKey(householdId), true)) {
+      throw StateError('Could not remember folder encryption');
+    }
+  }
+
   static String _keyFor(String householdId) => 'folderKey.$householdId';
 
   Future<FolderKey?> read(String householdId) async {
@@ -27,7 +44,10 @@ class FolderKeyStore {
 
   Future<void> write(String householdId, FolderKey key) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyFor(householdId), key.encode());
+    await rememberEncryption(householdId);
+    if (!await prefs.setString(_keyFor(householdId), key.encode())) {
+      throw StateError('Could not store folder key');
+    }
   }
 
   /// Forgets the key, which locks this device out until the passphrase is
@@ -35,6 +55,9 @@ class FolderKeyStore {
   /// open a folder this device is no longer part of.
   Future<void> clear(String householdId) async {
     final prefs = await SharedPreferences.getInstance();
+    if (await requiresEncryption(householdId)) {
+      await rememberEncryption(householdId);
+    }
     await prefs.remove(_keyFor(householdId));
   }
 }

@@ -51,6 +51,25 @@ void main() {
     );
   }
 
+  test(
+    'undo restores a deletion with a newer version and can sync again',
+    () async {
+      await addItem(quantity: 7, minQuantity: 9);
+      final before = await storedItem();
+      await controller.deleteItem(before);
+      final deleted = (await db.dirtyInventoryItems(householdId)).single;
+      expect(await db.watchInventoryItems(householdId).first, isEmpty);
+      await controller.restoreItem(before.clientId);
+      final restored = await storedItem();
+      expect(restored.quantity, 7);
+      expect(restored.minQuantity, 9);
+      expect(restored.updatedAt.isAfter(deleted.updatedAt), isTrue);
+      expect(restored.dirty, isTrue);
+      await controller.restoreItem(before.clientId);
+      expect((await storedItem()).updatedAt, restored.updatedAt);
+    },
+  );
+
   group('consumeQuantity', () {
     test('subtracts the amount and marks the row dirty for sync', () async {
       await addItem(quantity: 5);

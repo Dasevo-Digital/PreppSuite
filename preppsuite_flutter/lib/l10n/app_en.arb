@@ -1346,5 +1346,46 @@
   "photoEditRotateRight": "Rotate right",
   "photoEditReset": "Whole picture",
   "photoEditFailed": "This picture cannot be edited. It stays as it is.",
-  "editPhotoButton": "Crop photo"
+  "editPhotoButton": "Crop photo",
+  "sharingErrorEncryptionChanged": "Sync stopped: encryption metadata is missing or was reset. Restore the encrypted household.json from a backup. No unencrypted household data was written.",
+  "searchUnavailable": "Search is currently unavailable. Please try again.",
+  "inventoryFilters": "Filter and sort",
+  "inventoryFilterCategory": "Category",
+  "inventoryFilterLocation": "Storage location",
+  "inventoryFilterStatus": "Stock status",
+  "inventoryFilterAll": "All",
+  "inventoryNoLocation": "No storage location",
+  "inventoryExpiringSoon": "Expires in the next 7 days",
+  "inventorySortLabel": "Sort by",
+  "inventorySortName": "Name",
+  "inventorySortExpiry": "Expiry date",
+  "inventorySortAttention": "Needs attention",
+  "inventoryApplyFilters": "Apply",
+  "inventoryResetFilters": "Reset filters",
+  "inventoryFiltersActive": "Filters active",
+  "inventorySearchHint": "Search supplies",
+  "inventoryClearSearch": "Clear search",
+  "inventoryNoMatches": "No matching supplies. Adjust your search or filters.",
+  "unsavedChangesTitle": "Discard changes?",
+  "unsavedChangesMessage": "Your changes have not been saved yet.",
+  "keepEditing": "Keep editing",
+  "discardChanges": "Discard",
+  "inventoryItemDeleted": "Supply deleted",
+  "undoAction": "Undo",
+  "overviewStartTitle": "Your first step towards preparedness",
+  "overviewStartHint": "Add water or food to see how long your household supplies will last.",
+  "overviewAddFirst": "Add your first supply",
+  "overviewOpen": "Open",
+  "@overviewSupplyCalories": {
+    "placeholders": {
+      "current": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "target": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  }
 }

@@ -20,17 +20,35 @@ import 'consume_dialog.dart';
 import 'inventory_csv_import_screen.dart';
 import 'inventory_item_form_screen.dart';
 import 'storage_tips_screen.dart';
+import '../application/inventory_filter.dart';
+import 'inventory_filter_sheet.dart';
+import 'package:intl/intl.dart';
 import '../../../core/error_text.dart';
 
 enum _InventoryMenuAction { consumeByScan, storageTips, exportCsv, importCsv }
 
-class InventoryListScreen extends ConsumerWidget {
+class InventoryListScreen extends ConsumerStatefulWidget {
   const InventoryListScreen({super.key, required this.householdId});
 
   final String householdId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<InventoryListScreen> createState() =>
+      _InventoryListScreenState();
+}
+
+class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
+  final _searchController = TextEditingController();
+  InventoryFilter _filter = const InventoryFilter();
+  String get householdId => widget.householdId;
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     // debounced sync) for as long as this screen is on screen.
     final itemsAsync = ref.watch(inventoryItemsProvider(householdId));
@@ -96,33 +114,112 @@ class InventoryListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          _SupplyCalculatorCard(householdId: householdId),
-          Expanded(
-            child: itemsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) =>
-                  Center(child: Text(describeError(l10n, error))),
-              data: (items) => items.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Text(
-                          l10n.inventoryEmpty,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyLarge,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) => [
+          SliverToBoxAdapter(
+            child: Column(
+              children: [
+                _SupplyCalculatorCard(householdId: householdId),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (_) => setState(() {}),
+                          decoration: InputDecoration(
+                            labelText: l10n.inventorySearchHint,
+                            prefixIcon: const Icon(Icons.search),
+                            border: const OutlineInputBorder(),
+                            suffixIcon: _searchController.text.isEmpty
+                                ? null
+                                : IconButton(
+                                    tooltip: l10n.inventoryClearSearch,
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () =>
+                                        setState(_searchController.clear),
+                                  ),
+                          ),
                         ),
                       ),
-                    )
-                  : ListView.builder(
-                      itemCount: items.length,
-                      itemBuilder: (context, index) =>
-                          _InventoryTile(item: items[index], l10n: l10n),
+                      const SizedBox(width: 8),
+                      IconButton.filledTonal(
+                        tooltip: l10n.inventoryFilters,
+                        icon: Icon(
+                          _filter.isActive
+                              ? Icons.filter_alt
+                              : Icons.filter_alt_outlined,
+                        ),
+                        onPressed: () async {
+                          final filter =
+                              await showModalBottomSheet<InventoryFilter>(
+                                context: context,
+                                isScrollControlled: true,
+                                showDragHandle: true,
+                                builder: (_) => InventoryFilterSheet(
+                                  initial: _filter,
+                                  items: itemsAsync.value ?? [],
+                                ),
+                              );
+                          if (filter != null && mounted) {
+                            setState(() => _filter = filter);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                if (_filter.isActive)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: InputChip(
+                        label: Text(l10n.inventoryFiltersActive),
+                        onDeleted: () =>
+                            setState(() => _filter = const InventoryFilter()),
+                      ),
                     ),
+                  ),
+              ],
             ),
           ),
         ],
+        body: itemsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) =>
+              Center(child: Text(describeError(l10n, error))),
+          data: (allItems) {
+            final items = filterInventory(
+              allItems,
+              query: _searchController.text,
+              filter: _filter,
+            );
+            return items.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Text(
+                        allItems.isEmpty
+                            ? l10n.inventoryEmpty
+                            : l10n.inventoryNoMatches,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 96),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) =>
+                        _InventoryTile(item: items[index], l10n: l10n),
+                  );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).push(
@@ -278,44 +375,65 @@ class _InventoryTile extends ConsumerWidget {
     final category = InventoryItemCategoryX.fromName(item.category);
     final isLowStock =
         item.minQuantity != null && item.quantity < item.minQuantity!;
+    final now = DateTime.now();
     final isExpired =
-        item.expirationDate != null &&
-        item.expirationDate!.isBefore(DateTime.now());
+        item.expirationDate?.isBefore(DateTime(now.year, now.month, now.day)) ??
+        false;
 
     final photoPath = item.photoPath;
 
     return ListTile(
       leading: photoPath != null
-          ? CircleAvatar(backgroundImage: FileImage(File(photoPath)))
+          ? CircleAvatar(
+              backgroundImage: ResizeImage.resizeIfNeeded(
+                96,
+                96,
+                FileImage(File(photoPath)),
+              ),
+            )
           : CircleAvatar(child: Icon(categoryIcon(category))),
       title: Text(item.name),
-      subtitle: Text(
-        '${_formatQuantity(item.quantity)} ${item.unit} · ${item.storageLocation}',
-      ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isExpired)
-            Chip(
-              label: Text(l10n.expiredBadge),
-              visualDensity: VisualDensity.compact,
-              backgroundColor: Theme.of(context).colorScheme.errorContainer,
-            ),
-          if (isLowStock)
-            Chip(
-              label: Text(l10n.lowStockBadge),
-              visualDensity: VisualDensity.compact,
-              backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-            ),
-          // Only offered while there is something left to deduct.
-          if (item.quantity > 0)
-            IconButton(
-              icon: const Icon(Icons.remove_circle_outline),
-              tooltip: l10n.consumeAction,
-              onPressed: () => _showConsumeDialog(context, ref),
+          Text(
+            '${_formatQuantity(item.quantity)} ${item.unit} · ${item.storageLocation}',
+          ),
+          if (isExpired || isLowStock)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  if (isExpired)
+                    Chip(
+                      label: Text(l10n.expiredBadge),
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.errorContainer,
+                    ),
+                  if (isLowStock)
+                    Chip(
+                      label: Text(l10n.lowStockBadge),
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.tertiaryContainer,
+                    ),
+                ],
+              ),
             ),
         ],
       ),
+      trailing: item.quantity > 0
+          ? IconButton(
+              icon: const Icon(Icons.remove_circle_outline),
+              tooltip: l10n.consumeAction,
+              onPressed: () => _showConsumeDialog(context, ref),
+            )
+          : null,
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => InventoryItemFormScreen(
@@ -340,9 +458,7 @@ class _InventoryTile extends ConsumerWidget {
   }
 
   String _formatQuantity(double quantity) {
-    return quantity == quantity.roundToDouble()
-        ? quantity.toStringAsFixed(0)
-        : quantity.toString();
+    return NumberFormat.decimalPattern(l10n.localeName).format(quantity);
   }
 }
 
@@ -407,7 +523,10 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
                     label: l10n.supplyCalculatorWaterLabel,
                     current: result.waterCurrentLiters,
                     target: result.waterTargetLiters,
-                    formatter: (value) => value.toStringAsFixed(1),
+                    formatter: (value) => NumberFormat.decimalPatternDigits(
+                      locale: l10n.localeName,
+                      decimalDigits: 1,
+                    ).format(value),
                     unit: 'L',
                     l10n: l10n,
                   ),
@@ -417,7 +536,9 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
                     label: l10n.supplyCalculatorCaloriesLabel,
                     current: result.caloriesCurrent.toDouble(),
                     target: result.caloriesTarget.toDouble(),
-                    formatter: (value) => value.toStringAsFixed(0),
+                    formatter: (value) => NumberFormat.decimalPattern(
+                      l10n.localeName,
+                    ).format(value),
                     unit: 'kcal',
                     l10n: l10n,
                   ),

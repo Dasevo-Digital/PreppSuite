@@ -130,8 +130,8 @@ void main() {
     );
 
     expect(find.text('Versorgung für 10 Tage'), findsOneWidget);
-    expect(find.text('10.0 von 40.0 L'), findsOneWidget);
-    expect(find.text('11000 von 44000 kcal'), findsOneWidget);
+    expect(find.text('10,0 von 40,0 L'), findsOneWidget);
+    expect(find.text('11.000 von 44.000 kcal'), findsOneWidget);
   });
 
   testWidgets('expired and low stock are shown apart', (tester) async {
@@ -238,7 +238,7 @@ void main() {
     );
     // Flutter joins the labels it merges with newlines.
     final spoken = water.label.replaceAll('\n', ' ');
-    expect(spoken, 'Trinkwasser 10.0 von 40.0 L');
+    expect(spoken, 'Trinkwasser 10,0 von 40,0 L');
     expect(water.value, '25 %');
     handle.dispose();
   });

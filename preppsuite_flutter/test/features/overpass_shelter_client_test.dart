@@ -60,12 +60,15 @@ void main() {
     },
   );
 
-  test('fetchShelters returns an empty list on a non-200 response', () async {
+  test('fetchShelters reports failure on a non-200 response', () async {
     final client = OverpassShelterClient(
       httpClient: MockClient((request) async => http.Response('', 504)),
     );
 
     final bounds = boundingBoxForRadius(const LatLng(52.5, 13.4), 25);
-    expect(await client.fetchShelters(bounds), isEmpty);
+    await expectLater(
+      client.fetchShelters(bounds),
+      throwsA(isA<http.ClientException>()),
+    );
   });
 }

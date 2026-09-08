@@ -78,7 +78,7 @@ entscheidest du. Kein Konto, kein Einladungscode, kein Dienst dazwischen.
 
 Jedes Gerät schreibt genau eine Datei und liest alle anderen, sodass zwei
 Personen nie dieselbe Datei beschreiben. Bei gleichzeitiger Änderung
-derselben Zeile gewinnt die jüngere. Einzelheiten samt Grenzen in
+derselben Zeile entscheidet eine feste Versionsreihenfolge. Einzelheiten samt Grenzen in
 [`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md).
 
 Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
@@ -201,6 +201,13 @@ dart format --output=none --set-exit-if-changed .
 cd preppsuite_flutter && flutter test
 ```
 
+Die mobile CI (`.github/workflows/test-mobile.yml`) führt die nativen
+Speicher- und Webview-Tests auf einem Android-Emulator und einem iOS-Simulator
+aus. Lokal startet `python3 tool/run_ios_integration.py` einen verfügbaren
+iPhone-Simulator und beendet ihn danach wieder, sofern das Skript ihn
+selbst gestartet hat. Echte Hintergrundzustellung und der interaktive
+Ordner-Picker benötigen weiterhin Tests auf physischen Geräten.
+
 Nach jeder Änderung an einer Tabelle:
 
 ```bash
@@ -231,15 +238,17 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
 - Der Abgleich ist kein Echtzeit-Abgleich: alle zwei Minuten, beim Start und
   beim Zurückkehren in die App – dazu die Laufzeit des Dienstes, der die
   Dateien transportiert.
-- PreppSuite verschlüsselt den Ordner nicht. Wer ihn lesen kann, liest den
-  Haushalt.
-- MeteoAlarm-Warnungen lassen sich nicht nach Region filtern – ihre
-  Gebietsangabe ist freier Text ohne Schlüssel. Sie gelten deshalb für jeden
-  Haushalt des Landes. BBK-Warnungen werden bis auf Kreisebene gefiltert;
-  genauer gibt die Quelle nichts her.
-- Keine Quelle liefert ein Ablaufdatum. Warnungen werden beendet, wenn sie aus
-  einem vollständigen Abruf verschwinden – solange kein Abruf gelingt, bleiben
-  sie stehen. Einzelheiten in [`docs/warning-feeds.md`](docs/warning-feeds.md).
+- Die Ordner-Verschlüsselung ist optional und schützt die geteilten
+  Gerätedateien. Die lokale SQLite-Datenbank bleibt unverschlüsselt.
+  Beim Aktivieren müssen alle Geräte ihre bisherigen Klartextdateien neu
+  veröffentlichen; alte Cloud-Versionen verschwinden dadurch nicht.
+- Deutsche MeteoAlarm-Gebiete werden über die DWD-Gebietsliste auf Kreise
+  abgebildet. Nicht zuordenbare Gebiete und Meldungen anderer Länder gelten
+  für das ganze Land. BBK-Warnungen werden bis auf Kreisebene gefiltert.
+- BBK-Warnungen haben kein Ablaufdatum und werden beendet, wenn sie aus
+  einem vollständigen BBK-Abruf verschwinden. MeteoAlarm liefert dagegen
+  `cap:expires`, das die App übernimmt. Einzelheiten in
+  [`docs/warning-feeds.md`](docs/warning-feeds.md).
 - Der Hintergrundabruf ist auf Android verlässlich (15 Minuten Mindestabstand,
   eine Vorgabe der Plattform) und auf iOS nur gelegentlich – dort entscheidet
   das System. Für sofortige Warnungen ist NINA vom BBK die richtige Antwort,

@@ -37,23 +37,27 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   LatLng? _position;
   bool _locating = false;
+  int _lookupGeneration = 0;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _lookupGeneration++;
+    _geolocation.close();
     _mapController.dispose();
     super.dispose();
   }
 
   Future<void> _goToMyLocation(AppLocalizations l10n) async {
+    final generation = ++_lookupGeneration;
     setState(() => _locating = true);
     try {
       final position = await _geolocation.getCurrentLatLng();
-      if (!mounted) return;
+      if (!mounted || generation != _lookupGeneration) return;
       setState(() => _position = position);
       _mapController.move(position, 13);
     } on LocationUnavailableException catch (error) {
-      if (mounted) _say('$error');
+      if (mounted && generation == _lookupGeneration) _say('$error');
     } finally {
       if (mounted) setState(() => _locating = false);
     }
@@ -63,13 +67,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final query = _searchController.text.trim();
     if (query.isEmpty) return;
 
-    final result = await _geolocation.searchPlace(query);
-    if (!mounted) return;
-    if (result == null) {
-      _say(l10n.shelterSearchNoResult);
-      return;
+    final generation = ++_lookupGeneration;
+    try {
+      final result = await _geolocation.searchPlace(query);
+      if (!mounted || generation != _lookupGeneration) return;
+      if (result == null) {
+        _say(l10n.shelterSearchNoResult);
+        return;
+      }
+      _mapController.move(result, 12);
+    } catch (_) {
+      if (mounted && generation == _lookupGeneration) {
+        _say(l10n.searchUnavailable);
+      }
     }
-    _mapController.move(result, 12);
   }
 
   void _say(String message) => ScaffoldMessenger.of(

@@ -83,11 +83,24 @@ same time write different paths, so the cloud engine underneath never has to
 resolve a conflict — and the way those engines resolve one is to keep a copy
 and rename the other, which would silently split a household in two.
 
-**Merging is last-writer-wins by `updatedAt`, strictly greater.** Strictly,
-so replaying a snapshot is free and the order device files happen to be read
-in cannot change the result. It also means the clocks matter: a device set an
-hour ahead wins arguments it should lose. That is why deletions are
-tombstones — a wrong win can still be overruled.
+**Sync versions are ordered by `updatedAt`, then by shared contents.**
+SQLite stores seconds. Every local upsert transaction advances the stored
+row's timestamp by at least one second if the wall clock has not advanced.
+Rapid edits and clock corrections therefore cannot reuse or decrease a
+version. A timestamp is a logical version, not an exact audit time.
+At equal timestamps, tombstones outrank live rows, then the lexicographically
+larger canonical JSON of shared columns wins. Column names are sorted;
+`dirty`, `photo_path` and `updated_at` are excluded, and dates use epoch
+seconds. Identical snapshots remain no-ops. All household devices need this
+merge rule for guaranteed convergence; the on-disk and wire formats stay
+unchanged. Unseen edits on a device with a fast clock can still win.
+
+**Publishing acknowledges exact row versions, never a wall-clock cutoff.**
+Only the client ids and timestamps actually included in the uploaded snapshot
+may have `dirty` cleared. Edits made during the write remain pending, even
+when the logical timestamp leads the clock.
+The first sync after upgrading republishes clean rows once, recorded per
+household/device in `sync_state`, to recover old write/ack races.
 
 **Rows seeded by `ChecklistSeeder` carry a fixed `updatedAt`
 (`ChecklistSeeder.seededAt`), not `now()`.** A real timestamp would make a
@@ -457,6 +470,12 @@ tree; the test suite deliberately targets that layer rather than the UI.
   older app refuses a version it does not know. For an encrypted folder
   that refusal is right — it could not read the device files anyway — and
   for a plain one it would be a disaster.
+- **Encryption cannot silently fall back to plaintext.** A household-specific
+  requirement is persisted locally and survives forgetting its key. Missing or
+  plain metadata for a previously encrypted household stops sync with
+  `encryptionChanged`, including a second identity check before publication.
+  Version 2 without vault metadata is invalid. A saved key must pass the
+  folder's authenticated check value before reading or writing.
 - **A device without the folder key writes nothing at all**
   (`SharedFolderSyncError.locked`). Publishing a plaintext device file
   into an encrypted folder would silently undo the encryption for every
@@ -568,3 +587,35 @@ tree; the test suite deliberately targets that layer rather than the UI.
 Comments explain *why*, not *what* — the existing ones are the model to match,
 including their density. Prefer extending an existing service over adding a
 parallel one.
+
+### Resource and interaction limits
+
+- `HomeShell` creates destinations on first use and preserves their navigation
+  state afterwards. `FeatureActivity` removes inactive map renderers; map camera
+  state stays in the screen. Shelter search requests location only after a user
+  action.
+- Vector map caches have a 16 MiB tile budget on mobile and 48 MiB on desktop,
+  with 32/80 parsed entries and 2/4–8 render workers. Memory pressure recreates
+  the renderer with 8 MiB, 16 entries and one worker. These are cache budgets,
+  not a bound on total process memory.
+- ZIM clusters are limited to 64 MiB stored and decompressed. The LRU cluster
+  cache holds at most four clusters and 32 MiB in total. Larger permitted
+  clusters are returned uncached. Memory pressure clears the open archive's
+  cache. Zlib/XZ output is bounded while decoding; Zstandard frame windows,
+  content sizes and conservative block expansion bounds are checked before the
+  native decoder is called. Archives requiring larger clusters are refused.
+- `ShelterSearch` starts both sources together and publishes partial results.
+  Timeouts produce a source failure, not an empty successful search. A generation
+  counter rejects responses to superseded or canceled searches. Geocoding has
+  a 15-second timeout; WWBOTA and Overpass requests have 20/30-second timeouts.
+- Inventory search combines terms across name, barcode, location and notes.
+  Category, location and status filters can be combined; sorting supports name,
+  expiry and attention. Expiry filters use calendar dates (today remains valid)
+  and a seven-day upcoming window. Search and filters leave supply totals intact.
+- Leaving an edited inventory form requires discarding the changes explicitly.
+  Original photos survive until a successful save; abandoned temporary photos
+  are removed. Delete offers eight seconds to undo. Undo restores the latest
+  stored fields with a new dirty version so the restoration synchronizes too.
+- The overview offers a direct first-item action for an empty household,
+  visibly marks cards as links, and uses two columns on wide screens when text
+  size permits. Displayed supply quantities follow the selected locale.

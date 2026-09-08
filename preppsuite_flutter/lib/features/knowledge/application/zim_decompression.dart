@@ -1,7 +1,9 @@
 import 'dart:io' show zlib;
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart' show XZDecoder;
+import 'package:archive/archive.dart'
+    show XZDecoder, InputMemoryStream, OutputMemoryStream;
+import 'archive_memory_limits.dart';
 import 'package:zstandard/zstandard.dart';
 
 import 'zim_archive.dart' show ZimException;
@@ -30,6 +32,11 @@ class ZimCompression {
 }
 
 Future<Uint8List> decompressCluster(int type, Uint8List body) async {
+  if (body.length > maxClusterBytes) {
+    throw const ZimException(
+      'compressed cluster exceeds the 64 MiB memory limit',
+    );
+  }
   switch (type) {
     case ZimCompression.none:
       return body;
@@ -37,17 +44,46 @@ Future<Uint8List> decompressCluster(int type, Uint8List body) async {
     case ZimCompression.zstd:
       // Native on every platform the app ships to. Returns null rather
       // than throwing when the frame is not readable.
+      validateZstdMemoryBudget(body);
       final decoded = await Zstandard().decompress(body);
       if (decoded == null) {
         throw const ZimException('a cluster could not be decompressed');
       }
+      if (decoded.length > maxClusterBytes) {
+        throw const ZimException(
+          'decoded cluster exceeds the 64 MiB memory limit',
+        );
+      }
       return decoded;
 
     case ZimCompression.xz:
-      return Uint8List.fromList(XZDecoder().decodeBytes(body));
+      final output = _BoundedOutput();
+      if (!XZDecoder().decodeStream(
+        InputMemoryStream(body),
+        output,
+        verify: true,
+      )) {
+        throw const ZimException('invalid XZ cluster');
+      }
+      return output.getBytes();
 
     case ZimCompression.zlib:
-      return Uint8List.fromList(zlibCodec.decode(body));
+      final output = _BoundedSink();
+      final input = zlibCodec.decoder.startChunkedConversion(output);
+      try {
+        for (var offset = 0; offset < body.length; offset += 16384) {
+          final end = (offset + 16384).clamp(0, body.length);
+          input.add(Uint8List.sublistView(body, offset, end));
+        }
+        input.close();
+      } catch (_) {
+        // Closing a failed converter may throw again; preserve the cause.
+        try {
+          input.close();
+        } catch (_) {}
+        rethrow;
+      }
+      return output.bytes.takeBytes();
 
     default:
       // bzip2 among them: legal in the format, absent from anything made
@@ -57,3 +93,106 @@ Future<Uint8List> decompressCluster(int type, Uint8List body) async {
 }
 
 const zlibCodec = zlib;
+
+class _BoundedOutput extends OutputMemoryStream {
+  @override
+  void writeBytes(List<int> bytes, {int? length}) {
+    if (this.length + (length ?? bytes.length) > maxClusterBytes) {
+      throw const ZimException(
+        'decoded cluster exceeds the 64 MiB memory limit',
+      );
+    }
+    super.writeBytes(bytes, length: length);
+  }
+}
+
+class _BoundedSink implements Sink<List<int>> {
+  final bytes = BytesBuilder(copy: false);
+  @override
+  void add(List<int> data) {
+    if (bytes.length + data.length > maxClusterBytes) {
+      throw const ZimException(
+        'decoded cluster exceeds the 64 MiB memory limit',
+      );
+    }
+    bytes.add(data);
+  }
+
+  @override
+  void close() {}
+}
+
+/// Preflight frame headers and block bounds before calling the native decoder.
+/// RFC 8878: each compressed block expands to at most min(window, 128 KiB).
+/// This also bounds frames without a declared content size and concatenations.
+/// https://www.rfc-editor.org/rfc/rfc8878.html#section-3.1.1.2
+void validateZstdMemoryBudget(Uint8List data) {
+  var cursor = 0;
+  var totalBound = 0;
+  int read(int count) {
+    if (cursor + count > data.length) {
+      throw const ZimException('truncated Zstandard frame');
+    }
+    var value = 0;
+    for (var i = 0; i < count; i++) {
+      final byte = data[cursor++];
+      // All permitted lengths fit within 32 bits. Reject before shifting.
+      if (i >= 4 && byte != 0) {
+        throw const ZimException('Zstandard memory limit exceeded');
+      }
+      if (i < 4) value |= byte << (8 * i);
+    }
+    return value;
+  }
+
+  var frames = 0;
+  while (cursor < data.length) {
+    if (++frames > 1024 || read(4) != 0xfd2fb528) {
+      throw const ZimException('unsupported Zstandard frame');
+    }
+    final flags = read(1);
+    if (flags & 8 != 0) throw const ZimException('invalid Zstandard frame');
+    final single = flags & 32 != 0;
+    var window = 0;
+    if (!single) {
+      final descriptor = read(1);
+      final exponent = 10 + (descriptor >> 3);
+      if (exponent > 26) {
+        throw const ZimException('Zstandard window exceeds memory limit');
+      }
+      final base = 1 << exponent;
+      window = base + (base >> 3) * (descriptor & 7);
+    }
+    read(const [0, 1, 2, 4][flags & 3]); // Dictionary id.
+    final sizeFlag = flags >> 6;
+    final sizeBytes = sizeFlag == 0 ? (single ? 1 : 0) : (1 << sizeFlag);
+    final declared = sizeBytes == 0
+        ? null
+        : read(sizeBytes) + (sizeBytes == 2 ? 256 : 0);
+    if (single) window = declared!;
+    if (window > maxClusterBytes || (declared ?? 0) > maxClusterBytes) {
+      throw const ZimException('Zstandard frame exceeds memory limit');
+    }
+    var frameBound = 0;
+    while (true) {
+      final header = read(3);
+      final kind = (header >> 1) & 3;
+      final size = header >> 3;
+      if (kind == 3 || size > 128 * 1024) {
+        throw const ZimException('invalid Zstandard block');
+      }
+      frameBound += kind == 2 ? window.clamp(0, 128 * 1024) : size;
+      cursor += kind == 1 ? 1 : size;
+      if (cursor > data.length || frameBound > maxClusterBytes) {
+        throw const ZimException('Zstandard block exceeds memory limit');
+      }
+      if (header & 1 != 0) break;
+    }
+    if (flags & 4 != 0) read(4);
+    totalBound += frameBound;
+    if (totalBound > maxClusterBytes) {
+      throw const ZimException('Zstandard output exceeds memory limit');
+    }
+  }
+  if (frames == 0) throw const ZimException('empty Zstandard cluster');
+}

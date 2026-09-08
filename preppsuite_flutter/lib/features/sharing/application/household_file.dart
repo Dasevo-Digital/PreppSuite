@@ -73,7 +73,11 @@ class HouseholdFile {
       if (json is! Map<String, Object?>) return null;
 
       final version = json['version'];
-      if (version is! int || version > currentVersion) return null;
+      if (version is! int ||
+          version < plainVersion ||
+          version > currentVersion) {
+        return null;
+      }
 
       final id = json['householdId'];
       final name = json['name'];
@@ -88,6 +92,7 @@ class HouseholdFile {
       // and the failure would look like corruption.
       final rawVault = json['vault'];
       final check = json['check'];
+      if ((version == currentVersion) != (rawVault != null)) return null;
       VaultParameters? vault;
       if (rawVault != null) {
         if (rawVault is! Map<String, Object?>) return null;

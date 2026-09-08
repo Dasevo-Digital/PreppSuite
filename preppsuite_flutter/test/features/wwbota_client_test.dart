@@ -45,12 +45,15 @@ void main() {
     },
   );
 
-  test('fetchBunkers returns an empty list on a non-200 response', () async {
+  test('fetchBunkers reports failure on a non-200 response', () async {
     final client = WwbotaClient(
       httpClient: MockClient((request) async => http.Response('', 503)),
     );
 
     final bounds = boundingBoxForRadius(const LatLng(52.25, 10.5), 25);
-    expect(await client.fetchBunkers(bounds), isEmpty);
+    await expectLater(
+      client.fetchBunkers(bounds),
+      throwsA(isA<http.ClientException>()),
+    );
   });
 }

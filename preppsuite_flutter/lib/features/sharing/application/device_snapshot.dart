@@ -12,11 +12,10 @@ import '../../../local_db/database.dart';
 /// original device is gone still has every row, because every other device
 /// has been republishing them all along.
 ///
-/// Rows travel with their `updatedAt`, and the merge keeps the newer one.
-/// Which means the clocks matter: a device set an hour into the future
-/// wins arguments it should lose. That is the accepted cost of having no
-/// server to arbitrate, and it is why nothing here is deleted outright —
-/// every deletion is a tombstone that can itself be overruled.
+/// Rows travel with their `updatedAt` logical version. Local edits advance
+/// beyond the stored second; merges compare that version, then canonical
+/// shared contents on ties. A fast device clock can still outrank unseen
+/// edits. Deletions remain tombstones so a later edit can overrule them.
 class DeviceSnapshot {
   const DeviceSnapshot({
     required this.deviceId,

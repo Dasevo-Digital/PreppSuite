@@ -11,6 +11,55 @@ import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dar
 import 'zim_fixture.dart';
 
 void main() {
+  test('zlib expansion is bounded before retaining excessive output', () async {
+    final compressed = Uint8List.fromList(
+      zlib.encode(Uint8List(65 * 1024 * 1024)),
+    );
+    await expectLater(
+      decompressCluster(ZimCompression.zlib, compressed),
+      throwsA(isA<ZimException>()),
+    );
+  });
+
+  test('Zstandard preflight accepts a small raw frame', () {
+    // Single segment, three bytes, one final raw block.
+    validateZstdMemoryBudget(
+      Uint8List.fromList([
+        0x28,
+        0xb5,
+        0x2f,
+        0xfd,
+        0x20,
+        3,
+        25,
+        0,
+        0,
+        65,
+        66,
+        67,
+      ]),
+    );
+  });
+
+  test(
+    'Zstandard preflight rejects large windows and declared sizes before native allocation',
+    () {
+      for (final header in [
+        [0, 136], // 128 MiB window, unknown content size.
+        [0xa0, 1, 0, 0, 4], // Single segment, 64 MiB + 1.
+        [0xe0, 0, 0, 0, 0, 1, 0, 0, 0], // 64-bit size > 4 GiB.
+        [0x20, 3, 25, 0, 0, 65], // Truncated raw block.
+      ]) {
+        expect(
+          () => validateZstdMemoryBudget(
+            Uint8List.fromList([0x28, 0xb5, 0x2f, 0xfd, ...header]),
+          ),
+          throwsA(isA<ZimException>()),
+        );
+      }
+    },
+  );
+
   group('cluster compression', () {
     test('an uncompressed cluster is handed through unchanged', () async {
       final body = Uint8List.fromList([1, 2, 3]);
@@ -39,6 +88,46 @@ void main() {
     });
 
     tearDown(() => workspace.deleteSync(recursive: true));
+
+    for (final size in [0, 33 * 1024 * 1024, 65 * 1024 * 1024]) {
+      test(
+        'cluster cache respects byte budget and explicit clearing ($size)',
+        () async {
+          final path = writeZim(
+            workspace,
+            ZimFixture(
+              compression: ZimCompression.zstd,
+              entries: [
+                const ZimFixtureEntry(namespace: 'C', url: 'a', content: [65]),
+              ],
+            ),
+          );
+          var decodes = 0;
+          final archive = await ZimArchive.open(
+            await FileByteRangeSource.open(File(path)),
+            decompress: (_, body) async {
+              decodes++;
+              return size == 0 ? body : (Uint8List(size)..setAll(0, body));
+            },
+          );
+          addTearDown(archive.close);
+          final entry = (await archive.findByUrl('C', 'a'))!;
+          if (size > 64 * 1024 * 1024) {
+            await expectLater(
+              archive.readBlob(entry),
+              throwsA(isA<ZimException>()),
+            );
+          } else {
+            expect(await archive.readBlob(entry), [65]);
+            expect(await archive.readBlob(entry), [65]);
+            expect(decodes, size == 0 ? 1 : 2);
+            archive.clearClusterCache();
+            await archive.readBlob(entry);
+            expect(decodes, size == 0 ? 2 : 3);
+          }
+        },
+      );
+    }
 
     test('the cluster type byte decides which codec is asked', () async {
       // zstd is what Kiwix has written since 2020, and it is a platform

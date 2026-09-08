@@ -37,9 +37,8 @@ meist noch für anderes benutzt wird.
 }
 ```
 
-Wird einmal geschrieben, von dem Gerät, das den Ordner einrichtet, und
-danach nur noch gelesen. Genau deshalb hat sie keinen Konflikt: es gibt
-keinen zweiten Schreiber.
+Wird beim Einrichten geschrieben, beim Aktivieren der Verschlüsselung
+um die Schlüsselableitung ergänzt und bei jedem Abgleich geprüft.
 
 `name` und `countryCode` sind das Angebot an ein beitretendes Gerät, nicht
 eine Vorschrift. Nach dem Beitritt gehört beides wieder dem Gerät selbst —
@@ -64,19 +63,31 @@ zwei Dinge, die deutlich mehr wert sind:
 
 ## Wie zusammengeführt wird
 
-Jede Zeile trägt eine `clientId` (einmal vergeben, auf dem Gerät, das sie
-angelegt hat) und ein `updatedAt`. Beim Zusammenführen gewinnt die neuere
-Zeile, streng größer.
+Jede Zeile trägt eine `clientId` und ein `updatedAt`. Die lokale Datenbank
+speichert Sekunden. Jede lokale Änderung erhält mindestens die nächste
+Sekunde nach der bisher gespeicherten Version, falls die Geräteuhr noch
+keinen neueren Wert liefert. Dadurch bleiben schnelle Folgeänderungen und
+Änderungen nach einer Uhrkorrektur unterscheidbar. `updatedAt` ist deshalb
+eine logische Version und kein sekundengenaues Änderungsprotokoll.
 
-Streng deshalb, weil dieselbe Datei dann beliebig oft eingelesen werden
-darf, ohne etwas zu ändern, und weil die Reihenfolge, in der die
-Gerätedateien gelesen werden, das Ergebnis nicht beeinflussen kann.
+Beim Zusammenführen gewinnt zunächst die höhere Version. Bei Gleichstand
+gewinnt eine Löschung gegen einen lebenden Eintrag, danach entscheidet eine
+feste Reihenfolge der geteilten Inhalte. Gleiche Dateien erneut einzulesen
+ändert nichts; unterschiedliche Lesereihenfolgen führen zum selben Stand.
+Fotos und der lokale Offen-Merker nehmen an dieser Entscheidung nicht teil.
 
-**Damit hängt alles an den Uhren.** Ein Gerät, das eine Stunde vorgeht,
-gewinnt Auseinandersetzungen, die es verlieren sollte. Das ist der Preis
-dafür, dass niemand schlichtet, und der Grund, warum nichts wirklich
-gelöscht wird: jede Löschung ist eine Grabsteinzeile, die ihrerseits
-überstimmt werden kann.
+**Alle Geräte müssen dieselbe neue Konfliktregel verwenden.** Das Datei-
+und Datenbankformat bleibt unverändert, ältere App-Versionen können aber
+bei Gleichständen noch ihren eigenen Wert behalten. Ein Gerät mit stark
+vorgehender Uhr kann weiterhin noch unbekannte Änderungen anderer Geräte
+überstimmen. Nach einer Übernahme lässt sich die Zeile lokal erneut ändern;
+ihre Version steigt dann auch bei zurückgestellter Uhr.
+
+Nach erfolgreichem Schreiben werden nur die tatsächlich übertragenen
+Zeilenversionen als veröffentlicht markiert. Änderungen während des
+Schreibens bleiben für den nächsten Durchlauf offen. Beim ersten Abgleich
+nach dem Update wird der lokale Stand einmal vollständig neu veröffentlicht,
+auch wenn ältere Versionen ihn irrtümlich schon als übertragen markiert hatten.
 
 ## Was nicht mitreist
 
@@ -276,5 +287,20 @@ und dort landen die Downloads der App von sich aus.
 Person sieht es" liegen der Zwei-Minuten-Takt und die Laufzeit des
 darunterliegenden Dienstes.
 
-**Keine Verschlüsselung durch PreppSuite.** Wer den Ordner lesen kann,
-liest den Haushalt. Das ist Sache des Dienstes, dem der Ordner gehört.
+**Verschlüsselung ist optional.** Ohne aktivierte Verschlüsselung sind die
+Gerätedateien lesbar. Nach dem Einschalten müssen auch die anderen Geräte
+entsperrt werden und ihre alten Klartextdateien ersetzen. Cloud-Verläufe
+und externe Sicherungskopien werden dadurch nicht gelöscht.
+
+### Schutz vor verlorenen Verschlüsselungsdaten
+
+Sobald dieses Gerät einen verschlüsselten Haushalt kennt, merkt es sich die
+Verschlüsselungspflicht für dessen ID. Auch „Schlüssel vergessen“ hebt sie nicht
+auf. Fehlt danach die `household.json` oder wurde sie durch unverschlüsselte
+Metadaten ersetzt, stoppt der Abgleich. Die verschlüsselte `household.json` muss
+aus einer Sicherung wiederhergestellt werden. Die App erstellt für diesen
+Haushalt keinen Klartext-Ersatz.
+
+Ein gespeicherter Schlüssel wird außerdem vor dem Lesen und Veröffentlichen
+gegen den Prüfwert der aktuellen Ordner-Metadaten geprüft. Ein alter oder falscher
+Schlüssel sperrt den Abgleich; vorhandene Gerätedateien bleiben erhalten.

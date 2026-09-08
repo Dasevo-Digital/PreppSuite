@@ -104,10 +104,22 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
 
     final raw = await folder.readHouseholdFile();
     if (raw == null) {
+      if (await const FolderKeyStore().requiresEncryption(profile.id)) {
+        return SharedFolderJoinError.unreadable;
+      }
       await folder.writeHouseholdFile(_identityOf(profile).encode());
     } else {
       final existing = HouseholdFile.decode(raw);
       if (existing == null) return SharedFolderJoinError.unreadable;
+      if (!existing.isEncrypted &&
+          await const FolderKeyStore().requiresEncryption(
+            existing.householdId,
+          )) {
+        return SharedFolderJoinError.unreadable;
+      }
+      if (existing.isEncrypted) {
+        await const FolderKeyStore().rememberEncryption(existing.householdId);
+      }
 
       if (existing.householdId != profile.id) {
         await ref
@@ -180,6 +192,11 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
         // unlocked for; the service turns the second case into
         // SharedFolderSyncError.locked rather than writing in the clear.
         key: await const FolderKeyStore().read(profile.id),
+        requireEncryption: await const FolderKeyStore().requiresEncryption(
+          profile.id,
+        ),
+        onEncryptedFolder: () =>
+            const FolderKeyStore().rememberEncryption(profile.id),
         republish: republish,
       );
       final result = await service.sync();

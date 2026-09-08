@@ -20,12 +20,12 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('the native storage bridge', () {
-    test('answers at all', () async {
-      if (!usesNativeStoragePicker) {
-        // The desktops read picked storage with `dart:io` and register no
-        // handler. Nothing to answer, and nothing to be wrong.
-        return;
-      }
+    testWidgets('answers at all', (tester) async {
+      expect(
+        usesNativeStoragePicker,
+        isTrue,
+        reason: 'run the native integration suite on Android or iOS',
+      );
 
       // A handle that resolves to nothing: no permission on Android, no
       // such bookmark on iOS. Both must say so rather than throw — this
@@ -41,8 +41,10 @@ void main() {
       );
     });
 
-    test('a folder that cannot be resolved is not writable', () async {
-      if (!usesNativeStoragePicker) return;
+    testWidgets('a folder that cannot be resolved is not writable', (
+      tester,
+    ) async {
+      expect(usesNativeStoragePicker, isTrue);
 
       final writable = await nativeStorageChannel.invokeMethod<bool>(
         'ensureWritable',
@@ -52,8 +54,10 @@ void main() {
       expect(writable, isFalse);
     });
 
-    test('reading through a dead handle gives nothing, not an error', () async {
-      if (!usesNativeStoragePicker) return;
+    testWidgets('reading through a dead handle gives nothing, not an error', (
+      tester,
+    ) async {
+      expect(usesNativeStoragePicker, isTrue);
 
       final contents = await nativeStorageChannel.invokeMethod<String>('read', {
         'uri': 'bookmark://00000000-0000-0000-0000-000000000000',

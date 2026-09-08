@@ -206,6 +206,8 @@ class _StatusLine extends StatelessWidget {
             l10n.sharingErrorDifferentHousehold,
           SharedFolderSyncError.unsupportedVersion => l10n.sharingErrorVersion,
           SharedFolderSyncError.locked => l10n.sharingErrorLocked,
+          SharedFolderSyncError.encryptionChanged =>
+            l10n.sharingErrorEncryptionChanged,
           SharedFolderSyncError.failed => l10n.sharingErrorFailed,
         },
         style: theme.textTheme.bodySmall?.copyWith(

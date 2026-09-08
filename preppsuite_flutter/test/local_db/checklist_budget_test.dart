@@ -227,7 +227,13 @@ void main() {
         ['a'],
       );
 
-      await db.markHouseholdPublished('household-1', DateTime.utc(2026, 4));
+      await db.markHouseholdPublished(
+        'household-1',
+        budget: [
+          for (final row in await db.budgetEntriesForSync('household-1'))
+            (clientId: row.clientId, updatedAt: row.updatedAt),
+        ],
+      );
 
       expect(await db.dirtyBudgetEntries('household-1'), isEmpty);
     });

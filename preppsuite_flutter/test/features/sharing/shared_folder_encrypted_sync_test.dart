@@ -82,6 +82,80 @@ void main() {
         ),
       );
 
+  for (final missing in [true, false]) {
+    test(
+      'encrypted household blocks ${missing ? 'missing' : 'plain'} metadata',
+      () async {
+        await addWater(phone);
+        folder.householdFile = missing ? null : plainIdentity().encode();
+        final result = await (await serviceFor(
+          phone,
+          'phone',
+          withKey: key,
+        )).sync();
+        expect(result.error, SharedFolderSyncError.encryptionChanged);
+        expect(folder.deviceFiles, isEmpty);
+        expect(
+          (await phone.dirtyInventoryItems(householdId)).single.dirty,
+          isTrue,
+        );
+        expect(
+          folder.householdFile,
+          missing ? isNull : plainIdentity().encode(),
+        );
+      },
+    );
+  }
+
+  test(
+    'persisted encryption requirement protects a restarted locked device',
+    () async {
+      await addWater(phone);
+      folder.householdFile = plainIdentity().encode();
+      final result = await SharedFolderSyncService(
+        database: phone,
+        folder: folder,
+        deviceId: 'phone',
+        identity: plainIdentity(),
+        requireEncryption: true,
+      ).sync();
+      expect(result.error, SharedFolderSyncError.encryptionChanged);
+      expect(folder.deviceFiles, isEmpty);
+    },
+  );
+
+  test(
+    'a stale saved key cannot publish even into an empty encrypted folder',
+    () async {
+      await addWater(phone);
+      final wrong = await deriveFolderKey('previous-passphrase', parameters);
+      final result = await (await serviceFor(
+        phone,
+        'phone',
+        withKey: wrong,
+      )).sync();
+      expect(result.error, SharedFolderSyncError.locked);
+      expect(folder.deviceFiles, isEmpty);
+      expect((await phone.dirtyInventoryItems(householdId)), hasLength(1));
+    },
+  );
+
+  test('metadata downgrade during sync is caught before publishing', () async {
+    await addWater(phone);
+    final result = await SharedFolderSyncService(
+      database: phone,
+      folder: folder,
+      deviceId: 'phone',
+      identity: await sealedIdentity(),
+      key: key,
+      onEncryptedFolder: () async {
+        folder.householdFile = plainIdentity().encode();
+      },
+    ).sync();
+    expect(result.error, SharedFolderSyncError.encryptionChanged);
+    expect(folder.deviceFiles, isEmpty);
+  });
+
   test('a row reaches the other device through a sealed file', () async {
     await addWater(phone);
     await (await serviceFor(phone, 'phone', withKey: key)).sync();

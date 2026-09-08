@@ -30,6 +30,30 @@ void main() {
     encryption = FolderEncryption(folder: folder);
   });
 
+  test('forgetting a key preserves the encryption requirement', () async {
+    const store = FolderKeyStore();
+    final key = await deriveFolderKey('test-key', VaultParameters.testing);
+    await store.write('h1', key);
+    await store.clear('h1');
+    expect(await store.read('h1'), isNull);
+    expect(await store.requiresEncryption('h1'), isTrue);
+    expect(await store.requiresEncryption('other'), isFalse);
+    expect(
+      await encryption.enable(householdId: 'h1', passphrase: passphrase),
+      isNotNull,
+    );
+    expect(await encryption.isEncrypted(), isFalse);
+  });
+
+  test('version 2 without vault cannot be treated as plaintext', () {
+    expect(
+      HouseholdFile.decode(
+        folder.householdFile!.replaceFirst('"version": 1', '"version": 2'),
+      ),
+      isNull,
+    );
+  });
+
   test('a plain folder stays at version 1', () {
     // The asymmetry that keeps a household working while one member
     // updates: an older app must not be locked out of a folder that has

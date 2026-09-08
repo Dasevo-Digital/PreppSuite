@@ -37,6 +37,10 @@ class _FolderEncryptionSectionState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final syncError = ref.watch(sharedFolderProvider).value?.lastResult?.error;
+    if (syncError == SharedFolderSyncError.encryptionChanged) {
+      return const SizedBox.shrink(); // The sharing card explains the blocked sync.
+    }
     final encrypted = ref.watch(folderEncryptedProvider).value;
     if (encrypted == null) return const SizedBox.shrink();
 

@@ -1,3 +1,4 @@
+import 'archive_memory_limits.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -35,6 +36,11 @@ class ZimArchive {
   final _clusterCache = <int, Uint8List>{};
 
   static const _clusterCacheLimit = 4;
+  int _cachedBytes = 0;
+  void clearClusterCache() {
+    _clusterCache.clear();
+    _cachedBytes = 0;
+  }
 
   static Future<ZimArchive> open(
     ByteRangeSource source, {
@@ -52,7 +58,10 @@ class ZimArchive {
     }
   }
 
-  Future<void> close() => _source.close();
+  Future<void> close() {
+    clearClusterCache();
+    return _source.close();
+  }
 
   /// The entry at [index] in URL order, which is the order of the archive's
   /// main index.
@@ -329,7 +338,11 @@ class ZimArchive {
 
   Future<Uint8List> _cluster(int number) async {
     final cached = _clusterCache[number];
-    if (cached != null) return cached;
+    if (cached != null) {
+      _clusterCache.remove(number);
+      _clusterCache[number] = cached;
+      return cached;
+    }
 
     if (number >= header.clusterCount) {
       throw ZimException('no cluster $number');
@@ -342,18 +355,31 @@ class ZimArchive {
         ? await _readUint64(header.clusterPointerPosition + (number + 1) * 8)
         : header.checksumPosition;
 
+    if (end <= start || end - start > maxClusterBytes) {
+      throw const ZimException('cluster exceeds the 64 MiB memory limit');
+    }
     final raw = await _source.read(start, end - start);
     final info = raw[0];
     final body = await _decompress(info & 0x0f, raw.sublist(1));
 
-    if (_clusterCache.length >= _clusterCacheLimit) {
-      _clusterCache.remove(_clusterCache.keys.first);
+    if (body.length > maxClusterBytes) {
+      throw const ZimException(
+        'decoded cluster exceeds the 64 MiB memory limit',
+      );
     }
-    // Bit four says the blob offsets are 64-bit, which large clusters need.
-    return _clusterCache[number] = _ClusterBody.tag(
-      body,
-      extended: info & 0x10 != 0,
-    );
+    final tagged = _ClusterBody.tag(body, extended: info & 0x10 != 0);
+    if (tagged.length <= clusterCacheBytes) {
+      while (_clusterCache.isNotEmpty &&
+          (_clusterCache.length >= _clusterCacheLimit ||
+              _cachedBytes + tagged.length > clusterCacheBytes)) {
+        _cachedBytes -= _clusterCache.remove(_clusterCache.keys.first)!.length;
+      }
+      // Another concurrent read may have completed this same cluster.
+      _cachedBytes -= _clusterCache.remove(number)?.length ?? 0;
+      _clusterCache[number] = tagged;
+      _cachedBytes += tagged.length;
+    }
+    return tagged;
   }
 
   static Uint8List _blobFrom(Uint8List body, int blob) {

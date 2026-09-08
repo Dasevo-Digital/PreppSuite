@@ -33,9 +33,14 @@ class OverpassShelterFeature {
 /// covers the (rare) modern civil-protection tagging.
 class OverpassShelterClient {
   OverpassShelterClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _ownsClient = httpClient == null,
+      _httpClient = httpClient ?? http.Client();
 
   final http.Client _httpClient;
+  final bool _ownsClient;
+  void close() {
+    if (_ownsClient) _httpClient.close();
+  }
 
   static const _endpoint = 'https://overpass-api.de/api/interpreter';
 
@@ -61,11 +66,17 @@ class OverpassShelterClient {
         ');'
         'out center $_resultLimit;';
 
-    final response = await _httpClient.post(
-      Uri.parse(_endpoint),
-      body: {'data': query},
-    );
-    if (response.statusCode != 200) return [];
+    final response = await _httpClient
+        .post(
+          Uri.parse(_endpoint),
+          body: {'data': query},
+        )
+        .timeout(const Duration(seconds: 30));
+    if (response.statusCode != 200) {
+      throw http.ClientException(
+        'Shelter service returned ${response.statusCode}',
+      );
+    }
 
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
     if (decoded is! Map) return [];
