@@ -123,6 +123,29 @@ class ChecklistController {
     );
   }
 
+  /// Connects a checklist row to an inventory row. The presentation can
+  /// then derive completion from the live quantity without copying stock
+  /// numbers into the checklist.
+  Future<void> linkInventoryItem(
+    ChecklistItem item,
+    String? inventoryItemId,
+  ) async {
+    await _db.upsertChecklistItem(
+      ChecklistItemsCompanion.insert(
+        clientId: item.clientId,
+        householdId: Value(item.householdId),
+        templateClientId: item.templateClientId,
+        title: item.title,
+        targetQuantity: Value(item.targetQuantity),
+        isChecked: Value(item.isChecked),
+        linkedInventoryItemId: Value(inventoryItemId),
+        sortOrder: Value(item.sortOrder),
+        updatedAt: DateTime.now().toUtc(),
+        dirty: const Value(true),
+      ),
+    );
+  }
+
   Future<void> deleteItem(ChecklistItem item) async {
     await _deleteItem(item, DateTime.now().toUtc());
   }

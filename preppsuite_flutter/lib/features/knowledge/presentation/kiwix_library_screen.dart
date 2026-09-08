@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/platform_storage.dart';
 import '../../downloads/application/byte_size.dart';
 import '../../downloads/application/download_folder.dart';
 import '../../downloads/application/download_providers.dart';
@@ -162,9 +163,16 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
           // Taking it into use straight away is the point of downloading
           // it; there is no second step worth asking about.
           onFinished: (path, label) async {
+            // Sandboxed macOS can read the freshly written path only for
+            // the current folder scope. Persist a security bookmark so the
+            // archive remains reachable after the app is restarted.
+            final remembered = await rememberStoragePath(path, label: label);
             final problem = await ref
                 .read(knowledgeProvider.notifier)
-                .useArchive(location: path, label: label);
+                .useArchive(
+                  location: remembered?.value ?? path,
+                  label: remembered?.label ?? label,
+                );
 
             if (problem != null) {
               return switch (problem) {

@@ -31,13 +31,13 @@ ShellNavigation shellNavigationFor(double width) {
 /// rest are what they set up beforehand.
 enum ShellDestination {
   overview,
+  emergency,
   inventory,
   checklists,
   warnings,
   shelters,
   map,
   knowledge,
-  budget,
   household,
   settings,
 }

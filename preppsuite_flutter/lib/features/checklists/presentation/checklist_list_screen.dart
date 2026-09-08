@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
+import '../../budget/application/missing_equipment_report.dart';
+import '../../household/application/household_providers.dart';
 import '../application/checklist_category_l10n.dart';
 import '../application/checklist_controller.dart';
 import '../application/checklist_providers.dart';
+import '../application/checklist_satisfaction.dart';
+import '../../inventory/application/inventory_providers.dart';
 import 'checklist_detail_screen.dart';
 import '../../../core/error_text.dart';
 
@@ -21,7 +27,16 @@ class ChecklistListScreen extends ConsumerWidget {
     final templatesAsync = ref.watch(checklistTemplatesProvider(householdId));
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.checklistsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.checklistsTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            tooltip: l10n.exportPdfButton,
+            onPressed: () => _exportMissingEquipmentPdf(context, ref),
+          ),
+        ],
+      ),
       body: templatesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>
@@ -47,6 +62,40 @@ class ChecklistListScreen extends ConsumerWidget {
         onPressed: () => _showCreateTemplateDialog(context, ref, l10n),
         icon: const Icon(Icons.add),
         label: Text(l10n.createTemplateButton),
+      ),
+    );
+  }
+
+  Future<void> _exportMissingEquipmentPdf(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
+    final householdName = ref.read(householdProfileProvider).value?.name ?? '';
+    final db = ref.read(appDatabaseProvider);
+
+    final strings = MissingEquipmentReportStrings(
+      title: l10n.pdfReportTitle,
+      generatedOn: l10n.pdfGeneratedOn(
+        DateFormat.yMMMMd(locale).add_Hm().format(DateTime.now()),
+      ),
+      checklistSectionTitle: l10n.pdfChecklistSectionTitle,
+      noMissingChecklistItems: l10n.pdfNoMissingChecklistItems,
+      inventorySectionTitle: l10n.pdfInventorySectionTitle,
+      noLowStockItems: l10n.pdfNoLowStockItems,
+      columnItem: l10n.pdfColumnItem,
+      columnQuantity: l10n.pdfColumnQuantity,
+      columnMinQuantity: l10n.pdfColumnMinQuantity,
+      columnUnit: l10n.pdfColumnUnit,
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (_) => const MissingEquipmentReport().build(
+        db: db,
+        householdId: householdId,
+        householdName: householdName,
+        strings: strings,
       ),
     );
   }
@@ -194,6 +243,9 @@ class _TemplateTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final itemsAsync = ref.watch(checklistItemsProvider(template.clientId));
+    final inventory =
+        ref.watch(inventoryItemsProvider(householdId)).value ?? const [];
+    final inventoryById = {for (final item in inventory) item.clientId: item};
 
     return ListTile(
       leading: Icon(
@@ -215,7 +267,9 @@ class _TemplateTile extends ConsumerWidget {
       subtitle: itemsAsync.maybeWhen(
         data: (items) => Text(
           l10n.checklistProgress(
-            items.where((i) => i.isChecked).length,
+            items
+                .where((i) => isChecklistItemSatisfied(i, inventoryById))
+                .length,
             items.length,
           ),
         ),

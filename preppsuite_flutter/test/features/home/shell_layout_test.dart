@@ -60,13 +60,13 @@ void main() {
 
       expect(result.visible, [
         ShellDestination.overview,
+        ShellDestination.emergency,
         ShellDestination.inventory,
         ShellDestination.checklists,
-        ShellDestination.warnings,
       ]);
       expect(result.visible, hasLength(barSlotLimit - 1));
       expect(result.hasOverflow, isTrue);
-      expect(result.overflow.first, ShellDestination.shelters);
+      expect(result.overflow.first, ShellDestination.warnings);
       expect(
         {...result.visible, ...result.overflow},
         ShellDestination.values.toSet(),
@@ -115,13 +115,13 @@ void main() {
       // The ones before it stay where a thumb last found them.
       expect(result.visible.take(3), [
         ShellDestination.overview,
+        ShellDestination.emergency,
         ShellDestination.inventory,
-        ShellDestination.checklists,
       ]);
     });
 
     test('the overflow keeps the declared order', () {
-      final result = slots(ShellNavigation.bar, ShellDestination.budget);
+      final result = slots(ShellNavigation.bar, ShellDestination.knowledge);
       final order = ShellDestination.values;
 
       expect(

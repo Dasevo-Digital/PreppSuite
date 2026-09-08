@@ -378,6 +378,28 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// Hides a seeded checklist row that the product no longer ships.
+  ///
+  /// A tombstone is synced so an older device cannot restore the row. A
+  /// missing row is left missing, which keeps this safe on fresh installs.
+  Future<void> retireChecklistItem(String clientId) async {
+    final existing = await (select(
+      checklistItems,
+    )..where((t) => t.clientId.equals(clientId))).getSingleOrNull();
+    if (existing == null || existing.deletedAt != null) return;
+
+    final now = DateTime.now().toUtc();
+    await upsertChecklistItem(
+      existing
+          .toCompanion(true)
+          .copyWith(
+            deletedAt: Value(now),
+            updatedAt: Value(now),
+            dirty: const Value(true),
+          ),
+    );
+  }
+
   Future<ChecklistTemplate?> checklistTemplateByClientId(String clientId) {
     return (select(
       checklistTemplates,

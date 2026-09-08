@@ -22,8 +22,19 @@ class ChecklistSeeder {
 
   final AppDatabase _db;
 
+  static const _retiredBuiltInItems = [
+    // The inventory and supply calculator already track the required
+    // drinking-water quantity. The checklist keeps the equipment needed
+    // to store and treat it, without asking for the same stock twice.
+    '00000000-0000-4000-8000-000000000101',
+  ];
+
   Future<void> seed(String householdId) async {
     await _db.claimOrphanChecklistRows(householdId);
+
+    for (final clientId in _retiredBuiltInItems) {
+      await _db.retireChecklistItem(clientId);
+    }
 
     for (final template in builtInTemplates) {
       if (await _db.checklistTemplateByClientId(template.clientId) != null) {

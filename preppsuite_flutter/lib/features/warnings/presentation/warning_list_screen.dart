@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../model/categories.dart';
 import '../../../model/household_profile.dart';
 
@@ -416,6 +417,24 @@ class _WarningTile extends StatelessWidget {
                   context,
                 ).formatMediumDate(warning.sent),
                 style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () => launchUrl(
+                  switch (source) {
+                    WarningSource.bbk => Uri.https(
+                      'warnung.bund.de',
+                      '/meldungen/${warning.externalId}',
+                    ),
+                    WarningSource.meteoalarm => Uri.https(
+                      'meteoalarm.org',
+                      '/de/live/',
+                    ),
+                  },
+                  mode: LaunchMode.externalApplication,
+                ),
+                icon: const Icon(Icons.open_in_new),
+                label: Text(l10n.warningMoreInformation),
               ),
             ],
           ),

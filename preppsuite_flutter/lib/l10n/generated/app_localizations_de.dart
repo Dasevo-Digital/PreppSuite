@@ -2354,4 +2354,133 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get overviewOpen => 'Öffnen';
+
+  @override
+  String get warningMoreInformation =>
+      'Weitere Informationen bei der Warnquelle';
+
+  @override
+  String get moreActions => 'Weitere Aktionen';
+
+  @override
+  String get checklistLinkStockAction => 'Mit Vorrat verknüpfen';
+
+  @override
+  String get checklistLinkStockTitle => 'Vorrat auswählen';
+
+  @override
+  String get checklistUnlinkStockAction => 'Verknüpfung entfernen';
+
+  @override
+  String get checklistNoStockToLink =>
+      'Noch kein Vorrat zum Verknüpfen vorhanden.';
+
+  @override
+  String checklistLinkedStock(String name, num quantity, String unit) {
+    return '$name: $quantity $unit vorhanden';
+  }
+
+  @override
+  String get navEmergency => 'Notfall';
+
+  @override
+  String get emergencyTitle => 'Notfall & Bereitschaft';
+
+  @override
+  String get emergencyCall112 => 'Notruf 112';
+
+  @override
+  String get emergencyCall110 => 'Polizei 110';
+
+  @override
+  String get emergencyCurrentWarnings => 'Aktuelle Warnungen';
+
+  @override
+  String get emergencyNoWarnings => 'Keine relevanten aktiven Warnungen';
+
+  @override
+  String get readinessTitle => 'Offline-Bereitschaft';
+
+  @override
+  String get readinessReady => 'bereit';
+
+  @override
+  String get readinessNeedsWork => 'offen';
+
+  @override
+  String get readinessInventory => 'Vorrat angelegt';
+
+  @override
+  String get readinessChecklists => 'Checklisten begonnen';
+
+  @override
+  String get readinessPlan => 'Notfallplan ausgefüllt';
+
+  @override
+  String get readinessCards => 'Notfallkarten angelegt';
+
+  @override
+  String get readinessMap => 'Offline-Karte verfügbar';
+
+  @override
+  String get readinessKnowledge => 'Offline-Wissen verfügbar';
+
+  @override
+  String get emergencyPlanMissing => 'Notfallplan noch nicht ausgefüllt';
+
+  @override
+  String get emergencyPlanHeading => 'Wichtige Angaben';
+
+  @override
+  String get knowledgeManageArchives => 'Archive verwalten';
+
+  @override
+  String knowledgeArchiveCount(int count) {
+    return '$count Archive auf diesem Gerät';
+  }
+
+  @override
+  String get knowledgeArchiveSelected => 'Aktuell geöffnet';
+
+  @override
+  String get backupTitle => 'Sicherung & Wiederherstellung';
+
+  @override
+  String get backupCreate => 'Datensicherung erstellen';
+
+  @override
+  String get backupRestore => 'Datensicherung wiederherstellen';
+
+  @override
+  String get backupHint =>
+      'Vorräte, Checklisten, Notfallplan und Notfallkarten. Die Datei enthält persönliche Daten und sollte geschützt aufbewahrt werden.';
+
+  @override
+  String get backupCreated => 'Datensicherung gespeichert.';
+
+  @override
+  String backupRestored(int count) {
+    return 'Datensicherung wiederhergestellt: $count neuere Einträge übernommen.';
+  }
+
+  @override
+  String get backupInvalid =>
+      'Diese Sicherung gehört nicht zu diesem Haushalt oder ist beschädigt.';
+
+  @override
+  String get backupFailed =>
+      'Die Datensicherung konnte nicht verarbeitet werden.';
+
+  @override
+  String get backupPassphraseTitle => 'Sicherung verschlüsseln';
+
+  @override
+  String get backupPassphrase => 'Passwort';
+
+  @override
+  String get backupPassphraseRepeat => 'Passwort wiederholen';
+
+  @override
+  String get backupPassphraseInvalid =>
+      'Mindestens 8 Zeichen eingeben; beide Eingaben müssen übereinstimmen.';
 }

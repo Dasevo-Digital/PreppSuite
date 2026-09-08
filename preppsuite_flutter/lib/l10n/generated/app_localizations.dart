@@ -4027,6 +4027,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open'**
   String get overviewOpen;
+
+  /// No description provided for @warningMoreInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'More information from the warning source'**
+  String get warningMoreInformation;
+
+  /// No description provided for @moreActions.
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get moreActions;
+
+  /// No description provided for @checklistLinkStockAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Link to stock'**
+  String get checklistLinkStockAction;
+
+  /// No description provided for @checklistLinkStockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose stock item'**
+  String get checklistLinkStockTitle;
+
+  /// No description provided for @checklistUnlinkStockAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove link'**
+  String get checklistUnlinkStockAction;
+
+  /// No description provided for @checklistNoStockToLink.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no stock item to link yet.'**
+  String get checklistNoStockToLink;
+
+  /// No description provided for @checklistLinkedStock.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {quantity} {unit} available'**
+  String checklistLinkedStock(String name, num quantity, String unit);
+
+  /// No description provided for @navEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get navEmergency;
+
+  /// No description provided for @emergencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency & readiness'**
+  String get emergencyTitle;
+
+  /// No description provided for @emergencyCall112.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency 112'**
+  String get emergencyCall112;
+
+  /// No description provided for @emergencyCall110.
+  ///
+  /// In en, this message translates to:
+  /// **'Police 110'**
+  String get emergencyCall110;
+
+  /// No description provided for @emergencyCurrentWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Current warnings'**
+  String get emergencyCurrentWarnings;
+
+  /// No description provided for @emergencyNoWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'No relevant active warnings'**
+  String get emergencyNoWarnings;
+
+  /// No description provided for @readinessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline readiness'**
+  String get readinessTitle;
+
+  /// No description provided for @readinessReady.
+  ///
+  /// In en, this message translates to:
+  /// **'ready'**
+  String get readinessReady;
+
+  /// No description provided for @readinessNeedsWork.
+  ///
+  /// In en, this message translates to:
+  /// **'open'**
+  String get readinessNeedsWork;
+
+  /// No description provided for @readinessInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock recorded'**
+  String get readinessInventory;
+
+  /// No description provided for @readinessChecklists.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklists started'**
+  String get readinessChecklists;
+
+  /// No description provided for @readinessPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency plan completed'**
+  String get readinessPlan;
+
+  /// No description provided for @readinessCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency cards recorded'**
+  String get readinessCards;
+
+  /// No description provided for @readinessMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline map available'**
+  String get readinessMap;
+
+  /// No description provided for @readinessKnowledge.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline knowledge available'**
+  String get readinessKnowledge;
+
+  /// No description provided for @emergencyPlanMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency plan has not been completed'**
+  String get emergencyPlanMissing;
+
+  /// No description provided for @emergencyPlanHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Important details'**
+  String get emergencyPlanHeading;
+
+  /// No description provided for @knowledgeManageArchives.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage archives'**
+  String get knowledgeManageArchives;
+
+  /// No description provided for @knowledgeArchiveCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} archives on this device'**
+  String knowledgeArchiveCount(int count);
+
+  /// No description provided for @knowledgeArchiveSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently open'**
+  String get knowledgeArchiveSelected;
+
+  /// No description provided for @backupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & restore'**
+  String get backupTitle;
+
+  /// No description provided for @backupCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create data backup'**
+  String get backupCreate;
+
+  /// No description provided for @backupRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore data backup'**
+  String get backupRestore;
+
+  /// No description provided for @backupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock, checklists, emergency plan and emergency cards. The file contains personal data and should be stored securely.'**
+  String get backupHint;
+
+  /// No description provided for @backupCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Data backup saved.'**
+  String get backupCreated;
+
+  /// No description provided for @backupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored: {count} newer records applied.'**
+  String backupRestored(int count);
+
+  /// No description provided for @backupInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup belongs to a different household or is damaged.'**
+  String get backupInvalid;
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The data backup could not be processed.'**
+  String get backupFailed;
+
+  /// No description provided for @backupPassphraseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt backup'**
+  String get backupPassphraseTitle;
+
+  /// No description provided for @backupPassphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get backupPassphrase;
+
+  /// No description provided for @backupPassphraseRepeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat password'**
+  String get backupPassphraseRepeat;
+
+  /// No description provided for @backupPassphraseInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter at least 8 characters; both entries must match.'**
+  String get backupPassphraseInvalid;
 }
 
 class _AppLocalizationsDelegate

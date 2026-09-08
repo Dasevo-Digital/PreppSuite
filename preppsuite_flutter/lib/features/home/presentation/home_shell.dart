@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/feature_activity.dart';
 import '../../../model/household_profile.dart';
-import '../../budget/presentation/budget_list_screen.dart';
 import '../../checklists/presentation/checklist_list_screen.dart';
 import '../../household/presentation/household_overview_screen.dart';
 import '../../inventory/application/inventory_providers.dart';
@@ -19,6 +18,7 @@ import '../../warnings/presentation/warning_banner.dart';
 import '../../warnings/presentation/warning_list_screen.dart';
 import '../application/shell_layout.dart';
 import 'overview_screen.dart';
+import 'emergency_screen.dart';
 
 /// Top-level navigation once a profile exists.
 ///
@@ -28,7 +28,7 @@ import 'overview_screen.dart';
 /// screen behind it shows the history, the filters and the ones that
 /// concern somewhere else.
 ///
-/// Ten destinations do not fit across a phone. `shellSlotsFor` decides
+/// Nine destinations do not fit across a phone. `shellSlotsFor` decides
 /// which ones the bar shows and which go behind "more"; the rail, which
 /// has the room, shows all of them.
 ///
@@ -118,6 +118,10 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         profile: widget.profile,
         onNavigate: _select,
       ),
+      ShellDestination.emergency => EmergencyScreen(
+        profile: widget.profile,
+        onNavigate: _select,
+      ),
       ShellDestination.inventory => InventoryListScreen(
         householdId: householdId,
       ),
@@ -128,7 +132,6 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       ShellDestination.shelters => const ShelterMapScreen(),
       ShellDestination.map => const MapScreen(),
       ShellDestination.knowledge => const KnowledgeScreen(),
-      ShellDestination.budget => BudgetListScreen(householdId: householdId),
       ShellDestination.household => HouseholdOverviewScreen(
         profile: widget.profile,
       ),
@@ -252,6 +255,11 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         selectedIcon: const Icon(Icons.dashboard),
         label: l10n.navOverview,
       ),
+      ShellDestination.emergency => _Entry(
+        icon: const Icon(Icons.emergency_outlined),
+        selectedIcon: const Icon(Icons.emergency),
+        label: l10n.navEmergency,
+      ),
       ShellDestination.inventory => _inventoryEntry(l10n),
       ShellDestination.checklists => _Entry(
         icon: const Icon(Icons.checklist_outlined),
@@ -273,11 +281,6 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         icon: const Icon(Icons.menu_book_outlined),
         selectedIcon: const Icon(Icons.menu_book),
         label: l10n.navKnowledge,
-      ),
-      ShellDestination.budget => _Entry(
-        icon: const Icon(Icons.savings_outlined),
-        selectedIcon: const Icon(Icons.savings),
-        label: l10n.navBudget,
       ),
       ShellDestination.household => _Entry(
         icon: const Icon(Icons.home_outlined),

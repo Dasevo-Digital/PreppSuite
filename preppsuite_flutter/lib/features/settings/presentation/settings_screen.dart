@@ -12,6 +12,7 @@ import '../../inventory/presentation/expiry_reminders_card.dart';
 import '../../maps/presentation/offline_map_card.dart';
 import '../../sharing/presentation/shared_folder_card.dart';
 import 'additional_regions_card.dart';
+import 'backup_card.dart';
 import 'my_region_card.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -105,6 +106,13 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           DownloadFolderCard(l10n: l10n),
+          const SizedBox(height: 24),
+          Text(
+            l10n.backupTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          BackupCard(householdId: profile.id, l10n: l10n),
         ],
       ),
     );

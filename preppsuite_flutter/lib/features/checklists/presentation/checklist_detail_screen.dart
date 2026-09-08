@@ -5,6 +5,8 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/checklist_controller.dart';
 import '../application/checklist_providers.dart';
+import '../application/checklist_satisfaction.dart';
+import '../../inventory/application/inventory_providers.dart';
 import '../../../core/error_text.dart';
 
 class ChecklistDetailScreen extends ConsumerStatefulWidget {
@@ -49,6 +51,9 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
     final controller = ref.read(
       checklistControllerProvider(widget.householdId),
     );
+    final inventory =
+        ref.watch(inventoryItemsProvider(widget.householdId)).value ?? const [];
+    final inventoryById = {for (final item in inventory) item.clientId: item};
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.template.title)),
@@ -63,23 +68,67 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
                 itemCount: items.length,
                 itemBuilder: (context, index) {
                   final item = items[index];
+                  final linked = inventoryById[item.linkedInventoryItemId];
+                  final complete = isChecklistItemSatisfied(
+                    item,
+                    inventoryById,
+                  );
+                  final supplied = complete && !item.isChecked;
                   return CheckboxListTile(
-                    value: item.isChecked,
-                    onChanged: (_) => controller.toggleItem(item),
+                    value: complete,
+                    onChanged: supplied
+                        ? null
+                        : (_) => controller.toggleItem(item),
                     title: Text(
                       item.title,
-                      style: item.isChecked
+                      style: complete
                           ? const TextStyle(
                               decoration: TextDecoration.lineThrough,
                             )
                           : null,
                     ),
-                    secondary: IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      // Names the row it belongs to: in a list of forty
-                      // items, forty buttons called "delete" are useless.
-                      tooltip: l10n.deleteItemAction(item.title),
-                      onPressed: () => controller.deleteItem(item),
+                    subtitle: linked == null
+                        ? null
+                        : Text(
+                            l10n.checklistLinkedStock(
+                              linked.name,
+                              linked.quantity,
+                              linked.unit,
+                            ),
+                          ),
+                    secondary: PopupMenuButton<_ItemAction>(
+                      tooltip: l10n.moreActions,
+                      onSelected: (action) async {
+                        switch (action) {
+                          case _ItemAction.link:
+                            final id = await _chooseInventoryItem(
+                              context,
+                              inventory,
+                              item.linkedInventoryItemId,
+                              l10n,
+                            );
+                            if (id != null) {
+                              await controller.linkInventoryItem(
+                                item,
+                                id == _unlinkStock ? null : id,
+                              );
+                            }
+                            break;
+                          case _ItemAction.delete:
+                            await controller.deleteItem(item);
+                            break;
+                        }
+                      },
+                      itemBuilder: (_) => [
+                        PopupMenuItem(
+                          value: _ItemAction.link,
+                          child: Text(l10n.checklistLinkStockAction),
+                        ),
+                        PopupMenuItem(
+                          value: _ItemAction.delete,
+                          child: Text(l10n.deleteItemAction(item.title)),
+                        ),
+                      ],
                     ),
                   );
                 },
@@ -114,4 +163,51 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
       ),
     );
   }
+
+  Future<String?> _chooseInventoryItem(
+    BuildContext context,
+    List<InventoryItem> items,
+    String? selected,
+    AppLocalizations l10n,
+  ) {
+    return showDialog<String?>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: Text(l10n.checklistLinkStockTitle),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(dialogContext, _unlinkStock),
+            child: ListTile(
+              leading: const Icon(Icons.link_off),
+              title: Text(l10n.checklistUnlinkStockAction),
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+          for (final item in items)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(dialogContext, item.clientId),
+              child: ListTile(
+                leading: Icon(
+                  item.clientId == selected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_off,
+                ),
+                title: Text(item.name),
+                subtitle: Text('${item.quantity} ${item.unit}'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          if (items.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Text(l10n.checklistNoStockToLink),
+            ),
+        ],
+      ),
+    );
+  }
 }
+
+enum _ItemAction { link, delete }
+
+const _unlinkStock = '__unlink__';

@@ -65,11 +65,16 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
           if (async.value?.isConfigured ?? false)
             PopupMenuButton<_ArchiveAction>(
               onSelected: (action) => switch (action) {
+                _ArchiveAction.manage => _manageArchives(async.value!),
                 _ArchiveAction.download => _openLibrary(),
                 _ArchiveAction.add => _choose(l10n),
                 _ArchiveAction.remove => _remove(async.value),
               },
               itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: _ArchiveAction.manage,
+                  child: Text(l10n.knowledgeManageArchives),
+                ),
                 PopupMenuItem(
                   value: _ArchiveAction.download,
                   child: Text(l10n.knowledgeDownloadAction),
@@ -268,6 +273,98 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     );
   }
 
+  Future<void> _manageArchives(KnowledgeState state) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(sheetContext).height * .75,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(
+                  AppLocalizations.of(sheetContext)!.knowledgeManageArchives,
+                  style: Theme.of(sheetContext).textTheme.titleLarge,
+                ),
+                subtitle: Text(
+                  AppLocalizations.of(
+                    sheetContext,
+                  )!.knowledgeArchiveCount(state.library.length),
+                ),
+              ),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    for (final archive in state.library)
+                      ListTile(
+                        leading: Icon(
+                          archive.id == state.selectedId
+                              ? Icons.check_circle
+                              : Icons.menu_book_outlined,
+                        ),
+                        title: Text(archive.label),
+                        subtitle: Text(
+                          archive.id == state.selectedId
+                              ? AppLocalizations.of(
+                                  sheetContext,
+                                )!.knowledgeArchiveSelected
+                              : archive.location,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        onTap: () async {
+                          Navigator.pop(sheetContext);
+                          await ref
+                              .read(knowledgeProvider.notifier)
+                              .select(archive.id);
+                        },
+                        trailing: IconButton(
+                          tooltip: AppLocalizations.of(
+                            sheetContext,
+                          )!.knowledgeRemoveAction,
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () async {
+                            await ref
+                                .read(knowledgeProvider.notifier)
+                                .remove(archive.id);
+                            if (sheetContext.mounted) {
+                              Navigator.pop(sheetContext);
+                            }
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      Navigator.pop(sheetContext);
+                      _choose(AppLocalizations.of(context)!);
+                    },
+                    icon: const Icon(Icons.add),
+                    label: Text(
+                      AppLocalizations.of(sheetContext)!.knowledgeAddAction,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _remove(KnowledgeState? state) async {
     final id = state?.selectedId;
     if (id == null) return;
@@ -349,7 +446,7 @@ class _ArchiveSwitcher extends ConsumerWidget {
 
 enum _SearchMode { titles, fullText }
 
-enum _ArchiveAction { download, add, remove }
+enum _ArchiveAction { manage, download, add, remove }
 
 /// Sits under the results when the index is not finished.
 class _PartialIndexNote extends ConsumerWidget {

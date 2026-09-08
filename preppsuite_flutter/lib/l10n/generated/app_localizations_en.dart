@@ -2338,4 +2338,131 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overviewOpen => 'Open';
+
+  @override
+  String get warningMoreInformation =>
+      'More information from the warning source';
+
+  @override
+  String get moreActions => 'More actions';
+
+  @override
+  String get checklistLinkStockAction => 'Link to stock';
+
+  @override
+  String get checklistLinkStockTitle => 'Choose stock item';
+
+  @override
+  String get checklistUnlinkStockAction => 'Remove link';
+
+  @override
+  String get checklistNoStockToLink => 'There is no stock item to link yet.';
+
+  @override
+  String checklistLinkedStock(String name, num quantity, String unit) {
+    return '$name: $quantity $unit available';
+  }
+
+  @override
+  String get navEmergency => 'Emergency';
+
+  @override
+  String get emergencyTitle => 'Emergency & readiness';
+
+  @override
+  String get emergencyCall112 => 'Emergency 112';
+
+  @override
+  String get emergencyCall110 => 'Police 110';
+
+  @override
+  String get emergencyCurrentWarnings => 'Current warnings';
+
+  @override
+  String get emergencyNoWarnings => 'No relevant active warnings';
+
+  @override
+  String get readinessTitle => 'Offline readiness';
+
+  @override
+  String get readinessReady => 'ready';
+
+  @override
+  String get readinessNeedsWork => 'open';
+
+  @override
+  String get readinessInventory => 'Stock recorded';
+
+  @override
+  String get readinessChecklists => 'Checklists started';
+
+  @override
+  String get readinessPlan => 'Emergency plan completed';
+
+  @override
+  String get readinessCards => 'Emergency cards recorded';
+
+  @override
+  String get readinessMap => 'Offline map available';
+
+  @override
+  String get readinessKnowledge => 'Offline knowledge available';
+
+  @override
+  String get emergencyPlanMissing => 'Emergency plan has not been completed';
+
+  @override
+  String get emergencyPlanHeading => 'Important details';
+
+  @override
+  String get knowledgeManageArchives => 'Manage archives';
+
+  @override
+  String knowledgeArchiveCount(int count) {
+    return '$count archives on this device';
+  }
+
+  @override
+  String get knowledgeArchiveSelected => 'Currently open';
+
+  @override
+  String get backupTitle => 'Backup & restore';
+
+  @override
+  String get backupCreate => 'Create data backup';
+
+  @override
+  String get backupRestore => 'Restore data backup';
+
+  @override
+  String get backupHint =>
+      'Stock, checklists, emergency plan and emergency cards. The file contains personal data and should be stored securely.';
+
+  @override
+  String get backupCreated => 'Data backup saved.';
+
+  @override
+  String backupRestored(int count) {
+    return 'Backup restored: $count newer records applied.';
+  }
+
+  @override
+  String get backupInvalid =>
+      'This backup belongs to a different household or is damaged.';
+
+  @override
+  String get backupFailed => 'The data backup could not be processed.';
+
+  @override
+  String get backupPassphraseTitle => 'Encrypt backup';
+
+  @override
+  String get backupPassphrase => 'Password';
+
+  @override
+  String get backupPassphraseRepeat => 'Repeat password';
+
+  @override
+  String get backupPassphraseInvalid =>
+      'Enter at least 8 characters; both entries must match.';
 }

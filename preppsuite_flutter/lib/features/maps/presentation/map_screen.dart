@@ -36,6 +36,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   final _geolocation = GeolocationService();
 
   LatLng? _position;
+  LatLng? _searchPosition;
+  String? _searchLabel;
   bool _locating = false;
   int _lookupGeneration = 0;
 
@@ -75,6 +77,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         _say(l10n.shelterSearchNoResult);
         return;
       }
+      setState(() {
+        _searchPosition = result;
+        _searchLabel = query;
+      });
       _mapController.move(result, 12);
     } catch (_) {
       if (mounted && generation == _lookupGeneration) {
@@ -166,6 +172,34 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               shape: BoxShape.circle,
                               color: theme.colorScheme.primary,
                               border: Border.all(color: Colors.white, width: 2),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (_searchPosition case final position?)
+                    MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: position,
+                          width: 180,
+                          height: 48,
+                          alignment: Alignment.bottomCenter,
+                          child: Semantics(
+                            label: _searchLabel,
+                            child: Card(
+                              color: theme.colorScheme.surfaceContainerHigh,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                child: Text(
+                                  _searchLabel!,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.labelLarge,
+                                ),
+                              ),
                             ),
                           ),
                         ),

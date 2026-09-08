@@ -12,6 +12,7 @@ import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/presentation/inventory_item_form_screen.dart';
 import '../../inventory/application/supply_calculator.dart';
 import '../../checklists/application/checklist_providers.dart';
+import '../../checklists/application/checklist_satisfaction.dart';
 import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
 import '../application/home_overview.dart';
@@ -481,7 +482,19 @@ class _ChecklistCard extends ConsumerWidget {
         ref.watch(checklistTemplatesProvider(householdId)).value ?? const [];
     final items =
         ref.watch(allChecklistItemsProvider(householdId)).value ?? const [];
-    final overview = summarizeChecklists(templates: templates, items: items);
+    final inventory =
+        ref.watch(inventoryItemsProvider(householdId)).value ?? const [];
+    final inventoryById = {for (final item in inventory) item.clientId: item};
+    final effectiveItems = [
+      for (final item in items)
+        isChecklistItemSatisfied(item, inventoryById)
+            ? item.copyWith(isChecked: true)
+            : item,
+    ];
+    final overview = summarizeChecklists(
+      templates: templates,
+      items: effectiveItems,
+    );
 
     return _OverviewCard(
       icon: Icons.checklist_outlined,

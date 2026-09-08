@@ -41,10 +41,6 @@ const builtInTemplates = [
     ChecklistCategory.water,
     [
       BuiltInItem(
-        '00000000-0000-4000-8000-000000000101',
-        'Trinkwasser (mind. 2 l pro Person und Tag, für 10 Tage)',
-      ),
-      BuiltInItem(
         '00000000-0000-4000-8000-000000000102',
         'Wasserkanister/-behälter',
       ),
