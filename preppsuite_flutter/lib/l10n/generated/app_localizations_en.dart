@@ -1542,6 +1542,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String progressPercent(int percent) {
+    return '$percent%';
+  }
+
+  @override
   String get downloadBusyMessage =>
       'A download is already running. Only one goes at a time.';
 

@@ -2708,6 +2708,12 @@ abstract class AppLocalizations {
   /// **'{done} of {total}'**
   String downloadOfSize(String done, String total);
 
+  /// No description provided for @progressPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String progressPercent(int percent);
+
   /// No description provided for @downloadBusyMessage.
   ///
   /// In en, this message translates to:

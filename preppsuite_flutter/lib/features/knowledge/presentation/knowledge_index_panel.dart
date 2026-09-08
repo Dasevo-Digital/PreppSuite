@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/progress_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/knowledge_indexer.dart';
 import '../application/knowledge_providers.dart';
@@ -148,7 +149,10 @@ class KnowledgeIndexPanel extends ConsumerWidget {
         style: theme.textTheme.bodyMedium,
       ),
       const SizedBox(height: 10),
-      LinearProgressIndicator(value: progress?.fraction),
+      LinearProgressIndicator(
+        value: progress?.fraction,
+        semanticsValue: percentValue(l10n, progress?.fraction),
+      ),
       const SizedBox(height: 12),
       Align(
         alignment: Alignment.centerLeft,

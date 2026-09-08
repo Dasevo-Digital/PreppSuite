@@ -435,6 +435,7 @@
   "downloadRetryAction": "Erneut versuchen",
   "downloadDismissAction": "Ausblenden",
   "downloadOfSize": "{done} von {total}",
+  "progressPercent": "{percent} %",
   "downloadBusyMessage": "Es läuft schon ein Download. Es geht immer nur einer auf einmal.",
   "downloadStartAction": "Herunterladen",
   "downloadConfirmTitle": "Herunterladen?",

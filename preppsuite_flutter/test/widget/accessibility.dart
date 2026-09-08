@@ -1,3 +1,4 @@
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// The four checks Flutter can make on a rendered screen without knowing
@@ -44,4 +45,23 @@ Future<void> expectAccessible(
   } finally {
     handle.dispose();
   }
+}
+
+/// Every node in the rendered tree that asks to be read out as soon as it
+/// appears. Used to check that the ones that should announce do, and that
+/// the ones rebuilt on a timer do not.
+List<SemanticsNode> liveRegions(WidgetTester tester) {
+  final found = <SemanticsNode>[];
+  void walk(SemanticsNode node) {
+    if (node.getSemanticsData().flagsCollection.isLiveRegion) {
+      found.add(node);
+    }
+    node.visitChildren((child) {
+      walk(child);
+      return true;
+    });
+  }
+
+  walk(tester.binding.rootElement!.renderObject!.debugSemantics!);
+  return found;
 }

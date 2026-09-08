@@ -209,4 +209,26 @@ void main() {
     );
     await expectAccessible(tester);
   });
+
+  testWidgets('a supply gauge is read out as one thing, not three', (
+    tester,
+  ) async {
+    // Name, figure and bar only mean anything together. Without merging,
+    // a screen reader stops three times and the percentage arrives
+    // detached from what it is a percentage of.
+    final handle = tester.ensureSemantics();
+    await pumpOverview(
+      tester,
+      items: [item(clientId: 'w', category: 'water', quantity: 10, unit: 'L')],
+    );
+
+    final water = tester.getSemantics(
+      find.byType(LinearProgressIndicator).first,
+    );
+    // Flutter joins the labels it merges with newlines.
+    final spoken = water.label.replaceAll('\n', ' ');
+    expect(spoken, 'Trinkwasser 10.0 von 40.0 L');
+    expect(water.value, '25 %');
+    handle.dispose();
+  });
 }

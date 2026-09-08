@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/downloads/application/archive_downloader.dart';
 import 'package:preppsuite_flutter/features/downloads/application/download_providers.dart';
 import 'package:preppsuite_flutter/features/downloads/presentation/download_banner.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
@@ -92,5 +93,88 @@ void main() {
       ),
     );
     await expectAccessible(tester);
+  });
+
+  testWidgets('the bar tells a screen reader how far along it is', (
+    tester,
+  ) async {
+    // The figures beside the bar are readable, but only by navigating to
+    // them. A percentage on the bar itself is what somebody hears while
+    // passing over it.
+    final handle = tester.ensureSemantics();
+    await show(
+      tester,
+      ArchiveDownloadState(
+        request: request,
+        progress: const DownloadProgress(received: 3, total: 4),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(LinearProgressIndicator)).value,
+      '75 %',
+    );
+    handle.dispose();
+  });
+
+  testWidgets('a download without a total says no percentage at all', (
+    tester,
+  ) async {
+    // A mirror behind a redirect gives no length. "0 %" would be a lie
+    // that reads exactly like a download that is not moving.
+    final handle = tester.ensureSemantics();
+    await show(
+      tester,
+      ArchiveDownloadState(
+        request: request,
+        progress: const DownloadProgress(received: 3, total: null),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byType(LinearProgressIndicator)).value, '');
+    handle.dispose();
+  });
+
+  testWidgets('a running download is not announced over and over', (
+    tester,
+  ) async {
+    // A live region on the running banner would talk over everything else
+    // for as long as the download lasts — most of an afternoon for a
+    // 52 GB archive.
+    final handle = tester.ensureSemantics();
+    await show(
+      tester,
+      ArchiveDownloadState(
+        request: request,
+        progress: const DownloadProgress(received: 3, total: 4),
+      ),
+    );
+
+    expect(liveRegions(tester), isEmpty);
+    handle.dispose();
+  });
+
+  testWidgets('a finished download announces itself', (tester) async {
+    // The banner is shown wherever the user happens to be, so this is the
+    // one moment worth interrupting for.
+    final handle = tester.ensureSemantics();
+    await show(
+      tester,
+      ArchiveDownloadState(request: request, finishedPath: '/tmp/w.zim'),
+    );
+
+    expect(liveRegions(tester), hasLength(1));
+    handle.dispose();
+  });
+
+  testWidgets('a failed download announces itself too', (tester) async {
+    final handle = tester.ensureSemantics();
+    await show(
+      tester,
+      ArchiveDownloadState(request: request, error: 'kaputt'),
+    );
+
+    expect(liveRegions(tester), hasLength(1));
+    handle.dispose();
   });
 }

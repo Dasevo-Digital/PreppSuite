@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/progress_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
 import '../application/continents.dart';
@@ -703,7 +704,10 @@ class _Running extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 8),
-        LinearProgressIndicator(value: progress?.fraction),
+        LinearProgressIndicator(
+          value: progress?.fraction,
+          semanticsValue: percentValue(l10n, progress?.fraction),
+        ),
         const SizedBox(height: 8),
         TextButton(
           onPressed: () => ref.read(mapDownloadProvider.notifier).cancel(),

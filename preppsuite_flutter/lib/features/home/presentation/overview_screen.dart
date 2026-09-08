@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/progress_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
@@ -217,32 +218,43 @@ class _Meter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final progress = target > 0 ? (current / target).clamp(0.0, 1.0) : 0.0;
     final short = progress < 1;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Expanded(child: Text(label, style: theme.textTheme.labelLarge)),
-            Text(
-              text,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: short
-                    ? theme.colorScheme.onSurfaceVariant
-                    : theme.colorScheme.primary,
+    // One gauge, so one thing to hear: without this a screen reader stops
+    // three times — on the name, on the figure, and on the bar — and the
+    // three only mean anything together. The bar keeps the percentage as
+    // its value, which is what it adds over the figure beside it.
+    return MergeSemantics(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(label, style: theme.textTheme.labelLarge)),
+              Text(
+                text,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: short
+                      ? theme.colorScheme.onSurfaceVariant
+                      : theme.colorScheme.primary,
+                ),
               ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 8,
+              semanticsValue: percentValue(l10n, progress),
             ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(value: progress, minHeight: 8),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }

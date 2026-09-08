@@ -872,6 +872,14 @@
       }
     }
   },
+  "progressPercent": "{percent}%",
+  "@progressPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "downloadBusyMessage": "A download is already running. Only one goes at a time.",
   "downloadStartAction": "Download",
   "downloadConfirmTitle": "Download?",
