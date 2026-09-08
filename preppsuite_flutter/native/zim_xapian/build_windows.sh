@@ -89,4 +89,6 @@ echo "haengt an:"
 echo
 echo "gibt heraus:"
 "$HOST-objdump" -p "$BUILD/zim_xapian.dll" \
-  | awk '/^\t\[/ {print "  " $3}' | grep '^  zx_' || true
+  | awk '/Ordinal\/Name Pointer/ {listing = 1; next}
+         listing && /^\t\[/ {print "  " $NF}
+         listing && /^$/ {exit}'

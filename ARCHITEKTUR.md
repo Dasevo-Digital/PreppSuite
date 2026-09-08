@@ -126,9 +126,9 @@ is by bytes and Wikipedia titles start with a capital.
 archive; `knowledgeFullTextProvider` uses it when it is there and falls
 back to `KnowledgeIndexDatabase` — the FTS5 index `KnowledgeIndexer`
 builds — when it is not. Four ordinary things send it down the fallback:
-no native library in this build (macOS and Linux carry one), an archive
-with no index, an index in a compressed cluster, and a location that is
-not a path, which is Android. The wrapper is `XapianSearcher`, which keeps
+no native library in this build (the three desktop platforms carry one),
+an archive with no index, an index in a compressed cluster, and a
+location that is not a path, which is Android. The wrapper is `XapianSearcher`, which keeps
 `XapianIndex` on an isolate of its own: the binding blocks, and one Xapian
 database tolerates exactly one user at a time — the message queue is the
 lock. See [`docs/volltextsuche-xapian.md`](docs/volltextsuche-xapian.md).

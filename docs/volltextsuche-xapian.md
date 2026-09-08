@@ -8,11 +8,10 @@ Das ist ein anderer Weg als der, den die App bisher geht: `KnowledgeIndexer`
 baut sich einen eigenen SQLite-FTS5-Index. Beide bleiben. Welcher greift,
 entscheidet das Archiv.
 
-**Stand seit 0.15.0: in der App, unter macOS und Linux.** Wo die
-Bibliothek mitgeliefert wird und das Archiv einen Index trägt, sucht die
-App darin. Sonst fällt sie auf ihren eigenen zurück, ohne dass jemand
-etwas umstellen muss. Was für die übrigen Plattformen noch fehlt, steht
-unten.
+**Stand seit 0.15.0: in der App, auf allen drei Desktop-Systemen.** Wo
+die Bibliothek mitgeliefert wird und das Archiv einen Index trägt, sucht
+die App darin. Sonst fällt sie auf ihren eigenen zurück, ohne dass jemand
+etwas umstellen muss. Offen ist Android; was dort fehlt, steht unten.
 
 An der vollständigen deutschen Wikipedia gemessen, 50 GB:
 
@@ -165,7 +164,9 @@ Symbole mit voller Sichtbarkeit sind.
 verloren, dafür behandelt sein `configure` mingw an einem Dutzend
 Stellen. Das Skript läuft deshalb auf einer Linux-Maschine
 (`mingw-w64`, `libz-mingw-w64-dev`), und die fertige `zim_xapian.dll`
-wird herübergereicht. CMake legt sie neben die `.exe`.
+wird herübergereicht. CMake legt sie neben die `.exe`. 4,5 MB, und sie
+hängt nur an `KERNEL32`, `msvcrt`, `RPCRT4` und `WS2_32` — kein
+GCC-Unterbau, den ein Windows-Rechner nicht hat.
 
 Fehlt die Bibliothek, warnt der Bau und läuft weiter: die App muss auch
 ohne sie übersetzen.
@@ -179,6 +180,12 @@ Beide sind in der Schicht abgefangen, beide wären still gewesen:
 - `lseek` nimmt dort einen 32-Bit-Offset. Der Index der vollständigen
   Wikipedia fängt bei Byte 47 677 531 029 an — der Sprung wäre irgendwo
   gelandet, ohne Fehler.
+
+Deshalb ist die Windows-Prüfung mit Absicht gegen ein Archiv gelaufen,
+dessen Index bei Byte 3 476 744 340 anfängt, also jenseits dessen, was
+32 Bit vorzeichenbehaftet erreichen. Ergebnis: dieselben Zahlen wie auf
+dem Mac, bis auf den einzelnen Treffer — 40 803 Dokumente, 122 Treffer
+für `Trinkwasser`, `Element` und `Elemente` gleich viele.
 
 Testen gegen ein echtes Archiv:
 
@@ -196,16 +203,14 @@ der Nachbau gelesen wurde.
 
 ## Was noch fehlt
 
-1. **Windows ausprobieren.** Das Skript steht, gebaut und gestartet ist
-   es noch nicht.
-2. **Android**, aufwendiger: je ABI bauen (arm64-v8a, armeabi-v7a,
+1. **Android**, das einzige Übrige: je ABI bauen (arm64-v8a, armeabi-v7a,
    x86_64) und über `jniLibs` einbinden, rund 3–6 MB je ABI;
    [kiwix-build](https://github.com/kiwix/kiwix-build) hat ein Rezept.
    Dazu ein **eigener Deskriptor** über
    `ParcelFileDescriptor.detachFd()` im bestehenden Kanal
    `preppsuite/storage` – Xapian schließt ihn, also darf es nicht der
    sein, mit dem der Reader arbeitet.
-3. **iOS** ist offen: die Bibliothek ließe sich bauen, aber Archive liegen
+2. **iOS** ist offen: die Bibliothek ließe sich bauen, aber Archive liegen
    dort im Speicher der App, und ob eine 50-GB-Datei dorthin gehört, ist
    keine Frage an diese Seite.
 
