@@ -15,6 +15,7 @@ import '../application/recommended_archives.dart';
 import '../application/zim_archive.dart';
 import '../../downloads/presentation/download_banner.dart';
 import 'article_screen.dart';
+import 'apollo_library_screen.dart';
 import 'kiwix_library_screen.dart';
 import 'knowledge_index_panel.dart';
 import 'personal_documents_screen.dart';
@@ -66,6 +67,15 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       appBar: AppBar(
         title: Text(l10n.knowledgeTitle),
         actions: [
+          IconButton(
+            tooltip: l10n.knowledgeApolloTitle,
+            icon: const Icon(Icons.auto_stories_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const ApolloLibraryScreen(),
+              ),
+            ),
+          ),
           IconButton(
             tooltip: l10n.knowledgeDocumentsTitle,
             icon: const Icon(Icons.folder_copy_outlined),

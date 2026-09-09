@@ -2750,4 +2750,93 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get radioIaruSource => 'DARC / IARU-Notfunkfrequenzen öffnen';
+
+  @override
+  String get knowledgeApolloTitle => 'APOLLO-Wissensbasis';
+
+  @override
+  String get knowledgeApolloMissionTitle => 'Wissen für den Ausnahmefall';
+
+  @override
+  String get knowledgeApolloMissionBody =>
+      'Baue eine lokale Bibliothek für praktisches Handeln, Grundlagenwissen und Lernen zu Hause auf. Die Archive bleiben auf deinem Gerät und sind ohne Internet lesbar.';
+
+  @override
+  String get knowledgeApolloReady => 'Offline-Bibliothek geöffnet und bereit';
+
+  @override
+  String get knowledgeApolloNotReady => 'Noch kein Archiv geöffnet';
+
+  @override
+  String knowledgeApolloStatus(int count, String size) {
+    return '$count Archive registriert · bekannte Größe: $size';
+  }
+
+  @override
+  String get knowledgeApolloStatusHint =>
+      'Der Balken ist eine Orientierung für acht empfohlene Grundarchive; Größe und Auswahl bestimmst du selbst.';
+
+  @override
+  String get knowledgeApolloStartTitle => 'Praktisches Wissen zuerst';
+
+  @override
+  String get knowledgeApolloStartBody =>
+      'Lade zunächst Themen, die im Ausfall unmittelbar helfen. Ergänze anschließend Schule und Grundlagen.';
+
+  @override
+  String get knowledgeApolloMedicalTitle => 'Medizin & Erste Hilfe';
+
+  @override
+  String get knowledgeApolloMedicalBody =>
+      'Symptome verstehen, Erste Hilfe auffrischen und medizinische Grundlagen nachlesen. Es ersetzt keine Notruf- oder ärztliche Hilfe.';
+
+  @override
+  String get knowledgeApolloSurvivalTitle =>
+      'Überleben, Bushcraft & Selbstversorgung';
+
+  @override
+  String get knowledgeApolloSurvivalBody =>
+      'Wasser, Unterkunft, Feuer, Orientierung, Wetter, Nahrung und Hygiene als nachvollziehbare Grundlagen statt bloßer Packlisten.';
+
+  @override
+  String get knowledgeApolloRepairTitle => 'Handwerk, Energie & Reparatur';
+
+  @override
+  String get knowledgeApolloRepairBody =>
+      'Werkzeuge, Reparaturen, einfache Technik und Alltagshandwerk: Wissen, das Geräte und Versorgung länger nutzbar hält.';
+
+  @override
+  String get knowledgeApolloFoundationsTitle => 'Grundlagen & Bildung';
+
+  @override
+  String get knowledgeApolloBasicsTitle => 'Natur, Gesellschaft & Grundwissen';
+
+  @override
+  String get knowledgeApolloBasicsBody =>
+      'Mathematik, Sprache, Naturwissenschaften, Geschichte und verlässliche Hintergrundartikel zum Nachschlagen.';
+
+  @override
+  String get knowledgeApolloSchoolTitle => 'Lernen zu Hause';
+
+  @override
+  String get knowledgeApolloSchoolBody =>
+      'Kindgerechte Erklärungen, Bücher, Übungen und Simulationen für einen strukturierten Unterricht ohne Netz.';
+
+  @override
+  String get knowledgeApolloAdvancedTitle => 'Vertiefung & Lehrplan';
+
+  @override
+  String get knowledgeApolloAdvancedBody =>
+      'Umfangreichere Kurse für weiterführende Themen. Englischsprachige Angebote sind als Ergänzung gekennzeichnet.';
+
+  @override
+  String get knowledgeApolloPersonalTitle => 'Eigene Unterlagen ergänzen';
+
+  @override
+  String get knowledgeApolloPersonalBody =>
+      'Füge lokale PDFs, EPUBs und Markdown-Dateien hinzu und mache auslesbaren Text für die Offline-Volltextsuche verfügbar.';
+
+  @override
+  String get knowledgeApolloDownloadHint =>
+      'Öffnet die Kiwix-Bibliothek mit einer passenden Suche. Prüfe dort Sprache, Ausgabe und Speicherbedarf vor dem Download.';
 }

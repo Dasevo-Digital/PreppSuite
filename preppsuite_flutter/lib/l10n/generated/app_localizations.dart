@@ -4729,6 +4729,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open DARC / IARU emergency frequencies'**
   String get radioIaruSource;
+
+  /// No description provided for @knowledgeApolloTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'APOLLO knowledge base'**
+  String get knowledgeApolloTitle;
+
+  /// No description provided for @knowledgeApolloMissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge for exceptional circumstances'**
+  String get knowledgeApolloMissionTitle;
+
+  /// No description provided for @knowledgeApolloMissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Build a local library for practical action, core knowledge and learning at home. Archives stay on your device and can be read without an internet connection.'**
+  String get knowledgeApolloMissionBody;
+
+  /// No description provided for @knowledgeApolloReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline library opened and ready'**
+  String get knowledgeApolloReady;
+
+  /// No description provided for @knowledgeApolloNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'No archive opened yet'**
+  String get knowledgeApolloNotReady;
+
+  /// No description provided for @knowledgeApolloStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} archives registered · known size: {size}'**
+  String knowledgeApolloStatus(int count, String size);
+
+  /// No description provided for @knowledgeApolloStatusHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The bar is a guide for eight recommended core archives; you choose the size and selection.'**
+  String get knowledgeApolloStatusHint;
+
+  /// No description provided for @knowledgeApolloStartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Practical knowledge first'**
+  String get knowledgeApolloStartTitle;
+
+  /// No description provided for @knowledgeApolloStartBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Start with topics that directly help during a disruption. Add schooling and fundamentals afterwards.'**
+  String get knowledgeApolloStartBody;
+
+  /// No description provided for @knowledgeApolloMedicalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicine & first aid'**
+  String get knowledgeApolloMedicalTitle;
+
+  /// No description provided for @knowledgeApolloMedicalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand symptoms, refresh first aid and look up medical basics. It does not replace emergency or professional medical care.'**
+  String get knowledgeApolloMedicalBody;
+
+  /// No description provided for @knowledgeApolloSurvivalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Survival, bushcraft & self-reliance'**
+  String get knowledgeApolloSurvivalTitle;
+
+  /// No description provided for @knowledgeApolloSurvivalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Water, shelter, fire, navigation, weather, food and hygiene as understandable foundations rather than a list of gear.'**
+  String get knowledgeApolloSurvivalBody;
+
+  /// No description provided for @knowledgeApolloRepairTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Craft, energy & repair'**
+  String get knowledgeApolloRepairTitle;
+
+  /// No description provided for @knowledgeApolloRepairBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools, repairs, simple technology and practical craft: knowledge that keeps equipment and supplies usable longer.'**
+  String get knowledgeApolloRepairBody;
+
+  /// No description provided for @knowledgeApolloFoundationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fundamentals & education'**
+  String get knowledgeApolloFoundationsTitle;
+
+  /// No description provided for @knowledgeApolloBasicsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature, society & core knowledge'**
+  String get knowledgeApolloBasicsTitle;
+
+  /// No description provided for @knowledgeApolloBasicsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Mathematics, language, science, history and dependable background articles for reference.'**
+  String get knowledgeApolloBasicsBody;
+
+  /// No description provided for @knowledgeApolloSchoolTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Learning at home'**
+  String get knowledgeApolloSchoolTitle;
+
+  /// No description provided for @knowledgeApolloSchoolBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Child-friendly explanations, books, exercises and simulations for structured learning without a network.'**
+  String get knowledgeApolloSchoolBody;
+
+  /// No description provided for @knowledgeApolloAdvancedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced study & curriculum'**
+  String get knowledgeApolloAdvancedTitle;
+
+  /// No description provided for @knowledgeApolloAdvancedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'More extensive courses for advanced topics. English-language resources are marked as a supplement.'**
+  String get knowledgeApolloAdvancedBody;
+
+  /// No description provided for @knowledgeApolloPersonalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your own material'**
+  String get knowledgeApolloPersonalTitle;
+
+  /// No description provided for @knowledgeApolloPersonalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add local PDF, EPUB and Markdown files and make readable text available to offline full-text search.'**
+  String get knowledgeApolloPersonalBody;
+
+  /// No description provided for @knowledgeApolloDownloadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.'**
+  String get knowledgeApolloDownloadHint;
 }
 
 class _AppLocalizationsDelegate

@@ -2728,4 +2728,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get radioIaruSource => 'Open DARC / IARU emergency frequencies';
+
+  @override
+  String get knowledgeApolloTitle => 'APOLLO knowledge base';
+
+  @override
+  String get knowledgeApolloMissionTitle =>
+      'Knowledge for exceptional circumstances';
+
+  @override
+  String get knowledgeApolloMissionBody =>
+      'Build a local library for practical action, core knowledge and learning at home. Archives stay on your device and can be read without an internet connection.';
+
+  @override
+  String get knowledgeApolloReady => 'Offline library opened and ready';
+
+  @override
+  String get knowledgeApolloNotReady => 'No archive opened yet';
+
+  @override
+  String knowledgeApolloStatus(int count, String size) {
+    return '$count archives registered · known size: $size';
+  }
+
+  @override
+  String get knowledgeApolloStatusHint =>
+      'The bar is a guide for eight recommended core archives; you choose the size and selection.';
+
+  @override
+  String get knowledgeApolloStartTitle => 'Practical knowledge first';
+
+  @override
+  String get knowledgeApolloStartBody =>
+      'Start with topics that directly help during a disruption. Add schooling and fundamentals afterwards.';
+
+  @override
+  String get knowledgeApolloMedicalTitle => 'Medicine & first aid';
+
+  @override
+  String get knowledgeApolloMedicalBody =>
+      'Understand symptoms, refresh first aid and look up medical basics. It does not replace emergency or professional medical care.';
+
+  @override
+  String get knowledgeApolloSurvivalTitle =>
+      'Survival, bushcraft & self-reliance';
+
+  @override
+  String get knowledgeApolloSurvivalBody =>
+      'Water, shelter, fire, navigation, weather, food and hygiene as understandable foundations rather than a list of gear.';
+
+  @override
+  String get knowledgeApolloRepairTitle => 'Craft, energy & repair';
+
+  @override
+  String get knowledgeApolloRepairBody =>
+      'Tools, repairs, simple technology and practical craft: knowledge that keeps equipment and supplies usable longer.';
+
+  @override
+  String get knowledgeApolloFoundationsTitle => 'Fundamentals & education';
+
+  @override
+  String get knowledgeApolloBasicsTitle => 'Nature, society & core knowledge';
+
+  @override
+  String get knowledgeApolloBasicsBody =>
+      'Mathematics, language, science, history and dependable background articles for reference.';
+
+  @override
+  String get knowledgeApolloSchoolTitle => 'Learning at home';
+
+  @override
+  String get knowledgeApolloSchoolBody =>
+      'Child-friendly explanations, books, exercises and simulations for structured learning without a network.';
+
+  @override
+  String get knowledgeApolloAdvancedTitle => 'Advanced study & curriculum';
+
+  @override
+  String get knowledgeApolloAdvancedBody =>
+      'More extensive courses for advanced topics. English-language resources are marked as a supplement.';
+
+  @override
+  String get knowledgeApolloPersonalTitle => 'Add your own material';
+
+  @override
+  String get knowledgeApolloPersonalBody =>
+      'Add local PDF, EPUB and Markdown files and make readable text available to offline full-text search.';
+
+  @override
+  String get knowledgeApolloDownloadHint =>
+      'Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.';
 }
