@@ -8,6 +8,8 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/article_viewer.dart';
 import '../application/knowledge_providers.dart';
+import '../application/personal_document_index.dart';
+import '../application/personal_document_store.dart';
 import '../application/zim_store.dart';
 import '../application/recommended_archives.dart';
 import '../application/zim_archive.dart';
@@ -114,28 +116,41 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
 
   Widget _body(AppLocalizations l10n, KnowledgeState state) {
     if (!state.isReady) {
-      // The switcher stays: when one archive fails to open and others are
-      // there, getting to them is the first thing somebody wants.
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _ArchiveSwitcher(state: state, l10n: l10n),
-          Expanded(
-            child: _EmptyState(
-              state: state,
-              l10n: l10n,
-              onChoose: () => _choose(l10n),
-              onDownload: _openLibrary,
-            ),
-          ),
-        ],
+      // Keep the first-use view compact, but make the same full-text screen
+      // available when the person has already added their own documents.
+      // This also avoids presenting a search field that could only return an
+      // empty list on a completely fresh installation.
+      return FutureBuilder<List<PersonalDocument>>(
+        future: const PersonalDocumentStore().load(),
+        builder: (context, snapshot) {
+          if (snapshot.data?.isNotEmpty == true) {
+            return _searchBody(l10n, state);
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _ArchiveSwitcher(state: state, l10n: l10n),
+              Expanded(
+                child: _EmptyState(
+                  state: state,
+                  l10n: l10n,
+                  onChoose: () => _choose(l10n),
+                  onDownload: _openLibrary,
+                ),
+              ),
+            ],
+          );
+        },
       );
     }
+    return _searchBody(l10n, state);
+  }
 
+  Widget _searchBody(AppLocalizations l10n, KnowledgeState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const DownloadBanner(),
+        if (state.isReady) const DownloadBanner(),
         _ArchiveSwitcher(state: state, l10n: l10n),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -189,21 +204,15 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
   }
 
   Widget _results(AppLocalizations l10n, KnowledgeState state) {
-    if (_mode == _SearchMode.fullText) {
-      final index = ref.watch(knowledgeIndexProvider).value;
-      // Nothing to search in yet, or a run in progress: the panel is what
-      // belongs on screen, not an empty result list.
-      if (index == null ||
-          !index.isUsable ||
-          index.status == KnowledgeIndexStatus.running) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: KnowledgeIndexPanel(l10n: l10n),
+    if (_query.trim().isEmpty) {
+      if (!state.isReady) {
+        return _EmptyState(
+          state: state,
+          l10n: l10n,
+          onChoose: () => _choose(l10n),
+          onDownload: _openLibrary,
         );
       }
-    }
-
-    if (_query.trim().isEmpty) {
       return _BrowseArchive(
         l10n: l10n,
         onMainPage: () => _openMainPage(l10n, state),
@@ -218,10 +227,15 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       );
     }
 
-    final results = _mode == _SearchMode.titles
-        ? ref.watch(knowledgeSearchProvider(_query))
-        : ref.watch(knowledgeFullTextProvider(_query));
+    if (_mode == _SearchMode.fullText) {
+      return _fullTextResults(l10n, state);
+    }
 
+    if (!state.isReady) {
+      return _Centered(text: l10n.knowledgeNoResults(_query.trim()));
+    }
+
+    final results = ref.watch(knowledgeSearchProvider(_query));
     return results.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _Centered(
@@ -233,15 +247,8 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
         }
 
         return ListView.builder(
-          itemCount: matches.length + 1,
+          itemCount: matches.length,
           itemBuilder: (context, index) {
-            if (index == matches.length) {
-              // A partial index answers about what it has; saying so
-              // beats letting a missing article read as "not in
-              // Wikipedia".
-              return _PartialIndexNote(l10n: l10n, mode: _mode);
-            }
-
             final entry = matches[index];
             return ListTile(
               leading: const Icon(Icons.article_outlined),
@@ -251,6 +258,106 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
           },
         );
       },
+    );
+  }
+
+  Widget _fullTextResults(AppLocalizations l10n, KnowledgeState state) {
+    final personal = ref.watch(personalDocumentSearchProvider(_query));
+    final index = state.isReady
+        ? ref.watch(knowledgeIndexProvider).value
+        : null;
+    final zimResults =
+        state.isReady &&
+            index != null &&
+            index.isUsable &&
+            index.status != KnowledgeIndexStatus.running
+        ? ref.watch(knowledgeFullTextProvider(_query))
+        : null;
+
+    final personalMatches = personal.when(
+      data: (matches) => matches,
+      error: (_, _) => const <PersonalDocumentMatch>[],
+      loading: () => const <PersonalDocumentMatch>[],
+    );
+    final zimMatches =
+        zimResults?.when(
+          data: (matches) => matches,
+          error: (_, _) => const <ZimEntry>[],
+          loading: () => const <ZimEntry>[],
+        ) ??
+        const <ZimEntry>[];
+    final loading = personal.isLoading || zimResults?.isLoading == true;
+    final noUsableZimIndex =
+        state.isReady &&
+        (index == null ||
+            !index.isUsable ||
+            index.status == KnowledgeIndexStatus.running);
+
+    if (loading && personalMatches.isEmpty && zimMatches.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ListView(
+      padding: const EdgeInsets.only(bottom: 16),
+      children: [
+        if (noUsableZimIndex)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: KnowledgeIndexPanel(l10n: l10n),
+          ),
+        if (personalMatches.isNotEmpty) ...[
+          ListTile(
+            leading: const Icon(Icons.folder_copy_outlined),
+            title: Text(l10n.knowledgePersonalResults),
+            subtitle: Text(l10n.knowledgePersonalResultHint),
+          ),
+          for (final match in personalMatches)
+            ListTile(
+              leading: const Icon(Icons.description_outlined),
+              title: Text(match.label),
+              subtitle: Text(
+                match.excerpt,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              onTap: () => _openPersonal(l10n, match.id),
+            ),
+        ],
+        if (zimMatches.isNotEmpty) ...[
+          if (personalMatches.isNotEmpty) const Divider(),
+          for (final entry in zimMatches)
+            ListTile(
+              leading: const Icon(Icons.article_outlined),
+              title: Text(entry.title),
+              onTap: () => _open(l10n, state, entry),
+            ),
+          if (index?.status == KnowledgeIndexStatus.partial)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: KnowledgeIndexPanel(l10n: l10n, compact: true),
+            ),
+        ],
+        if (personalMatches.isEmpty && zimMatches.isEmpty && !noUsableZimIndex)
+          _Centered(text: l10n.knowledgeNoResults(_query.trim())),
+        if (personal.hasError)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(describeError(l10n, personal.error!)),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _openPersonal(AppLocalizations l10n, String id) async {
+    final documents = await const PersonalDocumentStore().load();
+    PersonalDocument? document;
+    for (final item in documents) {
+      if (item.id == id) document = item;
+    }
+    if (document == null) return;
+    if (await openPersonalDocument(document) || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.knowledgeDocumentOpenFailed)),
     );
   }
 
@@ -600,29 +707,6 @@ class _ArchiveSwitcher extends ConsumerWidget {
 enum _SearchMode { titles, fullText }
 
 enum _ArchiveAction { manage, download, add, remove }
-
-/// Sits under the results when the index is not finished.
-class _PartialIndexNote extends ConsumerWidget {
-  const _PartialIndexNote({required this.l10n, required this.mode});
-
-  final AppLocalizations l10n;
-  final _SearchMode mode;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (mode != _SearchMode.fullText) return const SizedBox.shrink();
-
-    final index = ref.watch(knowledgeIndexProvider).value;
-    if (index?.status != KnowledgeIndexStatus.partial) {
-      return const SizedBox.shrink();
-    }
-
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: KnowledgeIndexPanel(l10n: l10n, compact: true),
-    );
-  }
-}
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState({

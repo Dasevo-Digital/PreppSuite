@@ -988,6 +988,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.12.0"
+  pdf_cos:
+    dependency: transitive
+    description:
+      name: pdf_cos
+      sha256: "61861bbd9f3c7bd11d7cc3df40d6a735ddf55bd65fd0e876b9026d920b7618b5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.0"
+  pdf_document:
+    dependency: transitive
+    description:
+      name: pdf_document
+      sha256: "3c76e1ec069bf32c74af2d28c65fb2749ce93a375ab5b5415c19f7f591203ff0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.0"
+  pdf_graphics:
+    dependency: transitive
+    description:
+      name: pdf_graphics
+      sha256: aece60a0c98b4faef3129a3c0cf6b7cbfdf2ad2fb1900cf54d3d1fdd006663fe
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.0"
   pdf_widget_wrapper:
     dependency: transitive
     description:

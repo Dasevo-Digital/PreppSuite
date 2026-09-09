@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-import '../../../core/platform_storage.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
+import '../application/personal_document_index.dart';
 import '../application/personal_document_store.dart';
 
 class PersonalDocumentsScreen extends StatefulWidget {
@@ -31,22 +29,72 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
       }
       return;
     }
+
+    final index = await _askToIndex(l10n);
+    if (index == null) return;
     final updated = await _store.add(
       location: picked.value,
       label: picked.label,
     );
+    final document = updated.firstWhere(
+      (item) => item.location == picked.value,
+    );
     if (mounted) setState(() => _documents = Future.value(updated));
+    if (index) await _index(document);
+  }
+
+  Future<bool?> _askToIndex(AppLocalizations l10n) {
+    var enabled = true;
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(l10n.knowledgeDocumentIndexTitle),
+          content: CheckboxListTile(
+            value: enabled,
+            contentPadding: EdgeInsets.zero,
+            onChanged: (value) => setDialogState(() => enabled = value ?? true),
+            title: Text(l10n.knowledgeDocumentIndexOption),
+            subtitle: Text(l10n.knowledgeDocumentIndexPrivacy),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(enabled),
+              child: Text(l10n.knowledgeDocumentAdd),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _index(PersonalDocument document) async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(
+      () => _documents = _store.updateIndex(document.id, status: 'indexing'),
+    );
+    final result = await PersonalDocumentIndexer().index(document);
+    final updated = await _store.updateIndex(
+      document.id,
+      status: result.status.name,
+      characters: result.characters,
+    );
+    if (mounted) {
+      setState(() => _documents = Future.value(updated));
+      if (result.status != PersonalDocumentIndexStatus.ready) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_indexStatus(l10n, result.status.name))),
+        );
+      }
+    }
   }
 
   Future<void> _open(PersonalDocument document) async {
-    var location = document.location;
-    if (location.startsWith('bookmark://')) {
-      location = await resolveStoragePath(location) ?? location;
-    }
-    final uri = location.startsWith('content://')
-        ? Uri.parse(location)
-        : Uri.file(location);
-    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final opened = await openPersonalDocument(document);
     if (!opened && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -59,7 +107,35 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
   }
 
   Future<void> _remove(String id) async {
+    await PersonalDocumentIndexer().remove(id);
     final updated = await _store.remove(id);
+    if (mounted) setState(() => _documents = Future.value(updated));
+  }
+
+  Future<void> _clearIndex() async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.knowledgeDocumentClearIndex),
+        content: Text(l10n.knowledgeDocumentClearIndexBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.knowledgeDocumentClearIndex),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final database = PersonalDocumentIndex();
+    await database.clear();
+    await database.close();
+    final updated = await _store.clearIndex();
     if (mounted) setState(() => _documents = Future.value(updated));
   }
 
@@ -67,7 +143,16 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.knowledgeDocumentsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.knowledgeDocumentsTitle),
+        actions: [
+          IconButton(
+            tooltip: l10n.knowledgeDocumentClearIndex,
+            icon: const Icon(Icons.manage_search_outlined),
+            onPressed: _clearIndex,
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _add,
         icon: const Icon(Icons.add),
@@ -80,13 +165,20 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           final documents = snapshot.data!;
+          final indexed = documents.where((item) => item.isSearchable).length;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             children: [
               Card(
                 child: ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: Text(l10n.knowledgeDocumentsIntro),
+                  leading: const Icon(Icons.manage_search_outlined),
+                  title: Text(
+                    l10n.knowledgeDocumentIndexSummary(
+                      indexed,
+                      documents.length,
+                    ),
+                  ),
+                  subtitle: Text(l10n.knowledgeDocumentsIntro),
                 ),
               ),
               if (documents.isEmpty)
@@ -103,12 +195,26 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
                     child: ListTile(
                       leading: Icon(_icon(document.extension)),
                       title: Text(document.label),
-                      subtitle: Text(document.extension.toUpperCase()),
+                      subtitle: Text(
+                        '${document.extension.toUpperCase()} · ${_indexStatus(l10n, document.indexStatus)}',
+                      ),
                       onTap: () => _open(document),
-                      trailing: IconButton(
-                        tooltip: l10n.knowledgeDocumentRemove,
-                        icon: const Icon(Icons.delete_outline),
-                        onPressed: () => _remove(document.id),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            tooltip: l10n.knowledgeDocumentReindex,
+                            icon: const Icon(Icons.manage_search_outlined),
+                            onPressed: document.indexStatus == 'indexing'
+                                ? null
+                                : () => _index(document),
+                          ),
+                          IconButton(
+                            tooltip: l10n.knowledgeDocumentRemove,
+                            icon: const Icon(Icons.delete_outline),
+                            onPressed: () => _remove(document.id),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -118,6 +224,15 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
       ),
     );
   }
+
+  String _indexStatus(AppLocalizations l10n, String status) => switch (status) {
+    'ready' => l10n.knowledgeDocumentIndexed,
+    'indexing' => l10n.knowledgeDocumentIndexing,
+    'noText' => l10n.knowledgeDocumentNoText,
+    'tooLarge' => l10n.knowledgeDocumentTooLarge,
+    'failed' => l10n.knowledgeDocumentIndexFailed,
+    _ => l10n.knowledgeDocumentNotIndexed,
+  };
 
   IconData _icon(String extension) => switch (extension) {
     'pdf' => Icons.picture_as_pdf_outlined,

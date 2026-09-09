@@ -745,5 +745,21 @@
   "resetHouseholdHint": "Vorräte, Checklisten, Notfallplan und Notfallkarten dieses Haushalts dauerhaft von diesem Gerät löschen.",
   "resetConfirmTitle": "Wirklich zurücksetzen?",
   "resetConfirmHousehold": "Die lokalen Haushaltsdaten werden dauerhaft gelöscht. Eine Sicherung sollte vorher erstellt werden.",
-  "resetDone": "Zurücksetzen abgeschlossen."
+  "resetDone": "Zurücksetzen abgeschlossen.",
+  "knowledgeDocumentIndexTitle": "Offline-Suche",
+  "knowledgeDocumentIndexOption": "Dieses Dokument durchsuchbar machen",
+  "knowledgeDocumentIndexPrivacy": "Der Textindex bleibt ausschließlich auf diesem Gerät. Die Originaldatei wird nicht kopiert.",
+  "knowledgeDocumentIndexed": "Für die Offline-Suche bereit",
+  "knowledgeDocumentIndexing": "Index wird erstellt …",
+  "knowledgeDocumentNotIndexed": "Nicht in der Suche",
+  "knowledgeDocumentNoText": "Kein auslesbarer Text (möglicherweise ein Scan)",
+  "knowledgeDocumentTooLarge": "Für den Index zu groß (maximal 48 MB)",
+  "knowledgeDocumentIndexFailed": "Index konnte nicht erstellt werden",
+  "knowledgeDocumentReindex": "Suchindex erneuern",
+  "knowledgeDocumentClearIndex": "Suchindex löschen",
+  "knowledgeDocumentClearIndexBody": "Die Suchdaten aller eigenen Dokumente werden gelöscht. Die Originaldateien bleiben erhalten.",
+  "knowledgeDocumentIndexSummary": "{indexed} von {total} Dokumenten durchsuchbar",
+  "@knowledgeDocumentIndexSummary": {"placeholders": {"indexed": {"type": "int"}, "total": {"type": "int"}}},
+  "knowledgePersonalResults": "Eigene Dokumente",
+  "knowledgePersonalResultHint": "Treffer aus dem lokalen Dokumentenindex"
 }

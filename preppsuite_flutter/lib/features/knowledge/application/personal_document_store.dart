@@ -11,12 +11,20 @@ class PersonalDocument {
     required this.location,
     required this.label,
     required this.addedAt,
+    this.indexStatus = 'notIndexed',
+    this.indexedCharacters = 0,
   });
 
   final String id;
   final String location;
   final String label;
   final DateTime addedAt;
+
+  /// `ready`, `noText`, `failed`, `tooLarge`, or `notIndexed`.
+  final String indexStatus;
+  final int indexedCharacters;
+
+  bool get isSearchable => indexStatus == 'ready';
 
   String get extension {
     final dot = label.lastIndexOf('.');
@@ -28,6 +36,8 @@ class PersonalDocument {
     'location': location,
     'label': label,
     'addedAt': addedAt.toUtc().toIso8601String(),
+    'indexStatus': indexStatus,
+    'indexedCharacters': indexedCharacters,
   };
 
   static PersonalDocument? fromJson(Object? value) {
@@ -47,8 +57,24 @@ class PersonalDocument {
       location: location,
       label: label,
       addedAt: addedAt,
+      indexStatus: value['indexStatus'] is String
+          ? value['indexStatus'] as String
+          : 'notIndexed',
+      indexedCharacters: value['indexedCharacters'] is int
+          ? value['indexedCharacters'] as int
+          : 0,
     );
   }
+
+  PersonalDocument copyWith({String? indexStatus, int? indexedCharacters}) =>
+      PersonalDocument(
+        id: id,
+        location: location,
+        label: label,
+        addedAt: addedAt,
+        indexStatus: indexStatus ?? this.indexStatus,
+        indexedCharacters: indexedCharacters ?? this.indexedCharacters,
+      );
 }
 
 class PersonalDocumentStore {
@@ -95,6 +121,31 @@ class PersonalDocumentStore {
     final updated = [
       for (final item in await load())
         if (item.id != id) item,
+    ];
+    await _save(updated);
+    return updated;
+  }
+
+  Future<List<PersonalDocument>> updateIndex(
+    String id, {
+    required String status,
+    int characters = 0,
+  }) async {
+    final updated = [
+      for (final item in await load())
+        if (item.id == id)
+          item.copyWith(indexStatus: status, indexedCharacters: characters)
+        else
+          item,
+    ];
+    await _save(updated);
+    return updated;
+  }
+
+  Future<List<PersonalDocument>> clearIndex() async {
+    final updated = [
+      for (final item in await load())
+        item.copyWith(indexStatus: 'notIndexed', indexedCharacters: 0),
     ];
     await _save(updated);
     return updated;

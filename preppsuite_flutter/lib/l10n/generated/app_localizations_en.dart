@@ -2620,4 +2620,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetDone => 'Reset completed.';
+
+  @override
+  String get knowledgeDocumentIndexTitle => 'Offline search';
+
+  @override
+  String get knowledgeDocumentIndexOption => 'Make this document searchable';
+
+  @override
+  String get knowledgeDocumentIndexPrivacy =>
+      'The text index stays only on this device. The original file is not copied.';
+
+  @override
+  String get knowledgeDocumentIndexed => 'Ready for offline search';
+
+  @override
+  String get knowledgeDocumentIndexing => 'Building index …';
+
+  @override
+  String get knowledgeDocumentNotIndexed => 'Not in search';
+
+  @override
+  String get knowledgeDocumentNoText => 'No readable text (possibly a scan)';
+
+  @override
+  String get knowledgeDocumentTooLarge =>
+      'Too large for the index (48 MB maximum)';
+
+  @override
+  String get knowledgeDocumentIndexFailed => 'Could not build index';
+
+  @override
+  String get knowledgeDocumentReindex => 'Rebuild search index';
+
+  @override
+  String get knowledgeDocumentClearIndex => 'Delete search index';
+
+  @override
+  String get knowledgeDocumentClearIndexBody =>
+      'The search data for all personal documents will be deleted. Original files remain untouched.';
+
+  @override
+  String knowledgeDocumentIndexSummary(int indexed, int total) {
+    return '$indexed of $total documents searchable';
+  }
+
+  @override
+  String get knowledgePersonalResults => 'Personal documents';
+
+  @override
+  String get knowledgePersonalResultHint =>
+      'Results from the local document index';
 }

@@ -1478,5 +1478,21 @@
   "resetHouseholdHint": "Permanently delete this household’s inventory, checklists, emergency plan and emergency cards from this device.",
   "resetConfirmTitle": "Reset now?",
   "resetConfirmHousehold": "Local household data will be permanently deleted. Create a backup first if needed.",
-  "resetDone": "Reset completed."
+  "resetDone": "Reset completed.",
+  "knowledgeDocumentIndexTitle": "Offline search",
+  "knowledgeDocumentIndexOption": "Make this document searchable",
+  "knowledgeDocumentIndexPrivacy": "The text index stays only on this device. The original file is not copied.",
+  "knowledgeDocumentIndexed": "Ready for offline search",
+  "knowledgeDocumentIndexing": "Building index …",
+  "knowledgeDocumentNotIndexed": "Not in search",
+  "knowledgeDocumentNoText": "No readable text (possibly a scan)",
+  "knowledgeDocumentTooLarge": "Too large for the index (48 MB maximum)",
+  "knowledgeDocumentIndexFailed": "Could not build index",
+  "knowledgeDocumentReindex": "Rebuild search index",
+  "knowledgeDocumentClearIndex": "Delete search index",
+  "knowledgeDocumentClearIndexBody": "The search data for all personal documents will be deleted. Original files remain untouched.",
+  "knowledgeDocumentIndexSummary": "{indexed} of {total} documents searchable",
+  "@knowledgeDocumentIndexSummary": {"placeholders": {"indexed": {"type": "int"}, "total": {"type": "int"}}},
+  "knowledgePersonalResults": "Personal documents",
+  "knowledgePersonalResultHint": "Results from the local document index"
 }

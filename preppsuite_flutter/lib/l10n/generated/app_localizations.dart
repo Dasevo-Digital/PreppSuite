@@ -4543,6 +4543,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset completed.'**
   String get resetDone;
+
+  /// No description provided for @knowledgeDocumentIndexTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline search'**
+  String get knowledgeDocumentIndexTitle;
+
+  /// No description provided for @knowledgeDocumentIndexOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Make this document searchable'**
+  String get knowledgeDocumentIndexOption;
+
+  /// No description provided for @knowledgeDocumentIndexPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'The text index stays only on this device. The original file is not copied.'**
+  String get knowledgeDocumentIndexPrivacy;
+
+  /// No description provided for @knowledgeDocumentIndexed.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for offline search'**
+  String get knowledgeDocumentIndexed;
+
+  /// No description provided for @knowledgeDocumentIndexing.
+  ///
+  /// In en, this message translates to:
+  /// **'Building index …'**
+  String get knowledgeDocumentIndexing;
+
+  /// No description provided for @knowledgeDocumentNotIndexed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in search'**
+  String get knowledgeDocumentNotIndexed;
+
+  /// No description provided for @knowledgeDocumentNoText.
+  ///
+  /// In en, this message translates to:
+  /// **'No readable text (possibly a scan)'**
+  String get knowledgeDocumentNoText;
+
+  /// No description provided for @knowledgeDocumentTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Too large for the index (48 MB maximum)'**
+  String get knowledgeDocumentTooLarge;
+
+  /// No description provided for @knowledgeDocumentIndexFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not build index'**
+  String get knowledgeDocumentIndexFailed;
+
+  /// No description provided for @knowledgeDocumentReindex.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild search index'**
+  String get knowledgeDocumentReindex;
+
+  /// No description provided for @knowledgeDocumentClearIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete search index'**
+  String get knowledgeDocumentClearIndex;
+
+  /// No description provided for @knowledgeDocumentClearIndexBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The search data for all personal documents will be deleted. Original files remain untouched.'**
+  String get knowledgeDocumentClearIndexBody;
+
+  /// No description provided for @knowledgeDocumentIndexSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{indexed} of {total} documents searchable'**
+  String knowledgeDocumentIndexSummary(int indexed, int total);
+
+  /// No description provided for @knowledgePersonalResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal documents'**
+  String get knowledgePersonalResults;
+
+  /// No description provided for @knowledgePersonalResultHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Results from the local document index'**
+  String get knowledgePersonalResultHint;
 }
 
 class _AppLocalizationsDelegate
