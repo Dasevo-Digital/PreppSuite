@@ -401,94 +401,300 @@ class _WarningTile extends StatelessWidget {
         ].join(' · '),
       ),
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (warning.description != null) ...[
-                Text(warning.description!),
-                const SizedBox(height: 8),
-              ],
-              if (warning.instruction != null) ...[
-                Text(
-                  l10n.warningInstructionsTitle,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 4),
-                Text(warning.instruction!),
-                const SizedBox(height: 12),
-              ],
-              if (warning.areaDescription != null) ...[
-                Text(
-                  l10n.warningAreaTitle,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 4),
-                Text(warning.areaDescription!),
-                const SizedBox(height: 8),
-              ],
-              if (_warningPolygons(warning).isNotEmpty) ...[
-                OutlinedButton.icon(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => _WarningAreaMap(
-                        title: warning.headline,
-                        polygons: _warningPolygons(warning),
-                      ),
-                    ),
-                  ),
-                  icon: const Icon(Icons.map_outlined),
-                  label: Text(l10n.warningShowMap),
-                ),
-                const SizedBox(height: 8),
-              ],
-              if (warning.senderContact != null) ...[
-                Text(
-                  l10n.warningContactTitle,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 4),
-                Text(warning.senderContact!),
-                const SizedBox(height: 12),
-              ],
-              Text(
-                switch (source) {
-                  WarningSource.bbk => l10n.warningSourceBbk,
-                  WarningSource.meteoalarm => l10n.warningSourceMeteoalarm,
-                },
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              Text(
-                MaterialLocalizations.of(
-                  context,
-                ).formatMediumDate(warning.sent),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () => launchUrl(
-                  switch (source) {
-                    WarningSource.bbk => Uri.https(
-                      'warnung.bund.de',
-                      '/meldungen/${warning.externalId}',
-                    ),
-                    WarningSource.meteoalarm => Uri.https(
-                      'meteoalarm.org',
-                      '/de/live/',
-                    ),
-                  },
-                  mode: LaunchMode.externalApplication,
-                ),
-                icon: const Icon(Icons.open_in_new),
-                label: Text(l10n.warningMoreInformation),
-              ),
-            ],
-          ),
+        _WarningDetails(
+          warning: warning,
+          severity: severity,
+          colors: colors,
+          source: source,
+          l10n: l10n,
         ),
       ],
     );
   }
+}
+
+/// The complete, locally cached CAP message. This deliberately lives in the
+/// expansion rather than behind a network request: when a warning is already
+/// visible, its area, instructions and publisher must remain readable offline.
+class _WarningDetails extends StatelessWidget {
+  const _WarningDetails({
+    required this.warning,
+    required this.severity,
+    required this.colors,
+    required this.source,
+    required this.l10n,
+  });
+
+  final Warning warning;
+  final WarningSeverity severity;
+  final WarningSeverityColors colors;
+  final WarningSource source;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final material = MaterialLocalizations.of(context);
+    final polygons = _warningPolygons(warning);
+    final end = warning.expires == null
+        ? l10n.warningDetailsUntilFurtherNotice
+        : _formatDateTime(material, warning.expires!);
+    final period = l10n.warningDetailsPeriod(
+      _formatDateTime(material, warning.effective),
+      end,
+    );
+    final sourceName = switch (source) {
+      WarningSource.bbk => l10n.warningSourceBbk,
+      WarningSource.meteoalarm => l10n.warningSourceMeteoalarm,
+    };
+
+    final recommendation = _DetailSection(
+      icon: Icons.accessibility_new_outlined,
+      title: l10n.warningInstructionsTitle,
+      body: warning.instruction ?? l10n.warningDetailsNoInstructions,
+    );
+    final area = _DetailSection(
+      icon: Icons.map_outlined,
+      title: l10n.warningDetailsAffectedRegions,
+      body: warning.areaDescription ?? l10n.warningDetailsNoArea,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (polygons.isNotEmpty) ...[
+            _WarningMapPreview(
+              title: warning.headline,
+              polygons: polygons,
+              colors: colors,
+              expandLabel: l10n.warningShowMap,
+            ),
+            const SizedBox(height: 16),
+          ],
+          Text(period, style: theme.textTheme.bodyMedium),
+          const SizedBox(height: 8),
+          Text(warning.headline, style: theme.textTheme.headlineSmall),
+          const SizedBox(height: 12),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Chip(
+              avatar: Icon(
+                Icons.warning_amber_rounded,
+                color: colors.foreground,
+              ),
+              label: Text(
+                l10n.warningDetailsLevel(
+                  localizeWarningSeverity(l10n, severity),
+                ),
+              ),
+              backgroundColor: colors.background,
+              side: BorderSide.none,
+            ),
+          ),
+          if (warning.description != null) ...[
+            const SizedBox(height: 12),
+            Text(warning.description!, style: theme.textTheme.bodyLarge),
+          ],
+          const SizedBox(height: 24),
+          LayoutBuilder(
+            builder: (context, constraints) => constraints.maxWidth >= 620
+                ? Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: recommendation),
+                      const SizedBox(width: 24),
+                      Expanded(child: area),
+                    ],
+                  )
+                : Column(
+                    children: [
+                      recommendation,
+                      const SizedBox(height: 20),
+                      area,
+                    ],
+                  ),
+          ),
+          const SizedBox(height: 24),
+          _DetailSection(
+            icon: Icons.info_outline,
+            title: l10n.warningDetailsSource,
+            body: [
+              sourceName,
+              if (warning.senderContact != null) warning.senderContact!,
+              l10n.warningDetailsPublished(
+                _formatDateTime(material, warning.sent),
+              ),
+            ].join('\n'),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.warningDetailsOfflineHint,
+            style: theme.textTheme.bodySmall,
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              onPressed: () => launchUrl(
+                switch (source) {
+                  WarningSource.bbk => Uri.https(
+                    'warnung.bund.de',
+                    '/meldungen/${warning.externalId}',
+                  ),
+                  WarningSource.meteoalarm => Uri.https(
+                    'meteoalarm.org',
+                    '/de/live/',
+                  ),
+                },
+                mode: LaunchMode.externalApplication,
+              ),
+              icon: const Icon(Icons.open_in_new),
+              label: Text(l10n.warningMoreInformation),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _formatDateTime(MaterialLocalizations material, DateTime value) =>
+    '${material.formatMediumDate(value)} · '
+    '${material.formatTimeOfDay(TimeOfDay.fromDateTime(value))}';
+
+class _DetailSection extends StatelessWidget {
+  const _DetailSection({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: theme.colorScheme.primary),
+            const SizedBox(width: 10),
+            Expanded(child: Text(title, style: theme.textTheme.titleMedium)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(body, style: theme.textTheme.bodyLarge),
+      ],
+    );
+  }
+}
+
+class _WarningMapPreview extends StatefulWidget {
+  const _WarningMapPreview({
+    required this.title,
+    required this.polygons,
+    required this.colors,
+    required this.expandLabel,
+  });
+
+  final String title;
+  final List<List<LatLng>> polygons;
+  final WarningSeverityColors colors;
+  final String expandLabel;
+
+  @override
+  State<_WarningMapPreview> createState() => _WarningMapPreviewState();
+}
+
+class _WarningMapPreviewState extends State<_WarningMapPreview> {
+  final _controller = MapController();
+
+  void _fitArea() {
+    final all = widget.polygons.expand((polygon) => polygon).toList();
+    if (all.isEmpty) return;
+    _controller.fitCamera(
+      CameraFit.bounds(
+        bounds: LatLngBounds.fromPoints(all),
+        padding: const EdgeInsets.all(24),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: widget.expandLabel,
+    child: AspectRatio(
+      aspectRatio: 16 / 8,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            IgnorePointer(
+              child: FlutterMap(
+                mapController: _controller,
+                options: MapOptions(
+                  initialCenter: widget.polygons.first.first,
+                  initialZoom: 8,
+                  onMapReady: _fitArea,
+                ),
+                children: [
+                  const BaseMapLayer(),
+                  _WarningPolygons(
+                    polygons: widget.polygons,
+                    colors: widget.colors,
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              right: 8,
+              bottom: 8,
+              child: FilledButton.tonalIcon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => _WarningAreaMap(
+                      title: widget.title,
+                      polygons: widget.polygons,
+                      colors: widget.colors,
+                    ),
+                  ),
+                ),
+                icon: const Icon(Icons.fullscreen),
+                label: Text(widget.expandLabel),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _WarningPolygons extends StatelessWidget {
+  const _WarningPolygons({required this.polygons, required this.colors});
+
+  final List<List<LatLng>> polygons;
+  final WarningSeverityColors colors;
+
+  @override
+  Widget build(BuildContext context) => PolygonLayer(
+    polygons: [
+      for (final points in polygons)
+        Polygon(
+          points: points,
+          color: colors.background.withValues(alpha: .45),
+          borderColor: colors.foreground,
+          borderStrokeWidth: 3,
+        ),
+    ],
+  );
 }
 
 List<List<LatLng>> _warningPolygons(Warning warning) {
@@ -513,10 +719,15 @@ List<List<LatLng>> _warningPolygons(Warning warning) {
 }
 
 class _WarningAreaMap extends StatelessWidget {
-  const _WarningAreaMap({required this.title, required this.polygons});
+  const _WarningAreaMap({
+    required this.title,
+    required this.polygons,
+    required this.colors,
+  });
 
   final String title;
   final List<List<LatLng>> polygons;
+  final WarningSeverityColors colors;
 
   @override
   Widget build(BuildContext context) {
@@ -531,19 +742,7 @@ class _WarningAreaMap extends StatelessWidget {
         options: MapOptions(initialCenter: center, initialZoom: 9),
         children: [
           const BaseMapLayer(),
-          PolygonLayer(
-            polygons: [
-              for (final points in polygons)
-                Polygon(
-                  points: points,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.error.withValues(alpha: .2),
-                  borderColor: Theme.of(context).colorScheme.error,
-                  borderStrokeWidth: 3,
-                ),
-            ],
-          ),
+          _WarningPolygons(polygons: polygons, colors: colors),
           BaseMapAttribution(l10n: AppLocalizations.of(context)!),
         ],
       ),

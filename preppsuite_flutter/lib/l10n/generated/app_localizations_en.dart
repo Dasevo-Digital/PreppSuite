@@ -815,6 +815,40 @@ class AppLocalizationsEn extends AppLocalizations {
       'No lead time selected — no reminders will be scheduled.';
 
   @override
+  String get settingsScheduledRemindersUnsupported =>
+      'Linux does not support scheduled notifications.';
+
+  @override
+  String get settingsChargeReminderTitle => 'Check batteries and devices';
+
+  @override
+  String get settingsChargeReminderHint =>
+      'Reminds you to charge and test power banks, rechargeable batteries, torches and emergency radios.';
+
+  @override
+  String get settingsChargeReminderDisabledHint =>
+      'Turn on notifications above to schedule the charging reminder.';
+
+  @override
+  String get settingsChargeReminderNoneHint =>
+      'No charging reminder is scheduled.';
+
+  @override
+  String get settingsChargeReminderOff => 'Off';
+
+  @override
+  String chargeReminderInterval(int days) {
+    return 'every $days days';
+  }
+
+  @override
+  String get chargeReminderTitle => 'Check batteries and devices';
+
+  @override
+  String get chargeReminderBody =>
+      'Charge and test power banks, rechargeable batteries, torches and emergency radios.';
+
+  @override
   String expiryLeadDaysLabel(int days) {
     return '$days days';
   }
@@ -2479,6 +2513,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warningShowMap => 'Show area on map';
 
   @override
+  String warningDetailsPeriod(String start, String end) {
+    return 'Alert from: $start – $end';
+  }
+
+  @override
+  String get warningDetailsUntilFurtherNotice => 'until further notice';
+
+  @override
+  String warningDetailsLevel(String severity) {
+    return 'Alert level: $severity';
+  }
+
+  @override
+  String get warningDetailsAffectedRegions => 'Affected region(s)';
+
+  @override
+  String get warningDetailsNoInstructions =>
+      'No recommended actions were provided for this alert.';
+
+  @override
+  String get warningDetailsNoArea =>
+      'The warning source did not specify the affected area further.';
+
+  @override
+  String get warningDetailsSource => 'Warning source and publication';
+
+  @override
+  String warningDetailsPublished(String time) {
+    return 'Published: $time';
+  }
+
+  @override
+  String get warningDetailsOfflineHint =>
+      'The map, area and recommended actions were saved with this alert and remain readable offline.';
+
+  @override
   String get knowledgeBrowseTitle => 'Browse archive';
 
   @override
@@ -2602,7 +2672,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetSettingsHint =>
-      'Restore defaults for language, appearance, notifications and map provider. Data and downloads remain.';
+      'Restore defaults for language, appearance, notifications, reminders and map provider. Data and downloads remain.';
 
   @override
   String get resetHousehold => 'Delete household and local data';
@@ -2756,6 +2826,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'The bar is a guide for eight recommended core archives; you choose the size and selection.';
 
   @override
+  String get knowledgeApolloDownloadedTitle => 'Downloaded content';
+
+  @override
+  String get knowledgeApolloDownloaded => 'Downloaded';
+
+  @override
+  String get knowledgeApolloOpened => 'Open';
+
+  @override
   String get knowledgeApolloStartTitle => 'Practical knowledge first';
 
   @override
@@ -2767,7 +2846,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeApolloMedicalBody =>
-      'Understand symptoms, refresh first aid and look up medical basics. It does not replace emergency or professional medical care.';
+      'Use WikiMed to look up medical basics and first aid directly. It does not replace emergency or professional medical care.';
 
   @override
   String get knowledgeApolloSurvivalTitle =>
@@ -2775,7 +2854,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeApolloSurvivalBody =>
-      'Water, shelter, fire, navigation, weather, food and hygiene as understandable foundations rather than a list of gear.';
+      'Wikibooks and iFixit cover water, shelter, fire, navigation, food, hygiene and repairs as understandable foundations.';
 
   @override
   String get knowledgeApolloRepairTitle => 'Craft, energy & repair';

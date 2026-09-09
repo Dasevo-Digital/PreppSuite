@@ -35,9 +35,9 @@ enum RecommendedArchive {
   /// The one that answers most questions, and the largest download.
   wikipedia(name: 'Wikipedia', query: 'wikipedia', language: 'deu'),
 
-  /// Wikipedia's medical articles alone — a fraction of the size, and the
-  /// part that matters when no practice is open.
-  medicine(name: 'Wikipedia Medizin', query: 'medizin', language: 'deu'),
+  /// A focused, German medical encyclopedia. It is deliberately offered
+  /// instead of making a person hunt through the general encyclopedia.
+  medicine(name: 'WikiMed', query: 'wikimed', language: 'deu'),
 
   /// Repair instructions for household appliances and electronics, with
   /// pictures, in German.
@@ -61,6 +61,18 @@ enum RecommendedArchive {
 
   /// ISO 639-3, which is what the catalogue speaks.
   final String language;
+
+  /// Catalogue names are versioned, but retain the family name. Comparing
+  /// that small stable part tells APOLLO which of its suggestions already
+  /// exists locally without depending on a dated filename.
+  bool isInstalled(Iterable<String> labels) {
+    final needle = switch (this) {
+      RecommendedArchive.medicine => 'wikimed',
+      RecommendedArchive.khanAcademy => 'khan academy',
+      _ => name.toLowerCase(),
+    };
+    return labels.any((label) => label.toLowerCase().contains(needle));
+  }
 }
 
 String recommendedArchiveDescription(

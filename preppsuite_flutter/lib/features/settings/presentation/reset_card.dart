@@ -71,6 +71,7 @@ class ResetCard extends ConsumerWidget {
       'themeModeOverride',
       'notificationsEnabled',
       'expiryLeadDays',
+      'chargeReminderDays',
       'mapTileProvider',
       'mapTilerApiKey',
       'mapSourcePreference',

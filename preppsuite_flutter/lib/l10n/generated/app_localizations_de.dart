@@ -819,6 +819,40 @@ class AppLocalizationsDe extends AppLocalizations {
       'Keine Vorlaufzeit gewählt — es werden keine Erinnerungen geplant.';
 
   @override
+  String get settingsScheduledRemindersUnsupported =>
+      'Unter Linux gibt es keine geplanten Benachrichtigungen.';
+
+  @override
+  String get settingsChargeReminderTitle => 'Akkus und Geräte prüfen';
+
+  @override
+  String get settingsChargeReminderHint =>
+      'Erinnert daran, Powerbanks, Akkus, Taschenlampen und Notfunkgeräte aufzuladen und zu testen.';
+
+  @override
+  String get settingsChargeReminderDisabledHint =>
+      'Schalte oben die Benachrichtigungen ein, damit die Auflade-Erinnerung geplant wird.';
+
+  @override
+  String get settingsChargeReminderNoneHint =>
+      'Keine Auflade-Erinnerung geplant.';
+
+  @override
+  String get settingsChargeReminderOff => 'Aus';
+
+  @override
+  String chargeReminderInterval(int days) {
+    return 'alle $days Tage';
+  }
+
+  @override
+  String get chargeReminderTitle => 'Akkus und Geräte prüfen';
+
+  @override
+  String get chargeReminderBody =>
+      'Powerbanks, Akkus, Taschenlampen und Notfunkgeräte aufladen und testen.';
+
+  @override
   String expiryLeadDaysLabel(int days) {
     return '$days Tage';
   }
@@ -2497,6 +2531,42 @@ class AppLocalizationsDe extends AppLocalizations {
   String get warningShowMap => 'Gebiet auf Karte zeigen';
 
   @override
+  String warningDetailsPeriod(String start, String end) {
+    return 'Meldung vom: $start – $end';
+  }
+
+  @override
+  String get warningDetailsUntilFurtherNotice => 'bis auf Weiteres';
+
+  @override
+  String warningDetailsLevel(String severity) {
+    return 'Warnstufe: $severity';
+  }
+
+  @override
+  String get warningDetailsAffectedRegions => 'Betroffene Region(en)';
+
+  @override
+  String get warningDetailsNoInstructions =>
+      'Für diese Warnung liegen keine Handlungsempfehlungen vor.';
+
+  @override
+  String get warningDetailsNoArea =>
+      'Das betroffene Gebiet wurde von der Warnquelle nicht näher angegeben.';
+
+  @override
+  String get warningDetailsSource => 'Warnquelle und Veröffentlichung';
+
+  @override
+  String warningDetailsPublished(String time) {
+    return 'Veröffentlicht: $time';
+  }
+
+  @override
+  String get warningDetailsOfflineHint =>
+      'Karte, Gebiet und Handlungsempfehlungen wurden mit der Warnung gespeichert und sind auch offline lesbar.';
+
+  @override
   String get knowledgeBrowseTitle => 'Archiv durchblättern';
 
   @override
@@ -2622,7 +2692,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get resetSettingsHint =>
-      'Sprache, Darstellung, Benachrichtigungen und Kartenanbieter auf Standardwerte setzen. Daten und Downloads bleiben erhalten.';
+      'Sprache, Darstellung, Benachrichtigungen, Erinnerungen und Kartenanbieter auf Standardwerte setzen. Daten und Downloads bleiben erhalten.';
 
   @override
   String get resetHousehold => 'Haushalt und lokale Daten löschen';
@@ -2777,6 +2847,15 @@ class AppLocalizationsDe extends AppLocalizations {
       'Der Balken ist eine Orientierung für acht empfohlene Grundarchive; Größe und Auswahl bestimmst du selbst.';
 
   @override
+  String get knowledgeApolloDownloadedTitle => 'Heruntergeladene Inhalte';
+
+  @override
+  String get knowledgeApolloDownloaded => 'Heruntergeladen';
+
+  @override
+  String get knowledgeApolloOpened => 'Geöffnet';
+
+  @override
   String get knowledgeApolloStartTitle => 'Praktisches Wissen zuerst';
 
   @override
@@ -2788,7 +2867,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get knowledgeApolloMedicalBody =>
-      'Symptome verstehen, Erste Hilfe auffrischen und medizinische Grundlagen nachlesen. Es ersetzt keine Notruf- oder ärztliche Hilfe.';
+      'Mit WikiMed medizinische Grundlagen und Erste Hilfe gezielt nachschlagen. Es ersetzt keine Notruf- oder ärztliche Hilfe.';
 
   @override
   String get knowledgeApolloSurvivalTitle =>
@@ -2796,7 +2875,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get knowledgeApolloSurvivalBody =>
-      'Wasser, Unterkunft, Feuer, Orientierung, Wetter, Nahrung und Hygiene als nachvollziehbare Grundlagen statt bloßer Packlisten.';
+      'Wikibooks und iFixit für Wasser, Unterkunft, Feuer, Orientierung, Nahrung, Hygiene und Reparaturen als nachvollziehbare Grundlagen.';
 
   @override
   String get knowledgeApolloRepairTitle => 'Handwerk, Energie & Reparatur';

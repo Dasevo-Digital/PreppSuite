@@ -119,6 +119,7 @@ class NotificationService {
   /// [scheduleExpiryReminders] can clear exactly its own pending ones and
   /// leave anything else (warnings) alone.
   static const _expiryPayloadPrefix = 'expiry:';
+  static const _chargeReminderId = 90407;
 
   /// Replaces all pending expiry reminders with [reminders].
   ///
@@ -185,5 +186,40 @@ class NotificationService {
         await _plugin.cancel(id: request.id);
       }
     }
+  }
+
+  /// Schedules the next routine check for rechargeable emergency equipment.
+  /// Its fixed id means selecting another interval replaces the old check.
+  Future<void> scheduleChargeReminder({
+    required DateTime fireAt,
+    required String title,
+    required String body,
+  }) async {
+    if (!supportsScheduledNotifications) return;
+    await _ensureInitialized();
+    await _plugin.zonedSchedule(
+      id: _chargeReminderId,
+      title: title,
+      body: body,
+      payload: 'charge-reminder',
+      scheduledDate: tz.TZDateTime.from(fireAt.toUtc(), tz.UTC),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      notificationDetails: const NotificationDetails(
+        macOS: DarwinNotificationDetails(),
+        iOS: DarwinNotificationDetails(),
+        android: AndroidNotificationDetails(
+          'equipment-checks',
+          'Akkus und Geräte prüfen',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+      ),
+    );
+  }
+
+  Future<void> cancelChargeReminder() async {
+    if (!supportsScheduledNotifications) return;
+    await _ensureInitialized();
+    await _plugin.cancel(id: _chargeReminderId);
   }
 }

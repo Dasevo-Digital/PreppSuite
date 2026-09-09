@@ -17,6 +17,7 @@ class ApolloLibraryScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final state = ref.watch(knowledgeProvider).value;
     final archives = state?.library ?? const [];
+    final installedLabels = {for (final archive in archives) archive.label};
     final knownSize = archives.fold<int>(
       0,
       (total, archive) => total + (archive.sizeBytes ?? 0),
@@ -74,8 +75,8 @@ class ApolloLibraryScreen extends ConsumerWidget {
             body: l10n.knowledgeApolloMedicalBody,
             archives: const [
               RecommendedArchive.medicine,
-              RecommendedArchive.wikipedia,
             ],
+            installedLabels: installedLabels,
           ),
           _PathCard(
             icon: Icons.backpack_outlined,
@@ -83,8 +84,9 @@ class ApolloLibraryScreen extends ConsumerWidget {
             body: l10n.knowledgeApolloSurvivalBody,
             archives: const [
               RecommendedArchive.wikibooks,
-              RecommendedArchive.wikipedia,
+              RecommendedArchive.ifixit,
             ],
+            installedLabels: installedLabels,
           ),
           _PathCard(
             icon: Icons.handyman_outlined,
@@ -94,6 +96,7 @@ class ApolloLibraryScreen extends ConsumerWidget {
               RecommendedArchive.ifixit,
               RecommendedArchive.wikibooks,
             ],
+            installedLabels: installedLabels,
           ),
           const SizedBox(height: 24),
           Text(
@@ -109,6 +112,7 @@ class ApolloLibraryScreen extends ConsumerWidget {
               RecommendedArchive.wikipedia,
               RecommendedArchive.wikibooks,
             ],
+            installedLabels: installedLabels,
           ),
           _PathCard(
             icon: Icons.school_outlined,
@@ -120,6 +124,7 @@ class ApolloLibraryScreen extends ConsumerWidget {
               RecommendedArchive.phet,
               RecommendedArchive.wikiversity,
             ],
+            installedLabels: installedLabels,
           ),
           _PathCard(
             icon: Icons.language_outlined,
@@ -127,9 +132,44 @@ class ApolloLibraryScreen extends ConsumerWidget {
             body: l10n.knowledgeApolloAdvancedBody,
             archives: const [
               RecommendedArchive.khanAcademy,
-              RecommendedArchive.wikipedia,
+              RecommendedArchive.wikiversity,
             ],
+            installedLabels: installedLabels,
           ),
+          if (archives.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Text(
+              l10n.knowledgeApolloDownloadedTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Card(
+              child: Column(
+                children: [
+                  for (final archive in archives)
+                    ListTile(
+                      leading: Icon(
+                        archive.id == state?.selectedId
+                            ? Icons.menu_book
+                            : Icons.download_done_outlined,
+                      ),
+                      title: Text(archive.label),
+                      subtitle: Text(
+                        archive.id == state?.selectedId
+                            ? l10n.knowledgeApolloOpened
+                            : l10n.knowledgeApolloDownloaded,
+                      ),
+                      trailing: archive.id == state?.selectedId
+                          ? const Icon(Icons.check_circle_outline)
+                          : null,
+                      onTap: () => ref
+                          .read(knowledgeProvider.notifier)
+                          .select(archive.id),
+                    ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           Card(
             child: ListTile(
@@ -206,12 +246,14 @@ class _PathCard extends StatelessWidget {
     required this.title,
     required this.body,
     required this.archives,
+    required this.installedLabels,
   });
 
   final IconData icon;
   final String title;
   final String body;
   final List<RecommendedArchive> archives;
+  final Set<String> installedLabels;
 
   @override
   Widget build(BuildContext context) {
@@ -250,11 +292,17 @@ class _PathCard extends StatelessWidget {
               children: [
                 for (final archive in archives)
                   OutlinedButton.icon(
-                    icon: const Icon(
-                      Icons.download_for_offline_outlined,
+                    icon: Icon(
+                      archive.isInstalled(installedLabels)
+                          ? Icons.download_done_outlined
+                          : Icons.download_for_offline_outlined,
                       size: 18,
                     ),
-                    label: Text(archive.name),
+                    label: Text(
+                      archive.isInstalled(installedLabels)
+                          ? '${archive.name} · ${l10n.knowledgeApolloDownloaded}'
+                          : archive.name,
+                    ),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute<void>(
                         builder: (_) => KiwixLibraryScreen(

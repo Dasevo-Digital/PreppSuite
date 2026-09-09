@@ -9,6 +9,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../downloads/presentation/download_folder_card.dart';
 import '../../inventory/presentation/expiry_reminders_card.dart';
+import '../../inventory/presentation/charge_reminder_card.dart';
 import '../../maps/presentation/offline_map_card.dart';
 import '../../sharing/presentation/shared_folder_card.dart';
 import 'additional_regions_card.dart';
@@ -42,6 +43,21 @@ class SettingsScreen extends ConsumerWidget {
               trailing: _LanguagePicker(l10n: l10n),
             ),
           ),
+          const SizedBox(height: 24),
+          Text(
+            l10n.settingsChargeReminderTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          if (supportsScheduledNotifications)
+            ChargeReminderCard(l10n: l10n)
+          else
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.info_outline),
+                title: Text(l10n.settingsScheduledRemindersUnsupported),
+              ),
+            ),
           const SizedBox(height: 24),
           Text(
             l10n.settingsAppearanceTitle,

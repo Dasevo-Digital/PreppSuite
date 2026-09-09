@@ -1520,6 +1520,60 @@ abstract class AppLocalizations {
   /// **'No lead time selected — no reminders will be scheduled.'**
   String get settingsExpiryRemindersNoneHint;
 
+  /// No description provided for @settingsScheduledRemindersUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Linux does not support scheduled notifications.'**
+  String get settingsScheduledRemindersUnsupported;
+
+  /// No description provided for @settingsChargeReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check batteries and devices'**
+  String get settingsChargeReminderTitle;
+
+  /// No description provided for @settingsChargeReminderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminds you to charge and test power banks, rechargeable batteries, torches and emergency radios.'**
+  String get settingsChargeReminderHint;
+
+  /// No description provided for @settingsChargeReminderDisabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications above to schedule the charging reminder.'**
+  String get settingsChargeReminderDisabledHint;
+
+  /// No description provided for @settingsChargeReminderNoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No charging reminder is scheduled.'**
+  String get settingsChargeReminderNoneHint;
+
+  /// No description provided for @settingsChargeReminderOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get settingsChargeReminderOff;
+
+  /// No description provided for @chargeReminderInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'every {days} days'**
+  String chargeReminderInterval(int days);
+
+  /// No description provided for @chargeReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check batteries and devices'**
+  String get chargeReminderTitle;
+
+  /// No description provided for @chargeReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge and test power banks, rechargeable batteries, torches and emergency radios.'**
+  String get chargeReminderBody;
+
   /// No description provided for @expiryLeadDaysLabel.
   ///
   /// In en, this message translates to:
@@ -4286,6 +4340,60 @@ abstract class AppLocalizations {
   /// **'Show area on map'**
   String get warningShowMap;
 
+  /// No description provided for @warningDetailsPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert from: {start} – {end}'**
+  String warningDetailsPeriod(String start, String end);
+
+  /// No description provided for @warningDetailsUntilFurtherNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'until further notice'**
+  String get warningDetailsUntilFurtherNotice;
+
+  /// No description provided for @warningDetailsLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert level: {severity}'**
+  String warningDetailsLevel(String severity);
+
+  /// No description provided for @warningDetailsAffectedRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'Affected region(s)'**
+  String get warningDetailsAffectedRegions;
+
+  /// No description provided for @warningDetailsNoInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'No recommended actions were provided for this alert.'**
+  String get warningDetailsNoInstructions;
+
+  /// No description provided for @warningDetailsNoArea.
+  ///
+  /// In en, this message translates to:
+  /// **'The warning source did not specify the affected area further.'**
+  String get warningDetailsNoArea;
+
+  /// No description provided for @warningDetailsSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning source and publication'**
+  String get warningDetailsSource;
+
+  /// No description provided for @warningDetailsPublished.
+  ///
+  /// In en, this message translates to:
+  /// **'Published: {time}'**
+  String warningDetailsPublished(String time);
+
+  /// No description provided for @warningDetailsOfflineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The map, area and recommended actions were saved with this alert and remain readable offline.'**
+  String get warningDetailsOfflineHint;
+
   /// No description provided for @knowledgeBrowseTitle.
   ///
   /// In en, this message translates to:
@@ -4511,7 +4619,7 @@ abstract class AppLocalizations {
   /// No description provided for @resetSettingsHint.
   ///
   /// In en, this message translates to:
-  /// **'Restore defaults for language, appearance, notifications and map provider. Data and downloads remain.'**
+  /// **'Restore defaults for language, appearance, notifications, reminders and map provider. Data and downloads remain.'**
   String get resetSettingsHint;
 
   /// No description provided for @resetHousehold.
@@ -4772,6 +4880,24 @@ abstract class AppLocalizations {
   /// **'The bar is a guide for eight recommended core archives; you choose the size and selection.'**
   String get knowledgeApolloStatusHint;
 
+  /// No description provided for @knowledgeApolloDownloadedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded content'**
+  String get knowledgeApolloDownloadedTitle;
+
+  /// No description provided for @knowledgeApolloDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded'**
+  String get knowledgeApolloDownloaded;
+
+  /// No description provided for @knowledgeApolloOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get knowledgeApolloOpened;
+
   /// No description provided for @knowledgeApolloStartTitle.
   ///
   /// In en, this message translates to:
@@ -4793,7 +4919,7 @@ abstract class AppLocalizations {
   /// No description provided for @knowledgeApolloMedicalBody.
   ///
   /// In en, this message translates to:
-  /// **'Understand symptoms, refresh first aid and look up medical basics. It does not replace emergency or professional medical care.'**
+  /// **'Use WikiMed to look up medical basics and first aid directly. It does not replace emergency or professional medical care.'**
   String get knowledgeApolloMedicalBody;
 
   /// No description provided for @knowledgeApolloSurvivalTitle.
@@ -4805,7 +4931,7 @@ abstract class AppLocalizations {
   /// No description provided for @knowledgeApolloSurvivalBody.
   ///
   /// In en, this message translates to:
-  /// **'Water, shelter, fire, navigation, weather, food and hygiene as understandable foundations rather than a list of gear.'**
+  /// **'Wikibooks and iFixit cover water, shelter, fire, navigation, food, hygiene and repairs as understandable foundations.'**
   String get knowledgeApolloSurvivalBody;
 
   /// No description provided for @knowledgeApolloRepairTitle.
