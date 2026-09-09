@@ -76,6 +76,12 @@ class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
       ),
     );
   }
+
+  Future<void> clear() async {
+    await _store.clear();
+    await const WarningRegionStore().clear();
+    state = const AsyncData(null);
+  }
 }
 
 final householdProfileProvider =

@@ -108,6 +108,9 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     );
 
     final opened = await _open(stored.archives, wanted);
+    if (opened.isReady) {
+      await _store.save(opened.library, selectedId: opened.selectedId);
+    }
     _currentArchive = opened.archive;
     _currentServer = opened.server;
     return opened;
@@ -245,7 +248,7 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
       return opened.problem;
     }
 
-    await _store.save(library, selectedId: entry.id);
+    await _store.save(opened.library, selectedId: entry.id);
 
     final previousArchive = _currentArchive;
     final previousServer = _currentServer;
@@ -293,8 +296,17 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
       // close it by. A rejected archive used to leave its port bound.
       server = await ZimHttpServer.start(archive);
 
+      final enrichedEntry = entry.copyWith(
+        sizeBytes: archive.header.checksumPosition + 16,
+        entryCount: archive.header.entryCount,
+      );
+      final enrichedLibrary = [
+        for (final item in library)
+          if (item.id == entry.id) enrichedEntry else item,
+      ];
+
       return KnowledgeState(
-        library: library,
+        library: enrichedLibrary,
         selectedId: entry.id,
         archive: archive,
         server: server,

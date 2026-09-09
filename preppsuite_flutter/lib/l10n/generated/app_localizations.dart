@@ -4261,6 +4261,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter at least 8 characters; both entries must match.'**
   String get backupPassphraseInvalid;
+
+  /// No description provided for @warningInstructionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended actions'**
+  String get warningInstructionsTitle;
+
+  /// No description provided for @warningAreaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Affected area'**
+  String get warningAreaTitle;
+
+  /// No description provided for @warningContactTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publisher and contact'**
+  String get warningContactTitle;
+
+  /// No description provided for @warningShowMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Show area on map'**
+  String get warningShowMap;
+
+  /// No description provided for @knowledgeBrowseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse archive'**
+  String get knowledgeBrowseTitle;
+
+  /// No description provided for @knowledgeBrowseBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the main page, choose an initial letter, or discover a random article.'**
+  String get knowledgeBrowseBody;
+
+  /// No description provided for @knowledgeMainPageAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Main page'**
+  String get knowledgeMainPageAction;
+
+  /// No description provided for @knowledgeRandomAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Random article'**
+  String get knowledgeRandomAction;
+
+  /// No description provided for @knowledgeArchiveStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{articles} entries · approximately {size}'**
+  String knowledgeArchiveStats(int articles, String size);
+
+  /// No description provided for @knowledgeTotalSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Total size: approximately {size}'**
+  String knowledgeTotalSize(String size);
+
+  /// No description provided for @knowledgeDocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal documents'**
+  String get knowledgeDocumentsTitle;
+
+  /// No description provided for @knowledgeDocumentsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF, EPUB and Markdown files remain in their original location and are not duplicated.'**
+  String get knowledgeDocumentsIntro;
+
+  /// No description provided for @knowledgeDocumentAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add document'**
+  String get knowledgeDocumentAdd;
+
+  /// No description provided for @knowledgeDocumentsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No personal documents have been added yet.'**
+  String get knowledgeDocumentsEmpty;
+
+  /// No description provided for @knowledgeDocumentOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get knowledgeDocumentOpen;
+
+  /// No description provided for @knowledgeDocumentRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from library'**
+  String get knowledgeDocumentRemove;
+
+  /// No description provided for @knowledgeDocumentOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The document could not be opened.'**
+  String get knowledgeDocumentOpenFailed;
+
+  /// No description provided for @emergencyDirectoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency calls, contacts & radio'**
+  String get emergencyDirectoryTitle;
+
+  /// No description provided for @emergencyMedicalService.
+  ///
+  /// In en, this message translates to:
+  /// **'Non-emergency medical service 116117'**
+  String get emergencyMedicalService;
+
+  /// No description provided for @emergencyPoisonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Poison control centres'**
+  String get emergencyPoisonTitle;
+
+  /// No description provided for @emergencyPoisonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For life-threatening symptoms, call 112 first. The responsible poison control centre advises in suspected poisoning cases.'**
+  String get emergencyPoisonHint;
+
+  /// No description provided for @emergencyRadioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio frequency ranges'**
+  String get emergencyRadioTitle;
+
+  /// No description provided for @emergencyRadioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Local station frequencies change. Run a station scan during an incident and follow official announcements. Transmit only where the relevant radio service permits it.'**
+  String get emergencyRadioHint;
+
+  /// No description provided for @emergencyContactsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby emergency contacts'**
+  String get emergencyContactsTitle;
+
+  /// No description provided for @emergencyContactsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No nearby contacts saved yet.'**
+  String get emergencyContactsEmpty;
+
+  /// No description provided for @emergencyContactAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contact'**
+  String get emergencyContactAdd;
+
+  /// No description provided for @emergencyContactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get emergencyContactName;
+
+  /// No description provided for @emergencyContactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get emergencyContactPhone;
+
+  /// No description provided for @emergencyContactAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get emergencyContactAddress;
+
+  /// No description provided for @emergencyContactCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates (latitude, longitude)'**
+  String get emergencyContactCoordinates;
+
+  /// No description provided for @emergencyContactDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete contact'**
+  String get emergencyContactDelete;
+
+  /// No description provided for @emergencyCallAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get emergencyCallAction;
+
+  /// No description provided for @emergencyOpenMapAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open on map'**
+  String get emergencyOpenMapAction;
+
+  /// No description provided for @prepperRecipesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency recipes'**
+  String get prepperRecipesTitle;
+
+  /// No description provided for @prepperRecipesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple meals from shelf-stable supplies using little water and energy. Adjust quantities to the household.'**
+  String get prepperRecipesIntro;
+
+  /// No description provided for @preservationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preserving food'**
+  String get preservationTitle;
+
+  /// No description provided for @preservationIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Established methods for food on hand. Work cleanly, observe safe processing times, and discard swollen or suspicious jars.'**
+  String get preservationIntro;
+
+  /// No description provided for @storageOfficialCalculator.
+  ///
+  /// In en, this message translates to:
+  /// **'Open official stock calculator'**
+  String get storageOfficialCalculator;
+
+  /// No description provided for @storageOfficialTips.
+  ///
+  /// In en, this message translates to:
+  /// **'More food preparedness tips'**
+  String get storageOfficialTips;
+
+  /// No description provided for @resetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get resetTitle;
+
+  /// No description provided for @resetSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset app settings'**
+  String get resetSettings;
+
+  /// No description provided for @resetSettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore defaults for language, appearance, notifications and map provider. Data and downloads remain.'**
+  String get resetSettingsHint;
+
+  /// No description provided for @resetHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete household and local data'**
+  String get resetHousehold;
+
+  /// No description provided for @resetHouseholdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete this household’s inventory, checklists, emergency plan and emergency cards from this device.'**
+  String get resetHouseholdHint;
+
+  /// No description provided for @resetConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset now?'**
+  String get resetConfirmTitle;
+
+  /// No description provided for @resetConfirmHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Local household data will be permanently deleted. Create a backup first if needed.'**
+  String get resetConfirmHousehold;
+
+  /// No description provided for @resetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset completed.'**
+  String get resetDone;
 }
 
 class _AppLocalizationsDelegate

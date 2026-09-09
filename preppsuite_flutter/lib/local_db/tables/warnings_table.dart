@@ -22,6 +22,10 @@ class Warnings extends Table {
   TextColumn get eventType => text()();
   TextColumn get headline => text()();
   TextColumn get description => text().nullable()();
+  TextColumn get instruction => text().nullable()();
+  TextColumn get areaDescription => text().nullable()();
+  TextColumn get senderContact => text().nullable()();
+  TextColumn get polygonsJson => text().nullable()();
 
   DateTimeColumn get effective => dateTime()();
   DateTimeColumn get expires => dateTime().nullable()();

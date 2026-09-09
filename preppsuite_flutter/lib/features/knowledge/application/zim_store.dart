@@ -30,6 +30,8 @@ class StoredArchive {
     required this.id,
     required this.location,
     required this.label,
+    this.sizeBytes,
+    this.entryCount,
   });
 
   /// Stable for the life of the entry. Names this archive's index file, so
@@ -40,11 +42,23 @@ class StoredArchive {
   final String location;
 
   final String label;
+  final int? sizeBytes;
+  final int? entryCount;
+
+  StoredArchive copyWith({int? sizeBytes, int? entryCount}) => StoredArchive(
+    id: id,
+    location: location,
+    label: label,
+    sizeBytes: sizeBytes ?? this.sizeBytes,
+    entryCount: entryCount ?? this.entryCount,
+  );
 
   Map<String, Object?> toJson() => {
     'id': id,
     'location': location,
     'label': label,
+    'sizeBytes': sizeBytes,
+    'entryCount': entryCount,
   };
 
   static StoredArchive? fromJson(Object? json) {
@@ -59,6 +73,8 @@ class StoredArchive {
       id: id,
       location: location,
       label: label is String && label.isNotEmpty ? label : location,
+      sizeBytes: json['sizeBytes'] is int ? json['sizeBytes'] as int : null,
+      entryCount: json['entryCount'] is int ? json['entryCount'] as int : null,
     );
   }
 }

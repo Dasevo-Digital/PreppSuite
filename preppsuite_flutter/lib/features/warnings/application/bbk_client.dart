@@ -17,6 +17,11 @@ class BbkRawWarning {
     required this.severity,
     required this.eventTitleDe,
     required this.raw,
+    this.description,
+    this.instruction,
+    this.areaDescription,
+    this.senderContact,
+    this.polygons = const [],
   });
 
   final String id;
@@ -24,6 +29,30 @@ class BbkRawWarning {
   final String severity;
   final String eventTitleDe;
   final Map<String, dynamic> raw;
+  final String? description;
+  final String? instruction;
+  final String? areaDescription;
+  final String? senderContact;
+  final List<String> polygons;
+
+  BbkRawWarning withDetails({
+    String? description,
+    String? instruction,
+    String? areaDescription,
+    String? senderContact,
+    List<String> polygons = const [],
+  }) => BbkRawWarning(
+    id: id,
+    startDate: startDate,
+    severity: severity,
+    eventTitleDe: eventTitleDe,
+    raw: raw,
+    description: description,
+    instruction: instruction,
+    areaDescription: areaDescription,
+    senderContact: senderContact,
+    polygons: polygons,
+  );
 }
 
 /// The outcome of a nationwide poll across every BBK source.
@@ -105,6 +134,75 @@ class BbkClient {
       for (final entry in decoded)
         if (entry is Map<String, dynamic>) _parseDashboardEntry(entry),
     ];
+  }
+
+  /// Loads the German CAP detail behind a compact map/dashboard entry.
+  /// A failed detail request deliberately returns the compact warning: the
+  /// alert itself remains useful and a later poll can fill its offline cache.
+  Future<BbkRawWarning> fetchDetails(BbkRawWarning warning) async {
+    try {
+      final response = await _httpClient.get(
+        Uri.parse('$_baseUrl/warnings/${Uri.encodeComponent(warning.id)}.json'),
+      );
+      if (response.statusCode != 200) return warning;
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      if (decoded is! Map<String, dynamic>) return warning;
+      final infos = decoded['info'];
+      if (infos is! List) return warning;
+
+      Map<dynamic, dynamic>? selected;
+      for (final item in infos) {
+        if (item is! Map) continue;
+        final language = '${item['language'] ?? ''}'.toLowerCase();
+        selected ??= item;
+        if (language == 'de' || language == 'de-de') {
+          selected = item;
+          break;
+        }
+      }
+      if (selected == null) return warning;
+
+      final areas = selected['area'];
+      final areaNames = <String>[];
+      final polygons = <String>[];
+      if (areas is List) {
+        for (final area in areas.whereType<Map>()) {
+          final name = area['areaDesc'];
+          if (name is String && name.trim().isNotEmpty) {
+            areaNames.add(name.trim());
+          }
+          final polygon = area['polygon'];
+          if (polygon is List) {
+            polygons.addAll(
+              polygon.whereType<String>().where((p) => p.isNotEmpty),
+            );
+          }
+        }
+      }
+
+      String? contact;
+      final parameters = selected['parameter'];
+      if (parameters is List) {
+        for (final parameter in parameters.whereType<Map>()) {
+          if (parameter['valueName'] == 'sender_signature') {
+            contact = parameter['value'] as String?;
+            break;
+          }
+        }
+      }
+
+      String? text(Object? value) =>
+          value is String && value.trim().isNotEmpty ? value.trim() : null;
+      return warning.withDetails(
+        description: text(selected['description']),
+        instruction: text(selected['instruction']),
+        areaDescription: areaNames.isEmpty ? null : areaNames.join('\n'),
+        senderContact: text(contact ?? decoded['sender']),
+        polygons: polygons,
+      );
+    } on Object {
+      return warning;
+    }
   }
 
   BbkRawWarning _parseDashboardEntry(Map<String, dynamic> entry) {

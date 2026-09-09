@@ -33,7 +33,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   /// The tables whose rows travel through a shared folder, i.e. the ones
   /// with a `dirty` column.
@@ -147,8 +147,50 @@ class AppDatabase extends _$AppDatabase {
         // the head counts in the profile keep working on their own.
         await m.createTable(householdMembers);
       }
+      if (from < 12) {
+        // Installs older than 7 recreated the warning cache above from the
+        // current definition, so its detail columns already exist. Some old
+        // or partially repaired databases can lack the cache altogether;
+        // recreate it in that case because warnings are fetched again anyway.
+        if (from >= 7) {
+          final exists = await customSelect(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'warnings'",
+          ).getSingleOrNull();
+          if (exists == null) {
+            await m.createTable(warnings);
+          } else {
+            await m.addColumn(warnings, warnings.instruction);
+            await m.addColumn(warnings, warnings.areaDescription);
+            await m.addColumn(warnings, warnings.senderContact);
+            await m.addColumn(warnings, warnings.polygonsJson);
+          }
+        }
+      }
     },
   );
+
+  /// Permanently removes data owned by one local household. Used only by
+  /// the explicit factory-reset action after its confirmation dialog.
+  Future<void> deleteHouseholdData(String householdId) => transaction(() async {
+    await (delete(
+      checklistItems,
+    )..where((t) => t.householdId.equals(householdId))).go();
+    await (delete(
+      checklistTemplates,
+    )..where((t) => t.householdId.equals(householdId))).go();
+    await (delete(
+      inventoryItems,
+    )..where((t) => t.householdId.equals(householdId))).go();
+    await (delete(
+      budgetEntries,
+    )..where((t) => t.householdId.equals(householdId))).go();
+    await (delete(
+      householdPlans,
+    )..where((t) => t.householdId.equals(householdId))).go();
+    await (delete(
+      householdMembers,
+    )..where((t) => t.householdId.equals(householdId))).go();
+  });
 
   // --- Household members ------------------------------------------------
 

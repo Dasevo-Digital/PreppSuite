@@ -2483,4 +2483,161 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get backupPassphraseInvalid =>
       'Mindestens 8 Zeichen eingeben; beide Eingaben müssen übereinstimmen.';
+
+  @override
+  String get warningInstructionsTitle => 'Handlungsempfehlungen';
+
+  @override
+  String get warningAreaTitle => 'Betroffenes Gebiet';
+
+  @override
+  String get warningContactTitle => 'Herausgeber und Kontakt';
+
+  @override
+  String get warningShowMap => 'Gebiet auf Karte zeigen';
+
+  @override
+  String get knowledgeBrowseTitle => 'Archiv durchblättern';
+
+  @override
+  String get knowledgeBrowseBody =>
+      'Öffne die Startseite, wähle einen Anfangsbuchstaben oder entdecke einen zufälligen Artikel.';
+
+  @override
+  String get knowledgeMainPageAction => 'Startseite';
+
+  @override
+  String get knowledgeRandomAction => 'Zufälliger Artikel';
+
+  @override
+  String knowledgeArchiveStats(int articles, String size) {
+    return '$articles Einträge · ungefähr $size';
+  }
+
+  @override
+  String knowledgeTotalSize(String size) {
+    return 'Gesamtgröße: ungefähr $size';
+  }
+
+  @override
+  String get knowledgeDocumentsTitle => 'Eigene Dokumente';
+
+  @override
+  String get knowledgeDocumentsIntro =>
+      'PDF-, EPUB- und Markdown-Dateien bleiben an ihrem Speicherort und werden nicht dupliziert.';
+
+  @override
+  String get knowledgeDocumentAdd => 'Dokument hinzufügen';
+
+  @override
+  String get knowledgeDocumentsEmpty =>
+      'Noch keine eigenen Dokumente hinzugefügt.';
+
+  @override
+  String get knowledgeDocumentOpen => 'Öffnen';
+
+  @override
+  String get knowledgeDocumentRemove => 'Aus Bibliothek entfernen';
+
+  @override
+  String get knowledgeDocumentOpenFailed =>
+      'Das Dokument konnte nicht geöffnet werden.';
+
+  @override
+  String get emergencyDirectoryTitle => 'Notruf, Kontakte & Funk';
+
+  @override
+  String get emergencyMedicalService => 'Ärztlicher Bereitschaftsdienst 116117';
+
+  @override
+  String get emergencyPoisonTitle => 'Giftnotrufzentralen';
+
+  @override
+  String get emergencyPoisonHint =>
+      'Bei lebensbedrohlichen Symptomen zuerst 112 anrufen. Die zuständige Giftnotrufzentrale berät bei Vergiftungsverdacht.';
+
+  @override
+  String get emergencyRadioTitle => 'Radio- und Funkbereiche';
+
+  @override
+  String get emergencyRadioHint =>
+      'Lokale Senderfrequenzen ändern sich. Im Ereignisfall Sendersuchlauf nutzen und amtliche Durchsagen beachten. Senden ist nur im jeweils erlaubten Funkdienst zulässig.';
+
+  @override
+  String get emergencyContactsTitle => 'Nahe Notfallkontakte';
+
+  @override
+  String get emergencyContactsEmpty => 'Noch keine nahen Kontakte gespeichert.';
+
+  @override
+  String get emergencyContactAdd => 'Kontakt hinzufügen';
+
+  @override
+  String get emergencyContactName => 'Name';
+
+  @override
+  String get emergencyContactPhone => 'Telefonnummer';
+
+  @override
+  String get emergencyContactAddress => 'Adresse';
+
+  @override
+  String get emergencyContactCoordinates => 'Koordinaten (Breite, Länge)';
+
+  @override
+  String get emergencyContactDelete => 'Kontakt löschen';
+
+  @override
+  String get emergencyCallAction => 'Anrufen';
+
+  @override
+  String get emergencyOpenMapAction => 'Auf Karte öffnen';
+
+  @override
+  String get prepperRecipesTitle => 'Notfallrezepte';
+
+  @override
+  String get prepperRecipesIntro =>
+      'Einfache Gerichte aus haltbaren Vorräten, mit wenig Wasser und Energie. Mengen an den Haushalt anpassen.';
+
+  @override
+  String get preservationTitle => 'Lebensmittel haltbar machen';
+
+  @override
+  String get preservationIntro =>
+      'Bewährte Verfahren für vorhandene Lebensmittel. Sauber arbeiten, sichere Einkochzeiten beachten und aufgeblähte oder verdächtige Gläser entsorgen.';
+
+  @override
+  String get storageOfficialCalculator =>
+      'Offiziellen Vorratskalkulator öffnen';
+
+  @override
+  String get storageOfficialTips => 'Weitere Tipps der Ernährungsvorsorge';
+
+  @override
+  String get resetTitle => 'Zurücksetzen';
+
+  @override
+  String get resetSettings => 'App-Einstellungen zurücksetzen';
+
+  @override
+  String get resetSettingsHint =>
+      'Sprache, Darstellung, Benachrichtigungen und Kartenanbieter auf Standardwerte setzen. Daten und Downloads bleiben erhalten.';
+
+  @override
+  String get resetHousehold => 'Haushalt und lokale Daten löschen';
+
+  @override
+  String get resetHouseholdHint =>
+      'Vorräte, Checklisten, Notfallplan und Notfallkarten dieses Haushalts dauerhaft von diesem Gerät löschen.';
+
+  @override
+  String get resetConfirmTitle => 'Wirklich zurücksetzen?';
+
+  @override
+  String get resetConfirmHousehold =>
+      'Die lokalen Haushaltsdaten werden dauerhaft gelöscht. Eine Sicherung sollte vorher erstellt werden.';
+
+  @override
+  String get resetDone => 'Zurücksetzen abgeschlossen.';
 }

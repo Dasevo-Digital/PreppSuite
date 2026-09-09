@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../model/categories.dart';
 import '../../../model/household_profile.dart';
@@ -11,6 +15,7 @@ import '../application/warning_providers.dart';
 import '../application/warning_relevance.dart';
 import '../application/warning_severity_l10n.dart';
 import '../../../core/error_text.dart';
+import '../../maps/presentation/base_map_layer.dart';
 
 class WarningListScreen extends ConsumerStatefulWidget {
   const WarningListScreen({super.key, required this.profile});
@@ -405,6 +410,48 @@ class _WarningTile extends StatelessWidget {
                 Text(warning.description!),
                 const SizedBox(height: 8),
               ],
+              if (warning.instruction != null) ...[
+                Text(
+                  l10n.warningInstructionsTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 4),
+                Text(warning.instruction!),
+                const SizedBox(height: 12),
+              ],
+              if (warning.areaDescription != null) ...[
+                Text(
+                  l10n.warningAreaTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 4),
+                Text(warning.areaDescription!),
+                const SizedBox(height: 8),
+              ],
+              if (_warningPolygons(warning).isNotEmpty) ...[
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => _WarningAreaMap(
+                        title: warning.headline,
+                        polygons: _warningPolygons(warning),
+                      ),
+                    ),
+                  ),
+                  icon: const Icon(Icons.map_outlined),
+                  label: Text(l10n.warningShowMap),
+                ),
+                const SizedBox(height: 8),
+              ],
+              if (warning.senderContact != null) ...[
+                Text(
+                  l10n.warningContactTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 4),
+                Text(warning.senderContact!),
+                const SizedBox(height: 12),
+              ],
               Text(
                 switch (source) {
                   WarningSource.bbk => l10n.warningSourceBbk,
@@ -440,6 +487,66 @@ class _WarningTile extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+List<List<LatLng>> _warningPolygons(Warning warning) {
+  final encoded = warning.polygonsJson;
+  if (encoded == null) return const [];
+  try {
+    final decoded = jsonDecode(encoded);
+    if (decoded is! List) return const [];
+    return [
+      for (final polygon in decoded.whereType<String>())
+        [
+          for (final pair in polygon.split(RegExp(r'\s+')))
+            if (pair.split(',') case [final lat, final lon])
+              if (double.tryParse(lat) case final latitude?)
+                if (double.tryParse(lon) case final longitude?)
+                  LatLng(latitude, longitude),
+        ],
+    ].where((points) => points.length >= 3).toList();
+  } on Object {
+    return const [];
+  }
+}
+
+class _WarningAreaMap extends StatelessWidget {
+  const _WarningAreaMap({required this.title, required this.polygons});
+
+  final String title;
+  final List<List<LatLng>> polygons;
+
+  @override
+  Widget build(BuildContext context) {
+    final all = polygons.expand((polygon) => polygon).toList();
+    final center = LatLng(
+      all.fold<double>(0, (sum, point) => sum + point.latitude) / all.length,
+      all.fold<double>(0, (sum, point) => sum + point.longitude) / all.length,
+    );
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: FlutterMap(
+        options: MapOptions(initialCenter: center, initialZoom: 9),
+        children: [
+          const BaseMapLayer(),
+          PolygonLayer(
+            polygons: [
+              for (final points in polygons)
+                Polygon(
+                  points: points,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.error.withValues(alpha: .2),
+                  borderColor: Theme.of(context).colorScheme.error,
+                  borderStrokeWidth: 3,
+                ),
+            ],
+          ),
+          BaseMapAttribution(l10n: AppLocalizations.of(context)!),
+        ],
+      ),
     );
   }
 }

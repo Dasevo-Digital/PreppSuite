@@ -4919,6 +4919,50 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _instructionMeta = const VerificationMeta(
+    'instruction',
+  );
+  @override
+  late final GeneratedColumn<String> instruction = GeneratedColumn<String>(
+    'instruction',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _areaDescriptionMeta = const VerificationMeta(
+    'areaDescription',
+  );
+  @override
+  late final GeneratedColumn<String> areaDescription = GeneratedColumn<String>(
+    'area_description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _senderContactMeta = const VerificationMeta(
+    'senderContact',
+  );
+  @override
+  late final GeneratedColumn<String> senderContact = GeneratedColumn<String>(
+    'sender_contact',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _polygonsJsonMeta = const VerificationMeta(
+    'polygonsJson',
+  );
+  @override
+  late final GeneratedColumn<String> polygonsJson = GeneratedColumn<String>(
+    'polygons_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _effectiveMeta = const VerificationMeta(
     'effective',
   );
@@ -4986,6 +5030,10 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
     eventType,
     headline,
     description,
+    instruction,
+    areaDescription,
+    senderContact,
+    polygonsJson,
     effective,
     expires,
     sent,
@@ -5070,6 +5118,42 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
         ),
       );
     }
+    if (data.containsKey('instruction')) {
+      context.handle(
+        _instructionMeta,
+        instruction.isAcceptableOrUnknown(
+          data['instruction']!,
+          _instructionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('area_description')) {
+      context.handle(
+        _areaDescriptionMeta,
+        areaDescription.isAcceptableOrUnknown(
+          data['area_description']!,
+          _areaDescriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sender_contact')) {
+      context.handle(
+        _senderContactMeta,
+        senderContact.isAcceptableOrUnknown(
+          data['sender_contact']!,
+          _senderContactMeta,
+        ),
+      );
+    }
+    if (data.containsKey('polygons_json')) {
+      context.handle(
+        _polygonsJsonMeta,
+        polygonsJson.isAcceptableOrUnknown(
+          data['polygons_json']!,
+          _polygonsJsonMeta,
+        ),
+      );
+    }
     if (data.containsKey('effective')) {
       context.handle(
         _effectiveMeta,
@@ -5147,6 +5231,22 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
         DriftSqlType.string,
         data['${effectivePrefix}description'],
       ),
+      instruction: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}instruction'],
+      ),
+      areaDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}area_description'],
+      ),
+      senderContact: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sender_contact'],
+      ),
+      polygonsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}polygons_json'],
+      ),
       effective: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}effective'],
@@ -5190,6 +5290,10 @@ class Warning extends DataClass implements Insertable<Warning> {
   final String eventType;
   final String headline;
   final String? description;
+  final String? instruction;
+  final String? areaDescription;
+  final String? senderContact;
+  final String? polygonsJson;
   final DateTime effective;
   final DateTime? expires;
   final DateTime sent;
@@ -5212,6 +5316,10 @@ class Warning extends DataClass implements Insertable<Warning> {
     required this.eventType,
     required this.headline,
     this.description,
+    this.instruction,
+    this.areaDescription,
+    this.senderContact,
+    this.polygonsJson,
     required this.effective,
     this.expires,
     required this.sent,
@@ -5232,6 +5340,18 @@ class Warning extends DataClass implements Insertable<Warning> {
     map['headline'] = Variable<String>(headline);
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || instruction != null) {
+      map['instruction'] = Variable<String>(instruction);
+    }
+    if (!nullToAbsent || areaDescription != null) {
+      map['area_description'] = Variable<String>(areaDescription);
+    }
+    if (!nullToAbsent || senderContact != null) {
+      map['sender_contact'] = Variable<String>(senderContact);
+    }
+    if (!nullToAbsent || polygonsJson != null) {
+      map['polygons_json'] = Variable<String>(polygonsJson);
     }
     map['effective'] = Variable<DateTime>(effective);
     if (!nullToAbsent || expires != null) {
@@ -5257,6 +5377,18 @@ class Warning extends DataClass implements Insertable<Warning> {
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
+      instruction: instruction == null && nullToAbsent
+          ? const Value.absent()
+          : Value(instruction),
+      areaDescription: areaDescription == null && nullToAbsent
+          ? const Value.absent()
+          : Value(areaDescription),
+      senderContact: senderContact == null && nullToAbsent
+          ? const Value.absent()
+          : Value(senderContact),
+      polygonsJson: polygonsJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(polygonsJson),
       effective: Value(effective),
       expires: expires == null && nullToAbsent
           ? const Value.absent()
@@ -5281,6 +5413,10 @@ class Warning extends DataClass implements Insertable<Warning> {
       eventType: serializer.fromJson<String>(json['eventType']),
       headline: serializer.fromJson<String>(json['headline']),
       description: serializer.fromJson<String?>(json['description']),
+      instruction: serializer.fromJson<String?>(json['instruction']),
+      areaDescription: serializer.fromJson<String?>(json['areaDescription']),
+      senderContact: serializer.fromJson<String?>(json['senderContact']),
+      polygonsJson: serializer.fromJson<String?>(json['polygonsJson']),
       effective: serializer.fromJson<DateTime>(json['effective']),
       expires: serializer.fromJson<DateTime?>(json['expires']),
       sent: serializer.fromJson<DateTime>(json['sent']),
@@ -5300,6 +5436,10 @@ class Warning extends DataClass implements Insertable<Warning> {
       'eventType': serializer.toJson<String>(eventType),
       'headline': serializer.toJson<String>(headline),
       'description': serializer.toJson<String?>(description),
+      'instruction': serializer.toJson<String?>(instruction),
+      'areaDescription': serializer.toJson<String?>(areaDescription),
+      'senderContact': serializer.toJson<String?>(senderContact),
+      'polygonsJson': serializer.toJson<String?>(polygonsJson),
       'effective': serializer.toJson<DateTime>(effective),
       'expires': serializer.toJson<DateTime?>(expires),
       'sent': serializer.toJson<DateTime>(sent),
@@ -5317,6 +5457,10 @@ class Warning extends DataClass implements Insertable<Warning> {
     String? eventType,
     String? headline,
     Value<String?> description = const Value.absent(),
+    Value<String?> instruction = const Value.absent(),
+    Value<String?> areaDescription = const Value.absent(),
+    Value<String?> senderContact = const Value.absent(),
+    Value<String?> polygonsJson = const Value.absent(),
     DateTime? effective,
     Value<DateTime?> expires = const Value.absent(),
     DateTime? sent,
@@ -5331,6 +5475,14 @@ class Warning extends DataClass implements Insertable<Warning> {
     eventType: eventType ?? this.eventType,
     headline: headline ?? this.headline,
     description: description.present ? description.value : this.description,
+    instruction: instruction.present ? instruction.value : this.instruction,
+    areaDescription: areaDescription.present
+        ? areaDescription.value
+        : this.areaDescription,
+    senderContact: senderContact.present
+        ? senderContact.value
+        : this.senderContact,
+    polygonsJson: polygonsJson.present ? polygonsJson.value : this.polygonsJson,
     effective: effective ?? this.effective,
     expires: expires.present ? expires.value : this.expires,
     sent: sent ?? this.sent,
@@ -5353,6 +5505,18 @@ class Warning extends DataClass implements Insertable<Warning> {
       description: data.description.present
           ? data.description.value
           : this.description,
+      instruction: data.instruction.present
+          ? data.instruction.value
+          : this.instruction,
+      areaDescription: data.areaDescription.present
+          ? data.areaDescription.value
+          : this.areaDescription,
+      senderContact: data.senderContact.present
+          ? data.senderContact.value
+          : this.senderContact,
+      polygonsJson: data.polygonsJson.present
+          ? data.polygonsJson.value
+          : this.polygonsJson,
       effective: data.effective.present ? data.effective.value : this.effective,
       expires: data.expires.present ? data.expires.value : this.expires,
       sent: data.sent.present ? data.sent.value : this.sent,
@@ -5372,6 +5536,10 @@ class Warning extends DataClass implements Insertable<Warning> {
           ..write('eventType: $eventType, ')
           ..write('headline: $headline, ')
           ..write('description: $description, ')
+          ..write('instruction: $instruction, ')
+          ..write('areaDescription: $areaDescription, ')
+          ..write('senderContact: $senderContact, ')
+          ..write('polygonsJson: $polygonsJson, ')
           ..write('effective: $effective, ')
           ..write('expires: $expires, ')
           ..write('sent: $sent, ')
@@ -5391,6 +5559,10 @@ class Warning extends DataClass implements Insertable<Warning> {
     eventType,
     headline,
     description,
+    instruction,
+    areaDescription,
+    senderContact,
+    polygonsJson,
     effective,
     expires,
     sent,
@@ -5409,6 +5581,10 @@ class Warning extends DataClass implements Insertable<Warning> {
           other.eventType == this.eventType &&
           other.headline == this.headline &&
           other.description == this.description &&
+          other.instruction == this.instruction &&
+          other.areaDescription == this.areaDescription &&
+          other.senderContact == this.senderContact &&
+          other.polygonsJson == this.polygonsJson &&
           other.effective == this.effective &&
           other.expires == this.expires &&
           other.sent == this.sent &&
@@ -5425,6 +5601,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
   final Value<String> eventType;
   final Value<String> headline;
   final Value<String?> description;
+  final Value<String?> instruction;
+  final Value<String?> areaDescription;
+  final Value<String?> senderContact;
+  final Value<String?> polygonsJson;
   final Value<DateTime> effective;
   final Value<DateTime?> expires;
   final Value<DateTime> sent;
@@ -5440,6 +5620,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     this.eventType = const Value.absent(),
     this.headline = const Value.absent(),
     this.description = const Value.absent(),
+    this.instruction = const Value.absent(),
+    this.areaDescription = const Value.absent(),
+    this.senderContact = const Value.absent(),
+    this.polygonsJson = const Value.absent(),
     this.effective = const Value.absent(),
     this.expires = const Value.absent(),
     this.sent = const Value.absent(),
@@ -5456,6 +5640,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     required String eventType,
     required String headline,
     this.description = const Value.absent(),
+    this.instruction = const Value.absent(),
+    this.areaDescription = const Value.absent(),
+    this.senderContact = const Value.absent(),
+    this.polygonsJson = const Value.absent(),
     required DateTime effective,
     this.expires = const Value.absent(),
     required DateTime sent,
@@ -5480,6 +5668,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     Expression<String>? eventType,
     Expression<String>? headline,
     Expression<String>? description,
+    Expression<String>? instruction,
+    Expression<String>? areaDescription,
+    Expression<String>? senderContact,
+    Expression<String>? polygonsJson,
     Expression<DateTime>? effective,
     Expression<DateTime>? expires,
     Expression<DateTime>? sent,
@@ -5496,6 +5688,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
       if (eventType != null) 'event_type': eventType,
       if (headline != null) 'headline': headline,
       if (description != null) 'description': description,
+      if (instruction != null) 'instruction': instruction,
+      if (areaDescription != null) 'area_description': areaDescription,
+      if (senderContact != null) 'sender_contact': senderContact,
+      if (polygonsJson != null) 'polygons_json': polygonsJson,
       if (effective != null) 'effective': effective,
       if (expires != null) 'expires': expires,
       if (sent != null) 'sent': sent,
@@ -5514,6 +5710,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     Value<String>? eventType,
     Value<String>? headline,
     Value<String?>? description,
+    Value<String?>? instruction,
+    Value<String?>? areaDescription,
+    Value<String?>? senderContact,
+    Value<String?>? polygonsJson,
     Value<DateTime>? effective,
     Value<DateTime?>? expires,
     Value<DateTime>? sent,
@@ -5530,6 +5730,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
       eventType: eventType ?? this.eventType,
       headline: headline ?? this.headline,
       description: description ?? this.description,
+      instruction: instruction ?? this.instruction,
+      areaDescription: areaDescription ?? this.areaDescription,
+      senderContact: senderContact ?? this.senderContact,
+      polygonsJson: polygonsJson ?? this.polygonsJson,
       effective: effective ?? this.effective,
       expires: expires ?? this.expires,
       sent: sent ?? this.sent,
@@ -5566,6 +5770,18 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (instruction.present) {
+      map['instruction'] = Variable<String>(instruction.value);
+    }
+    if (areaDescription.present) {
+      map['area_description'] = Variable<String>(areaDescription.value);
+    }
+    if (senderContact.present) {
+      map['sender_contact'] = Variable<String>(senderContact.value);
+    }
+    if (polygonsJson.present) {
+      map['polygons_json'] = Variable<String>(polygonsJson.value);
+    }
     if (effective.present) {
       map['effective'] = Variable<DateTime>(effective.value);
     }
@@ -5598,6 +5814,10 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
           ..write('eventType: $eventType, ')
           ..write('headline: $headline, ')
           ..write('description: $description, ')
+          ..write('instruction: $instruction, ')
+          ..write('areaDescription: $areaDescription, ')
+          ..write('senderContact: $senderContact, ')
+          ..write('polygonsJson: $polygonsJson, ')
           ..write('effective: $effective, ')
           ..write('expires: $expires, ')
           ..write('sent: $sent, ')

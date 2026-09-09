@@ -74,18 +74,22 @@ class WarningPollService {
 
     if (countryCode == 'DE') {
       final nationwide = await _bbk.fetchAll();
+      final detailedNationwide = await _detailsForChanged(
+        nationwide.warnings,
+      );
       complete = nationwide.complete;
       fetched += nationwide.warnings.length;
       newsworthy.addAll(
-        await _ingest.ingestBbk(nationwide.warnings, countryCode: 'DE'),
+        await _ingest.ingestBbk(detailedNationwide, countryCode: 'DE'),
       );
 
       final seen = {for (final w in nationwide.warnings) w.id};
 
       if (kreisSchluessel != null && kreisSchluessel.length >= 5) {
-        final precise = await _bbk.fetchDashboard(
+        final compactPrecise = await _bbk.fetchDashboard(
           kreisSchluessel.substring(0, 5),
         );
+        final precise = await _detailsForChanged(compactPrecise);
         fetched += precise.length;
         newsworthy.addAll(
           await _ingest.ingestBbk(
@@ -143,6 +147,36 @@ class WarningPollService {
       retired: retired,
       complete: complete,
     );
+  }
+
+  /// BBK's map feed is deliberately small. Fetch full CAP payloads only for
+  /// new or changed warnings; unchanged rows already carry their cached text.
+  /// Four workers keep a weather event with many notices from serialising a
+  /// refresh without opening an unbounded number of sockets.
+  Future<List<BbkRawWarning>> _detailsForChanged(
+    List<BbkRawWarning> warnings,
+  ) async {
+    final result = List<BbkRawWarning>.from(warnings);
+    var next = 0;
+    Future<void> worker() async {
+      while (next < warnings.length) {
+        final at = next++;
+        final warning = warnings[at];
+        final existing = await _db.findWarning(
+          WarningSource.bbk.name,
+          warning.id,
+        );
+        final sent = DateTime.tryParse(warning.startDate)?.toUtc();
+        final changed =
+            existing == null || (sent != null && sent.isAfter(existing.sent));
+        if (changed) result[at] = await _bbk.fetchDetails(warning);
+      }
+    }
+
+    await Future.wait(
+      List.generate(warnings.length.clamp(0, 4), (_) => worker()),
+    );
+    return result;
   }
 
   /// The subset of [candidates] that should actually produce a

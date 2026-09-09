@@ -2465,4 +2465,159 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get backupPassphraseInvalid =>
       'Enter at least 8 characters; both entries must match.';
+
+  @override
+  String get warningInstructionsTitle => 'Recommended actions';
+
+  @override
+  String get warningAreaTitle => 'Affected area';
+
+  @override
+  String get warningContactTitle => 'Publisher and contact';
+
+  @override
+  String get warningShowMap => 'Show area on map';
+
+  @override
+  String get knowledgeBrowseTitle => 'Browse archive';
+
+  @override
+  String get knowledgeBrowseBody =>
+      'Open the main page, choose an initial letter, or discover a random article.';
+
+  @override
+  String get knowledgeMainPageAction => 'Main page';
+
+  @override
+  String get knowledgeRandomAction => 'Random article';
+
+  @override
+  String knowledgeArchiveStats(int articles, String size) {
+    return '$articles entries · approximately $size';
+  }
+
+  @override
+  String knowledgeTotalSize(String size) {
+    return 'Total size: approximately $size';
+  }
+
+  @override
+  String get knowledgeDocumentsTitle => 'Personal documents';
+
+  @override
+  String get knowledgeDocumentsIntro =>
+      'PDF, EPUB and Markdown files remain in their original location and are not duplicated.';
+
+  @override
+  String get knowledgeDocumentAdd => 'Add document';
+
+  @override
+  String get knowledgeDocumentsEmpty =>
+      'No personal documents have been added yet.';
+
+  @override
+  String get knowledgeDocumentOpen => 'Open';
+
+  @override
+  String get knowledgeDocumentRemove => 'Remove from library';
+
+  @override
+  String get knowledgeDocumentOpenFailed => 'The document could not be opened.';
+
+  @override
+  String get emergencyDirectoryTitle => 'Emergency calls, contacts & radio';
+
+  @override
+  String get emergencyMedicalService => 'Non-emergency medical service 116117';
+
+  @override
+  String get emergencyPoisonTitle => 'Poison control centres';
+
+  @override
+  String get emergencyPoisonHint =>
+      'For life-threatening symptoms, call 112 first. The responsible poison control centre advises in suspected poisoning cases.';
+
+  @override
+  String get emergencyRadioTitle => 'Radio frequency ranges';
+
+  @override
+  String get emergencyRadioHint =>
+      'Local station frequencies change. Run a station scan during an incident and follow official announcements. Transmit only where the relevant radio service permits it.';
+
+  @override
+  String get emergencyContactsTitle => 'Nearby emergency contacts';
+
+  @override
+  String get emergencyContactsEmpty => 'No nearby contacts saved yet.';
+
+  @override
+  String get emergencyContactAdd => 'Add contact';
+
+  @override
+  String get emergencyContactName => 'Name';
+
+  @override
+  String get emergencyContactPhone => 'Phone number';
+
+  @override
+  String get emergencyContactAddress => 'Address';
+
+  @override
+  String get emergencyContactCoordinates => 'Coordinates (latitude, longitude)';
+
+  @override
+  String get emergencyContactDelete => 'Delete contact';
+
+  @override
+  String get emergencyCallAction => 'Call';
+
+  @override
+  String get emergencyOpenMapAction => 'Open on map';
+
+  @override
+  String get prepperRecipesTitle => 'Emergency recipes';
+
+  @override
+  String get prepperRecipesIntro =>
+      'Simple meals from shelf-stable supplies using little water and energy. Adjust quantities to the household.';
+
+  @override
+  String get preservationTitle => 'Preserving food';
+
+  @override
+  String get preservationIntro =>
+      'Established methods for food on hand. Work cleanly, observe safe processing times, and discard swollen or suspicious jars.';
+
+  @override
+  String get storageOfficialCalculator => 'Open official stock calculator';
+
+  @override
+  String get storageOfficialTips => 'More food preparedness tips';
+
+  @override
+  String get resetTitle => 'Reset';
+
+  @override
+  String get resetSettings => 'Reset app settings';
+
+  @override
+  String get resetSettingsHint =>
+      'Restore defaults for language, appearance, notifications and map provider. Data and downloads remain.';
+
+  @override
+  String get resetHousehold => 'Delete household and local data';
+
+  @override
+  String get resetHouseholdHint =>
+      'Permanently delete this household’s inventory, checklists, emergency plan and emergency cards from this device.';
+
+  @override
+  String get resetConfirmTitle => 'Reset now?';
+
+  @override
+  String get resetConfirmHousehold =>
+      'Local household data will be permanently deleted. Create a backup first if needed.';
+
+  @override
+  String get resetDone => 'Reset completed.';
 }

@@ -14,6 +14,7 @@ import '../../sharing/presentation/shared_folder_card.dart';
 import 'additional_regions_card.dart';
 import 'backup_card.dart';
 import 'my_region_card.dart';
+import 'reset_card.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key, required this.profile});
@@ -113,6 +114,13 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           BackupCard(householdId: profile.id, l10n: l10n),
+          const SizedBox(height: 24),
+          Text(
+            l10n.resetTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          ResetCard(profile: profile, l10n: l10n),
         ],
       ),
     );

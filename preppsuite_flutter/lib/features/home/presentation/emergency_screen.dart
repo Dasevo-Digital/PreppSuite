@@ -14,6 +14,7 @@ import '../../maps/application/offline_map_providers.dart';
 import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
 import '../application/shell_layout.dart';
+import 'emergency_information_screen.dart';
 
 /// The information that must remain quick to reach when time, power or a
 /// data connection is scarce. All values are derived from existing records.
@@ -82,6 +83,17 @@ class EmergencyScreen extends ConsumerWidget {
               _CallButton(label: l10n.emergencyCall112, number: '112'),
               _CallButton(label: l10n.emergencyCall110, number: '110'),
             ],
+          ),
+          const SizedBox(height: 8),
+          ListTile(
+            leading: const Icon(Icons.contact_phone_outlined),
+            title: Text(l10n.emergencyDirectoryTitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const EmergencyInformationScreen(),
+              ),
+            ),
           ),
           const SizedBox(height: 20),
           Text(

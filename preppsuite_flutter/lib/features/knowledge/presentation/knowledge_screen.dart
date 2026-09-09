@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,7 @@ import '../../downloads/presentation/download_banner.dart';
 import 'article_screen.dart';
 import 'kiwix_library_screen.dart';
 import 'knowledge_index_panel.dart';
+import 'personal_documents_screen.dart';
 import '../../../core/error_text.dart';
 
 /// Looking things up without a network: search an offline archive by
@@ -62,6 +64,15 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       appBar: AppBar(
         title: Text(l10n.knowledgeTitle),
         actions: [
+          IconButton(
+            tooltip: l10n.knowledgeDocumentsTitle,
+            icon: const Icon(Icons.folder_copy_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const PersonalDocumentsScreen(),
+              ),
+            ),
+          ),
           if (async.value?.isConfigured ?? false)
             PopupMenuButton<_ArchiveAction>(
               onSelected: (action) => switch (action) {
@@ -193,7 +204,18 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     }
 
     if (_query.trim().isEmpty) {
-      return _Centered(text: l10n.knowledgeSearchPrompt);
+      return _BrowseArchive(
+        l10n: l10n,
+        onMainPage: () => _openMainPage(l10n, state),
+        onRandom: () => _openRandom(l10n, state),
+        onLetter: (letter) {
+          _queryController.text = letter;
+          setState(() {
+            _query = letter;
+            _mode = _SearchMode.titles;
+          });
+        },
+      );
     }
 
     final results = _mode == _SearchMode.titles
@@ -230,6 +252,35 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
         );
       },
     );
+  }
+
+  Future<void> _openMainPage(
+    AppLocalizations l10n,
+    KnowledgeState state,
+  ) async {
+    final entry = await state.archive!.mainPage();
+    if (entry != null && mounted) await _open(l10n, state, entry);
+  }
+
+  Future<void> _openRandom(
+    AppLocalizations l10n,
+    KnowledgeState state,
+  ) async {
+    final archive = state.archive!;
+    final random = Random.secure();
+    for (var attempt = 0; attempt < 100; attempt++) {
+      final candidate = await archive.resolve(
+        await archive.entryAt(random.nextInt(archive.header.entryCount)),
+      );
+      if (candidate == null ||
+          !const {'A', 'C'}.contains(candidate.namespace) ||
+          !archive.mimeTypeOf(candidate).startsWith('text/html') ||
+          candidate.title.trim().isEmpty) {
+        continue;
+      }
+      if (mounted) await _open(l10n, state, candidate);
+      return;
+    }
   }
 
   Future<void> _open(
@@ -297,6 +348,23 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                   )!.knowledgeArchiveCount(state.library.length),
                 ),
               ),
+              if (state.library.any((archive) => archive.sizeBytes != null))
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      AppLocalizations.of(sheetContext)!.knowledgeTotalSize(
+                        _formatBytes(
+                          state.library.fold<int>(
+                            0,
+                            (sum, archive) => sum + (archive.sizeBytes ?? 0),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               Flexible(
                 child: ListView(
                   shrinkWrap: true,
@@ -310,11 +378,21 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                         ),
                         title: Text(archive.label),
                         subtitle: Text(
-                          archive.id == state.selectedId
-                              ? AppLocalizations.of(
-                                  sheetContext,
-                                )!.knowledgeArchiveSelected
-                              : archive.location,
+                          [
+                            if (archive.id == state.selectedId)
+                              AppLocalizations.of(
+                                sheetContext,
+                              )!.knowledgeArchiveSelected,
+                            if (archive.entryCount != null &&
+                                archive.sizeBytes != null)
+                              AppLocalizations.of(
+                                sheetContext,
+                              )!.knowledgeArchiveStats(
+                                archive.entryCount!,
+                                _formatBytes(archive.sizeBytes!),
+                              ),
+                            archive.location,
+                          ].join('\n'),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -384,6 +462,81 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       SnackBar(content: Text(l10n.knowledgeErrorUnreadable)),
     );
   }
+}
+
+String _formatBytes(int bytes) {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  var value = bytes.toDouble();
+  var unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit++;
+  }
+  return '${value >= 10 || unit == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(1)} ${units[unit]}';
+}
+
+class _BrowseArchive extends StatelessWidget {
+  const _BrowseArchive({
+    required this.l10n,
+    required this.onMainPage,
+    required this.onRandom,
+    required this.onLetter,
+  });
+
+  final AppLocalizations l10n;
+  final VoidCallback onMainPage;
+  final VoidCallback onRandom;
+  final ValueChanged<String> onLetter;
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+    padding: const EdgeInsets.all(16),
+    child: Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.knowledgeBrowseTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 6),
+            Text(l10n.knowledgeBrowseBody),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                FilledButton.tonalIcon(
+                  onPressed: onMainPage,
+                  icon: const Icon(Icons.home_outlined),
+                  label: Text(l10n.knowledgeMainPageAction),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: onRandom,
+                  icon: const Icon(Icons.casino_outlined),
+                  label: Text(l10n.knowledgeRandomAction),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final code in List.generate(26, (index) => 65 + index))
+                  ActionChip(
+                    label: Text(String.fromCharCode(code)),
+                    onPressed: () => onLetter(String.fromCharCode(code)),
+                  ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 /// One row of the library, so switching is a tap.

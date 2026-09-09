@@ -7,6 +7,8 @@ import '../application/package_nutrition.dart';
 import '../application/storage_plan.dart';
 import '../application/storage_plan_l10n.dart';
 import 'inventory_item_form_screen.dart';
+import 'prepper_recipes_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// The BLE's stockpiling tables, scaled to this household.
 ///
@@ -41,7 +43,20 @@ class _StorageTipsScreenState extends ConsumerState<StorageTipsScreen> {
     final plan = storagePlanFor(_diet);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.storageTipsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.storageTipsTitle),
+        actions: [
+          IconButton(
+            tooltip: l10n.prepperRecipesTitle,
+            icon: const Icon(Icons.soup_kitchen_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const PrepperRecipesScreen(),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         children: [
@@ -81,6 +96,33 @@ class _StorageTipsScreenState extends ConsumerState<StorageTipsScreen> {
           const _NutrientLegend(),
           const SizedBox(height: 8),
           const _SourceNote(),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: () => launchUrl(
+                  Uri.parse(
+                    'https://www.ernaehrungsvorsorge.de/private-vorsorge/notvorrat/vorratskalkulator',
+                  ),
+                  mode: LaunchMode.externalApplication,
+                ),
+                icon: const Icon(Icons.calculate_outlined),
+                label: Text(l10n.storageOfficialCalculator),
+              ),
+              OutlinedButton.icon(
+                onPressed: () => launchUrl(
+                  Uri.parse(
+                    'https://www.ernaehrungsvorsorge.de/private-vorsorge/empfehlungen-tipps/so-koennen-lebensmittel-haltbar-gemacht-werden',
+                  ),
+                  mode: LaunchMode.externalApplication,
+                ),
+                icon: const Icon(Icons.open_in_new),
+                label: Text(l10n.storageOfficialTips),
+              ),
+            ],
+          ),
         ],
       ),
     );

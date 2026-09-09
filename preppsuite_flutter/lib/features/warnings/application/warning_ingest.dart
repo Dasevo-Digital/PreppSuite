@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import '../../../model/categories.dart';
 
@@ -45,7 +47,13 @@ class WarningIngest {
         severity: _parseSeverity(warning.severity),
         eventType: warning.eventTitleDe,
         headline: warning.eventTitleDe,
-        description: null,
+        description: warning.description,
+        instruction: warning.instruction,
+        areaDescription: warning.areaDescription,
+        senderContact: warning.senderContact,
+        polygonsJson: warning.polygons.isEmpty
+            ? null
+            : jsonEncode(warning.polygons),
         effective: _parseDateTime(warning.startDate) ?? DateTime.now().toUtc(),
         expires: null,
         sent: _parseDateTime(warning.startDate) ?? DateTime.now().toUtc(),
@@ -91,6 +99,10 @@ class WarningIngest {
         eventType: warning.event,
         headline: warning.title,
         description: warning.areaDesc.isEmpty ? null : warning.areaDesc,
+        instruction: null,
+        areaDescription: warning.areaDesc.isEmpty ? null : warning.areaDesc,
+        senderContact: null,
+        polygonsJson: null,
         effective: _parseDateTime(warning.onset) ?? sent,
         expires: _parseDateTime(warning.expires),
         sent: sent,
@@ -116,6 +128,10 @@ class WarningIngest {
     required String eventType,
     required String headline,
     required String? description,
+    required String? instruction,
+    required String? areaDescription,
+    required String? senderContact,
+    required String? polygonsJson,
     required DateTime effective,
     required DateTime? expires,
     required DateTime sent,
@@ -142,6 +158,10 @@ class WarningIngest {
         eventType: eventType,
         headline: headline,
         description: Value(description),
+        instruction: Value(instruction),
+        areaDescription: Value(areaDescription),
+        senderContact: Value(senderContact),
+        polygonsJson: Value(polygonsJson),
         effective: effective,
         expires: Value(expires),
         sent: sent,
