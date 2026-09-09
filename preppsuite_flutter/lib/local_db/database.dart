@@ -29,11 +29,14 @@ part 'database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
+  /// Shown in the settings version information without opening the database.
+  static const currentSchemaVersion = 12;
+
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => currentSchemaVersion;
 
   /// The tables whose rows travel through a shared folder, i.e. the ones
   /// with a `dirty` column.

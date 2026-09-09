@@ -21,6 +21,9 @@ part 'knowledge_index_database.g.dart';
 /// whole schema.
 @DriftDatabase(tables: [])
 class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
+  /// The schema of each derived, per-ZIM full-text index.
+  static const currentSchemaVersion = 1;
+
   KnowledgeIndexDatabase(String archiveId)
     : super(
         driftDatabase(
@@ -61,7 +64,7 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => currentSchemaVersion;
 
   @override
   MigrationStrategy get migration =>

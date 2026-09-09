@@ -24,6 +24,9 @@ part 'personal_document_index.g.dart';
 /// touch the original files or the household database.
 @DriftDatabase(tables: [])
 class PersonalDocumentIndex extends _$PersonalDocumentIndex {
+  /// The schema of the local PDF, EPUB and Markdown full-text index.
+  static const currentSchemaVersion = 1;
+
   PersonalDocumentIndex()
     : super(
         driftDatabase(
@@ -35,7 +38,7 @@ class PersonalDocumentIndex extends _$PersonalDocumentIndex {
   PersonalDocumentIndex.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => currentSchemaVersion;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

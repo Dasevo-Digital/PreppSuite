@@ -803,5 +803,17 @@
   "knowledgeApolloAdvancedBody": "Umfangreichere Kurse für weiterführende Themen. Englischsprachige Angebote sind als Ergänzung gekennzeichnet.",
   "knowledgeApolloPersonalTitle": "Eigene Unterlagen ergänzen",
   "knowledgeApolloPersonalBody": "Füge lokale PDFs, EPUBs und Markdown-Dateien hinzu und mache auslesbaren Text für die Offline-Volltextsuche verfügbar.",
-  "knowledgeApolloDownloadHint": "Öffnet die Kiwix-Bibliothek mit einer passenden Suche. Prüfe dort Sprache, Ausgabe und Speicherbedarf vor dem Download."
+  "knowledgeApolloDownloadHint": "Öffnet die Kiwix-Bibliothek mit einer passenden Suche. Prüfe dort Sprache, Ausgabe und Speicherbedarf vor dem Download.",
+  "settingsVersionInfoTitle": "Versionsinfo",
+  "settingsVersionInfoApp": "PreppSuite-App",
+  "settingsVersionInfoAppValue": "{version} · Build {build}",
+  "@settingsVersionInfoAppValue": {"placeholders": {"version": {"type": "String"}, "build": {"type": "String"}}},
+  "settingsVersionInfoDatabase": "Haushaltsdatenbank",
+  "settingsVersionInfoKnowledgeIndex": "Wissensarchiv-Volltextindex",
+  "settingsVersionInfoDocumentsIndex": "Dokument-Volltextindex",
+  "settingsVersionInfoSchema": "Schema {version}",
+  "@settingsVersionInfoSchema": {"placeholders": {"version": {"type": "int"}}},
+  "settingsVersionInfoOfflineMap": "Offline-Kartenformat",
+  "settingsVersionInfoPmtiles": "PMTiles v3",
+  "settingsVersionInfoUnavailable": "Nicht verfügbar"
 }

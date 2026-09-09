@@ -2818,4 +2818,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get knowledgeApolloDownloadHint =>
       'Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.';
+
+  @override
+  String get settingsVersionInfoTitle => 'Version information';
+
+  @override
+  String get settingsVersionInfoApp => 'PreppSuite app';
+
+  @override
+  String settingsVersionInfoAppValue(String version, String build) {
+    return '$version · build $build';
+  }
+
+  @override
+  String get settingsVersionInfoDatabase => 'Household database';
+
+  @override
+  String get settingsVersionInfoKnowledgeIndex =>
+      'Knowledge archive full-text index';
+
+  @override
+  String get settingsVersionInfoDocumentsIndex => 'Document full-text index';
+
+  @override
+  String settingsVersionInfoSchema(int version) {
+    return 'Schema $version';
+  }
+
+  @override
+  String get settingsVersionInfoOfflineMap => 'Offline map format';
+
+  @override
+  String get settingsVersionInfoPmtiles => 'PMTiles v3';
+
+  @override
+  String get settingsVersionInfoUnavailable => 'Unavailable';
 }

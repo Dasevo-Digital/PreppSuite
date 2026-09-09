@@ -4879,6 +4879,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.'**
   String get knowledgeApolloDownloadHint;
+
+  /// No description provided for @settingsVersionInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Version information'**
+  String get settingsVersionInfoTitle;
+
+  /// No description provided for @settingsVersionInfoApp.
+  ///
+  /// In en, this message translates to:
+  /// **'PreppSuite app'**
+  String get settingsVersionInfoApp;
+
+  /// No description provided for @settingsVersionInfoAppValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{version} · build {build}'**
+  String settingsVersionInfoAppValue(String version, String build);
+
+  /// No description provided for @settingsVersionInfoDatabase.
+  ///
+  /// In en, this message translates to:
+  /// **'Household database'**
+  String get settingsVersionInfoDatabase;
+
+  /// No description provided for @settingsVersionInfoKnowledgeIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge archive full-text index'**
+  String get settingsVersionInfoKnowledgeIndex;
+
+  /// No description provided for @settingsVersionInfoDocumentsIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Document full-text index'**
+  String get settingsVersionInfoDocumentsIndex;
+
+  /// No description provided for @settingsVersionInfoSchema.
+  ///
+  /// In en, this message translates to:
+  /// **'Schema {version}'**
+  String settingsVersionInfoSchema(int version);
+
+  /// No description provided for @settingsVersionInfoOfflineMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline map format'**
+  String get settingsVersionInfoOfflineMap;
+
+  /// No description provided for @settingsVersionInfoPmtiles.
+  ///
+  /// In en, this message translates to:
+  /// **'PMTiles v3'**
+  String get settingsVersionInfoPmtiles;
+
+  /// No description provided for @settingsVersionInfoUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get settingsVersionInfoUnavailable;
 }
 
 class _AppLocalizationsDelegate

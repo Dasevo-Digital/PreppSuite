@@ -15,6 +15,7 @@ import 'additional_regions_card.dart';
 import 'backup_card.dart';
 import 'my_region_card.dart';
 import 'reset_card.dart';
+import 'version_info_card.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key, required this.profile});
@@ -114,6 +115,13 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           BackupCard(householdId: profile.id, l10n: l10n),
+          const SizedBox(height: 24),
+          Text(
+            l10n.settingsVersionInfoTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          const VersionInfoCard(),
           const SizedBox(height: 24),
           Text(
             l10n.resetTitle,

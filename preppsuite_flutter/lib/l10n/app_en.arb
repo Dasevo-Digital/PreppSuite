@@ -1536,5 +1536,17 @@
   "knowledgeApolloAdvancedBody": "More extensive courses for advanced topics. English-language resources are marked as a supplement.",
   "knowledgeApolloPersonalTitle": "Add your own material",
   "knowledgeApolloPersonalBody": "Add local PDF, EPUB and Markdown files and make readable text available to offline full-text search.",
-  "knowledgeApolloDownloadHint": "Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading."
+  "knowledgeApolloDownloadHint": "Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.",
+  "settingsVersionInfoTitle": "Version information",
+  "settingsVersionInfoApp": "PreppSuite app",
+  "settingsVersionInfoAppValue": "{version} · build {build}",
+  "@settingsVersionInfoAppValue": {"placeholders": {"version": {"type": "String"}, "build": {"type": "String"}}},
+  "settingsVersionInfoDatabase": "Household database",
+  "settingsVersionInfoKnowledgeIndex": "Knowledge archive full-text index",
+  "settingsVersionInfoDocumentsIndex": "Document full-text index",
+  "settingsVersionInfoSchema": "Schema {version}",
+  "@settingsVersionInfoSchema": {"placeholders": {"version": {"type": "int"}}},
+  "settingsVersionInfoOfflineMap": "Offline map format",
+  "settingsVersionInfoPmtiles": "PMTiles v3",
+  "settingsVersionInfoUnavailable": "Unavailable"
 }
