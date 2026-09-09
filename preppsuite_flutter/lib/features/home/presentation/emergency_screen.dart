@@ -15,6 +15,7 @@ import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
 import '../application/shell_layout.dart';
 import 'emergency_information_screen.dart';
+import 'preparedness_tools_screen.dart';
 
 /// The information that must remain quick to reach when time, power or a
 /// data connection is scarce. All values are derived from existing records.
@@ -95,6 +96,19 @@ class EmergencyScreen extends ConsumerWidget {
               ),
             ),
           ),
+          ListTile(
+            leading: const Icon(Icons.playlist_add_check_circle_outlined),
+            title: const Text('Notfallmodus und Übungen'),
+            subtitle: const Text(
+              'Ablaufkarte und realistische Haushaltsübungen',
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const PreparednessToolsScreen(),
+              ),
+            ),
+          ),
           const SizedBox(height: 20),
           Text(
             l10n.emergencyCurrentWarnings,
@@ -145,6 +159,44 @@ class EmergencyScreen extends ConsumerWidget {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => onNavigate(entry.$3),
                   ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text('Offline-Pakete', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(
+                    mapReady
+                        ? Icons.verified_outlined
+                        : Icons.download_outlined,
+                  ),
+                  title: const Text('Offline-Karte'),
+                  subtitle: Text(
+                    mapReady
+                        ? 'Geöffnet und für die Nutzung bereit'
+                        : 'Noch kein geprüftes Kartenpaket',
+                  ),
+                  onTap: () => onNavigate(ShellDestination.map),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: Icon(
+                    knowledgeReady
+                        ? Icons.verified_outlined
+                        : Icons.download_outlined,
+                  ),
+                  title: const Text('Wissensarchive'),
+                  subtitle: Text(
+                    knowledgeReady
+                        ? 'Archiv geöffnet und für die Nutzung bereit'
+                        : 'Noch kein geprüftes Wissensarchiv',
+                  ),
+                  onTap: () => onNavigate(ShellDestination.knowledge),
+                ),
               ],
             ),
           ),
