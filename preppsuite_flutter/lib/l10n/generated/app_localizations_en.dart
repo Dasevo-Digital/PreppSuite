@@ -2671,4 +2671,61 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get knowledgePersonalResultHint =>
       'Results from the local document index';
+
+  @override
+  String get radioEmergencyTitle => 'Emergency radio frequencies';
+
+  @override
+  String get radioEmergencyEntryHint =>
+      'CB and amateur radio: frequencies, rules and guidance';
+
+  @override
+  String get radioEmergencyIntro =>
+      '112 remains the first route for emergencies. Radio frequencies are a possible fallback when approved equipment is available; they are not permanently monitored.';
+
+  @override
+  String get radioCbTitle => 'CB radio: calling and assistance channels';
+
+  @override
+  String get radioCbHintsTitle => 'CB radio guidance';
+
+  @override
+  String get radioCbRule =>
+      'CB radio is generally allocated in Germany. Use approved equipment only and observe power, mode and antenna requirements.';
+
+  @override
+  String get radioAmateurTitle =>
+      'Amateur radio: IARU emergency centres of activity';
+
+  @override
+  String get radioLegalTitle => 'Legal notice';
+
+  @override
+  String get radioAmateurLegal =>
+      'Amateur radio may only be operated in Germany with a valid amateur radio licence. These frequencies are information and activity centres, not guaranteed emergency services.';
+
+  @override
+  String get radioNoGuaranteedMonitoring =>
+      'Do not wait for a reply: always call 112 first when it is reachable.';
+
+  @override
+  String get radioListenFirst =>
+      'Listen for an extended period before transmitting. Do not interfere with ongoing emergency traffic.';
+
+  @override
+  String get radioEmergencyCall =>
+      'Call only in a genuine emergency. State location, hazard and required help first; keep it brief and clear.';
+
+  @override
+  String get radioUseHintsTitle => 'Usage guidance';
+
+  @override
+  String get radioBriefMessage =>
+      'Use the lowest possible transmit power, confirm receipt, and agree fixed check-in times when energy is scarce.';
+
+  @override
+  String get radioOfficialRules => 'Open Federal Network Agency rules';
+
+  @override
+  String get radioIaruSource => 'Open DARC / IARU emergency frequencies';
 }

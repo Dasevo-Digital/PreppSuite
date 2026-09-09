@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import 'radio_emergency_screen.dart';
 
 const _contactsKey = 'nearbyEmergencyContacts';
 
@@ -188,6 +189,18 @@ class _EmergencyInformationScreenState
                   subtitle: Text('149,0250–149,1125 MHz · 6 Kanäle'),
                 ),
               ],
+            ),
+          ),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+            leading: const Icon(Icons.settings_input_antenna_outlined),
+            title: Text(l10n.radioEmergencyTitle),
+            subtitle: Text(l10n.radioEmergencyEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const RadioEmergencyScreen(),
+              ),
             ),
           ),
           const SizedBox(height: 20),

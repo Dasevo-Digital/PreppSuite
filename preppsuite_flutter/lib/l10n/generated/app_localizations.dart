@@ -4633,6 +4633,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Results from the local document index'**
   String get knowledgePersonalResultHint;
+
+  /// No description provided for @radioEmergencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency radio frequencies'**
+  String get radioEmergencyTitle;
+
+  /// No description provided for @radioEmergencyEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'CB and amateur radio: frequencies, rules and guidance'**
+  String get radioEmergencyEntryHint;
+
+  /// No description provided for @radioEmergencyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'112 remains the first route for emergencies. Radio frequencies are a possible fallback when approved equipment is available; they are not permanently monitored.'**
+  String get radioEmergencyIntro;
+
+  /// No description provided for @radioCbTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CB radio: calling and assistance channels'**
+  String get radioCbTitle;
+
+  /// No description provided for @radioCbHintsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CB radio guidance'**
+  String get radioCbHintsTitle;
+
+  /// No description provided for @radioCbRule.
+  ///
+  /// In en, this message translates to:
+  /// **'CB radio is generally allocated in Germany. Use approved equipment only and observe power, mode and antenna requirements.'**
+  String get radioCbRule;
+
+  /// No description provided for @radioAmateurTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Amateur radio: IARU emergency centres of activity'**
+  String get radioAmateurTitle;
+
+  /// No description provided for @radioLegalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Legal notice'**
+  String get radioLegalTitle;
+
+  /// No description provided for @radioAmateurLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'Amateur radio may only be operated in Germany with a valid amateur radio licence. These frequencies are information and activity centres, not guaranteed emergency services.'**
+  String get radioAmateurLegal;
+
+  /// No description provided for @radioNoGuaranteedMonitoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not wait for a reply: always call 112 first when it is reachable.'**
+  String get radioNoGuaranteedMonitoring;
+
+  /// No description provided for @radioListenFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen for an extended period before transmitting. Do not interfere with ongoing emergency traffic.'**
+  String get radioListenFirst;
+
+  /// No description provided for @radioEmergencyCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call only in a genuine emergency. State location, hazard and required help first; keep it brief and clear.'**
+  String get radioEmergencyCall;
+
+  /// No description provided for @radioUseHintsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage guidance'**
+  String get radioUseHintsTitle;
+
+  /// No description provided for @radioBriefMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the lowest possible transmit power, confirm receipt, and agree fixed check-in times when energy is scarce.'**
+  String get radioBriefMessage;
+
+  /// No description provided for @radioOfficialRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Federal Network Agency rules'**
+  String get radioOfficialRules;
+
+  /// No description provided for @radioIaruSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Open DARC / IARU emergency frequencies'**
+  String get radioIaruSource;
 }
 
 class _AppLocalizationsDelegate

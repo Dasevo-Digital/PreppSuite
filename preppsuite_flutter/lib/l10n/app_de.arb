@@ -761,5 +761,21 @@
   "knowledgeDocumentIndexSummary": "{indexed} von {total} Dokumenten durchsuchbar",
   "@knowledgeDocumentIndexSummary": {"placeholders": {"indexed": {"type": "int"}, "total": {"type": "int"}}},
   "knowledgePersonalResults": "Eigene Dokumente",
-  "knowledgePersonalResultHint": "Treffer aus dem lokalen Dokumentenindex"
+  "knowledgePersonalResultHint": "Treffer aus dem lokalen Dokumentenindex",
+  "radioEmergencyTitle": "Funk-Notfallfrequenzen",
+  "radioEmergencyEntryHint": "CB- und Amateurfunk: Frequenzen, Regeln und Hinweise",
+  "radioEmergencyIntro": "112 bleibt der erste Weg für Notrufe. Funkfrequenzen sind ein möglicher Rückfallweg, wenn ein zugelassenes Gerät verfügbar ist; sie werden nicht dauerhaft überwacht.",
+  "radioCbTitle": "CB-Funk: Anruf- und Hilfekanäle",
+  "radioCbHintsTitle": "Hinweise zum CB-Funk",
+  "radioCbRule": "CB-Funk ist in Deutschland allgemein zugeteilt. Nutze nur zugelassene Geräte und halte Leistung, Betriebsart und Antennenvorgaben ein.",
+  "radioAmateurTitle": "Amateurfunk: IARU-Notfunk-Schwerpunkte",
+  "radioLegalTitle": "Rechtlicher Hinweis",
+  "radioAmateurLegal": "Amateurfunk darf in Deutschland nur mit gültiger Amateurfunkzulassung betrieben werden. Die Frequenzen sind Informations- und Aktivitätsschwerpunkte, keine garantierten Notrufstellen.",
+  "radioNoGuaranteedMonitoring": "Nicht auf eine Antwort warten: Wenn 112 erreichbar ist, immer zuerst 112 wählen.",
+  "radioListenFirst": "Vor dem Senden länger zuhören. Laufenden Notfunkverkehr nicht stören.",
+  "radioEmergencyCall": "Nur bei einer echten Notlage rufen. Nenne zuerst Ort, Art der Gefahr und benötigte Hilfe; bleibe kurz und klar.",
+  "radioUseHintsTitle": "Hinweise zur Nutzung",
+  "radioBriefMessage": "Sendeleistung so niedrig wie möglich halten, Empfang bestätigen und bei knapper Energie feste Meldezeiten vereinbaren.",
+  "radioOfficialRules": "Regeln der Bundesnetzagentur öffnen",
+  "radioIaruSource": "DARC / IARU-Notfunkfrequenzen öffnen"
 }

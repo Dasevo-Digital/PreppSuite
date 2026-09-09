@@ -2694,4 +2694,60 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get knowledgePersonalResultHint =>
       'Treffer aus dem lokalen Dokumentenindex';
+
+  @override
+  String get radioEmergencyTitle => 'Funk-Notfallfrequenzen';
+
+  @override
+  String get radioEmergencyEntryHint =>
+      'CB- und Amateurfunk: Frequenzen, Regeln und Hinweise';
+
+  @override
+  String get radioEmergencyIntro =>
+      '112 bleibt der erste Weg für Notrufe. Funkfrequenzen sind ein möglicher Rückfallweg, wenn ein zugelassenes Gerät verfügbar ist; sie werden nicht dauerhaft überwacht.';
+
+  @override
+  String get radioCbTitle => 'CB-Funk: Anruf- und Hilfekanäle';
+
+  @override
+  String get radioCbHintsTitle => 'Hinweise zum CB-Funk';
+
+  @override
+  String get radioCbRule =>
+      'CB-Funk ist in Deutschland allgemein zugeteilt. Nutze nur zugelassene Geräte und halte Leistung, Betriebsart und Antennenvorgaben ein.';
+
+  @override
+  String get radioAmateurTitle => 'Amateurfunk: IARU-Notfunk-Schwerpunkte';
+
+  @override
+  String get radioLegalTitle => 'Rechtlicher Hinweis';
+
+  @override
+  String get radioAmateurLegal =>
+      'Amateurfunk darf in Deutschland nur mit gültiger Amateurfunkzulassung betrieben werden. Die Frequenzen sind Informations- und Aktivitätsschwerpunkte, keine garantierten Notrufstellen.';
+
+  @override
+  String get radioNoGuaranteedMonitoring =>
+      'Nicht auf eine Antwort warten: Wenn 112 erreichbar ist, immer zuerst 112 wählen.';
+
+  @override
+  String get radioListenFirst =>
+      'Vor dem Senden länger zuhören. Laufenden Notfunkverkehr nicht stören.';
+
+  @override
+  String get radioEmergencyCall =>
+      'Nur bei einer echten Notlage rufen. Nenne zuerst Ort, Art der Gefahr und benötigte Hilfe; bleibe kurz und klar.';
+
+  @override
+  String get radioUseHintsTitle => 'Hinweise zur Nutzung';
+
+  @override
+  String get radioBriefMessage =>
+      'Sendeleistung so niedrig wie möglich halten, Empfang bestätigen und bei knapper Energie feste Meldezeiten vereinbaren.';
+
+  @override
+  String get radioOfficialRules => 'Regeln der Bundesnetzagentur öffnen';
+
+  @override
+  String get radioIaruSource => 'DARC / IARU-Notfunkfrequenzen öffnen';
 }
