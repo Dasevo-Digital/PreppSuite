@@ -2873,4 +2873,82 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsVersionInfoUnavailable => 'Nicht verfügbar';
+
+  @override
+  String get readinessOpenDashboard => 'Einsatzbereitschaft prüfen';
+
+  @override
+  String get readinessDashboardHint =>
+      'Offline-Pakete und Aktualität der Warnungsdaten';
+
+  @override
+  String readinessSummary(int ready, int total) {
+    return '$ready von $total Bereichen bereit';
+  }
+
+  @override
+  String get readinessSummaryHint =>
+      'Prüfe fehlende Punkte vor einem Ereignis und wiederhole die Kontrolle nach Änderungen am Gerät.';
+
+  @override
+  String get readinessOfflinePackages => 'Offline-Pakete';
+
+  @override
+  String get readinessPackageReady => 'Geöffnet und lesbar';
+
+  @override
+  String get readinessPackageMissing => 'Nicht eingerichtet oder nicht lesbar';
+
+  @override
+  String readinessArchivesReady(int count) {
+    return '$count Archive registriert; ausgewähltes Archiv geöffnet';
+  }
+
+  @override
+  String get readinessWarningData => 'Amtliche Warnungsdaten';
+
+  @override
+  String get readinessWarningNeverUpdated =>
+      'Noch keine vollständige Aktualisierung auf diesem Gerät';
+
+  @override
+  String readinessWarningUpdated(String age) {
+    return 'Zuletzt vollständig aktualisiert: $age';
+  }
+
+  @override
+  String get readinessJustNow => 'gerade eben';
+
+  @override
+  String readinessMinutesAgo(int minutes) {
+    return 'vor $minutes Minuten';
+  }
+
+  @override
+  String readinessHoursAgo(int hours) {
+    return 'vor $hours Stunden';
+  }
+
+  @override
+  String readinessDaysAgo(int days) {
+    return 'vor $days Tagen';
+  }
+
+  @override
+  String get emergencyPlanExport => 'Notfallplan als PDF';
+
+  @override
+  String get emergencyPlanPdfTitle => 'Persönlicher Notfallplan';
+
+  @override
+  String get emergencyPlanPdfMeetingPoints => 'Treffpunkte';
+
+  @override
+  String get emergencyPlanPdfContact => 'Kontakt außerhalb der Region';
+
+  @override
+  String get emergencyPlanPdfEquipment => 'Notgepäck und Abschaltpunkte';
+
+  @override
+  String get emergencyPlanPdfEmpty => 'Nicht eingetragen';
 }

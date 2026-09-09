@@ -4939,6 +4939,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unavailable'**
   String get settingsVersionInfoUnavailable;
+
+  /// No description provided for @readinessOpenDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Check readiness'**
+  String get readinessOpenDashboard;
+
+  /// No description provided for @readinessDashboardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline packages and freshness of warning data'**
+  String get readinessDashboardHint;
+
+  /// No description provided for @readinessSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{ready} of {total} areas ready'**
+  String readinessSummary(int ready, int total);
+
+  /// No description provided for @readinessSummaryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolve missing items before an event and repeat the check after changes to the device.'**
+  String get readinessSummaryHint;
+
+  /// No description provided for @readinessOfflinePackages.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline packages'**
+  String get readinessOfflinePackages;
+
+  /// No description provided for @readinessPackageReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened and readable'**
+  String get readinessPackageReady;
+
+  /// No description provided for @readinessPackageMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured or unreadable'**
+  String get readinessPackageMissing;
+
+  /// No description provided for @readinessArchivesReady.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} archives registered; selected archive opened'**
+  String readinessArchivesReady(int count);
+
+  /// No description provided for @readinessWarningData.
+  ///
+  /// In en, this message translates to:
+  /// **'Official warning data'**
+  String get readinessWarningData;
+
+  /// No description provided for @readinessWarningNeverUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'No complete refresh on this device yet'**
+  String get readinessWarningNeverUpdated;
+
+  /// No description provided for @readinessWarningUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last complete refresh: {age}'**
+  String readinessWarningUpdated(String age);
+
+  /// No description provided for @readinessJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get readinessJustNow;
+
+  /// No description provided for @readinessMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes ago'**
+  String readinessMinutesAgo(int minutes);
+
+  /// No description provided for @readinessHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours ago'**
+  String readinessHoursAgo(int hours);
+
+  /// No description provided for @readinessDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days ago'**
+  String readinessDaysAgo(int days);
+
+  /// No description provided for @emergencyPlanExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency plan as PDF'**
+  String get emergencyPlanExport;
+
+  /// No description provided for @emergencyPlanPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal emergency plan'**
+  String get emergencyPlanPdfTitle;
+
+  /// No description provided for @emergencyPlanPdfMeetingPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting points'**
+  String get emergencyPlanPdfMeetingPoints;
+
+  /// No description provided for @emergencyPlanPdfContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact outside the area'**
+  String get emergencyPlanPdfContact;
+
+  /// No description provided for @emergencyPlanPdfEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency kit and shut-off points'**
+  String get emergencyPlanPdfEquipment;
+
+  /// No description provided for @emergencyPlanPdfEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not entered'**
+  String get emergencyPlanPdfEmpty;
 }
 
 class _AppLocalizationsDelegate

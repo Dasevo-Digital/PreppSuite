@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
+import '../application/emergency_plan_report.dart';
+import '../application/household_providers.dart';
 import '../application/household_plan_controller.dart';
 import '../../../core/error_text.dart';
 
@@ -66,6 +70,12 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
       appBar: AppBar(
         title: Text(l10n.householdPlanTitle),
         actions: [
+          if (planAsync.value != null)
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              tooltip: l10n.emergencyPlanExport,
+              onPressed: () => _export(planAsync.value!, l10n),
+            ),
           if (planAsync.value != null)
             IconButton(
               icon: const Icon(Icons.delete_outline),
@@ -208,6 +218,28 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(l10n.householdPlanCleared)));
+  }
+
+  Future<void> _export(HouseholdPlan plan, AppLocalizations l10n) async {
+    final profile = ref.read(householdProfileProvider).value;
+    final locale = Localizations.localeOf(context).toString();
+    await Printing.layoutPdf(
+      onLayout: (_) => const EmergencyPlanReport().build(
+        plan: plan,
+        householdName: profile?.name ?? '',
+        strings: EmergencyPlanReportStrings(
+          title: l10n.emergencyPlanPdfTitle,
+          generatedOn: l10n.pdfGeneratedOn(
+            DateFormat.yMMMMd(locale).add_Hm().format(DateTime.now()),
+          ),
+          meetingPoints: l10n.emergencyPlanPdfMeetingPoints,
+          contact: l10n.emergencyPlanPdfContact,
+          equipment: l10n.emergencyPlanPdfEquipment,
+          notes: l10n.notesLabel,
+          empty: l10n.emergencyPlanPdfEmpty,
+        ),
+      ),
+    );
   }
 }
 

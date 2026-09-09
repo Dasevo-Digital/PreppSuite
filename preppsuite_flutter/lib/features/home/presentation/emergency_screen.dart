@@ -16,6 +16,7 @@ import '../../warnings/application/warning_relevance.dart';
 import '../application/shell_layout.dart';
 import 'emergency_information_screen.dart';
 import 'preparedness_tools_screen.dart';
+import 'readiness_screen.dart';
 
 /// The information that must remain quick to reach when time, power or a
 /// data connection is scarce. All values are derived from existing records.
@@ -139,6 +140,17 @@ class EmergencyScreen extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 8),
+          ListTile(
+            leading: const Icon(Icons.monitor_heart_outlined),
+            title: Text(l10n.readinessOpenDashboard),
+            subtitle: Text(l10n.readinessDashboardHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => ReadinessScreen(profile: profile),
+              ),
+            ),
+          ),
           Card(
             child: Column(
               children: [

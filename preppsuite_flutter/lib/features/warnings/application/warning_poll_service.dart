@@ -5,6 +5,7 @@ import 'bbk_client.dart';
 import 'dwd_areas.dart';
 import 'meteoalarm_client.dart';
 import 'warning_ingest.dart';
+import 'warning_poll_status_store.dart';
 import 'warning_severity_l10n.dart';
 
 /// What one poll did, so the caller can log or display it without having
@@ -140,6 +141,7 @@ class WarningPollService {
     // MeteoAlarm carries its own expiry, so those rows age out on their
     // own; this only keeps the table from growing without bound.
     await _db.pruneExpiredWarnings();
+    await const WarningPollStatusStore().record(complete: complete);
 
     return WarningPollResult(
       fetched: fetched,

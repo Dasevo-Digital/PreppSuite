@@ -2853,4 +2853,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsVersionInfoUnavailable => 'Unavailable';
+
+  @override
+  String get readinessOpenDashboard => 'Check readiness';
+
+  @override
+  String get readinessDashboardHint =>
+      'Offline packages and freshness of warning data';
+
+  @override
+  String readinessSummary(int ready, int total) {
+    return '$ready of $total areas ready';
+  }
+
+  @override
+  String get readinessSummaryHint =>
+      'Resolve missing items before an event and repeat the check after changes to the device.';
+
+  @override
+  String get readinessOfflinePackages => 'Offline packages';
+
+  @override
+  String get readinessPackageReady => 'Opened and readable';
+
+  @override
+  String get readinessPackageMissing => 'Not configured or unreadable';
+
+  @override
+  String readinessArchivesReady(int count) {
+    return '$count archives registered; selected archive opened';
+  }
+
+  @override
+  String get readinessWarningData => 'Official warning data';
+
+  @override
+  String get readinessWarningNeverUpdated =>
+      'No complete refresh on this device yet';
+
+  @override
+  String readinessWarningUpdated(String age) {
+    return 'Last complete refresh: $age';
+  }
+
+  @override
+  String get readinessJustNow => 'just now';
+
+  @override
+  String readinessMinutesAgo(int minutes) {
+    return '$minutes minutes ago';
+  }
+
+  @override
+  String readinessHoursAgo(int hours) {
+    return '$hours hours ago';
+  }
+
+  @override
+  String readinessDaysAgo(int days) {
+    return '$days days ago';
+  }
+
+  @override
+  String get emergencyPlanExport => 'Emergency plan as PDF';
+
+  @override
+  String get emergencyPlanPdfTitle => 'Personal emergency plan';
+
+  @override
+  String get emergencyPlanPdfMeetingPoints => 'Meeting points';
+
+  @override
+  String get emergencyPlanPdfContact => 'Contact outside the area';
+
+  @override
+  String get emergencyPlanPdfEquipment => 'Emergency kit and shut-off points';
+
+  @override
+  String get emergencyPlanPdfEmpty => 'Not entered';
 }
