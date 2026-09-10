@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../sharing/application/folder_encryption.dart'
+    show minimumPassphraseLength;
 
 /// Asks for the passphrase that protects a backup.
 ///
@@ -45,9 +47,17 @@ class _PassphraseDialogState extends State<PassphraseDialog> {
     // household — emergency cards with blood group, medication and
     // conditions included. Argon2id at 64 MB makes each guess expensive;
     // the passphrase decides how many guesses are needed.
-    if (_first.text.length < 12 ||
+    //
+    // The same constant the encrypted shared folder uses, rather than a
+    // second twelve written next to it: both protect the same household
+    // under the same KDF, and two numbers for one rule drift apart.
+    if (_first.text.length < minimumPassphraseLength ||
         (widget.confirm && _first.text != _second.text)) {
-      setState(() => _error = widget.l10n.backupPassphraseInvalid);
+      setState(
+        () => _error = widget.l10n.backupPassphraseInvalid(
+          minimumPassphraseLength,
+        ),
+      );
       return;
     }
     Navigator.pop(context, _first.text);

@@ -12,25 +12,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'PreppSuite';
 
   @override
-  String get signOutButton => 'Sign out';
-
-  @override
-  String get onboardingChooseTitle => 'Welcome to PreppSuite';
-
-  @override
-  String get onboardingChooseSubtitle =>
-      'Create a new household or join an existing one.';
-
-  @override
-  String get createHouseholdButton => 'Create household';
-
-  @override
-  String get joinHouseholdButton => 'Join household';
-
-  @override
-  String get createHouseholdTitle => 'Create household';
-
-  @override
   String get householdNameLabel => 'Household name';
 
   @override
@@ -43,53 +24,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get regionKeyHelper => 'Germany only, for more precise warnings';
 
   @override
-  String get regionKeyExplanationTooltip => 'What is this?';
-
-  @override
-  String get regionKeyExplanationTitle => 'Official Regional Key (ARS)';
-
-  @override
-  String get regionKeyExplanationBody =>
-      'The \"amtlicher Regionalschlüssel\" (ARS) is a 12-digit code that German authorities use to uniquely identify every municipality, down to the district and locality level. It\'s issued by the national statistics office (Destatis) and used, among other things, to precisely scope official warnings (BBK/NINA) to your area instead of your entire federal state.\n\nWithout it, warnings are only filtered by country. With it, you get warnings specific to your municipality.\n\nYou can look up your municipality\'s ARS via the Federal Statistical Office\'s municipality directory (\"Gemeindeverzeichnis\") or your local BBK warning app. Leave this field empty if you don\'t know it — you can add it later in household settings.';
-
-  @override
-  String get regionKeyExplanationClose => 'Got it';
-
-  @override
-  String get displayNameLabel => 'Your display name';
-
-  @override
   String get createButton => 'Create';
-
-  @override
-  String get joinHouseholdTitle => 'Join household';
-
-  @override
-  String get inviteCodeLabel => 'Invite code';
-
-  @override
-  String get joinButton => 'Join';
-
-  @override
-  String get householdOverviewTitle => 'My household';
-
-  @override
-  String get inviteCodeSectionTitle => 'Invite code';
-
-  @override
-  String get rotateInviteCodeButton => 'Generate new code';
-
-  @override
-  String get membersSectionTitle => 'Members';
-
-  @override
-  String get roleOwner => 'Owner';
-
-  @override
-  String get roleMember => 'Member';
-
-  @override
-  String get loadingHousehold => 'Loading household…';
 
   @override
   String get fieldRequired => 'This field is required.';
@@ -125,18 +60,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorPlatformRefused =>
       'The system refused. Check in the settings whether PreppSuite has permission for it.';
-
-  @override
-  String get errorInvalidInviteCode => 'This invite code is not valid.';
-
-  @override
-  String get errorAlreadyInHousehold => 'You already belong to a household.';
-
-  @override
-  String get errorNotOwner => 'Only the household\'s owner can do this.';
-
-  @override
-  String get errorNotAMember => 'You are not a member of this household.';
 
   @override
   String get navInventory => 'Inventory';
@@ -212,9 +135,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get caloriesLabel => 'Calories, total kcal (optional)';
-
-  @override
-  String get supplyCalculatorPersonCountLabel => 'People';
 
   @override
   String supplyCalculatorDaysLabel(int days) {
@@ -365,9 +285,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get csvImportRowsSectionTitle => 'Rows';
-
-  @override
   String csvImportRowLabel(int row) {
     return 'Row $row';
   }
@@ -386,9 +303,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get navChecklists => 'Checklists';
-
-  @override
-  String get navBudget => 'Budget';
 
   @override
   String get checklistsTitle => 'Checklists';
@@ -420,9 +334,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteTemplateAction => 'Delete checklist';
-
-  @override
-  String get checklistItemTitleLabel => 'Item';
 
   @override
   String get addChecklistItemHint => 'Add an item…';
@@ -640,9 +551,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get viewAllWarningsAction => 'View all';
-
-  @override
   String get warningExpiredLabel => 'Expired';
 
   @override
@@ -689,9 +597,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pdfColumnUnit => 'Unit';
 
   @override
-  String get settingsSectionTitle => 'Settings';
-
-  @override
   String get languageLabel => 'Language';
 
   @override
@@ -702,9 +607,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageEnglishOption => 'English';
-
-  @override
-  String get serverAddressLabel => 'Server address';
 
   @override
   String inventoryAttentionTooltip(int count) {
@@ -765,9 +667,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsBundeslandRequired => 'Choose a federal state.';
 
   @override
-  String get settingsRegionLabelLabel => 'Label';
-
-  @override
   String get settingsNotificationsTitle => 'Notifications';
 
   @override
@@ -783,11 +682,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsLocationNoMatchMessage =>
       'Couldn\'t match your location to a German state.';
-
-  @override
-  String settingsLocationSuccessMessage(String state) {
-    return '$state added as an additional region.';
-  }
 
   @override
   String get shelterMapTitle => 'Shelters';
@@ -1040,9 +934,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Amount must be greater than 0 and at most the stock on hand.';
 
   @override
-  String get syncRetryButton => 'Try again';
-
-  @override
   String syncAgeMinutes(int count) {
     return '$count minutes';
   }
@@ -1166,10 +1057,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shoppingListCopied => 'Shopping list copied.';
 
   @override
-  String get shoppingListEmpty =>
-      'Nothing to buy: the target is met and every item is above its minimum.';
-
-  @override
   String get rotationTitle => 'Use next';
 
   @override
@@ -1215,9 +1102,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'This folder is encrypted and this device does not have the passphrase. Nothing is being read or written until you enter it.';
 
   @override
-  String get folderEncryptionTitle => 'Encrypt the shared folder';
-
-  @override
   String get folderEncryptionOff =>
       'Off. Everything in the folder is readable by anyone who can see it — including your sync provider.';
 
@@ -1261,10 +1145,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get folderEncryptionUnlocked => 'Folder unlocked.';
-
-  @override
-  String get folderEncryptionWorking =>
-      'Deriving the key. This takes a moment on purpose.';
 
   @override
   String get householdPlanTitle => 'Emergency plan';
@@ -1431,13 +1311,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyCardNameRequired => 'A card needs a name.';
 
   @override
-  String get emergencyCardSaved => 'Card saved.';
-
-  @override
   String get emergencyCardRemoved => 'Card removed.';
-
-  @override
-  String get emergencyCardRemove => 'Remove card';
 
   @override
   String emergencyCardRemoveConfirm(String name) {
@@ -1451,9 +1325,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get emergencyCardsHealthEncrypted =>
       'This is health data. The shared folder it travels through is encrypted.';
-
-  @override
-  String get emergencyCardsGoToEncryption => 'Folder settings';
 
   @override
   String get emergencyCardBirthYearInvalid => 'That is not a year.';
@@ -1596,9 +1467,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md.';
 
   @override
-  String get offlineMapHelp => 'Where do I get such a file?';
-
-  @override
   String get navKnowledge => 'Knowledge';
 
   @override
@@ -1618,9 +1486,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get knowledgeChangeAction => 'Choose a different file';
 
   @override
-  String get knowledgeForgetAction => 'Remove file';
-
-  @override
   String get articleLinkLeavesArchive =>
       'That link points outside the archive. PreppSuite only shows what is in the file.';
 
@@ -1635,9 +1500,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String knowledgeNoResults(String query) {
     return 'No title starts with “$query”.';
   }
-
-  @override
-  String get knowledgeSearchPrompt => 'Type a beginning to search.';
 
   @override
   String get knowledgeSuggestionsTitle => 'Where to start';
@@ -1682,9 +1544,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeRemoveAction => 'Remove this archive';
-
-  @override
-  String get knowledgeLibraryLabel => 'Archives on this device';
 
   @override
   String knowledgeSwitchFailed(String name) {
@@ -1900,10 +1759,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapDownloadTitle => 'Download map area';
 
   @override
-  String get mapDownloadIntro =>
-      'Move the map to the area you need offline. Exactly what you can see is what gets downloaded.';
-
-  @override
   String get mapDownloadZoomLabel => 'Detail';
 
   @override
@@ -1951,9 +1806,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'From your MapTiler account. Stays on this device.';
 
   @override
-  String get mapDownloadApiKeyMissing => 'This source needs a key.';
-
-  @override
   String get mapDownloadPolite =>
       'The tiles come from a public server other people use too. Take no more than you need.';
 
@@ -1986,17 +1838,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'The deepest level this area still fits at.';
 
   @override
-  String mapDownloadPlaceTooLarge(String name) {
-    return '$name is too large even at the coarsest level. Choose somewhere smaller.';
-  }
-
-  @override
   String mapDownloadDeepestPossible(String count, String level) {
     return 'At level 14 that would be $count tiles — too many. Level $level is the deepest this area goes.';
   }
-
-  @override
-  String get mapDownloadScopeLabel => 'Scope';
 
   @override
   String get mapDownloadScopePlace => 'This place only';
@@ -2118,9 +1962,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String supplyCalculatorHouseholdLine(String who) {
     return '$who — from the household';
   }
-
-  @override
-  String get supplyCalculatorEditHousehold => 'Change in the household';
 
   @override
   String supplyCalculatorAdults(String count) {
@@ -2723,17 +2564,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Without this passphrase the file cannot be opened again – not by you either. There is no way back and no back door. Write it down where the passports are kept, and not on the device this backup is meant to replace.';
 
   @override
-  String get backupPassphraseInvalid =>
-      'Enter at least 12 characters; both entries must match.';
+  String backupPassphraseInvalid(int count) {
+    return 'Enter at least $count characters; both entries have to match.';
+  }
 
   @override
   String get warningInstructionsTitle => 'Recommended actions';
-
-  @override
-  String get warningAreaTitle => 'Affected area';
-
-  @override
-  String get warningContactTitle => 'Publisher and contact';
 
   @override
   String get warningShowMap => 'Show area on map';
@@ -2812,9 +2648,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'No personal documents have been added yet.';
 
   @override
-  String get knowledgeDocumentOpen => 'Open';
-
-  @override
   String get knowledgeDocumentRemove => 'Remove from library';
 
   @override
@@ -2891,9 +2724,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emergencyContactDelete => 'Delete contact';
-
-  @override
-  String get emergencyCallAction => 'Call';
 
   @override
   String get emergencyOpenMapAction => 'Open on map';

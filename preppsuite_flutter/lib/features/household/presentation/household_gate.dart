@@ -29,6 +29,10 @@ class HouseholdGate extends ConsumerStatefulWidget {
 class _HouseholdGateState extends ConsumerState<HouseholdGate> {
   late final AppLifecycleListener _lifecycle;
 
+  /// The household whose built-in checklists have already been written on
+  /// this run. See [_seedChecklists].
+  String? _seededFor;
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +56,24 @@ class _HouseholdGateState extends ConsumerState<HouseholdGate> {
     super.dispose();
   }
 
+  /// Writes the built-in checklists, once per household per launch.
+  ///
+  /// Still not behind a stored "has this been seeded" flag: such a flag
+  /// goes stale the moment the shipped set grows, and the seeder is
+  /// deliberately idempotent so that running it again is free of
+  /// consequence. What it is not is free of cost -- it reads all eighteen
+  /// templates -- and this used to sit unguarded in `build`, so it ran
+  /// again on every rebuild of this widget rather than once at start.
+  ///
+  /// Fire-and-forget on purpose: nothing on screen waits for it. The
+  /// checklists arrive through a stream, so the tab fills in when the
+  /// write lands.
+  void _seedChecklists(String householdId) {
+    if (_seededFor == householdId) return;
+    _seededFor = householdId;
+    ChecklistSeeder(ref.read(appDatabaseProvider)).seed(householdId);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -67,9 +89,7 @@ class _HouseholdGateState extends ConsumerState<HouseholdGate> {
       data: (profile) {
         if (profile == null) return const ProfileSetupScreen();
 
-        // Cheap and idempotent, so it runs on every launch rather than
-        // needing a "has this been seeded" flag that could go stale.
-        ChecklistSeeder(ref.watch(appDatabaseProvider)).seed(profile.id);
+        _seedChecklists(profile.id);
 
         return HomeShell(profile: profile);
       },

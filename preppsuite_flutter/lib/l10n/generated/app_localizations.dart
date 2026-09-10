@@ -104,42 +104,6 @@ abstract class AppLocalizations {
   /// **'PreppSuite'**
   String get appTitle;
 
-  /// No description provided for @signOutButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign out'**
-  String get signOutButton;
-
-  /// No description provided for @onboardingChooseTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Welcome to PreppSuite'**
-  String get onboardingChooseTitle;
-
-  /// No description provided for @onboardingChooseSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Create a new household or join an existing one.'**
-  String get onboardingChooseSubtitle;
-
-  /// No description provided for @createHouseholdButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Create household'**
-  String get createHouseholdButton;
-
-  /// No description provided for @joinHouseholdButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Join household'**
-  String get joinHouseholdButton;
-
-  /// No description provided for @createHouseholdTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Create household'**
-  String get createHouseholdTitle;
-
   /// No description provided for @householdNameLabel.
   ///
   /// In en, this message translates to:
@@ -164,101 +128,11 @@ abstract class AppLocalizations {
   /// **'Germany only, for more precise warnings'**
   String get regionKeyHelper;
 
-  /// No description provided for @regionKeyExplanationTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'What is this?'**
-  String get regionKeyExplanationTooltip;
-
-  /// No description provided for @regionKeyExplanationTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Official Regional Key (ARS)'**
-  String get regionKeyExplanationTitle;
-
-  /// No description provided for @regionKeyExplanationBody.
-  ///
-  /// In en, this message translates to:
-  /// **'The \"amtlicher Regionalschlüssel\" (ARS) is a 12-digit code that German authorities use to uniquely identify every municipality, down to the district and locality level. It\'s issued by the national statistics office (Destatis) and used, among other things, to precisely scope official warnings (BBK/NINA) to your area instead of your entire federal state.\n\nWithout it, warnings are only filtered by country. With it, you get warnings specific to your municipality.\n\nYou can look up your municipality\'s ARS via the Federal Statistical Office\'s municipality directory (\"Gemeindeverzeichnis\") or your local BBK warning app. Leave this field empty if you don\'t know it — you can add it later in household settings.'**
-  String get regionKeyExplanationBody;
-
-  /// No description provided for @regionKeyExplanationClose.
-  ///
-  /// In en, this message translates to:
-  /// **'Got it'**
-  String get regionKeyExplanationClose;
-
-  /// No description provided for @displayNameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Your display name'**
-  String get displayNameLabel;
-
   /// No description provided for @createButton.
   ///
   /// In en, this message translates to:
   /// **'Create'**
   String get createButton;
-
-  /// No description provided for @joinHouseholdTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Join household'**
-  String get joinHouseholdTitle;
-
-  /// No description provided for @inviteCodeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Invite code'**
-  String get inviteCodeLabel;
-
-  /// No description provided for @joinButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Join'**
-  String get joinButton;
-
-  /// No description provided for @householdOverviewTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'My household'**
-  String get householdOverviewTitle;
-
-  /// No description provided for @inviteCodeSectionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Invite code'**
-  String get inviteCodeSectionTitle;
-
-  /// No description provided for @rotateInviteCodeButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Generate new code'**
-  String get rotateInviteCodeButton;
-
-  /// No description provided for @membersSectionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Members'**
-  String get membersSectionTitle;
-
-  /// No description provided for @roleOwner.
-  ///
-  /// In en, this message translates to:
-  /// **'Owner'**
-  String get roleOwner;
-
-  /// No description provided for @roleMember.
-  ///
-  /// In en, this message translates to:
-  /// **'Member'**
-  String get roleMember;
-
-  /// No description provided for @loadingHousehold.
-  ///
-  /// In en, this message translates to:
-  /// **'Loading household…'**
-  String get loadingHousehold;
 
   /// No description provided for @fieldRequired.
   ///
@@ -313,30 +187,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The system refused. Check in the settings whether PreppSuite has permission for it.'**
   String get errorPlatformRefused;
-
-  /// No description provided for @errorInvalidInviteCode.
-  ///
-  /// In en, this message translates to:
-  /// **'This invite code is not valid.'**
-  String get errorInvalidInviteCode;
-
-  /// No description provided for @errorAlreadyInHousehold.
-  ///
-  /// In en, this message translates to:
-  /// **'You already belong to a household.'**
-  String get errorAlreadyInHousehold;
-
-  /// No description provided for @errorNotOwner.
-  ///
-  /// In en, this message translates to:
-  /// **'Only the household\'s owner can do this.'**
-  String get errorNotOwner;
-
-  /// No description provided for @errorNotAMember.
-  ///
-  /// In en, this message translates to:
-  /// **'You are not a member of this household.'**
-  String get errorNotAMember;
 
   /// No description provided for @navInventory.
   ///
@@ -487,12 +337,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Calories, total kcal (optional)'**
   String get caloriesLabel;
-
-  /// No description provided for @supplyCalculatorPersonCountLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'People'**
-  String get supplyCalculatorPersonCountLabel;
 
   /// No description provided for @supplyCalculatorDaysLabel.
   ///
@@ -734,12 +578,6 @@ abstract class AppLocalizations {
   /// **'Could not read this file: {error}'**
   String csvImportFileReadError(String error);
 
-  /// No description provided for @csvImportRowsSectionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Rows'**
-  String get csvImportRowsSectionTitle;
-
   /// No description provided for @csvImportRowLabel.
   ///
   /// In en, this message translates to:
@@ -775,12 +613,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Checklists'**
   String get navChecklists;
-
-  /// No description provided for @navBudget.
-  ///
-  /// In en, this message translates to:
-  /// **'Budget'**
-  String get navBudget;
 
   /// No description provided for @checklistsTitle.
   ///
@@ -841,12 +673,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete checklist'**
   String get deleteTemplateAction;
-
-  /// No description provided for @checklistItemTitleLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Item'**
-  String get checklistItemTitleLabel;
 
   /// No description provided for @addChecklistItemHint.
   ///
@@ -1214,12 +1040,6 @@ abstract class AppLocalizations {
   /// **'+{count} more'**
   String warningBannerMore(int count);
 
-  /// No description provided for @viewAllWarningsAction.
-  ///
-  /// In en, this message translates to:
-  /// **'View all'**
-  String get viewAllWarningsAction;
-
   /// No description provided for @warningExpiredLabel.
   ///
   /// In en, this message translates to:
@@ -1304,12 +1124,6 @@ abstract class AppLocalizations {
   /// **'Unit'**
   String get pdfColumnUnit;
 
-  /// No description provided for @settingsSectionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Settings'**
-  String get settingsSectionTitle;
-
   /// No description provided for @languageLabel.
   ///
   /// In en, this message translates to:
@@ -1333,12 +1147,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get languageEnglishOption;
-
-  /// No description provided for @serverAddressLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Server address'**
-  String get serverAddressLabel;
 
   /// No description provided for @inventoryAttentionTooltip.
   ///
@@ -1448,12 +1256,6 @@ abstract class AppLocalizations {
   /// **'Choose a federal state.'**
   String get settingsBundeslandRequired;
 
-  /// No description provided for @settingsRegionLabelLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Label'**
-  String get settingsRegionLabelLabel;
-
   /// No description provided for @settingsNotificationsTitle.
   ///
   /// In en, this message translates to:
@@ -1483,12 +1285,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t match your location to a German state.'**
   String get settingsLocationNoMatchMessage;
-
-  /// No description provided for @settingsLocationSuccessMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'{state} added as an additional region.'**
-  String settingsLocationSuccessMessage(String state);
 
   /// No description provided for @shelterMapTitle.
   ///
@@ -1886,12 +1682,6 @@ abstract class AppLocalizations {
   /// **'Amount must be greater than 0 and at most the stock on hand.'**
   String get consumeInvalidAmount;
 
-  /// No description provided for @syncRetryButton.
-  ///
-  /// In en, this message translates to:
-  /// **'Try again'**
-  String get syncRetryButton;
-
   /// No description provided for @syncAgeMinutes.
   ///
   /// In en, this message translates to:
@@ -2072,12 +1862,6 @@ abstract class AppLocalizations {
   /// **'Shopping list copied.'**
   String get shoppingListCopied;
 
-  /// No description provided for @shoppingListEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Nothing to buy: the target is met and every item is above its minimum.'**
-  String get shoppingListEmpty;
-
   /// No description provided for @rotationTitle.
   ///
   /// In en, this message translates to:
@@ -2149,12 +1933,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This folder is encrypted and this device does not have the passphrase. Nothing is being read or written until you enter it.'**
   String get sharingErrorLocked;
-
-  /// No description provided for @folderEncryptionTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Encrypt the shared folder'**
-  String get folderEncryptionTitle;
 
   /// No description provided for @folderEncryptionOff.
   ///
@@ -2233,12 +2011,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Folder unlocked.'**
   String get folderEncryptionUnlocked;
-
-  /// No description provided for @folderEncryptionWorking.
-  ///
-  /// In en, this message translates to:
-  /// **'Deriving the key. This takes a moment on purpose.'**
-  String get folderEncryptionWorking;
 
   /// No description provided for @householdPlanTitle.
   ///
@@ -2534,23 +2306,11 @@ abstract class AppLocalizations {
   /// **'A card needs a name.'**
   String get emergencyCardNameRequired;
 
-  /// No description provided for @emergencyCardSaved.
-  ///
-  /// In en, this message translates to:
-  /// **'Card saved.'**
-  String get emergencyCardSaved;
-
   /// No description provided for @emergencyCardRemoved.
   ///
   /// In en, this message translates to:
   /// **'Card removed.'**
   String get emergencyCardRemoved;
-
-  /// No description provided for @emergencyCardRemove.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove card'**
-  String get emergencyCardRemove;
 
   /// No description provided for @emergencyCardRemoveConfirm.
   ///
@@ -2569,12 +2329,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This is health data. The shared folder it travels through is encrypted.'**
   String get emergencyCardsHealthEncrypted;
-
-  /// No description provided for @emergencyCardsGoToEncryption.
-  ///
-  /// In en, this message translates to:
-  /// **'Folder settings'**
-  String get emergencyCardsGoToEncryption;
 
   /// No description provided for @emergencyCardBirthYearInvalid.
   ///
@@ -2798,12 +2552,6 @@ abstract class AppLocalizations {
   /// **'The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md.'**
   String get offlineMapErrorSchema;
 
-  /// No description provided for @offlineMapHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Where do I get such a file?'**
-  String get offlineMapHelp;
-
   /// No description provided for @navKnowledge.
   ///
   /// In en, this message translates to:
@@ -2840,12 +2588,6 @@ abstract class AppLocalizations {
   /// **'Choose a different file'**
   String get knowledgeChangeAction;
 
-  /// No description provided for @knowledgeForgetAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove file'**
-  String get knowledgeForgetAction;
-
   /// No description provided for @articleLinkLeavesArchive.
   ///
   /// In en, this message translates to:
@@ -2869,12 +2611,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No title starts with “{query}”.'**
   String knowledgeNoResults(String query);
-
-  /// No description provided for @knowledgeSearchPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Type a beginning to search.'**
-  String get knowledgeSearchPrompt;
 
   /// No description provided for @knowledgeSuggestionsTitle.
   ///
@@ -2947,12 +2683,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove this archive'**
   String get knowledgeRemoveAction;
-
-  /// No description provided for @knowledgeLibraryLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Archives on this device'**
-  String get knowledgeLibraryLabel;
 
   /// No description provided for @knowledgeSwitchFailed.
   ///
@@ -3290,12 +3020,6 @@ abstract class AppLocalizations {
   /// **'Download map area'**
   String get mapDownloadTitle;
 
-  /// No description provided for @mapDownloadIntro.
-  ///
-  /// In en, this message translates to:
-  /// **'Move the map to the area you need offline. Exactly what you can see is what gets downloaded.'**
-  String get mapDownloadIntro;
-
   /// No description provided for @mapDownloadZoomLabel.
   ///
   /// In en, this message translates to:
@@ -3368,12 +3092,6 @@ abstract class AppLocalizations {
   /// **'From your MapTiler account. Stays on this device.'**
   String get mapDownloadApiKeyHint;
 
-  /// No description provided for @mapDownloadApiKeyMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'This source needs a key.'**
-  String get mapDownloadApiKeyMissing;
-
   /// No description provided for @mapDownloadPolite.
   ///
   /// In en, this message translates to:
@@ -3422,23 +3140,11 @@ abstract class AppLocalizations {
   /// **'The deepest level this area still fits at.'**
   String get mapDownloadDetailAuto;
 
-  /// No description provided for @mapDownloadPlaceTooLarge.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} is too large even at the coarsest level. Choose somewhere smaller.'**
-  String mapDownloadPlaceTooLarge(String name);
-
   /// No description provided for @mapDownloadDeepestPossible.
   ///
   /// In en, this message translates to:
   /// **'At level 14 that would be {count} tiles — too many. Level {level} is the deepest this area goes.'**
   String mapDownloadDeepestPossible(String count, String level);
-
-  /// No description provided for @mapDownloadScopeLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Scope'**
-  String get mapDownloadScopeLabel;
 
   /// No description provided for @mapDownloadScopePlace.
   ///
@@ -3643,12 +3349,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{who} — from the household'**
   String supplyCalculatorHouseholdLine(String who);
-
-  /// No description provided for @supplyCalculatorEditHousehold.
-  ///
-  /// In en, this message translates to:
-  /// **'Change in the household'**
-  String get supplyCalculatorEditHousehold;
 
   /// No description provided for @supplyCalculatorAdults.
   ///
@@ -4667,26 +4367,14 @@ abstract class AppLocalizations {
   /// No description provided for @backupPassphraseInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Enter at least 12 characters; both entries must match.'**
-  String get backupPassphraseInvalid;
+  /// **'Enter at least {count} characters; both entries have to match.'**
+  String backupPassphraseInvalid(int count);
 
   /// No description provided for @warningInstructionsTitle.
   ///
   /// In en, this message translates to:
   /// **'Recommended actions'**
   String get warningInstructionsTitle;
-
-  /// No description provided for @warningAreaTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Affected area'**
-  String get warningAreaTitle;
-
-  /// No description provided for @warningContactTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Publisher and contact'**
-  String get warningContactTitle;
 
   /// No description provided for @warningShowMap.
   ///
@@ -4807,12 +4495,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No personal documents have been added yet.'**
   String get knowledgeDocumentsEmpty;
-
-  /// No description provided for @knowledgeDocumentOpen.
-  ///
-  /// In en, this message translates to:
-  /// **'Open'**
-  String get knowledgeDocumentOpen;
 
   /// No description provided for @knowledgeDocumentRemove.
   ///
@@ -4957,12 +4639,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete contact'**
   String get emergencyContactDelete;
-
-  /// No description provided for @emergencyCallAction.
-  ///
-  /// In en, this message translates to:
-  /// **'Call'**
-  String get emergencyCallAction;
 
   /// No description provided for @emergencyOpenMapAction.
   ///
