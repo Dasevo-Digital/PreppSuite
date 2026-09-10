@@ -3054,6 +3054,33 @@ class AppLocalizationsDe extends AppLocalizations {
   String get emergencyPlanExport => 'Notfallplan als PDF';
 
   @override
+  String get emergencyPlanPdfCards => 'Notfallkarten';
+
+  @override
+  String get emergencyPlanPdfCardsWarning =>
+      'Auf diesem Blatt stehen Gesundheitsdaten: Blutgruppe, Allergien, Medikation und Vorerkrankungen. Wer es in die Hand bekommt, kann sie lesen, und ein Blatt Papier schützt kein Kennwort. Bewahre es bei den Dokumenten auf, nimm es mit statt es liegen zu lassen, und schreddere es statt es wegzuwerfen.';
+
+  @override
+  String get emergencyPlanCardsAskTitle => 'Notfallkarten mitdrucken?';
+
+  @override
+  String emergencyPlanCardsAskBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Personen',
+      one: 'einer Person',
+    );
+    return 'Auf Papier funktionieren die Karten, wenn das Telefon leer oder weg ist — genau dafür sind sie da. Es heißt aber auch: ein loses Blatt mit Blutgruppe, Allergien, Medikation und Vorerkrankungen von $_temp0. Was auf Papier steht, lässt sich nicht zurückziehen, nicht aus der Ferne löschen und nicht mit einem Kennwort schützen.';
+  }
+
+  @override
+  String get emergencyPlanCardsAskWithout => 'Nur den Plan';
+
+  @override
+  String get emergencyPlanCardsAskWith => 'Mit Notfallkarten';
+
+  @override
   String get emergencyPlanPdfTitle => 'Persönlicher Notfallplan';
 
   @override

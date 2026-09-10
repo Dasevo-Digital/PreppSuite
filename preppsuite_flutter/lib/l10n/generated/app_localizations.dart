@@ -5228,6 +5228,42 @@ abstract class AppLocalizations {
   /// **'Emergency plan as PDF'**
   String get emergencyPlanExport;
 
+  /// No description provided for @emergencyPlanPdfCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency cards'**
+  String get emergencyPlanPdfCards;
+
+  /// No description provided for @emergencyPlanPdfCardsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This sheet names health details: blood group, allergies, medication and conditions. Anyone who picks it up can read them, and no lock protects a piece of paper. Keep it where you keep your documents, take it with you rather than leaving it behind, and shred it instead of binning it.'**
+  String get emergencyPlanPdfCardsWarning;
+
+  /// No description provided for @emergencyPlanCardsAskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Print the emergency cards as well?'**
+  String get emergencyPlanCardsAskTitle;
+
+  /// No description provided for @emergencyPlanCardsAskBody.
+  ///
+  /// In en, this message translates to:
+  /// **'On paper the cards work when the phone is dead or gone — which is the reason to have them. It also means a loose sheet naming blood group, allergies, medication and conditions for {count, plural, =1{one person} other{{count} people}}. Nothing on paper can be revoked, wiped remotely or password-protected.'**
+  String emergencyPlanCardsAskBody(int count);
+
+  /// No description provided for @emergencyPlanCardsAskWithout.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan only'**
+  String get emergencyPlanCardsAskWithout;
+
+  /// No description provided for @emergencyPlanCardsAskWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Include the cards'**
+  String get emergencyPlanCardsAskWith;
+
   /// No description provided for @emergencyPlanPdfTitle.
   ///
   /// In en, this message translates to:

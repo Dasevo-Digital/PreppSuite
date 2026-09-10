@@ -1628,6 +1628,24 @@
   "readinessDaysAgo": "{days} days ago",
   "@readinessDaysAgo": {"placeholders": {"days": {"type": "int"}}},
   "emergencyPlanExport": "Emergency plan as PDF",
+  "emergencyPlanPdfCards": "Emergency cards",
+  "@emergencyPlanPdfCards": {},
+  "emergencyPlanPdfCardsWarning": "This sheet names health details: blood group, allergies, medication and conditions. Anyone who picks it up can read them, and no lock protects a piece of paper. Keep it where you keep your documents, take it with you rather than leaving it behind, and shred it instead of binning it.",
+  "@emergencyPlanPdfCardsWarning": {},
+  "emergencyPlanCardsAskTitle": "Print the emergency cards as well?",
+  "@emergencyPlanCardsAskTitle": {},
+  "emergencyPlanCardsAskBody": "On paper the cards work when the phone is dead or gone — which is the reason to have them. It also means a loose sheet naming blood group, allergies, medication and conditions for {count, plural, =1{one person} other{{count} people}}. Nothing on paper can be revoked, wiped remotely or password-protected.",
+  "@emergencyPlanCardsAskBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "emergencyPlanCardsAskWithout": "Plan only",
+  "@emergencyPlanCardsAskWithout": {},
+  "emergencyPlanCardsAskWith": "Include the cards",
+  "@emergencyPlanCardsAskWith": {},
   "emergencyPlanPdfTitle": "Personal emergency plan",
   "emergencyPlanPdfMeetingPoints": "Meeting points",
   "emergencyPlanPdfContact": "Contact outside the area",

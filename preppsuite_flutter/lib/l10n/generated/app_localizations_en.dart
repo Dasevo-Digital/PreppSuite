@@ -3035,6 +3035,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyPlanExport => 'Emergency plan as PDF';
 
   @override
+  String get emergencyPlanPdfCards => 'Emergency cards';
+
+  @override
+  String get emergencyPlanPdfCardsWarning =>
+      'This sheet names health details: blood group, allergies, medication and conditions. Anyone who picks it up can read them, and no lock protects a piece of paper. Keep it where you keep your documents, take it with you rather than leaving it behind, and shred it instead of binning it.';
+
+  @override
+  String get emergencyPlanCardsAskTitle => 'Print the emergency cards as well?';
+
+  @override
+  String emergencyPlanCardsAskBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count people',
+      one: 'one person',
+    );
+    return 'On paper the cards work when the phone is dead or gone — which is the reason to have them. It also means a loose sheet naming blood group, allergies, medication and conditions for $_temp0. Nothing on paper can be revoked, wiped remotely or password-protected.';
+  }
+
+  @override
+  String get emergencyPlanCardsAskWithout => 'Plan only';
+
+  @override
+  String get emergencyPlanCardsAskWith => 'Include the cards';
+
+  @override
   String get emergencyPlanPdfTitle => 'Personal emergency plan';
 
   @override

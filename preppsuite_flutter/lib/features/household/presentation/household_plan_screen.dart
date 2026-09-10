@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 
+import '../application/household_member_controller.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/emergency_plan_report.dart';
@@ -223,10 +224,27 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
   Future<void> _export(HouseholdPlan plan, AppLocalizations l10n) async {
     final profile = ref.read(householdProfileProvider).value;
     final locale = Localizations.localeOf(context).toString();
+
+    // Asked every time, and never pre-selected. The cards on paper are
+    // the copy that survives a dead phone, and they are also a loose
+    // sheet naming somebody's blood group and medication — a trade worth
+    // making sometimes and not worth making silently.
+    final members = profile == null
+        ? const <HouseholdMember>[]
+        : ref.read(householdMembersProvider(profile.id)).value ?? const [];
+    var withCards = false;
+    if (members.isNotEmpty) {
+      final answer = await _askAboutCards(l10n, members.length);
+      if (answer == null) return;
+      withCards = answer;
+    }
+    if (!mounted) return;
+
     await Printing.layoutPdf(
       onLayout: (_) => const EmergencyPlanReport().build(
         plan: plan,
         householdName: profile?.name ?? '',
+        members: withCards ? members : const [],
         strings: EmergencyPlanReportStrings(
           title: l10n.emergencyPlanPdfTitle,
           generatedOn: l10n.pdfGeneratedOn(
@@ -237,7 +255,52 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
           equipment: l10n.emergencyPlanPdfEquipment,
           notes: l10n.notesLabel,
           empty: l10n.emergencyPlanPdfEmpty,
+          cards: l10n.emergencyPlanPdfCards,
+          cardsWarning: l10n.emergencyPlanPdfCardsWarning,
+          fields: EmergencyCardFieldStrings(
+            birthYear: l10n.emergencyCardBirthYear,
+            bloodType: l10n.emergencyCardBloodType,
+            allergies: l10n.emergencyCardAllergies,
+            medication: l10n.emergencyCardMedication,
+            conditions: l10n.emergencyCardConditions,
+            insurance: l10n.emergencyCardInsurance,
+            doctor: l10n.emergencyCardDoctor,
+            contact: l10n.emergencyCardContact,
+            notes: l10n.emergencyCardNotes,
+          ),
         ),
+      ),
+    );
+  }
+
+  /// True to include the cards, false for the plan alone, null to abandon
+  /// the export entirely.
+  Future<bool?> _askAboutCards(AppLocalizations l10n, int count) {
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: const Icon(Icons.warning_amber_outlined),
+        title: Text(l10n.emergencyPlanCardsAskTitle),
+        content: Text(l10n.emergencyPlanCardsAskBody(count)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              MaterialLocalizations.of(dialogContext).cancelButtonLabel,
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.emergencyPlanCardsAskWithout),
+          ),
+          // Not a FilledButton: including them is the more consequential
+          // of the two, and the emphasised button is the one people press
+          // without reading.
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.emergencyPlanCardsAskWith),
+          ),
+        ],
       ),
     );
   }
