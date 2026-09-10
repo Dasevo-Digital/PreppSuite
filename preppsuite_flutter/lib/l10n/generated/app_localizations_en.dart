@@ -2424,6 +2424,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get undoAction => 'Undo';
 
   @override
+  String get budgetEntryDeleted => 'Expense deleted';
+
+  @override
+  String emergencyRadioChannels(int count) {
+    return '$count channels';
+  }
+
+  @override
   String get overviewStartTitle => 'Your first step towards preparedness';
 
   @override

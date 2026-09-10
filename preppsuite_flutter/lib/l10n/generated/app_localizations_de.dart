@@ -2438,6 +2438,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get undoAction => 'Rückgängig';
 
   @override
+  String get budgetEntryDeleted => 'Ausgabe gelöscht';
+
+  @override
+  String emergencyRadioChannels(int count) {
+    return '$count Kanäle';
+  }
+
+  @override
   String get overviewStartTitle => 'Dein erster Schritt zur Vorsorge';
 
   @override

@@ -199,28 +199,36 @@ class _EmergencyInformationScreenState
           ),
           Text(l10n.emergencyRadioHint),
           const SizedBox(height: 8),
-          const Card(
+          // No longer const: the channel counts are localised, and "16
+          // Kanäle" was German on an English locale.
+          Card(
             child: Column(
               children: [
-                ListTile(
+                const ListTile(
                   title: Text('UKW / FM'),
                   subtitle: Text('87,5–108 MHz'),
                 ),
-                ListTile(
+                const ListTile(
                   title: Text('DAB+ Band III'),
                   subtitle: Text('174–240 MHz'),
                 ),
-                ListTile(
+                const ListTile(
                   title: Text('Mittelwelle / AM'),
                   subtitle: Text('526,5–1606,5 kHz'),
                 ),
                 ListTile(
-                  title: Text('PMR446'),
-                  subtitle: Text('446,00625–446,19375 MHz · 16 Kanäle'),
+                  title: const Text('PMR446'),
+                  subtitle: Text(
+                    '446,00625–446,19375 MHz · '
+                    '${l10n.emergencyRadioChannels(16)}',
+                  ),
                 ),
                 ListTile(
-                  title: Text('Freenet Deutschland'),
-                  subtitle: Text('149,0250–149,1125 MHz · 6 Kanäle'),
+                  title: const Text('Freenet Deutschland'),
+                  subtitle: Text(
+                    '149,0250–149,1125 MHz · '
+                    '${l10n.emergencyRadioChannels(6)}',
+                  ),
                 ),
               ],
             ),

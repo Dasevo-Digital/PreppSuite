@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../model/categories.dart';
 
+import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../inventory/application/inventory_category_l10n.dart';
@@ -100,10 +101,40 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
   }
 
   Future<void> _delete() async {
-    await ref
-        .read(budgetControllerProvider(widget.householdId))
-        .deleteEntry(widget.existing!);
-    if (mounted) Navigator.of(context).pop();
+    // No confirmation, but a way back — the same trade the inventory
+    // makes. A dialog in front of every deletion trains people to
+    // dismiss dialogs; an undo costs nothing until it is needed. What
+    // this must not be is neither, which is what it was: one tap on an
+    // icon in the title bar, gone, and the screen closed behind it.
+    final controller = ref.read(budgetControllerProvider(widget.householdId));
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    final deleted = widget.existing!;
+
+    await controller.deleteEntry(deleted);
+    if (!mounted) return;
+    Navigator.of(context).pop();
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(l10n.budgetEntryDeleted),
+        // Eight seconds, like the inventory: long enough to notice the
+        // wrong row is gone and reach for the button.
+        duration: const Duration(seconds: 8),
+        action: SnackBarAction(
+          label: l10n.undoAction,
+          onPressed: () async {
+            try {
+              await controller.restoreEntry(deleted.clientId);
+            } catch (error) {
+              messenger.showSnackBar(
+                SnackBar(content: Text(describeError(l10n, error))),
+              );
+            }
+          },
+        ),
+      ),
+    );
   }
 
   @override

@@ -60,6 +60,38 @@ class BudgetController {
     );
   }
 
+  /// Takes back a deletion, so the delete itself needs no confirmation.
+  ///
+  /// The counterpart to [deleteEntry], which tombstones rather than
+  /// removing — the row is still there and only marked gone, so undoing
+  /// is a matter of clearing the mark. Without this, deleting an entry
+  /// was the one action in the app with neither a question in front of it
+  /// nor a way back after it.
+  ///
+  /// Silent when there is nothing to restore: an entry already gone from
+  /// the database, or one that was never deleted, both mean the user has
+  /// nothing to gain from an error message.
+  Future<void> restoreEntry(String clientId) async {
+    // Two where clauses rather than one with `&`: drift joins them with
+    // AND, and this file imports drift as `show Value` on purpose, which
+    // does not bring the operator along.
+    final row =
+        await (_db.select(_db.budgetEntries)
+              ..where((t) => t.clientId.equals(clientId))
+              ..where((t) => t.householdId.equals(householdId)))
+            .getSingleOrNull();
+    if (row == null || row.deletedAt == null) return;
+    await _db.upsertBudgetEntry(
+      row
+          .toCompanion(false)
+          .copyWith(
+            deletedAt: const Value(null),
+            updatedAt: Value(DateTime.now().toUtc()),
+            dirty: const Value(true),
+          ),
+    );
+  }
+
   Future<void> deleteEntry(BudgetEntry existing) async {
     final now = DateTime.now().toUtc();
     await _db.upsertBudgetEntry(

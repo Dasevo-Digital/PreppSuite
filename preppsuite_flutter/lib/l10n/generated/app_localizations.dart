@@ -4106,6 +4106,18 @@ abstract class AppLocalizations {
   /// **'Undo'**
   String get undoAction;
 
+  /// No description provided for @budgetEntryDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Expense deleted'**
+  String get budgetEntryDeleted;
+
+  /// No description provided for @emergencyRadioChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} channels'**
+  String emergencyRadioChannels(int count);
+
   /// No description provided for @overviewStartTitle.
   ///
   /// In en, this message translates to:

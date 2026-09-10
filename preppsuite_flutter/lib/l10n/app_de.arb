@@ -669,6 +669,8 @@
   "discardChanges": "Verwerfen",
   "inventoryItemDeleted": "Vorrat gelöscht",
   "undoAction": "Rückgängig",
+  "budgetEntryDeleted": "Ausgabe gelöscht",
+  "emergencyRadioChannels": "{count} Kanäle",
   "overviewStartTitle": "Dein erster Schritt zur Vorsorge",
   "overviewStartHint": "Trage Wasser oder Lebensmittel ein. So siehst du, wie lange dein Haushalt versorgt ist.",
   "overviewAddFirst": "Ersten Vorrat anlegen",
