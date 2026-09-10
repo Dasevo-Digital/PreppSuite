@@ -39,7 +39,10 @@ void main() {
       find.text('Überleben, Bushcraft & Selbstversorgung'),
       200,
     );
-    expect(find.text('Überleben, Bushcraft & Selbstversorgung'), findsOneWidget);
+    expect(
+      find.text('Überleben, Bushcraft & Selbstversorgung'),
+      findsOneWidget,
+    );
     await tester.scrollUntilVisible(find.text('Lernen zu Hause'), 200);
     expect(find.text('Lernen zu Hause'), findsOneWidget);
   });

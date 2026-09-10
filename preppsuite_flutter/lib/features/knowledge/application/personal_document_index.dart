@@ -48,6 +48,22 @@ class PersonalDocumentIndex extends _$PersonalDocumentIndex {
     ),
   );
 
+  // Note the difference from `KnowledgeIndexDatabase`, which declares
+  // `content=''` and therefore stores no text at all: it can re-read any
+  // passage from the archive it indexed, because that archive is a file
+  // the app put there and can open again.
+  //
+  // This one cannot. A personal document may live on a removable disk, or
+  // behind a bookmark whose grant has lapsed, and a search result has to
+  // be readable either way. So the text is kept — which means this
+  // database holds, in the clear, whatever the household indexed:
+  // passports, policies, medical letters.
+  //
+  // That is the reason `appDatabaseDirectory` marks this whole directory
+  // as not-to-be-backed-up. Storing the text is a deliberate trade for
+  // being able to search when the original is out of reach; letting it
+  // leave the device was never part of the trade.
+
   Future<void> replace({
     required String id,
     required String label,

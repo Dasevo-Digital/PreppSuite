@@ -105,4 +105,24 @@ void main() {
     // whole download folder down with it.
     expect(await resolveStoragePath('bookmark://kept'), isNull);
   });
+
+  test(
+    'keeping something out of the cloud backup costs nothing off iOS',
+    () async {
+      // `appDatabaseDirectory` calls this while resolving where the
+      // databases live, which is on the path to the first frame and runs on
+      // every platform. It has to be free where there is no iCloud to keep
+      // things out of — and silent when the native side is not listening,
+      // which is the case in this very test.
+      await excludeFromBackup('${Directory.systemTemp.path}/anywhere');
+
+      expect(
+        calls.where((c) => c.method == 'excludeFromBackup'),
+        switch (true) {
+          _ when Platform.isIOS => hasLength(1),
+          _ => isEmpty,
+        },
+      );
+    },
+  );
 }

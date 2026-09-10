@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
+import 'platform_storage.dart';
+
 /// Where the app's own databases live.
 ///
 /// Application Support rather than the documents folder, for two reasons.
@@ -26,6 +28,23 @@ Future<Directory>? _prepared;
 Future<Directory> _prepare() async {
   final target = await getApplicationSupportDirectory();
   await target.create(recursive: true);
+
+  // Application Support is backed up to iCloud on iOS, the same as
+  // Documents — only `Library/Caches` and what is explicitly marked are
+  // left out. Everything this app knows about a household lives in these
+  // databases: the emergency cards carry blood type, allergies, medication
+  // and conditions, and the personal-document index carries the full text
+  // of whatever papers were added to it.
+  //
+  // None of that is ours to upload. The app already offers a backup that
+  // the household controls — one file, encrypted with a passphrase they
+  // choose (see `BackupService`) — and the shared folder for a second
+  // device. A silent copy in somebody's iCloud is a third route nobody
+  // asked for.
+  //
+  // Set on the directory, so a database added later is covered without
+  // anyone remembering to mark it.
+  await excludeFromBackup(target.path);
 
   Directory legacy;
   try {

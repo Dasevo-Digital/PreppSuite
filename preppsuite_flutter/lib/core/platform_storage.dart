@@ -32,14 +32,24 @@ bool get usesNativeStoragePicker {
   return Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
 }
 
-/// Keeps [path] out of the device's own cloud backup.
+/// Keeps [path] out of the device's own cloud backup. Works on a directory
+/// as well as a file, and then covers what is put there later.
 ///
-/// iOS backs up an app's Documents folder to iCloud, and that is where an
-/// archive lands — so without this a fifty-gigabyte encyclopedia would be
-/// uploaded to the user's iCloud account, over their connection, against
-/// their storage. Apple asks for exactly this flag on anything that can
-/// be downloaded again, and an offline archive is the clearest case of
-/// it there is.
+/// iOS backs up both Documents and Library/Application Support to iCloud —
+/// everything but `Library/Caches` and what is marked here. Two kinds of
+/// thing in this app land in those folders and neither belongs in somebody
+/// else's cloud:
+///
+/// The archives, because a fifty-gigabyte encyclopedia would be uploaded
+/// over the user's connection and against their storage to no end. Apple
+/// asks for exactly this flag on anything that can be downloaded again,
+/// and an offline archive is the clearest case of it there is.
+///
+/// The databases, because of what is in them — emergency cards hold blood
+/// type, allergies, medication and conditions, and the personal-document
+/// index holds the text of whatever papers were added. The household has
+/// its own way to keep a copy, encrypted and under its own passphrase;
+/// see `BackupService` and `appDatabaseDirectory`.
 ///
 /// A quiet no-op everywhere else. Android's own backup is switched off in
 /// the manifest, and on the desktops the file sits in a folder the user
