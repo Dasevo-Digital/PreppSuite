@@ -38,16 +38,19 @@ class ReadinessScreen extends ConsumerWidget {
     final knowledge = ref.watch(knowledgeProvider).value;
     final knowledgeReady = knowledge?.isReady ?? false;
     final warningStatus = ref.watch(_warningPollStatusProvider).value;
+    // Built once, not once per checklist item. `any` short-circuits, so the
+    // cost only shows in full when nothing is satisfied yet — which is the
+    // fresh household this screen exists for, and 129 built-in items
+    // against a stocked pantry is five figures of map insertions on every
+    // rebuild. There are seven streams above; a write to any of them
+    // rebuilds this.
+    final inventoryById = {for (final item in inventory) item.clientId: item};
+
     final checks = [
       (l10n.readinessInventory, inventory.isNotEmpty),
       (
         l10n.readinessChecklists,
-        checklist.any(
-          (item) => isChecklistItemSatisfied(
-            item,
-            {for (final stock in inventory) stock.clientId: stock},
-          ),
-        ),
+        checklist.any((item) => isChecklistItemSatisfied(item, inventoryById)),
       ),
       (l10n.readinessPlan, plan != null),
       (l10n.readinessCards, members.isNotEmpty),
