@@ -950,6 +950,36 @@ abstract class AppLocalizations {
   /// **'PreppSuite polls the official warning feeds every 15 minutes and shows them as an overview. For immediate alerts that reach you with the app closed, use NINA from Germany\'s Federal Office of Civil Protection — the same official source, in seconds rather than minutes.'**
   String get warningsNinaHintBody;
 
+  /// No description provided for @warningDayToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today is the nationwide warning day'**
+  String get warningDayToday;
+
+  /// No description provided for @warningDayIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Nationwide warning day in {days, plural, =1{one day} other{{days} days}}'**
+  String warningDayIn(int days);
+
+  /// No description provided for @warningDayBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Test warning at 11:00, all-clear at 11:45. Sirens, Cell Broadcast, radio and the warning apps are tested together. It is the one day a year on which you can find out whether what is meant to reach you actually does – a warning that never arrives goes unnoticed otherwise.'**
+  String get warningDayBody;
+
+  /// No description provided for @warningDayNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Today is the nationwide warning day'**
+  String get warningDayNotificationTitle;
+
+  /// No description provided for @warningDayNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The test warning goes out at 11:00 and the all-clear at 11:45. A good moment to check that sirens, Cell Broadcast and the warning apps reach you.'**
+  String get warningDayNotificationBody;
+
   /// No description provided for @warningSeverityMinor.
   ///
   /// In en, this message translates to:

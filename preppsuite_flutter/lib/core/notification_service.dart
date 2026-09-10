@@ -120,6 +120,7 @@ class NotificationService {
   /// leave anything else (warnings) alone.
   static const _expiryPayloadPrefix = 'expiry:';
   static const _chargeReminderId = 90407;
+  static const _warningDayId = 90408;
 
   /// Replaces all pending expiry reminders with [reminders].
   ///
@@ -221,5 +222,43 @@ class NotificationService {
     if (!supportsScheduledNotifications) return;
     await _ensureInitialized();
     await _plugin.cancel(id: _chargeReminderId);
+  }
+
+  /// Schedules the reminder for the nationwide warning day.
+  ///
+  /// One fixed id, like the charge check: rescheduling replaces rather
+  /// than piles up, and the date is worked out from a rule, so every
+  /// launch computes the same instant and writes over its own reminder.
+  Future<void> scheduleWarningDayReminder({
+    required DateTime fireAt,
+    required String title,
+    required String body,
+  }) async {
+    if (!supportsScheduledNotifications) return;
+    await _ensureInitialized();
+    await _plugin.zonedSchedule(
+      id: _warningDayId,
+      title: title,
+      body: body,
+      payload: 'warning-day',
+      scheduledDate: tz.TZDateTime.from(fireAt.toUtc(), tz.UTC),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      notificationDetails: const NotificationDetails(
+        macOS: DarwinNotificationDetails(),
+        iOS: DarwinNotificationDetails(),
+        android: AndroidNotificationDetails(
+          'warning-day',
+          'Bundesweiter Warntag',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+      ),
+    );
+  }
+
+  Future<void> cancelWarningDayReminder() async {
+    if (!supportsScheduledNotifications) return;
+    await _ensureInitialized();
+    await _plugin.cancel(id: _warningDayId);
   }
 }

@@ -27,7 +27,12 @@ void main() {
           locale: const Locale('de'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: WarningListScreen(profile: profile(countryCode)),
+          // Away from the warning day, so this stays a test about the
+          // NINA advisory and not about what else the screen shows.
+          home: WarningListScreen(
+            profile: profile(countryCode),
+            now: DateTime(2026, 5, 20),
+          ),
         ),
       ),
     );

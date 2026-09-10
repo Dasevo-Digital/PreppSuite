@@ -482,6 +482,31 @@ class AppLocalizationsDe extends AppLocalizations {
       'PreppSuite ruft die amtlichen Warnungen alle 15 Minuten ab und zeigt sie als Überblick. Wer sofort und auch bei geschlossener App gewarnt werden möchte, nutzt dafür NINA vom Bundesamt für Bevölkerungsschutz — dieselbe amtliche Quelle, in Sekunden statt Minuten.';
 
   @override
+  String get warningDayToday => 'Heute ist bundesweiter Warntag';
+
+  @override
+  String warningDayIn(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days Tagen',
+      one: 'einem Tag',
+    );
+    return 'Bundesweiter Warntag in $_temp0';
+  }
+
+  @override
+  String get warningDayBody =>
+      'Probewarnung um 11:00, Entwarnung um 11:45. Sirenen, Cell Broadcast, Radio und Warn-Apps werden zusammen getestet. Es ist der einzige Tag im Jahr, an dem sich prüfen lässt, ob dich wirklich erreicht, was dich erreichen soll – eine Warnung, die nicht ankommt, fällt sonst niemandem auf.';
+
+  @override
+  String get warningDayNotificationTitle => 'Heute ist bundesweiter Warntag';
+
+  @override
+  String get warningDayNotificationBody =>
+      'Um 11:00 geht die Probewarnung raus, um 11:45 die Entwarnung. Gute Gelegenheit zu prüfen, ob Sirene, Cell Broadcast und Warn-Apps bei dir ankommen.';
+
+  @override
   String get warningSeverityMinor => 'Gering';
 
   @override

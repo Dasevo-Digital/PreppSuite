@@ -480,6 +480,32 @@ class AppLocalizationsEn extends AppLocalizations {
       'PreppSuite polls the official warning feeds every 15 minutes and shows them as an overview. For immediate alerts that reach you with the app closed, use NINA from Germany\'s Federal Office of Civil Protection — the same official source, in seconds rather than minutes.';
 
   @override
+  String get warningDayToday => 'Today is the nationwide warning day';
+
+  @override
+  String warningDayIn(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: 'one day',
+    );
+    return 'Nationwide warning day in $_temp0';
+  }
+
+  @override
+  String get warningDayBody =>
+      'Test warning at 11:00, all-clear at 11:45. Sirens, Cell Broadcast, radio and the warning apps are tested together. It is the one day a year on which you can find out whether what is meant to reach you actually does – a warning that never arrives goes unnoticed otherwise.';
+
+  @override
+  String get warningDayNotificationTitle =>
+      'Today is the nationwide warning day';
+
+  @override
+  String get warningDayNotificationBody =>
+      'The test warning goes out at 11:00 and the all-clear at 11:45. A good moment to check that sirens, Cell Broadcast and the warning apps reach you.';
+
+  @override
   String get warningSeverityMinor => 'Minor';
 
   @override

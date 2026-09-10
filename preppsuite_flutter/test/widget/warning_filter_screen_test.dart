@@ -52,7 +52,17 @@ void main() {
     expires: now.subtract(const Duration(hours: 6)),
   );
 
-  Future<void> pumpScreen(WidgetTester tester, List<Warning> warnings) async {
+  /// A date deliberately nowhere near the second Thursday in September,
+  /// so the warning-day notice is absent and these tests are about the
+  /// list. Pinned rather than left to the real clock: otherwise they
+  /// would test something different for one week a year.
+  final ordinaryDay = DateTime(2026, 5, 20);
+
+  Future<void> pumpScreen(
+    WidgetTester tester,
+    List<Warning> warnings, {
+    DateTime? now,
+  }) async {
     await tester.binding.setSurfaceSize(const Size(900, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -66,6 +76,7 @@ void main() {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: WarningListScreen(
+            now: now ?? ordinaryDay,
             profile: const HouseholdProfile(
               id: 'household-1',
               name: 'Testhaushalt',
@@ -156,5 +167,24 @@ void main() {
   ) async {
     useLargeText(tester);
     await pumpScreen(tester, [storm, past]);
+  });
+
+  testWidgets('the warning-day notice fits above the list at twice the font', (
+    tester,
+  ) async {
+    // The advisory below the list and the filter bar together once took
+    // the whole screen at this size. A third card above the list is
+    // exactly the sort of thing that brings that back, and it appears for
+    // one week a year — the week nobody would be running this by hand.
+    useLargeText(tester);
+    await pumpScreen(tester, [storm], now: DateTime(2026, 9, 10));
+
+    expect(find.text('Heute ist bundesweiter Warntag'), findsOneWidget);
+  });
+
+  testWidgets('and stays away on an ordinary day', (tester) async {
+    await pumpScreen(tester, [storm]);
+
+    expect(find.text('Heute ist bundesweiter Warntag'), findsNothing);
   });
 }

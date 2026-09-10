@@ -11,6 +11,7 @@ import '../../../model/household_profile.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/warning_filter.dart';
+import 'warning_day_notice.dart';
 import '../application/warning_providers.dart';
 import '../application/warning_relevance.dart';
 import '../application/warning_severity_l10n.dart';
@@ -18,9 +19,17 @@ import '../../../core/error_text.dart';
 import '../../maps/presentation/base_map_layer.dart';
 
 class WarningListScreen extends ConsumerStatefulWidget {
-  const WarningListScreen({super.key, required this.profile});
+  const WarningListScreen({super.key, required this.profile, this.now});
 
   final HouseholdProfile profile;
+
+  /// Stands in for the clock the warning-day notice reads.
+  ///
+  /// Injectable only so tests can pin a date. Without it, whether this
+  /// screen carries the notice depends on the day the suite happens to
+  /// run -- which would make the layout tests below pass for fifty-one
+  /// weeks a year and fail in the fifty-second.
+  final DateTime? now;
 
   @override
   ConsumerState<WarningListScreen> createState() => _WarningListScreenState();
@@ -78,13 +87,20 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
     // filtered is dangerous — so the advisory is the one that gives way.
     final hint = profile.countryCode == 'DE' ? _NinaHint(l10n: l10n) : null;
 
+    // Only where the day applies. The warning day is a German exercise,
+    // and announcing it to a household in Austria would be noise on the
+    // one screen that must not carry any.
+    final warningDay = profile.countryCode == 'DE'
+        ? WarningDayNotice.forList(l10n, now: widget.now)
+        : null;
+
     /// A message with the advisory under it, scrollable as a pair.
     ///
     /// Not vertically centred any more: centring means filling the
     /// viewport, which pushed the card below the fold — and a hint nobody
     /// scrolls to is a hint nobody reads.
     Widget messageWithHint(Widget message) =>
-        ListView(children: [message, ?hint]);
+        ListView(children: [?warningDay, message, ?hint]);
 
     return warningsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -165,19 +181,25 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
             return b.sent.compareTo(a.sent);
           });
 
-        final leading = _filter.isEmpty ? 0 : 1;
+        // Both are context for the whole list rather than entries in it,
+        // and the notice goes first: it explains what the list may be
+        // about to contain, while the count is about the filter.
+        final leading = <Widget>[
+          ?warningDay,
+          // WarningFilter has isEmpty and no isNotEmpty.
+          if (!_filter.isEmpty)
+            _ResultCount(
+              shown: sorted.length,
+              total: all.length,
+              onClear: _clearFilter,
+            ),
+        ];
 
         return ListView.builder(
-          itemCount: leading + sorted.length + (hint == null ? 0 : 1),
+          itemCount: leading.length + sorted.length + (hint == null ? 0 : 1),
           itemBuilder: (context, index) {
-            if (leading == 1 && index == 0) {
-              return _ResultCount(
-                shown: sorted.length,
-                total: all.length,
-                onClear: _clearFilter,
-              );
-            }
-            final at = index - leading;
+            if (index < leading.length) return leading[index];
+            final at = index - leading.length;
             if (at == sorted.length) return hint!;
             return _WarningTile(warning: sorted[at], l10n: l10n);
           },
