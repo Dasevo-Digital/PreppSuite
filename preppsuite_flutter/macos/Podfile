@@ -38,5 +38,36 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_macos_build_settings(target)
+    drop_destructive_zstd_phase(target)
+  end
+end
+
+# zstandard_macos ships two build phases: one syncs the zstd C sources into the
+# plugin's own directory inside the pub cache, the other deletes them again with
+# `rm -rf`. The deleting one declares no outputs and `:execution_position => :any`,
+# so Xcode is free to schedule it whenever -- including ahead of the compiler that
+# needs those files. Then the build dies on "Build input file cannot be found:
+# .../zstd/compress/hist.c", and the next attempt may well succeed, because the
+# sync phase has meanwhile put the sources back.
+#
+# A release build that depends on which of two phases wins a race is not a release
+# build, so the deleting phase is dropped here. Nothing about the product changes:
+# its only effect is removing sources after they were compiled. What is lost is the
+# plugin tidying up the shared pub cache behind itself -- roughly 3 MB of C sources
+# that `flutter pub cache clean` takes away anyway, and that the sync phase would
+# recreate on the next build regardless.
+def drop_destructive_zstd_phase(target)
+  # Collected before deleting, and taken out of the object list as well as the
+  # project: `delete_if` on Xcodeproj's ObjectList leaves the phase in the
+  # written project.pbxproj, which looks like it worked and does not.
+  # Matched by substring: CocoaPods renames a podspec script phase to
+  # '[CP-User] Remove synced zstd', so comparing against the name from the
+  # podspec finds nothing and fails silently.
+  doomed = target.build_phases.select do |phase|
+    phase.respond_to?(:name) && phase.name.to_s.include?('Remove synced zstd')
+  end
+  doomed.each do |phase|
+    target.build_phases.delete(phase)
+    phase.remove_from_project
   end
 end
