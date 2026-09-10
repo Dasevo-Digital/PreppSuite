@@ -2516,7 +2516,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get backupPassphraseInvalid =>
-      'Mindestens 8 Zeichen eingeben; beide Eingaben müssen übereinstimmen.';
+      'Mindestens 12 Zeichen eingeben; beide Eingaben müssen übereinstimmen.';
 
   @override
   String get warningInstructionsTitle => 'Handlungsempfehlungen';

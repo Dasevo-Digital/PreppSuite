@@ -4313,7 +4313,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupPassphraseInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Enter at least 8 characters; both entries must match.'**
+  /// **'Enter at least 12 characters; both entries must match.'**
   String get backupPassphraseInvalid;
 
   /// No description provided for @warningInstructionsTitle.

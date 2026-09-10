@@ -2498,7 +2498,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupPassphraseInvalid =>
-      'Enter at least 8 characters; both entries must match.';
+      'Enter at least 12 characters; both entries must match.';
 
   @override
   String get warningInstructionsTitle => 'Recommended actions';

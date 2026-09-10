@@ -356,9 +356,13 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.csvExportSuccessMessage(items.length))),
       );
-    } catch (_) {
+    } catch (error) {
       messenger.showSnackBar(
-        SnackBar(content: Text(l10n.csvExportErrorMessage)),
+        SnackBar(
+          content: Text(
+            '${l10n.csvExportErrorMessage} ${describeError(l10n, error)}',
+          ),
+        ),
       );
     }
   }

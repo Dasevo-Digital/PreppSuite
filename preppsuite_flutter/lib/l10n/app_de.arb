@@ -706,7 +706,7 @@
   "backupPassphraseTitle": "Sicherung verschlüsseln",
   "backupPassphrase": "Passwort",
   "backupPassphraseRepeat": "Passwort wiederholen",
-  "backupPassphraseInvalid": "Mindestens 8 Zeichen eingeben; beide Eingaben müssen übereinstimmen.",
+  "backupPassphraseInvalid": "Mindestens 12 Zeichen eingeben; beide Eingaben müssen übereinstimmen.",
   "warningInstructionsTitle": "Handlungsempfehlungen",
   "warningAreaTitle": "Betroffenes Gebiet",
   "warningContactTitle": "Herausgeber und Kontakt",

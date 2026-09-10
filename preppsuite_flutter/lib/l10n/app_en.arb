@@ -1427,7 +1427,7 @@
   "backupPassphraseTitle": "Encrypt backup",
   "backupPassphrase": "Password",
   "backupPassphraseRepeat": "Repeat password",
-  "backupPassphraseInvalid": "Enter at least 8 characters; both entries must match.",
+  "backupPassphraseInvalid": "Enter at least 12 characters; both entries must match.",
   "@overviewSupplyCalories": {
     "placeholders": {
       "current": {

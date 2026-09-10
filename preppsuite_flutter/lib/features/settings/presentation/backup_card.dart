@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_database_providers.dart';
+import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/backup_service.dart';
 
@@ -56,8 +57,18 @@ class BackupCard extends ConsumerWidget {
         await file.writeAsBytes(bytes, flush: true);
       }
       messenger.showSnackBar(SnackBar(content: Text(l10n.backupCreated)));
-    } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(l10n.backupFailed)));
+    } catch (error) {
+      // The reason, not just the fact. This is somebody's whole household
+      // failing to leave the device or failing to come back, and "could
+      // not be processed" alone gives them nothing to act on — a full
+      // disk and a refused folder need different answers. A wrong
+      // passphrase does not land here; `restore` reports that as
+      // `backupInvalid` instead.
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${l10n.backupFailed} ${describeError(l10n, error)}'),
+        ),
+      );
     }
   }
 
@@ -88,8 +99,18 @@ class BackupCard extends ConsumerWidget {
           ),
         ),
       );
-    } catch (_) {
-      messenger.showSnackBar(SnackBar(content: Text(l10n.backupFailed)));
+    } catch (error) {
+      // The reason, not just the fact. This is somebody's whole household
+      // failing to leave the device or failing to come back, and "could
+      // not be processed" alone gives them nothing to act on — a full
+      // disk and a refused folder need different answers. A wrong
+      // passphrase does not land here; `restore` reports that as
+      // `backupInvalid` instead.
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${l10n.backupFailed} ${describeError(l10n, error)}'),
+        ),
+      );
     }
   }
 
@@ -136,7 +157,13 @@ class BackupCard extends ConsumerWidget {
             ),
             FilledButton(
               onPressed: () {
-                if (first.text.length < 8 ||
+                // Twelve, not eight. This file can be carried off and
+                // attacked offline for as long as somebody likes, and it
+                // holds the whole household — emergency cards with blood
+                // group, medication and conditions included. Argon2id at
+                // 64 MB makes each guess expensive; the passphrase decides
+                // how many guesses are needed.
+                if (first.text.length < 12 ||
                     (confirm && first.text != second.text)) {
                   setState(() => error = l10n.backupPassphraseInvalid);
                   return;
