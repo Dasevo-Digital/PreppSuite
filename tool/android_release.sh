@@ -65,6 +65,25 @@ readonly SIGNED="$APP_DIR/build/app/outputs/flutter-apk/app-release-rotated.apk"
 # this app is handed to.
 readonly TARGET_PLATFORMS=android-arm,android-arm64
 
+# Generated, git-ignored, and poison if it is stale.
+#
+# `flutter test integration_test/` writes this file with the
+# integration_test plugin registered in it, because for that run the plugin
+# has to be. It stays behind in the source tree afterwards, and the next
+# release build compiles it against a classpath that has no
+# integration_test -- so the build dies on "Package
+# dev.flutter.plugins.integration_test ist nicht vorhanden", pointing at a
+# file nobody wrote and nobody tracks.
+#
+# The build regenerates it correctly when it is absent, so removing it
+# costs nothing. Whoever runs the integration tests should not have to
+# remember this.
+readonly STALE_REGISTRANT="$ANDROID_DIR/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java"
+if [ -f "$STALE_REGISTRANT" ]; then
+  echo "== 0/5 erzeugten Plugin-Registrant entfernen =="
+  rm -f "$STALE_REGISTRANT"
+fi
+
 echo "== 1/5 bauen =="
 ( cd "$APP_DIR" && flutter build apk --release \
     --target-platform "$TARGET_PLATFORMS" )

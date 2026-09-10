@@ -337,6 +337,16 @@ tree; the test suite deliberately targets that layer rather than the UI.
 
 ## Gotchas worth knowing
 
+- `flutter test integration_test/` leaves a
+  `GeneratedPluginRegistrant.java` behind under
+  `android/app/src/main/java/io/flutter/plugins/`, with the
+  integration_test plugin registered in it. The file is git-ignored, so it
+  never shows up in a diff, and the next `flutter build apk --release`
+  compiles it against a classpath that has no integration_test: the build
+  dies on "Package dev.flutter.plugins.integration_test ist nicht
+  vorhanden" and points at a file nobody wrote. Deleting it is enough --
+  the build regenerates it correctly. `tool/android_release.sh` removes it
+  before building for exactly this reason.
 - `file_picker` is pinned to `^8.3.7`; 9.x/12.x break file picking on macOS.
   The reason is written out in `preppsuite_flutter/pubspec.yaml` — read it
   before bumping.
