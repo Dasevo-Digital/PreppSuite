@@ -120,4 +120,86 @@ void main() {
     final after = await db.checklistTemplateByClientId(template.clientId);
     expect(after!.title, 'Mein eigener Titel');
   });
+
+  test(
+    'an item added to a template that already exists does not arrive',
+    () async {
+      // Documented on purpose, because it is the reason "Hausapotheke" is a
+      // list of its own instead of nine more lines under "Erste Hilfe": the
+      // seeder skips a template it finds, so an item added to one that
+      // shipped earlier reaches fresh installs only. If this ever starts
+      // passing the other way, the comment on `builtInTemplates` needs
+      // revisiting -- and so does the question of resurrecting items the
+      // user deleted.
+      await ChecklistSeeder(db).seed(householdId);
+
+      final template = builtInTemplates.first;
+      final item = template.items.first;
+      await db.customStatement(
+        "DELETE FROM checklist_items WHERE client_id = '${item.clientId}'",
+      );
+
+      await ChecklistSeeder(db).seed(householdId);
+
+      final items = await db.watchChecklistItems(template.clientId).first;
+      expect(
+        items.where((row) => row.clientId == item.clientId),
+        isEmpty,
+        reason: 'the template was found, so its items were not revisited',
+      );
+    },
+  );
+
+  group('Hausapotheke', () {
+    /// The medicine cabinet the BBK checklist enumerates and this app was
+    /// missing: it listed thirteen entries where the app had four, and the
+    /// four were equipment rather than medicines.
+    late BuiltInTemplate cabinet;
+
+    setUp(() {
+      cabinet = builtInTemplates.firstWhere((t) => t.title == 'Hausapotheke');
+    });
+
+    test('carries the medicines the official list names', () {
+      final titles = cabinet.items.map((i) => i.title).join(' | ');
+
+      for (final wanted in [
+        'Schmerz',
+        'Erkältung',
+        'Durchfall',
+        'Elektrolyte',
+        'Nasen',
+        'desinfektion',
+        'Sonnenbrand',
+      ]) {
+        expect(
+          titles.toLowerCase(),
+          contains(wanted.toLowerCase()),
+          reason: '$wanted fehlt in der Hausapotheke',
+        );
+      }
+    });
+
+    test('does not ask again for what the first-aid kit contains', () {
+      // A DIN 13157 kit holds plasters, scissors, tweezers, gloves and a
+      // burn dressing, and the "Erste Hilfe" list already asks for the
+      // kit. Asking for its contents a second time is how a checklist
+      // loses the reader's trust.
+      final titles = cabinet.items
+          .map((i) => i.title)
+          .join(' | ')
+          .toLowerCase();
+
+      for (final covered in [
+        'pflaster',
+        'schere',
+        'pinzette',
+        'handschuh',
+        'verbandtuch',
+        'fieberthermometer',
+      ]) {
+        expect(titles, isNot(contains(covered)));
+      }
+    });
+  });
 }

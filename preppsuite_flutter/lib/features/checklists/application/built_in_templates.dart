@@ -13,6 +13,13 @@ import '../../../model/categories.dart';
 /// seeded long ago, and one that is already there is left exactly as the
 /// user left it.
 ///
+/// That growth works for whole templates and not for items inside one:
+/// `ChecklistSeeder` skips a template it already finds, so an item added
+/// to a template that shipped earlier reaches fresh installs only. Content
+/// that existing households should see therefore arrives as a new
+/// template -- which is why "Hausapotheke" is its own list rather than
+/// nine more lines under "Erste Hilfe".
+///
 /// The content follows the BBK's "Ratgeber für Notfallvorsorge und
 /// richtiges Handeln in Notsituationen" and its checklists. German only,
 /// like the rest of this file — it is seeded content, not app copy, and
@@ -698,6 +705,61 @@ const builtInTemplates = [
         '00000000-0000-4000-8000-000000001609',
         'Für jede Person eine Notfallkarte ausfüllen — in PreppSuite unter '
             'Haushalt',
+      ),
+    ],
+  ),
+  // Medikamente, und nur die. Pflaster, Schere, Pinzette, Einmalhandschuhe
+  // und das Verbandtuch fuer Brandwunden stehen in der BBK-Liste einzeln,
+  // stecken aber im Verbandskasten nach DIN 13157, den die Vorlage "Erste
+  // Hilfe" schon verlangt -- zweimal nach derselben Sache zu fragen macht
+  // eine Liste unglaubwuerdig. Was ein Verbandskasten nicht enthaelt, ist
+  // genau das hier.
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000017',
+    'Hausapotheke',
+    ChecklistCategory.firstAid,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001701',
+        'Schmerz- und fiebersenkende Mittel',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001702',
+        'Mittel gegen Erkältungsbeschwerden',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001703',
+        'Mittel gegen Durchfall, Erbrechen und Übelkeit',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001704',
+        'Elektrolyte zum Ausgleich von Flüssigkeitsverlust — bei Durchfall '
+            'ist das Austrocknen die Gefahr, nicht der Durchfall',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001705',
+        'Abschwellende Nasentropfen oder Nasenspray',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001706',
+        'Haut- und Wunddesinfektionsmittel',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001707',
+        'Brand-, Wund- und Heilsalbe',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001708',
+        'Mittel gegen Sonnenbrand und Insektenstiche',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001709',
+        'Kühlendes Gel für Verstauchungen und Prellungen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001710',
+        'Ablaufdaten prüfen — im Inventar erfasst, erinnert die App von '
+            'selbst daran',
       ),
     ],
   ),
