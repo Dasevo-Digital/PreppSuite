@@ -120,10 +120,31 @@ Debug-Schlüssel zurück.
 die App installiert haben, nie wieder eine Aktualisierung veröffentlichen.
 Keystore und Passwörter gehören an zwei getrennte gesicherte Orte.
 
-Das Paket enthält nur `arm64-v8a` und `armeabi-v7a`. x86 und x86_64 sind der
-Emulator und waren ein Drittel der Dateigröße, ohne je auf einem Gerät zu
-landen, an das diese App weitergegeben wird — `tool/android_release.sh`
-baut mit `--target-platform` und bricht ab, falls sie zurückkehren.
+Es entstehen **zwei Pakete, eines je Architektur**, und jedes enthält nur
+seine eigene. Ein Paket mit beiden war 64,7 MB, davon 60,2 MB nativer Code
+für zwei Architekturen – jedes Telefon lud und installierte also knapp
+29 MB, die es nie ausführen kann. Getrennt und gemessen: `arm64-v8a`
+35,9 MB, `armeabi-v7a` 32,9 MB.
+
+Weitergegeben wird im Normalfall **arm64-v8a**; das ist jedes Telefon der
+letzten Jahre. `armeabi-v7a` ist für die Handvoll älterer Geräte, die
+minSdk 24 noch zulässt.
+
+x86 und x86_64 sind der Emulator und landen auf keinem Gerät, an das diese
+App weitergegeben wird. `tool/android_release.sh` baut mit
+`--target-platform` und prüft jedes Paket einzeln darauf, genau eine
+Architektur zu enthalten – ein Paket, das beide trägt, hätte die 29 MB
+zurück, und eines mit der falschen installiert sich und startet dann
+nicht.
+
+**Die Aufteilung ist eine Einbahnstraße.** `--split-per-abi` rechnet je
+Architektur 1000 auf den `versionCode`: aus `+22` in der pubspec wird 1022
+für `armeabi-v7a` und 2022 für `arm64-v8a`. Über die bestehenden
+Installationen mit 22 lässt sich damit aktualisieren – zurück aber nicht.
+Ein späteres Paket mit beiden Architekturen trüge wieder eine schlichte
+23, und die weist jedes Telefon, das inzwischen auf 2022 steht, als
+Rückschritt ab; der einzige Ausweg wäre Deinstallieren samt Daten. Das
+Skript prüft den Offset deshalb ausdrücklich und bricht ab, wenn er fehlt.
 
 #### Schlüsselwechsel: warum `flutter build apk` allein nicht reicht
 
