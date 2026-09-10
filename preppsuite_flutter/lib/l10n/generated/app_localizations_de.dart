@@ -1203,6 +1203,32 @@ class AppLocalizationsDe extends AppLocalizations {
       'Schreib mindestens eine Sache auf, bevor du speicherst.';
 
   @override
+  String get drillsEmergencyMode => 'Notfallmodus';
+
+  @override
+  String get drillsCallEmergency => '112 anrufen';
+
+  @override
+  String get drillsHarmless =>
+      'Die Übung verändert keine Vorräte und verschickt keine Nachrichten.';
+
+  @override
+  String get drillsReset => 'Von vorn beginnen';
+
+  @override
+  String get drillsTitle => 'Notfallmodus und Übungen';
+
+  @override
+  String get drillsSubtitle => 'Ablaufkarte und realistische Haushaltsübungen';
+
+  @override
+  String get drillsImmediateDanger =>
+      'Bei unmittelbarer Gefahr zuerst 112 wählen. Danach amtliche Warnungen prüfen, Angehörige nach dem Haushaltsplan informieren und Strom sparen.';
+
+  @override
+  String get drillsSectionTitle => 'Übungsmodus';
+
+  @override
   String get emergencyCardsTitle => 'Notfallkarten';
 
   @override

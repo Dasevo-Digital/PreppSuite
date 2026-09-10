@@ -1192,6 +1192,33 @@ class AppLocalizationsEn extends AppLocalizations {
       'Write down at least one thing before saving.';
 
   @override
+  String get drillsEmergencyMode => 'Emergency mode';
+
+  @override
+  String get drillsCallEmergency => 'Call 112';
+
+  @override
+  String get drillsHarmless =>
+      'A drill changes no supplies and sends no messages.';
+
+  @override
+  String get drillsReset => 'Start over';
+
+  @override
+  String get drillsTitle => 'Emergency mode and drills';
+
+  @override
+  String get drillsSubtitle =>
+      'A card to work through, and realistic household drills';
+
+  @override
+  String get drillsImmediateDanger =>
+      'In immediate danger, call 112 first. Then check the official warnings, tell your family what the household plan says, and save power.';
+
+  @override
+  String get drillsSectionTitle => 'Drill mode';
+
+  @override
   String get emergencyCardsTitle => 'Emergency cards';
 
   @override

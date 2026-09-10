@@ -2126,6 +2126,54 @@ abstract class AppLocalizations {
   /// **'Write down at least one thing before saving.'**
   String get householdPlanNothingEntered;
 
+  /// No description provided for @drillsEmergencyMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency mode'**
+  String get drillsEmergencyMode;
+
+  /// No description provided for @drillsCallEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Call 112'**
+  String get drillsCallEmergency;
+
+  /// No description provided for @drillsHarmless.
+  ///
+  /// In en, this message translates to:
+  /// **'A drill changes no supplies and sends no messages.'**
+  String get drillsHarmless;
+
+  /// No description provided for @drillsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Start over'**
+  String get drillsReset;
+
+  /// No description provided for @drillsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency mode and drills'**
+  String get drillsTitle;
+
+  /// No description provided for @drillsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A card to work through, and realistic household drills'**
+  String get drillsSubtitle;
+
+  /// No description provided for @drillsImmediateDanger.
+  ///
+  /// In en, this message translates to:
+  /// **'In immediate danger, call 112 first. Then check the official warnings, tell your family what the household plan says, and save power.'**
+  String get drillsImmediateDanger;
+
+  /// No description provided for @drillsSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drill mode'**
+  String get drillsSectionTitle;
+
   /// No description provided for @emergencyCardsTitle.
   ///
   /// In en, this message translates to:

@@ -1,5 +1,10 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../../l10n/generated/app_localizations.dart';
+import '../application/drill_progress_store.dart';
 
 /// A deliberately small, offline exercise and incident guide. It does not
 /// create a cloud account or transmit a "safe" status; contacts remain under
@@ -13,71 +18,111 @@ class PreparednessToolsScreen extends StatefulWidget {
 }
 
 class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
-  final _checked = <String>{};
+  static const _store = DrillProgressStore();
+
+  Set<String> _checked = {};
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Notfallmodus und Übungen')),
-    body: ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Card(
-          color: Theme.of(context).colorScheme.errorContainer,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Notfallmodus',
+  void initState() {
+    super.initState();
+    unawaited(_restore());
+  }
+
+  Future<void> _restore() async {
+    final stored = await _store.load();
+    if (mounted) setState(() => _checked = stored);
+  }
+
+  void _toggle(String key, {required bool on}) {
+    setState(() {
+      if (on) {
+        _checked.add(key);
+      } else {
+        _checked.remove(key);
+      }
+    });
+    unawaited(_store.save(_checked));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.drillsTitle)),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            color: Theme.of(context).colorScheme.errorContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.drillsEmergencyMode,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(l10n.drillsImmediateDanger),
+                  const SizedBox(height: 12),
+                  FilledButton.icon(
+                    onPressed: () => launchUrl(Uri(scheme: 'tel', path: '112')),
+                    icon: const Icon(Icons.call),
+                    label: Text(l10n.drillsCallEmergency),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.drillsSectionTitle,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Bei unmittelbarer Gefahr zuerst 112 wählen. Danach amtliche Warnungen prüfen, Angehörige nach dem Haushaltsplan informieren und Strom sparen.',
+              ),
+              // Ticks outlive the screen now, so there has to be a way
+              // back to zero — otherwise the second run of a drill starts
+              // already finished.
+              if (_checked.isNotEmpty)
+                TextButton(
+                  onPressed: () {
+                    setState(_checked.clear);
+                    unawaited(_store.clear());
+                  },
+                  child: Text(l10n.drillsReset),
                 ),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: () => launchUrl(Uri(scheme: 'tel', path: '112')),
-                  icon: const Icon(Icons.call),
-                  label: const Text('112 anrufen'),
-                ),
-              ],
-            ),
+            ],
           ),
-        ),
-        const SizedBox(height: 20),
-        Text('Übungsmodus', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 4),
-        const Text(
-          'Die Übung verändert keine Vorräte und verschickt keine Nachrichten.',
-        ),
-        const SizedBox(height: 8),
-        for (final scenario in _scenarios)
-          Card(
-            child: ExpansionTile(
-              title: Text(scenario.title),
-              subtitle: Text(scenario.duration),
-              children: [
-                for (final step in scenario.steps)
-                  CheckboxListTile(
-                    value: _checked.contains('${scenario.title}:$step'),
-                    title: Text(step),
-                    onChanged: (value) => setState(() {
-                      final key = '${scenario.title}:$step';
-                      if (value == true) {
-                        _checked.add(key);
-                      } else {
-                        _checked.remove(key);
-                      }
-                    }),
-                  ),
-              ],
+          const SizedBox(height: 4),
+          Text(l10n.drillsHarmless),
+          const SizedBox(height: 8),
+          for (final scenario in _scenarios)
+            Card(
+              child: ExpansionTile(
+                title: Text(scenario.title),
+                subtitle: Text(scenario.duration),
+                children: [
+                  for (final step in scenario.steps)
+                    CheckboxListTile(
+                      value: _checked.contains('${scenario.title}:$step'),
+                      title: Text(step),
+                      onChanged: (value) => _toggle(
+                        '${scenario.title}:$step',
+                        on: value == true,
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
 class _Scenario {
@@ -87,6 +132,14 @@ class _Scenario {
   final List<String> steps;
 }
 
+/// The drills themselves, in German only.
+///
+/// Unlike the labels above, this is content rather than interface: three
+/// scenarios from the BBK's own guidance with fifteen strings between
+/// them. Translating civil-protection instructions is not a code change,
+/// and a half-translated drill is worse than an untranslated one — so
+/// until somebody writes the English, it stays as it is and stays visible
+/// here rather than hiding in the widget tree.
 const _scenarios = [
   _Scenario('72 Stunden ohne Strom', 'Vorbereitung: 20 Minuten', [
     'Licht, Radio und Powerbank bereitlegen',

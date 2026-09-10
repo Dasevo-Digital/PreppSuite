@@ -102,10 +102,8 @@ class EmergencyScreen extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.playlist_add_check_circle_outlined),
-            title: const Text('Notfallmodus und Übungen'),
-            subtitle: const Text(
-              'Ablaufkarte und realistische Haushaltsübungen',
-            ),
+            title: Text(l10n.drillsTitle),
+            subtitle: Text(l10n.drillsSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
