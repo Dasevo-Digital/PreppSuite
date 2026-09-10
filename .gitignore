@@ -10,3 +10,10 @@ build/
 
 # Erzeugt von scripts/generate-env.sh — enthaelt Geheimnisse
 .env
+
+# Firebase-Konfiguration. Die App benutzt kein Firebase; diese Dateien lagen
+# aus einem aufgegebenen Versuch im Repository und trugen einen API-Schluessel
+# mit sich. Sie stehen hier, damit ein "flutterfire configure" sie nicht
+# unbemerkt wieder hereinlegt.
+google-services.json
+GoogleService-Info.plist
