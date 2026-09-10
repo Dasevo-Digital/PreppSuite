@@ -4,11 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/checklists/application/checklist_providers.dart';
 import 'package:preppsuite_flutter/features/home/application/shell_layout.dart';
 import 'package:preppsuite_flutter/features/home/presentation/overview_screen.dart';
+import 'package:preppsuite_flutter/features/inventory/application/charge_reminder_provider.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_providers.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'accessibility.dart';
 
@@ -241,5 +243,115 @@ void main() {
     expect(spoken, 'Trinkwasser 10,0 von 40,0 L');
     expect(water.value, '25 %');
     handle.dispose();
+  });
+
+  group('the equipment check on the attention card', () {
+    // It used to live only in a notification: it arrived, it was
+    // dismissed, and the overview said nothing about it. Two places
+    // answering "what wants doing" means one of them stops being read.
+    Future<ProviderContainer> pumpWithCheck(
+      WidgetTester tester, {
+      required int everyDays,
+      DateTime? lastChecked,
+    }) async {
+      SharedPreferences.setMockInitialValues({
+        'chargeReminderDays': everyDays,
+        if (lastChecked != null)
+          'chargeReminderLastChecked': lastChecked.toIso8601String(),
+      });
+      final container = ProviderContainer(
+        overrides: [
+          inventoryItemsProvider(
+            householdId,
+          ).overrideWith((ref) => Stream.value([item()])),
+          activeWarningsProvider.overrideWith((ref) => Stream.value(const [])),
+          checklistTemplatesProvider(
+            householdId,
+          ).overrideWith((ref) => Stream.value(const [])),
+          allChecklistItemsProvider(
+            householdId,
+          ).overrideWith((ref) => Stream.value(const [])),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await tester.binding.setSurfaceSize(const Size(900, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            locale: const Locale('de'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: OverviewScreen(
+              profile: const HouseholdProfile(
+                id: householdId,
+                name: 'Testhaushalt',
+                countryCode: 'DE',
+                regionKey: '03241',
+                personCount: 2,
+              ),
+              onNavigate: (_) {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return container;
+    }
+
+    testWidgets('switched off, the card says nothing about it', (tester) async {
+      await pumpWithCheck(tester, everyDays: 0);
+
+      expect(find.textContaining('Akkugeräte prüfen'), findsNothing);
+    });
+
+    testWidgets('never confirmed reads as that, not as overdue', (
+      tester,
+    ) async {
+      await pumpWithCheck(tester, everyDays: 90);
+
+      expect(find.textContaining('Noch nicht bestätigt'), findsOneWidget);
+      expect(find.textContaining('überfällig'), findsNothing);
+    });
+
+    testWidgets('a check long past reads as overdue', (tester) async {
+      await pumpWithCheck(
+        tester,
+        everyDays: 14,
+        lastChecked: DateTime.now().toUtc().subtract(const Duration(days: 20)),
+      );
+
+      expect(find.textContaining('überfällig'), findsOneWidget);
+    });
+
+    testWidgets('a recent check reads as the days remaining', (tester) async {
+      await pumpWithCheck(
+        tester,
+        everyDays: 14,
+        lastChecked: DateTime.now().toUtc().subtract(const Duration(days: 4)),
+      );
+
+      expect(find.textContaining('Nächste Prüfung in'), findsOneWidget);
+      expect(find.textContaining('überfällig'), findsNothing);
+    });
+
+    testWidgets('confirming it there and then clears the overdue state', (
+      tester,
+    ) async {
+      final container = await pumpWithCheck(
+        tester,
+        everyDays: 14,
+        lastChecked: DateTime.now().toUtc().subtract(const Duration(days: 20)),
+      );
+
+      await tester.tap(find.widgetWithText(TextButton, 'Geprüft'));
+      await tester.pumpAndSettle();
+
+      expect(container.read(chargeCheckProvider).isDue(), isFalse);
+      expect(find.textContaining('überfällig'), findsNothing);
+      expect(find.textContaining('Nächste Prüfung in'), findsOneWidget);
+    });
   });
 }

@@ -3890,6 +3890,42 @@ abstract class AppLocalizations {
   /// **'Nothing has been added to the inventory yet.'**
   String get overviewNothingStored;
 
+  /// No description provided for @overviewChargeDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the rechargeable equipment'**
+  String get overviewChargeDue;
+
+  /// No description provided for @overviewChargeOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue by {days, plural, =1{one day} other{{days} days}}'**
+  String overviewChargeOverdue(int days);
+
+  /// No description provided for @overviewChargeDueToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Due today'**
+  String get overviewChargeDueToday;
+
+  /// No description provided for @overviewChargeNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next check in {days, plural, =1{one day} other{{days} days}}'**
+  String overviewChargeNext(int days);
+
+  /// No description provided for @overviewChargeNeverChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed yet'**
+  String get overviewChargeNeverChecked;
+
+  /// No description provided for @overviewChargeDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked'**
+  String get overviewChargeDone;
+
   /// No description provided for @overviewExpired.
   ///
   /// In en, this message translates to:

@@ -2287,6 +2287,40 @@ class AppLocalizationsDe extends AppLocalizations {
   String get overviewNothingStored => 'Im Vorrat ist noch nichts eingetragen.';
 
   @override
+  String get overviewChargeDue => 'Akkugeräte prüfen';
+
+  @override
+  String overviewChargeOverdue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days Tagen',
+      one: 'einem Tag',
+    );
+    return 'Seit $_temp0 überfällig';
+  }
+
+  @override
+  String get overviewChargeDueToday => 'Heute fällig';
+
+  @override
+  String overviewChargeNext(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days Tagen',
+      one: 'einem Tag',
+    );
+    return 'Nächste Prüfung in $_temp0';
+  }
+
+  @override
+  String get overviewChargeNeverChecked => 'Noch nicht bestätigt';
+
+  @override
+  String get overviewChargeDone => 'Geprüft';
+
+  @override
   String get overviewExpired => 'abgelaufen';
 
   @override

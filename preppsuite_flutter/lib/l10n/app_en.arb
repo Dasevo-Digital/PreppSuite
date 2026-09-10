@@ -1375,6 +1375,30 @@
   "overviewSupplyCalories": "{current} of {target} kcal",
   "overviewAttentionTitle": "Needs attention",
   "overviewNothingStored": "Nothing has been added to the inventory yet.",
+  "overviewChargeDue": "Check the rechargeable equipment",
+  "@overviewChargeDue": {},
+  "overviewChargeOverdue": "Overdue by {days, plural, =1{one day} other{{days} days}}",
+  "@overviewChargeOverdue": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "overviewChargeDueToday": "Due today",
+  "@overviewChargeDueToday": {},
+  "overviewChargeNext": "Next check in {days, plural, =1{one day} other{{days} days}}",
+  "@overviewChargeNext": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "overviewChargeNeverChecked": "Not confirmed yet",
+  "@overviewChargeNeverChecked": {},
+  "overviewChargeDone": "Checked",
+  "@overviewChargeDone": {},
   "overviewExpired": "expired",
   "overviewLowStock": "below minimum",
   "overviewExpiringSoon": "expires within 30 days",

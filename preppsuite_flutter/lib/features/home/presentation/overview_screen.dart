@@ -7,6 +7,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
 import '../../../model/household_profile.dart';
+import '../../inventory/application/charge_reminder_provider.dart';
 import '../../inventory/application/inventory_category_l10n.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/presentation/inventory_item_form_screen.dart';
@@ -136,6 +137,7 @@ class _OverviewCard extends StatelessWidget {
     required this.onOpen,
     this.trailing,
     this.tone,
+    this.footer,
   });
 
   final IconData icon;
@@ -143,6 +145,11 @@ class _OverviewCard extends StatelessWidget {
   final Widget child;
   final VoidCallback onOpen;
   final Widget? trailing;
+
+  /// Shown under the card's own body and outside its tap target: it
+  /// carries a button of its own, and a row that both navigates and acts
+  /// is a row that does the wrong one.
+  final Widget? footer;
 
   /// Colours the heading when the card is reporting a problem. Left null
   /// for the ordinary case, so that a coloured heading means something.
@@ -154,57 +161,69 @@ class _OverviewCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onOpen,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          InkWell(
+            onTap: onOpen,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    icon,
-                    size: 20,
-                    color: tone ?? theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: tone,
+                  Row(
+                    children: [
+                      Icon(
+                        icon,
+                        size: 20,
+                        color: tone ?? theme.colorScheme.primary,
                       ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: tone,
+                          ),
+                        ),
+                      ),
+                      ?trailing,
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  child,
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          AppLocalizations.of(context)!.overviewOpen,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ],
                     ),
                   ),
-                  ?trailing,
                 ],
               ),
-              const SizedBox(height: 12),
-              child,
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)!.overviewOpen,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right,
-                      size: 20,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+          if (footer != null) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 2, 8, 2),
+              child: footer,
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -342,23 +361,30 @@ class _Meter extends StatelessWidget {
 }
 
 /// What is expired, running low or about to run out.
-class _AttentionCard extends StatelessWidget {
+class _AttentionCard extends ConsumerWidget {
   const _AttentionCard({required this.overview, required this.onOpen});
 
   final InventoryOverview overview;
   final VoidCallback onOpen;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final wanted = overview.needsAttention > 0;
+    // The equipment check belongs on this card rather than on a screen of
+    // its own. "What wants doing" is one question, and it was answered in
+    // two places — here for the supplies, and by a notification for the
+    // power banks that arrived and was dismissed. Two answers means one of
+    // them stops being read.
+    final check = ref.watch(chargeCheckProvider);
+    final wanted = overview.needsAttention > 0 || check.isDue();
 
     return _OverviewCard(
       icon: wanted ? Icons.error_outline : Icons.check_circle_outline,
       title: l10n.overviewAttentionTitle,
       tone: wanted ? theme.colorScheme.error : null,
       onOpen: onOpen,
+      footer: check.isOff ? null : _ChargeRow(check: check),
       child: overview.isEmpty
           ? Text(l10n.overviewNothingStored, style: theme.textTheme.bodyMedium)
           : Wrap(
@@ -381,6 +407,57 @@ class _AttentionCard extends StatelessWidget {
                 ),
               ],
             ),
+    );
+  }
+}
+
+/// When the rechargeable equipment is next due, and a way to say it is
+/// done.
+///
+/// The reminder was a notification and nothing besides: it arrived, it was
+/// dismissed, and the app went on knowing nothing about whether anybody
+/// had looked. So there was no such thing as overdue. Confirming it here
+/// is what turns a blind interval into something that follows the shelf.
+class _ChargeRow extends ConsumerWidget {
+  const _ChargeRow({required this.check});
+
+  final ChargeCheck check;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final days = check.daysUntilDue();
+    final due = check.isDue();
+
+    final detail = switch (days) {
+      // Nobody has confirmed one yet. Not the same as being behind: a
+      // fresh install has not missed anything.
+      null => l10n.overviewChargeNeverChecked,
+      0 => l10n.overviewChargeDueToday,
+      final int left when left < 0 => l10n.overviewChargeOverdue(-left),
+      final int left => l10n.overviewChargeNext(left),
+    };
+
+    return Row(
+      children: [
+        Icon(
+          due ? Icons.battery_alert_outlined : Icons.battery_charging_full,
+          size: 18,
+          color: due ? theme.colorScheme.error : theme.colorScheme.primary,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            '${l10n.overviewChargeDue} · $detail',
+            style: theme.textTheme.bodySmall,
+          ),
+        ),
+        TextButton(
+          onPressed: () => ref.read(chargeCheckProvider.notifier).markChecked(),
+          child: Text(l10n.overviewChargeDone),
+        ),
+      ],
     );
   }
 }

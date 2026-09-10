@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _chargeReminderDaysPrefsKey = 'chargeReminderDays';
+const _chargeReminderCheckedPrefsKey = 'chargeReminderLastChecked';
 
 /// The intervals offered as chips. Zero is a conscious opt-out, not a
 /// missing preference.
@@ -57,4 +58,97 @@ class ChargeReminderDaysController extends Notifier<int> {
 final chargeReminderDaysProvider =
     NotifierProvider<ChargeReminderDaysController, int>(
       ChargeReminderDaysController.new,
+    );
+
+/// When the rechargeable equipment was last confirmed as checked, and
+/// whether that is overdue.
+///
+/// The reminder used to be a blind timer: it fired every so many days from
+/// whenever the setting was last touched, and nothing recorded whether
+/// anybody had actually gone and looked. So there was no such thing as
+/// "overdue" — only a notification that arrived and was dismissed, which
+/// is the same screen whether the power banks are full or flat.
+class ChargeCheck {
+  const ChargeCheck({required this.lastChecked, required this.everyDays});
+
+  /// Null when nobody has confirmed a check yet, which is the state a
+  /// fresh install is in and is not the same as being overdue.
+  final DateTime? lastChecked;
+
+  /// Zero means the reminder is switched off, and then nothing is due.
+  final int everyDays;
+
+  bool get isOff => everyDays == 0;
+
+  DateTime? get dueAt {
+    if (isOff) return null;
+    final from = lastChecked;
+    if (from == null) return null;
+    return from.add(Duration(days: everyDays));
+  }
+
+  /// Days until the next check, negative once it has passed.
+  int? daysUntilDue({DateTime? now}) {
+    final due = dueAt;
+    if (due == null) return null;
+    final today = _midnight(now ?? DateTime.now());
+    return _midnight(due).difference(today).inDays;
+  }
+
+  /// True once the interval has elapsed. False while it has not, and false
+  /// when nobody ever confirmed a check — an install that has never been
+  /// through this is not behind on it.
+  bool isDue({DateTime? now}) {
+    final days = daysUntilDue(now: now);
+    return days != null && days <= 0;
+  }
+
+  static DateTime _midnight(DateTime value) =>
+      DateTime(value.year, value.month, value.day);
+}
+
+class ChargeCheckController extends Notifier<ChargeCheck> {
+  /// Kept beside the state, not read out of it: `build` runs again every
+  /// time the interval changes, and reading `state` there would either
+  /// throw on the first run or drop the loaded date on every later one.
+  DateTime? _lastChecked;
+
+  @override
+  ChargeCheck build() {
+    // Watched, so changing the interval moves the due date with it rather
+    // than leaving one computed against the old interval.
+    final days = ref.watch(chargeReminderDaysProvider);
+    unawaited(_load());
+    return ChargeCheck(lastChecked: _lastChecked, everyDays: days);
+  }
+
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString(_chargeReminderCheckedPrefsKey);
+    if (!ref.mounted) return;
+    _lastChecked = stored == null ? null : DateTime.tryParse(stored);
+    state = ChargeCheck(
+      lastChecked: _lastChecked,
+      everyDays: state.everyDays,
+    );
+  }
+
+  /// Records that somebody has just been through the equipment.
+  Future<void> markChecked({DateTime? at}) async {
+    _lastChecked = (at ?? DateTime.now()).toUtc();
+    state = ChargeCheck(
+      lastChecked: _lastChecked,
+      everyDays: state.everyDays,
+    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _chargeReminderCheckedPrefsKey,
+      _lastChecked!.toIso8601String(),
+    );
+  }
+}
+
+final chargeCheckProvider =
+    NotifierProvider<ChargeCheckController, ChargeCheck>(
+      ChargeCheckController.new,
     );

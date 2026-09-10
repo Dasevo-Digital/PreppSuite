@@ -105,4 +105,103 @@ void main() {
       expect(ref.read(chargeReminderDaysProvider), defaultChargeReminderDays);
     });
   });
+
+  group('when the next check is due', () {
+    // A blind interval fires whether or not anybody went and looked. These
+    // are the cases that separate "not yet", "today", "behind" and "nobody
+    // has ever confirmed one" — the last of which is not a failure to keep
+    // up with anything.
+    ChargeCheck at(DateTime? checked, int every) =>
+        ChargeCheck(lastChecked: checked, everyDays: every);
+
+    final monday = DateTime.utc(2026, 9, 7, 8);
+
+    test('switched off, nothing is ever due', () {
+      final check = at(monday, 0);
+
+      expect(check.isOff, isTrue);
+      expect(check.dueAt, isNull);
+      expect(check.isDue(now: monday.add(const Duration(days: 400))), isFalse);
+    });
+
+    test('never confirmed is not the same as overdue', () {
+      final check = at(null, 14);
+
+      expect(check.daysUntilDue(now: monday), isNull);
+      expect(check.isDue(now: monday), isFalse);
+    });
+
+    test('the interval is counted from the last check', () {
+      final check = at(monday, 14);
+
+      expect(check.dueAt, DateTime.utc(2026, 9, 21, 8));
+      expect(check.daysUntilDue(now: monday), 14);
+    });
+
+    test('the day before is not yet due', () {
+      final check = at(monday, 14);
+
+      expect(check.daysUntilDue(now: DateTime.utc(2026, 9, 20, 23)), 1);
+      expect(check.isDue(now: DateTime.utc(2026, 9, 20, 23)), isFalse);
+    });
+
+    test('the day itself is due, whatever the time of day', () {
+      final check = at(monday, 14);
+
+      // Compared by calendar day, not by the hour: a check confirmed at
+      // eight in the morning is not "due at eight" two weeks later.
+      expect(check.isDue(now: DateTime.utc(2026, 9, 21, 0, 5)), isTrue);
+      expect(check.isDue(now: DateTime.utc(2026, 9, 21, 23, 55)), isTrue);
+      expect(check.daysUntilDue(now: DateTime.utc(2026, 9, 21, 23)), 0);
+    });
+
+    test('afterwards it counts how far behind', () {
+      final check = at(monday, 14);
+
+      expect(check.daysUntilDue(now: DateTime.utc(2026, 9, 24)), -3);
+      expect(check.isDue(now: DateTime.utc(2026, 9, 24)), isTrue);
+    });
+  });
+
+  group('confirming a check', () {
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    test('is remembered across a restart', () async {
+      final first = ProviderContainer();
+      addTearDown(first.dispose);
+      first.read(chargeCheckProvider);
+      await Future<void>.delayed(Duration.zero);
+      await first
+          .read(chargeCheckProvider.notifier)
+          .markChecked(at: DateTime.utc(2026, 9, 7));
+
+      final second = ProviderContainer();
+      addTearDown(second.dispose);
+      second.read(chargeCheckProvider);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        second.read(chargeCheckProvider).lastChecked,
+        DateTime.utc(2026, 9, 7),
+      );
+    });
+
+    test('changing the interval moves the due date, not the check', () async {
+      final ref = ProviderContainer();
+      addTearDown(ref.dispose);
+      ref.read(chargeCheckProvider);
+      await Future<void>.delayed(Duration.zero);
+      await ref
+          .read(chargeCheckProvider.notifier)
+          .markChecked(at: DateTime.utc(2026, 9, 7));
+
+      await ref.read(chargeReminderDaysProvider.notifier).setDays(14);
+      await Future<void>.delayed(Duration.zero);
+
+      final check = ref.read(chargeCheckProvider);
+      expect(check.everyDays, 14);
+      expect(check.lastChecked, DateTime.utc(2026, 9, 7));
+      expect(check.dueAt, DateTime.utc(2026, 9, 21));
+    });
+  });
 }

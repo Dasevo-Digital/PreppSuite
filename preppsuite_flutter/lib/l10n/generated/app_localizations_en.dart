@@ -2274,6 +2274,40 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nothing has been added to the inventory yet.';
 
   @override
+  String get overviewChargeDue => 'Check the rechargeable equipment';
+
+  @override
+  String overviewChargeOverdue(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: 'one day',
+    );
+    return 'Overdue by $_temp0';
+  }
+
+  @override
+  String get overviewChargeDueToday => 'Due today';
+
+  @override
+  String overviewChargeNext(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: 'one day',
+    );
+    return 'Next check in $_temp0';
+  }
+
+  @override
+  String get overviewChargeNeverChecked => 'Not confirmed yet';
+
+  @override
+  String get overviewChargeDone => 'Checked';
+
+  @override
   String get overviewExpired => 'expired';
 
   @override
