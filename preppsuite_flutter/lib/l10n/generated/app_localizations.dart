@@ -2084,6 +2084,18 @@ abstract class AppLocalizations {
   /// **'Where water, gas and power are shut off'**
   String get householdPlanShutoff;
 
+  /// No description provided for @householdPlanContactPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'The municipality\'s contact point'**
+  String get householdPlanContactPoint;
+
+  /// No description provided for @householdPlanContactPointHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The building on emergency power that opens when the power has been out for a long time – it gives information, and an emergency call can be handed over there when no phone works. Its name changes with the state; the municipality knows where the nearest one is. Not a meeting point – this is where you go for help, not to find each other.'**
+  String get householdPlanContactPointHint;
+
   /// No description provided for @householdPlanNotes.
   ///
   /// In en, this message translates to:

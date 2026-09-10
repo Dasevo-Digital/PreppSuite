@@ -12,6 +12,7 @@ class EmergencyPlanReportStrings {
     required this.generatedOn,
     required this.meetingPoints,
     required this.contact,
+    required this.contactPoint,
     required this.equipment,
     required this.notes,
     required this.empty,
@@ -24,6 +25,10 @@ class EmergencyPlanReportStrings {
   final String generatedOn;
   final String meetingPoints;
   final String contact;
+
+  /// Heading for the municipality's contact point.
+  final String contactPoint;
+
   final String equipment;
   final String notes;
   final String empty;
@@ -105,6 +110,13 @@ class EmergencyPlanReport {
           if (plan.contactName != null) plan.contactName!,
           if (plan.contactPhone != null) plan.contactPhone!,
         ],
+      ),
+      // Its own section rather than a third line under the contact: on
+      // paper the heading is what somebody reads first, and "where to go
+      // when nothing works" is not the same errand as "who to ring".
+      (
+        title: strings.contactPoint,
+        rows: [if (plan.localContactPoint != null) plan.localContactPoint!],
       ),
       (
         title: strings.equipment,

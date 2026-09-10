@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io' show ZLibCodec;
 import 'dart:typed_data';
 
+import 'package:drift/drift.dart' show Value;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:preppsuite_flutter/features/household/application/emergency_plan_report.dart';
@@ -19,6 +21,7 @@ void main() {
     generatedOn: 'Erstellt am 10.09.2026',
     meetingPoints: 'Treffpunkte',
     contact: 'Kontakt',
+    contactPoint: 'Anlaufstelle der Gemeinde',
     equipment: 'Ausrüstung',
     notes: 'Notizen',
     empty: 'Nicht eingetragen',
@@ -114,6 +117,37 @@ void main() {
   }
 
   setUpAll(TestWidgetsFlutterBinding.ensureInitialized);
+
+  test('the municipality contact point reaches the paper', () async {
+    // The one thing on this sheet that is only useful on paper: it is
+    // where somebody walks to when the power has been out for two days
+    // and the phone is dead, which is exactly when the app cannot be
+    // asked.
+    final withPoint = plan.copyWith(
+      localContactPoint: const Value('Grundschule Nordstadt, Turnhalle'),
+    );
+    final text = textIn(
+      await const EmergencyPlanReport().build(
+        plan: withPoint,
+        householdName: 'Familie Muster',
+        strings: strings,
+        font: pw.Font.helvetica(),
+      ),
+    );
+
+    expect(text, contains('Anlaufstelle'));
+    expect(text, contains('Grundschule Nordstadt'));
+  });
+
+  test('an unset contact point is headed and marked as unfilled', () async {
+    // Unlike the emergency cards, where an empty field is left off: on a
+    // plan the gap is the message. Somebody reading it should notice they
+    // never found out what their municipality opens.
+    final text = textIn(await render());
+
+    expect(text, contains('Anlaufstelle'));
+    expect(text, contains('Nicht eingetragen'));
+  });
 
   test('the plan itself is on the sheet', () async {
     final text = textIn(await render());

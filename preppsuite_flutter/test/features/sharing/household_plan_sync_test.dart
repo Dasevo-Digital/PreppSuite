@@ -50,6 +50,7 @@ void main() {
     String household = householdId,
     String? near,
     String? contact,
+    String? contactPoint,
     required DateTime updatedAt,
   }) => db.upsertHouseholdPlan(
     HouseholdPlansCompanion.insert(
@@ -57,6 +58,7 @@ void main() {
       householdId: household,
       meetingPointNear: Value(near),
       contactName: Value(contact),
+      localContactPoint: Value(contactPoint),
       updatedAt: updatedAt,
       dirty: const Value(true),
     ),
@@ -73,6 +75,45 @@ void main() {
 
     final plan = await laptop.watchHouseholdPlan(householdId).first;
     expect(plan?.meetingPointNear, 'Die Ecke bei der Bäckerei');
+  });
+
+  test('the municipality contact point travels with the plan', () async {
+    // A field left out of the snapshot encoding would look completely
+    // right on the device it was typed on and simply never arrive on the
+    // others -- which for a plan meant to be shared is the whole point of
+    // it missing. It also skews the tie-break: a key present in the
+    // stored row and absent from the incoming one shifts the canonical
+    // comparison, and the wrong side of a tie wins.
+    await writePlan(
+      phone,
+      near: 'Vor der Garage',
+      contactPoint: 'Grundschule Nordstadt, Turnhalle',
+      updatedAt: DateTime.utc(2026, 3, 1),
+    );
+    await serviceFor(phone, 'phone').sync();
+    await serviceFor(laptop, 'laptop').sync();
+
+    final plan = await laptop.watchHouseholdPlan(householdId).first;
+    expect(plan?.localContactPoint, 'Grundschule Nordstadt, Turnhalle');
+    expect(plan?.meetingPointNear, 'Vor der Garage');
+  });
+
+  test('a tie is decided the same way whichever device syncs first', () async {
+    // Both devices write the same second with different contact points.
+    // Whoever goes first, both have to end up on the same one.
+    final tie = DateTime.utc(2026, 3, 1);
+    await writePlan(phone, contactPoint: 'Feuerwache 3', updatedAt: tie);
+    await writePlan(laptop, contactPoint: 'Grundschule', updatedAt: tie);
+
+    for (var i = 0; i < 3; i++) {
+      await serviceFor(phone, 'phone').sync();
+      await serviceFor(laptop, 'laptop').sync();
+    }
+
+    final onPhone = await phone.watchHouseholdPlan(householdId).first;
+    final onLaptop = await laptop.watchHouseholdPlan(householdId).first;
+    expect(onPhone?.localContactPoint, onLaptop?.localContactPoint);
+    expect(onPhone?.localContactPoint, isNotNull);
   });
 
   test('both devices edit one record, not one each', () async {

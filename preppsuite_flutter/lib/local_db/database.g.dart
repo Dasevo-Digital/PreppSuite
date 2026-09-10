@@ -4153,6 +4153,18 @@ class $HouseholdPlansTable extends HouseholdPlans
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _localContactPointMeta = const VerificationMeta(
+    'localContactPoint',
+  );
+  @override
+  late final GeneratedColumn<String> localContactPoint =
+      GeneratedColumn<String>(
+        'local_contact_point',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -4207,6 +4219,7 @@ class $HouseholdPlansTable extends HouseholdPlans
     contactPhone,
     kitLocation,
     shutoffLocation,
+    localContactPoint,
     notes,
     updatedAt,
     deletedAt,
@@ -4297,6 +4310,15 @@ class $HouseholdPlansTable extends HouseholdPlans
         ),
       );
     }
+    if (data.containsKey('local_contact_point')) {
+      context.handle(
+        _localContactPointMeta,
+        localContactPoint.isAcceptableOrUnknown(
+          data['local_contact_point']!,
+          _localContactPointMeta,
+        ),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -4364,6 +4386,10 @@ class $HouseholdPlansTable extends HouseholdPlans
         DriftSqlType.string,
         data['${effectivePrefix}shutoff_location'],
       ),
+      localContactPoint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_contact_point'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -4412,6 +4438,24 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
 
   /// Where the water, gas and power can be shut off.
   final String? shutoffLocation;
+
+  /// The building the municipality opens when the power has been out for
+  /// a long time: on emergency supply, staffed, and the place an emergency
+  /// call can still be handed over when no phone works.
+  ///
+  /// Typed in by hand rather than looked up, because there is no national
+  /// dataset to look it up in. These are run by the Laender and the
+  /// municipalities, and even the name changes with the border --
+  /// Katastrophenschutz-Leuchtturm in Berlin and Brandenburg,
+  /// Notfalltreffpunkt in Baden-Wuerttemberg, Notfallinfopunkt in
+  /// Schleswig-Holstein. Whoever fills this in knows what theirs is
+  /// called; the app must not pretend to.
+  ///
+  /// Not one of the meeting points above, and kept apart from them on
+  /// purpose: those are where a household gathers, this is where it goes
+  /// for information and help. A household that has agreed a meeting
+  /// point still has nowhere to report a fire from.
+  final String? localContactPoint;
   final String? notes;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -4425,6 +4469,7 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
     this.contactPhone,
     this.kitLocation,
     this.shutoffLocation,
+    this.localContactPoint,
     this.notes,
     required this.updatedAt,
     this.deletedAt,
@@ -4452,6 +4497,9 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
     }
     if (!nullToAbsent || shutoffLocation != null) {
       map['shutoff_location'] = Variable<String>(shutoffLocation);
+    }
+    if (!nullToAbsent || localContactPoint != null) {
+      map['local_contact_point'] = Variable<String>(localContactPoint);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -4486,6 +4534,9 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
       shutoffLocation: shutoffLocation == null && nullToAbsent
           ? const Value.absent()
           : Value(shutoffLocation),
+      localContactPoint: localContactPoint == null && nullToAbsent
+          ? const Value.absent()
+          : Value(localContactPoint),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -4511,6 +4562,9 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
       contactPhone: serializer.fromJson<String?>(json['contactPhone']),
       kitLocation: serializer.fromJson<String?>(json['kitLocation']),
       shutoffLocation: serializer.fromJson<String?>(json['shutoffLocation']),
+      localContactPoint: serializer.fromJson<String?>(
+        json['localContactPoint'],
+      ),
       notes: serializer.fromJson<String?>(json['notes']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -4529,6 +4583,7 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
       'contactPhone': serializer.toJson<String?>(contactPhone),
       'kitLocation': serializer.toJson<String?>(kitLocation),
       'shutoffLocation': serializer.toJson<String?>(shutoffLocation),
+      'localContactPoint': serializer.toJson<String?>(localContactPoint),
       'notes': serializer.toJson<String?>(notes),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -4545,6 +4600,7 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
     Value<String?> contactPhone = const Value.absent(),
     Value<String?> kitLocation = const Value.absent(),
     Value<String?> shutoffLocation = const Value.absent(),
+    Value<String?> localContactPoint = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -4564,6 +4620,9 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
     shutoffLocation: shutoffLocation.present
         ? shutoffLocation.value
         : this.shutoffLocation,
+    localContactPoint: localContactPoint.present
+        ? localContactPoint.value
+        : this.localContactPoint,
     notes: notes.present ? notes.value : this.notes,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -4593,6 +4652,9 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
       shutoffLocation: data.shutoffLocation.present
           ? data.shutoffLocation.value
           : this.shutoffLocation,
+      localContactPoint: data.localContactPoint.present
+          ? data.localContactPoint.value
+          : this.localContactPoint,
       notes: data.notes.present ? data.notes.value : this.notes,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -4611,6 +4673,7 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
           ..write('contactPhone: $contactPhone, ')
           ..write('kitLocation: $kitLocation, ')
           ..write('shutoffLocation: $shutoffLocation, ')
+          ..write('localContactPoint: $localContactPoint, ')
           ..write('notes: $notes, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -4629,6 +4692,7 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
     contactPhone,
     kitLocation,
     shutoffLocation,
+    localContactPoint,
     notes,
     updatedAt,
     deletedAt,
@@ -4646,6 +4710,7 @@ class HouseholdPlan extends DataClass implements Insertable<HouseholdPlan> {
           other.contactPhone == this.contactPhone &&
           other.kitLocation == this.kitLocation &&
           other.shutoffLocation == this.shutoffLocation &&
+          other.localContactPoint == this.localContactPoint &&
           other.notes == this.notes &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -4661,6 +4726,7 @@ class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
   final Value<String?> contactPhone;
   final Value<String?> kitLocation;
   final Value<String?> shutoffLocation;
+  final Value<String?> localContactPoint;
   final Value<String?> notes;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -4675,6 +4741,7 @@ class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
     this.contactPhone = const Value.absent(),
     this.kitLocation = const Value.absent(),
     this.shutoffLocation = const Value.absent(),
+    this.localContactPoint = const Value.absent(),
     this.notes = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -4690,6 +4757,7 @@ class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
     this.contactPhone = const Value.absent(),
     this.kitLocation = const Value.absent(),
     this.shutoffLocation = const Value.absent(),
+    this.localContactPoint = const Value.absent(),
     this.notes = const Value.absent(),
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -4707,6 +4775,7 @@ class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
     Expression<String>? contactPhone,
     Expression<String>? kitLocation,
     Expression<String>? shutoffLocation,
+    Expression<String>? localContactPoint,
     Expression<String>? notes,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -4722,6 +4791,7 @@ class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
       if (contactPhone != null) 'contact_phone': contactPhone,
       if (kitLocation != null) 'kit_location': kitLocation,
       if (shutoffLocation != null) 'shutoff_location': shutoffLocation,
+      if (localContactPoint != null) 'local_contact_point': localContactPoint,
       if (notes != null) 'notes': notes,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -4739,6 +4809,7 @@ class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
     Value<String?>? contactPhone,
     Value<String?>? kitLocation,
     Value<String?>? shutoffLocation,
+    Value<String?>? localContactPoint,
     Value<String?>? notes,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -4754,6 +4825,7 @@ class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
       contactPhone: contactPhone ?? this.contactPhone,
       kitLocation: kitLocation ?? this.kitLocation,
       shutoffLocation: shutoffLocation ?? this.shutoffLocation,
+      localContactPoint: localContactPoint ?? this.localContactPoint,
       notes: notes ?? this.notes,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -4789,6 +4861,9 @@ class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
     if (shutoffLocation.present) {
       map['shutoff_location'] = Variable<String>(shutoffLocation.value);
     }
+    if (localContactPoint.present) {
+      map['local_contact_point'] = Variable<String>(localContactPoint.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -4818,6 +4893,7 @@ class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
           ..write('contactPhone: $contactPhone, ')
           ..write('kitLocation: $kitLocation, ')
           ..write('shutoffLocation: $shutoffLocation, ')
+          ..write('localContactPoint: $localContactPoint, ')
           ..write('notes: $notes, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')

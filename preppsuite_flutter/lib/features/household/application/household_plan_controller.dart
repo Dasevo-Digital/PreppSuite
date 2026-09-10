@@ -20,6 +20,7 @@ class HouseholdPlanDraft {
     this.meetingPointFar,
     this.contactName,
     this.contactPhone,
+    this.localContactPoint,
     this.kitLocation,
     this.shutoffLocation,
     this.notes,
@@ -29,6 +30,7 @@ class HouseholdPlanDraft {
   final String? meetingPointFar;
   final String? contactName;
   final String? contactPhone;
+  final String? localContactPoint;
   final String? kitLocation;
   final String? shutoffLocation;
   final String? notes;
@@ -39,6 +41,7 @@ class HouseholdPlanDraft {
     meetingPointFar,
     contactName,
     contactPhone,
+    localContactPoint,
     kitLocation,
     shutoffLocation,
     notes,
@@ -65,6 +68,7 @@ class HouseholdPlanController {
         meetingPointFar: Value(_trimmed(draft.meetingPointFar)),
         contactName: Value(_trimmed(draft.contactName)),
         contactPhone: Value(_trimmed(draft.contactPhone)),
+        localContactPoint: Value(_trimmed(draft.localContactPoint)),
         kitLocation: Value(_trimmed(draft.kitLocation)),
         shutoffLocation: Value(_trimmed(draft.shutoffLocation)),
         notes: Value(_trimmed(draft.notes)),

@@ -1179,6 +1179,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wo Wasser, Gas und Strom abgestellt werden';
 
   @override
+  String get householdPlanContactPoint => 'Anlaufstelle der Gemeinde';
+
+  @override
+  String get householdPlanContactPointHint =>
+      'Das Gebäude mit Notstrom, das bei langem Stromausfall aufmacht – dort gibt es Auskunft, und von dort geht ein Notruf raus, wenn kein Telefon mehr geht. Es heißt je nach Land Katastrophenschutz-Leuchtturm, Notfalltreffpunkt oder Notfallinfopunkt; die Gemeinde weiß, wo das nächste ist. Kein Treffpunkt – dorthin geht man um Hilfe, nicht um sich zu finden.';
+
+  @override
   String get householdPlanNotes => 'Sonstiges';
 
   @override

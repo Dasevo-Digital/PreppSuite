@@ -40,6 +40,24 @@ class HouseholdPlans extends Table {
   /// Where the water, gas and power can be shut off.
   TextColumn get shutoffLocation => text().nullable()();
 
+  /// The building the municipality opens when the power has been out for
+  /// a long time: on emergency supply, staffed, and the place an emergency
+  /// call can still be handed over when no phone works.
+  ///
+  /// Typed in by hand rather than looked up, because there is no national
+  /// dataset to look it up in. These are run by the Laender and the
+  /// municipalities, and even the name changes with the border --
+  /// Katastrophenschutz-Leuchtturm in Berlin and Brandenburg,
+  /// Notfalltreffpunkt in Baden-Wuerttemberg, Notfallinfopunkt in
+  /// Schleswig-Holstein. Whoever fills this in knows what theirs is
+  /// called; the app must not pretend to.
+  ///
+  /// Not one of the meeting points above, and kept apart from them on
+  /// purpose: those are where a household gathers, this is where it goes
+  /// for information and help. A household that has agreed a meeting
+  /// point still has nowhere to report a fire from.
+  TextColumn get localContactPoint => text().nullable()();
+
   TextColumn get notes => text().nullable()();
 
   DateTimeColumn get updatedAt => dateTime()();

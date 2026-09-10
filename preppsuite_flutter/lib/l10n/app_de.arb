@@ -332,6 +332,8 @@
   "householdPlanKitLocation": "Wo das Notgepäck liegt",
   "householdPlanKitLocationHint": "Damit im Dunkeln niemand danach sucht.",
   "householdPlanShutoff": "Wo Wasser, Gas und Strom abgestellt werden",
+  "householdPlanContactPoint": "Anlaufstelle der Gemeinde",
+  "householdPlanContactPointHint": "Das Gebäude mit Notstrom, das bei langem Stromausfall aufmacht – dort gibt es Auskunft, und von dort geht ein Notruf raus, wenn kein Telefon mehr geht. Es heißt je nach Land Katastrophenschutz-Leuchtturm, Notfalltreffpunkt oder Notfallinfopunkt; die Gemeinde weiß, wo das nächste ist. Kein Treffpunkt – dorthin geht man um Hilfe, nicht um sich zu finden.",
   "householdPlanNotes": "Sonstiges",
   "householdPlanSaved": "Plan gespeichert.",
   "householdPlanCleared": "Plan entfernt.",

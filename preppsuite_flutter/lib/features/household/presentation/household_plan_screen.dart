@@ -56,6 +56,7 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
     _field('far').text = plan.meetingPointFar ?? '';
     _field('name').text = plan.contactName ?? '';
     _field('phone').text = plan.contactPhone ?? '';
+    _field('contactPoint').text = plan.localContactPoint ?? '';
     _field('kit').text = plan.kitLocation ?? '';
     _field('shutoff').text = plan.shutoffLocation ?? '';
     _field('notes').text = plan.notes ?? '';
@@ -121,6 +122,12 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
                 keyboardType: TextInputType.phone,
               ),
               _Field(
+                controller: _field('contactPoint'),
+                label: l10n.householdPlanContactPoint,
+                hint: l10n.householdPlanContactPointHint,
+                icon: Icons.local_police_outlined,
+              ),
+              _Field(
                 controller: _field('kit'),
                 label: l10n.householdPlanKitLocation,
                 hint: l10n.householdPlanKitLocationHint,
@@ -162,6 +169,7 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
       meetingPointFar: _field('far').text,
       contactName: _field('name').text,
       contactPhone: _field('phone').text,
+      localContactPoint: _field('contactPoint').text,
       kitLocation: _field('kit').text,
       shutoffLocation: _field('shutoff').text,
       notes: _field('notes').text,
@@ -252,6 +260,7 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
           ),
           meetingPoints: l10n.emergencyPlanPdfMeetingPoints,
           contact: l10n.emergencyPlanPdfContact,
+          contactPoint: l10n.householdPlanContactPoint,
           equipment: l10n.emergencyPlanPdfEquipment,
           notes: l10n.notesLabel,
           empty: l10n.emergencyPlanPdfEmpty,

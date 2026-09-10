@@ -30,7 +30,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 12;
+  static const currentSchemaVersion = 13;
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
@@ -167,6 +167,31 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(warnings, warnings.senderContact);
             await m.addColumn(warnings, warnings.polygonsJson);
           }
+        }
+      }
+      if (from >= 10 && from < 13) {
+        // The municipality's contact point on the household plan.
+        //
+        // `from >= 10` and not plain `from < 13`: anything older than 10
+        // has no `household_plans` table yet and gets one created above
+        // from the current definition, which already carries this column.
+        // Adding it again would take the migration down -- the same trap
+        // the comment at `from < 8` describes.
+        //
+        // And the table is looked for rather than assumed, like the
+        // warning cache below. A database on 11 should have it, but a
+        // migration is the one piece of code that runs before the app can
+        // say anything: if it throws, the app does not open at all and
+        // there is no screen left to explain why. Creating an absent one
+        // costs nothing -- a household with no plan has no plan.
+        final exists = await customSelect(
+          "SELECT 1 FROM sqlite_master "
+          "WHERE type = 'table' AND name = 'household_plans'",
+        ).getSingleOrNull();
+        if (exists == null) {
+          await m.createTable(householdPlans);
+        } else {
+          await m.addColumn(householdPlans, householdPlans.localContactPoint);
         }
       }
     },

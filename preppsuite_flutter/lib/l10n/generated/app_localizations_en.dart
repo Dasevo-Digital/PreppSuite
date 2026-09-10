@@ -1168,6 +1168,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get householdPlanShutoff => 'Where water, gas and power are shut off';
 
   @override
+  String get householdPlanContactPoint => 'The municipality\'s contact point';
+
+  @override
+  String get householdPlanContactPointHint =>
+      'The building on emergency power that opens when the power has been out for a long time – it gives information, and an emergency call can be handed over there when no phone works. Its name changes with the state; the municipality knows where the nearest one is. Not a meeting point – this is where you go for help, not to find each other.';
+
+  @override
   String get householdPlanNotes => 'Anything else';
 
   @override

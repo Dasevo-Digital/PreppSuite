@@ -34,7 +34,10 @@ void main() {
     expect(find.text('Haushaltsdatenbank'), findsOneWidget);
     expect(find.text('Wissensarchiv-Volltextindex'), findsOneWidget);
     expect(find.text('Dokument-Volltextindex'), findsOneWidget);
-    expect(find.text('Schema 12'), findsOneWidget);
+    // Deliberately the literal and not AppDatabase.currentSchemaVersion:
+    // a migration that bumps the schema should make this test say so, and
+    // reading the constant back would only prove the card can print it.
+    expect(find.text('Schema 13'), findsOneWidget);
     expect(find.text('Schema 1'), findsNWidgets(2));
     expect(find.text('PMTiles v3'), findsOneWidget);
   });

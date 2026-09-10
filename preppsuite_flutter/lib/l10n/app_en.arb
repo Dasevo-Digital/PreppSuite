@@ -678,6 +678,8 @@
   "householdPlanKitLocation": "Where the emergency luggage is",
   "householdPlanKitLocationHint": "So nobody searches for it in the dark.",
   "householdPlanShutoff": "Where water, gas and power are shut off",
+  "householdPlanContactPoint": "The municipality's contact point",
+  "householdPlanContactPointHint": "The building on emergency power that opens when the power has been out for a long time – it gives information, and an emergency call can be handed over there when no phone works. Its name changes with the state; the municipality knows where the nearest one is. Not a meeting point – this is where you go for help, not to find each other.",
   "householdPlanNotes": "Anything else",
   "householdPlanSaved": "Plan saved.",
   "householdPlanCleared": "Plan removed.",
