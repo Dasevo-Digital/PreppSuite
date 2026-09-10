@@ -725,6 +725,7 @@
   "backupPassphraseTitle": "Sicherung verschlüsseln",
   "backupPassphrase": "Passwort",
   "backupPassphraseRepeat": "Passwort wiederholen",
+  "backupPassphraseWarning": "Ohne dieses Passwort lässt sich die Datei nicht mehr öffnen – auch von dir nicht. Es gibt keinen Weg zurück und keine Hintertür. Schreib es dorthin, wo auch die Ausweise liegen, und nicht auf das Gerät, das die Sicherung ersetzen soll.",
   "backupPassphraseInvalid": "Mindestens 12 Zeichen eingeben; beide Eingaben müssen übereinstimmen.",
   "warningInstructionsTitle": "Handlungsempfehlungen",
   "warningAreaTitle": "Betroffenes Gebiet",

@@ -2593,6 +2593,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get backupPassphraseRepeat => 'Passwort wiederholen';
 
   @override
+  String get backupPassphraseWarning =>
+      'Ohne dieses Passwort lässt sich die Datei nicht mehr öffnen – auch von dir nicht. Es gibt keinen Weg zurück und keine Hintertür. Schreib es dorthin, wo auch die Ausweise liegen, und nicht auf das Gerät, das die Sicherung ersetzen soll.';
+
+  @override
   String get backupPassphraseInvalid =>
       'Mindestens 12 Zeichen eingeben; beide Eingaben müssen übereinstimmen.';
 

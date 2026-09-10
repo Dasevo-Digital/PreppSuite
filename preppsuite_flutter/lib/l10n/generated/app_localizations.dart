@@ -4424,6 +4424,12 @@ abstract class AppLocalizations {
   /// **'Repeat password'**
   String get backupPassphraseRepeat;
 
+  /// No description provided for @backupPassphraseWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Without this passphrase the file cannot be opened again – not by you either. There is no way back and no back door. Write it down where the passports are kept, and not on the device this backup is meant to replace.'**
+  String get backupPassphraseWarning;
+
   /// No description provided for @backupPassphraseInvalid.
   ///
   /// In en, this message translates to:

@@ -9,6 +9,7 @@ import '../../../core/app_database_providers.dart';
 import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/backup_service.dart';
+import 'passphrase_dialog.dart';
 
 class BackupCard extends ConsumerWidget {
   const BackupCard({super.key, required this.householdId, required this.l10n});
@@ -117,67 +118,11 @@ class BackupCard extends ConsumerWidget {
   Future<String?> _askPassphrase(
     BuildContext context, {
     bool confirm = false,
-  }) async {
-    final first = TextEditingController();
-    final second = TextEditingController();
-    String? error;
-    final result = await showDialog<String>(
+  }) {
+    return showDialog<String>(
       context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(l10n.backupPassphraseTitle),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: first,
-                obscureText: true,
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: l10n.backupPassphrase,
-                  errorText: error,
-                ),
-              ),
-              if (confirm) ...[
-                const SizedBox(height: 12),
-                TextField(
-                  controller: second,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: l10n.backupPassphraseRepeat,
-                  ),
-                ),
-              ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-            ),
-            FilledButton(
-              onPressed: () {
-                // Twelve, not eight. This file can be carried off and
-                // attacked offline for as long as somebody likes, and it
-                // holds the whole household — emergency cards with blood
-                // group, medication and conditions included. Argon2id at
-                // 64 MB makes each guess expensive; the passphrase decides
-                // how many guesses are needed.
-                if (first.text.length < 12 ||
-                    (confirm && first.text != second.text)) {
-                  setState(() => error = l10n.backupPassphraseInvalid);
-                  return;
-                }
-                Navigator.pop(dialogContext, first.text);
-              },
-              child: Text(MaterialLocalizations.of(context).okButtonLabel),
-            ),
-          ],
-        ),
-      ),
+      builder: (dialogContext) =>
+          PassphraseDialog(l10n: l10n, confirm: confirm),
     );
-    first.dispose();
-    second.dispose();
-    return result;
   }
 }

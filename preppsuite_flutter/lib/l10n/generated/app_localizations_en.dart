@@ -2576,6 +2576,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get backupPassphraseRepeat => 'Repeat password';
 
   @override
+  String get backupPassphraseWarning =>
+      'Without this passphrase the file cannot be opened again – not by you either. There is no way back and no back door. Write it down where the passports are kept, and not on the device this backup is meant to replace.';
+
+  @override
   String get backupPassphraseInvalid =>
       'Enter at least 12 characters; both entries must match.';
 
