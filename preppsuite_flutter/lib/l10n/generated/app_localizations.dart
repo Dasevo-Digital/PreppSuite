@@ -980,6 +980,210 @@ abstract class AppLocalizations {
   /// **'The test warning goes out at 11:00 and the all-clear at 11:45. A good moment to check that sirens, Cell Broadcast and the warning apps reach you.'**
   String get warningDayNotificationBody;
 
+  /// No description provided for @pegelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Water levels'**
+  String get pegelTitle;
+
+  /// No description provided for @pegelEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The level on your own river, with the gauge\'s reference values'**
+  String get pegelEntryHint;
+
+  /// No description provided for @pegelNoneChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'No gauge chosen yet.'**
+  String get pegelNoneChosen;
+
+  /// No description provided for @pegelUpstreamHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the gauge upstream of you. The nearest one is no help if it lies downstream – it shows what has already passed, not what is coming.'**
+  String get pegelUpstreamHint;
+
+  /// No description provided for @pegelChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a gauge'**
+  String get pegelChoose;
+
+  /// No description provided for @pegelChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose another gauge'**
+  String get pegelChange;
+
+  /// No description provided for @pegelSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a gauge or waterway'**
+  String get pegelSearchHint;
+
+  /// No description provided for @pegelSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No gauge found.'**
+  String get pegelSearchEmpty;
+
+  /// No description provided for @pegelLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The gauge list could not be loaded. It needs a connection once.'**
+  String get pegelLoadFailed;
+
+  /// No description provided for @pegelOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection – this is the last value fetched.'**
+  String get pegelOffline;
+
+  /// No description provided for @pegelStale.
+  ///
+  /// In en, this message translates to:
+  /// **'More than an hour old. Inland gauges report every 15 minutes, so what is missing is the connection and not the water.'**
+  String get pegelStale;
+
+  /// No description provided for @pegelMeasuredAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Measured {time}'**
+  String pegelMeasuredAt(String time);
+
+  /// No description provided for @pegelRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get pegelRefresh;
+
+  /// No description provided for @pegelKilometre.
+  ///
+  /// In en, this message translates to:
+  /// **'River kilometre {km}'**
+  String pegelKilometre(String km);
+
+  /// No description provided for @pegelReferences.
+  ///
+  /// In en, this message translates to:
+  /// **'This gauge\'s reference values'**
+  String get pegelReferences;
+
+  /// No description provided for @pegelNoReferences.
+  ///
+  /// In en, this message translates to:
+  /// **'No reference values are published for this gauge, so the number stands without a scale.'**
+  String get pegelNoReferences;
+
+  /// No description provided for @pegelNoMeldestufe.
+  ///
+  /// In en, this message translates to:
+  /// **'No warning level: those are set by the states and are not in this data. Official flood warnings are in the warning list.'**
+  String get pegelNoMeldestufe;
+
+  /// No description provided for @pegelSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: PEGELONLINE, run by Germany\'s waterways administration. Federal waterways only – the brook that floods a village is not in here.'**
+  String get pegelSource;
+
+  /// No description provided for @pegelBandRecordLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower than ever measured'**
+  String get pegelBandRecordLow;
+
+  /// No description provided for @pegelBandLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low water'**
+  String get pegelBandLow;
+
+  /// No description provided for @pegelBandOrdinary.
+  ///
+  /// In en, this message translates to:
+  /// **'Within the ordinary range'**
+  String get pegelBandOrdinary;
+
+  /// No description provided for @pegelBandElevated.
+  ///
+  /// In en, this message translates to:
+  /// **'Above the mean'**
+  String get pegelBandElevated;
+
+  /// No description provided for @pegelBandFlood.
+  ///
+  /// In en, this message translates to:
+  /// **'Flood'**
+  String get pegelBandFlood;
+
+  /// No description provided for @pegelBandRecordHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher than ever measured'**
+  String get pegelBandRecordHigh;
+
+  /// No description provided for @pegelBandUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot be placed'**
+  String get pegelBandUnknown;
+
+  /// No description provided for @pegelTrendRising.
+  ///
+  /// In en, this message translates to:
+  /// **'Rising, {change} cm in 24 hours'**
+  String pegelTrendRising(String change);
+
+  /// No description provided for @pegelTrendFalling.
+  ///
+  /// In en, this message translates to:
+  /// **'Falling, {change} cm in 24 hours'**
+  String pegelTrendFalling(String change);
+
+  /// No description provided for @pegelTrendSteady.
+  ///
+  /// In en, this message translates to:
+  /// **'Barely changed in 24 hours'**
+  String get pegelTrendSteady;
+
+  /// No description provided for @pegelTrendUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'History not available'**
+  String get pegelTrendUnknown;
+
+  /// No description provided for @pegelRefMean.
+  ///
+  /// In en, this message translates to:
+  /// **'Mean level'**
+  String get pegelRefMean;
+
+  /// No description provided for @pegelRefMeanFlood.
+  ///
+  /// In en, this message translates to:
+  /// **'Mean flood level'**
+  String get pegelRefMeanFlood;
+
+  /// No description provided for @pegelRefHighest.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest level measured'**
+  String get pegelRefHighest;
+
+  /// No description provided for @pegelRefMeanLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Mean low level'**
+  String get pegelRefMeanLow;
+
+  /// No description provided for @pegelRefLowest.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest level measured'**
+  String get pegelRefLowest;
+
   /// No description provided for @warningSeverityMinor.
   ///
   /// In en, this message translates to:

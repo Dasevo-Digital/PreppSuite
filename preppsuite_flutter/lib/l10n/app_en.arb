@@ -274,6 +274,68 @@
   "warningDayBody": "Test warning at 11:00, all-clear at 11:45. Sirens, Cell Broadcast, radio and the warning apps are tested together. It is the one day a year on which you can find out whether what is meant to reach you actually does – a warning that never arrives goes unnoticed otherwise.",
   "warningDayNotificationTitle": "Today is the nationwide warning day",
   "warningDayNotificationBody": "The test warning goes out at 11:00 and the all-clear at 11:45. A good moment to check that sirens, Cell Broadcast and the warning apps reach you.",
+  "pegelTitle": "Water levels",
+  "pegelEntryHint": "The level on your own river, with the gauge's reference values",
+  "pegelNoneChosen": "No gauge chosen yet.",
+  "pegelUpstreamHint": "Choose the gauge upstream of you. The nearest one is no help if it lies downstream – it shows what has already passed, not what is coming.",
+  "pegelChoose": "Choose a gauge",
+  "pegelChange": "Choose another gauge",
+  "pegelSearchHint": "Search for a gauge or waterway",
+  "pegelSearchEmpty": "No gauge found.",
+  "pegelLoadFailed": "The gauge list could not be loaded. It needs a connection once.",
+  "pegelOffline": "No connection – this is the last value fetched.",
+  "pegelStale": "More than an hour old. Inland gauges report every 15 minutes, so what is missing is the connection and not the water.",
+  "pegelMeasuredAt": "Measured {time}",
+  "@pegelMeasuredAt": {
+      "placeholders": {
+          "time": {
+              "type": "String"
+          }
+      }
+  },
+  "pegelRefresh": "Refresh",
+  "pegelKilometre": "River kilometre {km}",
+  "@pegelKilometre": {
+      "placeholders": {
+          "km": {
+              "type": "String"
+          }
+      }
+  },
+  "pegelReferences": "This gauge's reference values",
+  "pegelNoReferences": "No reference values are published for this gauge, so the number stands without a scale.",
+  "pegelNoMeldestufe": "No warning level: those are set by the states and are not in this data. Official flood warnings are in the warning list.",
+  "pegelSource": "Source: PEGELONLINE, run by Germany's waterways administration. Federal waterways only – the brook that floods a village is not in here.",
+  "pegelBandRecordLow": "Lower than ever measured",
+  "pegelBandLow": "Low water",
+  "pegelBandOrdinary": "Within the ordinary range",
+  "pegelBandElevated": "Above the mean",
+  "pegelBandFlood": "Flood",
+  "pegelBandRecordHigh": "Higher than ever measured",
+  "pegelBandUnknown": "Cannot be placed",
+  "pegelTrendRising": "Rising, {change} cm in 24 hours",
+  "@pegelTrendRising": {
+      "placeholders": {
+          "change": {
+              "type": "String"
+          }
+      }
+  },
+  "pegelTrendFalling": "Falling, {change} cm in 24 hours",
+  "@pegelTrendFalling": {
+      "placeholders": {
+          "change": {
+              "type": "String"
+          }
+      }
+  },
+  "pegelTrendSteady": "Barely changed in 24 hours",
+  "pegelTrendUnknown": "History not available",
+  "pegelRefMean": "Mean level",
+  "pegelRefMeanFlood": "Mean flood level",
+  "pegelRefHighest": "Highest level measured",
+  "pegelRefMeanLow": "Mean low level",
+  "pegelRefLowest": "Lowest level measured",
   "warningSeverityMinor": "Minor",
   "warningSeverityModerate": "Moderate",
   "warningSeveritySevere": "Severe",

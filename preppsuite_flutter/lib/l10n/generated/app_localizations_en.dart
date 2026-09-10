@@ -506,6 +506,123 @@ class AppLocalizationsEn extends AppLocalizations {
       'The test warning goes out at 11:00 and the all-clear at 11:45. A good moment to check that sirens, Cell Broadcast and the warning apps reach you.';
 
   @override
+  String get pegelTitle => 'Water levels';
+
+  @override
+  String get pegelEntryHint =>
+      'The level on your own river, with the gauge\'s reference values';
+
+  @override
+  String get pegelNoneChosen => 'No gauge chosen yet.';
+
+  @override
+  String get pegelUpstreamHint =>
+      'Choose the gauge upstream of you. The nearest one is no help if it lies downstream – it shows what has already passed, not what is coming.';
+
+  @override
+  String get pegelChoose => 'Choose a gauge';
+
+  @override
+  String get pegelChange => 'Choose another gauge';
+
+  @override
+  String get pegelSearchHint => 'Search for a gauge or waterway';
+
+  @override
+  String get pegelSearchEmpty => 'No gauge found.';
+
+  @override
+  String get pegelLoadFailed =>
+      'The gauge list could not be loaded. It needs a connection once.';
+
+  @override
+  String get pegelOffline => 'No connection – this is the last value fetched.';
+
+  @override
+  String get pegelStale =>
+      'More than an hour old. Inland gauges report every 15 minutes, so what is missing is the connection and not the water.';
+
+  @override
+  String pegelMeasuredAt(String time) {
+    return 'Measured $time';
+  }
+
+  @override
+  String get pegelRefresh => 'Refresh';
+
+  @override
+  String pegelKilometre(String km) {
+    return 'River kilometre $km';
+  }
+
+  @override
+  String get pegelReferences => 'This gauge\'s reference values';
+
+  @override
+  String get pegelNoReferences =>
+      'No reference values are published for this gauge, so the number stands without a scale.';
+
+  @override
+  String get pegelNoMeldestufe =>
+      'No warning level: those are set by the states and are not in this data. Official flood warnings are in the warning list.';
+
+  @override
+  String get pegelSource =>
+      'Source: PEGELONLINE, run by Germany\'s waterways administration. Federal waterways only – the brook that floods a village is not in here.';
+
+  @override
+  String get pegelBandRecordLow => 'Lower than ever measured';
+
+  @override
+  String get pegelBandLow => 'Low water';
+
+  @override
+  String get pegelBandOrdinary => 'Within the ordinary range';
+
+  @override
+  String get pegelBandElevated => 'Above the mean';
+
+  @override
+  String get pegelBandFlood => 'Flood';
+
+  @override
+  String get pegelBandRecordHigh => 'Higher than ever measured';
+
+  @override
+  String get pegelBandUnknown => 'Cannot be placed';
+
+  @override
+  String pegelTrendRising(String change) {
+    return 'Rising, $change cm in 24 hours';
+  }
+
+  @override
+  String pegelTrendFalling(String change) {
+    return 'Falling, $change cm in 24 hours';
+  }
+
+  @override
+  String get pegelTrendSteady => 'Barely changed in 24 hours';
+
+  @override
+  String get pegelTrendUnknown => 'History not available';
+
+  @override
+  String get pegelRefMean => 'Mean level';
+
+  @override
+  String get pegelRefMeanFlood => 'Mean flood level';
+
+  @override
+  String get pegelRefHighest => 'Highest level measured';
+
+  @override
+  String get pegelRefMeanLow => 'Mean low level';
+
+  @override
+  String get pegelRefLowest => 'Lowest level measured';
+
+  @override
   String get warningSeverityMinor => 'Minor';
 
   @override

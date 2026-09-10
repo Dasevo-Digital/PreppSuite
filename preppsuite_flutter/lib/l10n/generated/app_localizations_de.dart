@@ -507,6 +507,124 @@ class AppLocalizationsDe extends AppLocalizations {
       'Um 11:00 geht die Probewarnung raus, um 11:45 die Entwarnung. Gute Gelegenheit zu prüfen, ob Sirene, Cell Broadcast und Warn-Apps bei dir ankommen.';
 
   @override
+  String get pegelTitle => 'Pegelstände';
+
+  @override
+  String get pegelEntryHint =>
+      'Wasserstand am eigenen Fluss, mit den Vergleichswerten des Pegels';
+
+  @override
+  String get pegelNoneChosen => 'Noch kein Pegel gewählt.';
+
+  @override
+  String get pegelUpstreamHint =>
+      'Wähle den Pegel flussaufwärts von dir. Der nächstgelegene hilft nicht, wenn er flussabwärts liegt – er zeigt, was schon vorbei ist, nicht was kommt.';
+
+  @override
+  String get pegelChoose => 'Pegel wählen';
+
+  @override
+  String get pegelChange => 'Anderen Pegel wählen';
+
+  @override
+  String get pegelSearchHint => 'Pegel oder Gewässer suchen';
+
+  @override
+  String get pegelSearchEmpty => 'Kein Pegel gefunden.';
+
+  @override
+  String get pegelLoadFailed =>
+      'Die Pegelliste ließ sich nicht laden. Sie braucht einmal eine Verbindung.';
+
+  @override
+  String get pegelOffline =>
+      'Keine Verbindung – das ist der letzte abgerufene Wert.';
+
+  @override
+  String get pegelStale =>
+      'Älter als eine Stunde. Binnenpegel melden alle 15 Minuten, hier fehlt also die Verbindung und nicht das Wasser.';
+
+  @override
+  String pegelMeasuredAt(String time) {
+    return 'Gemessen $time';
+  }
+
+  @override
+  String get pegelRefresh => 'Aktualisieren';
+
+  @override
+  String pegelKilometre(String km) {
+    return 'Flusskilometer $km';
+  }
+
+  @override
+  String get pegelReferences => 'Vergleichswerte dieses Pegels';
+
+  @override
+  String get pegelNoReferences =>
+      'Für diesen Pegel sind keine Vergleichswerte veröffentlicht. Die Zahl steht damit ohne Maßstab da.';
+
+  @override
+  String get pegelNoMeldestufe =>
+      'Keine Warnstufe: Meldestufen legen die Länder fest und stehen nicht in diesen Daten. Amtliche Hochwasserwarnungen stehen in der Warnungsliste.';
+
+  @override
+  String get pegelSource =>
+      'Quelle: PEGELONLINE der Wasserstraßen- und Schifffahrtsverwaltung. Nur Bundeswasserstraßen – der Bach, der ein Dorf überflutet, ist hier nicht dabei.';
+
+  @override
+  String get pegelBandRecordLow => 'Niedriger als je gemessen';
+
+  @override
+  String get pegelBandLow => 'Niedrigwasser';
+
+  @override
+  String get pegelBandOrdinary => 'Im gewöhnlichen Bereich';
+
+  @override
+  String get pegelBandElevated => 'Über dem Mittelwert';
+
+  @override
+  String get pegelBandFlood => 'Hochwasser';
+
+  @override
+  String get pegelBandRecordHigh => 'Höher als je gemessen';
+
+  @override
+  String get pegelBandUnknown => 'Nicht einzuordnen';
+
+  @override
+  String pegelTrendRising(String change) {
+    return 'Steigend, $change cm in 24 Stunden';
+  }
+
+  @override
+  String pegelTrendFalling(String change) {
+    return 'Fallend, $change cm in 24 Stunden';
+  }
+
+  @override
+  String get pegelTrendSteady => 'Kaum verändert in 24 Stunden';
+
+  @override
+  String get pegelTrendUnknown => 'Verlauf nicht verfügbar';
+
+  @override
+  String get pegelRefMean => 'Mittelwasser';
+
+  @override
+  String get pegelRefMeanFlood => 'Mittleres Hochwasser';
+
+  @override
+  String get pegelRefHighest => 'Höchster gemessener Stand';
+
+  @override
+  String get pegelRefMeanLow => 'Mittleres Niedrigwasser';
+
+  @override
+  String get pegelRefLowest => 'Niedrigster gemessener Stand';
+
+  @override
   String get warningSeverityMinor => 'Gering';
 
   @override
