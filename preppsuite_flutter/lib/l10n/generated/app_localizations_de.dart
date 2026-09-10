@@ -838,6 +838,20 @@ class AppLocalizationsDe extends AppLocalizations {
       'Keine Auflade-Erinnerung geplant.';
 
   @override
+  String get settingsChargeReminderCustom => 'Eigener Abstand…';
+
+  @override
+  String get settingsChargeReminderCustomTitle => 'Eigener Abstand';
+
+  @override
+  String get settingsChargeReminderCustomLabel => 'Tage zwischen den Prüfungen';
+
+  @override
+  String settingsChargeReminderCustomInvalid(int min, int max) {
+    return 'Eine ganze Zahl zwischen $min und $max eingeben.';
+  }
+
+  @override
   String get settingsChargeReminderOff => 'Aus';
 
   @override

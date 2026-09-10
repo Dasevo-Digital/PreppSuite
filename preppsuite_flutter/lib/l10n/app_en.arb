@@ -494,6 +494,23 @@
   "settingsChargeReminderHint": "Reminds you to charge and test power banks, rechargeable batteries, torches and emergency radios.",
   "settingsChargeReminderDisabledHint": "Turn on notifications above to schedule the charging reminder.",
   "settingsChargeReminderNoneHint": "No charging reminder is scheduled.",
+  "settingsChargeReminderCustom": "Custom…",
+  "@settingsChargeReminderCustom": {},
+  "settingsChargeReminderCustomTitle": "Own interval",
+  "@settingsChargeReminderCustomTitle": {},
+  "settingsChargeReminderCustomLabel": "Days between checks",
+  "@settingsChargeReminderCustomLabel": {},
+  "settingsChargeReminderCustomInvalid": "Enter a whole number between {min} and {max}.",
+  "@settingsChargeReminderCustomInvalid": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "settingsChargeReminderOff": "Off",
   "chargeReminderInterval": "every {days} days",
   "@chargeReminderInterval": {"placeholders": {"days": {"type": "int"}}},

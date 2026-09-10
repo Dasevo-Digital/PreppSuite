@@ -834,6 +834,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'No charging reminder is scheduled.';
 
   @override
+  String get settingsChargeReminderCustom => 'Custom…';
+
+  @override
+  String get settingsChargeReminderCustomTitle => 'Own interval';
+
+  @override
+  String get settingsChargeReminderCustomLabel => 'Days between checks';
+
+  @override
+  String settingsChargeReminderCustomInvalid(int min, int max) {
+    return 'Enter a whole number between $min and $max.';
+  }
+
+  @override
   String get settingsChargeReminderOff => 'Off';
 
   @override

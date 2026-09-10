@@ -1550,6 +1550,30 @@ abstract class AppLocalizations {
   /// **'No charging reminder is scheduled.'**
   String get settingsChargeReminderNoneHint;
 
+  /// No description provided for @settingsChargeReminderCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom…'**
+  String get settingsChargeReminderCustom;
+
+  /// No description provided for @settingsChargeReminderCustomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Own interval'**
+  String get settingsChargeReminderCustomTitle;
+
+  /// No description provided for @settingsChargeReminderCustomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Days between checks'**
+  String get settingsChargeReminderCustomLabel;
+
+  /// No description provided for @settingsChargeReminderCustomInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number between {min} and {max}.'**
+  String settingsChargeReminderCustomInvalid(int min, int max);
+
   /// No description provided for @settingsChargeReminderOff.
   ///
   /// In en, this message translates to:
