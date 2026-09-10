@@ -2716,6 +2716,35 @@ class AppLocalizationsDe extends AppLocalizations {
       'Lokale Senderfrequenzen ändern sich. Im Ereignisfall Sendersuchlauf nutzen und amtliche Durchsagen beachten. Senden ist nur im jeweils erlaubten Funkdienst zulässig.';
 
   @override
+  String get emergencySirenTitle => 'Sirenensignale';
+
+  @override
+  String get emergencySirenHint =>
+      'Bundesweit empfohlen, aber nicht überall gleich geregelt – im Zweifel gilt, was die eigene Gemeinde bekanntgegeben hat. Auf jede Warnung folgt dasselbe: hinein, Fenster zu, Radio an.';
+
+  @override
+  String get emergencySirenWarning =>
+      'Auf- und abschwellender Heulton, eine Minute';
+
+  @override
+  String get emergencySirenWarningMeaning =>
+      'Warnung. Gefahr in der Nähe. Gebäude aufsuchen, Fenster und Türen schließen, Radio einschalten und auf Ansagen warten.';
+
+  @override
+  String get emergencySirenAllClear => 'Durchgehender Dauerton, eine Minute';
+
+  @override
+  String get emergencySirenAllClearMeaning =>
+      'Entwarnung. Die Gefahr ist vorbei. Sie kommt über denselben Weg wie die Warnung.';
+
+  @override
+  String get emergencySirenFire => 'Zweimal unterbrochener Ton, eine Minute';
+
+  @override
+  String get emergencySirenFireMeaning =>
+      'Feuerwehralarm. Er ruft die Einsatzkräfte und gilt nicht der Bevölkerung – kein Anlass, etwas zu tun.';
+
+  @override
   String get emergencyContactsTitle => 'Nahe Notfallkontakte';
 
   @override

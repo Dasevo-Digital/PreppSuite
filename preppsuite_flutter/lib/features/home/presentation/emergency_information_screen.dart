@@ -159,6 +159,39 @@ class _EmergencyInformationScreenState
               onTap: () => _call(centre.$2),
             ),
           const SizedBox(height: 20),
+          // Before the radio section on purpose: the signal is what tells
+          // somebody to turn the radio on, so the two read in the order
+          // they happen.
+          Text(
+            l10n.emergencySirenTitle,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          Text(l10n.emergencySirenHint),
+          const SizedBox(height: 8),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.campaign_outlined),
+                  title: Text(l10n.emergencySirenWarning),
+                  subtitle: Text(l10n.emergencySirenWarningMeaning),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.check_circle_outline),
+                  title: Text(l10n.emergencySirenAllClear),
+                  subtitle: Text(l10n.emergencySirenAllClearMeaning),
+                ),
+                // Listed although it is not a public warning, because it
+                // is the one people hear most often and read as one.
+                ListTile(
+                  leading: const Icon(Icons.local_fire_department_outlined),
+                  title: Text(l10n.emergencySirenFire),
+                  subtitle: Text(l10n.emergencySirenFireMeaning),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
           Text(
             l10n.emergencyRadioTitle,
             style: Theme.of(context).textTheme.titleLarge,

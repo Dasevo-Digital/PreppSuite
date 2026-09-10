@@ -2698,6 +2698,34 @@ class AppLocalizationsEn extends AppLocalizations {
       'Local station frequencies change. Run a station scan during an incident and follow official announcements. Transmit only where the relevant radio service permits it.';
 
   @override
+  String get emergencySirenTitle => 'Siren signals';
+
+  @override
+  String get emergencySirenHint =>
+      'Recommended nationwide but not regulated the same everywhere – when in doubt, what your own municipality announced is what counts. Every warning is followed by the same thing: get inside, close the windows, turn on the radio.';
+
+  @override
+  String get emergencySirenWarning => 'Rising and falling wail, one minute';
+
+  @override
+  String get emergencySirenWarningMeaning =>
+      'Warning. Danger nearby. Get into a building, close windows and doors, turn on the radio and wait for announcements.';
+
+  @override
+  String get emergencySirenAllClear => 'Steady continuous tone, one minute';
+
+  @override
+  String get emergencySirenAllClearMeaning =>
+      'All clear. The danger has passed. It arrives by the same route the warning did.';
+
+  @override
+  String get emergencySirenFire => 'Tone interrupted twice, one minute';
+
+  @override
+  String get emergencySirenFireMeaning =>
+      'Fire brigade alert. It calls the responders and is not addressed to the public – no reason to do anything.';
+
+  @override
   String get emergencyContactsTitle => 'Nearby emergency contacts';
 
   @override

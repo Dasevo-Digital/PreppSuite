@@ -202,4 +202,42 @@ void main() {
       }
     });
   });
+
+  group('Falschmeldungen erkennen', () {
+    /// The chapter the revised BBK guide gained and the app had nothing
+    /// on. The three questions are the BBK's own, and so is the threshold
+    /// it puts on them.
+    late BuiltInTemplate list;
+
+    setUp(() {
+      list = builtInTemplates.firstWhere(
+        (t) => t.title == 'Falschmeldungen erkennen',
+      );
+    });
+
+    test('asks the three official questions', () {
+      final titles = list.items.map((i) => i.title).join(' | ').toLowerCase();
+
+      expect(titles, contains('zuerst veröffentlicht'));
+      expect(titles, contains('quellen genannt'));
+      expect(titles, contains('zweite verlässliche quelle'));
+    });
+
+    test('carries the threshold, not just the questions', () {
+      // Three checks without a rule for the answers leave the reader to
+      // invent one, and the invented one is usually "two out of three".
+      final titles = list.items.map((i) => i.title).join(' | ').toLowerCase();
+
+      expect(titles, contains('ein einziges "nein"'));
+    });
+
+    test('points at the app\'s own warnings as the checkable copy', () {
+      // The app already holds official warnings with their source named.
+      // A list about verifying claims that does not mention what the
+      // reader is holding would send them back to the group chat.
+      final titles = list.items.map((i) => i.title).join(' | ');
+
+      expect(titles, contains('PreppSuite'));
+    });
+  });
 }

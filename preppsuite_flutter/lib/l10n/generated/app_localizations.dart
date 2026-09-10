@@ -4628,6 +4628,54 @@ abstract class AppLocalizations {
   /// **'Local station frequencies change. Run a station scan during an incident and follow official announcements. Transmit only where the relevant radio service permits it.'**
   String get emergencyRadioHint;
 
+  /// No description provided for @emergencySirenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Siren signals'**
+  String get emergencySirenTitle;
+
+  /// No description provided for @emergencySirenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended nationwide but not regulated the same everywhere – when in doubt, what your own municipality announced is what counts. Every warning is followed by the same thing: get inside, close the windows, turn on the radio.'**
+  String get emergencySirenHint;
+
+  /// No description provided for @emergencySirenWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Rising and falling wail, one minute'**
+  String get emergencySirenWarning;
+
+  /// No description provided for @emergencySirenWarningMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning. Danger nearby. Get into a building, close windows and doors, turn on the radio and wait for announcements.'**
+  String get emergencySirenWarningMeaning;
+
+  /// No description provided for @emergencySirenAllClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Steady continuous tone, one minute'**
+  String get emergencySirenAllClear;
+
+  /// No description provided for @emergencySirenAllClearMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'All clear. The danger has passed. It arrives by the same route the warning did.'**
+  String get emergencySirenAllClearMeaning;
+
+  /// No description provided for @emergencySirenFire.
+  ///
+  /// In en, this message translates to:
+  /// **'Tone interrupted twice, one minute'**
+  String get emergencySirenFire;
+
+  /// No description provided for @emergencySirenFireMeaning.
+  ///
+  /// In en, this message translates to:
+  /// **'Fire brigade alert. It calls the responders and is not addressed to the public – no reason to do anything.'**
+  String get emergencySirenFireMeaning;
+
   /// No description provided for @emergencyContactsTitle.
   ///
   /// In en, this message translates to:

@@ -763,4 +763,56 @@ const builtInTemplates = [
       ),
     ],
   ),
+  // Das Kapitel, das der ueberarbeitete Ratgeber dazubekommen hat und das
+  // hier ganz fehlte. Die drei Pruefragen sind die des BBK, samt seiner
+  // Schwelle: ein einziges "nein" genuegt.
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000018',
+    'Falschmeldungen erkennen',
+    ChecklistCategory.information,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001801',
+        'Wer hat es zuerst veröffentlicht? Absender, echter Name, Impressum',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001802',
+        'Sind Quellen genannt, die sich nachprüfen lassen?',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001803',
+        'Berichtet eine zweite verlässliche Quelle dasselbe?',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001804',
+        'Ein einziges "nein" bei diesen drei Fragen genügt, um es nicht '
+            'weiterzugeben',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001805',
+        'Ein Bild kann echt und trotzdem von vorletztem Jahr sein — nach '
+            'Datum und Ort fragen, nicht nur nach Echtheit',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001806',
+        'Amtliche Warnungen stehen in PreppSuite mit ihrer Quelle — dort '
+            'nachsehen statt in Weitergeleitetem',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001807',
+        'Bei Zweifeln die Gemeinde oder die Leitstelle fragen, nicht die '
+            'Gruppenchats',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001808',
+        'Öffentlich-rechtlicher Rundfunk über Radio, wenn das Netz weg oder '
+            'überlastet ist',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001809',
+        'Kritisch hinterfragen statt weiterleiten — eine Falschmeldung, die '
+            'man selbst geteilt hat, kommt als scheinbare Bestätigung zurück',
+      ),
+    ],
+  ),
 ];
