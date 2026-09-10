@@ -158,16 +158,17 @@ class WarningPollService {
   Future<List<BbkRawWarning>> _detailsForChanged(
     List<BbkRawWarning> warnings,
   ) async {
+    // Loaded once, before the workers start. Asked inside the loop this was
+    // one query per warning, and the ingest below then asked the same
+    // question again for every one of them.
+    final stored = await _db.warningsBySource(WarningSource.bbk.name);
     final result = List<BbkRawWarning>.from(warnings);
     var next = 0;
     Future<void> worker() async {
       while (next < warnings.length) {
         final at = next++;
         final warning = warnings[at];
-        final existing = await _db.findWarning(
-          WarningSource.bbk.name,
-          warning.id,
-        );
+        final existing = stored[warning.id];
         final sent = DateTime.tryParse(warning.startDate)?.toUtc();
         final changed =
             existing == null || (sent != null && sent.isAfter(existing.sent));

@@ -520,6 +520,17 @@ class AppDatabase extends _$AppDatabase {
     return into(warnings).insertOnConflictUpdate(warning);
   }
 
+  /// The same thing for many, in one transaction.
+  ///
+  /// A poll used to write each row on its own, and every one of those was
+  /// its own transaction — a journal write and an fsync apiece. This runs
+  /// four times a day in a background isolate on a phone on battery, so
+  /// 130 of them is not free.
+  Future<void> upsertWarnings(List<WarningsCompanion> rows) async {
+    if (rows.isEmpty) return;
+    await batch((b) => b.insertAllOnConflictUpdate(warnings, rows));
+  }
+
   /// The warning stored under [source]/[externalId], or null.
   ///
   /// The poll needs the previous row to decide whether anything worth
@@ -530,6 +541,20 @@ class AppDatabase extends _$AppDatabase {
           (t) => t.source.equals(source) & t.externalId.equals(externalId),
         ))
         .getSingleOrNull();
+  }
+
+  /// Every warning of [source], keyed by the feed's own id.
+  ///
+  /// One query instead of one per warning. A German poll brings back
+  /// upwards of 130 of them, and each was looked up twice: once to decide
+  /// whether its full text needed fetching, once again to decide whether
+  /// the row had moved. That is 260 round trips to answer a question about
+  /// a table that fits in a page or two.
+  Future<Map<String, Warning>> warningsBySource(String source) async {
+    final rows = await (select(
+      warnings,
+    )..where((t) => t.source.equals(source))).get();
+    return {for (final row in rows) row.externalId: row};
   }
 
   /// Warnings that have not been announced yet.
@@ -564,18 +589,26 @@ class AppDatabase extends _$AppDatabase {
     )..where((t) => t.source.equals(source) & t.expires.isNull())).get();
 
     final now = DateTime.now().toUtc();
-    var retired = 0;
-    for (final warning in active) {
-      if (seenExternalIds.contains(warning.externalId)) continue;
-      await (update(warnings)..where(
-            (t) =>
-                t.source.equals(warning.source) &
-                t.externalId.equals(warning.externalId),
-          ))
-          .write(WarningsCompanion(expires: Value(now), updatedAt: Value(now)));
-      retired++;
-    }
-    return retired;
+    final gone = active
+        .where((w) => !seenExternalIds.contains(w.externalId))
+        .toList();
+    if (gone.isEmpty) return 0;
+
+    // One transaction for the sweep. Written one row at a time it was one
+    // transaction per retired warning, and a feed that quietens down after
+    // a storm retires them by the dozen.
+    await batch((b) {
+      for (final warning in gone) {
+        b.update(
+          warnings,
+          WarningsCompanion(expires: Value(now), updatedAt: Value(now)),
+          where: (t) =>
+              t.source.equals(warning.source) &
+              t.externalId.equals(warning.externalId),
+        );
+      }
+    });
+    return gone.length;
   }
 
   /// Keeps the local cache from growing forever — long-expired warnings

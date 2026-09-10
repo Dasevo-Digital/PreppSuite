@@ -13,6 +13,13 @@ import 'warning_severity_l10n.dart';
 /// A warning worth telling the user about, with the reason it qualified.
 typedef NotifiableWarning = ({String source, String externalId});
 
+/// One row ready to write, and whether it is worth announcing.
+typedef _Prepared = ({
+  bool newsworthy,
+  WarningsCompanion row,
+  NotifiableWarning key,
+});
+
 /// Maps both feeds' structurally different payloads onto the local
 /// `warnings` table, deduplicating by `(source, externalId)`.
 ///
@@ -36,10 +43,15 @@ class WarningIngest {
     /// guessed from the warning id.
     String? regionKeyOverride,
   }) async {
+    // One query for the whole source, instead of one per warning inside the
+    // loop below. See [AppDatabase.warningsBySource].
+    final existing = await _db.warningsBySource(WarningSource.bbk.name);
     final notifiable = <NotifiableWarning>[];
+    final rows = <WarningsCompanion>[];
 
     for (final warning in warnings) {
-      final result = await _upsert(
+      final result = _prepare(
+        existing: existing[warning.id],
         source: WarningSource.bbk,
         externalId: warning.id,
         countryCode: countryCode,
@@ -58,9 +70,13 @@ class WarningIngest {
         expires: null,
         sent: _parseDateTime(warning.startDate) ?? DateTime.now().toUtc(),
       );
-      if (result != null) notifiable.add(result);
+      if (result == null) continue;
+      rows.add(result.row);
+      if (result.newsworthy) notifiable.add(result.key);
     }
 
+    // One transaction for the whole feed rather than one per warning.
+    await _db.upsertWarnings(rows);
     return notifiable;
   }
 
@@ -73,7 +89,11 @@ class WarningIngest {
     required String countryCode,
     DwdAreas? areas,
   }) async {
+    final existing = await _db.warningsBySource(
+      WarningSource.meteoalarm.name,
+    );
     final notifiable = <NotifiableWarning>[];
+    final rows = <WarningsCompanion>[];
 
     for (final warning in warnings) {
       if (warning.identifier.isEmpty) continue;
@@ -81,7 +101,8 @@ class WarningIngest {
       final sent = _parseDateTime(warning.sent);
       if (sent == null) continue;
 
-      final result = await _upsert(
+      final result = _prepare(
+        existing: existing[warning.identifier],
         source: WarningSource.meteoalarm,
         externalId: warning.identifier,
         countryCode: countryCode,
@@ -107,19 +128,28 @@ class WarningIngest {
         expires: _parseDateTime(warning.expires),
         sent: sent,
       );
-      if (result != null) notifiable.add(result);
+      if (result == null) continue;
+      rows.add(result.row);
+      if (result.newsworthy) notifiable.add(result.key);
     }
 
+    // One transaction for the whole feed rather than one per warning.
+    await _db.upsertWarnings(rows);
     return notifiable;
   }
 
-  /// Writes one warning and reports whether it is newsworthy.
+  /// Prepares one warning's row and reports whether it is newsworthy.
   ///
   /// Newsworthy means new, or escalated to a higher severity. The sources
   /// reissue warnings constantly with corrected wording or a shifted end
   /// time; announcing every one of those is how a warning channel gets
   /// muted, which is the one thing it cannot survive.
-  Future<NotifiableWarning?> _upsert({
+  ///
+  /// [existing] is passed in rather than looked up: the caller has already
+  /// loaded every row of this source in one query, and this used to repeat
+  /// that lookup per warning. Returns null when there is nothing to write.
+  _Prepared? _prepare({
+    required Warning? existing,
     required WarningSource source,
     required String externalId,
     required String countryCode,
@@ -135,9 +165,7 @@ class WarningIngest {
     required DateTime effective,
     required DateTime? expires,
     required DateTime sent,
-  }) async {
-    final existing = await _db.findWarning(source.name, externalId);
-
+  }) {
     if (existing != null && !sent.isAfter(existing.sent)) return null;
 
     final escalated =
@@ -148,8 +176,9 @@ class WarningIngest {
     final newsworthy = existing == null || escalated;
     final wasAnnounced = existing?.notified ?? false;
 
-    await _db.upsertWarning(
-      WarningsCompanion.insert(
+    return (
+      newsworthy: newsworthy,
+      row: WarningsCompanion.insert(
         source: source.name,
         externalId: externalId,
         countryCode: countryCode,
@@ -170,9 +199,8 @@ class WarningIngest {
         // announce; an unchanged row keeps whatever it had.
         notified: Value(!newsworthy && wasAnnounced),
       ),
+      key: (source: source.name, externalId: externalId),
     );
-
-    return newsworthy ? (source: source.name, externalId: externalId) : null;
   }
 
   WarningSeverity _parseSeverity(String value) {
