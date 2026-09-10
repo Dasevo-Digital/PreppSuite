@@ -697,7 +697,6 @@
   "emergencyCardsHealthEncrypted": "This is health data. The shared folder it travels through is encrypted.",
   "emergencyCardsGoToEncryption": "Folder settings",
   "emergencyCardBirthYearInvalid": "That is not a year.",
-  "personCountLabel": "People in the household",
   "settingsSharingTitle": "Shared folder",
   "sharingIntro": "Supplies, checklists and spending live in a folder several devices can see — a Nextcloud, Syncthing, iCloud Drive or Dropbox directory. PreppSuite only writes files there. What carries them is your choice.",
   "sharingInactive": "This device shares nothing. Everything stays here.",

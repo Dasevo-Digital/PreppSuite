@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/household_providers.dart';
 import '../application/warning_feed_countries.dart';
+import 'count_tile.dart';
 
 /// First run: name the household and say where it is.
 ///
@@ -23,6 +24,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _regionController = TextEditingController();
   String _countryCode = 'DE';
   int _personCount = 1;
+  int _children = 0;
+  int _dogs = 0;
+  int _cats = 0;
   bool _saving = false;
 
   @override
@@ -44,6 +48,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           countryCode: _countryCode,
           regionKey: region.isEmpty ? null : region,
           personCount: _personCount,
+          children: _children,
+          dogs: _dogs,
+          cats: _cats,
         );
   }
 
@@ -116,30 +123,42 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                       ),
                     ],
                     const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(child: Text(l10n.personCountLabel)),
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline),
-                          tooltip: l10n.stepperDecrease(l10n.personCountLabel),
-                          onPressed: _personCount > 1
-                              ? () => setState(() => _personCount--)
-                              : null,
-                        ),
-                        Text(
-                          '$_personCount',
-                          style: Theme.of(context).textTheme.titleMedium,
-                          semanticsLabel: l10n.stepperValue(
-                            l10n.personCountLabel,
-                            _personCount,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline),
-                          tooltip: l10n.stepperIncrease(l10n.personCountLabel),
-                          onPressed: () => setState(() => _personCount++),
-                        ),
-                      ],
+                    // All four, and named the same as on the household
+                    // screen. This asked for "Personen im Haushalt" and
+                    // stored the answer as the number of adults, so a
+                    // family of two with two children entered 4 — which is
+                    // what the label asked for — and got a supply target
+                    // for four adults. Children need less, pets need
+                    // something else again, and none of it was asked until
+                    // somebody found the household screen by themselves.
+                    //
+                    // These are the whole input to the supply calculation,
+                    // and it is the first number the app shows.
+                    CountTile(
+                      icon: Icons.people_outline,
+                      label: l10n.householdAdultsLabel,
+                      value: _personCount,
+                      minimum: 1,
+                      onChanged: (value) =>
+                          setState(() => _personCount = value),
+                    ),
+                    CountTile(
+                      icon: Icons.child_care_outlined,
+                      label: l10n.householdChildrenLabel,
+                      value: _children,
+                      onChanged: (value) => setState(() => _children = value),
+                    ),
+                    CountTile(
+                      icon: Icons.pets_outlined,
+                      label: l10n.householdDogsLabel,
+                      value: _dogs,
+                      onChanged: (value) => setState(() => _dogs = value),
+                    ),
+                    CountTile(
+                      icon: Icons.pets,
+                      label: l10n.householdCatsLabel,
+                      value: _cats,
+                      onChanged: (value) => setState(() => _cats = value),
                     ),
                     const SizedBox(height: 32),
                     FilledButton(

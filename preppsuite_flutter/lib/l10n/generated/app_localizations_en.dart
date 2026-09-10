@@ -1268,9 +1268,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyCardBirthYearInvalid => 'That is not a year.';
 
   @override
-  String get personCountLabel => 'People in the household';
-
-  @override
   String get settingsSharingTitle => 'Shared folder';
 
   @override

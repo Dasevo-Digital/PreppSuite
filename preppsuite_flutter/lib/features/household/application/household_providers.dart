@@ -24,6 +24,9 @@ class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
     required String countryCode,
     String? regionKey,
     int personCount = 1,
+    int children = 0,
+    int dogs = 0,
+    int cats = 0,
   }) async {
     final profile = HouseholdProfile(
       // Generated once and then fixed: every local row partitions by it,
@@ -34,6 +37,9 @@ class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
       countryCode: countryCode,
       regionKey: regionKey,
       personCount: personCount,
+      children: children,
+      dogs: dogs,
+      cats: cats,
     );
     await _persist(profile);
     return profile;

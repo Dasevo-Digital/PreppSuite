@@ -362,7 +362,6 @@
   "emergencyCardsHealthEncrypted": "Das sind Gesundheitsdaten. Der gemeinsame Ordner, über den sie wandern, ist verschlüsselt.",
   "emergencyCardsGoToEncryption": "Ordner-Einstellungen",
   "emergencyCardBirthYearInvalid": "Das ist kein Jahr.",
-  "personCountLabel": "Personen im Haushalt",
   "settingsSharingTitle": "Gemeinsamer Ordner",
   "sharingIntro": "Vorräte, Checklisten und Ausgaben liegen in einem Ordner, den mehrere Geräte sehen — etwa in Nextcloud, Syncthing, iCloud Drive oder Dropbox. PreppSuite schreibt dort nur Dateien. Wer sie transportiert, entscheidest du.",
   "sharingInactive": "Dieses Gerät teilt nichts. Alle Daten bleiben hier.",

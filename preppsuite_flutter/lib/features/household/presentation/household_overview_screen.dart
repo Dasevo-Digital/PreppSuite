@@ -8,6 +8,7 @@ import '../application/household_plan_controller.dart';
 import 'household_plan_screen.dart';
 import '../application/household_member_controller.dart';
 import 'emergency_cards_screen.dart';
+import 'count_tile.dart';
 
 /// The household's own details.
 ///
@@ -101,7 +102,7 @@ class HouseholdOverviewScreen extends ConsumerWidget {
                 // Everyone the supply calculator has to plan for lives
                 // here, and only here. The inventory screen used to keep
                 // a second person count of its own.
-                _CountTile(
+                CountTile(
                   icon: Icons.people_outline,
                   label: l10n.householdAdultsLabel,
                   value: profile.personCount,
@@ -111,21 +112,21 @@ class HouseholdOverviewScreen extends ConsumerWidget {
                     profile.copyWith(personCount: value),
                   ),
                 ),
-                _CountTile(
+                CountTile(
                   icon: Icons.child_care_outlined,
                   label: l10n.householdChildrenLabel,
                   value: profile.children,
                   onChanged: (value) =>
                       _save(ref, profile.copyWith(children: value)),
                 ),
-                _CountTile(
+                CountTile(
                   icon: Icons.pets_outlined,
                   label: l10n.householdDogsLabel,
                   value: profile.dogs,
                   onChanged: (value) =>
                       _save(ref, profile.copyWith(dogs: value)),
                 ),
-                _CountTile(
+                CountTile(
                   icon: Icons.pets,
                   label: l10n.householdCatsLabel,
                   value: profile.cats,
@@ -154,49 +155,3 @@ class HouseholdOverviewScreen extends ConsumerWidget {
 
 void _save(WidgetRef ref, HouseholdProfile profile) =>
     ref.read(householdProfileProvider.notifier).save(profile);
-
-class _CountTile extends StatelessWidget {
-  const _CountTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.onChanged,
-    this.minimum = 0,
-  });
-
-  final IconData icon;
-  final String label;
-  final int value;
-  final int minimum;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(label),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.remove_circle_outline),
-            tooltip: l10n.stepperDecrease(label),
-            onPressed: value > minimum ? () => onChanged(value - 1) : null,
-          ),
-          Text(
-            '$value',
-            style: Theme.of(context).textTheme.titleMedium,
-            semanticsLabel: l10n.stepperValue(label, value),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            tooltip: l10n.stepperIncrease(label),
-            onPressed: () => onChanged(value + 1),
-          ),
-        ],
-      ),
-    );
-  }
-}

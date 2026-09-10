@@ -2264,12 +2264,6 @@ abstract class AppLocalizations {
   /// **'That is not a year.'**
   String get emergencyCardBirthYearInvalid;
 
-  /// No description provided for @personCountLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'People in the household'**
-  String get personCountLabel;
-
   /// No description provided for @settingsSharingTitle.
   ///
   /// In en, this message translates to:
