@@ -28,7 +28,23 @@ class PreppSuiteApp extends ConsumerWidget {
         useMaterial3: true,
       ),
       themeMode: ref.watch(themeModeProvider),
-      home: const HouseholdGate(),
+      // Nothing in this app was selectable. A Flutter `Text` is not, on
+      // its own, and there are 667 of them against no `SelectableText` and
+      // no `SelectionArea` at all — so right-click-copy worked inside
+      // input fields and nowhere else, which reads as "it works sometimes"
+      // rather than "it is missing".
+      //
+      // It matters more here than in most apps: the numbers people want to
+      // pass on are all read-only labels. How many litres are still
+      // needed, the Kreisschlüssel, a shelter's name and distance, the
+      // wording of an official warning.
+      //
+      // Wrapped around the whole app rather than per screen, having
+      // measured that it takes nothing away: a map still pans, a list
+      // still scrolls and a slider still drags inside one, because those
+      // recognizers win the gesture arena. See selection_test.dart, which
+      // keeps that true.
+      home: const SelectionArea(child: HouseholdGate()),
     );
   }
 }
