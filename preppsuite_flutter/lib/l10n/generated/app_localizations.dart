@@ -5401,6 +5401,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No cover in this archive'**
   String get knowledgeArchiveNoCover;
+
+  /// No description provided for @radiationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gamma radiation'**
+  String get radiationTitle;
+
+  /// No description provided for @radiationEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ambient dose rate at a BfS monitoring station'**
+  String get radiationEntryHint;
+
+  /// No description provided for @radiationNoneChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'No station chosen yet'**
+  String get radiationNoneChosen;
+
+  /// No description provided for @radiationChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a station'**
+  String get radiationChoose;
+
+  /// No description provided for @radiationChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Another station'**
+  String get radiationChange;
+
+  /// No description provided for @radiationRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get radiationRefresh;
+
+  /// No description provided for @radiationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Place or postal code'**
+  String get radiationSearchHint;
+
+  /// No description provided for @radiationSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No station found.'**
+  String get radiationSearchEmpty;
+
+  /// No description provided for @radiationLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The readings could not be loaded.'**
+  String get radiationLoadFailed;
+
+  /// No description provided for @radiationOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Last known value. The BfS service could not be reached.'**
+  String get radiationOffline;
+
+  /// No description provided for @radiationStale.
+  ///
+  /// In en, this message translates to:
+  /// **'More than two hours old. The network reports hourly, so this is a missing connection and not a standing value.'**
+  String get radiationStale;
+
+  /// No description provided for @radiationUnvalidated.
+  ///
+  /// In en, this message translates to:
+  /// **'Unchecked raw value. BfS publishes hourly readings unchecked at first; a technical fault looks like a measurement.'**
+  String get radiationUnvalidated;
+
+  /// No description provided for @radiationMeasuredAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Measured until {time}'**
+  String radiationMeasuredAt(String time);
+
+  /// No description provided for @radiationHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'{metres} m above sea level'**
+  String radiationHeight(String metres);
+
+  /// No description provided for @radiationPostalCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Postal code {code}'**
+  String radiationPostalCode(String code);
+
+  /// No description provided for @radiationBaseline.
+  ///
+  /// In en, this message translates to:
+  /// **'Usual at this station: {value} µSv/h'**
+  String radiationBaseline(String value);
+
+  /// No description provided for @radiationNoBaseline.
+  ///
+  /// In en, this message translates to:
+  /// **'This station has no baseline of its own yet, so the reading is judged against the national natural range of {floor} to {ceiling} µSv/h, which is coarser — in the Black Forest 0.16 µSv/h is perfectly ordinary.'**
+  String radiationNoBaseline(String floor, String ceiling);
+
+  /// No description provided for @radiationSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Of which {terrestrial} µSv/h from the ground and {cosmic} µSv/h from space'**
+  String radiationSplit(String terrestrial, String cosmic);
+
+  /// No description provided for @radiationBandOrdinary.
+  ///
+  /// In en, this message translates to:
+  /// **'Ordinary for this station'**
+  String get radiationBandOrdinary;
+
+  /// No description provided for @radiationBandWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Raised — which is the normal case after rain'**
+  String get radiationBandWeather;
+
+  /// No description provided for @radiationBandUnusual.
+  ///
+  /// In en, this message translates to:
+  /// **'Beyond what weather explains'**
+  String get radiationBandUnusual;
+
+  /// No description provided for @radiationBandUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Above the natural range, with no baseline of its own'**
+  String get radiationBandUnknown;
+
+  /// No description provided for @radiationWeatherExplained.
+  ///
+  /// In en, this message translates to:
+  /// **'Rain washes radon decay products out of the air and lifts the reading by up to a factor of three for a few hours. This is harmless and falls back on its own; the half-life is about 30 minutes. Fresh snow does the same, while lying snow shields the ground and lowers the reading.'**
+  String get radiationWeatherExplained;
+
+  /// No description provided for @radiationUnusualExplained.
+  ///
+  /// In en, this message translates to:
+  /// **'Per BfS, a radiological event only comes into question when a clearly raised reading persists for a day or longer or goes beyond that factor of three — or when the probe is faulty. A single value is not a warning: an official warning would arrive through this app’s warnings.'**
+  String get radiationUnusualExplained;
+
+  /// No description provided for @radiationNoWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the reading and its context, not a warning. Official warnings arrive through this app’s warnings.'**
+  String get radiationNoWarning;
+
+  /// No description provided for @radiationSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: Bundesamt für Strahlenschutz (BfS), ODL network. Datenlizenz Deutschland – Namensnennung 2.0.'**
+  String get radiationSource;
+
+  /// No description provided for @radiationFactor.
+  ///
+  /// In en, this message translates to:
+  /// **'{factor} times the usual value'**
+  String radiationFactor(String factor);
 }
 
 class _AppLocalizationsDelegate

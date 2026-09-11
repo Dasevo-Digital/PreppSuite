@@ -3206,4 +3206,110 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get knowledgeArchiveNoCover => 'Kein Titelbild im Archiv';
+
+  @override
+  String get radiationTitle => 'Gammastrahlung';
+
+  @override
+  String get radiationEntryHint =>
+      'Ortsdosisleistung an einer Messstelle des BfS';
+
+  @override
+  String get radiationNoneChosen => 'Noch keine Messstelle gewählt';
+
+  @override
+  String get radiationChoose => 'Messstelle wählen';
+
+  @override
+  String get radiationChange => 'Andere Messstelle';
+
+  @override
+  String get radiationRefresh => 'Aktualisieren';
+
+  @override
+  String get radiationSearchHint => 'Ort oder Postleitzahl';
+
+  @override
+  String get radiationSearchEmpty => 'Keine Messstelle gefunden.';
+
+  @override
+  String get radiationLoadFailed =>
+      'Die Messwerte konnten nicht geladen werden.';
+
+  @override
+  String get radiationOffline =>
+      'Letzter bekannter Wert. Die Verbindung zum BfS kam nicht zustande.';
+
+  @override
+  String get radiationStale =>
+      'Älter als zwei Stunden. Das Netz meldet stündlich, hier fehlt also die Verbindung und nicht der Messwert.';
+
+  @override
+  String get radiationUnvalidated =>
+      'Ungeprüfter Rohwert. Das BfS veröffentlicht Stundenwerte zunächst ungeprüft; technische Störungen sehen darin wie Messwerte aus.';
+
+  @override
+  String radiationMeasuredAt(String time) {
+    return 'Gemessen bis $time';
+  }
+
+  @override
+  String radiationHeight(String metres) {
+    return '$metres m über dem Meer';
+  }
+
+  @override
+  String radiationPostalCode(String code) {
+    return 'PLZ $code';
+  }
+
+  @override
+  String radiationBaseline(String value) {
+    return 'Üblich an dieser Messstelle: $value µSv/h';
+  }
+
+  @override
+  String radiationNoBaseline(String floor, String ceiling) {
+    return 'Für diese Messstelle liegt noch kein eigener Vergleichswert vor. Eingeordnet wird darum gegen den bundesweiten natürlichen Bereich von $floor bis $ceiling µSv/h, was gröber ist — im Schwarzwald sind 0,16 µSv/h völlig gewöhnlich.';
+  }
+
+  @override
+  String radiationSplit(String terrestrial, String cosmic) {
+    return 'Davon $terrestrial µSv/h aus dem Boden und $cosmic µSv/h aus dem Weltall';
+  }
+
+  @override
+  String get radiationBandOrdinary => 'Gewöhnlich für diese Messstelle';
+
+  @override
+  String get radiationBandWeather =>
+      'Erhöht — das ist nach Regen der Normalfall';
+
+  @override
+  String get radiationBandUnusual => 'Über dem, was Wetter erklärt';
+
+  @override
+  String get radiationBandUnknown =>
+      'Über dem natürlichen Bereich, ohne eigenen Vergleichswert';
+
+  @override
+  String get radiationWeatherExplained =>
+      'Regen wäscht Radon-Zerfallsprodukte aus der Luft und hebt den Wert für wenige Stunden um bis zum Dreifachen. Das ist harmlos und geht von selbst zurück; die Halbwertszeit liegt bei etwa 30 Minuten. Frischer Schnee wirkt genauso, liegender Schnee schirmt den Boden ab und senkt den Wert.';
+
+  @override
+  String get radiationUnusualExplained =>
+      'Laut BfS kommt ein radiologisches Ereignis erst in Frage, wenn ein deutlich erhöhter Wert einen Tag oder länger anhält oder über das Dreifache hinausgeht — oder wenn die Sonde technisch stört. Ein einzelner Wert ist keine Warnung: eine amtliche Warnung käme über die Warnungen dieser App.';
+
+  @override
+  String get radiationNoWarning =>
+      'Das ist der Messwert und seine Einordnung, keine Warnung. Amtliche Warnungen kommen über die Warnungen dieser App.';
+
+  @override
+  String get radiationSource =>
+      'Quelle: Bundesamt für Strahlenschutz (BfS), ODL-Messnetz. Datenlizenz Deutschland – Namensnennung 2.0.';
+
+  @override
+  String radiationFactor(String factor) {
+    return '$factor-fach gegenüber dem üblichen Wert';
+  }
 }

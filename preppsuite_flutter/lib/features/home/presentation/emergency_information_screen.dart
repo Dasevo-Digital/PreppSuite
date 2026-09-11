@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../warnings/presentation/pegel_screen.dart';
+import '../../warnings/presentation/radiation_screen.dart';
 import 'radio_emergency_screen.dart';
 
 const _contactsKey = 'nearbyEmergencyContacts';
@@ -246,6 +247,20 @@ class _EmergencyInformationScreenState
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const PegelScreen()),
+            ),
+          ),
+          // Beside the gauge for the same reason: a figure that is
+          // worthless out of date, on the screen somebody opens when
+          // something has happened. It keeps the last reading and says
+          // so rather than pretending.
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+            leading: const Icon(Icons.radar_outlined),
+            title: Text(l10n.radiationTitle),
+            subtitle: Text(l10n.radiationEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const RadiationScreen()),
             ),
           ),
           ListTile(

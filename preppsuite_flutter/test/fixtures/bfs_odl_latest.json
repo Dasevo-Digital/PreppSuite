@@ -1,0 +1,63 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     8.15,
+     48.28
+    ]
+   },
+   "properties": {
+    "id": "DEZ2940",
+    "kenn": "083170410",
+    "plz": "77756",
+    "name": "Hausach",
+    "site_status": 1,
+    "site_status_text": "in Betrieb",
+    "kid": 1,
+    "height_above_sea": 230,
+    "start_measure": "2026-09-11T05:00:00Z",
+    "end_measure": "2026-09-11T06:00:00Z",
+    "value": 0.162,
+    "value_cosmic": 0.045,
+    "value_terrestrial": 0.117,
+    "unit": "µSv/h",
+    "validated": 1,
+    "nuclide": "Gamma-ODL-Brutto",
+    "duration": "1h"
+   }
+  },
+  {
+   "type": "Feature",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     10.54,
+     49.16
+    ]
+   },
+   "properties": {
+    "id": "DEZ3481",
+    "kenn": "095711152",
+    "plz": "91572",
+    "name": "Bechhofen",
+    "site_status": 2,
+    "site_status_text": "defekt",
+    "kid": 3,
+    "height_above_sea": 427,
+    "start_measure": null,
+    "end_measure": null,
+    "value": null,
+    "value_cosmic": null,
+    "value_terrestrial": null,
+    "unit": "µSv/h",
+    "validated": null,
+    "nuclide": "Gamma-ODL-Brutto",
+    "duration": "1h"
+   }
+  }
+ ]
+}

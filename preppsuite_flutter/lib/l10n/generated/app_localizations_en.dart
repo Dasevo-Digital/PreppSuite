@@ -3187,4 +3187,109 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeArchiveNoCover => 'No cover in this archive';
+
+  @override
+  String get radiationTitle => 'Gamma radiation';
+
+  @override
+  String get radiationEntryHint =>
+      'Ambient dose rate at a BfS monitoring station';
+
+  @override
+  String get radiationNoneChosen => 'No station chosen yet';
+
+  @override
+  String get radiationChoose => 'Choose a station';
+
+  @override
+  String get radiationChange => 'Another station';
+
+  @override
+  String get radiationRefresh => 'Refresh';
+
+  @override
+  String get radiationSearchHint => 'Place or postal code';
+
+  @override
+  String get radiationSearchEmpty => 'No station found.';
+
+  @override
+  String get radiationLoadFailed => 'The readings could not be loaded.';
+
+  @override
+  String get radiationOffline =>
+      'Last known value. The BfS service could not be reached.';
+
+  @override
+  String get radiationStale =>
+      'More than two hours old. The network reports hourly, so this is a missing connection and not a standing value.';
+
+  @override
+  String get radiationUnvalidated =>
+      'Unchecked raw value. BfS publishes hourly readings unchecked at first; a technical fault looks like a measurement.';
+
+  @override
+  String radiationMeasuredAt(String time) {
+    return 'Measured until $time';
+  }
+
+  @override
+  String radiationHeight(String metres) {
+    return '$metres m above sea level';
+  }
+
+  @override
+  String radiationPostalCode(String code) {
+    return 'Postal code $code';
+  }
+
+  @override
+  String radiationBaseline(String value) {
+    return 'Usual at this station: $value µSv/h';
+  }
+
+  @override
+  String radiationNoBaseline(String floor, String ceiling) {
+    return 'This station has no baseline of its own yet, so the reading is judged against the national natural range of $floor to $ceiling µSv/h, which is coarser — in the Black Forest 0.16 µSv/h is perfectly ordinary.';
+  }
+
+  @override
+  String radiationSplit(String terrestrial, String cosmic) {
+    return 'Of which $terrestrial µSv/h from the ground and $cosmic µSv/h from space';
+  }
+
+  @override
+  String get radiationBandOrdinary => 'Ordinary for this station';
+
+  @override
+  String get radiationBandWeather =>
+      'Raised — which is the normal case after rain';
+
+  @override
+  String get radiationBandUnusual => 'Beyond what weather explains';
+
+  @override
+  String get radiationBandUnknown =>
+      'Above the natural range, with no baseline of its own';
+
+  @override
+  String get radiationWeatherExplained =>
+      'Rain washes radon decay products out of the air and lifts the reading by up to a factor of three for a few hours. This is harmless and falls back on its own; the half-life is about 30 minutes. Fresh snow does the same, while lying snow shields the ground and lowers the reading.';
+
+  @override
+  String get radiationUnusualExplained =>
+      'Per BfS, a radiological event only comes into question when a clearly raised reading persists for a day or longer or goes beyond that factor of three — or when the probe is faulty. A single value is not a warning: an official warning would arrive through this app’s warnings.';
+
+  @override
+  String get radiationNoWarning =>
+      'This is the reading and its context, not a warning. Official warnings arrive through this app’s warnings.';
+
+  @override
+  String get radiationSource =>
+      'Source: Bundesamt für Strahlenschutz (BfS), ODL network. Datenlizenz Deutschland – Namensnennung 2.0.';
+
+  @override
+  String radiationFactor(String factor) {
+    return '$factor times the usual value';
+  }
 }
