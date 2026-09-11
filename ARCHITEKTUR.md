@@ -663,6 +663,24 @@ tree; the test suite deliberately targets that layer rather than the UI.
   five-step wording for the WBI and not, where this was written, for the
   GLFI — and a five-step scale described in words somebody made up is
   what this app refuses to ship.
+- **zstd clusters are streamed, never size-guessed.** The `zstandard`
+  plugin's own `decompress` reads the final size out of the frame header
+  and, where the header does not carry one, allocates twenty times the
+  compressed length. No ZIM frame carries one: Kiwix writes clusters with
+  streaming compression, measured across all eight archives here — zero
+  declared sizes. So the guess is all there is, and it is often wrong:
+  688 of iFixit's 718 clusters expand past twenty times, the worst 114
+  times; Wikiversity 37, Wikibooks 7, Wikipedia none at 18.9 times.
+  Beyond the guess the plugin returns null, `decompressCluster` throws,
+  and the article view says "the archive answered with 500" — which is
+  what "iFixit shows nothing after the start page" always was. The app
+  therefore drives `ZSTD_decompressStream` itself
+  (`zstd_stream.dart`), through the same native library the plugin
+  loads, which needs no size in advance. The 64 MiB bound moves into
+  that loop. `integration_test/native_archive_test.dart` holds both
+  halves: a frame with no declared size that expands 6835 times, and —
+  with `PREPPSUITE_TEST_ZIM` set — the real archive served over its own
+  loopback server with every link off the start page fetched.
 - **The macOS build has to be checked for zstd symbols, because nothing
   else notices.** `zstandard_macos` compiles zstd into its own framework
   from C sources it syncs into the pub cache. CocoaPods collects that file

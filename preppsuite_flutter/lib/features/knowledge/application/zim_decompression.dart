@@ -4,9 +4,9 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart'
     show XZDecoder, InputMemoryStream, OutputMemoryStream;
 import 'archive_memory_limits.dart';
-import 'package:zstandard/zstandard.dart';
 
 import 'zim_archive.dart' show ZimException;
+import 'zstd_stream.dart';
 
 /// Turns a cluster's stored bytes into its contents.
 ///
@@ -42,19 +42,12 @@ Future<Uint8List> decompressCluster(int type, Uint8List body) async {
       return body;
 
     case ZimCompression.zstd:
-      // Native on every platform the app ships to. Returns null rather
-      // than throwing when the frame is not readable.
+      // Streamed rather than handed to the plugin's own `decompress`,
+      // which needs to know the final size in advance and guesses twenty
+      // times the compressed length when the frame does not say. No ZIM
+      // frame says. See zstd_stream.dart for what that cost.
       validateZstdMemoryBudget(body);
-      final decoded = await Zstandard().decompress(body);
-      if (decoded == null) {
-        throw const ZimException('a cluster could not be decompressed');
-      }
-      if (decoded.length > maxClusterBytes) {
-        throw const ZimException(
-          'decoded cluster exceeds the 64 MiB memory limit',
-        );
-      }
-      return decoded;
+      return zstdDecompress(body, limit: maxClusterBytes);
 
     case ZimCompression.xz:
       final output = _BoundedOutput();

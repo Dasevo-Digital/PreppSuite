@@ -73,6 +73,10 @@ dependencies:
   vector_map_tiles: ^9.0.0-beta.13
   vector_tile_renderer: ^6.1.0
   zstandard: ^1.5.0
+  # Direct, because the app decompresses through the streaming API itself
+  # rather than the plugin's size-guessing `decompress`; see
+  # lib/features/knowledge/application/zstd_stream.dart.
+  zstandard_native: ^1.5.0
   archive: ^4.0.0
   # Renders the HTML that comes out of a ZIM archive. The pages are real
   # Wikipedia, stylesheets and all; anything less than a browser engine
