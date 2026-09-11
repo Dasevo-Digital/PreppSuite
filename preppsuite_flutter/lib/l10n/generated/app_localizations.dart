@@ -5558,11 +5558,167 @@ abstract class AppLocalizations {
   /// **'Source: Bundesamt für Strahlenschutz (BfS), ODL network. Datenlizenz Deutschland – Namensnennung 2.0.'**
   String get radiationSource;
 
-  /// No description provided for @radiationFactor.
+  /// No description provided for @fireDangerTitle.
   ///
   /// In en, this message translates to:
-  /// **'{factor} times the usual value'**
-  String radiationFactor(String factor);
+  /// **'Forest fire danger'**
+  String get fireDangerTitle;
+
+  /// No description provided for @fireDangerEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The DWD forest fire danger index for one station'**
+  String get fireDangerEntryHint;
+
+  /// No description provided for @fireDangerNoneChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'No station chosen yet'**
+  String get fireDangerNoneChosen;
+
+  /// No description provided for @fireDangerChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a station'**
+  String get fireDangerChoose;
+
+  /// No description provided for @fireDangerChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Another station'**
+  String get fireDangerChange;
+
+  /// No description provided for @fireDangerRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get fireDangerRefresh;
+
+  /// No description provided for @fireDangerSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Place or state'**
+  String get fireDangerSearchHint;
+
+  /// No description provided for @fireDangerSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No station found.'**
+  String get fireDangerSearchEmpty;
+
+  /// No description provided for @fireDangerLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The forest fire danger index could not be loaded.'**
+  String get fireDangerLoadFailed;
+
+  /// No description provided for @fireDangerOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Last known state. The DWD server could not be reached.'**
+  String get fireDangerOffline;
+
+  /// No description provided for @fireDangerStale.
+  ///
+  /// In en, this message translates to:
+  /// **'This is from {date} and not from today. The DWD issues the index only during the fire season, roughly March to October — outside it nothing new arrives.'**
+  String fireDangerStale(String date);
+
+  /// No description provided for @fireDangerStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {step} of 5'**
+  String fireDangerStep(int step);
+
+  /// No description provided for @fireDangerIssuedFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Issued for {date}'**
+  String fireDangerIssuedFor(String date);
+
+  /// No description provided for @fireDangerLevel1.
+  ///
+  /// In en, this message translates to:
+  /// **'Very low danger'**
+  String get fireDangerLevel1;
+
+  /// No description provided for @fireDangerLevel2.
+  ///
+  /// In en, this message translates to:
+  /// **'Low danger'**
+  String get fireDangerLevel2;
+
+  /// No description provided for @fireDangerLevel3.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate danger'**
+  String get fireDangerLevel3;
+
+  /// No description provided for @fireDangerLevel4.
+  ///
+  /// In en, this message translates to:
+  /// **'High danger'**
+  String get fireDangerLevel4;
+
+  /// No description provided for @fireDangerLevel5.
+  ///
+  /// In en, this message translates to:
+  /// **'Very high danger'**
+  String get fireDangerLevel5;
+
+  /// No description provided for @fireDangerAhead.
+  ///
+  /// In en, this message translates to:
+  /// **'The days ahead'**
+  String get fireDangerAhead;
+
+  /// No description provided for @fireDangerPeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Rises to level {step} in {days} days'**
+  String fireDangerPeak(int step, int days);
+
+  /// No description provided for @fireDangerPeakTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Rises to level {step} tomorrow'**
+  String fireDangerPeakTomorrow(int step);
+
+  /// No description provided for @fireDangerToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get fireDangerToday;
+
+  /// No description provided for @fireDangerInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'In {days} days'**
+  String fireDangerInDays(int days);
+
+  /// No description provided for @fireDangerTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get fireDangerTomorrow;
+
+  /// No description provided for @fireDangerNoWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The index describes the meteorological potential for forest fire. It is not a warning and not a ban on entering a forest; bans are issued by the states, and official warnings arrive through this app’s warnings.'**
+  String get fireDangerNoWarning;
+
+  /// No description provided for @fireDangerSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: Deutscher Wetterdienst (DWD), forest fire danger index WBI.'**
+  String get fireDangerSource;
+
+  /// No description provided for @fireDangerState.
+  ///
+  /// In en, this message translates to:
+  /// **'State {state}'**
+  String fireDangerState(String state);
 }
 
 class _AppLocalizationsDelegate

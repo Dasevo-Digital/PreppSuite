@@ -314,6 +314,33 @@ indistinguishable from a measured one. A nutrient heavier than the
 package it is in is rejected, which is what catches the common Open Food
 Facts error of a per-package figure typed into the per-100 g field.
 
+**Where a public authority publishes the interpretation, the app uses
+theirs.** Three live feeds now show a bare number, and a bare number is
+unreadable or frightening or both: a gauge reading, a gamma dose rate and
+a fire-danger step. So every band is the issuing authority's own.
+PEGELONLINE's long-run reference levels place a water level; the BfS
+states 0.05–0.2 µSv/h as natural, rain lifting a reading by up to a
+factor of three for hours as harmless, and an event only in question past
+that or after a day; the DWD names its five WBI steps "sehr geringe" to
+"sehr hohe Gefahr". None of the three screens invents a threshold, none
+of them calls itself a warning, and each says so — a real warning arrives
+through the BBK feed. `radiation_level.dart` and `fire_danger_level.dart`
+carry the sources in their library comments.
+
+**A dose rate is judged against its own probe, not against one national
+number.** `baselineFrom` takes the median of the station's last week —
+the median precisely because every rainfall in that week is a spike of up
+to three times the baseline, and a mean would fold the spikes into the
+thing they are measured against. Hausach reads 0.157 µSv/h in perfectly
+ordinary weather; against the national ceiling of 0.2 the Black Forest
+would look permanently raised.
+
+**The DWD station list is Latin-1.** It is the only file in this app that
+is, and reading it as UTF-8 mangles every umlaut in it — the same class
+of mistake as `KiwixCatalogue` reading `response.body`, from the other
+direction. `fire_danger_live_test` asserts "Großenkneten" against the
+real server for exactly this.
+
 **Figures that are official and figures this app invented are kept
 apart.** `SupplyHead` carries one rate per kind of head and says at each
 where it came from. The BBK's page states 1.5 + 0.5 litres and ~2200 kcal
@@ -627,6 +654,15 @@ tree; the test suite deliberately targets that layer rather than the UI.
   household that had set a region. `DwdAreas` now maps the name to a
   district key, and `null` — "concerns everyone" — is the fallback,
   because for a civil-protection alert too many people is the safe error.
+- **The DWD's fire-danger paths carry a dataset version.** `v2-3--0` is
+  in every file name, so a bump there breaks every request at once while
+  the code stays perfectly valid. It is a constant in
+  `fire_danger_client.dart` and the live test is what notices.
+- **Only the woodland index ships.** The grassland index (GLFI) sits
+  beside it in the same directory and is not used: the DWD publishes the
+  five-step wording for the WBI and not, where this was written, for the
+  GLFI — and a five-step scale described in words somebody made up is
+  what this app refuses to ship.
 - **A library entry carries what the archive says about itself.**
   `StoredArchive` keeps the title, the one-line description and the 48x48
   cover out of the ZIM's own `M/` namespace, written when the archive is

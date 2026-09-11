@@ -3309,7 +3309,102 @@ class AppLocalizationsDe extends AppLocalizations {
       'Quelle: Bundesamt für Strahlenschutz (BfS), ODL-Messnetz. Datenlizenz Deutschland – Namensnennung 2.0.';
 
   @override
-  String radiationFactor(String factor) {
-    return '$factor-fach gegenüber dem üblichen Wert';
+  String get fireDangerTitle => 'Waldbrandgefahr';
+
+  @override
+  String get fireDangerEntryHint =>
+      'Waldbrandgefahrenindex des DWD für eine Station';
+
+  @override
+  String get fireDangerNoneChosen => 'Noch keine Station gewählt';
+
+  @override
+  String get fireDangerChoose => 'Station wählen';
+
+  @override
+  String get fireDangerChange => 'Andere Station';
+
+  @override
+  String get fireDangerRefresh => 'Aktualisieren';
+
+  @override
+  String get fireDangerSearchHint => 'Ort oder Bundesland';
+
+  @override
+  String get fireDangerSearchEmpty => 'Keine Station gefunden.';
+
+  @override
+  String get fireDangerLoadFailed =>
+      'Der Waldbrandgefahrenindex konnte nicht geladen werden.';
+
+  @override
+  String get fireDangerOffline =>
+      'Letzter bekannter Stand. Die Verbindung zum DWD kam nicht zustande.';
+
+  @override
+  String fireDangerStale(String date) {
+    return 'Dieser Stand ist vom $date und nicht von heute. Der DWD gibt den Index nur in der Waldbrandsaison heraus, etwa März bis Oktober — außerhalb kommt nichts Neues nach.';
+  }
+
+  @override
+  String fireDangerStep(int step) {
+    return 'Stufe $step von 5';
+  }
+
+  @override
+  String fireDangerIssuedFor(String date) {
+    return 'Gilt für $date';
+  }
+
+  @override
+  String get fireDangerLevel1 => 'Sehr geringe Gefahr';
+
+  @override
+  String get fireDangerLevel2 => 'Geringe Gefahr';
+
+  @override
+  String get fireDangerLevel3 => 'Mittlere Gefahr';
+
+  @override
+  String get fireDangerLevel4 => 'Hohe Gefahr';
+
+  @override
+  String get fireDangerLevel5 => 'Sehr hohe Gefahr';
+
+  @override
+  String get fireDangerAhead => 'Die nächsten Tage';
+
+  @override
+  String fireDangerPeak(int step, int days) {
+    return 'Steigt auf Stufe $step in $days Tagen';
+  }
+
+  @override
+  String fireDangerPeakTomorrow(int step) {
+    return 'Steigt morgen auf Stufe $step';
+  }
+
+  @override
+  String get fireDangerToday => 'Heute';
+
+  @override
+  String fireDangerInDays(int days) {
+    return 'In $days Tagen';
+  }
+
+  @override
+  String get fireDangerTomorrow => 'Morgen';
+
+  @override
+  String get fireDangerNoWarning =>
+      'Der Index beschreibt das Wetterpotenzial für Waldbrand, er ist keine Warnung und kein Betretungsverbot. Verbote sprechen die Länder aus; amtliche Warnungen kommen über die Warnungen dieser App.';
+
+  @override
+  String get fireDangerSource =>
+      'Quelle: Deutscher Wetterdienst (DWD), Waldbrandgefahrenindex WBI.';
+
+  @override
+  String fireDangerState(String state) {
+    return 'Bundesland $state';
   }
 }
