@@ -2543,9 +2543,6 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get knowledgeArchiveSelected => 'Aktuell geöffnet';
-
-  @override
   String get backupTitle => 'Sicherung & Wiederherstellung';
 
   @override

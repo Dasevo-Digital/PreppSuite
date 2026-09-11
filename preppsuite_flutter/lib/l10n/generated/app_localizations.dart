@@ -4298,12 +4298,6 @@ abstract class AppLocalizations {
   /// **'{count} archives on this device'**
   String knowledgeArchiveCount(int count);
 
-  /// No description provided for @knowledgeArchiveSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Currently open'**
-  String get knowledgeArchiveSelected;
-
   /// No description provided for @backupTitle.
   ///
   /// In en, this message translates to:

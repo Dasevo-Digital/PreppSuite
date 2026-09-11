@@ -66,6 +66,12 @@ class MissingEquipmentReport {
     // instead. Same font used for regular and bold weight (only one static
     // weight is bundled); this loses bold *emphasis* but never garbles
     // text, which is the actual correctness requirement.
+    // A static cut, deliberately: the theme below uses the same face for
+    // base and bold, so no weight is ever interpolated, and the variable
+    // NotoSans carried 1.25 MB of glyph variation data for that on every
+    // platform. `tool/font_instance.py` produces the asset and
+    // `font_asset_test.dart` guards it -- a fresh download from Google
+    // Fonts is variable and would put the megabyte back.
     final unicodeFont = pw.Font.ttf(
       await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'),
     );

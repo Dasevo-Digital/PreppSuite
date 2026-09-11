@@ -1485,7 +1485,6 @@
   "knowledgeManageArchives": "Manage archives",
   "knowledgeArchiveCount": "{count} archives on this device",
   "@knowledgeArchiveCount": { "placeholders": { "count": { "type": "int" } } },
-  "knowledgeArchiveSelected": "Currently open",
   "backupTitle": "Backup & restore",
   "backupCreate": "Create data backup",
   "backupRestore": "Restore data backup",

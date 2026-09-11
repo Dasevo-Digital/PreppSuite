@@ -2528,9 +2528,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get knowledgeArchiveSelected => 'Currently open';
-
-  @override
   String get backupTitle => 'Backup & restore';
 
   @override

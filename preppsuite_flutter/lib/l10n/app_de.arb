@@ -703,7 +703,6 @@
   "knowledgeManageArchives": "Archive verwalten",
   "knowledgeArchiveCount": "{count} Archive auf diesem Gerät",
   "@knowledgeArchiveCount": { "placeholders": { "count": { "type": "int" } } },
-  "knowledgeArchiveSelected": "Aktuell geöffnet",
   "backupTitle": "Sicherung & Wiederherstellung",
   "backupCreate": "Datensicherung erstellen",
   "backupRestore": "Datensicherung wiederherstellen",

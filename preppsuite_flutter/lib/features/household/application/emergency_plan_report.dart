@@ -90,6 +90,12 @@ class EmergencyPlanReport {
     /// reached the paper. A built-in font writes the strings literally.
     pw.Font? font,
   }) async {
+    // A static cut, deliberately: the theme below uses the same face for
+    // base and bold, so no weight is ever interpolated, and the variable
+    // NotoSans carried 1.25 MB of glyph variation data for that on every
+    // platform. `tool/font_instance.py` produces the asset and
+    // `font_asset_test.dart` guards it -- a fresh download from Google
+    // Fonts is variable and would put the megabyte back.
     font ??= pw.Font.ttf(
       await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'),
     );
