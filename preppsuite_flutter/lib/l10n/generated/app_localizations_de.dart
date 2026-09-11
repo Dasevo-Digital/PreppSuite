@@ -9,6 +9,147 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
+  String get airQualityEntryHint =>
+      'Feinstaub, Ozon und Stickstoffdioxid an einer Messstation in deiner Nähe.';
+
+  @override
+  String get airQualityTitle => 'Luftqualität';
+
+  @override
+  String get airQualityNoneChosen => 'Noch keine Messstation gewählt';
+
+  @override
+  String get airQualityChoose => 'Messstation wählen';
+
+  @override
+  String get airQualityChange => 'Andere Messstation';
+
+  @override
+  String get airQualityRefresh => 'Neu laden';
+
+  @override
+  String get airQualitySearchHint => 'Ort, Station oder Bundesland';
+
+  @override
+  String get airQualitySearchEmpty => 'Keine Station gefunden.';
+
+  @override
+  String get airQualityLoadFailed =>
+      'Die Messwerte sind gerade nicht zu erreichen.';
+
+  @override
+  String get airQualityOffline =>
+      'Zuletzt gespeicherter Wert – der Abruf ist gerade fehlgeschlagen.';
+
+  @override
+  String get airQualityStale =>
+      'Diese Messung ist über drei Stunden alt. Die Station meldet zurzeit nichts Neues.';
+
+  @override
+  String get airQualityIncomplete =>
+      'Nicht alle Schadstoffe dieser Station haben in dieser Stunde gemeldet. Die Einstufung gilt für das, was gemeldet wurde.';
+
+  @override
+  String get airQualityComponents => 'Einzelne Schadstoffe';
+
+  @override
+  String airQualityLeading(String code, String value, String unit) {
+    return 'Ausschlaggebend: $code mit $value $unit';
+  }
+
+  @override
+  String airQualitySpan(String min, String max) {
+    return '$min bis $max';
+  }
+
+  @override
+  String airQualityMeasuredAt(String when) {
+    return 'Gemessen am $when';
+  }
+
+  @override
+  String get airQualityVeryGood => 'Sehr gut';
+
+  @override
+  String get airQualityGood => 'Gut';
+
+  @override
+  String get airQualityModerate => 'Mäßig';
+
+  @override
+  String get airQualityPoor => 'Schlecht';
+
+  @override
+  String get airQualityVeryPoor => 'Sehr schlecht';
+
+  @override
+  String get airQualityUnknown => 'Keine Einstufung';
+
+  @override
+  String get airQualityNoWarning =>
+      'Das ist ein Messwert, keine Warnung. Wird tatsächlich vor etwas gewarnt, kommt die Warnung über die Warnmeldungen dieser App.';
+
+  @override
+  String get airQualityAdvice =>
+      'Was das UBA bei welcher Stufe empfiehlt, steht beim UBA selbst. Diese App gibt keine eigenen Gesundheitshinweise.';
+
+  @override
+  String get airQualitySource =>
+      'Quelle: Umweltbundesamt, Luftqualitätsindex. Einstufung und Schwellenwerte stammen vom UBA.';
+
+  @override
+  String get roadClosureTitle => 'Autobahnsperrungen';
+
+  @override
+  String get roadClosureEntryHint =>
+      'Was auf den Autobahnen gesperrt ist, die du beobachtest.';
+
+  @override
+  String get roadClosureNoneChosen => 'Noch keine Autobahn gewählt';
+
+  @override
+  String get roadClosureWhy =>
+      'Wenn eine Gegend verlassen werden muss, ist „welcher Weg ist offen“ die konkretere Frage als jede Checkliste. Die Auskunft gibt es nur je Autobahn – deshalb einmal auswählen, welche zählen.';
+
+  @override
+  String get roadClosureChoose => 'Autobahnen wählen';
+
+  @override
+  String get roadClosureChange => 'Auswahl ändern';
+
+  @override
+  String get roadClosureDone => 'Fertig';
+
+  @override
+  String get roadClosureRefresh => 'Neu laden';
+
+  @override
+  String get roadClosureLoadFailed =>
+      'Die Verkehrsmeldungen sind gerade nicht zu erreichen.';
+
+  @override
+  String get roadClosureNow => 'Jetzt';
+
+  @override
+  String get roadClosureNothingNow =>
+      'Zurzeit keine Sperrung und keine Warnung.';
+
+  @override
+  String get roadClosureLater => 'Angekündigt';
+
+  @override
+  String get roadClosureBlocked => 'Gesperrt';
+
+  @override
+  String roadClosureFrom(String when) {
+    return 'Ab $when';
+  }
+
+  @override
+  String get roadClosureSource =>
+      'Quelle: Autobahn GmbH des Bundes, offene Verkehrsdaten. Baustellen ohne Sperrung sind nicht aufgeführt.';
+
+  @override
   String get appTitle => 'PreppSuite';
 
   @override

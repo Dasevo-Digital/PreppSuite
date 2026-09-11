@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../warnings/presentation/air_quality_screen.dart';
+import '../../warnings/presentation/road_closure_screen.dart';
 import '../../warnings/presentation/fire_danger_screen.dart';
 import '../../warnings/presentation/pegel_screen.dart';
 import '../../warnings/presentation/radiation_screen.dart';
@@ -264,6 +266,19 @@ class _EmergencyInformationScreenState
               MaterialPageRoute<void>(builder: (_) => const RadiationScreen()),
             ),
           ),
+          // The third measurement of the same kind: a number that is
+          // worthless out of date, and one whose meaning comes from the
+          // authority that publishes it rather than from this app.
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+            leading: const Icon(Icons.air_outlined),
+            title: Text(l10n.airQualityTitle),
+            subtitle: Text(l10n.airQualityEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const AirQualityScreen()),
+            ),
+          ),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 8),
             leading: const Icon(Icons.local_fire_department_outlined),
@@ -272,6 +287,21 @@ class _EmergencyInformationScreenState
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const FireDangerScreen()),
+            ),
+          ),
+          // Not a measurement like the three above: this is about
+          // leaving. "Which way is open" is the question a household has
+          // when it can no longer stay.
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+            leading: const Icon(Icons.alt_route_outlined),
+            title: Text(l10n.roadClosureTitle),
+            subtitle: Text(l10n.roadClosureEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const RoadClosureScreen(),
+              ),
             ),
           ),
           ListTile(

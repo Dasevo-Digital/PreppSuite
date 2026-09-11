@@ -98,6 +98,246 @@ abstract class AppLocalizations {
     Locale('en'),
   ];
 
+  /// No description provided for @airQualityEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Particulates, ozone and nitrogen dioxide at a station near you.'**
+  String get airQualityEntryHint;
+
+  /// No description provided for @airQualityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Air quality'**
+  String get airQualityTitle;
+
+  /// No description provided for @airQualityNoneChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'No station chosen yet'**
+  String get airQualityNoneChosen;
+
+  /// No description provided for @airQualityChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a station'**
+  String get airQualityChoose;
+
+  /// No description provided for @airQualityChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Another station'**
+  String get airQualityChange;
+
+  /// No description provided for @airQualityRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get airQualityRefresh;
+
+  /// No description provided for @airQualitySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Place, station or state'**
+  String get airQualitySearchHint;
+
+  /// No description provided for @airQualitySearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No station found.'**
+  String get airQualitySearchEmpty;
+
+  /// No description provided for @airQualityLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The readings cannot be reached right now.'**
+  String get airQualityLoadFailed;
+
+  /// No description provided for @airQualityOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Last stored reading — fetching just failed.'**
+  String get airQualityOffline;
+
+  /// No description provided for @airQualityStale.
+  ///
+  /// In en, this message translates to:
+  /// **'This reading is over three hours old. The station is not reporting at the moment.'**
+  String get airQualityStale;
+
+  /// No description provided for @airQualityIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Not every pollutant this station measures reported this hour. The class covers what did.'**
+  String get airQualityIncomplete;
+
+  /// No description provided for @airQualityComponents.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual pollutants'**
+  String get airQualityComponents;
+
+  /// No description provided for @airQualityLeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Decisive: {code} at {value} {unit}'**
+  String airQualityLeading(String code, String value, String unit);
+
+  /// No description provided for @airQualitySpan.
+  ///
+  /// In en, this message translates to:
+  /// **'{min} to {max}'**
+  String airQualitySpan(String min, String max);
+
+  /// No description provided for @airQualityMeasuredAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Measured on {when}'**
+  String airQualityMeasuredAt(String when);
+
+  /// No description provided for @airQualityVeryGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Very good'**
+  String get airQualityVeryGood;
+
+  /// No description provided for @airQualityGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get airQualityGood;
+
+  /// No description provided for @airQualityModerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get airQualityModerate;
+
+  /// No description provided for @airQualityPoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Poor'**
+  String get airQualityPoor;
+
+  /// No description provided for @airQualityVeryPoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Very poor'**
+  String get airQualityVeryPoor;
+
+  /// No description provided for @airQualityUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'No class'**
+  String get airQualityUnknown;
+
+  /// No description provided for @airQualityNoWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a measurement, not a warning. If something is actually being warned about, the warning arrives through this app\'s warning list.'**
+  String get airQualityNoWarning;
+
+  /// No description provided for @airQualityAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'What the UBA recommends at each class is published by the UBA itself. This app gives no health advice of its own.'**
+  String get airQualityAdvice;
+
+  /// No description provided for @airQualitySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: Umweltbundesamt air quality index. The classification and thresholds are the UBA\'s.'**
+  String get airQualitySource;
+
+  /// No description provided for @roadClosureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Motorway closures'**
+  String get roadClosureTitle;
+
+  /// No description provided for @roadClosureEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What is shut on the motorways you watch.'**
+  String get roadClosureEntryHint;
+
+  /// No description provided for @roadClosureNoneChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'No motorway chosen yet'**
+  String get roadClosureNoneChosen;
+
+  /// No description provided for @roadClosureWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'When a region has to be left, “which way is open” is a more concrete question than any checklist. The service answers per road — so the roads that matter are named once.'**
+  String get roadClosureWhy;
+
+  /// No description provided for @roadClosureChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose motorways'**
+  String get roadClosureChoose;
+
+  /// No description provided for @roadClosureChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the selection'**
+  String get roadClosureChange;
+
+  /// No description provided for @roadClosureDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get roadClosureDone;
+
+  /// No description provided for @roadClosureRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get roadClosureRefresh;
+
+  /// No description provided for @roadClosureLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The traffic reports cannot be reached right now.'**
+  String get roadClosureLoadFailed;
+
+  /// No description provided for @roadClosureNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get roadClosureNow;
+
+  /// No description provided for @roadClosureNothingNow.
+  ///
+  /// In en, this message translates to:
+  /// **'No closure and no warning at the moment.'**
+  String get roadClosureNothingNow;
+
+  /// No description provided for @roadClosureLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Announced'**
+  String get roadClosureLater;
+
+  /// No description provided for @roadClosureBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get roadClosureBlocked;
+
+  /// No description provided for @roadClosureFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From {when}'**
+  String roadClosureFrom(String when);
+
+  /// No description provided for @roadClosureSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: Autobahn GmbH des Bundes open traffic data. Roadworks that block nothing are not listed.'**
+  String get roadClosureSource;
+
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:

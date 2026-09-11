@@ -9,6 +9,145 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get airQualityEntryHint =>
+      'Particulates, ozone and nitrogen dioxide at a station near you.';
+
+  @override
+  String get airQualityTitle => 'Air quality';
+
+  @override
+  String get airQualityNoneChosen => 'No station chosen yet';
+
+  @override
+  String get airQualityChoose => 'Choose a station';
+
+  @override
+  String get airQualityChange => 'Another station';
+
+  @override
+  String get airQualityRefresh => 'Reload';
+
+  @override
+  String get airQualitySearchHint => 'Place, station or state';
+
+  @override
+  String get airQualitySearchEmpty => 'No station found.';
+
+  @override
+  String get airQualityLoadFailed =>
+      'The readings cannot be reached right now.';
+
+  @override
+  String get airQualityOffline => 'Last stored reading — fetching just failed.';
+
+  @override
+  String get airQualityStale =>
+      'This reading is over three hours old. The station is not reporting at the moment.';
+
+  @override
+  String get airQualityIncomplete =>
+      'Not every pollutant this station measures reported this hour. The class covers what did.';
+
+  @override
+  String get airQualityComponents => 'Individual pollutants';
+
+  @override
+  String airQualityLeading(String code, String value, String unit) {
+    return 'Decisive: $code at $value $unit';
+  }
+
+  @override
+  String airQualitySpan(String min, String max) {
+    return '$min to $max';
+  }
+
+  @override
+  String airQualityMeasuredAt(String when) {
+    return 'Measured on $when';
+  }
+
+  @override
+  String get airQualityVeryGood => 'Very good';
+
+  @override
+  String get airQualityGood => 'Good';
+
+  @override
+  String get airQualityModerate => 'Moderate';
+
+  @override
+  String get airQualityPoor => 'Poor';
+
+  @override
+  String get airQualityVeryPoor => 'Very poor';
+
+  @override
+  String get airQualityUnknown => 'No class';
+
+  @override
+  String get airQualityNoWarning =>
+      'This is a measurement, not a warning. If something is actually being warned about, the warning arrives through this app\'s warning list.';
+
+  @override
+  String get airQualityAdvice =>
+      'What the UBA recommends at each class is published by the UBA itself. This app gives no health advice of its own.';
+
+  @override
+  String get airQualitySource =>
+      'Source: Umweltbundesamt air quality index. The classification and thresholds are the UBA\'s.';
+
+  @override
+  String get roadClosureTitle => 'Motorway closures';
+
+  @override
+  String get roadClosureEntryHint => 'What is shut on the motorways you watch.';
+
+  @override
+  String get roadClosureNoneChosen => 'No motorway chosen yet';
+
+  @override
+  String get roadClosureWhy =>
+      'When a region has to be left, “which way is open” is a more concrete question than any checklist. The service answers per road — so the roads that matter are named once.';
+
+  @override
+  String get roadClosureChoose => 'Choose motorways';
+
+  @override
+  String get roadClosureChange => 'Change the selection';
+
+  @override
+  String get roadClosureDone => 'Done';
+
+  @override
+  String get roadClosureRefresh => 'Reload';
+
+  @override
+  String get roadClosureLoadFailed =>
+      'The traffic reports cannot be reached right now.';
+
+  @override
+  String get roadClosureNow => 'Now';
+
+  @override
+  String get roadClosureNothingNow =>
+      'No closure and no warning at the moment.';
+
+  @override
+  String get roadClosureLater => 'Announced';
+
+  @override
+  String get roadClosureBlocked => 'Blocked';
+
+  @override
+  String roadClosureFrom(String when) {
+    return 'From $when';
+  }
+
+  @override
+  String get roadClosureSource =>
+      'Source: Autobahn GmbH des Bundes open traffic data. Roadworks that block nothing are not listed.';
+
+  @override
   String get appTitle => 'PreppSuite';
 
   @override

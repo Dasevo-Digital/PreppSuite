@@ -92,19 +92,30 @@ class BbkClient {
   ];
   static const _baseUrl = 'https://warnung.bund.de/api31';
 
+  /// All six sources, asked at once.
+  ///
+  /// One after another meant six round trips to the same host before the
+  /// warning list could be drawn — measured against the live server at
+  /// 115 ms where asking together took 28. The number is small on a desk
+  /// connection and is not the point: on mobile data at 200 ms a round
+  /// trip, six of them are a second and a quarter in front of the screen
+  /// somebody opens first in an emergency.
+  ///
+  /// Order is kept, so warnings arrive in the same sequence as before and
+  /// nothing downstream has to care that this changed.
   Future<BbkFetchResult> fetchAll() async {
+    final fetched = await Future.wait(_sources.map(_fetchSource));
+
     final results = <BbkRawWarning>[];
     var complete = true;
-
-    for (final source in _sources) {
-      final fetched = await _fetchSource(source);
-      if (fetched == null) {
-        // One bad source must not discard the others' warnings, but it does
-        // mean the picture is incomplete — see [BbkFetchResult.complete].
+    for (final source in fetched) {
+      // One bad source must not discard the others' warnings, but it does
+      // mean the picture is incomplete — see [BbkFetchResult.complete].
+      if (source == null) {
         complete = false;
         continue;
       }
-      results.addAll(fetched);
+      results.addAll(source);
     }
 
     return BbkFetchResult(warnings: results, complete: complete);

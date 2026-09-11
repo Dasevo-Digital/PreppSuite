@@ -654,6 +654,41 @@ tree; the test suite deliberately targets that layer rather than the UI.
   household that had set a region. `DwdAreas` now maps the name to a
   district key, and `null` — "concerns everyone" — is the fallback,
   because for a civil-protection alert too many people is the safe error.
+- **The six BBK sources are asked at once.** One after another meant six
+  round trips to the same host before the warning list could be drawn —
+  115 ms against 28 measured live. The number is small on a desk
+  connection and is not the point: on mobile data at 200 ms a round trip
+  that is a second and a quarter in front of the screen somebody opens
+  first in an emergency. `BbkFetchResult.complete` still means every
+  source answered.
+- **The air quality index is the UBA's, class and thresholds alike.**
+  `luftdaten.umweltbundesamt.de/api/air-data`, no key. The `airquality`
+  endpoint returns an index of 0 to 4 per hour per station and each
+  pollutant's own index beside it; the class boundaries come from
+  `v4/thresholds` rather than being written down here, because they have
+  already changed once — the UBA publishes both the classic index (`aq`)
+  and its post-WHO-2021 revision (`aq4`) on the same endpoint, and only
+  `aq` at scope 2 matches what `airquality` returns. **The UBA's
+  behaviour advice is deliberately not shipped**: it is published only as
+  images, and paraphrasing somebody else's health advice is exactly what
+  the rule against invented scales exists to prevent. The screen names
+  the class, names the pollutant the class came from, and points at the
+  source. Two things the interface does that cost an hour to find: asking
+  for every station at once answers 502, so it is asked per station; and
+  the same request answers 404 now and then, which is why there is one
+  retry.
+- **The Autobahn service answers per road, so the roads are chosen.**
+  `verkehr.autobahn.de/o/autobahn`, no key. Closures and warnings are
+  fetched; roadworks are not — the same interface lists over a hundred
+  per motorway, almost none of them blocking anything. Titles are mixed
+  and there is no rule to lean on: of 25 closures on the A2, 16 began
+  with "A2 | …" and the rest were free text out of a roadworks system, so
+  the screen prefixes the road itself. `future` arrives as a real boolean
+  and `isBlocked` as the string "true"/"false"; both are read for what
+  they are. And an open road answers with an empty list, so failure is
+  recorded as failure and never inferred from emptiness — "nothing is
+  shut" and "could not ask" looking the same is the one way that screen
+  could actively mislead somebody.
 - **The DWD's fire-danger paths carry a dataset version.** `v2-3--0` is
   in every file name, so a bump there breaks every request at once while
   the code stays perfectly valid. It is a constant in
