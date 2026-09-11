@@ -3535,4 +3535,165 @@ class AppLocalizationsEn extends AppLocalizations {
   String fireDangerState(String state) {
     return 'State $state';
   }
+
+  @override
+  String get nearbyTitle => 'Nearby';
+
+  @override
+  String get nearbyEntryHint =>
+      'Pharmacy, water, fuel — from the downloaded map, without a network.';
+
+  @override
+  String nearbySearchFrom(String place) {
+    return 'Searching around $place';
+  }
+
+  @override
+  String get nearbyMapCentre => 'the map centre';
+
+  @override
+  String get nearbyMyPosition => 'your position';
+
+  @override
+  String get nearbyUseMyLocation => 'Use my location';
+
+  @override
+  String get nearbyNoCentre => 'No point chosen yet';
+
+  @override
+  String get nearbyNoCentreWhy =>
+      'This search needs somewhere to start from. Take your position — or open the map, move it to the area and search from there.';
+
+  @override
+  String get nearbyOpenMap => 'Open the map';
+
+  @override
+  String get nearbyRadius => 'Radius';
+
+  @override
+  String nearbyRadiusKm(int km) {
+    return '$km km';
+  }
+
+  @override
+  String nearbySearching(int done, int total) {
+    return '$done of $total tiles read';
+  }
+
+  @override
+  String get nearbyNothingFound => 'Nothing found.';
+
+  @override
+  String get nearbyNothingFoundWhy =>
+      'The map carries none of these points within this radius. A wider radius may help — or the area was only downloaded coarsely.';
+
+  @override
+  String get nearbyNoArchive => 'No map downloaded';
+
+  @override
+  String get nearbyNoArchiveWhy =>
+      'This search reads the map that is on this device. Without a downloaded map there is nothing to search.';
+
+  @override
+  String get nearbyDownloadMap => 'Download a map';
+
+  @override
+  String get nearbyTooShallow => 'The map does not go deep enough';
+
+  @override
+  String get nearbyTooShallowWhy =>
+      'Individual points first appear at zoom level 14. This archive stops short of it: it draws a perfectly good map and holds not one pharmacy. Download the area again at a greater level of detail.';
+
+  @override
+  String get nearbyOutsideArchive => 'Outside the downloaded area';
+
+  @override
+  String get nearbyOutsideArchiveWhy =>
+      'This point is not inside what was downloaded. The map knows nothing here — including that anything is missing.';
+
+  @override
+  String get nearbyCaveats =>
+      'Only what was downloaded and what volunteers entered into OpenStreetMap can be found. A point being on the map is no promise that it is open, stocked or staffed.';
+
+  @override
+  String get nearbyShelterNote =>
+      'In OpenStreetMap a “shelter” is nearly always a bus shelter or a hiking hut, not a protective shelter. That is why the kind is not listed here.';
+
+  @override
+  String get nearbyKindWater => 'Water';
+
+  @override
+  String get nearbyKindHealth => 'Health';
+
+  @override
+  String get nearbyKindFood => 'Food';
+
+  @override
+  String get nearbyKindFuel => 'Fuel and power';
+
+  @override
+  String get nearbyKindHardware => 'Tools and materials';
+
+  @override
+  String get nearbyKindHelp => 'Help and authorities';
+
+  @override
+  String get poiDrinkingWater => 'Drinking water';
+
+  @override
+  String get poiPharmacy => 'Pharmacy';
+
+  @override
+  String get poiHospital => 'Hospital';
+
+  @override
+  String get poiClinic => 'Clinic';
+
+  @override
+  String get poiDoctors => 'Doctor\'s surgery';
+
+  @override
+  String get poiSupermarket => 'Supermarket';
+
+  @override
+  String get poiConvenience => 'Convenience store';
+
+  @override
+  String get poiBakery => 'Bakery';
+
+  @override
+  String get poiButcher => 'Butcher';
+
+  @override
+  String get poiGreengrocer => 'Greengrocer';
+
+  @override
+  String get poiMarketplace => 'Marketplace';
+
+  @override
+  String get poiDeli => 'Delicatessen';
+
+  @override
+  String get poiFuel => 'Filling station';
+
+  @override
+  String get poiChargingStation => 'Charging point';
+
+  @override
+  String get poiDoityourself => 'DIY store';
+
+  @override
+  String get poiHardware => 'Hardware shop';
+
+  @override
+  String get poiFireStation => 'Fire station';
+
+  @override
+  String get poiPolice => 'Police';
+
+  @override
+  String get poiTownhall => 'Town hall';
+
+  @override
+  String get poiCommunityCentre => 'Community centre';
 }

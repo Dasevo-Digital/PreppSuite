@@ -5977,6 +5977,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'State {state}'**
   String fireDangerState(String state);
+
+  /// No description provided for @nearbyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby'**
+  String get nearbyTitle;
+
+  /// No description provided for @nearbyEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy, water, fuel — from the downloaded map, without a network.'**
+  String get nearbyEntryHint;
+
+  /// No description provided for @nearbySearchFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching around {place}'**
+  String nearbySearchFrom(String place);
+
+  /// No description provided for @nearbyMapCentre.
+  ///
+  /// In en, this message translates to:
+  /// **'the map centre'**
+  String get nearbyMapCentre;
+
+  /// No description provided for @nearbyMyPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'your position'**
+  String get nearbyMyPosition;
+
+  /// No description provided for @nearbyUseMyLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my location'**
+  String get nearbyUseMyLocation;
+
+  /// No description provided for @nearbyNoCentre.
+  ///
+  /// In en, this message translates to:
+  /// **'No point chosen yet'**
+  String get nearbyNoCentre;
+
+  /// No description provided for @nearbyNoCentreWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'This search needs somewhere to start from. Take your position — or open the map, move it to the area and search from there.'**
+  String get nearbyNoCentreWhy;
+
+  /// No description provided for @nearbyOpenMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the map'**
+  String get nearbyOpenMap;
+
+  /// No description provided for @nearbyRadius.
+  ///
+  /// In en, this message translates to:
+  /// **'Radius'**
+  String get nearbyRadius;
+
+  /// No description provided for @nearbyRadiusKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String nearbyRadiusKm(int km);
+
+  /// No description provided for @nearbySearching.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} tiles read'**
+  String nearbySearching(int done, int total);
+
+  /// No description provided for @nearbyNothingFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found.'**
+  String get nearbyNothingFound;
+
+  /// No description provided for @nearbyNothingFoundWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'The map carries none of these points within this radius. A wider radius may help — or the area was only downloaded coarsely.'**
+  String get nearbyNothingFoundWhy;
+
+  /// No description provided for @nearbyNoArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'No map downloaded'**
+  String get nearbyNoArchive;
+
+  /// No description provided for @nearbyNoArchiveWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'This search reads the map that is on this device. Without a downloaded map there is nothing to search.'**
+  String get nearbyNoArchiveWhy;
+
+  /// No description provided for @nearbyDownloadMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Download a map'**
+  String get nearbyDownloadMap;
+
+  /// No description provided for @nearbyTooShallow.
+  ///
+  /// In en, this message translates to:
+  /// **'The map does not go deep enough'**
+  String get nearbyTooShallow;
+
+  /// No description provided for @nearbyTooShallowWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Individual points first appear at zoom level 14. This archive stops short of it: it draws a perfectly good map and holds not one pharmacy. Download the area again at a greater level of detail.'**
+  String get nearbyTooShallowWhy;
+
+  /// No description provided for @nearbyOutsideArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Outside the downloaded area'**
+  String get nearbyOutsideArchive;
+
+  /// No description provided for @nearbyOutsideArchiveWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'This point is not inside what was downloaded. The map knows nothing here — including that anything is missing.'**
+  String get nearbyOutsideArchiveWhy;
+
+  /// No description provided for @nearbyCaveats.
+  ///
+  /// In en, this message translates to:
+  /// **'Only what was downloaded and what volunteers entered into OpenStreetMap can be found. A point being on the map is no promise that it is open, stocked or staffed.'**
+  String get nearbyCaveats;
+
+  /// No description provided for @nearbyShelterNote.
+  ///
+  /// In en, this message translates to:
+  /// **'In OpenStreetMap a “shelter” is nearly always a bus shelter or a hiking hut, not a protective shelter. That is why the kind is not listed here.'**
+  String get nearbyShelterNote;
+
+  /// No description provided for @nearbyKindWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get nearbyKindWater;
+
+  /// No description provided for @nearbyKindHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get nearbyKindHealth;
+
+  /// No description provided for @nearbyKindFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get nearbyKindFood;
+
+  /// No description provided for @nearbyKindFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel and power'**
+  String get nearbyKindFuel;
+
+  /// No description provided for @nearbyKindHardware.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools and materials'**
+  String get nearbyKindHardware;
+
+  /// No description provided for @nearbyKindHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help and authorities'**
+  String get nearbyKindHelp;
+
+  /// No description provided for @poiDrinkingWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Drinking water'**
+  String get poiDrinkingWater;
+
+  /// No description provided for @poiPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Pharmacy'**
+  String get poiPharmacy;
+
+  /// No description provided for @poiHospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital'**
+  String get poiHospital;
+
+  /// No description provided for @poiClinic.
+  ///
+  /// In en, this message translates to:
+  /// **'Clinic'**
+  String get poiClinic;
+
+  /// No description provided for @poiDoctors.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctor\'s surgery'**
+  String get poiDoctors;
+
+  /// No description provided for @poiSupermarket.
+  ///
+  /// In en, this message translates to:
+  /// **'Supermarket'**
+  String get poiSupermarket;
+
+  /// No description provided for @poiConvenience.
+  ///
+  /// In en, this message translates to:
+  /// **'Convenience store'**
+  String get poiConvenience;
+
+  /// No description provided for @poiBakery.
+  ///
+  /// In en, this message translates to:
+  /// **'Bakery'**
+  String get poiBakery;
+
+  /// No description provided for @poiButcher.
+  ///
+  /// In en, this message translates to:
+  /// **'Butcher'**
+  String get poiButcher;
+
+  /// No description provided for @poiGreengrocer.
+  ///
+  /// In en, this message translates to:
+  /// **'Greengrocer'**
+  String get poiGreengrocer;
+
+  /// No description provided for @poiMarketplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Marketplace'**
+  String get poiMarketplace;
+
+  /// No description provided for @poiDeli.
+  ///
+  /// In en, this message translates to:
+  /// **'Delicatessen'**
+  String get poiDeli;
+
+  /// No description provided for @poiFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filling station'**
+  String get poiFuel;
+
+  /// No description provided for @poiChargingStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Charging point'**
+  String get poiChargingStation;
+
+  /// No description provided for @poiDoityourself.
+  ///
+  /// In en, this message translates to:
+  /// **'DIY store'**
+  String get poiDoityourself;
+
+  /// No description provided for @poiHardware.
+  ///
+  /// In en, this message translates to:
+  /// **'Hardware shop'**
+  String get poiHardware;
+
+  /// No description provided for @poiFireStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Fire station'**
+  String get poiFireStation;
+
+  /// No description provided for @poiPolice.
+  ///
+  /// In en, this message translates to:
+  /// **'Police'**
+  String get poiPolice;
+
+  /// No description provided for @poiTownhall.
+  ///
+  /// In en, this message translates to:
+  /// **'Town hall'**
+  String get poiTownhall;
+
+  /// No description provided for @poiCommunityCentre.
+  ///
+  /// In en, this message translates to:
+  /// **'Community centre'**
+  String get poiCommunityCentre;
 }
 
 class _AppLocalizationsDelegate

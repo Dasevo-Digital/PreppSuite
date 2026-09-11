@@ -45,8 +45,33 @@ Uint8List _encodeDirectory(
 }
 
 /// Builds an archive holding [tiles], keyed by (z, x, y).
+///
+/// The bodies are text, which is all a reader test needs. Where the bytes
+/// have to be a real vector tile — the offline point-of-interest search
+/// decodes them — use [buildBinaryArchive] instead.
 Uint8List buildArchive({
   required Map<(int, int, int), String> tiles,
+  int minZoom = 0,
+  int maxZoom = 14,
+  (double, double, double, double) bounds = (-180, -85, 180, 85),
+  Map<String, Object?> metadata = const {},
+  bool contiguousOffsets = false,
+  int? leafSize,
+}) => buildBinaryArchive(
+  tiles: {
+    for (final tile in tiles.entries) tile.key: utf8.encode(tile.value),
+  },
+  minZoom: minZoom,
+  maxZoom: maxZoom,
+  bounds: bounds,
+  metadata: metadata,
+  contiguousOffsets: contiguousOffsets,
+  leafSize: leafSize,
+);
+
+/// The same, for tile bodies that are bytes rather than text.
+Uint8List buildBinaryArchive({
+  required Map<(int, int, int), List<int>> tiles,
   int minZoom = 0,
   int maxZoom = 14,
   (double, double, double, double) bounds = (-180, -85, 180, 85),
@@ -65,7 +90,7 @@ Uint8List buildArchive({
     });
 
   for (final tile in sorted) {
-    final body = gzip.encode(utf8.encode(tile.value));
+    final body = gzip.encode(tile.value);
     entries.add((
       tileId: tileIdFor(tile.key.$1, tile.key.$2, tile.key.$3),
       offset: tileData.length,

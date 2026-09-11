@@ -788,6 +788,30 @@ tree; the test suite deliberately targets that layer rather than the UI.
   "français" came through as "franÃ§ais". The live server does send
   `charset=utf-8`, so nothing showed it; a mirror that does not would
   mangle every non-ASCII title in the library. Same trap as PEGELONLINE.
+- **The offline "what is nearby" search reads the map archive, not a
+  service.** `OfflinePoiSearch` opens the same PMTiles file the map draws
+  from, decodes the OpenMapTiles `poi` layer at zoom 14 and measures every
+  point against a centre. It is the only search in this app that still
+  answers when the network is gone, which is the same moment the shelter
+  map, the warnings and the gauges all stop. Four things it turns on:
+  **the layer exists only from zoom 14** — below it there is no `poi`
+  layer at all, so an area downloaded at zoom 12 draws a fine map and
+  holds not one pharmacy, and the screen says that rather than reporting
+  an empty result; **the filter keys on `subclass`, never on `class`** —
+  measured over 21 real tiles, `class=fuel` held 569 points of which 525
+  were charging stations and 44 were filling stations, and in a scenario
+  that starts with the power being off, merging those would be the most
+  misleading answer the screen could give; **a point outside the tile's
+  own square is dropped**, because the schema buffers each tile and the
+  neighbour that owns the point writes it too; and **tiles are read
+  nearest first and the result is a stream**, so the closest pharmacy is
+  on screen long before the far edge of the radius has been touched.
+  Reading is capped at 225 tiles — at German latitudes a zoom-14 tile is
+  about 1.5 km across, so ten kilometres is already 196 of them. Each
+  tile is decoded in `Isolate.run`: a city tile carries three and a half
+  thousand features. `shelter` is deliberately **not** offered: 695 of
+  them in the sample, 10 with a name — in OpenStreetMap it is a bus
+  shelter, not a Schutzraum.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

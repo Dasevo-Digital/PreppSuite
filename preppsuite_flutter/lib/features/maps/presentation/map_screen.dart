@@ -10,6 +10,7 @@ import 'base_map_layer.dart';
 import 'map_download_screen.dart';
 import 'map_source_bar.dart';
 import 'map_zoom_buttons.dart';
+import 'nearby_screen.dart';
 import 'swipe_zoom.dart';
 
 /// Roughly the centre of Germany, so the map opens on something before a
@@ -103,6 +104,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       appBar: AppBar(
         title: Text(l10n.navMap),
         actions: [
+          // From here rather than from a position lookup: the map's
+          // centre is already the place being looked at, it costs no
+          // permission and no network, and panning is how somebody says
+          // "over there" without having to be there.
+          IconButton(
+            icon: const Icon(Icons.travel_explore_outlined),
+            tooltip: l10n.nearbyTitle,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => NearbyScreen(
+                  centre: _mapController.camera.center,
+                  centreLabel: l10n.nearbyMapCentre,
+                ),
+              ),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.cloud_download_outlined),
             tooltip: l10n.mapDownloadAction,

@@ -3558,4 +3558,165 @@ class AppLocalizationsDe extends AppLocalizations {
   String fireDangerState(String state) {
     return 'Bundesland $state';
   }
+
+  @override
+  String get nearbyTitle => 'In der Nähe';
+
+  @override
+  String get nearbyEntryHint =>
+      'Apotheke, Wasser, Tankstelle – aus der heruntergeladenen Karte, ohne Netz.';
+
+  @override
+  String nearbySearchFrom(String place) {
+    return 'Suche um $place';
+  }
+
+  @override
+  String get nearbyMapCentre => 'Kartenmitte';
+
+  @override
+  String get nearbyMyPosition => 'deinen Standort';
+
+  @override
+  String get nearbyUseMyLocation => 'Meinen Standort verwenden';
+
+  @override
+  String get nearbyNoCentre => 'Noch kein Punkt gewählt';
+
+  @override
+  String get nearbyNoCentreWhy =>
+      'Diese Suche braucht einen Ausgangspunkt. Nimm deinen Standort – oder öffne die Karte, schiebe sie auf die Gegend und starte die Suche von dort.';
+
+  @override
+  String get nearbyOpenMap => 'Karte öffnen';
+
+  @override
+  String get nearbyRadius => 'Umkreis';
+
+  @override
+  String nearbyRadiusKm(int km) {
+    return '$km km';
+  }
+
+  @override
+  String nearbySearching(int done, int total) {
+    return '$done von $total Kacheln gelesen';
+  }
+
+  @override
+  String get nearbyNothingFound => 'Nichts gefunden.';
+
+  @override
+  String get nearbyNothingFoundWhy =>
+      'In diesem Umkreis führt die Karte keinen dieser Punkte. Ein größerer Umkreis kann helfen – oder die Gegend wurde nur grob heruntergeladen.';
+
+  @override
+  String get nearbyNoArchive => 'Keine Karte heruntergeladen';
+
+  @override
+  String get nearbyNoArchiveWhy =>
+      'Diese Suche liest die Karte, die auf diesem Gerät liegt. Ohne heruntergeladene Karte gibt es nichts zu durchsuchen.';
+
+  @override
+  String get nearbyDownloadMap => 'Karte herunterladen';
+
+  @override
+  String get nearbyTooShallow => 'Die Karte reicht nicht tief genug';
+
+  @override
+  String get nearbyTooShallowWhy =>
+      'Einzelne Punkte stehen erst ab Zoomstufe 14 in der Karte. Dieses Archiv hört vorher auf: Es zeichnet eine gute Karte und enthält keine einzige Apotheke. Lade die Gegend noch einmal mit größerer Detailstufe.';
+
+  @override
+  String get nearbyOutsideArchive => 'Außerhalb der heruntergeladenen Gegend';
+
+  @override
+  String get nearbyOutsideArchiveWhy =>
+      'Dieser Punkt liegt nicht in dem Bereich, der heruntergeladen wurde. Die Karte weiß hier nichts – auch nicht, dass etwas fehlt.';
+
+  @override
+  String get nearbyCaveats =>
+      'Gefunden wird nur, was heruntergeladen wurde und was in OpenStreetMap eingetragen ist. Dass ein Punkt auf der Karte steht, heißt nicht, dass dort geöffnet, geliefert oder besetzt ist.';
+
+  @override
+  String get nearbyShelterNote =>
+      '„Unterstand“ steht in OpenStreetMap fast immer für ein Buswartehäuschen oder eine Schutzhütte – nicht für einen Schutzraum. Deshalb ist diese Art hier nicht aufgeführt.';
+
+  @override
+  String get nearbyKindWater => 'Wasser';
+
+  @override
+  String get nearbyKindHealth => 'Gesundheit';
+
+  @override
+  String get nearbyKindFood => 'Lebensmittel';
+
+  @override
+  String get nearbyKindFuel => 'Kraftstoff und Strom';
+
+  @override
+  String get nearbyKindHardware => 'Werkzeug und Baustoff';
+
+  @override
+  String get nearbyKindHelp => 'Hilfe und Behörde';
+
+  @override
+  String get poiDrinkingWater => 'Trinkwasser';
+
+  @override
+  String get poiPharmacy => 'Apotheke';
+
+  @override
+  String get poiHospital => 'Krankenhaus';
+
+  @override
+  String get poiClinic => 'Klinik';
+
+  @override
+  String get poiDoctors => 'Arztpraxis';
+
+  @override
+  String get poiSupermarket => 'Supermarkt';
+
+  @override
+  String get poiConvenience => 'Kiosk';
+
+  @override
+  String get poiBakery => 'Bäckerei';
+
+  @override
+  String get poiButcher => 'Metzgerei';
+
+  @override
+  String get poiGreengrocer => 'Obst und Gemüse';
+
+  @override
+  String get poiMarketplace => 'Marktplatz';
+
+  @override
+  String get poiDeli => 'Feinkost';
+
+  @override
+  String get poiFuel => 'Tankstelle';
+
+  @override
+  String get poiChargingStation => 'Ladesäule';
+
+  @override
+  String get poiDoityourself => 'Baumarkt';
+
+  @override
+  String get poiHardware => 'Eisenwarenhandel';
+
+  @override
+  String get poiFireStation => 'Feuerwehr';
+
+  @override
+  String get poiPolice => 'Polizei';
+
+  @override
+  String get poiTownhall => 'Rathaus';
+
+  @override
+  String get poiCommunityCentre => 'Gemeindezentrum';
 }

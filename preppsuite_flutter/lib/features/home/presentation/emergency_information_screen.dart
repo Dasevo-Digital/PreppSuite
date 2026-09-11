@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../maps/presentation/nearby_screen.dart';
 import '../../warnings/presentation/air_quality_screen.dart';
 import '../../warnings/presentation/road_closure_screen.dart';
 import '../../warnings/presentation/fire_danger_screen.dart';
@@ -302,6 +303,19 @@ class _EmergencyInformationScreenState
               MaterialPageRoute<void>(
                 builder: (_) => const RoadClosureScreen(),
               ),
+            ),
+          ),
+          // The one entry on this screen that needs nothing at all. Every
+          // other live figure here dies with the network; this reads the
+          // map that is already on the device.
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+            leading: const Icon(Icons.travel_explore_outlined),
+            title: Text(l10n.nearbyTitle),
+            subtitle: Text(l10n.nearbyEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const NearbyScreen()),
             ),
           ),
           ListTile(
