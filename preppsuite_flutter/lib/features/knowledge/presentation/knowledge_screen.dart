@@ -139,6 +139,12 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // The first download is the one that most needs saying: a
+              // fresh install has no archive, so this branch is where
+              // somebody sits while 52 GB come down — and it was the one
+              // branch with no banner on it. Leaving the library screen
+              // meant the progress vanished.
+              const DownloadBanner(),
               _ArchiveSwitcher(state: state, l10n: l10n),
               Expanded(
                 child: _EmptyState(
@@ -160,7 +166,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (state.isReady) const DownloadBanner(),
+        const DownloadBanner(),
         _ArchiveSwitcher(state: state, l10n: l10n),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
@@ -483,58 +489,16 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                   ),
                 ),
               Flexible(
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    for (final archive in state.library)
-                      ListTile(
-                        leading: Icon(
-                          archive.id == state.selectedId
-                              ? Icons.check_circle
-                              : Icons.menu_book_outlined,
-                        ),
-                        title: Text(archive.label),
-                        subtitle: Text(
-                          [
-                            if (archive.id == state.selectedId)
-                              AppLocalizations.of(
-                                sheetContext,
-                              )!.knowledgeArchiveSelected,
-                            if (archive.entryCount != null &&
-                                archive.sizeBytes != null)
-                              AppLocalizations.of(
-                                sheetContext,
-                              )!.knowledgeArchiveStats(
-                                archive.entryCount!,
-                                _formatBytes(archive.sizeBytes!),
-                              ),
-                            archive.location,
-                          ].join('\n'),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        onTap: () async {
-                          Navigator.pop(sheetContext);
-                          await ref
-                              .read(knowledgeProvider.notifier)
-                              .select(archive.id);
-                        },
-                        trailing: IconButton(
-                          tooltip: AppLocalizations.of(
-                            sheetContext,
-                          )!.knowledgeRemoveAction,
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () async {
-                            await ref
-                                .read(knowledgeProvider.notifier)
-                                .remove(archive.id);
-                            if (sheetContext.mounted) {
-                              Navigator.pop(sheetContext);
-                            }
-                          },
-                        ),
-                      ),
-                  ],
+                child: _ArchiveGrid(
+                  state: state,
+                  onSelect: (id) async {
+                    Navigator.pop(sheetContext);
+                    await ref.read(knowledgeProvider.notifier).select(id);
+                  },
+                  onRemove: (id) async {
+                    await ref.read(knowledgeProvider.notifier).remove(id);
+                    if (sheetContext.mounted) Navigator.pop(sheetContext);
+                  },
                 ),
               ),
               Padding(
@@ -590,6 +554,197 @@ String _formatBytes(int bytes) {
     unit++;
   }
   return '${value >= 10 || unit == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(1)} ${units[unit]}';
+}
+
+/// The library as tiles, each showing what the archive says about itself.
+///
+/// A list of file names was what this used to be — including
+/// `bookmark://BFDD0E14-...` under each one, which is a security handle
+/// and means nothing to anybody. What an archive actually carries is a
+/// title, a one-line description and a cover image, all three written by
+/// whoever built it, and all three read when the archive was opened.
+///
+/// The cover is the archive's own illustration rather than a rendering of
+/// its start page: a screenshot per tile would mean opening every archive
+/// and a browser engine for each, for a library that is meant to be
+/// allowed to grow.
+class _ArchiveGrid extends StatelessWidget {
+  const _ArchiveGrid({
+    required this.state,
+    required this.onSelect,
+    required this.onRemove,
+  });
+
+  final KnowledgeState state;
+  final ValueChanged<String> onSelect;
+  final ValueChanged<String> onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final width = MediaQuery.sizeOf(context).width;
+
+    // Two tiles on a phone, more as there is room. A tile whose text has
+    // grown with the system font size needs the height, so the aspect
+    // ratio follows the text scale rather than being fixed.
+    final columns = (width / 220).floor().clamp(2, 4);
+    final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+
+    return GridView.builder(
+      shrinkWrap: true,
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: (1 / (0.95 + 0.35 * (scale - 1))).clamp(0.45, 1.1),
+      ),
+      itemCount: state.library.length,
+      itemBuilder: (context, index) {
+        final archive = state.library[index];
+        return _ArchiveTile(
+          archive: archive,
+          open: archive.id == state.selectedId,
+          l10n: l10n,
+          onSelect: () => onSelect(archive.id),
+          onRemove: () => onRemove(archive.id),
+        );
+      },
+    );
+  }
+}
+
+class _ArchiveTile extends StatelessWidget {
+  const _ArchiveTile({
+    required this.archive,
+    required this.open,
+    required this.l10n,
+    required this.onSelect,
+    required this.onRemove,
+  });
+
+  final StoredArchive archive;
+  final bool open;
+  final AppLocalizations l10n;
+  final VoidCallback onSelect;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cover = archive.cover;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      // The open one is marked by its frame as well as by the tick, so
+      // which archive is being searched is visible at a glance rather
+      // than by reading every tile.
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: open
+            ? BorderSide(color: theme.colorScheme.primary, width: 2)
+            : BorderSide(color: theme.colorScheme.outlineVariant),
+      ),
+      child: InkWell(
+        onTap: onSelect,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Container(
+                color: theme.colorScheme.surfaceContainerHighest,
+                alignment: Alignment.center,
+                child: cover == null
+                    ? Icon(
+                        Icons.menu_book_outlined,
+                        size: 32,
+                        color: theme.colorScheme.onSurfaceVariant,
+                        semanticLabel: l10n.knowledgeArchiveNoCover,
+                      )
+                    // The illustration is 48x48; letting it fill the tile
+                    // would be four times its own size and visibly soft.
+                    : Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Image.memory(
+                          cover,
+                          width: 48,
+                          height: 48,
+                          filterQuality: FilterQuality.medium,
+                          // A cover that will not decode is a cosmetic
+                          // problem, never a reason a library will not
+                          // draw.
+                          errorBuilder: (context, error, stack) => Icon(
+                            Icons.menu_book_outlined,
+                            size: 32,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 8, 4, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      if (open) ...[
+                        Icon(
+                          Icons.check_circle,
+                          size: 16,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 4),
+                      ],
+                      Expanded(
+                        child: Text(
+                          // Its own title where it has one; a file name
+                          // only where it does not.
+                          archive.title ?? archive.label,
+                          style: theme.textTheme.titleSmall,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      // Full size, not compact: `VisualDensity.compact`
+                      // took it to 40x40, under the 48x48 a tap target
+                      // has to be. The icon inside it is small; the
+                      // thing being aimed at is not.
+                      IconButton(
+                        tooltip: l10n.knowledgeRemoveAction,
+                        icon: const Icon(Icons.delete_outline, size: 18),
+                        onPressed: onRemove,
+                      ),
+                    ],
+                  ),
+                  if (archive.description != null)
+                    Text(
+                      archive.description!,
+                      style: theme.textTheme.bodySmall,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  if (archive.entryCount != null && archive.sizeBytes != null)
+                    Text(
+                      l10n.knowledgeArchiveStats(
+                        archive.entryCount!,
+                        _formatBytes(archive.sizeBytes!),
+                      ),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _BrowseArchive extends StatelessWidget {
@@ -684,7 +839,11 @@ class _ArchiveSwitcher extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(right: 8),
               child: ChoiceChip(
-                label: Text(archive.label),
+                // Its own title where it has one, the same as the
+                // library tiles: a chip reading
+                // "wikipedia_de_all_maxi_2026-01.zim" is a file name
+                // sitting above every search.
+                label: Text(archive.title ?? archive.label),
                 selected: archive.id == state.selectedId,
                 onSelected: (_) => _switch(context, ref, archive),
               ),

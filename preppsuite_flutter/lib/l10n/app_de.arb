@@ -899,5 +899,16 @@
   "@kiwixLanguageCount": {"placeholders": {"count": {"type": "int"}}},
   "kiwixLanguageNoMatch": "Keine Sprache gefunden.",
   "kiwixLanguageArchives": "{count} Archive",
-  "@kiwixLanguageArchives": {"placeholders": {"count": {"type": "int"}}}
+  "@kiwixLanguageArchives": {"placeholders": {"count": {"type": "int"}}},
+  "downloadRemainingHours": "noch {hours} h {minutes} min",
+  "@downloadRemainingHours": {"placeholders": {"hours": {"type": "int"}, "minutes": {"type": "int"}}},
+  "downloadRemainingMinutes": "noch {minutes} min",
+  "@downloadRemainingMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "downloadRemainingSeconds": "noch {seconds} s",
+  "@downloadRemainingSeconds": {"placeholders": {"seconds": {"type": "int"}}},
+  "articleLoadFailed": "Die Seite konnte nicht geladen werden.",
+  "articleHttpStatus": "Das Archiv antwortete mit {status}.",
+  "@articleHttpStatus": {"placeholders": {"status": {"type": "String"}}},
+  "articleReload": "Erneut laden",
+  "knowledgeArchiveNoCover": "Kein Titelbild im Archiv"
 }

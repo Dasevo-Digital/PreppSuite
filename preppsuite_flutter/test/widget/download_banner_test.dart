@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/downloads/application/archive_downloader.dart';
 import 'package:preppsuite_flutter/features/downloads/application/download_providers.dart';
+import 'package:preppsuite_flutter/features/downloads/application/download_rate.dart';
 import 'package:preppsuite_flutter/features/downloads/presentation/download_banner.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 
@@ -189,5 +190,100 @@ void main() {
 
     expect(liveRegions(tester), hasLength(1));
     handle.dispose();
+  });
+
+  group('while it is running', () {
+    // "1,2 GB von 52 GB" answers how far along, in arithmetic, and says
+    // nothing about when the archive will be usable — which for a file
+    // this size is the only question anybody has.
+    testWidgets('the percentage is spelled out', (tester) async {
+      await show(
+        tester,
+        ArchiveDownloadState(
+          request: request,
+          progress: const DownloadProgress(
+            received: 4500000000,
+            total: 10000000000,
+          ),
+        ),
+      );
+
+      expect(find.textContaining('45'), findsOneWidget);
+    });
+
+    testWidgets('speed and remaining time are shown once known', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        ArchiveDownloadState(
+          request: request,
+          progress: const DownloadProgress(
+            received: 4500000000,
+            total: 10000000000,
+          ),
+          rate: const DownloadRate(
+            bytesPerSecond: 5500000,
+            remaining: Duration(minutes: 16, seconds: 40),
+          ),
+        ),
+      );
+
+      expect(find.textContaining('5.5 MB/s'), findsOneWidget);
+      expect(find.textContaining('noch 16 min'), findsOneWidget);
+    });
+
+    testWidgets('the first seconds say nothing rather than nonsense', (
+      tester,
+    ) async {
+      // The rate is null until there is enough of a sample; the bar and
+      // the sizes still have to be there.
+      await show(
+        tester,
+        ArchiveDownloadState(
+          request: request,
+          progress: const DownloadProgress(received: 1000, total: 10000000000),
+        ),
+      );
+
+      expect(find.textContaining('MB/s'), findsNothing);
+      expect(find.textContaining('noch'), findsNothing);
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    });
+
+    testWidgets('a download with no stated total still shows a bar', (
+      tester,
+    ) async {
+      // A mirror behind a redirect sometimes gives no length at all.
+      await show(
+        tester,
+        ArchiveDownloadState(
+          request: request,
+          progress: const DownloadProgress(received: 1000000, total: null),
+        ),
+      );
+
+      expect(find.byType(LinearProgressIndicator), findsOneWidget);
+      expect(find.textContaining('%'), findsNothing);
+    });
+
+    testWidgets('an hour or more reads in hours', (tester) async {
+      await show(
+        tester,
+        ArchiveDownloadState(
+          request: request,
+          progress: const DownloadProgress(
+            received: 1000000000,
+            total: 52000000000,
+          ),
+          rate: const DownloadRate(
+            bytesPerSecond: 4000000,
+            remaining: Duration(hours: 3, minutes: 32),
+          ),
+        ),
+      );
+
+      expect(find.textContaining('noch 3 h 32 min'), findsOneWidget);
+    });
   });
 }

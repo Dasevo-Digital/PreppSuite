@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
@@ -157,9 +159,17 @@ class KiwixCatalogue {
         'the library answered ${response.statusCode}',
       );
     }
-    // bodyBytes rather than body: the catalogue is UTF-8 and titles are
-    // in every script there is, but the header does not always say so.
-    return XmlDocument.parse(response.body);
+    // bodyBytes rather than body, and this is not theoretical: `body`
+    // decodes as Latin-1 whenever the header names no charset, and every
+    // archive title in the catalogue is in its own language. The comment
+    // saying this has been here longer than the code doing it — the call
+    // below was `response.body`, and "français" came through as
+    // "franÃ§ais". The live server does send `charset=utf-8`, which is
+    // why it never showed; a mirror that does not would mangle the whole
+    // library.
+    return XmlDocument.parse(
+      utf8.decode(response.bodyBytes, allowMalformed: true),
+    );
   }
 
   KiwixEntry? _parseEntry(XmlElement entry) {

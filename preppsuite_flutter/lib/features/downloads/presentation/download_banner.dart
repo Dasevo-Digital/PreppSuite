@@ -5,6 +5,7 @@ import '../../../core/progress_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/byte_size.dart';
 import '../application/download_providers.dart';
+import '../application/download_rate.dart';
 
 /// The state of the one download in flight, wherever the user happens to
 /// be looking.
@@ -76,6 +77,23 @@ class DownloadBanner extends ConsumerWidget {
     }
 
     final progress = state.progress;
+    final fraction = progress?.fraction;
+
+    // What is worth knowing while a 52 GB archive comes down, in the
+    // order somebody wants it: how far along, how fast, and when it will
+    // be usable. The size pair alone answered only the first, and
+    // answered it in arithmetic.
+    final details = <String>[
+      if (fraction != null) l10n.progressPercent((fraction * 100).round()),
+      if (progress != null && progress.total != null)
+        l10n.downloadOfSize(
+          formatByteSize(progress.received),
+          formatByteSize(progress.total!),
+        ),
+      ?state.rate?.formatted,
+      ?_remaining(l10n, state.rate?.remaining),
+    ];
+
     return _Frame(
       colour: theme.colorScheme.surfaceContainerHighest,
       child: Column(
@@ -101,18 +119,12 @@ class DownloadBanner extends ConsumerWidget {
           // A determinate bar needs a total, and a mirror behind a
           // redirect does not always give one.
           LinearProgressIndicator(
-            value: progress?.fraction,
-            semanticsValue: percentValue(l10n, progress?.fraction),
+            value: fraction,
+            semanticsValue: percentValue(l10n, fraction),
           ),
-          if (progress != null && progress.total != null) ...[
+          if (details.isNotEmpty) ...[
             const SizedBox(height: 4),
-            Text(
-              l10n.downloadOfSize(
-                formatByteSize(progress.received),
-                formatByteSize(progress.total!),
-              ),
-              style: theme.textTheme.bodySmall,
-            ),
+            Text(details.join(' · '), style: theme.textTheme.bodySmall),
           ],
         ],
       ),
@@ -151,4 +163,21 @@ class _Frame extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A remaining time in the unit the wait is actually felt in.
+///
+/// Nobody waiting on a 52 GB archive needs seconds, and nobody waiting
+/// on its last minute needs hours.
+String? _remaining(AppLocalizations l10n, Duration? remaining) {
+  if (remaining == null) return null;
+
+  final parts = splitRemaining(remaining);
+  if (parts.hours != null) {
+    return l10n.downloadRemainingHours(parts.hours!, parts.minutes!);
+  }
+  if (parts.minutes != null) {
+    return l10n.downloadRemainingMinutes(parts.minutes!);
+  }
+  return l10n.downloadRemainingSeconds(parts.seconds!);
 }

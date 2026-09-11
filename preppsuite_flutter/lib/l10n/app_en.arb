@@ -1706,5 +1706,16 @@
   "@kiwixLanguageCount": {"placeholders": {"count": {"type": "int"}}},
   "kiwixLanguageNoMatch": "No language found.",
   "kiwixLanguageArchives": "{count} archives",
-  "@kiwixLanguageArchives": {"placeholders": {"count": {"type": "int"}}}
+  "@kiwixLanguageArchives": {"placeholders": {"count": {"type": "int"}}},
+  "downloadRemainingHours": "{hours} h {minutes} min left",
+  "@downloadRemainingHours": {"placeholders": {"hours": {"type": "int"}, "minutes": {"type": "int"}}},
+  "downloadRemainingMinutes": "{minutes} min left",
+  "@downloadRemainingMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "downloadRemainingSeconds": "{seconds} s left",
+  "@downloadRemainingSeconds": {"placeholders": {"seconds": {"type": "int"}}},
+  "articleLoadFailed": "The page could not be loaded.",
+  "articleHttpStatus": "The archive answered with {status}.",
+  "@articleHttpStatus": {"placeholders": {"status": {"type": "String"}}},
+  "articleReload": "Reload",
+  "knowledgeArchiveNoCover": "No cover in this archive"
 }

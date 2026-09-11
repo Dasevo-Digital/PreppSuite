@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'archive_downloader.dart';
 import 'download_folder.dart';
+import 'download_rate.dart';
 
 /// One archive to fetch.
 class ArchiveDownloadRequest {
@@ -38,6 +39,7 @@ class ArchiveDownloadState {
   const ArchiveDownloadState({
     this.request,
     this.progress,
+    this.rate,
     this.error,
     this.finishedPath,
     this.takeUpProblem,
@@ -45,6 +47,12 @@ class ArchiveDownloadState {
 
   final ArchiveDownloadRequest? request;
   final DownloadProgress? progress;
+
+  /// How fast it is going and how much longer it has, once there is
+  /// enough of a sample to say. Null for the first two seconds, and for
+  /// a download the server stated no length for.
+  final DownloadRate? rate;
+
   final Object? error;
 
   /// Set once the file is whole and in place.
@@ -65,6 +73,14 @@ class ArchiveDownloadState {
 
 class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
   StreamSubscription<DownloadProgress>? _subscription;
+
+  /// When this run started and what was already on disk then.
+  ///
+  /// Both, because a resumed download begins with gigabytes in place:
+  /// measuring from zero would report a speed this connection has never
+  /// managed, and a remaining time to match.
+  DateTime? _startedAt;
+  int? _startedFrom;
 
   @override
   ArchiveDownloadState build() {
@@ -101,6 +117,8 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
     }
 
     await _subscription?.cancel();
+    _startedAt = null;
+    _startedFrom = null;
     _subscription = ArchiveDownloader()
         .download(
           url: request.url,
@@ -108,10 +126,21 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
           estimatedLength: request.estimatedLength,
         )
         .listen(
-          (progress) => state = ArchiveDownloadState(
-            request: request,
-            progress: progress,
-          ),
+          (progress) {
+            final startedAt = _startedAt ??= DateTime.now();
+            final startedFrom = _startedFrom ??= progress.received;
+
+            state = ArchiveDownloadState(
+              request: request,
+              progress: progress,
+              rate: downloadRate(
+                received: progress.received,
+                total: progress.total,
+                startedFrom: startedFrom,
+                elapsed: DateTime.now().difference(startedAt),
+              ),
+            );
+          },
           onError: (Object error) {
             state = ArchiveDownloadState(request: request, error: error);
           },

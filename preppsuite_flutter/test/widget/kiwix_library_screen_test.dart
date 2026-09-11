@@ -18,6 +18,9 @@ void main() {
   final entriesXml = File(
     'test/fixtures/kiwix_entries_de.xml',
   ).readAsStringSync();
+  final languagesXml = File(
+    'test/fixtures/kiwix_languages.xml',
+  ).readAsStringSync();
 
   Future<void> show(WidgetTester tester, {KiwixCatalogue? catalogue}) async {
     await tester.pumpWidget(
@@ -108,5 +111,103 @@ void main() {
         }),
       ),
     );
+  });
+
+  group('picking a language', () {
+    // The live catalogue offers 337 of them. A dropdown that long is
+    // scrolled past rather than read — on a phone it is several screens
+    // of names in their own scripts — so typing two letters is the only
+    // way anybody finds theirs.
+    Future<void> showWithLanguages(WidgetTester tester) async {
+      await show(
+        tester,
+        catalogue: KiwixCatalogue(
+          httpClient: FixtureHttpClient({
+            'https://library.kiwix.org/catalog/v2/entries'
+                    '?lang=deu&start=0&count=25':
+                entriesXml,
+            'https://library.kiwix.org/catalog/v2/languages': languagesXml,
+          }),
+        ),
+      );
+    }
+
+    testWidgets('the field names the language and how many there are', (
+      tester,
+    ) async {
+      await showWithLanguages(tester);
+
+      expect(find.textContaining('Deutsch'), findsWidgets);
+      expect(find.textContaining('3 Sprachen'), findsOneWidget);
+    });
+
+    testWidgets('the list opens and can be searched', (tester) async {
+      await showWithLanguages(tester);
+
+      await tester.tap(find.textContaining('Deutsch (306)'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('français'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField).last, 'eng');
+      await tester.pumpAndSettle();
+
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('français'), findsNothing);
+    });
+
+    testWidgets('a code matches as well as a name', (tester) async {
+      // Both are things people type: "fra" is what the catalogue calls it
+      // and what a suggestion names, "français" is what somebody reads.
+      await showWithLanguages(tester);
+
+      await tester.tap(find.textContaining('Deutsch (306)'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).last, 'fra');
+      await tester.pumpAndSettle();
+
+      expect(find.text('français'), findsOneWidget);
+      expect(find.text('English'), findsNothing);
+    });
+
+    testWidgets('a search matching nothing says so', (tester) async {
+      await showWithLanguages(tester);
+
+      await tester.tap(find.textContaining('Deutsch (306)'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).last, 'klingon');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Keine Sprache gefunden.'), findsOneWidget);
+    });
+
+    testWidgets('picking one reloads the list in that language', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        catalogue: KiwixCatalogue(
+          httpClient: FixtureHttpClient({
+            'https://library.kiwix.org/catalog/v2/entries'
+                    '?lang=deu&start=0&count=25':
+                entriesXml,
+            'https://library.kiwix.org/catalog/v2/entries'
+                    '?lang=eng&start=0&count=25':
+                entriesXml,
+            'https://library.kiwix.org/catalog/v2/languages': languagesXml,
+          }),
+        ),
+      );
+
+      await tester.tap(find.textContaining('Deutsch (306)'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('English'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('English (1298)'), findsOneWidget);
+    });
   });
 }

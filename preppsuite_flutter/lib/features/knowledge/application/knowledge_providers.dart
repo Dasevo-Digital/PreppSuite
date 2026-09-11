@@ -1,4 +1,5 @@
 import 'dart:async' show unawaited;
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -280,6 +281,26 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     if (archive != null) unawaited(archive.close());
   }
 
+  /// The archive's own cover, or null where it has none.
+  ///
+  /// Every openZIM archive carries one under this name, a PNG of a few
+  /// kilobytes. Reading it costs decompressing the cluster it sits in,
+  /// which is why it is read while the archive is being opened anyway
+  /// and then kept.
+  static Future<Uint8List?> _cover(ZimArchive archive) async {
+    try {
+      final entry = await archive.findByUrl('M', 'Illustration_48x48@1');
+      if (entry == null) return null;
+      final resolved = await archive.resolve(entry);
+      if (resolved == null) return null;
+      return await archive.readBlob(resolved);
+    } on Object {
+      // An archive without a readable cover is still a perfectly good
+      // archive; this must never be the reason one will not open.
+      return null;
+    }
+  }
+
   Future<KnowledgeState> _open(
     List<StoredArchive> library,
     StoredArchive entry,
@@ -299,6 +320,11 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
       final enrichedEntry = entry.copyWith(
         sizeBytes: archive.header.checksumPosition + 16,
         entryCount: archive.header.entryCount,
+        // Read here, once, because a library screen shows every archive
+        // at the same time and only one of them is ever open.
+        title: await archive.metadata('Title'),
+        description: await archive.metadata('Description'),
+        cover: await _cover(archive),
       );
       final enrichedLibrary = [
         for (final item in library)

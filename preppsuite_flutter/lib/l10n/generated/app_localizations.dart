@@ -5365,6 +5365,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} archives'**
   String kiwixLanguageArchives(int count);
+
+  /// No description provided for @downloadRemainingHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min left'**
+  String downloadRemainingHours(int hours, int minutes);
+
+  /// No description provided for @downloadRemainingMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min left'**
+  String downloadRemainingMinutes(int minutes);
+
+  /// No description provided for @downloadRemainingSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} s left'**
+  String downloadRemainingSeconds(int seconds);
+
+  /// No description provided for @articleLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The page could not be loaded.'**
+  String get articleLoadFailed;
+
+  /// No description provided for @articleHttpStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'The archive answered with {status}.'**
+  String articleHttpStatus(String status);
+
+  /// No description provided for @articleReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get articleReload;
+
+  /// No description provided for @knowledgeArchiveNoCover.
+  ///
+  /// In en, this message translates to:
+  /// **'No cover in this archive'**
+  String get knowledgeArchiveNoCover;
 }
 
 class _AppLocalizationsDelegate

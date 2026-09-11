@@ -3161,4 +3161,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String kiwixLanguageArchives(int count) {
     return '$count archives';
   }
+
+  @override
+  String downloadRemainingHours(int hours, int minutes) {
+    return '$hours h $minutes min left';
+  }
+
+  @override
+  String downloadRemainingMinutes(int minutes) {
+    return '$minutes min left';
+  }
+
+  @override
+  String downloadRemainingSeconds(int seconds) {
+    return '$seconds s left';
+  }
+
+  @override
+  String get articleLoadFailed => 'The page could not be loaded.';
+
+  @override
+  String articleHttpStatus(String status) {
+    return 'The archive answered with $status.';
+  }
+
+  @override
+  String get articleReload => 'Reload';
+
+  @override
+  String get knowledgeArchiveNoCover => 'No cover in this archive';
 }

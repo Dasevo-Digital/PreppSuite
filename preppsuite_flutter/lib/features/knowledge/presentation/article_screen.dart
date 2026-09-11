@@ -23,6 +23,21 @@ class ArticleScreen extends StatefulWidget {
 class _ArticleScreenState extends State<ArticleScreen> {
   late final WebViewController _controller;
 
+  /// The page currently on display, which is not always the one this
+  /// screen was opened with.
+  ///
+  /// Links inside an archive navigate within the same web view, so the
+  /// title bar used to keep naming the entry that was tapped three
+  /// articles ago. In an iFixit archive that reads as a blank page
+  /// labelled "iFixit in German" — which is exactly how a failed load
+  /// looked too, with nothing to tell them apart.
+  String? _pageTitle;
+
+  bool _loading = true;
+
+  /// Why the page did not arrive, in the engine's own words.
+  String? _failure;
+
   @override
   void initState() {
     super.initState();
@@ -38,7 +53,58 @@ class _ArticleScreenState extends State<ArticleScreen> {
       // pleasantly — leaving the archive by following a link.
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
-        NavigationDelegate(onNavigationRequest: _decideNavigation),
+        NavigationDelegate(
+          onNavigationRequest: _decideNavigation,
+          onPageStarted: (_) {
+            if (mounted) {
+              setState(() {
+                _loading = true;
+                _failure = null;
+              });
+            }
+          },
+          onPageFinished: (_) async {
+            // The page's own <title>, which is better than the entry's:
+            // the iFixit start page is entry "home/home" titled "iFixit
+            // in German" and page-titled "iFixit: Das kostenlose
+            // Reparaturhandbuch".
+            final title = (await _controller.getTitle())?.trim();
+            if (!mounted) return;
+            setState(() {
+              _loading = false;
+              _pageTitle = title == null || title.isEmpty ? null : title;
+            });
+          },
+          // Both of these used to go unreported, which is the whole
+          // reason a page that failed showed as a blank white area with
+          // a stale title and no way to tell what had happened.
+          onWebResourceError: (error) {
+            // Only the main document. A missing image inside a
+            // thirty-gigabyte archive is not worth a full-screen error,
+            // and real archives have plenty of them.
+            if (error.isForMainFrame == false) return;
+            if (mounted) {
+              setState(() {
+                _loading = false;
+                _failure = error.description;
+              });
+            }
+          },
+          onHttpError: (error) {
+            final status = error.response?.statusCode;
+            if (mounted) {
+              setState(() {
+                _loading = false;
+                _failure = status == null ? '' : '$status';
+              });
+            }
+          },
+          onUrlChange: (_) {
+            // Cleared on the way out, so the bar never names the page
+            // before last while the next one is still arriving.
+            if (mounted) setState(() => _pageTitle = null);
+          },
+        ),
       )
       ..loadRequest(widget.uri);
   }
@@ -68,9 +134,94 @@ class _ArticleScreenState extends State<ArticleScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      body: WebViewWidget(controller: _controller),
+      appBar: AppBar(
+        title: Text(_pageTitle ?? widget.title),
+        bottom: _loading
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(2),
+                child: LinearProgressIndicator(minHeight: 2),
+              )
+            : null,
+      ),
+      body: _failure == null
+          ? WebViewWidget(controller: _controller)
+          : _Failure(
+              detail: _failure!,
+              l10n: l10n,
+              onRetry: () {
+                setState(() {
+                  _failure = null;
+                  _loading = true;
+                });
+                _controller.reload();
+              },
+            ),
+    );
+  }
+}
+
+/// A page that did not arrive, and what is known about why.
+///
+/// A blank web view is indistinguishable from an article with no content
+/// in it, so this replaces the view entirely rather than sitting over it.
+class _Failure extends StatelessWidget {
+  const _Failure({
+    required this.detail,
+    required this.l10n,
+    required this.onRetry,
+  });
+
+  /// The engine's description, or an HTTP status. Kept and shown: this is
+  /// the app's own loopback server answering, so a status here means a
+  /// named entry the archive would not give up, which is worth reporting
+  /// rather than smoothing over.
+  final String detail;
+
+  final AppLocalizations l10n;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = int.tryParse(detail);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.menu_book_outlined,
+              size: 40,
+              color: theme.colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.articleLoadFailed,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium,
+            ),
+            if (detail.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                status == null ? detail : l10n.articleHttpStatus('$status'),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.articleReload),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

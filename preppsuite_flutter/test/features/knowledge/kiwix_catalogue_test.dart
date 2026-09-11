@@ -109,5 +109,27 @@ void main() {
       expect(german.name, 'Deutsch');
       expect(german.archiveCount, 306);
     });
+
+    test('a name is read as UTF-8, whatever the header says', () async {
+      // `response.body` decodes as Latin-1 when the header names no
+      // charset, and every name in this list is in its own language.
+      // The comment saying to use bodyBytes had been in the client
+      // longer than the code doing it: "français" came out as
+      // "franÃ§ais". The live server does send `charset=utf-8`, which is
+      // why it never showed — and a mirror that does not would mangle
+      // the whole library.
+      final catalogue = KiwixCatalogue(
+        httpClient: FixtureHttpClient({
+          'https://library.kiwix.org/catalog/v2/languages': languagesXml,
+        }),
+      );
+
+      final languages = await catalogue.languages();
+
+      expect(
+        languages.firstWhere((l) => l.code == 'fra').name,
+        'français',
+      );
+    });
   });
 }

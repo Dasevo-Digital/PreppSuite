@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,6 +33,9 @@ class StoredArchive {
     required this.label,
     this.sizeBytes,
     this.entryCount,
+    this.title,
+    this.description,
+    this.cover,
   });
 
   /// Stable for the life of the entry. Names this archive's index file, so
@@ -45,12 +49,39 @@ class StoredArchive {
   final int? sizeBytes;
   final int? entryCount;
 
-  StoredArchive copyWith({int? sizeBytes, int? entryCount}) => StoredArchive(
+  /// What the archive calls itself, from its own `M/Title`. The label is
+  /// whatever the file happened to be named — for a download that is
+  /// `wikipedia_de_all_maxi_2026-01.zim`, which is a file name and not a
+  /// thing anybody would choose to read in a library.
+  final String? title;
+
+  /// The archive's own one-line description, from `M/Description`.
+  final String? description;
+
+  /// The archive's own cover, from `M/Illustration_48x48@1` — a PNG of a
+  /// few kilobytes that every openZIM archive carries.
+  ///
+  /// Kept here rather than read on demand because showing a library
+  /// means showing all of them at once, and reading one out of a file
+  /// costs opening it and decompressing a cluster. Written when the
+  /// archive is opened, alongside the size and the entry count.
+  final Uint8List? cover;
+
+  StoredArchive copyWith({
+    int? sizeBytes,
+    int? entryCount,
+    String? title,
+    String? description,
+    Uint8List? cover,
+  }) => StoredArchive(
     id: id,
     location: location,
     label: label,
     sizeBytes: sizeBytes ?? this.sizeBytes,
     entryCount: entryCount ?? this.entryCount,
+    title: title ?? this.title,
+    description: description ?? this.description,
+    cover: cover ?? this.cover,
   );
 
   Map<String, Object?> toJson() => {
@@ -59,6 +90,9 @@ class StoredArchive {
     'label': label,
     'sizeBytes': sizeBytes,
     'entryCount': entryCount,
+    'title': title,
+    'description': description,
+    if (cover != null) 'cover': base64Encode(cover!),
   };
 
   static StoredArchive? fromJson(Object? json) {
@@ -69,12 +103,31 @@ class StoredArchive {
     if (location is! String || location.isEmpty) return null;
 
     final label = json['label'];
+    String? text(Object? value) =>
+        value is String && value.trim().isNotEmpty ? value.trim() : null;
+
+    // An entry written before covers were stored simply has none, and an
+    // unreadable one is not worth losing the archive over — it comes
+    // back the next time the archive is opened.
+    Uint8List? cover;
+    final encoded = json['cover'];
+    if (encoded is String && encoded.isNotEmpty) {
+      try {
+        cover = base64Decode(encoded);
+      } on FormatException {
+        cover = null;
+      }
+    }
+
     return StoredArchive(
       id: id,
       location: location,
       label: label is String && label.isNotEmpty ? label : location,
       sizeBytes: json['sizeBytes'] is int ? json['sizeBytes'] as int : null,
       entryCount: json['entryCount'] is int ? json['entryCount'] as int : null,
+      title: text(json['title']),
+      description: text(json['description']),
+      cover: cover,
     );
   }
 }
