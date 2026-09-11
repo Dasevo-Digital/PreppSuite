@@ -701,6 +701,28 @@ tree; the test suite deliberately targets that layer rather than the UI.
   affected. `integration_test/native_archive_test.dart` is what proves it
   from the Dart side; a plain `flutter test` cannot, because the plugin
   needs a real engine.
+- **A dropped connection is resumed, not reported.** These downloads run
+  for hours — 11 GB from a public mirror is an ordinary ask — and over
+  that span a mirror closing the socket is a normal event. The banner
+  used to show the mirror's own words ("Connection closed while receiving
+  data, uri=https://ftp.nluug.nl/...") and stop, leaving the user to press
+  download again; that did resume from the partial file, and then usually
+  stopped somewhere else. `ArchiveDownloader.download` now loops around
+  one attempt, each picking up from what is on disk, so no byte is
+  fetched twice. The budget resets whenever an attempt brings bytes in: a
+  transfer that is making progress may drop as often as the mirror likes,
+  while one that cannot get a single byte through gives up after six
+  tries. What is *not* retried is anything the server said on purpose —
+  `DownloadException.retryable` is false for a status code, because
+  asking a mirror six more times for something it has already answered
+  404 to is rude and cannot help. Two traps found while writing it: an
+  error out of a `yield*`-ed stream goes straight to the listener and
+  never touches the `try` around it, so the loop has to `await for`; and
+  the waiting itself has to be visible (`DownloadProgress.resuming`),
+  because a progress bar that stops for a minute without a word reads as
+  a hung app. Speed and remaining time are dropped while it waits rather
+  than left standing — both would be measurements of a transfer that is
+  not happening.
 - **A download outlives the screen that started it, so its take-up must
   not hold that screen's `ref`.** An archive is tens of gigabytes and takes
   hours; the progress banner exists precisely so the user can go

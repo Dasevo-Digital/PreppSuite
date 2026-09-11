@@ -967,6 +967,7 @@
   "downloadFolderTitle": "Download folder",
   "downloadFolderChange": "Choose folder",
   "downloadFolderReset": "Reset",
+  "downloadResumingLabel": "Connection dropped — resuming…",
   "downloadRunningLabel": "Downloading {name}",
   "@downloadRunningLabel": {
     "placeholders": {

@@ -84,14 +84,19 @@ class DownloadBanner extends ConsumerWidget {
     // be usable. The size pair alone answered only the first, and
     // answered it in arithmetic.
     final details = <String>[
+      // First, because while this is true the rest is about a transfer
+      // that is not currently moving.
+      if (progress?.resuming ?? false) l10n.downloadResumingLabel,
       if (fraction != null) l10n.progressPercent((fraction * 100).round()),
       if (progress != null && progress.total != null)
         l10n.downloadOfSize(
           formatByteSize(progress.received),
           formatByteSize(progress.total!),
         ),
-      ?state.rate?.formatted,
-      ?_remaining(l10n, state.rate?.remaining),
+      if (!(progress?.resuming ?? false)) ...[
+        ?state.rate?.formatted,
+        ?_remaining(l10n, state.rate?.remaining),
+      ],
     ];
 
     return _Frame(

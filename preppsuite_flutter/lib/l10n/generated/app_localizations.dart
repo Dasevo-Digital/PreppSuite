@@ -2846,6 +2846,12 @@ abstract class AppLocalizations {
   /// **'Reset'**
   String get downloadFolderReset;
 
+  /// No description provided for @downloadResumingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection dropped — resuming…'**
+  String get downloadResumingLabel;
+
   /// No description provided for @downloadRunningLabel.
   ///
   /// In en, this message translates to:

@@ -1649,6 +1649,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get downloadFolderReset => 'Reset';
 
   @override
+  String get downloadResumingLabel => 'Connection dropped — resuming…';
+
+  @override
   String downloadRunningLabel(String name) {
     return 'Downloading $name';
   }

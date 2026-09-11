@@ -77,6 +77,73 @@ class _TruncatingServer extends http.BaseClient {
   }
 }
 
+/// Drops the connection part-way through, the way a public mirror does
+/// on an eleven-gigabyte file, and behaves once it has done so [drops]
+/// times.
+class _FlakyServer extends http.BaseClient {
+  _FlakyServer(this.body, {required this.drops, this.after = 120});
+
+  final Uint8List body;
+
+  /// How many more transfers to cut short.
+  int drops;
+
+  /// How many bytes to deliver before cutting one short.
+  final int after;
+
+  final requestedRanges = <String?>[];
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final range = request.headers['range'];
+    requestedRanges.add(range);
+
+    final start = range == null
+        ? 0
+        : int.parse(range.split('=')[1].split('-')[0]);
+    if (start >= body.length) {
+      return http.StreamedResponse(
+        const Stream.empty(),
+        416,
+        headers: {'content-range': 'bytes */${body.length}'},
+      );
+    }
+
+    final slice = body.sublist(start);
+    final Stream<List<int>> stream;
+    if (drops > 0) {
+      drops--;
+      final cut = after < slice.length ? after : slice.length ~/ 2;
+      stream = Stream<List<int>>.fromIterable([slice.sublist(0, cut)]);
+    } else {
+      stream = Stream<List<int>>.value(slice);
+    }
+
+    return http.StreamedResponse(
+      stream,
+      start == 0 ? 200 : 206,
+      contentLength: slice.length,
+      headers: start == 0
+          ? {'content-length': '${body.length}'}
+          : {'content-range': 'bytes $start-${body.length - 1}/${body.length}'},
+    );
+  }
+}
+
+/// Answers with a status and nothing else.
+class _RefusingServer extends http.BaseClient {
+  _RefusingServer(this.status);
+
+  final int status;
+  var calls = 0;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    calls++;
+    return http.StreamedResponse(const Stream.empty(), status);
+  }
+}
+
 void main() {
   late Directory dir;
   late String target;
@@ -146,10 +213,18 @@ void main() {
 
   test('a short answer stays a partial file rather than an archive', () async {
     // Declares more than it sends, the way a connection that drops
-    // mid-transfer looks from this side.
+    // mid-transfer looks from this side. No retries here: what is under
+    // test is where the bytes end up when the downloader finally gives
+    // up, and this server would truncate every attempt equally.
     final server = _TruncatingServer(body, declared: body.length + 40);
     await expectLater(
-      run(ArchiveDownloader(httpClient: server, reportEvery: Duration.zero)),
+      run(
+        ArchiveDownloader(
+          httpClient: server,
+          reportEvery: Duration.zero,
+          retryDelays: const [],
+        ),
+      ),
       throwsA(isA<DownloadException>()),
     );
 
@@ -214,5 +289,74 @@ void main() {
     final partial = File('$target${ArchiveDownloader.partialSuffix}');
     expect(await partial.exists(), isTrue);
     expect(await partial.length(), lessThan(body.length));
+  });
+
+  // An eleven-gigabyte download from a public mirror takes hours, and
+  // over that span a dropped connection is an ordinary event. It used to
+  // end the download and show the mirror's own words in the banner.
+  test('a dropped connection is picked up where it stopped', () async {
+    final server = _FlakyServer(body, drops: 2, after: 120);
+    final progress = await run(
+      ArchiveDownloader(
+        httpClient: server,
+        reportEvery: Duration.zero,
+        retryDelays: const [Duration.zero, Duration.zero, Duration.zero],
+      ),
+      estimate: body.length,
+    );
+
+    expect(await File(target).readAsBytes(), body);
+    expect(progress.last.received, body.length);
+    // Three transfers, each resuming from where the last one stopped —
+    // no byte fetched twice.
+    expect(server.requestedRanges, [null, 'bytes=120-', 'bytes=240-']);
+  });
+
+  test('a download that keeps moving may drop more often than the budget', (
+  ) async {
+    // Five drops against a budget of two, but every attempt brings bytes
+    // in, so the budget keeps being handed back.
+    final server = _FlakyServer(body, drops: 5, after: 80);
+    await run(
+      ArchiveDownloader(
+        httpClient: server,
+        reportEvery: Duration.zero,
+        retryDelays: const [Duration.zero, Duration.zero],
+      ),
+      estimate: body.length,
+    );
+
+    expect(await File(target).readAsBytes(), body);
+    expect(server.requestedRanges.length, 6);
+  });
+
+  test('a mirror that gives nothing is let go', () async {
+    // Drops before a single byte, every time. Nothing is progressing, so
+    // the budget runs out instead of resetting.
+    final server = _FlakyServer(body, drops: 99, after: 0);
+    await expectLater(
+      run(
+        ArchiveDownloader(
+          httpClient: server,
+          reportEvery: Duration.zero,
+          retryDelays: const [Duration.zero, Duration.zero],
+        ),
+      ),
+      throwsA(isA<DownloadException>()),
+    );
+
+    expect(server.requestedRanges.length, 3, reason: 'one try and two more');
+  });
+
+  test('a refusal is not asked again', () async {
+    // Six more requests for something the mirror has already answered
+    // would be rude and could not help.
+    final server = _RefusingServer(404);
+    await expectLater(
+      run(ArchiveDownloader(httpClient: server, reportEvery: Duration.zero)),
+      throwsA(isA<DownloadException>()),
+    );
+
+    expect(server.calls, 1);
   });
 }

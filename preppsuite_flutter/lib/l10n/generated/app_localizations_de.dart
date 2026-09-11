@@ -1659,6 +1659,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get downloadFolderReset => 'Zurücksetzen';
 
   @override
+  String get downloadResumingLabel =>
+      'Verbindung unterbrochen – wird fortgesetzt …';
+
+  @override
   String downloadRunningLabel(String name) {
     return 'Lädt $name';
   }

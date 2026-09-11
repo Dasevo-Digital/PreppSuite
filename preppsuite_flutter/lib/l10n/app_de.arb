@@ -459,6 +459,7 @@
   "downloadFolderTitle": "Ordner für Downloads",
   "downloadFolderChange": "Ordner wählen",
   "downloadFolderReset": "Zurücksetzen",
+  "downloadResumingLabel": "Verbindung unterbrochen – wird fortgesetzt …",
   "downloadRunningLabel": "Lädt {name}",
   "downloadCancelAction": "Abbrechen",
   "downloadFailedLabel": "Download abgebrochen: {error}",
