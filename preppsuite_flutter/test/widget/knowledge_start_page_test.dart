@@ -25,18 +25,37 @@ void main() {
   /// did. A test that has to shut down early — because an open archive
   /// leaves timers running that a widget test refuses to end on — says so
   /// here rather than racing the tear-down for it.
+  final opened = <ProviderContainer>[];
   final closed = <ProviderContainer>{};
   void close(ProviderContainer container) {
     if (closed.add(container)) container.dispose();
   }
 
   setUp(() {
+    opened.clear();
     closed.clear();
     SharedPreferences.setMockInitialValues({});
     workspace = Directory.systemTemp.createTempSync('preppsuite-start');
   });
 
-  tearDown(() => workspace.deleteSync(recursive: true));
+  tearDown(() async {
+    // Every archive shut before the files under it go. Windows refuses to
+    // delete a file another handle still holds, and an archive is closed
+    // asynchronously — so the folder is retried rather than deleted once
+    // and hoped for. On macOS and Linux the first attempt succeeds.
+    for (final container in opened) {
+      close(container);
+    }
+    for (var attempt = 0; ; attempt++) {
+      try {
+        workspace.deleteSync(recursive: true);
+        return;
+      } on FileSystemException {
+        if (attempt >= 40) rethrow;
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+      }
+    }
+  });
 
   /// A genuine archive that says what it is. Uncompressed, so reading its
   /// metadata needs no native decompressor.
@@ -72,7 +91,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [knowledgeIndexDatabaseProvider.overrideWithValue(null)],
     );
-    addTearDown(() => close(container));
+    opened.add(container);
     await container.read(knowledgeProvider.future);
 
     final notifier = container.read(knowledgeProvider.notifier);
@@ -203,7 +222,7 @@ void main() {
       tester,
       build: () async {
         final container = ProviderContainer();
-        addTearDown(() => close(container));
+        opened.add(container);
         await container.read(knowledgeProvider.future);
         await container
             .read(knowledgeProvider.notifier)
@@ -249,7 +268,7 @@ void main() {
     container.dispose();
 
     final again = ProviderContainer();
-    addTearDown(() => close(again));
+    opened.add(again);
     final state = await again.read(knowledgeProvider.future);
     expect(state.library.map((a) => a.title), ['Klexikon', 'Wikibooks']);
     expect(state.isReady, isTrue);
