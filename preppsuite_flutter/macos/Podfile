@@ -35,6 +35,46 @@ target 'Runner' do
   end
 end
 
+# The zstd C sources have to be in place *before* CocoaPods collects the file
+# list, or the plugin is built without a single ZSTD_* symbol -- and then every
+# Kiwix archive fails to open, because a ZIM keeps even its title in a
+# compressed cluster. The app says "a ZIM archive is expected" and means "I
+# cannot decompress anything".
+#
+# zstandard_macos means to handle this itself with `prepare_command`, but
+# CocoaPods runs that only for pods it downloads, never for a local one
+# (`:path => '.'`), which is what a Flutter plugin always is. So the sources
+# are there only if some earlier build left them there -- and the plugin's own
+# clean-up phase exists to remove them. 1.7.0 and 1.7.1 shipped that way on
+# macOS: a framework of 228 KB holding the Swift registrar and nothing else.
+#
+# Syncing here makes it independent of what any previous build did.
+pre_install do |installer|
+  sync_zstd_sources
+end
+
+def sync_zstd_sources
+  script = File.join(
+    File.dirname(File.realpath(__FILE__)),
+    'Flutter', 'ephemeral', '.symlinks', 'plugins', 'zstandard_macos',
+    'scripts', 'sync_zstd.sh',
+  )
+  unless File.exist?(script)
+    raise "zstandard_macos sync script not found at #{script} -- " \
+          'run "flutter pub get" first'
+  end
+
+  system('bash', script) || raise('sync_zstd.sh failed; zstd would be missing')
+
+  header = File.join(
+    File.dirname(script), '..', 'macos', 'Classes', 'zstd', 'zstd.h',
+  )
+  unless File.exist?(header)
+    raise "sync_zstd.sh ran but #{header} is missing -- the plugin would " \
+          'build without zstd'
+  end
+end
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_macos_build_settings(target)

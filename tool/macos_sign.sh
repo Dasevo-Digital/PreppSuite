@@ -163,6 +163,32 @@ else
   exit 1
 fi
 
+# A signed bundle can still be an unusable one. zstandard_macos is meant to
+# carry zstd compiled into it, and when CocoaPods collected its file list
+# without the C sources present it produces a perfectly valid framework of
+# 228 KB containing the Swift registrar and nothing else. Nothing fails at
+# build, nothing fails at signing, nothing fails at launch — the app only
+# says "a ZIM archive is expected" for every archive there is, because a ZIM
+# keeps even its title in a compressed cluster. 1.7.0 and 1.7.1 shipped like
+# that. Three symbols are what the reader actually calls.
+zstd_lib="$APP/Contents/Frameworks/zstandard_macos.framework/Versions/A/zstandard_macos"
+if [ ! -f "$zstd_lib" ]; then
+  bad "zstandard_macos.framework is missing entirely"
+  exit 1
+fi
+missing=""
+for symbol in _ZSTD_decompress _ZSTD_compressBound _ZSTD_getFrameContentSize; do
+  nm -gU "$zstd_lib" 2>/dev/null | grep -qE "[[:space:]]${symbol}$" || \
+    missing="$missing $symbol"
+done
+if [ -z "$missing" ]; then
+  good "zstd is compiled in ($(nm -gU "$zstd_lib" 2>/dev/null | grep -c 'ZSTD_') symbols)"
+else
+  bad "zstandard_macos carries no zstd —$missing"
+  note "cd preppsuite_flutter/macos && pod install, then build again."
+  exit 1
+fi
+
 # The entitlements have to be the same ones afterwards. A typo in the path
 # would otherwise only surface when the app could no longer reach the
 # user's folder.

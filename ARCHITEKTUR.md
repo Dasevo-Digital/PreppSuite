@@ -663,6 +663,26 @@ tree; the test suite deliberately targets that layer rather than the UI.
   five-step wording for the WBI and not, where this was written, for the
   GLFI — and a five-step scale described in words somebody made up is
   what this app refuses to ship.
+- **The macOS build has to be checked for zstd symbols, because nothing
+  else notices.** `zstandard_macos` compiles zstd into its own framework
+  from C sources it syncs into the pub cache. CocoaPods collects that file
+  list at `pod install`; the plugin's own clean-up phase deletes the
+  sources after a build; and the `prepare_command` meant to restore them
+  never runs, because CocoaPods runs it only for pods it downloads and a
+  Flutter plugin is always a local one. So the glob can find nothing, and
+  the result is a valid, signed, launchable 228 KB framework holding the
+  Swift registrar and no zstd at all. Every Kiwix archive then fails to
+  open — a ZIM keeps even its `M/Title` in a compressed cluster, so
+  `_open` throws and the app says "a ZIM archive is expected" — and
+  **1.4.0 through 1.7.1 all shipped that way**, checked against the
+  packages on Gitea. Two guards: `macos/Podfile` syncs the sources in a
+  `pre_install` hook, before the file list is collected; and
+  `tool/macos_sign.sh` refuses to finish unless the framework exports
+  `ZSTD_decompress`, `ZSTD_compressBound` and `ZSTD_getFrameContentSize`.
+  Linux and Windows ship zstd as a library of its own and were never
+  affected. `integration_test/native_archive_test.dart` is what proves it
+  from the Dart side; a plain `flutter test` cannot, because the plugin
+  needs a real engine.
 - **A download outlives the screen that started it, so its take-up must
   not hold that screen's `ref`.** An archive is tens of gigabytes and takes
   hours; the progress banner exists precisely so the user can go
