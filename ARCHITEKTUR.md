@@ -837,6 +837,24 @@ tree; the test suite deliberately targets that layer rather than the UI.
   happen is `null` and said in words — "the sun does not set today" —
   never printed as `--:--`, which reads as a broken app rather than as a
   midnight sun.
+- **The licence-free bands carry the allocation they come from.** The
+  Notfunk screen now covers PMR446 and Freenet beside CB and amateur
+  radio — the two bands a household is most likely to already own, and
+  the only ones here needing neither a licence nor an examination. Both
+  were re-regulated in 2025 and the two now live in *different*
+  documents: Freenet in **Vfg. 45/2025** (corrected by Mitt. 193/2025,
+  in force 1 October 2025, 1 W ERP, 0.5 W within 10 km of the Belgian and
+  Polish borders, handhelds only, no coaxial antenna, no repeater or
+  gateway, no transmission past 180 seconds), PMR446 in the SRD
+  collective allocation **Vfg. 91/2025**, band 83 (500 mW ERP, built-in
+  antennas only, peer-to-peer), which replaced Vfg. 46/2020. Every card
+  names its Verfügung underneath, which is what lets a reader check a
+  figure and see when it has been superseded. And the screen states that
+  **no calling or emergency channel is laid down by the regulator** for
+  either band: the "Kanal 3" convention is named as the private
+  initiative it is, alongside the places that use channel 1 instead —
+  the same rule as the DWD's Graslandfeuerindex, that where an authority
+  publishes no scale this app does not invent one.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

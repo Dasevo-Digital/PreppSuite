@@ -18,6 +18,71 @@ class RadioEmergencyScreen extends StatelessWidget {
         children: [
           _IntroCard(text: l10n.radioEmergencyIntro),
           const SizedBox(height: 20),
+
+          // First, because these are the two bands a household is most
+          // likely to already own and the only ones here that need
+          // neither a licence nor an examination. They are also the only
+          // ones that keep working with no infrastructure whatsoever —
+          // which is the case this screen exists for.
+          _SectionTitle(text: l10n.radioEverydayTitle),
+          const SizedBox(height: 4),
+          Text(l10n.radioEverydayIntro),
+          const SizedBox(height: 12),
+          _RuleCard(
+            title: l10n.radioPmrTitle,
+            headline: l10n.radioPmrRange,
+            lines: [
+              l10n.radioPmrChannels,
+              l10n.radioPmrPower,
+              l10n.radioPmrAntenna,
+              l10n.radioPmrPeerToPeer,
+            ],
+            source: l10n.radioPmrSource,
+          ),
+          const SizedBox(height: 12),
+          _RuleCard(
+            title: l10n.radioFreenetTitle,
+            headline: l10n.radioFreenetRange,
+            lines: [
+              l10n.radioFreenetAnalogue,
+              l10n.radioFreenetDigital,
+              l10n.radioFreenetPower,
+              l10n.radioFreenetHandheld,
+              l10n.radioFreenetAntenna,
+              l10n.radioFreenetPeerToPeer,
+              l10n.radioFreenetDuration,
+              l10n.radioFreenetExtras,
+              l10n.radioFreenetGermanyOnly,
+            ],
+            source: l10n.radioFreenetSource,
+          ),
+          // The six analogue channels written out, because they are the
+          // ones a radio is set to by hand. The twelve digital ones are
+          // said as a count in the card above rather than listed: a
+          // digital radio is programmed from a file, not from a screen.
+          const SizedBox(height: 8),
+          _FrequencyCard(
+            color: Theme.of(context).colorScheme.secondary,
+            rows: const [
+              _FrequencyRow('Freenet 1', '149,0250 MHz', '12,5 kHz'),
+              _FrequencyRow('Freenet 2', '149,0375 MHz', '12,5 kHz'),
+              _FrequencyRow('Freenet 3', '149,0500 MHz', '12,5 kHz'),
+              _FrequencyRow('Freenet 4', '149,0875 MHz', '12,5 kHz'),
+              _FrequencyRow('Freenet 5', '149,1000 MHz', '12,5 kHz'),
+              _FrequencyRow('Freenet 6', '149,1125 MHz', '12,5 kHz'),
+            ],
+          ),
+          _HintCard(
+            title: l10n.radioCallingChannelTitle,
+            lines: [
+              l10n.radioCallingChannelNone,
+              l10n.radioCallingChannelThree,
+              l10n.radioCallingChannelNoListener,
+              l10n.radioListenFirst,
+            ],
+          ),
+
+          const SizedBox(height: 20),
           _SectionTitle(text: l10n.radioCbTitle),
           const SizedBox(height: 8),
           _FrequencyCard(
@@ -138,6 +203,51 @@ class _FrequencyCard extends StatelessWidget {
       ],
     ),
   );
+}
+
+/// One band's rules, with the allocation they come from named under
+/// them.
+///
+/// The source line is not decoration: every figure on this screen is
+/// somebody else's, and a power limit that turns out to be wrong is a
+/// fine rather than an inconvenience. Naming the Verfügung is what lets
+/// a reader check it, and what makes it obvious when it has been
+/// superseded.
+class _RuleCard extends StatelessWidget {
+  const _RuleCard({
+    required this.title,
+    required this.headline,
+    required this.lines,
+    required this.source,
+  });
+
+  final String title;
+  final String headline;
+  final List<String> lines;
+  final String source;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: theme.textTheme.titleMedium),
+            Text(headline, style: theme.textTheme.titleSmall),
+            for (final line in lines) ...[
+              const SizedBox(height: 8),
+              Text(line),
+            ],
+            const SizedBox(height: 12),
+            Text(source, style: theme.textTheme.bodySmall),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _FrequencyRow {

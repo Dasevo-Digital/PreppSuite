@@ -5093,7 +5093,7 @@ abstract class AppLocalizations {
   /// No description provided for @radioEmergencyEntryHint.
   ///
   /// In en, this message translates to:
-  /// **'CB and amateur radio: frequencies, rules and guidance'**
+  /// **'PMR446, Freenet, CB and amateur radio: frequencies, rules and guidance'**
   String get radioEmergencyEntryHint;
 
   /// No description provided for @radioEmergencyIntro.
@@ -6529,6 +6529,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{minutes} min'**
   String durationMinutes(int minutes);
+
+  /// No description provided for @radioEverydayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Licence-free radio: PMR446 and Freenet'**
+  String get radioEverydayTitle;
+
+  /// No description provided for @radioEverydayIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The two bands many households actually own. They need no registration and no examination — and no infrastructure: device to device, one to a few kilometres. That is exactly why they belong here beside CB and amateur radio.'**
+  String get radioEverydayIntro;
+
+  /// No description provided for @radioPmrTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PMR446'**
+  String get radioPmrTitle;
+
+  /// No description provided for @radioPmrRange.
+  ///
+  /// In en, this message translates to:
+  /// **'446.0–446.2 MHz'**
+  String get radioPmrRange;
+
+  /// No description provided for @radioPmrChannels.
+  ///
+  /// In en, this message translates to:
+  /// **'16 analogue channels, 12.5 kHz spacing'**
+  String get radioPmrChannels;
+
+  /// No description provided for @radioPmrPower.
+  ///
+  /// In en, this message translates to:
+  /// **'At most 0.5 W ERP'**
+  String get radioPmrPower;
+
+  /// No description provided for @radioPmrAntenna.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in antennas only'**
+  String get radioPmrAntenna;
+
+  /// No description provided for @radioPmrPeerToPeer.
+  ///
+  /// In en, this message translates to:
+  /// **'Device to device only. No fixed station, no repeater, no linking into a network.'**
+  String get radioPmrPeerToPeer;
+
+  /// No description provided for @radioPmrSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundesnetzagentur, Vfg. 91/2025 (collective allocation for short-range devices), band 83. Replaces Vfg. 46/2020, valid until 31 December 2035. The channel plan itself is in the harmonised standard, not in the allocation.'**
+  String get radioPmrSource;
+
+  /// No description provided for @radioFreenetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Freenet Deutschland'**
+  String get radioFreenetTitle;
+
+  /// No description provided for @radioFreenetRange.
+  ///
+  /// In en, this message translates to:
+  /// **'149.01875–149.11875 MHz'**
+  String get radioFreenetRange;
+
+  /// No description provided for @radioFreenetAnalogue.
+  ///
+  /// In en, this message translates to:
+  /// **'6 channels at 12.5 kHz, analogue or digital'**
+  String get radioFreenetAnalogue;
+
+  /// No description provided for @radioFreenetDigital.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus 12 channels at 6.25 kHz, digital only'**
+  String get radioFreenetDigital;
+
+  /// No description provided for @radioFreenetPower.
+  ///
+  /// In en, this message translates to:
+  /// **'At most 1 W ERP. Within 10 km of the Belgian and Polish borders, only 0.5 W.'**
+  String get radioFreenetPower;
+
+  /// No description provided for @radioFreenetHandheld.
+  ///
+  /// In en, this message translates to:
+  /// **'Handheld radios with their own power supply, operable in one hand. Fixed stations are not permitted.'**
+  String get radioFreenetHandheld;
+
+  /// No description provided for @radioFreenetAntenna.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the built-in antenna or an exchangeable one on the radio itself. An antenna on a coaxial cable or a mast is not allowed.'**
+  String get radioFreenetAntenna;
+
+  /// No description provided for @radioFreenetPeerToPeer.
+  ///
+  /// In en, this message translates to:
+  /// **'Device to device only. No repeater, no relay, no gateway to the internet.'**
+  String get radioFreenetPeerToPeer;
+
+  /// No description provided for @radioFreenetDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'No continuous transmission. The standard cuts off after 180 seconds; below that too, transmit only as long as needed.'**
+  String get radioFreenetDuration;
+
+  /// No description provided for @radioFreenetGermanyOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This allocation applies in Germany only.'**
+  String get radioFreenetGermanyOnly;
+
+  /// No description provided for @radioFreenetExtras.
+  ///
+  /// In en, this message translates to:
+  /// **'VOX and CTCSS are expressly permitted.'**
+  String get radioFreenetExtras;
+
+  /// No description provided for @radioFreenetSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundesnetzagentur, Vfg. 45/2025, corrected by Mitt. 193/2025. In force since 1 October 2025, valid until 30 September 2035; replaces Vfg. 60/2019.'**
+  String get radioFreenetSource;
+
+  /// No description provided for @radioCallingChannelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no official calling channel'**
+  String get radioCallingChannelTitle;
+
+  /// No description provided for @radioCallingChannelNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Neither PMR446 nor Freenet has an emergency or calling channel laid down by the regulator. What exists are conventions among operators — and they are not uniform.'**
+  String get radioCallingChannelNone;
+
+  /// No description provided for @radioCallingChannelThree.
+  ///
+  /// In en, this message translates to:
+  /// **'The most widespread is the private “Channel 3” initiative: PMR446 446.03125 MHz, Freenet 149.0500 MHz, CB 26.985 MHz. One number for all three bands. Elsewhere channel 1 is used instead.'**
+  String get radioCallingChannelThree;
+
+  /// No description provided for @radioCallingChannelNoListener.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not count on anybody listening. Nobody is obliged to monitor any of these channels.'**
+  String get radioCallingChannelNoListener;
 }
 
 class _AppLocalizationsDelegate

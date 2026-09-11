@@ -2984,7 +2984,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get radioEmergencyEntryHint =>
-      'CB and amateur radio: frequencies, rules and guidance';
+      'PMR446, Freenet, CB and amateur radio: frequencies, rules and guidance';
 
   @override
   String get radioEmergencyIntro =>
@@ -3843,4 +3843,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String durationMinutes(int minutes) {
     return '$minutes min';
   }
+
+  @override
+  String get radioEverydayTitle => 'Licence-free radio: PMR446 and Freenet';
+
+  @override
+  String get radioEverydayIntro =>
+      'The two bands many households actually own. They need no registration and no examination — and no infrastructure: device to device, one to a few kilometres. That is exactly why they belong here beside CB and amateur radio.';
+
+  @override
+  String get radioPmrTitle => 'PMR446';
+
+  @override
+  String get radioPmrRange => '446.0–446.2 MHz';
+
+  @override
+  String get radioPmrChannels => '16 analogue channels, 12.5 kHz spacing';
+
+  @override
+  String get radioPmrPower => 'At most 0.5 W ERP';
+
+  @override
+  String get radioPmrAntenna => 'Built-in antennas only';
+
+  @override
+  String get radioPmrPeerToPeer =>
+      'Device to device only. No fixed station, no repeater, no linking into a network.';
+
+  @override
+  String get radioPmrSource =>
+      'Bundesnetzagentur, Vfg. 91/2025 (collective allocation for short-range devices), band 83. Replaces Vfg. 46/2020, valid until 31 December 2035. The channel plan itself is in the harmonised standard, not in the allocation.';
+
+  @override
+  String get radioFreenetTitle => 'Freenet Deutschland';
+
+  @override
+  String get radioFreenetRange => '149.01875–149.11875 MHz';
+
+  @override
+  String get radioFreenetAnalogue =>
+      '6 channels at 12.5 kHz, analogue or digital';
+
+  @override
+  String get radioFreenetDigital =>
+      'Plus 12 channels at 6.25 kHz, digital only';
+
+  @override
+  String get radioFreenetPower =>
+      'At most 1 W ERP. Within 10 km of the Belgian and Polish borders, only 0.5 W.';
+
+  @override
+  String get radioFreenetHandheld =>
+      'Handheld radios with their own power supply, operable in one hand. Fixed stations are not permitted.';
+
+  @override
+  String get radioFreenetAntenna =>
+      'Only the built-in antenna or an exchangeable one on the radio itself. An antenna on a coaxial cable or a mast is not allowed.';
+
+  @override
+  String get radioFreenetPeerToPeer =>
+      'Device to device only. No repeater, no relay, no gateway to the internet.';
+
+  @override
+  String get radioFreenetDuration =>
+      'No continuous transmission. The standard cuts off after 180 seconds; below that too, transmit only as long as needed.';
+
+  @override
+  String get radioFreenetGermanyOnly =>
+      'This allocation applies in Germany only.';
+
+  @override
+  String get radioFreenetExtras => 'VOX and CTCSS are expressly permitted.';
+
+  @override
+  String get radioFreenetSource =>
+      'Bundesnetzagentur, Vfg. 45/2025, corrected by Mitt. 193/2025. In force since 1 October 2025, valid until 30 September 2035; replaces Vfg. 60/2019.';
+
+  @override
+  String get radioCallingChannelTitle => 'There is no official calling channel';
+
+  @override
+  String get radioCallingChannelNone =>
+      'Neither PMR446 nor Freenet has an emergency or calling channel laid down by the regulator. What exists are conventions among operators — and they are not uniform.';
+
+  @override
+  String get radioCallingChannelThree =>
+      'The most widespread is the private “Channel 3” initiative: PMR446 446.03125 MHz, Freenet 149.0500 MHz, CB 26.985 MHz. One number for all three bands. Elsewhere channel 1 is used instead.';
+
+  @override
+  String get radioCallingChannelNoListener =>
+      'Do not count on anybody listening. Nobody is obliged to monitor any of these channels.';
 }

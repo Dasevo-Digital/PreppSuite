@@ -3009,7 +3009,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get radioEmergencyEntryHint =>
-      'CB- und Amateurfunk: Frequenzen, Regeln und Hinweise';
+      'PMR446, Freenet, CB- und Amateurfunk: Frequenzen, Regeln und Hinweise';
 
   @override
   String get radioEmergencyIntro =>
@@ -3866,4 +3866,95 @@ class AppLocalizationsDe extends AppLocalizations {
   String durationMinutes(int minutes) {
     return '$minutes min';
   }
+
+  @override
+  String get radioEverydayTitle => 'Jedermannfunk: PMR446 und Freenet';
+
+  @override
+  String get radioEverydayIntro =>
+      'Die beiden Bänder, die viele Haushalte tatsächlich im Schrank haben. Sie brauchen keine Anmeldung und keine Prüfung – und keine Infrastruktur: Gerät zu Gerät, ein bis wenige Kilometer. Genau deshalb stehen sie hier neben CB- und Amateurfunk.';
+
+  @override
+  String get radioPmrTitle => 'PMR446';
+
+  @override
+  String get radioPmrRange => '446,0–446,2 MHz';
+
+  @override
+  String get radioPmrChannels => '16 Kanäle analog, Raster 12,5 kHz';
+
+  @override
+  String get radioPmrPower => 'Höchstens 0,5 W ERP';
+
+  @override
+  String get radioPmrAntenna => 'Nur fest eingebaute Antennen';
+
+  @override
+  String get radioPmrPeerToPeer =>
+      'Nur direkt von Gerät zu Gerät. Keine ortsfeste Station, kein Repeater, keine Einbindung in ein Netz.';
+
+  @override
+  String get radioPmrSource =>
+      'Bundesnetzagentur, Vfg. 91/2025 (Sammelzuteilung für Geräte geringer Reichweite), Band 83. Löst die Vfg. 46/2020 ab, befristet bis 31.12.2035. Die Kanalaufteilung selbst steht in der harmonisierten Norm, nicht in der Verfügung.';
+
+  @override
+  String get radioFreenetTitle => 'Freenet Deutschland';
+
+  @override
+  String get radioFreenetRange => '149,01875–149,11875 MHz';
+
+  @override
+  String get radioFreenetAnalogue =>
+      '6 Kanäle mit 12,5 kHz, analog oder digital';
+
+  @override
+  String get radioFreenetDigital =>
+      'Dazu 12 Kanäle mit 6,25 kHz, ausschließlich digital';
+
+  @override
+  String get radioFreenetPower =>
+      'Höchstens 1 W ERP. Innerhalb von 10 km zur belgischen und polnischen Grenze nur 0,5 W.';
+
+  @override
+  String get radioFreenetHandheld =>
+      'Nur Handsprechfunkgeräte mit eigener Stromversorgung, in einer Hand bedienbar. Ortsfeste Funkstellen sind nicht zugelassen.';
+
+  @override
+  String get radioFreenetAntenna =>
+      'Nur die eingebaute Antenne oder eine Wechselantenne am Gerät. Eine Antenne über Koaxialkabel oder an einem Mast ist nicht erlaubt.';
+
+  @override
+  String get radioFreenetPeerToPeer =>
+      'Nur direkt von Gerät zu Gerät. Kein Repeater, kein Relais, kein Gateway ins Internet.';
+
+  @override
+  String get radioFreenetDuration =>
+      'Keine Daueraussendungen. Die Norm schaltet nach 180 Sekunden ab; auch darunter gilt: nur so lange senden wie nötig.';
+
+  @override
+  String get radioFreenetGermanyOnly =>
+      'Diese Zuteilung gilt nur in Deutschland.';
+
+  @override
+  String get radioFreenetExtras =>
+      'VOX und CTCSS sind ausdrücklich zugelassen.';
+
+  @override
+  String get radioFreenetSource =>
+      'Bundesnetzagentur, Vfg. 45/2025, korrigiert durch Mitt. 193/2025. Gilt seit 1. Oktober 2025, befristet bis 30. September 2035; löst die Vfg. 60/2019 ab.';
+
+  @override
+  String get radioCallingChannelTitle => 'Es gibt keinen amtlichen Anrufkanal';
+
+  @override
+  String get radioCallingChannelNone =>
+      'Weder für PMR446 noch für Freenet ist ein Not- oder Anrufkanal behördlich festgelegt. Was es gibt, sind Absprachen unter Funkern – und die sind nicht einheitlich.';
+
+  @override
+  String get radioCallingChannelThree =>
+      'Am weitesten verbreitet ist die private Initiative „Kanal 3“: PMR446 446,03125 MHz, Freenet 149,0500 MHz, CB-Funk 26,985 MHz. Eine Zahl für alle drei Bänder. Daneben wird mancherorts Kanal 1 verwendet.';
+
+  @override
+  String get radioCallingChannelNoListener =>
+      'Verlass dich nicht darauf, dass jemand mithört. Niemand ist verpflichtet, einen dieser Kanäle zu überwachen.';
 }
