@@ -700,6 +700,8 @@
   "readinessKnowledge": "Offline-Wissen verfügbar",
   "emergencyPlanMissing": "Notfallplan noch nicht ausgefüllt",
   "emergencyPlanHeading": "Wichtige Angaben",
+  "knowledgeLibraryTitle": "Deine Archive",
+  "knowledgeLibraryEmpty": "Kein Archiv mehr in der Bibliothek.",
   "knowledgeManageArchives": "Archive verwalten",
   "knowledgeArchiveCount": "{count} Archive auf diesem Gerät",
   "@knowledgeArchiveCount": { "placeholders": { "count": { "type": "int" } } },

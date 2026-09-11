@@ -4286,6 +4286,18 @@ abstract class AppLocalizations {
   /// **'Important details'**
   String get emergencyPlanHeading;
 
+  /// No description provided for @knowledgeLibraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your archives'**
+  String get knowledgeLibraryTitle;
+
+  /// No description provided for @knowledgeLibraryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No archives left in the library.'**
+  String get knowledgeLibraryEmpty;
+
   /// No description provided for @knowledgeManageArchives.
   ///
   /// In en, this message translates to:

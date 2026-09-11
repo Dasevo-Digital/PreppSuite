@@ -95,9 +95,18 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
   /// The callback rather than a direct call into a feature's controller:
   /// a map and an encyclopedia are downloaded the same way and stored in
   /// different places, and this has no business knowing which.
+  ///
+  /// It is handed this notifier's own [Ref] and must use that one. A
+  /// download of tens of gigabytes outlives by hours the screen it was
+  /// started from, and a callback that closed over that screen's
+  /// `WidgetRef` threw the moment it was called — after the file had
+  /// arrived. Nothing caught it, so the banner announced a finished
+  /// download and the archive was never taken into use. That is how a
+  /// download folder came to hold nine archives and the library none.
   Future<void> start(
     ArchiveDownloadRequest request, {
-    required Future<String?> Function(String path, String label) onFinished,
+    required Future<String?> Function(Ref ref, String path, String label)
+    onFinished,
   }) async {
     if (state.isRunning) return;
 
@@ -165,9 +174,18 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
   Future<void> _takeUp(
     ArchiveDownloadRequest request,
     String target,
-    Future<String?> Function(String path, String label) onFinished,
+    Future<String?> Function(Ref ref, String path, String label) onFinished,
   ) async {
-    final problem = await onFinished(target, request.label);
+    // Whatever the callback does, this must end in a state that says what
+    // happened. An exception escaping here used to leave the banner on
+    // its "finished" wording, which is the one thing worse than saying
+    // the archive could not be opened: it says the opposite.
+    String? problem;
+    try {
+      problem = await onFinished(ref, target, request.label);
+    } on Object catch (error) {
+      problem = error.toString();
+    }
     // A second download may have been started while this one was being
     // opened; its state is the current one and must not be overwritten.
     if (state.finishedPath != target) return;

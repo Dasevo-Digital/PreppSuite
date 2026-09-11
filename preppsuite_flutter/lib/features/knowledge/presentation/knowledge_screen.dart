@@ -88,7 +88,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
           if (async.value?.isConfigured ?? false)
             PopupMenuButton<_ArchiveAction>(
               onSelected: (action) => switch (action) {
-                _ArchiveAction.manage => _manageArchives(async.value!),
+                _ArchiveAction.manage => _manageArchives(),
                 _ArchiveAction.download => _openLibrary(),
                 _ArchiveAction.add => _choose(l10n),
                 _ArchiveAction.remove => _remove(async.value),
@@ -167,7 +167,10 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const DownloadBanner(),
-        _ArchiveSwitcher(state: state, l10n: l10n),
+        // Only over results. On the start page the tiles below are the
+        // chooser, and two of them stacked is one too many.
+        if (_query.trim().isNotEmpty)
+          _ArchiveSwitcher(state: state, l10n: l10n),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Column(
@@ -221,7 +224,8 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
 
   Widget _results(AppLocalizations l10n, KnowledgeState state) {
     if (_query.trim().isEmpty) {
-      if (!state.isReady) {
+      // Nothing to show a library of yet.
+      if (!state.isConfigured) {
         return _EmptyState(
           state: state,
           l10n: l10n,
@@ -229,17 +233,55 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
           onDownload: _openLibrary,
         );
       }
-      return _BrowseArchive(
-        l10n: l10n,
-        onMainPage: () => _openMainPage(l10n, state),
-        onRandom: () => _openRandom(l10n, state),
-        onLetter: (letter) {
-          _queryController.text = letter;
-          setState(() {
-            _query = letter;
-            _mode = _SearchMode.titles;
-          });
-        },
+
+      // The library first, as tiles: each archive's own cover, title and
+      // one-line description. What is on the device is the thing to see
+      // on arriving here, and a row of chips said far less about it than
+      // the archives say about themselves.
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text(
+                l10n.knowledgeLibraryTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            _ArchiveGrid(
+              state: state,
+              nested: true,
+              onSelect: (id) => _select(l10n, state, id),
+            ),
+            if (state.isReady)
+              _BrowseArchive(
+                nested: true,
+                l10n: l10n,
+                onMainPage: () => _openMainPage(l10n, state),
+                onRandom: () => _openRandom(l10n, state),
+                onLetter: (letter) {
+                  _queryController.text = letter;
+                  setState(() {
+                    _query = letter;
+                    _mode = _SearchMode.titles;
+                  });
+                },
+              )
+            else
+              // Registered but not open — a moved file, an unplugged
+              // disk. The tiles above are how to pick another one.
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  l10n.knowledgeErrorUnreadable,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ),
+          ],
+        ),
       );
     }
 
@@ -447,7 +489,13 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     );
   }
 
-  Future<void> _manageArchives(KnowledgeState state) async {
+  /// The library as a sheet: switch, remove, add.
+  ///
+  /// It watches the library rather than being handed a copy of it, and it
+  /// stays open across a removal. Closing on every delete meant reopening
+  /// the sheet for each archive in turn, and the count at the top went on
+  /// naming the number there had been before.
+  Future<void> _manageArchives() async {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -457,70 +505,108 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
           constraints: BoxConstraints(
             maxHeight: MediaQuery.sizeOf(sheetContext).height * .75,
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text(
-                  AppLocalizations.of(sheetContext)!.knowledgeManageArchives,
-                  style: Theme.of(sheetContext).textTheme.titleLarge,
-                ),
-                subtitle: Text(
-                  AppLocalizations.of(
-                    sheetContext,
-                  )!.knowledgeArchiveCount(state.library.length),
-                ),
-              ),
-              if (state.library.any((archive) => archive.sizeBytes != null))
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      AppLocalizations.of(sheetContext)!.knowledgeTotalSize(
-                        _formatBytes(
-                          state.library.fold<int>(
-                            0,
-                            (sum, archive) => sum + (archive.sizeBytes ?? 0),
+          child: Consumer(
+            builder: (context, ref, _) {
+              final l10n = AppLocalizations.of(context)!;
+              final state =
+                  ref.watch(knowledgeProvider).value ?? const KnowledgeState();
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    title: Text(
+                      l10n.knowledgeManageArchives,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    subtitle: Text(
+                      l10n.knowledgeArchiveCount(state.library.length),
+                    ),
+                  ),
+                  if (state.library.any((archive) => archive.sizeBytes != null))
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          l10n.knowledgeTotalSize(
+                            _formatBytes(
+                              state.library.fold<int>(
+                                0,
+                                (sum, archive) => sum + (archive.sizeBytes ?? 0),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
+                  Flexible(
+                    child: state.library.isEmpty
+                        // Emptied from in here. The sheet stays put — the
+                        // add button below is the obvious next step, and
+                        // having it vanish under the finger would not be.
+                        ? Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Text(l10n.knowledgeLibraryEmpty),
+                          )
+                        : _ArchiveGrid(
+                            state: state,
+                            onSelect: (id) async {
+                              // Switching is done with, so the sheet
+                              // closes; removing is not.
+                              Navigator.pop(sheetContext);
+                              await ref
+                                  .read(knowledgeProvider.notifier)
+                                  .select(id);
+                            },
+                            onRemove: (id) => ref
+                                .read(knowledgeProvider.notifier)
+                                .remove(id),
+                          ),
                   ),
-                ),
-              Flexible(
-                child: _ArchiveGrid(
-                  state: state,
-                  onSelect: (id) async {
-                    Navigator.pop(sheetContext);
-                    await ref.read(knowledgeProvider.notifier).select(id);
-                  },
-                  onRemove: (id) async {
-                    await ref.read(knowledgeProvider.notifier).remove(id);
-                    if (sheetContext.mounted) Navigator.pop(sheetContext);
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.pop(sheetContext);
-                      _choose(AppLocalizations.of(context)!);
-                    },
-                    icon: const Icon(Icons.add),
-                    label: Text(
-                      AppLocalizations.of(sheetContext)!.knowledgeAddAction,
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          Navigator.pop(sheetContext);
+                          _choose(l10n);
+                        },
+                        icon: const Icon(Icons.add),
+                        label: Text(l10n.knowledgeAddAction),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ),
       ),
+    );
+  }
+
+  /// Opens an archive from the library tiles.
+  ///
+  /// The entry stays in the library when it will not open — an unplugged
+  /// disk comes back — so the refusal has to be said out loud rather than
+  /// left to a tile that silently declines to become the open one.
+  Future<void> _select(
+    AppLocalizations l10n,
+    KnowledgeState state,
+    String id,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final problem = await ref.read(knowledgeProvider.notifier).select(id);
+    if (problem == null) return;
+
+    final archive = state.library.firstWhere(
+      (entry) => entry.id == id,
+      orElse: () => state.library.first,
+    );
+    messenger.showSnackBar(
+      SnackBar(content: Text(l10n.knowledgeSwitchFailed(archive.label))),
     );
   }
 
@@ -572,12 +658,21 @@ class _ArchiveGrid extends StatelessWidget {
   const _ArchiveGrid({
     required this.state,
     required this.onSelect,
-    required this.onRemove,
+    this.onRemove,
+    this.nested = false,
   });
 
   final KnowledgeState state;
   final ValueChanged<String> onSelect;
-  final ValueChanged<String> onRemove;
+
+  /// Null where removing is not on offer. The start page shows the same
+  /// tiles to choose from, and a delete button one tap away from the
+  /// archive somebody is trying to open is a trap rather than a
+  /// convenience; that belongs in "manage archives".
+  final ValueChanged<String>? onRemove;
+
+  /// Whether this sits inside something that already scrolls.
+  final bool nested;
 
   @override
   Widget build(BuildContext context) {
@@ -599,15 +694,17 @@ class _ArchiveGrid extends StatelessWidget {
         crossAxisSpacing: 12,
         childAspectRatio: (1 / (0.95 + 0.35 * (scale - 1))).clamp(0.45, 1.1),
       ),
+      physics: nested ? const NeverScrollableScrollPhysics() : null,
       itemCount: state.library.length,
       itemBuilder: (context, index) {
         final archive = state.library[index];
+        final remove = onRemove;
         return _ArchiveTile(
           archive: archive,
           open: archive.id == state.selectedId,
           l10n: l10n,
           onSelect: () => onSelect(archive.id),
-          onRemove: () => onRemove(archive.id),
+          onRemove: remove == null ? null : () => remove(archive.id),
         );
       },
     );
@@ -620,14 +717,14 @@ class _ArchiveTile extends StatelessWidget {
     required this.open,
     required this.l10n,
     required this.onSelect,
-    required this.onRemove,
+    this.onRemove,
   });
 
   final StoredArchive archive;
   final bool open;
   final AppLocalizations l10n;
   final VoidCallback onSelect;
-  final VoidCallback onRemove;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
@@ -711,11 +808,12 @@ class _ArchiveTile extends StatelessWidget {
                       // took it to 40x40, under the 48x48 a tap target
                       // has to be. The icon inside it is small; the
                       // thing being aimed at is not.
-                      IconButton(
-                        tooltip: l10n.knowledgeRemoveAction,
-                        icon: const Icon(Icons.delete_outline, size: 18),
-                        onPressed: onRemove,
-                      ),
+                      if (onRemove != null)
+                        IconButton(
+                          tooltip: l10n.knowledgeRemoveAction,
+                          icon: const Icon(Icons.delete_outline, size: 18),
+                          onPressed: onRemove,
+                        ),
                     ],
                   ),
                   if (archive.description != null)
@@ -753,7 +851,11 @@ class _BrowseArchive extends StatelessWidget {
     required this.onMainPage,
     required this.onRandom,
     required this.onLetter,
+    this.nested = false,
   });
+
+  /// Whether this sits inside something that already scrolls.
+  final bool nested;
 
   final AppLocalizations l10n;
   final VoidCallback onMainPage;
@@ -761,8 +863,8 @@ class _BrowseArchive extends StatelessWidget {
   final ValueChanged<String> onLetter;
 
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
+  Widget build(BuildContext context) => _Scroller(
+    nested: nested,
     child: Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -997,6 +1099,25 @@ class _Suggestions extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+/// Scrolls, or leaves the scrolling to whatever it sits in.
+///
+/// A card that scrolls inside a page that also scrolls swallows the
+/// page's gestures over its own area, which on the start page is most of
+/// the screen.
+class _Scroller extends StatelessWidget {
+  const _Scroller({required this.nested, required this.child});
+
+  final bool nested;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    const padding = EdgeInsets.all(16);
+    if (nested) return Padding(padding: padding, child: child);
+    return SingleChildScrollView(padding: padding, child: child);
   }
 }
 

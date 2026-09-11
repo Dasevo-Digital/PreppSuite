@@ -162,12 +162,23 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
           ),
           // Taking it into use straight away is the point of downloading
           // it; there is no second step worth asking about.
-          onFinished: (path, label) async {
+          //
+          // `downloadRef`, never this screen's `ref`: a 52 GB archive
+          // takes an afternoon, and nobody sits on the library screen
+          // while it comes down. Reading a provider through the ref of a
+          // screen that has since been left throws, and that throw is
+          // what used to swallow the whole take-up.
+          onFinished: (downloadRef, path, label) async {
             // Sandboxed macOS can read the freshly written path only for
             // the current folder scope. Persist a security bookmark so the
             // archive remains reachable after the app is restarted.
             final remembered = await rememberStoragePath(path, label: label);
-            final problem = await ref
+            // Awaited, so the library that is about to be written is the
+            // stored one and not the empty placeholder of a provider
+            // still building — which would save this archive over every
+            // other one.
+            await downloadRef.read(knowledgeProvider.future);
+            final problem = await downloadRef
                 .read(knowledgeProvider.notifier)
                 .useArchive(
                   location: remembered?.value ?? path,

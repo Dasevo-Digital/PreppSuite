@@ -40,6 +40,34 @@ const _older = StoredArchive(
   label: 'wikibooks_de_all_maxi_2026-01.zim',
 );
 
+/// A library that really loses an archive when one is removed, so the
+/// sheet around it has something to react to.
+class _MutableLibrary extends KnowledgeController {
+  _MutableLibrary(this.initial);
+
+  final KnowledgeState initial;
+
+  @override
+  Future<KnowledgeState> build() async => initial;
+
+  @override
+  Future<void> remove(String id) async {
+    final current = state.requireValue;
+    final library = [
+      for (final archive in current.library)
+        if (archive.id != id) archive,
+    ];
+    state = AsyncData(
+      KnowledgeState(
+        library: library,
+        selectedId: library.any((a) => a.id == current.selectedId)
+            ? current.selectedId
+            : null,
+      ),
+    );
+  }
+}
+
 class _Library extends KnowledgeController {
   _Library(this.fixed);
 
@@ -191,6 +219,77 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('removing one archive leaves the sheet open', (tester) async {
+    // It used to close on every delete, so clearing out three archives
+    // meant reopening the sheet three times — and the count at the top
+    // went on naming the number there had been before.
+    final controller = _MutableLibrary(both);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [knowledgeProvider.overrideWith(() => controller)],
+        child: const MaterialApp(
+          locale: Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: KnowledgeScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Archive verwalten'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 Archive auf diesem Gerät'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.delete_outline).last);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Archive verwalten'),
+      findsOneWidget,
+      reason: 'the sheet stays put',
+    );
+    expect(
+      find.text('1 Archive auf diesem Gerät'),
+      findsOneWidget,
+      reason: 'and says what is left, not what there was',
+    );
+    expect(find.byType(GridView), findsOneWidget);
+  });
+
+  testWidgets('emptying the library leaves the sheet open to add one', (
+    tester,
+  ) async {
+    final controller = _MutableLibrary(both);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [knowledgeProvider.overrideWith(() => controller)],
+        child: const MaterialApp(
+          locale: Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: KnowledgeScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.more_vert));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Archive verwalten'));
+    await tester.pumpAndSettle();
+
+    for (var i = 0; i < 2; i++) {
+      await tester.tap(find.byIcon(Icons.delete_outline).last);
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.text('Kein Archiv mehr in der Bibliothek.'), findsOneWidget);
+    // The way out is still under the finger rather than gone with it.
+    expect(find.text('Weiteres Archiv hinzufügen'), findsOneWidget);
   });
 
   testWidgets('the library grid meets the accessibility guidelines', (

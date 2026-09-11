@@ -663,6 +663,22 @@ tree; the test suite deliberately targets that layer rather than the UI.
   five-step wording for the WBI and not, where this was written, for the
   GLFI — and a five-step scale described in words somebody made up is
   what this app refuses to ship.
+- **A download outlives the screen that started it, so its take-up must
+  not hold that screen's `ref`.** An archive is tens of gigabytes and takes
+  hours; the progress banner exists precisely so the user can go
+  elsewhere meanwhile. `ArchiveDownloadController.start` therefore hands
+  its callback the notifier's own `Ref`. Closing over the library
+  screen's `WidgetRef` instead threw the moment the file arrived —
+  reading a provider through a disposed widget's ref is an error — and
+  because the throw happened inside the stream's `onDone`, nothing caught
+  it: the banner announced a finished download and the archive was never
+  added. That is how a download folder came to hold nine archives and the
+  library none. The map never had the bug because its take-up already ran
+  from the download provider's own ref.
+- **`_takeUp` turns any failure into a state that says so.** Silence
+  there is worse than an error message, because the banner's other
+  wording claims the opposite. Same rule as everywhere else here: where
+  something can fail out of sight, the screen says what happened.
 - **A library entry carries what the archive says about itself.**
   `StoredArchive` keeps the title, the one-line description and the 48x48
   cover out of the ZIM's own `M/` namespace, written when the archive is

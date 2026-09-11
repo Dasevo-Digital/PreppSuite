@@ -2520,6 +2520,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyPlanHeading => 'Important details';
 
   @override
+  String get knowledgeLibraryTitle => 'Your archives';
+
+  @override
+  String get knowledgeLibraryEmpty => 'No archives left in the library.';
+
+  @override
   String get knowledgeManageArchives => 'Manage archives';
 
   @override

@@ -2535,6 +2535,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get emergencyPlanHeading => 'Wichtige Angaben';
 
   @override
+  String get knowledgeLibraryTitle => 'Deine Archive';
+
+  @override
+  String get knowledgeLibraryEmpty => 'Kein Archiv mehr in der Bibliothek.';
+
+  @override
   String get knowledgeManageArchives => 'Archive verwalten';
 
   @override

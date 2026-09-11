@@ -1482,6 +1482,8 @@
   "readinessKnowledge": "Offline knowledge available",
   "emergencyPlanMissing": "Emergency plan has not been completed",
   "emergencyPlanHeading": "Important details",
+  "knowledgeLibraryTitle": "Your archives",
+  "knowledgeLibraryEmpty": "No archives left in the library.",
   "knowledgeManageArchives": "Manage archives",
   "knowledgeArchiveCount": "{count} archives on this device",
   "@knowledgeArchiveCount": { "placeholders": { "count": { "type": "int" } } },
