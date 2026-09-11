@@ -8,13 +8,23 @@ class ShelterSearchResult {
   const ShelterSearchResult(
     this.shelters,
     this.pending,
-    this.wwbotaFailed,
-    this.overpassFailed,
+    this.wwbotaError,
+    this.overpassError,
   );
   final List<ClassifiedShelter> shelters;
   final int pending;
-  final bool wwbotaFailed;
-  final bool overpassFailed;
+
+  /// Why a source came back empty, or null when it did not.
+  ///
+  /// The reason used to be caught and dropped, which left the screen
+  /// saying "OpenStreetMap/Overpass konnte nicht geladen werden" and
+  /// nothing else — the same sentence for a rate limit that clears in
+  /// seconds, a query that timed out and no network at all.
+  final Object? wwbotaError;
+  final Object? overpassError;
+
+  bool get wwbotaFailed => wwbotaError != null;
+  bool get overpassFailed => overpassError != null;
 }
 
 /// Independent sources publish partial results; only the newest search may win.
@@ -36,7 +46,7 @@ class ShelterSearch {
   ) async {
     final generation = ++_generation;
     final results = <List<ClassifiedShelter>>[[], []];
-    final failed = [false, false];
+    final failed = <Object?>[null, null];
     var pending = 2;
     void emit() {
       if (generation == _generation) {
@@ -55,8 +65,8 @@ class ShelterSearch {
     Future<void> load(int index, ShelterSource source) async {
       try {
         results[index] = await source(bounds).timeout(timeout);
-      } catch (_) {
-        failed[index] = true;
+      } catch (error) {
+        failed[index] = error;
       }
       pending--;
       emit();

@@ -17,6 +17,8 @@ import '../features/maps/application/pmtiles_archive.dart'
 import '../features/maps/application/place_search.dart'
     show PlaceSearchException;
 import '../features/maps/application/tile_source.dart' show TileSourceException;
+import '../features/shelters/application/overpass_shelter_client.dart'
+    show OverpassException;
 import '../l10n/generated/app_localizations.dart';
 
 /// What to put on the screen when something failed.
@@ -52,6 +54,7 @@ String describeError(AppLocalizations l10n, Object error) {
     // The services behind the map and the library are somebody else's.
     TileSourceException() ||
     PlaceSearchException() ||
+    OverpassException() ||
     KiwixCatalogueException() => l10n.errorServiceUnavailable,
 
     // Drift wraps whatever the underlying database threw, so this is the

@@ -890,5 +890,8 @@
   "emergencyPlanPdfEquipment": "Notgepäck und Abschaltpunkte",
   "emergencyPlanPdfEmpty": "Nicht eingetragen",
   "settingsRegionUnknownKey": "Unbekannter Schlüssel — bitte prüfen",
-  "settingsRegionKeyInvalid": "Bitte fünf oder zwölf Ziffern eingeben (z. B. 03101)."
+  "settingsRegionKeyInvalid": "Bitte fünf oder zwölf Ziffern eingeben (z. B. 03101).",
+  "shelterOverpassBusyMessage": "OpenStreetMap/Overpass ist gerade ausgelastet (Anfragelimit). In einigen Sekunden erneut versuchen.",
+  "shelterSourceFailureReason": "Grund: {reason}",
+  "@shelterSourceFailureReason": {"placeholders": {"reason": {"type": "String"}}}
 }

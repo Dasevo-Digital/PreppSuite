@@ -60,15 +60,113 @@ void main() {
     },
   );
 
+  final bounds = boundingBoxForRadius(const LatLng(52.5, 13.4), 25);
+
+  const empty = '{"version": 0.6, "elements": []}';
+
   test('fetchShelters reports failure on a non-200 response', () async {
     final client = OverpassShelterClient(
+      retryDelay: Duration.zero,
       httpClient: MockClient((request) async => http.Response('', 504)),
     );
 
-    final bounds = boundingBoxForRadius(const LatLng(52.5, 13.4), 25);
     await expectLater(
       client.fetchShelters(bounds),
-      throwsA(isA<http.ClientException>()),
+      throwsA(
+        isA<OverpassException>().having((e) => e.statusCode, 'status', 504),
+      ),
     );
+  });
+
+  group('when an instance will not answer', () {
+    // `overpass-api.de/api/status` states "Rate limit: 2" — two
+    // concurrent queries per address, 429 for the third. Pressing
+    // refresh twice was enough to reach it, and every one of these came
+    // out as one sentence with no reason in it.
+    test(
+      'a rate limit is retried on the same instance first',
+      () async {
+        final asked = <String>[];
+        final client = OverpassShelterClient(
+          httpClient: MockClient((request) async {
+            asked.add(request.url.host);
+            return asked.length == 1
+                ? http.Response('', 429)
+                : http.Response(empty, 200);
+          }),
+        );
+
+        await client.fetchShelters(bounds);
+
+        expect(asked, ['overpass-api.de', 'overpass-api.de']);
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
+
+    test(
+      'a busy instance falls through to the mirror',
+      () async {
+        final asked = <String>[];
+        final client = OverpassShelterClient(
+          httpClient: MockClient((request) async {
+            asked.add(request.url.host);
+            return request.url.host == 'overpass-api.de'
+                ? http.Response('', 429)
+                : http.Response(empty, 200);
+          }),
+        );
+
+        await client.fetchShelters(bounds);
+
+        expect(asked, [
+          'overpass-api.de',
+          'overpass-api.de',
+          'overpass.kumi.systems',
+        ]);
+      },
+      timeout: const Timeout(Duration(seconds: 40)),
+    );
+
+    test('a bad request is not asked twice', () async {
+      // 400 is this app's query being wrong. A second identical try is
+      // just another request against a server run for other people.
+      final asked = <String>[];
+      final client = OverpassShelterClient(
+        retryDelay: Duration.zero,
+        httpClient: MockClient((request) async {
+          asked.add(request.url.host);
+          return http.Response('', 400);
+        }),
+      );
+
+      await expectLater(
+        client.fetchShelters(bounds),
+        throwsA(isA<OverpassException>()),
+      );
+      expect(asked, ['overpass-api.de', 'overpass.kumi.systems']);
+    });
+
+    test('an unreachable instance is moved on from, not retried', () async {
+      final asked = <String>[];
+      final client = OverpassShelterClient(
+        httpClient: MockClient((request) async {
+          asked.add(request.url.host);
+          throw http.ClientException('no route', request.url);
+        }),
+      );
+
+      await expectLater(
+        client.fetchShelters(bounds),
+        throwsA(isA<OverpassException>()),
+      );
+      expect(asked, ['overpass-api.de', 'overpass.kumi.systems']);
+    });
+
+    test('a rate limit is the kind that clears itself', () {
+      expect(const OverpassException(429).isBusy, isTrue);
+      expect(const OverpassException(504).isBusy, isTrue);
+      expect(const OverpassException(400).isBusy, isFalse);
+      expect(const OverpassException(0).isBusy, isFalse);
+    });
   });
 }

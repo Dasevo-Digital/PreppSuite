@@ -32,9 +32,10 @@ class OverpassShelterFeature {
 /// carrying `historic`/`disused`/`ruins`); `emergency`/`amenity=shelter`
 /// covers the (rare) modern civil-protection tagging.
 class OverpassShelterClient {
-  OverpassShelterClient({http.Client? httpClient})
+  OverpassShelterClient({http.Client? httpClient, Duration? retryDelay})
     : _ownsClient = httpClient == null,
-      _httpClient = httpClient ?? http.Client();
+      _httpClient = httpClient ?? http.Client(),
+      _retryDelay = retryDelay ?? defaultRetryDelay;
 
   final http.Client _httpClient;
   final bool _ownsClient;
@@ -42,7 +43,29 @@ class OverpassShelterClient {
     if (_ownsClient) _httpClient.close();
   }
 
-  static const _endpoint = 'https://overpass-api.de/api/interpreter';
+  /// The main instance first, then a mirror.
+  ///
+  /// Not redundancy for its own sake: `overpass-api.de/api/status` states
+  /// "Rate limit: 2" — two concurrent queries per IP address — and
+  /// answers 429 for the third. Pressing refresh twice is enough to hit
+  /// it, which is what "OpenStreetMap/Overpass konnte nicht geladen
+  /// werden" was usually reporting. Both were confirmed live on
+  /// 2026-09-11; the mirror is slower (6.5 s against 0.5 s for the same
+  /// query) which is why it is second and not first.
+  static const endpoints = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+  ];
+
+  /// How long to wait before asking the same instance again.
+  ///
+  /// A refused slot frees up in seconds, and the whole search sits behind
+  /// a 30-second timeout, so there is room for exactly one pause.
+  /// Injectable so the tests can take it out: three real seconds per case
+  /// is most of the suite's running time and none of its meaning.
+  static const defaultRetryDelay = Duration(seconds: 3);
+
+  final Duration _retryDelay;
 
   /// Caps the number of returned elements — a 50 km radius in a dense area
   /// could otherwise return more markers than the map can usefully show.
@@ -66,18 +89,7 @@ class OverpassShelterClient {
         ');'
         'out center $_resultLimit;';
 
-    final response = await _httpClient
-        .post(
-          Uri.parse(_endpoint),
-          body: {'data': query},
-        )
-        .timeout(const Duration(seconds: 30));
-    if (response.statusCode != 200) {
-      throw http.ClientException(
-        'Shelter service returned ${response.statusCode}',
-      );
-    }
-
+    final response = await _ask(query);
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
     if (decoded is! Map) return [];
     final elements = decoded['elements'];
@@ -87,6 +99,40 @@ class OverpassShelterClient {
       for (final entry in elements)
         if (entry is Map<String, dynamic>) _parseElement(entry),
     ].whereType<OverpassShelterFeature>().toList();
+  }
+
+  /// Sends [query], once per attempt, until one instance answers.
+  ///
+  /// Only a busy instance is worth asking again: 429 is the rate limit
+  /// and 504 is the query timing out on their side, and both are about
+  /// the moment rather than the request. Anything else is a bad request
+  /// or a broken instance, where a second identical try is just another
+  /// request against a server run for other people.
+  Future<http.Response> _ask(String query) async {
+    OverpassException? last;
+
+    for (final endpoint in endpoints) {
+      for (var attempt = 0; attempt < 2; attempt++) {
+        if (attempt > 0) await Future<void>.delayed(_retryDelay);
+
+        final http.Response response;
+        try {
+          response = await _httpClient
+              .post(Uri.parse(endpoint), body: {'data': query})
+              .timeout(const Duration(seconds: 30));
+        } on Object {
+          // A dead instance is worth moving on from, not retrying.
+          break;
+        }
+
+        if (response.statusCode == 200) return response;
+
+        last = OverpassException(response.statusCode);
+        if (!last.isBusy) break;
+      }
+    }
+
+    throw last ?? const OverpassException(0);
   }
 
   OverpassShelterFeature? _parseElement(Map<String, dynamic> entry) {
@@ -112,4 +158,25 @@ class OverpassShelterClient {
 
     return OverpassShelterFeature(id: id, lat: lat, lon: lon, tags: tags);
   }
+}
+
+/// An Overpass instance that would not answer, and with what.
+///
+/// A type rather than a `ClientException` with the code in its message,
+/// because the screen has to tell two things apart: the service being
+/// momentarily full, which resolves itself, and the service being
+/// unreachable, which does not. The shelter screen used to report both
+/// as one sentence with no reason in it at all.
+class OverpassException implements Exception {
+  const OverpassException(this.statusCode);
+
+  /// The HTTP status, or 0 when no instance answered at all.
+  final int statusCode;
+
+  /// Whether this is the rate limit or their own query timeout — the two
+  /// that are about the moment rather than the request.
+  bool get isBusy => statusCode == 429 || statusCode == 504;
+
+  @override
+  String toString() => 'OverpassException($statusCode)';
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../core/error_text.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/presentation/base_map_layer.dart';
@@ -40,8 +41,8 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
   ShelterConfidence? _filter;
   List<ClassifiedShelter> _shelters = const [];
   bool _isLoading = false;
-  bool _wwbotaFailed = false;
-  bool _overpassFailed = false;
+  Object? _wwbotaError;
+  Object? _overpassError;
   String? _locationError;
 
   int _lookupGeneration = 0;
@@ -130,11 +131,30 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
       if (!mounted) return;
       setState(() {
         _shelters = result.shelters;
-        _wwbotaFailed = result.wwbotaFailed;
-        _overpassFailed = result.overpassFailed;
+        _wwbotaError = result.wwbotaError;
+        _overpassError = result.overpassError;
         _isLoading = result.pending > 0;
       });
     });
+  }
+
+  /// What to say about Overpass having refused.
+  ///
+  /// The rate limit gets its own sentence and no reason under it: the
+  /// message already says exactly what happened, and `describeError`
+  /// would add "the service cannot be reached", which is the opposite of
+  /// true — it answered, it was full.
+  Widget _overpassFailure(AppLocalizations l10n) {
+    final error = _overpassError!;
+    final busy = error is OverpassException && error.isBusy;
+
+    return _SourceFailure(
+      message: busy
+          ? l10n.shelterOverpassBusyMessage
+          : l10n.shelterOverpassErrorMessage,
+      reason: busy ? null : describeError(l10n, error),
+      l10n: l10n,
+    );
   }
 
   double _zoomForRadius(double radiusKm) {
@@ -420,22 +440,27 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton(
-                    onPressed: _center == null ? null : _fetchShelters,
+                    // Disabled while a search runs. Overpass allows two
+                    // concurrent queries per address and refuses the
+                    // third, so a button that can be pressed five times
+                    // in a row is a button that produces the rate-limit
+                    // failure it is meant to clear.
+                    onPressed: _center == null || _isLoading
+                        ? null
+                        : _fetchShelters,
                     child: Text(l10n.shelterRefreshButton),
                   ),
-                  if (_wwbotaFailed) ...[
+                  if (_wwbotaError != null) ...[
                     const SizedBox(height: 8),
-                    Text(
-                      l10n.shelterWwbotaErrorMessage,
-                      style: TextStyle(color: colorScheme.error),
+                    _SourceFailure(
+                      message: l10n.shelterWwbotaErrorMessage,
+                      reason: describeError(l10n, _wwbotaError!),
+                      l10n: l10n,
                     ),
                   ],
-                  if (_overpassFailed) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.shelterOverpassErrorMessage,
-                      style: TextStyle(color: colorScheme.error),
-                    ),
+                  if (_overpassError != null) ...[
+                    const SizedBox(height: 8),
+                    _overpassFailure(l10n),
                   ],
                 ],
               ),
@@ -492,6 +517,46 @@ class _LegendRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// One source that would not answer, with the reason under it.
+///
+/// The reason is the point. This screen is opened when somebody wants to
+/// know where they could go, and "could not be loaded" with nothing
+/// behind it leaves them unable to tell a moment's rate limit from a
+/// missing connection — the first clears itself, the second does not.
+class _SourceFailure extends StatelessWidget {
+  const _SourceFailure({
+    required this.message,
+    required this.reason,
+    required this.l10n,
+  });
+
+  final String message;
+
+  /// Null where the message above already is the reason.
+  final String? reason;
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(message, style: TextStyle(color: theme.colorScheme.error)),
+        if (reason != null && reason != message)
+          Text(
+            l10n.shelterSourceFailureReason(reason!),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+      ],
     );
   }
 }

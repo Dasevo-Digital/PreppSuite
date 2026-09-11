@@ -5329,6 +5329,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter five or twelve digits (for example 03101).'**
   String get settingsRegionKeyInvalid;
+
+  /// No description provided for @shelterOverpassBusyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenStreetMap/Overpass is busy right now (request limit). Try again in a few seconds.'**
+  String get shelterOverpassBusyMessage;
+
+  /// No description provided for @shelterSourceFailureReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String shelterSourceFailureReason(String reason);
 }
 
 class _AppLocalizationsDelegate

@@ -3155,4 +3155,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get settingsRegionKeyInvalid =>
       'Bitte fünf oder zwölf Ziffern eingeben (z. B. 03101).';
+
+  @override
+  String get shelterOverpassBusyMessage =>
+      'OpenStreetMap/Overpass ist gerade ausgelastet (Anfragelimit). In einigen Sekunden erneut versuchen.';
+
+  @override
+  String shelterSourceFailureReason(String reason) {
+    return 'Grund: $reason';
+  }
 }
