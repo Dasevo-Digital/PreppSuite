@@ -812,6 +812,31 @@ tree; the test suite deliberately targets that layer rather than the UI.
   thousand features. `shelter` is deliberately **not** offered: 695 of
   them in the sample, 10 with a name — in OpenStreetMap it is a bus
   shelter, not a Schutzraum.
+- **The almanac is arithmetic, not a feed.** `features/daylight/`
+  computes sunrise, twilight, solar noon, moonrise, moonset and the
+  moon's lit fraction on the device: the NOAA solar-position algorithm
+  for the sun, the Astronomical Almanac's low-precision series for the
+  moon. Nothing is fetched, so nothing can go stale — it is as right on
+  the tenth day without a network as on the first, which is the whole
+  reason it is here. It is checked against the **US Naval Observatory's**
+  own tables (`aa.usno.navy.mil/api/rstt/oneday`) in
+  `test/live/daylight_live_test.dart`: over 112 compared times across four
+  places and four seasons, sun and moon are at most **one minute** out.
+  The app never calls that service; the test exists so that an almanac
+  shipped as fact can be shown to be one. Three traps, each found by
+  being a minute or two wrong against the tables: **the moon's rise
+  threshold is compared against the *geocentric* altitude** — Meeus's
+  `0.7275 * parallax - 34'` already contains the parallax, so subtracting
+  it as well put every moonrise six or seven minutes late; **a
+  local-flavoured `DateTime` must never reach `toUtc()`** in this code,
+  because the machine's own zone would then be applied on top of the one
+  already added by hand, which put every moonrise two hours out; and
+  **the conversion back to the wall clock is Dart's `toLocal` by
+  default**, not a fixed offset taken at midnight, or every event on the
+  morning the clocks change would be an hour out. An event that does not
+  happen is `null` and said in words — "the sun does not set today" —
+  never printed as `--:--`, which reads as a broken app rather than as a
+  midnight sun.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

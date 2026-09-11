@@ -3719,4 +3719,151 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get poiCommunityCentre => 'Gemeindezentrum';
+
+  @override
+  String get daylightTitle => 'Tageslicht und Mond';
+
+  @override
+  String get daylightEntryHint =>
+      'Sonne, Dämmerung und Mond – auf dem Gerät gerechnet, ohne Netz.';
+
+  @override
+  String get daylightNoPlace => 'Noch kein Ort gesetzt';
+
+  @override
+  String get daylightNoPlaceWhy =>
+      'Sonnenstand und Mond hängen davon ab, wo du stehst. Setze den Ort einmal – er bleibt gespeichert und wird danach nie wieder gebraucht.';
+
+  @override
+  String get daylightSetPlace => 'Ort setzen';
+
+  @override
+  String get daylightChangePlace => 'Ort ändern';
+
+  @override
+  String get daylightCoordinates => 'Koordinaten';
+
+  @override
+  String get daylightCoordinatesHint => '52.2689, 10.5268';
+
+  @override
+  String get daylightCoordinatesBad =>
+      'Zwei Zahlen, Breite und Länge – zum Beispiel 52.2689, 10.5268.';
+
+  @override
+  String get daylightPlaceName => 'Name (frei)';
+
+  @override
+  String get daylightToday => 'Heute';
+
+  @override
+  String get daylightTomorrow => 'Morgen';
+
+  @override
+  String get daylightSunrise => 'Sonnenaufgang';
+
+  @override
+  String get daylightSunset => 'Sonnenuntergang';
+
+  @override
+  String get daylightSolarNoon => 'Höchststand';
+
+  @override
+  String get daylightCivilDawn => 'Erste Helligkeit';
+
+  @override
+  String get daylightCivilDusk => 'Letzte Helligkeit';
+
+  @override
+  String get daylightNauticalDawn => 'Dämmerungsbeginn';
+
+  @override
+  String get daylightNauticalDusk => 'Dämmerungsende';
+
+  @override
+  String daylightDayLength(String duration) {
+    return 'Tageslänge $duration';
+  }
+
+  @override
+  String daylightEveningTwilight(String duration) {
+    return 'Danach noch $duration nutzbares Licht';
+  }
+
+  @override
+  String get daylightAlwaysUp => 'Die Sonne geht heute nicht unter.';
+
+  @override
+  String get daylightAlwaysDown => 'Die Sonne geht heute nicht auf.';
+
+  @override
+  String get daylightMoon => 'Mond';
+
+  @override
+  String get daylightMoonrise => 'Mondaufgang';
+
+  @override
+  String get daylightMoonset => 'Monduntergang';
+
+  @override
+  String daylightMoonIllumination(int percent) {
+    return '$percent % beleuchtet';
+  }
+
+  @override
+  String get daylightMoonUpAllDay =>
+      'Der Mond steht heute durchgehend über dem Horizont.';
+
+  @override
+  String get daylightMoonDownAllDay =>
+      'Der Mond kommt heute nicht über den Horizont.';
+
+  @override
+  String get daylightMoonNoRise =>
+      'Heute kein Aufgang – der Mond geht jeden Tag rund 50 Minuten später auf.';
+
+  @override
+  String get daylightMoonNoSet => 'Heute kein Untergang.';
+
+  @override
+  String get daylightWhy =>
+      'Ohne Lichtschalter ist die Sonne der Arbeitstag, und ob der Mond scheint, entscheidet über Bewegung bei Nacht. Beides sind Fragen mit genauen Antworten – und beide lassen sich ohne Netz nicht mehr nachschlagen, wenn die Antwort nicht schon im Gerät steht.';
+
+  @override
+  String get daylightAccuracy =>
+      'Alles hier wird auf dem Gerät gerechnet, nichts abgefragt. Geprüft gegen die Tabellen der US Naval Observatory: Sonne und Mond liegen bei 112 verglichenen Zeiten höchstens eine Minute daneben. Die Zeiten gelten für freie Sicht zum Horizont – Berge, Wald und Häuser verschieben sie.';
+
+  @override
+  String get moonPhaseNew => 'Neumond';
+
+  @override
+  String get moonPhaseWaxingCrescent => 'Zunehmende Sichel';
+
+  @override
+  String get moonPhaseFirstQuarter => 'Erstes Viertel';
+
+  @override
+  String get moonPhaseWaxingGibbous => 'Zunehmender Dreiviertelmond';
+
+  @override
+  String get moonPhaseFull => 'Vollmond';
+
+  @override
+  String get moonPhaseWaningGibbous => 'Abnehmender Dreiviertelmond';
+
+  @override
+  String get moonPhaseLastQuarter => 'Letztes Viertel';
+
+  @override
+  String get moonPhaseWaningCrescent => 'Abnehmende Sichel';
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String durationMinutes(int minutes) {
+    return '$minutes min';
+  }
 }

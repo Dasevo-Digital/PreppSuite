@@ -6271,6 +6271,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Community centre'**
   String get poiCommunityCentre;
+
+  /// No description provided for @daylightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daylight and moon'**
+  String get daylightTitle;
+
+  /// No description provided for @daylightEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun, twilight and moon — worked out on the device, without a network.'**
+  String get daylightEntryHint;
+
+  /// No description provided for @daylightNoPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'No place set yet'**
+  String get daylightNoPlace;
+
+  /// No description provided for @daylightNoPlaceWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the sun and moon stand depends on where you are. Set the place once — it is remembered and never needed again.'**
+  String get daylightNoPlaceWhy;
+
+  /// No description provided for @daylightSetPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the place'**
+  String get daylightSetPlace;
+
+  /// No description provided for @daylightChangePlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the place'**
+  String get daylightChangePlace;
+
+  /// No description provided for @daylightCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates'**
+  String get daylightCoordinates;
+
+  /// No description provided for @daylightCoordinatesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'52.2689, 10.5268'**
+  String get daylightCoordinatesHint;
+
+  /// No description provided for @daylightCoordinatesBad.
+  ///
+  /// In en, this message translates to:
+  /// **'Two numbers, latitude and longitude — for example 52.2689, 10.5268.'**
+  String get daylightCoordinatesBad;
+
+  /// No description provided for @daylightPlaceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name (optional)'**
+  String get daylightPlaceName;
+
+  /// No description provided for @daylightToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get daylightToday;
+
+  /// No description provided for @daylightTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get daylightTomorrow;
+
+  /// No description provided for @daylightSunrise.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunrise'**
+  String get daylightSunrise;
+
+  /// No description provided for @daylightSunset.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset'**
+  String get daylightSunset;
+
+  /// No description provided for @daylightSolarNoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Solar noon'**
+  String get daylightSolarNoon;
+
+  /// No description provided for @daylightCivilDawn.
+  ///
+  /// In en, this message translates to:
+  /// **'First light'**
+  String get daylightCivilDawn;
+
+  /// No description provided for @daylightCivilDusk.
+  ///
+  /// In en, this message translates to:
+  /// **'Last light'**
+  String get daylightCivilDusk;
+
+  /// No description provided for @daylightNauticalDawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Twilight begins'**
+  String get daylightNauticalDawn;
+
+  /// No description provided for @daylightNauticalDusk.
+  ///
+  /// In en, this message translates to:
+  /// **'Twilight ends'**
+  String get daylightNauticalDusk;
+
+  /// No description provided for @daylightDayLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Day length {duration}'**
+  String daylightDayLength(String duration);
+
+  /// No description provided for @daylightEveningTwilight.
+  ///
+  /// In en, this message translates to:
+  /// **'Then {duration} of usable light'**
+  String daylightEveningTwilight(String duration);
+
+  /// No description provided for @daylightAlwaysUp.
+  ///
+  /// In en, this message translates to:
+  /// **'The sun does not set today.'**
+  String get daylightAlwaysUp;
+
+  /// No description provided for @daylightAlwaysDown.
+  ///
+  /// In en, this message translates to:
+  /// **'The sun does not rise today.'**
+  String get daylightAlwaysDown;
+
+  /// No description provided for @daylightMoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Moon'**
+  String get daylightMoon;
+
+  /// No description provided for @daylightMoonrise.
+  ///
+  /// In en, this message translates to:
+  /// **'Moonrise'**
+  String get daylightMoonrise;
+
+  /// No description provided for @daylightMoonset.
+  ///
+  /// In en, this message translates to:
+  /// **'Moonset'**
+  String get daylightMoonset;
+
+  /// No description provided for @daylightMoonIllumination.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent} % lit'**
+  String daylightMoonIllumination(int percent);
+
+  /// No description provided for @daylightMoonUpAllDay.
+  ///
+  /// In en, this message translates to:
+  /// **'The moon stays above the horizon all day.'**
+  String get daylightMoonUpAllDay;
+
+  /// No description provided for @daylightMoonDownAllDay.
+  ///
+  /// In en, this message translates to:
+  /// **'The moon does not come above the horizon today.'**
+  String get daylightMoonDownAllDay;
+
+  /// No description provided for @daylightMoonNoRise.
+  ///
+  /// In en, this message translates to:
+  /// **'No moonrise today — the moon rises about 50 minutes later each day.'**
+  String get daylightMoonNoRise;
+
+  /// No description provided for @daylightMoonNoSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No moonset today.'**
+  String get daylightMoonNoSet;
+
+  /// No description provided for @daylightWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a light switch the sun is the working day, and whether the moon is up decides whether moving at night is possible. Both are questions with exact answers, and neither can be looked up without a network unless the answer is already in the device.'**
+  String get daylightWhy;
+
+  /// No description provided for @daylightAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything here is computed on the device, nothing is fetched. Checked against the US Naval Observatory\'s tables: over 112 compared times, sun and moon are at most one minute out. The times assume a clear horizon — hills, trees and buildings shift them.'**
+  String get daylightAccuracy;
+
+  /// No description provided for @moonPhaseNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New moon'**
+  String get moonPhaseNew;
+
+  /// No description provided for @moonPhaseWaxingCrescent.
+  ///
+  /// In en, this message translates to:
+  /// **'Waxing crescent'**
+  String get moonPhaseWaxingCrescent;
+
+  /// No description provided for @moonPhaseFirstQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'First quarter'**
+  String get moonPhaseFirstQuarter;
+
+  /// No description provided for @moonPhaseWaxingGibbous.
+  ///
+  /// In en, this message translates to:
+  /// **'Waxing gibbous'**
+  String get moonPhaseWaxingGibbous;
+
+  /// No description provided for @moonPhaseFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full moon'**
+  String get moonPhaseFull;
+
+  /// No description provided for @moonPhaseWaningGibbous.
+  ///
+  /// In en, this message translates to:
+  /// **'Waning gibbous'**
+  String get moonPhaseWaningGibbous;
+
+  /// No description provided for @moonPhaseLastQuarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Last quarter'**
+  String get moonPhaseLastQuarter;
+
+  /// No description provided for @moonPhaseWaningCrescent.
+  ///
+  /// In en, this message translates to:
+  /// **'Waning crescent'**
+  String get moonPhaseWaningCrescent;
+
+  /// No description provided for @durationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String durationHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @durationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String durationMinutes(int minutes);
 }
 
 class _AppLocalizationsDelegate

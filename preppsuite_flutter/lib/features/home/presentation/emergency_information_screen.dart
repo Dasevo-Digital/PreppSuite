@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../daylight/presentation/daylight_screen.dart';
 import '../../maps/presentation/nearby_screen.dart';
 import '../../warnings/presentation/air_quality_screen.dart';
 import '../../warnings/presentation/road_closure_screen.dart';
@@ -316,6 +317,20 @@ class _EmergencyInformationScreenState
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const NearbyScreen()),
+            ),
+          ),
+          // Beside it for the same reason: the answer is already in the
+          // device. This one is arithmetic rather than a stored map, so
+          // it is as right on the tenth day without a network as on the
+          // first.
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+            leading: const Icon(Icons.wb_twilight_outlined),
+            title: Text(l10n.daylightTitle),
+            subtitle: Text(l10n.daylightEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const DaylightScreen()),
             ),
           ),
           ListTile(

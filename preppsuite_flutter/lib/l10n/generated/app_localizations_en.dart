@@ -3696,4 +3696,151 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get poiCommunityCentre => 'Community centre';
+
+  @override
+  String get daylightTitle => 'Daylight and moon';
+
+  @override
+  String get daylightEntryHint =>
+      'Sun, twilight and moon — worked out on the device, without a network.';
+
+  @override
+  String get daylightNoPlace => 'No place set yet';
+
+  @override
+  String get daylightNoPlaceWhy =>
+      'Where the sun and moon stand depends on where you are. Set the place once — it is remembered and never needed again.';
+
+  @override
+  String get daylightSetPlace => 'Set the place';
+
+  @override
+  String get daylightChangePlace => 'Change the place';
+
+  @override
+  String get daylightCoordinates => 'Coordinates';
+
+  @override
+  String get daylightCoordinatesHint => '52.2689, 10.5268';
+
+  @override
+  String get daylightCoordinatesBad =>
+      'Two numbers, latitude and longitude — for example 52.2689, 10.5268.';
+
+  @override
+  String get daylightPlaceName => 'Name (optional)';
+
+  @override
+  String get daylightToday => 'Today';
+
+  @override
+  String get daylightTomorrow => 'Tomorrow';
+
+  @override
+  String get daylightSunrise => 'Sunrise';
+
+  @override
+  String get daylightSunset => 'Sunset';
+
+  @override
+  String get daylightSolarNoon => 'Solar noon';
+
+  @override
+  String get daylightCivilDawn => 'First light';
+
+  @override
+  String get daylightCivilDusk => 'Last light';
+
+  @override
+  String get daylightNauticalDawn => 'Twilight begins';
+
+  @override
+  String get daylightNauticalDusk => 'Twilight ends';
+
+  @override
+  String daylightDayLength(String duration) {
+    return 'Day length $duration';
+  }
+
+  @override
+  String daylightEveningTwilight(String duration) {
+    return 'Then $duration of usable light';
+  }
+
+  @override
+  String get daylightAlwaysUp => 'The sun does not set today.';
+
+  @override
+  String get daylightAlwaysDown => 'The sun does not rise today.';
+
+  @override
+  String get daylightMoon => 'Moon';
+
+  @override
+  String get daylightMoonrise => 'Moonrise';
+
+  @override
+  String get daylightMoonset => 'Moonset';
+
+  @override
+  String daylightMoonIllumination(int percent) {
+    return '$percent % lit';
+  }
+
+  @override
+  String get daylightMoonUpAllDay =>
+      'The moon stays above the horizon all day.';
+
+  @override
+  String get daylightMoonDownAllDay =>
+      'The moon does not come above the horizon today.';
+
+  @override
+  String get daylightMoonNoRise =>
+      'No moonrise today — the moon rises about 50 minutes later each day.';
+
+  @override
+  String get daylightMoonNoSet => 'No moonset today.';
+
+  @override
+  String get daylightWhy =>
+      'Without a light switch the sun is the working day, and whether the moon is up decides whether moving at night is possible. Both are questions with exact answers, and neither can be looked up without a network unless the answer is already in the device.';
+
+  @override
+  String get daylightAccuracy =>
+      'Everything here is computed on the device, nothing is fetched. Checked against the US Naval Observatory\'s tables: over 112 compared times, sun and moon are at most one minute out. The times assume a clear horizon — hills, trees and buildings shift them.';
+
+  @override
+  String get moonPhaseNew => 'New moon';
+
+  @override
+  String get moonPhaseWaxingCrescent => 'Waxing crescent';
+
+  @override
+  String get moonPhaseFirstQuarter => 'First quarter';
+
+  @override
+  String get moonPhaseWaxingGibbous => 'Waxing gibbous';
+
+  @override
+  String get moonPhaseFull => 'Full moon';
+
+  @override
+  String get moonPhaseWaningGibbous => 'Waning gibbous';
+
+  @override
+  String get moonPhaseLastQuarter => 'Last quarter';
+
+  @override
+  String get moonPhaseWaningCrescent => 'Waning crescent';
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String durationMinutes(int minutes) {
+    return '$minutes min';
+  }
 }
