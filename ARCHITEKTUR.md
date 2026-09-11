@@ -600,6 +600,20 @@ tree; the test suite deliberately targets that layer rather than the UI.
   household that had set a region. `DwdAreas` now maps the name to a
   district key, and `null` — "concerns everyone" — is the fallback,
   because for a civil-protection alert too many people is the safe error.
+- **A library entry carries what the archive says about itself.**
+  `StoredArchive` keeps the title, the one-line description and the 48x48
+  cover out of the ZIM's own `M/` namespace, written when the archive is
+  opened alongside its size and entry count. Read on demand instead, a
+  library screen would mean opening every archive and decompressing a
+  cluster per tile — and only one archive is ever open at a time. An entry
+  from before 1.6.0 has none of the three until the next time it is
+  opened, which is why every reader falls back to the file name.
+- **`response.body` decodes as Latin-1 unless the header names a
+  charset.** `KiwixCatalogue._get` carried a comment saying to use
+  `bodyBytes` for years while the code below it used `body`, and
+  "français" came through as "franÃ§ais". The live server does send
+  `charset=utf-8`, so nothing showed it; a mirror that does not would
+  mangle every non-ASCII title in the library. Same trap as PEGELONLINE.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions
