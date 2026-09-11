@@ -893,5 +893,11 @@
   "settingsRegionKeyInvalid": "Bitte fünf oder zwölf Ziffern eingeben (z. B. 03101).",
   "shelterOverpassBusyMessage": "OpenStreetMap/Overpass ist gerade ausgelastet (Anfragelimit). In einigen Sekunden erneut versuchen.",
   "shelterSourceFailureReason": "Grund: {reason}",
-  "@shelterSourceFailureReason": {"placeholders": {"reason": {"type": "String"}}}
+  "@shelterSourceFailureReason": {"placeholders": {"reason": {"type": "String"}}},
+  "kiwixLanguageSearchHint": "Sprache suchen",
+  "kiwixLanguageCount": "{count} Sprachen",
+  "@kiwixLanguageCount": {"placeholders": {"count": {"type": "int"}}},
+  "kiwixLanguageNoMatch": "Keine Sprache gefunden.",
+  "kiwixLanguageArchives": "{count} Archive",
+  "@kiwixLanguageArchives": {"placeholders": {"count": {"type": "int"}}}
 }

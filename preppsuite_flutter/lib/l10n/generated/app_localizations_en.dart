@@ -3145,4 +3145,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String shelterSourceFailureReason(String reason) {
     return 'Reason: $reason';
   }
+
+  @override
+  String get kiwixLanguageSearchHint => 'Search language';
+
+  @override
+  String kiwixLanguageCount(int count) {
+    return '$count languages';
+  }
+
+  @override
+  String get kiwixLanguageNoMatch => 'No language found.';
+
+  @override
+  String kiwixLanguageArchives(int count) {
+    return '$count archives';
+  }
 }

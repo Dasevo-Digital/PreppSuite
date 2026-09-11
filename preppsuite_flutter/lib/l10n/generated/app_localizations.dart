@@ -5341,6 +5341,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reason: {reason}'**
   String shelterSourceFailureReason(String reason);
+
+  /// No description provided for @kiwixLanguageSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search language'**
+  String get kiwixLanguageSearchHint;
+
+  /// No description provided for @kiwixLanguageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} languages'**
+  String kiwixLanguageCount(int count);
+
+  /// No description provided for @kiwixLanguageNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No language found.'**
+  String get kiwixLanguageNoMatch;
+
+  /// No description provided for @kiwixLanguageArchives.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} archives'**
+  String kiwixLanguageArchives(int count);
 }
 
 class _AppLocalizationsDelegate

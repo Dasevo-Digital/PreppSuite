@@ -119,6 +119,16 @@ marked clean. This was a real bug across all three controllers;
 `inventory_controller_test` guards it. The flag now feeds shared-folder sync
 rather than a server.
 
+**Map labels come from the archive, never from the app.** There is no
+list of city names in the code, and there must not be one: a hard-coded
+"Braunschweig" marker existed until 1.6.0 on the theory that the renderer
+dropped the label. It did not — the extract's own `place` layer carries
+Braunschweig from zoom 7 — so the marker drew a second copy from 7 up and
+invented one at 6, where the schema names no city of that size in any
+country. It also only applied to the map screen and not to the shelter
+map, so the two disagreed about the same place.
+`test/live/offline_map_labels_test.dart` checks the archive instead.
+
 **The offline map only renders an OpenMapTiles-schema archive.** The style
 is `ProvidedThemes.lightTheme()` from `vector_tile_renderer`, which reads
 layer names like `water` and `transportation`; a Protomaps-schema archive
@@ -601,7 +611,11 @@ parallel one.
 ### Resource and interaction limits
 
 - `HomeShell` creates destinations on first use and preserves their navigation
-  state afterwards. `FeatureActivity` removes inactive map renderers; map camera
+  state afterwards. `FeatureActivity` releases a map renderer a minute after
+  the map leaves the screen (`BaseMapLayer.releaseGrace`), not the instant it
+  does: reading and decoding a screenful of 48 tiles out of a country extract
+  is 117 ms, and dropping the cache on every tab switch paid that again on
+  every return. Memory pressure ends the grace period early. Map camera
   state stays in the screen. Shelter search requests location only after a user
   action.
 - Vector map caches have a 16 MiB tile budget on mobile and 48 MiB on desktop,

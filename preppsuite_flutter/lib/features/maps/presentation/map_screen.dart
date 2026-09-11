@@ -8,7 +8,6 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/offline_map_providers.dart';
 import 'base_map_layer.dart';
 import 'map_download_screen.dart';
-import 'offline_city_labels.dart';
 import 'map_source_bar.dart';
 import 'map_zoom_buttons.dart';
 import 'swipe_zoom.dart';
@@ -161,7 +160,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 ),
                 children: [
                   const BaseMapLayer(),
-                  const OfflineCityLabels(),
                   if (_position case final position?)
                     MarkerLayer(
                       markers: [

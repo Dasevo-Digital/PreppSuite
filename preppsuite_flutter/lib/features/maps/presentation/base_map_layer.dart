@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -25,6 +26,23 @@ import '../application/pmtiles_tile_provider.dart';
 /// forgetting the archive to do it.
 class BaseMapLayer extends ConsumerStatefulWidget {
   const BaseMapLayer({super.key});
+
+  /// How long a map that is no longer being looked at keeps its renderer.
+  ///
+  /// It used to be dropped the moment the tab lost focus, which made
+  /// every return to the map a cold start: the parsed-tile cache went
+  /// with it, and the whole screenful had to be read, decoded and
+  /// rasterised again. Measured on a 1.9 GB country extract, opening the
+  /// archive is 3 ms and the first tile 8 ms — but reading and decoding a
+  /// screenful of 48 tiles is 117 ms of work that was being repeated for
+  /// nothing every time somebody checked the shopping list and came back.
+  ///
+  /// A minute rather than forever, because there are two map
+  /// destinations and their caches are 48 MiB each on desktop. Somebody
+  /// switching tabs gets the map back instantly; somebody who has moved
+  /// on gets the memory back. Memory pressure ends it early.
+  static const releaseGrace = Duration(seconds: 60);
+
   @override
   ConsumerState<BaseMapLayer> createState() => _BaseMapLayerState();
 }
@@ -33,28 +51,66 @@ class _BaseMapLayerState extends ConsumerState<BaseMapLayer> {
   late final MemoryPressureListener _memory;
   int _cacheGeneration = 0;
   bool _lowMemory = false;
+
+  /// Whether the renderer has actually been let go.
+  bool _released = false;
+  Timer? _release;
+
+  /// Whether this map is the one on screen. Kept as a field so the
+  /// memory-pressure callback can act on it without a build context.
+  bool _active = true;
+
   @override
   void initState() {
     super.initState();
     _memory = MemoryPressureListener(() {
-      if (mounted) {
-        setState(() {
-          _lowMemory = true;
-          _cacheGeneration++;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _lowMemory = true;
+        _cacheGeneration++;
+        // Pressure ends the grace period outright. Holding a cache for a
+        // map nobody is looking at is exactly what there is no room for.
+        if (!_active) {
+          _release?.cancel();
+          _release = null;
+          _released = true;
+        }
+      });
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // FeatureActivity is an inherited widget, so this runs on every
+    // change of it — which is what starts and stops the grace period.
+    _active = FeatureActivity.of(context);
+    if (_active) {
+      _release?.cancel();
+      _release = null;
+      if (_released) setState(() => _released = false);
+      return;
+    }
+
+    if (_released || _release != null) return;
+    _release = Timer(BaseMapLayer.releaseGrace, () {
+      if (mounted) setState(() => _released = true);
     });
   }
 
   @override
   void dispose() {
+    _release?.cancel();
     _memory.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!FeatureActivity.of(context)) return const SizedBox.shrink();
+    // Still read, and still the thing that decides — a released renderer
+    // stays released until this says the map is being looked at again.
+    final active = FeatureActivity.of(context);
+    if (!active && _released) return const SizedBox.shrink();
     final mobile = Platform.isAndroid || Platform.isIOS;
     final archive = usesOfflineMap(ref)
         ? ref.watch(offlineMapProvider).value?.archive
@@ -69,8 +125,10 @@ class _BaseMapLayerState extends ConsumerState<BaseMapLayer> {
           'openmaptiles': PmTilesVectorTileProvider(archive),
         }),
         key: ValueKey(_cacheGeneration),
-        // Only the visible map keeps a renderer. Pressure recreates it
-        // with a smaller budget; the map camera remains in its parent.
+        // A map keeps its renderer while it is on screen and for
+        // [BaseMapLayer.releaseGrace] after. Pressure recreates it with a smaller
+        // budget, or drops it outright where it is not on screen; the map
+        // camera remains in its parent either way.
         memoryTileCacheMaxSize:
             (_lowMemory
                 ? 8

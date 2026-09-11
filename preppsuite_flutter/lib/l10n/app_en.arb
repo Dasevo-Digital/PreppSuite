@@ -1700,5 +1700,11 @@
   "settingsRegionKeyInvalid": "Enter five or twelve digits (for example 03101).",
   "shelterOverpassBusyMessage": "OpenStreetMap/Overpass is busy right now (request limit). Try again in a few seconds.",
   "shelterSourceFailureReason": "Reason: {reason}",
-  "@shelterSourceFailureReason": {"placeholders": {"reason": {"type": "String"}}}
+  "@shelterSourceFailureReason": {"placeholders": {"reason": {"type": "String"}}},
+  "kiwixLanguageSearchHint": "Search language",
+  "kiwixLanguageCount": "{count} languages",
+  "@kiwixLanguageCount": {"placeholders": {"count": {"type": "int"}}},
+  "kiwixLanguageNoMatch": "No language found.",
+  "kiwixLanguageArchives": "{count} archives",
+  "@kiwixLanguageArchives": {"placeholders": {"count": {"type": "int"}}}
 }

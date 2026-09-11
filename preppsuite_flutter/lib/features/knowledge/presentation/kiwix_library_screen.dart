@@ -346,6 +346,13 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
   }
 }
 
+/// Which language to browse the library in.
+///
+/// A field that opens a searchable list rather than a dropdown: the
+/// catalogue offers 337 languages, and a menu that long is scrolled past
+/// rather than read — on a phone it is several screens of names in their
+/// own scripts. Typing two letters is the only way anyone finds "Deutsch"
+/// in it.
 class _LanguagePicker extends ConsumerWidget {
   const _LanguagePicker({
     required this.value,
@@ -360,32 +367,147 @@ class _LanguagePicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final languages = ref.watch(_languagesProvider);
+    final known = languages.value;
 
-    return DropdownButtonFormField<String>(
-      initialValue: value,
-      isExpanded: true,
+    KiwixLanguage? current;
+    for (final language in known ?? const <KiwixLanguage>[]) {
+      if (language.code == value) current = language;
+    }
+
+    // The code until the list arrives, so the field shows what is in
+    // effect rather than going blank.
+    final label = current == null
+        ? (value ?? '')
+        : '${current.name} (${current.archiveCount})';
+
+    return InputDecorator(
       decoration: InputDecoration(
         labelText: l10n.kiwixLanguageLabel,
         border: const OutlineInputBorder(),
+        suffixIcon: const Icon(Icons.arrow_drop_down),
+        // Says how much is behind the field, which is the reason it is
+        // not a menu.
+        helperText: known == null
+            ? null
+            : l10n.kiwixLanguageCount(known.length),
       ),
-      items: switch (languages) {
-        AsyncData(:final value) => [
-          for (final language in value)
-            DropdownMenuItem(
-              value: language.code,
-              child: Text('${language.name} (${language.archiveCount})'),
+      child: InkWell(
+        onTap: known == null
+            ? null
+            : () async {
+                final picked = await showDialog<String>(
+                  context: context,
+                  builder: (context) => _LanguageDialog(
+                    languages: known,
+                    selected: value,
+                    l10n: l10n,
+                  ),
+                );
+                if (picked != null) onChanged(picked);
+              },
+        child: Row(
+          children: [
+            Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The searchable list itself.
+class _LanguageDialog extends StatefulWidget {
+  const _LanguageDialog({
+    required this.languages,
+    required this.selected,
+    required this.l10n,
+  });
+
+  final List<KiwixLanguage> languages;
+  final String? selected;
+  final AppLocalizations l10n;
+
+  @override
+  State<_LanguageDialog> createState() => _LanguageDialogState();
+}
+
+class _LanguageDialogState extends State<_LanguageDialog> {
+  final _controller = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// Matched on the name and on the code, because both are things people
+  /// type: "deu" is what the catalogue calls German and what a
+  /// suggestion names, and "Deutsch" is what a person looking for it
+  /// reads.
+  List<KiwixLanguage> get _matches {
+    final query = _query.trim().toLowerCase();
+    if (query.isEmpty) return widget.languages;
+    return [
+      for (final language in widget.languages)
+        if (language.name.toLowerCase().contains(query) ||
+            language.code.toLowerCase().contains(query))
+          language,
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final matches = _matches;
+
+    return AlertDialog(
+      title: Text(widget.l10n.kiwixLanguageLabel),
+      content: SizedBox(
+        width: 420,
+        height: 440,
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
+              autofocus: true,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: widget.l10n.kiwixLanguageSearchHint,
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: (value) => setState(() => _query = value),
             ),
-        ],
-        // Until the list arrives the current choice is the only item, so
-        // the field shows what is in effect rather than going blank.
-        _ => [
-          if (value != null)
-            DropdownMenuItem(value: value, child: Text(value!)),
-        ],
-      },
-      onChanged: (code) {
-        if (code != null) onChanged(code);
-      },
+            const SizedBox(height: 8),
+            Expanded(
+              child: matches.isEmpty
+                  ? Center(child: Text(widget.l10n.kiwixLanguageNoMatch))
+                  : ListView.builder(
+                      itemCount: matches.length,
+                      itemBuilder: (context, index) {
+                        final language = matches[index];
+                        return ListTile(
+                          selected: language.code == widget.selected,
+                          title: Text(language.name),
+                          subtitle: Text(
+                            widget.l10n.kiwixLanguageArchives(
+                              language.archiveCount,
+                            ),
+                          ),
+                          trailing: Text(language.code),
+                          onTap: () => Navigator.of(context).pop(language.code),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(widget.l10n.cancelButton),
+        ),
+      ],
     );
   }
 }
