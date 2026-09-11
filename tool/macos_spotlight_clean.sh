@@ -85,3 +85,35 @@ echo "Im Dateiindex:"
 mdfind "kMDItemContentType == 'com.apple.application-bundle'" 2>/dev/null \
   | grep -i prepp \
   | sed 's/^/  /'
+
+# Ordner, die Spotlight fuer Programme haelt.
+#
+# Nicht jeder Eintrag oben ist eine App. Auf diesem Mac wird ein sichtbarer
+# Ordner, dessen Name auf `.0` endet, als com.apple.application-bundle
+# geführt, Art "Programm" -- die Release-Ordner v1.4.0 und v1.5.0 standen so
+# in Spotlights Programme-Abschnitt, v1.3.1 nicht. Dreimal mit sichtbaren
+# Probeordnern reproduziert. Es ist nicht die UTI (`.0` loest auf einen
+# undeklarierten dynamischen Typ auf, der weder Paket noch Programm ist) und
+# nicht der Inode (frische Verzeichnisse verhalten sich gleich).
+#
+# lsregister hilft dagegen nicht: der Eintrag steht nicht in Launch Services,
+# sondern im Dateiindex. Was hilft, ist ein anderer Name. Deshalb wird hier
+# nur gemeldet und nicht umbenannt -- Ordner auf dem Schreibtisch gehoeren
+# dem Nutzer.
+mislabelled=0
+while IFS= read -r path; do
+  [ -e "$path/Contents/Info.plist" ] && continue
+  if [ "$mislabelled" = 0 ]; then
+    echo
+    echo "Als Programm gefuehrt, aber keine App:"
+  fi
+  mislabelled=$((mislabelled + 1))
+  echo "  $path"
+done < <(mdfind "kMDItemContentType == 'com.apple.application-bundle'" 2>/dev/null \
+  | grep -i prepp)
+
+if [ "$mislabelled" != 0 ]; then
+  echo
+  echo "  Abhilfe: umbenennen, sodass der Name nicht auf .0 endet."
+  echo "  Ein angehaengtes -Upload genuegt."
+fi
