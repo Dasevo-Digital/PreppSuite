@@ -39,19 +39,23 @@ void main() {
   });
 
   tearDown(() async {
-    // Every archive shut before the files under it go. Windows refuses to
-    // delete a file another handle still holds, and an archive is closed
-    // asynchronously — so the folder is retried rather than deleted once
-    // and hoped for. On macOS and Linux the first attempt succeeds.
+    // Every archive shut before the files under it go.
     for (final container in opened) {
       close(container);
     }
-    for (var attempt = 0; ; attempt++) {
+
+    // Best effort, and deliberately so. Windows refuses to delete a file
+    // another handle still holds, and an archive is closed without
+    // anybody awaiting it — `KnowledgeController._closeCurrent` fires the
+    // close and returns, because on disposal there is no one left to wait
+    // for it. That is right for the app and leaves a test no way to force
+    // the handle shut. What these tests assert is what the screen shows;
+    // a temporary folder is the system's to reclaim.
+    for (var attempt = 0; attempt < 40; attempt++) {
       try {
         workspace.deleteSync(recursive: true);
         return;
       } on FileSystemException {
-        if (attempt >= 40) rethrow;
         await Future<void>.delayed(const Duration(milliseconds: 50));
       }
     }
