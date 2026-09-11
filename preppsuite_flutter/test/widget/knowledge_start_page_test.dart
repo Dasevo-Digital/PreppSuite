@@ -128,6 +128,22 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Unmounts the screen and closes the library, with the real event loop
+  /// turning.
+  ///
+  /// An open archive holds a file handle and a loopback server, and both
+  /// are closed asynchronously. Windows refuses to delete a file another
+  /// handle still holds, so leaving this to the tear-down meant the
+  /// temporary folder could not be removed — on macOS and Linux the same
+  /// leak simply went unnoticed.
+  Future<void> shutdown(WidgetTester tester, ProviderContainer container) async {
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.runAsync(() async {
+      close(container);
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    });
+  }
+
   /// Pumps until [ready], letting the real event loop run in between.
   ///
   /// Opening an archive reads a file and starts a loopback server, and
@@ -179,6 +195,8 @@ void main() {
     expect(inGrid(find.byIcon(Icons.check_circle)), findsOneWidget);
     // And the browse card is still there, below them.
     expect(find.text('Archiv durchblättern'), findsOneWidget);
+
+    await shutdown(tester, container);
   });
 
   testWidgets('no archive can be deleted from the start page', (tester) async {
@@ -188,6 +206,8 @@ void main() {
     expect(container.read(knowledgeProvider).requireValue.isReady, isTrue);
 
     expect(find.byIcon(Icons.delete_outline), findsNothing);
+
+    await shutdown(tester, container);
   });
 
   testWidgets('tapping a tile opens that archive', (tester) async {
@@ -206,19 +226,11 @@ void main() {
       tester,
       () => container.read(knowledgeProvider).requireValue.title == 'Klexikon',
     );
-    // An open archive holds a loopback server and a file handle, and the
-    // timers behind them outlast the frame the assertion above passes on.
-    // Closed here, in the real event loop, rather than left for the
-    // tear-down that runs after the widget test checks for them.
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.runAsync(() async {
-      close(container);
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-    });
+    await shutdown(tester, container);
   });
 
   testWidgets('one archive alone still gets a tile', (tester) async {
-    await pumpLibrary(
+    final container = await pumpLibrary(
       tester,
       build: () async {
         final container = ProviderContainer();
@@ -244,10 +256,12 @@ void main() {
       ),
       findsOneWidget,
     );
+
+    await shutdown(tester, container);
   });
 
   testWidgets('a search replaces the tiles with its results', (tester) async {
-    await pumpLibrary(tester);
+    final container = await pumpLibrary(tester);
 
     await tester.enterText(find.byType(TextField), 'Artikel');
     // Past the 250 ms the field waits before it searches.
@@ -259,6 +273,8 @@ void main() {
       reason: 'the library gives way to what was asked for',
     );
     await settle(tester, () => find.text('Artikel').evaluate().isNotEmpty);
+
+    await shutdown(tester, container);
   });
 
   test('the library entry survives a restart of the app', () async {
