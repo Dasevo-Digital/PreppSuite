@@ -24,9 +24,36 @@ cd preppsuite_flutter && flutter test
 cd preppsuite_flutter && flutter test integration_test/ -d <device>
 ```
 
-Linux is built in a container from here — see [`tool/docker/`](tool/docker/).
-Windows cannot be built on a Mac at all; `.github/workflows/build-desktop.yml`
-is the only path to one.
+Linux is built in a container from here — see [`tool/docker/`](tool/docker/),
+but on Apple silicon that produces **arm64**. Windows cannot be built on a
+Mac at all.
+
+**The shipped x64 packages for both come from two machines on the LAN**,
+`TestKubuntu` and `TestWindows` in `~/.ssh/config`, each with Flutter
+3.44.8 installed. `.github/workflows/build-desktop.yml` describes the same
+builds and is useful as a list of what they need, but it is **not** a build
+path here: the repository lives on Gitea and has no Actions runner
+registered — zero runs, checked. Anything saying the workflow is the only
+way to a Windows build is wrong and has cost a detour before.
+
+The source goes over as a tarball of the tag rather than a checkout, so
+what is built is exactly what was tagged and no local build residue comes
+along:
+
+```bash
+git archive --format=tar.gz --prefix=src/ -o /tmp/src.tar.gz v<version>
+# TestKubuntu: extract, then
+#   flutter pub get
+#   preppsuite_flutter/native/zim_xapian/build_linux.sh   # before the app
+#   cd preppsuite_flutter && flutter build linux --release
+# TestWindows (cmd.exe over ssh): extract with `tar -xzf`, then
+#   cd ...\preppsuite_flutter && flutter build windows --release
+```
+
+The Xapian step has to run **before** the app or CMake will not bundle the
+library, and skipping it silently costs the archive's own full-text index —
+1.5.0 shipped a Linux package without `libzim_xapian.so` for exactly that
+reason. Windows has no shim at all; there the app searches its own index.
 
 Generated data assets:
 
