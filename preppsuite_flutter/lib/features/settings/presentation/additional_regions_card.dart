@@ -7,6 +7,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../household/application/german_states.dart';
 import '../../household/application/household_providers.dart';
+import '../../warnings/application/dwd_areas_provider.dart';
 import '../../warnings/application/warning_region_filter.dart';
 
 /// Regions followed beyond the household's own.
@@ -35,7 +36,7 @@ class AdditionalRegionsCard extends ConsumerWidget {
                       ? Icons.location_city
                       : Icons.map_outlined,
                 ),
-                title: Text(_regionTitle(region)),
+                title: Text(_regionTitle(ref, region)),
                 subtitle: Text(
                   region.kind == WarningRegionKind.kreis
                       ? l10n.settingsRegionTypeKreis
@@ -70,9 +71,15 @@ class AdditionalRegionsCard extends ConsumerWidget {
 }
 
 /// "NI" is what gets stored and what the BBK feed says; it is not what
-/// anyone calls the place they live.
-String _regionTitle(WarningRegion region) {
-  if (region.kind == WarningRegionKind.kreis) return region.value;
+/// anyone calls the place they live. Neither is "03101".
+String _regionTitle(WidgetRef ref, WarningRegion region) {
+  if (region.kind == WarningRegionKind.kreis) {
+    final described = describeRegionKey(
+      ref.watch(dwdAreasProvider).value,
+      region.value,
+    );
+    return described == null ? region.value : '$described (${region.value})';
+  }
   return germanStateByBbkCode(region.value)?.nameDe ?? region.value;
 }
 
@@ -201,7 +208,7 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
             }),
           ),
           const SizedBox(height: 16),
-          if (_kind == WarningRegionKind.kreis)
+          if (_kind == WarningRegionKind.kreis) ...[
             TextField(
               controller: _kreisController,
               keyboardType: TextInputType.number,
@@ -210,8 +217,16 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
                 helperText: l10n.settingsKreisSchluesselHelper,
                 errorText: _error,
               ),
-            )
-          else
+              // So the district's name appears under the field while it
+              // is being typed, rather than after saving the wrong one.
+              onChanged: (_) => setState(() => _error = null),
+            ),
+            const SizedBox(height: 8),
+            _KreisPreview(
+              regionKey: _kreisController.text.trim(),
+              l10n: l10n,
+            ),
+          ] else
             DropdownButtonFormField<GermanState>(
               // A FormField reads `initialValue` once and never again, so
               // the state the location button finds would not show up
@@ -255,6 +270,46 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
         FilledButton(
           onPressed: () => _add(l10n),
           child: Text(l10n.settingsAddRegionButton),
+        ),
+      ],
+    );
+  }
+}
+
+/// The district a typed Kreisschluessel names, while it is being typed.
+class _KreisPreview extends ConsumerWidget {
+  const _KreisPreview({required this.regionKey, required this.l10n});
+
+  final String regionKey;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (regionKey.length < 5) return const SizedBox.shrink();
+
+    final theme = Theme.of(context);
+    final described = describeRegionKey(
+      ref.watch(dwdAreasProvider).value,
+      regionKey,
+    );
+
+    return Row(
+      children: [
+        Icon(
+          described == null ? Icons.help_outline : Icons.place_outlined,
+          size: 18,
+          color: described == null
+              ? theme.colorScheme.error
+              : theme.colorScheme.primary,
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            described ?? l10n.settingsRegionUnknownKey,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: described == null ? theme.colorScheme.error : null,
+            ),
+          ),
         ),
       ],
     );

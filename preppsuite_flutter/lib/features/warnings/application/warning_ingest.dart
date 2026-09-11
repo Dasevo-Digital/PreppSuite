@@ -42,6 +42,10 @@ class WarningIngest {
     /// the Kreisschlüssel is a better `regionKey` than the state code
     /// guessed from the warning id.
     String? regionKeyOverride,
+
+    /// Last resort for the warnings whose id names no state — KATWARN's
+    /// do not. See [_bbkRegionKey].
+    DwdAreas? areas,
   }) async {
     // One query for the whole source, instead of one per warning inside the
     // loop below. See [AppDatabase.warningsBySource].
@@ -55,7 +59,11 @@ class WarningIngest {
         source: WarningSource.bbk,
         externalId: warning.id,
         countryCode: countryCode,
-        regionKey: regionKeyOverride ?? bbkRegionFromId(warning.id),
+        regionKey: _bbkRegionKey(
+          warning,
+          override: regionKeyOverride,
+          areas: areas,
+        ),
         severity: _parseSeverity(warning.severity),
         eventType: warning.eventTitleDe,
         headline: warning.eventTitleDe,
@@ -212,6 +220,34 @@ class WarningIngest {
     if (value == null || value.isEmpty) return null;
     return DateTime.tryParse(value)?.toUtc();
   }
+}
+
+/// Where a BBK warning applies, best effort, in order of trust.
+///
+/// 1. A precise per-Kreis fetch, where the district is known outright.
+/// 2. The state in the warning's own id, which is most sources.
+/// 3. The one state its area description unanimously names.
+///
+/// The third step exists because of KATWARN: its ids carry no state at
+/// all (`kat.6aa2cd02995efd5eae120ffb_public_topics`), so an earthquake
+/// near Worms came out unplaced — and unplaced means "concerns
+/// everyone", which put it in front of a household in Braunschweig. It
+/// is tried last and only ever yields a state, never a district: see
+/// [DwdAreas.stateForAreaNames] for why narrowing further would be
+/// dangerous.
+String? _bbkRegionKey(
+  BbkRawWarning warning, {
+  required String? override,
+  required DwdAreas? areas,
+}) {
+  if (override != null) return override;
+
+  final fromId = bbkRegionFromId(warning.id);
+  if (fromId != null) return fromId;
+
+  final description = warning.areaDescription;
+  if (areas == null || description == null) return null;
+  return areas.stateForAreaNames(description);
 }
 
 /// BBK ids embed a state code, but not in one shape — the sources use two,

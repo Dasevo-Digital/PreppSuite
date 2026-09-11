@@ -888,5 +888,7 @@
   "emergencyPlanPdfMeetingPoints": "Treffpunkte",
   "emergencyPlanPdfContact": "Kontakt außerhalb der Region",
   "emergencyPlanPdfEquipment": "Notgepäck und Abschaltpunkte",
-  "emergencyPlanPdfEmpty": "Nicht eingetragen"
+  "emergencyPlanPdfEmpty": "Nicht eingetragen",
+  "settingsRegionUnknownKey": "Unbekannter Schlüssel — bitte prüfen",
+  "settingsRegionKeyInvalid": "Bitte fünf oder zwölf Ziffern eingeben (z. B. 03101)."
 }

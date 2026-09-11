@@ -73,6 +73,19 @@ class WarningPollService {
     var retired = 0;
     var complete = true;
 
+    // Loaded once for the whole poll and shared by both feeds. Only
+    // Germany has a table to place areas with; a table that will not load
+    // must not cost the warnings themselves — without it they simply
+    // concern the whole country.
+    DwdAreas? areas;
+    if (countryCode == 'DE') {
+      try {
+        areas = await DwdAreas.load();
+      } on Object {
+        areas = null;
+      }
+    }
+
     if (countryCode == 'DE') {
       final nationwide = await _bbk.fetchAll();
       final detailedNationwide = await _detailsForChanged(
@@ -81,7 +94,11 @@ class WarningPollService {
       complete = nationwide.complete;
       fetched += nationwide.warnings.length;
       newsworthy.addAll(
-        await _ingest.ingestBbk(detailedNationwide, countryCode: 'DE'),
+        await _ingest.ingestBbk(
+          detailedNationwide,
+          countryCode: 'DE',
+          areas: areas,
+        ),
       );
 
       final seen = {for (final w in nationwide.warnings) w.id};
@@ -118,17 +135,6 @@ class WarningPollService {
     if (slug != null) {
       final warnings = await _meteoAlarm.fetchCountry(slug);
       fetched += warnings.length;
-      // Only Germany can place these areas — the list behind it is the
-      // DWD's. A table that will not load must not cost the warnings
-      // themselves: without it they simply concern the whole country.
-      DwdAreas? areas;
-      if (countryCode == 'DE') {
-        try {
-          areas = await DwdAreas.load();
-        } on Object {
-          areas = null;
-        }
-      }
       newsworthy.addAll(
         await _ingest.ingestMeteoAlarm(
           warnings,

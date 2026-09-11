@@ -28,7 +28,26 @@ class WarningBanner extends ConsumerWidget {
     final warningsAsync = ref.watch(activeWarningsProvider);
 
     return warningsAsync.maybeWhen(
-      data: (warnings) {
+      data: (all) {
+        // Only what concerns this household. Every other reader of
+        // `activeWarningsProvider` — the overview card, the destination
+        // badge, the emergency screen — already filters this way, and
+        // this one did not: a minor bomb disposal in Dulmen sat across
+        // the top of every tab of a household in Braunschweig, with
+        // "+7 more" behind it, while the badge beside it showed 1. The
+        // banner is the thing that must be seen without looking, which
+        // makes it the worst place to put somebody else's warning.
+        //
+        // The screen behind it still lists them — that is where the ones
+        // concerning somewhere else belong.
+        final warnings = [
+          for (final warning in all)
+            if (isWarningRelevant(
+              warning: warning,
+              filter: profile.warningFilter,
+            ))
+              warning,
+        ];
         if (warnings.isEmpty) return const SizedBox.shrink();
 
         // Severity is still the primary sort key — an extreme nationwide

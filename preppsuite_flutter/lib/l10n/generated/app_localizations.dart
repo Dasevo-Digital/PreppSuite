@@ -5317,6 +5317,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not entered'**
   String get emergencyPlanPdfEmpty;
+
+  /// No description provided for @settingsRegionUnknownKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown key — please check'**
+  String get settingsRegionUnknownKey;
+
+  /// No description provided for @settingsRegionKeyInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter five or twelve digits (for example 03101).'**
+  String get settingsRegionKeyInvalid;
 }
 
 class _AppLocalizationsDelegate

@@ -3148,4 +3148,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get emergencyPlanPdfEmpty => 'Nicht eingetragen';
+
+  @override
+  String get settingsRegionUnknownKey => 'Unbekannter Schlüssel — bitte prüfen';
+
+  @override
+  String get settingsRegionKeyInvalid =>
+      'Bitte fünf oder zwölf Ziffern eingeben (z. B. 03101).';
 }

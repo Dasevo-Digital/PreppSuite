@@ -1695,5 +1695,7 @@
   "emergencyPlanPdfMeetingPoints": "Meeting points",
   "emergencyPlanPdfContact": "Contact outside the area",
   "emergencyPlanPdfEquipment": "Emergency kit and shut-off points",
-  "emergencyPlanPdfEmpty": "Not entered"
+  "emergencyPlanPdfEmpty": "Not entered",
+  "settingsRegionUnknownKey": "Unknown key — please check",
+  "settingsRegionKeyInvalid": "Enter five or twelve digits (for example 03101)."
 }

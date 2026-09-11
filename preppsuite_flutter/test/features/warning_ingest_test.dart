@@ -3,6 +3,7 @@ import 'package:drift/drift.dart'
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/warnings/application/bbk_client.dart';
+import 'package:preppsuite_flutter/features/warnings/application/dwd_areas.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_ingest.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
@@ -134,6 +135,103 @@ void main() {
     ], countryCode: 'DE');
 
     expect(calmer, isEmpty);
+  });
+
+  group('placing a warning whose id names no state', () {
+    // KATWARN's ids carry none, so these came out unplaced — and unplaced
+    // means "concerns everyone". An earthquake near Worms was pinned to
+    // the top of a household in Braunschweig because of it.
+    final areas = DwdAreas.parse("""
+# name;district;state
+Kreis Alzey-Worms;07331;RP
+Kreis Bad Dürkheim;07332;RP
+Rhein-Pfalz-Kreis;07338;RP
+Kreis Göttingen;03159;NI
+Kreis Kassel;06633;HE
+""");
+
+    BbkRawWarning katwarn({String? areaDescription}) =>
+        raw(
+          id: 'kat.6aa2cd02995efd5eae120ffb_public_topics',
+        ).withDetails(
+          description: null,
+          instruction: null,
+          areaDescription: areaDescription,
+          senderContact: null,
+          polygons: const [],
+        );
+
+    Future<String?> storedRegionKey() async {
+      final rows = await db.select(db.warnings).get();
+      return rows.single.regionKey;
+    }
+
+    test('the area description places it in its state', () async {
+      await ingest.ingestBbk(
+        [
+          katwarn(
+            areaDescription:
+                'Teile von LKr. Alzey-Worms, LKr. Bad Dürkheim, '
+                'Rhein-Pfalz-Kreis und Umland',
+          ),
+        ],
+        countryCode: 'DE',
+        areas: areas,
+      );
+
+      expect(await storedRegionKey(), 'RP');
+    });
+
+    test('without the table it stays unplaced', () async {
+      // A table that will not load must not cost the warning itself.
+      await ingest.ingestBbk(
+        [katwarn(areaDescription: 'Rhein-Pfalz-Kreis')],
+        countryCode: 'DE',
+      );
+
+      expect(await storedRegionKey(), isNull);
+    });
+
+    test('an area spanning two states stays unplaced', () async {
+      await ingest.ingestBbk(
+        [katwarn(areaDescription: 'Kreis Kassel und Kreis Göttingen')],
+        countryCode: 'DE',
+        areas: areas,
+      );
+
+      expect(await storedRegionKey(), isNull);
+    });
+
+    test('a state in the id is trusted over the prose', () async {
+      // Order of trust: the id is structured, the description is a
+      // sentence. Only the warnings with nothing in the id fall through.
+      await ingest.ingestBbk(
+        [
+          raw(id: 'mow.DE-HE-MKK-W220-20260811-001').withDetails(
+            description: null,
+            instruction: null,
+            areaDescription: 'Rhein-Pfalz-Kreis',
+            senderContact: null,
+            polygons: const [],
+          ),
+        ],
+        countryCode: 'DE',
+        areas: areas,
+      );
+
+      expect(await storedRegionKey(), 'HE');
+    });
+
+    test('a precise per-Kreis fetch outranks both', () async {
+      await ingest.ingestBbk(
+        [katwarn(areaDescription: 'Rhein-Pfalz-Kreis')],
+        countryCode: 'DE',
+        regionKeyOverride: '03101',
+        areas: areas,
+      );
+
+      expect(await storedRegionKey(), '03101');
+    });
   });
 
   group('bbkRegionFromId', () {

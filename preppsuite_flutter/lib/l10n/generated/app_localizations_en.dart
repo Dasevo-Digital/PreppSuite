@@ -3129,4 +3129,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emergencyPlanPdfEmpty => 'Not entered';
+
+  @override
+  String get settingsRegionUnknownKey => 'Unknown key — please check';
+
+  @override
+  String get settingsRegionKeyInvalid =>
+      'Enter five or twelve digits (for example 03101).';
 }
