@@ -1175,7 +1175,7 @@
   "@energyPerDayIs": {"placeholders": {"amount": {"type": "String"}, "unit": {"type": "String"}, "stored": {"type": "String"}}},
   "energyUnused": "Eingelagert, aber nichts verbraucht es. Trage den Verbraucher ein, sonst rechnet hier nichts.",
   "energyEmpty": "Wird verbraucht, ist aber nicht eingelagert.",
-  "energyShortest": "Zuerst leer: {kind} nach {days}",
+  "energyShortest": "Zuerst leer: {kind} – {days}",
   "@energyShortest": {"placeholders": {"kind": {"type": "String"}, "days": {"type": "String"}}},
   "energyShortestWhy": "Das ist die Reichweite des Haushalts. Vier Vorräte mit jeweils beruhigenden Zahlen sind keine vier Antworten – der kleinste zählt.",
   "energyNoAnswer": "Noch keine Reichweite: Zu jedem Vorrat gehört ein Verbraucher, sonst gibt es nichts zu teilen.",

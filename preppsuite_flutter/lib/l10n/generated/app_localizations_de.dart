@@ -4044,7 +4044,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String energyShortest(String kind, String days) {
-    return 'Zuerst leer: $kind nach $days';
+    return 'Zuerst leer: $kind – $days';
   }
 
   @override

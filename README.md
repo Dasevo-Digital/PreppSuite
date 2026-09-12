@@ -8,6 +8,25 @@ holt sich nur das, was ohnehin öffentlich ist: amtliche Warnungen vom BBK und
 von MeteoAlarm, Produktdaten von Open Food Facts, Karten und Schutzräume von
 OpenStreetMap. Sie ist offline vollständig benutzbar.
 
+## Bilder
+
+| | |
+|---|---|
+| ![In der Nähe](docs/bilder/in-der-naehe.png) | ![Tageslicht und Mond](docs/bilder/tageslicht-und-mond.png) |
+| **In der Nähe** – gesucht in der heruntergeladenen Karte, ohne Netz. | **Tageslicht und Mond** – auf dem Gerät gerechnet, nichts abgefragt. |
+| ![Energie und Brennstoff](docs/bilder/energie-und-brennstoff.png) | ![Artikel in der einfachen Ansicht](docs/bilder/artikel-einfache-ansicht.png) |
+| **Energie und Brennstoff** – welcher Vorrat zuerst leer ist. | **Wissen** – Artikel auch ohne Browser-Komponente des Systems. |
+
+![Notfunk](docs/bilder/notfunk.png)
+
+**Notfunk** – Frequenzen und Regeln, jeweils mit der Verfügung darunter,
+aus der die Zahlen stammen.
+
+Die Bilder entstehen aus den Widgets der App selbst, mit
+`PREPPSUITE_SCREENSHOTS=1 flutter test test/screenshots` – dieselbe
+Oberfläche, dasselbe Farbschema, nur mit Daten, die zeigen, wozu ein
+Bildschirm da ist. So lassen sie sich nach jeder Änderung wieder erzeugen.
+
 ## Was sie kann
 
 **Vorräte.** Artikel mit Menge, Einheit, Lagerort, Mindestbestand und

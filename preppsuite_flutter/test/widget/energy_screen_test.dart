@@ -113,7 +113,7 @@ void main() {
 
     // Gas lasts eight days, candlelight six. Six is the answer.
     expect(
-      find.textContaining('Zuerst leer: Kerzenlicht nach 6 Tage'),
+      find.textContaining('Zuerst leer: Kerzenlicht – 6 Tage'),
       findsOneWidget,
     );
   });

@@ -1982,7 +1982,7 @@
   "@energyPerDayIs": {"placeholders": {"amount": {"type": "String"}, "unit": {"type": "String"}, "stored": {"type": "String"}}},
   "energyUnused": "Stored, but nothing uses it. Enter the consumer, or there is nothing to divide.",
   "energyEmpty": "Something uses it and there is none.",
-  "energyShortest": "First to run out: {kind} after {days}",
+  "energyShortest": "First to run out: {kind} – {days}",
   "@energyShortest": {"placeholders": {"kind": {"type": "String"}, "days": {"type": "String"}}},
   "energyShortestWhy": "That is the household's range. Four reserves each with a reassuring number are not four answers — the smallest one counts.",
   "energyNoAnswer": "No range yet: every reserve needs a consumer, or there is nothing to divide.",

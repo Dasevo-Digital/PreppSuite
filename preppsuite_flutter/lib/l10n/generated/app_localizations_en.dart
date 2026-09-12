@@ -4019,7 +4019,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String energyShortest(String kind, String days) {
-    return 'First to run out: $kind after $days';
+    return 'First to run out: $kind – $days';
   }
 
   @override

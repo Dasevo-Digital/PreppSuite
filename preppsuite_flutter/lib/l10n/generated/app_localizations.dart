@@ -6833,7 +6833,7 @@ abstract class AppLocalizations {
   /// No description provided for @energyShortest.
   ///
   /// In en, this message translates to:
-  /// **'First to run out: {kind} after {days}'**
+  /// **'First to run out: {kind} – {days}'**
   String energyShortest(String kind, String days);
 
   /// No description provided for @energyShortestWhy.

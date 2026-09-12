@@ -109,7 +109,10 @@ void main() {
   ) async {
     await show(tester, shelters: [far]);
 
-    expect(find.textContaining('3.0 km östlich'), findsOneWidget);
+    // With a comma: this screen is German, and every other number on it
+    // is written that way. It used to read "3.0 km" because
+    // `toStringAsFixed` writes a point whatever the locale.
+    expect(find.textContaining('3,0 km östlich'), findsOneWidget);
   });
 
   testWidgets('the grade is a word, not only the colour of the shield', (

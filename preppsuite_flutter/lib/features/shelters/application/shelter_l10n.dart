@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 import '../../../l10n/generated/app_localizations.dart';
 import 'shelter_bearing.dart';
 import 'shelter_classification.dart';
@@ -49,8 +51,14 @@ String formatShelterDistance(
     // figure like "287 m" claims they are.
     return l10n.shelterDistanceMeters((meters / 10).round() * 10, where);
   }
+  // Through `NumberFormat` and not `toStringAsFixed`: that one always
+  // writes a point, so a German screen read "1.1 km" while every other
+  // number on it read "1,1".
   return l10n.shelterDistanceKilometers(
-    (meters / 1000).toStringAsFixed(1),
+    NumberFormat.decimalPatternDigits(
+      locale: l10n.localeName,
+      decimalDigits: 1,
+    ).format(meters / 1000),
     where,
   );
 }
