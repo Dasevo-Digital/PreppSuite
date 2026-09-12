@@ -14,6 +14,7 @@ import '../application/zim_store.dart';
 import '../application/recommended_archives.dart';
 import '../application/zim_archive.dart';
 import '../../downloads/presentation/download_banner.dart';
+import 'article_reader_screen.dart';
 import 'article_screen.dart';
 import 'apollo_library_screen.dart';
 import 'kiwix_library_screen.dart';
@@ -468,19 +469,35 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
 
       case ArticleViewer.window:
         // Whether an engine is actually installed is only knowable by
-        // asking for one, so the message comes after the attempt rather
+        // asking for one, so the fallback comes after the attempt rather
         // than instead of it.
         if (await openArticleWindow(title: entry.title, uri: uri)) return;
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.knowledgeArticleNoEngine)),
-        );
+        // No engine on this machine, and on a machine with no network
+        // there is no getting one. The app draws the article itself
+        // rather than saying which package is missing and stopping —
+        // that message was correct and useless in the one situation this
+        // app is for.
+        await _readHere(entry.title, uri);
+
+      case ArticleViewer.builtIn:
+        await _readHere(entry.title, uri);
 
       case ArticleViewer.none:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.knowledgeArticleUnsupported)),
         );
     }
+  }
+
+  /// Reads the article without any engine.
+  Future<void> _readHere(String title, Uri uri) async {
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => ArticleReaderScreen(title: title, uri: uri),
+      ),
+    );
   }
 
   void _openLibrary() {

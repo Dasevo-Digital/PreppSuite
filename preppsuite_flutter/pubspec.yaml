@@ -68,6 +68,12 @@ dependencies:
   # Parses MeteoAlarm's Atom+CAP feed, which the app now fetches itself
   # instead of going through a server.
   xml: ^6.6.1
+  # The Dart team's own HTML parser. Direct, because the built-in article
+  # reader turns a ZIM article into widgets without a browser engine —
+  # parsing is the part worth taking from somewhere that maintains it,
+  # the drawing is this app's own. See
+  # lib/features/knowledge/application/article_document.dart.
+  html: ^0.15.6
   # Periodic background polling for warnings. Android runs it through
   # WorkManager (15-minute floor, a platform limit); on iOS it maps to
   # BGAppRefreshTask, which the system schedules when it feels like it.

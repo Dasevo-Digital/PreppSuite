@@ -4157,4 +4157,30 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get portableUnsupported =>
       'A carried data folder is possible on computers only, not on phones: there the system decides where an app\'s data lives.';
+
+  @override
+  String get articleReaderSimple => 'Simple view';
+
+  @override
+  String get articleReaderWhy =>
+      'This page is shown without the system\'s browser component: text, headings, lists, links and pictures. Scripts, typeset formulas and finer styling are missing.';
+
+  @override
+  String get articleReaderLoading => 'Loading …';
+
+  @override
+  String get articleReaderFailed => 'The article could not be read.';
+
+  @override
+  String get articleReaderEmpty => 'This page holds no readable text.';
+
+  @override
+  String get articleReaderImageMissing => 'Picture unavailable';
+
+  @override
+  String get articleReaderExternal =>
+      'Leads out of the archive and was not opened.';
+
+  @override
+  String get articleReaderOpenInBrowser => 'Open in a browser';
 }

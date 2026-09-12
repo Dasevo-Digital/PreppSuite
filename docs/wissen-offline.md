@@ -197,3 +197,48 @@ ab.
 
 Die Inhalte stehen unter den Bedingungen ihrer Quelle – Wikipedia unter
 CC BY-SA. Sie werden mit der Datei ausgeliefert und stehen in ihr.
+
+## Lesen ohne Browser-Komponente des Systems
+
+Artikel gehen in die Browser-Komponente des Systems, wo es eine gibt:
+unter macOS, iOS und Android ist sie Teil des Betriebssystems, unter Linux
+ist es WebKitGTK und unter Windows die WebView2-Laufzeit. Die beiden
+letzten **liegen der App nicht bei**, und auf einem Rechner ohne sie und
+ohne Netz war das Wissensarchiv bis jetzt eine Suche, die Artikel findet,
+die niemand lesen kann — also genau in der Lage, für die diese App da ist.
+
+Deshalb zeichnet die App den Artikel notfalls selbst.
+`article_document.dart` zerlegt die Seite in Blöcke und Textläufe,
+`article_reader_screen.dart` macht Flutter-Widgets daraus. Das Zerlegen
+übernimmt das `html`-Paket des Dart-Teams: echtes Markup steckt voller
+nicht geschlossener Tags, und ein nachsichtiger Parser ist nichts, was man
+nebenbei richtig hinbekommt. Gezeichnet wird selbst, weil das der Teil
+ist, der zu dieser App passen muss.
+
+Die einfache Ansicht sagt oben, was sie ist: **kein Browser.** Keine
+Skripte, kein Formelsatz, keine nach rechts gesetzten Infoboxen. Text,
+Überschriften, Listen, Tabellen, Links und Bilder. Dafür gilt die
+Schriftgröße und das Farbschema der App auch im Artikel, was in der
+Browser-Komponente nie der Fall war.
+
+### Warum die Bibliothek nicht einfach mitgeliefert wird
+
+Gemessen an `libwebkit2gtk-4.1.so.0` (2.52.6):
+
+- Die Hilfsprozesse, ohne die WebKit nichts rendert, werden über einen
+  **einkompilierten absoluten Pfad** gesucht
+  (`/usr/lib/x86_64-linux-gnu/webkit2gtk-4.1/WebKitWebProcess`).
+- `WEBKIT_EXEC_PATH` kommt in der Bibliothek **nicht vor** — nur
+  `WEBKIT_INJECTED_BUNDLE_PATH`, und das ist etwas anderes.
+- Weder `dladdr` noch `dl_iterate_phdr` noch `/proc/self/*` werden benutzt,
+  um den Pfad zur Laufzeit auszurechnen.
+
+Eine kopierte `.so` sucht ihre Hilfsprozesse also an der Systemstelle und
+findet nichts. Dazu kämen rund **170 MB** (WebKit 92,7 + JavaScriptCore
+30,9 + ICU 37,8 + GStreamer) und die Programme `bwrap` und
+`xdg-dbus-proxy`. Machbar wäre es nur mit einem selbst gebauten WebKitGTK
+auf festem Präfix — und das ist installieren, nicht mitführen.
+
+Chromium über CEF wurde ebenfalls verworfen: Die Minimalauslieferung ist
+**300 MB gepackt**, gegen eine App von 31 MB.
+

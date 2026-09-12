@@ -899,6 +899,27 @@ tree; the test suite deliberately targets that layer rather than the UI.
   the platform's own Application Support and deliberately **not** in the
   preferences — the preferences are one of the things that move, so the
   way there cannot be kept inside them.
+- **An article is readable without a browser engine.** Where the system
+  has one it is used — a panel on macOS, iOS and Android, a window on
+  Linux and Windows. Where it has not, `article_document.dart` parses the
+  page into blocks and spans and `article_reader_screen.dart` draws them
+  as ordinary widgets. That case is not exotic: WebKitGTK is not
+  installed on a KDE desktop by default and the WebView2 runtime is not
+  on every Windows 10, and neither can be fetched on a machine with no
+  network — which is the situation this app is for. Parsing is the Dart
+  team's `html` package (real markup is full of unclosed tags); the
+  drawing is ours. **Bundling the engine was measured and rejected**:
+  WebKitGTK finds its helper processes at a path compiled into the
+  library, a release build carries no `WEBKIT_EXEC_PATH`, and it works
+  the path out from neither `dladdr` nor `/proc/self/*` — a copied
+  library finds nothing, quite apart from the ~170 MB and the two extra
+  binaries it needs. Chromium through CEF is a 300 MB download against an
+  app of 31 MB. Two traps met while writing it: text before a nested list
+  inside an `li` has to be closed *as that list entry* or it falls out as
+  a paragraph and the article loses its outline; and `SelectableText.rich`
+  swallows the taps that follow links, so it is `SelectionArea` around
+  `Text.rich` instead — which also gives selection across blocks rather
+  than within one.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

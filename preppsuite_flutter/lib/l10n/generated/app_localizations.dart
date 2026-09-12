@@ -7063,6 +7063,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A carried data folder is possible on computers only, not on phones: there the system decides where an app\'s data lives.'**
   String get portableUnsupported;
+
+  /// No description provided for @articleReaderSimple.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple view'**
+  String get articleReaderSimple;
+
+  /// No description provided for @articleReaderWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'This page is shown without the system\'s browser component: text, headings, lists, links and pictures. Scripts, typeset formulas and finer styling are missing.'**
+  String get articleReaderWhy;
+
+  /// No description provided for @articleReaderLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading …'**
+  String get articleReaderLoading;
+
+  /// No description provided for @articleReaderFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The article could not be read.'**
+  String get articleReaderFailed;
+
+  /// No description provided for @articleReaderEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This page holds no readable text.'**
+  String get articleReaderEmpty;
+
+  /// No description provided for @articleReaderImageMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Picture unavailable'**
+  String get articleReaderImageMissing;
+
+  /// No description provided for @articleReaderExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Leads out of the archive and was not opened.'**
+  String get articleReaderExternal;
+
+  /// No description provided for @articleReaderOpenInBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in a browser'**
+  String get articleReaderOpenInBrowser;
 }
 
 class _AppLocalizationsDelegate

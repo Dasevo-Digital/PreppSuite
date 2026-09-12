@@ -2024,5 +2024,13 @@
   "portableTakeover": "The first time a new folder is used, the app takes over once what is on this machine — copied, not moved. The installation here is left untouched.",
   "portableRelativeNote": "Maps, archives and documents that sit on the same disk are remembered relative to it. They are found again even when the disk comes up under a different letter on the next machine.",
   "portableFolderUnusable": "This folder cannot be written to.",
-  "portableUnsupported": "A carried data folder is possible on computers only, not on phones: there the system decides where an app's data lives."
+  "portableUnsupported": "A carried data folder is possible on computers only, not on phones: there the system decides where an app's data lives.",
+  "articleReaderSimple": "Simple view",
+  "articleReaderWhy": "This page is shown without the system's browser component: text, headings, lists, links and pictures. Scripts, typeset formulas and finer styling are missing.",
+  "articleReaderLoading": "Loading …",
+  "articleReaderFailed": "The article could not be read.",
+  "articleReaderEmpty": "This page holds no readable text.",
+  "articleReaderImageMissing": "Picture unavailable",
+  "articleReaderExternal": "Leads out of the archive and was not opened.",
+  "articleReaderOpenInBrowser": "Open in a browser"
 }

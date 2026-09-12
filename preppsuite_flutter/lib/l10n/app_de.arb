@@ -1217,5 +1217,13 @@
   "portableTakeover": "Beim ersten Start mit einem neuen Ordner übernimmt die App einmalig, was auf diesem Rechner liegt – kopiert, nicht verschoben. Die Installation hier bleibt unberührt.",
   "portableRelativeNote": "Karten, Archive und Dokumente, die auf demselben Datenträger liegen, werden relativ gemerkt. Sie werden also auch dann wiedergefunden, wenn der Datenträger am nächsten Rechner unter einem anderen Buchstaben erscheint.",
   "portableFolderUnusable": "Dieser Ordner lässt sich nicht beschreiben.",
-  "portableUnsupported": "Ein mitgeführter Datenordner ist nur auf Rechnern möglich, nicht auf Telefonen: Dort bestimmt das System, wo die Daten einer App liegen."
+  "portableUnsupported": "Ein mitgeführter Datenordner ist nur auf Rechnern möglich, nicht auf Telefonen: Dort bestimmt das System, wo die Daten einer App liegen.",
+  "articleReaderSimple": "Einfache Ansicht",
+  "articleReaderWhy": "Diese Seite wird ohne Browser-Komponente des Systems dargestellt: Text, Überschriften, Listen, Links und Bilder. Skripte, Formelsatz und Feinheiten der Gestaltung fehlen.",
+  "articleReaderLoading": "Wird geladen …",
+  "articleReaderFailed": "Der Artikel konnte nicht gelesen werden.",
+  "articleReaderEmpty": "Diese Seite enthält keinen lesbaren Text.",
+  "articleReaderImageMissing": "Bild nicht verfügbar",
+  "articleReaderExternal": "Führt aus dem Archiv hinaus und wurde nicht geöffnet.",
+  "articleReaderOpenInBrowser": "Im Browser öffnen"
 }

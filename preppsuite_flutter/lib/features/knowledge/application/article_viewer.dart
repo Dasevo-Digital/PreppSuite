@@ -21,6 +21,22 @@ enum ArticleViewer {
   /// browser and several hundred megabytes with the app.
   window,
 
+  /// Drawn by the app itself, without any engine at all.
+  ///
+  /// The fallback for the case that used to end in a message and nothing
+  /// else: WebKitGTK not installed on Linux, the WebView2 runtime absent
+  /// on Windows. Neither can be fetched without a network, which is the
+  /// situation this app exists for — so the article is parsed and drawn
+  /// here instead. See `article_document.dart`.
+  ///
+  /// Bundling the engine instead was measured and rejected: WebKitGTK
+  /// looks for its helper processes at a path compiled into the library
+  /// (`/usr/lib/<arch>/webkit2gtk-4.1`), there is no `WEBKIT_EXEC_PATH`
+  /// in a release build and it works the path out neither from `dladdr`
+  /// nor from `/proc/self/*` — so a copied library finds nothing. And
+  /// Chromium through CEF is a 300 MB download against an app of 31 MB.
+  builtIn,
+
   none,
 }
 
@@ -35,7 +51,8 @@ ArticleViewer articleViewerFor(TargetPlatform platform) => switch (platform) {
   TargetPlatform.iOS ||
   TargetPlatform.macOS => ArticleViewer.panel,
   TargetPlatform.linux || TargetPlatform.windows => ArticleViewer.window,
-  TargetPlatform.fuchsia => ArticleViewer.none,
+  // Nothing to embed and no window to open: the app draws it itself.
+  TargetPlatform.fuchsia => ArticleViewer.builtIn,
 };
 
 /// Whether [target] is served by the loopback server behind [origin].

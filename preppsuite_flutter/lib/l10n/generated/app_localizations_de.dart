@@ -4183,4 +4183,30 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get portableUnsupported =>
       'Ein mitgeführter Datenordner ist nur auf Rechnern möglich, nicht auf Telefonen: Dort bestimmt das System, wo die Daten einer App liegen.';
+
+  @override
+  String get articleReaderSimple => 'Einfache Ansicht';
+
+  @override
+  String get articleReaderWhy =>
+      'Diese Seite wird ohne Browser-Komponente des Systems dargestellt: Text, Überschriften, Listen, Links und Bilder. Skripte, Formelsatz und Feinheiten der Gestaltung fehlen.';
+
+  @override
+  String get articleReaderLoading => 'Wird geladen …';
+
+  @override
+  String get articleReaderFailed => 'Der Artikel konnte nicht gelesen werden.';
+
+  @override
+  String get articleReaderEmpty => 'Diese Seite enthält keinen lesbaren Text.';
+
+  @override
+  String get articleReaderImageMissing => 'Bild nicht verfügbar';
+
+  @override
+  String get articleReaderExternal =>
+      'Führt aus dem Archiv hinaus und wurde nicht geöffnet.';
+
+  @override
+  String get articleReaderOpenInBrowser => 'Im Browser öffnen';
 }
