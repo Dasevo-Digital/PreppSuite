@@ -55,6 +55,25 @@ library, and skipping it silently costs the archive's own full-text index —
 1.5.0 shipped a Linux package without `libzim_xapian.so` for exactly that
 reason. Windows has no shim at all; there the app searches its own index.
 
+**After every release, put this Mac back in order** — the machine that
+builds is also the machine that uses the app, and a build leaves copies
+behind:
+
+```bash
+tool/macos_install.sh ~/Desktop/PreppSuite-Release-v<version>-Upload/PreppSuite-<version>-macos-universal.zip
+```
+
+It installs the released bundle as both `/Applications/PreppSuite.app`
+and `/Applications/PreppSuite Test.app` (same build, own identifier, own
+sandbox container), re-signs both from `Release.entitlements`, and then
+runs `tool/macos_spotlight_clean.sh` so Launch Services and the file index
+know these two and nothing else. Install from the **release zip**, not
+from `build/`: that way what is on this machine is byte-for-byte what was
+published. Without this step the two installed apps keep the previous
+version while Spotlight also offers the build tree's copy — three
+PreppSuites, two of them wrong, in the menu somebody uses to reach their
+own inventory.
+
 Generated data assets:
 
 ```bash
