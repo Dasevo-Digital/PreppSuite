@@ -20,13 +20,18 @@ Liste abbuchen.
 
 **Vorrats-Rechner.** Rechnet den Bestand gegen die Empfehlung des BBK –
 2 Liter Trinkwasser und 2200 kcal pro Person und Tag – für eine
-einstellbare Zahl an Tagen und Personen. Die Kalorien kommen beim
+einstellbare Zahl an Tagen und Personen. Kinder bis zwölf zählen mit
+1 Liter Getränken, wie es die Fußnote der Vorratstabelle der Bundesanstalt
+für Landwirtschaft und Ernährung angibt; Hunde und Katzen mit der
+tierärztlichen Faustregel von rund 60 ml je Kilogramm. Die Kalorien kommen beim
 Barcode-Scan aus den Nährwerten von Open Food Facts, hochgerechnet auf die
 Packungsgrösse.
 
-**Checklisten.** Drei mitgelieferte Listen – Wasser, Lebensmittel und
-Erste Hilfe, angelehnt an die amtlichen Empfehlungen – dazu beliebig viele
-eigene. Einzelne Punkte lassen sich mit einem Vorratsartikel verknüpfen.
+**Checklisten.** 19 mitgelieferte Listen nach dem BBK-Ratgeber – von
+Wasser, Lebensmitteln und Erster Hilfe über Strom- und Heizungsausfall,
+Hochwasser, Hitze und Sturm bis zu Haustieren, Säuglingen und
+Falschmeldungen – dazu beliebig viele eigene. Einzelne Punkte lassen sich
+mit einem Vorratsartikel verknüpfen.
 
 **Budget.** Was die Vorsorge gekostet hat, nach Kategorie. Dazu ein
 PDF-Bericht der fehlenden Ausrüstung – der Bestände also, die unter ihrem
@@ -54,6 +59,50 @@ die App sagt das an Ort und Stelle auch selbst.
 **Schutzräume.** Karte mit Schutzräumen und Bunkern aus OpenStreetMap und
 der WWBOTA-Datenbank, nach Entfernung und nach Belastbarkeit der Angabe
 filterbar.
+
+**Notfall-Informationen.** Messwerte, die alt nichts mehr wert sind, und
+jeder mit der Deutung der Stelle, die ihn veröffentlicht — nie mit einer
+selbst erfundenen Skala:
+
+- **Pegelstände** von PEGELONLINE, mit den Richtwerten des jeweiligen Pegels.
+- **Gammastrahlung** aus dem ODL-Messnetz des Bundesamts für
+  Strahlenschutz, gemessen gegen die eigene Wochen-Grundlinie der Station
+  statt gegen einen bundesweiten Wert.
+- **Luftqualität** nach dem Index des Umweltbundesamts, stündlich je
+  Station.
+- **Waldbrandgefahr** nach dem Index des Deutschen Wetterdienstes, heute
+  und sechs Tage voraus.
+- **Autobahnsperrungen** von der Autobahn GmbH, für die Strecken, die
+  zählen. Baustellen ohne Sperrung bleiben draußen.
+
+**In der Nähe.** Apotheke, Arzt, Trinkwasser, Supermarkt, Tankstelle,
+Feuerwehr, Baumarkt — gesucht in der **heruntergeladenen Karte**, ohne
+jedes Netz. Die einzige Suche in dieser App, die an dem Tag noch
+antwortet, an dem die Schutzraumsuche, die Warnungen und die Pegel es
+nicht mehr tun. Tankstelle und Ladesäule werden dabei streng
+auseinandergehalten: In einer Stichprobe echter Kacheln kamen auf
+18 Tankstellen 126 Ladesäulen, und wenn der Strom weg ist, sind das zwei
+sehr verschiedene Antworten.
+
+**Tageslicht und Mond.** Sonnenaufgang, Dämmerung, Höchststand,
+Untergang, Mondauf- und -untergang und der beleuchtete Anteil — auf dem
+Gerät gerechnet, nichts abgefragt, also auch am zehnten Tag ohne Netz
+richtig. Geprüft gegen die Tabellen der US Naval Observatory: bei 112
+verglichenen Zeiten liegen Sonne und Mond höchstens eine Minute daneben.
+Ohne Lichtschalter ist die Sonne der Arbeitstag, und ob der Mond scheint,
+entscheidet über Bewegung bei Nacht.
+
+**Energie und Brennstoff.** Die zweite Hälfte des Vorrats-Rechners: wie
+lange Strom, Gas, Brennstoff und Kerzenlicht reichen — und welcher Vorrat
+zuerst leer ist, was die eigentliche Reichweite des Haushalts ist.
+Geschätzt wird hier nichts: Was ein Kocher verbraucht, steht auf dem
+Kocher. Die App teilt.
+
+**Notfunk.** Frequenzen und Regeln für PMR446, Freenet, CB- und
+Amateurfunk, jeweils mit der Verfügung darunter, aus der die Zahlen
+stammen. Für PMR446 und Freenet gibt es **keinen amtlichen Anrufkanal**;
+die verbreitete „Kanal 3"-Absprache steht als das da, was sie ist — eine
+private Initiative.
 
 **Karte offline.** Die Karte lässt sich in der App herunterladen: Ort
 suchen – Stadt, Kreis, Bundesland oder Land – oder den Ausschnitt auf der
@@ -85,9 +134,32 @@ Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
 
 ## Installieren
 
-Fertige macOS-Fassungen liegen unter *Releases*. Sie sind nicht mit einem
-gekauften Zertifikat signiert; Gatekeeper meldet sich beim ersten Start, über
-**Rechtsklick → Öffnen** startet die App trotzdem.
+Fertige Fassungen für **macOS, Windows, Linux und Android** liegen unter
+*Releases*. Die drei Desktop-Bauten sind nicht mit einem gekauften
+Zertifikat signiert: Auf macOS meldet sich Gatekeeper beim ersten Start,
+über **Rechtsklick → Öffnen** startet die App trotzdem; auf Windows
+meldet sich SmartScreen, dort **Weitere Informationen → Trotzdem
+ausführen**. Die Android-Pakete *sind* signiert.
+
+### Von einem Datenträger betreiben
+
+Die App kann ihre Daten in einem Ordner neben dem Programm halten statt
+dort, wo das Betriebssystem sie sonst ablegt. Damit läuft dieselbe
+Installation von einer externen Platte oder einem Stick — auch an einem
+fremden Rechner.
+
+Unter **Windows und Linux** genügt ein Ordner namens `PreppSuite-Daten`
+neben dem Programm; der nächste Start benutzt ihn. Für beide liegt unter
+*Releases* auch eine Fassung, die den Ordner schon mitbringt
+(`…-portabel.zip` beziehungsweise `…-portabel.tar.gz`). Unter **macOS**
+wird er einmal je Mac ausgewählt, weil die App in der Sandbox läuft und
+dort keinen Ordner neben dem eigenen Bündel lesen darf.
+
+Nichts wird von allein angelegt — eine installierte Fassung verhält sich
+genau wie bisher. Karten, Archive und Dokumente auf demselben Datenträger
+werden relativ gemerkt und deshalb auch dann wiedergefunden, wenn er am
+nächsten Rechner unter einem anderen Buchstaben erscheint. Einzelheiten in
+[`docs/mitgefuehrte-fassung.md`](docs/mitgefuehrte-fassung.md).
 
 Selbst bauen:
 
@@ -209,8 +281,10 @@ Die Annahmen, die dahinterstehen, sind in
 aufgeschrieben, die Warnquellen in
 [`docs/warning-feeds.md`](docs/warning-feeds.md), das Ordnerformat in
 [`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md), die
-Offline-Karte in [`docs/karte-offline.md`](docs/karte-offline.md) und die
-Wissensdatei in [`docs/wissen-offline.md`](docs/wissen-offline.md).
+Offline-Karte in [`docs/karte-offline.md`](docs/karte-offline.md), die
+Wissensdatei in [`docs/wissen-offline.md`](docs/wissen-offline.md) und der
+Betrieb von einem Datenträger in
+[`docs/mitgefuehrte-fassung.md`](docs/mitgefuehrte-fassung.md).
 
 ## Entwicklung
 
@@ -299,17 +373,22 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   Anhalten geht jederzeit; das Angefangene bleibt durchsuchbar. Dieser
   Index kennt keinen deutschen Wortstamm.
 - Artikel öffnen unter Linux und Windows ein eigenes Fenster statt eines
-  Bereichs in der App, und brauchen dort die Browser-Komponente des
-  Systems: WebView2 unter Windows, `libwebkit2gtk-4.1-0` unter Linux.
-  Fehlt sie, sagt die App das beim Öffnen.
+  Bereichs in der App, weil dort keine eingebettete Browser-Komponente
+  erreichbar ist. **Fehlt die Komponente des Systems** — WebView2 unter
+  Windows, `libwebkit2gtk-4.1-0` unter Linux —, **zeichnet die App den
+  Artikel seit 1.8.0 selbst**: Text, Überschriften, Listen, Tabellen,
+  Links und Bilder, ohne Skripte und ohne Formelsatz. Beides ist unter
+  Einstellungen wählbar. Warum die Bibliothek nicht einfach beiliegt,
+  steht in [`docs/wissen-offline.md`](docs/wissen-offline.md).
 - Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen
-  wurden – im Ordner liegen nur die Daten, nicht die Bilder.
-- Veröffentlicht wird bisher nur eine macOS-Fassung. Android baut durch und
-  wurde am fertigen Paket geprüft; die Release-APK ist noch mit dem
-  Debug-Schlüssel signiert. Für iOS ist geprüft, dass die App durchbaut;
-  ausgeliefert wird sie nicht, aber sie läuft auf dem Simulator. iOS
-  verlangt mindestens iOS 14 – `workmanager` bringt die Grenze mit.
-  Linux baut durch, geprüft im Container; auf einer echten Maschine
-  fehlten die WebKitGTK-Pakete. Unter Windows baut alles außer den
-  Benachrichtigungen, denen die ATL-Komponente von Visual Studio fehlt.
-  Was beide brauchen, steht in [`docs/desktop-bauen.md`](docs/desktop-bauen.md). Web bräuchte Umbau: der Foto-Teil verwendet `dart:io`.
+  wurden – im gemeinsamen Ordner liegen nur die Daten, nicht die Bilder.
+  Auf einem mitgeführten Datenträger wandern sie dagegen mit.
+- Veröffentlicht werden **macOS, Windows, Linux und Android**, jeweils aus
+  einem Bau auf der echten Maschine. Die Android-Pakete tragen seit 0.11.0
+  den eigenen Schlüssel mit der Signaturkette; die Desktop-Bauten sind
+  nicht signiert. Für **iOS** ist geprüft, dass die App durchbaut, und sie
+  läuft auf dem Simulator; ausgeliefert wird sie nicht. iOS verlangt
+  mindestens iOS 14 – `workmanager` bringt die Grenze mit. Was Linux und
+  Windows zum Bauen brauchen, steht in
+  [`docs/desktop-bauen.md`](docs/desktop-bauen.md). Web bräuchte Umbau:
+  der Foto-Teil verwendet `dart:io`.
