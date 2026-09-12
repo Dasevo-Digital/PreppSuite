@@ -287,38 +287,41 @@ void main() {
     });
   });
 
-  testWidgets('a dropped connection is said out loud, not left to a still bar', (
-    tester,
-  ) async {
-    // The wait before the next attempt runs up to a minute. A progress
-    // bar that simply stops for that long reads as a hung app.
-    await show(
+  testWidgets(
+    'a dropped connection is said out loud, not left to a still bar',
+    (
       tester,
-      ArchiveDownloadState(
-        request: request,
-        progress: const DownloadProgress(
-          received: 4_000_000,
-          total: 11_000_000,
-          resuming: true,
+    ) async {
+      // The wait before the next attempt runs up to a minute. A progress
+      // bar that simply stops for that long reads as a hung app.
+      await show(
+        tester,
+        ArchiveDownloadState(
+          request: request,
+          progress: const DownloadProgress(
+            received: 4_000_000,
+            total: 11_000_000,
+            resuming: true,
+          ),
+          rate: const DownloadRate(
+            bytesPerSecond: 2_000_000,
+            remaining: Duration(minutes: 4),
+          ),
         ),
-        rate: const DownloadRate(
-          bytesPerSecond: 2_000_000,
-          remaining: Duration(minutes: 4),
-        ),
-      ),
-    );
+      );
 
-    expect(
-      find.textContaining('wird fortgesetzt'),
-      findsOneWidget,
-      reason: 'the pause has to be named',
-    );
-    // Neither of these is true while nothing is being transferred, and a
-    // remaining time counted from a speed that has stopped is a guess
-    // dressed as a measurement.
-    expect(find.textContaining('MB/s'), findsNothing);
-    expect(find.textContaining('4 Minuten'), findsNothing);
-    // What is still true stays.
-    expect(find.textContaining('36'), findsOneWidget);
-  });
+      expect(
+        find.textContaining('wird fortgesetzt'),
+        findsOneWidget,
+        reason: 'the pause has to be named',
+      );
+      // Neither of these is true while nothing is being transferred, and a
+      // remaining time counted from a speed that has stopped is a guess
+      // dressed as a measurement.
+      expect(find.textContaining('MB/s'), findsNothing);
+      expect(find.textContaining('4 Minuten'), findsNothing);
+      // What is still true stays.
+      expect(find.textContaining('36'), findsOneWidget);
+    },
+  );
 }

@@ -86,7 +86,11 @@ void main() {
 
     final now = tester.getTopLeft(find.text('A2 | Jetzt gesperrt')).dy;
     final later = tester.getTopLeft(find.text('A2 | Später gesperrt')).dy;
-    expect(now, lessThan(later), reason: 'a closure starting Friday is not a reason to turn round today');
+    expect(
+      now,
+      lessThan(later),
+      reason: 'a closure starting Friday is not a reason to turn round today',
+    );
     expect(find.text('Jetzt'), findsOneWidget);
     expect(find.text('Angekündigt'), findsOneWidget);
   });

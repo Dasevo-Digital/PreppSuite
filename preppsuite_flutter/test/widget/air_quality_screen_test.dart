@@ -51,7 +51,10 @@ class _FakeClient implements AirQualityClient {
   var readingCalls = 0;
 
   @override
-  Future<AirQualityReading?> fetchReading(String stationId, {DateTime? now}) async {
+  Future<AirQualityReading?> fetchReading(
+    String stationId, {
+    DateTime? now,
+  }) async {
     readingCalls++;
     if (fails) throw const AirQualityException(503);
     return reading;
@@ -173,8 +176,10 @@ void main() {
       now: DateTime(2026, 9, 4, 10),
     );
 
-    expect(find.textContaining('keine eigenen Gesundheitshinweise'),
-        findsOneWidget);
+    expect(
+      find.textContaining('keine eigenen Gesundheitshinweise'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the screen meets the accessibility guidelines', (tester) async {

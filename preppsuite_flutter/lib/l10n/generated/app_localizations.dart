@@ -7111,6 +7111,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open in a browser'**
   String get articleReaderOpenInBrowser;
+
+  /// No description provided for @articleViewerChoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing an article'**
+  String get articleViewerChoiceTitle;
+
+  /// No description provided for @articleViewerChoiceWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'On Linux and Windows this app has no embedded browser component available. An article therefore opens either in a window of the system\'s own — or the app draws it itself.'**
+  String get articleViewerChoiceWhy;
+
+  /// No description provided for @articleViewerChoiceWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'A window of its own'**
+  String get articleViewerChoiceWindow;
+
+  /// No description provided for @articleViewerChoiceWindowWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows the article in full: scripts, typeset formulas, the page\'s own layout. Needs the system\'s browser component — WebKitGTK on Linux, the WebView2 runtime on Windows.'**
+  String get articleViewerChoiceWindowWhy;
+
+  /// No description provided for @articleViewerChoiceBuiltIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside the app'**
+  String get articleViewerChoiceBuiltIn;
+
+  /// No description provided for @articleViewerChoiceBuiltInWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs nothing from the system and stays in the same window. The app\'s text size and colours apply to the article too. No scripts, no typeset formulas, no floated infoboxes.'**
+  String get articleViewerChoiceBuiltInWhy;
+
+  /// No description provided for @articleViewerChoiceFallbackNote.
+  ///
+  /// In en, this message translates to:
+  /// **'If the system\'s component is missing, the app draws the article itself in any case — this choice only changes what is tried first.'**
+  String get articleViewerChoiceFallbackNote;
 }
 
 class _AppLocalizationsDelegate

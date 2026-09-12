@@ -919,7 +919,12 @@ tree; the test suite deliberately targets that layer rather than the UI.
   a paragraph and the article loses its outline; and `SelectableText.rich`
   swallows the taps that follow links, so it is `SelectionArea` around
   `Text.rich` instead — which also gives selection across blocks rather
-  than within one.
+  than within one. On Linux and Windows the two are **offered as a
+  choice** (`article_viewer_choice.dart`, settings card), defaulting to
+  the window because it shows more of the article; the fallback still
+  holds whichever is chosen, so the choice only decides what is tried
+  first. The card appears on no other platform — there the embedded panel
+  is both the best option and the only one.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

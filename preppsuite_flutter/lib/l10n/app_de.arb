@@ -1225,5 +1225,12 @@
   "articleReaderEmpty": "Diese Seite enthält keinen lesbaren Text.",
   "articleReaderImageMissing": "Bild nicht verfügbar",
   "articleReaderExternal": "Führt aus dem Archiv hinaus und wurde nicht geöffnet.",
-  "articleReaderOpenInBrowser": "Im Browser öffnen"
+  "articleReaderOpenInBrowser": "Im Browser öffnen",
+  "articleViewerChoiceTitle": "Artikel anzeigen",
+  "articleViewerChoiceWhy": "Unter Linux und Windows hat diese App keine eingebaute Browser-Komponente zur Verfügung. Der Artikel geht deshalb entweder in ein eigenes Fenster des Systems – oder die App zeichnet ihn selbst.",
+  "articleViewerChoiceWindow": "Eigenes Fenster",
+  "articleViewerChoiceWindowWhy": "Zeigt den Artikel vollständig: Skripte, Formelsatz, das Layout der Seite. Braucht die Browser-Komponente des Systems – unter Linux WebKitGTK, unter Windows die WebView2-Laufzeit.",
+  "articleViewerChoiceBuiltIn": "In der App",
+  "articleViewerChoiceBuiltInWhy": "Braucht gar nichts vom System und bleibt im selben Fenster. Schriftgröße und Farben der App gelten auch im Artikel. Ohne Skripte, ohne Formelsatz, ohne seitliche Infoboxen.",
+  "articleViewerChoiceFallbackNote": "Fehlt die Komponente des Systems, zeichnet die App den Artikel ohnehin selbst – die Auswahl hier ändert nur, was zuerst versucht wird."
 }

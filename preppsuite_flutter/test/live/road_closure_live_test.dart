@@ -15,7 +15,9 @@ void main() {
     'the motorways are listed',
     () async {
       final roads = await RoadClosureClient().fetchRoads();
-      stdout.writeln('${roads.length} Autobahnen: ${roads.take(6).join(", ")} …');
+      stdout.writeln(
+        '${roads.length} Autobahnen: ${roads.take(6).join(", ")} …',
+      );
 
       expect(roads.length, greaterThan(50));
       expect(roads, contains('A2'));

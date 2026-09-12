@@ -312,23 +312,25 @@ void main() {
     expect(server.requestedRanges, [null, 'bytes=120-', 'bytes=240-']);
   });
 
-  test('a download that keeps moving may drop more often than the budget', (
-  ) async {
-    // Five drops against a budget of two, but every attempt brings bytes
-    // in, so the budget keeps being handed back.
-    final server = _FlakyServer(body, drops: 5, after: 80);
-    await run(
-      ArchiveDownloader(
-        httpClient: server,
-        reportEvery: Duration.zero,
-        retryDelays: const [Duration.zero, Duration.zero],
-      ),
-      estimate: body.length,
-    );
+  test(
+    'a download that keeps moving may drop more often than the budget',
+    () async {
+      // Five drops against a budget of two, but every attempt brings bytes
+      // in, so the budget keeps being handed back.
+      final server = _FlakyServer(body, drops: 5, after: 80);
+      await run(
+        ArchiveDownloader(
+          httpClient: server,
+          reportEvery: Duration.zero,
+          retryDelays: const [Duration.zero, Duration.zero],
+        ),
+        estimate: body.length,
+      );
 
-    expect(await File(target).readAsBytes(), body);
-    expect(server.requestedRanges.length, 6);
-  });
+      expect(await File(target).readAsBytes(), body);
+      expect(server.requestedRanges.length, 6);
+    },
+  );
 
   test('a mirror that gives nothing is let go', () async {
     // Drops before a single byte, every time. Nothing is progressing, so

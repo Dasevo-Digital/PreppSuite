@@ -221,6 +221,24 @@ Skripte, kein Formelsatz, keine nach rechts gesetzten Infoboxen. Text,
 Schriftgröße und das Farbschema der App auch im Artikel, was in der
 Browser-Komponente nie der Fall war.
 
+### Wählbar unter Linux und Windows
+
+Beide Wege sind unter Einstellungen → **Artikel anzeigen** auswählbar.
+Voreingestellt bleibt das eigene Fenster, weil es mehr vom Artikel zeigt:
+Skripte, Formelsatz, das Layout der Seite. Die einfache Ansicht bleibt
+damit das, wofür sie gebaut wurde — ein Rückfall — und wird nur dann zur
+Vorgabe, wenn jemand das sagt.
+
+Gründe, sie trotzdem zu wählen: kein zweites Fenster in der Leiste, die
+Schriftgröße und das Farbschema der App gelten auch im Artikel, und es
+wird nichts vom System gebraucht.
+
+**Fehlt die Komponente des Systems, zeichnet die App den Artikel ohnehin
+selbst.** Die Auswahl ändert nur, was zuerst versucht wird. Auf den
+übrigen Plattformen taucht die Einstellung nicht auf: Dort ist die
+eingebettete Ansicht sowohl die bessere als auch die einzige, und eine
+Auswahl zwischen einer Sache ist keine.
+
 ### Warum die Bibliothek nicht einfach mitgeliefert wird
 
 Gemessen an `libwebkit2gtk-4.1.so.0` (2.52.6):

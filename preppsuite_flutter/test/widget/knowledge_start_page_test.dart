@@ -140,7 +140,10 @@ void main() {
   /// handle still holds, so leaving this to the tear-down meant the
   /// temporary folder could not be removed — on macOS and Linux the same
   /// leak simply went unnoticed.
-  Future<void> shutdown(WidgetTester tester, ProviderContainer container) async {
+  Future<void> shutdown(
+    WidgetTester tester,
+    ProviderContainer container,
+  ) async {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.runAsync(() async {
       close(container);
@@ -294,12 +297,14 @@ void main() {
     expect(state.isReady, isTrue);
   });
 
-  test('an archive keeps its own title and description in the library',
-      () async {
-    final container = await libraryOfTwo();
-    final library = container.read(knowledgeProvider).requireValue.library;
-    expect(library.map((a) => a.title), ['Klexikon', 'Wikibooks']);
-    expect(library.first.description, 'Ein Lexikon fuer Kinder.');
-    expect(library.first, isA<StoredArchive>());
-  });
+  test(
+    'an archive keeps its own title and description in the library',
+    () async {
+      final container = await libraryOfTwo();
+      final library = container.read(knowledgeProvider).requireValue.library;
+      expect(library.map((a) => a.title), ['Klexikon', 'Wikibooks']);
+      expect(library.first.description, 'Ein Lexikon fuer Kinder.');
+      expect(library.first, isA<StoredArchive>());
+    },
+  );
 }

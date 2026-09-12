@@ -4209,4 +4209,29 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get articleReaderOpenInBrowser => 'Im Browser öffnen';
+
+  @override
+  String get articleViewerChoiceTitle => 'Artikel anzeigen';
+
+  @override
+  String get articleViewerChoiceWhy =>
+      'Unter Linux und Windows hat diese App keine eingebaute Browser-Komponente zur Verfügung. Der Artikel geht deshalb entweder in ein eigenes Fenster des Systems – oder die App zeichnet ihn selbst.';
+
+  @override
+  String get articleViewerChoiceWindow => 'Eigenes Fenster';
+
+  @override
+  String get articleViewerChoiceWindowWhy =>
+      'Zeigt den Artikel vollständig: Skripte, Formelsatz, das Layout der Seite. Braucht die Browser-Komponente des Systems – unter Linux WebKitGTK, unter Windows die WebView2-Laufzeit.';
+
+  @override
+  String get articleViewerChoiceBuiltIn => 'In der App';
+
+  @override
+  String get articleViewerChoiceBuiltInWhy =>
+      'Braucht gar nichts vom System und bleibt im selben Fenster. Schriftgröße und Farben der App gelten auch im Artikel. Ohne Skripte, ohne Formelsatz, ohne seitliche Infoboxen.';
+
+  @override
+  String get articleViewerChoiceFallbackNote =>
+      'Fehlt die Komponente des Systems, zeichnet die App den Artikel ohnehin selbst – die Auswahl hier ändert nur, was zuerst versucht wird.';
 }

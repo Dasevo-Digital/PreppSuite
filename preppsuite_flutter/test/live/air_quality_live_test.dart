@@ -23,7 +23,11 @@ void main() {
 
       expect(stations.length, greaterThan(300));
       final named = stations.where((s) => s.state != null).toList();
-      expect(named.length, stations.length, reason: 'every station has a state');
+      expect(
+        named.length,
+        stations.length,
+        reason: 'every station has a state',
+      );
 
       final located = stations.where(
         (s) => s.latitude != null && s.longitude != null,

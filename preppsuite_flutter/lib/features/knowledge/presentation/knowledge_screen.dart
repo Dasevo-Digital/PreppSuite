@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/article_viewer.dart';
+import '../application/article_viewer_choice.dart';
 import '../application/knowledge_providers.dart';
 import '../application/personal_document_index.dart';
 import '../application/personal_document_store.dart';
@@ -468,10 +469,16 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
         );
 
       case ArticleViewer.window:
-        // Whether an engine is actually installed is only knowable by
-        // asking for one, so the fallback comes after the attempt rather
-        // than instead of it.
-        if (await openArticleWindow(title: entry.title, uri: uri)) return;
+        // Where somebody has said they would rather stay in the app,
+        // that is the end of it — no window is opened and none is
+        // needed.
+        final choice = await const ArticleViewerChoiceStore().load();
+        if (choice == ArticleViewerChoice.systemWindow) {
+          // Whether an engine is actually installed is only knowable by
+          // asking for one, so the fallback comes after the attempt
+          // rather than instead of it.
+          if (await openArticleWindow(title: entry.title, uri: uri)) return;
+        }
         if (!mounted) return;
         // No engine on this machine, and on a machine with no network
         // there is no getting one. The app draws the article itself

@@ -8,6 +8,8 @@ import '../../../core/theme_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../downloads/presentation/download_folder_card.dart';
+import '../../knowledge/application/article_viewer_choice.dart';
+import 'article_viewer_card.dart';
 import 'portable_data_card.dart';
 import '../../inventory/presentation/expiry_reminders_card.dart';
 import '../../inventory/presentation/charge_reminder_card.dart';
@@ -118,6 +120,17 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           OfflineMapCard(l10n: l10n),
+          // Only where there is something to choose between: Linux and
+          // Windows reach no embedded engine, every other platform does.
+          if (offersArticleViewerChoice) ...[
+            const SizedBox(height: 24),
+            Text(
+              l10n.articleViewerChoiceTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            ArticleViewerCard(l10n: l10n),
+          ],
           const SizedBox(height: 24),
           Text(
             l10n.downloadFolderTitle,
