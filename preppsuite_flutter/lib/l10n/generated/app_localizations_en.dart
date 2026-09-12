@@ -4098,4 +4098,63 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get energyHelperPowerbank =>
       'Power bank in mAh? Times 3.7 V, divided by 1000, gives watt-hours: 20000 mAh is 74 Wh. Careful — that is the cell, not the socket. Stepping up to 5 V loses something; how much depends on the device, which is why no percentage is given here.';
+
+  @override
+  String get portableTitle => 'Data folder';
+
+  @override
+  String get portableInstalled => 'On this machine';
+
+  @override
+  String get portableInstalledHint =>
+      'Household, stock, photos and settings sit where this operating system keeps them for programs.';
+
+  @override
+  String get portableCarried => 'On a disk you carry';
+
+  @override
+  String portableSourceBeside(String folder) {
+    return 'Found as a folder named “$folder” beside the program.';
+  }
+
+  @override
+  String get portableSourceChosen => 'Chosen once and remembered.';
+
+  @override
+  String portableSourceEnvironment(String variable) {
+    return 'Named by the environment variable $variable.';
+  }
+
+  @override
+  String portableExplain(String folder) {
+    return 'Create a folder called “$folder” beside the program and the next launch uses it. Nothing is created on its own: an installed copy behaves exactly as it always has.';
+  }
+
+  @override
+  String get portableExplainMac =>
+      'On macOS the app runs sandboxed — deliberately, because that is what stops the system asking for folder access again after every update. A sandboxed app may not read a folder beside the program. So here the folder is chosen once per Mac instead of being found.';
+
+  @override
+  String get portableChoose => 'Choose a folder';
+
+  @override
+  String get portableForget => 'Back to this machine';
+
+  @override
+  String get portableRestartNeeded => 'Takes effect at the next start.';
+
+  @override
+  String get portableTakeover =>
+      'The first time a new folder is used, the app takes over once what is on this machine — copied, not moved. The installation here is left untouched.';
+
+  @override
+  String get portableRelativeNote =>
+      'Maps, archives and documents that sit on the same disk are remembered relative to it. They are found again even when the disk comes up under a different letter on the next machine.';
+
+  @override
+  String get portableFolderUnusable => 'This folder cannot be written to.';
+
+  @override
+  String get portableUnsupported =>
+      'A carried data folder is possible on computers only, not on phones: there the system decides where an app\'s data lives.';
 }

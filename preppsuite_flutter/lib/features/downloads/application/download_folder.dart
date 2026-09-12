@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/platform_storage.dart';
+import '../../../core/portable_data.dart';
+import '../../../core/portable_paths.dart';
 
 const _folderKey = 'archiveDownloadFolder';
 
@@ -60,7 +62,8 @@ class DownloadFolder {
 
     final stored = prefs.getString(_folderKey);
     if (stored != null && stored.isNotEmpty) {
-      final directory = Directory(stored);
+      // A download folder on the same disk as the app moves with it.
+      final directory = Directory(readLocation(stored));
       if (await directory.exists()) return directory;
     }
     return defaultFolder();
@@ -71,7 +74,7 @@ class DownloadFolder {
   /// for the platforms that need nothing else.
   Future<void> use(String path, {String? handle}) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_folderKey, path);
+    await prefs.setString(_folderKey, storeLocation(path));
     if (handle == null || handle.isEmpty) {
       await prefs.remove(_handleKey);
     } else {
@@ -93,6 +96,16 @@ class DownloadFolder {
   }
 
   Future<Directory> _platformDefault() async {
+    // A carried copy puts its archives on the disk it is carried on.
+    // Anything else would be absurd: the point of the copy is that it
+    // works on a machine that is not yours, and ~/Downloads there is
+    // somebody else's folder — on a public machine possibly one that is
+    // wiped at logout.
+    final carried = portableSupportDirectory;
+    if (carried != null) {
+      return Directory('${carried.path}${Platform.pathSeparator}Archive');
+    }
+
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         // The app's own Documents folder, which `UIFileSharingEnabled`

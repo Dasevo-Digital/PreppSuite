@@ -3,8 +3,11 @@ import 'dart:typed_data';
 
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../../core/app_database_directory.dart';
+import '../../../core/portable_data.dart';
+import '../../../core/portable_paths.dart';
 
 /// Captures or picks a product photo and stores it on local disk, inside
 /// the app's own support directory.
@@ -17,11 +20,14 @@ import 'package:uuid/uuid.dart';
 class InventoryPhotoService {
   const InventoryPhotoService();
 
-  static const _subdirectory = 'inventory_photos';
+  /// The folder photos go in, under whichever support directory this
+  /// copy uses. Public because resolving an old absolute path falls back
+  /// to looking for the same file name in here.
+  static const subdirectory = 'inventory_photos';
 
   Future<Directory> _photosDirectory() async {
-    final appDir = await getApplicationSupportDirectory();
-    final dir = Directory(p.join(appDir.path, _subdirectory));
+    final appDir = await appSupportDirectory();
+    final dir = Directory(p.join(appDir.path, subdirectory));
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }
@@ -57,7 +63,10 @@ class InventoryPhotoService {
       '${const Uuid().v4()}${extension.isEmpty ? '.jpg' : extension}',
     );
     await File(picked.path).copy(destination);
-    return destination;
+    // Written down relative to the data folder where there is one, so a
+    // photo carried on the same disk is still found when the disk comes
+    // up under another letter.
+    return storeLocation(destination);
   }
 
   /// Writes edited bytes as a new photo and returns its path.
@@ -69,7 +78,7 @@ class InventoryPhotoService {
     final dir = await _photosDirectory();
     final destination = p.join(dir.path, '${const Uuid().v4()}.jpg');
     await File(destination).writeAsBytes(bytes, flush: true);
-    return destination;
+    return storeLocation(destination);
   }
 
   /// Best-effort delete of a photo that's no longer referenced (replaced or
@@ -78,9 +87,38 @@ class InventoryPhotoService {
   Future<void> delete(String? path) async {
     if (path == null) return;
     try {
-      await File(path).delete();
+      await File(resolvePhotoPath(path)).delete();
     } catch (_) {
       // Already gone, or some other benign issue — nothing to do.
     }
+  }
+
+  /// The stored path as a file on this machine.
+  ///
+  /// Three cases, in order. A path written down relative to the data
+  /// folder resolves against it. An absolute one written by an installed
+  /// copy is used as it stands. And an absolute one that is *not* there
+  /// — the case that turns up when a household is taken over onto a
+  /// carried copy, where the photos came along but their paths named the
+  /// old machine — is looked for by name in this copy's own photo
+  /// folder, which is where the copy put it.
+  static String resolvePhotoPath(String stored) {
+    final located = readLocation(stored);
+    if (File(located).existsSync()) return located;
+
+    final folder = photoDirectoryPath;
+    if (folder == null) return located;
+
+    final candidate = p.join(folder, p.basename(located));
+    return File(candidate).existsSync() ? candidate : located;
+  }
+
+  /// Where this copy keeps photos, once that is known.
+  ///
+  /// Null for an installed copy, where stored paths are already right and
+  /// no fallback is needed.
+  static String? get photoDirectoryPath {
+    final root = portableSupportDirectory;
+    return root == null ? null : p.join(root.path, subdirectory);
   }
 }

@@ -45,6 +45,10 @@ dependencies:
   pdf_graphics: 3.8.0
   printing: ^5.14.3
   shared_preferences: ^2.5.5
+  # Direct, because a carried copy registers a settings store of its own
+  # that writes into the folder on the disk rather than into the
+  # platform's place. See lib/core/portable_preferences.dart.
+  shared_preferences_platform_interface: ^2.4.1
   csv: ^8.0.0
   # Pinned below 9.x: file_picker 12.0.0 (via file_picker_darwin 1.0.0)
   # calls macOS-native methods by FileType name (e.g. "custom"), but the

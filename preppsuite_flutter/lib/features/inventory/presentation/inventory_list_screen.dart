@@ -13,6 +13,7 @@ import '../application/inventory_csv_export.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_providers.dart';
 import '../../energy/presentation/energy_screen.dart';
+import '../application/inventory_photo_service.dart';
 import 'barcode_scanner_screen.dart';
 import 'rotation_screen.dart';
 import 'shopping_list_screen.dart';
@@ -415,7 +416,11 @@ class _InventoryTile extends ConsumerWidget {
               backgroundImage: ResizeImage.resizeIfNeeded(
                 96,
                 96,
-                FileImage(File(photoPath)),
+                FileImage(
+                  File(
+                    InventoryPhotoService.resolvePhotoPath(photoPath),
+                  ),
+                ),
               ),
             )
           : CircleAvatar(child: Icon(categoryIcon(category))),

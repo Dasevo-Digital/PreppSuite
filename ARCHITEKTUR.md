@@ -874,6 +874,31 @@ tree; the test suite deliberately targets that layer rather than the UI.
   rating and not what leaves the socket — and deliberately **without** an
   efficiency percentage, which would be exactly the invented figure the
   rest of the feature avoids.
+- **A carried copy keeps its data beside the program.** A folder named
+  `PreppSuite-Daten` next to the executable turns it on; nothing is
+  created on its own, so an installed copy behaves exactly as before.
+  See `core/portable_location.dart` and
+  [docs/mitgefuehrte-fassung.md](docs/mitgefuehrte-fassung.md). Four
+  things this turns on: **the settings store is ours**
+  (`portable_preferences.dart`, a JSON file) rather than the platform's,
+  because on macOS the platform's is `NSUserDefaults` — not a file in a
+  directory and not pointable anywhere, so one implementation that
+  behaves the same on all three desktops beats three that nearly do;
+  **macOS cannot find the folder by itself** and is pointed at one
+  instead, because the sandbox is deliberately on (it is what stops the
+  system asking for folder access after every update) and a sandboxed app
+  may not read a directory beside its own bundle — the same
+  security-scoped bookmark machinery the shared folder uses; **paths
+  inside the data folder are stored relative** with the `daten:` prefix
+  and forward slashes (`portable_paths.dart`), because an absolute path
+  is a claim about one machine and the stick is `E:` today and
+  `/Volumes/PREPP` tomorrow — without this it is a portable program with
+  a broken library, which is worse than none; and **taking over an
+  installed copy's data copies, never moves**, because that installation
+  is still somebody's. The pointer to a chosen folder lives in a file in
+  the platform's own Application Support and deliberately **not** in the
+  preferences — the preferences are one of the things that move, so the
+  way there cannot be kept inside them.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions

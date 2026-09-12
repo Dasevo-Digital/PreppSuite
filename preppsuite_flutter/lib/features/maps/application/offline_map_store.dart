@@ -1,5 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/portable_paths.dart';
+
 const _archivePathKey = 'offlineMapArchivePath';
 const _archiveLabelKey = 'offlineMapArchiveLabel';
 
@@ -14,8 +16,12 @@ class OfflineMapStore {
 
   Future<({String location, String label})?> archive() async {
     final prefs = await SharedPreferences.getInstance();
-    final location = prefs.getString(_archivePathKey);
-    if (location == null || location.isEmpty) return null;
+    final stored = prefs.getString(_archivePathKey);
+    if (stored == null || stored.isEmpty) return null;
+    // An archive on the same disk as the app is remembered by where it
+    // sits within the data folder, not by a path that names a drive
+    // letter. See `portable_paths.dart`.
+    final location = readLocation(stored);
 
     final label = prefs.getString(_archiveLabelKey);
     return (
@@ -26,7 +32,7 @@ class OfflineMapStore {
 
   Future<void> save({required String location, required String label}) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_archivePathKey, location);
+    await prefs.setString(_archivePathKey, storeLocation(location));
     await prefs.setString(_archiveLabelKey, label);
   }
 

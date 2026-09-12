@@ -4123,4 +4123,64 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get energyHelperPowerbank =>
       'Powerbank in mAh? Mal 3,7 V, geteilt durch 1000, ergibt Wattstunden: 20000 mAh sind 74 Wh. Achtung – das ist die Zelle, nicht die Steckdose. Beim Hochsetzen auf 5 V geht etwas verloren; wie viel, hängt vom Gerät ab, deshalb steht hier keine Prozentzahl.';
+
+  @override
+  String get portableTitle => 'Datenordner';
+
+  @override
+  String get portableInstalled => 'Auf diesem Rechner';
+
+  @override
+  String get portableInstalledHint =>
+      'Haushalt, Vorräte, Fotos und Einstellungen liegen dort, wo dieses Betriebssystem sie für Programme vorsieht.';
+
+  @override
+  String get portableCarried => 'Auf einem mitgeführten Datenträger';
+
+  @override
+  String portableSourceBeside(String folder) {
+    return 'Gefunden als Ordner „$folder“ neben dem Programm.';
+  }
+
+  @override
+  String get portableSourceChosen => 'Einmal ausgewählt und gemerkt.';
+
+  @override
+  String portableSourceEnvironment(String variable) {
+    return 'Von der Umgebungsvariable $variable vorgegeben.';
+  }
+
+  @override
+  String portableExplain(String folder) {
+    return 'Lege neben dem Programm einen Ordner namens „$folder“ an, und der nächste Start benutzt ihn. Nichts wird von allein angelegt: Eine installierte Fassung verhält sich genau wie bisher.';
+  }
+
+  @override
+  String get portableExplainMac =>
+      'Unter macOS läuft die App in der Sandbox – absichtlich, denn nur so fragt das System nach einer Aktualisierung nicht erneut nach Ordner-Zugriff. Eine Sandbox darf keinen Ordner neben dem Programm lesen. Deshalb wird der Ordner hier einmal je Mac ausgewählt statt von allein gefunden.';
+
+  @override
+  String get portableChoose => 'Ordner auswählen';
+
+  @override
+  String get portableForget => 'Wieder auf diesem Rechner';
+
+  @override
+  String get portableRestartNeeded => 'Wirkt beim nächsten Start.';
+
+  @override
+  String get portableTakeover =>
+      'Beim ersten Start mit einem neuen Ordner übernimmt die App einmalig, was auf diesem Rechner liegt – kopiert, nicht verschoben. Die Installation hier bleibt unberührt.';
+
+  @override
+  String get portableRelativeNote =>
+      'Karten, Archive und Dokumente, die auf demselben Datenträger liegen, werden relativ gemerkt. Sie werden also auch dann wiedergefunden, wenn der Datenträger am nächsten Rechner unter einem anderen Buchstaben erscheint.';
+
+  @override
+  String get portableFolderUnusable =>
+      'Dieser Ordner lässt sich nicht beschreiben.';
+
+  @override
+  String get portableUnsupported =>
+      'Ein mitgeführter Datenordner ist nur auf Rechnern möglich, nicht auf Telefonen: Dort bestimmt das System, wo die Daten einer App liegen.';
 }

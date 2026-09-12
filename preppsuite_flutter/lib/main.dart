@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
+import 'core/portable_data.dart';
 import 'features/inventory/application/open_food_facts_service.dart';
 
 /// PreppSuite runs entirely on the device.
@@ -20,6 +21,13 @@ void main(List<String> args) async {
   if (runWebViewTitleBarWidget(args)) return;
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Before anything reads a setting or opens a database: this is what
+  // decides whether they come from the platform's own place or from a
+  // folder on the disk the program is being carried on. It cannot throw
+  // and it cannot stop startup — the worst it does is decide that this
+  // is an ordinary installation.
+  await startPortableData();
 
   OpenFoodFactsService.configure();
 

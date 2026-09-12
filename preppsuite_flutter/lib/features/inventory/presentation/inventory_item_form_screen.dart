@@ -310,7 +310,9 @@ class _InventoryItemFormScreenState
 
     final edited = await Navigator.of(context).push<Uint8List>(
       MaterialPageRoute(
-        builder: (_) => PhotoEditorScreen(file: File(path)),
+        builder: (_) => PhotoEditorScreen(
+          file: File(InventoryPhotoService.resolvePhotoPath(path)),
+        ),
       ),
     );
     if (edited == null || !mounted) return;
@@ -895,7 +897,11 @@ class _PhotoPicker extends StatelessWidget {
             border: Border.all(color: colorScheme.outlineVariant),
           ),
           child: photoPath != null
-              ? Image.file(File(photoPath), fit: BoxFit.cover, cacheWidth: 600)
+              ? Image.file(
+                  File(InventoryPhotoService.resolvePhotoPath(photoPath)),
+                  fit: BoxFit.cover,
+                  cacheWidth: 600,
+                )
               : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

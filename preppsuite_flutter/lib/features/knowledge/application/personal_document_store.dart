@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/portable_paths.dart';
+
 const _documentsKey = 'knowledgePersonalDocuments';
 
 class PersonalDocument {
@@ -33,7 +35,10 @@ class PersonalDocument {
 
   Map<String, Object?> toJson() => {
     'id': id,
-    'location': location,
+    // Written down relative to the data folder when it is inside it, so
+    // a document carried on the same disk is still found after the disk
+    // comes up under another letter. See `portable_paths.dart`.
+    'location': storeLocation(location),
     'label': label,
     'addedAt': addedAt.toUtc().toIso8601String(),
     'indexStatus': indexStatus,
@@ -54,7 +59,7 @@ class PersonalDocument {
     }
     return PersonalDocument(
       id: id,
-      location: location,
+      location: readLocation(location),
       label: label,
       addedAt: addedAt,
       indexStatus: value['indexStatus'] is String

@@ -1,7 +1,8 @@
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+
+import '../../../core/app_database_directory.dart';
 
 /// How an article can be put in front of the reader here.
 ///
@@ -86,5 +87,5 @@ Future<bool> openArticleWindow({
 /// only ever show up on an installed copy, never on a developer's.
 Future<String> _windowsUserDataFolder() async {
   if (defaultTargetPlatform != TargetPlatform.windows) return '';
-  return p.join((await getApplicationSupportDirectory()).path, 'webview2');
+  return p.join((await appSupportDirectory()).path, 'webview2');
 }

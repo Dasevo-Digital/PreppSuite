@@ -8,6 +8,7 @@ import '../../../core/theme_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../downloads/presentation/download_folder_card.dart';
+import 'portable_data_card.dart';
 import '../../inventory/presentation/expiry_reminders_card.dart';
 import '../../inventory/presentation/charge_reminder_card.dart';
 import '../../maps/presentation/offline_map_card.dart';
@@ -124,6 +125,10 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           DownloadFolderCard(l10n: l10n),
+          // Under the download folder, because the two are the same kind
+          // of question — where do the files go — and because this one
+          // is the answer for everything the app writes for itself.
+          PortableDataCard(l10n: l10n),
           const SizedBox(height: 24),
           Text(
             l10n.backupTitle,

@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/portable_paths.dart';
+
 const _libraryKey = 'knowledgeArchives';
 const _selectedKey = 'knowledgeSelectedArchive';
 
@@ -86,7 +88,10 @@ class StoredArchive {
 
   Map<String, Object?> toJson() => {
     'id': id,
-    'location': location,
+    // An archive on the same disk as the app is written down by where it
+    // sits within the data folder. An absolute path names a drive letter,
+    // and a carried disk does not have the same one twice running.
+    'location': storeLocation(location),
     'label': label,
     'sizeBytes': sizeBytes,
     'entryCount': entryCount,
@@ -119,10 +124,11 @@ class StoredArchive {
       }
     }
 
+    final resolved = readLocation(location);
     return StoredArchive(
       id: id,
-      location: location,
-      label: label is String && label.isNotEmpty ? label : location,
+      location: resolved,
+      label: label is String && label.isNotEmpty ? label : resolved,
       sizeBytes: json['sizeBytes'] is int ? json['sizeBytes'] as int : null,
       entryCount: json['entryCount'] is int ? json['entryCount'] as int : null,
       title: text(json['title']),
@@ -196,7 +202,8 @@ class ZimStore {
   /// does not come back here even if the user later removes every archive.
   Future<({List<StoredArchive> archives, String? selectedId})>
   _carryOverSingleArchive(SharedPreferences prefs) async {
-    final location = prefs.getString(_legacyLocationKey);
+    final stored = prefs.getString(_legacyLocationKey);
+    final location = stored == null ? null : readLocation(stored);
     if (location == null || location.isEmpty) {
       return (archives: const <StoredArchive>[], selectedId: null);
     }

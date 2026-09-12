@@ -6967,6 +6967,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Power bank in mAh? Times 3.7 V, divided by 1000, gives watt-hours: 20000 mAh is 74 Wh. Careful — that is the cell, not the socket. Stepping up to 5 V loses something; how much depends on the device, which is why no percentage is given here.'**
   String get energyHelperPowerbank;
+
+  /// No description provided for @portableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data folder'**
+  String get portableTitle;
+
+  /// No description provided for @portableInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'On this machine'**
+  String get portableInstalled;
+
+  /// No description provided for @portableInstalledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Household, stock, photos and settings sit where this operating system keeps them for programs.'**
+  String get portableInstalledHint;
+
+  /// No description provided for @portableCarried.
+  ///
+  /// In en, this message translates to:
+  /// **'On a disk you carry'**
+  String get portableCarried;
+
+  /// No description provided for @portableSourceBeside.
+  ///
+  /// In en, this message translates to:
+  /// **'Found as a folder named “{folder}” beside the program.'**
+  String portableSourceBeside(String folder);
+
+  /// No description provided for @portableSourceChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Chosen once and remembered.'**
+  String get portableSourceChosen;
+
+  /// No description provided for @portableSourceEnvironment.
+  ///
+  /// In en, this message translates to:
+  /// **'Named by the environment variable {variable}.'**
+  String portableSourceEnvironment(String variable);
+
+  /// No description provided for @portableExplain.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a folder called “{folder}” beside the program and the next launch uses it. Nothing is created on its own: an installed copy behaves exactly as it always has.'**
+  String portableExplain(String folder);
+
+  /// No description provided for @portableExplainMac.
+  ///
+  /// In en, this message translates to:
+  /// **'On macOS the app runs sandboxed — deliberately, because that is what stops the system asking for folder access again after every update. A sandboxed app may not read a folder beside the program. So here the folder is chosen once per Mac instead of being found.'**
+  String get portableExplainMac;
+
+  /// No description provided for @portableChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a folder'**
+  String get portableChoose;
+
+  /// No description provided for @portableForget.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to this machine'**
+  String get portableForget;
+
+  /// No description provided for @portableRestartNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Takes effect at the next start.'**
+  String get portableRestartNeeded;
+
+  /// No description provided for @portableTakeover.
+  ///
+  /// In en, this message translates to:
+  /// **'The first time a new folder is used, the app takes over once what is on this machine — copied, not moved. The installation here is left untouched.'**
+  String get portableTakeover;
+
+  /// No description provided for @portableRelativeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Maps, archives and documents that sit on the same disk are remembered relative to it. They are found again even when the disk comes up under a different letter on the next machine.'**
+  String get portableRelativeNote;
+
+  /// No description provided for @portableFolderUnusable.
+  ///
+  /// In en, this message translates to:
+  /// **'This folder cannot be written to.'**
+  String get portableFolderUnusable;
+
+  /// No description provided for @portableUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'A carried data folder is possible on computers only, not on phones: there the system decides where an app\'s data lives.'**
+  String get portableUnsupported;
 }
 
 class _AppLocalizationsDelegate

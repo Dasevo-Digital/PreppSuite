@@ -533,7 +533,8 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                             _formatBytes(
                               state.library.fold<int>(
                                 0,
-                                (sum, archive) => sum + (archive.sizeBytes ?? 0),
+                                (sum, archive) =>
+                                    sum + (archive.sizeBytes ?? 0),
                               ),
                             ),
                           ),
@@ -559,9 +560,8 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                                   .read(knowledgeProvider.notifier)
                                   .select(id);
                             },
-                            onRemove: (id) => ref
-                                .read(knowledgeProvider.notifier)
-                                .remove(id),
+                            onRemove: (id) =>
+                                ref.read(knowledgeProvider.notifier).remove(id),
                           ),
                   ),
                   Padding(
