@@ -12,6 +12,7 @@ import '../application/inventory_category_l10n.dart';
 import '../application/inventory_csv_export.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_providers.dart';
+import '../../energy/presentation/energy_screen.dart';
 import 'barcode_scanner_screen.dart';
 import 'rotation_screen.dart';
 import 'shopping_list_screen.dart';
@@ -25,7 +26,13 @@ import 'inventory_filter_sheet.dart';
 import 'package:intl/intl.dart';
 import '../../../core/error_text.dart';
 
-enum _InventoryMenuAction { consumeByScan, storageTips, exportCsv, importCsv }
+enum _InventoryMenuAction {
+  consumeByScan,
+  energy,
+  storageTips,
+  exportCsv,
+  importCsv,
+}
 
 class InventoryListScreen extends ConsumerStatefulWidget {
   const InventoryListScreen({super.key, required this.householdId});
@@ -87,6 +94,18 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
                 child: ListTile(
                   leading: const Icon(Icons.qr_code_scanner),
                   title: Text(l10n.consumeScanAction),
+                ),
+              ),
+              // Beside the storage tips rather than in the stock list:
+              // it is the same question — how long does this last — for
+              // everything the stock list cannot count, because a
+              // cartridge has no calories and a candle has no expiry
+              // date.
+              PopupMenuItem(
+                value: _InventoryMenuAction.energy,
+                child: ListTile(
+                  leading: const Icon(Icons.bolt_outlined),
+                  title: Text(l10n.energyTitle),
                 ),
               ),
               PopupMenuItem(
@@ -243,6 +262,10 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
     switch (action) {
       case _InventoryMenuAction.consumeByScan:
         await _consumeByScan(context, ref, householdId, l10n);
+      case _InventoryMenuAction.energy:
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const EnergyScreen()),
+        );
       case _InventoryMenuAction.storageTips:
         await Navigator.of(context).push(
           MaterialPageRoute(

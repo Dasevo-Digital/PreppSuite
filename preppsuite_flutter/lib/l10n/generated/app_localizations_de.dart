@@ -3957,4 +3957,170 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get radioCallingChannelNoListener =>
       'Verlass dich nicht darauf, dass jemand mithört. Niemand ist verpflichtet, einen dieser Kanäle zu überwachen.';
+
+  @override
+  String get energyTitle => 'Energie und Brennstoff';
+
+  @override
+  String get energyEntryHint =>
+      'Wie lange Strom, Gas, Brennstoff und Licht reichen.';
+
+  @override
+  String get energyIntro =>
+      'Die App rechnet aus, wie lange Essen und Wasser reichen. Das hier ist dieselbe Rechnung für das, womit gekocht, geheizt und geleuchtet wird.';
+
+  @override
+  String get energyNothingYet => 'Noch nichts eingetragen';
+
+  @override
+  String get energyNothingYetWhy =>
+      'Trage ein, was du hast – und was es verbraucht. Beide Zahlen stehen auf dem Gerät und auf der Packung: „160 g/h“ auf dem Kocher, „230 g“ auf der Kartusche. Geschätzt wird hier nichts.';
+
+  @override
+  String get energyReserves => 'Vorrat';
+
+  @override
+  String get energyDraws => 'Verbraucher';
+
+  @override
+  String get energyAddReserve => 'Vorrat hinzufügen';
+
+  @override
+  String get energyAddDraw => 'Verbraucher hinzufügen';
+
+  @override
+  String get energyEditReserve => 'Vorrat ändern';
+
+  @override
+  String get energyEditDraw => 'Verbraucher ändern';
+
+  @override
+  String get energyDelete => 'Löschen';
+
+  @override
+  String get energyLabel => 'Bezeichnung';
+
+  @override
+  String get energyKind => 'Art';
+
+  @override
+  String get energyAmount => 'Menge';
+
+  @override
+  String get energyPerHour => 'Verbrauch je Stunde';
+
+  @override
+  String get energyHoursPerDay => 'Stunden am Tag';
+
+  @override
+  String get energyNumberNeeded => 'Eine Zahl größer als null.';
+
+  @override
+  String get energyLabelNeeded =>
+      'Eine Bezeichnung, damit die Zeile später noch etwas sagt.';
+
+  @override
+  String energyDays(int days) {
+    return '$days Tage';
+  }
+
+  @override
+  String get energyOneDay => '1 Tag';
+
+  @override
+  String get energyZeroDays => 'Reicht keinen Tag';
+
+  @override
+  String energyPerDayIs(String amount, String unit, String stored) {
+    return '$amount $unit am Tag von $stored $unit';
+  }
+
+  @override
+  String get energyUnused =>
+      'Eingelagert, aber nichts verbraucht es. Trage den Verbraucher ein, sonst rechnet hier nichts.';
+
+  @override
+  String get energyEmpty => 'Wird verbraucht, ist aber nicht eingelagert.';
+
+  @override
+  String energyShortest(String kind, String days) {
+    return 'Zuerst leer: $kind nach $days';
+  }
+
+  @override
+  String get energyShortestWhy =>
+      'Das ist die Reichweite des Haushalts. Vier Vorräte mit jeweils beruhigenden Zahlen sind keine vier Antworten – der kleinste zählt.';
+
+  @override
+  String get energyNoAnswer =>
+      'Noch keine Reichweite: Zu jedem Vorrat gehört ein Verbraucher, sonst gibt es nichts zu teilen.';
+
+  @override
+  String get energySources =>
+      'Alle Zahlen hier sind deine eigenen. Diese App schätzt keinen Verbrauch – was ein Kocher zieht, steht auf dem Kocher, und was ein Gerät zieht, steht auf dem Netzteil. Gerechnet wird nur.';
+
+  @override
+  String get energyKindElectricity => 'Strom';
+
+  @override
+  String get energyKindGas => 'Gas';
+
+  @override
+  String get energyKindLiquidFuel => 'Flüssiger Brennstoff';
+
+  @override
+  String get energyKindSolidFuel => 'Fester Brennstoff';
+
+  @override
+  String get energyKindCandles => 'Kerzenlicht';
+
+  @override
+  String get energyKindElectricityHint =>
+      'Powerbank, Batterien, Solarertrag – in Wattstunden.';
+
+  @override
+  String get energyKindGasHint =>
+      'Kartuschen und Flaschen – in Gramm, so wie der Kocher seinen Verbrauch angibt.';
+
+  @override
+  String get energyKindLiquidFuelHint =>
+      'Benzin, Diesel, Petroleum, Lampenöl, Spiritus – in Litern.';
+
+  @override
+  String get energyKindSolidFuelHint =>
+      'Brennholz, Briketts, Kohle, Pellets – in Kilogramm.';
+
+  @override
+  String get energyKindCandlesHint =>
+      'In Brennstunden: Stückzahl mal Brenndauer je Stück von der Packung.';
+
+  @override
+  String get energyUnitWattHours => 'Wh';
+
+  @override
+  String get energyUnitGrams => 'g';
+
+  @override
+  String get energyUnitLiters => 'l';
+
+  @override
+  String get energyUnitKilograms => 'kg';
+
+  @override
+  String get energyUnitHours => 'h';
+
+  @override
+  String get energyHelperTitle => 'Umrechnen';
+
+  @override
+  String get energyHelperGasBottle =>
+      'Gasflasche in Kilogramm? Mal 1000 ergibt Gramm – 5 kg sind 5000 g.';
+
+  @override
+  String get energyHelperCandles =>
+      'Kerzen? Stückzahl mal Brenndauer je Stück. 40 Teelichter zu 4 Stunden sind 160 Stunden.';
+
+  @override
+  String get energyHelperPowerbank =>
+      'Powerbank in mAh? Mal 3,7 V, geteilt durch 1000, ergibt Wattstunden: 20000 mAh sind 74 Wh. Achtung – das ist die Zelle, nicht die Steckdose. Beim Hochsetzen auf 5 V geht etwas verloren; wie viel, hängt vom Gerät ab, deshalb steht hier keine Prozentzahl.';
 }

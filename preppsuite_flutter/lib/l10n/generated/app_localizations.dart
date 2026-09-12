@@ -6679,6 +6679,294 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Do not count on anybody listening. Nobody is obliged to monitor any of these channels.'**
   String get radioCallingChannelNoListener;
+
+  /// No description provided for @energyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy and fuel'**
+  String get energyTitle;
+
+  /// No description provided for @energyEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How long power, gas, fuel and light last.'**
+  String get energyEntryHint;
+
+  /// No description provided for @energyIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The app works out how long the food and water last. This is the same sum for what you cook, heat and light with.'**
+  String get energyIntro;
+
+  /// No description provided for @energyNothingYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing entered yet'**
+  String get energyNothingYet;
+
+  /// No description provided for @energyNothingYetWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter what you have — and what uses it. Both figures are printed on the thing itself: “160 g/h” on the stove, “230 g” on the cartridge. Nothing here is estimated for you.'**
+  String get energyNothingYetWhy;
+
+  /// No description provided for @energyReserves.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored'**
+  String get energyReserves;
+
+  /// No description provided for @energyDraws.
+  ///
+  /// In en, this message translates to:
+  /// **'Used by'**
+  String get energyDraws;
+
+  /// No description provided for @energyAddReserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a reserve'**
+  String get energyAddReserve;
+
+  /// No description provided for @energyAddDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a consumer'**
+  String get energyAddDraw;
+
+  /// No description provided for @energyEditReserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the reserve'**
+  String get energyEditReserve;
+
+  /// No description provided for @energyEditDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the consumer'**
+  String get energyEditDraw;
+
+  /// No description provided for @energyDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get energyDelete;
+
+  /// No description provided for @energyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get energyLabel;
+
+  /// No description provided for @energyKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get energyKind;
+
+  /// No description provided for @energyAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get energyAmount;
+
+  /// No description provided for @energyPerHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses per hour'**
+  String get energyPerHour;
+
+  /// No description provided for @energyHoursPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours a day'**
+  String get energyHoursPerDay;
+
+  /// No description provided for @energyNumberNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'A number greater than zero.'**
+  String get energyNumberNeeded;
+
+  /// No description provided for @energyLabelNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'A name, so the row still says something later.'**
+  String get energyLabelNeeded;
+
+  /// No description provided for @energyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String energyDays(int days);
+
+  /// No description provided for @energyOneDay.
+  ///
+  /// In en, this message translates to:
+  /// **'1 day'**
+  String get energyOneDay;
+
+  /// No description provided for @energyZeroDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Does not last a day'**
+  String get energyZeroDays;
+
+  /// No description provided for @energyPerDayIs.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} {unit} a day out of {stored} {unit}'**
+  String energyPerDayIs(String amount, String unit, String stored);
+
+  /// No description provided for @energyUnused.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored, but nothing uses it. Enter the consumer, or there is nothing to divide.'**
+  String get energyUnused;
+
+  /// No description provided for @energyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Something uses it and there is none.'**
+  String get energyEmpty;
+
+  /// No description provided for @energyShortest.
+  ///
+  /// In en, this message translates to:
+  /// **'First to run out: {kind} after {days}'**
+  String energyShortest(String kind, String days);
+
+  /// No description provided for @energyShortestWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'That is the household\'s range. Four reserves each with a reassuring number are not four answers — the smallest one counts.'**
+  String get energyShortestWhy;
+
+  /// No description provided for @energyNoAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'No range yet: every reserve needs a consumer, or there is nothing to divide.'**
+  String get energyNoAnswer;
+
+  /// No description provided for @energySources.
+  ///
+  /// In en, this message translates to:
+  /// **'Every figure here is your own. This app estimates no consumption — what a stove uses is written on the stove, and what a device draws is written on its power supply. All it does is the arithmetic.'**
+  String get energySources;
+
+  /// No description provided for @energyKindElectricity.
+  ///
+  /// In en, this message translates to:
+  /// **'Electricity'**
+  String get energyKindElectricity;
+
+  /// No description provided for @energyKindGas.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas'**
+  String get energyKindGas;
+
+  /// No description provided for @energyKindLiquidFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Liquid fuel'**
+  String get energyKindLiquidFuel;
+
+  /// No description provided for @energyKindSolidFuel.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid fuel'**
+  String get energyKindSolidFuel;
+
+  /// No description provided for @energyKindCandles.
+  ///
+  /// In en, this message translates to:
+  /// **'Candlelight'**
+  String get energyKindCandles;
+
+  /// No description provided for @energyKindElectricityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Power banks, batteries, a solar day\'s work — in watt-hours.'**
+  String get energyKindElectricityHint;
+
+  /// No description provided for @energyKindGasHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Cartridges and cylinders — in grams, the way a stove states its consumption.'**
+  String get energyKindGasHint;
+
+  /// No description provided for @energyKindLiquidFuelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Petrol, diesel, paraffin, lamp oil, spirit — in litres.'**
+  String get energyKindLiquidFuelHint;
+
+  /// No description provided for @energyKindSolidFuelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Firewood, briquettes, coal, pellets — in kilograms.'**
+  String get energyKindSolidFuelHint;
+
+  /// No description provided for @energyKindCandlesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'In burning hours: pieces times the burn time per piece from the packet.'**
+  String get energyKindCandlesHint;
+
+  /// No description provided for @energyUnitWattHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Wh'**
+  String get energyUnitWattHours;
+
+  /// No description provided for @energyUnitGrams.
+  ///
+  /// In en, this message translates to:
+  /// **'g'**
+  String get energyUnitGrams;
+
+  /// No description provided for @energyUnitLiters.
+  ///
+  /// In en, this message translates to:
+  /// **'l'**
+  String get energyUnitLiters;
+
+  /// No description provided for @energyUnitKilograms.
+  ///
+  /// In en, this message translates to:
+  /// **'kg'**
+  String get energyUnitKilograms;
+
+  /// No description provided for @energyUnitHours.
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get energyUnitHours;
+
+  /// No description provided for @energyHelperTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Converting'**
+  String get energyHelperTitle;
+
+  /// No description provided for @energyHelperGasBottle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cylinder in kilograms? Times 1000 gives grams — 5 kg is 5000 g.'**
+  String get energyHelperGasBottle;
+
+  /// No description provided for @energyHelperCandles.
+  ///
+  /// In en, this message translates to:
+  /// **'Candles? Pieces times the burn time each. 40 tea lights at 4 hours is 160 hours.'**
+  String get energyHelperCandles;
+
+  /// No description provided for @energyHelperPowerbank.
+  ///
+  /// In en, this message translates to:
+  /// **'Power bank in mAh? Times 3.7 V, divided by 1000, gives watt-hours: 20000 mAh is 74 Wh. Careful — that is the cell, not the socket. Stepping up to 5 V loses something; how much depends on the device, which is why no percentage is given here.'**
+  String get energyHelperPowerbank;
 }
 
 class _AppLocalizationsDelegate

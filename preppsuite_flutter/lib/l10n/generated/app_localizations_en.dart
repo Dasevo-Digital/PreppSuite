@@ -3933,4 +3933,169 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get radioCallingChannelNoListener =>
       'Do not count on anybody listening. Nobody is obliged to monitor any of these channels.';
+
+  @override
+  String get energyTitle => 'Energy and fuel';
+
+  @override
+  String get energyEntryHint => 'How long power, gas, fuel and light last.';
+
+  @override
+  String get energyIntro =>
+      'The app works out how long the food and water last. This is the same sum for what you cook, heat and light with.';
+
+  @override
+  String get energyNothingYet => 'Nothing entered yet';
+
+  @override
+  String get energyNothingYetWhy =>
+      'Enter what you have — and what uses it. Both figures are printed on the thing itself: “160 g/h” on the stove, “230 g” on the cartridge. Nothing here is estimated for you.';
+
+  @override
+  String get energyReserves => 'Stored';
+
+  @override
+  String get energyDraws => 'Used by';
+
+  @override
+  String get energyAddReserve => 'Add a reserve';
+
+  @override
+  String get energyAddDraw => 'Add a consumer';
+
+  @override
+  String get energyEditReserve => 'Change the reserve';
+
+  @override
+  String get energyEditDraw => 'Change the consumer';
+
+  @override
+  String get energyDelete => 'Delete';
+
+  @override
+  String get energyLabel => 'Name';
+
+  @override
+  String get energyKind => 'Kind';
+
+  @override
+  String get energyAmount => 'Amount';
+
+  @override
+  String get energyPerHour => 'Uses per hour';
+
+  @override
+  String get energyHoursPerDay => 'Hours a day';
+
+  @override
+  String get energyNumberNeeded => 'A number greater than zero.';
+
+  @override
+  String get energyLabelNeeded =>
+      'A name, so the row still says something later.';
+
+  @override
+  String energyDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get energyOneDay => '1 day';
+
+  @override
+  String get energyZeroDays => 'Does not last a day';
+
+  @override
+  String energyPerDayIs(String amount, String unit, String stored) {
+    return '$amount $unit a day out of $stored $unit';
+  }
+
+  @override
+  String get energyUnused =>
+      'Stored, but nothing uses it. Enter the consumer, or there is nothing to divide.';
+
+  @override
+  String get energyEmpty => 'Something uses it and there is none.';
+
+  @override
+  String energyShortest(String kind, String days) {
+    return 'First to run out: $kind after $days';
+  }
+
+  @override
+  String get energyShortestWhy =>
+      'That is the household\'s range. Four reserves each with a reassuring number are not four answers — the smallest one counts.';
+
+  @override
+  String get energyNoAnswer =>
+      'No range yet: every reserve needs a consumer, or there is nothing to divide.';
+
+  @override
+  String get energySources =>
+      'Every figure here is your own. This app estimates no consumption — what a stove uses is written on the stove, and what a device draws is written on its power supply. All it does is the arithmetic.';
+
+  @override
+  String get energyKindElectricity => 'Electricity';
+
+  @override
+  String get energyKindGas => 'Gas';
+
+  @override
+  String get energyKindLiquidFuel => 'Liquid fuel';
+
+  @override
+  String get energyKindSolidFuel => 'Solid fuel';
+
+  @override
+  String get energyKindCandles => 'Candlelight';
+
+  @override
+  String get energyKindElectricityHint =>
+      'Power banks, batteries, a solar day\'s work — in watt-hours.';
+
+  @override
+  String get energyKindGasHint =>
+      'Cartridges and cylinders — in grams, the way a stove states its consumption.';
+
+  @override
+  String get energyKindLiquidFuelHint =>
+      'Petrol, diesel, paraffin, lamp oil, spirit — in litres.';
+
+  @override
+  String get energyKindSolidFuelHint =>
+      'Firewood, briquettes, coal, pellets — in kilograms.';
+
+  @override
+  String get energyKindCandlesHint =>
+      'In burning hours: pieces times the burn time per piece from the packet.';
+
+  @override
+  String get energyUnitWattHours => 'Wh';
+
+  @override
+  String get energyUnitGrams => 'g';
+
+  @override
+  String get energyUnitLiters => 'l';
+
+  @override
+  String get energyUnitKilograms => 'kg';
+
+  @override
+  String get energyUnitHours => 'h';
+
+  @override
+  String get energyHelperTitle => 'Converting';
+
+  @override
+  String get energyHelperGasBottle =>
+      'Cylinder in kilograms? Times 1000 gives grams — 5 kg is 5000 g.';
+
+  @override
+  String get energyHelperCandles =>
+      'Candles? Pieces times the burn time each. 40 tea lights at 4 hours is 160 hours.';
+
+  @override
+  String get energyHelperPowerbank =>
+      'Power bank in mAh? Times 3.7 V, divided by 1000, gives watt-hours: 20000 mAh is 74 Wh. Careful — that is the cell, not the socket. Stepping up to 5 V loses something; how much depends on the device, which is why no percentage is given here.';
 }

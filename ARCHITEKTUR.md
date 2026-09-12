@@ -855,6 +855,25 @@ tree; the test suite deliberately targets that layer rather than the UI.
   initiative it is, alongside the places that use channel 1 instead —
   the same rule as the DWD's Graslandfeuerindex, that where an authority
   publishes no scale this app does not invent one.
+- **The energy range estimates nothing.** `features/energy/` is the
+  supply calculator's other half: that one answers how long the food and
+  water last, this one how long the cooking, the light and the radio do.
+  It keeps the same rule about figures, and keeps it harder — **every
+  number on that screen was typed in by the household**, off the stove
+  ("160 g/h") and off the cartridge ("230 g"). The app supplies the
+  division, the units and one question nobody asks themselves: which of
+  the reserves runs out first, which is the household's actual range and
+  is never the number anyone reads off the list. Three decisions worth
+  keeping: the five kinds are counted in the unit their own labels use
+  (gas in grams, not kilograms, because that is how a stove states its
+  consumption — so no constant from anywhere is needed to divide), days
+  are rounded **down** (a reserve lasting three days and twenty hours
+  lasts three days), and "stored but nothing uses it" is a state of its
+  own rather than an infinite range. The one conversion offered is
+  mAh -> Wh for a power bank, with the caveat that it is the cell's
+  rating and not what leaves the socket — and deliberately **without** an
+  efficiency percentage, which would be exactly the invented figure the
+  rest of the feature avoids.
 - Comments in code are English; `docs/` prose is German.
 
 ## Conventions
