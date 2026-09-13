@@ -150,6 +150,9 @@ derselben Zeile entscheidet eine feste Versionsreihenfolge. Einzelheiten samt Gr
 [`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md).
 
 Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
+Auf einem breiten Fenster legen sich die Bildschirme in Spalten lesbarer
+Breite nebeneinander, statt eine einzelne Spalte über die ganze Breite zu
+ziehen; auf dem Telefon bleibt alles wie es war.
 
 ## Installieren
 
