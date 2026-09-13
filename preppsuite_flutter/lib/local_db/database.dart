@@ -54,6 +54,50 @@ class AppDatabase extends _$AppDatabase {
     'budget_entries',
   ];
 
+  /// Whether the database really holds this table.
+  ///
+  /// Asked rather than deduced from the version. See [_addColumnOnce].
+  Future<bool> _hasTable(String table) async {
+    final row = await customSelect(
+      "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+      variables: [Variable<String>(table)],
+    ).getSingleOrNull();
+    return row != null;
+  }
+
+  /// Adds a column unless the table already has it.
+  ///
+  /// Every `addColumn` in the migration goes through here, because a
+  /// migration that assumes a column is missing can brick the app for
+  /// good. Drift runs `onUpgrade` and then, as a separate write, records
+  /// the new version -- there is no transaction around the pair (see
+  /// `engines.dart`: "set version now, after migrations ran
+  /// successfully"). So a process that dies between the two -- a force
+  /// quit, a crash, the bundle being replaced under a running app --
+  /// leaves the column added and the version unchanged. The next launch
+  /// runs the same ALTER again, SQLite answers "duplicate column name",
+  /// and the app cannot open at all: the failure is in the code that runs
+  /// before there is a screen to explain it, and it repeats on every
+  /// single launch. It happened here, to the real household database,
+  /// between 1.7.4 and 1.8.0.
+  ///
+  /// Asking costs one `PRAGMA table_info` per column at upgrade time,
+  /// which happens once per install per version.
+  Future<void> _addColumnOnce(
+    Migrator m,
+    TableInfo table,
+    GeneratedColumn column,
+  ) async {
+    final columns = await customSelect(
+      'PRAGMA table_info(${table.actualTableName})',
+    ).get();
+    final present = columns.any(
+      (row) => row.read<String>('name') == column.name,
+    );
+    if (present) return;
+    await m.addColumn(table, column);
+  }
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
@@ -67,10 +111,10 @@ class AppDatabase extends _$AppDatabase {
         await m.createTable(warnings);
       }
       if (from < 4) {
-        await m.addColumn(inventoryItems, inventoryItems.photoPath);
+        await _addColumnOnce(m, inventoryItems, inventoryItems.photoPath);
       }
       if (from < 5) {
-        await m.addColumn(inventoryItems, inventoryItems.calories);
+        await _addColumnOnce(m, inventoryItems, inventoryItems.calories);
       }
       if (from < 6) {
         // Repairs data left behind by a bug that kept `dirty` at false when
@@ -135,10 +179,14 @@ class AppDatabase extends _$AppDatabase {
         //
         // `== 8` and not `< 9`: anything older came through the rebuild
         // above, which already created these columns.
-        await m.addColumn(inventoryItems, inventoryItems.proteinGrams);
-        await m.addColumn(inventoryItems, inventoryItems.carbohydrateGrams);
-        await m.addColumn(inventoryItems, inventoryItems.fatGrams);
-        await m.addColumn(inventoryItems, inventoryItems.fiberGrams);
+        await _addColumnOnce(m, inventoryItems, inventoryItems.proteinGrams);
+        await _addColumnOnce(
+          m,
+          inventoryItems,
+          inventoryItems.carbohydrateGrams,
+        );
+        await _addColumnOnce(m, inventoryItems, inventoryItems.fatGrams);
+        await _addColumnOnce(m, inventoryItems, inventoryItems.fiberGrams);
       }
       if (from < 10) {
         // A new table, so nothing to convert: an install that never had a
@@ -156,16 +204,13 @@ class AppDatabase extends _$AppDatabase {
         // or partially repaired databases can lack the cache altogether;
         // recreate it in that case because warnings are fetched again anyway.
         if (from >= 7) {
-          final exists = await customSelect(
-            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'warnings'",
-          ).getSingleOrNull();
-          if (exists == null) {
+          if (!await _hasTable('warnings')) {
             await m.createTable(warnings);
           } else {
-            await m.addColumn(warnings, warnings.instruction);
-            await m.addColumn(warnings, warnings.areaDescription);
-            await m.addColumn(warnings, warnings.senderContact);
-            await m.addColumn(warnings, warnings.polygonsJson);
+            await _addColumnOnce(m, warnings, warnings.instruction);
+            await _addColumnOnce(m, warnings, warnings.areaDescription);
+            await _addColumnOnce(m, warnings, warnings.senderContact);
+            await _addColumnOnce(m, warnings, warnings.polygonsJson);
           }
         }
       }
@@ -175,23 +220,20 @@ class AppDatabase extends _$AppDatabase {
         // `from >= 10` and not plain `from < 13`: anything older than 10
         // has no `household_plans` table yet and gets one created above
         // from the current definition, which already carries this column.
-        // Adding it again would take the migration down -- the same trap
-        // the comment at `from < 8` describes.
         //
-        // And the table is looked for rather than assumed, like the
-        // warning cache below. A database on 11 should have it, but a
-        // migration is the one piece of code that runs before the app can
-        // say anything: if it throws, the app does not open at all and
-        // there is no screen left to explain why. Creating an absent one
-        // costs nothing -- a household with no plan has no plan.
-        final exists = await customSelect(
-          "SELECT 1 FROM sqlite_master "
-          "WHERE type = 'table' AND name = 'household_plans'",
-        ).getSingleOrNull();
-        if (exists == null) {
+        // Neither the table nor the column is assumed here, both are
+        // looked for -- see [_addColumnOnce] for what assuming them cost.
+        // A migration is the one piece of code that runs before the app
+        // can say anything: if it throws, the app does not open at all
+        // and there is no screen left to explain why.
+        if (!await _hasTable('household_plans')) {
           await m.createTable(householdPlans);
         } else {
-          await m.addColumn(householdPlans, householdPlans.localContactPoint);
+          await _addColumnOnce(
+            m,
+            householdPlans,
+            householdPlans.localContactPoint,
+          );
         }
       }
     },
