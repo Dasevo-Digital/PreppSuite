@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../daylight/presentation/daylight_screen.dart';
 import '../../maps/presentation/nearby_screen.dart';
@@ -158,276 +159,307 @@ class _EmergencyInformationScreenState
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.emergencyDirectoryTitle)),
-      body: ListView(
+      body: AdaptiveColumns(
         padding: const EdgeInsets.all(16),
-        children: [
+        // Seven poison-control centres, five radio bands and eight more
+        // entries are a long single column on a phone and a very wide,
+        // very empty one on a desktop, with the call icon a screen's
+        // width from the number it belongs to. Each heading travels with
+        // what is under it.
+        blocks: [
           ListTile(
             leading: const Icon(Icons.medical_services_outlined),
             title: Text(l10n.emergencyMedicalService),
             trailing: const Icon(Icons.call_outlined),
             onTap: () => _call('116117'),
           ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.emergencyPoisonTitle,
-            style: Theme.of(context).textTheme.titleLarge,
+          _Block(
+            children: [
+              Text(
+                l10n.emergencyPoisonTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Text(l10n.emergencyPoisonHint),
+              const SizedBox(height: 8),
+              for (final centre in _poisonCentres)
+                ListTile(
+                  dense: true,
+                  leading: const Icon(Icons.local_hospital_outlined),
+                  title: Text(centre.$1),
+                  subtitle: Text(centre.$2),
+                  trailing: const Icon(Icons.call_outlined),
+                  onTap: () => _call(centre.$2),
+                ),
+            ],
           ),
-          Text(l10n.emergencyPoisonHint),
-          const SizedBox(height: 8),
-          for (final centre in _poisonCentres)
-            ListTile(
-              dense: true,
-              leading: const Icon(Icons.local_hospital_outlined),
-              title: Text(centre.$1),
-              subtitle: Text(centre.$2),
-              trailing: const Icon(Icons.call_outlined),
-              onTap: () => _call(centre.$2),
-            ),
-          const SizedBox(height: 20),
           // Before the radio section on purpose: the signal is what tells
           // somebody to turn the radio on, so the two read in the order
           // they happen.
-          Text(
-            l10n.emergencySirenTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          Text(l10n.emergencySirenHint),
-          const SizedBox(height: 8),
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.campaign_outlined),
-                  title: Text(l10n.emergencySirenWarning),
-                  subtitle: Text(l10n.emergencySirenWarningMeaning),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.check_circle_outline),
-                  title: Text(l10n.emergencySirenAllClear),
-                  subtitle: Text(l10n.emergencySirenAllClearMeaning),
-                ),
-                // Listed although it is not a public warning, because it
-                // is the one people hear most often and read as one.
-                ListTile(
-                  leading: const Icon(Icons.local_fire_department_outlined),
-                  title: Text(l10n.emergencySirenFire),
-                  subtitle: Text(l10n.emergencySirenFireMeaning),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            l10n.emergencyRadioTitle,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          Text(l10n.emergencyRadioHint),
-          const SizedBox(height: 8),
-          // No longer const: the channel counts are localised, and "16
-          // Kanäle" was German on an English locale.
-          Card(
-            child: Column(
-              children: [
-                const ListTile(
-                  title: Text('UKW / FM'),
-                  subtitle: Text('87,5–108 MHz'),
-                ),
-                const ListTile(
-                  title: Text('DAB+ Band III'),
-                  subtitle: Text('174–240 MHz'),
-                ),
-                const ListTile(
-                  title: Text('Mittelwelle / AM'),
-                  subtitle: Text('526,5–1606,5 kHz'),
-                ),
-                ListTile(
-                  title: const Text('PMR446'),
-                  subtitle: Text(
-                    '446,00625–446,19375 MHz · '
-                    '${l10n.emergencyRadioChannels(16)}',
-                  ),
-                ),
-                ListTile(
-                  title: const Text('Freenet Deutschland'),
-                  subtitle: Text(
-                    '149,0250–149,1125 MHz · '
-                    '${l10n.emergencyRadioChannels(6)}',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Live data on an otherwise offline reference screen, and it
-          // earns the place: the screen is where somebody looks in an
-          // emergency, and a river's level is the one figure here that is
-          // worthless when out of date. It keeps the last reading and says
-          // so rather than pretending.
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            leading: const Icon(Icons.water_outlined),
-            title: Text(l10n.pegelTitle),
-            subtitle: Text(l10n.pegelEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const PegelScreen()),
-            ),
-          ),
-          // Beside the gauge for the same reason: a figure that is
-          // worthless out of date, on the screen somebody opens when
-          // something has happened. It keeps the last reading and says
-          // so rather than pretending.
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            leading: const Icon(Icons.radar_outlined),
-            title: Text(l10n.radiationTitle),
-            subtitle: Text(l10n.radiationEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const RadiationScreen()),
-            ),
-          ),
-          // The third measurement of the same kind: a number that is
-          // worthless out of date, and one whose meaning comes from the
-          // authority that publishes it rather than from this app.
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            leading: const Icon(Icons.air_outlined),
-            title: Text(l10n.airQualityTitle),
-            subtitle: Text(l10n.airQualityEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const AirQualityScreen()),
-            ),
-          ),
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            leading: const Icon(Icons.local_fire_department_outlined),
-            title: Text(l10n.fireDangerTitle),
-            subtitle: Text(l10n.fireDangerEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const FireDangerScreen()),
-            ),
-          ),
-          // Not a measurement like the three above: this is about
-          // leaving. "Which way is open" is the question a household has
-          // when it can no longer stay.
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            leading: const Icon(Icons.alt_route_outlined),
-            title: Text(l10n.roadClosureTitle),
-            subtitle: Text(l10n.roadClosureEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const RoadClosureScreen(),
-              ),
-            ),
-          ),
-          // The one entry on this screen that needs nothing at all. Every
-          // other live figure here dies with the network; this reads the
-          // map that is already on the device.
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            leading: const Icon(Icons.travel_explore_outlined),
-            title: Text(l10n.nearbyTitle),
-            subtitle: Text(l10n.nearbyEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const NearbyScreen()),
-            ),
-          ),
-          // Beside it for the same reason: the answer is already in the
-          // device. This one is arithmetic rather than a stored map, so
-          // it is as right on the tenth day without a network as on the
-          // first.
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            leading: const Icon(Icons.wb_twilight_outlined),
-            title: Text(l10n.daylightTitle),
-            subtitle: Text(l10n.daylightEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const DaylightScreen()),
-            ),
-          ),
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-            leading: const Icon(Icons.settings_input_antenna_outlined),
-            title: Text(l10n.radioEmergencyTitle),
-            subtitle: Text(l10n.radioEmergencyEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const RadioEmergencyScreen(),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
+          _Block(
             children: [
-              Expanded(
-                child: Text(
-                  l10n.emergencyContactsTitle,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+              Text(
+                l10n.emergencySirenTitle,
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-              IconButton.filledTonal(
-                tooltip: l10n.emergencyContactAdd,
-                onPressed: () => _edit(),
-                icon: const Icon(Icons.person_add_alt),
+              Text(l10n.emergencySirenHint),
+              const SizedBox(height: 8),
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.campaign_outlined),
+                      title: Text(l10n.emergencySirenWarning),
+                      subtitle: Text(l10n.emergencySirenWarningMeaning),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.check_circle_outline),
+                      title: Text(l10n.emergencySirenAllClear),
+                      subtitle: Text(l10n.emergencySirenAllClearMeaning),
+                    ),
+                    // Listed although it is not a public warning, because it
+                    // is the one people hear most often and read as one.
+                    ListTile(
+                      leading: const Icon(Icons.local_fire_department_outlined),
+                      title: Text(l10n.emergencySirenFire),
+                      subtitle: Text(l10n.emergencySirenFireMeaning),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          if (_contacts.isEmpty)
-            ListTile(title: Text(l10n.emergencyContactsEmpty))
-          else
-            for (final contact in _contacts)
+          _Block(
+            children: [
+              Text(
+                l10n.emergencyRadioTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Text(l10n.emergencyRadioHint),
+              const SizedBox(height: 8),
+              // No longer const: the channel counts are localised, and "16
+              // Kanäle" was German on an English locale.
               Card(
-                child: ListTile(
-                  leading: const Icon(Icons.person_pin_circle_outlined),
-                  title: Text(contact.name),
-                  subtitle: Text(
-                    [
-                      if (contact.phone.isNotEmpty) contact.phone,
-                      if (contact.address.isNotEmpty) contact.address,
-                      if (contact.coordinates.isNotEmpty) contact.coordinates,
-                    ].join('\n'),
-                  ),
-                  onTap: contact.phone.isEmpty
-                      ? null
-                      : () => _call(contact.phone),
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (action) async {
-                      if (action == 'map') await _map(contact);
-                      if (action == 'edit') await _edit(existing: contact);
-                      if (action == 'delete') {
-                        setState(
-                          () =>
-                              _contacts.removeWhere((c) => c.id == contact.id),
-                        );
-                        await _save();
-                      }
-                    },
-                    itemBuilder: (_) => [
-                      if (contact.address.isNotEmpty ||
-                          contact.coordinates.isNotEmpty)
-                        PopupMenuItem(
-                          value: 'map',
-                          child: Text(l10n.emergencyOpenMapAction),
-                        ),
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Text(l10n.emergencyContactEdit),
+                child: Column(
+                  children: [
+                    const ListTile(
+                      title: Text('UKW / FM'),
+                      subtitle: Text('87,5–108 MHz'),
+                    ),
+                    const ListTile(
+                      title: Text('DAB+ Band III'),
+                      subtitle: Text('174–240 MHz'),
+                    ),
+                    const ListTile(
+                      title: Text('Mittelwelle / AM'),
+                      subtitle: Text('526,5–1606,5 kHz'),
+                    ),
+                    ListTile(
+                      title: const Text('PMR446'),
+                      subtitle: Text(
+                        '446,00625–446,19375 MHz · '
+                        '${l10n.emergencyRadioChannels(16)}',
                       ),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Text(l10n.emergencyContactDelete),
+                    ),
+                    ListTile(
+                      title: const Text('Freenet Deutschland'),
+                      subtitle: Text(
+                        '149,0250–149,1125 MHz · '
+                        '${l10n.emergencyRadioChannels(6)}',
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          _Block(
+            children: [
+              // Live data on an otherwise offline reference screen, and it
+              // earns the place: the screen is where somebody looks in an
+              // emergency, and a river's level is the one figure here that is
+              // worthless when out of date. It keeps the last reading and says
+              // so rather than pretending.
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: const Icon(Icons.water_outlined),
+                title: Text(l10n.pegelTitle),
+                subtitle: Text(l10n.pegelEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const PegelScreen()),
+                ),
+              ),
+              // Beside the gauge for the same reason: a figure that is
+              // worthless out of date, on the screen somebody opens when
+              // something has happened. It keeps the last reading and says
+              // so rather than pretending.
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: const Icon(Icons.radar_outlined),
+                title: Text(l10n.radiationTitle),
+                subtitle: Text(l10n.radiationEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const RadiationScreen(),
                   ),
                 ),
               ),
+              // The third measurement of the same kind: a number that is
+              // worthless out of date, and one whose meaning comes from the
+              // authority that publishes it rather than from this app.
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: const Icon(Icons.air_outlined),
+                title: Text(l10n.airQualityTitle),
+                subtitle: Text(l10n.airQualityEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const AirQualityScreen(),
+                  ),
+                ),
+              ),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: const Icon(Icons.local_fire_department_outlined),
+                title: Text(l10n.fireDangerTitle),
+                subtitle: Text(l10n.fireDangerEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const FireDangerScreen(),
+                  ),
+                ),
+              ),
+              // Not a measurement like the three above: this is about
+              // leaving. "Which way is open" is the question a household has
+              // when it can no longer stay.
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: const Icon(Icons.alt_route_outlined),
+                title: Text(l10n.roadClosureTitle),
+                subtitle: Text(l10n.roadClosureEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const RoadClosureScreen(),
+                  ),
+                ),
+              ),
+              // The one entry on this screen that needs nothing at all. Every
+              // other live figure here dies with the network; this reads the
+              // map that is already on the device.
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: const Icon(Icons.travel_explore_outlined),
+                title: Text(l10n.nearbyTitle),
+                subtitle: Text(l10n.nearbyEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const NearbyScreen()),
+                ),
+              ),
+              // Beside it for the same reason: the answer is already in the
+              // device. This one is arithmetic rather than a stored map, so
+              // it is as right on the tenth day without a network as on the
+              // first.
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: const Icon(Icons.wb_twilight_outlined),
+                title: Text(l10n.daylightTitle),
+                subtitle: Text(l10n.daylightEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const DaylightScreen(),
+                  ),
+                ),
+              ),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: const Icon(Icons.settings_input_antenna_outlined),
+                title: Text(l10n.radioEmergencyTitle),
+                subtitle: Text(l10n.radioEmergencyEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const RadioEmergencyScreen(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          _Block(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.emergencyContactsTitle,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  IconButton.filledTonal(
+                    tooltip: l10n.emergencyContactAdd,
+                    onPressed: () => _edit(),
+                    icon: const Icon(Icons.person_add_alt),
+                  ),
+                ],
+              ),
+              if (_contacts.isEmpty)
+                ListTile(title: Text(l10n.emergencyContactsEmpty))
+              else
+                for (final contact in _contacts)
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.person_pin_circle_outlined),
+                      title: Text(contact.name),
+                      subtitle: Text(
+                        [
+                          if (contact.phone.isNotEmpty) contact.phone,
+                          if (contact.address.isNotEmpty) contact.address,
+                          if (contact.coordinates.isNotEmpty)
+                            contact.coordinates,
+                        ].join('\n'),
+                      ),
+                      onTap: contact.phone.isEmpty
+                          ? null
+                          : () => _call(contact.phone),
+                      trailing: PopupMenuButton<String>(
+                        onSelected: (action) async {
+                          if (action == 'map') await _map(contact);
+                          if (action == 'edit') await _edit(existing: contact);
+                          if (action == 'delete') {
+                            setState(
+                              () => _contacts.removeWhere(
+                                (c) => c.id == contact.id,
+                              ),
+                            );
+                            await _save();
+                          }
+                        },
+                        itemBuilder: (_) => [
+                          if (contact.address.isNotEmpty ||
+                              contact.coordinates.isNotEmpty)
+                            PopupMenuItem(
+                              value: 'map',
+                              child: Text(l10n.emergencyOpenMapAction),
+                            ),
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Text(l10n.emergencyContactEdit),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Text(l10n.emergencyContactDelete),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+            ],
+          ),
         ],
       ),
     );
@@ -493,4 +525,18 @@ class _NearbyContact {
       coordinates: value['coordinates'] as String? ?? '',
     );
   }
+}
+
+/// One section of the directory, kept in one piece when the page is laid
+/// out in columns.
+class _Block extends StatelessWidget {
+  const _Block({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: children,
+  );
 }

@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../model/categories.dart';
 import '../../../model/household_profile.dart';
 
+import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/warning_filter.dart';
@@ -195,14 +196,19 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
             ),
         ];
 
-        return ListView.builder(
-          itemCount: leading.length + sorted.length + (hint == null ? 0 : 1),
-          itemBuilder: (context, index) {
-            if (index < leading.length) return leading[index];
-            final at = index - leading.length;
-            if (at == sorted.length) return hint!;
-            return _WarningTile(warning: sorted[at], l10n: l10n);
-          },
+        // Columns rather than one stretched list: a warning tile at
+        // desktop width puts its headline at one edge and its time at the
+        // other. Everything is built rather than only what is on screen,
+        // which is affordable here and nowhere else in the app -- this
+        // list is what the subscribed regions currently have out, tens of
+        // entries at the very worst, not a household's whole inventory.
+        return AdaptiveColumns(
+          blocks: [
+            ...leading,
+            for (final warning in sorted)
+              _WarningTile(warning: warning, l10n: l10n),
+            ?hint,
+          ],
         );
       },
     );

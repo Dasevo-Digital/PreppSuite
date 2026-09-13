@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/geolocation_service.dart';
+import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/daylight_l10n.dart';
 import '../application/daylight_store.dart';
@@ -208,107 +209,131 @@ class _DaylightScreenState extends State<DaylightScreen> {
 
     String clock(DateTime moment) => DateFormat.Hm(locale).format(moment);
 
-    return ListView(
+    return AdaptiveColumns(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-      children: [
-        Text(
-          place.name ??
-              '${place.latitude.toStringAsFixed(4)}, '
-                  '${place.longitude.toStringAsFixed(4)}',
-          style: theme.textTheme.titleMedium,
-        ),
-        Text(
-          DateFormat.yMMMMEEEEd(locale).format(now),
-          style: theme.textTheme.bodySmall,
-        ),
-        const SizedBox(height: 16),
+      // Sun, moon and tomorrow: three answers of the same shape, which a
+      // wide window can show at once instead of one under the other.
+      blocks: [
+        _Part(
+          children: [
+            Text(
+              place.name ??
+                  '${place.latitude.toStringAsFixed(4)}, '
+                      '${place.longitude.toStringAsFixed(4)}',
+              style: theme.textTheme.titleMedium,
+            ),
+            Text(
+              DateFormat.yMMMMEEEEd(locale).format(now),
+              style: theme.textTheme.bodySmall,
+            ),
+            const SizedBox(height: 16),
 
-        if (sun.alwaysUp)
-          _Note(text: l10n.daylightAlwaysUp)
-        else if (sun.alwaysDown)
-          _Note(text: l10n.daylightAlwaysDown),
+            if (sun.alwaysUp)
+              _Note(text: l10n.daylightAlwaysUp)
+            else if (sun.alwaysDown)
+              _Note(text: l10n.daylightAlwaysDown),
 
-        Card(
-          margin: EdgeInsets.zero,
-          child: Column(
-            children: [
-              // In the order the day happens, which is the order somebody
-              // reads it in.
-              ?_row(l10n.daylightCivilDawn, sun.civilDawn, clock),
-              ?_row(l10n.daylightSunrise, sun.sunrise, clock),
-              ?_row(l10n.daylightSolarNoon, sun.solarNoon, clock),
-              ?_row(l10n.daylightSunset, sun.sunset, clock),
-              ?_row(l10n.daylightCivilDusk, sun.civilDusk, clock),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        if (sun.dayLength case final length?)
-          Text(
-            l10n.daylightDayLength(formatSpan(l10n, length)),
-            style: theme.textTheme.bodyMedium,
-          ),
-        if (sun.eveningTwilight case final twilight?)
-          // The half hour that decides whether the walk home is a walk or
-          // a stumble.
-          Text(
-            l10n.daylightEveningTwilight(formatSpan(l10n, twilight)),
-            style: theme.textTheme.bodyMedium,
-          ),
-
-        const SizedBox(height: 20),
-        Text(l10n.daylightMoon, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 4),
-        Card(
-          margin: EdgeInsets.zero,
-          child: Column(
-            children: [
-              ListTile(
-                dense: true,
-                leading: const Icon(Icons.nightlight_outlined),
-                title: Text(localizeMoonPhase(l10n, moon.phase)),
-                subtitle: Text(
-                  l10n.daylightMoonIllumination(
-                    (moon.illumination * 100).round(),
-                  ),
-                ),
+            Card(
+              margin: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  // In the order the day happens, which is the order somebody
+                  // reads it in.
+                  ?_row(l10n.daylightCivilDawn, sun.civilDawn, clock),
+                  ?_row(l10n.daylightSunrise, sun.sunrise, clock),
+                  ?_row(l10n.daylightSolarNoon, sun.solarNoon, clock),
+                  ?_row(l10n.daylightSunset, sun.sunset, clock),
+                  ?_row(l10n.daylightCivilDusk, sun.civilDusk, clock),
+                ],
               ),
-              if (moon.upAllDay)
-                ListTile(dense: true, title: Text(l10n.daylightMoonUpAllDay))
-              else if (moon.downAllDay)
-                ListTile(dense: true, title: Text(l10n.daylightMoonDownAllDay))
-              else ...[
-                _row(l10n.daylightMoonrise, moon.rise, clock) ??
-                    ListTile(dense: true, title: Text(l10n.daylightMoonNoRise)),
-                _row(l10n.daylightMoonset, moon.set, clock) ??
-                    ListTile(dense: true, title: Text(l10n.daylightMoonNoSet)),
-              ],
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+            if (sun.dayLength case final length?)
+              Text(
+                l10n.daylightDayLength(formatSpan(l10n, length)),
+                style: theme.textTheme.bodyMedium,
+              ),
+            if (sun.eveningTwilight case final twilight?)
+              // The half hour that decides whether the walk home is a walk or
+              // a stumble.
+              Text(
+                l10n.daylightEveningTwilight(formatSpan(l10n, twilight)),
+                style: theme.textTheme.bodyMedium,
+              ),
+          ],
         ),
-
-        const SizedBox(height: 20),
-        Text(l10n.daylightTomorrow, style: theme.textTheme.titleSmall),
-        const SizedBox(height: 4),
-        Card(
-          margin: EdgeInsets.zero,
-          child: Column(
-            children: [
-              ?_row(l10n.daylightSunrise, nextSun.sunrise, clock),
-              ?_row(l10n.daylightSunset, nextSun.sunset, clock),
-            ],
-          ),
+        _Part(
+          children: [
+            Text(l10n.daylightMoon, style: theme.textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Card(
+              margin: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  ListTile(
+                    dense: true,
+                    leading: const Icon(Icons.nightlight_outlined),
+                    title: Text(localizeMoonPhase(l10n, moon.phase)),
+                    subtitle: Text(
+                      l10n.daylightMoonIllumination(
+                        (moon.illumination * 100).round(),
+                      ),
+                    ),
+                  ),
+                  if (moon.upAllDay)
+                    ListTile(
+                      dense: true,
+                      title: Text(l10n.daylightMoonUpAllDay),
+                    )
+                  else if (moon.downAllDay)
+                    ListTile(
+                      dense: true,
+                      title: Text(l10n.daylightMoonDownAllDay),
+                    )
+                  else ...[
+                    _row(l10n.daylightMoonrise, moon.rise, clock) ??
+                        ListTile(
+                          dense: true,
+                          title: Text(l10n.daylightMoonNoRise),
+                        ),
+                    _row(l10n.daylightMoonset, moon.set, clock) ??
+                        ListTile(
+                          dense: true,
+                          title: Text(l10n.daylightMoonNoSet),
+                        ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
-
-        const SizedBox(height: 20),
-        OutlinedButton(
-          onPressed: _typePlace,
-          child: Text(l10n.daylightChangePlace),
+        _Part(
+          children: [
+            Text(l10n.daylightTomorrow, style: theme.textTheme.titleSmall),
+            const SizedBox(height: 4),
+            Card(
+              margin: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  ?_row(l10n.daylightSunrise, nextSun.sunrise, clock),
+                  ?_row(l10n.daylightSunset, nextSun.sunset, clock),
+                ],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 16),
-        Text(l10n.daylightWhy, style: theme.textTheme.bodySmall),
-        const SizedBox(height: 8),
-        Text(l10n.daylightAccuracy, style: theme.textTheme.bodySmall),
+        _Part(
+          children: [
+            OutlinedButton(
+              onPressed: _typePlace,
+              child: Text(l10n.daylightChangePlace),
+            ),
+            const SizedBox(height: 16),
+            Text(l10n.daylightWhy, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 8),
+            Text(l10n.daylightAccuracy, style: theme.textTheme.bodySmall),
+          ],
+        ),
       ],
     );
   }
@@ -341,5 +366,18 @@ class _Note extends StatelessWidget {
       margin: EdgeInsets.zero,
       child: Padding(padding: const EdgeInsets.all(12), child: Text(text)),
     ),
+  );
+}
+
+/// One answer of the screen, kept together when it is laid out in columns.
+class _Part extends StatelessWidget {
+  const _Part({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: children,
   );
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/energy_l10n.dart';
 import '../application/energy_range.dart';
@@ -148,53 +149,61 @@ class _EnergyScreenState extends State<EnergyScreen> {
       appBar: AppBar(title: Text(l10n.energyTitle)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
+          : AdaptiveColumns(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-              children: [
-                Text(l10n.energyIntro),
-                const SizedBox(height: 16),
+              // Four blocks: the answer, what is stored, what draws on
+              // it, and the rules of thumb. On a desktop window they sit
+              // beside each other instead of one 1400 px column with
+              // "Strom" at one edge and "14 Tage" at the other.
+              blocks: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.energyIntro),
+                    const SizedBox(height: 16),
 
-                if (_plan.isEmpty) ...[
-                  Text(
-                    l10n.energyNothingYet,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(l10n.energyNothingYetWhy),
-                  const SizedBox(height: 16),
-                ] else ...[
-                  // The answer first. Everything under it is the working.
-                  if (shortest?.days case final days?)
-                    Card(
-                      margin: EdgeInsets.zero,
-                      color: theme.colorScheme.surfaceContainerHigh,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.energyShortest(
-                                localizeEnergyKind(l10n, shortest!.kind),
-                                localizeEnergyDays(l10n, days)!,
-                              ),
-                              style: theme.textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 6),
-                            Text(l10n.energyShortestWhy),
-                          ],
-                        ),
+                    if (_plan.isEmpty) ...[
+                      Text(
+                        l10n.energyNothingYet,
+                        style: theme.textTheme.titleMedium,
                       ),
-                    )
-                  else
-                    Text(l10n.energyNoAnswer),
-                  const SizedBox(height: 16),
+                      const SizedBox(height: 8),
+                      Text(l10n.energyNothingYetWhy),
+                      const SizedBox(height: 16),
+                    ] else ...[
+                      // The answer first. Everything under it is the working.
+                      if (shortest?.days case final days?)
+                        Card(
+                          margin: EdgeInsets.zero,
+                          color: theme.colorScheme.surfaceContainerHigh,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.energyShortest(
+                                    localizeEnergyKind(l10n, shortest!.kind),
+                                    localizeEnergyDays(l10n, days)!,
+                                  ),
+                                  style: theme.textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(l10n.energyShortestWhy),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        Text(l10n.energyNoAnswer),
+                      const SizedBox(height: 16),
 
-                  for (final range in ranges)
-                    _RangeCard(range: range, l10n: l10n, number: number),
-                ],
+                      for (final range in ranges)
+                        _RangeCard(range: range, l10n: l10n, number: number),
+                    ],
+                  ],
+                ),
 
-                const SizedBox(height: 8),
                 _ListSection(
                   title: l10n.energyReserves,
                   addLabel: l10n.energyAddReserve,
@@ -213,7 +222,6 @@ class _EnergyScreenState extends State<EnergyScreen> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 16),
                 _ListSection(
                   title: l10n.energyDraws,
                   addLabel: l10n.energyAddDraw,
@@ -234,30 +242,34 @@ class _EnergyScreenState extends State<EnergyScreen> {
                   ],
                 ),
 
-                const SizedBox(height: 20),
-                Card(
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.energyHelperTitle,
-                          style: theme.textTheme.titleMedium,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Card(
+                      margin: EdgeInsets.zero,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.energyHelperTitle,
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(l10n.energyHelperGasBottle),
+                            const SizedBox(height: 8),
+                            Text(l10n.energyHelperCandles),
+                            const SizedBox(height: 8),
+                            Text(l10n.energyHelperPowerbank),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(l10n.energyHelperGasBottle),
-                        const SizedBox(height: 8),
-                        Text(l10n.energyHelperCandles),
-                        const SizedBox(height: 8),
-                        Text(l10n.energyHelperPowerbank),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    Text(l10n.energySources, style: theme.textTheme.bodySmall),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                Text(l10n.energySources, style: theme.textTheme.bodySmall),
               ],
             ),
     );

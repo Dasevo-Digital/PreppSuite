@@ -946,6 +946,26 @@ tree; the test suite deliberately targets that layer rather than the UI.
   is both the best option and the only one.
 - Comments in code are English; `docs/` prose is German.
 
+### Wide windows
+
+Screens that are a list of sections lay themselves out with
+`core/adaptive_columns.dart` rather than a plain `ListView`. It cuts the
+page into columns of readable width and lets the window decide how many;
+below about 1140 px it *is* a plain `ListView`, so phones are unchanged and
+nothing lazy is given up there.
+
+Pass `blocks`, not children: a block is whatever must stay together, a
+heading with its list. Blocks are dealt into the lanes in order, so a
+heading can never land in one column with its list in the next. Spacing
+between blocks comes from the layout, not from `SizedBox`es in the caller.
+
+Two things it is deliberately not: it is not a way to centre a narrow
+column in a wide window (the space is used, not abandoned), and it is not
+for long or unbounded lists -- it builds every block. The warning list is
+the one exception and says why in place: that list is what the subscribed
+regions currently have out, tens of entries at worst. The inventory is not
+converted for exactly this reason.
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,
