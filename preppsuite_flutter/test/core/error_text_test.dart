@@ -41,6 +41,15 @@ void main() {
       ): (l) =>
           l.errorDatabase,
       PlatformException(code: 'denied'): (l) => l.errorPlatformRefused,
+      // What `jsonDecode` throws when a service answers with an HTML
+      // error page instead of JSON. Before this it reached the screen
+      // as "Unexpected character (at character 1)".
+      const FormatException(
+        'Unexpected character',
+        '<!DOCTYPE html>',
+        0,
+      ): (l) =>
+          l.errorServiceUnavailable,
     };
 
     cases.forEach((error, expected) {

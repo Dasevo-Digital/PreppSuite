@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../../core/platform_storage.dart';
 import '../../../core/portable_data.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import 'missing_data_folder_notice.dart';
 
 /// Where this copy keeps its data, and how to move it onto a disk.
 ///
@@ -121,6 +122,15 @@ class _PortableDataCardState extends State<PortableDataCard> {
               ],
             ),
             const SizedBox(height: 8),
+
+            // Before anything else, because it contradicts the line
+            // underneath: without this the card reads "Auf diesem
+            // Rechner" to somebody who chose a disk and simply has not
+            // plugged it in.
+            if (location.missingChoice case final chosen?) ...[
+              MissingDataFolderNotice(path: chosen),
+              const SizedBox(height: 12),
+            ],
 
             Text(
               location.isPortable

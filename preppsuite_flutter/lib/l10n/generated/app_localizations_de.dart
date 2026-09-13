@@ -4184,6 +4184,22 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dieser Ordner lässt sich nicht beschreiben.';
 
   @override
+  String get portableChoiceMissingTitle => 'Der gewählte Datenordner fehlt';
+
+  @override
+  String get portableChoiceMissingBody =>
+      'Du hast einmal einen Datenordner ausgewählt, er ist gerade nicht erreichbar. Bis er wieder da ist, arbeitet die App mit den Daten auf diesem Rechner – das ist ein anderer Haushalt. Was du jetzt einträgst, liegt nicht im ausgewählten Ordner.';
+
+  @override
+  String portableChoiceMissingWhere(String path) {
+    return 'Ausgewählt war: $path';
+  }
+
+  @override
+  String get portableChoiceMissingHint =>
+      'Meistens ist der Datenträger nicht angeschlossen. Anschließen und die App neu starten.';
+
+  @override
   String get portableUnsupported =>
       'Ein mitgeführter Datenordner ist nur auf Rechnern möglich, nicht auf Telefonen: Dort bestimmt das System, wo die Daten einer App liegen.';
 

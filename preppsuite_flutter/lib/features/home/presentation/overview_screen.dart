@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/progress_text.dart';
+import '../../../core/portable_data.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../settings/presentation/missing_data_folder_notice.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
 import '../../../model/household_profile.dart';
@@ -71,6 +73,14 @@ class OverviewScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             children: [
+              // First on the first screen, above even the empty-household
+              // card -- because when the data folder is missing, an empty
+              // household is exactly what this screen would otherwise be
+              // explaining, with the wrong explanation.
+              if (portableLocation.missingChoice case final chosen?) ...[
+                MissingDataFolderNotice(path: chosen),
+                const SizedBox(height: 16),
+              ],
               if (inventory.hasValue && items.isEmpty) ...[
                 Card(
                   color: Theme.of(context).colorScheme.primaryContainer,

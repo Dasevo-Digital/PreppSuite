@@ -7064,6 +7064,30 @@ abstract class AppLocalizations {
   /// **'This folder cannot be written to.'**
   String get portableFolderUnusable;
 
+  /// No description provided for @portableChoiceMissingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The chosen data folder is missing'**
+  String get portableChoiceMissingTitle;
+
+  /// No description provided for @portableChoiceMissingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You picked a data folder once and it cannot be reached right now. Until it is back, the app is working with the data on this machine — a different household. Anything you enter now is not in the folder you chose.'**
+  String get portableChoiceMissingBody;
+
+  /// No description provided for @portableChoiceMissingWhere.
+  ///
+  /// In en, this message translates to:
+  /// **'You chose: {path}'**
+  String portableChoiceMissingWhere(String path);
+
+  /// No description provided for @portableChoiceMissingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Usually the disk is not plugged in. Plug it in and start the app again.'**
+  String get portableChoiceMissingHint;
+
   /// No description provided for @portableUnsupported.
   ///
   /// In en, this message translates to:

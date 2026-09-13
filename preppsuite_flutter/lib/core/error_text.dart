@@ -53,10 +53,19 @@ String describeError(AppLocalizations l10n, Object error) {
     DownloadException() => l10n.errorDownloadFailed,
 
     // The services behind the map and the library are somebody else's.
+    //
+    // `FormatException` belongs here and not in the unknown case below:
+    // the app reads JSON from other people's services in some forty
+    // places, and when one of them answers with an HTML error page
+    // instead -- which the DWD, the UBA and Autobahn GmbH all do from
+    // time to time -- the decoder throws this. What that means to the
+    // person looking at it is "the service is not answering properly",
+    // not "Unexpected character (at character 1)".
     TileSourceException() ||
     PlaceSearchException() ||
     OverpassException() ||
-    KiwixCatalogueException() => l10n.errorServiceUnavailable,
+    KiwixCatalogueException() ||
+    FormatException() => l10n.errorServiceUnavailable,
 
     // Drift wraps whatever the underlying database threw. The raw type is
     // named as well because one path does not go through that wrapper:

@@ -60,10 +60,13 @@ Future<PortableLocation> startPortableData({
   } on Object {
     // The folder went away between being checked and being written to —
     // a stick pulled during startup is the obvious case. Carry on as an
-    // ordinary installation rather than with settings nobody can save.
-    _location = const PortableLocation(
+    // ordinary installation rather than with settings nobody can save,
+    // but remember which folder it was: this is the same silent swap
+    // `missingChoice` exists for, just half a second later.
+    _location = PortableLocation(
       directory: null,
       source: PortableSource.installed,
+      missingChoice: directory.path,
     );
     return _location;
   }

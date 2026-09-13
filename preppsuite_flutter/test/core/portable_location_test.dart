@@ -143,6 +143,83 @@ void main() {
     skip: Platform.isWindows ? 'chmod is a POSIX idea' : null,
   );
 
+  group('a chosen folder that is not there', () {
+    /// Writes the pointer file the way choosing a folder does, and gives
+    /// back the directory it lives in.
+    Directory pointingAt(String path) {
+      final support = Directory('${workspace.path}/support')
+        ..createSync(recursive: true);
+      File('${support.path}/portable-data.txt').writeAsStringSync(path);
+      return support;
+    }
+
+    test('is reported rather than silently ignored', () async {
+      // The case this exists for: the household is on an external disk
+      // and the disk is not plugged in. Opening the other database
+      // without a word is what makes it dangerous.
+      final gone = '${workspace.path}/nicht-eingehaengt';
+
+      final location = await resolvePortableLocation(
+        environment: const {},
+        executablePath: unpacked(depth: 0, withDataFolder: false),
+        searchBesideProgram: true,
+        pointerDirectory: pointingAt(gone),
+      );
+
+      expect(location.isPortable, isFalse, reason: 'it still starts');
+      expect(location.choiceIsMissing, isTrue);
+      expect(location.missingChoice, gone);
+    });
+
+    test('is still reported when some other folder is found instead', () async {
+      // Worse than finding nothing: the app would come up on a different
+      // household and look perfectly fine doing it.
+      final executable = unpacked(depth: 0);
+
+      final location = await resolvePortableLocation(
+        environment: const {},
+        executablePath: executable,
+        searchBesideProgram: true,
+        pointerDirectory: pointingAt('${workspace.path}/nicht-eingehaengt'),
+      );
+
+      expect(location.isPortable, isTrue);
+      expect(location.source, PortableSource.besideTheProgram);
+      expect(location.choiceIsMissing, isTrue);
+    });
+
+    test('a folder that is there is not reported as missing', () async {
+      final there = Directory('${workspace.path}/eingehaengt')
+        ..createSync(recursive: true);
+
+      final location = await resolvePortableLocation(
+        environment: const {},
+        executablePath: unpacked(depth: 0, withDataFolder: false),
+        searchBesideProgram: true,
+        pointerDirectory: pointingAt(there.path),
+      );
+
+      expect(location.isPortable, isTrue);
+      expect(location.source, PortableSource.chosen);
+      expect(location.choiceIsMissing, isFalse);
+    });
+
+    test('never choosing one is not a missing choice', () async {
+      // The two look the same to the code that opens the database and
+      // are opposites to the person using it.
+      final location = await resolvePortableLocation(
+        environment: const {},
+        executablePath: unpacked(depth: 0, withDataFolder: false),
+        searchBesideProgram: true,
+        pointerDirectory: Directory('${workspace.path}/support')
+          ..createSync(recursive: true),
+      );
+
+      expect(location.choiceIsMissing, isFalse);
+      expect(location.source, PortableSource.installed);
+    });
+  });
+
   test('the probe file it writes is cleaned up again', () async {
     final folder = Directory('${workspace.path}/daten')..createSync();
 

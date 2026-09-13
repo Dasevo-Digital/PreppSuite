@@ -4158,6 +4158,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get portableFolderUnusable => 'This folder cannot be written to.';
 
   @override
+  String get portableChoiceMissingTitle => 'The chosen data folder is missing';
+
+  @override
+  String get portableChoiceMissingBody =>
+      'You picked a data folder once and it cannot be reached right now. Until it is back, the app is working with the data on this machine — a different household. Anything you enter now is not in the folder you chose.';
+
+  @override
+  String portableChoiceMissingWhere(String path) {
+    return 'You chose: $path';
+  }
+
+  @override
+  String get portableChoiceMissingHint =>
+      'Usually the disk is not plugged in. Plug it in and start the app again.';
+
+  @override
   String get portableUnsupported =>
       'A carried data folder is possible on computers only, not on phones: there the system decides where an app\'s data lives.';
 

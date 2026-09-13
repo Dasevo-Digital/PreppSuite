@@ -31,14 +31,34 @@ const _pointerFileName = 'portable-data.txt';
 
 /// Where the data actually is, and how it was decided.
 class PortableLocation {
-  const PortableLocation({required this.directory, required this.source});
+  const PortableLocation({
+    required this.directory,
+    required this.source,
+    this.missingChoice,
+  });
 
   /// Null means the platform's own place — an ordinary installation.
   final Directory? directory;
 
   final PortableSource source;
 
+  /// What a folder chosen earlier said, when it cannot be reached now.
+  ///
+  /// The dangerous case this exists for: somebody put their household on
+  /// an external disk, the disk is not plugged in, and the app quietly
+  /// opens the database it still has on this machine instead. That looks
+  /// like an emptied household — or worse, it looks like a working one,
+  /// and whatever gets typed into it is in the wrong database and
+  /// apparently gone the next time the disk is there.
+  ///
+  /// Starting anyway is deliberate (see [resolvePortableLocation]); doing
+  /// it without a word is not. Whoever shows this has to say it.
+  final String? missingChoice;
+
   bool get isPortable => directory != null;
+
+  /// Whether a folder was chosen once and is not reachable right now.
+  bool get choiceIsMissing => missingChoice != null;
 }
 
 /// How a portable folder was found. Shown in the settings, because "it is
@@ -89,6 +109,7 @@ Future<PortableLocation> resolvePortableLocation({
   Map<String, String>? environment,
   String? executablePath,
   bool? searchBesideProgram,
+  Directory? pointerDirectory,
 }) async {
   if (!supportsPortableData) {
     return const PortableLocation(
@@ -109,13 +130,20 @@ Future<PortableLocation> resolvePortableLocation({
     }
   }
 
-  final chosen = await _chosenDirectory();
-  if (chosen != null) {
+  final chosen = await _chosenDirectory(pointerDirectory);
+  if (chosen.directory case final directory?) {
     return PortableLocation(
-      directory: chosen,
+      directory: directory,
       source: PortableSource.chosen,
     );
   }
+
+  // Carried through every remaining answer: a choice that cannot be
+  // reached matters just as much when the app then finds some *other*
+  // folder beside the program as when it finds none at all. Quietly
+  // using a different household than the one that was picked is the
+  // thing being guarded against, not the absence of one.
+  final missing = chosen.stored;
 
   if (searchBesideProgram ?? findsPortableFolderByItself) {
     final beside = await _besideTheProgram(
@@ -125,13 +153,15 @@ Future<PortableLocation> resolvePortableLocation({
       return PortableLocation(
         directory: beside,
         source: PortableSource.besideTheProgram,
+        missingChoice: missing,
       );
     }
   }
 
-  return const PortableLocation(
+  return PortableLocation(
     directory: null,
     source: PortableSource.installed,
+    missingChoice: missing,
   );
 }
 
@@ -155,32 +185,52 @@ Future<void> forgetPortableFolder() async {
   if (await pointer.exists()) await pointer.delete();
 }
 
-/// What the pointer file names, if anything it still points at.
-Future<Directory?> _chosenDirectory() async {
+/// What the pointer file names, and whether it still points at anything.
+///
+/// The two answers are kept apart on purpose. "No folder was ever
+/// chosen" and "a folder was chosen and is not there" look the same to
+/// the code that opens the database, and they are opposites to the
+/// person using it.
+Future<({Directory? directory, String? stored})> _chosenDirectory([
+  Directory? pointerDirectory,
+]) async {
+  const nothingChosen = (directory: null, stored: null);
+
   final File pointer;
   try {
-    pointer = await _pointerFile();
-    if (!await pointer.exists()) return null;
+    pointer = await _pointerFile(pointerDirectory);
+    if (!await pointer.exists()) return nothingChosen;
   } on Object {
-    return null;
+    return nothingChosen;
   }
 
-  final stored = (await pointer.readAsString()).trim();
-  if (stored.isEmpty) return null;
+  final String stored;
+  try {
+    stored = (await pointer.readAsString()).trim();
+  } on Object {
+    return nothingChosen;
+  }
+  if (stored.isEmpty) return nothingChosen;
 
   // A handle has to be resolved, and resolving it is also what opens the
   // security scope that lets `dart:io` touch anything inside.
   final path = isNativeStorageHandle(stored)
       ? await resolveStoragePath(stored)
       : stored;
-  if (path == null) return null;
+
+  // A handle nobody can resolve has no path worth showing, so the handle
+  // itself stands in -- it is at least evidence that a choice was made.
+  if (path == null) return (directory: null, stored: stored);
 
   final directory = Directory(path);
-  return await _usable(directory) ? directory : null;
+  if (await _usable(directory)) return (directory: directory, stored: null);
+  return (directory: null, stored: path);
 }
 
-Future<File> _pointerFile() async {
-  final base = await getApplicationSupportDirectory();
+/// [override] is for the tests, which have no Application Support
+/// directory to speak of; the same seam as `executablePath` above.
+Future<File> _pointerFile([Directory? override]) async {
+  final base = override ?? await getApplicationSupportDirectory();
   await base.create(recursive: true);
   return File('${base.path}${Platform.pathSeparator}$_pointerFileName');
 }
