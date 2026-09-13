@@ -813,6 +813,7 @@
   "emergencyContactPhone": "Telefonnummer",
   "emergencyContactAddress": "Adresse",
   "emergencyContactCoordinates": "Koordinaten (Breite, Länge)",
+  "emergencyContactEdit": "Kontakt bearbeiten",
   "emergencyContactDelete": "Kontakt löschen",
   "emergencyOpenMapAction": "Auf Karte öffnen",
   "prepperRecipesTitle": "Notfallrezepte",

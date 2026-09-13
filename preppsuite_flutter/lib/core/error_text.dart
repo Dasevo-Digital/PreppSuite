@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:drift/drift.dart'
     show DriftWrappedException, InvalidDataException;
 import 'package:flutter/services.dart' show PlatformException;
+import 'package:sqlite3/common.dart' show SqliteException;
 
 import '../features/downloads/application/archive_downloader.dart'
     show DownloadException;
@@ -57,9 +58,15 @@ String describeError(AppLocalizations l10n, Object error) {
     OverpassException() ||
     KiwixCatalogueException() => l10n.errorServiceUnavailable,
 
-    // Drift wraps whatever the underlying database threw, so this is the
-    // one type that covers SQLite's own errors as well.
-    DriftWrappedException() || InvalidDataException() => l10n.errorDatabase,
+    // Drift wraps whatever the underlying database threw. The raw type is
+    // named as well because one path does not go through that wrapper:
+    // a failure while the database is being opened, i.e. a migration.
+    // Without this, an interrupted migration put SQLite's own words on
+    // the screen -- "duplicate column name: local_contact_point, SQL
+    // logic error (code 1)", followed by the ALTER TABLE statement.
+    DriftWrappedException() ||
+    InvalidDataException() ||
+    SqliteException() => l10n.errorDatabase,
 
     // Camera, location, notifications, the file picker — everything the
     // system can refuse.

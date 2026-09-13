@@ -193,6 +193,13 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
           .save(draft);
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.householdPlanSaved)));
+    } catch (error) {
+      // Same reason as on the emergency card: without this the screen
+      // reports a save it did not do -- or rather, reports nothing.
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(describeError(l10n, error))),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }

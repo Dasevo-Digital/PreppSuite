@@ -4898,6 +4898,12 @@ abstract class AppLocalizations {
   /// **'Coordinates (latitude, longitude)'**
   String get emergencyContactCoordinates;
 
+  /// No description provided for @emergencyContactEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit contact'**
+  String get emergencyContactEdit;
+
   /// No description provided for @emergencyContactDelete.
   ///
   /// In en, this message translates to:

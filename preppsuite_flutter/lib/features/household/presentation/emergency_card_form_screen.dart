@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/household_member_controller.dart';
@@ -172,6 +173,7 @@ class _EmergencyCardFormScreenState
     });
     if (_nameError != null || _yearError != null) return;
 
+    final messenger = ScaffoldMessenger.of(context);
     setState(() => _saving = true);
     try {
       await ref
@@ -194,6 +196,15 @@ class _EmergencyCardFormScreenState
           );
       if (!mounted) return;
       Navigator.of(context).pop();
+    } catch (error) {
+      // A save that fails silently is the worst of both worlds: the form
+      // stays as it was, which looks like nothing happened, and whoever
+      // typed the card has no idea whether it is stored. Say so, and keep
+      // the form open so the typing is not lost.
+      if (!mounted) return;
+      messenger.showSnackBar(
+        SnackBar(content: Text(describeError(l10n, error))),
+      );
     } finally {
       if (mounted) setState(() => _saving = false);
     }

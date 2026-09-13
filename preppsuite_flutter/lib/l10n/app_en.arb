@@ -1608,6 +1608,7 @@
   "emergencyContactPhone": "Phone number",
   "emergencyContactAddress": "Address",
   "emergencyContactCoordinates": "Coordinates (latitude, longitude)",
+  "emergencyContactEdit": "Edit contact",
   "emergencyContactDelete": "Delete contact",
   "emergencyOpenMapAction": "Open on map",
   "prepperRecipesTitle": "Emergency recipes",

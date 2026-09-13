@@ -2897,6 +2897,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get emergencyContactCoordinates => 'Koordinaten (Breite, Länge)';
 
   @override
+  String get emergencyContactEdit => 'Kontakt bearbeiten';
+
+  @override
   String get emergencyContactDelete => 'Kontakt löschen';
 
   @override

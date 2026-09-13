@@ -25,7 +25,16 @@ const _germanyCentre = LatLng(51.1657, 10.4515);
 /// the whole window, and the choice between the archive and the network
 /// is a control rather than a consequence.
 class MapScreen extends ConsumerStatefulWidget {
-  const MapScreen({super.key});
+  const MapScreen({super.key, this.focus, this.focusLabel});
+
+  /// A point the map should open on, rather than the whole country.
+  ///
+  /// Used by the nearby search: a list saying "Trinkwasser, 400 m
+  /// nordwestlich" answers how far, not which way round the corner. The
+  /// point is drawn with the same labelled marker a place search uses, so
+  /// there is one way a found place looks.
+  final LatLng? focus;
+  final String? focusLabel;
 
   @override
   ConsumerState<MapScreen> createState() => _MapScreenState();
@@ -41,6 +50,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   String? _searchLabel;
   bool _locating = false;
   int _lookupGeneration = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchPosition = widget.focus;
+    _searchLabel = widget.focusLabel;
+  }
 
   @override
   void dispose() {
@@ -171,9 +187,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               controller: _mapController,
               child: FlutterMap(
                 mapController: _mapController,
-                options: const MapOptions(
-                  initialCenter: _germanyCentre,
-                  initialZoom: 5.5,
+                options: MapOptions(
+                  initialCenter: widget.focus ?? _germanyCentre,
+                  // Close enough to see which side of the street it is on.
+                  // The country-wide view is what the map opens on with
+                  // nothing to show; arriving there after tapping a point
+                  // 400 m away would be an answer to a different question.
+                  initialZoom: widget.focus == null ? 5.5 : 16,
                 ),
                 children: [
                   const BaseMapLayer(),

@@ -12,6 +12,7 @@ import '../application/offline_poi_search.dart';
 import '../application/pmtiles_archive.dart';
 import '../application/poi_labels.dart';
 import 'map_download_screen.dart';
+import 'map_screen.dart';
 
 /// What is nearby, read out of the downloaded map.
 ///
@@ -365,6 +366,17 @@ class _PlaceTile extends StatelessWidget {
       trailing: Text(
         formatShelterDistance(l10n, place.distanceMeters, place.bearing),
         style: Theme.of(context).textTheme.bodyMedium,
+      ),
+      // "400 m nordwestlich" is a distance and a direction, not a way
+      // there. The map it opens is the downloaded one, so this still
+      // works with nothing to ask.
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => MapScreen(
+            focus: place.position,
+            focusLabel: place.name ?? what,
+          ),
+        ),
       ),
     );
   }

@@ -75,6 +75,54 @@ void main() {
     expect(find.textContaining('Gemeinde'), findsWidgets);
   });
 
+  testWidgets('a saved contact can be corrected afterwards', (tester) async {
+    // Until 1.8.1 the only way to fix a mistyped number was to delete the
+    // contact and enter it again, on the screen that exists for the
+    // moment when there is no time for that.
+    SharedPreferences.setMockInitialValues({
+      'nearbyEmergencyContacts':
+          '[{"id":"c1","name":"Nachbarin Ella","phone":"0531 111111",'
+          '"address":"Hauptstrasse 4","coordinates":""}]',
+    });
+    await show(tester);
+
+    // The contacts sit at the bottom of a long ListView, so they are not
+    // built until they are scrolled to.
+    await tester.scrollUntilVisible(find.text('Nachbarin Ella'), 400);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.more_vert).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Kontakt bearbeiten'));
+    await tester.pumpAndSettle();
+
+    // The dialog comes up filled in -- editing starts from what is there.
+    expect(
+      tester.widget<TextField>(find.byType(TextField).at(1)).controller!.text,
+      '0531 111111',
+    );
+
+    await tester.enterText(find.byType(TextField).at(1), '0531 222222');
+    await tester.tap(find.text('Speichern'));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('0531 222222'), findsOneWidget);
+    expect(find.textContaining('0531 111111'), findsNothing);
+
+    // Changed, not added.
+    expect(find.text('Nachbarin Ella'), findsOneWidget);
+
+    final stored = (await SharedPreferences.getInstance()).getString(
+      'nearbyEmergencyContacts',
+    )!;
+    expect(stored, contains('0531 222222'));
+    expect(
+      stored,
+      contains('"id":"c1"'),
+      reason: 'same contact, not a new one',
+    );
+  });
+
   testWidgets('the screen meets the accessibility guidelines', (tester) async {
     await show(tester);
     await expectAccessible(tester);

@@ -59,16 +59,28 @@ class _EmergencyInformationScreenState
     ),
   );
 
-  Future<void> _add() async {
+  /// The one dialog for both adding and changing a contact.
+  ///
+  /// Editing was missing entirely: a contact typed with a digit wrong
+  /// could only be deleted and entered again, which on the screen people
+  /// reach for in an emergency is the wrong kind of work. [existing] is
+  /// null when adding.
+  Future<void> _edit({_NearbyContact? existing}) async {
     final l10n = AppLocalizations.of(context)!;
-    final name = TextEditingController();
-    final phone = TextEditingController();
-    final address = TextEditingController();
-    final coordinates = TextEditingController();
+    final name = TextEditingController(text: existing?.name ?? '');
+    final phone = TextEditingController(text: existing?.phone ?? '');
+    final address = TextEditingController(text: existing?.address ?? '');
+    final coordinates = TextEditingController(
+      text: existing?.coordinates ?? '',
+    );
     final accepted = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.emergencyContactAdd),
+        title: Text(
+          existing == null
+              ? l10n.emergencyContactAdd
+              : l10n.emergencyContactEdit,
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -120,17 +132,23 @@ class _EmergencyInformationScreenState
       ),
     );
     if (accepted != true || name.text.trim().isEmpty) return;
+
+    // The id is carried over when editing, so anything else holding on to
+    // this contact still points at the same one.
+    final edited = _NearbyContact(
+      id: existing?.id ?? const Uuid().v4(),
+      name: name.text.trim(),
+      phone: phone.text.trim(),
+      address: address.text.trim(),
+      coordinates: coordinates.text.trim(),
+    );
     setState(() {
-      _contacts = [
-        ..._contacts,
-        _NearbyContact(
-          id: const Uuid().v4(),
-          name: name.text.trim(),
-          phone: phone.text.trim(),
-          address: address.text.trim(),
-          coordinates: coordinates.text.trim(),
-        ),
-      ];
+      _contacts = existing == null
+          ? [..._contacts, edited]
+          : [
+              for (final contact in _contacts)
+                contact.id == existing.id ? edited : contact,
+            ];
     });
     await _save();
   }
@@ -356,7 +374,7 @@ class _EmergencyInformationScreenState
               ),
               IconButton.filledTonal(
                 tooltip: l10n.emergencyContactAdd,
-                onPressed: _add,
+                onPressed: () => _edit(),
                 icon: const Icon(Icons.person_add_alt),
               ),
             ],
@@ -382,6 +400,7 @@ class _EmergencyInformationScreenState
                   trailing: PopupMenuButton<String>(
                     onSelected: (action) async {
                       if (action == 'map') await _map(contact);
+                      if (action == 'edit') await _edit(existing: contact);
                       if (action == 'delete') {
                         setState(
                           () =>
@@ -397,6 +416,10 @@ class _EmergencyInformationScreenState
                           value: 'map',
                           child: Text(l10n.emergencyOpenMapAction),
                         ),
+                      PopupMenuItem(
+                        value: 'edit',
+                        child: Text(l10n.emergencyContactEdit),
+                      ),
                       PopupMenuItem(
                         value: 'delete',
                         child: Text(l10n.emergencyContactDelete),

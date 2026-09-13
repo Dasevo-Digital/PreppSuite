@@ -2876,6 +2876,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyContactCoordinates => 'Coordinates (latitude, longitude)';
 
   @override
+  String get emergencyContactEdit => 'Edit contact';
+
+  @override
   String get emergencyContactDelete => 'Delete contact';
 
   @override

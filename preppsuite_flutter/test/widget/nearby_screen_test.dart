@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:preppsuite_flutter/features/maps/application/offline_map_providers.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart';
+import 'package:preppsuite_flutter/features/maps/presentation/map_screen.dart';
 import 'package:preppsuite_flutter/features/maps/presentation/nearby_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 
@@ -48,6 +49,7 @@ void main() {
     required List<TestPoi> points,
     int maxZoom = 14,
     LatLng? at = centre,
+    NavigatorObserver? observer,
     bool withArchive = true,
   }) async {
     PmTilesArchive? archive;
@@ -80,6 +82,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          navigatorObservers: [?observer],
           locale: const Locale('de'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -136,6 +139,38 @@ void main() {
     // coarser class.
     expect(find.text('Tankstelle'), findsOneWidget);
     expect(find.text('Ladesäule'), findsOneWidget);
+  });
+
+  testWidgets('tapping a point opens the map on it', (tester) async {
+    // "400 m nordwestlich" says how far and which way, not where. The
+    // archive the map draws from is the same one this list was read out
+    // of, so the answer stays available with nothing to ask.
+    final routes = _PushedRoutes();
+    await show(
+      tester,
+      points: [
+        (subclass: 'drinking_water', name: 'Brunnen am Ring', x: 2048, y: 2048),
+      ],
+      observer: routes,
+    );
+
+    await tester.tap(find.text('Brunnen am Ring'));
+
+    // Deliberately not pumped: building the real map starts tile and
+    // animation timers that never finish under the test clock. What is
+    // being checked is which screen was asked for and with what, and the
+    // route knows that before it is ever mounted.
+    final route = routes.last as MaterialPageRoute<void>;
+    final map =
+        route.builder(tester.element(find.byType(NearbyScreen))) as MapScreen;
+
+    expect(map.focusLabel, 'Brunnen am Ring');
+    expect(map.focus, isNotNull);
+
+    // The point it opens on is the one that was tapped, not the centre
+    // the search started from.
+    expect(map.focus!.latitude, closeTo(centre.latitude, 0.05));
+    expect(map.focus!.longitude, closeTo(centre.longitude, 0.05));
   });
 
   testWidgets('the caveats are on the screen, not in a help text', (
@@ -215,4 +250,16 @@ void main() {
 
     await expectAccessible(tester);
   });
+}
+
+/// Remembers what was pushed, so a route can be inspected without being
+/// built into the tree.
+class _PushedRoutes extends NavigatorObserver {
+  final _routes = <Route<dynamic>>[];
+
+  Route<dynamic> get last => _routes.last;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _routes.add(route);
 }
