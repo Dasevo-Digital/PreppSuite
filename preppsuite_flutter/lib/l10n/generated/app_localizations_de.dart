@@ -4128,6 +4128,113 @@ class AppLocalizationsDe extends AppLocalizations {
       'Powerbank in mAh? Mal 3,7 V, geteilt durch 1000, ergibt Wattstunden: 20000 mAh sind 74 Wh. Achtung – das ist die Zelle, nicht die Steckdose. Beim Hochsetzen auf 5 V geht etwas verloren; wie viel, hängt vom Gerät ab, deshalb steht hier keine Prozentzahl.';
 
   @override
+  String get transferTitle => 'Ohne Netz übertragen';
+
+  @override
+  String get transferIntro =>
+      'Ein Gerät zeigt eine Folge von Bildern, das andere filmt sie ab. Ohne Netz, ohne gemeinsamen Ordner, ohne Kopplung – die beiden Geräte müssen nur nebeneinander liegen.';
+
+  @override
+  String get transferSend => 'Haushalt zeigen';
+
+  @override
+  String get transferReceive => 'Haushalt abfilmen';
+
+  @override
+  String get transferSendTitle => 'Haushalt zeigen';
+
+  @override
+  String get transferSendHint =>
+      'Halte die Kamera des anderen Geräts auf den Bildschirm. Die Bilder laufen in einer Schleife – ein verpasstes kommt von allein wieder.';
+
+  @override
+  String transferFrameOf(int index, int total) {
+    return 'Bild $index von $total';
+  }
+
+  @override
+  String get transferSendNothing =>
+      'Dieser Haushalt enthält noch nichts, was sich übertragen ließe.';
+
+  @override
+  String get transferSlower => 'Langsamer';
+
+  @override
+  String get transferFaster => 'Schneller';
+
+  @override
+  String get transferReceiveTitle => 'Haushalt abfilmen';
+
+  @override
+  String get transferReceiveHint =>
+      'Auf den Bildschirm des anderen Geräts halten und liegen lassen, bis es voll ist.';
+
+  @override
+  String transferProgress(int received, int total) {
+    return '$received von $total Bildern';
+  }
+
+  @override
+  String get transferWaiting => 'Noch kein Bild erkannt.';
+
+  @override
+  String transferDone(int rows) {
+    return 'Vollständig. $rows Zeilen übernommen.';
+  }
+
+  @override
+  String get transferNothingNew => 'Vollständig. Alles war schon bekannt.';
+
+  @override
+  String get transferBroken =>
+      'Die Bilder passen nicht zusammen. Noch einmal abfilmen.';
+
+  @override
+  String get transferWrongHousehold =>
+      'Das ist ein anderer Haushalt. Übernommen wird nur, was zu diesem hier gehört.';
+
+  @override
+  String get transferCameraNeeded =>
+      'Für das Abfilmen wird die Kamera gebraucht.';
+
+  @override
+  String get transferSendOverNetwork => 'Über das Netz (schnell)';
+
+  @override
+  String get transferSendOverNetworkHint =>
+      'Beide Geräte hängen im selben Netz – WLAN zu Hause, ein Hotspot, ein Campingplatz. Der Code hier ist der Schlüssel: Nur wer ihn abfilmt, kommt herein. Der ganze Haushalt geht in einem Zug hinüber, in beide Richtungen.';
+
+  @override
+  String get transferSendWaiting => 'Warte auf das andere Gerät …';
+
+  @override
+  String get transferSendNoNetwork =>
+      'Dieses Gerät hängt in keinem Netz. Es bleibt der Weg über die Bilderfolge.';
+
+  @override
+  String get transferUseChain => 'Stattdessen ohne Netz zeigen';
+
+  @override
+  String get transferUseNetwork => 'Stattdessen über das Netz';
+
+  @override
+  String get transferSendChainHint =>
+      'Ohne Netz: Halte die Kamera des anderen Geräts auf den Bildschirm. Die Bilder laufen in einer Schleife – ein verpasstes kommt von allein wieder.';
+
+  @override
+  String transferHandoverDone(int rows) {
+    return 'Abgeglichen. $rows Zeilen übernommen.';
+  }
+
+  @override
+  String get transferHandoverNothing =>
+      'Abgeglichen. Beide Geräte waren schon auf demselben Stand.';
+
+  @override
+  String get transferUnreachable =>
+      'Das andere Gerät ist nicht erreichbar. Hängen beide im selben Netz?';
+
+  @override
   String get portableTitle => 'Datenordner';
 
   @override

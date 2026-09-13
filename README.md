@@ -149,6 +149,19 @@ Personen nie dieselbe Datei beschreiben. Bei gleichzeitiger Änderung
 derselben Zeile entscheidet eine feste Versionsreihenfolge. Einzelheiten samt Grenzen in
 [`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md).
 
+**Ohne Netz übertragen.** Zwei Wege für den Fall, dass es keinen
+gemeinsamen Ordner gibt. Im selben Netz – WLAN, Hotspot, Campingplatz –
+zeigt ein Gerät **einen** QR-Code mit Adresse und frischem Schlüssel; das
+andere filmt ihn ab, und der Haushalt geht in einem Zug hinüber, in beide
+Richtungen. Der Code ist dabei der Türschlüssel, nicht die Straße: Wer den
+Bildschirm sieht, kommt herein, sonst niemand.
+
+Und wenn auch das nicht da ist, zeigt ein Gerät eine **Folge** von
+QR-Bildern in einer Schleife, das andere filmt sie ab. Das braucht nichts
+außer einem Bildschirm und einer Kamera. Ein Haushalt mit zweihundert
+Vorratszeilen sind etwa vier Bilder. Einzelheiten in
+[`docs/ohne-netz-uebertragen.md`](docs/ohne-netz-uebertragen.md).
+
 Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
 Auf einem breiten Fenster legen sich die Bildschirme in Spalten lesbarer
 Breite nebeneinander, statt eine einzelne Spalte über die ganze Breite zu

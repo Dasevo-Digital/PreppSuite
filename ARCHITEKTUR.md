@@ -946,6 +946,39 @@ tree; the test suite deliberately targets that layer rather than the UI.
   is both the best option and the only one.
 - Comments in code are English; `docs/` prose is German.
 
+### Moving a household
+
+Three roads, one payload. `DeviceSnapshot` is what travels in every case,
+and `sharing/application/snapshot_exchange.dart` is the only place that
+reads one out of the database or merges one in. Adding a fourth road means
+calling those two functions, never writing a second merge: two sets of
+tie-break rules is how two devices come to disagree about what is in the
+cellar, quietly.
+
+  * the shared folder (`shared_folder_sync_service.dart`) -- the one that
+    runs by itself;
+  * the local handover (`transfer/application/local_handover.dart`) -- an
+    HTTP socket on the local network, bootstrapped by a QR code that
+    carries the address and a one-shot key. The key is the whole security
+    model: whoever can see the screen gets in, nobody else. The body is
+    encrypted with `folder_crypto.dart` anyway, because "local network" on
+    a phone often means a café;
+  * the QR chain (`transfer/application/qr_chain.dart`) -- frames shown in
+    a loop and filmed. No back channel at all, which is why it loops.
+
+The chain is deliberately **not** encrypted, and that is only defensible
+because a picture on a screen can only be filmed by somebody present. The
+same payload over radio, network or a file must be encrypted -- the
+snapshot carries the emergency cards.
+
+Two things about drawing the codes, both learned the hard way in
+`qr_code_view.dart`: the four-module quiet zone is not decoration (without
+it many readers cannot find the code at all), and anti-aliasing has to be
+switched off. Measured on a 600-character frame, the default paint left
+37% of the painted pixels neither dark nor light, and a grey module is not
+a value a decoder can read -- a code that looks perfectly fine and does
+not scan.
+
 ### Wide windows
 
 Screens that are a list of sections lay themselves out with

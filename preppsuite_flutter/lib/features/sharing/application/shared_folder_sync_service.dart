@@ -1,5 +1,6 @@
 import '../../../local_db/database.dart';
 import 'device_snapshot.dart';
+import 'snapshot_exchange.dart';
 import 'folder_crypto.dart';
 import 'household_file.dart';
 import 'sync_folder.dart';
@@ -256,44 +257,8 @@ class SharedFolderSyncService {
     return decryptFromFolder(raw, folderKey);
   }
 
-  Future<int> _apply(DeviceSnapshot snapshot) {
-    return _db.mergeIncomingRows(
-      inventory: [
-        for (final json in snapshot.inventoryItems)
-          ?_incoming(json, decodeInventoryItem(json)),
-      ],
-      templates: [
-        for (final json in snapshot.checklistTemplates)
-          ?_incoming(json, decodeChecklistTemplate(json)),
-      ],
-      items: [
-        for (final json in snapshot.checklistItems)
-          ?_incoming(json, decodeChecklistItem(json)),
-      ],
-      budget: [
-        for (final json in snapshot.budgetEntries)
-          ?_incoming(json, decodeBudgetEntry(json)),
-      ],
-      plans: [
-        for (final json in snapshot.householdPlans)
-          ?_incoming(json, decodeHouseholdPlan(json)),
-      ],
-      members: [
-        for (final json in snapshot.householdMembers)
-          ?_incoming(json, decodeHouseholdMember(json)),
-      ],
-    );
-  }
-
-  /// Lifts the two fields the merge compares out of the raw JSON, so the
-  /// comparison never has to reach into a companion's `Value`s.
-  IncomingRow<C>? _incoming<C>(Map<String, Object?> json, C? companion) {
-    if (companion == null) return null;
-    final clientId = json['clientId'];
-    final updatedAt = asUtcDate(json['updatedAt']);
-    if (clientId is! String || updatedAt == null) return null;
-    return (clientId: clientId, updatedAt: updatedAt, companion: companion);
-  }
+  Future<int> _apply(DeviceSnapshot snapshot) =>
+      applyHouseholdSnapshot(_db, snapshot);
 
   /// Writes this device's snapshot, unless there is demonstrably nothing
   /// to say.
@@ -323,38 +288,13 @@ class SharedFolderSyncService {
       return false;
     }
 
-    // Informational only. Acknowledgement below uses each included row's
-    // version, not this wall-clock instant.
-    final readAt = DateTime.now().toUtc();
-
-    final snapshot = DeviceSnapshot(
+    // The snapshot stamps itself; that stamp is informational only, since
+    // acknowledgement below uses each included row's own version rather
+    // than any wall-clock instant.
+    final snapshot = await readHouseholdSnapshot(
+      _db,
       deviceId: deviceId,
       householdId: householdId,
-      writtenAt: readAt,
-      inventoryItems: [
-        for (final row in await _db.inventoryItemsForSync(householdId))
-          encodeInventoryItem(row),
-      ],
-      checklistTemplates: [
-        for (final row in await _db.checklistTemplatesForSync(householdId))
-          encodeChecklistTemplate(row),
-      ],
-      checklistItems: [
-        for (final row in await _db.checklistItemsForSync(householdId))
-          encodeChecklistItem(row),
-      ],
-      budgetEntries: [
-        for (final row in await _db.budgetEntriesForSync(householdId))
-          encodeBudgetEntry(row),
-      ],
-      householdPlans: [
-        for (final row in await _db.householdPlansForSync(householdId))
-          encodeHouseholdPlan(row),
-      ],
-      householdMembers: [
-        for (final row in await _db.householdMembersForSync(householdId))
-          encodeHouseholdMember(row),
-      ],
     );
 
     final folderKey = key;

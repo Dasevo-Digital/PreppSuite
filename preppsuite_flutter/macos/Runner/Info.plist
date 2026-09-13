@@ -26,6 +26,8 @@
 	<string>$(PRODUCT_COPYRIGHT)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>PreppSuite verwendet die Kamera, um Barcodes von Vorratsartikeln zu scannen.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>PreppSuite gleicht den Haushalt direkt mit einem zweiten Geraet im selben Netz ab. Die Daten verlassen das oertliche Netz dabei nicht.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>PreppSuite verwendet deinen Standort, um dein Bundesland für genauere Warnmeldungen zu bestimmen.</string>
 	<!-- macOS asks for this key by name: geolocator only calls

@@ -41,6 +41,12 @@ dependencies:
   path_provider: ^2.1.6
   uuid: ^4.6.0
   mobile_scanner: ^7.4.0
+  # QR codes are generated from this pure-Dart encoder and painted by
+  # the app itself (features/transfer/presentation/qr_code_view.dart).
+  # qr_flutter would have saved the painter and has not been published
+  # in three years; the painter is sixty lines and the module data is
+  # all that is really needed.
+  qr: ^3.0.2
   openfoodfacts: ^3.30.2
   pdf: ^3.12.0
   # Pure-Dart PDF parser used for the offline full-text index of personal

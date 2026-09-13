@@ -15,6 +15,7 @@ import '../../inventory/presentation/expiry_reminders_card.dart';
 import '../../inventory/presentation/charge_reminder_card.dart';
 import '../../maps/presentation/offline_map_card.dart';
 import '../../sharing/presentation/shared_folder_card.dart';
+import '../../transfer/presentation/transfer_card.dart';
 import 'additional_regions_card.dart';
 import 'backup_card.dart';
 import 'my_region_card.dart';
@@ -113,6 +114,8 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           SharedFolderCard(profile: profile, l10n: l10n),
+          const SizedBox(height: 12),
+          TransferCard(householdId: profile.id, l10n: l10n),
           const SizedBox(height: 24),
           Text(
             l10n.settingsOfflineMapTitle,

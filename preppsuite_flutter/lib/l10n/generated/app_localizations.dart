@@ -6974,6 +6974,180 @@ abstract class AppLocalizations {
   /// **'Power bank in mAh? Times 3.7 V, divided by 1000, gives watt-hours: 20000 mAh is 74 Wh. Careful — that is the cell, not the socket. Stepping up to 5 V loses something; how much depends on the device, which is why no percentage is given here.'**
   String get energyHelperPowerbank;
 
+  /// No description provided for @transferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Transfer without a network'**
+  String get transferTitle;
+
+  /// No description provided for @transferIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'One device shows a run of images, the other films them. No network, no shared folder, no pairing — the two devices only have to be next to each other.'**
+  String get transferIntro;
+
+  /// No description provided for @transferSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Show household'**
+  String get transferSend;
+
+  /// No description provided for @transferReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'Film household'**
+  String get transferReceive;
+
+  /// No description provided for @transferSendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show household'**
+  String get transferSendTitle;
+
+  /// No description provided for @transferSendHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the other device\'s camera at this screen. The images run in a loop — one that is missed comes round again on its own.'**
+  String get transferSendHint;
+
+  /// No description provided for @transferFrameOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Image {index} of {total}'**
+  String transferFrameOf(int index, int total);
+
+  /// No description provided for @transferSendNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'This household has nothing in it yet that could be transferred.'**
+  String get transferSendNothing;
+
+  /// No description provided for @transferSlower.
+  ///
+  /// In en, this message translates to:
+  /// **'Slower'**
+  String get transferSlower;
+
+  /// No description provided for @transferFaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Faster'**
+  String get transferFaster;
+
+  /// No description provided for @transferReceiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Film household'**
+  String get transferReceiveTitle;
+
+  /// No description provided for @transferReceiveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold it at the other device\'s screen and leave it there until it is full.'**
+  String get transferReceiveHint;
+
+  /// No description provided for @transferProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{received} of {total} images'**
+  String transferProgress(int received, int total);
+
+  /// No description provided for @transferWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'No image recognised yet.'**
+  String get transferWaiting;
+
+  /// No description provided for @transferDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete. {rows} rows taken in.'**
+  String transferDone(int rows);
+
+  /// No description provided for @transferNothingNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete. All of it was already known.'**
+  String get transferNothingNew;
+
+  /// No description provided for @transferBroken.
+  ///
+  /// In en, this message translates to:
+  /// **'The images do not fit together. Film it again.'**
+  String get transferBroken;
+
+  /// No description provided for @transferWrongHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'That is a different household. Only what belongs to this one is taken in.'**
+  String get transferWrongHousehold;
+
+  /// No description provided for @transferCameraNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Filming needs the camera.'**
+  String get transferCameraNeeded;
+
+  /// No description provided for @transferSendOverNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Over the network (fast)'**
+  String get transferSendOverNetwork;
+
+  /// No description provided for @transferSendOverNetworkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Both devices are on the same network — home wifi, a hotspot, a campsite. The code here is the key: only whoever films it gets in. The whole household crosses in one go, in both directions.'**
+  String get transferSendOverNetworkHint;
+
+  /// No description provided for @transferSendWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the other device …'**
+  String get transferSendWaiting;
+
+  /// No description provided for @transferSendNoNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'This device is on no network. That leaves the run of images.'**
+  String get transferSendNoNetwork;
+
+  /// No description provided for @transferUseChain.
+  ///
+  /// In en, this message translates to:
+  /// **'Show without a network instead'**
+  String get transferUseChain;
+
+  /// No description provided for @transferUseNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the network instead'**
+  String get transferUseNetwork;
+
+  /// No description provided for @transferSendChainHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a network: point the other device\'s camera at this screen. The images run in a loop — one that is missed comes round again on its own.'**
+  String get transferSendChainHint;
+
+  /// No description provided for @transferHandoverDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced. {rows} rows taken in.'**
+  String transferHandoverDone(int rows);
+
+  /// No description provided for @transferHandoverNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced. Both devices were already at the same point.'**
+  String get transferHandoverNothing;
+
+  /// No description provided for @transferUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'The other device cannot be reached. Are both on the same network?'**
+  String get transferUnreachable;
+
   /// No description provided for @portableTitle.
   ///
   /// In en, this message translates to:
