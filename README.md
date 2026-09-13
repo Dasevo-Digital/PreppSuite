@@ -162,6 +162,11 @@ außer einem Bildschirm und einer Kamera. Ein Haushalt mit zweihundert
 Vorratszeilen sind etwa vier Bilder. Einzelheiten in
 [`docs/ohne-netz-uebertragen.md`](docs/ohne-netz-uebertragen.md).
 
+Ein Funkchat über LoRa an Menschen außerhalb des Haushalts ist **geplant,
+aber nicht gebaut**. Der Entwurf samt der Rechnung, warum darüber kein
+Haushaltsabgleich läuft, steht in
+[`docs/lora-funkchat-plan.md`](docs/lora-funkchat-plan.md).
+
 Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
 Auf einem breiten Fenster legen sich die Bildschirme in Spalten lesbarer
 Breite nebeneinander, statt eine einzelne Spalte über die ganze Breite zu
