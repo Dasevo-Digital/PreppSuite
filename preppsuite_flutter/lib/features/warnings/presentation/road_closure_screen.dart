@@ -154,15 +154,16 @@ class _RoadClosureScreenState extends State<RoadClosureScreen> {
       for (final event in _events)
         if (event.current) event,
     ];
-    final later = [
-      for (final event in _events)
-        if (!event.current) event,
-    ]..sort((a, b) {
-      final at = a.startsAt;
-      final bt = b.startsAt;
-      if (at == null || bt == null) return 0;
-      return at.compareTo(bt);
-    });
+    final later =
+        [
+          for (final event in _events)
+            if (!event.current) event,
+        ]..sort((a, b) {
+          final at = a.startsAt;
+          final bt = b.startsAt;
+          if (at == null || bt == null) return 0;
+          return at.compareTo(bt);
+        });
 
     return ListView(
       padding: const EdgeInsets.all(16),

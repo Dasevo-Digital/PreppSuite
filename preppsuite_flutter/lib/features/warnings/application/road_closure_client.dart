@@ -126,7 +126,8 @@ class RoadClosureClient {
   }) {
     final decoded = jsonDecode(body);
     if (decoded is! Map<String, Object?>) return const [];
-    final items = decoded[kind == RoadEventKind.closure ? 'closure' : 'warning'];
+    final items =
+        decoded[kind == RoadEventKind.closure ? 'closure' : 'warning'];
     if (items is! List) return const [];
 
     final events = <RoadEvent>[];

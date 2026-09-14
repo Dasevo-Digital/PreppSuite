@@ -33,10 +33,9 @@ void main() {
       addTearDown(client.close);
 
       Future<int> status(String path) async {
-        final response =
-            await (await client.getUrl(
-              Uri.parse('http://127.0.0.1:${server.port}$path'),
-            )).close();
+        final response = await (await client.getUrl(
+          Uri.parse('http://127.0.0.1:${server.port}$path'),
+        )).close();
         await response.drain<void>();
         return response.statusCode;
       }
@@ -52,8 +51,7 @@ void main() {
       // resolves it -- '..' and all.
       final html = String.fromCharCodes(await archive.readBlob(main));
       final targets = <String>{};
-      for (final match
-          in RegExp('(?:href|src)="([^"]+)"').allMatches(html)) {
+      for (final match in RegExp('(?:href|src)="([^"]+)"').allMatches(html)) {
         final raw = match.group(1)!;
         if (raw.startsWith('#') ||
             raw.startsWith('data:') ||
@@ -111,11 +109,11 @@ void main() {
     // Inline, because an integration test runs from the app's own working
     // directory and not the project's. 206 bytes.
     final frame = base64Decode(
-        'KLUv/QRojAIAAsUQE5DPAVA/JyneJGuyK4wEQHU3CAGlshajQDHC+52X784d'
-        'SS/H95nlfpTf1Vv85XiaeE4WFzIFjgLejCpApDwNcWU9AgIALf3fQi6Dd5IB'
-        'VAAAAAEA/f/b/7kGAkQAAAABAP3/OQACRAAAAAEA/f85AAJEAAAAAQD9/zkA'
-        'AkQAAAABAP3/OQACRAAAAAEA/f85AAJEAAAAAQD9/zkAAkQAAAABAP3/OQAC'
-        'RAAAAAEA/f85AAJFAAAAAQD9ezkAAqvm6YE=',
+      'KLUv/QRojAIAAsUQE5DPAVA/JyneJGuyK4wEQHU3CAGlshajQDHC+52X784d'
+      'SS/H95nlfpTf1Vv85XiaeE4WFzIFjgLejCpApDwNcWU9AgIALf3fQi6Dd5IB'
+      'VAAAAAEA/f/b/7kGAkQAAAABAP3/OQACRAAAAAEA/f85AAJEAAAAAQD9/zkA'
+      'AkQAAAABAP3/OQACRAAAAAEA/f85AAJEAAAAAQD9/zkAAkQAAAABAP3/OQAC'
+      'RAAAAAEA/f85AAJFAAAAAQD9ezkAAqvm6YE=',
     );
 
     final expected = Uint8List.fromList(

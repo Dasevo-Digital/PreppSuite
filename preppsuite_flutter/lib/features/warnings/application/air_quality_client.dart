@@ -205,7 +205,8 @@ class AirQualityClient {
     if (decoded is! Map<String, Object?>) return null;
     final data = decoded['data'];
     if (data is! Map<String, Object?>) return null;
-    final hours = data[stationId] ?? (data.length == 1 ? data.values.first : null);
+    final hours =
+        data[stationId] ?? (data.length == 1 ? data.values.first : null);
     if (hours is! Map<String, Object?>) return null;
 
     AirQualityReading? newest;
