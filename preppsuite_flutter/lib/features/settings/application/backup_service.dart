@@ -5,42 +5,26 @@ import 'dart:typed_data';
 import '../../../local_db/database.dart';
 import '../../sharing/application/device_snapshot.dart';
 import '../../sharing/application/folder_crypto.dart';
+import '../../sharing/application/snapshot_exchange.dart';
 
+/// An encrypted copy of one household, as a single file.
+///
+/// Reading and merging go through `snapshot_exchange.dart` like every
+/// other road a household travels. This file used to spell both out
+/// again, and the cost showed the first time a table was added: a backup
+/// that quietly held everything except the newest table would look
+/// perfectly fine until somebody restored it.
 class BackupService {
   const BackupService(this.database);
 
   final AppDatabase database;
 
   Future<String> exportHousehold(String householdId, String passphrase) async {
-    final snapshot = DeviceSnapshot(
+    final snapshot = (await readHouseholdSnapshot(
+      database,
       deviceId: 'backup',
       householdId: householdId,
-      writtenAt: DateTime.now().toUtc(),
-      inventoryItems: [
-        for (final row in await database.inventoryItemsForSync(householdId))
-          encodeInventoryItem(row),
-      ],
-      checklistTemplates: [
-        for (final row in await database.checklistTemplatesForSync(householdId))
-          encodeChecklistTemplate(row),
-      ],
-      checklistItems: [
-        for (final row in await database.checklistItemsForSync(householdId))
-          encodeChecklistItem(row),
-      ],
-      budgetEntries: [
-        for (final row in await database.budgetEntriesForSync(householdId))
-          encodeBudgetEntry(row),
-      ],
-      householdPlans: [
-        for (final row in await database.householdPlansForSync(householdId))
-          encodeHouseholdPlan(row),
-      ],
-      householdMembers: [
-        for (final row in await database.householdMembersForSync(householdId))
-          encodeHouseholdMember(row),
-      ],
-    ).encode();
+    )).encode();
     final random = Random.secure();
     final parameters = VaultParameters(
       salt: Uint8List.fromList(
@@ -82,38 +66,10 @@ class BackupService {
     final snapshot = DeviceSnapshot.decode(clear);
     if (snapshot == null || snapshot.householdId != householdId) return null;
 
-    IncomingRow<C>? incoming<C>(Map<String, Object?> json, C? companion) {
-      final id = json['clientId'];
-      final updatedAt = asUtcDate(json['updatedAt']);
-      if (companion == null || id is! String || updatedAt == null) return null;
-      return (clientId: id, updatedAt: updatedAt, companion: companion);
-    }
-
-    return database.mergeIncomingRows(
-      inventory: [
-        for (final json in snapshot.inventoryItems)
-          ?incoming(json, decodeInventoryItem(json)),
-      ],
-      templates: [
-        for (final json in snapshot.checklistTemplates)
-          ?incoming(json, decodeChecklistTemplate(json)),
-      ],
-      items: [
-        for (final json in snapshot.checklistItems)
-          ?incoming(json, decodeChecklistItem(json)),
-      ],
-      budget: [
-        for (final json in snapshot.budgetEntries)
-          ?incoming(json, decodeBudgetEntry(json)),
-      ],
-      plans: [
-        for (final json in snapshot.householdPlans)
-          ?incoming(json, decodeHouseholdPlan(json)),
-      ],
-      members: [
-        for (final json in snapshot.householdMembers)
-          ?incoming(json, decodeHouseholdMember(json)),
-      ],
-    );
+    // The same merge as a shared folder, a QR chain and a handover: a
+    // row is taken only when it is newer than what is held, so restoring
+    // an old backup over a current household changes nothing rather than
+    // winding it back.
+    return applyHouseholdSnapshot(database, snapshot);
   }
 }

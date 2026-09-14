@@ -7357,6 +7357,462 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'If the system\'s component is missing, the app draws the article itself in any case — this choice only changes what is tried first.'**
   String get articleViewerChoiceFallbackNote;
+
+  /// No description provided for @outageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Power outage'**
+  String get outageTitle;
+
+  /// No description provided for @outageEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How long the fridge and the freezer still hold.'**
+  String get outageEntryHint;
+
+  /// No description provided for @outageIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'While the power is off, the cold runs out. Tap when it starts and the app keeps counting, even if you close it.'**
+  String get outageIntro;
+
+  /// No description provided for @outageStart.
+  ///
+  /// In en, this message translates to:
+  /// **'The power just went out'**
+  String get outageStart;
+
+  /// No description provided for @outageEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'The power is back'**
+  String get outageEnded;
+
+  /// No description provided for @outageRunningSince.
+  ///
+  /// In en, this message translates to:
+  /// **'Running since {time}'**
+  String outageRunningSince(String time);
+
+  /// No description provided for @outageChangeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Different time'**
+  String get outageChangeStart;
+
+  /// No description provided for @outageStoreRefrigerator.
+  ///
+  /// In en, this message translates to:
+  /// **'Refrigerator'**
+  String get outageStoreRefrigerator;
+
+  /// No description provided for @outageStoreFreezer.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezer'**
+  String get outageStoreFreezer;
+
+  /// No description provided for @outageRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{left} left'**
+  String outageRemaining(String left);
+
+  /// No description provided for @outageRemainingHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} h {minutes} min'**
+  String outageRemainingHours(int hours, int minutes);
+
+  /// No description provided for @outageRemainingMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String outageRemainingMinutes(int minutes);
+
+  /// No description provided for @outageUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Until {time}'**
+  String outageUntil(String time);
+
+  /// No description provided for @outageGrace.
+  ///
+  /// In en, this message translates to:
+  /// **'Window over — discard in {left}'**
+  String outageGrace(String left);
+
+  /// No description provided for @outageSpoilt.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard perishable food'**
+  String get outageSpoilt;
+
+  /// No description provided for @outageFreezerFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezer'**
+  String get outageFreezerFill;
+
+  /// No description provided for @outageFreezerFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Well filled'**
+  String get outageFreezerFull;
+
+  /// No description provided for @outageFreezerHalf.
+  ///
+  /// In en, this message translates to:
+  /// **'Half full or less'**
+  String get outageFreezerHalf;
+
+  /// No description provided for @outageFreezerWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'A full freezer holds for about 48 hours, a half-full one for about 24. The cold is in the food itself, not in the appliance.'**
+  String get outageFreezerWhy;
+
+  /// No description provided for @outageRulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rules'**
+  String get outageRulesTitle;
+
+  /// No description provided for @outageRuleClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the door shut. Every opening costs hours, and the figures here only hold for a closed door.'**
+  String get outageRuleClosed;
+
+  /// No description provided for @outageRuleTwoHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything that spent two hours above {degrees} °C goes — meat, fish, eggs, dairy, leftovers.'**
+  String outageRuleTwoHours(int degrees);
+
+  /// No description provided for @outageRuleTaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Never taste food to decide. You cannot taste it.'**
+  String get outageRuleTaste;
+
+  /// No description provided for @outageRuleRefreeze.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreezing is allowed while ice crystals remain. Quality suffers, safety does not.'**
+  String get outageRuleRefreeze;
+
+  /// No description provided for @outageRuleGenerator.
+  ///
+  /// In en, this message translates to:
+  /// **'Run a generator outdoors only, at least 6 metres from windows, doors and an attached garage.'**
+  String get outageRuleGenerator;
+
+  /// No description provided for @outageRuleUnplug.
+  ///
+  /// In en, this message translates to:
+  /// **'Unplug appliances: the power comes back as a surge.'**
+  String get outageRuleUnplug;
+
+  /// No description provided for @outageSource.
+  ///
+  /// In en, this message translates to:
+  /// **'The hour figures come from FEMA (ready.gov) and the USDA (FSIS). No German authority publishes figures for this, which is why the source is named here.'**
+  String get outageSource;
+
+  /// No description provided for @dailyDoseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken per day'**
+  String get dailyDoseLabel;
+
+  /// No description provided for @dailyDoseHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'In the same unit as the stock: with 60 tablets and 2 a day, enter “2”. Leave empty if it is not taken daily.'**
+  String get dailyDoseHelper;
+
+  /// No description provided for @medicationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication'**
+  String get medicationTitle;
+
+  /// No description provided for @medicationEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How long the medication lasts.'**
+  String get medicationEntryHint;
+
+  /// No description provided for @medicationIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The same arithmetic as for supplies and fuel, applied to the medicine cabinet: stock divided by what is taken per day. Both figures are yours — the app never guesses a dose.'**
+  String get medicationIntro;
+
+  /// No description provided for @medicationNothingYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No medication entered yet'**
+  String get medicationNothingYet;
+
+  /// No description provided for @medicationNothingYetWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a medicine as a supply item in the “medical” category and give what is taken per day. Only then is there something to work out.'**
+  String get medicationNothingYetWhy;
+
+  /// No description provided for @medicationNoAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'No medicine has a daily amount entered — without one there is nothing to divide.'**
+  String get medicationNoAnswer;
+
+  /// No description provided for @medicationShortest.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs out first: {name} — {days}'**
+  String medicationShortest(String name, String days);
+
+  /// No description provided for @medicationShortestWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'That is the reach of the medicine cabinet. A refill needs a practice and a pharmacy, and in an emergency neither is available at once.'**
+  String get medicationShortestWhy;
+
+  /// No description provided for @medicationRunsOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Gone on {date}'**
+  String medicationRunsOut(String date);
+
+  /// No description provided for @medicationDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String medicationDays(int days);
+
+  /// No description provided for @medicationOneDay.
+  ///
+  /// In en, this message translates to:
+  /// **'1 day'**
+  String get medicationOneDay;
+
+  /// No description provided for @medicationZeroDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Less than a day'**
+  String get medicationZeroDays;
+
+  /// No description provided for @medicationStock.
+  ///
+  /// In en, this message translates to:
+  /// **'{quantity} {unit} in stock, {dose} a day'**
+  String medicationStock(String quantity, String unit, String dose);
+
+  /// No description provided for @medicationWithoutDoseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a daily amount'**
+  String get medicationWithoutDoseTitle;
+
+  /// No description provided for @medicationWithoutDoseWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'These are in the stores but not counted. They are named here instead of being quietly skipped — otherwise the figure above would read as covering the whole cabinet.'**
+  String get medicationWithoutDoseWhy;
+
+  /// No description provided for @medicationSource.
+  ///
+  /// In en, this message translates to:
+  /// **'FEMA and the CDC both advise keeping a supply of prescription medication and knowing how long it lasts. How large that supply may be is a matter for the practice — the app only counts what is there.'**
+  String get medicationSource;
+
+  /// No description provided for @possessionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Household inventory'**
+  String get possessionsTitle;
+
+  /// No description provided for @possessionsEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What the household owns — for the insurer.'**
+  String get possessionsEntryHint;
+
+  /// No description provided for @possessionsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing entered yet'**
+  String get possessionsEmpty;
+
+  /// No description provided for @possessionsWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'After a fire, a flood or a break-in the insurer asks what was there. Nobody answers that from memory. This list is not the supply store — it is what would have to be replaced.'**
+  String get possessionsWhy;
+
+  /// No description provided for @possessionsNoRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'No room given'**
+  String get possessionsNoRoom;
+
+  /// No description provided for @possessionsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total: {amount}'**
+  String possessionsTotal(String amount);
+
+  /// No description provided for @possessionsWithoutPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} entries without a price are not in the total.'**
+  String possessionsWithoutPrice(int count);
+
+  /// No description provided for @possessionsExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as PDF'**
+  String get possessionsExport;
+
+  /// No description provided for @possessionsPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Household inventory'**
+  String get possessionsPdfTitle;
+
+  /// No description provided for @possessionsKeepElsewhere.
+  ///
+  /// In en, this message translates to:
+  /// **'This list does not belong only in the home it describes. Print it and keep it elsewhere, or mail it to yourself. The photos are not in this file — they are only on the device that took them.'**
+  String get possessionsKeepElsewhere;
+
+  /// No description provided for @possessionAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry'**
+  String get possessionAdd;
+
+  /// No description provided for @possessionAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New entry'**
+  String get possessionAddTitle;
+
+  /// No description provided for @possessionEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit entry'**
+  String get possessionEditTitle;
+
+  /// No description provided for @possessionNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get possessionNameLabel;
+
+  /// No description provided for @possessionNameNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'A name, or the row will say nothing later.'**
+  String get possessionNameNeeded;
+
+  /// No description provided for @possessionRoomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get possessionRoomLabel;
+
+  /// No description provided for @possessionRoomHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Living room, cellar, garage — however you walk through it.'**
+  String get possessionRoomHelper;
+
+  /// No description provided for @possessionSerialLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Serial number'**
+  String get possessionSerialLabel;
+
+  /// No description provided for @possessionSerialHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The one field that cannot be reconstructed afterwards. Usually on the back or underneath.'**
+  String get possessionSerialHelper;
+
+  /// No description provided for @possessionPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase price'**
+  String get possessionPriceLabel;
+
+  /// No description provided for @possessionCurrencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get possessionCurrencyLabel;
+
+  /// No description provided for @possessionAcquiredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bought on'**
+  String get possessionAcquiredLabel;
+
+  /// No description provided for @possessionAcquiredNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No date'**
+  String get possessionAcquiredNone;
+
+  /// No description provided for @possessionPhotoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get possessionPhotoTitle;
+
+  /// No description provided for @possessionPhotoWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'A picture convinces an insurer more than any description. It stays on this device and does not go into the shared folder.'**
+  String get possessionPhotoWhy;
+
+  /// No description provided for @possessionPhotoCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get possessionPhotoCamera;
+
+  /// No description provided for @possessionPhotoGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose photo'**
+  String get possessionPhotoGallery;
+
+  /// No description provided for @possessionPhotoRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get possessionPhotoRemove;
+
+  /// No description provided for @possessionRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete entry?'**
+  String get possessionRemoveTitle;
+
+  /// No description provided for @possessionRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'“{name}” will be removed on every device in the household.'**
+  String possessionRemoveBody(String name);
+
+  /// No description provided for @possessionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String possessionsCount(int count);
 }
 
 class _AppLocalizationsDelegate

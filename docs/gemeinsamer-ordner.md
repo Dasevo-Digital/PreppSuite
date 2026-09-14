@@ -133,6 +133,17 @@ Neben Vorrat, Checklisten und Budget liegen zwei weitere Sätze im Ordner:
 - **Die Notfallkarten** – eine Zeile je Person. Das sind **Gesundheitsdaten**;
   der Bildschirm sagt vor der Eingabe, ob der Ordner verschlüsselt ist.
 
+Seit Schema 14 kommt ein dritter dazu:
+
+- **Das Hausratverzeichnis** – eine Zeile je Gegenstand, mit Raum,
+  Seriennummer, Kaufdatum und Preis. Das Foto bleibt auf dem Gerät, das es
+  aufgenommen hat, wie bei Vorratsartikeln auch.
+
+Eine Datei, die vor Schema 14 geschrieben wurde, hat diesen Satz gar nicht.
+Sie bleibt lesbar: ein fehlender Schlüssel wird als leere Liste gelesen,
+nicht als Fehler. Ein Gerät auf einer älteren Fassung hält den Ordner
+deshalb nicht auf.
+
 ## Verschlüsselung
 
 Der Ordner liegt in fremder Hand – Nextcloud, Syncthing, iCloud. Lesen kann

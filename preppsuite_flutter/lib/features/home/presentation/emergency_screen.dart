@@ -6,6 +6,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../checklists/application/checklist_providers.dart';
 import '../../checklists/application/checklist_satisfaction.dart';
+import '../../energy/presentation/outage_screen.dart';
 import '../../household/application/household_member_controller.dart';
 import '../../household/application/household_plan_controller.dart';
 import '../../inventory/application/inventory_providers.dart';
@@ -109,6 +110,15 @@ class EmergencyScreen extends ConsumerWidget {
               MaterialPageRoute<void>(
                 builder: (_) => const PreparednessToolsScreen(),
               ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.power_off_outlined),
+            title: Text(l10n.outageTitle),
+            subtitle: Text(l10n.outageEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const OutageScreen()),
             ),
           ),
           const SizedBox(height: 20),

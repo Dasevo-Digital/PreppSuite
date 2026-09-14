@@ -21,6 +21,7 @@ import '../application/supply_calculator.dart';
 import 'consume_dialog.dart';
 import 'inventory_csv_import_screen.dart';
 import 'inventory_item_form_screen.dart';
+import 'medication_range_screen.dart';
 import 'storage_tips_screen.dart';
 import '../application/inventory_filter.dart';
 import 'inventory_filter_sheet.dart';
@@ -29,6 +30,7 @@ import '../../../core/error_text.dart';
 
 enum _InventoryMenuAction {
   consumeByScan,
+  medication,
   energy,
   storageTips,
   exportCsv,
@@ -102,6 +104,13 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
               // everything the stock list cannot count, because a
               // cartridge has no calories and a candle has no expiry
               // date.
+              PopupMenuItem(
+                value: _InventoryMenuAction.medication,
+                child: ListTile(
+                  leading: const Icon(Icons.medication_outlined),
+                  title: Text(l10n.medicationTitle),
+                ),
+              ),
               PopupMenuItem(
                 value: _InventoryMenuAction.energy,
                 child: ListTile(
@@ -263,6 +272,12 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
     switch (action) {
       case _InventoryMenuAction.consumeByScan:
         await _consumeByScan(context, ref, householdId, l10n);
+      case _InventoryMenuAction.medication:
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => MedicationRangeScreen(householdId: householdId),
+          ),
+        );
       case _InventoryMenuAction.energy:
         await Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (_) => const EnergyScreen()),

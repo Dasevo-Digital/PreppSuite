@@ -24,6 +24,16 @@ import '../../../model/categories.dart';
 /// richtiges Handeln in Notsituationen" and its checklists. German only,
 /// like the rest of this file — it is seeded content, not app copy, and
 /// once a row is in the database no locale switch can reach it anyway.
+///
+/// One template, "Wenn der Strom ausfällt", comes from FEMA's Ready.gov
+/// instead. It is the one subject where the BBK's own material says what
+/// to stock and not what to do while the power is off, and where the US
+/// guidance is specific enough to act on: 20 feet from a window for a
+/// generator, an appliance disconnected against the surge on return, and
+/// perishable food gone after two hours above 40 °F. The figures are
+/// converted to metric and nothing else is changed. See
+/// `docs/us-behoerden-abgleich.md` for what else was compared and what
+/// was already covered.
 
 class BuiltInTemplate {
   const BuiltInTemplate(this.clientId, this.title, this.category, this.items);
@@ -812,6 +822,53 @@ const builtInTemplates = [
         '00000000-0000-4000-8000-000000001809',
         'Kritisch hinterfragen statt weiterleiten — eine Falschmeldung, die '
             'man selbst geteilt hat, kommt als scheinbare Bestätigung zurück',
+      ),
+    ],
+  ),
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000019',
+    'Wenn der Strom ausfällt',
+    ChecklistCategory.energy,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001901',
+        'Kühl- und Gefriergerät geschlossen halten — jedes Öffnen kostet '
+            'Stunden',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001902',
+        'Notstromaggregat und Brennstoff nur im Freien, mindestens 6 Meter '
+            'von Fenstern, Türen und angebauter Garage entfernt',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001903',
+        'Kohlenmonoxidmelder auf jeder Etage — das Gas ist farb- und '
+            'geruchlos',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001904',
+        'Kocher, Grill und Holzkohle nur im Freien, nie in Wohnung, Keller '
+            'oder Garage',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001905',
+        'Geräte und Elektronik vom Netz nehmen — der Strom kommt als '
+            'Spannungsspitze zurück',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001906',
+        'Für strombetriebene Medizingeräte vorher einen Plan mit der '
+            'Arztpraxis machen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001907',
+        'Bei Medikamenten, die gekühlt werden müssen: vorher erfragen, wie '
+            'lange sie wärmer liegen dürfen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001908',
+        'Verderbliches, das zwei Stunden über 4 °C lag, kommt weg — und '
+            'niemals probieren, um das zu entscheiden',
       ),
     ],
   ),

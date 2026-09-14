@@ -32,6 +32,7 @@ class InventoryController {
     String? barcode,
     String? offProductId,
     String? photoPath,
+    double? dailyDose,
     PackageNutrition nutrition = const PackageNutrition(),
   }) async {
     await _db.upsertInventoryItem(
@@ -45,6 +46,7 @@ class InventoryController {
         storageLocation: storageLocation,
         expirationDate: Value(expirationDate),
         minQuantity: Value(minQuantity),
+        dailyDose: Value(dailyDose),
         notes: Value(notes),
         barcode: Value(barcode),
         offProductId: Value(offProductId),
@@ -73,6 +75,7 @@ class InventoryController {
     String? barcode,
     String? offProductId,
     String? photoPath,
+    double? dailyDose,
     PackageNutrition nutrition = const PackageNutrition(),
   }) async {
     await _db.upsertInventoryItem(
@@ -88,6 +91,7 @@ class InventoryController {
         storageLocation: storageLocation,
         expirationDate: Value(expirationDate),
         minQuantity: Value(minQuantity),
+        dailyDose: Value(dailyDose),
         notes: Value(notes),
         photoPath: Value(photoPath),
         calories: Value(nutrition.kcal),

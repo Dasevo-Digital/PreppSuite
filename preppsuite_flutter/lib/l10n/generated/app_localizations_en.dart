@@ -4332,4 +4332,285 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get articleViewerChoiceFallbackNote =>
       'If the system\'s component is missing, the app draws the article itself in any case — this choice only changes what is tried first.';
+
+  @override
+  String get outageTitle => 'Power outage';
+
+  @override
+  String get outageEntryHint =>
+      'How long the fridge and the freezer still hold.';
+
+  @override
+  String get outageIntro =>
+      'While the power is off, the cold runs out. Tap when it starts and the app keeps counting, even if you close it.';
+
+  @override
+  String get outageStart => 'The power just went out';
+
+  @override
+  String get outageEnded => 'The power is back';
+
+  @override
+  String outageRunningSince(String time) {
+    return 'Running since $time';
+  }
+
+  @override
+  String get outageChangeStart => 'Different time';
+
+  @override
+  String get outageStoreRefrigerator => 'Refrigerator';
+
+  @override
+  String get outageStoreFreezer => 'Freezer';
+
+  @override
+  String outageRemaining(String left) {
+    return '$left left';
+  }
+
+  @override
+  String outageRemainingHours(int hours, int minutes) {
+    return '$hours h $minutes min';
+  }
+
+  @override
+  String outageRemainingMinutes(int minutes) {
+    return '$minutes min';
+  }
+
+  @override
+  String outageUntil(String time) {
+    return 'Until $time';
+  }
+
+  @override
+  String outageGrace(String left) {
+    return 'Window over — discard in $left';
+  }
+
+  @override
+  String get outageSpoilt => 'Discard perishable food';
+
+  @override
+  String get outageFreezerFill => 'Freezer';
+
+  @override
+  String get outageFreezerFull => 'Well filled';
+
+  @override
+  String get outageFreezerHalf => 'Half full or less';
+
+  @override
+  String get outageFreezerWhy =>
+      'A full freezer holds for about 48 hours, a half-full one for about 24. The cold is in the food itself, not in the appliance.';
+
+  @override
+  String get outageRulesTitle => 'Rules';
+
+  @override
+  String get outageRuleClosed =>
+      'Keep the door shut. Every opening costs hours, and the figures here only hold for a closed door.';
+
+  @override
+  String outageRuleTwoHours(int degrees) {
+    return 'Anything that spent two hours above $degrees °C goes — meat, fish, eggs, dairy, leftovers.';
+  }
+
+  @override
+  String get outageRuleTaste =>
+      'Never taste food to decide. You cannot taste it.';
+
+  @override
+  String get outageRuleRefreeze =>
+      'Refreezing is allowed while ice crystals remain. Quality suffers, safety does not.';
+
+  @override
+  String get outageRuleGenerator =>
+      'Run a generator outdoors only, at least 6 metres from windows, doors and an attached garage.';
+
+  @override
+  String get outageRuleUnplug =>
+      'Unplug appliances: the power comes back as a surge.';
+
+  @override
+  String get outageSource =>
+      'The hour figures come from FEMA (ready.gov) and the USDA (FSIS). No German authority publishes figures for this, which is why the source is named here.';
+
+  @override
+  String get dailyDoseLabel => 'Taken per day';
+
+  @override
+  String get dailyDoseHelper =>
+      'In the same unit as the stock: with 60 tablets and 2 a day, enter “2”. Leave empty if it is not taken daily.';
+
+  @override
+  String get medicationTitle => 'Medication';
+
+  @override
+  String get medicationEntryHint => 'How long the medication lasts.';
+
+  @override
+  String get medicationIntro =>
+      'The same arithmetic as for supplies and fuel, applied to the medicine cabinet: stock divided by what is taken per day. Both figures are yours — the app never guesses a dose.';
+
+  @override
+  String get medicationNothingYet => 'No medication entered yet';
+
+  @override
+  String get medicationNothingYetWhy =>
+      'Enter a medicine as a supply item in the “medical” category and give what is taken per day. Only then is there something to work out.';
+
+  @override
+  String get medicationNoAnswer =>
+      'No medicine has a daily amount entered — without one there is nothing to divide.';
+
+  @override
+  String medicationShortest(String name, String days) {
+    return 'Runs out first: $name — $days';
+  }
+
+  @override
+  String get medicationShortestWhy =>
+      'That is the reach of the medicine cabinet. A refill needs a practice and a pharmacy, and in an emergency neither is available at once.';
+
+  @override
+  String medicationRunsOut(String date) {
+    return 'Gone on $date';
+  }
+
+  @override
+  String medicationDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get medicationOneDay => '1 day';
+
+  @override
+  String get medicationZeroDays => 'Less than a day';
+
+  @override
+  String medicationStock(String quantity, String unit, String dose) {
+    return '$quantity $unit in stock, $dose a day';
+  }
+
+  @override
+  String get medicationWithoutDoseTitle => 'Without a daily amount';
+
+  @override
+  String get medicationWithoutDoseWhy =>
+      'These are in the stores but not counted. They are named here instead of being quietly skipped — otherwise the figure above would read as covering the whole cabinet.';
+
+  @override
+  String get medicationSource =>
+      'FEMA and the CDC both advise keeping a supply of prescription medication and knowing how long it lasts. How large that supply may be is a matter for the practice — the app only counts what is there.';
+
+  @override
+  String get possessionsTitle => 'Household inventory';
+
+  @override
+  String get possessionsEntryHint =>
+      'What the household owns — for the insurer.';
+
+  @override
+  String get possessionsEmpty => 'Nothing entered yet';
+
+  @override
+  String get possessionsWhy =>
+      'After a fire, a flood or a break-in the insurer asks what was there. Nobody answers that from memory. This list is not the supply store — it is what would have to be replaced.';
+
+  @override
+  String get possessionsNoRoom => 'No room given';
+
+  @override
+  String possessionsTotal(String amount) {
+    return 'Total: $amount';
+  }
+
+  @override
+  String possessionsWithoutPrice(int count) {
+    return '$count entries without a price are not in the total.';
+  }
+
+  @override
+  String get possessionsExport => 'Export as PDF';
+
+  @override
+  String get possessionsPdfTitle => 'Household inventory';
+
+  @override
+  String get possessionsKeepElsewhere =>
+      'This list does not belong only in the home it describes. Print it and keep it elsewhere, or mail it to yourself. The photos are not in this file — they are only on the device that took them.';
+
+  @override
+  String get possessionAdd => 'Entry';
+
+  @override
+  String get possessionAddTitle => 'New entry';
+
+  @override
+  String get possessionEditTitle => 'Edit entry';
+
+  @override
+  String get possessionNameLabel => 'Item';
+
+  @override
+  String get possessionNameNeeded =>
+      'A name, or the row will say nothing later.';
+
+  @override
+  String get possessionRoomLabel => 'Room';
+
+  @override
+  String get possessionRoomHelper =>
+      'Living room, cellar, garage — however you walk through it.';
+
+  @override
+  String get possessionSerialLabel => 'Serial number';
+
+  @override
+  String get possessionSerialHelper =>
+      'The one field that cannot be reconstructed afterwards. Usually on the back or underneath.';
+
+  @override
+  String get possessionPriceLabel => 'Purchase price';
+
+  @override
+  String get possessionCurrencyLabel => 'Currency';
+
+  @override
+  String get possessionAcquiredLabel => 'Bought on';
+
+  @override
+  String get possessionAcquiredNone => 'No date';
+
+  @override
+  String get possessionPhotoTitle => 'Photo';
+
+  @override
+  String get possessionPhotoWhy =>
+      'A picture convinces an insurer more than any description. It stays on this device and does not go into the shared folder.';
+
+  @override
+  String get possessionPhotoCamera => 'Take photo';
+
+  @override
+  String get possessionPhotoGallery => 'Choose photo';
+
+  @override
+  String get possessionPhotoRemove => 'Remove photo';
+
+  @override
+  String get possessionRemoveTitle => 'Delete entry?';
+
+  @override
+  String possessionRemoveBody(String name) {
+    return '“$name” will be removed on every device in the household.';
+  }
+
+  @override
+  String possessionsCount(int count) {
+    return '$count items';
+  }
 }

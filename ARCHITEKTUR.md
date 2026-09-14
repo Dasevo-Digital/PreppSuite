@@ -297,6 +297,15 @@ read `from == 8` rather than `from < 9`, because anything older already
 got it from the rebuild. `migration_to_8_test` and `migration_to_9_test`
 cover the two halves.
 
+**Every road a household travels goes through `snapshot_exchange.dart`.**
+The shared folder, the QR chain, the local handover *and the encrypted
+backup* all read and merge through the same two functions. The backup
+service used to spell both out again, which meant a table added to the
+snapshot was simply absent from every backup — with no error, and no way
+to notice until somebody restored one. A second copy of the merge is a
+second set of tie-break rules; a second copy of the read is silent data
+loss. `backup_service_test` now asserts that a newer table comes back.
+
 **The snapshot format in `device_snapshot.dart` is a contract, not a dump.**
 Row codecs are hand-written rather than drift's generated `toJson` precisely
 so that a migration does not silently change a file format other installs —
@@ -345,6 +354,32 @@ that or after a day; the DWD names its five WBI steps "sehr geringe" to
 of them calls itself a warning, and each says so — a real warning arrives
 through the BBK feed. `radiation_level.dart` and `fire_danger_level.dart`
 carry the sources in their library comments.
+
+**Where no German authority publishes the interpretation, a foreign
+one is quoted by name.** The blackout clock in
+`energy/application/outage_food_safety.dart` is the only place this
+applies: four hours of refrigerator, forty-eight of a full freezer,
+twenty-four of a half-full one, and perishables gone two hours above
+4 °C. Those figures are FEMA's and the USDA's. The BZfE, the BfR, the
+BMEL and the Verbraucherzentrale were all checked and all describe the
+principle without stating hours. So the rule above gains one sentence
+rather than an exception: the source is named on the screen. A cold
+chain is not a national quantity, and the alternative — this app
+choosing its own number — is the thing the rule exists to prevent. See
+[`docs/us-behoerden-abgleich.md`](docs/us-behoerden-abgleich.md) for the
+whole comparison, including what was already covered and what was
+deliberately left out.
+
+**The possessions list is not the supply list, and mixing them would
+break both.** `inventory_items` answers "how long do the stores last" —
+quantities, expiry dates, calories, and the supply calculator adding it
+up. `possessions` answers "what did we lose", which is what an insurer
+asks after a fire and what nobody answers from memory. They are separate
+tables on purpose: a washing machine in the calorie target is what one
+table would produce. The photo on a possession stays on the device that
+took it, like an inventory item's, which is why the PDF export exists at
+all — a list of what burned that lives only in the flat that burned is
+not a list.
 
 **A dose rate is judged against its own probe, not against one national
 number.** `baselineFrom` takes the median of the station's last week —
@@ -410,6 +445,9 @@ are measured in gigabytes: a resumable HTTP download, where the files
 land, and the banner both features show. It knows nothing about maps or
 archives — the caller passes a callback for what to do with the finished
 file.
+
+`features/possessions/` is the household's inventory of what it owns,
+with a PDF export meant to be kept somewhere else.
 
 `features/sharing/` is the shared-folder sync. `SyncFolder` is an interface
 over "a directory" with a `dart:io` implementation, so the merge is tested

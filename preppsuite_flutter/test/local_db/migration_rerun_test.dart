@@ -53,6 +53,28 @@ void main() {
         updatedAt: DateTime.utc(2026, 9, 10),
       ),
     );
+    await fresh.upsertInventoryItem(
+      InventoryItemsCompanion.insert(
+        clientId: 'item-2',
+        householdId: 'household-1',
+        name: 'Ramipril',
+        category: 'medical',
+        quantity: 60,
+        unit: 'Tablette',
+        storageLocation: 'Hausapotheke',
+        dailyDose: const Value(2),
+        updatedAt: DateTime.utc(2026, 9, 10),
+      ),
+    );
+    await fresh.upsertPossession(
+      PossessionsCompanion.insert(
+        clientId: 'possession-1',
+        householdId: 'household-1',
+        name: 'Waschmaschine',
+        room: const Value('Keller'),
+        updatedAt: DateTime.utc(2026, 9, 10),
+      ),
+    );
     await fresh.close();
 
     // Wound back in `setup`, which runs before drift reads the version,
@@ -71,8 +93,8 @@ void main() {
     return db;
   }
 
-  // 13 is the current version, so a database wound back to anything below
-  // it replays that many steps over a schema that already has them.
+  // A database wound back to anything below the current version replays
+  // that many steps over a schema that already has them.
   for (var version = 1; version < AppDatabase.currentSchemaVersion; version++) {
     test('an upgrade interrupted at $version can be repeated', () async {
       final file = await databaseRewoundTo(version);
@@ -87,7 +109,25 @@ void main() {
       expect(plan.localContactPoint, 'Grundschule Nordstadt');
 
       final items = await db.watchInventoryItems('household-1').first;
-      expect(items.single.name, 'Haferflocken');
+      expect(items.map((item) => item.name), contains('Haferflocken'));
+
+      // Schema 14 added one column to a table the schema-8 rebuild
+      // recreates, and one new table. Both are read here, because a
+      // column left out of that branch's `newColumns` does not fail
+      // loudly -- it fails on the one install that came from version 7.
+      final medicine = items.firstWhere((item) => item.name == 'Ramipril');
+
+      final owned = await db.watchPossessions('household-1').first;
+      expect(owned.single.name, 'Waschmaschine');
+
+      // The value itself only survives from 8 up, and that is correct
+      // rather than a leak: `newColumns` tells drift the column is new,
+      // so the rebuild creates it empty instead of copying it out of a
+      // version-7 table that never had it. Nothing is lost in the field,
+      // because an install that is genuinely on 7 cannot hold a dose --
+      // the column did not exist there. Only this test can construct the
+      // combination, by winding today's schema back.
+      expect(medicine.dailyDose, version < 8 ? isNull : 2);
     });
   }
 

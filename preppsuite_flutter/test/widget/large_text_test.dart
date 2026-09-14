@@ -19,7 +19,12 @@ import 'package:preppsuite_flutter/features/household/presentation/profile_setup
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/inventory_csv_import_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/inventory_item_form_screen.dart';
+import 'package:preppsuite_flutter/features/energy/presentation/outage_screen.dart';
+import 'package:preppsuite_flutter/features/inventory/presentation/medication_range_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/rotation_screen.dart';
+import 'package:preppsuite_flutter/features/possessions/application/possession_controller.dart';
+import 'package:preppsuite_flutter/features/possessions/presentation/possession_form_screen.dart';
+import 'package:preppsuite_flutter/features/possessions/presentation/possessions_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/shopping_list_screen.dart';
 import 'package:preppsuite_flutter/features/settings/presentation/settings_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
@@ -104,6 +109,9 @@ void main() {
           householdPlanProvider(
             householdId,
           ).overrideWith((ref) => Stream.value(null)),
+          possessionsProvider(
+            householdId,
+          ).overrideWith((ref) => Stream.value(const [])),
           checklistItemsProvider(
             'template-1',
           ).overrideWith((ref) => Stream.value(const [])),
@@ -145,6 +153,22 @@ void main() {
 
   testWidgets('the household overview', (tester) async {
     await pump(tester, const HouseholdOverviewScreen(profile: profile));
+  });
+
+  testWidgets('the possessions list', (tester) async {
+    await pump(tester, const PossessionsScreen(householdId: householdId));
+  });
+
+  testWidgets('the possession form', (tester) async {
+    await pump(tester, const PossessionFormScreen(householdId: householdId));
+  });
+
+  testWidgets('the medication reach', (tester) async {
+    await pump(tester, const MedicationRangeScreen(householdId: householdId));
+  });
+
+  testWidgets('the blackout clock', (tester) async {
+    await pump(tester, const OutageScreen());
   });
 
   testWidgets('the household plan', (tester) async {

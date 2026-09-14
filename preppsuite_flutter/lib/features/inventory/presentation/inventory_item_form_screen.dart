@@ -67,6 +67,7 @@ class _InventoryItemFormScreenState
   late final TextEditingController _unitController;
   late final TextEditingController _storageLocationController;
   late final TextEditingController _minQuantityController;
+  late final TextEditingController _dailyDoseController;
   late final TextEditingController _caloriesController;
   late final TextEditingController _proteinController;
   late final TextEditingController _carbohydrateController;
@@ -90,6 +91,7 @@ class _InventoryItemFormScreenState
     _unitController,
     _storageLocationController,
     _minQuantityController,
+    _dailyDoseController,
     _caloriesController,
     _proteinController,
     _carbohydrateController,
@@ -180,6 +182,11 @@ class _InventoryItemFormScreenState
           ? _formatNumber(existing!.minQuantity!)
           : '',
     );
+    _dailyDoseController = TextEditingController(
+      text: existing?.dailyDose != null
+          ? _formatNumber(existing!.dailyDose!)
+          : '',
+    );
     _caloriesController = TextEditingController(
       text: nutrition.kcal != null ? '${nutrition.kcal}' : '',
     );
@@ -222,6 +229,7 @@ class _InventoryItemFormScreenState
     _unitController.dispose();
     _storageLocationController.dispose();
     _minQuantityController.dispose();
+    _dailyDoseController.dispose();
     _caloriesController.dispose();
     _proteinController.dispose();
     _carbohydrateController.dispose();
@@ -440,6 +448,14 @@ class _InventoryItemFormScreenState
           ? null
           : double.parse(minQuantityText);
       final nutrition = _readNutrition();
+      // Only for a medicine. A dose left behind on an item whose category
+      // was changed afterwards would put a tin of beans into the
+      // medication reach with a straight face.
+      final doseText = _dailyDoseController.text.trim();
+      final dailyDose =
+          _category == InventoryItemCategory.medical && doseText.isNotEmpty
+          ? double.parse(doseText)
+          : null;
       final notes = _notesController.text.trim();
 
       if (_isEditing) {
@@ -452,6 +468,7 @@ class _InventoryItemFormScreenState
           storageLocation: _storageLocationController.text.trim(),
           expirationDate: _expirationDate,
           minQuantity: minQuantity,
+          dailyDose: dailyDose,
           notes: notes.isEmpty ? null : notes,
           barcode: _barcode,
           offProductId: _offProductId,
@@ -467,6 +484,7 @@ class _InventoryItemFormScreenState
           storageLocation: _storageLocationController.text.trim(),
           expirationDate: _expirationDate,
           minQuantity: minQuantity,
+          dailyDose: dailyDose,
           notes: notes.isEmpty ? null : notes,
           barcode: _barcode,
           offProductId: _offProductId,
@@ -709,6 +727,21 @@ class _InventoryItemFormScreenState
                         ),
                         validator: _numberValidator(l10n, required: false),
                       ),
+                      if (_category == InventoryItemCategory.medical) ...[
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _dailyDoseController,
+                          decoration: InputDecoration(
+                            labelText: l10n.dailyDoseLabel,
+                            helperText: l10n.dailyDoseHelper,
+                            helperMaxLines: 3,
+                          ),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          validator: _numberValidator(l10n, required: false),
+                        ),
+                      ],
                       if (_category == InventoryItemCategory.food) ...[
                         const SizedBox(height: 24),
                         Text(

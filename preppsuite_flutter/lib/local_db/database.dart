@@ -11,6 +11,7 @@ import 'tables/checklist_templates_table.dart';
 import 'tables/household_members_table.dart';
 import 'tables/household_plans_table.dart';
 import 'tables/inventory_items_table.dart';
+import 'tables/possessions_table.dart';
 import 'tables/sync_state_table.dart';
 import 'tables/warnings_table.dart';
 
@@ -24,13 +25,14 @@ part 'database.g.dart';
     BudgetEntries,
     HouseholdMembers,
     HouseholdPlans,
+    Possessions,
     Warnings,
     SyncState,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 13;
+  static const currentSchemaVersion = 14;
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
@@ -164,6 +166,7 @@ class AppDatabase extends _$AppDatabase {
               inventoryItems.carbohydrateGrams,
               inventoryItems.fatGrams,
               inventoryItems.fiberGrams,
+              inventoryItems.dailyDose,
             ],
           ),
         );
@@ -236,6 +239,33 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       }
+      if (from < 14) {
+        // The household's possessions, for an insurer rather than for the
+        // supply calculator. A new table, so nothing to convert.
+        await m.createTable(possessions);
+      }
+      if (from >= 8 && from < 14) {
+        // A medicine's daily dose, which is what turns a stock into a
+        // number of days.
+        //
+        // `from >= 8` for the reason spelled out in the schema-8 branch:
+        // anything older is rebuilt from today's definition there and
+        // already has the column, so adding it again would be a second
+        // `ALTER TABLE` on a table that has it.
+        //
+        // The table is looked for rather than assumed, like the warnings
+        // cache above: a database repaired by hand or half-migrated can
+        // be at version 10 with no `inventory_items` at all, and
+        // `PRAGMA table_info` on a table that is not there answers the
+        // same empty list as a table without the column -- so
+        // [_addColumnOnce] would go ahead and the ALTER would take the
+        // whole migration down.
+        if (!await _hasTable('inventory_items')) {
+          await m.createTable(inventoryItems);
+        } else {
+          await _addColumnOnce(m, inventoryItems, inventoryItems.dailyDose);
+        }
+      }
     },
   );
 
@@ -259,6 +289,9 @@ class AppDatabase extends _$AppDatabase {
     )..where((t) => t.householdId.equals(householdId))).go();
     await (delete(
       householdMembers,
+    )..where((t) => t.householdId.equals(householdId))).go();
+    await (delete(
+      possessions,
     )..where((t) => t.householdId.equals(householdId))).go();
   });
 
@@ -296,6 +329,44 @@ class AppDatabase extends _$AppDatabase {
   Future<List<HouseholdMember>> householdMembersForSync(String householdId) {
     return (select(
       householdMembers,
+    )..where((t) => t.householdId.equals(householdId))).get();
+  }
+
+  // --- Possessions -----------------------------------------------------
+
+  /// What the household owns, grouped by room in the screen and ordered
+  /// here so that rows from the same room arrive together.
+  Stream<List<Possession>> watchPossessions(String householdId) {
+    return (select(possessions)
+          ..where(
+            (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
+          )
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.room),
+            (t) => OrderingTerm.asc(t.name),
+          ]))
+        .watch();
+  }
+
+  Future<void> upsertPossession(PossessionsCompanion possession) {
+    return _writeLocal(
+      possessions,
+      possession.clientId.value,
+      possession.updatedAt.value,
+      (timestamp) => possession.copyWith(updatedAt: Value(timestamp)),
+    );
+  }
+
+  Future<List<Possession>> dirtyPossessions(String householdId) {
+    return (select(possessions)..where(
+          (t) => t.householdId.equals(householdId) & t.dirty.equals(true),
+        ))
+        .get();
+  }
+
+  Future<List<Possession>> possessionsForSync(String householdId) {
+    return (select(
+      possessions,
     )..where((t) => t.householdId.equals(householdId))).get();
   }
 
@@ -763,6 +834,7 @@ class AppDatabase extends _$AppDatabase {
     List<PublishedRow> budget = const [],
     List<PublishedRow> plans = const [],
     List<PublishedRow> members = const [],
+    List<PublishedRow> owned = const [],
   }) {
     return transaction(() async {
       for (final (table, rows)
@@ -773,6 +845,7 @@ class AppDatabase extends _$AppDatabase {
             (budgetEntries, budget),
             (householdPlans, plans),
             (householdMembers, members),
+            (possessions, owned),
           ]) {
         for (final row in rows) {
           await customUpdate(
@@ -872,6 +945,15 @@ class AppDatabase extends _$AppDatabase {
         ),
       );
 
+      await (update(
+        possessions,
+      )..where((t) => t.householdId.equals(from))).write(
+        PossessionsCompanion(
+          householdId: Value(to),
+          dirty: const Value(true),
+        ),
+      );
+
       // The plan cannot be re-stamped like the rest. Its `clientId` *is*
       // the household id — that is what makes two devices edit one record
       // instead of one each — so a plan left under the old key would stop
@@ -910,6 +992,7 @@ class AppDatabase extends _$AppDatabase {
     List<IncomingRow<BudgetEntriesCompanion>> budget = const [],
     List<IncomingRow<HouseholdPlansCompanion>> plans = const [],
     List<IncomingRow<HouseholdMembersCompanion>> members = const [],
+    List<IncomingRow<PossessionsCompanion>> owned = const [],
   }) {
     return transaction(() async {
       var changed = 0;
@@ -946,6 +1029,12 @@ class AppDatabase extends _$AppDatabase {
       changed += await _mergeInto(
         householdMembers,
         members,
+        (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+        (row) => row.toCompanion(false),
+      );
+      changed += await _mergeInto(
+        possessions,
+        owned,
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
         (row) => row.toCompanion(false),
       );

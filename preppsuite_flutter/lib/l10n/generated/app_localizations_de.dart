@@ -4360,4 +4360,285 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get articleViewerChoiceFallbackNote =>
       'Fehlt die Komponente des Systems, zeichnet die App den Artikel ohnehin selbst – die Auswahl hier ändert nur, was zuerst versucht wird.';
+
+  @override
+  String get outageTitle => 'Stromausfall';
+
+  @override
+  String get outageEntryHint =>
+      'Wie lange Kühlschrank und Gefriergerät noch halten.';
+
+  @override
+  String get outageIntro =>
+      'Solange der Strom weg ist, läuft die Kälte ab. Tippe an, wenn es losgeht – die App zählt mit, auch wenn du sie schließt.';
+
+  @override
+  String get outageStart => 'Der Strom ist jetzt weg';
+
+  @override
+  String get outageEnded => 'Der Strom ist wieder da';
+
+  @override
+  String outageRunningSince(String time) {
+    return 'Läuft seit $time';
+  }
+
+  @override
+  String get outageChangeStart => 'Anderer Zeitpunkt';
+
+  @override
+  String get outageStoreRefrigerator => 'Kühlschrank';
+
+  @override
+  String get outageStoreFreezer => 'Gefriergerät';
+
+  @override
+  String outageRemaining(String left) {
+    return 'Noch $left';
+  }
+
+  @override
+  String outageRemainingHours(int hours, int minutes) {
+    return '$hours Std. $minutes Min.';
+  }
+
+  @override
+  String outageRemainingMinutes(int minutes) {
+    return '$minutes Min.';
+  }
+
+  @override
+  String outageUntil(String time) {
+    return 'Bis $time';
+  }
+
+  @override
+  String outageGrace(String left) {
+    return 'Abgelaufen – entsorgen in $left';
+  }
+
+  @override
+  String get outageSpoilt => 'Verderbliches entsorgen';
+
+  @override
+  String get outageFreezerFill => 'Gefriergerät';
+
+  @override
+  String get outageFreezerFull => 'Gut gefüllt';
+
+  @override
+  String get outageFreezerHalf => 'Halb voll oder weniger';
+
+  @override
+  String get outageFreezerWhy =>
+      'Ein volles Gefriergerät hält etwa 48 Stunden, ein halb volles etwa 24. Die Kälte steckt im Gefriergut selbst, nicht im Gerät.';
+
+  @override
+  String get outageRulesTitle => 'Regeln';
+
+  @override
+  String get outageRuleClosed =>
+      'Tür zu lassen. Jedes Öffnen kostet Stunden, und die Zahlen hier gelten nur bei geschlossener Tür.';
+
+  @override
+  String outageRuleTwoHours(int degrees) {
+    return 'Was zwei Stunden über $degrees °C lag, kommt weg – Fleisch, Fisch, Eier, Milchprodukte, Gekochtes.';
+  }
+
+  @override
+  String get outageRuleTaste =>
+      'Niemals probieren, um zu entscheiden. Man schmeckt es nicht.';
+
+  @override
+  String get outageRuleRefreeze =>
+      'Wieder einfrieren ist erlaubt, solange noch Eiskristalle da sind. Die Güte leidet, die Sicherheit nicht.';
+
+  @override
+  String get outageRuleGenerator =>
+      'Notstromaggregat nur im Freien, mindestens 6 Meter von Fenstern, Türen und angebauter Garage entfernt.';
+
+  @override
+  String get outageRuleUnplug =>
+      'Geräte vom Netz nehmen: der Strom kommt als Spannungsspitze zurück.';
+
+  @override
+  String get outageSource =>
+      'Die Stundenangaben stammen von FEMA (ready.gov) und dem US-Landwirtschaftsministerium (FSIS). Eine deutsche Behörde veröffentlicht dazu keine Zahlen – deshalb steht hier, woher sie kommen.';
+
+  @override
+  String get dailyDoseLabel => 'Verbrauch am Tag';
+
+  @override
+  String get dailyDoseHelper =>
+      'In derselben Einheit wie der Bestand: bei 60 Tabletten und 2 am Tag steht hier „2\". Leer lassen, wenn es nicht täglich genommen wird.';
+
+  @override
+  String get medicationTitle => 'Medikamente';
+
+  @override
+  String get medicationEntryHint => 'Wie lange die Medikamente reichen.';
+
+  @override
+  String get medicationIntro =>
+      'Dieselbe Rechnung wie bei Vorräten und Brennstoff, nur für die Hausapotheke: Bestand geteilt durch Tagesverbrauch. Beide Zahlen sind deine eigenen – die App schätzt keine Dosis.';
+
+  @override
+  String get medicationNothingYet => 'Noch keine Medikamente eingetragen';
+
+  @override
+  String get medicationNothingYetWhy =>
+      'Trage ein Medikament als Vorrat mit der Kategorie „Medizin“ ein und gib den Tagesverbrauch an. Erst dann lässt sich etwas ausrechnen.';
+
+  @override
+  String get medicationNoAnswer =>
+      'Zu keinem Medikament ist ein Tagesverbrauch eingetragen – ohne den gibt es nichts zu teilen.';
+
+  @override
+  String medicationShortest(String name, String days) {
+    return 'Zuerst leer: $name – $days';
+  }
+
+  @override
+  String get medicationShortestWhy =>
+      'Das ist die Reichweite der Hausapotheke. Ein Nachschub braucht Praxis und Apotheke – beides ist im Ernstfall nicht sofort zu haben.';
+
+  @override
+  String medicationRunsOut(String date) {
+    return 'Aufgebraucht am $date';
+  }
+
+  @override
+  String medicationDays(int days) {
+    return '$days Tage';
+  }
+
+  @override
+  String get medicationOneDay => '1 Tag';
+
+  @override
+  String get medicationZeroDays => 'Reicht keinen Tag';
+
+  @override
+  String medicationStock(String quantity, String unit, String dose) {
+    return 'Bestand $quantity $unit, $dose am Tag';
+  }
+
+  @override
+  String get medicationWithoutDoseTitle => 'Ohne Tagesverbrauch';
+
+  @override
+  String get medicationWithoutDoseWhy =>
+      'Diese stehen im Vorrat, sind aber nicht mitgerechnet. Sie werden hier genannt statt stillschweigend übergangen – sonst läse sich die Zahl oben, als gälte sie für den ganzen Schrank.';
+
+  @override
+  String get medicationSource =>
+      'FEMA und die US-Gesundheitsbehörde CDC empfehlen beide, einen Vorrat verschreibungspflichtiger Medikamente zu halten und zu wissen, wie lange er reicht. Wie groß der Vorrat sein darf, entscheidet die Praxis – die App rechnet nur, was da ist.';
+
+  @override
+  String get possessionsTitle => 'Hausratverzeichnis';
+
+  @override
+  String get possessionsEntryHint =>
+      'Was der Haushalt besitzt – für die Versicherung.';
+
+  @override
+  String get possessionsEmpty => 'Noch nichts eingetragen';
+
+  @override
+  String get possessionsWhy =>
+      'Nach einem Brand, einem Wasserschaden oder einem Einbruch fragt die Versicherung, was da war. Aus dem Kopf beantwortet das niemand. Diese Liste ist nicht der Vorrat – hier steht, was ersetzt werden müsste.';
+
+  @override
+  String get possessionsNoRoom => 'Ohne Raum';
+
+  @override
+  String possessionsTotal(String amount) {
+    return 'Summe: $amount';
+  }
+
+  @override
+  String possessionsWithoutPrice(int count) {
+    return '$count Einträge ohne Preis sind nicht in der Summe.';
+  }
+
+  @override
+  String get possessionsExport => 'Als PDF ausgeben';
+
+  @override
+  String get possessionsPdfTitle => 'Hausratverzeichnis';
+
+  @override
+  String get possessionsKeepElsewhere =>
+      'Diese Liste gehört nicht nur in die Wohnung, um die es geht. Ausdrucken und woanders hinlegen, oder an sich selbst mailen. Die Fotos sind nicht in dieser Datei – sie liegen nur auf dem Gerät, das sie aufgenommen hat.';
+
+  @override
+  String get possessionAdd => 'Eintrag';
+
+  @override
+  String get possessionAddTitle => 'Neuer Eintrag';
+
+  @override
+  String get possessionEditTitle => 'Eintrag ändern';
+
+  @override
+  String get possessionNameLabel => 'Gegenstand';
+
+  @override
+  String get possessionNameNeeded =>
+      'Ein Name, sonst sagt die Zeile später nichts.';
+
+  @override
+  String get possessionRoomLabel => 'Raum';
+
+  @override
+  String get possessionRoomHelper =>
+      'Wohnzimmer, Keller, Garage – wie du selbst gehst.';
+
+  @override
+  String get possessionSerialLabel => 'Seriennummer';
+
+  @override
+  String get possessionSerialHelper =>
+      'Das einzige Feld, das sich hinterher nicht mehr rekonstruieren lässt. Steht meist auf der Rückseite oder unter dem Gerät.';
+
+  @override
+  String get possessionPriceLabel => 'Kaufpreis';
+
+  @override
+  String get possessionCurrencyLabel => 'Währung';
+
+  @override
+  String get possessionAcquiredLabel => 'Gekauft am';
+
+  @override
+  String get possessionAcquiredNone => 'Kein Datum';
+
+  @override
+  String get possessionPhotoTitle => 'Foto';
+
+  @override
+  String get possessionPhotoWhy =>
+      'Ein Bild überzeugt eine Versicherung mehr als jede Beschreibung. Es bleibt auf diesem Gerät und geht nicht in den geteilten Ordner.';
+
+  @override
+  String get possessionPhotoCamera => 'Aufnehmen';
+
+  @override
+  String get possessionPhotoGallery => 'Auswählen';
+
+  @override
+  String get possessionPhotoRemove => 'Foto entfernen';
+
+  @override
+  String get possessionRemoveTitle => 'Eintrag löschen?';
+
+  @override
+  String possessionRemoveBody(String name) {
+    return '„$name“ wird auf allen Geräten des Haushalts entfernt.';
+  }
+
+  @override
+  String possessionsCount(int count) {
+    return '$count Gegenstände';
+  }
 }

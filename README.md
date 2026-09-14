@@ -49,7 +49,8 @@ Packungsgrösse.
 **Checklisten.** 19 mitgelieferte Listen nach dem BBK-Ratgeber – von
 Wasser, Lebensmitteln und Erster Hilfe über Strom- und Heizungsausfall,
 Hochwasser, Hitze und Sturm bis zu Haustieren, Säuglingen und
-Falschmeldungen – dazu beliebig viele eigene. Einzelne Punkte lassen sich
+Falschmeldungen; eine davon, das Verhalten während eines Stromausfalls,
+folgt FEMA – dazu beliebig viele eigene. Einzelne Punkte lassen sich
 mit einem Vorratsartikel verknüpfen.
 
 **Budget.** Was die Vorsorge gekostet hat, nach Kategorie. Dazu ein
@@ -161,6 +162,28 @@ QR-Bildern in einer Schleife, das andere filmt sie ab. Das braucht nichts
 außer einem Bildschirm und einer Kamera. Ein Haushalt mit zweihundert
 Vorratszeilen sind etwa vier Bilder. Einzelheiten in
 [`docs/ohne-netz-uebertragen.md`](docs/ohne-netz-uebertragen.md).
+
+**Stromausfall.** Eine Uhr für das, was im Dunkeln wirklich gefragt wird:
+wie lange Kühlschrank und Gefriergerät noch halten. Vier Stunden, 48 bei
+vollem und 24 bei halbvollem Gefriergerät, dazu die Zwei-Stunden-Regel ab
+4 °C. Die Zahlen stammen von FEMA und der USDA und stehen mit ihrer
+Quelle auf dem Bildschirm – eine deutsche Behörde veröffentlicht dazu
+keine. Die Uhr läuft über einen Neustart hinweg weiter.
+
+**Medikamente.** Dieselbe Reichweitenrechnung wie bei Vorräten und
+Brennstoff: Bestand geteilt durch Tagesverbrauch, mit dem, was zuerst
+leer ist, ganz oben. Die Dosis kommt von der Packung; Medikamente ohne
+Tagesverbrauch werden genannt statt stillschweigend übergangen.
+
+**Hausratverzeichnis.** Was der Haushalt besitzt – Gegenstand, Raum,
+Seriennummer, Kaufdatum, Preis, Foto –, gruppiert nach Raum und mit
+Summen je Währung. Nicht der Vorrat, sondern was eine Versicherung nach
+einem Brand wissen will. Die PDF-Ausgabe ist dafür gedacht, außerhalb der
+Wohnung aufbewahrt zu werden.
+
+Was die US-Behörden darüber hinaus aufführen und warum das meiste davon
+schon abgedeckt war, steht in
+[`docs/us-behoerden-abgleich.md`](docs/us-behoerden-abgleich.md).
 
 Ein Funkchat über LoRa an Menschen außerhalb des Haushalts ist **geplant,
 aber nicht gebaut**. Der Entwurf samt der Rechnung, warum darüber kein

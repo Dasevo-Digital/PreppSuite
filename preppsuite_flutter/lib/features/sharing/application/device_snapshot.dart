@@ -27,6 +27,7 @@ class DeviceSnapshot {
     this.budgetEntries = const [],
     this.householdPlans = const [],
     this.householdMembers = const [],
+    this.possessions = const [],
   });
 
   /// See [HouseholdFile.currentVersion] for how a mismatch is handled: a
@@ -52,6 +53,12 @@ class DeviceSnapshot {
   /// encryption in `folder_crypto.dart`.
   final List<Map<String, Object?>> householdMembers;
 
+  /// What the household owns, for an insurer rather than for the supply
+  /// calculator. Added after the fact, which a reader has to tolerate:
+  /// a file written by an older version simply has no such key, and
+  /// [_rows] answers an empty list for it.
+  final List<Map<String, Object?>> possessions;
+
   String encode() => const JsonEncoder.withIndent('  ').convert({
     'version': currentVersion,
     'deviceId': deviceId,
@@ -63,6 +70,7 @@ class DeviceSnapshot {
     'budgetEntries': budgetEntries,
     'householdPlans': householdPlans,
     'householdMembers': householdMembers,
+    'possessions': possessions,
   });
 
   static DeviceSnapshot? decode(String raw) {
@@ -88,6 +96,7 @@ class DeviceSnapshot {
         budgetEntries: _rows(json['budgetEntries']),
         householdPlans: _rows(json['householdPlans']),
         householdMembers: _rows(json['householdMembers']),
+        possessions: _rows(json['possessions']),
       );
     } on FormatException {
       return null;
@@ -126,6 +135,7 @@ Map<String, Object?> encodeInventoryItem(InventoryItem row) => {
   'carbohydrateGrams': row.carbohydrateGrams,
   'fatGrams': row.fatGrams,
   'fiberGrams': row.fiberGrams,
+  'dailyDose': row.dailyDose,
   'notes': row.notes,
   'updatedAt': _date(row.updatedAt),
   'deletedAt': _date(row.deletedAt),
@@ -173,6 +183,7 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
     carbohydrateGrams: Value(_double(json['carbohydrateGrams'])),
     fatGrams: Value(_double(json['fatGrams'])),
     fiberGrams: Value(_double(json['fiberGrams'])),
+    dailyDose: Value(_double(json['dailyDose'])),
     notes: Value(_string(json['notes'])),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),
@@ -303,6 +314,53 @@ HouseholdMembersCompanion? decodeHouseholdMember(Map<String, Object?> json) {
     emergencyContact: Value(_string(json['emergencyContact'])),
     notes: Value(_string(json['notes'])),
     sortOrder: Value(_int(json['sortOrder']) ?? 0),
+    updatedAt: updatedAt,
+    deletedAt: Value(asUtcDate(json['deletedAt'])),
+    dirty: const Value(false),
+  );
+}
+
+Map<String, Object?> encodePossession(Possession row) => {
+  'clientId': row.clientId,
+  'householdId': row.householdId,
+  'name': row.name,
+  'room': row.room,
+  'serialNumber': row.serialNumber,
+  'acquiredOn': _date(row.acquiredOn),
+  'purchasePriceCents': row.purchasePriceCents,
+  'currency': row.currency,
+  'notes': row.notes,
+  'updatedAt': _date(row.updatedAt),
+  'deletedAt': _date(row.deletedAt),
+  // photoPath stays behind for the same reason it does on an inventory
+  // item: it names a file in this device's documents directory.
+};
+
+PossessionsCompanion? decodePossession(Map<String, Object?> json) {
+  final clientId = _string(json['clientId']);
+  final householdId = _string(json['householdId']);
+  final name = _string(json['name']);
+  final updatedAt = asUtcDate(json['updatedAt']);
+  // A name and nothing else is a usable entry: "Waschmaschine" in a list
+  // of forty is still worth more after a fire than a perfect record of
+  // thirty-nine.
+  if (clientId == null ||
+      householdId == null ||
+      name == null ||
+      updatedAt == null) {
+    return null;
+  }
+
+  return PossessionsCompanion.insert(
+    clientId: clientId,
+    householdId: householdId,
+    name: name,
+    room: Value(_string(json['room'])),
+    serialNumber: Value(_string(json['serialNumber'])),
+    acquiredOn: Value(asUtcDate(json['acquiredOn'])),
+    purchasePriceCents: Value(_int(json['purchasePriceCents'])),
+    currency: Value(_string(json['currency'])),
+    notes: Value(_string(json['notes'])),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),
     dirty: const Value(false),

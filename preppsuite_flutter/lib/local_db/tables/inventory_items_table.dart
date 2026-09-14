@@ -38,6 +38,19 @@ class InventoryItems extends Table {
   RealColumn get fatGrams => real().nullable()();
   RealColumn get fiberGrams => real().nullable()();
 
+  /// How much of [unit] is taken each day, for a medicine.
+  ///
+  /// The one figure that turns a stock into an answer: two tablets a day
+  /// out of sixty is a month. Null everywhere else, and null on a
+  /// medicine whose dose the household has not typed in — which stays a
+  /// stock without an answer rather than becoming a guessed one.
+  ///
+  /// In the item's own [unit] on purpose. A dose in milligrams against a
+  /// stock in tablets would need the strength per tablet, and that is a
+  /// second number off the same packet for no gain: whoever counts
+  /// tablets knows how many a day.
+  RealColumn get dailyDose => real().nullable()();
+
   TextColumn get notes => text().nullable()();
 
   /// Path to a locally-stored photo of the item (see

@@ -183,6 +183,17 @@ class $InventoryItemsTable extends InventoryItems
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _dailyDoseMeta = const VerificationMeta(
+    'dailyDose',
+  );
+  @override
+  late final GeneratedColumn<double> dailyDose = GeneratedColumn<double>(
+    'daily_dose',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -256,6 +267,7 @@ class $InventoryItemsTable extends InventoryItems
     carbohydrateGrams,
     fatGrams,
     fiberGrams,
+    dailyDose,
     notes,
     photoPath,
     updatedAt,
@@ -405,6 +417,12 @@ class $InventoryItemsTable extends InventoryItems
         fiberGrams.isAcceptableOrUnknown(data['fiber_grams']!, _fiberGramsMeta),
       );
     }
+    if (data.containsKey('daily_dose')) {
+      context.handle(
+        _dailyDoseMeta,
+        dailyDose.isAcceptableOrUnknown(data['daily_dose']!, _dailyDoseMeta),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -510,6 +528,10 @@ class $InventoryItemsTable extends InventoryItems
         DriftSqlType.double,
         data['${effectivePrefix}fiber_grams'],
       ),
+      dailyDose: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}daily_dose'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -570,6 +592,19 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   final double? carbohydrateGrams;
   final double? fatGrams;
   final double? fiberGrams;
+
+  /// How much of [unit] is taken each day, for a medicine.
+  ///
+  /// The one figure that turns a stock into an answer: two tablets a day
+  /// out of sixty is a month. Null everywhere else, and null on a
+  /// medicine whose dose the household has not typed in — which stays a
+  /// stock without an answer rather than becoming a guessed one.
+  ///
+  /// In the item's own [unit] on purpose. A dose in milligrams against a
+  /// stock in tablets would need the strength per tablet, and that is a
+  /// second number off the same packet for no gain: whoever counts
+  /// tablets knows how many a day.
+  final double? dailyDose;
   final String? notes;
 
   /// Path to a locally-stored photo of the item (see
@@ -598,6 +633,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     this.carbohydrateGrams,
     this.fatGrams,
     this.fiberGrams,
+    this.dailyDose,
     this.notes,
     this.photoPath,
     required this.updatedAt,
@@ -640,6 +676,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     }
     if (!nullToAbsent || fiberGrams != null) {
       map['fiber_grams'] = Variable<double>(fiberGrams);
+    }
+    if (!nullToAbsent || dailyDose != null) {
+      map['daily_dose'] = Variable<double>(dailyDose);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -691,6 +730,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       fiberGrams: fiberGrams == null && nullToAbsent
           ? const Value.absent()
           : Value(fiberGrams),
+      dailyDose: dailyDose == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dailyDose),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -729,6 +771,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       ),
       fatGrams: serializer.fromJson<double?>(json['fatGrams']),
       fiberGrams: serializer.fromJson<double?>(json['fiberGrams']),
+      dailyDose: serializer.fromJson<double?>(json['dailyDose']),
       notes: serializer.fromJson<String?>(json['notes']),
       photoPath: serializer.fromJson<String?>(json['photoPath']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -756,6 +799,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'carbohydrateGrams': serializer.toJson<double?>(carbohydrateGrams),
       'fatGrams': serializer.toJson<double?>(fatGrams),
       'fiberGrams': serializer.toJson<double?>(fiberGrams),
+      'dailyDose': serializer.toJson<double?>(dailyDose),
       'notes': serializer.toJson<String?>(notes),
       'photoPath': serializer.toJson<String?>(photoPath),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -781,6 +825,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     Value<double?> carbohydrateGrams = const Value.absent(),
     Value<double?> fatGrams = const Value.absent(),
     Value<double?> fiberGrams = const Value.absent(),
+    Value<double?> dailyDose = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<String?> photoPath = const Value.absent(),
     DateTime? updatedAt,
@@ -807,6 +852,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
         : this.carbohydrateGrams,
     fatGrams: fatGrams.present ? fatGrams.value : this.fatGrams,
     fiberGrams: fiberGrams.present ? fiberGrams.value : this.fiberGrams,
+    dailyDose: dailyDose.present ? dailyDose.value : this.dailyDose,
     notes: notes.present ? notes.value : this.notes,
     photoPath: photoPath.present ? photoPath.value : this.photoPath,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -847,6 +893,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       fiberGrams: data.fiberGrams.present
           ? data.fiberGrams.value
           : this.fiberGrams,
+      dailyDose: data.dailyDose.present ? data.dailyDose.value : this.dailyDose,
       notes: data.notes.present ? data.notes.value : this.notes,
       photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -874,6 +921,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ..write('carbohydrateGrams: $carbohydrateGrams, ')
           ..write('fatGrams: $fatGrams, ')
           ..write('fiberGrams: $fiberGrams, ')
+          ..write('dailyDose: $dailyDose, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
           ..write('updatedAt: $updatedAt, ')
@@ -901,6 +949,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     carbohydrateGrams,
     fatGrams,
     fiberGrams,
+    dailyDose,
     notes,
     photoPath,
     updatedAt,
@@ -927,6 +976,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           other.carbohydrateGrams == this.carbohydrateGrams &&
           other.fatGrams == this.fatGrams &&
           other.fiberGrams == this.fiberGrams &&
+          other.dailyDose == this.dailyDose &&
           other.notes == this.notes &&
           other.photoPath == this.photoPath &&
           other.updatedAt == this.updatedAt &&
@@ -951,6 +1001,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<double?> carbohydrateGrams;
   final Value<double?> fatGrams;
   final Value<double?> fiberGrams;
+  final Value<double?> dailyDose;
   final Value<String?> notes;
   final Value<String?> photoPath;
   final Value<DateTime> updatedAt;
@@ -974,6 +1025,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.carbohydrateGrams = const Value.absent(),
     this.fatGrams = const Value.absent(),
     this.fiberGrams = const Value.absent(),
+    this.dailyDose = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -998,6 +1050,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.carbohydrateGrams = const Value.absent(),
     this.fatGrams = const Value.absent(),
     this.fiberGrams = const Value.absent(),
+    this.dailyDose = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
     required DateTime updatedAt,
@@ -1029,6 +1082,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<double>? carbohydrateGrams,
     Expression<double>? fatGrams,
     Expression<double>? fiberGrams,
+    Expression<double>? dailyDose,
     Expression<String>? notes,
     Expression<String>? photoPath,
     Expression<DateTime>? updatedAt,
@@ -1053,6 +1107,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       if (carbohydrateGrams != null) 'carbohydrate_grams': carbohydrateGrams,
       if (fatGrams != null) 'fat_grams': fatGrams,
       if (fiberGrams != null) 'fiber_grams': fiberGrams,
+      if (dailyDose != null) 'daily_dose': dailyDose,
       if (notes != null) 'notes': notes,
       if (photoPath != null) 'photo_path': photoPath,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1079,6 +1134,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Value<double?>? carbohydrateGrams,
     Value<double?>? fatGrams,
     Value<double?>? fiberGrams,
+    Value<double?>? dailyDose,
     Value<String?>? notes,
     Value<String?>? photoPath,
     Value<DateTime>? updatedAt,
@@ -1103,6 +1159,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       carbohydrateGrams: carbohydrateGrams ?? this.carbohydrateGrams,
       fatGrams: fatGrams ?? this.fatGrams,
       fiberGrams: fiberGrams ?? this.fiberGrams,
+      dailyDose: dailyDose ?? this.dailyDose,
       notes: notes ?? this.notes,
       photoPath: photoPath ?? this.photoPath,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1163,6 +1220,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     if (fiberGrams.present) {
       map['fiber_grams'] = Variable<double>(fiberGrams.value);
     }
+    if (dailyDose.present) {
+      map['daily_dose'] = Variable<double>(dailyDose.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -1203,6 +1263,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
           ..write('carbohydrateGrams: $carbohydrateGrams, ')
           ..write('fatGrams: $fatGrams, ')
           ..write('fiberGrams: $fiberGrams, ')
+          ..write('dailyDose: $dailyDose, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
           ..write('updatedAt: $updatedAt, ')
@@ -4904,6 +4965,802 @@ class HouseholdPlansCompanion extends UpdateCompanion<HouseholdPlan> {
   }
 }
 
+class $PossessionsTable extends Possessions
+    with TableInfo<$PossessionsTable, Possession> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PossessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
+  @override
+  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
+    'client_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _roomMeta = const VerificationMeta('room');
+  @override
+  late final GeneratedColumn<String> room = GeneratedColumn<String>(
+    'room',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _serialNumberMeta = const VerificationMeta(
+    'serialNumber',
+  );
+  @override
+  late final GeneratedColumn<String> serialNumber = GeneratedColumn<String>(
+    'serial_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _acquiredOnMeta = const VerificationMeta(
+    'acquiredOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> acquiredOn = GeneratedColumn<DateTime>(
+    'acquired_on',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _purchasePriceCentsMeta =
+      const VerificationMeta('purchasePriceCents');
+  @override
+  late final GeneratedColumn<int> purchasePriceCents = GeneratedColumn<int>(
+    'purchase_price_cents',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    clientId,
+    householdId,
+    name,
+    room,
+    serialNumber,
+    acquiredOn,
+    purchasePriceCents,
+    currency,
+    notes,
+    photoPath,
+    updatedAt,
+    deletedAt,
+    dirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'possessions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Possession> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('client_id')) {
+      context.handle(
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_clientIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('room')) {
+      context.handle(
+        _roomMeta,
+        room.isAcceptableOrUnknown(data['room']!, _roomMeta),
+      );
+    }
+    if (data.containsKey('serial_number')) {
+      context.handle(
+        _serialNumberMeta,
+        serialNumber.isAcceptableOrUnknown(
+          data['serial_number']!,
+          _serialNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('acquired_on')) {
+      context.handle(
+        _acquiredOnMeta,
+        acquiredOn.isAcceptableOrUnknown(data['acquired_on']!, _acquiredOnMeta),
+      );
+    }
+    if (data.containsKey('purchase_price_cents')) {
+      context.handle(
+        _purchasePriceCentsMeta,
+        purchasePriceCents.isAcceptableOrUnknown(
+          data['purchase_price_cents']!,
+          _purchasePriceCentsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {clientId};
+  @override
+  Possession map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Possession(
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      room: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}room'],
+      ),
+      serialNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}serial_number'],
+      ),
+      acquiredOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}acquired_on'],
+      ),
+      purchasePriceCents: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}purchase_price_cents'],
+      ),
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $PossessionsTable createAlias(String alias) {
+    return $PossessionsTable(attachedDatabase, alias);
+  }
+}
+
+class Possession extends DataClass implements Insertable<Possession> {
+  final String clientId;
+  final String householdId;
+  final String name;
+
+  /// Free text rather than an enum. An insurer's list is grouped by room,
+  /// and a household's rooms are its own — "Dachboden", "Garage",
+  /// "Wohnwagen" are all answers no fixed list would have held.
+  final String? room;
+
+  /// The one field that cannot be reconstructed after the fact, which is
+  /// why it is here at all.
+  final String? serialNumber;
+  final DateTime? acquiredOn;
+
+  /// Integer cents, like [BudgetEntries] — money is never a double here.
+  /// What was paid, not what it is worth today: the first is a fact the
+  /// household has a receipt for, the second is an opinion an insurer
+  /// forms.
+  final int? purchasePriceCents;
+  final String? currency;
+  final String? notes;
+
+  /// Path to a locally-stored photo, relative to the app's documents
+  /// directory — same convention as [InventoryItems.photoPath], and
+  /// device-local for the same reason: the path means nothing elsewhere
+  /// and the picture is not in the shared folder.
+  ///
+  /// Which is worth saying out loud for this table in particular: the
+  /// photo is the most persuasive part of a claim and it lives only on
+  /// the device that took it. That is what the PDF export is for.
+  final String? photoPath;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final bool dirty;
+  const Possession({
+    required this.clientId,
+    required this.householdId,
+    required this.name,
+    this.room,
+    this.serialNumber,
+    this.acquiredOn,
+    this.purchasePriceCents,
+    this.currency,
+    this.notes,
+    this.photoPath,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.dirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['client_id'] = Variable<String>(clientId);
+    map['household_id'] = Variable<String>(householdId);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || room != null) {
+      map['room'] = Variable<String>(room);
+    }
+    if (!nullToAbsent || serialNumber != null) {
+      map['serial_number'] = Variable<String>(serialNumber);
+    }
+    if (!nullToAbsent || acquiredOn != null) {
+      map['acquired_on'] = Variable<DateTime>(acquiredOn);
+    }
+    if (!nullToAbsent || purchasePriceCents != null) {
+      map['purchase_price_cents'] = Variable<int>(purchasePriceCents);
+    }
+    if (!nullToAbsent || currency != null) {
+      map['currency'] = Variable<String>(currency);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || photoPath != null) {
+      map['photo_path'] = Variable<String>(photoPath);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['dirty'] = Variable<bool>(dirty);
+    return map;
+  }
+
+  PossessionsCompanion toCompanion(bool nullToAbsent) {
+    return PossessionsCompanion(
+      clientId: Value(clientId),
+      householdId: Value(householdId),
+      name: Value(name),
+      room: room == null && nullToAbsent ? const Value.absent() : Value(room),
+      serialNumber: serialNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serialNumber),
+      acquiredOn: acquiredOn == null && nullToAbsent
+          ? const Value.absent()
+          : Value(acquiredOn),
+      purchasePriceCents: purchasePriceCents == null && nullToAbsent
+          ? const Value.absent()
+          : Value(purchasePriceCents),
+      currency: currency == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currency),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
+      photoPath: photoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoPath),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      dirty: Value(dirty),
+    );
+  }
+
+  factory Possession.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Possession(
+      clientId: serializer.fromJson<String>(json['clientId']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      name: serializer.fromJson<String>(json['name']),
+      room: serializer.fromJson<String?>(json['room']),
+      serialNumber: serializer.fromJson<String?>(json['serialNumber']),
+      acquiredOn: serializer.fromJson<DateTime?>(json['acquiredOn']),
+      purchasePriceCents: serializer.fromJson<int?>(json['purchasePriceCents']),
+      currency: serializer.fromJson<String?>(json['currency']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      photoPath: serializer.fromJson<String?>(json['photoPath']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'clientId': serializer.toJson<String>(clientId),
+      'householdId': serializer.toJson<String>(householdId),
+      'name': serializer.toJson<String>(name),
+      'room': serializer.toJson<String?>(room),
+      'serialNumber': serializer.toJson<String?>(serialNumber),
+      'acquiredOn': serializer.toJson<DateTime?>(acquiredOn),
+      'purchasePriceCents': serializer.toJson<int?>(purchasePriceCents),
+      'currency': serializer.toJson<String?>(currency),
+      'notes': serializer.toJson<String?>(notes),
+      'photoPath': serializer.toJson<String?>(photoPath),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+    };
+  }
+
+  Possession copyWith({
+    String? clientId,
+    String? householdId,
+    String? name,
+    Value<String?> room = const Value.absent(),
+    Value<String?> serialNumber = const Value.absent(),
+    Value<DateTime?> acquiredOn = const Value.absent(),
+    Value<int?> purchasePriceCents = const Value.absent(),
+    Value<String?> currency = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
+    Value<String?> photoPath = const Value.absent(),
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? dirty,
+  }) => Possession(
+    clientId: clientId ?? this.clientId,
+    householdId: householdId ?? this.householdId,
+    name: name ?? this.name,
+    room: room.present ? room.value : this.room,
+    serialNumber: serialNumber.present ? serialNumber.value : this.serialNumber,
+    acquiredOn: acquiredOn.present ? acquiredOn.value : this.acquiredOn,
+    purchasePriceCents: purchasePriceCents.present
+        ? purchasePriceCents.value
+        : this.purchasePriceCents,
+    currency: currency.present ? currency.value : this.currency,
+    notes: notes.present ? notes.value : this.notes,
+    photoPath: photoPath.present ? photoPath.value : this.photoPath,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    dirty: dirty ?? this.dirty,
+  );
+  Possession copyWithCompanion(PossessionsCompanion data) {
+    return Possession(
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      name: data.name.present ? data.name.value : this.name,
+      room: data.room.present ? data.room.value : this.room,
+      serialNumber: data.serialNumber.present
+          ? data.serialNumber.value
+          : this.serialNumber,
+      acquiredOn: data.acquiredOn.present
+          ? data.acquiredOn.value
+          : this.acquiredOn,
+      purchasePriceCents: data.purchasePriceCents.present
+          ? data.purchasePriceCents.value
+          : this.purchasePriceCents,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Possession(')
+          ..write('clientId: $clientId, ')
+          ..write('householdId: $householdId, ')
+          ..write('name: $name, ')
+          ..write('room: $room, ')
+          ..write('serialNumber: $serialNumber, ')
+          ..write('acquiredOn: $acquiredOn, ')
+          ..write('purchasePriceCents: $purchasePriceCents, ')
+          ..write('currency: $currency, ')
+          ..write('notes: $notes, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    clientId,
+    householdId,
+    name,
+    room,
+    serialNumber,
+    acquiredOn,
+    purchasePriceCents,
+    currency,
+    notes,
+    photoPath,
+    updatedAt,
+    deletedAt,
+    dirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Possession &&
+          other.clientId == this.clientId &&
+          other.householdId == this.householdId &&
+          other.name == this.name &&
+          other.room == this.room &&
+          other.serialNumber == this.serialNumber &&
+          other.acquiredOn == this.acquiredOn &&
+          other.purchasePriceCents == this.purchasePriceCents &&
+          other.currency == this.currency &&
+          other.notes == this.notes &&
+          other.photoPath == this.photoPath &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.dirty == this.dirty);
+}
+
+class PossessionsCompanion extends UpdateCompanion<Possession> {
+  final Value<String> clientId;
+  final Value<String> householdId;
+  final Value<String> name;
+  final Value<String?> room;
+  final Value<String?> serialNumber;
+  final Value<DateTime?> acquiredOn;
+  final Value<int?> purchasePriceCents;
+  final Value<String?> currency;
+  final Value<String?> notes;
+  final Value<String?> photoPath;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> dirty;
+  final Value<int> rowid;
+  const PossessionsCompanion({
+    this.clientId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.room = const Value.absent(),
+    this.serialNumber = const Value.absent(),
+    this.acquiredOn = const Value.absent(),
+    this.purchasePriceCents = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.photoPath = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PossessionsCompanion.insert({
+    required String clientId,
+    required String householdId,
+    required String name,
+    this.room = const Value.absent(),
+    this.serialNumber = const Value.absent(),
+    this.acquiredOn = const Value.absent(),
+    this.purchasePriceCents = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.photoPath = const Value.absent(),
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : clientId = Value(clientId),
+       householdId = Value(householdId),
+       name = Value(name),
+       updatedAt = Value(updatedAt);
+  static Insertable<Possession> custom({
+    Expression<String>? clientId,
+    Expression<String>? householdId,
+    Expression<String>? name,
+    Expression<String>? room,
+    Expression<String>? serialNumber,
+    Expression<DateTime>? acquiredOn,
+    Expression<int>? purchasePriceCents,
+    Expression<String>? currency,
+    Expression<String>? notes,
+    Expression<String>? photoPath,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? dirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (clientId != null) 'client_id': clientId,
+      if (householdId != null) 'household_id': householdId,
+      if (name != null) 'name': name,
+      if (room != null) 'room': room,
+      if (serialNumber != null) 'serial_number': serialNumber,
+      if (acquiredOn != null) 'acquired_on': acquiredOn,
+      if (purchasePriceCents != null)
+        'purchase_price_cents': purchasePriceCents,
+      if (currency != null) 'currency': currency,
+      if (notes != null) 'notes': notes,
+      if (photoPath != null) 'photo_path': photoPath,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PossessionsCompanion copyWith({
+    Value<String>? clientId,
+    Value<String>? householdId,
+    Value<String>? name,
+    Value<String?>? room,
+    Value<String?>? serialNumber,
+    Value<DateTime?>? acquiredOn,
+    Value<int?>? purchasePriceCents,
+    Value<String?>? currency,
+    Value<String?>? notes,
+    Value<String?>? photoPath,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? dirty,
+    Value<int>? rowid,
+  }) {
+    return PossessionsCompanion(
+      clientId: clientId ?? this.clientId,
+      householdId: householdId ?? this.householdId,
+      name: name ?? this.name,
+      room: room ?? this.room,
+      serialNumber: serialNumber ?? this.serialNumber,
+      acquiredOn: acquiredOn ?? this.acquiredOn,
+      purchasePriceCents: purchasePriceCents ?? this.purchasePriceCents,
+      currency: currency ?? this.currency,
+      notes: notes ?? this.notes,
+      photoPath: photoPath ?? this.photoPath,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      dirty: dirty ?? this.dirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (clientId.present) {
+      map['client_id'] = Variable<String>(clientId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (room.present) {
+      map['room'] = Variable<String>(room.value);
+    }
+    if (serialNumber.present) {
+      map['serial_number'] = Variable<String>(serialNumber.value);
+    }
+    if (acquiredOn.present) {
+      map['acquired_on'] = Variable<DateTime>(acquiredOn.value);
+    }
+    if (purchasePriceCents.present) {
+      map['purchase_price_cents'] = Variable<int>(purchasePriceCents.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PossessionsCompanion(')
+          ..write('clientId: $clientId, ')
+          ..write('householdId: $householdId, ')
+          ..write('name: $name, ')
+          ..write('room: $room, ')
+          ..write('serialNumber: $serialNumber, ')
+          ..write('acquiredOn: $acquiredOn, ')
+          ..write('purchasePriceCents: $purchasePriceCents, ')
+          ..write('currency: $currency, ')
+          ..write('notes: $notes, ')
+          ..write('photoPath: $photoPath, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -6137,6 +6994,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $HouseholdPlansTable householdPlans = $HouseholdPlansTable(this);
+  late final $PossessionsTable possessions = $PossessionsTable(this);
   late final $WarningsTable warnings = $WarningsTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
   @override
@@ -6150,6 +7008,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     budgetEntries,
     householdMembers,
     householdPlans,
+    possessions,
     warnings,
     syncState,
   ];
