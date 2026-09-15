@@ -75,6 +75,42 @@ set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
 
+# The Microsoft C++ runtime, beside the executable.
+#
+# Flutter's template does not ship it, and on a machine that has it the
+# omission is invisible -- which is every machine that has ever had Visual
+# Studio, Flutter, or half the software on a developer's disk. On a machine
+# that does not, the app does not crash and does not say anything: the
+# process starts, loads flutter_windows.dll, and then sits at five
+# megabytes with no window, forever. Nothing appears on screen and nothing
+# lands in the event log.
+#
+# Measured in a fresh Windows Sandbox: without the runtime, four threads
+# and no window; with it installed and nothing else changed, twenty-nine
+# threads, 118 MB and a window titled PreppSuite. The same was true of the
+# already-published 1.8.2, so this has been shipped broken for anyone
+# without the redistributable.
+#
+# Roughly 600 kB against a 21 MB package, and Microsoft's redistributable
+# licence expressly allows placing these DLLs beside the application.
+#
+# The UCRT is deliberately excluded: it is part of Windows 10 and 11 and
+# copying it in is how an app ends up running against an older C library
+# than the system's own.
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+set(CMAKE_INSTALL_UCRT_LIBRARIES FALSE)
+include(InstallRequiredSystemLibraries)
+if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+  install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+    COMPONENT Runtime)
+  message(STATUS "C++-Laufzeit wird mitgeliefert: ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}")
+else()
+  message(WARNING
+    "Die C++-Laufzeit wurde nicht gefunden. Das Paket startet dann nur auf "
+    "Rechnern, auf denen sie schon liegt.")
+endif()
+
 install(FILES "${FLUTTER_ICU_DATA_FILE}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   COMPONENT Runtime)
 
