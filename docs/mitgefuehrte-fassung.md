@@ -95,6 +95,11 @@ dem Fall, für den diese App gebaut ist. Die Suche im Archiv und alles
 andere laufen weiter; nur der Artikeltext bleibt zu. Die App sagt das
 mit dem Paketnamen, statt einfach nichts zu tun.
 
+**Linux: der Ton des Taktgebers.** Die Herzdruckmassage-Hilfe gibt ihren
+Takt über GStreamer aus. Fehlt es, blinkt sie weiter und sagt, dass kein
+Ton kommt. Auf einem Telefon ist das nie ein Thema, und dort steht auch
+die Vibration zur Verfügung.
+
 **macOS: Gatekeeper.** Die Bauten sind nicht signiert. Beim ersten Start
 auf einem fremden Mac einmal Rechtsklick auf `PreppSuite.app` → „Öffnen"
 und im Dialog bestätigen.

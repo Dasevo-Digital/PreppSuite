@@ -25,6 +25,12 @@ liegt es meist ohnehin da. Das betrifft nicht nur den Bau: zum **Lesen**
 von Artikeln braucht die fertige App `libwebkit2gtk-4.1-0` auf dem
 Zielrechner.
 
+**Der Ton des Erste-Hilfe-Taktgebers läuft über GStreamer.** Zum Bauen
+braucht es nichts zusätzlich; zum Abspielen auf dem Zielrechner
+`gstreamer1.0-plugins-base` und `gstreamer1.0-plugins-good`, die ein
+Desktop meist schon hat. Fehlen sie, läuft der Taktgeber weiter und sagt
+auf dem Bildschirm, dass kein Ton kommt — er blinkt dann nur.
+
 `zlib1g-dev` und `uuid-dev` sind für die Volltextsuche im Archiv da —
 das ist, woran xapian-core hängt. Die Bibliothek dafür entsteht vor dem
 Bau der App:

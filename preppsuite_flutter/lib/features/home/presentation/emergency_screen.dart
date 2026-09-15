@@ -7,6 +7,7 @@ import '../../../model/household_profile.dart';
 import '../../checklists/application/checklist_providers.dart';
 import '../../checklists/application/checklist_satisfaction.dart';
 import '../../energy/presentation/outage_screen.dart';
+import '../../first_aid/presentation/first_aid_screen.dart';
 import '../../household/application/household_member_controller.dart';
 import '../../household/application/household_plan_controller.dart';
 import '../../inventory/application/inventory_providers.dart';
@@ -91,6 +92,25 @@ class EmergencyScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
+          // First in the list, and the only entry here that needs nothing
+          // downloaded, nothing configured and no network. Somebody
+          // opening this screen with a casualty in front of them should
+          // not have to read past anything.
+          Card(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            child: ListTile(
+              leading: const Icon(Icons.medical_services_outlined),
+              title: Text(
+                l10n.firstAidTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              subtitle: Text(l10n.firstAidEntryHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const FirstAidScreen()),
+              ),
+            ),
+          ),
           ListTile(
             leading: const Icon(Icons.contact_phone_outlined),
             title: Text(l10n.emergencyDirectoryTitle),

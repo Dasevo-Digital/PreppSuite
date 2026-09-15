@@ -414,6 +414,42 @@ not.
 `AppLocalizations` with entries in both `app_de.arb` and `app_en.arb`.
 Enum-to-label mapping lives in the feature's `*_l10n.dart` helper.
 
+**The first aid guides are the one deliberate exception to that,** and
+they are content rather than interface: `first_aid_guides_de.dart` and
+`first_aid_guides_en.dart`, one file per language. Medical text has to be
+reviewable as prose against the guideline it came from, and two hundred
+strings scattered through fourteen hundred lines of interface wording
+cannot be read end to end by anybody. `first_aid_guides_test.dart` holds
+the two files to the same ids, the same order and the same number of
+steps, cautions and figures â a translation that quietly drops a step
+drops a step of a resuscitation. Buttons and headings on those screens go
+through the ARB files like everything else.
+
+**First aid works on a fresh install with no network, no download and no
+setting.** That is the whole reason it is its own feature rather than a
+corner of `features/knowledge/`, which is an encyclopedia behind a
+multi-gigabyte archive. Nothing on those screens may come to depend on a
+download, a profile or a permission. The optional video pack is built so
+that no guide needs it.
+
+**A `FirstAidGuide.id` is a published name.** A downloaded video pack
+names it to say which guide a clip belongs to, so renaming one orphans
+every video that pointed at it. Adding is free; renaming is not.
+
+**The compression pacer is a pure function of elapsed time,** never a
+counter a timer increments. 110 a minute is 545,454.54â¦ Âµs; a counting
+pacer is several beats adrift after two minutes, which puts the count of
+thirty â and therefore the breaths â in the wrong place. See
+`compression_pacer.dart`.
+
+**A video pack manifest is untrusted input.** It arrives from an address
+somebody typed or a zip somebody was handed, and is far likelier to be a
+captive portal's login page than a manifest. `file` must be a plain
+basename; anything with a path in it is dropped rather than written. On
+import, only entries the manifest itself names are extracted. Size and
+sha256 are checked after every download, and a file that fails is deleted
+rather than kept under its final name.
+
 ## Feature layout
 
 ```
@@ -448,6 +484,11 @@ file.
 
 `features/possessions/` is the household's inventory of what it owns,
 with a PDF export meant to be kept somewhere else.
+
+`features/first_aid/` is the instructions, the drawings the app paints
+itself, the compression pacer and the optional video pack. It is the only
+feature that is fully usable the moment the app is installed. See
+`docs/erste-hilfe.md`.
 
 `features/sharing/` is the shared-folder sync. `SyncFolder` is an interface
 over "a directory" with a `dart:io` implementation, so the merge is tested

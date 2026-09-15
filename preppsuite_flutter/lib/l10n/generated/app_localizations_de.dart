@@ -4641,4 +4641,205 @@ class AppLocalizationsDe extends AppLocalizations {
   String possessionsCount(int count) {
     return '$count Gegenstände';
   }
+
+  @override
+  String get firstAidTitle => 'Erste Hilfe';
+
+  @override
+  String get firstAidEntryHint =>
+      'Anleitungen, Zeichnungen und ein Taktgeber für die Herzdruckmassage. Ohne Netz, ohne Download.';
+
+  @override
+  String get firstAidSearchHint => 'Wonach suchst du?';
+
+  @override
+  String get firstAidSearchEmpty => 'Dazu gibt es hier keine Anleitung.';
+
+  @override
+  String get firstAidDisclaimer =>
+      'Diese Anleitungen ersetzen keinen Erste-Hilfe-Kurs und keinen Notruf. Im Zweifel: 112 anrufen und am Telefon bleiben – die Leitstelle leitet dich an.';
+
+  @override
+  String get firstAidGroupBasics => 'Zuerst';
+
+  @override
+  String get firstAidGroupLifeThreatening => 'Lebensgefahr';
+
+  @override
+  String get firstAidGroupInjury => 'Verletzungen';
+
+  @override
+  String get firstAidGroupIllness => 'Plötzliche Erkrankung';
+
+  @override
+  String get firstAidGroupEnvironment => 'Kälte, Hitze, Gift';
+
+  @override
+  String get firstAidCallNow => 'Notruf 112 wählen';
+
+  @override
+  String get firstAidCallFirst => 'Hier wird zuerst angerufen, dann geholfen.';
+
+  @override
+  String get firstAidSteps => 'Schritte';
+
+  @override
+  String get firstAidCautions => 'Nicht tun';
+
+  @override
+  String firstAidSource(String source) {
+    return 'Quelle: $source';
+  }
+
+  @override
+  String get firstAidOpenPacer => 'Taktgeber starten';
+
+  @override
+  String get firstAidVideos => 'Videos';
+
+  @override
+  String get firstAidVideosNone =>
+      'Zu dieser Anleitung ist kein Video installiert.';
+
+  @override
+  String get firstAidVideoManage => 'Videopaket verwalten';
+
+  @override
+  String get firstAidVideoMissing =>
+      'Die Videodatei ist nicht mehr da. Lade das Paket noch einmal.';
+
+  @override
+  String get firstAidVideoRestart => 'Von vorn';
+
+  @override
+  String get firstAidVideoSystemPlayer =>
+      'Auf diesem System spielt die App keine Videos selbst ab. Der Knopf unten öffnet die Datei im Abspielprogramm des Rechners.';
+
+  @override
+  String get firstAidVideoOpenExternal => 'Mit dem Abspielprogramm öffnen';
+
+  @override
+  String get firstAidVideoNotACourse =>
+      'Ein Video ist kein Kurs. Die Handgriffe sitzen erst, wenn man sie einmal gemacht hat.';
+
+  @override
+  String get firstAidVideoPackTitle => 'Videopaket';
+
+  @override
+  String get firstAidVideoPackWhy =>
+      'Die Anleitungen brauchen kein Video: Text, Zahlen und Zeichnungen sind vollständig und immer da. Videos sind ein Zusatz für den Abend, an dem man sich die Handgriffe in Ruhe ansieht – und sie sind ein eigener Download, weil zehn Filme mehr wiegen als die ganze App.';
+
+  @override
+  String get firstAidVideoPackFromNetwork => 'Über das Netz';
+
+  @override
+  String get firstAidVideoPackUrlLabel => 'Adresse der Paketbeschreibung';
+
+  @override
+  String get firstAidVideoPackUrlHelper =>
+      'Die Adresse einer paket.json. Diese App bringt keine mit – trag die Adresse ein, unter der du dein Paket veröffentlicht hast.';
+
+  @override
+  String get firstAidVideoPackFetch => 'Beschreibung abrufen';
+
+  @override
+  String get firstAidVideoPackFromFile => 'Aus einer Datei';
+
+  @override
+  String get firstAidVideoPackFromFileWhy =>
+      'Ein Paket als ZIP, vom Stick oder aus dem gemeinsamen Ordner. Das ist der Weg, der ohne Netz funktioniert – also in der Lage, für die diese App gebaut ist.';
+
+  @override
+  String get firstAidVideoPackImport => 'Paketdatei wählen';
+
+  @override
+  String get firstAidVideoPackNone => 'Noch kein Videopaket installiert.';
+
+  @override
+  String firstAidVideoPackInstalled(int present, int total, String size) {
+    return '$present von $total Videos vorhanden, $size auf der Festplatte';
+  }
+
+  @override
+  String get firstAidVideoPackRemove => 'Videopaket löschen';
+
+  @override
+  String get firstAidVideoPackRemoveBody =>
+      'Die Videodateien und die Paketbeschreibung werden vom Gerät entfernt. Die Anleitungen selbst bleiben unverändert.';
+
+  @override
+  String firstAidVideoPackOffer(int count, String size) {
+    return '$count Videos, zusammen $size';
+  }
+
+  @override
+  String get firstAidVideoPackStart => 'Alle laden';
+
+  @override
+  String firstAidVideoPackProgress(int done, int total) {
+    return '$done von $total fertig';
+  }
+
+  @override
+  String firstAidVideoPackDone(int done, int total) {
+    return '$done von $total Videos geladen';
+  }
+
+  @override
+  String get firstAidVideoPackLicenceNote =>
+      'Bei jedem Video stehen der Urheber und die Lizenz. Lade nur Pakete, deren Filme weitergegeben werden dürfen.';
+
+  @override
+  String get firstAidVideoPackBadUrl => 'Das ist keine vollständige Adresse.';
+
+  @override
+  String get firstAidVideoPackClose => 'Schließen';
+
+  @override
+  String get pacerTitle => 'Taktgeber';
+
+  @override
+  String get pacerStart => 'Start';
+
+  @override
+  String get pacerStop => 'Stopp';
+
+  @override
+  String get pacerIdle =>
+      'Gibt den Takt für die Herzdruckmassage vor – als Ton, als Blinken und, auf dem Telefon, als Vibration. Bildschirm bleibt an, solange er läuft.';
+
+  @override
+  String pacerElapsed(String time) {
+    return 'Laufzeit $time';
+  }
+
+  @override
+  String get pacerDepth =>
+      '5–6 cm tief · senkrecht von oben · nach jedem Druck vollständig entlasten';
+
+  @override
+  String get pacerNoSound =>
+      'Auf diesem Gerät kommt kein Ton. Der Takt blinkt weiter.';
+
+  @override
+  String pacerPerMinute(int rate) {
+    return '$rate/min';
+  }
+
+  @override
+  String pacerOfCycle(int total, int cycle) {
+    return 'von $total · Durchgang $cycle';
+  }
+
+  @override
+  String get pacerBreathe => 'Jetzt 2× beatmen';
+
+  @override
+  String get pacerSwapNow => 'Wechseln, wenn ihr zu zweit seid';
+
+  @override
+  String get pacerPushOnly => 'Ohne Unterbrechung drücken';
+
+  @override
+  String get pacerPushOnlyShort => 'Nur drücken';
 }

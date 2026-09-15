@@ -5,6 +5,7 @@
 import FlutterMacOS
 import Foundation
 
+import audioplayers_darwin
 import desktop_webview_window
 import file_picker
 import file_selector_macos
@@ -15,11 +16,14 @@ import package_info_plus
 import printing
 import shared_preferences_foundation
 import url_launcher_macos
+import video_player_avfoundation
+import wakelock_plus
 import webview_flutter_wkwebview
 import workmanager_apple
 import zstandard_macos
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  AudioplayersDarwinPlugin.register(with: registry.registrar(forPlugin: "AudioplayersDarwinPlugin"))
   DesktopWebviewWindowPlugin.register(with: registry.registrar(forPlugin: "DesktopWebviewWindowPlugin"))
   FilePickerPlugin.register(with: registry.registrar(forPlugin: "FilePickerPlugin"))
   FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))
@@ -30,6 +34,8 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   PrintingPlugin.register(with: registry.registrar(forPlugin: "PrintingPlugin"))
   SharedPreferencesPlugin.register(with: registry.registrar(forPlugin: "SharedPreferencesPlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
+  VideoPlayerPlugin.register(with: registry.registrar(forPlugin: "VideoPlayerPlugin"))
+  WakelockPlusMacosPlugin.register(with: registry.registrar(forPlugin: "WakelockPlusMacosPlugin"))
   WebViewFlutterPlugin.register(with: registry.registrar(forPlugin: "WebViewFlutterPlugin"))
   WorkmanagerPlugin.register(with: registry.registrar(forPlugin: "WorkmanagerPlugin"))
   ZstandardMacosPlugin.register(with: registry.registrar(forPlugin: "ZstandardMacosPlugin"))

@@ -57,6 +57,20 @@ mit einem Vorratsartikel verknüpfen.
 PDF-Bericht der fehlenden Ausrüstung – der Bestände also, die unter ihrem
 Mindestbestand liegen.
 
+**Erste Hilfe.** Siebzehn Anleitungen nach den Reanimations- und
+Erste-Hilfe-Leitlinien 2021 des European Resuscitation Council, in
+Dringlichkeitsreihenfolge: Notruf, bewusstlose Person, Wiederbelebung für
+Erwachsene, Kinder und Säuglinge, Defibrillator, stabile Seitenlage,
+Ersticken, starke Blutung, Schock, Verbrennung, Schlaganfall, Herzinfarkt,
+Krampfanfall, allergischer Schock, Unterkühlung, Hitzschlag und
+Vergiftung – letztere mit den Nummern der Giftinformationszentren. Dazu
+Strichzeichnungen, die die App selbst zeichnet, und ein **Taktgeber für
+die Herzdruckmassage** mit Ton, Blinken und Vibration, der den Bildschirm
+anlässt. Alles davon ist beim ersten Start da, ohne Netz und ohne
+Download. Videos sind ein eigenes, nachladbares Paket – siehe
+[`docs/erste-hilfe.md`](docs/erste-hilfe.md). Die Anleitungen ersetzen
+keinen Kurs und keinen Notruf, und jede nennt ihre Quelle.
+
 **Warnungen.** Amtliche Meldungen für die eigene Region, im Banner über
 allen Ansichten und als Verlauf. Quellen sind das BBK über
 warnung.bund.de – alle sechs Kanäle, von MoWaS und DWD über Katwarn und
@@ -345,7 +359,9 @@ aufgeschrieben, die Warnquellen in
 [`docs/warning-feeds.md`](docs/warning-feeds.md), das Ordnerformat in
 [`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md), die
 Offline-Karte in [`docs/karte-offline.md`](docs/karte-offline.md), die
-Wissensdatei in [`docs/wissen-offline.md`](docs/wissen-offline.md) und der
+Wissensdatei in [`docs/wissen-offline.md`](docs/wissen-offline.md), die
+Erste Hilfe samt Videopaket in
+[`docs/erste-hilfe.md`](docs/erste-hilfe.md) und der
 Betrieb von einem Datenträger in
 [`docs/mitgefuehrte-fassung.md`](docs/mitgefuehrte-fassung.md).
 

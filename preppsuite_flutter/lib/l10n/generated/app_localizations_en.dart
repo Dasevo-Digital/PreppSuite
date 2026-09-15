@@ -4613,4 +4613,204 @@ class AppLocalizationsEn extends AppLocalizations {
   String possessionsCount(int count) {
     return '$count items';
   }
+
+  @override
+  String get firstAidTitle => 'First aid';
+
+  @override
+  String get firstAidEntryHint =>
+      'Instructions, drawings and a pacer for chest compressions. No network, no download.';
+
+  @override
+  String get firstAidSearchHint => 'What are you looking for?';
+
+  @override
+  String get firstAidSearchEmpty => 'There is no guide here for that.';
+
+  @override
+  String get firstAidDisclaimer =>
+      'These guides replace neither a first aid course nor an emergency call. In doubt: call 112 and stay on the line — the dispatcher will talk you through it.';
+
+  @override
+  String get firstAidGroupBasics => 'First of all';
+
+  @override
+  String get firstAidGroupLifeThreatening => 'Life-threatening';
+
+  @override
+  String get firstAidGroupInjury => 'Injuries';
+
+  @override
+  String get firstAidGroupIllness => 'Sudden illness';
+
+  @override
+  String get firstAidGroupEnvironment => 'Cold, heat, poison';
+
+  @override
+  String get firstAidCallNow => 'Call 112';
+
+  @override
+  String get firstAidCallFirst => 'Here you call first and help second.';
+
+  @override
+  String get firstAidSteps => 'Steps';
+
+  @override
+  String get firstAidCautions => 'Do not';
+
+  @override
+  String firstAidSource(String source) {
+    return 'Source: $source';
+  }
+
+  @override
+  String get firstAidOpenPacer => 'Start the pacer';
+
+  @override
+  String get firstAidVideos => 'Videos';
+
+  @override
+  String get firstAidVideosNone => 'No video is installed for this guide.';
+
+  @override
+  String get firstAidVideoManage => 'Manage the video pack';
+
+  @override
+  String get firstAidVideoMissing =>
+      'The video file is gone. Fetch the pack again.';
+
+  @override
+  String get firstAidVideoRestart => 'From the start';
+
+  @override
+  String get firstAidVideoSystemPlayer =>
+      'This system cannot play video inside the app. The button below opens the file in the computer\'s own player.';
+
+  @override
+  String get firstAidVideoOpenExternal => 'Open in the system player';
+
+  @override
+  String get firstAidVideoNotACourse =>
+      'A video is not a course. The movements only stick once you have done them yourself.';
+
+  @override
+  String get firstAidVideoPackTitle => 'Video pack';
+
+  @override
+  String get firstAidVideoPackWhy =>
+      'The guides need no video: the text, the figures and the drawings are complete and always there. Videos are an extra for the evening you sit down to learn the movements properly — and they are a separate download, because ten films weigh more than the whole app.';
+
+  @override
+  String get firstAidVideoPackFromNetwork => 'Over the network';
+
+  @override
+  String get firstAidVideoPackUrlLabel => 'Address of the pack description';
+
+  @override
+  String get firstAidVideoPackUrlHelper =>
+      'The address of a paket.json. This app ships none — enter the address where you published your pack.';
+
+  @override
+  String get firstAidVideoPackFetch => 'Fetch the description';
+
+  @override
+  String get firstAidVideoPackFromFile => 'From a file';
+
+  @override
+  String get firstAidVideoPackFromFileWhy =>
+      'A pack as a zip, from a memory stick or from the shared folder. This is the way that works without a network — that is, in the situation this app is built for.';
+
+  @override
+  String get firstAidVideoPackImport => 'Choose a pack file';
+
+  @override
+  String get firstAidVideoPackNone => 'No video pack installed yet.';
+
+  @override
+  String firstAidVideoPackInstalled(int present, int total, String size) {
+    return '$present of $total videos present, $size on disk';
+  }
+
+  @override
+  String get firstAidVideoPackRemove => 'Delete the video pack';
+
+  @override
+  String get firstAidVideoPackRemoveBody =>
+      'The video files and the pack description are removed from the device. The guides themselves are untouched.';
+
+  @override
+  String firstAidVideoPackOffer(int count, String size) {
+    return '$count videos, $size in all';
+  }
+
+  @override
+  String get firstAidVideoPackStart => 'Fetch them all';
+
+  @override
+  String firstAidVideoPackProgress(int done, int total) {
+    return '$done of $total done';
+  }
+
+  @override
+  String firstAidVideoPackDone(int done, int total) {
+    return '$done of $total videos fetched';
+  }
+
+  @override
+  String get firstAidVideoPackLicenceNote =>
+      'Every video names its author and its licence. Only fetch packs whose films may be passed on.';
+
+  @override
+  String get firstAidVideoPackBadUrl => 'That is not a complete address.';
+
+  @override
+  String get firstAidVideoPackClose => 'Close';
+
+  @override
+  String get pacerTitle => 'Pacer';
+
+  @override
+  String get pacerStart => 'Start';
+
+  @override
+  String get pacerStop => 'Stop';
+
+  @override
+  String get pacerIdle =>
+      'Sets the beat for chest compressions — as a tone, as a flash and, on a phone, as a vibration. The screen stays on while it runs.';
+
+  @override
+  String pacerElapsed(String time) {
+    return 'Running $time';
+  }
+
+  @override
+  String get pacerDepth =>
+      '5–6 cm deep · vertically from above · let the chest come all the way back up';
+
+  @override
+  String get pacerNoSound =>
+      'No sound on this device. The beat keeps flashing.';
+
+  @override
+  String pacerPerMinute(int rate) {
+    return '$rate/min';
+  }
+
+  @override
+  String pacerOfCycle(int total, int cycle) {
+    return 'of $total · round $cycle';
+  }
+
+  @override
+  String get pacerBreathe => 'Now 2 breaths';
+
+  @override
+  String get pacerSwapNow => 'Swap over if there are two of you';
+
+  @override
+  String get pacerPushOnly => 'Push without stopping';
+
+  @override
+  String get pacerPushOnlyShort => 'Push only';
 }

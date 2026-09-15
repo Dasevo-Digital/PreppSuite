@@ -125,6 +125,29 @@ dependencies:
   # pulls it in too, but a transitive dependency cannot be imported.
   timezone: ^0.11.0
   cryptography: ^2.9.0
+  # The beat for chest compressions. A metronome is the one thing this
+  # app can do during a resuscitation that a printed card cannot, so it
+  # has to make a sound that is actually audible -- Flutter's own
+  # SystemSound.click follows the system's "touch sounds" setting, which
+  # is off on most phones, and would be a metronome that is silent
+  # exactly when it is needed.
+  #
+  # On Linux this reaches the sound card through GStreamer, which a
+  # desktop usually already has; where it is missing the pacer keeps its
+  # flashing and its vibration and says the tone is unavailable. See
+  # features/first_aid/presentation/compression_pacer_sheet.dart.
+  audioplayers: ^6.5.0
+  # Plays a clip out of a downloaded first aid video pack. Reaches
+  # Android, iOS and macOS; on Linux and Windows there is no
+  # implementation, and the file is handed to the system's own player
+  # through url_launcher instead -- the same split the article reader
+  # makes, for the same reason.
+  video_player: ^2.10.0
+  # Keeps the screen on while the compression pacer runs. Without it the
+  # display sleeps after half a minute -- in the middle of a
+  # resuscitation, taking the count and the beat with it, because a
+  # backgrounded app's timers are throttled by every platform here.
+  wakelock_plus: ^1.3.2
   url_launcher: ^6.3.2
 
 dev_dependencies:
@@ -164,6 +187,7 @@ flutter:
   # https://flutter.dev/assets-and-images/#from-packages
   assets:
     - assets/dwd_warncells.csv
+    - assets/sounds/metronome_click.wav
     - assets/fonts/NotoSans-Regular.ttf
 dependency_overrides:
   flutter_secure_storage: ^10.0.0

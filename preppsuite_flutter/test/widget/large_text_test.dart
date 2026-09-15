@@ -19,6 +19,11 @@ import 'package:preppsuite_flutter/features/household/presentation/profile_setup
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/inventory_csv_import_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/inventory_item_form_screen.dart';
+import 'package:preppsuite_flutter/features/first_aid/application/first_aid_providers.dart';
+import 'package:preppsuite_flutter/features/first_aid/presentation/compression_pacer_screen.dart';
+import 'package:preppsuite_flutter/features/first_aid/presentation/first_aid_guide_screen.dart';
+import 'package:preppsuite_flutter/features/first_aid/presentation/first_aid_screen.dart';
+import 'package:preppsuite_flutter/features/first_aid/presentation/first_aid_videos_screen.dart';
 import 'package:preppsuite_flutter/features/energy/presentation/outage_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/medication_range_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/rotation_screen.dart';
@@ -116,6 +121,14 @@ void main() {
             'template-1',
           ).overrideWith((ref) => Stream.value(const [])),
           householdProfileProvider.overrideWith(() => _FixedProfile(profile)),
+          // The first aid screens read the download folder to find a
+          // video pack, and path_provider has no implementation here.
+          // Nothing installed is also the state that renders the most
+          // text, which is what this test is looking at.
+          installedFirstAidPackProvider.overrideWith(
+            (ref) async => InstalledFirstAidPack.none,
+          ),
+          firstAidPackUrlProvider.overrideWith((ref) async => ''),
         ],
         child: MaterialApp(
           locale: const Locale('de'),
@@ -165,6 +178,32 @@ void main() {
 
   testWidgets('the medication reach', (tester) async {
     await pump(tester, const MedicationRangeScreen(householdId: householdId));
+  });
+
+  testWidgets('the first aid list', (tester) async {
+    await pump(tester, const FirstAidScreen());
+  });
+
+  testWidgets('a first aid guide with a drawing, figures and the pacer', (
+    tester,
+  ) async {
+    // Resuscitation is the guide that carries every part this screen can
+    // show at once, so it is the one that overflows first.
+    await pump(tester, const FirstAidGuideScreen(guideId: 'cpr-adult'));
+  });
+
+  testWidgets('a first aid guide that is a list of telephone numbers', (
+    tester,
+  ) async {
+    await pump(tester, const FirstAidGuideScreen(guideId: 'poisoning'));
+  });
+
+  testWidgets('the compression pacer', (tester) async {
+    await pump(tester, const CompressionPacerScreen());
+  });
+
+  testWidgets('the video pack screen', (tester) async {
+    await pump(tester, const FirstAidVideosScreen());
   });
 
   testWidgets('the blackout clock', (tester) async {

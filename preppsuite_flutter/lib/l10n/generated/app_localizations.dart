@@ -7813,6 +7813,348 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} items'**
   String possessionsCount(int count);
+
+  /// No description provided for @firstAidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'First aid'**
+  String get firstAidTitle;
+
+  /// No description provided for @firstAidEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions, drawings and a pacer for chest compressions. No network, no download.'**
+  String get firstAidEntryHint;
+
+  /// No description provided for @firstAidSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you looking for?'**
+  String get firstAidSearchHint;
+
+  /// No description provided for @firstAidSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no guide here for that.'**
+  String get firstAidSearchEmpty;
+
+  /// No description provided for @firstAidDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'These guides replace neither a first aid course nor an emergency call. In doubt: call 112 and stay on the line — the dispatcher will talk you through it.'**
+  String get firstAidDisclaimer;
+
+  /// No description provided for @firstAidGroupBasics.
+  ///
+  /// In en, this message translates to:
+  /// **'First of all'**
+  String get firstAidGroupBasics;
+
+  /// No description provided for @firstAidGroupLifeThreatening.
+  ///
+  /// In en, this message translates to:
+  /// **'Life-threatening'**
+  String get firstAidGroupLifeThreatening;
+
+  /// No description provided for @firstAidGroupInjury.
+  ///
+  /// In en, this message translates to:
+  /// **'Injuries'**
+  String get firstAidGroupInjury;
+
+  /// No description provided for @firstAidGroupIllness.
+  ///
+  /// In en, this message translates to:
+  /// **'Sudden illness'**
+  String get firstAidGroupIllness;
+
+  /// No description provided for @firstAidGroupEnvironment.
+  ///
+  /// In en, this message translates to:
+  /// **'Cold, heat, poison'**
+  String get firstAidGroupEnvironment;
+
+  /// No description provided for @firstAidCallNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Call 112'**
+  String get firstAidCallNow;
+
+  /// No description provided for @firstAidCallFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Here you call first and help second.'**
+  String get firstAidCallFirst;
+
+  /// No description provided for @firstAidSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Steps'**
+  String get firstAidSteps;
+
+  /// No description provided for @firstAidCautions.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not'**
+  String get firstAidCautions;
+
+  /// No description provided for @firstAidSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: {source}'**
+  String firstAidSource(String source);
+
+  /// No description provided for @firstAidOpenPacer.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the pacer'**
+  String get firstAidOpenPacer;
+
+  /// No description provided for @firstAidVideos.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos'**
+  String get firstAidVideos;
+
+  /// No description provided for @firstAidVideosNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No video is installed for this guide.'**
+  String get firstAidVideosNone;
+
+  /// No description provided for @firstAidVideoManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage the video pack'**
+  String get firstAidVideoManage;
+
+  /// No description provided for @firstAidVideoMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The video file is gone. Fetch the pack again.'**
+  String get firstAidVideoMissing;
+
+  /// No description provided for @firstAidVideoRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'From the start'**
+  String get firstAidVideoRestart;
+
+  /// No description provided for @firstAidVideoSystemPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'This system cannot play video inside the app. The button below opens the file in the computer\'s own player.'**
+  String get firstAidVideoSystemPlayer;
+
+  /// No description provided for @firstAidVideoOpenExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in the system player'**
+  String get firstAidVideoOpenExternal;
+
+  /// No description provided for @firstAidVideoNotACourse.
+  ///
+  /// In en, this message translates to:
+  /// **'A video is not a course. The movements only stick once you have done them yourself.'**
+  String get firstAidVideoNotACourse;
+
+  /// No description provided for @firstAidVideoPackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video pack'**
+  String get firstAidVideoPackTitle;
+
+  /// No description provided for @firstAidVideoPackWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'The guides need no video: the text, the figures and the drawings are complete and always there. Videos are an extra for the evening you sit down to learn the movements properly — and they are a separate download, because ten films weigh more than the whole app.'**
+  String get firstAidVideoPackWhy;
+
+  /// No description provided for @firstAidVideoPackFromNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Over the network'**
+  String get firstAidVideoPackFromNetwork;
+
+  /// No description provided for @firstAidVideoPackUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address of the pack description'**
+  String get firstAidVideoPackUrlLabel;
+
+  /// No description provided for @firstAidVideoPackUrlHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'The address of a paket.json. This app ships none — enter the address where you published your pack.'**
+  String get firstAidVideoPackUrlHelper;
+
+  /// No description provided for @firstAidVideoPackFetch.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch the description'**
+  String get firstAidVideoPackFetch;
+
+  /// No description provided for @firstAidVideoPackFromFile.
+  ///
+  /// In en, this message translates to:
+  /// **'From a file'**
+  String get firstAidVideoPackFromFile;
+
+  /// No description provided for @firstAidVideoPackFromFileWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'A pack as a zip, from a memory stick or from the shared folder. This is the way that works without a network — that is, in the situation this app is built for.'**
+  String get firstAidVideoPackFromFileWhy;
+
+  /// No description provided for @firstAidVideoPackImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a pack file'**
+  String get firstAidVideoPackImport;
+
+  /// No description provided for @firstAidVideoPackNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No video pack installed yet.'**
+  String get firstAidVideoPackNone;
+
+  /// No description provided for @firstAidVideoPackInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'{present} of {total} videos present, {size} on disk'**
+  String firstAidVideoPackInstalled(int present, int total, String size);
+
+  /// No description provided for @firstAidVideoPackRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the video pack'**
+  String get firstAidVideoPackRemove;
+
+  /// No description provided for @firstAidVideoPackRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The video files and the pack description are removed from the device. The guides themselves are untouched.'**
+  String get firstAidVideoPackRemoveBody;
+
+  /// No description provided for @firstAidVideoPackOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} videos, {size} in all'**
+  String firstAidVideoPackOffer(int count, String size);
+
+  /// No description provided for @firstAidVideoPackStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch them all'**
+  String get firstAidVideoPackStart;
+
+  /// No description provided for @firstAidVideoPackProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String firstAidVideoPackProgress(int done, int total);
+
+  /// No description provided for @firstAidVideoPackDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} videos fetched'**
+  String firstAidVideoPackDone(int done, int total);
+
+  /// No description provided for @firstAidVideoPackLicenceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Every video names its author and its licence. Only fetch packs whose films may be passed on.'**
+  String get firstAidVideoPackLicenceNote;
+
+  /// No description provided for @firstAidVideoPackBadUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a complete address.'**
+  String get firstAidVideoPackBadUrl;
+
+  /// No description provided for @firstAidVideoPackClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get firstAidVideoPackClose;
+
+  /// No description provided for @pacerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pacer'**
+  String get pacerTitle;
+
+  /// No description provided for @pacerStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get pacerStart;
+
+  /// No description provided for @pacerStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get pacerStop;
+
+  /// No description provided for @pacerIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets the beat for chest compressions — as a tone, as a flash and, on a phone, as a vibration. The screen stays on while it runs.'**
+  String get pacerIdle;
+
+  /// No description provided for @pacerElapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Running {time}'**
+  String pacerElapsed(String time);
+
+  /// No description provided for @pacerDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'5–6 cm deep · vertically from above · let the chest come all the way back up'**
+  String get pacerDepth;
+
+  /// No description provided for @pacerNoSound.
+  ///
+  /// In en, this message translates to:
+  /// **'No sound on this device. The beat keeps flashing.'**
+  String get pacerNoSound;
+
+  /// No description provided for @pacerPerMinute.
+  ///
+  /// In en, this message translates to:
+  /// **'{rate}/min'**
+  String pacerPerMinute(int rate);
+
+  /// No description provided for @pacerOfCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'of {total} · round {cycle}'**
+  String pacerOfCycle(int total, int cycle);
+
+  /// No description provided for @pacerBreathe.
+  ///
+  /// In en, this message translates to:
+  /// **'Now 2 breaths'**
+  String get pacerBreathe;
+
+  /// No description provided for @pacerSwapNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap over if there are two of you'**
+  String get pacerSwapNow;
+
+  /// No description provided for @pacerPushOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Push without stopping'**
+  String get pacerPushOnly;
+
+  /// No description provided for @pacerPushOnlyShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Push only'**
+  String get pacerPushOnlyShort;
 }
 
 class _AppLocalizationsDelegate
