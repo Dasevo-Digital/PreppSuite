@@ -65,7 +65,7 @@ class FirstAidGuideScreen extends ConsumerWidget {
                     ],
                   ],
                 ),
-                if (guide.facts.isNotEmpty) _Facts(guide: guide, l10n: l10n),
+                if (guide.facts.isNotEmpty) _Facts(guide: guide),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -199,46 +199,91 @@ class _StepTile extends StatelessWidget {
 }
 
 class _Facts extends StatelessWidget {
-  const _Facts({required this.guide, required this.l10n});
+  const _Facts({required this.guide});
 
   final FirstAidGuide guide;
-  final AppLocalizations l10n;
 
   /// A value that is only digits, spaces and the usual punctuation is a
-  /// telephone number, and worth making tappable. Everything else — a
-  /// depth, a rate — is just text.
+  /// telephone number, and worth making tappable. Everything else â a
+  /// depth, a rate â is just text.
   static final _dialable = RegExp(r'^[0-9][0-9 /+()-]{2,}$');
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Column(
-          children: [
-            for (final fact in guide.facts)
-              ListTile(
-                dense: true,
-                title: Text(fact.label),
-                trailing: Text(
-                  fact.value,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                onTap: _dialable.hasMatch(fact.value)
-                    ? () => launchUrl(
-                        Uri(
-                          scheme: 'tel',
-                          path: fact.value.replaceAll(RegExp(r'[^0-9+]'), ''),
-                        ),
-                      )
-                    : null,
-              ),
+      child: Column(
+        children: [
+          for (final (index, fact) in guide.facts.indexed) ...[
+            if (index > 0) const Divider(height: 1),
+            _FactRow(fact: fact, dialable: _dialable.hasMatch(fact.value)),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+/// One labelled figure.
+///
+/// Deliberately not a `ListTile` with a `trailing`. At twice the system
+/// font size "100â120 pro Minute" as a trailing widget consumes the whole
+/// tile and the tile asserts rather than wrapping â which is exactly what
+/// `large_text_test` caught. A [Wrap] puts the two beside each other while
+/// they fit and underneath each other when they do not.
+class _FactRow extends StatelessWidget {
+  const _FactRow({required this.fact, required this.dialable});
+
+  final FirstAidFact fact;
+  final bool dialable;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final value = Text(
+      fact.value,
+      style: theme.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: dialable ? theme.colorScheme.primary : null,
+      ),
+    );
+
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 16,
+        runSpacing: 4,
+        children: [
+          Text(fact.label),
+          if (dialable)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.call, size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+                // Flexible, not a bare child: at twice the font size a
+                // nine-digit number plus the handset is wider than a
+                // phone, and a Row with a bare Text overflows instead of
+                // letting it wrap.
+                Flexible(child: value),
+              ],
+            )
+          else
+            value,
+        ],
+      ),
+    );
+
+    if (!dialable) return row;
+    return InkWell(
+      onTap: () => launchUrl(
+        Uri(
+          scheme: 'tel',
+          path: fact.value.replaceAll(RegExp(r'[^0-9+]'), ''),
         ),
       ),
+      child: row,
     );
   }
 }
