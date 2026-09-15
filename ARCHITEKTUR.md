@@ -450,6 +450,16 @@ import, only entries the manifest itself names are extracted. Size and
 sha256 are checked after every download, and a file that fails is deleted
 rather than kept under its final name.
 
+**A Windows package is launched in a Windows Sandbox, not on the build
+machine.** A developer machine has the Visual C++ Redistributable, and a
+user's machine may not; starting it where everything is already installed
+proves nothing. That is how the packages came to be shipped for months
+needing a runtime they did not carry — the failure is silent, with no
+crash, no message and no event-log entry, just a process sitting at five
+megabytes with no window. The check runs a control package alongside the
+new one, because a failure on its own does not say whether the package or
+the environment is at fault. See `tool/windows-startcheck/`.
+
 ## Feature layout
 
 ```

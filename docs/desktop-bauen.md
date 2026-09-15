@@ -4,6 +4,17 @@ macOS baut hier direkt. Linux und Windows sind die beiden, die unbemerkt
 kaputtgehen, weil hier niemand auf ihnen entwickelt — und beide brauchen
 etwas, das nicht mitkommt.
 
+## Windows
+
+Die C++-Laufzeit wird seit `556df7f` mit ins Paket gelegt
+(`windows/CMakeLists.txt`). Ohne sie startet die App auf einem Rechner,
+der sie nicht schon hat, gar nicht — und zwar lautlos.
+
+Den Startnachweis führt `tool/windows-startcheck/` in einem Windows
+Sandbox, also in einem Windows, auf dem nichts installiert ist. Auf dem
+Baurechner zu starten beweist nichts. Einzelheiten in
+[`tool/windows-startcheck/LIESMICH.md`](../tool/windows-startcheck/LIESMICH.md).
+
 ## Linux
 
 ```bash

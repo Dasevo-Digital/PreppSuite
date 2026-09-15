@@ -1,0 +1,14 @@
+<Configuration>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>C:\sbtest</HostFolder>
+      <SandboxFolder>C:\shared</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>C:\shared\start.cmd</Command>
+  </LogonCommand>
+  <MemoryInMB>6144</MemoryInMB>
+  <vGPU>Enable</vGPU>
+</Configuration>
