@@ -21,9 +21,29 @@ void main() {
   final dashboard = File(
     'test/fixtures/bbk_dashboard_sample.json',
   ).readAsStringSync();
-  final meteoalarm = File(
-    'test/fixtures/meteoalarm_germany_sample.xml',
-  ).readAsStringSync();
+
+  /// The captured MeteoAlarm feed, with its expiry moved to tomorrow.
+  ///
+  /// The file is a real feed and therefore carries real timestamps --
+  /// `2026-08-15T17:00:00+00:00`. `poll` finishes by calling
+  /// [AppDatabase.pruneExpiredWarnings], which deletes anything that
+  /// expired more than thirty days ago, so a fixture this old is written
+  /// and then removed again inside the same call: the warnings simply
+  /// stop being there, and the test fails saying MeteoAlarm stored
+  /// nothing.
+  ///
+  /// It happened exactly that way on 2026-09-15. The two tests below had
+  /// passed the evening before with under two hours to spare, because
+  /// that is when the thirty-day cutoff crossed the fixture's expiry.
+  /// Moving the date here rather than editing the file keeps the capture
+  /// genuine and takes the clock out of it for good.
+  final meteoalarm =
+      File(
+        'test/fixtures/meteoalarm_germany_sample.xml',
+      ).readAsStringSync().replaceAll(
+        '2026-08-15T17:00:00+00:00',
+        DateTime.now().toUtc().add(const Duration(days: 1)).toIso8601String(),
+      );
 
   const bbkBase = 'https://warnung.bund.de/api31';
   const meteoUrl =

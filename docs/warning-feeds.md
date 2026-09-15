@@ -144,6 +144,47 @@ verwerfen wäre genau der Fehler, den diese Zuordnung behebt.
 Mit dem gemessenen Feed sieht ein Haushalt in Braunschweig **9 von 121**
 Warnungen statt keiner — acht davon die nicht zuzuordnenden Seegebiete.
 
+## Warnungen ohne Bundesland in der Kennung
+
+Die meisten Quellen tragen das Land in der Kennung: `mow.DE-HE-KS-…`
+ergibt Hessen, `lhp.LHP.NW.…` Nordrhein-Westfalen. **KATWARN nicht** —
+dessen Kennungen sehen aus wie
+`kat.6aa7f6b0995efd5eae12108e_public_topics` und sagen gar nichts.
+
+Für die wird der Reihe nach versucht:
+
+1. Die **Gebietsbeschreibung**, wenn sie einstimmig ein Land nennt
+   („Teile von LKr. Alzey-Worms, LKr. Bad Dürkheim, Rhein-Pfalz-Kreis und
+   Umland" → RP).
+2. Die **absendende Stelle** aus dem Titel. KATWARN-Titel sind maschinell
+   gebaut: `<Absender> meldet: <Warnung>`.
+
+Beide liefern nur ein **Bundesland**, nie einen Kreis. Aus Prosa einen
+Kreis abzuleiten hieße, ein falsch gelesenes Wort könnte eine Warnung vor
+genau dem Kreis verbergen, um den es geht.
+
+Warum es Schritt 2 überhaupt gibt: Am 14.09.2026 erreichte eine schwere
+Trinkwasserwarnung des Vogelsbergkreises einen Haushalt in Braunschweig.
+Ihre ganze Ortsangabe lautet „Teile von Lauterbach", und das ist nicht
+auflösbar — die Warncell-Tabelle kennt ein Lauterbach in
+Baden-Württemberg, eines in Thüringen, und führt das hessische unter
+„Stadt Lauterbach (Hessen)". Damit blieb die Warnung unverortet, und
+unverortet heißt „betrifft alle". Der Titel dagegen sagt
+„Vogelsbergkreis meldet: …", und dieser Name steht genau einmal in der
+Tabelle.
+
+Der Absender ist die schwächere Aussage — er sagt, *wer* gewarnt hat,
+nicht *wo* — und wird deshalb zuletzt versucht. Ist er keine Ortsangabe
+(„Erdbebendienst Südwest meldet: …"), findet die Tabelle nichts und die
+Warnung bleibt, wo sie war.
+
+**Eine bereits gespeicherte, unverortete Warnung wird beim nächsten
+Abruf nachträglich verortet.** Sonst hülfe eine verbesserte Zuordnung
+immer erst der nächsten Warnung, während die auf dem Bildschirm ihre
+alte Lesart behielte. Nachträglich verortet wird nur von „gar nichts" zu
+„etwas", nie ein schon vorhandener Schlüssel überschrieben, und es löst
+keine zweite Benachrichtigung aus.
+
 ## Bekannte Einschränkungen
 
 - **MeteoAlarm-Warnungen außerhalb Deutschlands werden nicht nach Region

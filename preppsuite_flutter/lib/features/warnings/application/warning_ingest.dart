@@ -174,7 +174,17 @@ class WarningIngest {
     required DateTime? expires,
     required DateTime sent,
   }) {
-    if (existing != null && !sent.isAfter(existing.sent)) return null;
+    if (existing != null && !sent.isAfter(existing.sent)) {
+      // One exception to "unchanged is a no-op": a row that could not be
+      // placed when it arrived and can be placed now. That happens when
+      // this app learns a new way to read a region out of a warning --
+      // and without it, the warnings already on screen keep the reading
+      // that put them there, which for an unplaced warning is "concerns
+      // everyone". Narrowing only, never a change to a key we already
+      // have, and it is not newsworthy: nobody is notified twice because
+      // the app got better at geography.
+      if (existing.regionKey != null || regionKey == null) return null;
+    }
 
     final escalated =
         existing != null &&
@@ -227,14 +237,29 @@ class WarningIngest {
 /// 1. A precise per-Kreis fetch, where the district is known outright.
 /// 2. The state in the warning's own id, which is most sources.
 /// 3. The one state its area description unanimously names.
+/// 4. The one state the authority that issued it sits in.
 ///
-/// The third step exists because of KATWARN: its ids carry no state at
-/// all (`kat.6aa2cd02995efd5eae120ffb_public_topics`), so an earthquake
-/// near Worms came out unplaced — and unplaced means "concerns
-/// everyone", which put it in front of a household in Braunschweig. It
-/// is tried last and only ever yields a state, never a district: see
+/// Steps three and four exist because of KATWARN: its ids carry no state
+/// at all (`kat.6aa2cd02995efd5eae120ffb_public_topics`), so an
+/// earthquake near Worms came out unplaced — and unplaced means
+/// "concerns everyone", which put it in front of a household in
+/// Braunschweig. Both only ever yield a state, never a district: see
 /// [DwdAreas.stateForAreaNames] for why narrowing further would be
 /// dangerous.
+///
+/// The fourth step was added after a drinking-water alert for Lauterbach
+/// in Hesse reached the same household in Lower Saxony. Its area
+/// description is "Teile von Lauterbach", and that genuinely cannot be
+/// placed: the warncell table holds a Lauterbach in Baden-Wurttemberg
+/// and one in Thuringia, and the Hessian one is filed under
+/// "Stadt Lauterbach (Hessen)", so the bare name matches neither
+/// unanimously nor at all. What the warning does say is who sent it —
+/// "Vogelsbergkreis meldet: ..." — and that name is in the table exactly
+/// once.
+///
+/// Asking who warned rather than where is a weaker statement, which is
+/// why it is tried last: an authority warns about its own area, but the
+/// title is the only place that says so.
 String? _bbkRegionKey(
   BbkRawWarning warning, {
   required String? override,
@@ -245,9 +270,36 @@ String? _bbkRegionKey(
   final fromId = bbkRegionFromId(warning.id);
   if (fromId != null) return fromId;
 
+  if (areas == null) return null;
+
   final description = warning.areaDescription;
-  if (areas == null || description == null) return null;
-  return areas.stateForAreaNames(description);
+  if (description != null) {
+    final fromArea = areas.stateForAreaNames(description);
+    if (fromArea != null) return fromArea;
+  }
+
+  final issuer = bbkIssuerFromTitle(warning.eventTitleDe);
+  if (issuer == null) return null;
+  return areas.stateForAreaNames(issuer);
+}
+
+/// The authority a KATWARN title names, or null.
+///
+/// KATWARN titles reaching the BBK feed are machine-built to one shape:
+/// `<Absender> meldet: <Warnung>`. Confirmed on the live feed against
+/// both an authority that is a district ("Vogelsbergkreis meldet: Warnung
+/// Trinkwasserunfall") and one that is not ("Erdbebendienst Sudwest
+/// meldet: Schwaches Erdbeben ... bei Worms"). The second is the reason
+/// the name is looked up rather than trusted: a seismic service is not a
+/// place, finds nothing in the warncell table, and correctly leaves the
+/// warning where it was.
+///
+/// Titles from every other source do not carry the word at all, so they
+/// fall out here rather than needing to be excluded by source.
+String? bbkIssuerFromTitle(String title) {
+  final match = RegExp(r'^(.{3,80}?)\s+meldet:').firstMatch(title);
+  final issuer = match?.group(1)?.trim();
+  return issuer == null || issuer.isEmpty ? null : issuer;
 }
 
 /// BBK ids embed a state code, but not in one shape — the sources use two,

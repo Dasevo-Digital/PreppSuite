@@ -73,12 +73,13 @@ void main() {
     String id = 'mow.DE-HE-MKK-W220-20260811-001',
     String severity = 'Moderate',
     String startDate = '2026-08-11T08:30:54+02:00',
+    String title = 'Testwarnung',
   }) {
     return BbkRawWarning(
       id: id,
       startDate: startDate,
       severity: severity,
-      eventTitleDe: 'Testwarnung',
+      eventTitleDe: title,
       raw: const {},
     );
   }
@@ -150,9 +151,10 @@ Kreis Göttingen;03159;NI
 Kreis Kassel;06633;HE
 """);
 
-    BbkRawWarning katwarn({String? areaDescription}) =>
+    BbkRawWarning katwarn({String? areaDescription, String? title}) =>
         raw(
           id: 'kat.6aa2cd02995efd5eae120ffb_public_topics',
+          title: title ?? 'Testwarnung',
         ).withDetails(
           description: null,
           instruction: null,
@@ -231,6 +233,161 @@ Kreis Kassel;06633;HE
       );
 
       expect(await storedRegionKey(), '03101');
+    });
+
+    group('and whose area description cannot be placed either', () {
+      // The real case, live on 2026-09-14: a severe drinking-water alert
+      // for Lauterbach in Hesse reached a household in Braunschweig.
+      // "Teile von Lauterbach" is genuinely unplaceable -- there is a
+      // Lauterbach in Baden-Wurttemberg and one in Thuringia, and the
+      // Hessian one is filed under a name of its own -- but the title
+      // says who warned, and that name is in the table exactly once.
+      final withLauterbach = DwdAreas.parse("""
+# name;district;state
+Gemeinde Lauterbach;08325;BW
+Gemeinde Lauterbach;16063;TH
+Stadt Lauterbach (Hessen);06535;HE
+Vogelsbergkreis;06535;HE
+""");
+
+      test('the authority that issued it places it', () async {
+        await ingest.ingestBbk(
+          [
+            katwarn(
+              areaDescription: 'Teile von Lauterbach',
+              title:
+                  'Vogelsbergkreis meldet: Warnung Trinkwasserunfall. '
+                  'Gultig ab 14.09.2026, 15:29.',
+            ),
+          ],
+          countryCode: 'DE',
+          areas: withLauterbach,
+        );
+
+        expect(await storedRegionKey(), 'HE');
+      });
+
+      test('an issuer that is not a place leaves it unplaced', () async {
+        // "Erdbebendienst Sudwest meldet: ..." -- a seismic service is
+        // not in the warncell table, and a warning nobody can place
+        // concerns everyone, which is the safe error here.
+        await ingest.ingestBbk(
+          [
+            katwarn(
+              areaDescription: 'Teile von Lauterbach',
+              title:
+                  'Erdbebendienst Sudwest meldet: Schwaches Erdbeben bei '
+                  'Worms',
+            ),
+          ],
+          countryCode: 'DE',
+          areas: withLauterbach,
+        );
+
+        expect(await storedRegionKey(), isNull);
+      });
+
+      test('the area description still wins over the issuer', () async {
+        // Where it applies beats who said it, whenever both answer.
+        await ingest.ingestBbk(
+          [
+            katwarn(
+              areaDescription: 'Stadt Lauterbach (Hessen)',
+              title: 'Vogelsbergkreis meldet: Warnung',
+            ),
+          ],
+          countryCode: 'DE',
+          areas: withLauterbach,
+        );
+
+        expect(await storedRegionKey(), 'HE');
+      });
+
+      test('a warning stored unplaced is placed on a later pass', () async {
+        // Otherwise the fix only helps the next warning, and the one
+        // already on somebody's screen keeps the reading that put it
+        // there.
+        await ingest.ingestBbk(
+          [
+            katwarn(
+              areaDescription: 'Teile von Lauterbach',
+              title: 'Vogelsbergkreis meldet: Warnung Trinkwasserunfall.',
+            ),
+          ],
+          countryCode: 'DE',
+        );
+        expect(await storedRegionKey(), isNull, reason: 'no table yet');
+
+        final again = await ingest.ingestBbk(
+          [
+            katwarn(
+              areaDescription: 'Teile von Lauterbach',
+              title: 'Vogelsbergkreis meldet: Warnung Trinkwasserunfall.',
+            ),
+          ],
+          countryCode: 'DE',
+          areas: withLauterbach,
+        );
+
+        expect(await storedRegionKey(), 'HE');
+        expect(
+          again,
+          isEmpty,
+          reason: 'nobody is notified twice because the app learned geography',
+        );
+      });
+
+      test('a key already known is never overwritten by the issuer', () async {
+        await ingest.ingestBbk(
+          [katwarn(areaDescription: 'Stadt Lauterbach (Hessen)')],
+          countryCode: 'DE',
+          areas: withLauterbach,
+        );
+        expect(await storedRegionKey(), 'HE');
+
+        await ingest.ingestBbk(
+          [
+            katwarn(
+              areaDescription: 'Gemeinde Lauterbach',
+              title: 'Vogelsbergkreis meldet: Warnung',
+            ),
+          ],
+          countryCode: 'DE',
+          areas: withLauterbach,
+        );
+
+        expect(await storedRegionKey(), 'HE');
+      });
+    });
+  });
+
+  group('bbkIssuerFromTitle', () {
+    test('reads the authority out of a KATWARN title', () {
+      expect(
+        bbkIssuerFromTitle(
+          'Vogelsbergkreis meldet: Warnung Trinkwasserunfall. '
+          'Gultig ab 14.09.2026, 15:29.',
+        ),
+        'Vogelsbergkreis',
+      );
+    });
+
+    test('keeps a multi-word authority whole', () {
+      expect(
+        bbkIssuerFromTitle('Erdbebendienst Sudwest meldet: Schwaches Erdbeben'),
+        'Erdbebendienst Sudwest',
+      );
+    });
+
+    test('a title from any other source names no authority', () {
+      // Every other feed writes a plain event title, so they fall out
+      // here rather than having to be excluded by source.
+      expect(bbkIssuerFromTitle('Abkochgebot Trinkwasser - Ehrenberg'), isNull);
+      expect(bbkIssuerFromTitle('Sturmboeen'), isNull);
+    });
+
+    test('the word alone is not an authority', () {
+      expect(bbkIssuerFromTitle('meldet: etwas'), isNull);
     });
   });
 
