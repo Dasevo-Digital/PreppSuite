@@ -118,6 +118,26 @@ jobs:
         working-directory: preppsuite_flutter
         run: flutter build windows --release
 
+      # The packages shipped for months needing the Microsoft C++ runtime
+      # and not carrying it. On a build machine that is invisible -- the
+      # runtime is always there -- and on a user's machine the app did not
+      # crash but hung with no window and no message. windows/CMakeLists.txt
+      # bundles it now; this is what stops that being undone quietly.
+      - name: Die C++-Laufzeit muss im Paket liegen
+        shell: pwsh
+        working-directory: preppsuite_flutter/build/windows/x64/runner/Release
+        run: |
+          $needed = 'vcruntime140.dll', 'vcruntime140_1.dll', 'msvcp140.dll'
+          $missing = $needed | Where-Object { -not (Test-Path $_) }
+          if ($missing) {
+            Write-Host "::error::Im Paket fehlt: $($missing -join ', ')"
+            Write-Host "Ohne diese Dateien startet die App auf einem Rechner ohne Visual C++ Redistributable gar nicht, und zwar lautlos."
+            Write-Host "Vorhanden sind:"
+            Get-ChildItem *.dll | ForEach-Object { Write-Host "  $($_.Name)" }
+            exit 1
+          }
+          Write-Host "Laufzeit im Paket: $($needed -join ', ')"
+
       - uses: actions/upload-artifact@v4
         with:
           name: preppsuite-windows-x64
