@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'warning_http.dart';
+
 /// A single raw entry from a BBK (warnung.bund.de) `mapData.json` feed —
 /// intentionally untyped beyond this shape; `WarningIngest` maps it onto
 /// the local `warnings` table. Fields confirmed against the live API on
@@ -133,7 +135,8 @@ class BbkClient {
   /// here rather than reusing `_parseEntry`.
   Future<List<BbkRawWarning>> fetchDashboard(String kreisSchluessel) async {
     final ars = kreisSchluessel.padRight(12, '0');
-    final response = await _httpClient.get(
+    final response = await getWarningResponse(
+      _httpClient,
       Uri.parse('$_baseUrl/dashboard/$ars.json'),
     );
     if (response.statusCode != 200) return [];
@@ -152,7 +155,8 @@ class BbkClient {
   /// alert itself remains useful and a later poll can fill its offline cache.
   Future<BbkRawWarning> fetchDetails(BbkRawWarning warning) async {
     try {
-      final response = await _httpClient.get(
+      final response = await getWarningResponse(
+        _httpClient,
         Uri.parse('$_baseUrl/warnings/${Uri.encodeComponent(warning.id)}.json'),
       );
       if (response.statusCode != 200) return warning;
@@ -239,7 +243,8 @@ class BbkClient {
   Future<List<BbkRawWarning>?> _fetchSource(String source) async {
     final http.Response response;
     try {
-      response = await _httpClient.get(
+      response = await getWarningResponse(
+        _httpClient,
         Uri.parse('$_baseUrl/$source/mapData.json'),
       );
     } catch (_) {

@@ -1,6 +1,8 @@
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
+import 'warning_http.dart';
+
 /// A single `<entry>` from a MeteoAlarm legacy Atom+CAP feed. Fields
 /// confirmed against the live feed on 2026-08-14; see
 /// `docs/warning-feeds.md`.
@@ -43,7 +45,8 @@ class MeteoAlarmClient {
   /// "united-kingdom" — see [meteoAlarmCountrySlugs] below for the
   /// ISO-code-to-slug mapping.
   Future<List<MeteoAlarmRawWarning>> fetchCountry(String countrySlug) async {
-    final response = await _httpClient.get(
+    final response = await getWarningResponse(
+      _httpClient,
       Uri.parse(
         'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-$countrySlug',
       ),

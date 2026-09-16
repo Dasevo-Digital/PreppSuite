@@ -31,7 +31,7 @@ dependencies:
   package_info_plus: ^9.0.1
   intl: any
   flutter_riverpod: ^3.4.2
-  drift: ^2.34.3
+  drift: ^2.35.0
   drift_flutter: ^0.3.1
   # Named directly only so that core/error_text.dart can recognise a
   # raw SqliteException. Drift wraps most database errors, but not the
@@ -40,7 +40,7 @@ dependencies:
   sqlite3: ^3.5.2
   path_provider: ^2.1.6
   uuid: ^4.6.0
-  mobile_scanner: ^7.4.0
+  mobile_scanner: ^7.4.2
   # QR codes are generated from this pure-Dart encoder and painted by
   # the app itself (features/transfer/presentation/qr_code_view.dart).
   # qr_flutter would have saved the painter and has not been published
@@ -56,6 +56,7 @@ dependencies:
   pdf_graphics: 3.8.0
   printing: ^5.14.3
   shared_preferences: ^2.5.5
+  flutter_secure_storage: ^10.0.0
   # Direct, because a carried copy registers a settings store of its own
   # that writes into the folder on the disk rather than into the
   # platform's place. See lib/core/portable_preferences.dart.
@@ -71,9 +72,9 @@ dependencies:
   # Cropping and rotating a product photo (see `photo_edit.dart`).
   # `printing` pulls it in too, but a transitive dependency cannot be
   # imported.
-  image: ^4.8.0
+  image: ^4.10.1
   path: ^1.9.1
-  flutter_local_notifications: ^22.3.0
+  flutter_local_notifications: ^22.3.1
   geolocator: ^14.0.2
   http: ^1.6.0
   # Parses MeteoAlarm's Atom+CAP feed, which the app now fetches itself
@@ -189,9 +190,6 @@ flutter:
     - assets/dwd_warncells.csv
     - assets/sounds/metronome_click.wav
     - assets/fonts/NotoSans-Regular.ttf
-dependency_overrides:
-  flutter_secure_storage: ^10.0.0
-
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a

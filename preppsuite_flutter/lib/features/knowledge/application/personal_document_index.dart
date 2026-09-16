@@ -157,6 +157,9 @@ class PersonalDocumentIndexer {
 
   static const maxDocumentBytes = 48 * 1024 * 1024;
   static const maxIndexCharacters = 4 * 1024 * 1024;
+  static const _maxEpubEntries = 4096;
+  static const _maxEpubEntryBytes = 8 * 1024 * 1024;
+  static const _maxEpubDecodedBytes = 16 * 1024 * 1024;
 
   final PersonalDocumentIndex _index;
   final bool _ownsIndex;
@@ -241,7 +244,11 @@ class PersonalDocumentIndexer {
 
   String _extractEpub(Uint8List bytes) {
     final archive = ZipDecoder().decodeBytes(bytes, verify: true);
+    if (archive.files.length > _maxEpubEntries) {
+      throw const _DocumentTooLarge();
+    }
     final buffer = StringBuffer();
+    var decodedBytes = 0;
     for (final file in archive.files) {
       final name = file.name.toLowerCase();
       if (!file.isFile ||
@@ -250,12 +257,30 @@ class PersonalDocumentIndexer {
               name.endsWith('.htm'))) {
         continue;
       }
+      // The size in a ZIP header is only a claim, but rejecting a clearly
+      // excessive one avoids starting an expensive inflate. The bounded
+      // output below enforces the same limit against a forged header.
+      if (file.size < 0 || file.size > _maxEpubEntryBytes) {
+        throw const _DocumentTooLarge();
+      }
+      final content = _decodeEpubEntry(
+        file,
+        _maxEpubDecodedBytes - decodedBytes,
+      );
+      decodedBytes += content.length;
       buffer
-        ..writeln(_stripMarkup(utf8.decode(file.content, allowMalformed: true)))
+        ..writeln(_stripMarkup(utf8.decode(content, allowMalformed: true)))
         ..writeln();
       if (buffer.length >= maxIndexCharacters) break;
     }
     return buffer.toString();
+  }
+
+  Uint8List _decodeEpubEntry(ArchiveFile file, int remainingBytes) {
+    if (remainingBytes <= 0) throw const _DocumentTooLarge();
+    final output = _BoundedEpubOutput(remainingBytes);
+    file.decompress(output);
+    return output.getBytes();
   }
 
   String _extractPdf(Uint8List bytes) {
@@ -295,4 +320,36 @@ class PersonalDocumentIndexer {
 
 class _DocumentTooLarge implements Exception {
   const _DocumentTooLarge();
+}
+
+/// Archive's normal memory output grows without a ceiling. EPUBs are ZIP
+/// files supplied by other people, so cap every entry while it is inflated.
+class _BoundedEpubOutput extends OutputMemoryStream {
+  _BoundedEpubOutput(this._limit) : super(size: 32 * 1024);
+
+  final int _limit;
+
+  void _reserve(int count) {
+    if (count < 0 || length + count > _limit) {
+      throw const _DocumentTooLarge();
+    }
+  }
+
+  @override
+  void writeByte(int value) {
+    _reserve(1);
+    super.writeByte(value);
+  }
+
+  @override
+  void writeBytes(List<int> bytes, {int? length}) {
+    _reserve(length ?? bytes.length);
+    super.writeBytes(bytes, length: length);
+  }
+
+  @override
+  void writeStream(InputStream stream) {
+    _reserve(stream.length);
+    super.writeStream(stream);
+  }
 }

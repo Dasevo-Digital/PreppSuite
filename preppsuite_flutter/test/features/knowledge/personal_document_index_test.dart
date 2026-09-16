@@ -97,4 +97,27 @@ void main() {
     expect((await index.search('PMR446')).single.id, 'epub');
     expect((await index.search('Trinkwasser')).single.id, 'pdf');
   });
+
+  test('refuses EPUBs with an excessive number of entries', () async {
+    final archive = Archive();
+    for (var number = 0; number < 4097; number++) {
+      archive.addFile(
+        ArchiveFile.string('OPS/chapter-$number.xhtml', '<p>Kapitel</p>'),
+      );
+    }
+    final epub = File('${workspace.path}/too-many.epub')
+      ..writeAsBytesSync(ZipEncoder().encodeBytes(archive));
+
+    final result = await PersonalDocumentIndexer(index: index).index(
+      PersonalDocument(
+        id: 'many',
+        location: epub.path,
+        label: 'too-many.epub',
+        addedAt: DateTime.now(),
+      ),
+    );
+
+    expect(result.status, PersonalDocumentIndexStatus.tooLarge);
+    expect(await index.search('Kapitel'), isEmpty);
+  });
 }

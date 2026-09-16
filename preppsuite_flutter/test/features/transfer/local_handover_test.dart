@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/sharing/application/folder_crypto.dart';
@@ -44,12 +46,17 @@ void main() {
   /// A host bound to loopback. Only in a test does that address make
   /// sense — a real guest could never reach it, which is why
   /// `localAddresses` leaves it out.
-  Future<LocalHandoverHost> hostOn(AppDatabase db, {String? household}) async {
+  Future<LocalHandoverHost> hostOn(
+    AppDatabase db, {
+    String? household,
+    int? maxRequestBytes,
+  }) async {
     final host = await LocalHandoverHost.start(
       db: db,
       deviceId: 'device-a',
       householdId: household ?? householdId,
       addresses: const ['127.0.0.1'],
+      maxRequestBytes: maxRequestBytes ?? localHandoverMaxRequestBytes,
     );
     addTearDown(host.stop);
     return host;
@@ -138,6 +145,23 @@ void main() {
 
     expect((await run()).received, 1);
     expect((await run()).received, 0);
+  });
+
+  test('refuses an oversized handover before buffering it', () async {
+    final host = await hostOn(open(), maxRequestBytes: 32);
+    final client = HttpClient();
+    addTearDown(client.close);
+
+    final request = await client.post(
+      '127.0.0.1',
+      host.invitation.port,
+      '/handover',
+    );
+    request.add(List<int>.filled(33, 0x61));
+    final response = await request.close();
+
+    expect(response.statusCode, HttpStatus.requestEntityTooLarge);
+    await response.drain();
   });
 
   test('the later edit wins, whichever device made it', () async {

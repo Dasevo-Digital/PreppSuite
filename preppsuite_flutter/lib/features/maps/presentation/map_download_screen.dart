@@ -789,12 +789,16 @@ class _SourcePickerState extends ConsumerState<_SourcePicker> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final source = ref.watch(mapSourceProvider);
-    if (source is! AsyncData) return const SizedBox.shrink();
-
-    final provider = source.requireValue.provider;
+    // The protected key store is asynchronous. The key-less source is the
+    // safe default, so show the picker immediately instead of leaving a
+    // blank gap while a platform credential store wakes up.
+    final sourceValue = ref.watch(mapSourceProvider);
+    final source = sourceValue is AsyncData
+        ? sourceValue.requireValue
+        : (provider: MapTileProvider.openFreeMap, apiKey: null);
+    final provider = source.provider;
     if (!_keyLoaded) {
-      _keyController.text = source.requireValue.apiKey ?? '';
+      _keyController.text = source.apiKey ?? '';
       _keyLoaded = true;
     }
 

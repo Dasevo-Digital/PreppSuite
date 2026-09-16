@@ -35,6 +35,7 @@ import '../../sharing/application/snapshot_exchange.dart';
 /// The marker an invitation starts with, so the receiving screen can tell
 /// it from a QR chain frame or the barcode on a tin.
 const localHandoverPrefix = 'PSL1';
+const localHandoverMaxRequestBytes = 8 * 1024 * 1024;
 
 /// What the host shows and the guest films.
 class LocalHandoverInvitation {
@@ -106,10 +107,11 @@ enum LocalHandoverFailure {
 
 /// The side that waits.
 class LocalHandoverHost {
-  LocalHandoverHost._(this._server, this.invitation);
+  LocalHandoverHost._(this._server, this.invitation, this._maxRequestBytes);
 
   final HttpServer _server;
   final LocalHandoverInvitation invitation;
+  final int _maxRequestBytes;
 
   final _done = StreamController<LocalHandoverResult>.broadcast();
 
@@ -126,7 +128,11 @@ class LocalHandoverHost {
     required String deviceId,
     required String householdId,
     List<String>? addresses,
+    int maxRequestBytes = localHandoverMaxRequestBytes,
   }) async {
+    if (maxRequestBytes < 1) {
+      throw ArgumentError.value(maxRequestBytes, 'maxRequestBytes');
+    }
     final found = addresses ?? await localAddresses();
     if (found.isEmpty) {
       throw const LocalHandoverException(LocalHandoverFailure.unreachable);
@@ -141,6 +147,7 @@ class LocalHandoverHost {
         householdId: householdId,
         key: FolderKey(_freshKey()),
       ),
+      maxRequestBytes,
     );
 
     unawaited(
@@ -162,7 +169,7 @@ class LocalHandoverHost {
           continue;
         }
 
-        final raw = await utf8.decoder.bind(request).join();
+        final raw = await _readRequest(request);
         final plain = await decryptFromFolder(raw, invitation.key);
         if (plain == null) {
           // Wrong key: somebody on the network who did not see the
@@ -196,6 +203,13 @@ class LocalHandoverHost {
         await request.response.close();
 
         _done.add((received: received, sent: _rowsIn(ours)));
+      } on _HandoverTooLarge {
+        try {
+          request.response.statusCode = HttpStatus.requestEntityTooLarge;
+          await request.response.close();
+        } on Object {
+          // The client went away after being told its request is too large.
+        }
       } on Object {
         // One bad request must not take the socket down: the person is
         // still standing there with the other device.
@@ -209,10 +223,28 @@ class LocalHandoverHost {
     }
   }
 
+  Future<String> _readRequest(HttpRequest request) async {
+    if (request.contentLength > _maxRequestBytes) {
+      throw const _HandoverTooLarge();
+    }
+    final bytes = BytesBuilder(copy: false);
+    await for (final chunk in request) {
+      if (bytes.length + chunk.length > _maxRequestBytes) {
+        throw const _HandoverTooLarge();
+      }
+      bytes.add(chunk);
+    }
+    return utf8.decode(bytes.takeBytes());
+  }
+
   Future<void> stop() async {
     await _server.close(force: true);
     await _done.close();
   }
+}
+
+class _HandoverTooLarge implements Exception {
+  const _HandoverTooLarge();
 }
 
 /// The side that connects, having filmed the invitation.
