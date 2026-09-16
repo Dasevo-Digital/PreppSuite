@@ -25,7 +25,7 @@ readonly BUILD="$HERE/build"
 
 # Matches the Runner's own target. A library built for something newer
 # would load on this machine and refuse on an older one.
-export MACOSX_DEPLOYMENT_TARGET=10.15
+export MACOSX_DEPLOYMENT_TARGET=12.0
 
 [ "${1:-}" = "--clean" ] && rm -rf "$BUILD"
 mkdir -p "$BUILD"

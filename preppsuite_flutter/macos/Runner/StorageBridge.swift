@@ -387,7 +387,7 @@ final class StorageBridge: NSObject {
     fileReads.async {
       do {
         // The throwing pair only exists from 10.15.4; the deployment
-        // target is 10.15. The older calls do the same thing but report
+        // target was 10.15. The older calls do the same thing but report
         // failure as an Objective-C exception, which Swift cannot catch —
         // so on those systems a bad read takes the app down rather than
         // returning an error. Accepted knowingly: it covers four point
