@@ -4813,4 +4813,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pacerPushOnlyShort => 'Push only';
+
+  @override
+  String get warningSituationMapTitle => 'Warning situation map';
+
+  @override
+  String get warningSituationMapEmpty =>
+      'There are no active warnings for this selection.';
+
+  @override
+  String get warningSituationMapNoGeometry =>
+      'The active warnings do not include map areas. Their complete guidance remains available offline in the warning list.';
+
+  @override
+  String get warningSituationMapFailed =>
+      'The stored warning situation could not be read.';
+
+  @override
+  String get knowledgeApolloPackagesTitle => 'APOLLO package status';
+
+  @override
+  String knowledgeApolloPackageSummary(int installed, int total) {
+    return '$installed of $total recommended sources available';
+  }
+
+  @override
+  String get knowledgeApolloPackageInstalled =>
+      'Downloaded and registered in the library';
+
+  @override
+  String get knowledgeApolloPackageMissing => 'Not yet in the library';
+
+  @override
+  String get readinessEquipment => 'Equipment and batteries checked';
+
+  @override
+  String get readinessEquipmentOff => 'The check routine is switched off';
+
+  @override
+  String get readinessEquipmentNotChecked => 'No check has been confirmed yet';
+
+  @override
+  String get readinessEquipmentDue => 'A check is due';
+
+  @override
+  String get readinessEquipmentChecked =>
+      'A check was confirmed within the chosen interval';
+
+  @override
+  String get transferNearbyTitle => 'Devices on the local network';
+
+  @override
+  String get transferNearbyHint =>
+      'Only random, short-lived availability signals are searched for. Select a device, then scan its visible QR code; nothing is transferred without that code.';
+
+  @override
+  String get transferNearbyEmpty =>
+      'No transfer-ready PreppSuite device has been found on this network yet.';
+
+  @override
+  String get transferNearbyUnavailable =>
+      'Device discovery is not available on this network right now. You can still scan the QR code directly.';
+
+  @override
+  String get transferNearbyDevice => 'PreppSuite device ready';
+
+  @override
+  String get transferNearbyScanHint =>
+      'Scan this device\'s QR code for the secure handover';
 }

@@ -45,6 +45,8 @@ void main() {
     );
     await tester.scrollUntilVisible(find.text('Lernen zu Hause'), 200);
     expect(find.text('Lernen zu Hause'), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('APOLLO-Paketstand'), 200);
+    expect(find.text('APOLLO-Paketstand'), findsOneWidget);
   });
 
   testWidgets('meets accessibility guidelines', (tester) async {

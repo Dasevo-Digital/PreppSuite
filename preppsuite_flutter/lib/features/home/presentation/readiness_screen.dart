@@ -8,6 +8,7 @@ import '../../checklists/application/checklist_satisfaction.dart';
 import '../../household/application/household_member_controller.dart';
 import '../../household/application/household_plan_controller.dart';
 import '../../inventory/application/inventory_providers.dart';
+import '../../inventory/application/charge_reminder_provider.dart';
 import '../../knowledge/application/knowledge_providers.dart';
 import '../../maps/application/offline_map_providers.dart';
 import '../../warnings/application/warning_poll_status_store.dart';
@@ -38,6 +39,9 @@ class ReadinessScreen extends ConsumerWidget {
     final knowledge = ref.watch(knowledgeProvider).value;
     final knowledgeReady = knowledge?.isReady ?? false;
     final warningStatus = ref.watch(_warningPollStatusProvider).value;
+    final equipment = ref.watch(chargeCheckProvider);
+    final equipmentReady =
+        !equipment.isOff && equipment.lastChecked != null && !equipment.isDue();
     // Built once, not once per checklist item. `any` short-circuits, so the
     // cost only shows in full when nothing is satisfied yet — which is the
     // fresh household this screen exists for, and 129 built-in items
@@ -56,6 +60,7 @@ class ReadinessScreen extends ConsumerWidget {
       (l10n.readinessCards, members.isNotEmpty),
       (l10n.readinessMap, mapReady),
       (l10n.readinessKnowledge, knowledgeReady),
+      (l10n.readinessEquipment, equipmentReady),
     ];
     final readyCount = checks.where((check) => check.$2).length;
 
@@ -117,6 +122,18 @@ class ReadinessScreen extends ConsumerWidget {
                   value: mapReady
                       ? l10n.readinessPackageReady
                       : l10n.readinessPackageMissing,
+                ),
+                const Divider(height: 1),
+                _StatusRow(
+                  icon: Icons.battery_charging_full_outlined,
+                  title: l10n.readinessEquipment,
+                  value: switch (equipment) {
+                    _ when equipment.isOff => l10n.readinessEquipmentOff,
+                    _ when equipment.lastChecked == null =>
+                      l10n.readinessEquipmentNotChecked,
+                    _ when equipment.isDue() => l10n.readinessEquipmentDue,
+                    _ => l10n.readinessEquipmentChecked,
+                  },
                 ),
                 const Divider(height: 1),
                 _StatusRow(

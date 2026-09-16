@@ -4842,4 +4842,72 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get pacerPushOnlyShort => 'Nur drücken';
+
+  @override
+  String get warningSituationMapTitle => 'Warnlagekarte';
+
+  @override
+  String get warningSituationMapEmpty =>
+      'Für diese Auswahl liegen keine aktiven Warnungen vor.';
+
+  @override
+  String get warningSituationMapNoGeometry =>
+      'Zu den aktiven Warnungen sind keine Kartenflächen verfügbar. Die vollständigen Hinweise bleiben in der Warnungsliste offline lesbar.';
+
+  @override
+  String get warningSituationMapFailed =>
+      'Die gespeicherte Warnlage konnte nicht gelesen werden.';
+
+  @override
+  String get knowledgeApolloPackagesTitle => 'APOLLO-Paketstand';
+
+  @override
+  String knowledgeApolloPackageSummary(int installed, int total) {
+    return '$installed von $total empfohlenen Quellen verfügbar';
+  }
+
+  @override
+  String get knowledgeApolloPackageInstalled =>
+      'Heruntergeladen und in der Bibliothek registriert';
+
+  @override
+  String get knowledgeApolloPackageMissing => 'Noch nicht in der Bibliothek';
+
+  @override
+  String get readinessEquipment => 'Ausrüstung und Akkus geprüft';
+
+  @override
+  String get readinessEquipmentOff => 'Prüfroutine ist ausgeschaltet';
+
+  @override
+  String get readinessEquipmentNotChecked => 'Noch keine Prüfung bestätigt';
+
+  @override
+  String get readinessEquipmentDue => 'Prüfung ist fällig';
+
+  @override
+  String get readinessEquipmentChecked =>
+      'Prüfung innerhalb des gewählten Intervalls bestätigt';
+
+  @override
+  String get transferNearbyTitle => 'Geräte im lokalen Netz';
+
+  @override
+  String get transferNearbyHint =>
+      'Es werden nur zufällige, kurzlebige Bereitschaftssignale gesucht. Wähle ein Gerät und scanne anschließend dessen sichtbaren QR-Code; ohne diesen Code wird nichts übertragen.';
+
+  @override
+  String get transferNearbyEmpty =>
+      'Noch kein sendebereites PreppSuite-Gerät im gleichen Netz gefunden.';
+
+  @override
+  String get transferNearbyUnavailable =>
+      'Die Gerätesuche ist auf diesem Netz gerade nicht verfügbar. Du kannst den QR-Code weiterhin direkt scannen.';
+
+  @override
+  String get transferNearbyDevice => 'PreppSuite-Gerät bereit';
+
+  @override
+  String get transferNearbyScanHint =>
+      'Für die sichere Übergabe QR-Code dieses Geräts scannen';
 }

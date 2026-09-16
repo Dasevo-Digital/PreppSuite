@@ -8155,6 +8155,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Push only'**
   String get pacerPushOnlyShort;
+
+  /// No description provided for @warningSituationMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning situation map'**
+  String get warningSituationMapTitle;
+
+  /// No description provided for @warningSituationMapEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no active warnings for this selection.'**
+  String get warningSituationMapEmpty;
+
+  /// No description provided for @warningSituationMapNoGeometry.
+  ///
+  /// In en, this message translates to:
+  /// **'The active warnings do not include map areas. Their complete guidance remains available offline in the warning list.'**
+  String get warningSituationMapNoGeometry;
+
+  /// No description provided for @warningSituationMapFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The stored warning situation could not be read.'**
+  String get warningSituationMapFailed;
+
+  /// No description provided for @knowledgeApolloPackagesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'APOLLO package status'**
+  String get knowledgeApolloPackagesTitle;
+
+  /// No description provided for @knowledgeApolloPackageSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{installed} of {total} recommended sources available'**
+  String knowledgeApolloPackageSummary(int installed, int total);
+
+  /// No description provided for @knowledgeApolloPackageInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloaded and registered in the library'**
+  String get knowledgeApolloPackageInstalled;
+
+  /// No description provided for @knowledgeApolloPackageMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not yet in the library'**
+  String get knowledgeApolloPackageMissing;
+
+  /// No description provided for @readinessEquipment.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment and batteries checked'**
+  String get readinessEquipment;
+
+  /// No description provided for @readinessEquipmentOff.
+  ///
+  /// In en, this message translates to:
+  /// **'The check routine is switched off'**
+  String get readinessEquipmentOff;
+
+  /// No description provided for @readinessEquipmentNotChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'No check has been confirmed yet'**
+  String get readinessEquipmentNotChecked;
+
+  /// No description provided for @readinessEquipmentDue.
+  ///
+  /// In en, this message translates to:
+  /// **'A check is due'**
+  String get readinessEquipmentDue;
+
+  /// No description provided for @readinessEquipmentChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'A check was confirmed within the chosen interval'**
+  String get readinessEquipmentChecked;
+
+  /// No description provided for @transferNearbyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Devices on the local network'**
+  String get transferNearbyTitle;
+
+  /// No description provided for @transferNearbyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only random, short-lived availability signals are searched for. Select a device, then scan its visible QR code; nothing is transferred without that code.'**
+  String get transferNearbyHint;
+
+  /// No description provided for @transferNearbyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No transfer-ready PreppSuite device has been found on this network yet.'**
+  String get transferNearbyEmpty;
+
+  /// No description provided for @transferNearbyUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Device discovery is not available on this network right now. You can still scan the QR code directly.'**
+  String get transferNearbyUnavailable;
+
+  /// No description provided for @transferNearbyDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'PreppSuite device ready'**
+  String get transferNearbyDevice;
+
+  /// No description provided for @transferNearbyScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan this device\'s QR code for the secure handover'**
+  String get transferNearbyScanHint;
 }
 
 class _AppLocalizationsDelegate

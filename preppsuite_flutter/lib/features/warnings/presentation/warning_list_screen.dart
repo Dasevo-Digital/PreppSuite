@@ -12,6 +12,7 @@ import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/warning_filter.dart';
+import 'warning_situation_map_screen.dart';
 import 'warning_day_notice.dart';
 import '../application/warning_providers.dart';
 import '../application/warning_relevance.dart';
@@ -59,7 +60,20 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
     final warningsAsync = ref.watch(allWarningsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.warningsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.warningsTitle),
+        actions: [
+          IconButton(
+            tooltip: l10n.warningSituationMapTitle,
+            icon: const Icon(Icons.map_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => WarningSituationMapScreen(profile: profile),
+              ),
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           _FilterBar(

@@ -10,6 +10,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../sharing/application/shared_folder_store.dart';
 import '../../sharing/application/snapshot_exchange.dart';
 import '../application/local_handover.dart';
+import '../application/local_discovery.dart';
 import '../application/qr_chain.dart';
 import 'qr_code_view.dart';
 
@@ -44,6 +45,7 @@ class _QrSendScreenState extends ConsumerState<QrSendScreen> {
   var _networkTried = false;
   String? _handoverResult;
   StreamSubscription<LocalHandoverResult>? _watching;
+  LocalTransferBroadcaster? _broadcaster;
 
   /// How long one frame stays up.
   ///
@@ -77,6 +79,7 @@ class _QrSendScreenState extends ConsumerState<QrSendScreen> {
   void dispose() {
     _timer?.cancel();
     _watching?.cancel();
+    _broadcaster?.dispose();
     // Fire and forget: the socket is going away with the screen and
     // nothing is waiting on the answer.
     unawaited(_host?.stop() ?? Future<void>.value());
@@ -103,8 +106,15 @@ class _QrSendScreenState extends ConsumerState<QrSendScreen> {
               : l10n.transferHandoverDone(result.received);
         });
       });
+      final broadcaster = await LocalTransferBroadcaster.start();
+      if (!mounted) {
+        broadcaster.dispose();
+        await host.stop();
+        return;
+      }
       setState(() {
         _host = host;
+        _broadcaster = broadcaster;
         _networkTried = true;
       });
     } on Object {

@@ -18,6 +18,10 @@ class ApolloLibraryScreen extends ConsumerWidget {
     final state = ref.watch(knowledgeProvider).value;
     final archives = state?.library ?? const [];
     final installedLabels = {for (final archive in archives) archive.label};
+    final installedRecommendations = {
+      for (final recommendation in RecommendedArchive.values)
+        if (recommendation.isInstalled(installedLabels)) recommendation,
+    };
     final knownSize = archives.fold<int>(
       0,
       (total, archive) => total + (archive.sizeBytes ?? 0),
@@ -136,6 +140,11 @@ class ApolloLibraryScreen extends ConsumerWidget {
             ],
             installedLabels: installedLabels,
           ),
+          const SizedBox(height: 24),
+          _PackageStatus(
+            installed: installedRecommendations,
+            l10n: l10n,
+          ),
           if (archives.isNotEmpty) ...[
             const SizedBox(height: 16),
             Text(
@@ -182,6 +191,50 @@ class ApolloLibraryScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Makes the intended offline curriculum auditable at a glance.
+///
+/// A registered archive is not automatically one of APOLLO's recommended
+/// sources. Comparing the actual library against the small manifest avoids
+/// calling a collection ready merely because a general encyclopedia happens
+/// to be present.
+class _PackageStatus extends StatelessWidget {
+  const _PackageStatus({required this.installed, required this.l10n});
+
+  final Set<RecommendedArchive> installed;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: ExpansionTile(
+      leading: const Icon(Icons.inventory_2_outlined),
+      title: Text(l10n.knowledgeApolloPackagesTitle),
+      subtitle: Text(
+        l10n.knowledgeApolloPackageSummary(
+          installed.length,
+          RecommendedArchive.values.length,
+        ),
+      ),
+      children: [
+        for (final archive in RecommendedArchive.values)
+          ListTile(
+            dense: true,
+            leading: Icon(
+              installed.contains(archive)
+                  ? Icons.verified_outlined
+                  : Icons.download_for_offline_outlined,
+            ),
+            title: Text(archive.name),
+            subtitle: Text(
+              installed.contains(archive)
+                  ? l10n.knowledgeApolloPackageInstalled
+                  : l10n.knowledgeApolloPackageMissing,
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 class _OfflineStatus extends StatelessWidget {

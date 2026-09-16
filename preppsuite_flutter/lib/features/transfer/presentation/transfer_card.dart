@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import 'qr_receive_screen.dart';
 import 'qr_send_screen.dart';
+import 'local_devices_screen.dart';
 
 /// The way to hand a household over with nothing in between.
 ///
@@ -79,6 +80,17 @@ class TransferCard extends StatelessWidget {
                   ),
                   icon: const Icon(Icons.photo_camera_outlined),
                   label: Text(l10n.transferReceive),
+                ),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => LocalDevicesScreen(
+                        householdId: householdId,
+                      ),
+                    ),
+                  ),
+                  icon: const Icon(Icons.devices_other_outlined),
+                  label: Text(l10n.transferNearbyTitle),
                 ),
               ],
             ),
