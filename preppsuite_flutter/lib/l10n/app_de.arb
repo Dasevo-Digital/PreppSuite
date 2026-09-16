@@ -244,6 +244,15 @@
   "settingsLocationNoMatchMessage": "Aus deinem Standort konnte kein Bundesland ermittelt werden.",
   "shelterMapTitle": "Schutzräume",
   "shelterInfoLine": "OpenStreetMap und WWBOTA/DLBOTA im Umkreis von {radius} km geladen.",
+  "shelterLegendTitle": "Einordnung der Markierungen",
+  "shelterLegendSummary": "Grün {green} · Gelb {yellow} · Rot {red}",
+  "@shelterLegendSummary": {
+    "placeholders": {
+      "green": {"type": "int"},
+      "yellow": {"type": "int"},
+      "red": {"type": "int"}
+    }
+  },
   "shelterLegendGreenLabel": "Grün",
   "shelterLegendGreenDescription": "offiziell als nutzbarer Schutzraum bestätigt",
   "shelterLegendYellowLabel": "Gelb",

@@ -1538,6 +1538,18 @@ abstract class AppLocalizations {
   /// **'OpenStreetMap and WWBOTA/DLBOTA loaded within {radius} km.'**
   String shelterInfoLine(int radius);
 
+  /// No description provided for @shelterLegendTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Marker guide'**
+  String get shelterLegendTitle;
+
+  /// No description provided for @shelterLegendSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Green {green} · Yellow {yellow} · Red {red}'**
+  String shelterLegendSummary(int green, int yellow, int red);
+
   /// No description provided for @shelterLegendGreenLabel.
   ///
   /// In en, this message translates to:

@@ -188,284 +188,277 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
         ? _shelters
         : _shelters.where((s) => s.confidence == _filter).toList();
 
+    final mapHeight = (MediaQuery.sizeOf(context).height * 0.26)
+        .clamp(176.0, 240.0)
+        .toDouble();
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.shelterMapTitle)),
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Text(
+            l10n.shelterInfoLine(_radiusKm.round()),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
+          Card(
+            clipBehavior: Clip.antiAlias,
+            child: ExpansionTile(
+              title: Text(l10n.shelterLegendTitle),
+              subtitle: Text(
+                l10n.shelterLegendSummary(
+                  counts[ShelterConfidence.green] ?? 0,
+                  counts[ShelterConfidence.yellow] ?? 0,
+                  counts[ShelterConfidence.red] ?? 0,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               children: [
-                Text(
-                  l10n.shelterInfoLine(_radiusKm.round()),
-                  style: Theme.of(context).textTheme.bodySmall,
+                _LegendRow(
+                  color: _colorFor(ShelterConfidence.green),
+                  label: l10n.shelterLegendGreenLabel,
+                  count: counts[ShelterConfidence.green] ?? 0,
+                  description: l10n.shelterLegendGreenDescription,
+                ),
+                _LegendRow(
+                  color: _colorFor(ShelterConfidence.yellow),
+                  label: l10n.shelterLegendYellowLabel,
+                  count: counts[ShelterConfidence.yellow] ?? 0,
+                  description: l10n.shelterLegendYellowDescription,
+                ),
+                _LegendRow(
+                  color: _colorFor(ShelterConfidence.red),
+                  label: l10n.shelterLegendRedLabel,
+                  count: counts[ShelterConfidence.red] ?? 0,
+                  description: l10n.shelterLegendRedDescription,
                 ),
                 const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: colorScheme.outlineVariant),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _LegendRow(
-                        color: _colorFor(ShelterConfidence.green),
-                        label: l10n.shelterLegendGreenLabel,
-                        count: counts[ShelterConfidence.green] ?? 0,
-                        description: l10n.shelterLegendGreenDescription,
-                      ),
-                      _LegendRow(
-                        color: _colorFor(ShelterConfidence.yellow),
-                        label: l10n.shelterLegendYellowLabel,
-                        count: counts[ShelterConfidence.yellow] ?? 0,
-                        description: l10n.shelterLegendYellowDescription,
-                      ),
-                      _LegendRow(
-                        color: _colorFor(ShelterConfidence.red),
-                        label: l10n.shelterLegendRedLabel,
-                        count: counts[ShelterConfidence.red] ?? 0,
-                        description: l10n.shelterLegendRedDescription,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.shelterDisclaimer,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
+                Text(
+                  l10n.shelterDisclaimer,
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
-                if ((counts[ShelterConfidence.green] ?? 0) == 0 &&
-                    _shelters.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.shelterNoConfirmedShelters,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
               ],
             ),
           ),
+          if ((counts[ShelterConfidence.green] ?? 0) == 0 &&
+              _shelters.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.shelterNoConfirmedShelters,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+          const SizedBox(height: 12),
           SizedBox(
-            height: 260,
-            child: Stack(
-              children: [
-                SwipeZoom(
-                  // A Magic Mouse has no wheel; see swipe_zoom.dart.
-                  controller: _mapController,
-                  child: FlutterMap(
-                    mapController: _mapController,
-                    options: MapOptions(
-                      initialCenter: _center ?? _germanyFallbackCenter,
-                      initialZoom: _center != null
-                          ? _zoomForRadius(_radiusKm)
-                          : 5.5,
-                    ),
-                    children: [
-                      const BaseMapLayer(),
-                      MapZoomButtons(controller: _mapController),
-                      BaseMapAttribution(l10n: l10n),
-                      MarkerLayer(
-                        markers: [
-                          if (_center != null)
-                            Marker(
-                              point: _center!,
-                              width: 20,
-                              height: 20,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: colorScheme.primary,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 2,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          for (final shelter in visibleShelters)
-                            Marker(
-                              point: LatLng(shelter.lat, shelter.lon),
-                              width: 28,
-                              height: 28,
-                              // The grade belongs in the words, not only in
-                              // the colour: three shields that differ in
-                              // nothing but green, amber and red are three
-                              // identical shields to anyone who cannot tell
-                              // those apart.
-                              child: Tooltip(
-                                message: l10n.shelterMarkerTooltip(
-                                  shelter.name,
-                                  localizeShelterConfidence(
-                                    l10n,
-                                    shelter.confidence,
-                                  ),
-                                  shelter.sourceLabel,
-                                ),
-                                child: Icon(
-                                  Icons.shield,
-                                  color: _colorFor(shelter.confidence),
-                                  size: 28,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                if (_center == null && !_isLoading)
-                  Center(
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(
-                          l10n.shelterEmptyPrompt,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (_isLoading)
-                  const Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(8),
-                        child: SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
+            height: mapHeight,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Stack(
                 children: [
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      ChoiceChip(
-                        label: Text(l10n.shelterFilterAll(_shelters.length)),
-                        selected: _filter == null,
-                        onSelected: (_) => setState(() => _filter = null),
+                  SwipeZoom(
+                    // A Magic Mouse has no wheel; see swipe_zoom.dart.
+                    controller: _mapController,
+                    child: FlutterMap(
+                      mapController: _mapController,
+                      options: MapOptions(
+                        initialCenter: _center ?? _germanyFallbackCenter,
+                        initialZoom: _center != null
+                            ? _zoomForRadius(_radiusKm)
+                            : 5.5,
                       ),
-                      for (final confidence in ShelterConfidence.values)
-                        ChoiceChip(
-                          label: Text(
-                            l10n.shelterFilterCount(
-                              localizeShelterConfidence(l10n, confidence),
-                              counts[confidence] ?? 0,
-                            ),
+                      children: [
+                        const BaseMapLayer(),
+                        MapZoomButtons(controller: _mapController),
+                        BaseMapAttribution(l10n: l10n),
+                        MarkerLayer(
+                          markers: [
+                            if (_center != null)
+                              Marker(
+                                point: _center!,
+                                width: 20,
+                                height: 20,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: colorScheme.primary,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            for (final shelter in visibleShelters)
+                              Marker(
+                                point: LatLng(shelter.lat, shelter.lon),
+                                width: 28,
+                                height: 28,
+                                // The grade belongs in the words, not only in
+                                // the colour: three shields that differ in
+                                // nothing but green, amber and red are three
+                                // identical shields to anyone who cannot tell
+                                // those apart.
+                                child: Tooltip(
+                                  message: l10n.shelterMarkerTooltip(
+                                    shelter.name,
+                                    localizeShelterConfidence(
+                                      l10n,
+                                      shelter.confidence,
+                                    ),
+                                    shelter.sourceLabel,
+                                  ),
+                                  child: Icon(
+                                    Icons.shield,
+                                    color: _colorFor(shelter.confidence),
+                                    size: 28,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (_center == null && !_isLoading)
+                    Center(
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(
+                            l10n.shelterEmptyPrompt,
+                            textAlign: TextAlign.center,
                           ),
-                          selected: _filter == confidence,
-                          onSelected: (_) =>
-                              setState(() => _filter = confidence),
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  ShelterList(
-                    shelters: visibleShelters,
-                    center: _center,
-                    l10n: l10n,
-                    colorFor: _colorFor,
-                    onShow: (shelter) => _mapController.move(
-                      LatLng(shelter.lat, shelter.lon),
-                      14,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            labelText: l10n.shelterSearchHint,
+                  if (_isLoading)
+                    const Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(8),
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           ),
-                          onSubmitted: (_) => _search(),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      FilledButton(
-                        onPressed: _search,
-                        child: Text(l10n.shelterSearchButton),
-                      ),
-                    ],
-                  ),
-                  if (_locationError != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      _locationError!,
-                      style: TextStyle(color: colorScheme.error),
                     ),
-                  ],
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      for (final km in [10.0, 25.0, 50.0])
-                        ChoiceChip(
-                          label: Text('${km.round()} km'),
-                          selected: _radiusKm == km,
-                          onSelected: (_) {
-                            setState(() => _radiusKm = km);
-                            if (_center != null) {
-                              _mapController.move(
-                                _center!,
-                                _zoomForRadius(km),
-                              );
-                              unawaited(_fetchShelters());
-                            }
-                          },
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton(
-                    onPressed: _useCurrentLocation,
-                    child: Text(l10n.shelterUseLocationButton),
-                  ),
-                  const SizedBox(height: 8),
-                  OutlinedButton(
-                    // Disabled while a search runs. Overpass allows two
-                    // concurrent queries per address and refuses the
-                    // third, so a button that can be pressed five times
-                    // in a row is a button that produces the rate-limit
-                    // failure it is meant to clear.
-                    onPressed: _center == null || _isLoading
-                        ? null
-                        : _fetchShelters,
-                    child: Text(l10n.shelterRefreshButton),
-                  ),
-                  if (_wwbotaError != null) ...[
-                    const SizedBox(height: 8),
-                    _SourceFailure(
-                      message: l10n.shelterWwbotaErrorMessage,
-                      reason: describeError(l10n, _wwbotaError!),
-                      l10n: l10n,
-                    ),
-                  ],
-                  if (_overpassError != null) ...[
-                    const SizedBox(height: 8),
-                    _overpassFailure(l10n),
-                  ],
                 ],
               ),
             ),
           ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            children: [
+              ChoiceChip(
+                label: Text(l10n.shelterFilterAll(_shelters.length)),
+                selected: _filter == null,
+                onSelected: (_) => setState(() => _filter = null),
+              ),
+              for (final confidence in ShelterConfidence.values)
+                ChoiceChip(
+                  label: Text(
+                    l10n.shelterFilterCount(
+                      localizeShelterConfidence(l10n, confidence),
+                      counts[confidence] ?? 0,
+                    ),
+                  ),
+                  selected: _filter == confidence,
+                  onSelected: (_) => setState(() => _filter = confidence),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ShelterList(
+            shelters: visibleShelters,
+            center: _center,
+            l10n: l10n,
+            colorFor: _colorFor,
+            onShow: (shelter) => _mapController.move(
+              LatLng(shelter.lat, shelter.lon),
+              14,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    labelText: l10n.shelterSearchHint,
+                  ),
+                  onSubmitted: (_) => _search(),
+                ),
+              ),
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: _search,
+                child: Text(l10n.shelterSearchButton),
+              ),
+            ],
+          ),
+          if (_locationError != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _locationError!,
+              style: TextStyle(color: colorScheme.error),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            children: [
+              for (final km in [10.0, 25.0, 50.0])
+                ChoiceChip(
+                  label: Text('${km.round()} km'),
+                  selected: _radiusKm == km,
+                  onSelected: (_) {
+                    setState(() => _radiusKm = km);
+                    if (_center != null) {
+                      _mapController.move(
+                        _center!,
+                        _zoomForRadius(km),
+                      );
+                      unawaited(_fetchShelters());
+                    }
+                  },
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: _useCurrentLocation,
+            child: Text(l10n.shelterUseLocationButton),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            // Disabled while a search runs. Overpass allows two concurrent
+            // queries per address and refuses the third, so a button that can
+            // be pressed five times in a row is a button that produces the
+            // rate-limit failure it is meant to clear.
+            onPressed: _center == null || _isLoading ? null : _fetchShelters,
+            child: Text(l10n.shelterRefreshButton),
+          ),
+          if (_wwbotaError != null) ...[
+            const SizedBox(height: 8),
+            _SourceFailure(
+              message: l10n.shelterWwbotaErrorMessage,
+              reason: describeError(l10n, _wwbotaError!),
+              l10n: l10n,
+            ),
+          ],
+          if (_overpassError != null) ...[
+            const SizedBox(height: 8),
+            _overpassFailure(l10n),
+          ],
         ],
       ),
     );

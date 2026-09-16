@@ -831,6 +831,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get shelterLegendTitle => 'Marker guide';
+
+  @override
+  String shelterLegendSummary(int green, int yellow, int red) {
+    return 'Green $green · Yellow $yellow · Red $red';
+  }
+
+  @override
   String get shelterLegendGreenLabel => 'Green';
 
   @override

@@ -836,6 +836,14 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get shelterLegendTitle => 'Einordnung der Markierungen';
+
+  @override
+  String shelterLegendSummary(int green, int yellow, int red) {
+    return 'Grün $green · Gelb $yellow · Rot $red';
+  }
+
+  @override
   String get shelterLegendGreenLabel => 'Grün';
 
   @override

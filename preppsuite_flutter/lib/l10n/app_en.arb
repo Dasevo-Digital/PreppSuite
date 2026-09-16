@@ -427,6 +427,15 @@
       }
     }
   },
+  "shelterLegendTitle": "Marker guide",
+  "shelterLegendSummary": "Green {green} · Yellow {yellow} · Red {red}",
+  "@shelterLegendSummary": {
+    "placeholders": {
+      "green": {"type": "int"},
+      "yellow": {"type": "int"},
+      "red": {"type": "int"}
+    }
+  },
   "shelterLegendGreenLabel": "Green",
   "shelterLegendGreenDescription": "officially confirmed as a usable shelter",
   "shelterLegendYellowLabel": "Yellow",
