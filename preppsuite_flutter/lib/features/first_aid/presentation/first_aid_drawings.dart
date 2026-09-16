@@ -104,34 +104,61 @@ class _FirstAidPainter extends CustomPainter {
     canvas.restore();
   }
 
-  /// The chest from the front, with the lower half of the breastbone
-  /// marked. That is the whole content of the picture: where, not how.
+  /// The chest from the front, with the place the hands go marked.
+  ///
+  /// Rendered and looked at, twice. The first version drew the ribcage as
+  /// a tapering shield with a line through a circle, which read as a crest
+  /// with a power button on it. The second put a rounded bar across the
+  /// marker, which read as a prohibition sign -- a circle with a diagonal
+  /// through it means one thing and it is not "push here".
+  ///
+  /// What works is a hand: a palm with fingers, the same shape the
+  /// bleeding drawing uses, which is legible there for the same reason.
   void _compressionPoint(Canvas canvas, Paint stroke, Paint mark, Paint wash) {
-    // Head and shoulders.
-    canvas.drawCircle(const Offset(50, 16), 10, stroke);
-    canvas.drawPath(
-      Path()
-        ..moveTo(26, 40)
-        ..quadraticBezierTo(50, 30, 74, 40),
-      stroke,
-    );
-
-    // Ribcage: a rounded trapezoid, wider at the shoulders.
-    canvas.drawPath(
-      Path()
-        ..moveTo(28, 42)
-        ..lineTo(72, 42)
-        ..quadraticBezierTo(70, 74, 50, 82)
-        ..quadraticBezierTo(30, 74, 28, 42)
-        ..close(),
-      stroke,
-    );
-
-    // The breastbone, and its lower half picked out.
-    canvas.drawLine(const Offset(50, 42), const Offset(50, 70), stroke);
-    canvas.drawCircle(const Offset(50, 62), 12, wash);
-    canvas.drawCircle(const Offset(50, 62), 12, mark);
-    canvas.drawLine(const Offset(50, 56), const Offset(50, 68), mark);
+    canvas
+      ..drawCircle(const Offset(50, 13), 8, stroke)
+      ..drawLine(const Offset(50, 21), const Offset(50, 28), stroke)
+      // Shoulders straight and wide: an arc here reads as a helmet brim.
+      ..drawLine(const Offset(29, 30), const Offset(71, 30), stroke)
+      ..drawPath(
+        Path()
+          ..moveTo(29, 30)
+          ..lineTo(20, 58)
+          ..moveTo(71, 30)
+          ..lineTo(80, 58),
+        stroke,
+      )
+      // The torso, ending flat rather than in a point.
+      ..drawRRect(
+        RRect.fromRectAndRadius(
+          const Rect.fromLTWH(31, 30, 38, 50),
+          const Radius.circular(10),
+        ),
+        stroke,
+      )
+      // The breastbone, stopping well above the marker so nothing crosses
+      // it.
+      ..drawLine(const Offset(50, 35), const Offset(50, 46), stroke)
+      ..drawCircle(const Offset(50, 62), 13, wash)
+      ..drawCircle(const Offset(50, 62), 13, mark)
+      // Palm and three fingers, centred on the marker.
+      ..drawRRect(
+        RRect.fromRectAndRadius(
+          const Rect.fromLTWH(41, 60, 18, 12),
+          const Radius.circular(4),
+        ),
+        mark,
+      )
+      ..drawPath(
+        Path()
+          ..moveTo(44, 60)
+          ..lineTo(44, 54)
+          ..moveTo(50, 60)
+          ..lineTo(50, 53)
+          ..moveTo(56, 60)
+          ..lineTo(56, 55),
+        mark,
+      );
   }
 
   /// Seen from the side: head down, upper arm under the cheek, upper knee
@@ -201,18 +228,36 @@ class _FirstAidPainter extends CustomPainter {
       stroke,
     );
 
-    // The helping hand, flat between the shoulder blades.
-    canvas.drawPath(
-      Path()
-        ..moveTo(74, 44)
-        ..lineTo(60, 50),
-      mark,
-    );
-    canvas.drawCircle(const Offset(58, 51), 5, mark);
+    // The helping hand, flat between the shoulder blades. A palm with
+    // fingers rather than a blob: a small circle on a stick reads as a
+    // key, which is what the first version looked like.
+    canvas
+      ..save()
+      ..translate(63, 49)
+      ..rotate(0.5)
+      ..drawRRect(
+        RRect.fromRectAndRadius(
+          const Rect.fromLTWH(-4, -8, 13, 16),
+          const Radius.circular(4),
+        ),
+        mark,
+      )
+      ..drawPath(
+        Path()
+          ..moveTo(9, -5)
+          ..lineTo(15, -5)
+          ..moveTo(9, 0)
+          ..lineTo(16, 0)
+          ..moveTo(9, 5)
+          ..lineTo(15, 5),
+        mark,
+      )
+      ..restore();
 
     // Two short strokes for the direction of the blow.
-    canvas.drawLine(const Offset(82, 38), const Offset(74, 41), mark);
-    canvas.drawLine(const Offset(84, 48), const Offset(76, 48), mark);
+    canvas
+      ..drawLine(const Offset(86, 36), const Offset(78, 40), mark)
+      ..drawLine(const Offset(88, 46), const Offset(80, 47), mark);
   }
 
   /// A hand pressing a pad onto a forearm, and staying there.

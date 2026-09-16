@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:preppsuite_flutter/app.dart';
+import 'package:preppsuite_flutter/core/app_theme.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_severity_l10n.dart';
 import 'package:preppsuite_flutter/model/categories.dart';
 
@@ -42,11 +42,12 @@ void main() {
 
           await tester.pumpWidget(
             MaterialApp(
-              theme: ThemeData(
-                colorSchemeSeed: appSeedColor,
-                brightness: brightness,
-                useMaterial3: true,
-              ),
+              // The shipped themes, not a scheme built for the test:
+              // the severity ladder is set by hand in `app_theme.dart`
+              // and this is what holds it to 4.5:1.
+              theme: brightness == Brightness.light
+                  ? appLightTheme
+                  : appDarkTheme,
               home: Builder(
                 builder: (context) {
                   colors = warningSeverityColors(context, severity);

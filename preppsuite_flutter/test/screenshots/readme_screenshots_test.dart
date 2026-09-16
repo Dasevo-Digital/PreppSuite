@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:preppsuite_flutter/app.dart' show appSeedColor;
+import 'package:preppsuite_flutter/core/app_theme.dart';
 import 'package:preppsuite_flutter/features/daylight/application/daylight_store.dart';
 import 'package:preppsuite_flutter/features/daylight/presentation/daylight_screen.dart';
 import 'package:preppsuite_flutter/features/energy/application/energy_range.dart';
@@ -43,6 +43,15 @@ import '../features/maps/pmtiles_fixture.dart';
 /// renders with a blank placeholder font unless one is loaded, so the
 /// bundled Noto Sans is loaded here. On a real machine the app uses
 /// whatever the system offers.
+/// The shipped theme with the bundled typeface put over it -- see the note
+/// above about why a test needs a font loaded at all.
+ThemeData _shotTheme(bool dark) {
+  final base = dark ? appDarkTheme : appLightTheme;
+  return base.copyWith(
+    textTheme: base.textTheme.apply(fontFamily: 'Noto Sans'),
+  );
+}
+
 void main() {
   final wanted = Platform.environment['PREPPSUITE_SCREENSHOTS'] == '1';
 
@@ -98,6 +107,7 @@ void main() {
     String name,
     Widget home, {
     Widget Function(Widget child)? wrap,
+    bool dark = false,
   }) async {
     tester.view.physicalSize = size * scale;
     tester.view.devicePixelRatio = scale;
@@ -111,11 +121,9 @@ void main() {
         locale: const Locale('de'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        theme: ThemeData(
-          colorSchemeSeed: appSeedColor,
-          useMaterial3: true,
-          fontFamily: 'Noto Sans',
-        ),
+        // The shipped theme, with the bundled typeface put over it --
+        // see the note above about why a test needs a font loaded.
+        theme: _shotTheme(dark),
         home: home,
       ),
     );
