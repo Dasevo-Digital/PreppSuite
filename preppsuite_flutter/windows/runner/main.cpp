@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include "flutter_window.h"
+#include "library_check.h"
 #include "utils.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
@@ -11,6 +12,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   // new console when running with a debugger.
   if (!::AttachConsole(ATTACH_PARENT_PROCESS) && ::IsDebuggerPresent()) {
     CreateAndAttachConsole();
+  }
+
+  // Before anything else that matters: nothing below can report a missing
+  // dependency. The engine does not fail on one, it hangs -- no window,
+  // no message, nothing in the event log. See library_check.h.
+  if (!CheckBundledLibraries()) {
+    return EXIT_FAILURE;
   }
 
   // Initialize COM, so that it is available for use in the library and/or
