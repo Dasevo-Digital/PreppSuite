@@ -8,6 +8,7 @@ import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
 import '../../../local_db/database.dart';
 import 'warning_poll_service.dart';
+import 'warning_region_filter.dart';
 import 'warning_region_store.dart';
 import 'warning_relevance.dart';
 
@@ -83,6 +84,10 @@ Future<bool> runWarningBackgroundPoll({
     await service.poll(
       countryCode: filter.countryCode,
       kreisSchluessel: filter.ownKreisSchluessel,
+      extraKreisSchluessel: [
+        for (final region in filter.extraRegions)
+          if (region.kind == WarningRegionKind.kreis) region.value,
+      ],
     );
 
     final pending = await service.pendingNotifications(

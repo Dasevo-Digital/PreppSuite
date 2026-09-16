@@ -181,6 +181,19 @@ void main() {
       expect(WarningRegion.decode(region.encode()), region);
     });
 
+    test('a named place round-trips without changing its identity', () {
+      const region = WarningRegion(
+        kind: WarningRegionKind.kreis,
+        value: '03101',
+        label: 'Arbeit',
+      );
+
+      final decoded = WarningRegion.decode(region.encode());
+
+      expect(decoded, region);
+      expect(decoded!.label, 'Arbeit');
+    });
+
     test('rubbish decodes to null rather than a bogus region', () {
       expect(WarningRegion.decode('nonsense'), isNull);
       expect(WarningRegion.decode('kreis:'), isNull);

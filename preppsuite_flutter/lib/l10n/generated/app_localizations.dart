@@ -8281,6 +8281,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scan this device\'s QR code for the secure handover'**
   String get transferNearbyScanHint;
+
+  /// No description provided for @settingsRegionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label (optional)'**
+  String get settingsRegionLabel;
+
+  /// No description provided for @settingsRegionLabelHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'For example home, work or a relative.'**
+  String get settingsRegionLabelHelper;
+
+  /// No description provided for @mapPlacesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My places'**
+  String get mapPlacesTitle;
+
+  /// No description provided for @mapPlacesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal places appear as markers on the map. They stay on this device only.'**
+  String get mapPlacesIntro;
+
+  /// No description provided for @mapPlacesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No personal places yet. Save meeting points, distribution points, or important supplies.'**
+  String get mapPlacesEmpty;
+
+  /// No description provided for @mapPlaceAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add place'**
+  String get mapPlaceAdd;
+
+  /// No description provided for @mapPlaceEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit place'**
+  String get mapPlaceEdit;
+
+  /// No description provided for @mapPlacePrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'These location details stay local to this device and are not shared with the household.'**
+  String get mapPlacePrivacy;
+
+  /// No description provided for @mapPlaceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get mapPlaceLabel;
+
+  /// No description provided for @mapPlaceLatitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get mapPlaceLatitude;
+
+  /// No description provided for @mapPlaceLongitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get mapPlaceLongitude;
+
+  /// No description provided for @mapPlaceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get mapPlaceNote;
+
+  /// No description provided for @mapPlaceNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example access, supplies, or meeting time'**
+  String get mapPlaceNoteHint;
+
+  /// No description provided for @mapPlaceCoordinatesInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a label and valid coordinates.'**
+  String get mapPlaceCoordinatesInvalid;
+
+  /// No description provided for @mapPlaceDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove “{label}”?'**
+  String mapPlaceDeleteConfirm(Object label);
+
+  /// No description provided for @drillsLastCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'last completed: {date}'**
+  String drillsLastCompleted(String date);
 }
 
 class _AppLocalizationsDelegate

@@ -36,11 +36,14 @@ class AdditionalRegionsCard extends ConsumerWidget {
                       ? Icons.location_city
                       : Icons.map_outlined,
                 ),
-                title: Text(_regionTitle(ref, region)),
+                title: Text(region.label ?? _regionTitle(ref, region)),
                 subtitle: Text(
-                  region.kind == WarningRegionKind.kreis
-                      ? l10n.settingsRegionTypeKreis
-                      : l10n.settingsRegionTypeBundesland,
+                  [
+                    _regionTitle(ref, region),
+                    region.kind == WarningRegionKind.kreis
+                        ? l10n.settingsRegionTypeKreis
+                        : l10n.settingsRegionTypeBundesland,
+                  ].join(' · '),
                 ),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
@@ -92,6 +95,7 @@ class _AddRegionDialog extends ConsumerStatefulWidget {
 
 class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
   final _kreisController = TextEditingController();
+  final _labelController = TextEditingController();
   WarningRegionKind _kind = WarningRegionKind.kreis;
 
   /// Picked from a list rather than typed. There are sixteen of them and
@@ -105,11 +109,13 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
   @override
   void dispose() {
     _kreisController.dispose();
+    _labelController.dispose();
     super.dispose();
   }
 
   Future<void> _add(AppLocalizations l10n) async {
     final WarningRegion region;
+    final label = _labelController.text.trim();
 
     switch (_kind) {
       case WarningRegionKind.kreis:
@@ -121,7 +127,11 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
           setState(() => _error = l10n.settingsKreisSchluesselInvalid);
           return;
         }
-        region = WarningRegion(kind: _kind, value: value);
+        region = WarningRegion(
+          kind: _kind,
+          value: value,
+          label: label.isEmpty ? null : label,
+        );
 
       case WarningRegionKind.bundesland:
         final state = _state;
@@ -129,7 +139,11 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
           setState(() => _error = l10n.settingsBundeslandRequired);
           return;
         }
-        region = WarningRegion(kind: _kind, value: state.bbkCode);
+        region = WarningRegion(
+          kind: _kind,
+          value: state.bbkCode,
+          label: label.isEmpty ? null : label,
+        );
     }
 
     await ref.read(householdProfileProvider.notifier).addRegion(region);
@@ -206,6 +220,15 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
               // The old error belongs to the other kind of input.
               _error = null;
             }),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _labelController,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(
+              labelText: l10n.settingsRegionLabel,
+              helperText: l10n.settingsRegionLabelHelper,
+            ),
           ),
           const SizedBox(height: 16),
           if (_kind == WarningRegionKind.kreis) ...[

@@ -93,6 +93,34 @@ Stadt Worms;07319;RP
     expect(find.text('Stadt Worms · Rheinland-Pfalz (07319)'), findsOneWidget);
   });
 
+  testWidgets('a personal label stays paired with its actual warning region', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      Builder(
+        builder: (context) => AdditionalRegionsCard(
+          profile: HouseholdProfile(
+            id: 'h1',
+            name: 'Test',
+            countryCode: 'DE',
+            extraRegions: const [
+              WarningRegion(
+                kind: WarningRegionKind.kreis,
+                value: '07319',
+                label: 'Arbeitsort',
+              ),
+            ],
+          ),
+          l10n: AppLocalizations.of(context)!,
+        ),
+      ),
+    );
+
+    expect(find.text('Arbeitsort'), findsOneWidget);
+    expect(find.textContaining('Stadt Worms'), findsOneWidget);
+  });
+
   testWidgets('a Bundesland subscription keeps its own name', (tester) async {
     await pump(
       tester,

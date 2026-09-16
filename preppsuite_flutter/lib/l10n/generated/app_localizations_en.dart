@@ -4889,4 +4889,62 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get transferNearbyScanHint =>
       'Scan this device\'s QR code for the secure handover';
+
+  @override
+  String get settingsRegionLabel => 'Label (optional)';
+
+  @override
+  String get settingsRegionLabelHelper =>
+      'For example home, work or a relative.';
+
+  @override
+  String get mapPlacesTitle => 'My places';
+
+  @override
+  String get mapPlacesIntro =>
+      'Personal places appear as markers on the map. They stay on this device only.';
+
+  @override
+  String get mapPlacesEmpty =>
+      'No personal places yet. Save meeting points, distribution points, or important supplies.';
+
+  @override
+  String get mapPlaceAdd => 'Add place';
+
+  @override
+  String get mapPlaceEdit => 'Edit place';
+
+  @override
+  String get mapPlacePrivacy =>
+      'These location details stay local to this device and are not shared with the household.';
+
+  @override
+  String get mapPlaceLabel => 'Label';
+
+  @override
+  String get mapPlaceLatitude => 'Latitude';
+
+  @override
+  String get mapPlaceLongitude => 'Longitude';
+
+  @override
+  String get mapPlaceNote => 'Note (optional)';
+
+  @override
+  String get mapPlaceNoteHint =>
+      'For example access, supplies, or meeting time';
+
+  @override
+  String get mapPlaceCoordinatesInvalid =>
+      'Enter a label and valid coordinates.';
+
+  @override
+  String mapPlaceDeleteConfirm(Object label) {
+    return 'Remove “$label”?';
+  }
+
+  @override
+  String drillsLastCompleted(String date) {
+    return 'last completed: $date';
+  }
 }

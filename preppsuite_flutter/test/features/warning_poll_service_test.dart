@@ -172,6 +172,31 @@ void main() {
     expect(precise, isNotEmpty);
   });
 
+  test(
+    'every followed additional district receives a precise BBK fetch',
+    () async {
+      final requested = <String>[];
+      final client = FixtureHttpClient({
+        ...allBbkSources(mowasBody: mowas),
+        '$bbkBase/dashboard/053340000000.json': dashboard,
+        '$bbkBase/dashboard/031010000000.json': dashboard,
+      }, onRequest: requested.add);
+
+      await WarningPollService(
+        database: db,
+        bbkClient: BbkClient(httpClient: client),
+        meteoAlarmClient: MeteoAlarmClient(httpClient: client),
+      ).poll(
+        countryCode: 'DE',
+        kreisSchluessel: '05334',
+        extraKreisSchluessel: const ['03101', '05334'],
+      );
+
+      expect(requested, contains('$bbkBase/dashboard/053340000000.json'));
+      expect(requested, contains('$bbkBase/dashboard/031010000000.json'));
+    },
+  );
+
   group('pendingNotifications', () {
     /// The captured feeds contain only `Minor` entries, so anything that
     /// has to be announced is written directly. Polling first and hoping

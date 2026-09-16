@@ -67,6 +67,7 @@ class WarningPollService {
   Future<WarningPollResult> poll({
     required String countryCode,
     String? kreisSchluessel,
+    Iterable<String> extraKreisSchluessel = const [],
   }) async {
     final newsworthy = <NotifiableWarning>[];
     var fetched = 0;
@@ -103,22 +104,33 @@ class WarningPollService {
 
       final seen = {for (final w in nationwide.warnings) w.id};
 
-      if (kreisSchluessel != null && kreisSchluessel.length >= 5) {
-        final compactPrecise = await _bbk.fetchDashboard(
+      final districts = <String>{
+        if (kreisSchluessel != null && kreisSchluessel.length >= 5)
           kreisSchluessel.substring(0, 5),
-        );
-        final precise = await _detailsForChanged(compactPrecise);
-        fetched += precise.length;
-        newsworthy.addAll(
-          await _ingest.ingestBbk(
-            precise,
-            countryCode: 'DE',
-            regionKeyOverride: kreisSchluessel.substring(0, 5),
-          ),
-        );
-        // Folded in so a warning only the per-Kreis endpoint knows about is
-        // not retired by the sweep below.
-        seen.addAll(precise.map((w) => w.id));
+        for (final extra in extraKreisSchluessel)
+          if (extra.length >= 5) extra.substring(0, 5),
+      };
+      for (final district in districts) {
+        // A precise dashboard is an enhancement over the nationwide feed.
+        // One offline "Meine Orte" entry must not cancel all current alerts.
+        try {
+          final compactPrecise = await _bbk.fetchDashboard(district);
+          final precise = await _detailsForChanged(compactPrecise);
+          fetched += precise.length;
+          newsworthy.addAll(
+            await _ingest.ingestBbk(
+              precise,
+              countryCode: 'DE',
+              regionKeyOverride: district,
+            ),
+          );
+          // Folded in so a warning only the per-Kreis endpoint knows about
+          // is not retired by the sweep below.
+          seen.addAll(precise.map((w) => w.id));
+        } on Object {
+          // The nationwide feed was complete. A failed optional district
+          // lookup must not keep unrelated, retired nationwide warnings.
+        }
       }
 
       // Only when every source answered. An incomplete picture would end

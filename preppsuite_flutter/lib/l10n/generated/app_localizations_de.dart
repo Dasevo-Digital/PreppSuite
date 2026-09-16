@@ -4918,4 +4918,61 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get transferNearbyScanHint =>
       'Für die sichere Übergabe QR-Code dieses Geräts scannen';
+
+  @override
+  String get settingsRegionLabel => 'Bezeichnung (optional)';
+
+  @override
+  String get settingsRegionLabelHelper =>
+      'Zum Beispiel Zuhause, Arbeit oder Angehörige.';
+
+  @override
+  String get mapPlacesTitle => 'Meine Orte';
+
+  @override
+  String get mapPlacesIntro =>
+      'Persönliche Orte erscheinen als Markierungen auf der Karte. Sie bleiben nur auf diesem Gerät.';
+
+  @override
+  String get mapPlacesEmpty =>
+      'Noch keine persönlichen Orte. Speichere zum Beispiel Treffpunkte, Ausgabestellen oder wichtige Versorgungspunkte.';
+
+  @override
+  String get mapPlaceAdd => 'Ort hinzufügen';
+
+  @override
+  String get mapPlaceEdit => 'Ort bearbeiten';
+
+  @override
+  String get mapPlacePrivacy =>
+      'Diese Ortsdaten bleiben lokal auf diesem Gerät und werden nicht mit dem Haushalt geteilt.';
+
+  @override
+  String get mapPlaceLabel => 'Bezeichnung';
+
+  @override
+  String get mapPlaceLatitude => 'Breitengrad';
+
+  @override
+  String get mapPlaceLongitude => 'Längengrad';
+
+  @override
+  String get mapPlaceNote => 'Notiz (optional)';
+
+  @override
+  String get mapPlaceNoteHint => 'Zum Beispiel Zugang, Material oder Treffzeit';
+
+  @override
+  String get mapPlaceCoordinatesInvalid =>
+      'Bitte Bezeichnung sowie gültige Koordinaten eingeben.';
+
+  @override
+  String mapPlaceDeleteConfirm(Object label) {
+    return '„$label“ wirklich entfernen?';
+  }
+
+  @override
+  String drillsLastCompleted(String date) {
+    return 'zuletzt durchgeführt: $date';
+  }
 }

@@ -55,6 +55,10 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
       await service.poll(
         countryCode: filter.countryCode,
         kreisSchluessel: filter.ownKreisSchluessel,
+        extraKreisSchluessel: [
+          for (final region in filter.extraRegions)
+            if (region.kind == WarningRegionKind.kreis) region.value,
+        ],
       );
       await _notifyIfEnabled(service, filter);
       state = const AsyncData(null);

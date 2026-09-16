@@ -64,7 +64,12 @@ class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
   Future<void> addRegion(WarningRegion region) async {
     final profile = state.value;
     if (profile == null) return;
-    if (profile.extraRegions.contains(region)) return;
+    final existing = profile.extraRegions.indexOf(region);
+    if (existing >= 0) {
+      final updated = [...profile.extraRegions]..[existing] = region;
+      await _persist(profile.copyWith(extraRegions: updated));
+      return;
+    }
     await _persist(
       profile.copyWith(extraRegions: [...profile.extraRegions, region]),
     );

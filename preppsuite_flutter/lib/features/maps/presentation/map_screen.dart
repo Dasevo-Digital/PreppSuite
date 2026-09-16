@@ -6,11 +6,13 @@ import 'package:latlong2/latlong.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/offline_map_providers.dart';
+import '../application/personal_place.dart';
 import 'base_map_layer.dart';
 import 'map_download_screen.dart';
 import 'map_source_bar.dart';
 import 'map_zoom_buttons.dart';
 import 'nearby_screen.dart';
+import 'personal_places_screen.dart';
 import 'swipe_zoom.dart';
 
 /// Roughly the centre of Germany, so the map opens on something before a
@@ -50,12 +52,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   String? _searchLabel;
   bool _locating = false;
   int _lookupGeneration = 0;
+  List<PersonalPlace> _personalPlaces = const [];
 
   @override
   void initState() {
     super.initState();
     _searchPosition = widget.focus;
     _searchLabel = widget.focusLabel;
+    _loadPersonalPlaces();
   }
 
   @override
@@ -110,6 +114,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     context,
   ).showSnackBar(SnackBar(content: Text(message)));
 
+  Future<void> _loadPersonalPlaces() async {
+    final places = await const PersonalPlaceStore().load();
+    if (mounted) setState(() => _personalPlaces = places);
+  }
+
+  Future<void> _openPersonalPlaces(AppLocalizations l10n) async {
+    final changed = await Navigator.of(context).push<List<PersonalPlace>>(
+      MaterialPageRoute(
+        builder: (_) => PersonalPlacesScreen(places: _personalPlaces),
+      ),
+    );
+    if (changed != null && mounted) {
+      setState(() => _personalPlaces = changed);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -135,6 +155,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 ),
               ),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.bookmark_outline),
+            tooltip: l10n.mapPlacesTitle,
+            onPressed: () => _openPersonalPlaces(l10n),
           ),
           IconButton(
             icon: const Icon(Icons.cloud_download_outlined),
@@ -240,6 +265,45 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             ),
                           ),
                         ),
+                      ],
+                    ),
+                  if (_personalPlaces.isNotEmpty)
+                    MarkerLayer(
+                      markers: [
+                        for (final place in _personalPlaces)
+                          Marker(
+                            point: LatLng(place.latitude, place.longitude),
+                            width: 160,
+                            height: 42,
+                            alignment: Alignment.bottomCenter,
+                            child: Semantics(
+                              label: place.note == null
+                                  ? place.label
+                                  : '${place.label}: ${place.note}',
+                              child: Card(
+                                color: theme.colorScheme.secondaryContainer,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 5,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.place, size: 16),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          place.label,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.labelLarge,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   MapZoomButtons(controller: _mapController),

@@ -21,6 +21,7 @@ class _StubPollService extends WarningPollService {
   Future<WarningPollResult> poll({
     required String countryCode,
     String? kreisSchluessel,
+    Iterable<String> extraKreisSchluessel = const [],
   }) async {
     polls++;
     await _db.upsertWarning(

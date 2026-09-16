@@ -21,6 +21,7 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
   static const _store = DrillProgressStore();
 
   Set<String> _checked = {};
+  Map<String, DateTime> _completed = {};
 
   @override
   void initState() {
@@ -29,19 +30,35 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
   }
 
   Future<void> _restore() async {
-    final stored = await _store.load();
-    if (mounted) setState(() => _checked = stored);
+    final result = await Future.wait([_store.load(), _store.loadCompleted()]);
+    if (mounted) {
+      setState(() {
+        _checked = result[0] as Set<String>;
+        _completed = result[1] as Map<String, DateTime>;
+      });
+    }
   }
 
-  void _toggle(String key, {required bool on}) {
+  void _toggle(_Scenario scenario, String step, {required bool on}) {
+    final key = '${scenario.id}:$step';
+    final updated = {..._checked};
+    if (on) {
+      updated.add(key);
+    } else {
+      updated.remove(key);
+    }
     setState(() {
-      if (on) {
-        _checked.add(key);
-      } else {
-        _checked.remove(key);
-      }
+      _checked = updated;
     });
-    unawaited(_store.save(_checked));
+    unawaited(_store.save(updated));
+    if (on &&
+        scenario.steps.every(
+          (item) => updated.contains('${scenario.id}:$item'),
+        )) {
+      final completedAt = DateTime.now();
+      setState(() => _completed = {..._completed, scenario.id: completedAt});
+      unawaited(_store.markCompleted(scenario.id, completedAt));
+    }
   }
 
   @override
@@ -105,16 +122,20 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
             Card(
               child: ExpansionTile(
                 title: Text(scenario.title),
-                subtitle: Text(scenario.duration),
+                subtitle: Text(
+                  switch (_completed[scenario.id]) {
+                    final DateTime completed =>
+                      '${scenario.duration} · ${l10n.drillsLastCompleted(MaterialLocalizations.of(context).formatMediumDate(completed))}',
+                    null => scenario.duration,
+                  },
+                ),
                 children: [
                   for (final step in scenario.steps)
                     CheckboxListTile(
-                      value: _checked.contains('${scenario.title}:$step'),
+                      value: _checked.contains('${scenario.id}:$step'),
                       title: Text(step),
-                      onChanged: (value) => _toggle(
-                        '${scenario.title}:$step',
-                        on: value == true,
-                      ),
+                      onChanged: (value) =>
+                          _toggle(scenario, step, on: value == true),
                     ),
                 ],
               ),
@@ -126,7 +147,8 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
 }
 
 class _Scenario {
-  const _Scenario(this.title, this.duration, this.steps);
+  const _Scenario(this.id, this.title, this.duration, this.steps);
+  final String id;
   final String title;
   final String duration;
   final List<String> steps;
@@ -141,19 +163,34 @@ class _Scenario {
 /// until somebody writes the English, it stays as it is and stays visible
 /// here rather than hiding in the widget tree.
 const _scenarios = [
-  _Scenario('72 Stunden ohne Strom', 'Vorbereitung: 20 Minuten', [
-    'Licht, Radio und Powerbank bereitlegen',
-    'Wasser, Kocher und Vorräte prüfen',
-    'Kühlgeräte geschlossen halten',
-  ]),
-  _Scenario('Evakuierung in 15 Minuten', 'Vorbereitung: 15 Minuten', [
-    'Dokumente und Medikamente einpacken',
-    'Treffpunkt und Weg auf Offlinekarte prüfen',
-    'Haushaltsmitglieder und Kontaktweg abgleichen',
-  ]),
-  _Scenario('Kommunikation ausgefallen', 'Vorbereitung: 10 Minuten', [
-    'Lokales Radio und Warnungen prüfen',
-    'Nahe Kontakte und Treffpunkt bereithalten',
-    'Funkgerät nur im erlaubten Funkdienst einsetzen',
-  ]),
+  _Scenario(
+    'power-outage',
+    '72 Stunden ohne Strom',
+    'Vorbereitung: 20 Minuten',
+    [
+      'Licht, Radio und Powerbank bereitlegen',
+      'Wasser, Kocher und Vorräte prüfen',
+      'Kühlgeräte geschlossen halten',
+    ],
+  ),
+  _Scenario(
+    'evacuation',
+    'Evakuierung in 15 Minuten',
+    'Vorbereitung: 15 Minuten',
+    [
+      'Dokumente und Medikamente einpacken',
+      'Treffpunkt und Weg auf Offlinekarte prüfen',
+      'Haushaltsmitglieder und Kontaktweg abgleichen',
+    ],
+  ),
+  _Scenario(
+    'communication',
+    'Kommunikation ausgefallen',
+    'Vorbereitung: 10 Minuten',
+    [
+      'Lokales Radio und Warnungen prüfen',
+      'Nahe Kontakte und Treffpunkt bereithalten',
+      'Funkgerät nur im erlaubten Funkdienst einsetzen',
+    ],
+  ),
 ];
