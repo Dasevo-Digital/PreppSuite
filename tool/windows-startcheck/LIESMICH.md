@@ -8,20 +8,36 @@ Flutter, keine Laufzeit, die jemand für sie installiert hat.
 Das ist der Rechner, den ein Nutzer hat. Auf dem Baurechner zu starten
 beweist nichts: dort liegt alles schon da.
 
-## Warum nicht auf TestWindows selbst
+## Warum nicht auf dem Baurechner
 
-Zwei Gründe.
+Ein Entwicklungsrechner hat alles installiert. Genau deshalb blieb lange
+unbemerkt, dass die Pakete die Visual-C++-Laufzeit brauchten und nicht
+mitbrachten — auf TestWindows lag sie, wie auf jedem Rechner mit Visual
+Studio. Der Sandkasten hat es in einem Lauf gezeigt.
 
-**Smart App Control.** Auf TestWindows ist es scharf geschaltet
-(`HKLM:\SYSTEM\CurrentControlSet\Control\CI\Policy\VerifiedAndReputablePolicyState
-= 1`) und blockiert unsignierte Programme mit Beendigungscode
-`0xC0E90002`. Abschalten geht, ist aber eine Einbahnstraße: wieder
-einschalten nur durch eine Neuinstallation von Windows.
+## Was der Sandkasten nicht löst: Smart App Control
 
-**Und der wichtigere:** ein Entwicklungsrechner hat alles installiert.
-Genau deshalb blieb jahrelang unbemerkt, dass die Pakete die Visual-C++-
-Laufzeit brauchten und nicht mitbrachten. Der Sandkasten hat es in einem
-Lauf gezeigt.
+**Er umgeht es nicht.** Der Sandkasten erbt den Zustand des Wirts: auf
+TestWindows steht
+`HKLM:\SYSTEM\CurrentControlSet\Control\CI\Policy\VerifiedAndReputablePolicyState`
+auf `1`, und im Sandkasten steht er ebenfalls auf `1`. Unsignierte
+Programme werden dort genauso abgewiesen — mit `0xC0E90002` und den
+CodeIntegrity-Ereignissen 3077 und 3118.
+
+Am 15.09.2026 liefen die Messungen dort noch durch, am 16.09. nicht mehr;
+dazwischen lag eine Richtlinien-Aktualisierung („Code Integrity policy
+refresh finished for 6 policies"). Es blockiert auch eine Datei, die nie
+heruntergeladen wurde — direkt aus dem Bauordner gestartet, ohne Mark of
+the Web, derselbe Code.
+
+Solange das so ist, läuft dieser Startnachweis auf dieser Maschine gar
+nicht. Es hilft nur eines von beidem:
+
+- **Smart App Control auf TestWindows abschalten** (Windows-Sicherheit →
+  App- und Browsersteuerung). Einbahnstraße: wieder einschalten geht nur
+  durch eine Neuinstallation von Windows.
+- **Die Programme signieren**, mit einem Zertifikat einer anerkannten
+  Zertifizierungsstelle. Das löst es zugleich für die Nutzer.
 
 ## Ablauf
 

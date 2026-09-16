@@ -460,6 +460,13 @@ megabytes with no window. The check runs a control package alongside the
 new one, because a failure on its own does not say whether the package or
 the environment is at fault. See `tool/windows-startcheck/`.
 
+**The sandbox does not get past Smart App Control.** It inherits the
+host's state, and TestWindows has it enforced, so no unsigned binary runs
+there at all -- not from an archive and not straight out of the build
+folder. Either that is turned off on the host (one way only: turning it
+back on needs a reinstall of Windows) or the binaries are signed. Until
+then the Windows launch check cannot run on this hardware.
+
 ## Feature layout
 
 ```
