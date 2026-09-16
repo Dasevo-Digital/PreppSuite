@@ -30,7 +30,7 @@ void main() {
 
   group('an installed copy', () {
     test('writes down exactly what it was given', () {
-      const path = '/home/marco/Karten/niedersachsen.pmtiles';
+      const path = '/home/testuser/Karten/niedersachsen.pmtiles';
       expect(storeLocation(path), path);
       expect(readLocation(path), path);
     });
@@ -82,14 +82,14 @@ void main() {
       // An archive on the machine's own disk is exactly as findable as
       // it ever was, and writing it down relative to a stick would be
       // wrong.
-      const elsewhere = '/home/marco/Karten/niedersachsen.pmtiles';
+      const elsewhere = '/home/testuser/Karten/niedersachsen.pmtiles';
       expect(storeLocation(elsewhere), elsewhere);
     });
 
     test('reads a path written before any of this existed unchanged', () async {
       await carriedIn(workspace);
 
-      const old = '/home/marco/wikipedia.zim';
+      const old = '/home/testuser/wikipedia.zim';
       expect(readLocation(old), old);
     });
 

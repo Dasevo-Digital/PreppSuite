@@ -7,7 +7,7 @@ import 'portable_data.dart';
 ///
 /// A stored path is absolute, and on a carried disk an absolute path is
 /// a guess about a machine: the stick is `E:` today and `F:` tomorrow,
-/// `/Volumes/PREPP` on a Mac and `/media/marco/PREPP` on Linux. The map
+/// `/Volumes/PREPP` on a Mac and `/media/prepp/PREPP` on Linux. The map
 /// archive, the encyclopedias and the scanned documents would all be
 /// "not found" after the first replug — a portable program with a broken
 /// library, which is worse than no portable program.

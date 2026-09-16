@@ -12,6 +12,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check repository privacy
+        run: tool/repo_privacy_check.sh
 
       - uses: subosito/flutter-action@v2
         with:

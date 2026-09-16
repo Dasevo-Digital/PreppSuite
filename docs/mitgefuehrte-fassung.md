@@ -70,7 +70,7 @@ Das ist der Teil, ohne den das Ganze nicht trägt.
 Ein gemerkter Pfad ist absolut, und auf einem mitgeführten Datenträger
 ist ein absoluter Pfad eine Behauptung über einen bestimmten Rechner: Der
 Stick ist heute `E:` und morgen `F:`, auf einem Mac `/Volumes/PREPP` und
-unter Linux `/media/marco/PREPP`. Kartenarchiv, Wissensarchive,
+unter Linux `/media/prepp/PREPP`. Kartenarchiv, Wissensarchive,
 persönliche Dokumente, Fotos und der Download-Ordner wären nach dem
 ersten Umstecken allesamt „nicht gefunden" — ein portables Programm mit
 kaputter Bibliothek, und das ist schlechter als gar keins.

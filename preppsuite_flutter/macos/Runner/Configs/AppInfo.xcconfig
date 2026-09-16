@@ -15,4 +15,4 @@ PRODUCT_NAME = PreppSuite
 PRODUCT_BUNDLE_IDENTIFIER = de.status403.preppsuite
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 LeonardoGamar. MIT-Lizenz, siehe LICENSE.
+PRODUCT_COPYRIGHT = Copyright © 2026 PreppSuite Contributors. MIT-Lizenz, siehe LICENSE.
