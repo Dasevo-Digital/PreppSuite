@@ -31,7 +31,10 @@ class WarningSituationMapScreen extends ConsumerStatefulWidget {
 class _WarningSituationMapScreenState
     extends ConsumerState<WarningSituationMapScreen> {
   final _controller = MapController();
-  var _onlyMyRegions = false;
+  // The nationwide BBK feed is the input; the warning map is about the
+  // household's situation. Keep unrelated state and district polygons out
+  // until someone explicitly asks to inspect the national picture.
+  var _onlyMyRegions = true;
   var _onlySevere = false;
 
   @override

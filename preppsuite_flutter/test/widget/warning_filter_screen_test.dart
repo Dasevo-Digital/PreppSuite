@@ -90,12 +90,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('everything is shown until a chip is tapped', (tester) async {
+  testWidgets('the first view contains only the household regions', (
+    tester,
+  ) async {
     await pumpScreen(tester, [storm, past]);
 
     expect(find.text('Sturmböen Hannover'), findsOneWidget);
-    expect(find.text('Glätte Bremen'), findsOneWidget);
-    expect(find.textContaining('von 2 Warnungen'), findsNothing);
+    expect(find.text('Glätte Bremen'), findsNothing);
+    expect(find.text('1 von 2 Warnungen'), findsOneWidget);
   });
 
   testWidgets('"Akut" hides what has already run out', (tester) async {
@@ -109,24 +111,26 @@ void main() {
     expect(find.text('1 von 2 Warnungen'), findsOneWidget);
   });
 
-  testWidgets('"Meine Regionen" hides another district', (tester) async {
+  testWidgets('"Meine Regionen" can be switched off for national browsing', (
+    tester,
+  ) async {
     await pumpScreen(tester, [storm, past]);
 
     await tester.tap(find.widgetWithText(FilterChip, 'Meine Regionen'));
     await tester.pumpAndSettle();
 
     expect(find.text('Sturmböen Hannover'), findsOneWidget);
-    expect(find.text('Glätte Bremen'), findsNothing);
+    expect(find.text('Glätte Bremen'), findsOneWidget);
   });
 
-  testWidgets('searching a place name narrows to it', (tester) async {
+  testWidgets('searching a local place name narrows to it', (tester) async {
     await pumpScreen(tester, [storm, past]);
 
-    await tester.enterText(find.byType(TextField), 'bremen');
+    await tester.enterText(find.byType(TextField), 'hannover');
     await tester.pumpAndSettle();
 
-    expect(find.text('Glätte Bremen'), findsOneWidget);
-    expect(find.text('Sturmböen Hannover'), findsNothing);
+    expect(find.text('Sturmböen Hannover'), findsOneWidget);
+    expect(find.text('Glätte Bremen'), findsNothing);
   });
 
   testWidgets('a filter that hides everything says so, and offers a way back', (
@@ -146,7 +150,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sturmböen Hannover'), findsOneWidget);
-    expect(find.text('Glätte Bremen'), findsOneWidget);
+    expect(find.text('Glätte Bremen'), findsNothing);
   });
 
   testWidgets('an empty feed still reads as an empty feed', (tester) async {

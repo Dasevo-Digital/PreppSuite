@@ -38,7 +38,13 @@ class WarningListScreen extends ConsumerStatefulWidget {
 }
 
 class _WarningListScreenState extends ConsumerState<WarningListScreen> {
-  var _filter = const WarningFilter();
+  // The BBK map feeds cover the whole country. Showing that whole feed by
+  // default made the dedicated warning screen contradict both its banner
+  // and its notifications: a household in one state opened the screen and
+  // saw alerts from the others. The chip stays reversible for deliberately
+  // browsing the national picture, but the safe everyday view is the places
+  // this household follows.
+  var _filter = const WarningFilter(onlyMyRegions: true);
   final _searchController = TextEditingController();
 
   HouseholdProfile get profile => widget.profile;
@@ -51,7 +57,9 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
 
   void _clearFilter() {
     _searchController.clear();
-    setState(() => _filter = const WarningFilter());
+    // "Clear" returns to the normal, region-scoped view; it must not quietly
+    // re-enable every warning in the country.
+    setState(() => _filter = const WarningFilter(onlyMyRegions: true));
   }
 
   @override
