@@ -23,6 +23,7 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
 
   Set<String> _checked = {};
   Map<String, DateTime> _completed = {};
+  final Map<String, bool> _learningAnswers = {};
 
   @override
   void initState() {
@@ -111,6 +112,58 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
             ),
           ),
           const SizedBox(height: 20),
+          Text(
+            'Kurz lernen',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Kurze Offline-Wiederholungen ergänzen Übungen und Wissensarchiv.',
+          ),
+          const SizedBox(height: 8),
+          for (final lesson in _lessons)
+            Card(
+              child: ExpansionTile(
+                leading: Icon(lesson.icon),
+                title: Text(lesson.title),
+                subtitle: Text(lesson.summary),
+                childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                children: [
+                  Text(lesson.question),
+                  const SizedBox(height: 8),
+                  for (final answer in lesson.answers)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: OutlinedButton(
+                        onPressed: () => setState(
+                          () => _learningAnswers[lesson.id] =
+                              lesson.answers.indexOf(answer) ==
+                              lesson.correctAnswer,
+                        ),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(answer),
+                        ),
+                      ),
+                    ),
+                  if (_learningAnswers.containsKey(lesson.id))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        _learningAnswers[lesson.id] == true
+                            ? 'Richtig. ${lesson.explanation}'
+                            : 'Noch einmal nachsehen: ${lesson.explanation}',
+                        style: TextStyle(
+                          color: _learningAnswers[lesson.id] == true
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
@@ -170,6 +223,68 @@ class _Scenario {
   final String duration;
   final List<String> steps;
 }
+
+class _Lesson {
+  const _Lesson(
+    this.id,
+    this.icon,
+    this.title,
+    this.summary,
+    this.question,
+    this.answers,
+    this.correctAnswer,
+    this.explanation,
+  );
+  final String id, title, summary, question, explanation;
+  final IconData icon;
+  final List<String> answers;
+  final int correctAnswer;
+}
+
+const _lessons = [
+  _Lesson(
+    'communication',
+    Icons.forum_outlined,
+    'Kommunikation',
+    'Netze entlasten und Kontakte koordinieren.',
+    'Welcher Weg ist bei überlastetem Mobilfunk meist sinnvoll?',
+    [
+      'Langer Anruf',
+      'Kurze Nachricht mit Rückmeldezeit',
+      'Fortlaufend neu wählen',
+    ],
+    1,
+    'Kurze Nachrichten benötigen weniger Netzkapazität und schonen den Akku.',
+  ),
+  _Lesson(
+    'evacuation',
+    Icons.route_outlined,
+    'Evakuierung',
+    'Plan, Notgepäck und Treffpunkt bereithalten.',
+    'Was sollte vor einer Evakuierung geprüft werden?',
+    [
+      'Treffpunkt, Weg und benötigte Unterstützung',
+      'Nur die Wetter-App',
+      'Nur der Tankstand',
+    ],
+    0,
+    'Ein klarer Treffpunkt, der Weg und individuelle Bedarfe verhindern Stress und Fehlentscheidungen.',
+  ),
+  _Lesson(
+    'power',
+    Icons.battery_charging_full_outlined,
+    'Stromausfall',
+    'Licht, Information und Energie sichern.',
+    'Wofür dient das batteriebetriebene oder Kurbelradio?',
+    [
+      'Als Ersatz für amtliche Warnungen',
+      'Als zusätzlicher Informationskanal',
+      'Nur zum Musikhören',
+    ],
+    1,
+    'Radio ergänzt Systemwarnungen und funktioniert auch bei ausgefallenem Internet.',
+  ),
+];
 
 /// The drills themselves, in German only.
 ///

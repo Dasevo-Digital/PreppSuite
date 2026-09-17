@@ -1,7 +1,6 @@
 import 'dart:async' show unawaited;
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
@@ -51,45 +50,128 @@ class _PreparednessHubScreenState extends State<PreparednessHubScreen> {
     appBar: AppBar(title: const Text('Krisenorganisation')),
     body: _loading
         ? const Center(child: CircularProgressIndicator())
-        : ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Text(
-                'Alle Angaben bleiben auf diesem Gerät. Exportierst du ein Ereignisprotokoll, entscheidest du selbst über den Empfänger.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 16),
-              _section(
-                'Radio-Empfangsplan',
-                Icons.radio_outlined,
-                'Lokale UKW- und DAB-Stationen, Geräte und Stromversorgung festhalten.',
-                _radioPlan(),
-              ),
-              _section(
-                'Notfallmappe',
-                Icons.folder_copy_outlined,
-                'Dokumentenmappe ohne Inhalte oder Personenangaben verwalten.',
-                _folder(),
-              ),
-              _section(
-                'Wartungszentrale',
-                Icons.build_outlined,
-                'Regelmäßig prüfen, damit wichtige Ausrüstung im Notfall einsatzbereit ist.',
-                _maintenance(),
-              ),
-              _section(
-                'Evakuierungs-Karten',
-                Icons.route_outlined,
-                'Treffpunkte und sichere Wege als offline lesbare Karten notieren.',
-                _evacuation(),
-              ),
-              _section(
-                'Ereignisprotokoll',
-                Icons.history_edu_outlined,
-                'Beobachtungen und Maßnahmen mit Uhrzeit dokumentieren und bei Bedarf als PDF exportieren.',
-                _events(),
-              ),
-            ],
+        : MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(_data.crisisMode ? 1.25 : 1),
+            ),
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text(
+                  'Alle Angaben bleiben auf diesem Gerät. Exportierst du ein Ereignisprotokoll, entscheidest du selbst über den Empfänger.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 16),
+                _section(
+                  'Radio-Empfangsplan',
+                  Icons.radio_outlined,
+                  'Lokale UKW- und DAB-Stationen, Geräte und Stromversorgung festhalten.',
+                  _radioPlan(),
+                ),
+                _section(
+                  'Notfallmappe',
+                  Icons.folder_copy_outlined,
+                  'Dokumentenmappe ohne Inhalte oder Personenangaben verwalten.',
+                  _folder(),
+                ),
+                _section(
+                  'Kommunikationsplan',
+                  Icons.forum_outlined,
+                  'Kontakt-Reihenfolge, externe Kontaktperson und kurze Statusmeldungen für überlastete Netze.',
+                  _planNote(
+                    note: _data.communication,
+                    label: 'Kommunikationsplan',
+                    hint:
+                        'Wer wird in welcher Reihenfolge kontaktiert? Welche externe Kontaktperson koordiniert?\n\nVorlage: Wir sind sicher. Nächster Kontakt um …',
+                    onSave: (value) =>
+                        _change(_data.copyWith(communication: value)),
+                    templates: const [
+                      'Wir sind sicher. Nächster Kontakt um …',
+                      'Wir brauchen Unterstützung bei … Treffpunkt: …',
+                    ],
+                  ),
+                ),
+                _section(
+                  'Unterstützungsplan',
+                  Icons.accessible_forward_outlined,
+                  'Persönliche Unterstützung, Medikamente, Hilfsmittel und Transport bei einer Evakuierung.',
+                  _planNote(
+                    note: _data.support,
+                    label: 'Unterstützungsplan',
+                    hint:
+                        'Nur notwendige Angaben: benötigte Hilfe, Medikamente, Hilfsmittel, verlässliche Unterstützung und Transport.',
+                    onSave: (value) => _change(_data.copyWith(support: value)),
+                  ),
+                ),
+                _section(
+                  'Haustier-Notfallplan',
+                  Icons.pets_outlined,
+                  'Transport, Futter, Medikamente, Betreuung und Ausweichunterkunft für Tiere vorbereiten.',
+                  _planNote(
+                    note: _data.pets,
+                    label: 'Haustier-Notfallplan',
+                    hint:
+                        'Transportbox, Vorräte, Tierarzt, Betreuung, tierfreundliche Unterkunft und Dokumentenkopien.',
+                    onSave: (value) => _change(_data.copyWith(pets: value)),
+                  ),
+                ),
+                _section(
+                  'Fahrzeug und Mobilität',
+                  Icons.directions_car_outlined,
+                  'Fahrzeug-Notgepäck, Energie- oder Tankreserve, alternative Verkehrsmittel und Abholung.',
+                  _planNote(
+                    note: _data.mobility,
+                    label: 'Mobilitätsplan',
+                    hint:
+                        'Fahrzeug, Lade- oder Tankziel, Notgepäck, alternative Route, ÖPNV und Abholung.',
+                    onSave: (value) => _change(_data.copyWith(mobility: value)),
+                  ),
+                ),
+                _section(
+                  'Versorgungs-Unterbrechung',
+                  Icons.power_off_outlined,
+                  'Absperrorte und manuelle Alternativen für Strom, Wasser, Gas, Heizung und Telekommunikation.',
+                  _planNote(
+                    note: _data.utilities,
+                    label: 'Versorgungsplan',
+                    hint:
+                        'Absperrorte, Ansprechpartner, Ersatzstrom, Wasserentnahme, Heizung und kontaktlose Kommunikationswege.',
+                    onSave: (value) =>
+                        _change(_data.copyWith(utilities: value)),
+                  ),
+                ),
+                _section(
+                  'Wartungszentrale',
+                  Icons.build_outlined,
+                  'Regelmäßig prüfen, damit wichtige Ausrüstung im Notfall einsatzbereit ist.',
+                  _maintenance(),
+                ),
+                _section(
+                  'Evakuierungs-Karten',
+                  Icons.route_outlined,
+                  'Treffpunkte und sichere Wege als offline lesbare Karten notieren.',
+                  _evacuation(),
+                ),
+                _section(
+                  'Ereignisprotokoll',
+                  Icons.history_edu_outlined,
+                  'Beobachtungen und Maßnahmen mit Uhrzeit dokumentieren und bei Bedarf als PDF exportieren.',
+                  _events(),
+                ),
+                _section(
+                  'Handlungskarten',
+                  Icons.timer_outlined,
+                  'Vorbereitung nach Vorwarnzeit: sofort, innerhalb von 48 Stunden und mehrere Tage vorher.',
+                  _actionCards(),
+                ),
+                _section(
+                  'Krisenmodus und Briefing',
+                  Icons.visibility_outlined,
+                  'Größere Darstellung für diese Seite und ein druckbares Briefing für Haushalt oder Notgepäck.',
+                  _crisisTools(),
+                ),
+              ],
+            ),
           ),
   );
 
@@ -124,6 +206,120 @@ class _PreparednessHubScreenState extends State<PreparednessHubScreen> {
         ],
       ),
     ),
+  );
+
+  Widget _planNote({
+    required PlanNote note,
+    required String label,
+    required String hint,
+    required ValueChanged<PlanNote> onSave,
+    List<String> templates = const [],
+  }) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(note.text.isEmpty ? 'Noch nicht hinterlegt.' : note.text),
+      if (note.checkedAt != null) ...[
+        const SizedBox(height: 4),
+        Text(
+          'Zuletzt aktualisiert: ${_date(note.checkedAt)}',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+      const SizedBox(height: 8),
+      Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: [
+          OutlinedButton.icon(
+            onPressed: () => _editPlanNote(
+              title: label,
+              current: note,
+              hint: hint,
+              onSave: onSave,
+            ),
+            icon: const Icon(Icons.edit_outlined),
+            label: Text(note.text.isEmpty ? 'Plan anlegen' : 'Bearbeiten'),
+          ),
+          for (final template in templates)
+            TextButton.icon(
+              onPressed: () => Clipboard.setData(ClipboardData(text: template)),
+              icon: const Icon(Icons.copy_outlined),
+              label: const Text('Vorlage kopieren'),
+            ),
+        ],
+      ),
+    ],
+  );
+
+  Future<void> _editPlanNote({
+    required String title,
+    required PlanNote current,
+    required String hint,
+    required ValueChanged<PlanNote> onSave,
+  }) async {
+    final controller = TextEditingController(text: current.text);
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          minLines: 5,
+          maxLines: 12,
+          decoration: InputDecoration(hintText: hint),
+        ),
+        actions: _dialogActions(context, () => Navigator.pop(context, true)),
+      ),
+    );
+    if (saved == true) onSave(current.update(controller.text.trim()));
+  }
+
+  Widget _actionCards() => Column(
+    children: [
+      for (final action in _actionTasks)
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _data.actionDone.containsKey(action.id),
+          title: Text(action.title),
+          subtitle: Text(
+            _data.actionDone[action.id] == null
+                ? action.body
+                : 'Erledigt: ${_date(_data.actionDone[action.id])}',
+          ),
+          onChanged: (value) {
+            final updated = {..._data.actionDone};
+            if (value == true) {
+              updated[action.id] = DateTime.now();
+            } else {
+              updated.remove(action.id);
+            }
+            unawaited(_change(_data.copyWith(actionDone: updated)));
+          },
+        ),
+    ],
+  );
+
+  Widget _crisisTools() => Column(
+    children: [
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: _data.crisisMode,
+        title: const Text('Vereinfachte, größere Darstellung'),
+        subtitle: const Text(
+          'Vergrößert Text und Bedienelemente in der Krisenorganisation.',
+        ),
+        onChanged: (value) => _change(_data.copyWith(crisisMode: value)),
+      ),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: FilledButton.icon(
+          onPressed: _exportBriefing,
+          icon: const Icon(Icons.print_outlined),
+          label: const Text('Notfallbriefing als PDF'),
+        ),
+      ),
+    ],
   );
 
   Widget _radioPlan() => Column(
@@ -624,12 +820,97 @@ class _PreparednessHubScreenState extends State<PreparednessHubScreen> {
       );
     }
   }
+
+  Future<void> _exportBriefing() async {
+    final document = pw.Document();
+    final plans = [
+      ('Kommunikation', _data.communication.text),
+      ('Unterstützung', _data.support.text),
+      ('Haustiere', _data.pets.text),
+      ('Mobilität', _data.mobility.text),
+      ('Versorgung', _data.utilities.text),
+      ('Notfallmappe', _data.folder.location),
+    ];
+    document.addPage(
+      pw.MultiPage(
+        build: (_) => [
+          pw.Header(level: 0, child: pw.Text('PreppSuite – Notfallbriefing')),
+          pw.Text('Erstellt: ${DateTime.now().toLocal()}'),
+          pw.SizedBox(height: 12),
+          for (final plan in plans)
+            if (plan.$2.isNotEmpty)
+              pw.Container(
+                margin: const pw.EdgeInsets.only(bottom: 10),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      plan.$1,
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    ),
+                    pw.Text(plan.$2),
+                  ],
+                ),
+              ),
+          if (_data.radioPlans.isNotEmpty) ...[
+            pw.Text(
+              'Radio',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            ),
+            for (final radio in _data.radioPlans)
+              pw.Text(
+                '${radio.station}: ${radio.band} ${radio.frequency} · ${radio.receiver}',
+              ),
+          ],
+          if (_data.evacuationCards.isNotEmpty) ...[
+            pw.SizedBox(height: 10),
+            pw.Text(
+              'Evakuierung',
+              style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+            ),
+            for (final card in _data.evacuationCards)
+              pw.Text('${card.label}: ${card.start} → ${card.destination}'),
+          ],
+        ],
+      ),
+    );
+    final bytes = await document.save();
+    if (mounted) {
+      await Printing.sharePdf(
+        bytes: Uint8List.fromList(bytes),
+        filename: 'preppsuite-notfallbriefing.pdf',
+      );
+    }
+  }
 }
 
 class _MaintenanceTask {
   const _MaintenanceTask(this.id, this.title, this.hint);
   final String id, title, hint;
 }
+
+class _ActionTask {
+  const _ActionTask(this.id, this.title, this.body);
+  final String id, title, body;
+}
+
+const _actionTasks = [
+  _ActionTask(
+    'now',
+    'Jetzt',
+    'Amtliche Meldung lesen, Gefahr vermeiden, Radio einschalten und Angehörige kurz informieren.',
+  ),
+  _ActionTask(
+    'two_days',
+    'Innerhalb von 24–48 Stunden',
+    'Wasser, Vorrat, Medikamente, Akkus und Fahrzeug prüfen. Haus und Notgepäck vorbereiten.',
+  ),
+  _ActionTask(
+    'days',
+    'Mehrere Tage vorher',
+    'Evakuierungs-Karte abgleichen, Unterstützung organisieren, Haustier- und Versorgungsplan prüfen.',
+  ),
+];
 
 const _maintenanceTasks = [
   _MaintenanceTask(

@@ -49,6 +49,13 @@ void main() {
           action: 'Radio eingeschaltet',
         ),
       ],
+      communication: PlanNote(text: 'Kontaktkette', checkedAt: savedAt),
+      support: PlanNote(text: 'Hilfsmittel', checkedAt: savedAt),
+      pets: PlanNote(text: 'Transportbox', checkedAt: savedAt),
+      mobility: PlanNote(text: 'Fahrzeug', checkedAt: savedAt),
+      utilities: PlanNote(text: 'Absperrort', checkedAt: savedAt),
+      actionDone: {'now': savedAt},
+      crisisMode: true,
     );
 
     await store.save(data);
@@ -59,6 +66,10 @@ void main() {
     expect(restored.maintenance['batteries'], savedAt);
     expect(restored.evacuationCards.single.route, 'Nebenstraßen');
     expect(restored.events.single.action, 'Radio eingeschaltet');
+    expect(restored.communication.text, 'Kontaktkette');
+    expect(restored.pets.text, 'Transportbox');
+    expect(restored.actionDone['now'], savedAt);
+    expect(restored.crisisMode, isTrue);
   });
 
   test('invalid stored content falls back to an empty plan', () {

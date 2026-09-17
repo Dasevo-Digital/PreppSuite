@@ -34,6 +34,13 @@ class PreparednessHubData {
     this.maintenance = const {},
     this.evacuationCards = const [],
     this.events = const [],
+    this.communication = const PlanNote(),
+    this.support = const PlanNote(),
+    this.pets = const PlanNote(),
+    this.mobility = const PlanNote(),
+    this.utilities = const PlanNote(),
+    this.actionDone = const {},
+    this.crisisMode = false,
   });
 
   final List<RadioReceptionPlan> radioPlans;
@@ -43,6 +50,13 @@ class PreparednessHubData {
   final Map<String, DateTime> maintenance;
   final List<EvacuationCard> evacuationCards;
   final List<IncidentEntry> events;
+  final PlanNote communication;
+  final PlanNote support;
+  final PlanNote pets;
+  final PlanNote mobility;
+  final PlanNote utilities;
+  final Map<String, DateTime> actionDone;
+  final bool crisisMode;
 
   PreparednessHubData copyWith({
     List<RadioReceptionPlan>? radioPlans,
@@ -50,12 +64,26 @@ class PreparednessHubData {
     Map<String, DateTime>? maintenance,
     List<EvacuationCard>? evacuationCards,
     List<IncidentEntry>? events,
+    PlanNote? communication,
+    PlanNote? support,
+    PlanNote? pets,
+    PlanNote? mobility,
+    PlanNote? utilities,
+    Map<String, DateTime>? actionDone,
+    bool? crisisMode,
   }) => PreparednessHubData(
     radioPlans: radioPlans ?? this.radioPlans,
     folder: folder ?? this.folder,
     maintenance: maintenance ?? this.maintenance,
     evacuationCards: evacuationCards ?? this.evacuationCards,
     events: events ?? this.events,
+    communication: communication ?? this.communication,
+    support: support ?? this.support,
+    pets: pets ?? this.pets,
+    mobility: mobility ?? this.mobility,
+    utilities: utilities ?? this.utilities,
+    actionDone: actionDone ?? this.actionDone,
+    crisisMode: crisisMode ?? this.crisisMode,
   );
 
   Map<String, Object?> toJson() => {
@@ -66,6 +94,15 @@ class PreparednessHubData {
     ),
     'evacuationCards': [for (final item in evacuationCards) item.toJson()],
     'events': [for (final item in events) item.toJson()],
+    'communication': communication.toJson(),
+    'support': support.toJson(),
+    'pets': pets.toJson(),
+    'mobility': mobility.toJson(),
+    'utilities': utilities.toJson(),
+    'actionDone': actionDone.map(
+      (key, value) => MapEntry(key, value.toUtc().toIso8601String()),
+    ),
+    'crisisMode': crisisMode,
   };
 
   static PreparednessHubData fromJson(Object? value) {
@@ -76,24 +113,59 @@ class PreparednessHubData {
       return raw.map(parse).whereType<T>().toList();
     }
 
-    final rawMaintenance = value['maintenance'];
-    final maintenance = <String, DateTime>{};
-    if (rawMaintenance is Map) {
-      for (final entry in rawMaintenance.entries) {
-        final parsed = entry.value is String
-            ? DateTime.tryParse(entry.value as String)?.toLocal()
-            : null;
-        if (entry.key is String && parsed != null) {
-          maintenance[entry.key as String] = parsed;
+    Map<String, DateTime> dates(String key) {
+      final raw = value[key];
+      final result = <String, DateTime>{};
+      if (raw is Map) {
+        for (final entry in raw.entries) {
+          final parsed = entry.value is String
+              ? DateTime.tryParse(entry.value as String)?.toLocal()
+              : null;
+          if (entry.key is String && parsed != null) {
+            result[entry.key as String] = parsed;
+          }
         }
       }
+      return result;
     }
+
     return PreparednessHubData(
       radioPlans: items('radioPlans', RadioReceptionPlan.fromJson),
       folder: EmergencyFolderStatus.fromJson(value['folder']),
-      maintenance: maintenance,
+      maintenance: dates('maintenance'),
       evacuationCards: items('evacuationCards', EvacuationCard.fromJson),
       events: items('events', IncidentEntry.fromJson),
+      communication: PlanNote.fromJson(value['communication']),
+      support: PlanNote.fromJson(value['support']),
+      pets: PlanNote.fromJson(value['pets']),
+      mobility: PlanNote.fromJson(value['mobility']),
+      utilities: PlanNote.fromJson(value['utilities']),
+      actionDone: dates('actionDone'),
+      crisisMode: value['crisisMode'] == true,
+    );
+  }
+}
+
+/// A deliberately free-form, local plan. People should write only what their
+/// household needs; the app never supplies names, medical information or an
+/// address as a default.
+class PlanNote {
+  const PlanNote({this.text = '', this.checkedAt});
+  final String text;
+  final DateTime? checkedAt;
+  PlanNote update(String value) =>
+      PlanNote(text: value, checkedAt: DateTime.now());
+  Map<String, Object?> toJson() => {
+    'text': text,
+    'checkedAt': checkedAt?.toUtc().toIso8601String(),
+  };
+  static PlanNote fromJson(Object? value) {
+    if (value is! Map) return const PlanNote();
+    return PlanNote(
+      text: value['text'] is String ? value['text'] as String : '',
+      checkedAt: value['checkedAt'] is String
+          ? DateTime.tryParse(value['checkedAt'] as String)?.toLocal()
+          : null,
     );
   }
 }
