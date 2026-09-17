@@ -9,6 +9,7 @@ import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/article_viewer.dart';
 import '../application/article_viewer_choice.dart';
 import '../application/knowledge_providers.dart';
+import '../application/knowledge_bookmark_store.dart';
 import '../application/personal_document_index.dart';
 import '../application/personal_document_store.dart';
 import '../application/zim_store.dart';
@@ -69,6 +70,11 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       appBar: AppBar(
         title: Text(l10n.knowledgeTitle),
         actions: [
+          IconButton(
+            tooltip: 'Lesezeichen',
+            icon: const Icon(Icons.bookmarks_outlined),
+            onPressed: () => _showBookmarks(l10n, async.value),
+          ),
           IconButton(
             tooltip: l10n.knowledgeApolloTitle,
             icon: const Icon(Icons.auto_stories_outlined),
@@ -464,7 +470,12 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       case ArticleViewer.panel:
         await Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (context) => ArticleScreen(title: entry.title, uri: uri),
+            builder: (context) => ArticleScreen(
+              title: entry.title,
+              uri: uri,
+              archiveId: state.selectedId,
+              entryUrl: resolved.url,
+            ),
           ),
         );
 
@@ -495,6 +506,61 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
           SnackBar(content: Text(l10n.knowledgeArticleUnsupported)),
         );
     }
+  }
+
+  Future<void> _showBookmarks(
+    AppLocalizations l10n,
+    KnowledgeState? state,
+  ) async {
+    final bookmarks = await const KnowledgeBookmarkStore().load();
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: bookmarks.isEmpty
+            ? const Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'Noch keine Lesezeichen. Öffne einen Artikel und tippe auf das Lesezeichen-Symbol.',
+                ),
+              )
+            : ListView(
+                shrinkWrap: true,
+                children: [
+                  const ListTile(title: Text('Lesezeichen')),
+                  for (final bookmark in bookmarks)
+                    ListTile(
+                      leading: const Icon(Icons.bookmark),
+                      title: Text(bookmark.title),
+                      subtitle: Text(
+                        state?.selectedId == bookmark.archiveId
+                            ? 'Im geöffneten Archiv'
+                            : 'Archiv zuerst in der Bibliothek öffnen',
+                      ),
+                      onTap:
+                          state?.selectedId == bookmark.archiveId &&
+                              state?.archive != null
+                          ? () async {
+                              final entry =
+                                  await state!.archive!.findByUrl(
+                                    'C',
+                                    bookmark.entryUrl,
+                                  ) ??
+                                  await state.archive!.findByUrl(
+                                    'A',
+                                    bookmark.entryUrl,
+                                  );
+                              if (entry == null || !context.mounted) return;
+                              Navigator.of(context).pop();
+                              await _open(l10n, state, entry);
+                            }
+                          : null,
+                    ),
+                ],
+              ),
+      ),
+    );
   }
 
   /// Reads the article without any engine.

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../preparedness/presentation/preparedness_hub_screen.dart';
 import '../application/drill_progress_store.dart';
 
 /// A deliberately small, offline exercise and incident guide. It does not
@@ -90,6 +91,22 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
                     label: Text(l10n.drillsCallEmergency),
                   ),
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.folder_special_outlined),
+              title: const Text('Krisenorganisation'),
+              subtitle: const Text(
+                'Radio, Notfallmappe, Wartung, Evakuierungs-Karten und Ereignisprotokoll',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const PreparednessHubScreen(),
+                ),
               ),
             ),
           ),

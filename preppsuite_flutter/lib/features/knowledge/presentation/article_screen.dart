@@ -3,6 +3,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/article_viewer.dart';
+import '../application/knowledge_bookmark_store.dart';
 
 /// One article, rendered by the system's browser engine.
 ///
@@ -11,10 +12,21 @@ import '../application/article_viewer.dart';
 /// origin and is answered from the same file. Following a link between
 /// articles therefore needs no code here at all.
 class ArticleScreen extends StatefulWidget {
-  const ArticleScreen({super.key, required this.title, required this.uri});
+  const ArticleScreen({
+    super.key,
+    required this.title,
+    required this.uri,
+    this.archiveId,
+    this.entryUrl,
+  });
 
   final String title;
   final Uri uri;
+
+  /// Set only for a concrete archive entry; browser-internal links have no
+  /// stable ZIM entry id to put in a reading list.
+  final String? archiveId;
+  final String? entryUrl;
 
   @override
   State<ArticleScreen> createState() => _ArticleScreenState();
@@ -34,6 +46,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
   String? _pageTitle;
 
   bool _loading = true;
+  bool _bookmarked = false;
 
   /// Why the page did not arrive, in the engine's own words.
   String? _failure;
@@ -41,6 +54,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
   @override
   void initState() {
     super.initState();
+    _restoreBookmark();
     _controller = WebViewController()
       // The pages carry their own scripts — real Wikipedia articles need
       // them for collapsible sections and maths. They are not trusted for
@@ -109,6 +123,32 @@ class _ArticleScreenState extends State<ArticleScreen> {
       ..loadRequest(widget.uri);
   }
 
+  Future<void> _restoreBookmark() async {
+    final archiveId = widget.archiveId;
+    final entryUrl = widget.entryUrl;
+    if (archiveId == null || entryUrl == null) return;
+    final saved = await const KnowledgeBookmarkStore().contains(
+      archiveId,
+      entryUrl,
+    );
+    if (mounted) setState(() => _bookmarked = saved);
+  }
+
+  Future<void> _toggleBookmark() async {
+    final archiveId = widget.archiveId;
+    final entryUrl = widget.entryUrl;
+    if (archiveId == null || entryUrl == null) return;
+    final saved = await const KnowledgeBookmarkStore().toggle(
+      KnowledgeBookmark(
+        archiveId: archiveId,
+        entryUrl: entryUrl,
+        title: widget.title,
+        createdAt: DateTime.now(),
+      ),
+    );
+    if (mounted) setState(() => _bookmarked = saved);
+  }
+
   NavigationDecision _decideNavigation(NavigationRequest request) {
     if (isArchiveUrl(Uri.tryParse(request.url), widget.uri)) {
       return NavigationDecision.navigate;
@@ -139,6 +179,16 @@ class _ArticleScreenState extends State<ArticleScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_pageTitle ?? widget.title),
+        actions: [
+          if (widget.archiveId != null && widget.entryUrl != null)
+            IconButton(
+              tooltip: _bookmarked
+                  ? 'Lesezeichen entfernen'
+                  : 'Lesezeichen setzen',
+              icon: Icon(_bookmarked ? Icons.bookmark : Icons.bookmark_border),
+              onPressed: _toggleBookmark,
+            ),
+        ],
         bottom: _loading
             ? const PreferredSize(
                 preferredSize: Size.fromHeight(2),
