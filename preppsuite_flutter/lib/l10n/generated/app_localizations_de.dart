@@ -5710,4 +5710,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get hubFolderReportAutonomy => 'Autarkie';
+
+  @override
+  String get mapWaterTitle => 'Trinkwasser betroffen';
+
+  @override
+  String mapWaterStock(String value) {
+    return 'Eigener Trinkwasservorrat: $value';
+  }
+
+  @override
+  String mapWaterStockUnknown(String reason) {
+    return 'Wie weit der eigene Vorrat reicht, ist noch offen: $reason.';
+  }
+
+  @override
+  String get mapWaterNearby => 'Trinkwasser in der Nähe';
+
+  @override
+  String get mapWaterAdviceNote =>
+      'Was mit dem Wasser zu tun ist, steht in der Warnung selbst. Diese App gibt dazu keine eigenen Zahlen aus.';
 }

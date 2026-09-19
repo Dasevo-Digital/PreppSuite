@@ -9598,6 +9598,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Self-sufficiency'**
   String get hubFolderReportAutonomy;
+
+  /// No description provided for @mapWaterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Drinking water affected'**
+  String get mapWaterTitle;
+
+  /// No description provided for @mapWaterStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own drinking water: {value}'**
+  String mapWaterStock(String value);
+
+  /// No description provided for @mapWaterStockUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'How far your own supply reaches is still open: {reason}.'**
+  String mapWaterStockUnknown(String reason);
+
+  /// No description provided for @mapWaterNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'Drinking water nearby'**
+  String get mapWaterNearby;
+
+  /// No description provided for @mapWaterAdviceNote.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do with the water is in the warning itself. This app publishes no figures of its own on that.'**
+  String get mapWaterAdviceNote;
 }
 
 class _AppLocalizationsDelegate

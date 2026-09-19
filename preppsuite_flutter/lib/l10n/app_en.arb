@@ -2506,5 +2506,12 @@
   "hubFolderReportFile": "preppsuite-emergency-folder.pdf",
   "hubFolderReportRoute": "Route",
   "hubFolderReportPlaces": "Important places",
-  "hubFolderReportAutonomy": "Self-sufficiency"
+  "hubFolderReportAutonomy": "Self-sufficiency",
+  "mapWaterTitle": "Drinking water affected",
+  "mapWaterStock": "Your own drinking water: {value}",
+  "@mapWaterStock": {"placeholders": {"value": {"type": "String"}}},
+  "mapWaterStockUnknown": "How far your own supply reaches is still open: {reason}.",
+  "@mapWaterStockUnknown": {"placeholders": {"reason": {"type": "String"}}},
+  "mapWaterNearby": "Drinking water nearby",
+  "mapWaterAdviceNote": "What to do with the water is in the warning itself. This app publishes no figures of its own on that."
 }

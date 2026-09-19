@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
 import 'package:preppsuite_flutter/features/maps/application/map_source_preference.dart';
 import 'package:preppsuite_flutter/features/maps/application/offline_map_providers.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_providers.dart';
@@ -9,6 +10,7 @@ import 'package:preppsuite_flutter/features/warnings/presentation/warning_situat
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _NoOfflineMap extends OfflineMapController {
   @override
@@ -24,7 +26,22 @@ class _OnlineMapSource extends MapSourceController {
 /// gained afterwards: what applies at one particular spot, which is what
 /// somebody looking at three overlapping outlines actually wants to know.
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   final now = DateTime.utc(2026, 9, 18, 12);
+
+  InventoryItem water(double liters) => InventoryItem(
+    clientId: 'w',
+    householdId: 'home',
+    name: 'Trinkwasser',
+    category: 'water',
+    quantity: liters,
+    unit: 'l',
+    storageLocation: 'Keller',
+    updatedAt: DateTime.utc(2026, 9, 18),
+    dirty: false,
+  );
 
   Warning warning({
     required String id,
@@ -59,7 +76,11 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> show(WidgetTester tester, List<Warning> warnings) async {
+  Future<void> show(
+    WidgetTester tester,
+    List<Warning> warnings, {
+    List<InventoryItem> items = const [],
+  }) async {
     await tester.binding.setSurfaceSize(const Size(600, 1000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
@@ -68,6 +89,9 @@ void main() {
           offlineMapProvider.overrideWith(_NoOfflineMap.new),
           mapSourceProvider.overrideWith(_OnlineMapSource.new),
           activeWarningsProvider.overrideWith((ref) => Stream.value(warnings)),
+          inventoryItemsProvider(
+            'home',
+          ).overrideWith((ref) => Stream.value(items)),
         ],
         child: MaterialApp(
           locale: const Locale('de'),
@@ -78,6 +102,7 @@ void main() {
               id: 'home',
               name: 'Zuhause',
               countryCode: 'DE',
+              personCount: 2,
             ),
           ),
         ),
@@ -152,5 +177,51 @@ void main() {
       find.text('Hier liegt keine der angezeigten Warnflächen.'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('a drinking-water warning also answers about our own water', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      [
+        warning(
+          id: 'water',
+          headline: 'Landkreis meldet: Warnung Trinkwasserunfall',
+          polygons: north,
+          instruction: 'Wasser nicht zum Trinken verwenden.',
+        ),
+      ],
+      // Two adults at four litres a day: forty litres is ten days.
+      items: [water(40)],
+    );
+
+    final map = tester.getRect(find.byType(FlutterMap));
+    await tapMap(tester, map.center);
+
+    expect(find.text('Trinkwasser betroffen'), findsOneWidget);
+    expect(
+      find.text('Eigener Trinkwasservorrat: 10 Tage'),
+      findsOneWidget,
+    );
+    expect(find.text('Trinkwasser in der Nähe'), findsOneWidget);
+    // The authority's own instruction, and no figure of ours about what
+    // to do with the water.
+    expect(find.text('Wasser nicht zum Trinken verwenden.'), findsOneWidget);
+    expect(find.textContaining('abkochen'), findsNothing);
+    expect(find.textContaining('Minuten'), findsNothing);
+  });
+
+  testWidgets('a storm warning does not ask about the water', (tester) async {
+    await show(
+      tester,
+      [warning(id: 'storm', headline: 'Orkanböen', polygons: north)],
+      items: [water(40)],
+    );
+
+    final map = tester.getRect(find.byType(FlutterMap));
+    await tapMap(tester, map.center);
+
+    expect(find.text('Trinkwasser betroffen'), findsNothing);
   });
 }

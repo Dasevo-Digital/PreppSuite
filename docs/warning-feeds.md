@@ -210,6 +210,30 @@ prüft die gezeichnete Fläche; ob eine Warnung für den eigenen Haushalt
 gilt, entscheidet `isWarningRelevant` über den Regionsschlüssel. Eine
 Warnung ohne Geometrie deckt keinen Punkt ab, auch wenn sie alle angeht.
 
+## Trinkwasser
+
+Für „das Trinkwasser ist betroffen" gibt es **keinen CAP-Code**. Die
+Meldungen kommen als KATWARN-Nachrichten über den BBK-Feed, mit maschinell
+gebautem Titel `<Absender> meldet: <Warnung>` — oben steht der am Live-Feed
+bestätigte Fall „Vogelsbergkreis meldet: Warnung Trinkwasserunfall". Die
+Art der Warnung ist Freitext dessen, der sie geschickt hat.
+
+`drinking_water_warning.dart` erkennt sie deshalb an Wörtern, und das ist
+eine Schätzung. Sie ist so gebaut, dass sie in die harmlose Richtung
+irrt: **sie ergänzt, sie verbirgt nie.** Ein Treffer legt eine zusätzliche
+Karte dazu — wie lange der eigene Vorrat reicht und wo die heruntergeladene
+Karte Trinkwasser kennt. Ein Fehltreffer kostet eine Karte neben einer
+Warnung, die ohnehin vollständig angezeigt wird; ein verpasster Treffer
+kostet nur diese Karte. Nichts wird herausgefiltert und keine Warnung
+umformuliert.
+
+**Was die App dabei nicht sagt, ist, was mit dem Wasser zu tun ist.**
+Abkochzeiten wurden für diese App geprüft und verworfen: CDC, WHO und UBA
+nennen unterschiedliche, und eine davon auszuliefern wäre genau die
+erfundene Skala, die diese App nicht ausgibt. Auf der Karte steht die
+Anweisung der Behörde selbst, und daneben ein Satz, der sagt, dass die App
+dazu keine eigenen Zahlen hat.
+
 ## Bekannte Einschränkungen
 
 - **MeteoAlarm-Warnungen außerhalb Deutschlands werden nicht nach Region

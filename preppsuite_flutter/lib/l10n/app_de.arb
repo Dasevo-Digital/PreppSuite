@@ -1699,5 +1699,12 @@
   "hubFolderReportFile": "preppsuite-notfallordner.pdf",
   "hubFolderReportRoute": "Weg",
   "hubFolderReportPlaces": "Wichtige Orte",
-  "hubFolderReportAutonomy": "Autarkie"
+  "hubFolderReportAutonomy": "Autarkie",
+  "mapWaterTitle": "Trinkwasser betroffen",
+  "mapWaterStock": "Eigener Trinkwasservorrat: {value}",
+  "@mapWaterStock": {"placeholders": {"value": {"type": "String"}}},
+  "mapWaterStockUnknown": "Wie weit der eigene Vorrat reicht, ist noch offen: {reason}.",
+  "@mapWaterStockUnknown": {"placeholders": {"reason": {"type": "String"}}},
+  "mapWaterNearby": "Trinkwasser in der Nähe",
+  "mapWaterAdviceNote": "Was mit dem Wasser zu tun ist, steht in der Warnung selbst. Diese App gibt dazu keine eigenen Zahlen aus."
 }

@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +9,15 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
 import '../../../model/household_profile.dart';
+import '../../energy/application/energy_store.dart';
+import '../../inventory/application/inventory_providers.dart';
+import '../../maps/application/offline_poi_search.dart';
 import '../../maps/presentation/base_map_layer.dart';
+import '../../maps/presentation/nearby_screen.dart';
+import '../../preparedness/application/autonomy_overview.dart';
+import '../../preparedness/application/preparedness_hub_store.dart';
+import '../../inventory/application/supply_calculator.dart';
+import '../application/drinking_water_warning.dart';
 import '../application/warning_polygon_codec.dart';
 import '../application/warning_providers.dart';
 import '../application/warning_relevance.dart';
@@ -31,6 +41,43 @@ class WarningSituationMapScreen extends ConsumerStatefulWidget {
 class _WarningSituationMapScreenState
     extends ConsumerState<WarningSituationMapScreen> {
   final _controller = MapController();
+  static const _hubStore = PreparednessHubStore();
+
+  /// Only for the hand-entered fallback: a household whose water is in
+  /// crates rather than litres has typed its own figure, and a drinking
+  /// water warning is exactly when that figure matters.
+  var _entered = const AutonomySnapshot();
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(
+      _hubStore.load().then((data) {
+        if (mounted) setState(() => _entered = data.autonomy);
+      }),
+    );
+  }
+
+  /// How long the household's own drinking water lasts.
+  ///
+  /// Worked out in `build` and carried into the tap handler: the
+  /// inventory is a stream, and asking it for the first time at the
+  /// moment somebody taps would answer "still loading" — which on this
+  /// card would read as "you have no water".
+  AutonomyReach _waterReach(List<InventoryItem> items) {
+    return autonomyReaches(
+      items: items,
+      household: SupplyHousehold(
+        adults: widget.profile.personCount,
+        children: widget.profile.children,
+        dogs: widget.profile.dogs,
+        cats: widget.profile.cats,
+      ),
+      energy: const EnergyPlan(),
+      entered: _entered,
+    ).firstWhere((reach) => reach.resource == AutonomyResource.water);
+  }
+
   // Decoding the areas is the expensive part of drawing this screen, and
   // nothing about it changes when a filter chip is tapped.
   final _polygons = WarningPolygonCache();
@@ -61,6 +108,9 @@ class _WarningSituationMapScreenState
     List<Warning> all,
   ) {
     _polygons.retain(all);
+    final water = _waterReach(
+      ref.watch(inventoryItemsProvider(widget.profile.id)).value ?? const [],
+    );
     final selected = [
       for (final warning in all)
         if (warning.countryCode == widget.profile.countryCode)
@@ -127,7 +177,7 @@ class _WarningSituationMapScreenState
                   controller: _controller,
                   entries: onMap,
                   l10n: l10n,
-                  onTap: (point) => _showAt(onMap, point, l10n),
+                  onTap: (point) => _showAt(onMap, point, l10n, water),
                 ),
         ),
         SizedBox(
@@ -149,11 +199,13 @@ class _WarningSituationMapScreenState
     List<({Warning warning, List<List<LatLng>> polygons})> entries,
     LatLng point,
     AppLocalizations l10n,
+    AutonomyReach waterReach,
   ) {
     final here = [
       for (final entry in entries)
         if (polygonsCover(entry.polygons, point)) entry.warning,
     ];
+    final water = drinkingWaterWarnings(here).isEmpty ? null : waterReach;
     return showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -175,10 +227,101 @@ class _WarningSituationMapScreenState
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 8),
+                  // First, because it is the one thing on this sheet the
+                  // warning itself cannot tell somebody: how long their
+                  // own water lasts.
+                  if (water != null)
+                    _DrinkingWater(reach: water, point: point, l10n: l10n),
                   for (final warning in here)
                     _WarningAtPoint(warning: warning, l10n: l10n),
                 ],
               ),
+      ),
+    );
+  }
+}
+
+/// What a drinking-water warning cannot say, and this app can.
+///
+/// The warning names the area and what to do; only the household's own
+/// records know how long its stored water lasts, and only the downloaded
+/// map knows where there is more. What this deliberately does **not** do
+/// is say anything about treating the water: boiling times were looked
+/// up for this app and rejected, because the CDC, the WHO and the UBA
+/// give three different ones and picking one would be inventing a figure.
+/// The authority's own instruction is on the card below this.
+class _DrinkingWater extends StatelessWidget {
+  const _DrinkingWater({
+    required this.reach,
+    required this.point,
+    required this.l10n,
+  });
+
+  final AutonomyReach reach;
+  final LatLng point;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      color: theme.colorScheme.secondaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.water_drop_outlined,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.mapWaterTitle,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              switch (reach.days) {
+                final days? => l10n.mapWaterStock(l10n.hubAutonomyDays(days)),
+                _ => l10n.mapWaterStockUnknown(l10n.hubAutonomyOpen),
+              },
+              style: TextStyle(color: theme.colorScheme.onSecondaryContainer),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              l10n.mapWaterAdviceNote,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSecondaryContainer,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FilledButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => NearbyScreen(
+                      centre: point,
+                      kinds: const {PoiKind.water},
+                    ),
+                  ),
+                ),
+                icon: const Icon(Icons.travel_explore),
+                label: Text(l10n.mapWaterNearby),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

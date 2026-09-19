@@ -26,7 +26,12 @@ import 'map_screen.dart';
 /// coverage is exactly what was downloaded, the data is OpenStreetMap's,
 /// and a point on a map is not a shop that is open.
 class NearbyScreen extends ConsumerStatefulWidget {
-  const NearbyScreen({super.key, this.centre, this.centreLabel});
+  const NearbyScreen({
+    super.key,
+    this.centre,
+    this.centreLabel,
+    this.kinds,
+  });
 
   /// Where to search around. Usually the map's centre, handed over when
   /// this is opened from there — no position lookup, no network, nothing
@@ -35,6 +40,11 @@ class NearbyScreen extends ConsumerStatefulWidget {
 
   /// What to call that point on screen.
   final String? centreLabel;
+
+  /// Which groups to start with. All of them unless somebody opened this
+  /// with one question in mind — a drinking-water warning does, and
+  /// making them untick five chips first is making them work for it.
+  final Set<PoiKind>? kinds;
 
   @override
   ConsumerState<NearbyScreen> createState() => _NearbyScreenState();
@@ -54,7 +64,7 @@ class _NearbyScreenState extends ConsumerState<NearbyScreen> {
   late String? _centreLabel = widget.centreLabel;
 
   double _radius = 2000;
-  var _kinds = {...PoiKind.values};
+  late var _kinds = {...widget.kinds ?? PoiKind.values};
 
   StreamSubscription<PoiSearchProgress>? _subscription;
 

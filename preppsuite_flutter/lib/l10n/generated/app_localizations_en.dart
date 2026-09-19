@@ -5682,4 +5682,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hubFolderReportAutonomy => 'Self-sufficiency';
+
+  @override
+  String get mapWaterTitle => 'Drinking water affected';
+
+  @override
+  String mapWaterStock(String value) {
+    return 'Your own drinking water: $value';
+  }
+
+  @override
+  String mapWaterStockUnknown(String reason) {
+    return 'How far your own supply reaches is still open: $reason.';
+  }
+
+  @override
+  String get mapWaterNearby => 'Drinking water nearby';
+
+  @override
+  String get mapWaterAdviceNote =>
+      'What to do with the water is in the warning itself. This app publishes no figures of its own on that.';
 }
