@@ -6,6 +6,11 @@ import 'package:uuid/uuid.dart';
 /// Local-only preparations. These are deliberately kept out of the shared
 /// household database: a radio frequency, document location, route, or event
 /// note must never leave the device just because household data is synced.
+///
+/// Not synced is not the same as not kept, though. `BackupService` writes
+/// this plan into its own encrypted section of a backup, so a lost or
+/// reset device does not take the household's crisis planning with it.
+/// That is a deliberate act with a passphrase, not a background copy.
 class PreparednessHubStore {
   const PreparednessHubStore();
 
@@ -24,6 +29,16 @@ class PreparednessHubStore {
   Future<void> save(PreparednessHubData value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key, jsonEncode(value.toJson()));
+  }
+
+  /// Folds a restored plan into the one this device holds.
+  ///
+  /// Restoring must not wind a plan back: somebody who backs up in March
+  /// and restores in September after losing the phone has nothing to lose,
+  /// but somebody who restores onto a device they kept using would
+  /// otherwise trade the newer plan for the older one.
+  Future<void> mergeFrom(PreparednessHubData incoming) async {
+    await save((await load()).mergeWith(incoming));
   }
 }
 
@@ -121,6 +136,57 @@ class PreparednessHubData {
     mutualAid: mutualAid ?? this.mutualAid,
     practice: practice ?? this.practice,
   );
+
+  /// The same rule the household database uses for a shared folder, a QR
+  /// chain and a backup: the newer entry is taken, the older one is kept.
+  /// Every part of this plan carries the date on which it was last
+  /// checked, so "newer" is decided per note, per card and per station
+  /// rather than for the plan as a whole.
+  PreparednessHubData mergeWith(PreparednessHubData incoming) =>
+      PreparednessHubData(
+        radioPlans: _mergeById(
+          radioPlans,
+          incoming.radioPlans,
+          (item) => item.id,
+          (item) => item.checkedAt,
+        ),
+        folder: _mergeFolder(folder, incoming.folder),
+        maintenance: _mergeDates(maintenance, incoming.maintenance),
+        evacuationCards: _mergeById(
+          evacuationCards,
+          incoming.evacuationCards,
+          (item) => item.id,
+          (item) => item.checkedAt,
+        ),
+        // An incident log is a record of what happened, so entries are
+        // only ever added. Two devices that were both running during a
+        // power cut hold two halves of the same night.
+        events: _mergeById(
+          events,
+          incoming.events,
+          (item) => item.id,
+          (item) => item.at,
+        ),
+        communication: _mergeNote(communication, incoming.communication),
+        support: _mergeNote(support, incoming.support),
+        pets: _mergeNote(pets, incoming.pets),
+        mobility: _mergeNote(mobility, incoming.mobility),
+        utilities: _mergeNote(utilities, incoming.utilities),
+        actionDone: _mergeDates(actionDone, incoming.actionDone),
+        // Crisis mode describes what this device is showing right now,
+        // not what the household has planned, so a restore never switches
+        // it on or off behind somebody's back.
+        crisisMode: crisisMode,
+        autonomy: _mergeAutonomy(autonomy, incoming.autonomy),
+        waterHygiene: _mergeNote(waterHygiene, incoming.waterHygiene),
+        powerOutage: _mergeNote(powerOutage, incoming.powerOutage),
+        cooking: _mergeNote(cooking, incoming.cooking),
+        redundancy: _mergeNote(redundancy, incoming.redundancy),
+        climateRoom: _mergeNote(climateRoom, incoming.climateRoom),
+        analogFallback: _mergeNote(analogFallback, incoming.analogFallback),
+        mutualAid: _mergeNote(mutualAid, incoming.mutualAid),
+        practice: _mergeNote(practice, incoming.practice),
+      );
 
   Map<String, Object?> toJson() => {
     'radioPlans': [for (final item in radioPlans) item.toJson()],
@@ -506,3 +572,67 @@ class IncidentEntry {
     );
   }
 }
+
+/// A note that was never touched loses to one that was; otherwise the
+/// later check wins. Text alone does not decide it — an entry without a
+/// date is a plan nobody has confirmed.
+PlanNote _mergeNote(PlanNote held, PlanNote incoming) {
+  if (held.checkedAt == null && held.text.isEmpty) return incoming;
+  return _isNewer(incoming.checkedAt, held.checkedAt) ? incoming : held;
+}
+
+bool _isNewer(DateTime? candidate, DateTime? held) {
+  if (candidate == null) return false;
+  if (held == null) return true;
+  return candidate.isAfter(held);
+}
+
+/// Union by id, held order first, so a restore adds what is missing
+/// without reshuffling the list somebody reads under pressure.
+List<T> _mergeById<T>(
+  List<T> held,
+  List<T> incoming,
+  String Function(T) idOf,
+  DateTime Function(T) dateOf,
+) {
+  final byId = {for (final item in held) idOf(item): item};
+  final order = [for (final item in held) idOf(item)];
+  for (final item in incoming) {
+    final id = idOf(item);
+    final existing = byId[id];
+    if (existing == null) {
+      order.add(id);
+      byId[id] = item;
+    } else if (dateOf(item).isAfter(dateOf(existing))) {
+      byId[id] = item;
+    }
+  }
+  return [for (final id in order) byId[id] as T];
+}
+
+Map<String, DateTime> _mergeDates(
+  Map<String, DateTime> held,
+  Map<String, DateTime> incoming,
+) {
+  final result = Map<String, DateTime>.from(held);
+  for (final entry in incoming.entries) {
+    final existing = result[entry.key];
+    if (existing == null || entry.value.isAfter(existing)) {
+      result[entry.key] = entry.value;
+    }
+  }
+  return result;
+}
+
+EmergencyFolderStatus _mergeFolder(
+  EmergencyFolderStatus held,
+  EmergencyFolderStatus incoming,
+) {
+  if (held.lastChecked == null && held.location.isEmpty) return incoming;
+  return _isNewer(incoming.lastChecked, held.lastChecked) ? incoming : held;
+}
+
+AutonomySnapshot _mergeAutonomy(
+  AutonomySnapshot held,
+  AutonomySnapshot incoming,
+) => _isNewer(incoming.checkedAt, held.checkedAt) ? incoming : held;

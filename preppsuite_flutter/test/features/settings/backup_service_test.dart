@@ -1,10 +1,19 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/preparedness/application/preparedness_hub_store.dart';
 import 'package:preppsuite_flutter/features/settings/application/backup_service.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  // A backup carries the crisis plan alongside the household, and that
+  // plan lives in the platform's own store.
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   test(
     'a household backup restores its inventory into an empty database',
     () async {
@@ -106,6 +115,91 @@ void main() {
     expect(
       await BackupService(db).restore(raw, 'home', 'wrong-pass'),
       isNull,
+    );
+  });
+
+  test('a backup carries the crisis plan, not only the household', () async {
+    // The plan does not live in the database and is deliberately not
+    // synced, which for months meant it was in no backup either: a lost
+    // phone took every evacuation card with it.
+    final source = AppDatabase.forTesting(NativeDatabase.memory());
+    final target = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(source.close);
+    addTearDown(target.close);
+
+    const hub = PreparednessHubStore();
+    await hub.save(
+      PreparednessHubData(
+        evacuationCards: [
+          EvacuationCard(
+            id: 'route',
+            label: 'Zuhause',
+            start: 'Wohnung',
+            destination: 'Treffpunkt Sporthalle',
+            route: 'Nebenstrassen',
+            locations: 'Apotheke',
+            checkedAt: DateTime(2026, 9, 14),
+          ),
+        ],
+        utilities: PlanNote(
+          text: 'Hauptabsperrhahn im Keller',
+          checkedAt: DateTime(2026, 9, 14),
+        ),
+      ),
+    );
+
+    final raw = await BackupService(source).exportHousehold(
+      'home',
+      'secret-123',
+    );
+
+    // A device that knows nothing about this household yet.
+    SharedPreferences.setMockInitialValues({});
+    expect((await hub.load()).evacuationCards, isEmpty);
+
+    await BackupService(target).restore(raw, 'home', 'secret-123');
+
+    final restored = await hub.load();
+    expect(
+      restored.evacuationCards.single.destination,
+      'Treffpunkt Sporthalle',
+    );
+    expect(restored.utilities.text, 'Hauptabsperrhahn im Keller');
+  });
+
+  test('restoring an older backup does not wind a newer plan back', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
+    const hub = PreparednessHubStore();
+
+    await hub.save(
+      PreparednessHubData(
+        utilities: PlanNote(text: 'alt', checkedAt: DateTime(2026, 3, 1)),
+      ),
+    );
+    final raw = await BackupService(db).exportHousehold('home', 'secret-123');
+
+    await hub.save(
+      PreparednessHubData(
+        utilities: PlanNote(text: 'neu', checkedAt: DateTime(2026, 9, 14)),
+      ),
+    );
+    await BackupService(db).restore(raw, 'home', 'secret-123');
+
+    expect((await hub.load()).utilities.text, 'neu');
+  });
+
+  test('a backup written before the plan section still restores', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
+    final raw = await BackupService(db).exportHousehold('home', 'secret-123');
+    final envelope = jsonDecode(raw) as Map<String, Object?>..remove('device');
+
+    expect(
+      await BackupService(
+        db,
+      ).restore(jsonEncode(envelope), 'home', 'secret-123'),
+      0,
     );
   });
 }

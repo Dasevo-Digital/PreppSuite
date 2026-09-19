@@ -114,4 +114,145 @@ void main() {
     expect(snapshot.limitingDays, 0);
     expect(snapshot.bottleneck, 'Energie');
   });
+
+  group('merging a restored plan into the one on the device', () {
+    PlanNote note(String text, DateTime at) =>
+        PlanNote(text: text, checkedAt: at);
+
+    test('the later check wins, in both directions', () {
+      final held = PreparednessHubData(
+        utilities: note('alt', DateTime(2026, 3, 1)),
+        pets: note('neu', DateTime(2026, 9, 14)),
+      );
+      final incoming = PreparednessHubData(
+        utilities: note('neu', DateTime(2026, 9, 14)),
+        pets: note('alt', DateTime(2026, 3, 1)),
+      );
+
+      final merged = held.mergeWith(incoming);
+
+      expect(merged.utilities.text, 'neu');
+      expect(merged.pets.text, 'neu');
+    });
+
+    test('a note nobody has touched yields to one that was written', () {
+      final merged = const PreparednessHubData().mergeWith(
+        PreparednessHubData(
+          communication: note('Kontaktkette', DateTime(2026, 9, 14)),
+        ),
+      );
+
+      expect(merged.communication.text, 'Kontaktkette');
+    });
+
+    test('cards are joined by id, held order first', () {
+      EvacuationCard card(String id, String destination, DateTime at) =>
+          EvacuationCard(
+            id: id,
+            label: id,
+            start: 'Wohnung',
+            destination: destination,
+            route: 'Nebenstrassen',
+            locations: '',
+            checkedAt: at,
+          );
+      final held = PreparednessHubData(
+        evacuationCards: [
+          card('a', 'Sporthalle', DateTime(2026, 9, 14)),
+          card('b', 'Schule', DateTime(2026, 3, 1)),
+        ],
+      );
+      final incoming = PreparednessHubData(
+        evacuationCards: [
+          card('b', 'Gemeindehaus', DateTime(2026, 9, 16)),
+          card('c', 'Bahnhof', DateTime(2026, 3, 1)),
+          card('a', 'Feuerwache', DateTime(2026, 3, 1)),
+        ],
+      );
+
+      final merged = held.mergeWith(incoming);
+
+      expect(
+        merged.evacuationCards.map((item) => item.id),
+        ['a', 'b', 'c'],
+      );
+      // 'a' keeps the newer local destination, 'b' takes the newer one
+      // from the backup, 'c' is added.
+      expect(
+        merged.evacuationCards.map((item) => item.destination),
+        ['Sporthalle', 'Gemeindehaus', 'Bahnhof'],
+      );
+    });
+
+    test('an incident log only ever grows', () {
+      IncidentEntry event(String id, DateTime at) => IncidentEntry(
+        id: id,
+        at: at,
+        kind: 'Stromausfall',
+        note: '',
+        action: '',
+      );
+      final merged =
+          PreparednessHubData(
+            events: [event('one', DateTime(2026, 9, 14))],
+          ).mergeWith(
+            PreparednessHubData(events: [event('two', DateTime(2026, 3, 1))]),
+          );
+
+      expect(merged.events.map((item) => item.id), ['one', 'two']);
+    });
+
+    test('a check date is kept when the backup only has an older one', () {
+      final merged =
+          PreparednessHubData(
+            maintenance: {'batteries': DateTime(2026, 9, 14)},
+            actionDone: {'now': DateTime(2026, 3, 1)},
+          ).mergeWith(
+            PreparednessHubData(
+              maintenance: {
+                'batteries': DateTime(2026, 3, 1),
+                'filter': DateTime(2026, 3, 1),
+              },
+              actionDone: {'now': DateTime(2026, 9, 14)},
+            ),
+          );
+
+      expect(merged.maintenance['batteries'], DateTime(2026, 9, 14));
+      expect(merged.maintenance['filter'], DateTime(2026, 3, 1));
+      expect(merged.actionDone['now'], DateTime(2026, 9, 14));
+    });
+
+    test('a restore never switches crisis mode on or off', () {
+      expect(
+        const PreparednessHubData(
+          crisisMode: false,
+        ).mergeWith(const PreparednessHubData(crisisMode: true)).crisisMode,
+        isFalse,
+      );
+      expect(
+        const PreparednessHubData(
+          crisisMode: true,
+        ).mergeWith(const PreparednessHubData(crisisMode: false)).crisisMode,
+        isTrue,
+      );
+    });
+
+    test('the store folds a restored plan into what it holds', () async {
+      const store = PreparednessHubStore();
+      await store.save(
+        PreparednessHubData(cooking: note('Gaskocher', DateTime(2026, 9, 14))),
+      );
+
+      await store.mergeFrom(
+        PreparednessHubData(
+          cooking: note('Campingkocher', DateTime(2026, 3, 1)),
+          practice: note('Filtertest', DateTime(2026, 9, 16)),
+        ),
+      );
+
+      final merged = await store.load();
+      expect(merged.cooking.text, 'Gaskocher');
+      expect(merged.practice.text, 'Filtertest');
+    });
+  });
 }

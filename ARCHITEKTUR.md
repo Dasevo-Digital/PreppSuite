@@ -306,6 +306,27 @@ to notice until somebody restored one. A second copy of the merge is a
 second set of tie-break rules; a second copy of the read is silent data
 loss. `backup_service_test` now asserts that a newer table comes back.
 
+**What is not in the database is not in the backup — unless it says so.**
+The crisis plan in `preparedness_hub_store.dart` is the one exception to
+"drift is the source of truth": a radio frequency, a document location
+and an evacuation route are deliberately kept out of the shared folder,
+because they should not travel to every household device just because the
+inventory does. For a while that also meant they were in no backup, so a
+lost phone took the whole plan with it — the same silent loss as the
+missing table above, one layer further out. The backup now carries the
+plan in its own encrypted section (`'device'`), under the same passphrase
+and outside the snapshot, so an older version reads the household from a
+newer file and a newer version finds no plan in an older one. Restoring
+merges rather than overwrites: every note, card and station carries the
+date it was last checked, and the later one wins, so a restore onto a
+device somebody kept using cannot wind the plan back. Crisis mode is the
+exception to the exception — it describes what this device is showing
+right now, so a restore never switches it.
+
+Anything else that grows outside drift inherits this problem. A new
+`SharedPreferences` key that holds something a household would be sorry
+to lose is not finished until it is named here and in a backup test.
+
 **The snapshot format in `device_snapshot.dart` is a contract, not a dump.**
 Row codecs are hand-written rather than drift's generated `toJson` precisely
 so that a migration does not silently change a file format other installs —
