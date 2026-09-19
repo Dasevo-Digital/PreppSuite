@@ -1,24 +1,37 @@
 import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../energy/application/energy_store.dart';
+import '../../household/application/household_providers.dart';
+import '../../inventory/application/inventory_providers.dart';
+import '../../inventory/application/supply_calculator.dart';
 import '../../inventory/presentation/prepper_recipes_screen.dart';
+import '../application/autonomy_overview.dart';
 import '../application/preparedness_hub_store.dart';
 
 /// Private, offline planning tools. The screen intentionally has no map or
 /// cloud action: routes and sensitive document locations stay on this device.
-class PreparednessHubScreen extends StatefulWidget {
-  const PreparednessHubScreen({super.key});
+class PreparednessHubScreen extends ConsumerStatefulWidget {
+  const PreparednessHubScreen({super.key, required this.householdId});
+
+  final String householdId;
 
   @override
-  State<PreparednessHubScreen> createState() => _PreparednessHubScreenState();
+  ConsumerState<PreparednessHubScreen> createState() =>
+      _PreparednessHubScreenState();
 }
 
-class _PreparednessHubScreenState extends State<PreparednessHubScreen> {
+class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   static const _store = PreparednessHubStore();
+  static const _energyStore = EnergyPlanStore();
   PreparednessHubData _data = const PreparednessHubData();
+  // The stored energy is kept by its own screen, not here. This screen
+  // only divides it, the same as it does the inventory.
+  EnergyPlan _energy = const EnergyPlan();
   var _loading = true;
 
   @override
@@ -29,12 +42,37 @@ class _PreparednessHubScreenState extends State<PreparednessHubScreen> {
 
   Future<void> _load() async {
     final data = await _store.load();
+    final energy = await _energyStore.load();
     if (mounted) {
       setState(() {
         _data = data;
+        _energy = energy;
         _loading = false;
       });
     }
+  }
+
+  /// What the household is on its own for, resource by resource.
+  ///
+  /// Four of the five come out of records the app already holds. This
+  /// screen used to ask for all five by hand, beside an inventory that
+  /// answered four of them — the same second, silently disagreeing
+  /// number the supply calculator had and removed.
+  List<AutonomyReach> _reaches() {
+    final items =
+        ref.watch(inventoryItemsProvider(widget.householdId)).value ?? const [];
+    final profile = ref.watch(householdProfileProvider).value;
+    return autonomyReaches(
+      items: items,
+      household: SupplyHousehold(
+        adults: profile?.personCount ?? 1,
+        children: profile?.children ?? 0,
+        dogs: profile?.dogs ?? 0,
+        cats: profile?.cats ?? 0,
+      ),
+      energy: _energy,
+      entered: _data.autonomy,
+    );
   }
 
   Future<void> _change(PreparednessHubData value) async {
@@ -47,236 +85,242 @@ class _PreparednessHubScreenState extends State<PreparednessHubScreen> {
       : MaterialLocalizations.of(context).formatMediumDate(value);
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Krisenorganisation')),
-    body: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaler: TextScaler.linear(_data.crisisMode ? 1.25 : 1),
+  Widget build(BuildContext context) {
+    final reaches = _reaches();
+    return Scaffold(
+      appBar: AppBar(title: const Text('Krisenorganisation')),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: TextScaler.linear(_data.crisisMode ? 1.25 : 1),
+              ),
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Text(
+                    'Alle Angaben bleiben auf diesem Gerät. Exportierst du ein Ereignisprotokoll, entscheidest du selbst über den Empfänger.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 16),
+                  _section(
+                    'Autarkie-Status',
+                    Icons.monitor_heart_outlined,
+                    'Reichweite in Tagen, aus Bestand und Energieplan gerechnet. Der niedrigste Wert zeigt den nächsten Engpass.',
+                    _autonomy(reaches),
+                  ),
+                  _section(
+                    'Wasser und Hygiene',
+                    Icons.water_drop_outlined,
+                    'Trink- und Brauchwasser, Aufbereitung, Kanisterrotation, Toilette und Abfall getrennt planen.',
+                    _planNote(
+                      note: _data.waterHygiene,
+                      label: 'Wasser- und Hygieneplan',
+                      hint:
+                          'Trinkwasser: …\nBrauchwasser: …\nQuellen und Aufbereitung: …\nKanisterrotation: …\nToilette, Abfall und Reinigungsmittel: …',
+                      onSave: (value) =>
+                          _change(_data.copyWith(waterHygiene: value)),
+                    ),
+                  ),
+                  _section(
+                    'Stromausfall-Plan',
+                    Icons.power_outlined,
+                    'Startzeit, Kühlkette, Ladeprioritäten, Licht, Information und sichere Wärme vorbereiten.',
+                    _planNote(
+                      note: _data.powerOutage,
+                      label: 'Stromausfall-Plan',
+                      hint:
+                          'Startzeit notieren. Kühl- und Gefriergeräte geschlossen halten. Ladeprioritäten, Radio, Licht, sichere Wärme und Ansprechpartner festhalten.',
+                      onSave: (value) =>
+                          _change(_data.copyWith(powerOutage: value)),
+                    ),
+                  ),
+                  _section(
+                    'Vorratsküche',
+                    Icons.soup_kitchen_outlined,
+                    'Mahlzeiten nach Vorrat, Wasser- und Brennstoffbedarf planen.',
+                    _cookingPlan(),
+                  ),
+                  _section(
+                    'Redundanz-Check',
+                    Icons.account_tree_outlined,
+                    'Zweite Wege für Wasser, Licht, Kochen, Information und Kommunikation festhalten.',
+                    _planNote(
+                      note: _data.redundancy,
+                      label: 'Redundanz-Check',
+                      hint:
+                          'Wasser: Hauptweg / Ersatzweg\nLicht: Hauptweg / Ersatzweg\nKochen: Hauptweg / Ersatzweg\nInformation und Kommunikation: Hauptweg / Ersatzweg',
+                      onSave: (value) =>
+                          _change(_data.copyWith(redundancy: value)),
+                    ),
+                  ),
+                  _section(
+                    'Kälte- und Hitze-Schutzraum',
+                    Icons.thermostat_outlined,
+                    'Geeigneten Aufenthaltsraum, Kleidung, Lüftung und sichere Wärme oder Kühlung vorab bestimmen.',
+                    _planNote(
+                      note: _data.climateRoom,
+                      label: 'Schutzraum für Kälte und Hitze',
+                      hint:
+                          'Raum: …\nWärme/Kühlung: …\nDecken und Kleidung: …\nLüftung: …\nCO-Melder und sichere Geräte: …',
+                      onSave: (value) =>
+                          _change(_data.copyWith(climateRoom: value)),
+                    ),
+                  ),
+                  _section(
+                    'Radio-Empfangsplan',
+                    Icons.radio_outlined,
+                    'Lokale UKW- und DAB-Stationen, Geräte und Stromversorgung festhalten.',
+                    _radioPlan(),
+                  ),
+                  _section(
+                    'Notfallmappe',
+                    Icons.folder_copy_outlined,
+                    'Dokumentenmappe ohne Inhalte oder Personenangaben verwalten.',
+                    _folder(),
+                  ),
+                  _section(
+                    'Kommunikationsplan',
+                    Icons.forum_outlined,
+                    'Kontakt-Reihenfolge, externe Kontaktperson und kurze Statusmeldungen für überlastete Netze.',
+                    _planNote(
+                      note: _data.communication,
+                      label: 'Kommunikationsplan',
+                      hint:
+                          'Wer wird in welcher Reihenfolge kontaktiert? Welche externe Kontaktperson koordiniert?\n\nVorlage: Wir sind sicher. Nächster Kontakt um …',
+                      onSave: (value) =>
+                          _change(_data.copyWith(communication: value)),
+                      templates: const [
+                        'Wir sind sicher. Nächster Kontakt um …',
+                        'Wir brauchen Unterstützung bei … Treffpunkt: …',
+                      ],
+                    ),
+                  ),
+                  _section(
+                    'Unterstützungsplan',
+                    Icons.accessible_forward_outlined,
+                    'Persönliche Unterstützung, Medikamente, Hilfsmittel und Transport bei einer Evakuierung.',
+                    _planNote(
+                      note: _data.support,
+                      label: 'Unterstützungsplan',
+                      hint:
+                          'Nur notwendige Angaben: benötigte Hilfe, Medikamente, Hilfsmittel, verlässliche Unterstützung und Transport.',
+                      onSave: (value) =>
+                          _change(_data.copyWith(support: value)),
+                    ),
+                  ),
+                  _section(
+                    'Haustier-Notfallplan',
+                    Icons.pets_outlined,
+                    'Transport, Futter, Medikamente, Betreuung und Ausweichunterkunft für Tiere vorbereiten.',
+                    _planNote(
+                      note: _data.pets,
+                      label: 'Haustier-Notfallplan',
+                      hint:
+                          'Transportbox, Vorräte, Tierarzt, Betreuung, tierfreundliche Unterkunft und Dokumentenkopien.',
+                      onSave: (value) => _change(_data.copyWith(pets: value)),
+                    ),
+                  ),
+                  _section(
+                    'Fahrzeug und Mobilität',
+                    Icons.directions_car_outlined,
+                    'Fahrzeug-Notgepäck, Energie- oder Tankreserve, alternative Verkehrsmittel und Abholung.',
+                    _planNote(
+                      note: _data.mobility,
+                      label: 'Mobilitätsplan',
+                      hint:
+                          'Fahrzeug, Lade- oder Tankziel, Notgepäck, alternative Route, ÖPNV und Abholung.',
+                      onSave: (value) =>
+                          _change(_data.copyWith(mobility: value)),
+                    ),
+                  ),
+                  _section(
+                    'Versorgungs-Unterbrechung',
+                    Icons.power_off_outlined,
+                    'Absperrorte und manuelle Alternativen für Strom, Wasser, Gas, Heizung und Telekommunikation.',
+                    _planNote(
+                      note: _data.utilities,
+                      label: 'Versorgungsplan',
+                      hint:
+                          'Absperrorte, Ansprechpartner, Ersatzstrom, Wasserentnahme, Heizung und kontaktlose Kommunikationswege.',
+                      onSave: (value) =>
+                          _change(_data.copyWith(utilities: value)),
+                    ),
+                  ),
+                  _section(
+                    'Wartungszentrale',
+                    Icons.build_outlined,
+                    'Regelmäßig prüfen, damit wichtige Ausrüstung im Notfall einsatzbereit ist.',
+                    _maintenance(),
+                  ),
+                  _section(
+                    'Evakuierungs-Karten',
+                    Icons.route_outlined,
+                    'Treffpunkte und sichere Wege als offline lesbare Karten notieren.',
+                    _evacuation(),
+                  ),
+                  _section(
+                    'Ereignisprotokoll',
+                    Icons.history_edu_outlined,
+                    'Beobachtungen und Maßnahmen mit Uhrzeit dokumentieren und bei Bedarf als PDF exportieren.',
+                    _events(),
+                  ),
+                  _section(
+                    'Handlungskarten',
+                    Icons.timer_outlined,
+                    'Vorbereitung nach Vorwarnzeit: sofort, innerhalb von 48 Stunden und mehrere Tage vorher.',
+                    _actionCards(),
+                  ),
+                  _section(
+                    'Krisenmodus und Briefing',
+                    Icons.visibility_outlined,
+                    'Größere Darstellung für diese Seite und ein druckbares Briefing für Haushalt oder Notgepäck.',
+                    _crisisTools(),
+                  ),
+                  _section(
+                    'Analoger Fallback',
+                    Icons.print_outlined,
+                    'Ausdrucke, Karten, Notizen und Ersatzschlüssel ohne Akku oder Netz verfügbar halten.',
+                    _planNote(
+                      note: _data.analogFallback,
+                      label: 'Analoger Fallback',
+                      hint:
+                          'Gedruckte Karten, Telefonliste, Anleitungen, Bargeld, Ersatzschlüssel und Aufbewahrungsort.',
+                      onSave: (value) =>
+                          _change(_data.copyWith(analogFallback: value)),
+                    ),
+                  ),
+                  _section(
+                    'Nachbarschaftshilfe',
+                    Icons.volunteer_activism_outlined,
+                    'Fähigkeiten, Hilfsmittel und sichere Kontaktwege lokal planen; keine Daten werden veröffentlicht.',
+                    _planNote(
+                      note: _data.mutualAid,
+                      label: 'Hilfe- und Tauschkarte',
+                      hint:
+                          'Eigene Fähigkeiten und Hilfsmittel, benötigte Unterstützung, vertrauenswürdige Kontakte und Übergabeort.',
+                      onSave: (value) =>
+                          _change(_data.copyWith(mutualAid: value)),
+                    ),
+                  ),
+                  _section(
+                    'Praxis und Wartung',
+                    Icons.event_repeat_outlined,
+                    'Regelmäßig Wasserfilter, Kochen, Radio, Notgepäck und analoge Abläufe praktisch üben.',
+                    _planNote(
+                      note: _data.practice,
+                      label: 'Praxis-Wartungsplan',
+                      hint:
+                          'Nächste Übung: …\nWasserfilter testen: …\nOhne Strom kochen: …\nRadio und Notgepäck prüfen: …',
+                      onSave: (value) =>
+                          _change(_data.copyWith(practice: value)),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                Text(
-                  'Alle Angaben bleiben auf diesem Gerät. Exportierst du ein Ereignisprotokoll, entscheidest du selbst über den Empfänger.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 16),
-                _section(
-                  'Autarkie-Status',
-                  Icons.monitor_heart_outlined,
-                  'Geprüfte Reichweite in Tagen. Der niedrigste Wert zeigt den nächsten Engpass.',
-                  _autonomy(),
-                ),
-                _section(
-                  'Wasser und Hygiene',
-                  Icons.water_drop_outlined,
-                  'Trink- und Brauchwasser, Aufbereitung, Kanisterrotation, Toilette und Abfall getrennt planen.',
-                  _planNote(
-                    note: _data.waterHygiene,
-                    label: 'Wasser- und Hygieneplan',
-                    hint:
-                        'Trinkwasser: …\nBrauchwasser: …\nQuellen und Aufbereitung: …\nKanisterrotation: …\nToilette, Abfall und Reinigungsmittel: …',
-                    onSave: (value) =>
-                        _change(_data.copyWith(waterHygiene: value)),
-                  ),
-                ),
-                _section(
-                  'Stromausfall-Plan',
-                  Icons.power_outlined,
-                  'Startzeit, Kühlkette, Ladeprioritäten, Licht, Information und sichere Wärme vorbereiten.',
-                  _planNote(
-                    note: _data.powerOutage,
-                    label: 'Stromausfall-Plan',
-                    hint:
-                        'Startzeit notieren. Kühl- und Gefriergeräte geschlossen halten. Ladeprioritäten, Radio, Licht, sichere Wärme und Ansprechpartner festhalten.',
-                    onSave: (value) =>
-                        _change(_data.copyWith(powerOutage: value)),
-                  ),
-                ),
-                _section(
-                  'Vorratsküche',
-                  Icons.soup_kitchen_outlined,
-                  'Mahlzeiten nach Vorrat, Wasser- und Brennstoffbedarf planen.',
-                  _cookingPlan(),
-                ),
-                _section(
-                  'Redundanz-Check',
-                  Icons.account_tree_outlined,
-                  'Zweite Wege für Wasser, Licht, Kochen, Information und Kommunikation festhalten.',
-                  _planNote(
-                    note: _data.redundancy,
-                    label: 'Redundanz-Check',
-                    hint:
-                        'Wasser: Hauptweg / Ersatzweg\nLicht: Hauptweg / Ersatzweg\nKochen: Hauptweg / Ersatzweg\nInformation und Kommunikation: Hauptweg / Ersatzweg',
-                    onSave: (value) =>
-                        _change(_data.copyWith(redundancy: value)),
-                  ),
-                ),
-                _section(
-                  'Kälte- und Hitze-Schutzraum',
-                  Icons.thermostat_outlined,
-                  'Geeigneten Aufenthaltsraum, Kleidung, Lüftung und sichere Wärme oder Kühlung vorab bestimmen.',
-                  _planNote(
-                    note: _data.climateRoom,
-                    label: 'Schutzraum für Kälte und Hitze',
-                    hint:
-                        'Raum: …\nWärme/Kühlung: …\nDecken und Kleidung: …\nLüftung: …\nCO-Melder und sichere Geräte: …',
-                    onSave: (value) =>
-                        _change(_data.copyWith(climateRoom: value)),
-                  ),
-                ),
-                _section(
-                  'Radio-Empfangsplan',
-                  Icons.radio_outlined,
-                  'Lokale UKW- und DAB-Stationen, Geräte und Stromversorgung festhalten.',
-                  _radioPlan(),
-                ),
-                _section(
-                  'Notfallmappe',
-                  Icons.folder_copy_outlined,
-                  'Dokumentenmappe ohne Inhalte oder Personenangaben verwalten.',
-                  _folder(),
-                ),
-                _section(
-                  'Kommunikationsplan',
-                  Icons.forum_outlined,
-                  'Kontakt-Reihenfolge, externe Kontaktperson und kurze Statusmeldungen für überlastete Netze.',
-                  _planNote(
-                    note: _data.communication,
-                    label: 'Kommunikationsplan',
-                    hint:
-                        'Wer wird in welcher Reihenfolge kontaktiert? Welche externe Kontaktperson koordiniert?\n\nVorlage: Wir sind sicher. Nächster Kontakt um …',
-                    onSave: (value) =>
-                        _change(_data.copyWith(communication: value)),
-                    templates: const [
-                      'Wir sind sicher. Nächster Kontakt um …',
-                      'Wir brauchen Unterstützung bei … Treffpunkt: …',
-                    ],
-                  ),
-                ),
-                _section(
-                  'Unterstützungsplan',
-                  Icons.accessible_forward_outlined,
-                  'Persönliche Unterstützung, Medikamente, Hilfsmittel und Transport bei einer Evakuierung.',
-                  _planNote(
-                    note: _data.support,
-                    label: 'Unterstützungsplan',
-                    hint:
-                        'Nur notwendige Angaben: benötigte Hilfe, Medikamente, Hilfsmittel, verlässliche Unterstützung und Transport.',
-                    onSave: (value) => _change(_data.copyWith(support: value)),
-                  ),
-                ),
-                _section(
-                  'Haustier-Notfallplan',
-                  Icons.pets_outlined,
-                  'Transport, Futter, Medikamente, Betreuung und Ausweichunterkunft für Tiere vorbereiten.',
-                  _planNote(
-                    note: _data.pets,
-                    label: 'Haustier-Notfallplan',
-                    hint:
-                        'Transportbox, Vorräte, Tierarzt, Betreuung, tierfreundliche Unterkunft und Dokumentenkopien.',
-                    onSave: (value) => _change(_data.copyWith(pets: value)),
-                  ),
-                ),
-                _section(
-                  'Fahrzeug und Mobilität',
-                  Icons.directions_car_outlined,
-                  'Fahrzeug-Notgepäck, Energie- oder Tankreserve, alternative Verkehrsmittel und Abholung.',
-                  _planNote(
-                    note: _data.mobility,
-                    label: 'Mobilitätsplan',
-                    hint:
-                        'Fahrzeug, Lade- oder Tankziel, Notgepäck, alternative Route, ÖPNV und Abholung.',
-                    onSave: (value) => _change(_data.copyWith(mobility: value)),
-                  ),
-                ),
-                _section(
-                  'Versorgungs-Unterbrechung',
-                  Icons.power_off_outlined,
-                  'Absperrorte und manuelle Alternativen für Strom, Wasser, Gas, Heizung und Telekommunikation.',
-                  _planNote(
-                    note: _data.utilities,
-                    label: 'Versorgungsplan',
-                    hint:
-                        'Absperrorte, Ansprechpartner, Ersatzstrom, Wasserentnahme, Heizung und kontaktlose Kommunikationswege.',
-                    onSave: (value) =>
-                        _change(_data.copyWith(utilities: value)),
-                  ),
-                ),
-                _section(
-                  'Wartungszentrale',
-                  Icons.build_outlined,
-                  'Regelmäßig prüfen, damit wichtige Ausrüstung im Notfall einsatzbereit ist.',
-                  _maintenance(),
-                ),
-                _section(
-                  'Evakuierungs-Karten',
-                  Icons.route_outlined,
-                  'Treffpunkte und sichere Wege als offline lesbare Karten notieren.',
-                  _evacuation(),
-                ),
-                _section(
-                  'Ereignisprotokoll',
-                  Icons.history_edu_outlined,
-                  'Beobachtungen und Maßnahmen mit Uhrzeit dokumentieren und bei Bedarf als PDF exportieren.',
-                  _events(),
-                ),
-                _section(
-                  'Handlungskarten',
-                  Icons.timer_outlined,
-                  'Vorbereitung nach Vorwarnzeit: sofort, innerhalb von 48 Stunden und mehrere Tage vorher.',
-                  _actionCards(),
-                ),
-                _section(
-                  'Krisenmodus und Briefing',
-                  Icons.visibility_outlined,
-                  'Größere Darstellung für diese Seite und ein druckbares Briefing für Haushalt oder Notgepäck.',
-                  _crisisTools(),
-                ),
-                _section(
-                  'Analoger Fallback',
-                  Icons.print_outlined,
-                  'Ausdrucke, Karten, Notizen und Ersatzschlüssel ohne Akku oder Netz verfügbar halten.',
-                  _planNote(
-                    note: _data.analogFallback,
-                    label: 'Analoger Fallback',
-                    hint:
-                        'Gedruckte Karten, Telefonliste, Anleitungen, Bargeld, Ersatzschlüssel und Aufbewahrungsort.',
-                    onSave: (value) =>
-                        _change(_data.copyWith(analogFallback: value)),
-                  ),
-                ),
-                _section(
-                  'Nachbarschaftshilfe',
-                  Icons.volunteer_activism_outlined,
-                  'Fähigkeiten, Hilfsmittel und sichere Kontaktwege lokal planen; keine Daten werden veröffentlicht.',
-                  _planNote(
-                    note: _data.mutualAid,
-                    label: 'Hilfe- und Tauschkarte',
-                    hint:
-                        'Eigene Fähigkeiten und Hilfsmittel, benötigte Unterstützung, vertrauenswürdige Kontakte und Übergabeort.',
-                    onSave: (value) =>
-                        _change(_data.copyWith(mutualAid: value)),
-                  ),
-                ),
-                _section(
-                  'Praxis und Wartung',
-                  Icons.event_repeat_outlined,
-                  'Regelmäßig Wasserfilter, Kochen, Radio, Notgepäck und analoge Abläufe praktisch üben.',
-                  _planNote(
-                    note: _data.practice,
-                    label: 'Praxis-Wartungsplan',
-                    hint:
-                        'Nächste Übung: …\nWasserfilter testen: …\nOhne Strom kochen: …\nRadio und Notgepäck prüfen: …',
-                    onSave: (value) => _change(_data.copyWith(practice: value)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-  );
+    );
+  }
 
   Widget _section(
     String title,
@@ -311,49 +355,118 @@ class _PreparednessHubScreenState extends State<PreparednessHubScreen> {
     ),
   );
 
-  Widget _autonomy() {
-    final snapshot = _data.autonomy;
-    final limiting = snapshot.limitingDays;
+  Widget _autonomy(List<AutonomyReach> reaches) {
+    final limiting = limitingReach(reaches);
+    final open = openQuestions(reaches);
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (limiting == 0)
+        // A range that leaves a resource out is not this household's
+        // range, so an unanswered question outranks the number.
+        if (open.isNotEmpty) ...[
           Text(
-            'Autarkie noch unvollständig. Offen: ${snapshot.entries.where((entry) => entry.$2 == 0).map((entry) => entry.$1).join(', ')}.',
-          )
-        else
+            'Autarkie noch unvollständig. Offen: '
+            '${open.map((reach) => _resourceName(reach.resource)).join(', ')}.',
+            style: theme.textTheme.titleMedium,
+          ),
+          if (limiting != null)
+            Text(
+              'Von dem, was bekannt ist: ${limiting.days} Tage, '
+              'Engpass ${_resourceName(limiting.resource)}.',
+            ),
+        ] else if (limiting != null)
           Text(
-            '$limiting Tage autark – Engpass: ${snapshot.bottleneck}',
-            style: Theme.of(context).textTheme.titleMedium,
+            '${limiting.days} Tage autark – Engpass: '
+            '${_resourceName(limiting.resource)}',
+            style: theme.textTheme.titleMedium,
           ),
         const SizedBox(height: 8),
-        for (final entry in snapshot.entries)
+        for (final reach in reaches)
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(
-              entry.$2 == limiting && limiting > 0
+              identical(reach, limiting)
                   ? Icons.priority_high
-                  : Icons.check_circle_outline,
+                  : reach.answered
+                  ? Icons.check_circle_outline
+                  : Icons.help_outline,
             ),
-            title: Text(entry.$1),
-            trailing: Text(entry.$2 == 0 ? 'offen' : '${entry.$2} Tage'),
+            title: Text(_resourceName(reach.resource)),
+            subtitle: switch (_reachDetail(reach)) {
+              final detail? => Text(detail),
+              _ => null,
+            },
+            trailing: Text(
+              reach.days == null ? 'offen' : '${reach.days} Tage',
+            ),
           ),
         OutlinedButton.icon(
-          onPressed: _editAutonomy,
+          onPressed: () => _editAutonomy(reaches),
           icon: const Icon(Icons.edit_outlined),
-          label: const Text('Reichweite eintragen'),
+          label: const Text('Von Hand ergänzen'),
         ),
       ],
     );
   }
 
-  Future<void> _editAutonomy() async {
+  String _resourceName(AutonomyResource resource) => switch (resource) {
+    AutonomyResource.water => 'Wasser',
+    AutonomyResource.food => 'Lebensmittel',
+    AutonomyResource.medicine => 'Medikamente',
+    AutonomyResource.energy => 'Energie',
+    AutonomyResource.hygiene => 'Hygiene',
+  };
+
+  /// Why a figure is what it is — or why there is none.
+  ///
+  /// Never silent: a household that reads "8 Tage" has to be able to see
+  /// whether that covers the crates of water in the cellar.
+  String? _reachDetail(AutonomyReach reach) {
+    final missed = reach.unmeasured > 0
+        ? '${reach.unmeasured} Eintrag${reach.unmeasured == 1 ? '' : 'e'} '
+              'nicht mitgerechnet: ${_gapReason(reach)}'
+        : null;
+    return switch (reach.basis) {
+      AutonomyBasis.stock => missed ?? 'Aus dem Bestand gerechnet',
+      AutonomyBasis.entered => 'Selbst eingetragen – ${_gapReason(reach)}',
+      null => _gapReason(reach),
+    };
+  }
+
+  String _gapReason(AutonomyReach reach) => switch (reach.gap) {
+    AutonomyGap.onlyByHand => 'zählt die App nicht mit',
+    AutonomyGap.nothingRecorded => switch (reach.resource) {
+      AutonomyResource.energy => 'noch kein Energieplan angelegt',
+      _ => 'noch nichts im Bestand erfasst',
+    },
+    AutonomyGap.notDivisible => switch (reach.resource) {
+      AutonomyResource.water => 'nicht in Litern erfasst',
+      AutonomyResource.food => 'ohne Kalorienangabe',
+      AutonomyResource.medicine => 'ohne Tagesdosis',
+      AutonomyResource.energy => 'nichts verbraucht davon',
+      AutonomyResource.hygiene => 'zählt die App nicht mit',
+    },
+    null => 'nicht in Litern erfasst',
+  };
+
+  /// Only what the records cannot answer.
+  ///
+  /// Water, food, medicines and energy are asked for here only while the
+  /// inventory or the energy plan cannot divide them; hygiene always,
+  /// because nothing in this app counts soap.
+  Future<void> _editAutonomy(List<AutonomyReach> reaches) async {
     final snapshot = _data.autonomy;
-    final water = TextEditingController(text: '${snapshot.waterDays}');
-    final food = TextEditingController(text: '${snapshot.foodDays}');
-    final medicine = TextEditingController(text: '${snapshot.medicineDays}');
-    final energy = TextEditingController(text: '${snapshot.energyDays}');
-    final hygiene = TextEditingController(text: '${snapshot.hygieneDays}');
+    final byHand = [
+      for (final reach in reaches)
+        if (reach.basis != AutonomyBasis.stock) reach,
+    ];
+    final fields = {
+      for (final reach in byHand)
+        reach.resource: TextEditingController(
+          text: '${_enteredFor(snapshot, reach.resource)}',
+        ),
+    };
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -361,12 +474,20 @@ class _PreparednessHubScreenState extends State<PreparednessHubScreen> {
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _daysField(water, 'Wasser'),
-              _daysField(food, 'Lebensmittel'),
-              _daysField(medicine, 'Medikamente'),
-              _daysField(energy, 'Energie'),
-              _daysField(hygiene, 'Hygiene'),
+              const Text(
+                'Was die App aus Bestand und Energieplan ableiten kann, '
+                'steht schon auf dem Bildschirm. Hier nur, was sie nicht '
+                'teilen kann.',
+              ),
+              const SizedBox(height: 12),
+              for (final reach in byHand)
+                _daysField(
+                  fields[reach.resource]!,
+                  '${_resourceName(reach.resource)} '
+                  '(${_gapReason(reach)})',
+                ),
             ],
           ),
         ),
@@ -374,20 +495,34 @@ class _PreparednessHubScreenState extends State<PreparednessHubScreen> {
       ),
     );
     if (saved != true) return;
-    int read(TextEditingController value) =>
-        (int.tryParse(value.text.trim())?.clamp(0, 3650) ?? 0).toInt();
+    int read(AutonomyResource resource) {
+      final controller = fields[resource];
+      if (controller == null) return _enteredFor(snapshot, resource);
+      return (int.tryParse(controller.text.trim())?.clamp(0, 3650) ?? 0)
+          .toInt();
+    }
+
     await _change(
       _data.copyWith(
         autonomy: snapshot.copyWith(
-          waterDays: read(water),
-          foodDays: read(food),
-          medicineDays: read(medicine),
-          energyDays: read(energy),
-          hygieneDays: read(hygiene),
+          waterDays: read(AutonomyResource.water),
+          foodDays: read(AutonomyResource.food),
+          medicineDays: read(AutonomyResource.medicine),
+          energyDays: read(AutonomyResource.energy),
+          hygieneDays: read(AutonomyResource.hygiene),
         ),
       ),
     );
   }
+
+  int _enteredFor(AutonomySnapshot snapshot, AutonomyResource resource) =>
+      switch (resource) {
+        AutonomyResource.water => snapshot.waterDays,
+        AutonomyResource.food => snapshot.foodDays,
+        AutonomyResource.medicine => snapshot.medicineDays,
+        AutonomyResource.energy => snapshot.energyDays,
+        AutonomyResource.hygiene => snapshot.hygieneDays,
+      };
 
   Widget _daysField(TextEditingController controller, String label) =>
       TextField(

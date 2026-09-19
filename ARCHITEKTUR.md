@@ -471,6 +471,22 @@ import, only entries the manifest itself names are extracted. Size and
 sha256 are checked after every download, and a file that fails is deleted
 rather than kept under its final name.
 
+**A reach the app can divide, it does not ask for.** Four of the crisis
+hub's five autonomy figures were already calculated elsewhere — water and
+food in `supply_calculator.dart`, medicines in `medication_range.dart`,
+stored energy in `energy_range.dart` — and the hub asked the household to
+type them in anyway, beside an inventory that knew them. That is the same
+second, silently disagreeing number the supply calculator itself had and
+removed. `autonomy_overview.dart` divides the records; the hand-entered
+figures survive only as the fallback for what cannot be divided.
+
+The division has to be able to fail out loud. Water in crates rather than
+litres, food with no calorie figure, a medicine with no daily dose, a
+reserve nothing draws on: each of those is a gap the screen names, never
+a zero, and never quietly dropped from a total — a reach that omits half
+the cupboard reads as covering all of it. Hygiene has no calculation at
+all and is not given one, because nothing in this app counts soap.
+
 **A photo drawn small is decoded small.** `InventoryPhotoService` stores
 pictures at up to 2000 pixels wide, and what a picture costs in memory is
 the size it is decoded to, not the size it is drawn at: one of them is

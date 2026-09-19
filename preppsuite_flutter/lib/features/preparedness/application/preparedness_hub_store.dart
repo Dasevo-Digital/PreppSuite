@@ -290,9 +290,14 @@ class PlanNote {
   }
 }
 
-/// Manually verified coverage in days. Unlike food and water inventory,
-/// sanitation, medicine and energy cannot be honestly inferred from a single
-/// generic unit, so the household enters its own tested range here.
+/// The part of the household's range only it can state.
+///
+/// This used to hold all five figures and work out the bottleneck from
+/// them, beside an inventory that already answered four — the same
+/// second, silently disagreeing number the supply calculator once kept.
+/// `autonomy_overview.dart` divides the records now; what is left here is
+/// the fallback for what they cannot answer, and hygiene, which nothing
+/// in this app counts.
 class AutonomySnapshot {
   const AutonomySnapshot({
     this.waterDays = 0,
@@ -304,23 +309,6 @@ class AutonomySnapshot {
   });
   final int waterDays, foodDays, medicineDays, energyDays, hygieneDays;
   final DateTime? checkedAt;
-  List<(String, int)> get entries => [
-    ('Wasser', waterDays),
-    ('Lebensmittel', foodDays),
-    ('Medikamente', medicineDays),
-    ('Energie', energyDays),
-    ('Hygiene', hygieneDays),
-  ];
-
-  /// A missing category is an open planning gap, not a category that can be
-  /// ignored while claiming the range of the other supplies as the result.
-  int get limitingDays => entries
-      .map((entry) => entry.$2)
-      .fold<int>(3650, (lowest, days) => days < lowest ? days : lowest);
-  String? get bottleneck => entries
-      .where((entry) => entry.$2 == limitingDays)
-      .map((entry) => entry.$1)
-      .firstOrNull;
   AutonomySnapshot copyWith({
     int? waterDays,
     int? foodDays,

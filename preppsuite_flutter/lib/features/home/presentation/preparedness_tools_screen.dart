@@ -11,7 +11,11 @@ import '../application/drill_progress_store.dart';
 /// create a cloud account or transmit a "safe" status; contacts remain under
 /// the user's control in the emergency directory.
 class PreparednessToolsScreen extends StatefulWidget {
-  const PreparednessToolsScreen({super.key});
+  const PreparednessToolsScreen({super.key, required this.householdId});
+
+  /// Passed through to the crisis hub, which divides the household's own
+  /// inventory into days rather than asking for the figure again.
+  final String householdId;
 
   @override
   State<PreparednessToolsScreen> createState() =>
@@ -106,7 +110,8 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => const PreparednessHubScreen(),
+                  builder: (_) =>
+                      PreparednessHubScreen(householdId: widget.householdId),
                 ),
               ),
             ),

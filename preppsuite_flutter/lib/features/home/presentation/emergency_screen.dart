@@ -128,7 +128,8 @@ class EmergencyScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => const PreparednessToolsScreen(),
+                builder: (_) =>
+                    PreparednessToolsScreen(householdId: profile.id),
               ),
             ),
           ),

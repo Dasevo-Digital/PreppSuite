@@ -31,7 +31,7 @@ void main() {
         locale: const Locale('de'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const PreparednessToolsScreen(),
+        home: const PreparednessToolsScreen(householdId: 'home'),
       ),
     );
     await tester.pumpAndSettle();

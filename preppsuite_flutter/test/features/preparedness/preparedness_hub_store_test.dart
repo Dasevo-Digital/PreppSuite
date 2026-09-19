@@ -86,8 +86,7 @@ void main() {
     expect(restored.pets.text, 'Transportbox');
     expect(restored.actionDone['now'], savedAt);
     expect(restored.crisisMode, isTrue);
-    expect(restored.autonomy.limitingDays, 5);
-    expect(restored.autonomy.bottleneck, 'Medikamente');
+    expect(restored.autonomy.medicineDays, 5);
     expect(restored.waterHygiene.text, 'Kanisterrotation');
     expect(restored.analogFallback.text, 'Papierkarte');
   });
@@ -100,19 +99,6 @@ void main() {
       isA<PreparednessHubData>(),
     );
     expect(PreparednessHubData.fromJson(null).events, isEmpty);
-  });
-
-  test('does not hide a missing resource behind the other ranges', () {
-    const snapshot = AutonomySnapshot(
-      waterDays: 8,
-      foodDays: 12,
-      medicineDays: 5,
-      energyDays: 0,
-      hygieneDays: 10,
-    );
-
-    expect(snapshot.limitingDays, 0);
-    expect(snapshot.bottleneck, 'Energie');
   });
 
   group('merging a restored plan into the one on the device', () {

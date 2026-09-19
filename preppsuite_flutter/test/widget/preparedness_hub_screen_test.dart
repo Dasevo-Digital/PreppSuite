@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/household/application/household_providers.dart';
+import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
+import 'package:preppsuite_flutter/local_db/database.dart';
+import 'package:preppsuite_flutter/model/household_profile.dart';
 import 'package:preppsuite_flutter/features/preparedness/application/preparedness_hub_store.dart';
 import 'package:preppsuite_flutter/features/preparedness/presentation/preparedness_hub_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
@@ -14,7 +19,29 @@ void main() {
 
   const store = PreparednessHubStore();
 
-  Future<void> show(WidgetTester tester) async {
+  InventoryItem item({
+    required String clientId,
+    required String category,
+    required double quantity,
+    String unit = 'Stk',
+    int? calories,
+  }) => InventoryItem(
+    clientId: clientId,
+    householdId: 'home',
+    name: clientId,
+    category: category,
+    quantity: quantity,
+    unit: unit,
+    storageLocation: 'Keller',
+    calories: calories,
+    updatedAt: DateTime.utc(2026, 9, 19),
+    dirty: false,
+  );
+
+  Future<void> show(
+    WidgetTester tester, {
+    List<InventoryItem> items = const [],
+  }) async {
     // Tall enough that the whole list is built: a `ListView` builds only
     // what it can show, and this screen is the longest in the app.
     tester.view.physicalSize = const Size(1200, 14000);
@@ -22,11 +49,19 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        locale: Locale('de'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: PreparednessHubScreen(),
+      ProviderScope(
+        overrides: [
+          inventoryItemsProvider(
+            'home',
+          ).overrideWith((ref) => Stream.value(items)),
+          householdProfileProvider.overrideWith(_TwoAdults.new),
+        ],
+        child: const MaterialApp(
+          locale: Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: PreparednessHubScreen(householdId: 'home'),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -125,4 +160,62 @@ void main() {
 
     expect(find.text('Krisenorganisation'), findsOneWidget);
   });
+
+  testWidgets('the range comes out of the inventory, not out of a dialog', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      items: [
+        item(clientId: 'w', category: 'water', quantity: 40, unit: 'l'),
+        item(clientId: 'f', category: 'food', quantity: 1, calories: 8800),
+      ],
+    );
+
+    // Two adults: 40 litres at 4 a day is ten days, 8800 kcal at 4400 is
+    // two — and food is the bottleneck nobody worked out by hand.
+    expect(find.textContaining('Engpass Lebensmittel'), findsOneWidget);
+    expect(find.text('10 Tage'), findsOneWidget);
+    expect(find.text('2 Tage'), findsOneWidget);
+    expect(find.text('Aus dem Bestand gerechnet'), findsWidgets);
+  });
+
+  testWidgets('a resource the app cannot divide is open, not zero', (
+    tester,
+  ) async {
+    await show(tester);
+
+    // Nothing recorded anywhere: five open questions and no reassuring
+    // number in front of them.
+    expect(find.text('offen'), findsNWidgets(5));
+    expect(find.textContaining('Autarkie noch unvollständig'), findsOneWidget);
+  });
+
+  testWidgets('by hand it asks only for what it could not work out', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      items: [item(clientId: 'w', category: 'water', quantity: 40, unit: 'l')],
+    );
+
+    await tester.tap(find.text('Von Hand ergänzen'));
+    await tester.pumpAndSettle();
+
+    // Water is answered, so it is not asked for again.
+    expect(find.textContaining('Wasser –'), findsNothing);
+    expect(find.textContaining('Hygiene'), findsWidgets);
+  });
+}
+
+/// A household of two adults, which is what the arithmetic in these tests
+/// is worked out for.
+class _TwoAdults extends HouseholdProfileController {
+  @override
+  Future<HouseholdProfile?> build() async => const HouseholdProfile(
+    id: 'home',
+    name: 'Zuhause',
+    countryCode: 'DE',
+    personCount: 2,
+  );
 }

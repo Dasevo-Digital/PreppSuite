@@ -130,7 +130,7 @@ SupplyCalculatorResult calculateSupply({
   for (final item in items) {
     final category = InventoryItemCategoryX.fromName(item.category);
     if (category == InventoryItemCategory.water) {
-      final liters = _normalizeToLiters(item.quantity, item.unit);
+      final liters = normalizeToLiters(item.quantity, item.unit);
       if (liters != null) waterCurrent += liters;
     } else if (category == InventoryItemCategory.food &&
         item.calories != null) {
@@ -150,7 +150,7 @@ SupplyCalculatorResult calculateSupply({
 /// (bottle), "Kiste" (crate) etc. can't be reliably converted without a
 /// separate per-unit volume, so those items are simply not counted rather
 /// than guessed at.
-double? _normalizeToLiters(double quantity, String unit) {
+double? normalizeToLiters(double quantity, String unit) {
   final normalized = unit.trim().toLowerCase();
   switch (normalized) {
     case 'l':
@@ -164,3 +164,31 @@ double? _normalizeToLiters(double quantity, String unit) {
       return null;
   }
 }
+
+/// Water the calculator had to leave out, because its unit does not
+/// unambiguously mean a volume.
+///
+/// Shown rather than silently skipped, for the reason
+/// [medicationsWithoutDose] gives: a reach that quietly omits half the
+/// cupboard is worse than one that says which half, because the
+/// household reads the reassuring number as covering everything.
+List<InventoryItem> waterWithoutVolume(List<InventoryItem> items) => [
+  for (final item in items)
+    if (InventoryItemCategoryX.fromName(item.category) ==
+        InventoryItemCategory.water)
+      if (item.quantity > 0)
+        if (normalizeToLiters(item.quantity, item.unit) == null) item,
+];
+
+/// Food nobody has put a calorie figure on.
+///
+/// The same rule again. A cupboard of tins with no figures is not a
+/// household with no food, and a calorie total that omits them is not
+/// that household's reach.
+List<InventoryItem> foodWithoutCalories(List<InventoryItem> items) => [
+  for (final item in items)
+    if (InventoryItemCategoryX.fromName(item.category) ==
+        InventoryItemCategory.food)
+      if (item.quantity > 0)
+        if (item.calories == null || item.calories == 0) item,
+];
