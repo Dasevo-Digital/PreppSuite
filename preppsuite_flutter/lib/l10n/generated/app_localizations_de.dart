@@ -4867,6 +4867,17 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die gespeicherte Warnlage konnte nicht gelesen werden.';
 
   @override
+  String get warningSituationMapTapHint =>
+      'Tippe in die Karte, um zu sehen, was an einer Stelle gilt.';
+
+  @override
+  String get warningSituationMapAtPoint => 'An dieser Stelle';
+
+  @override
+  String get warningSituationMapNothingHere =>
+      'Hier liegt keine der angezeigten Warnflächen.';
+
+  @override
   String get knowledgeApolloPackagesTitle => 'APOLLO-Paketstand';
 
   @override

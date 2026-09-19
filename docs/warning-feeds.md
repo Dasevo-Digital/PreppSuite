@@ -185,6 +185,31 @@ alte Lesart behielte. Nachträglich verortet wird nur von „gar nichts" zu
 „etwas", nie ein schon vorhandener Schlüssel überschrieben, und es löst
 keine zweite Benachrichtigung aus.
 
+## Die Lagekarte befragen
+
+Die CAP-Flächen einer Warnung liegen als Text in `polygonsJson` und
+werden von `warning_polygon_codec.dart` gelesen — einmal, für alle
+Bildschirme. Bis 1.8.8 hatte die Warnungsliste eine wortgleiche private
+Kopie dieser Funktion; eine Korrektur an einer der beiden hätte die
+andere nicht erreicht.
+
+Derselbe Codec beantwortet inzwischen die zweite Frage an dieselben
+Daten: nicht „zeichne diese Fläche", sondern „welche dieser Flächen
+liegt über diesem Punkt". `ringContains` zählt dafür, wie oft ein nach
+Osten laufender Strahl die Kanten schneidet — eine ungerade Zahl heißt
+innerhalb. Längengrad gilt dabei als x, Breitengrad als y. Auf einer
+Kugel ist das falsch und auf der Größe eines Landkreises belanglos: der
+Fehler bleibt weit unter der Auflösung der Umrisse, die der Feed liefert.
+
+In der Warnlagekarte öffnet ein Tipp deshalb eine Auskunft für genau
+diese Stelle, mit der Handlungsanweisung zuerst. Liegt dort keine der
+angezeigten Flächen, sagt die Karte das, statt stumm zu bleiben.
+
+**Das ist nicht dieselbe Frage wie „betrifft mich das".** `polygonsCover`
+prüft die gezeichnete Fläche; ob eine Warnung für den eigenen Haushalt
+gilt, entscheidet `isWarningRelevant` über den Regionsschlüssel. Eine
+Warnung ohne Geometrie deckt keinen Punkt ab, auch wenn sie alle angeht.
+
 ## Bekannte Einschränkungen
 
 - **MeteoAlarm-Warnungen außerhalb Deutschlands werden nicht nach Region

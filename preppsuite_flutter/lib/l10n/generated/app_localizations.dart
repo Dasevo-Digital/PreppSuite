@@ -8192,6 +8192,24 @@ abstract class AppLocalizations {
   /// **'The stored warning situation could not be read.'**
   String get warningSituationMapFailed;
 
+  /// No description provided for @warningSituationMapTapHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the map to see what applies at a spot.'**
+  String get warningSituationMapTapHint;
+
+  /// No description provided for @warningSituationMapAtPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'At this spot'**
+  String get warningSituationMapAtPoint;
+
+  /// No description provided for @warningSituationMapNothingHere.
+  ///
+  /// In en, this message translates to:
+  /// **'None of the areas shown covers this spot.'**
+  String get warningSituationMapNothingHere;
+
   /// No description provided for @knowledgeApolloPackagesTitle.
   ///
   /// In en, this message translates to:

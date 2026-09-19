@@ -98,6 +98,13 @@ class _WarningSituationMapScreenState
             ],
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+          child: Text(
+            l10n.warningSituationMapTapHint,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
         Expanded(
           flex: 3,
           child: onMap.isEmpty
@@ -116,6 +123,7 @@ class _WarningSituationMapScreenState
                   controller: _controller,
                   entries: onMap,
                   l10n: l10n,
+                  onTap: (point) => _showAt(onMap, point, l10n),
                 ),
         ),
         SizedBox(
@@ -125,6 +133,101 @@ class _WarningSituationMapScreenState
       ],
     );
   }
+
+  /// What applies at one spot.
+  ///
+  /// The list below the map answers "what is active in my area"; this
+  /// answers the question somebody actually has in front of a map with
+  /// three overlapping outlines on it — which of them covers the street
+  /// I am standing in, and what does it tell me to do. The instruction
+  /// comes first for that reason; the headline alone is not an answer.
+  Future<void> _showAt(
+    List<({Warning warning, List<List<LatLng>> polygons})> entries,
+    LatLng point,
+    AppLocalizations l10n,
+  ) {
+    final here = [
+      for (final entry in entries)
+        if (polygonsCover(entry.polygons, point)) entry.warning,
+    ];
+    return showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: here.isEmpty
+            ? Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                child: Text(
+                  l10n.warningSituationMapNothingHere,
+                  textAlign: TextAlign.center,
+                ),
+              )
+            : ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                children: [
+                  Text(
+                    l10n.warningSituationMapAtPoint,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  for (final warning in here)
+                    _WarningAtPoint(warning: warning, l10n: l10n),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+class _WarningAtPoint extends StatelessWidget {
+  const _WarningAtPoint({required this.warning, required this.l10n});
+
+  final Warning warning;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final severity = warningSeverityFromName(warning.severity);
+    final colors = warningSeverityColors(context, severity);
+    final guidance = warning.instruction?.trim().isNotEmpty == true
+        ? warning.instruction!.trim()
+        : warning.description?.trim();
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.warning_amber_rounded, color: colors.foreground),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        warning.headline,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      Text(localizeWarningSeverity(l10n, severity)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (guidance != null && guidance.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(guidance),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _Map extends StatelessWidget {
@@ -132,11 +235,13 @@ class _Map extends StatelessWidget {
     required this.controller,
     required this.entries,
     required this.l10n,
+    required this.onTap,
   });
 
   final MapController controller;
   final List<({Warning warning, List<List<LatLng>> polygons})> entries;
   final AppLocalizations l10n;
+  final void Function(LatLng point) onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +259,7 @@ class _Map extends StatelessWidget {
       options: MapOptions(
         initialCenter: center,
         initialZoom: 7,
+        onTap: (_, point) => onTap(point),
         onMapReady: () => controller.fitCamera(
           CameraFit.bounds(
             bounds: LatLngBounds.fromPoints(points),

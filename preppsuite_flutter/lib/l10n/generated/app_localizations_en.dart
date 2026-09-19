@@ -4838,6 +4838,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'The stored warning situation could not be read.';
 
   @override
+  String get warningSituationMapTapHint =>
+      'Tap the map to see what applies at a spot.';
+
+  @override
+  String get warningSituationMapAtPoint => 'At this spot';
+
+  @override
+  String get warningSituationMapNothingHere =>
+      'None of the areas shown covers this spot.';
+
+  @override
   String get knowledgeApolloPackagesTitle => 'APOLLO package status';
 
   @override

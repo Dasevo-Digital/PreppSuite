@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_polygon_codec.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
@@ -34,5 +35,71 @@ void main() {
     expect(warningPolygons(warning(null)), isEmpty);
     expect(warningPolygons(warning('not json')), isEmpty);
     expect(warningPolygons(warning('["52.1,10.5 broken"]')), isEmpty);
+  });
+
+  group('which area covers a spot', () {
+    // A square from 52.0,10.0 to 53.0,11.0, given clockwise the way the
+    // feed writes them.
+    final square = [
+      const LatLng(52, 10),
+      const LatLng(53, 10),
+      const LatLng(53, 11),
+      const LatLng(52, 11),
+    ];
+
+    test('a point inside counts, a point outside does not', () {
+      expect(ringContains(square, const LatLng(52.5, 10.5)), isTrue);
+      expect(ringContains(square, const LatLng(51.5, 10.5)), isFalse);
+      expect(ringContains(square, const LatLng(52.5, 11.5)), isFalse);
+    });
+
+    test('a bite out of the area is not inside it', () {
+      // An L: the missing quarter is the north-east one.
+      final shape = [
+        const LatLng(52, 10),
+        const LatLng(53, 10),
+        const LatLng(53, 10.5),
+        const LatLng(52.5, 10.5),
+        const LatLng(52.5, 11),
+        const LatLng(52, 11),
+      ];
+
+      expect(ringContains(shape, const LatLng(52.2, 10.2)), isTrue);
+      expect(ringContains(shape, const LatLng(52.8, 10.8)), isFalse);
+    });
+
+    test('a line is not an area', () {
+      expect(
+        ringContains(
+          [const LatLng(52, 10), const LatLng(53, 10)],
+          const LatLng(52.5, 10),
+        ),
+        isFalse,
+      );
+    });
+
+    test('a warning is covered when any one of its areas is', () {
+      final far = [
+        const LatLng(48, 8),
+        const LatLng(49, 8),
+        const LatLng(49, 9),
+        const LatLng(48, 9),
+      ];
+
+      expect(polygonsCover([far, square], const LatLng(52.5, 10.5)), isTrue);
+      expect(polygonsCover([far, square], const LatLng(50, 10)), isFalse);
+      // A warning without geometry covers no spot, even one that concerns
+      // everybody — that question belongs to `isWarningRelevant`.
+      expect(polygonsCover(const [], const LatLng(52.5, 10.5)), isFalse);
+    });
+
+    test('the decoded geometry of a warning answers the same question', () {
+      final polygons = warningPolygons(
+        warning('["52.0,10.0 53.0,10.0 53.0,11.0 52.0,11.0"]'),
+      );
+
+      expect(polygonsCover(polygons, const LatLng(52.5, 10.5)), isTrue);
+      expect(polygonsCover(polygons, const LatLng(54.0, 10.5)), isFalse);
+    });
   });
 }

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +10,7 @@ import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/warning_filter.dart';
+import '../application/warning_polygon_codec.dart';
 import 'warning_situation_map_screen.dart';
 import 'warning_day_notice.dart';
 import '../application/warning_providers.dart';
@@ -485,7 +484,7 @@ class _WarningDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final material = MaterialLocalizations.of(context);
-    final polygons = _warningPolygons(warning);
+    final polygons = warningPolygons(warning);
     final end = warning.expires == null
         ? l10n.warningDetailsUntilFurtherNotice
         : _formatDateTime(material, warning.expires!);
@@ -745,27 +744,6 @@ class _WarningPolygons extends StatelessWidget {
         ),
     ],
   );
-}
-
-List<List<LatLng>> _warningPolygons(Warning warning) {
-  final encoded = warning.polygonsJson;
-  if (encoded == null) return const [];
-  try {
-    final decoded = jsonDecode(encoded);
-    if (decoded is! List) return const [];
-    return [
-      for (final polygon in decoded.whereType<String>())
-        [
-          for (final pair in polygon.split(RegExp(r'\s+')))
-            if (pair.split(',') case [final lat, final lon])
-              if (double.tryParse(lat) case final latitude?)
-                if (double.tryParse(lon) case final longitude?)
-                  LatLng(latitude, longitude),
-        ],
-    ].where((points) => points.length >= 3).toList();
-  } on Object {
-    return const [];
-  }
 }
 
 class _WarningAreaMap extends StatelessWidget {

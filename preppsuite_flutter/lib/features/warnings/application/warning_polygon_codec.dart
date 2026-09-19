@@ -29,3 +29,35 @@ List<List<LatLng>> warningPolygons(Warning warning) {
     return const [];
   }
 }
+
+/// Whether [point] lies inside [ring].
+///
+/// Ray casting: count how often a ray going east from the point crosses an
+/// edge; an odd number means inside. Longitude is treated as x and latitude
+/// as y, which is wrong on a sphere and irrelevant at the size of a German
+/// district — the error stays far below the resolution of the outlines the
+/// feed delivers.
+bool ringContains(List<LatLng> ring, LatLng point) {
+  if (ring.length < 3) return false;
+  var inside = false;
+  for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    final yi = ring[i].latitude;
+    final xi = ring[i].longitude;
+    final yj = ring[j].latitude;
+    final xj = ring[j].longitude;
+    // Only an edge that straddles the point's latitude can be crossed.
+    if ((yi > point.latitude) == (yj > point.latitude)) continue;
+    final x = xi + (point.latitude - yi) / (yj - yi) * (xj - xi);
+    if (point.longitude < x) inside = !inside;
+  }
+  return inside;
+}
+
+/// Whether any of [polygons] covers [point].
+///
+/// This answers "is this spot inside the drawn outline", not "does this
+/// warning apply to me" — `isWarningRelevant` answers that one, and the
+/// two must not be confused. A warning that names no geometry covers no
+/// point here even when it concerns everybody.
+bool polygonsCover(List<List<LatLng>> polygons, LatLng point) =>
+    polygons.any((ring) => ringContains(ring, point));
