@@ -41,6 +41,15 @@ class PreparednessHubData {
     this.utilities = const PlanNote(),
     this.actionDone = const {},
     this.crisisMode = false,
+    this.autonomy = const AutonomySnapshot(),
+    this.waterHygiene = const PlanNote(),
+    this.powerOutage = const PlanNote(),
+    this.cooking = const PlanNote(),
+    this.redundancy = const PlanNote(),
+    this.climateRoom = const PlanNote(),
+    this.analogFallback = const PlanNote(),
+    this.mutualAid = const PlanNote(),
+    this.practice = const PlanNote(),
   });
 
   final List<RadioReceptionPlan> radioPlans;
@@ -57,6 +66,15 @@ class PreparednessHubData {
   final PlanNote utilities;
   final Map<String, DateTime> actionDone;
   final bool crisisMode;
+  final AutonomySnapshot autonomy;
+  final PlanNote waterHygiene;
+  final PlanNote powerOutage;
+  final PlanNote cooking;
+  final PlanNote redundancy;
+  final PlanNote climateRoom;
+  final PlanNote analogFallback;
+  final PlanNote mutualAid;
+  final PlanNote practice;
 
   PreparednessHubData copyWith({
     List<RadioReceptionPlan>? radioPlans,
@@ -71,6 +89,15 @@ class PreparednessHubData {
     PlanNote? utilities,
     Map<String, DateTime>? actionDone,
     bool? crisisMode,
+    AutonomySnapshot? autonomy,
+    PlanNote? waterHygiene,
+    PlanNote? powerOutage,
+    PlanNote? cooking,
+    PlanNote? redundancy,
+    PlanNote? climateRoom,
+    PlanNote? analogFallback,
+    PlanNote? mutualAid,
+    PlanNote? practice,
   }) => PreparednessHubData(
     radioPlans: radioPlans ?? this.radioPlans,
     folder: folder ?? this.folder,
@@ -84,6 +111,15 @@ class PreparednessHubData {
     utilities: utilities ?? this.utilities,
     actionDone: actionDone ?? this.actionDone,
     crisisMode: crisisMode ?? this.crisisMode,
+    autonomy: autonomy ?? this.autonomy,
+    waterHygiene: waterHygiene ?? this.waterHygiene,
+    powerOutage: powerOutage ?? this.powerOutage,
+    cooking: cooking ?? this.cooking,
+    redundancy: redundancy ?? this.redundancy,
+    climateRoom: climateRoom ?? this.climateRoom,
+    analogFallback: analogFallback ?? this.analogFallback,
+    mutualAid: mutualAid ?? this.mutualAid,
+    practice: practice ?? this.practice,
   );
 
   Map<String, Object?> toJson() => {
@@ -103,6 +139,15 @@ class PreparednessHubData {
       (key, value) => MapEntry(key, value.toUtc().toIso8601String()),
     ),
     'crisisMode': crisisMode,
+    'autonomy': autonomy.toJson(),
+    'waterHygiene': waterHygiene.toJson(),
+    'powerOutage': powerOutage.toJson(),
+    'cooking': cooking.toJson(),
+    'redundancy': redundancy.toJson(),
+    'climateRoom': climateRoom.toJson(),
+    'analogFallback': analogFallback.toJson(),
+    'mutualAid': mutualAid.toJson(),
+    'practice': practice.toJson(),
   };
 
   static PreparednessHubData fromJson(Object? value) {
@@ -142,6 +187,15 @@ class PreparednessHubData {
       utilities: PlanNote.fromJson(value['utilities']),
       actionDone: dates('actionDone'),
       crisisMode: value['crisisMode'] == true,
+      autonomy: AutonomySnapshot.fromJson(value['autonomy']),
+      waterHygiene: PlanNote.fromJson(value['waterHygiene']),
+      powerOutage: PlanNote.fromJson(value['powerOutage']),
+      cooking: PlanNote.fromJson(value['cooking']),
+      redundancy: PlanNote.fromJson(value['redundancy']),
+      climateRoom: PlanNote.fromJson(value['climateRoom']),
+      analogFallback: PlanNote.fromJson(value['analogFallback']),
+      mutualAid: PlanNote.fromJson(value['mutualAid']),
+      practice: PlanNote.fromJson(value['practice']),
     );
   }
 }
@@ -163,6 +217,76 @@ class PlanNote {
     if (value is! Map) return const PlanNote();
     return PlanNote(
       text: value['text'] is String ? value['text'] as String : '',
+      checkedAt: value['checkedAt'] is String
+          ? DateTime.tryParse(value['checkedAt'] as String)?.toLocal()
+          : null,
+    );
+  }
+}
+
+/// Manually verified coverage in days. Unlike food and water inventory,
+/// sanitation, medicine and energy cannot be honestly inferred from a single
+/// generic unit, so the household enters its own tested range here.
+class AutonomySnapshot {
+  const AutonomySnapshot({
+    this.waterDays = 0,
+    this.foodDays = 0,
+    this.medicineDays = 0,
+    this.energyDays = 0,
+    this.hygieneDays = 0,
+    this.checkedAt,
+  });
+  final int waterDays, foodDays, medicineDays, energyDays, hygieneDays;
+  final DateTime? checkedAt;
+  List<(String, int)> get entries => [
+    ('Wasser', waterDays),
+    ('Lebensmittel', foodDays),
+    ('Medikamente', medicineDays),
+    ('Energie', energyDays),
+    ('Hygiene', hygieneDays),
+  ];
+  int get limitingDays => entries
+      .map((entry) => entry.$2)
+      .where((days) => days > 0)
+      .fold<int>(
+        0,
+        (lowest, days) => lowest == 0 || days < lowest ? days : lowest,
+      );
+  String? get bottleneck => entries
+      .where((entry) => entry.$2 == limitingDays && limitingDays > 0)
+      .map((entry) => entry.$1)
+      .firstOrNull;
+  AutonomySnapshot copyWith({
+    int? waterDays,
+    int? foodDays,
+    int? medicineDays,
+    int? energyDays,
+    int? hygieneDays,
+  }) => AutonomySnapshot(
+    waterDays: waterDays ?? this.waterDays,
+    foodDays: foodDays ?? this.foodDays,
+    medicineDays: medicineDays ?? this.medicineDays,
+    energyDays: energyDays ?? this.energyDays,
+    hygieneDays: hygieneDays ?? this.hygieneDays,
+    checkedAt: DateTime.now(),
+  );
+  Map<String, Object?> toJson() => {
+    'waterDays': waterDays,
+    'foodDays': foodDays,
+    'medicineDays': medicineDays,
+    'energyDays': energyDays,
+    'hygieneDays': hygieneDays,
+    'checkedAt': checkedAt?.toUtc().toIso8601String(),
+  };
+  static AutonomySnapshot fromJson(Object? value) {
+    if (value is! Map) return const AutonomySnapshot();
+    int read(String key) => (value[key] as num?)?.toInt().clamp(0, 3650) ?? 0;
+    return AutonomySnapshot(
+      waterDays: read('waterDays'),
+      foodDays: read('foodDays'),
+      medicineDays: read('medicineDays'),
+      energyDays: read('energyDays'),
+      hygieneDays: read('hygieneDays'),
       checkedAt: value['checkedAt'] is String
           ? DateTime.tryParse(value['checkedAt'] as String)?.toLocal()
           : null,

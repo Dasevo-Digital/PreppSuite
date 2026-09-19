@@ -56,6 +56,22 @@ void main() {
       utilities: PlanNote(text: 'Absperrort', checkedAt: savedAt),
       actionDone: {'now': savedAt},
       crisisMode: true,
+      autonomy: AutonomySnapshot(
+        waterDays: 8,
+        foodDays: 12,
+        medicineDays: 5,
+        energyDays: 7,
+        hygieneDays: 10,
+        checkedAt: savedAt,
+      ),
+      waterHygiene: PlanNote(text: 'Kanisterrotation', checkedAt: savedAt),
+      powerOutage: PlanNote(text: 'Kühlkette', checkedAt: savedAt),
+      cooking: PlanNote(text: 'Ein-Topf-Gericht', checkedAt: savedAt),
+      redundancy: PlanNote(text: 'Zweites Radio', checkedAt: savedAt),
+      climateRoom: PlanNote(text: 'Innenraum', checkedAt: savedAt),
+      analogFallback: PlanNote(text: 'Papierkarte', checkedAt: savedAt),
+      mutualAid: PlanNote(text: 'Hilfeangebot', checkedAt: savedAt),
+      practice: PlanNote(text: 'Filtertest', checkedAt: savedAt),
     );
 
     await store.save(data);
@@ -70,6 +86,10 @@ void main() {
     expect(restored.pets.text, 'Transportbox');
     expect(restored.actionDone['now'], savedAt);
     expect(restored.crisisMode, isTrue);
+    expect(restored.autonomy.limitingDays, 5);
+    expect(restored.autonomy.bottleneck, 'Medikamente');
+    expect(restored.waterHygiene.text, 'Kanisterrotation');
+    expect(restored.analogFallback.text, 'Papierkarte');
   });
 
   test('invalid stored content falls back to an empty plan', () {
