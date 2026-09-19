@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../energy/application/energy_store.dart';
 import '../../household/application/household_providers.dart';
 import '../../inventory/application/inventory_providers.dart';
@@ -27,6 +28,8 @@ class PreparednessHubScreen extends ConsumerStatefulWidget {
 
 class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   static const _store = PreparednessHubStore();
+
+  AppLocalizations get _l10n => AppLocalizations.of(context)!;
   static const _energyStore = EnergyPlanStore();
   PreparednessHubData _data = const PreparednessHubData();
   // The stored energy is kept by its own screen, not here. This screen
@@ -81,14 +84,14 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   }
 
   String _date(DateTime? value) => value == null
-      ? 'noch nicht geprüft'
+      ? _l10n.hubNotCheckedYet
       : MaterialLocalizations.of(context).formatMediumDate(value);
 
   @override
   Widget build(BuildContext context) {
     final reaches = _reaches();
     return Scaffold(
-      appBar: AppBar(title: const Text('Krisenorganisation')),
+      appBar: AppBar(title: Text(_l10n.hubTitle)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : MediaQuery(
@@ -99,219 +102,207 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
                 padding: const EdgeInsets.all(16),
                 children: [
                   Text(
-                    'Alle Angaben bleiben auf diesem Gerät. Exportierst du ein Ereignisprotokoll, entscheidest du selbst über den Empfänger.',
+                    _l10n.hubPrivacyNote,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 16),
                   _section(
-                    'Autarkie-Status',
+                    _l10n.hubAutonomyTitle,
                     Icons.monitor_heart_outlined,
-                    'Reichweite in Tagen, aus Bestand und Energieplan gerechnet. Der niedrigste Wert zeigt den nächsten Engpass.',
+                    _l10n.hubAutonomyHint,
                     _autonomy(reaches),
                   ),
                   _section(
-                    'Wasser und Hygiene',
+                    _l10n.hubWaterHygieneTitle,
                     Icons.water_drop_outlined,
-                    'Trink- und Brauchwasser, Aufbereitung, Kanisterrotation, Toilette und Abfall getrennt planen.',
+                    _l10n.hubWaterHygieneHint,
                     _planNote(
                       note: _data.waterHygiene,
-                      label: 'Wasser- und Hygieneplan',
-                      hint:
-                          'Trinkwasser: …\nBrauchwasser: …\nQuellen und Aufbereitung: …\nKanisterrotation: …\nToilette, Abfall und Reinigungsmittel: …',
+                      label: _l10n.hubWaterHygieneLabel,
+                      hint: _l10n.hubWaterHygieneTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(waterHygiene: value)),
                     ),
                   ),
                   _section(
-                    'Stromausfall-Plan',
+                    _l10n.hubPowerOutageTitle,
                     Icons.power_outlined,
-                    'Startzeit, Kühlkette, Ladeprioritäten, Licht, Information und sichere Wärme vorbereiten.',
+                    _l10n.hubPowerOutageHint,
                     _planNote(
                       note: _data.powerOutage,
-                      label: 'Stromausfall-Plan',
-                      hint:
-                          'Startzeit notieren. Kühl- und Gefriergeräte geschlossen halten. Ladeprioritäten, Radio, Licht, sichere Wärme und Ansprechpartner festhalten.',
+                      label: _l10n.hubPowerOutageTitle,
+                      hint: _l10n.hubPowerOutageTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(powerOutage: value)),
                     ),
                   ),
                   _section(
-                    'Vorratsküche',
+                    _l10n.hubCookingTitle,
                     Icons.soup_kitchen_outlined,
-                    'Mahlzeiten nach Vorrat, Wasser- und Brennstoffbedarf planen.',
+                    _l10n.hubCookingHint,
                     _cookingPlan(),
                   ),
                   _section(
-                    'Redundanz-Check',
+                    _l10n.hubRedundancyTitle,
                     Icons.account_tree_outlined,
-                    'Zweite Wege für Wasser, Licht, Kochen, Information und Kommunikation festhalten.',
+                    _l10n.hubRedundancyHint,
                     _planNote(
                       note: _data.redundancy,
-                      label: 'Redundanz-Check',
-                      hint:
-                          'Wasser: Hauptweg / Ersatzweg\nLicht: Hauptweg / Ersatzweg\nKochen: Hauptweg / Ersatzweg\nInformation und Kommunikation: Hauptweg / Ersatzweg',
+                      label: _l10n.hubRedundancyTitle,
+                      hint: _l10n.hubRedundancyTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(redundancy: value)),
                     ),
                   ),
                   _section(
-                    'Kälte- und Hitze-Schutzraum',
+                    _l10n.hubClimateRoomTitle,
                     Icons.thermostat_outlined,
-                    'Geeigneten Aufenthaltsraum, Kleidung, Lüftung und sichere Wärme oder Kühlung vorab bestimmen.',
+                    _l10n.hubClimateRoomHint,
                     _planNote(
                       note: _data.climateRoom,
-                      label: 'Schutzraum für Kälte und Hitze',
-                      hint:
-                          'Raum: …\nWärme/Kühlung: …\nDecken und Kleidung: …\nLüftung: …\nCO-Melder und sichere Geräte: …',
+                      label: _l10n.hubClimateRoomLabel,
+                      hint: _l10n.hubClimateRoomTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(climateRoom: value)),
                     ),
                   ),
                   _section(
-                    'Radio-Empfangsplan',
+                    _l10n.hubRadioTitle,
                     Icons.radio_outlined,
-                    'Lokale UKW- und DAB-Stationen, Geräte und Stromversorgung festhalten.',
+                    _l10n.hubRadioHint,
                     _radioPlan(),
                   ),
                   _section(
-                    'Notfallmappe',
+                    _l10n.hubFolderTitle,
                     Icons.folder_copy_outlined,
-                    'Dokumentenmappe ohne Inhalte oder Personenangaben verwalten.',
+                    _l10n.hubFolderHint,
                     _folder(),
                   ),
                   _section(
-                    'Kommunikationsplan',
+                    _l10n.hubCommunicationTitle,
                     Icons.forum_outlined,
-                    'Kontakt-Reihenfolge, externe Kontaktperson und kurze Statusmeldungen für überlastete Netze.',
+                    _l10n.hubCommunicationHint,
                     _planNote(
                       note: _data.communication,
-                      label: 'Kommunikationsplan',
-                      hint:
-                          'Wer wird in welcher Reihenfolge kontaktiert? Welche externe Kontaktperson koordiniert?\n\nVorlage: Wir sind sicher. Nächster Kontakt um …',
+                      label: _l10n.hubCommunicationTitle,
+                      hint: _l10n.hubCommunicationTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(communication: value)),
-                      templates: const [
-                        'Wir sind sicher. Nächster Kontakt um …',
-                        'Wir brauchen Unterstützung bei … Treffpunkt: …',
+                      templates: [
+                        _l10n.hubStatusSafe,
+                        _l10n.hubStatusHelp,
                       ],
                     ),
                   ),
                   _section(
-                    'Unterstützungsplan',
+                    _l10n.hubSupportTitle,
                     Icons.accessible_forward_outlined,
-                    'Persönliche Unterstützung, Medikamente, Hilfsmittel und Transport bei einer Evakuierung.',
+                    _l10n.hubSupportHint,
                     _planNote(
                       note: _data.support,
-                      label: 'Unterstützungsplan',
-                      hint:
-                          'Nur notwendige Angaben: benötigte Hilfe, Medikamente, Hilfsmittel, verlässliche Unterstützung und Transport.',
+                      label: _l10n.hubSupportTitle,
+                      hint: _l10n.hubSupportTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(support: value)),
                     ),
                   ),
                   _section(
-                    'Haustier-Notfallplan',
+                    _l10n.hubPetsTitle,
                     Icons.pets_outlined,
-                    'Transport, Futter, Medikamente, Betreuung und Ausweichunterkunft für Tiere vorbereiten.',
+                    _l10n.hubPetsHint,
                     _planNote(
                       note: _data.pets,
-                      label: 'Haustier-Notfallplan',
-                      hint:
-                          'Transportbox, Vorräte, Tierarzt, Betreuung, tierfreundliche Unterkunft und Dokumentenkopien.',
+                      label: _l10n.hubPetsTitle,
+                      hint: _l10n.hubPetsTemplate,
                       onSave: (value) => _change(_data.copyWith(pets: value)),
                     ),
                   ),
                   _section(
-                    'Fahrzeug und Mobilität',
+                    _l10n.hubMobilityTitle,
                     Icons.directions_car_outlined,
-                    'Fahrzeug-Notgepäck, Energie- oder Tankreserve, alternative Verkehrsmittel und Abholung.',
+                    _l10n.hubMobilityHint,
                     _planNote(
                       note: _data.mobility,
-                      label: 'Mobilitätsplan',
-                      hint:
-                          'Fahrzeug, Lade- oder Tankziel, Notgepäck, alternative Route, ÖPNV und Abholung.',
+                      label: _l10n.hubMobilityLabel,
+                      hint: _l10n.hubMobilityTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(mobility: value)),
                     ),
                   ),
                   _section(
-                    'Versorgungs-Unterbrechung',
+                    _l10n.hubUtilitiesTitle,
                     Icons.power_off_outlined,
-                    'Absperrorte und manuelle Alternativen für Strom, Wasser, Gas, Heizung und Telekommunikation.',
+                    _l10n.hubUtilitiesHint,
                     _planNote(
                       note: _data.utilities,
-                      label: 'Versorgungsplan',
-                      hint:
-                          'Absperrorte, Ansprechpartner, Ersatzstrom, Wasserentnahme, Heizung und kontaktlose Kommunikationswege.',
+                      label: _l10n.hubUtilitiesLabel,
+                      hint: _l10n.hubUtilitiesTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(utilities: value)),
                     ),
                   ),
                   _section(
-                    'Wartungszentrale',
+                    _l10n.hubMaintenanceTitle,
                     Icons.build_outlined,
-                    'Regelmäßig prüfen, damit wichtige Ausrüstung im Notfall einsatzbereit ist.',
+                    _l10n.hubMaintenanceHint,
                     _maintenance(),
                   ),
                   _section(
-                    'Evakuierungs-Karten',
+                    _l10n.hubEvacuationTitle,
                     Icons.route_outlined,
-                    'Treffpunkte und sichere Wege als offline lesbare Karten notieren.',
+                    _l10n.hubEvacuationHint,
                     _evacuation(),
                   ),
                   _section(
-                    'Ereignisprotokoll',
+                    _l10n.hubEventsTitle,
                     Icons.history_edu_outlined,
-                    'Beobachtungen und Maßnahmen mit Uhrzeit dokumentieren und bei Bedarf als PDF exportieren.',
+                    _l10n.hubEventsHint,
                     _events(),
                   ),
                   _section(
-                    'Handlungskarten',
+                    _l10n.hubActionsTitle,
                     Icons.timer_outlined,
-                    'Vorbereitung nach Vorwarnzeit: sofort, innerhalb von 48 Stunden und mehrere Tage vorher.',
+                    _l10n.hubActionsHint,
                     _actionCards(),
                   ),
                   _section(
-                    'Krisenmodus und Briefing',
+                    _l10n.hubCrisisTitle,
                     Icons.visibility_outlined,
-                    'Größere Darstellung für diese Seite und ein druckbares Briefing für Haushalt oder Notgepäck.',
+                    _l10n.hubCrisisHint,
                     _crisisTools(),
                   ),
                   _section(
-                    'Analoger Fallback',
+                    _l10n.hubAnalogTitle,
                     Icons.print_outlined,
-                    'Ausdrucke, Karten, Notizen und Ersatzschlüssel ohne Akku oder Netz verfügbar halten.',
+                    _l10n.hubAnalogHint,
                     _planNote(
                       note: _data.analogFallback,
-                      label: 'Analoger Fallback',
-                      hint:
-                          'Gedruckte Karten, Telefonliste, Anleitungen, Bargeld, Ersatzschlüssel und Aufbewahrungsort.',
+                      label: _l10n.hubAnalogTitle,
+                      hint: _l10n.hubAnalogTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(analogFallback: value)),
                     ),
                   ),
                   _section(
-                    'Nachbarschaftshilfe',
+                    _l10n.hubMutualAidTitle,
                     Icons.volunteer_activism_outlined,
-                    'Fähigkeiten, Hilfsmittel und sichere Kontaktwege lokal planen; keine Daten werden veröffentlicht.',
+                    _l10n.hubMutualAidHint,
                     _planNote(
                       note: _data.mutualAid,
-                      label: 'Hilfe- und Tauschkarte',
-                      hint:
-                          'Eigene Fähigkeiten und Hilfsmittel, benötigte Unterstützung, vertrauenswürdige Kontakte und Übergabeort.',
+                      label: _l10n.hubMutualAidLabel,
+                      hint: _l10n.hubMutualAidTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(mutualAid: value)),
                     ),
                   ),
                   _section(
-                    'Praxis und Wartung',
+                    _l10n.hubPracticeTitle,
                     Icons.event_repeat_outlined,
-                    'Regelmäßig Wasserfilter, Kochen, Radio, Notgepäck und analoge Abläufe praktisch üben.',
+                    _l10n.hubPracticeHint,
                     _planNote(
                       note: _data.practice,
-                      label: 'Praxis-Wartungsplan',
-                      hint:
-                          'Nächste Übung: …\nWasserfilter testen: …\nOhne Strom kochen: …\nRadio und Notgepäck prüfen: …',
+                      label: _l10n.hubPracticeLabel,
+                      hint: _l10n.hubPracticeTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(practice: value)),
                     ),
@@ -366,19 +357,24 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
         // range, so an unanswered question outranks the number.
         if (open.isNotEmpty) ...[
           Text(
-            'Autarkie noch unvollständig. Offen: '
-            '${open.map((reach) => _resourceName(reach.resource)).join(', ')}.',
+            _l10n.hubAutonomyIncomplete(
+              open.map((reach) => _resourceName(reach.resource)).join(', '),
+            ),
             style: theme.textTheme.titleMedium,
           ),
           if (limiting != null)
             Text(
-              'Von dem, was bekannt ist: ${limiting.days} Tage, '
-              'Engpass ${_resourceName(limiting.resource)}.',
+              _l10n.hubAutonomyKnownSoFar(
+                limiting.days!,
+                _resourceName(limiting.resource),
+              ),
             ),
         ] else if (limiting != null)
           Text(
-            '${limiting.days} Tage autark – Engpass: '
-            '${_resourceName(limiting.resource)}',
+            _l10n.hubAutonomyRange(
+              limiting.days!,
+              _resourceName(limiting.resource),
+            ),
             style: theme.textTheme.titleMedium,
           ),
         const SizedBox(height: 8),
@@ -398,24 +394,59 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
               _ => null,
             },
             trailing: Text(
-              reach.days == null ? 'offen' : '${reach.days} Tage',
+              switch (reach.days) {
+                final days? => _l10n.hubAutonomyDays(days),
+                _ => _l10n.hubAutonomyOpen,
+              },
             ),
           ),
         OutlinedButton.icon(
           onPressed: () => _editAutonomy(reaches),
           icon: const Icon(Icons.edit_outlined),
-          label: const Text('Von Hand ergänzen'),
+          label: Text(_l10n.hubAutonomyAddByHand),
         ),
       ],
     );
   }
 
+  String _actionTitle(_ActionTask task) => switch (task) {
+    _ActionTask.now => _l10n.hubActionNowTitle,
+    _ActionTask.twoDays => _l10n.hubActionTwoDaysTitle,
+    _ActionTask.days => _l10n.hubActionDaysTitle,
+  };
+
+  String _actionBody(_ActionTask task) => switch (task) {
+    _ActionTask.now => _l10n.hubActionNowBody,
+    _ActionTask.twoDays => _l10n.hubActionTwoDaysBody,
+    _ActionTask.days => _l10n.hubActionDaysBody,
+  };
+
+  String _taskTitle(_MaintenanceTask task) => switch (task) {
+    _MaintenanceTask.batteries => _l10n.hubTaskBatteriesTitle,
+    _MaintenanceTask.radio => _l10n.hubTaskRadioTitle,
+    _MaintenanceTask.waterFilter => _l10n.hubTaskWaterFilterTitle,
+    _MaintenanceTask.kit => _l10n.hubTaskKitTitle,
+    _MaintenanceTask.medicine => _l10n.hubTaskMedicineTitle,
+    _MaintenanceTask.extinguisher => _l10n.hubTaskExtinguisherTitle,
+    _MaintenanceTask.vehicle => _l10n.hubTaskVehicleTitle,
+  };
+
+  String _taskHint(_MaintenanceTask task) => switch (task) {
+    _MaintenanceTask.batteries => _l10n.hubTaskBatteriesHint,
+    _MaintenanceTask.radio => _l10n.hubTaskRadioHint,
+    _MaintenanceTask.waterFilter => _l10n.hubTaskWaterFilterHint,
+    _MaintenanceTask.kit => _l10n.hubTaskKitHint,
+    _MaintenanceTask.medicine => _l10n.hubTaskMedicineHint,
+    _MaintenanceTask.extinguisher => _l10n.hubTaskExtinguisherHint,
+    _MaintenanceTask.vehicle => _l10n.hubTaskVehicleHint,
+  };
+
   String _resourceName(AutonomyResource resource) => switch (resource) {
-    AutonomyResource.water => 'Wasser',
-    AutonomyResource.food => 'Lebensmittel',
-    AutonomyResource.medicine => 'Medikamente',
-    AutonomyResource.energy => 'Energie',
-    AutonomyResource.hygiene => 'Hygiene',
+    AutonomyResource.water => _l10n.hubResourceWater,
+    AutonomyResource.food => _l10n.hubResourceFood,
+    AutonomyResource.medicine => _l10n.hubResourceMedicine,
+    AutonomyResource.energy => _l10n.hubResourceEnergy,
+    AutonomyResource.hygiene => _l10n.hubResourceHygiene,
   };
 
   /// Why a figure is what it is — or why there is none.
@@ -424,30 +455,29 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   /// whether that covers the crates of water in the cellar.
   String? _reachDetail(AutonomyReach reach) {
     final missed = reach.unmeasured > 0
-        ? '${reach.unmeasured} Eintrag${reach.unmeasured == 1 ? '' : 'e'} '
-              'nicht mitgerechnet: ${_gapReason(reach)}'
+        ? _l10n.hubAutonomyNotCounted(reach.unmeasured, _gapReason(reach))
         : null;
     return switch (reach.basis) {
-      AutonomyBasis.stock => missed ?? 'Aus dem Bestand gerechnet',
-      AutonomyBasis.entered => 'Selbst eingetragen – ${_gapReason(reach)}',
+      AutonomyBasis.stock => missed ?? _l10n.hubAutonomyFromStock,
+      AutonomyBasis.entered => _l10n.hubAutonomyByHandWith(_gapReason(reach)),
       null => _gapReason(reach),
     };
   }
 
   String _gapReason(AutonomyReach reach) => switch (reach.gap) {
-    AutonomyGap.onlyByHand => 'zählt die App nicht mit',
+    AutonomyGap.onlyByHand => _l10n.hubGapOnlyByHand,
     AutonomyGap.nothingRecorded => switch (reach.resource) {
-      AutonomyResource.energy => 'noch kein Energieplan angelegt',
-      _ => 'noch nichts im Bestand erfasst',
+      AutonomyResource.energy => _l10n.hubGapNoEnergyPlan,
+      _ => _l10n.hubGapNothingRecorded,
     },
     AutonomyGap.notDivisible => switch (reach.resource) {
-      AutonomyResource.water => 'nicht in Litern erfasst',
-      AutonomyResource.food => 'ohne Kalorienangabe',
-      AutonomyResource.medicine => 'ohne Tagesdosis',
-      AutonomyResource.energy => 'nichts verbraucht davon',
-      AutonomyResource.hygiene => 'zählt die App nicht mit',
+      AutonomyResource.water => _l10n.hubGapNoLiters,
+      AutonomyResource.food => _l10n.hubGapNoCalories,
+      AutonomyResource.medicine => _l10n.hubGapNoDose,
+      AutonomyResource.energy => _l10n.hubGapNoDraw,
+      AutonomyResource.hygiene => _l10n.hubGapOnlyByHand,
     },
-    null => 'nicht in Litern erfasst',
+    null => _l10n.hubGapNoLiters,
   };
 
   /// Only what the records cannot answer.
@@ -470,23 +500,18 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Autarkie-Reichweite'),
+        title: Text(_l10n.hubAutonomyDialogTitle),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Was die App aus Bestand und Energieplan ableiten kann, '
-                'steht schon auf dem Bildschirm. Hier nur, was sie nicht '
-                'teilen kann.',
-              ),
+              Text(_l10n.hubAutonomyDialogHint),
               const SizedBox(height: 12),
               for (final reach in byHand)
                 _daysField(
                   fields[reach.resource]!,
-                  '${_resourceName(reach.resource)} '
-                  '(${_gapReason(reach)})',
+                  '${_resourceName(reach.resource)} (${_gapReason(reach)})',
                 ),
             ],
           ),
@@ -528,7 +553,9 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
       TextField(
         controller: controller,
         keyboardType: TextInputType.number,
-        decoration: InputDecoration(labelText: '$label – Tage'),
+        decoration: InputDecoration(
+          labelText: _l10n.hubAutonomyDaysField(label),
+        ),
       );
 
   Widget _cookingPlan() => Column(
@@ -536,9 +563,8 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
     children: [
       _planNote(
         note: _data.cooking,
-        label: 'Vorratsküchenplan',
-        hint:
-            'Gericht: …\nZutaten aus dem Vorrat: …\nWasser: …\nBrennstoff und Kochzeit: …\nSichere Kochstelle: …',
+        label: _l10n.hubCookingLabel,
+        hint: _l10n.hubCookingTemplate,
         onSave: (value) => _change(_data.copyWith(cooking: value)),
       ),
       const SizedBox(height: 8),
@@ -547,7 +573,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
           MaterialPageRoute<void>(builder: (_) => const PrepperRecipesScreen()),
         ),
         icon: const Icon(Icons.menu_book_outlined),
-        label: const Text('Offline-Rezepte öffnen'),
+        label: Text(_l10n.hubCookingRecipes),
       ),
     ],
   );
@@ -561,11 +587,11 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   }) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(note.text.isEmpty ? 'Noch nicht hinterlegt.' : note.text),
+      Text(note.text.isEmpty ? _l10n.hubNoteEmpty : note.text),
       if (note.checkedAt != null) ...[
         const SizedBox(height: 4),
         Text(
-          'Zuletzt aktualisiert: ${_date(note.checkedAt)}',
+          _l10n.hubNoteUpdated(_date(note.checkedAt)),
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -582,13 +608,15 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
               onSave: onSave,
             ),
             icon: const Icon(Icons.edit_outlined),
-            label: Text(note.text.isEmpty ? 'Plan anlegen' : 'Bearbeiten'),
+            label: Text(
+              note.text.isEmpty ? _l10n.hubNoteCreate : _l10n.hubNoteEdit,
+            ),
           ),
           for (final template in templates)
             TextButton.icon(
               onPressed: () => Clipboard.setData(ClipboardData(text: template)),
               icon: const Icon(Icons.copy_outlined),
-              label: const Text('Vorlage kopieren'),
+              label: Text(_l10n.hubNoteCopyTemplate),
             ),
         ],
       ),
@@ -621,15 +649,15 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
 
   Widget _actionCards() => Column(
     children: [
-      for (final action in _actionTasks)
+      for (final action in _ActionTask.values)
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           value: _data.actionDone.containsKey(action.id),
-          title: Text(action.title),
+          title: Text(_actionTitle(action)),
           subtitle: Text(
             _data.actionDone[action.id] == null
-                ? action.body
-                : 'Erledigt: ${_date(_data.actionDone[action.id])}',
+                ? _actionBody(action)
+                : _l10n.hubActionDone(_date(_data.actionDone[action.id])),
           ),
           onChanged: (value) {
             final updated = {..._data.actionDone};
@@ -649,9 +677,9 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
         value: _data.crisisMode,
-        title: const Text('Vereinfachte, größere Darstellung'),
-        subtitle: const Text(
-          'Vergrößert Text und Bedienelemente in der Krisenorganisation.',
+        title: Text(_l10n.hubCrisisSwitch),
+        subtitle: Text(
+          _l10n.hubCrisisSwitchHint,
         ),
         onChanged: (value) => _change(_data.copyWith(crisisMode: value)),
       ),
@@ -660,7 +688,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
         child: FilledButton.icon(
           onPressed: _exportBriefing,
           icon: const Icon(Icons.print_outlined),
-          label: const Text('Notfallbriefing als PDF'),
+          label: Text(_l10n.hubBriefingButton),
         ),
       ),
     ],
@@ -673,12 +701,18 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
           contentPadding: EdgeInsets.zero,
           title: Text(plan.station),
           subtitle: Text(
-            '${plan.band} · ${plan.frequency}\n${plan.receiver} · ${plan.power}\nGetestet: ${_date(plan.checkedAt)}',
+            _l10n.hubRadioDetails(
+              plan.band,
+              plan.frequency,
+              plan.receiver,
+              plan.power,
+              _date(plan.checkedAt),
+            ),
           ),
           isThreeLine: true,
           trailing: IconButton(
             icon: const Icon(Icons.delete_outline),
-            tooltip: 'Eintrag entfernen',
+            tooltip: _l10n.hubEntryRemove,
             onPressed: () => _change(
               _data.copyWith(
                 radioPlans: [
@@ -694,7 +728,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
         child: OutlinedButton.icon(
           onPressed: _addRadio,
           icon: const Icon(Icons.add),
-          label: const Text('Empfang hinzufügen'),
+          label: Text(_l10n.hubRadioAdd),
         ),
       ),
     ],
@@ -708,9 +742,9 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(Icons.place_outlined),
-          title: const Text('Aufbewahrungsort'),
+          title: Text(_l10n.hubFolderLocation),
           subtitle: Text(
-            folder.location.isEmpty ? 'nicht hinterlegt' : folder.location,
+            folder.location.isEmpty ? _l10n.hubFolderNotSet : folder.location,
           ),
           trailing: const Icon(Icons.edit_outlined),
           onTap: _editFolderLocation,
@@ -718,7 +752,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           value: folder.copiesReady,
-          title: const Text('Kopien wichtiger Unterlagen vorhanden'),
+          title: Text(_l10n.hubFolderCopies),
           onChanged: (value) => _change(
             _data.copyWith(folder: folder.copyWith(copiesReady: value == true)),
           ),
@@ -726,7 +760,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           value: folder.takeWhenLeaving,
-          title: const Text('Bei Evakuierung mitnehmen'),
+          title: Text(_l10n.hubFolderTakeAlong),
           onChanged: (value) => _change(
             _data.copyWith(
               folder: folder.copyWith(takeWhenLeaving: value == true),
@@ -743,7 +777,11 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
             ),
             icon: const Icon(Icons.verified_outlined),
             label: Text(
-              'Heute geprüft${folder.lastChecked == null ? '' : ' · zuletzt ${_date(folder.lastChecked)}'}',
+              folder.lastChecked == null
+                  ? _l10n.hubFolderCheckedToday
+                  : _l10n.hubFolderCheckedTodayWith(
+                      _date(folder.lastChecked),
+                    ),
             ),
           ),
         ),
@@ -753,15 +791,17 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
 
   Widget _maintenance() => Column(
     children: [
-      for (final task in _maintenanceTasks)
+      for (final task in _MaintenanceTask.values)
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
           value: _data.maintenance.containsKey(task.id),
-          title: Text(task.title),
+          title: Text(_taskTitle(task)),
           subtitle: Text(
             _data.maintenance[task.id] == null
-                ? task.hint
-                : 'Zuletzt geprüft: ${_date(_data.maintenance[task.id])}',
+                ? _taskHint(task)
+                : _l10n.hubMaintenanceLastChecked(
+                    _date(_data.maintenance[task.id]),
+                  ),
           ),
           onChanged: (value) {
             final updated = {..._data.maintenance};
@@ -784,13 +824,19 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
           leading: const Icon(Icons.map_outlined),
           title: Text(card.label),
           subtitle: Text(
-            '${card.start.isEmpty ? 'Start offen' : card.start} → ${card.destination.isEmpty ? 'Ziel offen' : card.destination}\nGeprüft: ${_date(card.checkedAt)}',
+            _l10n.hubEvacuationSummary(
+              card.start.isEmpty ? _l10n.hubEvacuationStartOpen : card.start,
+              card.destination.isEmpty
+                  ? _l10n.hubEvacuationDestinationOpen
+                  : card.destination,
+              _date(card.checkedAt),
+            ),
           ),
           isThreeLine: true,
           onTap: () => _showEvacuation(card),
           trailing: IconButton(
             icon: const Icon(Icons.delete_outline),
-            tooltip: 'Karte entfernen',
+            tooltip: _l10n.hubEvacuationRemove,
             onPressed: () => _change(
               _data.copyWith(
                 evacuationCards: [
@@ -806,7 +852,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
         child: OutlinedButton.icon(
           onPressed: () => _editEvacuation(),
           icon: const Icon(Icons.add),
-          label: const Text('Karte hinzufügen'),
+          label: Text(_l10n.hubEvacuationAdd),
         ),
       ),
     ],
@@ -820,12 +866,15 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
           leading: const Icon(Icons.notes_outlined),
           title: Text(event.kind),
           subtitle: Text(
-            '${_dateTime(event.at)}\n${event.note.isEmpty ? event.action : event.note}',
+            _l10n.hubEventSummary(
+              _dateTime(event.at),
+              event.note.isEmpty ? event.action : event.note,
+            ),
           ),
           isThreeLine: true,
           trailing: IconButton(
             icon: const Icon(Icons.delete_outline),
-            tooltip: 'Eintrag entfernen',
+            tooltip: _l10n.hubEntryRemove,
             onPressed: () => _change(
               _data.copyWith(
                 events: [
@@ -843,33 +892,37 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
           OutlinedButton.icon(
             onPressed: _addEvent,
             icon: const Icon(Icons.add),
-            label: const Text('Eintrag hinzufügen'),
+            label: Text(_l10n.hubEventsAdd),
           ),
           if (_data.events.isNotEmpty)
             FilledButton.icon(
               onPressed: _exportEvents,
               icon: const Icon(Icons.picture_as_pdf_outlined),
-              label: const Text('PDF exportieren'),
+              label: Text(_l10n.hubEventsExport),
             ),
         ],
       ),
     ],
   );
 
-  String _dateTime(DateTime date) =>
-      '${_date(date)} · ${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(date))}';
+  String _dateTime(DateTime date) => _l10n.hubDateTime(
+    _date(date),
+    MaterialLocalizations.of(
+      context,
+    ).formatTimeOfDay(TimeOfDay.fromDateTime(date)),
+  );
 
   Future<void> _addRadio() async {
     final station = TextEditingController();
     final frequency = TextEditingController();
     final receiver = TextEditingController();
-    final power = TextEditingController(text: 'Batterien');
+    final power = TextEditingController(text: _l10n.hubRadioPowerExample);
     var band = 'UKW';
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Radio-Empfang hinzufügen'),
+          title: Text(_l10n.hubRadioDialogTitle),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -877,11 +930,15 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
                 TextField(
                   controller: station,
                   autofocus: true,
-                  decoration: const InputDecoration(labelText: 'Sender'),
+                  decoration: InputDecoration(
+                    labelText: _l10n.hubRadioStation,
+                  ),
                 ),
                 DropdownButtonFormField(
                   initialValue: band,
-                  decoration: const InputDecoration(labelText: 'Band'),
+                  decoration: InputDecoration(
+                    labelText: _l10n.hubRadioBand,
+                  ),
                   items: const [
                     DropdownMenuItem(value: 'UKW', child: Text('UKW')),
                     DropdownMenuItem(value: 'DAB+', child: Text('DAB+')),
@@ -890,18 +947,20 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
                 ),
                 TextField(
                   controller: frequency,
-                  decoration: const InputDecoration(
-                    labelText: 'Frequenz oder Kanal',
+                  decoration: InputDecoration(
+                    labelText: _l10n.hubRadioFrequency,
                   ),
                 ),
                 TextField(
                   controller: receiver,
-                  decoration: const InputDecoration(labelText: 'Empfänger'),
+                  decoration: InputDecoration(
+                    labelText: _l10n.hubRadioReceiver,
+                  ),
                 ),
                 TextField(
                   controller: power,
-                  decoration: const InputDecoration(
-                    labelText: 'Stromversorgung',
+                  decoration: InputDecoration(
+                    labelText: _l10n.hubRadioPower,
                   ),
                 ),
               ],
@@ -934,13 +993,13 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Aufbewahrungsort'),
+        title: Text(_l10n.hubFolderLocation),
         content: TextField(
           controller: location,
           autofocus: true,
           maxLines: 2,
-          decoration: const InputDecoration(
-            labelText: 'z. B. abschließbarer Schrank',
+          decoration: InputDecoration(
+            labelText: _l10n.hubFolderLocationHint,
           ),
         ),
         actions: _dialogActions(context, () => Navigator.pop(context, true)),
@@ -964,7 +1023,9 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(current == null ? 'Evakuierungs-Karte' : current.label),
+        title: Text(
+          current == null ? _l10n.hubEvacuationDialogTitle : current.label,
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -972,32 +1033,34 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
               TextField(
                 controller: label,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Bezeichnung, z. B. Zuhause',
+                decoration: InputDecoration(
+                  labelText: _l10n.hubEvacuationLabel,
                 ),
               ),
               TextField(
                 controller: start,
-                decoration: const InputDecoration(labelText: 'Startpunkt'),
+                decoration: InputDecoration(
+                  labelText: _l10n.hubEvacuationStart,
+                ),
               ),
               TextField(
                 controller: destination,
-                decoration: const InputDecoration(
-                  labelText: 'Treffpunkt oder Ziel',
+                decoration: InputDecoration(
+                  labelText: _l10n.hubEvacuationDestination,
                 ),
               ),
               TextField(
                 controller: route,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Weg und Alternativen',
+                decoration: InputDecoration(
+                  labelText: _l10n.hubEvacuationRoute,
                 ),
               ),
               TextField(
                 controller: locations,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Wichtige Orte unterwegs',
+                decoration: InputDecoration(
+                  labelText: _l10n.hubEvacuationPlaces,
                 ),
               ),
             ],
@@ -1035,17 +1098,25 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Start: ${card.start.isEmpty ? '–' : card.start}'),
-            Text('Ziel: ${card.destination.isEmpty ? '–' : card.destination}'),
+            Text(
+              _l10n.hubEvacuationStartLine(
+                card.start.isEmpty ? '–' : card.start,
+              ),
+            ),
+            Text(
+              _l10n.hubEvacuationDestinationLine(
+                card.destination.isEmpty ? '–' : card.destination,
+              ),
+            ),
             const SizedBox(height: 12),
-            const Text(
-              'Weg und Alternativen',
+            Text(
+              _l10n.hubEvacuationRoute,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(card.route.isEmpty ? '–' : card.route),
             const SizedBox(height: 12),
-            const Text(
-              'Wichtige Orte',
+            Text(
+              _l10n.hubEvacuationPlacesLine,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(card.locations.isEmpty ? '–' : card.locations),
@@ -1055,47 +1126,49 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Schließen'),
+          child: Text(_l10n.hubClose),
         ),
         FilledButton(
           onPressed: () {
             Navigator.pop(context);
             _editEvacuation(card);
           },
-          child: const Text('Bearbeiten'),
+          child: Text(_l10n.hubNoteEdit),
         ),
       ],
     ),
   );
 
   Future<void> _addEvent() async {
-    final kind = TextEditingController(text: 'Beobachtung');
+    final kind = TextEditingController(text: _l10n.hubEventsNoteHint);
     final note = TextEditingController();
     final action = TextEditingController();
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Ereignis dokumentieren'),
+        title: Text(_l10n.hubEventsDialogTitle),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: kind,
-                decoration: const InputDecoration(labelText: 'Art'),
+                decoration: InputDecoration(
+                  labelText: _l10n.hubEventsKind,
+                ),
               ),
               TextField(
                 controller: note,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Beobachtung oder Schaden',
+                decoration: InputDecoration(
+                  labelText: _l10n.hubEventsNote,
                 ),
               ),
               TextField(
                 controller: action,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Getroffene Maßnahme',
+                decoration: InputDecoration(
+                  labelText: _l10n.hubEventsAction,
                 ),
               ),
             ],
@@ -1110,7 +1183,9 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
         _data.copyWith(
           events: [
             IncidentEntry.create(
-              kind: kind.text.trim().isEmpty ? 'Ereignis' : kind.text.trim(),
+              kind: kind.text.trim().isEmpty
+                  ? _l10n.hubEventsKindHint
+                  : kind.text.trim(),
               note: note.text.trim(),
               action: action.text.trim(),
             ),
@@ -1124,9 +1199,9 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   List<Widget> _dialogActions(BuildContext context, VoidCallback save) => [
     TextButton(
       onPressed: () => Navigator.pop(context),
-      child: const Text('Abbrechen'),
+      child: Text(_l10n.hubCancel),
     ),
-    FilledButton(onPressed: save, child: const Text('Speichern')),
+    FilledButton(onPressed: save, child: Text(_l10n.hubSave)),
   ];
 
   Future<void> _exportEvents() async {
@@ -1134,7 +1209,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
     document.addPage(
       pw.MultiPage(
         build: (_) => [
-          pw.Header(level: 0, child: pw.Text('PreppSuite – Ereignisprotokoll')),
+          pw.Header(level: 0, child: pw.Text(_l10n.hubEventsPdfTitle)),
           for (final event in _data.events)
             pw.Container(
               margin: const pw.EdgeInsets.only(bottom: 12),
@@ -1147,9 +1222,9 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
                   ),
                   pw.Text(event.at.toLocal().toString()),
                   if (event.note.isNotEmpty)
-                    pw.Text('Beobachtung: ${event.note}'),
+                    pw.Text(_l10n.hubEventsObservationLine(event.note)),
                   if (event.action.isNotEmpty)
-                    pw.Text('Maßnahme: ${event.action}'),
+                    pw.Text(_l10n.hubEventsActionLine(event.action)),
                 ],
               ),
             ),
@@ -1160,7 +1235,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
     if (mounted) {
       await Printing.sharePdf(
         bytes: Uint8List.fromList(bytes),
-        filename: 'preppsuite-ereignisprotokoll.pdf',
+        filename: _l10n.hubEventsPdfFile,
       );
     }
   }
@@ -1168,26 +1243,26 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   Future<void> _exportBriefing() async {
     final document = pw.Document();
     final plans = [
-      ('Kommunikation', _data.communication.text),
-      ('Unterstützung', _data.support.text),
-      ('Haustiere', _data.pets.text),
-      ('Mobilität', _data.mobility.text),
-      ('Versorgung', _data.utilities.text),
-      ('Notfallmappe', _data.folder.location),
-      ('Wasser und Hygiene', _data.waterHygiene.text),
-      ('Stromausfall', _data.powerOutage.text),
-      ('Vorratsküche', _data.cooking.text),
-      ('Redundanz', _data.redundancy.text),
-      ('Kälte und Hitze', _data.climateRoom.text),
-      ('Analoger Fallback', _data.analogFallback.text),
-      ('Nachbarschaftshilfe', _data.mutualAid.text),
-      ('Praxis und Wartung', _data.practice.text),
+      (_l10n.hubBriefingCommunication, _data.communication.text),
+      (_l10n.hubBriefingSupport, _data.support.text),
+      (_l10n.hubBriefingPets, _data.pets.text),
+      (_l10n.hubBriefingMobility, _data.mobility.text),
+      (_l10n.hubBriefingUtilities, _data.utilities.text),
+      (_l10n.hubFolderTitle, _data.folder.location),
+      (_l10n.hubWaterHygieneTitle, _data.waterHygiene.text),
+      (_l10n.hubBriefingPowerOutage, _data.powerOutage.text),
+      (_l10n.hubCookingTitle, _data.cooking.text),
+      (_l10n.hubBriefingRedundancy, _data.redundancy.text),
+      (_l10n.hubBriefingClimate, _data.climateRoom.text),
+      (_l10n.hubAnalogTitle, _data.analogFallback.text),
+      (_l10n.hubMutualAidTitle, _data.mutualAid.text),
+      (_l10n.hubPracticeTitle, _data.practice.text),
     ];
     document.addPage(
       pw.MultiPage(
         build: (_) => [
-          pw.Header(level: 0, child: pw.Text('PreppSuite – Notfallbriefing')),
-          pw.Text('Erstellt: ${DateTime.now().toLocal()}'),
+          pw.Header(level: 0, child: pw.Text(_l10n.hubBriefingPdfTitle)),
+          pw.Text(_l10n.hubBriefingCreated('${DateTime.now().toLocal()}')),
           pw.SizedBox(height: 12),
           for (final plan in plans)
             if (plan.$2.isNotEmpty)
@@ -1206,22 +1281,33 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
               ),
           if (_data.radioPlans.isNotEmpty) ...[
             pw.Text(
-              'Radio',
+              _l10n.hubBriefingRadio,
               style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
             ),
             for (final radio in _data.radioPlans)
               pw.Text(
-                '${radio.station}: ${radio.band} ${radio.frequency} · ${radio.receiver}',
+                _l10n.hubBriefingRadioLine(
+                  radio.station,
+                  radio.band,
+                  radio.frequency,
+                  radio.receiver,
+                ),
               ),
           ],
           if (_data.evacuationCards.isNotEmpty) ...[
             pw.SizedBox(height: 10),
             pw.Text(
-              'Evakuierung',
+              _l10n.hubBriefingEvacuation,
               style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
             ),
             for (final card in _data.evacuationCards)
-              pw.Text('${card.label}: ${card.start} → ${card.destination}'),
+              pw.Text(
+                _l10n.hubBriefingEvacuationLine(
+                  card.label,
+                  card.start,
+                  card.destination,
+                ),
+              ),
           ],
         ],
       ),
@@ -1230,74 +1316,41 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
     if (mounted) {
       await Printing.sharePdf(
         bytes: Uint8List.fromList(bytes),
-        filename: 'preppsuite-notfallbriefing.pdf',
+        filename: _l10n.hubBriefingPdfFile,
       );
     }
   }
 }
 
-class _MaintenanceTask {
-  const _MaintenanceTask(this.id, this.title, this.hint);
-  final String id, title, hint;
+/// The ids are what is stored against a check date, so they are fixed
+/// strings and not translated. What a person reads comes out of the
+/// translations beside them — the two used to be the same value, which
+/// meant a German sentence sat in a const list at the bottom of this
+/// file and no English reader ever saw anything else.
+enum _MaintenanceTask {
+  batteries,
+  radio,
+  waterFilter('water_filter'),
+  kit,
+  medicine,
+  extinguisher,
+  vehicle;
+
+  const _MaintenanceTask([this._id]);
+
+  final String? _id;
+
+  String get id => _id ?? name;
 }
 
-class _ActionTask {
-  const _ActionTask(this.id, this.title, this.body);
-  final String id, title, body;
+enum _ActionTask {
+  now,
+  twoDays('two_days'),
+  days;
+
+  const _ActionTask([this._id]);
+
+  final String? _id;
+
+  String get id => _id ?? name;
 }
-
-const _actionTasks = [
-  _ActionTask(
-    'now',
-    'Jetzt',
-    'Amtliche Meldung lesen, Gefahr vermeiden, Radio einschalten und Angehörige kurz informieren.',
-  ),
-  _ActionTask(
-    'two_days',
-    'Innerhalb von 24–48 Stunden',
-    'Wasser, Vorrat, Medikamente, Akkus und Fahrzeug prüfen. Haus und Notgepäck vorbereiten.',
-  ),
-  _ActionTask(
-    'days',
-    'Mehrere Tage vorher',
-    'Evakuierungs-Karte abgleichen, Unterstützung organisieren, Haustier- und Versorgungsplan prüfen.',
-  ),
-];
-
-const _maintenanceTasks = [
-  _MaintenanceTask(
-    'batteries',
-    'Akkus, Batterien und Powerbanks',
-    'Ladezustand und Ersatzbatterien prüfen',
-  ),
-  _MaintenanceTask(
-    'radio',
-    'Radio und Empfangsplan',
-    'Sender, Antenne und Stromversorgung testen',
-  ),
-  _MaintenanceTask(
-    'water_filter',
-    'Wasserfilter und Kanister',
-    'Filterzustand, Dichtungen und Vorrat prüfen',
-  ),
-  _MaintenanceTask(
-    'kit',
-    'Notgepäck',
-    'Kleidung, Licht und persönliche Bedarfe prüfen',
-  ),
-  _MaintenanceTask(
-    'medicine',
-    'Hausapotheke',
-    'Haltbarkeit und persönliche Medikamente prüfen',
-  ),
-  _MaintenanceTask(
-    'extinguisher',
-    'Feuerlöscher und Rauchmelder',
-    'Prüftermin und Batterien prüfen',
-  ),
-  _MaintenanceTask(
-    'vehicle',
-    'Fahrzeug und Mobilität',
-    'Kraftstoff, Reifen und alternative Wege prüfen',
-  ),
-];

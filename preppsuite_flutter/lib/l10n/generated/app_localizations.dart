@@ -8395,6 +8395,1131 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'last completed: {date}'**
   String drillsLastCompleted(String date);
+
+  /// No description provided for @hubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crisis organisation'**
+  String get hubTitle;
+
+  /// No description provided for @hubPrivacyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything here stays on this device. If you export an incident log, you decide who receives it.'**
+  String get hubPrivacyNote;
+
+  /// No description provided for @hubNotCheckedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'not checked yet'**
+  String get hubNotCheckedYet;
+
+  /// No description provided for @hubAutonomyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-sufficiency'**
+  String get hubAutonomyTitle;
+
+  /// No description provided for @hubAutonomyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Range in days, worked out from your stock and your energy plan. The lowest figure is the next bottleneck.'**
+  String get hubAutonomyHint;
+
+  /// No description provided for @hubAutonomyIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-sufficiency not yet complete. Open: {resources}.'**
+  String hubAutonomyIncomplete(String resources);
+
+  /// No description provided for @hubAutonomyKnownSoFar.
+  ///
+  /// In en, this message translates to:
+  /// **'Of what is known: {days} days, bottleneck {resource}.'**
+  String hubAutonomyKnownSoFar(int days, String resource);
+
+  /// No description provided for @hubAutonomyRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days on your own – bottleneck: {resource}'**
+  String hubAutonomyRange(int days, String resource);
+
+  /// No description provided for @hubAutonomyOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'open'**
+  String get hubAutonomyOpen;
+
+  /// No description provided for @hubAutonomyDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String hubAutonomyDays(int days);
+
+  /// No description provided for @hubAutonomyAddByHand.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in by hand'**
+  String get hubAutonomyAddByHand;
+
+  /// No description provided for @hubAutonomyDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Range in days'**
+  String get hubAutonomyDialogTitle;
+
+  /// No description provided for @hubAutonomyDialogHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What the app can work out from your stock and energy plan is already on the screen. This is only for what it cannot divide.'**
+  String get hubAutonomyDialogHint;
+
+  /// No description provided for @hubAutonomyDaysField.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} – days'**
+  String hubAutonomyDaysField(String label);
+
+  /// No description provided for @hubAutonomyFromStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Worked out from your stock'**
+  String get hubAutonomyFromStock;
+
+  /// No description provided for @hubAutonomyByHandWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Entered by hand – {reason}'**
+  String hubAutonomyByHandWith(String reason);
+
+  /// No description provided for @hubAutonomyNotCounted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural,=1{One entry not counted: {reason}}other{{count} entries not counted: {reason}}}'**
+  String hubAutonomyNotCounted(int count, String reason);
+
+  /// No description provided for @hubResourceWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get hubResourceWater;
+
+  /// No description provided for @hubResourceFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get hubResourceFood;
+
+  /// No description provided for @hubResourceMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicines'**
+  String get hubResourceMedicine;
+
+  /// No description provided for @hubResourceEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy'**
+  String get hubResourceEnergy;
+
+  /// No description provided for @hubResourceHygiene.
+  ///
+  /// In en, this message translates to:
+  /// **'Hygiene'**
+  String get hubResourceHygiene;
+
+  /// No description provided for @hubGapOnlyByHand.
+  ///
+  /// In en, this message translates to:
+  /// **'the app does not count this'**
+  String get hubGapOnlyByHand;
+
+  /// No description provided for @hubGapNoEnergyPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'no energy plan yet'**
+  String get hubGapNoEnergyPlan;
+
+  /// No description provided for @hubGapNothingRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing recorded in your stock yet'**
+  String get hubGapNothingRecorded;
+
+  /// No description provided for @hubGapNoLiters.
+  ///
+  /// In en, this message translates to:
+  /// **'not recorded in litres'**
+  String get hubGapNoLiters;
+
+  /// No description provided for @hubGapNoCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'without a calorie figure'**
+  String get hubGapNoCalories;
+
+  /// No description provided for @hubGapNoDose.
+  ///
+  /// In en, this message translates to:
+  /// **'without a daily dose'**
+  String get hubGapNoDose;
+
+  /// No description provided for @hubGapNoDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'nothing draws on it'**
+  String get hubGapNoDraw;
+
+  /// No description provided for @hubWaterHygieneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Water and hygiene'**
+  String get hubWaterHygieneTitle;
+
+  /// No description provided for @hubWaterHygieneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan drinking water, service water, treatment, canister rotation, toilet and waste separately.'**
+  String get hubWaterHygieneHint;
+
+  /// No description provided for @hubWaterHygieneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Water and hygiene plan'**
+  String get hubWaterHygieneLabel;
+
+  /// No description provided for @hubWaterHygieneTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Drinking water: …\nService water: …\nSources and treatment: …\nCanister rotation: …\nToilet, waste and cleaning supplies: …'**
+  String get hubWaterHygieneTemplate;
+
+  /// No description provided for @hubPowerOutageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Power cut plan'**
+  String get hubPowerOutageTitle;
+
+  /// No description provided for @hubPowerOutageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare the start time, the cold chain, charging priorities, light, information and safe warmth.'**
+  String get hubPowerOutageHint;
+
+  /// No description provided for @hubPowerOutageTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Note the start time. Keep fridge and freezer shut. Write down charging priorities, radio, light, safe warmth and who to contact.'**
+  String get hubPowerOutageTemplate;
+
+  /// No description provided for @hubCookingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking from stock'**
+  String get hubCookingTitle;
+
+  /// No description provided for @hubCookingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan meals around the stock, the water and the fuel they need.'**
+  String get hubCookingHint;
+
+  /// No description provided for @hubCookingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooking-from-stock plan'**
+  String get hubCookingLabel;
+
+  /// No description provided for @hubCookingTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Dish: …\nIngredients from stock: …\nWater: …\nFuel and cooking time: …\nSafe place to cook: …'**
+  String get hubCookingTemplate;
+
+  /// No description provided for @hubCookingRecipes.
+  ///
+  /// In en, this message translates to:
+  /// **'Open offline recipes'**
+  String get hubCookingRecipes;
+
+  /// No description provided for @hubRedundancyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Second ways'**
+  String get hubRedundancyTitle;
+
+  /// No description provided for @hubRedundancyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write down a second way to get water, light, cooking, information and communication.'**
+  String get hubRedundancyHint;
+
+  /// No description provided for @hubRedundancyTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Water: main way / fallback\nLight: main way / fallback\nCooking: main way / fallback\nInformation and communication: main way / fallback'**
+  String get hubRedundancyTemplate;
+
+  /// No description provided for @hubClimateRoomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Room for cold and heat'**
+  String get hubClimateRoomTitle;
+
+  /// No description provided for @hubClimateRoomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Decide in advance which room to use, what to wear, how to ventilate and how to warm or cool it safely.'**
+  String get hubClimateRoomHint;
+
+  /// No description provided for @hubClimateRoomLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Room for cold and heat'**
+  String get hubClimateRoomLabel;
+
+  /// No description provided for @hubClimateRoomTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Room: …\nWarmth/cooling: …\nBlankets and clothing: …\nVentilation: …\nCO alarm and safe appliances: …'**
+  String get hubClimateRoomTemplate;
+
+  /// No description provided for @hubRadioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio reception plan'**
+  String get hubRadioTitle;
+
+  /// No description provided for @hubRadioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write down local FM and DAB stations, the receivers and how they are powered.'**
+  String get hubRadioHint;
+
+  /// No description provided for @hubRadioAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a station'**
+  String get hubRadioAdd;
+
+  /// No description provided for @hubRadioDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add radio reception'**
+  String get hubRadioDialogTitle;
+
+  /// No description provided for @hubRadioStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Station'**
+  String get hubRadioStation;
+
+  /// No description provided for @hubRadioBand.
+  ///
+  /// In en, this message translates to:
+  /// **'Band'**
+  String get hubRadioBand;
+
+  /// No description provided for @hubRadioFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency or channel'**
+  String get hubRadioFrequency;
+
+  /// No description provided for @hubRadioReceiver.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiver'**
+  String get hubRadioReceiver;
+
+  /// No description provided for @hubRadioPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power supply'**
+  String get hubRadioPower;
+
+  /// No description provided for @hubRadioDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'{band} · {frequency}\n{receiver} · {power}\nTested: {checked}'**
+  String hubRadioDetails(
+    String band,
+    String frequency,
+    String receiver,
+    String power,
+    String checked,
+  );
+
+  /// No description provided for @hubFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency folder'**
+  String get hubFolderTitle;
+
+  /// No description provided for @hubFolderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep track of the folder itself — no contents and no personal details.'**
+  String get hubFolderHint;
+
+  /// No description provided for @hubFolderLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Where it is kept'**
+  String get hubFolderLocation;
+
+  /// No description provided for @hubFolderLocationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. a lockable cupboard'**
+  String get hubFolderLocationHint;
+
+  /// No description provided for @hubFolderNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'not set'**
+  String get hubFolderNotSet;
+
+  /// No description provided for @hubFolderCopies.
+  ///
+  /// In en, this message translates to:
+  /// **'Copies of important papers are ready'**
+  String get hubFolderCopies;
+
+  /// No description provided for @hubFolderTakeAlong.
+  ///
+  /// In en, this message translates to:
+  /// **'Take it when evacuating'**
+  String get hubFolderTakeAlong;
+
+  /// No description provided for @hubFolderCheckedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked today'**
+  String get hubFolderCheckedToday;
+
+  /// No description provided for @hubCommunicationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication plan'**
+  String get hubCommunicationTitle;
+
+  /// No description provided for @hubCommunicationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is contacted in what order, who coordinates from outside, and short status messages for overloaded networks.'**
+  String get hubCommunicationHint;
+
+  /// No description provided for @hubCommunicationTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Who is contacted, and in what order? Who coordinates from outside?\n\nTemplate: We are safe. Next contact at …'**
+  String get hubCommunicationTemplate;
+
+  /// No description provided for @hubStatusSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'We are safe. Next contact at …'**
+  String get hubStatusSafe;
+
+  /// No description provided for @hubStatusHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'We need help with … Meeting point: …'**
+  String get hubStatusHelp;
+
+  /// No description provided for @hubSupportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support plan'**
+  String get hubSupportTitle;
+
+  /// No description provided for @hubSupportHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal support, medicines, aids and transport during an evacuation.'**
+  String get hubSupportHint;
+
+  /// No description provided for @hubSupportTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Only what is needed: the help required, medicines, aids, reliable support and transport.'**
+  String get hubSupportTemplate;
+
+  /// No description provided for @hubPetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet emergency plan'**
+  String get hubPetsTitle;
+
+  /// No description provided for @hubPetsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare transport, food, medicines, care and somewhere else to stay for the animals.'**
+  String get hubPetsHint;
+
+  /// No description provided for @hubPetsTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Carrier, supplies, vet, care, pet-friendly accommodation and copies of the papers.'**
+  String get hubPetsTemplate;
+
+  /// No description provided for @hubMobilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle and getting about'**
+  String get hubMobilityTitle;
+
+  /// No description provided for @hubMobilityHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A kit in the vehicle, a fuel or charge reserve, other ways to travel, and who collects whom.'**
+  String get hubMobilityHint;
+
+  /// No description provided for @hubMobilityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobility plan'**
+  String get hubMobilityLabel;
+
+  /// No description provided for @hubMobilityTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle, charge or fuel target, kit, alternative route, public transport and collection.'**
+  String get hubMobilityTemplate;
+
+  /// No description provided for @hubUtilitiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Utilities cut off'**
+  String get hubUtilitiesTitle;
+
+  /// No description provided for @hubUtilitiesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the shut-offs are, and manual alternatives for power, water, gas, heating and telephony.'**
+  String get hubUtilitiesHint;
+
+  /// No description provided for @hubUtilitiesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Utilities plan'**
+  String get hubUtilitiesLabel;
+
+  /// No description provided for @hubUtilitiesTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Shut-off points, who to call, backup power, where to draw water, heating and ways to communicate without contact.'**
+  String get hubUtilitiesTemplate;
+
+  /// No description provided for @hubMaintenanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get hubMaintenanceTitle;
+
+  /// No description provided for @hubMaintenanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check regularly, so the equipment that matters works when it is needed.'**
+  String get hubMaintenanceHint;
+
+  /// No description provided for @hubMaintenanceLastChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Last checked: {date}'**
+  String hubMaintenanceLastChecked(String date);
+
+  /// No description provided for @hubEvacuationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Evacuation cards'**
+  String get hubEvacuationTitle;
+
+  /// No description provided for @hubEvacuationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting points and safe routes, written down so they can be read offline.'**
+  String get hubEvacuationHint;
+
+  /// No description provided for @hubEvacuationAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a card'**
+  String get hubEvacuationAdd;
+
+  /// No description provided for @hubEvacuationRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove card'**
+  String get hubEvacuationRemove;
+
+  /// No description provided for @hubEvacuationDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Evacuation card'**
+  String get hubEvacuationDialogTitle;
+
+  /// No description provided for @hubEvacuationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, e.g. Home'**
+  String get hubEvacuationLabel;
+
+  /// No description provided for @hubEvacuationStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting point'**
+  String get hubEvacuationStart;
+
+  /// No description provided for @hubEvacuationDestination.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting point or destination'**
+  String get hubEvacuationDestination;
+
+  /// No description provided for @hubEvacuationRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route and alternatives'**
+  String get hubEvacuationRoute;
+
+  /// No description provided for @hubEvacuationPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Important places on the way'**
+  String get hubEvacuationPlaces;
+
+  /// No description provided for @hubEvacuationStartOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Start not set'**
+  String get hubEvacuationStartOpen;
+
+  /// No description provided for @hubEvacuationDestinationOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination not set'**
+  String get hubEvacuationDestinationOpen;
+
+  /// No description provided for @hubEvacuationSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} → {destination}\nChecked: {checked}'**
+  String hubEvacuationSummary(String start, String destination, String checked);
+
+  /// No description provided for @hubEvacuationStartLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Start: {value}'**
+  String hubEvacuationStartLine(String value);
+
+  /// No description provided for @hubEvacuationDestinationLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination: {value}'**
+  String hubEvacuationDestinationLine(String value);
+
+  /// No description provided for @hubEvacuationPlacesLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Important places'**
+  String get hubEvacuationPlacesLine;
+
+  /// No description provided for @hubEventsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident log'**
+  String get hubEventsTitle;
+
+  /// No description provided for @hubEventsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Record observations and what was done, with the time, and export them as a PDF if needed.'**
+  String get hubEventsHint;
+
+  /// No description provided for @hubEventsAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an entry'**
+  String get hubEventsAdd;
+
+  /// No description provided for @hubEventsExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as PDF'**
+  String get hubEventsExport;
+
+  /// No description provided for @hubEventsDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Record an incident'**
+  String get hubEventsDialogTitle;
+
+  /// No description provided for @hubEventsKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get hubEventsKind;
+
+  /// No description provided for @hubEventsKindHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Incident'**
+  String get hubEventsKindHint;
+
+  /// No description provided for @hubEventsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Observation or damage'**
+  String get hubEventsNote;
+
+  /// No description provided for @hubEventsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'What was done'**
+  String get hubEventsAction;
+
+  /// No description provided for @hubEventsObservationLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Observation: {text}'**
+  String hubEventsObservationLine(String text);
+
+  /// No description provided for @hubEventsActionLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Action: {text}'**
+  String hubEventsActionLine(String text);
+
+  /// No description provided for @hubEventsPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PreppSuite – incident log'**
+  String get hubEventsPdfTitle;
+
+  /// No description provided for @hubEventsPdfFile.
+  ///
+  /// In en, this message translates to:
+  /// **'preppsuite-incident-log.pdf'**
+  String get hubEventsPdfFile;
+
+  /// No description provided for @hubActionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do, and when'**
+  String get hubActionsTitle;
+
+  /// No description provided for @hubActionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation by how much warning there is: right now, within 48 hours, and several days ahead.'**
+  String get hubActionsHint;
+
+  /// No description provided for @hubActionNowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Right now'**
+  String get hubActionNowTitle;
+
+  /// No description provided for @hubActionNowBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the official message, keep out of danger, switch the radio on and tell your family briefly.'**
+  String get hubActionNowBody;
+
+  /// No description provided for @hubActionTwoDaysTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Within 24–48 hours'**
+  String get hubActionTwoDaysTitle;
+
+  /// No description provided for @hubActionTwoDaysBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Check water, stock, medicines, batteries and the vehicle. Get the house and the kit ready.'**
+  String get hubActionTwoDaysBody;
+
+  /// No description provided for @hubActionDaysTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Several days ahead'**
+  String get hubActionDaysTitle;
+
+  /// No description provided for @hubActionDaysBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Go over the evacuation card, arrange support, check the pet and utilities plans.'**
+  String get hubActionDaysBody;
+
+  /// No description provided for @hubActionDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done: {date}'**
+  String hubActionDone(String date);
+
+  /// No description provided for @hubCrisisTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crisis mode and briefing'**
+  String get hubCrisisTitle;
+
+  /// No description provided for @hubCrisisHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A larger display for this page, and a printable briefing for the household or the kit.'**
+  String get hubCrisisHint;
+
+  /// No description provided for @hubCrisisSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplified, larger display'**
+  String get hubCrisisSwitch;
+
+  /// No description provided for @hubCrisisSwitchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Makes the text and controls in the crisis organisation larger.'**
+  String get hubCrisisSwitchHint;
+
+  /// No description provided for @hubBriefingButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency briefing as PDF'**
+  String get hubBriefingButton;
+
+  /// No description provided for @hubBriefingPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PreppSuite – emergency briefing'**
+  String get hubBriefingPdfTitle;
+
+  /// No description provided for @hubBriefingCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Created: {date}'**
+  String hubBriefingCreated(String date);
+
+  /// No description provided for @hubBriefingRadio.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio'**
+  String get hubBriefingRadio;
+
+  /// No description provided for @hubBriefingRadioLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{station}: {band} {frequency} · {receiver}'**
+  String hubBriefingRadioLine(
+    String station,
+    String band,
+    String frequency,
+    String receiver,
+  );
+
+  /// No description provided for @hubBriefingEvacuation.
+  ///
+  /// In en, this message translates to:
+  /// **'Evacuation'**
+  String get hubBriefingEvacuation;
+
+  /// No description provided for @hubBriefingEvacuationLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{label}: {start} → {destination}'**
+  String hubBriefingEvacuationLine(
+    String label,
+    String start,
+    String destination,
+  );
+
+  /// No description provided for @hubBriefingPdfFile.
+  ///
+  /// In en, this message translates to:
+  /// **'preppsuite-emergency-briefing.pdf'**
+  String get hubBriefingPdfFile;
+
+  /// No description provided for @hubAnalogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On paper'**
+  String get hubAnalogTitle;
+
+  /// No description provided for @hubAnalogHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep printouts, maps, notes and spare keys available without a battery or a network.'**
+  String get hubAnalogHint;
+
+  /// No description provided for @hubAnalogTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Printed maps, a phone list, instructions, cash, spare keys and where they are kept.'**
+  String get hubAnalogTemplate;
+
+  /// No description provided for @hubMutualAidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Helping each other'**
+  String get hubMutualAidTitle;
+
+  /// No description provided for @hubMutualAidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan skills, equipment and safe ways to get in touch locally. Nothing is published.'**
+  String get hubMutualAidHint;
+
+  /// No description provided for @hubMutualAidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Help and exchange card'**
+  String get hubMutualAidLabel;
+
+  /// No description provided for @hubMutualAidTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Your own skills and equipment, the support you need, people you trust, and where to hand things over.'**
+  String get hubMutualAidTemplate;
+
+  /// No description provided for @hubPracticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice and upkeep'**
+  String get hubPracticeTitle;
+
+  /// No description provided for @hubPracticeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Regularly practise with the water filter, cooking, the radio, the kit and the paper routines.'**
+  String get hubPracticeHint;
+
+  /// No description provided for @hubPracticeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice and upkeep plan'**
+  String get hubPracticeLabel;
+
+  /// No description provided for @hubPracticeTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Next practice: …\nTest the water filter: …\nCook without power: …\nCheck the radio and the kit: …'**
+  String get hubPracticeTemplate;
+
+  /// No description provided for @hubNoteEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not written down yet.'**
+  String get hubNoteEmpty;
+
+  /// No description provided for @hubNoteUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Last updated: {date}'**
+  String hubNoteUpdated(String date);
+
+  /// No description provided for @hubNoteCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a plan'**
+  String get hubNoteCreate;
+
+  /// No description provided for @hubNoteEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get hubNoteEdit;
+
+  /// No description provided for @hubNoteCopyTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy template'**
+  String get hubNoteCopyTemplate;
+
+  /// No description provided for @hubEntryRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove entry'**
+  String get hubEntryRemove;
+
+  /// No description provided for @hubClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get hubClose;
+
+  /// No description provided for @hubCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get hubCancel;
+
+  /// No description provided for @hubSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get hubSave;
+
+  /// No description provided for @hubDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} · {time}'**
+  String hubDateTime(String date, String time);
+
+  /// No description provided for @hubTaskBatteriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Batteries and power banks'**
+  String get hubTaskBatteriesTitle;
+
+  /// No description provided for @hubTaskBatteriesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the charge and the spares'**
+  String get hubTaskBatteriesHint;
+
+  /// No description provided for @hubTaskRadioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio and reception plan'**
+  String get hubTaskRadioTitle;
+
+  /// No description provided for @hubTaskRadioHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Test the stations, the aerial and the power supply'**
+  String get hubTaskRadioHint;
+
+  /// No description provided for @hubTaskWaterFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Water filter and canisters'**
+  String get hubTaskWaterFilterTitle;
+
+  /// No description provided for @hubTaskWaterFilterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the filter, the seals and the stock'**
+  String get hubTaskWaterFilterHint;
+
+  /// No description provided for @hubTaskKitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency kit'**
+  String get hubTaskKitTitle;
+
+  /// No description provided for @hubTaskKitHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check clothing, light and personal needs'**
+  String get hubTaskKitHint;
+
+  /// No description provided for @hubTaskMedicineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicine cabinet'**
+  String get hubTaskMedicineTitle;
+
+  /// No description provided for @hubTaskMedicineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check expiry dates and personal medicines'**
+  String get hubTaskMedicineHint;
+
+  /// No description provided for @hubTaskExtinguisherTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Extinguisher and smoke alarms'**
+  String get hubTaskExtinguisherTitle;
+
+  /// No description provided for @hubTaskExtinguisherHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the service date and the batteries'**
+  String get hubTaskExtinguisherHint;
+
+  /// No description provided for @hubTaskVehicleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle and getting about'**
+  String get hubTaskVehicleTitle;
+
+  /// No description provided for @hubTaskVehicleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check fuel, tyres and alternative routes'**
+  String get hubTaskVehicleHint;
+
+  /// No description provided for @hubFolderCheckedTodayWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked today · last {date}'**
+  String hubFolderCheckedTodayWith(String date);
+
+  /// No description provided for @hubBriefingCommunication.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication'**
+  String get hubBriefingCommunication;
+
+  /// No description provided for @hubBriefingSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get hubBriefingSupport;
+
+  /// No description provided for @hubBriefingPets.
+  ///
+  /// In en, this message translates to:
+  /// **'Pets'**
+  String get hubBriefingPets;
+
+  /// No description provided for @hubBriefingMobility.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting about'**
+  String get hubBriefingMobility;
+
+  /// No description provided for @hubBriefingUtilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Utilities'**
+  String get hubBriefingUtilities;
+
+  /// No description provided for @hubBriefingPowerOutage.
+  ///
+  /// In en, this message translates to:
+  /// **'Power cut'**
+  String get hubBriefingPowerOutage;
+
+  /// No description provided for @hubBriefingRedundancy.
+  ///
+  /// In en, this message translates to:
+  /// **'Second ways'**
+  String get hubBriefingRedundancy;
+
+  /// No description provided for @hubBriefingClimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Cold and heat'**
+  String get hubBriefingClimate;
+
+  /// No description provided for @hubRadioPowerExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Batteries'**
+  String get hubRadioPowerExample;
+
+  /// No description provided for @hubEventsNoteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Observation'**
+  String get hubEventsNoteHint;
+
+  /// No description provided for @hubEventSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{when}\n{text}'**
+  String hubEventSummary(String when, String text);
 }
 
 class _AppLocalizationsDelegate

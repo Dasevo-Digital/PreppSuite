@@ -41,6 +41,7 @@ void main() {
   Future<void> show(
     WidgetTester tester, {
     List<InventoryItem> items = const [],
+    Locale locale = const Locale('de'),
   }) async {
     // Tall enough that the whole list is built: a `ListView` builds only
     // what it can show, and this screen is the longest in the app.
@@ -56,11 +57,11 @@ void main() {
           ).overrideWith((ref) => Stream.value(items)),
           householdProfileProvider.overrideWith(_TwoAdults.new),
         ],
-        child: const MaterialApp(
-          locale: Locale('de'),
+        child: MaterialApp(
+          locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: PreparednessHubScreen(householdId: 'home'),
+          home: const PreparednessHubScreen(householdId: 'home'),
         ),
       ),
     );
@@ -205,6 +206,29 @@ void main() {
     // Water is answered, so it is not asked for again.
     expect(find.textContaining('Wasser –'), findsNothing);
     expect(find.textContaining('Hygiene'), findsWidgets);
+  });
+
+  testWidgets('an English household reads English', (tester) async {
+    // This screen was the one area of the app with no translations at
+    // all: 171 German strings, including every heading a person has to
+    // read under pressure.
+    await show(
+      tester,
+      locale: const Locale('en'),
+      items: [
+        item(clientId: 'w', category: 'water', quantity: 40, unit: 'l'),
+      ],
+    );
+
+    expect(find.text('Crisis organisation'), findsOneWidget);
+    expect(find.text('Self-sufficiency'), findsOneWidget);
+    expect(find.text('Water'), findsWidgets);
+    expect(find.text('Worked out from your stock'), findsOneWidget);
+    expect(find.text('Add a card'), findsOneWidget);
+    expect(find.text('Emergency briefing as PDF'), findsOneWidget);
+    // And nothing German left behind on it.
+    expect(find.text('Krisenorganisation'), findsNothing);
+    expect(find.text('Karte hinzufügen'), findsNothing);
   });
 }
 

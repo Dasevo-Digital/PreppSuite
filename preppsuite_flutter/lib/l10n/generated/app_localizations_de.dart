@@ -4986,4 +4986,671 @@ class AppLocalizationsDe extends AppLocalizations {
   String drillsLastCompleted(String date) {
     return 'zuletzt durchgeführt: $date';
   }
+
+  @override
+  String get hubTitle => 'Krisenorganisation';
+
+  @override
+  String get hubPrivacyNote =>
+      'Alle Angaben bleiben auf diesem Gerät. Exportierst du ein Ereignisprotokoll, entscheidest du selbst über den Empfänger.';
+
+  @override
+  String get hubNotCheckedYet => 'noch nicht geprüft';
+
+  @override
+  String get hubAutonomyTitle => 'Autarkie-Status';
+
+  @override
+  String get hubAutonomyHint =>
+      'Reichweite in Tagen, aus Bestand und Energieplan gerechnet. Der niedrigste Wert zeigt den nächsten Engpass.';
+
+  @override
+  String hubAutonomyIncomplete(String resources) {
+    return 'Autarkie noch unvollständig. Offen: $resources.';
+  }
+
+  @override
+  String hubAutonomyKnownSoFar(int days, String resource) {
+    return 'Von dem, was bekannt ist: $days Tage, Engpass $resource.';
+  }
+
+  @override
+  String hubAutonomyRange(int days, String resource) {
+    return '$days Tage autark – Engpass: $resource';
+  }
+
+  @override
+  String get hubAutonomyOpen => 'offen';
+
+  @override
+  String hubAutonomyDays(int days) {
+    return '$days Tage';
+  }
+
+  @override
+  String get hubAutonomyAddByHand => 'Von Hand ergänzen';
+
+  @override
+  String get hubAutonomyDialogTitle => 'Autarkie-Reichweite';
+
+  @override
+  String get hubAutonomyDialogHint =>
+      'Was die App aus Bestand und Energieplan ableiten kann, steht schon auf dem Bildschirm. Hier nur, was sie nicht teilen kann.';
+
+  @override
+  String hubAutonomyDaysField(String label) {
+    return '$label – Tage';
+  }
+
+  @override
+  String get hubAutonomyFromStock => 'Aus dem Bestand gerechnet';
+
+  @override
+  String hubAutonomyByHandWith(String reason) {
+    return 'Selbst eingetragen – $reason';
+  }
+
+  @override
+  String hubAutonomyNotCounted(int count, String reason) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge nicht mitgerechnet: $reason',
+      one: 'Ein Eintrag nicht mitgerechnet: $reason',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hubResourceWater => 'Wasser';
+
+  @override
+  String get hubResourceFood => 'Lebensmittel';
+
+  @override
+  String get hubResourceMedicine => 'Medikamente';
+
+  @override
+  String get hubResourceEnergy => 'Energie';
+
+  @override
+  String get hubResourceHygiene => 'Hygiene';
+
+  @override
+  String get hubGapOnlyByHand => 'zählt die App nicht mit';
+
+  @override
+  String get hubGapNoEnergyPlan => 'noch kein Energieplan angelegt';
+
+  @override
+  String get hubGapNothingRecorded => 'noch nichts im Bestand erfasst';
+
+  @override
+  String get hubGapNoLiters => 'nicht in Litern erfasst';
+
+  @override
+  String get hubGapNoCalories => 'ohne Kalorienangabe';
+
+  @override
+  String get hubGapNoDose => 'ohne Tagesdosis';
+
+  @override
+  String get hubGapNoDraw => 'nichts verbraucht davon';
+
+  @override
+  String get hubWaterHygieneTitle => 'Wasser und Hygiene';
+
+  @override
+  String get hubWaterHygieneHint =>
+      'Trink- und Brauchwasser, Aufbereitung, Kanisterrotation, Toilette und Abfall getrennt planen.';
+
+  @override
+  String get hubWaterHygieneLabel => 'Wasser- und Hygieneplan';
+
+  @override
+  String get hubWaterHygieneTemplate =>
+      'Trinkwasser: …\nBrauchwasser: …\nQuellen und Aufbereitung: …\nKanisterrotation: …\nToilette, Abfall und Reinigungsmittel: …';
+
+  @override
+  String get hubPowerOutageTitle => 'Stromausfall-Plan';
+
+  @override
+  String get hubPowerOutageHint =>
+      'Startzeit, Kühlkette, Ladeprioritäten, Licht, Information und sichere Wärme vorbereiten.';
+
+  @override
+  String get hubPowerOutageTemplate =>
+      'Startzeit notieren. Kühl- und Gefriergeräte geschlossen halten. Ladeprioritäten, Radio, Licht, sichere Wärme und Ansprechpartner festhalten.';
+
+  @override
+  String get hubCookingTitle => 'Vorratsküche';
+
+  @override
+  String get hubCookingHint =>
+      'Mahlzeiten nach Vorrat, Wasser- und Brennstoffbedarf planen.';
+
+  @override
+  String get hubCookingLabel => 'Vorratsküchenplan';
+
+  @override
+  String get hubCookingTemplate =>
+      'Gericht: …\nZutaten aus dem Vorrat: …\nWasser: …\nBrennstoff und Kochzeit: …\nSichere Kochstelle: …';
+
+  @override
+  String get hubCookingRecipes => 'Offline-Rezepte öffnen';
+
+  @override
+  String get hubRedundancyTitle => 'Redundanz-Check';
+
+  @override
+  String get hubRedundancyHint =>
+      'Zweite Wege für Wasser, Licht, Kochen, Information und Kommunikation festhalten.';
+
+  @override
+  String get hubRedundancyTemplate =>
+      'Wasser: Hauptweg / Ersatzweg\nLicht: Hauptweg / Ersatzweg\nKochen: Hauptweg / Ersatzweg\nInformation und Kommunikation: Hauptweg / Ersatzweg';
+
+  @override
+  String get hubClimateRoomTitle => 'Kälte- und Hitze-Schutzraum';
+
+  @override
+  String get hubClimateRoomHint =>
+      'Geeigneten Aufenthaltsraum, Kleidung, Lüftung und sichere Wärme oder Kühlung vorab bestimmen.';
+
+  @override
+  String get hubClimateRoomLabel => 'Schutzraum für Kälte und Hitze';
+
+  @override
+  String get hubClimateRoomTemplate =>
+      'Raum: …\nWärme/Kühlung: …\nDecken und Kleidung: …\nLüftung: …\nCO-Melder und sichere Geräte: …';
+
+  @override
+  String get hubRadioTitle => 'Radio-Empfangsplan';
+
+  @override
+  String get hubRadioHint =>
+      'Lokale UKW- und DAB-Stationen, Geräte und Stromversorgung festhalten.';
+
+  @override
+  String get hubRadioAdd => 'Empfang hinzufügen';
+
+  @override
+  String get hubRadioDialogTitle => 'Radio-Empfang hinzufügen';
+
+  @override
+  String get hubRadioStation => 'Sender';
+
+  @override
+  String get hubRadioBand => 'Band';
+
+  @override
+  String get hubRadioFrequency => 'Frequenz oder Kanal';
+
+  @override
+  String get hubRadioReceiver => 'Empfänger';
+
+  @override
+  String get hubRadioPower => 'Stromversorgung';
+
+  @override
+  String hubRadioDetails(
+    String band,
+    String frequency,
+    String receiver,
+    String power,
+    String checked,
+  ) {
+    return '$band · $frequency\n$receiver · $power\nGetestet: $checked';
+  }
+
+  @override
+  String get hubFolderTitle => 'Notfallmappe';
+
+  @override
+  String get hubFolderHint =>
+      'Dokumentenmappe ohne Inhalte oder Personenangaben verwalten.';
+
+  @override
+  String get hubFolderLocation => 'Aufbewahrungsort';
+
+  @override
+  String get hubFolderLocationHint => 'z. B. abschließbarer Schrank';
+
+  @override
+  String get hubFolderNotSet => 'nicht hinterlegt';
+
+  @override
+  String get hubFolderCopies => 'Kopien wichtiger Unterlagen vorhanden';
+
+  @override
+  String get hubFolderTakeAlong => 'Bei Evakuierung mitnehmen';
+
+  @override
+  String get hubFolderCheckedToday => 'Heute geprüft';
+
+  @override
+  String get hubCommunicationTitle => 'Kommunikationsplan';
+
+  @override
+  String get hubCommunicationHint =>
+      'Kontakt-Reihenfolge, externe Kontaktperson und kurze Statusmeldungen für überlastete Netze.';
+
+  @override
+  String get hubCommunicationTemplate =>
+      'Wer wird in welcher Reihenfolge kontaktiert? Welche externe Kontaktperson koordiniert?\n\nVorlage: Wir sind sicher. Nächster Kontakt um …';
+
+  @override
+  String get hubStatusSafe => 'Wir sind sicher. Nächster Kontakt um …';
+
+  @override
+  String get hubStatusHelp => 'Wir brauchen Unterstützung bei … Treffpunkt: …';
+
+  @override
+  String get hubSupportTitle => 'Unterstützungsplan';
+
+  @override
+  String get hubSupportHint =>
+      'Persönliche Unterstützung, Medikamente, Hilfsmittel und Transport bei einer Evakuierung.';
+
+  @override
+  String get hubSupportTemplate =>
+      'Nur notwendige Angaben: benötigte Hilfe, Medikamente, Hilfsmittel, verlässliche Unterstützung und Transport.';
+
+  @override
+  String get hubPetsTitle => 'Haustier-Notfallplan';
+
+  @override
+  String get hubPetsHint =>
+      'Transport, Futter, Medikamente, Betreuung und Ausweichunterkunft für Tiere vorbereiten.';
+
+  @override
+  String get hubPetsTemplate =>
+      'Transportbox, Vorräte, Tierarzt, Betreuung, tierfreundliche Unterkunft und Dokumentenkopien.';
+
+  @override
+  String get hubMobilityTitle => 'Fahrzeug und Mobilität';
+
+  @override
+  String get hubMobilityHint =>
+      'Fahrzeug-Notgepäck, Energie- oder Tankreserve, alternative Verkehrsmittel und Abholung.';
+
+  @override
+  String get hubMobilityLabel => 'Mobilitätsplan';
+
+  @override
+  String get hubMobilityTemplate =>
+      'Fahrzeug, Lade- oder Tankziel, Notgepäck, alternative Route, ÖPNV und Abholung.';
+
+  @override
+  String get hubUtilitiesTitle => 'Versorgungs-Unterbrechung';
+
+  @override
+  String get hubUtilitiesHint =>
+      'Absperrorte und manuelle Alternativen für Strom, Wasser, Gas, Heizung und Telekommunikation.';
+
+  @override
+  String get hubUtilitiesLabel => 'Versorgungsplan';
+
+  @override
+  String get hubUtilitiesTemplate =>
+      'Absperrorte, Ansprechpartner, Ersatzstrom, Wasserentnahme, Heizung und kontaktlose Kommunikationswege.';
+
+  @override
+  String get hubMaintenanceTitle => 'Wartungszentrale';
+
+  @override
+  String get hubMaintenanceHint =>
+      'Regelmäßig prüfen, damit wichtige Ausrüstung im Notfall einsatzbereit ist.';
+
+  @override
+  String hubMaintenanceLastChecked(String date) {
+    return 'Zuletzt geprüft: $date';
+  }
+
+  @override
+  String get hubEvacuationTitle => 'Evakuierungs-Karten';
+
+  @override
+  String get hubEvacuationHint =>
+      'Treffpunkte und sichere Wege als offline lesbare Karten notieren.';
+
+  @override
+  String get hubEvacuationAdd => 'Karte hinzufügen';
+
+  @override
+  String get hubEvacuationRemove => 'Karte entfernen';
+
+  @override
+  String get hubEvacuationDialogTitle => 'Evakuierungs-Karte';
+
+  @override
+  String get hubEvacuationLabel => 'Bezeichnung, z. B. Zuhause';
+
+  @override
+  String get hubEvacuationStart => 'Startpunkt';
+
+  @override
+  String get hubEvacuationDestination => 'Treffpunkt oder Ziel';
+
+  @override
+  String get hubEvacuationRoute => 'Weg und Alternativen';
+
+  @override
+  String get hubEvacuationPlaces => 'Wichtige Orte unterwegs';
+
+  @override
+  String get hubEvacuationStartOpen => 'Start offen';
+
+  @override
+  String get hubEvacuationDestinationOpen => 'Ziel offen';
+
+  @override
+  String hubEvacuationSummary(
+    String start,
+    String destination,
+    String checked,
+  ) {
+    return '$start → $destination\nGeprüft: $checked';
+  }
+
+  @override
+  String hubEvacuationStartLine(String value) {
+    return 'Start: $value';
+  }
+
+  @override
+  String hubEvacuationDestinationLine(String value) {
+    return 'Ziel: $value';
+  }
+
+  @override
+  String get hubEvacuationPlacesLine => 'Wichtige Orte';
+
+  @override
+  String get hubEventsTitle => 'Ereignisprotokoll';
+
+  @override
+  String get hubEventsHint =>
+      'Beobachtungen und Maßnahmen mit Uhrzeit dokumentieren und bei Bedarf als PDF exportieren.';
+
+  @override
+  String get hubEventsAdd => 'Eintrag hinzufügen';
+
+  @override
+  String get hubEventsExport => 'PDF exportieren';
+
+  @override
+  String get hubEventsDialogTitle => 'Ereignis dokumentieren';
+
+  @override
+  String get hubEventsKind => 'Art';
+
+  @override
+  String get hubEventsKindHint => 'Ereignis';
+
+  @override
+  String get hubEventsNote => 'Beobachtung oder Schaden';
+
+  @override
+  String get hubEventsAction => 'Getroffene Maßnahme';
+
+  @override
+  String hubEventsObservationLine(String text) {
+    return 'Beobachtung: $text';
+  }
+
+  @override
+  String hubEventsActionLine(String text) {
+    return 'Maßnahme: $text';
+  }
+
+  @override
+  String get hubEventsPdfTitle => 'PreppSuite – Ereignisprotokoll';
+
+  @override
+  String get hubEventsPdfFile => 'preppsuite-ereignisprotokoll.pdf';
+
+  @override
+  String get hubActionsTitle => 'Handlungskarten';
+
+  @override
+  String get hubActionsHint =>
+      'Vorbereitung nach Vorwarnzeit: sofort, innerhalb von 48 Stunden und mehrere Tage vorher.';
+
+  @override
+  String get hubActionNowTitle => 'Jetzt';
+
+  @override
+  String get hubActionNowBody =>
+      'Amtliche Meldung lesen, Gefahr vermeiden, Radio einschalten und Angehörige kurz informieren.';
+
+  @override
+  String get hubActionTwoDaysTitle => 'Innerhalb von 24–48 Stunden';
+
+  @override
+  String get hubActionTwoDaysBody =>
+      'Wasser, Vorrat, Medikamente, Akkus und Fahrzeug prüfen. Haus und Notgepäck vorbereiten.';
+
+  @override
+  String get hubActionDaysTitle => 'Mehrere Tage vorher';
+
+  @override
+  String get hubActionDaysBody =>
+      'Evakuierungs-Karte abgleichen, Unterstützung organisieren, Haustier- und Versorgungsplan prüfen.';
+
+  @override
+  String hubActionDone(String date) {
+    return 'Erledigt: $date';
+  }
+
+  @override
+  String get hubCrisisTitle => 'Krisenmodus und Briefing';
+
+  @override
+  String get hubCrisisHint =>
+      'Größere Darstellung für diese Seite und ein druckbares Briefing für Haushalt oder Notgepäck.';
+
+  @override
+  String get hubCrisisSwitch => 'Vereinfachte, größere Darstellung';
+
+  @override
+  String get hubCrisisSwitchHint =>
+      'Vergrößert Text und Bedienelemente in der Krisenorganisation.';
+
+  @override
+  String get hubBriefingButton => 'Notfallbriefing als PDF';
+
+  @override
+  String get hubBriefingPdfTitle => 'PreppSuite – Notfallbriefing';
+
+  @override
+  String hubBriefingCreated(String date) {
+    return 'Erstellt: $date';
+  }
+
+  @override
+  String get hubBriefingRadio => 'Radio';
+
+  @override
+  String hubBriefingRadioLine(
+    String station,
+    String band,
+    String frequency,
+    String receiver,
+  ) {
+    return '$station: $band $frequency · $receiver';
+  }
+
+  @override
+  String get hubBriefingEvacuation => 'Evakuierung';
+
+  @override
+  String hubBriefingEvacuationLine(
+    String label,
+    String start,
+    String destination,
+  ) {
+    return '$label: $start → $destination';
+  }
+
+  @override
+  String get hubBriefingPdfFile => 'preppsuite-notfallbriefing.pdf';
+
+  @override
+  String get hubAnalogTitle => 'Analoger Fallback';
+
+  @override
+  String get hubAnalogHint =>
+      'Ausdrucke, Karten, Notizen und Ersatzschlüssel ohne Akku oder Netz verfügbar halten.';
+
+  @override
+  String get hubAnalogTemplate =>
+      'Gedruckte Karten, Telefonliste, Anleitungen, Bargeld, Ersatzschlüssel und Aufbewahrungsort.';
+
+  @override
+  String get hubMutualAidTitle => 'Nachbarschaftshilfe';
+
+  @override
+  String get hubMutualAidHint =>
+      'Fähigkeiten, Hilfsmittel und sichere Kontaktwege lokal planen; keine Daten werden veröffentlicht.';
+
+  @override
+  String get hubMutualAidLabel => 'Hilfe- und Tauschkarte';
+
+  @override
+  String get hubMutualAidTemplate =>
+      'Eigene Fähigkeiten und Hilfsmittel, benötigte Unterstützung, vertrauenswürdige Kontakte und Übergabeort.';
+
+  @override
+  String get hubPracticeTitle => 'Praxis und Wartung';
+
+  @override
+  String get hubPracticeHint =>
+      'Regelmäßig Wasserfilter, Kochen, Radio, Notgepäck und analoge Abläufe praktisch üben.';
+
+  @override
+  String get hubPracticeLabel => 'Praxis-Wartungsplan';
+
+  @override
+  String get hubPracticeTemplate =>
+      'Nächste Übung: …\nWasserfilter testen: …\nOhne Strom kochen: …\nRadio und Notgepäck prüfen: …';
+
+  @override
+  String get hubNoteEmpty => 'Noch nicht hinterlegt.';
+
+  @override
+  String hubNoteUpdated(String date) {
+    return 'Zuletzt aktualisiert: $date';
+  }
+
+  @override
+  String get hubNoteCreate => 'Plan anlegen';
+
+  @override
+  String get hubNoteEdit => 'Bearbeiten';
+
+  @override
+  String get hubNoteCopyTemplate => 'Vorlage kopieren';
+
+  @override
+  String get hubEntryRemove => 'Eintrag entfernen';
+
+  @override
+  String get hubClose => 'Schließen';
+
+  @override
+  String get hubCancel => 'Abbrechen';
+
+  @override
+  String get hubSave => 'Speichern';
+
+  @override
+  String hubDateTime(String date, String time) {
+    return '$date · $time';
+  }
+
+  @override
+  String get hubTaskBatteriesTitle => 'Akkus, Batterien und Powerbanks';
+
+  @override
+  String get hubTaskBatteriesHint => 'Ladezustand und Ersatzbatterien prüfen';
+
+  @override
+  String get hubTaskRadioTitle => 'Radio und Empfangsplan';
+
+  @override
+  String get hubTaskRadioHint => 'Sender, Antenne und Stromversorgung testen';
+
+  @override
+  String get hubTaskWaterFilterTitle => 'Wasserfilter und Kanister';
+
+  @override
+  String get hubTaskWaterFilterHint =>
+      'Filterzustand, Dichtungen und Vorrat prüfen';
+
+  @override
+  String get hubTaskKitTitle => 'Notgepäck';
+
+  @override
+  String get hubTaskKitHint => 'Kleidung, Licht und persönliche Bedarfe prüfen';
+
+  @override
+  String get hubTaskMedicineTitle => 'Hausapotheke';
+
+  @override
+  String get hubTaskMedicineHint =>
+      'Haltbarkeit und persönliche Medikamente prüfen';
+
+  @override
+  String get hubTaskExtinguisherTitle => 'Feuerlöscher und Rauchmelder';
+
+  @override
+  String get hubTaskExtinguisherHint => 'Prüftermin und Batterien prüfen';
+
+  @override
+  String get hubTaskVehicleTitle => 'Fahrzeug und Mobilität';
+
+  @override
+  String get hubTaskVehicleHint =>
+      'Kraftstoff, Reifen und alternative Wege prüfen';
+
+  @override
+  String hubFolderCheckedTodayWith(String date) {
+    return 'Heute geprüft · zuletzt $date';
+  }
+
+  @override
+  String get hubBriefingCommunication => 'Kommunikation';
+
+  @override
+  String get hubBriefingSupport => 'Unterstützung';
+
+  @override
+  String get hubBriefingPets => 'Haustiere';
+
+  @override
+  String get hubBriefingMobility => 'Mobilität';
+
+  @override
+  String get hubBriefingUtilities => 'Versorgung';
+
+  @override
+  String get hubBriefingPowerOutage => 'Stromausfall';
+
+  @override
+  String get hubBriefingRedundancy => 'Redundanz';
+
+  @override
+  String get hubBriefingClimate => 'Kälte und Hitze';
+
+  @override
+  String get hubRadioPowerExample => 'Batterien';
+
+  @override
+  String get hubEventsNoteHint => 'Beobachtung';
+
+  @override
+  String hubEventSummary(String when, String text) {
+    return '$when\n$text';
+  }
 }
