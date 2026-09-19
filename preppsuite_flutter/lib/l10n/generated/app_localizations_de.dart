@@ -5653,4 +5653,39 @@ class AppLocalizationsDe extends AppLocalizations {
   String hubEventSummary(String when, String text) {
     return '$when\n$text';
   }
+
+  @override
+  String get hubSituationTitle => 'Es läuft gerade etwas';
+
+  @override
+  String hubSituationOutage(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'Stromausfall seit $hours Stunden',
+      one: 'Stromausfall seit einer Stunde',
+      zero: 'Stromausfall, gerade begonnen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hubSituationMoreWarnings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Und $count weitere Warnungen',
+      one: 'Und eine weitere Warnung',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hubSituationCrisisMode => 'Größere Darstellung einschalten';
+
+  @override
+  String get hubSituationLog => 'Im Protokoll festhalten';
+
+  @override
+  String get hubSituationOutageKind => 'Stromausfall';
 }

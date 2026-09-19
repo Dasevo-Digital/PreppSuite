@@ -9520,6 +9520,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{when}\n{text}'**
   String hubEventSummary(String when, String text);
+
+  /// No description provided for @hubSituationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Something is happening'**
+  String get hubSituationTitle;
+
+  /// No description provided for @hubSituationOutage.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours,plural,=0{Power cut, just started}=1{Power cut for an hour}other{Power cut for {hours} hours}}'**
+  String hubSituationOutage(int hours);
+
+  /// No description provided for @hubSituationMoreWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural,=1{And one more warning}other{And {count} more warnings}}'**
+  String hubSituationMoreWarnings(int count);
+
+  /// No description provided for @hubSituationCrisisMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to the larger display'**
+  String get hubSituationCrisisMode;
+
+  /// No description provided for @hubSituationLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Record it in the log'**
+  String get hubSituationLog;
+
+  /// No description provided for @hubSituationOutageKind.
+  ///
+  /// In en, this message translates to:
+  /// **'Power cut'**
+  String get hubSituationOutageKind;
 }
 
 class _AppLocalizationsDelegate

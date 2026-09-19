@@ -1684,5 +1684,13 @@
   "hubRadioPowerExample": "Batterien",
   "hubEventsNoteHint": "Beobachtung",
   "hubEventSummary": "{when}\n{text}",
-  "@hubEventSummary": {"placeholders": {"when": {"type": "String"}, "text": {"type": "String"}}}
+  "@hubEventSummary": {"placeholders": {"when": {"type": "String"}, "text": {"type": "String"}}},
+  "hubSituationTitle": "Es läuft gerade etwas",
+  "hubSituationOutage": "{hours,plural,=0{Stromausfall, gerade begonnen}=1{Stromausfall seit einer Stunde}other{Stromausfall seit {hours} Stunden}}",
+  "@hubSituationOutage": {"placeholders": {"hours": {"type": "int"}}},
+  "hubSituationMoreWarnings": "{count,plural,=1{Und eine weitere Warnung}other{Und {count} weitere Warnungen}}",
+  "@hubSituationMoreWarnings": {"placeholders": {"count": {"type": "int"}}},
+  "hubSituationCrisisMode": "Größere Darstellung einschalten",
+  "hubSituationLog": "Im Protokoll festhalten",
+  "hubSituationOutageKind": "Stromausfall"
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/household/application/household_providers.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_providers.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
 import 'package:preppsuite_flutter/features/preparedness/application/preparedness_hub_store.dart';
@@ -38,9 +39,25 @@ void main() {
     dirty: false,
   );
 
+  Warning warning({required String severity, required String headline}) =>
+      Warning(
+        source: 'bbk',
+        externalId: headline,
+        countryCode: 'DE',
+        regionKey: '03241',
+        severity: severity,
+        eventType: 'Sturm',
+        headline: headline,
+        effective: DateTime.utc(2026, 9, 19),
+        sent: DateTime.utc(2026, 9, 19),
+        updatedAt: DateTime.utc(2026, 9, 19),
+        notified: false,
+      );
+
   Future<void> show(
     WidgetTester tester, {
     List<InventoryItem> items = const [],
+    List<Warning> warnings = const [],
     Locale locale = const Locale('de'),
   }) async {
     // Tall enough that the whole list is built: a `ListView` builds only
@@ -56,6 +73,7 @@ void main() {
             'home',
           ).overrideWith((ref) => Stream.value(items)),
           householdProfileProvider.overrideWith(_TwoAdults.new),
+          activeWarningsProvider.overrideWith((ref) => Stream.value(warnings)),
         ],
         child: MaterialApp(
           locale: locale,
@@ -229,6 +247,77 @@ void main() {
     // And nothing German left behind on it.
     expect(find.text('Krisenorganisation'), findsNothing);
     expect(find.text('Karte hinzufügen'), findsNothing);
+  });
+
+  group('when something is actually happening', () {
+    testWidgets('a quiet day says nothing', (tester) async {
+      await show(tester);
+
+      expect(find.text('Es läuft gerade etwas'), findsNothing);
+    });
+
+    testWidgets('a severe warning reaches the page with the plans on it', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        warnings: [
+          warning(severity: 'severe', headline: 'Orkanböen erwartet'),
+        ],
+      );
+
+      expect(find.text('Es läuft gerade etwas'), findsOneWidget);
+      expect(find.text('Orkanböen erwartet'), findsOneWidget);
+      // The card sits on the error container, which is the one colour
+      // pair on this page that could fail to read.
+      await expectAccessible(tester);
+    });
+
+    testWidgets('a wind advisory does not', (tester) async {
+      // Crying wolf over a minor warning is how a household learns to
+      // scroll past the one that matters.
+      await show(
+        tester,
+        warnings: [warning(severity: 'minor', headline: 'Windig')],
+      );
+
+      expect(find.text('Es läuft gerade etwas'), findsNothing);
+    });
+
+    testWidgets('the larger display is offered, never switched on', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        warnings: [warning(severity: 'extreme', headline: 'Hochwasser')],
+      );
+
+      // Offered, and off until somebody says so.
+      expect((await store.load()).crisisMode, isFalse);
+
+      await tester.tap(find.text('Größere Darstellung einschalten'));
+      await tester.pumpAndSettle();
+
+      expect((await store.load()).crisisMode, isTrue);
+    });
+
+    testWidgets('the log opens with the warning already in it', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        warnings: [warning(severity: 'severe', headline: 'Orkanböen erwartet')],
+      );
+
+      await tester.tap(find.text('Im Protokoll festhalten'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Speichern'));
+      await tester.pumpAndSettle();
+
+      final event = (await store.load()).events.single;
+      expect(event.kind, 'Sturm');
+      expect(event.note, 'Orkanböen erwartet');
+    });
   });
 }
 

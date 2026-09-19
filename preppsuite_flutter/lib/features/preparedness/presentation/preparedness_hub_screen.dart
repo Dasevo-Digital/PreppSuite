@@ -7,11 +7,14 @@ import 'package:printing/printing.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../energy/application/energy_store.dart';
+import '../../energy/application/outage_store.dart';
+import '../../warnings/application/warning_providers.dart';
 import '../../household/application/household_providers.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/application/supply_calculator.dart';
 import '../../inventory/presentation/prepper_recipes_screen.dart';
 import '../application/autonomy_overview.dart';
+import '../application/current_situation.dart';
 import '../application/preparedness_hub_store.dart';
 
 /// Private, offline planning tools. The screen intentionally has no map or
@@ -31,10 +34,12 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
   static const _energyStore = EnergyPlanStore();
+  static const _outageStore = OutageClockStore();
   PreparednessHubData _data = const PreparednessHubData();
   // The stored energy is kept by its own screen, not here. This screen
   // only divides it, the same as it does the inventory.
   EnergyPlan _energy = const EnergyPlan();
+  OutageClock? _outage;
   var _loading = true;
 
   @override
@@ -46,14 +51,23 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   Future<void> _load() async {
     final data = await _store.load();
     final energy = await _energyStore.load();
+    final outage = await _outageStore.load();
     if (mounted) {
       setState(() {
         _data = data;
         _energy = energy;
+        _outage = outage;
         _loading = false;
       });
     }
   }
+
+  /// What is actually going on, as far as the records say.
+  CurrentSituation _situation() => currentSituation(
+    warnings: ref.watch(activeWarningsProvider).value ?? const [],
+    profile: ref.watch(householdProfileProvider).value,
+    outage: _outage,
+  );
 
   /// What the household is on its own for, resource by resource.
   ///
@@ -90,6 +104,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   @override
   Widget build(BuildContext context) {
     final reaches = _reaches();
+    final situation = _situation();
     return Scaffold(
       appBar: AppBar(title: Text(_l10n.hubTitle)),
       body: _loading
@@ -101,6 +116,10 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  if (!situation.isQuiet) ...[
+                    _situationCard(situation),
+                    const SizedBox(height: 16),
+                  ],
                   Text(
                     _l10n.hubPrivacyNote,
                     style: Theme.of(context).textTheme.bodySmall,
@@ -310,6 +329,85 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
                 ],
               ),
             ),
+    );
+  }
+
+  /// What is happening, at the top of the page where the plans are.
+  ///
+  /// The two things the app can actually know: a severe warning over this
+  /// household's own region, and a blackout somebody started the clock
+  /// on. Both were already in the app; neither reached this screen, where
+  /// "crisis mode" meant a quarter more text and nothing else.
+  ///
+  /// It offers, it does not act. The larger display stays a choice — a
+  /// screen that rearranges itself because a feed said so is one nobody
+  /// can rely on — and the log button opens the ordinary dialog with the
+  /// details filled in, so what is written down is still somebody's own
+  /// words.
+  Widget _situationCard(CurrentSituation situation) {
+    final theme = Theme.of(context);
+    final warning = situation.leadWarning;
+    final hours = outageHours(situation.outage, DateTime.now());
+    final onColor = theme.colorScheme.onErrorContainer;
+    return Card(
+      color: theme.colorScheme.errorContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: onColor),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _l10n.hubSituationTitle,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: onColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (warning != null)
+              Text(warning.headline, style: TextStyle(color: onColor)),
+            if (situation.warnings.length > 1)
+              Text(
+                _l10n.hubSituationMoreWarnings(situation.warnings.length - 1),
+                style: TextStyle(color: onColor),
+              ),
+            if (hours != null)
+              Text(
+                _l10n.hubSituationOutage(hours),
+                style: TextStyle(color: onColor),
+              ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (!_data.crisisMode)
+                  OutlinedButton.icon(
+                    onPressed: () => _change(_data.copyWith(crisisMode: true)),
+                    icon: const Icon(Icons.format_size),
+                    label: Text(_l10n.hubSituationCrisisMode),
+                  ),
+                FilledButton.icon(
+                  onPressed: () => _addEvent(
+                    kindPrefill:
+                        warning?.eventType ?? _l10n.hubSituationOutageKind,
+                    notePrefill: warning?.headline,
+                  ),
+                  icon: const Icon(Icons.edit_note),
+                  label: Text(_l10n.hubSituationLog),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1139,9 +1237,11 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
     ),
   );
 
-  Future<void> _addEvent() async {
-    final kind = TextEditingController(text: _l10n.hubEventsNoteHint);
-    final note = TextEditingController();
+  Future<void> _addEvent({String? kindPrefill, String? notePrefill}) async {
+    final kind = TextEditingController(
+      text: kindPrefill ?? _l10n.hubEventsNoteHint,
+    );
+    final note = TextEditingController(text: notePrefill ?? '');
     final action = TextEditingController();
     final saved = await showDialog<bool>(
       context: context,

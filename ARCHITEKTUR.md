@@ -471,6 +471,21 @@ import, only entries the manifest itself names are extracted. Size and
 sha256 are checked after every download, and a file that fails is deleted
 rather than kept under its final name.
 
+**The app reports what is happening; the household decides what to do
+about it.** "Crisis mode" used to be a switch on one screen that scaled
+that screen's text by a quarter, while the app already knew when
+something was going on — a severe warning over the household's own
+region, a blackout clock somebody had started — and none of it reached
+the page the plans are on. `current_situation.dart` is that join, and it
+is deliberately narrow: severe and above only, because an app that cries
+wolf over a wind advisory is one people learn to scroll past.
+
+What it must not do is act. The larger display stays an offer, and the
+incident log opens the ordinary dialog with the warning's own words
+filled in rather than writing an entry itself. A screen that rearranges
+itself because a feed said so is a screen nobody can rely on, and a log
+the app wrote is not a record of what the household saw.
+
 **A reach the app can divide, it does not ask for.** Four of the crisis
 hub's five autonomy figures were already calculated elsewhere — water and
 food in `supply_calculator.dart`, medicines in `medication_range.dart`,

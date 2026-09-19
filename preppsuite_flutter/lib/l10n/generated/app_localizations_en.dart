@@ -5625,4 +5625,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String hubEventSummary(String when, String text) {
     return '$when\n$text';
   }
+
+  @override
+  String get hubSituationTitle => 'Something is happening';
+
+  @override
+  String hubSituationOutage(int hours) {
+    String _temp0 = intl.Intl.pluralLogic(
+      hours,
+      locale: localeName,
+      other: 'Power cut for $hours hours',
+      one: 'Power cut for an hour',
+      zero: 'Power cut, just started',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String hubSituationMoreWarnings(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'And $count more warnings',
+      one: 'And one more warning',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get hubSituationCrisisMode => 'Switch to the larger display';
+
+  @override
+  String get hubSituationLog => 'Record it in the log';
+
+  @override
+  String get hubSituationOutageKind => 'Power cut';
 }

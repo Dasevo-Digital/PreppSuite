@@ -2491,5 +2491,13 @@
   "hubRadioPowerExample": "Batteries",
   "hubEventsNoteHint": "Observation",
   "hubEventSummary": "{when}\n{text}",
-  "@hubEventSummary": {"placeholders": {"when": {"type": "String"}, "text": {"type": "String"}}}
+  "@hubEventSummary": {"placeholders": {"when": {"type": "String"}, "text": {"type": "String"}}},
+  "hubSituationTitle": "Something is happening",
+  "hubSituationOutage": "{hours,plural,=0{Power cut, just started}=1{Power cut for an hour}other{Power cut for {hours} hours}}",
+  "@hubSituationOutage": {"placeholders": {"hours": {"type": "int"}}},
+  "hubSituationMoreWarnings": "{count,plural,=1{And one more warning}other{And {count} more warnings}}",
+  "@hubSituationMoreWarnings": {"placeholders": {"count": {"type": "int"}}},
+  "hubSituationCrisisMode": "Switch to the larger display",
+  "hubSituationLog": "Record it in the log",
+  "hubSituationOutageKind": "Power cut"
 }
