@@ -232,6 +232,22 @@ class _PossessionTile extends ConsumerWidget {
                   ),
                   width: 48,
                   height: 48,
+                  // Photos are stored at up to 2000 pixels wide, and what
+                  // costs memory is the size they are decoded to, not the
+                  // size they are drawn at: one of them is eleven
+                  // megabytes of pixels. Every tile in this list is built
+                  // at once, so without this a household that
+                  // photographed forty things for its insurer fills
+                  // Flutter's hundred-megabyte image cache several times
+                  // over and re-decodes JPEGs on every rebuild.
+                  //
+                  // Width only: giving both axes would stretch the
+                  // picture to a square before `cover` crops it. 192
+                  // rather than 48 at triple density, because `cover`
+                  // fills the square from the picture's *short* side —
+                  // on a landscape photo that is the height, and asking
+                  // for 144 across would leave only 108 down.
+                  cacheWidth: 192,
                   fit: BoxFit.cover,
                   // A picture whose file is gone must not take the list
                   // down with it -- the row is still worth showing.

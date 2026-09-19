@@ -31,6 +31,9 @@ class WarningSituationMapScreen extends ConsumerStatefulWidget {
 class _WarningSituationMapScreenState
     extends ConsumerState<WarningSituationMapScreen> {
   final _controller = MapController();
+  // Decoding the areas is the expensive part of drawing this screen, and
+  // nothing about it changes when a filter chip is tapped.
+  final _polygons = WarningPolygonCache();
   // The nationwide BBK feed is the input; the warning map is about the
   // household's situation. Keep unrelated state and district polygons out
   // until someone explicitly asks to inspect the national picture.
@@ -57,6 +60,7 @@ class _WarningSituationMapScreenState
     AppLocalizations l10n,
     List<Warning> all,
   ) {
+    _polygons.retain(all);
     final selected = [
       for (final warning in all)
         if (warning.countryCode == widget.profile.countryCode)
@@ -70,7 +74,7 @@ class _WarningSituationMapScreenState
                       warningSeverityFromName(warning.severity),
                     ) >=
                     warningSeverityRank(WarningSeverity.severe))
-              (warning: warning, polygons: warningPolygons(warning)),
+              (warning: warning, polygons: _polygons.of(warning)),
     ];
     final onMap = [
       for (final item in selected)

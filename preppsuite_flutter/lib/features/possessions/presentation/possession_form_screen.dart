@@ -278,6 +278,11 @@ class _PossessionFormScreenState extends ConsumerState<PossessionFormScreen> {
                       File(InventoryPhotoService.resolvePhotoPath(photoPath)),
                       height: 180,
                       width: double.infinity,
+                      // The stored picture is up to 2000 pixels wide; this
+                      // strip is 180 tall. 1080 covers a phone at triple
+                      // density and a desktop card at its widest, for a
+                      // third of the memory.
+                      cacheWidth: 1080,
                       fit: BoxFit.cover,
                     ),
                   ),

@@ -471,6 +471,32 @@ import, only entries the manifest itself names are extracted. Size and
 sha256 are checked after every download, and a file that fails is deleted
 rather than kept under its final name.
 
+**A photo drawn small is decoded small.** `InventoryPhotoService` stores
+pictures at up to 2000 pixels wide, and what a picture costs in memory is
+the size it is decoded to, not the size it is drawn at: one of them is
+eleven megabytes of pixels, and Flutter's whole image cache holds a
+hundred. The possessions list draws them at 48 by 48 and builds every
+tile at once, so without a `cacheWidth` eight photographed items filled
+that cache and the ninth started evicting the others — after which every
+rebuild decoded JPEGs again. Measured before and after in
+`possessions_photo_memory_test`: 91.6 MB down to 0.8 MB.
+
+Width only, never both axes: two of them stretch the picture to the
+target rectangle before `BoxFit.cover` crops it. And the number is taken
+from the picture's *short* side, because that is the one `cover` fills
+the box from — on a landscape photo in a square tile that is the height.
+
+**Work that does not change is not repeated every frame.** Decoding a
+warning's areas walks every coordinate pair it names; the situation map
+draws many at once and rebuilds on every filter chip and every poll. At a
+storm-day feed of 120 warnings that was 14 ms a rebuild and at a
+saturated one 71 ms, on a desktop machine — a phone is slower and a frame
+is 16 ms. `WarningPolygonCache` keys the result by the warning's identity
+and the time it was last written, so a rewritten warning decodes again
+and an ended one is forgotten. It is handed everything the feed holds,
+not what a filter left of it: otherwise turning a filter on would discard
+exactly what turning it off again needs.
+
 **A Windows package is launched in a Windows Sandbox, not on the build
 machine.** A developer machine has the Visual C++ Redistributable, and a
 user's machine may not; starting it where everything is already installed

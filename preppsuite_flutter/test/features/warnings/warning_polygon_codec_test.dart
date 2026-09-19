@@ -102,4 +102,59 @@ void main() {
       expect(polygonsCover(polygons, const LatLng(54.0, 10.5)), isFalse);
     });
   });
+
+  group('decoding the same warning twice', () {
+    Warning at(DateTime updatedAt) => Warning(
+      source: 'bbk',
+      externalId: 'warning-1',
+      countryCode: 'DE',
+      severity: 'severe',
+      eventType: 'storm',
+      headline: 'Sturmböen',
+      polygonsJson: '["52.1,10.5 52.2,10.6 52.0,10.7"]',
+      effective: now,
+      sent: now,
+      updatedAt: updatedAt,
+      notified: false,
+    );
+
+    test('costs nothing the second time', () {
+      final cache = WarningPolygonCache();
+      final first = cache.of(at(now));
+
+      // Identity, not equality: a second decode would build new lists.
+      expect(identical(cache.of(at(now)), first), isTrue);
+    });
+
+    test('a warning the feed rewrote is decoded again', () {
+      final cache = WarningPolygonCache();
+      final first = cache.of(at(now));
+
+      expect(
+        identical(cache.of(at(now.add(const Duration(minutes: 1)))), first),
+        isFalse,
+      );
+    });
+
+    test('a warning that has ended is forgotten', () {
+      final cache = WarningPolygonCache();
+      final first = cache.of(at(now));
+
+      cache.retain(const []);
+
+      expect(identical(cache.of(at(now)), first), isFalse);
+    });
+
+    test('a warning still in the feed survives a filter being toggled', () {
+      final cache = WarningPolygonCache();
+      final live = at(now);
+      final first = cache.of(live);
+
+      // What the screen does on every rebuild: hand over everything the
+      // feed holds, not what the filter left of it.
+      cache.retain([live]);
+
+      expect(identical(cache.of(live), first), isTrue);
+    });
+  });
 }
