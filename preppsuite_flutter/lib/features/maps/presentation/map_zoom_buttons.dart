@@ -58,19 +58,27 @@ class MapZoomButtons extends StatelessWidget {
         child: Card(
           margin: EdgeInsets.zero,
           color: theme.colorScheme.surface.withValues(alpha: 0.92),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              button(Icons.add, l10n.mapZoomIn, _step),
-              Divider(
-                height: 1,
-                thickness: 1,
-                indent: 6,
-                endIndent: 6,
-                color: theme.colorScheme.outlineVariant,
-              ),
-              button(Icons.remove, l10n.mapZoomOut, -_step),
-            ],
+          // A [Column] takes the largest width offered by its parent. Inside
+          // FlutterMap that is the entire map, so the translucent control
+          // card used to cover nearly every tile on wide windows. The buttons
+          // themselves are intentionally 48 px; make the card exactly that
+          // wide as well.
+          child: SizedBox(
+            width: 48,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                button(Icons.add, l10n.mapZoomIn, _step),
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  indent: 6,
+                  endIndent: 6,
+                  color: theme.colorScheme.outlineVariant,
+                ),
+                button(Icons.remove, l10n.mapZoomOut, -_step),
+              ],
+            ),
           ),
         ),
       ),

@@ -32,10 +32,14 @@ class OverpassShelterFeature {
 /// carrying `historic`/`disused`/`ruins`); `emergency`/`amenity=shelter`
 /// covers the (rare) modern civil-protection tagging.
 class OverpassShelterClient {
-  OverpassShelterClient({http.Client? httpClient, Duration? retryDelay})
-    : _ownsClient = httpClient == null,
-      _httpClient = httpClient ?? http.Client(),
-      _retryDelay = retryDelay ?? defaultRetryDelay;
+  OverpassShelterClient({
+    http.Client? httpClient,
+    Duration? retryDelay,
+    Duration? cacheLifetime,
+  }) : _ownsClient = httpClient == null,
+       _httpClient = httpClient ?? http.Client(),
+       _retryDelay = retryDelay ?? defaultRetryDelay,
+       _cacheLifetime = cacheLifetime ?? defaultCacheLifetime;
 
   final http.Client _httpClient;
   final bool _ownsClient;
@@ -65,13 +69,56 @@ class OverpassShelterClient {
   /// is most of the suite's running time and none of its meaning.
   static const defaultRetryDelay = Duration(seconds: 3);
 
+  /// A refresh should not turn a person pressing the button twice into two
+  /// identical public Overpass queries. Coordinates stay only in this
+  /// in-memory, per-screen cache; nothing is persisted.
+  static const defaultCacheLifetime = Duration(minutes: 2);
+
   final Duration _retryDelay;
+  final Duration _cacheLifetime;
+  final _cache = <String, _CachedShelters>{};
+  final _inFlight = <String, Future<List<OverpassShelterFeature>>>{};
 
   /// Caps the number of returned elements — a 50 km radius in a dense area
   /// could otherwise return more markers than the map can usefully show.
   static const _resultLimit = 300;
 
   Future<List<OverpassShelterFeature>> fetchShelters(
+    GeoBoundingBox bounds,
+  ) async {
+    final cacheKey = _cacheKey(bounds);
+    final cached = _cache[cacheKey];
+    if (cached != null &&
+        DateTime.now().difference(cached.savedAt) < _cacheLifetime) {
+      return cached.features;
+    }
+
+    // Flutter's HTTP requests cannot be reliably cancelled on every target.
+    // Sharing the first request is therefore both gentler to Overpass and
+    // safer than sending a replacement while the earlier request is still
+    // occupying one of its two public slots.
+    final running = _inFlight[cacheKey];
+    if (running != null) return running;
+
+    final request = _fetchShelters(bounds).then((features) {
+      _cache[cacheKey] = _CachedShelters(DateTime.now(), features);
+      return features;
+    });
+    _inFlight[cacheKey] = request;
+    return request.whenComplete(() {
+      if (identical(_inFlight[cacheKey], request)) {
+        _inFlight.remove(cacheKey);
+      }
+    });
+  }
+
+  String _cacheKey(GeoBoundingBox bounds) =>
+      '${bounds.south.toStringAsFixed(5)},'
+      '${bounds.west.toStringAsFixed(5)},'
+      '${bounds.north.toStringAsFixed(5)},'
+      '${bounds.east.toStringAsFixed(5)}';
+
+  Future<List<OverpassShelterFeature>> _fetchShelters(
     GeoBoundingBox bounds,
   ) async {
     // Overpass bbox order is (south,west,north,east).
@@ -158,6 +205,13 @@ class OverpassShelterClient {
 
     return OverpassShelterFeature(id: id, lat: lat, lon: lon, tags: tags);
   }
+}
+
+class _CachedShelters {
+  const _CachedShelters(this.savedAt, this.features);
+
+  final DateTime savedAt;
+  final List<OverpassShelterFeature> features;
 }
 
 /// An Overpass instance that would not answer, and with what.

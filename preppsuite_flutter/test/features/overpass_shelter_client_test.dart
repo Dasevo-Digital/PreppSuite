@@ -64,6 +64,24 @@ void main() {
 
   const empty = '{"version": 0.6, "elements": []}';
 
+  test(
+    'reuses a successful identical query for the short screen cache',
+    () async {
+      var calls = 0;
+      final client = OverpassShelterClient(
+        httpClient: MockClient((request) async {
+          calls++;
+          return http.Response(empty, 200);
+        }),
+      );
+
+      await client.fetchShelters(bounds);
+      await client.fetchShelters(bounds);
+
+      expect(calls, 1);
+    },
+  );
+
   test('fetchShelters reports failure on a non-200 response', () async {
     final client = OverpassShelterClient(
       retryDelay: Duration.zero,

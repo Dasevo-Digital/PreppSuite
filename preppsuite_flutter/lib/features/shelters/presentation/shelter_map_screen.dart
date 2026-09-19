@@ -153,6 +153,7 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
           ? l10n.shelterOverpassBusyMessage
           : l10n.shelterOverpassErrorMessage,
       reason: busy ? null : describeError(l10n, error),
+      transient: busy,
       l10n: l10n,
     );
   }
@@ -524,6 +525,7 @@ class _SourceFailure extends StatelessWidget {
   const _SourceFailure({
     required this.message,
     required this.reason,
+    this.transient = false,
     required this.l10n,
   });
 
@@ -532,21 +534,28 @@ class _SourceFailure extends StatelessWidget {
   /// Null where the message above already is the reason.
   final String? reason;
 
+  /// A busy public service has not made the map or already found shelters
+  /// unusable. Present it as a temporary notice rather than an alarm.
+  final bool transient;
+
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final color = transient
+        ? theme.colorScheme.tertiary
+        : theme.colorScheme.error;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(message, style: TextStyle(color: theme.colorScheme.error)),
+        Text(message, style: TextStyle(color: color)),
         if (reason != null && reason != message)
           Text(
             l10n.shelterSourceFailureReason(reason!),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.error,
+              color: color,
             ),
           ),
       ],
