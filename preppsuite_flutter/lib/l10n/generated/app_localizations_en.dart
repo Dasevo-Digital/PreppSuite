@@ -5462,7 +5462,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String start,
     String destination,
   ) {
-    return '$label: $start → $destination';
+    return '$label: $start -> $destination';
   }
 
   @override
@@ -5660,4 +5660,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hubSituationOutageKind => 'Power cut';
+
+  @override
+  String get hubFolderReportButton => 'Emergency folder as PDF';
+
+  @override
+  String get hubFolderReportTitle => 'Emergency folder';
+
+  @override
+  String get hubFolderReportIntro =>
+      'Print this and keep it away from the home: with relatives, in the vehicle or in the kit. It does not replace the original documents.';
+
+  @override
+  String get hubFolderReportFile => 'preppsuite-emergency-folder.pdf';
+
+  @override
+  String get hubFolderReportRoute => 'Route';
+
+  @override
+  String get hubFolderReportPlaces => 'Important places';
+
+  @override
+  String get hubFolderReportAutonomy => 'Self-sufficiency';
 }

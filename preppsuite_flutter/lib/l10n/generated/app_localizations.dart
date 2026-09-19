@@ -9226,7 +9226,7 @@ abstract class AppLocalizations {
   /// No description provided for @hubBriefingEvacuationLine.
   ///
   /// In en, this message translates to:
-  /// **'{label}: {start} → {destination}'**
+  /// **'{label}: {start} -> {destination}'**
   String hubBriefingEvacuationLine(
     String label,
     String start,
@@ -9556,6 +9556,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Power cut'**
   String get hubSituationOutageKind;
+
+  /// No description provided for @hubFolderReportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency folder as PDF'**
+  String get hubFolderReportButton;
+
+  /// No description provided for @hubFolderReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency folder'**
+  String get hubFolderReportTitle;
+
+  /// No description provided for @hubFolderReportIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Print this and keep it away from the home: with relatives, in the vehicle or in the kit. It does not replace the original documents.'**
+  String get hubFolderReportIntro;
+
+  /// No description provided for @hubFolderReportFile.
+  ///
+  /// In en, this message translates to:
+  /// **'preppsuite-emergency-folder.pdf'**
+  String get hubFolderReportFile;
+
+  /// No description provided for @hubFolderReportRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get hubFolderReportRoute;
+
+  /// No description provided for @hubFolderReportPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Important places'**
+  String get hubFolderReportPlaces;
+
+  /// No description provided for @hubFolderReportAutonomy.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-sufficiency'**
+  String get hubFolderReportAutonomy;
 }
 
 class _AppLocalizationsDelegate

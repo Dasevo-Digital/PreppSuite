@@ -5490,7 +5490,7 @@ class AppLocalizationsDe extends AppLocalizations {
     String start,
     String destination,
   ) {
-    return '$label: $start → $destination';
+    return '$label: $start -> $destination';
   }
 
   @override
@@ -5688,4 +5688,26 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get hubSituationOutageKind => 'Stromausfall';
+
+  @override
+  String get hubFolderReportButton => 'Notfallordner als PDF';
+
+  @override
+  String get hubFolderReportTitle => 'Notfallordner';
+
+  @override
+  String get hubFolderReportIntro =>
+      'Zum Ausdrucken und außerhalb der Wohnung aufbewahren: bei Verwandten, im Fahrzeug oder im Notgepäck. Ersetzt keine Originaldokumente.';
+
+  @override
+  String get hubFolderReportFile => 'preppsuite-notfallordner.pdf';
+
+  @override
+  String get hubFolderReportRoute => 'Weg';
+
+  @override
+  String get hubFolderReportPlaces => 'Wichtige Orte';
+
+  @override
+  String get hubFolderReportAutonomy => 'Autarkie';
 }

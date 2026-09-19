@@ -471,6 +471,33 @@ import, only entries the manifest itself names are extracted. Size and
 sha256 are checked after every download, and a file that fails is deleted
 rather than kept under its final name.
 
+**There is one folder, and it is a document, not five exports.** This
+app is built on the assumption that the device may be gone — that is why
+the database is local, why the maps download and why the knowledge
+archive is offline. Paper is the last fallback under all of it, and it
+used to come in five separate exports on five separate screens, each
+partial, with the household expected to know all five existed. The crisis
+hub even asked whether copies of the important papers were ready and then
+gave no help answering. `emergency_folder_report.dart` is that help, and
+it sits behind exactly that question.
+
+Two things it deliberately leaves out: the possessions list is for an
+insurer and belongs in another drawer, and the missing-equipment report
+is a shopping list, not a record. Empty sections print as empty rather
+than vanishing, because a folder that shows its own gaps is one somebody
+can finish. The emergency cards are asked about every time and never
+remembered, exactly as `EmergencyPlanReport` argues; `emergencyCardRows`
+is shared between the two so the rule that an empty field is left off the
+sheet cannot drift apart.
+
+**The bundled font is a subset, and U+2192 is not in it.** `tool/font_instance.py`
+cuts NotoSans down, and an arrow written into a PDF prints as nothing at
+all — silently. The crisis briefing had been shipping an invisible one in
+every evacuation line. PDF text uses `->`; the screen, which has the
+system font, may keep the real arrow. Measured with a probe over the
+bundled asset: U+2013, U+2014, U+00B7, U+00BB, U+203A and U+2026 are all
+present, U+2192 alone is not.
+
 **The app reports what is happening; the household decides what to do
 about it.** "Crisis mode" used to be a switch on one screen that scaled
 that screen's text by a quarter, while the app already knew when

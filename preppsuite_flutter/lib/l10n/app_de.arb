@@ -1631,7 +1631,7 @@
   "hubBriefingRadioLine": "{station}: {band} {frequency} · {receiver}",
   "@hubBriefingRadioLine": {"placeholders": {"station": {"type": "String"}, "band": {"type": "String"}, "frequency": {"type": "String"}, "receiver": {"type": "String"}}},
   "hubBriefingEvacuation": "Evakuierung",
-  "hubBriefingEvacuationLine": "{label}: {start} → {destination}",
+  "hubBriefingEvacuationLine": "{label}: {start} -> {destination}",
   "@hubBriefingEvacuationLine": {"placeholders": {"label": {"type": "String"}, "start": {"type": "String"}, "destination": {"type": "String"}}},
   "hubBriefingPdfFile": "preppsuite-notfallbriefing.pdf",
   "hubAnalogTitle": "Analoger Fallback",
@@ -1692,5 +1692,12 @@
   "@hubSituationMoreWarnings": {"placeholders": {"count": {"type": "int"}}},
   "hubSituationCrisisMode": "Größere Darstellung einschalten",
   "hubSituationLog": "Im Protokoll festhalten",
-  "hubSituationOutageKind": "Stromausfall"
+  "hubSituationOutageKind": "Stromausfall",
+  "hubFolderReportButton": "Notfallordner als PDF",
+  "hubFolderReportTitle": "Notfallordner",
+  "hubFolderReportIntro": "Zum Ausdrucken und außerhalb der Wohnung aufbewahren: bei Verwandten, im Fahrzeug oder im Notgepäck. Ersetzt keine Originaldokumente.",
+  "hubFolderReportFile": "preppsuite-notfallordner.pdf",
+  "hubFolderReportRoute": "Weg",
+  "hubFolderReportPlaces": "Wichtige Orte",
+  "hubFolderReportAutonomy": "Autarkie"
 }

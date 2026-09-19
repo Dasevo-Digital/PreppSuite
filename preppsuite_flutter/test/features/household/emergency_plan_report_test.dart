@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io' show ZLibCodec;
 import 'dart:typed_data';
 
 import 'package:drift/drift.dart' show Value;
@@ -8,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:preppsuite_flutter/features/household/application/emergency_plan_report.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
+
+import '../../pdf_text.dart';
 
 /// The paper copy of the household's agreement.
 ///
@@ -72,36 +72,6 @@ void main() {
     updatedAt: DateTime.utc(2026),
     dirty: false,
   );
-
-  /// Everything printed on the page, as one searchable string.
-  ///
-  /// The content streams are Flate-compressed in the real output, so they
-  /// are inflated here rather than the compression being switched off for
-  /// the test — the point is to read what actually leaves the app.
-  ///
-  /// PDF splits a line into several literals for kerning, so 'Familie
-  /// Muster' arrives as two. They are joined back with spaces, which is
-  /// close enough to ask whether a value reached the paper.
-  String textIn(Uint8List pdf) {
-    final raw = latin1.decode(pdf, allowInvalid: true);
-    final parts = <String>[];
-
-    for (final match in RegExp(r'stream\r?\n').allMatches(raw)) {
-      final end = raw.indexOf('endstream', match.end);
-      if (end < 0) continue;
-      final List<int> inflated;
-      try {
-        inflated = ZLibCodec().decode(pdf.sublist(match.end, end));
-      } on Object {
-        continue;
-      }
-      final text = latin1.decode(inflated, allowInvalid: true);
-      for (final literal in RegExp(r'\(([^()]*)\)').allMatches(text)) {
-        parts.add(literal.group(1)!);
-      }
-    }
-    return parts.join(' ');
-  }
 
   Future<Uint8List> render({List<HouseholdMember> members = const []}) {
     return const EmergencyPlanReport().build(

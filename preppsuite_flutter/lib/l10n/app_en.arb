@@ -2438,7 +2438,7 @@
   "hubBriefingRadioLine": "{station}: {band} {frequency} · {receiver}",
   "@hubBriefingRadioLine": {"placeholders": {"station": {"type": "String"}, "band": {"type": "String"}, "frequency": {"type": "String"}, "receiver": {"type": "String"}}},
   "hubBriefingEvacuation": "Evacuation",
-  "hubBriefingEvacuationLine": "{label}: {start} → {destination}",
+  "hubBriefingEvacuationLine": "{label}: {start} -> {destination}",
   "@hubBriefingEvacuationLine": {"placeholders": {"label": {"type": "String"}, "start": {"type": "String"}, "destination": {"type": "String"}}},
   "hubBriefingPdfFile": "preppsuite-emergency-briefing.pdf",
   "hubAnalogTitle": "On paper",
@@ -2499,5 +2499,12 @@
   "@hubSituationMoreWarnings": {"placeholders": {"count": {"type": "int"}}},
   "hubSituationCrisisMode": "Switch to the larger display",
   "hubSituationLog": "Record it in the log",
-  "hubSituationOutageKind": "Power cut"
+  "hubSituationOutageKind": "Power cut",
+  "hubFolderReportButton": "Emergency folder as PDF",
+  "hubFolderReportTitle": "Emergency folder",
+  "hubFolderReportIntro": "Print this and keep it away from the home: with relatives, in the vehicle or in the kit. It does not replace the original documents.",
+  "hubFolderReportFile": "preppsuite-emergency-folder.pdf",
+  "hubFolderReportRoute": "Route",
+  "hubFolderReportPlaces": "Important places",
+  "hubFolderReportAutonomy": "Self-sufficiency"
 }

@@ -180,7 +180,7 @@ class EmergencyPlanReport {
                   fontWeight: pw.FontWeight.bold,
                 ),
               ),
-              for (final row in _cardRows(member, strings.fields))
+              for (final row in emergencyCardRows(member, strings.fields))
                 pw.Bullet(text: '${row.label}: ${row.value}'),
               pw.SizedBox(height: 10),
             ],
@@ -190,33 +190,37 @@ class EmergencyPlanReport {
     );
     return document.save();
   }
+}
 
-  /// The filled-in fields of one card, in reading order.
-  ///
-  /// Empty fields are left out rather than printed as blanks: a card with
-  /// "Allergien: —" on it invites the reader to believe somebody checked,
-  /// and on a sheet handed to a paramedic that is worse than silence.
-  static List<({String label, String value})> _cardRows(
-    HouseholdMember member,
-    EmergencyCardFieldStrings fields,
-  ) {
-    final rows = <({String label, String value})>[];
-    void add(String label, String? value) {
-      if (value == null || value.trim().isEmpty) return;
-      rows.add((label: label, value: value.trim()));
-    }
-
-    if (member.birthYear != null) {
-      add(fields.birthYear, '${member.birthYear}');
-    }
-    add(fields.bloodType, member.bloodType);
-    add(fields.allergies, member.allergies);
-    add(fields.medication, member.medication);
-    add(fields.conditions, member.conditions);
-    add(fields.insurance, member.insurance);
-    add(fields.doctor, member.doctor);
-    add(fields.contact, member.emergencyContact);
-    add(fields.notes, member.notes);
-    return rows;
+/// The filled-in fields of one card, in reading order.
+///
+/// Empty fields are left out rather than printed as blanks: a card with
+/// "Allergien: —" on it invites the reader to believe somebody checked,
+/// and on a sheet handed to a paramedic that is worse than silence.
+///
+/// Top-level and shared, because the emergency folder prints the same
+/// cards. Two copies of this rule would be two chances for one of them
+/// to start printing the blanks.
+List<({String label, String value})> emergencyCardRows(
+  HouseholdMember member,
+  EmergencyCardFieldStrings fields,
+) {
+  final rows = <({String label, String value})>[];
+  void add(String label, String? value) {
+    if (value == null || value.trim().isEmpty) return;
+    rows.add((label: label, value: value.trim()));
   }
+
+  if (member.birthYear != null) {
+    add(fields.birthYear, '${member.birthYear}');
+  }
+  add(fields.bloodType, member.bloodType);
+  add(fields.allergies, member.allergies);
+  add(fields.medication, member.medication);
+  add(fields.conditions, member.conditions);
+  add(fields.insurance, member.insurance);
+  add(fields.doctor, member.doctor);
+  add(fields.contact, member.emergencyContact);
+  add(fields.notes, member.notes);
+  return rows;
 }

@@ -2,6 +2,7 @@ import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
@@ -9,12 +10,16 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../energy/application/energy_store.dart';
 import '../../energy/application/outage_store.dart';
 import '../../warnings/application/warning_providers.dart';
+import '../../household/application/emergency_plan_report.dart';
+import '../../household/application/household_member_controller.dart';
+import '../../household/application/household_plan_controller.dart';
 import '../../household/application/household_providers.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/application/supply_calculator.dart';
 import '../../inventory/presentation/prepper_recipes_screen.dart';
 import '../application/autonomy_overview.dart';
 import '../application/current_situation.dart';
+import '../application/emergency_folder_report.dart';
 import '../application/preparedness_hub_store.dart';
 
 /// Private, offline planning tools. The screen intentionally has no map or
@@ -195,7 +200,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
                     _l10n.hubFolderTitle,
                     Icons.folder_copy_outlined,
                     _l10n.hubFolderHint,
-                    _folder(),
+                    _folder(reaches),
                   ),
                   _section(
                     _l10n.hubCommunicationTitle,
@@ -832,7 +837,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
     ],
   );
 
-  Widget _folder() {
+  Widget _folder(List<AutonomyReach> reaches) {
     final folder = _data.folder;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -883,9 +888,128 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
             ),
           ),
         ),
+        // The question above is "are the copies ready?". Until now the
+        // app asked it and gave no help answering: the material was
+        // spread over five separate exports on five separate screens.
+        Align(
+          alignment: Alignment.centerLeft,
+          child: FilledButton.icon(
+            onPressed: () => _exportFolder(reaches),
+            icon: const Icon(Icons.folder_special_outlined),
+            label: Text(_l10n.hubFolderReportButton),
+          ),
+        ),
       ],
     );
   }
+
+  /// The folder, as one document.
+  ///
+  /// The emergency cards are asked about every time, never remembered —
+  /// the same trade `EmergencyPlanReport` spells out: a printed card is
+  /// the copy that still works when the phone is dead, and it is a loose
+  /// sheet naming somebody's blood group and medication.
+  Future<void> _exportFolder(List<AutonomyReach> reaches) async {
+    final members =
+        ref.read(householdMembersProvider(widget.householdId)).value ??
+        const [];
+    var withCards = false;
+    if (members.isNotEmpty) {
+      final answer = await _askAboutCards(members.length);
+      if (answer == null) return;
+      withCards = answer;
+    }
+    if (!mounted) return;
+    final locale = _l10n.localeName;
+    final plan = ref.read(householdPlanProvider(widget.householdId)).value;
+    final profile = ref.read(householdProfileProvider).value;
+    final l10n = _l10n;
+    final autonomy = [
+      for (final reach in reaches)
+        (
+          label: _resourceName(reach.resource),
+          value: switch (reach.days) {
+            final days? => l10n.hubAutonomyDays(days),
+            _ => l10n.hubAutonomyOpen,
+          },
+        ),
+    ];
+    await Printing.layoutPdf(
+      name: l10n.hubFolderReportFile,
+      onLayout: (_) => const EmergencyFolderReport().build(
+        householdName: profile?.name ?? '',
+        plan: plan,
+        members: withCards ? members : const [],
+        hub: _data,
+        autonomy: autonomy,
+        strings: EmergencyFolderReportStrings(
+          title: l10n.hubFolderReportTitle,
+          generatedOn: l10n.pdfGeneratedOn(
+            DateFormat.yMMMMd(locale).add_Hm().format(DateTime.now()),
+          ),
+          intro: l10n.hubFolderReportIntro,
+          empty: l10n.emergencyPlanPdfEmpty,
+          meetingPoints: l10n.emergencyPlanPdfMeetingPoints,
+          contact: l10n.emergencyPlanPdfContact,
+          contactPoint: l10n.householdPlanContactPoint,
+          equipment: l10n.emergencyPlanPdfEquipment,
+          notes: l10n.notesLabel,
+          cards: l10n.emergencyPlanPdfCards,
+          cardsWarning: l10n.emergencyPlanPdfCardsWarning,
+          fields: EmergencyCardFieldStrings(
+            birthYear: l10n.emergencyCardBirthYear,
+            bloodType: l10n.emergencyCardBloodType,
+            allergies: l10n.emergencyCardAllergies,
+            medication: l10n.emergencyCardMedication,
+            conditions: l10n.emergencyCardConditions,
+            insurance: l10n.emergencyCardInsurance,
+            doctor: l10n.emergencyCardDoctor,
+            contact: l10n.emergencyCardContact,
+            notes: l10n.emergencyCardNotes,
+          ),
+          evacuation: l10n.hubEvacuationTitle,
+          evacuationRoute: l10n.hubFolderReportRoute,
+          evacuationPlaces: l10n.hubFolderReportPlaces,
+          communication: l10n.hubCommunicationTitle,
+          radio: l10n.hubRadioTitle,
+          autonomy: l10n.hubFolderReportAutonomy,
+          folder: l10n.hubFolderTitle,
+          folderCopiesReady: l10n.hubFolderCopies,
+          folderTakeAlong: l10n.hubFolderTakeAlong,
+        ),
+      ),
+    );
+  }
+
+  /// True to include the cards, false for the folder alone, null to
+  /// abandon the export.
+  Future<bool?> _askAboutCards(int count) => showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      icon: const Icon(Icons.warning_amber_outlined),
+      title: Text(_l10n.emergencyPlanCardsAskTitle),
+      content: Text(_l10n.emergencyPlanCardsAskBody(count)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: Text(
+            MaterialLocalizations.of(dialogContext).cancelButtonLabel,
+          ),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, false),
+          child: Text(_l10n.emergencyPlanCardsAskWithout),
+        ),
+        // Not emphasised: including them is the more consequential of
+        // the two, and the emphasised button is the one people press
+        // without reading.
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext, true),
+          child: Text(_l10n.emergencyPlanCardsAskWith),
+        ),
+      ],
+    ),
+  );
 
   Widget _maintenance() => Column(
     children: [
