@@ -101,4 +101,17 @@ void main() {
     );
     expect(PreparednessHubData.fromJson(null).events, isEmpty);
   });
+
+  test('does not hide a missing resource behind the other ranges', () {
+    const snapshot = AutonomySnapshot(
+      waterDays: 8,
+      foodDays: 12,
+      medicineDays: 5,
+      energyDays: 0,
+      hygieneDays: 10,
+    );
+
+    expect(snapshot.limitingDays, 0);
+    expect(snapshot.bottleneck, 'Energie');
+  });
 }

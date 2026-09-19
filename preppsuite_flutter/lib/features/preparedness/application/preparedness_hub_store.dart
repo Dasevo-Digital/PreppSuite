@@ -245,15 +245,14 @@ class AutonomySnapshot {
     ('Energie', energyDays),
     ('Hygiene', hygieneDays),
   ];
+
+  /// A missing category is an open planning gap, not a category that can be
+  /// ignored while claiming the range of the other supplies as the result.
   int get limitingDays => entries
       .map((entry) => entry.$2)
-      .where((days) => days > 0)
-      .fold<int>(
-        0,
-        (lowest, days) => lowest == 0 || days < lowest ? days : lowest,
-      );
+      .fold<int>(3650, (lowest, days) => days < lowest ? days : lowest);
   String? get bottleneck => entries
-      .where((entry) => entry.$2 == limitingDays && limitingDays > 0)
+      .where((entry) => entry.$2 == limitingDays)
       .map((entry) => entry.$1)
       .firstOrNull;
   AutonomySnapshot copyWith({

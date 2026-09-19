@@ -318,8 +318,8 @@ class _PreparednessHubScreenState extends State<PreparednessHubScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (limiting == 0)
-          const Text(
-            'Noch keine Reichweite hinterlegt. Werte nur nach einer tatsächlichen Bestands- und Verbrauchsprüfung eintragen.',
+          Text(
+            'Autarkie noch unvollständig. Offen: ${snapshot.entries.where((entry) => entry.$2 == 0).map((entry) => entry.$1).join(', ')}.',
           )
         else
           Text(
