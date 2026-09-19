@@ -488,6 +488,28 @@ folder. Either that is turned off on the host (one way only: turning it
 back on needs a reinstall of Windows) or the binaries are signed. Until
 then the Windows launch check cannot run on this hardware.
 
+**`CompanyName` stays `com.example` until a Windows build can be
+launched, and that is a decision, not an oversight.** On Windows
+`path_provider` builds its directory out of the executable's version
+resource: `%APPDATA%\<CompanyName>\<ProductName>`, from `Runner.rc`, with
+no fallback. Changing that string moves the household database, the
+product photos and the WebView2 working directory in one step, and the
+takeover that exists today only covers the documents folder of a much
+older version, not one Application Support path to another.
+
+So the change needs a second legacy candidate — `%APPDATA%\com.example\
+PreppSuite` — and it needs to be *launched* against a real household
+before it ships, because a takeover that silently does nothing leaves
+somebody with an empty app and their data still on disk under a name
+they will never look for. Smart App Control makes that run impossible
+here today, so the change waits for the certificate rather than going
+out unverified. When it does go out, the name is **MMDM**, in
+`CompanyName` and in `LegalCopyright`, and the takeover ships in the
+same release — not after it.
+
+The cost of waiting is known and accepted: every release adds installs
+that the takeover will later have to find.
+
 ## Feature layout
 
 ```
