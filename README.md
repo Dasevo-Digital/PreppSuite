@@ -164,6 +164,16 @@ Personen nie dieselbe Datei beschreiben. Bei gleichzeitiger Änderung
 derselben Zeile entscheidet eine feste Versionsreihenfolge. Einzelheiten samt Grenzen in
 [`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md).
 
+**Beitreten kommt vor dem Anlegen.** Die Ersteinrichtung fragt zuerst, ob
+es den Haushalt schon auf einem anderen Gerät gibt, und bietet drei Wege:
+neu anlegen, einen gemeinsamen Ordner öffnen oder den QR-Code des anderen
+Geräts abfilmen. Das ist kein bequemerer Ort für dieselbe Sache, sondern
+der einzige ungefährliche: Beitreten heißt, die fremde Haushaltskennung zu
+übernehmen und **jede eigene Zeile darauf umzustempeln**. Auf einem Gerät,
+das gerade erst eingerichtet wird, gibt es nichts umzustempeln. Später
+muss die App fragen, was mit zwei verschiedenen Beständen geschehen soll –
+und Zusammenführen lässt sich nicht rückgängig machen.
+
 **Ohne Netz übertragen.** Zwei Wege für den Fall, dass es keinen
 gemeinsamen Ordner gibt. Im selben Netz – WLAN, Hotspot, Campingplatz –
 zeigt ein Gerät **einen** QR-Code mit Adresse und frischem Schlüssel; das
@@ -176,6 +186,19 @@ QR-Bildern in einer Schleife, das andere filmt sie ab. Das braucht nichts
 außer einem Bildschirm und einer Kamera. Ein Haushalt mit zweihundert
 Vorratszeilen sind etwa vier Bilder. Einzelheiten in
 [`docs/ohne-netz-uebertragen.md`](docs/ohne-netz-uebertragen.md).
+
+Beide Wege bringen seit 1.9.2 mehr mit als die Zeilen: **die Einstellungen
+des Haushalts** – Profil, Region, Energieplan, Messstationen, Erinnerungs-
+fristen. Übernommen werden sie nur von einem Gerät in der Ersteinrichtung;
+ein Gerät, das schon in Benutzung ist, behält seine eigenen. Die
+Geräteeinstellungen bleiben, wo sie sind: die Gerätekennung, alle lokalen
+Dateipfade und der Karten-Schlüssel aus dem Schlüsselbund reisen nicht mit.
+
+**Die Fotos gehen nur über die Direktübergabe** – den Weg über das örtliche
+Netz. In der Bilderfolge wären es je Foto rund zweihundert zusätzliche
+Einzelbilder zum Abfilmen, und im gemeinsamen Ordner würden dieselben Bytes
+bei jedem Abgleich neu geschrieben. Die Gegenseite nennt, was sie schon
+hat, also trägt eine zweite Übergabe nichts doppelt.
 
 **Stromausfall.** Eine Uhr für das, was im Dunkeln wirklich gefragt wird:
 wie lange Kühlschrank und Gefriergerät noch halten. Vier Stunden, 48 bei
@@ -459,9 +482,10 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   Links und Bilder, ohne Skripte und ohne Formelsatz. Beides ist unter
   Einstellungen wählbar. Warum die Bibliothek nicht einfach beiliegt,
   steht in [`docs/wissen-offline.md`](docs/wissen-offline.md).
-- Fotos zu Vorratsartikeln bleiben auf dem Gerät, auf dem sie aufgenommen
-  wurden – im gemeinsamen Ordner liegen nur die Daten, nicht die Bilder.
-  Auf einem mitgeführten Datenträger wandern sie dagegen mit.
+- Fotos zu Vorratsartikeln liegen im gemeinsamen Ordner **nicht** – dort
+  stehen nur die Daten. Auf einem mitgeführten Datenträger wandern sie mit,
+  und seit 1.9.2 gehen sie auch über die Direktübergabe im örtlichen Netz
+  auf ein zweites Gerät. Über die QR-Bilderfolge gehen sie nicht.
 - Veröffentlicht werden **macOS, Windows, Linux und Android**, jeweils aus
   einem Bau auf der echten Maschine. Die Android-Pakete tragen seit 0.11.0
   den eigenen Schlüssel mit der Signaturkette; die Desktop-Bauten sind
