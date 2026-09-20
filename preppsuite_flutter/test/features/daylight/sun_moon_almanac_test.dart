@@ -21,8 +21,12 @@ void main() {
   /// The equation of time in minutes, read out of the app by way of the
   /// one place it surfaces: solar noon on the Greenwich meridian.
   double equationOfTime(DateTime day) {
-    final noon = sunTimesFor(day, 51.4779, 0.0, zoneOffset: Duration.zero)
-        .solarNoon!;
+    final noon = sunTimesFor(
+      day,
+      51.4779,
+      0.0,
+      zoneOffset: Duration.zero,
+    ).solarNoon!;
     return 720 - (noon.hour * 60 + noon.minute + noon.second / 60);
   }
 
@@ -51,10 +55,12 @@ void main() {
 
     test('Berlin gets the day lengths its solstices are known for', () {
       const zone = Duration(hours: 1);
-      Duration lengthOn(int month, int day) =>
-          sunTimesFor(DateTime(2026, month, day), 52.52, 13.405,
-                  zoneOffset: zone)
-              .dayLength!;
+      Duration lengthOn(int month, int day) => sunTimesFor(
+        DateTime(2026, month, day),
+        52.52,
+        13.405,
+        zoneOffset: zone,
+      ).dayLength!;
 
       // 16 h 50 min and 7 h 39 min, as every Berlin calendar prints them.
       expect(lengthOn(6, 21).inMinutes, closeTo(16 * 60 + 50, 2));
@@ -67,16 +73,23 @@ void main() {
       expect(lengthOn(3, 20).inMinutes, closeTo(12 * 60 + 10, 2));
       expect(lengthOn(9, 23).inMinutes, closeTo(12 * 60 + 9, 2));
       expect(
-        sunTimesFor(DateTime(2026, 3, 20), 0, 0, zoneOffset: Duration.zero)
-            .dayLength!
-            .inMinutes,
+        sunTimesFor(
+          DateTime(2026, 3, 20),
+          0,
+          0,
+          zoneOffset: Duration.zero,
+        ).dayLength!.inMinutes,
         closeTo(12 * 60 + 6, 2),
       );
     });
 
     test('the events of a day come in the order they are read in', () {
-      final day = sunTimesFor(DateTime(2026, 4, 3), 52.52, 13.405,
-          zoneOffset: const Duration(hours: 2));
+      final day = sunTimesFor(
+        DateTime(2026, 4, 3),
+        52.52,
+        13.405,
+        zoneOffset: const Duration(hours: 2),
+      );
       final order = [
         day.nauticalDawn!,
         day.civilDawn!,
@@ -104,10 +117,9 @@ void main() {
     /// position series, so it cannot agree with either of the two by
     /// accident.
     DateTime newMoon(int k) => DateTime.fromMillisecondsSinceEpoch(
-          (((2451550.09766 + 29.530588861 * k) - 2440587.5) * 86400000)
-              .round(),
-          isUtc: true,
-        );
+      (((2451550.09766 + 29.530588861 * k) - 2440587.5) * 86400000).round(),
+      isUtc: true,
+    );
 
     test('new and full moons fall where the phase formula puts them', () {
       var checked = 0;
@@ -146,8 +158,12 @@ void main() {
       for (final (name, latitude, longitude) in places) {
         for (var day = 0; day < 365; day += 7) {
           final date = DateTime(2026, 1, 1).add(Duration(days: day));
-          final app = moonFor(date, latitude, longitude,
-              zoneOffset: Duration.zero);
+          final app = moonFor(
+            date,
+            latitude,
+            longitude,
+            zoneOffset: Duration.zero,
+          );
           final reference = referenceMoonEvents(date, latitude, longitude);
 
           for (final (ours, theirs) in [
@@ -158,8 +174,15 @@ void main() {
             compared++;
             // A zero offset means the returned fields are UTC; they have
             // to be reassembled as such before anything is subtracted.
-            final asUtc = DateTime.utc(ours.year, ours.month, ours.day,
-                ours.hour, ours.minute, ours.second, ours.millisecond);
+            final asUtc = DateTime.utc(
+              ours.year,
+              ours.month,
+              ours.day,
+              ours.hour,
+              ours.minute,
+              ours.second,
+              ours.millisecond,
+            );
             final off = asUtc.difference(theirs).inMinutes.abs();
             if (off > worst) {
               worst = off;
