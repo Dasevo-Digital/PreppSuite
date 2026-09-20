@@ -6,6 +6,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/first_aid_guides.dart';
 import 'first_aid_guide_screen.dart';
 import 'first_aid_videos_screen.dart';
+import 'knowledge_check_screen.dart';
 
 /// The list of instructions.
 ///
@@ -96,7 +97,24 @@ class _FirstAidScreenState extends ConsumerState<FirstAidScreen> {
                     children: [
                       if (searching)
                         for (final guide in matches) _GuideTile(guide: guide)
-                      else
+                      else ...[
+                        // Above the guides, because reading one again is
+                        // not how anybody finds out what they have
+                        // forgotten.
+                        Card(
+                          child: ListTile(
+                            leading: const Icon(Icons.quiz_outlined),
+                            title: Text(l10n.knowledgeCheckTitle),
+                            subtitle: Text(l10n.knowledgeCheckIntro),
+                            trailing: const Icon(Icons.chevron_right),
+                            isThreeLine: true,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => const KnowledgeCheckScreen(),
+                              ),
+                            ),
+                          ),
+                        ),
                         for (final group in FirstAidGroup.values) ...[
                           Padding(
                             padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
@@ -108,6 +126,7 @@ class _FirstAidScreenState extends ConsumerState<FirstAidScreen> {
                           for (final guide in matches)
                             if (guide.group == group) _GuideTile(guide: guide),
                         ],
+                      ],
                       const SizedBox(height: 16),
                       Text(
                         l10n.firstAidDisclaimer,

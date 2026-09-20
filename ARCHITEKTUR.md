@@ -1243,6 +1243,24 @@ switched off. Measured on a 600-character frame, the default paint left
 a value a decoder can read -- a code that looks perfectly fine and does
 not scan.
 
+### The knowledge check must not know anything the guides do not
+
+`first_aid/application/knowledge_check_*.dart` asks back about first aid,
+because reading a guide again is not how anybody finds out what they have
+forgotten. Every question names the guide it is answerable from, and its
+explanation is **one caution or one step of that guide, word for word** --
+not a paraphrase and not an addition. A test holds every question in both
+languages to that, and it earns its keep: it caught four German and
+sixteen English explanations where a sentence of reasoning had crept in
+that no guide contains. The moment an explanation may say "because...",
+the quiz has started giving medical advice of its own, arrived at by
+whoever wrote the question.
+
+The result is stored per device and deliberately **not** in the
+household's carried settings, unlike the drill progress beside it.
+Practising an evacuation is something a household does together; knowing
+that a tourniquet stays on is something a person knows or does not.
+
 ### Wide windows
 
 **A block is all-or-nothing, and that is a trap on a phone.** With one

@@ -8504,6 +8504,84 @@ abstract class AppLocalizations {
   /// **'For example home, work or a relative.'**
   String get settingsRegionLabelHelper;
 
+  /// No description provided for @knowledgeCheckTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your knowledge'**
+  String get knowledgeCheckTitle;
+
+  /// No description provided for @knowledgeCheckIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'First aid goes quiet without telling you. A few questions show what still holds — and what does not.'**
+  String get knowledgeCheckIntro;
+
+  /// No description provided for @knowledgeCheckProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {number} of {total}'**
+  String knowledgeCheckProgress(int number, int total);
+
+  /// No description provided for @knowledgeCheckRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Right.'**
+  String get knowledgeCheckRight;
+
+  /// No description provided for @knowledgeCheckWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Not quite.'**
+  String get knowledgeCheckWrong;
+
+  /// No description provided for @knowledgeCheckReadGuide.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the guide'**
+  String get knowledgeCheckReadGuide;
+
+  /// No description provided for @knowledgeCheckNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get knowledgeCheckNext;
+
+  /// No description provided for @knowledgeCheckFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get knowledgeCheckFinish;
+
+  /// No description provided for @knowledgeCheckResult.
+  ///
+  /// In en, this message translates to:
+  /// **'{right} of {total} right.'**
+  String knowledgeCheckResult(int right, int total);
+
+  /// No description provided for @knowledgeCheckHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'{held} of {total} questions hold.'**
+  String knowledgeCheckHeld(int held, int total);
+
+  /// No description provided for @knowledgeCheckComeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Come back in a few months. Not tomorrow — that is not what this is for.'**
+  String get knowledgeCheckComeBack;
+
+  /// No description provided for @knowledgeCheckReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Worth reading again'**
+  String get knowledgeCheckReview;
+
+  /// No description provided for @knowledgeCheckAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Another round'**
+  String get knowledgeCheckAgain;
+
   /// No description provided for @mapPlacesImport.
   ///
   /// In en, this message translates to:

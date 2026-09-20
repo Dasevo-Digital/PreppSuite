@@ -5058,6 +5058,53 @@ class AppLocalizationsDe extends AppLocalizations {
       'Zum Beispiel Zuhause, Arbeit oder Angehörige.';
 
   @override
+  String get knowledgeCheckTitle => 'Wissen prüfen';
+
+  @override
+  String get knowledgeCheckIntro =>
+      'Erste Hilfe verlernt sich still. Ein paar Fragen zeigen, was noch sitzt — und was nicht.';
+
+  @override
+  String knowledgeCheckProgress(int number, int total) {
+    return 'Frage $number von $total';
+  }
+
+  @override
+  String get knowledgeCheckRight => 'Richtig.';
+
+  @override
+  String get knowledgeCheckWrong => 'Nicht ganz.';
+
+  @override
+  String get knowledgeCheckReadGuide => 'Anleitung lesen';
+
+  @override
+  String get knowledgeCheckNext => 'Weiter';
+
+  @override
+  String get knowledgeCheckFinish => 'Fertig';
+
+  @override
+  String knowledgeCheckResult(int right, int total) {
+    return '$right von $total richtig.';
+  }
+
+  @override
+  String knowledgeCheckHeld(int held, int total) {
+    return '$held von $total Fragen sitzen.';
+  }
+
+  @override
+  String get knowledgeCheckComeBack =>
+      'Komm in ein paar Monaten wieder. Nicht morgen — darum geht es hier nicht.';
+
+  @override
+  String get knowledgeCheckReview => 'Das würde ich noch einmal nachlesen';
+
+  @override
+  String get knowledgeCheckAgain => 'Noch eine Runde';
+
+  @override
   String get mapPlacesImport => 'Orte einlesen';
 
   @override
