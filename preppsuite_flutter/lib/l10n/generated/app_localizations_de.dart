@@ -2096,6 +2096,69 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navMap => 'Karte';
 
   @override
+  String get myPositionAction => 'Standort weitergeben';
+
+  @override
+  String get myPositionTitle => 'Mein Standort';
+
+  @override
+  String get myPositionIntro =>
+      'Lies vor, wonach gefragt wird. Eine Leitstelle verlangt meist Grad und Minuten und liest sie zurück.';
+
+  @override
+  String get myPositionOffline =>
+      'Die App rechnet das selbst aus. Es braucht kein Netz — genau dann ist es gefragt.';
+
+  @override
+  String get myPositionMeasure => 'Neu messen';
+
+  @override
+  String get myPositionCopied => 'Kopiert.';
+
+  @override
+  String myPositionAccuracy(int metres) {
+    return 'Der Empfänger meldet ±$metres m.';
+  }
+
+  @override
+  String get myPositionAccuracyPoor =>
+      'Das reicht nicht bis zur Hausnummer. Unter freiem Himmel noch einmal messen, und der Leitstelle die Ungenauigkeit mitsagen.';
+
+  @override
+  String get myPositionDms => 'Grad, Minuten, Sekunden';
+
+  @override
+  String get myPositionDmsHint =>
+      'Was eine Leitstelle am Telefon verlangt — und was sich vorlesen und mitschreiben lässt.';
+
+  @override
+  String get myPositionUtm => 'UTM';
+
+  @override
+  String get myPositionUtmHint =>
+      'Meter auf dem Gitter. Damit rechnen Rettungsdienst, Feuerwehr und THW.';
+
+  @override
+  String get myPositionMgrs => 'MGRS';
+
+  @override
+  String get myPositionMgrsHint =>
+      'Dasselbe Gitter als kurze Kennung, wie sie auf gegitterten Karten am Rand steht.';
+
+  @override
+  String get myPositionPlusCode => 'Plus Code';
+
+  @override
+  String get myPositionPlusCodeHint =>
+      'Zehn Zeichen ohne jede Karte, zum Weitergeben an jemanden, der sie eintippt.';
+
+  @override
+  String get myPositionDecimal => 'Dezimalgrad';
+
+  @override
+  String get myPositionDecimalHint => 'Was in eine Karten-App hineingeht.';
+
+  @override
   String get mapMyLocationAction => 'Mein Standort';
 
   @override

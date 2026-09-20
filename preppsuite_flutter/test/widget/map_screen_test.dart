@@ -65,6 +65,9 @@ void main() {
 
     expect(find.byTooltip('Karte herunterladen'), findsOneWidget);
     expect(find.byTooltip('Mein Standort'), findsOneWidget);
+    // Beside it and not the same thing: one centres the map, the other
+    // hands you the coordinates to read out.
+    expect(find.byTooltip('Standort weitergeben'), findsOneWidget);
   });
 
   testWidgets('the map meets the accessibility guidelines', (

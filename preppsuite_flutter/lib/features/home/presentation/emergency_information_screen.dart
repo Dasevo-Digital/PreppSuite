@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/adaptive_columns.dart';
 import '../../first_aid/application/poison_centres.dart';
+import '../../maps/presentation/my_position_screen.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../daylight/presentation/daylight_screen.dart';
 import '../../maps/presentation/nearby_screen.dart';
@@ -168,6 +169,22 @@ class _EmergencyInformationScreenState
         // width from the number it belongs to. Each heading travels with
         // what is under it.
         blocks: [
+          // First, because it is the question every one of these calls
+          // begins with and the only one this app can answer for the
+          // caller: where are you.
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.share_location_outlined),
+              title: Text(l10n.myPositionTitle),
+              subtitle: Text(l10n.myPositionDmsHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const MyPositionScreen(),
+                ),
+              ),
+            ),
+          ),
           ListTile(
             leading: const Icon(Icons.medical_services_outlined),
             title: Text(l10n.emergencyMedicalService),

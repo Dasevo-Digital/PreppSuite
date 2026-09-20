@@ -3554,6 +3554,114 @@ abstract class AppLocalizations {
   /// **'Map'**
   String get navMap;
 
+  /// No description provided for @myPositionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass on my position'**
+  String get myPositionAction;
+
+  /// No description provided for @myPositionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My position'**
+  String get myPositionTitle;
+
+  /// No description provided for @myPositionIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Read out whatever is asked for. A control room usually wants degrees and minutes, and reads them back.'**
+  String get myPositionIntro;
+
+  /// No description provided for @myPositionOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'The app works this out itself. It needs no network — which is when it is wanted.'**
+  String get myPositionOffline;
+
+  /// No description provided for @myPositionMeasure.
+  ///
+  /// In en, this message translates to:
+  /// **'Measure again'**
+  String get myPositionMeasure;
+
+  /// No description provided for @myPositionCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied.'**
+  String get myPositionCopied;
+
+  /// No description provided for @myPositionAccuracy.
+  ///
+  /// In en, this message translates to:
+  /// **'The receiver reports ±{metres} m.'**
+  String myPositionAccuracy(int metres);
+
+  /// No description provided for @myPositionAccuracyPoor.
+  ///
+  /// In en, this message translates to:
+  /// **'That will not reach a house number. Measure again under open sky, and tell the control room how rough it is.'**
+  String get myPositionAccuracyPoor;
+
+  /// No description provided for @myPositionDms.
+  ///
+  /// In en, this message translates to:
+  /// **'Degrees, minutes, seconds'**
+  String get myPositionDms;
+
+  /// No description provided for @myPositionDmsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What a control room asks for on the telephone — and what survives being read aloud and written down.'**
+  String get myPositionDmsHint;
+
+  /// No description provided for @myPositionUtm.
+  ///
+  /// In en, this message translates to:
+  /// **'UTM'**
+  String get myPositionUtm;
+
+  /// No description provided for @myPositionUtmHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Metres on a grid. Emergency services and the technical relief service work in these.'**
+  String get myPositionUtmHint;
+
+  /// No description provided for @myPositionMgrs.
+  ///
+  /// In en, this message translates to:
+  /// **'MGRS'**
+  String get myPositionMgrs;
+
+  /// No description provided for @myPositionMgrsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The same grid as one short reference, the way a gridded map labels it.'**
+  String get myPositionMgrsHint;
+
+  /// No description provided for @myPositionPlusCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus Code'**
+  String get myPositionPlusCode;
+
+  /// No description provided for @myPositionPlusCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ten characters and no map at all, for somebody who is going to type it in.'**
+  String get myPositionPlusCodeHint;
+
+  /// No description provided for @myPositionDecimal.
+  ///
+  /// In en, this message translates to:
+  /// **'Decimal degrees'**
+  String get myPositionDecimal;
+
+  /// No description provided for @myPositionDecimalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What goes into a map app.'**
+  String get myPositionDecimalHint;
+
   /// No description provided for @mapMyLocationAction.
   ///
   /// In en, this message translates to:

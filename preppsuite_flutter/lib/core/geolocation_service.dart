@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:geolocator/geolocator.dart';
+
+import '../features/maps/application/readable_position.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
@@ -75,6 +77,21 @@ class GeolocationService {
   Future<LatLng> getCurrentLatLng() async {
     final position = await _getPosition();
     return LatLng(position.latitude, position.longitude);
+  }
+
+  /// The same fix, with the one number that decides whether it is worth
+  /// reading out: how far off it may be.
+  ///
+  /// A position without its accuracy is a claim without a confidence. Ten
+  /// metres is a doorway; eight hundred is the wrong end of the village,
+  /// and the screen that reads it aloud has to be able to say which.
+  Future<ReadablePosition> getCurrentFix() async {
+    final position = await _getPosition();
+    return ReadablePosition(
+      latitude: position.latitude,
+      longitude: position.longitude,
+      accuracyMetres: position.accuracy,
+    );
   }
 
   /// Forward-geocodes a free-text place/postal code query (e.g. "38100" or

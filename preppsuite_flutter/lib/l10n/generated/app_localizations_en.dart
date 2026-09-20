@@ -2081,6 +2081,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMap => 'Map';
 
   @override
+  String get myPositionAction => 'Pass on my position';
+
+  @override
+  String get myPositionTitle => 'My position';
+
+  @override
+  String get myPositionIntro =>
+      'Read out whatever is asked for. A control room usually wants degrees and minutes, and reads them back.';
+
+  @override
+  String get myPositionOffline =>
+      'The app works this out itself. It needs no network — which is when it is wanted.';
+
+  @override
+  String get myPositionMeasure => 'Measure again';
+
+  @override
+  String get myPositionCopied => 'Copied.';
+
+  @override
+  String myPositionAccuracy(int metres) {
+    return 'The receiver reports ±$metres m.';
+  }
+
+  @override
+  String get myPositionAccuracyPoor =>
+      'That will not reach a house number. Measure again under open sky, and tell the control room how rough it is.';
+
+  @override
+  String get myPositionDms => 'Degrees, minutes, seconds';
+
+  @override
+  String get myPositionDmsHint =>
+      'What a control room asks for on the telephone — and what survives being read aloud and written down.';
+
+  @override
+  String get myPositionUtm => 'UTM';
+
+  @override
+  String get myPositionUtmHint =>
+      'Metres on a grid. Emergency services and the technical relief service work in these.';
+
+  @override
+  String get myPositionMgrs => 'MGRS';
+
+  @override
+  String get myPositionMgrsHint =>
+      'The same grid as one short reference, the way a gridded map labels it.';
+
+  @override
+  String get myPositionPlusCode => 'Plus Code';
+
+  @override
+  String get myPositionPlusCodeHint =>
+      'Ten characters and no map at all, for somebody who is going to type it in.';
+
+  @override
+  String get myPositionDecimal => 'Decimal degrees';
+
+  @override
+  String get myPositionDecimalHint => 'What goes into a map app.';
+
+  @override
   String get mapMyLocationAction => 'My location';
 
   @override

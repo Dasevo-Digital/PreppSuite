@@ -14,6 +14,8 @@ import 'map_zoom_buttons.dart';
 import 'nearby_screen.dart';
 import 'personal_places_screen.dart';
 import 'swipe_zoom.dart';
+import '../application/readable_position.dart';
+import 'my_position_screen.dart';
 
 /// Roughly the centre of Germany, so the map opens on something before a
 /// position or a search has resolved.
@@ -190,6 +192,30 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     ),
                     onSubmitted: (_) => _search(l10n),
                   ),
+                ),
+                const SizedBox(width: 8),
+                // Beside the dot and not inside it: finding yourself on
+                // the map and being able to say where that is are two
+                // different jobs, and the second one is done on the
+                // telephone.
+                IconButton.filledTonal(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => MyPositionScreen(
+                        initial: _position == null
+                            ? null
+                            : ReadablePosition(
+                                latitude: _position!.latitude,
+                                longitude: _position!.longitude,
+                              ),
+                      ),
+                    ),
+                  ),
+                  // Not "my location": that button is next to it and
+                  // does something else. One centres the map, the other
+                  // tells you what to say on the telephone.
+                  tooltip: l10n.myPositionAction,
+                  icon: const Icon(Icons.share_location_outlined),
                 ),
                 const SizedBox(width: 8),
                 IconButton.filledTonal(
