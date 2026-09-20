@@ -9814,6 +9814,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PreppSuite backup'**
   String get backupShareSubject;
+
+  /// No description provided for @toolsHubTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crisis organisation'**
+  String get toolsHubTitle;
+
+  /// No description provided for @toolsHubBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio, emergency folder, upkeep, evacuation cards and incident log'**
+  String get toolsHubBody;
+
+  /// No description provided for @toolsLearnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A quick round'**
+  String get toolsLearnTitle;
+
+  /// No description provided for @toolsLearnBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Short offline refreshers, alongside the drills and the knowledge archive.'**
+  String get toolsLearnBody;
+
+  /// No description provided for @toolsAnswerRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct. {explanation}'**
+  String toolsAnswerRight(String explanation);
+
+  /// No description provided for @toolsAnswerWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Have another look: {explanation}'**
+  String toolsAnswerWrong(String explanation);
+
+  /// No description provided for @toolsDrillDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation: {minutes} minutes'**
+  String toolsDrillDuration(int minutes);
+
+  /// No description provided for @toolsDrillMeta.
+  ///
+  /// In en, this message translates to:
+  /// **'{duration} · {completed}'**
+  String toolsDrillMeta(String duration, String completed);
+
+  /// No description provided for @toolsLessonCommunicationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication'**
+  String get toolsLessonCommunicationTitle;
+
+  /// No description provided for @toolsLessonCommunicationSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Take load off the networks and coordinate contacts.'**
+  String get toolsLessonCommunicationSummary;
+
+  /// No description provided for @toolsLessonCommunicationQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Which way usually works best when the mobile network is overloaded?'**
+  String get toolsLessonCommunicationQuestion;
+
+  /// No description provided for @toolsLessonCommunicationAnswerA.
+  ///
+  /// In en, this message translates to:
+  /// **'A long call'**
+  String get toolsLessonCommunicationAnswerA;
+
+  /// No description provided for @toolsLessonCommunicationAnswerB.
+  ///
+  /// In en, this message translates to:
+  /// **'A short message naming a time to reply'**
+  String get toolsLessonCommunicationAnswerB;
+
+  /// No description provided for @toolsLessonCommunicationAnswerC.
+  ///
+  /// In en, this message translates to:
+  /// **'Redialling over and over'**
+  String get toolsLessonCommunicationAnswerC;
+
+  /// No description provided for @toolsLessonCommunicationExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Short messages need less network capacity and spare the battery.'**
+  String get toolsLessonCommunicationExplanation;
+
+  /// No description provided for @toolsLessonEvacuationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Evacuation'**
+  String get toolsLessonEvacuationTitle;
+
+  /// No description provided for @toolsLessonEvacuationSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the plan, the kit and the meeting point ready.'**
+  String get toolsLessonEvacuationSummary;
+
+  /// No description provided for @toolsLessonEvacuationQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What should be checked before an evacuation?'**
+  String get toolsLessonEvacuationQuestion;
+
+  /// No description provided for @toolsLessonEvacuationAnswerA.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting point, route and the support anyone needs'**
+  String get toolsLessonEvacuationAnswerA;
+
+  /// No description provided for @toolsLessonEvacuationAnswerB.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the weather app'**
+  String get toolsLessonEvacuationAnswerB;
+
+  /// No description provided for @toolsLessonEvacuationAnswerC.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the fuel gauge'**
+  String get toolsLessonEvacuationAnswerC;
+
+  /// No description provided for @toolsLessonEvacuationExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'A clear meeting point, the route and individual needs prevent stress and bad decisions.'**
+  String get toolsLessonEvacuationExplanation;
+
+  /// No description provided for @toolsLessonPowerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Power cut'**
+  String get toolsLessonPowerTitle;
+
+  /// No description provided for @toolsLessonPowerSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure light, information and energy.'**
+  String get toolsLessonPowerSummary;
+
+  /// No description provided for @toolsLessonPowerQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What is the battery or wind-up radio for?'**
+  String get toolsLessonPowerQuestion;
+
+  /// No description provided for @toolsLessonPowerAnswerA.
+  ///
+  /// In en, this message translates to:
+  /// **'As a replacement for official warnings'**
+  String get toolsLessonPowerAnswerA;
+
+  /// No description provided for @toolsLessonPowerAnswerB.
+  ///
+  /// In en, this message translates to:
+  /// **'As an additional channel for information'**
+  String get toolsLessonPowerAnswerB;
+
+  /// No description provided for @toolsLessonPowerAnswerC.
+  ///
+  /// In en, this message translates to:
+  /// **'Only for listening to music'**
+  String get toolsLessonPowerAnswerC;
+
+  /// No description provided for @toolsLessonPowerExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio adds to the system\'s warnings and works when the internet does not.'**
+  String get toolsLessonPowerExplanation;
+
+  /// No description provided for @toolsDrillPowerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'72 hours without power'**
+  String get toolsDrillPowerTitle;
+
+  /// No description provided for @toolsDrillPowerStepA.
+  ///
+  /// In en, this message translates to:
+  /// **'Put out light, radio and a power bank'**
+  String get toolsDrillPowerStepA;
+
+  /// No description provided for @toolsDrillPowerStepB.
+  ///
+  /// In en, this message translates to:
+  /// **'Check water, stove and supplies'**
+  String get toolsDrillPowerStepB;
+
+  /// No description provided for @toolsDrillPowerStepC.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep fridge and freezer shut'**
+  String get toolsDrillPowerStepC;
+
+  /// No description provided for @toolsDrillEvacuationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Evacuation in 15 minutes'**
+  String get toolsDrillEvacuationTitle;
+
+  /// No description provided for @toolsDrillEvacuationStepA.
+  ///
+  /// In en, this message translates to:
+  /// **'Pack documents and medicines'**
+  String get toolsDrillEvacuationStepA;
+
+  /// No description provided for @toolsDrillEvacuationStepB.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the meeting point and route on the offline map'**
+  String get toolsDrillEvacuationStepB;
+
+  /// No description provided for @toolsDrillEvacuationStepC.
+  ///
+  /// In en, this message translates to:
+  /// **'Go over who is in the household and how to reach them'**
+  String get toolsDrillEvacuationStepC;
+
+  /// No description provided for @toolsDrillCommunicationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication is down'**
+  String get toolsDrillCommunicationTitle;
+
+  /// No description provided for @toolsDrillCommunicationStepA.
+  ///
+  /// In en, this message translates to:
+  /// **'Check local radio and the warnings'**
+  String get toolsDrillCommunicationStepA;
+
+  /// No description provided for @toolsDrillCommunicationStepB.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep nearby contacts and the meeting point at hand'**
+  String get toolsDrillCommunicationStepB;
+
+  /// No description provided for @toolsDrillCommunicationStepC.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a radio only on a service you are allowed to use'**
+  String get toolsDrillCommunicationStepC;
 }
 
 class _AppLocalizationsDelegate

@@ -103,9 +103,9 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
           Card(
             child: ListTile(
               leading: const Icon(Icons.folder_special_outlined),
-              title: const Text('Krisenorganisation'),
-              subtitle: const Text(
-                'Radio, Notfallmappe, Wartung, Evakuierungs-Karten und Ereignisprotokoll',
+              title: Text(l10n.toolsHubTitle),
+              subtitle: Text(
+                l10n.toolsHubBody,
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(
@@ -118,31 +118,34 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Kurz lernen',
+            l10n.toolsLearnTitle,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Kurze Offline-Wiederholungen ergänzen Übungen und Wissensarchiv.',
+          Text(
+            l10n.toolsLearnBody,
           ),
           const SizedBox(height: 8),
-          for (final lesson in _lessons)
+          for (final lesson in _Lesson.values)
             Card(
               child: ExpansionTile(
                 leading: Icon(lesson.icon),
-                title: Text(lesson.title),
-                subtitle: Text(lesson.summary),
+                title: Text(_lessonTitle(l10n, lesson)),
+                subtitle: Text(_lessonSummary(l10n, lesson)),
                 childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                 children: [
-                  Text(lesson.question),
+                  Text(_lessonQuestion(l10n, lesson)),
                   const SizedBox(height: 8),
-                  for (final answer in lesson.answers)
+                  for (final answer in _lessonAnswers(l10n, lesson))
                     Padding(
                       padding: const EdgeInsets.only(bottom: 6),
                       child: OutlinedButton(
                         onPressed: () => setState(
                           () => _learningAnswers[lesson.id] =
-                              lesson.answers.indexOf(answer) ==
+                              _lessonAnswers(
+                                l10n,
+                                lesson,
+                              ).indexOf(answer) ==
                               lesson.correctAnswer,
                         ),
                         child: Align(
@@ -156,8 +159,12 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
                         _learningAnswers[lesson.id] == true
-                            ? 'Richtig. ${lesson.explanation}'
-                            : 'Noch einmal nachsehen: ${lesson.explanation}',
+                            ? l10n.toolsAnswerRight(
+                                _lessonExplanation(l10n, lesson),
+                              )
+                            : l10n.toolsAnswerWrong(
+                                _lessonExplanation(l10n, lesson),
+                              ),
                         style: TextStyle(
                           color: _learningAnswers[lesson.id] == true
                               ? Theme.of(context).colorScheme.primary
@@ -193,24 +200,33 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
           const SizedBox(height: 4),
           Text(l10n.drillsHarmless),
           const SizedBox(height: 8),
-          for (final scenario in _scenarios)
+          for (final scenario in _Scenario.values)
             Card(
               child: ExpansionTile(
-                title: Text(scenario.title),
+                title: Text(_drillTitle(l10n, scenario)),
                 subtitle: Text(
                   switch (_completed[scenario.id]) {
-                    final DateTime completed =>
-                      '${scenario.duration} · ${l10n.drillsLastCompleted(MaterialLocalizations.of(context).formatMediumDate(completed))}',
-                    null => scenario.duration,
+                    final DateTime completed => l10n.toolsDrillMeta(
+                      l10n.toolsDrillDuration(scenario.minutes),
+                      l10n.drillsLastCompleted(
+                        MaterialLocalizations.of(
+                          context,
+                        ).formatMediumDate(completed),
+                      ),
+                    ),
+                    null => l10n.toolsDrillDuration(scenario.minutes),
                   },
                 ),
                 children: [
-                  for (final step in scenario.steps)
+                  for (final (index, text) in _drillSteps(
+                    l10n,
+                    scenario,
+                  ).indexed)
                     CheckboxListTile(
-                      value: _checked.contains('${scenario.id}:$step'),
-                      title: Text(step),
+                      value: _checked.contains('${scenario.id}:$index'),
+                      title: Text(text),
                       onChanged: (value) =>
-                          _toggle(scenario, step, on: value == true),
+                          _toggle(scenario, '$index', on: value == true),
                     ),
                 ],
               ),
@@ -221,113 +237,122 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
   }
 }
 
-class _Scenario {
-  const _Scenario(this.id, this.title, this.duration, this.steps);
+/// The text of a lesson, by id.
+///
+/// Switches rather than a map, so adding a lesson without translating it
+/// does not compile.
+String _lessonTitle(AppLocalizations l10n, _Lesson lesson) => switch (lesson) {
+  _Lesson.communication => l10n.toolsLessonCommunicationTitle,
+  _Lesson.evacuation => l10n.toolsLessonEvacuationTitle,
+  _Lesson.power => l10n.toolsLessonPowerTitle,
+};
+
+String _lessonSummary(AppLocalizations l10n, _Lesson lesson) =>
+    switch (lesson) {
+      _Lesson.communication => l10n.toolsLessonCommunicationSummary,
+      _Lesson.evacuation => l10n.toolsLessonEvacuationSummary,
+      _Lesson.power => l10n.toolsLessonPowerSummary,
+    };
+
+String _lessonQuestion(AppLocalizations l10n, _Lesson lesson) =>
+    switch (lesson) {
+      _Lesson.communication => l10n.toolsLessonCommunicationQuestion,
+      _Lesson.evacuation => l10n.toolsLessonEvacuationQuestion,
+      _Lesson.power => l10n.toolsLessonPowerQuestion,
+    };
+
+/// In the order the answers are shown, which is what `correctAnswer`
+/// indexes into.
+List<String> _lessonAnswers(AppLocalizations l10n, _Lesson lesson) =>
+    switch (lesson) {
+      _Lesson.communication => [
+        l10n.toolsLessonCommunicationAnswerA,
+        l10n.toolsLessonCommunicationAnswerB,
+        l10n.toolsLessonCommunicationAnswerC,
+      ],
+      _Lesson.evacuation => [
+        l10n.toolsLessonEvacuationAnswerA,
+        l10n.toolsLessonEvacuationAnswerB,
+        l10n.toolsLessonEvacuationAnswerC,
+      ],
+      _Lesson.power => [
+        l10n.toolsLessonPowerAnswerA,
+        l10n.toolsLessonPowerAnswerB,
+        l10n.toolsLessonPowerAnswerC,
+      ],
+    };
+
+String _lessonExplanation(AppLocalizations l10n, _Lesson lesson) =>
+    switch (lesson) {
+      _Lesson.communication => l10n.toolsLessonCommunicationExplanation,
+      _Lesson.evacuation => l10n.toolsLessonEvacuationExplanation,
+      _Lesson.power => l10n.toolsLessonPowerExplanation,
+    };
+
+String _drillTitle(AppLocalizations l10n, _Scenario drill) => switch (drill) {
+  _Scenario.powerOutage => l10n.toolsDrillPowerTitle,
+  _Scenario.evacuation => l10n.toolsDrillEvacuationTitle,
+  _Scenario.communication => l10n.toolsDrillCommunicationTitle,
+};
+
+/// The steps, in the order they are ticked off.
+List<String> _drillSteps(AppLocalizations l10n, _Scenario drill) =>
+    switch (drill) {
+      _Scenario.powerOutage => [
+        l10n.toolsDrillPowerStepA,
+        l10n.toolsDrillPowerStepB,
+        l10n.toolsDrillPowerStepC,
+      ],
+      _Scenario.evacuation => [
+        l10n.toolsDrillEvacuationStepA,
+        l10n.toolsDrillEvacuationStepB,
+        l10n.toolsDrillEvacuationStepC,
+      ],
+      _Scenario.communication => [
+        l10n.toolsDrillCommunicationStepA,
+        l10n.toolsDrillCommunicationStepB,
+        l10n.toolsDrillCommunicationStepC,
+      ],
+    };
+
+/// The drills, as ids and nothing else.
+///
+/// What is stored against a person's progress is the id, and the id used
+/// to be the same string as the heading they read — so translating the
+/// heading would have orphaned every tick they had made. The text lives
+/// in the translations now; only the structure lives here.
+enum _Scenario {
+  powerOutage('power-outage', 20, 3),
+  evacuation('evacuation', 15, 3),
+  communication('communication', 10, 3);
+
+  const _Scenario(this.id, this.minutes, this.stepCount);
+
   final String id;
-  final String title;
-  final String duration;
-  final List<String> steps;
+  final int minutes;
+  final int stepCount;
+
+  /// What a tick is stored against, one per step.
+  ///
+  /// A number, and it used to be the German sentence itself — which made
+  /// translating the sentence the same thing as losing the tick. The
+  /// scenario id is untouched, so the log of finished runs survives; a
+  /// drill that happens to be half-ticked while the app updates starts
+  /// over, which is what `DrillProgressStore` says a rehearsal does
+  /// anyway.
+  Iterable<String> get steps => [
+    for (var index = 0; index < stepCount; index++) '$index',
+  ];
 }
 
-class _Lesson {
-  const _Lesson(
-    this.id,
-    this.icon,
-    this.title,
-    this.summary,
-    this.question,
-    this.answers,
-    this.correctAnswer,
-    this.explanation,
-  );
-  final String id, title, summary, question, explanation;
+enum _Lesson {
+  communication('communication', Icons.forum_outlined, 1),
+  evacuation('evacuation', Icons.route_outlined, 0),
+  power('power', Icons.flash_on_outlined, 1);
+
+  const _Lesson(this.id, this.icon, this.correctAnswer);
+
+  final String id;
   final IconData icon;
-  final List<String> answers;
   final int correctAnswer;
 }
-
-const _lessons = [
-  _Lesson(
-    'communication',
-    Icons.forum_outlined,
-    'Kommunikation',
-    'Netze entlasten und Kontakte koordinieren.',
-    'Welcher Weg ist bei überlastetem Mobilfunk meist sinnvoll?',
-    [
-      'Langer Anruf',
-      'Kurze Nachricht mit Rückmeldezeit',
-      'Fortlaufend neu wählen',
-    ],
-    1,
-    'Kurze Nachrichten benötigen weniger Netzkapazität und schonen den Akku.',
-  ),
-  _Lesson(
-    'evacuation',
-    Icons.route_outlined,
-    'Evakuierung',
-    'Plan, Notgepäck und Treffpunkt bereithalten.',
-    'Was sollte vor einer Evakuierung geprüft werden?',
-    [
-      'Treffpunkt, Weg und benötigte Unterstützung',
-      'Nur die Wetter-App',
-      'Nur der Tankstand',
-    ],
-    0,
-    'Ein klarer Treffpunkt, der Weg und individuelle Bedarfe verhindern Stress und Fehlentscheidungen.',
-  ),
-  _Lesson(
-    'power',
-    Icons.battery_charging_full_outlined,
-    'Stromausfall',
-    'Licht, Information und Energie sichern.',
-    'Wofür dient das batteriebetriebene oder Kurbelradio?',
-    [
-      'Als Ersatz für amtliche Warnungen',
-      'Als zusätzlicher Informationskanal',
-      'Nur zum Musikhören',
-    ],
-    1,
-    'Radio ergänzt Systemwarnungen und funktioniert auch bei ausgefallenem Internet.',
-  ),
-];
-
-/// The drills themselves, in German only.
-///
-/// Unlike the labels above, this is content rather than interface: three
-/// scenarios from the BBK's own guidance with fifteen strings between
-/// them. Translating civil-protection instructions is not a code change,
-/// and a half-translated drill is worse than an untranslated one — so
-/// until somebody writes the English, it stays as it is and stays visible
-/// here rather than hiding in the widget tree.
-const _scenarios = [
-  _Scenario(
-    'power-outage',
-    '72 Stunden ohne Strom',
-    'Vorbereitung: 20 Minuten',
-    [
-      'Licht, Radio und Powerbank bereitlegen',
-      'Wasser, Kocher und Vorräte prüfen',
-      'Kühlgeräte geschlossen halten',
-    ],
-  ),
-  _Scenario(
-    'evacuation',
-    'Evakuierung in 15 Minuten',
-    'Vorbereitung: 15 Minuten',
-    [
-      'Dokumente und Medikamente einpacken',
-      'Treffpunkt und Weg auf Offlinekarte prüfen',
-      'Haushaltsmitglieder und Kontaktweg abgleichen',
-    ],
-  ),
-  _Scenario(
-    'communication',
-    'Kommunikation ausgefallen',
-    'Vorbereitung: 10 Minuten',
-    [
-      'Lokales Radio und Warnungen prüfen',
-      'Nahe Kontakte und Treffpunkt bereithalten',
-      'Funkgerät nur im erlaubten Funkdienst einsetzen',
-    ],
-  ),
-];

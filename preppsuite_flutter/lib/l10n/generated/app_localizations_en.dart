@@ -5834,4 +5834,154 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupShareSubject => 'PreppSuite backup';
+
+  @override
+  String get toolsHubTitle => 'Crisis organisation';
+
+  @override
+  String get toolsHubBody =>
+      'Radio, emergency folder, upkeep, evacuation cards and incident log';
+
+  @override
+  String get toolsLearnTitle => 'A quick round';
+
+  @override
+  String get toolsLearnBody =>
+      'Short offline refreshers, alongside the drills and the knowledge archive.';
+
+  @override
+  String toolsAnswerRight(String explanation) {
+    return 'Correct. $explanation';
+  }
+
+  @override
+  String toolsAnswerWrong(String explanation) {
+    return 'Have another look: $explanation';
+  }
+
+  @override
+  String toolsDrillDuration(int minutes) {
+    return 'Preparation: $minutes minutes';
+  }
+
+  @override
+  String toolsDrillMeta(String duration, String completed) {
+    return '$duration · $completed';
+  }
+
+  @override
+  String get toolsLessonCommunicationTitle => 'Communication';
+
+  @override
+  String get toolsLessonCommunicationSummary =>
+      'Take load off the networks and coordinate contacts.';
+
+  @override
+  String get toolsLessonCommunicationQuestion =>
+      'Which way usually works best when the mobile network is overloaded?';
+
+  @override
+  String get toolsLessonCommunicationAnswerA => 'A long call';
+
+  @override
+  String get toolsLessonCommunicationAnswerB =>
+      'A short message naming a time to reply';
+
+  @override
+  String get toolsLessonCommunicationAnswerC => 'Redialling over and over';
+
+  @override
+  String get toolsLessonCommunicationExplanation =>
+      'Short messages need less network capacity and spare the battery.';
+
+  @override
+  String get toolsLessonEvacuationTitle => 'Evacuation';
+
+  @override
+  String get toolsLessonEvacuationSummary =>
+      'Keep the plan, the kit and the meeting point ready.';
+
+  @override
+  String get toolsLessonEvacuationQuestion =>
+      'What should be checked before an evacuation?';
+
+  @override
+  String get toolsLessonEvacuationAnswerA =>
+      'Meeting point, route and the support anyone needs';
+
+  @override
+  String get toolsLessonEvacuationAnswerB => 'Only the weather app';
+
+  @override
+  String get toolsLessonEvacuationAnswerC => 'Only the fuel gauge';
+
+  @override
+  String get toolsLessonEvacuationExplanation =>
+      'A clear meeting point, the route and individual needs prevent stress and bad decisions.';
+
+  @override
+  String get toolsLessonPowerTitle => 'Power cut';
+
+  @override
+  String get toolsLessonPowerSummary => 'Secure light, information and energy.';
+
+  @override
+  String get toolsLessonPowerQuestion =>
+      'What is the battery or wind-up radio for?';
+
+  @override
+  String get toolsLessonPowerAnswerA =>
+      'As a replacement for official warnings';
+
+  @override
+  String get toolsLessonPowerAnswerB =>
+      'As an additional channel for information';
+
+  @override
+  String get toolsLessonPowerAnswerC => 'Only for listening to music';
+
+  @override
+  String get toolsLessonPowerExplanation =>
+      'Radio adds to the system\'s warnings and works when the internet does not.';
+
+  @override
+  String get toolsDrillPowerTitle => '72 hours without power';
+
+  @override
+  String get toolsDrillPowerStepA => 'Put out light, radio and a power bank';
+
+  @override
+  String get toolsDrillPowerStepB => 'Check water, stove and supplies';
+
+  @override
+  String get toolsDrillPowerStepC => 'Keep fridge and freezer shut';
+
+  @override
+  String get toolsDrillEvacuationTitle => 'Evacuation in 15 minutes';
+
+  @override
+  String get toolsDrillEvacuationStepA => 'Pack documents and medicines';
+
+  @override
+  String get toolsDrillEvacuationStepB =>
+      'Check the meeting point and route on the offline map';
+
+  @override
+  String get toolsDrillEvacuationStepC =>
+      'Go over who is in the household and how to reach them';
+
+  @override
+  String get toolsDrillCommunicationTitle => 'Communication is down';
+
+  @override
+  String get toolsDrillCommunicationStepA =>
+      'Check local radio and the warnings';
+
+  @override
+  String get toolsDrillCommunicationStepB =>
+      'Keep nearby contacts and the meeting point at hand';
+
+  @override
+  String get toolsDrillCommunicationStepC =>
+      'Use a radio only on a service you are allowed to use';
 }

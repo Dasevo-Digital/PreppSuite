@@ -126,4 +126,27 @@ void main() {
     useLargeText(tester);
     await show(tester);
   });
+
+  testWidgets('an English household reads English here too', (tester) async {
+    // This screen was the last one in the app with German wired into it,
+    // and the drill steps were the worst of it: the sentence *was* the
+    // key a tick is stored against.
+    tester.view.physicalSize = const Size(1000, 6000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const MaterialApp(
+        locale: Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: PreparednessToolsScreen(householdId: 'home'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('72 hours without power'), findsOneWidget);
+    expect(find.text('A quick round'), findsOneWidget);
+    expect(find.text('Crisis organisation'), findsOneWidget);
+    expect(find.text('72 Stunden ohne Strom'), findsNothing);
+  });
 }

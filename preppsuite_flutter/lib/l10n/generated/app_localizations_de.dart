@@ -5863,4 +5863,153 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get backupShareSubject => 'PreppSuite-Datensicherung';
+
+  @override
+  String get toolsHubTitle => 'Krisenorganisation';
+
+  @override
+  String get toolsHubBody =>
+      'Radio, Notfallmappe, Wartung, Evakuierungs-Karten und Ereignisprotokoll';
+
+  @override
+  String get toolsLearnTitle => 'Kurz lernen';
+
+  @override
+  String get toolsLearnBody =>
+      'Kurze Offline-Wiederholungen ergänzen Übungen und Wissensarchiv.';
+
+  @override
+  String toolsAnswerRight(String explanation) {
+    return 'Richtig. $explanation';
+  }
+
+  @override
+  String toolsAnswerWrong(String explanation) {
+    return 'Noch einmal nachsehen: $explanation';
+  }
+
+  @override
+  String toolsDrillDuration(int minutes) {
+    return 'Vorbereitung: $minutes Minuten';
+  }
+
+  @override
+  String toolsDrillMeta(String duration, String completed) {
+    return '$duration · $completed';
+  }
+
+  @override
+  String get toolsLessonCommunicationTitle => 'Kommunikation';
+
+  @override
+  String get toolsLessonCommunicationSummary =>
+      'Netze entlasten und Kontakte koordinieren.';
+
+  @override
+  String get toolsLessonCommunicationQuestion =>
+      'Welcher Weg ist bei überlastetem Mobilfunk meist sinnvoll?';
+
+  @override
+  String get toolsLessonCommunicationAnswerA => 'Langer Anruf';
+
+  @override
+  String get toolsLessonCommunicationAnswerB =>
+      'Kurze Nachricht mit Rückmeldezeit';
+
+  @override
+  String get toolsLessonCommunicationAnswerC => 'Fortlaufend neu wählen';
+
+  @override
+  String get toolsLessonCommunicationExplanation =>
+      'Kurze Nachrichten benötigen weniger Netzkapazität und schonen den Akku.';
+
+  @override
+  String get toolsLessonEvacuationTitle => 'Evakuierung';
+
+  @override
+  String get toolsLessonEvacuationSummary =>
+      'Plan, Notgepäck und Treffpunkt bereithalten.';
+
+  @override
+  String get toolsLessonEvacuationQuestion =>
+      'Was sollte vor einer Evakuierung geprüft werden?';
+
+  @override
+  String get toolsLessonEvacuationAnswerA =>
+      'Treffpunkt, Weg und benötigte Unterstützung';
+
+  @override
+  String get toolsLessonEvacuationAnswerB => 'Nur die Wetter-App';
+
+  @override
+  String get toolsLessonEvacuationAnswerC => 'Nur der Tankstand';
+
+  @override
+  String get toolsLessonEvacuationExplanation =>
+      'Ein klarer Treffpunkt, der Weg und individuelle Bedarfe verhindern Stress und Fehlentscheidungen.';
+
+  @override
+  String get toolsLessonPowerTitle => 'Stromausfall';
+
+  @override
+  String get toolsLessonPowerSummary =>
+      'Licht, Information und Energie sichern.';
+
+  @override
+  String get toolsLessonPowerQuestion =>
+      'Wofür dient das batteriebetriebene oder Kurbelradio?';
+
+  @override
+  String get toolsLessonPowerAnswerA => 'Als Ersatz für amtliche Warnungen';
+
+  @override
+  String get toolsLessonPowerAnswerB => 'Als zusätzlicher Informationskanal';
+
+  @override
+  String get toolsLessonPowerAnswerC => 'Nur zum Musikhören';
+
+  @override
+  String get toolsLessonPowerExplanation =>
+      'Radio ergänzt Systemwarnungen und funktioniert auch bei ausgefallenem Internet.';
+
+  @override
+  String get toolsDrillPowerTitle => '72 Stunden ohne Strom';
+
+  @override
+  String get toolsDrillPowerStepA => 'Licht, Radio und Powerbank bereitlegen';
+
+  @override
+  String get toolsDrillPowerStepB => 'Wasser, Kocher und Vorräte prüfen';
+
+  @override
+  String get toolsDrillPowerStepC => 'Kühlgeräte geschlossen halten';
+
+  @override
+  String get toolsDrillEvacuationTitle => 'Evakuierung in 15 Minuten';
+
+  @override
+  String get toolsDrillEvacuationStepA => 'Dokumente und Medikamente einpacken';
+
+  @override
+  String get toolsDrillEvacuationStepB =>
+      'Treffpunkt und Weg auf Offlinekarte prüfen';
+
+  @override
+  String get toolsDrillEvacuationStepC =>
+      'Haushaltsmitglieder und Kontaktweg abgleichen';
+
+  @override
+  String get toolsDrillCommunicationTitle => 'Kommunikation ausgefallen';
+
+  @override
+  String get toolsDrillCommunicationStepA =>
+      'Lokales Radio und Warnungen prüfen';
+
+  @override
+  String get toolsDrillCommunicationStepB =>
+      'Nahe Kontakte und Treffpunkt bereithalten';
+
+  @override
+  String get toolsDrillCommunicationStepC =>
+      'Funkgerät nur im erlaubten Funkdienst einsetzen';
 }
