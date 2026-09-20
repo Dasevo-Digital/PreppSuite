@@ -272,6 +272,26 @@ lässt und übersprungen wird. Die Alternative auf SAF wäre löschen und
 umbenennen — ein Fenster, in dem die Datei ganz fehlt, dazu Anzeigenamen,
 die der Provider umschreiben darf.
 
+**Wolken ohne Ordnerbaum.** Die Ordnerauswahl kann nur Anbieter
+erreichen, die einen *DocumentsProvider* mit Baumzugriff anmelden.
+**OneDrive und Google Drive tun das nicht** — sie tauchen im Wähler also
+gar nicht erst auf, und daran ist von dieser App aus nichts zu reparieren.
+
+Für den gemeinsamen Ordner gibt es zwei Auswege, und beide laufen darauf
+hinaus, dass der Ordner **lokal** liegt: entweder ein Anbieter mit
+richtigem Baumzugriff (Nextcloud), oder ein lokaler Ordner, den eine
+Sync-App abgleicht (Syncthing, FolderSync). Dass das gefahrlos geht, ist
+kein Zufall: im Ordner liegt pro Gerät eine eigene Datei, und jedes Gerät
+schreibt nur seine eigene — ein einfacher Datei-Synchronisierer kann hier
+gar keinen Konflikt erzeugen.
+
+Für die **Datensicherung** gibt es seit 1.9.1 den kürzeren Weg: sie lässt
+sich an den Teilen-Dialog des Systems übergeben, und dort ist OneDrive
+sehr wohl vertreten, ebenso jeder Messenger und jedes Mailprogramm. Was
+dabei das Gerät verlässt, ist derselbe mit der Passphrase verschlüsselte
+Umschlag; ohne sie ist die Datei Rauschen. Das ist kein Abgleich, sondern
+ein Transport von Hand — aber einer, der überall ankommt.
+
 **iOS und iPadOS** geben gar keinen Pfad heraus, der weiterarbeitet. Ein
 im Dokumentenwähler gewählter Ordner kommt als *security-scoped* URL
 zurück, deren Zugriff mit dem Prozess stirbt — und anders als unter macOS

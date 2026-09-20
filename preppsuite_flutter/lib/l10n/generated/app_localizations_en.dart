@@ -5824,4 +5824,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get transferConflictReplaced =>
       'This device\'s data discarded, the other household taken over.';
+
+  @override
+  String get backupShare => 'Share the backup';
+
+  @override
+  String get backupShareHint =>
+      'Hand it to another app — a cloud the file picker cannot reach, for instance. The file is encrypted with your passphrase; whoever gets it without that passphrase can do nothing with it.';
+
+  @override
+  String get backupShareSubject => 'PreppSuite backup';
 }

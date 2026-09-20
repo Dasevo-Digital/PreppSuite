@@ -2,8 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:path_provider/path_provider.dart';
 
 import '../../../core/app_database_providers.dart';
 import '../../../core/error_text.dart';
@@ -26,6 +29,12 @@ class BackupCard extends ConsumerWidget {
           title: Text(l10n.backupCreate),
           subtitle: Text(l10n.backupHint),
           onTap: () => _export(context, ref),
+        ),
+        ListTile(
+          leading: const Icon(Icons.ios_share),
+          title: Text(l10n.backupShare),
+          subtitle: Text(l10n.backupShareHint),
+          onTap: () => _share(context, ref),
         ),
         ListTile(
           leading: const Icon(Icons.restore),
@@ -65,6 +74,51 @@ class BackupCard extends ConsumerWidget {
       // disk and a refused folder need different answers. A wrong
       // passphrase does not land here; `restore` reports that as
       // `backupInvalid` instead.
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${l10n.backupFailed} ${describeError(l10n, error)}'),
+        ),
+      );
+    }
+  }
+
+  /// Hands the backup to whatever the system offers.
+  ///
+  /// The saving road above goes through the file picker, and on Android
+  /// that road does not reach OneDrive or Google Drive: neither
+  /// registers a document tree, so neither appears. Both are perfectly
+  /// ordinary *share* targets, and so is every messenger and mail app —
+  /// which makes this the difference between a cloud being a usable
+  /// transport for a household backup and not being one at all.
+  ///
+  /// What leaves the device is the same encrypted envelope `_export`
+  /// writes. Sending it through somebody else's server is not a leak of
+  /// the household; without the passphrase it is noise.
+  Future<void> _share(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final passphrase = await _askPassphrase(context, confirm: true);
+      if (passphrase == null) return;
+      final raw = await BackupService(
+        ref.read(appDatabaseProvider),
+      ).exportHousehold(householdId, passphrase);
+
+      // The app's own temporary directory, not the documents folder: this
+      // copy exists for the seconds it takes another app to pick it up.
+      final file = File(
+        '${(await getTemporaryDirectory()).path}'
+        '${Platform.pathSeparator}preppsuite-backup.json',
+      );
+      await file.writeAsBytes(utf8.encode(raw), flush: true);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/json')],
+          subject: l10n.backupShareSubject,
+        ),
+      );
+    } catch (error) {
+      // The reason, not just the fact — the same as the two roads above.
       messenger.showSnackBar(
         SnackBar(
           content: Text('${l10n.backupFailed} ${describeError(l10n, error)}'),

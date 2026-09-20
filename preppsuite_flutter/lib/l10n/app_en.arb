@@ -2547,5 +2547,8 @@
   "transferConflictKeep": "Change nothing",
   "transferConflictKeepBody": "Nothing is taken over. If the other device should join this one instead, show the code there and read it there.",
   "transferConflictCancelled": "Cancelled. Nothing was changed.",
-  "transferConflictReplaced": "This device's data discarded, the other household taken over."
+  "transferConflictReplaced": "This device's data discarded, the other household taken over.",
+  "backupShare": "Share the backup",
+  "backupShareHint": "Hand it to another app — a cloud the file picker cannot reach, for instance. The file is encrypted with your passphrase; whoever gets it without that passphrase can do nothing with it.",
+  "backupShareSubject": "PreppSuite backup"
 }

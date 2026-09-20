@@ -68,6 +68,12 @@ dependencies:
   # every pick fails with MissingPluginException on this platform. 8.x's
   # macOS implementation uses "pickFiles" and works correctly.
   file_picker: ^8.3.7
+  # Only so a backup can be handed to the system's share sheet. The file
+  # picker cannot reach OneDrive or Google Drive on Android -- neither
+  # registers a document tree -- but both are ordinary share targets, so
+  # this is what makes a cloud a usable transport for the one file the
+  # household may not lose.
+  share_plus: ^12.0.0
   image_picker: ^1.2.3
   # Cropping and rotating a product photo (see `photo_edit.dart`).
   # `printing` pulls it in too, but a transitive dependency cannot be

@@ -5853,4 +5853,14 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get transferConflictReplaced =>
       'Eigene Daten verworfen, anderer Haushalt übernommen.';
+
+  @override
+  String get backupShare => 'Datensicherung teilen';
+
+  @override
+  String get backupShareHint =>
+      'An eine andere App übergeben — etwa in eine Wolke, die sich im Dateiwähler nicht auswählen lässt. Die Datei ist mit deiner Passphrase verschlüsselt; wer sie ohne die Passphrase bekommt, kann nichts damit anfangen.';
+
+  @override
+  String get backupShareSubject => 'PreppSuite-Datensicherung';
 }

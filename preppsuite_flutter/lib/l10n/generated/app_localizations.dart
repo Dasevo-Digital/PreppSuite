@@ -9796,6 +9796,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This device\'s data discarded, the other household taken over.'**
   String get transferConflictReplaced;
+
+  /// No description provided for @backupShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share the backup'**
+  String get backupShare;
+
+  /// No description provided for @backupShareHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand it to another app — a cloud the file picker cannot reach, for instance. The file is encrypted with your passphrase; whoever gets it without that passphrase can do nothing with it.'**
+  String get backupShareHint;
+
+  /// No description provided for @backupShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'PreppSuite backup'**
+  String get backupShareSubject;
 }
 
 class _AppLocalizationsDelegate
