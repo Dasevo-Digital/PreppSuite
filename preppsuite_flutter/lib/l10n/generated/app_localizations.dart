@@ -8504,6 +8504,48 @@ abstract class AppLocalizations {
   /// **'For example home, work or a relative.'**
   String get settingsRegionLabelHelper;
 
+  /// No description provided for @mapPlacesImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Read places in'**
+  String get mapPlacesImport;
+
+  /// No description provided for @mapPlacesExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand places over'**
+  String get mapPlacesExport;
+
+  /// No description provided for @mapPlacesExportGpx.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand over as GPX'**
+  String get mapPlacesExportGpx;
+
+  /// No description provided for @mapPlacesExportKml.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand over as KML'**
+  String get mapPlacesExportKml;
+
+  /// No description provided for @mapPlacesExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be written.'**
+  String get mapPlacesExportFailed;
+
+  /// No description provided for @mapPlacesImportNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no place in this file that the app can read.'**
+  String get mapPlacesImportNothing;
+
+  /// No description provided for @mapPlacesImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Every place was already here.} =1{One place was added.} other{{count} places were added.}}'**
+  String mapPlacesImported(int count);
+
   /// No description provided for @mapPlacesTitle.
   ///
   /// In en, this message translates to:

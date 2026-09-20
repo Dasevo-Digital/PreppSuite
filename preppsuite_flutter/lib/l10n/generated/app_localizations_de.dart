@@ -5058,6 +5058,37 @@ class AppLocalizationsDe extends AppLocalizations {
       'Zum Beispiel Zuhause, Arbeit oder Angehörige.';
 
   @override
+  String get mapPlacesImport => 'Orte einlesen';
+
+  @override
+  String get mapPlacesExport => 'Orte abgeben';
+
+  @override
+  String get mapPlacesExportGpx => 'Als GPX abgeben';
+
+  @override
+  String get mapPlacesExportKml => 'Als KML abgeben';
+
+  @override
+  String get mapPlacesExportFailed => 'Die Datei liess sich nicht schreiben.';
+
+  @override
+  String get mapPlacesImportNothing =>
+      'In dieser Datei steht kein Ort, den die App lesen kann.';
+
+  @override
+  String mapPlacesImported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Orte sind dazugekommen.',
+      one: 'Ein Ort ist dazugekommen.',
+      zero: 'Alle Orte waren schon da.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get mapPlacesTitle => 'Meine Orte';
 
   @override

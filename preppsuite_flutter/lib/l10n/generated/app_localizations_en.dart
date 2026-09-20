@@ -5029,6 +5029,37 @@ class AppLocalizationsEn extends AppLocalizations {
       'For example home, work or a relative.';
 
   @override
+  String get mapPlacesImport => 'Read places in';
+
+  @override
+  String get mapPlacesExport => 'Hand places over';
+
+  @override
+  String get mapPlacesExportGpx => 'Hand over as GPX';
+
+  @override
+  String get mapPlacesExportKml => 'Hand over as KML';
+
+  @override
+  String get mapPlacesExportFailed => 'The file could not be written.';
+
+  @override
+  String get mapPlacesImportNothing =>
+      'There is no place in this file that the app can read.';
+
+  @override
+  String mapPlacesImported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count places were added.',
+      one: 'One place was added.',
+      zero: 'Every place was already here.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get mapPlacesTitle => 'My places';
 
   @override

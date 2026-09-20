@@ -1,8 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/personal_place.dart';
+import '../application/place_exchange.dart';
 
 /// A compact, device-local situation map directory.
 class PersonalPlacesScreen extends StatefulWidget {
@@ -168,6 +175,84 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
     await _store.save(_places);
   }
 
+  /// Hands the places to whatever else can read a map.
+  ///
+  /// Two formats and not one: GPX is what receivers and hiking software
+  /// speak, KML what the mapping services do. Which is wanted depends on
+  /// where it is going, and this app cannot know.
+  Future<void> _export({required bool asGpx}) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (_places.isEmpty) return;
+    try {
+      final name = asGpx ? 'preppsuite-orte.gpx' : 'preppsuite-orte.kml';
+      final file = File(
+        '${(await getTemporaryDirectory()).path}${Platform.pathSeparator}$name',
+      );
+      await file.writeAsString(
+        asGpx ? placesToGpx(_places) : placesToKml(_places),
+        flush: true,
+      );
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile(
+              file.path,
+              mimeType: asGpx
+                  ? 'application/gpx+xml'
+                  : 'application/vnd.google-earth.kml+xml',
+            ),
+          ],
+          subject: l10n.mapPlacesTitle,
+        ),
+      );
+    } on Object {
+      if (!mounted) return;
+      _say(l10n.mapPlacesExportFailed);
+    }
+  }
+
+  /// Reads a file somebody else wrote, and says what came of it.
+  ///
+  /// Merged rather than replaced, and the same file twice adds nothing:
+  /// importing twice is what people do when they are not sure it worked.
+  Future<void> _import() async {
+    final l10n = AppLocalizations.of(context)!;
+    final picked = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      // Lower case only: the picker matches these literally, and a file
+      // off a camera or a receiver is as likely to shout as not.
+      allowedExtensions: const ['gpx', 'kml', 'xml'],
+      withData: true,
+    );
+    final file = picked?.files.firstOrNull;
+    final bytes = file?.bytes;
+    if (bytes == null || !mounted) return;
+
+    final String raw;
+    try {
+      raw = utf8.decode(bytes, allowMalformed: true);
+    } on Object {
+      _say(l10n.mapPlacesImportNothing);
+      return;
+    }
+
+    final incoming = placesFromXml(raw);
+    if (incoming.isEmpty) {
+      _say(l10n.mapPlacesImportNothing);
+      return;
+    }
+    final merged = mergePlaces(_places, incoming);
+    final added = merged.length - _places.length;
+    setState(() => _places = merged);
+    await _store.save(_places);
+    if (!mounted) return;
+    _say(l10n.mapPlacesImported(added));
+  }
+
+  void _say(String message) => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: Text(message)));
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -177,7 +262,34 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
         if (!didPop) Navigator.of(context).pop(_places);
       },
       child: Scaffold(
-        appBar: AppBar(title: Text(l10n.mapPlacesTitle)),
+        appBar: AppBar(
+          title: Text(l10n.mapPlacesTitle),
+          actions: [
+            IconButton(
+              onPressed: _import,
+              tooltip: l10n.mapPlacesImport,
+              icon: const Icon(Icons.file_download_outlined),
+            ),
+            // A plan that cannot leave the app it was made in is a plan
+            // that ends with the app.
+            PopupMenuButton<bool>(
+              enabled: _places.isNotEmpty,
+              tooltip: l10n.mapPlacesExport,
+              icon: const Icon(Icons.file_upload_outlined),
+              onSelected: (asGpx) => _export(asGpx: asGpx),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: true,
+                  child: Text(l10n.mapPlacesExportGpx),
+                ),
+                PopupMenuItem(
+                  value: false,
+                  child: Text(l10n.mapPlacesExportKml),
+                ),
+              ],
+            ),
+          ],
+        ),
         body: _places.isEmpty
             ? Center(
                 child: Padding(
