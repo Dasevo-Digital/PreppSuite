@@ -17,18 +17,21 @@ import 'package:preppsuite_flutter/local_db/database.dart';
 void main() {
   late Directory photos;
 
-  setUp(() async {
-    photos = await Directory.systemTemp.createTemp('preppsuite-photos');
-    // One file per item: the image cache is keyed by path, so eight
-    // tiles sharing one picture would measure a single decode and hide
-    // exactly what this is about.
-    for (var i = 0; i < 8; i++) {
-      final picture = img.Image(width: 2000, height: 1500);
-      img.fill(picture, color: img.ColorRgb8(90, 140 + i, 90));
+  /// One file per item: the image cache is keyed by path, so tiles
+  /// sharing one picture would measure a single decode and hide exactly
+  /// what this is about.
+  void writePhotos(int count, {int width = 2000, int height = 1500}) {
+    for (var i = 0; i < count; i++) {
+      final picture = img.Image(width: width, height: height);
+      img.fill(picture, color: img.ColorRgb8(90, (140 + i) % 256, 90));
       File('${photos.path}/photo-$i.jpg')
         ..createSync()
         ..writeAsBytesSync(img.encodeJpg(picture, quality: 85));
     }
+  }
+
+  setUp(() async {
+    photos = await Directory.systemTemp.createTemp('preppsuite-photos');
   });
 
   tearDown(() {
@@ -37,30 +40,28 @@ void main() {
     imageCache.clearLiveImages();
   });
 
-  Possession row(int index) => Possession(
+  Possession row(int index, {String room = 'Wohnzimmer'}) => Possession(
     clientId: 'thing-$index',
     householdId: 'home',
     name: 'Gegenstand $index',
-    room: 'Wohnzimmer',
+    room: room,
     photoPath: '${photos.path}/photo-$index.jpg',
     updatedAt: DateTime.utc(2026, 9, 18),
     dirty: false,
   );
 
-  testWidgets('a list of photographed possessions stays within memory', (
-    tester,
+  Future<void> show(
+    WidgetTester tester,
+    List<Possession> rows,
+    Size size,
   ) async {
-    await tester.binding.setSurfaceSize(const Size(600, 2400));
+    await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          possessionsProvider(
-            'home',
-          ).overrideWith(
-            (ref) => Stream.value([for (var i = 0; i < 8; i++) row(i)]),
-          ),
+          possessionsProvider('home').overrideWith((ref) => Stream.value(rows)),
         ],
         child: const MaterialApp(
           locale: Locale('de'),
@@ -69,6 +70,17 @@ void main() {
           home: PossessionsScreen(householdId: 'home'),
         ),
       ),
+    );
+  }
+
+  testWidgets('a list of photographed possessions stays within memory', (
+    tester,
+  ) async {
+    writePhotos(8);
+    await show(
+      tester,
+      [for (var i = 0; i < 8; i++) row(i)],
+      const Size(600, 2400),
     );
     // Decoding a real file is real asynchronous work; fake async never
     // gets there.
@@ -87,6 +99,39 @@ void main() {
       imageCache.currentSizeBytes / (1024 * 1024),
       lessThan(2),
       reason: 'the stored picture is being decoded at its full 2000 pixels',
+    );
+  });
+
+  testWidgets('a big household on a phone builds only what is on screen', (
+    tester,
+  ) async {
+    // The rooms are what made this go wrong: each was one block of
+    // `AdaptiveColumns`, and a block is all-or-nothing, so the first room
+    // to reach into the viewport was built whole. Measured before the fix
+    // on a 400 by 800 screen holding six tiles: 300 things in three rooms
+    // built 100 tiles and decoded 10.5 MB. It grew with the size of the
+    // room, without limit.
+    const count = 90;
+    writePhotos(count, width: 1200, height: 900);
+    await show(
+      tester,
+      [
+        for (var i = 0; i < count; i++)
+          row(i, room: ['Wohnzimmer', 'Keller', 'Garage'][i % 3]),
+      ],
+      const Size(400, 800),
+    );
+    await tester.runAsync(() async {
+      await tester.pump();
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+    });
+    await tester.pump();
+
+    // Six tiles fit. Thirty per room is what a block would have built.
+    expect(
+      tester.widgetList(find.byType(Image)).length,
+      lessThan(15),
+      reason: 'a whole room is being built to show a screenful',
     );
   });
 }

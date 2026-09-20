@@ -1245,6 +1245,20 @@ not scan.
 
 ### Wide windows
 
+**A block is all-or-nothing, and that is a trap on a phone.** With one
+column `AdaptiveColumns` is a plain `ListView`, which builds only what is
+on screen -- but only per *block*. A room holding two hundred
+photographed things was one block, so the first room to reach into the
+viewport was built whole: measured at 400 by 800 with six tiles visible,
+a household of 300 things in three rooms built **100 tiles and decoded
+10.5 MB**, growing with the size of the room and with no limit. Anything
+that is a heading plus an unbounded list of user data is an
+`AdaptiveSection`, which stays one block while there are columns to be
+separated by and is taken apart when there is only one (measured after:
+11 pictures, 1.2 MB). The other screens with a loop inside a block --
+energy, medication range, the first-aid guides -- were checked and build
+cheap text rows, so they stay as they are.
+
 Screens that are a list of sections lay themselves out with
 `core/adaptive_columns.dart` rather than a plain `ListView`. It cuts the
 page into columns of readable width and lets the window decide how many;

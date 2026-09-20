@@ -108,15 +108,17 @@ class PossessionsScreen extends ConsumerWidget {
                   ],
                 ],
               ),
+              // A section and not a Column: at desktop width a room's name
+              // must not end up in one column with its contents in the
+              // next, but on a phone a room of two hundred things is one
+              // block the list has to build whole. See [AdaptiveSection].
               for (final entry in grouped.entries)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      entry.key ?? l10n.possessionsNoRoom,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
+                AdaptiveSection(
+                  heading: Text(
+                    entry.key ?? l10n.possessionsNoRoom,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  rows: [
                     for (final row in entry.value)
                       _PossessionTile(
                         row: row,

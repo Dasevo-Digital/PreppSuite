@@ -85,6 +85,69 @@ void main() {
     );
   });
 
+  group('a section, which is one block that can be taken apart', () {
+    List<Widget> room(String name, int rows) => [
+      AdaptiveSection(
+        heading: Text(name),
+        rows: [
+          for (var i = 0; i < rows; i++)
+            SizedBox(height: 120, child: Text('$name $i')),
+        ],
+      ),
+    ];
+
+    testWidgets('on a phone the list builds only what is on screen', (
+      tester,
+    ) async {
+      // The measurement that caused this: a household of 300 things in
+      // three rooms decoded 100 pictures to show six, because a room was
+      // one block and a block has no inside.
+      await show(tester, const Size(400, 800), room('Keller', 60));
+
+      final built = tester.widgetList(find.textContaining('Keller ')).length;
+      expect(built, lessThan(15), reason: 'the whole room was built');
+      expect(built, greaterThan(0));
+      expect(find.text('Keller'), findsOneWidget);
+    });
+
+    testWidgets('a wide window keeps the heading with its rows', (
+      tester,
+    ) async {
+      // The contract the section must not break: a room's name in one
+      // column and its contents in the next is not a layout.
+      await show(tester, const Size(1500, 900), [
+        ...room('Keller', 2),
+        const Text('Dazwischen'),
+        ...room('Garage', 2),
+      ]);
+
+      expect(
+        tester.getTopLeft(find.text('Keller 0')).dx,
+        tester.getTopLeft(find.text('Keller')).dx,
+      );
+      expect(
+        tester.getTopLeft(find.text('Garage 0')).dx,
+        tester.getTopLeft(find.text('Garage')).dx,
+      );
+    });
+
+    testWidgets('unpacked, it looks exactly like the packed column', (
+      tester,
+    ) async {
+      // Same widgets, same order, same spacing — the phone must not get
+      // a different page, only a lazier one.
+      const section = AdaptiveSection(
+        heading: Text('Keller'),
+        rows: [Text('Zelt'), Text('Kocher')],
+      );
+
+      expect(section.parts, hasLength(4));
+      expect((section.parts.first as Text).data, 'Keller');
+      expect(section.parts[1], isA<SizedBox>());
+      expect((section.parts.last as Text).data, 'Kocher');
+    });
+  });
+
   testWidgets('every block is still there', (tester) async {
     await show(tester, const Size(1500, 900), numbered(7));
 
