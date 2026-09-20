@@ -12,6 +12,7 @@ import '../../sharing/application/device_snapshot.dart';
 import '../../sharing/application/snapshot_exchange.dart';
 import '../../sharing/application/shared_folder_store.dart';
 import '../application/local_handover.dart';
+import 'household_conflict_dialog.dart';
 import '../application/qr_chain.dart';
 
 /// Films the other device's screen until the household is in.
@@ -83,57 +84,12 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
     await _finish();
   }
 
-  /// What to do when the code names a household this device is not in.
-  ///
-  /// Refusing outright was the old answer, and it is the right *default*:
-  /// two merged sets of data cannot be separated again, so it must never
-  /// happen by accident. It is a poor answer to somebody who meant it,
-  /// though — the two devices of one household that were set up
-  /// separately before joining existed, and had no way back.
-  ///
-  /// So it is asked rather than decided, with the row counts on screen.
-  Future<_Conflict?> _askAboutConflict(String mine) async {
-    final l10n = AppLocalizations.of(context)!;
-    final snapshot = await readHouseholdSnapshot(
-      ref.read(appDatabaseProvider),
-      deviceId: 'conflict',
-      householdId: widget.householdId,
-    );
-    if (!mounted) return null;
-    final rows = snapshot.rowCount;
-    return showDialog<_Conflict>(
-      context: context,
-      builder: (context) => AlertDialog(
-        icon: const Icon(Icons.merge_type),
-        title: Text(l10n.transferConflictTitle),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(l10n.transferConflictBody(mine)),
-              const SizedBox(height: 16),
-              _ConflictOption(
-                title: l10n.transferConflictMerge,
-                body: l10n.transferConflictMergeBody(rows),
-                onTap: () => Navigator.pop(context, _Conflict.merge),
-              ),
-              _ConflictOption(
-                title: l10n.transferConflictReplace,
-                body: l10n.transferConflictReplaceBody(rows),
-                onTap: () => Navigator.pop(context, _Conflict.replace),
-              ),
-              _ConflictOption(
-                title: l10n.transferConflictKeep,
-                body: l10n.transferConflictKeepBody,
-                onTap: () => Navigator.pop(context, _Conflict.keep),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  /// The row counts this device would be bringing along.
+  Future<int> _ownRows() async => (await readHouseholdSnapshot(
+    ref.read(appDatabaseProvider),
+    deviceId: 'conflict',
+    householdId: widget.householdId,
+  )).rowCount;
 
   /// Settles a differing household, then returns the id to carry on with.
   ///
@@ -147,15 +103,21 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
 
     final profile = ref.read(householdProfileProvider).value;
     if (profile == null) return null;
-    final choice = await _askAboutConflict(profile.name);
+    final rows = await _ownRows();
+    if (!mounted) return null;
+    final choice = await askAboutHouseholdConflict(
+      context,
+      mine: profile.name,
+      rows: rows,
+    );
     if (!mounted) return null;
     switch (choice) {
       case null:
-      case _Conflict.keep:
+      case HouseholdConflictChoice.keep:
         return null;
-      case _Conflict.merge:
+      case HouseholdConflictChoice.merge:
         return _adopt(incoming);
-      case _Conflict.replace:
+      case HouseholdConflictChoice.replace:
         // Deleted before the id moves, or the rows would travel along
         // under the new household and defeat the point of choosing this.
         await ref
@@ -368,30 +330,4 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
       ),
     );
   }
-}
-
-/// What to do about a code from another household.
-enum _Conflict { merge, replace, keep }
-
-class _ConflictOption extends StatelessWidget {
-  const _ConflictOption({
-    required this.title,
-    required this.body,
-    required this.onTap,
-  });
-
-  final String title;
-  final String body;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.only(bottom: 8),
-    child: ListTile(
-      title: Text(title, style: Theme.of(context).textTheme.titleSmall),
-      subtitle: Text(body),
-      isThreeLine: true,
-      onTap: onTap,
-    ),
-  );
 }

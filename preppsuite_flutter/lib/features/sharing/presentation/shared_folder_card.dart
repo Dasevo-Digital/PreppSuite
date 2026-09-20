@@ -6,7 +6,11 @@ import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
 import '../application/shared_folder_access.dart';
 import '../application/shared_folder_sync_service.dart';
+import '../../../core/app_database_providers.dart';
+import '../../transfer/presentation/household_conflict_dialog.dart';
+import '../application/household_file.dart';
 import '../application/sharing_providers.dart';
+import '../application/snapshot_exchange.dart';
 import 'folder_encryption_section.dart';
 import '../../../core/error_text.dart';
 
@@ -127,6 +131,15 @@ class _Body extends ConsumerWidget {
       dialogTitle: l10n.settingsSharingTitle,
     );
     if (picked == null) return;
+    if (!context.mounted) return;
+
+    // Asked *before* joining, because `joinFolder` adopts whatever it
+    // finds and re-stamps every local row onto it. That used to happen
+    // here unannounced, with a line afterwards saying it had — which made
+    // this the careless road into somebody else's household while the QR
+    // code, doing the very same thing, asked first.
+    if (!await _settleConflict(context, ref, picked)) return;
+    if (!context.mounted) return;
 
     final previousId = profile.id;
     final error = await ref
@@ -148,6 +161,54 @@ class _Body extends ConsumerWidget {
     final adopted = ref.read(householdProfileProvider).value;
     if (adopted != null && adopted.id != previousId) {
       _tell(context, l10n.sharingJoinedOther(adopted.name));
+    }
+  }
+
+  /// True when the join may go ahead.
+  ///
+  /// A folder that holds no household, or this one's, needs no question:
+  /// the first is being founded and the second is a device coming back.
+  Future<bool> _settleConflict(
+    BuildContext context,
+    WidgetRef ref,
+    SharedFolderLocation location,
+  ) async {
+    final HouseholdFile? existing;
+    try {
+      final raw = await syncFolderFor(location.value).readHouseholdFile();
+      existing = raw == null ? null : HouseholdFile.decode(raw);
+    } on Object {
+      // Unreadable is not this question's business: `joinFolder` reports
+      // it properly a moment later, in the user's own words.
+      return true;
+    }
+    if (existing == null || existing.householdId == profile.id) return true;
+
+    final db = ref.read(appDatabaseProvider);
+    final rows = (await readHouseholdSnapshot(
+      db,
+      deviceId: 'conflict',
+      householdId: profile.id,
+    )).rowCount;
+    if (!context.mounted) return false;
+
+    final choice = await askAboutHouseholdConflict(
+      context,
+      mine: profile.name,
+      rows: rows,
+    );
+    switch (choice) {
+      case null:
+      case HouseholdConflictChoice.keep:
+        return false;
+      case HouseholdConflictChoice.merge:
+        return true;
+      case HouseholdConflictChoice.replace:
+        // Before the join, or the rows would be re-stamped onto the new
+        // household and travel along — which is what this answer says
+        // not to do.
+        await db.deleteHouseholdData(profile.id);
+        return true;
     }
   }
 

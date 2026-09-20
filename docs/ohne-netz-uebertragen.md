@@ -84,9 +84,16 @@ dem Bildschirm:
 Bei der **Ersteinrichtung** wird nicht gefragt, sondern übernommen: dort
 hat das Gerät noch keine eigenen Zeilen, es ist also nichts abzuwägen.
 
-Der gemeinsame Ordner verhält sich hier anders und tut es ungefragt: wer
-einen Ordner mit fremdem Haushalt wählt, tritt ihm bei und erfährt es
-hinterher. Das ist eine offene Unstimmigkeit, keine Absicht.
+**Der gemeinsame Ordner fragt seit 1.9.1 dasselbe.** Er tat es vorher
+ungefragt — wer einen Ordner mit fremdem Haushalt wählte, trat ihm bei und
+erfuhr es hinterher. Damit war ausgerechnet der beiläufigere Weg der
+sorglosere. Beide benutzen jetzt denselben Dialog aus
+`household_conflict_dialog.dart`, mit denselben Worten: ein Weg in fremde
+Daten, den zwei Bildschirme verschieden beschreiben, ist ein Weg, den
+niemand zweimal gleich versteht.
+
+Ein Ordner ohne Haushalt oder mit dem eigenen wird nicht gefragt: das eine
+ist eine Gründung, das andere ein Gerät, das zurückkommt.
 
 ## Was übertragen wird
 
