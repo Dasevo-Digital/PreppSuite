@@ -153,4 +153,100 @@ void main() {
       expect(kcal! / 2200, closeTo(0.8, 0.05));
     });
   });
+
+  group('kilocalories for one stored unit', () {
+    // The column holds energy per unit and the calculator multiplies by
+    // the quantity, so what goes in has to be per unit — and "per unit"
+    // is a different sum for a tin than for a kilogram.
+    test('a tin is a package: the size text decides', () {
+      expect(
+        kcalPerStoredUnit(
+          kcalPer100: 120,
+          packageSizeText: '400 g',
+          storedUnit: 'Dose',
+        ),
+        480,
+      );
+    });
+
+    test('an unknown unit is treated as a package too', () {
+      for (final unit in ['Packung', 'Stk', 'Glas', 'Beutel', '']) {
+        expect(
+          kcalPerStoredUnit(
+            kcalPer100: 120,
+            packageSizeText: '400 g',
+            storedUnit: unit,
+          ),
+          480,
+          reason: unit,
+        );
+      }
+    });
+
+    test('kilograms come from the label, not from the package', () {
+      // The decisive case. Counting in kilograms and multiplying a
+      // per-package figure by the number of kilograms would be wrong by
+      // whatever the package weighs.
+      expect(
+        kcalPerStoredUnit(
+          kcalPer100: 350,
+          packageSizeText: '500 g',
+          storedUnit: 'kg',
+        ),
+        3500,
+      );
+      expect(
+        kcalPerStoredUnit(
+          kcalPer100: 45,
+          packageSizeText: '1,5 l',
+          storedUnit: 'l',
+        ),
+        450,
+      );
+    });
+
+    test('grams and millilitres get no number at all', () {
+      // Kilocalories per gram run to single digits and the column is an
+      // integer: rounding 3.5 to 4 is a fourteen percent error on every
+      // gram in the cellar. Better none than that.
+      expect(
+        kcalPerStoredUnit(
+          kcalPer100: 350,
+          packageSizeText: '500 g',
+          storedUnit: 'g',
+        ),
+        isNull,
+      );
+      expect(
+        kcalPerStoredUnit(
+          kcalPer100: 45,
+          packageSizeText: '1 l',
+          storedUnit: 'ml',
+        ),
+        isNull,
+      );
+    });
+
+    test('no figure on the label means no figure stored', () {
+      expect(
+        kcalPerStoredUnit(
+          kcalPer100: null,
+          packageSizeText: '400 g',
+          storedUnit: 'Dose',
+        ),
+        isNull,
+      );
+    });
+
+    test('a package whose size nobody wrote down stays unknown', () {
+      expect(
+        kcalPerStoredUnit(
+          kcalPer100: 120,
+          packageSizeText: null,
+          storedUnit: 'Dose',
+        ),
+        isNull,
+      );
+    });
+  });
 }

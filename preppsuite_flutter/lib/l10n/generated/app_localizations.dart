@@ -575,8 +575,20 @@ abstract class AppLocalizations {
   /// No description provided for @caloriesLabel.
   ///
   /// In en, this message translates to:
-  /// **'Calories, total kcal (optional)'**
+  /// **'Calories per unit (kcal, optional)'**
   String get caloriesLabel;
+
+  /// No description provided for @caloriesPerUnitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories per {unit} (kcal, optional)'**
+  String caloriesPerUnitLabel(String unit);
+
+  /// No description provided for @caloriesTotalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Comes to {total} kcal in stock.'**
+  String caloriesTotalHint(int total);
 
   /// No description provided for @supplyCalculatorDaysLabel.
   ///

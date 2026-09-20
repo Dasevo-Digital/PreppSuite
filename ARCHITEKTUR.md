@@ -1243,6 +1243,32 @@ switched off. Measured on a 600-character frame, the default paint left
 a value a decoder can read -- a code that looks perfectly fine and does
 not scan.
 
+### Nutrition figures: per unit, and only the energy is summed
+
+`inventory_items.calories` is the energy in **one** `unit` -- one tin, one
+kilogram -- and `calculateSupply` multiplies it by `quantity`. It used to
+be documented as a total for the stock and added once per row, so six tins
+of 900 kcal came to 900: a cellar counted as a sixth of itself. Every test
+of it used a quantity of one, which is also how anybody tries the app out,
+and a quantity of one hides a missing multiplication perfectly.
+
+Per unit rather than a total because a total is a figure nothing
+maintains: `consumeQuantity` changes the quantity and cannot rescale a
+number whose basis it does not know.
+
+The macronutrients beside it stay **per package**, and that difference is
+deliberate: energy is added up across the cellar and so has to multiply by
+something, while the grams are shown on the item and nowhere else, where
+the figure that helps is the one printed on the tin.
+
+What makes the per-unit basis safe is that the scanner respects it.
+`kcalPerStoredUnit` converts the label's per-100 figure according to the
+unit the household counts in -- from the package size for a tin, from the
+label alone for a kilogram, and **not at all** for grams and millilitres,
+where an integer column would be a tenth of a kilocalorie out on every
+gram in the cellar. Without that, a scan into an item counted in grams
+would have been multiplied by the gram count.
+
 ### The knowledge check must not know anything the guides do not
 
 `first_aid/application/knowledge_check_*.dart` asks back about first aid,

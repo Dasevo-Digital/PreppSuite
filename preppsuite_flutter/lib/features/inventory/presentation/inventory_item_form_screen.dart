@@ -18,6 +18,7 @@ import '../application/open_food_facts_service.dart';
 import '../application/package_nutrition.dart';
 import 'barcode_scanner_screen.dart';
 import 'photo_editor_screen.dart';
+import '../application/package_energy.dart';
 
 /// A form filled in from somewhere other than an existing row — the
 /// stockpiling table hands one over when a food is added from it.
@@ -272,7 +273,7 @@ class _InventoryItemFormScreenState
       if (product != null) {
         _nameController.text = product.name;
         _offProductId = product.barcode;
-        _fillNutrition(product.nutrition);
+        _fillNutrition(product.nutrition, product: product);
       }
     });
 
@@ -392,19 +393,43 @@ class _InventoryItemFormScreenState
   /// Only ever fills an empty one: a value already typed in is the user's
   /// own correction, and it outranks a figure derived from a per-100 g
   /// number and a free-text package size.
-  void _fillNutrition(PackageNutrition nutrition) {
+  void _fillNutrition(
+    PackageNutrition nutrition, {
+    OpenFoodFactsProduct? product,
+  }) {
     void fill(TextEditingController controller, String? value) {
       if (value != null && controller.text.trim().isEmpty) {
         controller.text = value;
       }
     }
 
-    final kcal = nutrition.kcal;
+    // The energy column holds kilocalories in **one** unit, and what one
+    // unit is depends on what the household counts in. A scan knows the
+    // label and the package size; only this screen knows whether the
+    // cellar is counted in tins or in kilograms, so the conversion
+    // belongs here and not in the lookup.
+    final kcal = product == null
+        ? nutrition.kcal
+        : kcalPerStoredUnit(
+            kcalPer100: product.energyKcalPer100,
+            packageSizeText: product.quantity,
+            storedUnit: _unitController.text,
+          );
     fill(_caloriesController, kcal == null ? null : '$kcal');
     fill(_proteinController, _grams(nutrition.proteinGrams));
     fill(_carbohydrateController, _grams(nutrition.carbohydrateGrams));
     fill(_fatController, _grams(nutrition.fatGrams));
     fill(_fiberController, _grams(nutrition.fiberGrams));
+  }
+
+  /// What the stock comes to, or null while either half is missing.
+  int? _caloriesTotal() {
+    final kcal = int.tryParse(_caloriesController.text.trim());
+    final quantity = double.tryParse(
+      _quantityController.text.trim().replaceAll(',', '.'),
+    );
+    if (kcal == null || quantity == null || quantity <= 0) return null;
+    return (kcal * quantity).round();
   }
 
   String? _grams(double? value) =>
@@ -757,7 +782,15 @@ class _InventoryItemFormScreenState
                         TextFormField(
                           controller: _caloriesController,
                           decoration: InputDecoration(
-                            labelText: l10n.caloriesLabel,
+                            // Named after the unit the household typed,
+                            // because "per unit" is the whole point and a
+                            // label that does not say which unit is how
+                            // the figure was misread in the first place.
+                            labelText: _unitController.text.trim().isEmpty
+                                ? l10n.caloriesLabel
+                                : l10n.caloriesPerUnitLabel(
+                                    _unitController.text.trim(),
+                                  ),
                           ),
                           keyboardType: TextInputType.number,
                           validator: (value) {
@@ -768,6 +801,16 @@ class _InventoryItemFormScreenState
                                 : null;
                           },
                         ),
+                        // The multiplication, spelled out. A number that
+                        // means something else than the household thinks
+                        // is invisible in a total and obvious here.
+                        if (_caloriesTotal() case final total?) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n.caloriesTotalHint(total),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
                         const SizedBox(height: 8),
                         Row(
                           children: [

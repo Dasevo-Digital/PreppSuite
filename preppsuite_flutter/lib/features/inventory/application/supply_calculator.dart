@@ -99,6 +99,13 @@ class SupplyHousehold {
 }
 
 /// Target vs. current stock for the "Vorräte für X Tage" calculator.
+///
+/// Both halves count the same way: an amount times a per-unit figure.
+/// Water takes the quantity through [normalizeToLiters]; food multiplies
+/// the stored kilocalories by it. For a long time only the water half did,
+/// and the difference was invisible in the one case that is also the
+/// commonest way to try the app out — a single tin, where a quantity of
+/// one hides a missing multiplication perfectly.
 /// Deliberately covers only drinking water and calories — the reference
 /// this is modeled on also tracks "Brauchwasser" (service/hygiene water),
 /// but there's no official BBK figure for that and [InventoryItemCategory]
@@ -134,7 +141,11 @@ SupplyCalculatorResult calculateSupply({
       if (liters != null) waterCurrent += liters;
     } else if (category == InventoryItemCategory.food &&
         item.calories != null) {
-      caloriesCurrent += item.calories!;
+      // Times the quantity, the same way the water above is. It used to
+      // be added once per *line*, so six tins of 900 kcal came to 900 —
+      // a cellar counted as a sixth of itself. The column holds the
+      // energy in one unit; how many of them there are is the quantity.
+      caloriesCurrent += (item.calories! * item.quantity).round();
     }
   }
 

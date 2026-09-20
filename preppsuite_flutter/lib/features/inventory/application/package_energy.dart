@@ -97,6 +97,51 @@ int? estimatePackageKcal({
   return total?.round();
 }
 
+/// Kilocalories for **one** of whatever the household counts this item in.
+///
+/// The column stores kcal per unit, and the supply calculator multiplies
+/// by the quantity. So what has to be written is not "the energy in this
+/// tin" but "the energy in one [storedUnit]", and those are the same
+/// number only when the unit *is* the tin.
+///
+/// Three cases, and the package size text only matters in the third:
+///
+///  * the household counts in **kilograms or litres** — then the label's
+///    own per-100 figure answers it directly, and the package size is
+///    irrelevant;
+///  * it counts in **grams or millilitres** — then the honest answer is
+///    none at all. Kilocalories per gram run to single digits, the column
+///    is an integer, and rounding 3.6 to 4 is an eleven percent error on
+///    every gram in the cellar. Better no number than that one;
+///  * it counts in **tins, packets, pieces** — anything the unit parser
+///    does not recognise as mass or volume. Then one unit is one package,
+///    and [estimatePackageKcal] is the answer.
+int? kcalPerStoredUnit({
+  required double? kcalPer100,
+  required String? packageSizeText,
+  required String storedUnit,
+}) {
+  if (kcalPer100 == null) return null;
+
+  // Asking the size parser what one of the stored unit weighs. It answers
+  // for grams, kilograms, millilitres and litres, and gives up on "Dose"
+  // — which is exactly the distinction that decides this.
+  final one = parsePackageSize('1 ${storedUnit.trim()}');
+  if (one == null) {
+    return estimatePackageKcal(
+      kcalPer100: kcalPer100,
+      quantityText: packageSizeText,
+    );
+  }
+
+  final perUnit = kcalPer100 * one.amount / 100;
+  // Below this an integer is too blunt to be worth storing: at 20 kcal a
+  // rounding of half a kilocalorie is already two and a half percent, and
+  // it gets worse all the way down to a single gram.
+  if (perUnit < 20) return null;
+  return perUnit.round();
+}
+
 /// Total grams of a nutrient in a package — protein, fat, carbohydrate,
 /// fibre — or `null` when the label does not say.
 ///

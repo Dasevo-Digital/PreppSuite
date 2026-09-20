@@ -277,7 +277,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get minQuantityLabel => 'Mindestbestand (optional)';
 
   @override
-  String get caloriesLabel => 'Kalorien, gesamt in kcal (optional)';
+  String get caloriesLabel => 'Kalorien je Einheit (kcal, optional)';
+
+  @override
+  String caloriesPerUnitLabel(String unit) {
+    return 'Kalorien je $unit (kcal, optional)';
+  }
+
+  @override
+  String caloriesTotalHint(int total) {
+    return 'Macht $total kcal im Bestand.';
+  }
 
   @override
   String supplyCalculatorDaysLabel(int days) {

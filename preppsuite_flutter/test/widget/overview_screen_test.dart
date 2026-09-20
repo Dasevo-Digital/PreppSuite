@@ -123,11 +123,17 @@ void main() {
     tester,
   ) async {
     // Two adults, ten days: 40 litres and 44,000 kcal.
+    //
+    // The food line is five packets at 2,200 kcal each, written out
+    // rather than left to the helper's defaults: the stored figure is
+    // per unit and the calculator multiplies by the quantity. This test
+    // used to pass with one packet's worth of calories on a shelf of
+    // five, because the multiplication was missing on both sides.
     await pumpOverview(
       tester,
       items: [
         item(clientId: 'w', category: 'water', quantity: 10, unit: 'L'),
-        item(clientId: 'f', calories: 11000),
+        item(clientId: 'f', quantity: 5, unit: 'Packung', calories: 2200),
       ],
     );
 

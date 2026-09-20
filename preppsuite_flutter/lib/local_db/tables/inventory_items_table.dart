@@ -23,14 +23,23 @@ class InventoryItems extends Table {
   DateTimeColumn get expirationDate => dateTime().nullable()();
   RealColumn get minQuantity => real().nullable()();
 
-  /// Total kcal for the item's current [quantity] (not per-unit) — only
-  /// meaningful for `category: food`. Powers the "Vorräte für X Tage"
-  /// supply calculator (`supply_calculator.dart`).
+  /// Kilocalories in **one** [unit] of this item — one tin, one kilogram,
+  /// one packet. Only meaningful for `category: food`, and multiplied by
+  /// [quantity] by the supply calculator (`supply_calculator.dart`).
+  ///
+  /// Per unit and not a total for the stock, because a total is a figure
+  /// nothing maintains: [quantity] changes every time somebody eats
+  /// something, and no consume path can rescale a number whose basis it
+  /// does not know. Per unit survives that untouched.
   IntColumn get calories => integer().nullable()();
 
-  /// Macronutrients for the item's current [quantity], in grams — the
-  /// same "whole item, not per 100 g" convention as [calories], for the
-  /// same reason: a shelf is then a sum. Filled in from the barcode (see
+  /// Macronutrients for **one package**, in grams, as the label gives
+  /// them — deliberately *not* the per-unit basis [calories] uses.
+  ///
+  /// They differ because their jobs do. Kilocalories are added up across
+  /// the cellar, so they have to multiply by something; these are shown
+  /// on the item and nowhere else, so the figure that helps is the one
+  /// printed on the tin. Filled in from the barcode (see
   /// `open_food_facts_service.dart`) or by hand, and null wherever the
   /// label does not say, which is most non-food supplies.
   RealColumn get proteinGrams => real().nullable()();

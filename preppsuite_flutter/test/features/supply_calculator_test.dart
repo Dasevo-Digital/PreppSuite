@@ -110,5 +110,57 @@ void main() {
 
       expect(result.caloriesCurrent, 3500);
     });
+
+    test('six tins of 900 kcal are 5400, not 900', () {
+      // The bug this pins, reported from the field: the calories were
+      // added once per *line* and never multiplied by how many there
+      // were, so a cellar was counted as a sixth of itself.
+      final result = calculateSupply(
+        items: [
+          item(category: 'food', quantity: 6, unit: 'Dose', calories: 900),
+        ],
+        days: 1,
+      );
+
+      expect(result.caloriesCurrent, 6 * 900);
+    });
+
+    test('and it was invisible because one is the same either way', () {
+      // Every test above this one used the helper's default quantity of
+      // one, which is also how anybody tries the app out first. A missing
+      // multiplication hides perfectly behind a single tin.
+      final one = calculateSupply(
+        items: [item(category: 'food', quantity: 1, calories: 900)],
+        days: 1,
+      );
+
+      expect(one.caloriesCurrent, 900);
+    });
+
+    test('a part of a unit counts as a part', () {
+      // Half a kilogram of something at 3500 kcal the kilogram. Stored as
+      // an int, so the result is rounded rather than truncated.
+      final result = calculateSupply(
+        items: [
+          item(category: 'food', quantity: 0.5, unit: 'kg', calories: 3500),
+        ],
+        days: 1,
+      );
+
+      expect(result.caloriesCurrent, 1750);
+    });
+
+    test('an emptied item stops counting on its own', () {
+      // The reason the column holds a per-unit figure rather than a
+      // total: nothing has to rescale it when the stock changes.
+      final result = calculateSupply(
+        items: [
+          item(category: 'food', quantity: 0, unit: 'Dose', calories: 900),
+        ],
+        days: 1,
+      );
+
+      expect(result.caloriesCurrent, 0);
+    });
   });
 }

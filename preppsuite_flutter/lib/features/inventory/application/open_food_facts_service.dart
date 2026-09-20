@@ -45,6 +45,7 @@ class OpenFoodFactsProduct {
     this.brand,
     this.quantity,
     this.nutrition = const PackageNutrition(),
+    this.energyKcalPer100,
   });
 
   final String barcode;
@@ -54,6 +55,15 @@ class OpenFoodFactsProduct {
   /// Free-text package quantity as reported by Open Food Facts (e.g.
   /// "1.5 l", "500g") — informational only, not parsed into a number/unit.
   final String? quantity;
+
+  /// What the label itself says, per 100 g or 100 ml, before anything is
+  /// worked out from it.
+  ///
+  /// Carried raw because the conversion the inventory needs depends on a
+  /// thing this layer cannot know: the unit the household counts the item
+  /// in. Energy is stored per unit, and "per unit" is a different sum for
+  /// a tin than for a kilogram — see [kcalPerStoredUnit].
+  final double? energyKcalPer100;
 
   /// Energy and macronutrients for the whole package, worked out from the
   /// reported per-100 g figures and [quantity] — see `package_energy.dart`.
@@ -107,6 +117,10 @@ class OpenFoodFactsService {
         brand: product.brands,
         quantity: product.quantity,
         nutrition: packageNutritionOf(product.nutriments, product.quantity),
+        energyKcalPer100: product.nutriments?.getValue(
+          Nutrient.energyKCal,
+          PerSize.oneHundredGrams,
+        ),
       );
     } catch (_) {
       // Network error, timeout, malformed response, etc. — the user can

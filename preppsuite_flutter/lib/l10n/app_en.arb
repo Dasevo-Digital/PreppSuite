@@ -90,7 +90,11 @@
   "storageLocationLabel": "Storage location",
   "expirationDateLabel": "Expiration date (optional)",
   "minQuantityLabel": "Minimum quantity (optional)",
-  "caloriesLabel": "Calories, total kcal (optional)",
+  "caloriesLabel": "Calories per unit (kcal, optional)",
+  "caloriesPerUnitLabel": "Calories per {unit} (kcal, optional)",
+  "@caloriesPerUnitLabel": {"placeholders": {"unit": {"type": "String"}}},
+  "caloriesTotalHint": "Comes to {total} kcal in stock.",
+  "@caloriesTotalHint": {"placeholders": {"total": {"type": "int"}}},
   "supplyCalculatorDaysLabel": "Supplies for {days} days",
   "@supplyCalculatorDaysLabel": {
     "placeholders": {
