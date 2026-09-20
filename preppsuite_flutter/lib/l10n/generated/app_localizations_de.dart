@@ -5730,4 +5730,72 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get mapWaterAdviceNote =>
       'Was mit dem Wasser zu tun ist, steht in der Warnung selbst. Diese App gibt dazu keine eigenen Zahlen aus.';
+
+  @override
+  String get setupChoiceTitle => 'Haushalt einrichten';
+
+  @override
+  String get setupChoiceIntro =>
+      'Gibt es diesen Haushalt schon auf einem anderen Gerät? Dann hol ihn dir hierher, statt ihn neu anzulegen — sonst stehen am Ende zwei Haushalte nebeneinander, die sich nie wieder vereinigen.';
+
+  @override
+  String get setupChoiceNewTitle => 'Neuen Haushalt anlegen';
+
+  @override
+  String get setupChoiceNewBody =>
+      'Das erste Gerät. Alles Weitere lässt sich später von hier aus übertragen.';
+
+  @override
+  String get setupChoiceFolderTitle => 'Gemeinsamen Ordner wählen';
+
+  @override
+  String get setupChoiceFolderBody =>
+      'Liegt der Haushalt in einem Ordner, den beide Geräte sehen — iCloud, Nextcloud, ein Stick oder ein Ordner, den eine Sync-App abgleicht —, tritt dieses Gerät ihm bei und bleibt danach von allein auf demselben Stand.';
+
+  @override
+  String get setupChoiceScanTitle => 'Von einem anderen Gerät übernehmen';
+
+  @override
+  String get setupChoiceScanBody =>
+      'Das andere Gerät zeigt einen QR-Code, dieses filmt ihn ab. Über das örtliche Netz geht der ganze Haushalt in einem Zug hinüber; ohne Netz als Bilderfolge.';
+
+  @override
+  String get setupChoiceSafeNote =>
+      'Jetzt ist der ungefährlichste Zeitpunkt dafür: dieses Gerät hat noch keine eigenen Daten, die dabei umgestempelt werden müssten.';
+
+  @override
+  String get setupFolderSearching => 'Ordner wird gelesen …';
+
+  @override
+  String setupFolderFound(String name) {
+    return 'Haushalt gefunden: $name';
+  }
+
+  @override
+  String get setupFolderFoundBody =>
+      'Dieses Gerät tritt ihm bei. Name und Land kommen aus dem Ordner; Region und Personenzahl gehören weiter diesem Gerät.';
+
+  @override
+  String get setupFolderEmpty =>
+      'In diesem Ordner liegt noch kein Haushalt. Es wird ein neuer angelegt und hineingeschrieben.';
+
+  @override
+  String get setupScanHint =>
+      'Fülle zuerst aus, was diesem Gerät gehört. Danach filmst du den QR-Code des anderen Geräts ab, und der Haushalt wird übernommen.';
+
+  @override
+  String get setupScanContinue => 'Weiter zum Abfilmen';
+
+  @override
+  String setupJoinFailed(String reason) {
+    return 'Beitreten nicht möglich: $reason';
+  }
+
+  @override
+  String setupAdopted(String name) {
+    return 'Haushalt „$name“ übernommen.';
+  }
+
+  @override
+  String get transferAdoptHousehold => 'Haushalt dieses Codes übernehmen';
 }

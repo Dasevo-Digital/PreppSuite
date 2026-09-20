@@ -6,6 +6,8 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/app_database_providers.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../model/household_profile.dart';
+import '../../household/application/household_providers.dart';
 import '../../sharing/application/device_snapshot.dart';
 import '../../sharing/application/snapshot_exchange.dart';
 import '../../sharing/application/shared_folder_store.dart';
@@ -24,12 +26,25 @@ import '../application/qr_chain.dart';
 /// holding a phone at a screen has no idea whether to keep holding it or
 /// whether it is stuck.
 class QrReceiveScreen extends ConsumerStatefulWidget {
-  const QrReceiveScreen({super.key, required this.householdId});
+  const QrReceiveScreen({
+    super.key,
+    required this.householdId,
+    this.adoptHousehold = false,
+  });
 
   /// The household this device belongs to. A snapshot from a different
   /// one is refused rather than merged: two households sharing rows by
   /// accident is not something a merge rule can undo afterwards.
   final String householdId;
+
+  /// Take over the scanned household instead of refusing it.
+  ///
+  /// Set only by first-run setup, and the refusal above is exactly why:
+  /// adopting means re-stamping every local row with somebody else's
+  /// household id, which cannot be undone. On a device that was set up a
+  /// minute ago there are no rows to re-stamp, so the move is free — and
+  /// it is the only moment at which it is. See [SetupChoiceScreen].
+  final bool adoptHousehold;
 
   @override
   ConsumerState<QrReceiveScreen> createState() => _QrReceiveScreenState();
@@ -68,14 +83,52 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
     await _finish();
   }
 
+  /// Takes over [incoming] as this device's household.
+  ///
+  /// The same two steps `joinFolder` does for a shared folder: re-stamp
+  /// the local rows, then move the profile onto the new id. Which
+  /// warnings this device wants and how many people it plans for stay
+  /// where they are — those belong to the device, not to the shared data.
+  ///
+  /// Returns the id to carry on with, which is the old one whenever
+  /// there is nothing to adopt.
+  Future<String> _adopt(String incoming) async {
+    if (!widget.adoptHousehold || incoming == widget.householdId) {
+      return widget.householdId;
+    }
+    final profile = ref.read(householdProfileProvider).value;
+    if (profile == null) return widget.householdId;
+
+    await ref
+        .read(appDatabaseProvider)
+        .adoptHouseholdId(from: profile.id, to: incoming);
+    await ref
+        .read(householdProfileProvider.notifier)
+        .adopt(
+          HouseholdProfile(
+            id: incoming,
+            name: profile.name,
+            countryCode: profile.countryCode,
+            regionKey: profile.regionKey,
+            personCount: profile.personCount,
+            children: profile.children,
+            dogs: profile.dogs,
+            cats: profile.cats,
+            extraRegions: profile.extraRegions,
+          ),
+        );
+    return incoming;
+  }
+
   Future<void> _handover(LocalHandoverInvitation invitation) async {
     final l10n = AppLocalizations.of(context)!;
     setState(() {});
     try {
+      final householdId = await _adopt(invitation.householdId);
       final result = await joinLocalHandover(
         db: ref.read(appDatabaseProvider),
         deviceId: await const SharedFolderStore().deviceId(),
-        householdId: widget.householdId,
+        householdId: householdId,
         invitation: invitation,
       );
       if (!mounted) return;
@@ -117,7 +170,8 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
         });
         return;
       }
-      if (snapshot.householdId != widget.householdId) {
+      final householdId = await _adopt(snapshot.householdId);
+      if (snapshot.householdId != householdId) {
         setState(() {
           _failed = true;
           _result = l10n.transferWrongHousehold;

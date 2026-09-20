@@ -5702,4 +5702,72 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get mapWaterAdviceNote =>
       'What to do with the water is in the warning itself. This app publishes no figures of its own on that.';
+
+  @override
+  String get setupChoiceTitle => 'Set up a household';
+
+  @override
+  String get setupChoiceIntro =>
+      'Does this household already exist on another device? Then bring it over instead of starting a new one — otherwise you end up with two households side by side that never merge.';
+
+  @override
+  String get setupChoiceNewTitle => 'Start a new household';
+
+  @override
+  String get setupChoiceNewBody =>
+      'The first device. Everything else can be handed over from here later.';
+
+  @override
+  String get setupChoiceFolderTitle => 'Choose a shared folder';
+
+  @override
+  String get setupChoiceFolderBody =>
+      'If the household lives in a folder both devices can see — iCloud, Nextcloud, a stick, or a folder some sync app keeps in step — this device joins it and stays up to date by itself.';
+
+  @override
+  String get setupChoiceScanTitle => 'Take it from another device';
+
+  @override
+  String get setupChoiceScanBody =>
+      'The other device shows a QR code and this one reads it. Over the local network the whole household goes across in one go; with no network, as a sequence of images.';
+
+  @override
+  String get setupChoiceSafeNote =>
+      'Now is the safest moment for this: this device has no data of its own yet that would have to be re-stamped.';
+
+  @override
+  String get setupFolderSearching => 'Reading the folder …';
+
+  @override
+  String setupFolderFound(String name) {
+    return 'Household found: $name';
+  }
+
+  @override
+  String get setupFolderFoundBody =>
+      'This device will join it. Name and country come from the folder; region and household size stay with this device.';
+
+  @override
+  String get setupFolderEmpty =>
+      'There is no household in this folder yet. A new one will be created and written into it.';
+
+  @override
+  String get setupScanHint =>
+      'First fill in what belongs to this device. Then read the other device\'s QR code, and the household is taken over.';
+
+  @override
+  String get setupScanContinue => 'Continue to the scan';
+
+  @override
+  String setupJoinFailed(String reason) {
+    return 'Could not join: $reason';
+  }
+
+  @override
+  String setupAdopted(String name) {
+    return 'Household “$name” taken over.';
+  }
+
+  @override
+  String get transferAdoptHousehold => 'Take over this code\'s household';
 }

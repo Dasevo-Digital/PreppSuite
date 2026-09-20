@@ -111,6 +111,36 @@ Nennt der Ordner später einen *anderen* Haushalt als den, zu dem das Gerät
 gehört, wird gar nichts zusammengeführt. Zwei fremde Datenbestände lassen
 sich nicht wieder trennen.
 
+### Beitreten bei der Ersteinrichtung
+
+Seit 1.9.1 wird der Beitritt **vor** dem Anlegen angeboten, nicht erst
+danach in den Einstellungen. Der erste Bildschirm fragt, ob dieser
+Haushalt schon auf einem anderen Gerät existiert, und bietet drei Wege:
+neu anlegen, einem gemeinsamen Ordner beitreten, oder ihn von einem
+anderen Gerät abfilmen.
+
+Das ist kein reiner Bequemlichkeitsgewinn. Wer auf dem zweiten Gerät das
+alte Formular ausfüllte, legte einen **zweiten** Haushalt mit neuer
+Kennung an — und weil jede Tabelle nach dieser Kennung partitioniert ist,
+lassen sich die beiden danach nie wieder vereinigen. Der Weg zum Beitritt
+war da, aber nur hinter einem bereits falsch angelegten Haushalt.
+
+Umgekehrt ist die Ersteinrichtung der **sicherste** Zeitpunkt dafür.
+Beitreten heisst, die fremde Haushalts-Kennung zu übernehmen und jede
+eigene Zeile darauf umzustempeln; auf einem Gerät ohne eigene Zeilen ist
+daran nichts zu verlieren.
+
+Beim Ordner wird die `household.json` gelesen, **bevor** etwas gefragt
+wird: liegt dort ein Haushalt, stehen Name und Land schon im Formular,
+statt eingetippt und gleich darauf überschrieben zu werden. Scheitert das
+Beitreten danach, wird das eben angelegte Profil wieder verworfen — sonst
+liesse das Türchen jemanden in einen Haushalt, der mit nichts verbunden
+ist.
+
+Beim QR-Weg kommt das Formular zuerst und die Kamera danach. Andersherum
+füllte jemand Felder aus, während im Hintergrund die Einladung des
+anderen Geräts abläuft.
+
 ## Wann geschrieben wird
 
 Gelesen wird beim Start, beim Zurückkehren in die App und alle zwei

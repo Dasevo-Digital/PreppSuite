@@ -9628,6 +9628,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'What to do with the water is in the warning itself. This app publishes no figures of its own on that.'**
   String get mapWaterAdviceNote;
+
+  /// No description provided for @setupChoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up a household'**
+  String get setupChoiceTitle;
+
+  /// No description provided for @setupChoiceIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Does this household already exist on another device? Then bring it over instead of starting a new one — otherwise you end up with two households side by side that never merge.'**
+  String get setupChoiceIntro;
+
+  /// No description provided for @setupChoiceNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new household'**
+  String get setupChoiceNewTitle;
+
+  /// No description provided for @setupChoiceNewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The first device. Everything else can be handed over from here later.'**
+  String get setupChoiceNewBody;
+
+  /// No description provided for @setupChoiceFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a shared folder'**
+  String get setupChoiceFolderTitle;
+
+  /// No description provided for @setupChoiceFolderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'If the household lives in a folder both devices can see — iCloud, Nextcloud, a stick, or a folder some sync app keeps in step — this device joins it and stays up to date by itself.'**
+  String get setupChoiceFolderBody;
+
+  /// No description provided for @setupChoiceScanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take it from another device'**
+  String get setupChoiceScanTitle;
+
+  /// No description provided for @setupChoiceScanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The other device shows a QR code and this one reads it. Over the local network the whole household goes across in one go; with no network, as a sequence of images.'**
+  String get setupChoiceScanBody;
+
+  /// No description provided for @setupChoiceSafeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Now is the safest moment for this: this device has no data of its own yet that would have to be re-stamped.'**
+  String get setupChoiceSafeNote;
+
+  /// No description provided for @setupFolderSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the folder …'**
+  String get setupFolderSearching;
+
+  /// No description provided for @setupFolderFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Household found: {name}'**
+  String setupFolderFound(String name);
+
+  /// No description provided for @setupFolderFoundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This device will join it. Name and country come from the folder; region and household size stay with this device.'**
+  String get setupFolderFoundBody;
+
+  /// No description provided for @setupFolderEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no household in this folder yet. A new one will be created and written into it.'**
+  String get setupFolderEmpty;
+
+  /// No description provided for @setupScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'First fill in what belongs to this device. Then read the other device\'s QR code, and the household is taken over.'**
+  String get setupScanHint;
+
+  /// No description provided for @setupScanContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to the scan'**
+  String get setupScanContinue;
+
+  /// No description provided for @setupJoinFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not join: {reason}'**
+  String setupJoinFailed(String reason);
+
+  /// No description provided for @setupAdopted.
+  ///
+  /// In en, this message translates to:
+  /// **'Household “{name}” taken over.'**
+  String setupAdopted(String name);
+
+  /// No description provided for @transferAdoptHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Take over this code\'s household'**
+  String get transferAdoptHousehold;
 }
 
 class _AppLocalizationsDelegate

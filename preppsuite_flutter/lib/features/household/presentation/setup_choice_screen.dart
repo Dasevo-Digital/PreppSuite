@@ -1,0 +1,218 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../l10n/generated/app_localizations.dart';
+import '../../../model/household_profile.dart';
+import '../../sharing/application/household_file.dart';
+import '../../sharing/application/shared_folder_access.dart';
+import '../../sharing/application/sharing_providers.dart';
+import '../../transfer/presentation/qr_receive_screen.dart';
+import '../application/household_providers.dart';
+import 'profile_setup_screen.dart';
+
+/// The first question, which the app never used to ask.
+///
+/// Setting up was a single form, written when one household meant one
+/// device. On the second device that form is a trap: it makes a *new*
+/// household with a new id, and because every local table is partitioned
+/// by that id, the two can never merge afterwards. The way to join an
+/// existing one existed — a shared folder, a QR code — but only in the
+/// settings, behind a household that had already been created wrongly.
+///
+/// So the choice comes first. And this is the right moment for it in more
+/// than a navigational sense: joining means taking over somebody else's
+/// household id and re-stamping every local row with it, which is
+/// irreversible. On a device that has no rows yet, there is nothing to
+/// re-stamp and nothing to lose.
+class SetupChoiceScreen extends ConsumerStatefulWidget {
+  const SetupChoiceScreen({super.key});
+
+  @override
+  ConsumerState<SetupChoiceScreen> createState() => _SetupChoiceScreenState();
+}
+
+class _SetupChoiceScreenState extends ConsumerState<SetupChoiceScreen> {
+  var _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.setupChoiceTitle)),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: ListView(
+              padding: const EdgeInsets.all(24),
+              children: [
+                Text(l10n.setupChoiceIntro, style: theme.textTheme.bodyLarge),
+                const SizedBox(height: 24),
+                _Option(
+                  icon: Icons.home_outlined,
+                  title: l10n.setupChoiceNewTitle,
+                  body: l10n.setupChoiceNewBody,
+                  onTap: _busy ? null : _startFresh,
+                ),
+                _Option(
+                  icon: Icons.folder_shared_outlined,
+                  title: l10n.setupChoiceFolderTitle,
+                  body: l10n.setupChoiceFolderBody,
+                  onTap: _busy ? null : _joinFolder,
+                ),
+                _Option(
+                  icon: Icons.qr_code_scanner,
+                  title: l10n.setupChoiceScanTitle,
+                  body: l10n.setupChoiceScanBody,
+                  onTap: _busy ? null : _joinByScan,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.setupChoiceSafeNote,
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _startFresh() => Navigator.of(context).push(
+    MaterialPageRoute<void>(builder: (_) => const ProfileSetupScreen()),
+  );
+
+  /// Reads the folder *before* asking anything.
+  ///
+  /// The household file names the household and its country, and the
+  /// documentation calls those "das Angebot an ein beitretendes Gerät".
+  /// Showing the offer first means somebody types a name only when there
+  /// is none to take, instead of typing one that is then overwritten.
+  Future<void> _joinFolder() async {
+    final l10n = AppLocalizations.of(context)!;
+    setState(() => _busy = true);
+    HouseholdFile? found;
+    SharedFolderLocation? location;
+    try {
+      location = await pickSharedFolder(dialogTitle: l10n.setupChoiceTitle);
+      if (location == null) return;
+      final raw = await syncFolderFor(location.value).readHouseholdFile();
+      if (raw != null) found = HouseholdFile.decode(raw);
+    } on Object {
+      // An unreadable folder is not an error worth a stack trace here:
+      // `joinFolder` below reports it properly, in the user's words.
+      found = null;
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+    if (!mounted || location == null) return;
+
+    final target = location;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ProfileSetupScreen(
+          intro: found == null
+              ? l10n.setupFolderEmpty
+              : '${l10n.setupFolderFound(found.name)}\n\n'
+                    '${l10n.setupFolderFoundBody}',
+          initialName: found?.name,
+          initialCountryCode: found?.countryCode,
+          onFilled: (profile) => _finishFolder(target, profile),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _finishFolder(
+    SharedFolderLocation location,
+    HouseholdProfile profile,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final error = await ref
+        .read(sharedFolderProvider.notifier)
+        .joinFolder(location, profile: profile);
+    if (!mounted) return;
+    if (error == null) return;
+
+    // The profile exists by now, so the gate would let the app through
+    // with a folder that was never joined. Undo it and say why.
+    await ref.read(householdProfileProvider.notifier).forget();
+    if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          l10n.setupJoinFailed(switch (error) {
+            SharedFolderJoinError.unwritable => l10n.sharingErrorUnwritable,
+            SharedFolderJoinError.unreadable => l10n.sharingErrorUnreadable,
+          }),
+        ),
+      ),
+    );
+  }
+
+  /// The form first, then the camera.
+  ///
+  /// The other way round would read the household id off the code and
+  /// then leave somebody filling in a form while the host's invitation
+  /// times out behind them.
+  void _joinByScan() {
+    final l10n = AppLocalizations.of(context)!;
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ProfileSetupScreen(
+          intro: l10n.setupScanHint,
+          submitLabel: l10n.setupScanContinue,
+          onFilled: _finishScan,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _finishScan(HouseholdProfile profile) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            QrReceiveScreen(householdId: profile.id, adoptHousehold: true),
+      ),
+    );
+  }
+}
+
+class _Option extends StatelessWidget {
+  const _Option({
+    required this.icon,
+    required this.title,
+    required this.body,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: const EdgeInsets.only(bottom: 12),
+    child: ListTile(
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 12,
+      ),
+      leading: Icon(icon, size: 32),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Text(body),
+      ),
+      isThreeLine: true,
+      onTap: onTap,
+    ),
+  );
+}

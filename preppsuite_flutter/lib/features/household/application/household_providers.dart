@@ -53,6 +53,18 @@ class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
   /// restored backup — keeping its id so the data merges.
   Future<void> adopt(HouseholdProfile profile) => _persist(profile);
 
+  /// Drops the profile, putting the app back on the setup screen.
+  ///
+  /// For one case only: a join during first run that created the profile
+  /// and then failed to attach it to the folder or the other device. The
+  /// gate goes by the profile alone, so leaving it behind would let the
+  /// app through into a household that is joined to nothing — with a
+  /// fresh id that can never merge with the one it was meant to join.
+  Future<void> forget() async {
+    await _store.clear();
+    state = const AsyncData(null);
+  }
+
   Future<void> _persist(HouseholdProfile profile) async {
     await _store.save(profile);
     // The background worker cannot read this provider, so the regions it

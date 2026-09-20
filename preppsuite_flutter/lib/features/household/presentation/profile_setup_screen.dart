@@ -2,17 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../model/household_profile.dart';
 import '../application/household_providers.dart';
 import '../application/warning_feed_countries.dart';
 import 'count_tile.dart';
 
-/// First run: name the household and say where it is.
+/// What the household is called and where it is.
 ///
-/// This is all the setup there is now. There is no account to create, no
-/// server to point at and no invite code to type — the app works the
-/// moment this is filled in.
+/// There is no account to create and no server to point at. What there
+/// *is*, since the second device became a normal thing, is the question
+/// of whether this household already exists somewhere else — see
+/// [SetupChoiceScreen]. This screen fills in the part that belongs to
+/// this device either way, and [onFilled] decides what happens with it.
 class ProfileSetupScreen extends ConsumerStatefulWidget {
-  const ProfileSetupScreen({super.key});
+  const ProfileSetupScreen({
+    super.key,
+    this.onFilled,
+    this.intro,
+    this.submitLabel,
+    this.initialName,
+    this.initialCountryCode,
+  });
+
+  /// Called instead of creating the profile outright.
+  ///
+  /// Null means the ordinary first run: create the household here and
+  /// now. The joining routes pass a callback because for them creating
+  /// is only the first half — the household id still has to be adopted
+  /// from a folder or from another device.
+  final Future<void> Function(HouseholdProfile profile)? onFilled;
+
+  /// Replaces the standard introduction where the route needs to explain
+  /// itself instead.
+  final String? intro;
+
+  final String? submitLabel;
+
+  /// What a shared folder already says the household is called.
+  final String? initialName;
+  final String? initialCountryCode;
 
   @override
   ConsumerState<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
@@ -20,9 +48,11 @@ class ProfileSetupScreen extends ConsumerStatefulWidget {
 
 class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  late final _nameController = TextEditingController(
+    text: widget.initialName ?? '',
+  );
   final _regionController = TextEditingController();
-  String _countryCode = 'DE';
+  late String _countryCode = widget.initialCountryCode ?? 'DE';
   int _personCount = 1;
   int _children = 0;
   int _dogs = 0;
@@ -41,7 +71,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     setState(() => _saving = true);
 
     final region = _regionController.text.trim();
-    await ref
+    final profile = await ref
         .read(householdProfileProvider.notifier)
         .create(
           name: _nameController.text.trim(),
@@ -52,6 +82,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           dogs: _dogs,
           cats: _cats,
         );
+    final next = widget.onFilled;
+    if (next == null) return;
+    try {
+      await next(profile);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
@@ -73,7 +110,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      l10n.profileSetupIntro,
+                      widget.intro ?? l10n.profileSetupIntro,
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                     const SizedBox(height: 24),
@@ -163,7 +200,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     const SizedBox(height: 32),
                     FilledButton(
                       onPressed: _saving ? null : _submit,
-                      child: Text(l10n.profileSetupSubmit),
+                      child: Text(
+                        widget.submitLabel ?? l10n.profileSetupSubmit,
+                      ),
                     ),
                   ],
                 ),
