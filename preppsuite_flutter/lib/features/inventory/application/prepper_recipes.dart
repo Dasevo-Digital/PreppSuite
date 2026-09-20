@@ -1,23 +1,23 @@
 /// Cooking out of the store cupboard, in the language that was asked for.
 ///
-/// The recipes are prose in two lists, and a compiler cannot check prose.
-/// What it can be held to is that both lists describe the same dishes —
-/// `prepper_recipes_test.dart` does that, the way the first-aid guides are
-/// held to it.
+/// Two things live in this file and they are localised differently, on
+/// purpose.
 ///
-/// **But the two lists are allowed to drift**, and that is the point of
-/// [recipesFor]. A dish is not a string: "H-Milch" is a German pantry and
-/// "long-life milk" is not quite the same shelf, so a language may one day
-/// want a dish the other does not have. What must never happen is the
-/// thing that happens by default — the shorter list silently being all an
-/// English household ever sees.
+/// **The recipes are not translations of each other.** A dish is not a
+/// string: "H-Milch" is a German pantry and "long-life milk" is not quite
+/// the same shelf, and a household that stocks baked beans does not cook
+/// from a list built around Dosentomaten. So each language carries the
+/// dishes its own store cupboard actually holds. Neither list is short of
+/// anything, so there is nothing to fall back to and the two are free to
+/// differ in length.
 ///
-/// So what is missing in the language asked for is shown all the same, in
-/// the language it exists in, and **labelled as such**. Translating it on
-/// the device is not an option: there is no translator here, and inventing
-/// one would be the invented content this app does not ship. A cook who
-/// reads "only available in German" can decide; a cook who is shown four
-/// recipes instead of five cannot.
+/// **The preservation methods are translations of each other**, because
+/// drying is drying. There a gap is a real gap, so [mergeByLanguage] still
+/// shows what only one language has and labels it. Translating on the
+/// device is not an option: there is no translator here, and inventing one
+/// would be the invented content this app does not ship. A cook who reads
+/// "only available in German" can decide; a cook who is shown four methods
+/// instead of five cannot.
 library;
 
 /// One dish.
@@ -67,18 +67,16 @@ class LocalisedRecipe<T> {
   bool get isFallback => fallbackLanguage != null;
 }
 
-/// The recipes for [languageCode], with anything untranslated appended.
+/// The recipes for [languageCode].
 ///
-/// Appended rather than interleaved: the ones in the reader's own language
-/// come first in their own order, and the rest arrive as what they are —
-/// extras from the other language.
-List<LocalisedRecipe<PrepperRecipe>> recipesFor(String languageCode) =>
-    mergeByLanguage(
-      languageCode,
-      de: prepperRecipesDe,
-      en: prepperRecipesEn,
-      idOf: (item) => item.id,
-    );
+/// Each list is whole, so nothing is appended from the other language and
+/// no entry is ever marked. Anything that is not German is served English,
+/// which is what the rest of the app does.
+List<LocalisedRecipe<PrepperRecipe>> recipesFor(String languageCode) => [
+  for (final recipe
+      in languageCode == 'de' ? prepperRecipesDe : prepperRecipesEn)
+    LocalisedRecipe(recipe),
+];
 
 List<LocalisedRecipe<PreservationMethod>> preservationMethodsFor(
   String languageCode,
@@ -91,6 +89,10 @@ List<LocalisedRecipe<PreservationMethod>> preservationMethodsFor(
 
 /// Picks the list for [languageCode] and appends what only the other one
 /// has, marked.
+///
+/// The preservation methods use this and the recipes deliberately do not:
+/// techniques are the same everywhere, so one missing in a language is a
+/// gap rather than a difference.
 ///
 /// Public because it is also the only way to exercise the drift it exists
 /// for: the shipped lists agree today, so a test hands it a pair that does
@@ -161,46 +163,65 @@ const prepperRecipesDe = [
   ),
 ];
 
+/// Not the German list in English: the same question asked of a store
+/// cupboard that holds baked beans, corned beef and split peas.
+///
+/// The hint says what it costs to cook, because in a power cut that is
+/// what decides between two dishes.
 const prepperRecipesEn = [
   PrepperRecipe(
-    id: 'couscous',
-    title: 'Couscous with chickpeas',
-    hint: 'No prolonged cooking',
+    id: 'beans-on-toast',
+    title: 'Beans on toast',
+    hint: 'One pan, or none',
     steps:
-        'Soak couscous in hot water. Fold in chickpeas, canned tomatoes, '
-        'oil and spices.',
+        'Warm a tin of baked beans. Toast bread over whatever heat there '
+        'is, or spoon the beans straight onto crackers or flatbread.',
   ),
   PrepperRecipe(
-    id: 'lentil-tomato',
-    title: 'Lentil tomato pot',
+    id: 'corned-beef-hash',
+    title: 'Corned beef hash',
+    hint: 'One pan',
+    steps:
+        'Fry drained tinned potatoes until they colour, break in tinned '
+        'corned beef and press flat. Pepper and a dash of Worcestershire '
+        'sauce; tinned peas alongside.',
+  ),
+  PrepperRecipe(
+    id: 'curried-chickpeas',
+    title: 'Curried chickpeas with rice',
     hint: 'One pot',
     steps:
-        'Cook red lentils with canned tomatoes and little water for 12–15 '
-        'minutes. Season with stock and dried herbs.',
+        'Let curry powder sizzle in oil for a moment, add chickpeas and '
+        'chopped tomatoes with the juice from the tin, simmer ten minutes. '
+        'Rice cooked in measured water alongside.',
   ),
   PrepperRecipe(
-    id: 'porridge',
-    title: 'Oat porridge',
-    hint: 'Hot or cold',
-    steps:
-        'Mix oats with long-life milk, plant drink or water. Add dried '
-        'fruit, nuts and cinnamon.',
-  ),
-  PrepperRecipe(
-    id: 'bean-corn-salad',
-    title: 'Bean and corn salad',
+    id: 'tuna-sweetcorn',
+    title: 'Tuna and sweetcorn on crackers',
     hint: 'No cooking',
     steps:
-        'Drain beans and corn and mix with oil, vinegar, salt and herbs. '
-        'Reuse the liquid where appropriate.',
+        'Drain tuna and sweetcorn, mix with mayonnaise or oil and plenty '
+        'of black pepper. An opened jar of mayonnaise needs cold storage, '
+        'so use oil when the power is out.',
   ),
   PrepperRecipe(
-    id: 'tuna-pasta',
-    title: 'Tuna pasta pot',
-    hint: 'One pot',
+    id: 'soda-bread',
+    title: 'Soda bread in a pan',
+    hint: 'Needs steady heat',
     steps:
-        'Cook pasta in a measured amount of water. Mix in tuna, canned '
-        'peas and seasoning.',
+        'Mix flour, bicarbonate of soda and salt with long-life buttermilk, '
+        'or with milk soured by a spoon of vinegar. Shape flat, cut a '
+        'cross, bake in a covered heavy pan over low heat and turn once. '
+        'No yeast and no proving time.',
+  ),
+  PrepperRecipe(
+    id: 'pea-ham-soup',
+    title: 'Split pea and ham soup',
+    hint: 'One pot, long simmer',
+    steps:
+        'Simmer dried split peas in plenty of water until they collapse, '
+        'about an hour. Stir in tinned ham and a stock cube. The hour costs '
+        'fuel, so cook enough for two meals at once.',
   ),
 ];
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/inventory/application/prepper_recipes.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/prepper_recipes_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 
@@ -12,6 +13,11 @@ import 'accessibility.dart';
 /// two languages, chosen from the locale rather than from the l10n files.
 /// A screen that reads the locale by hand is a screen that can stop
 /// following it without anybody noticing.
+///
+/// The two lists are not translations of each other, so they may differ
+/// in length. What is pinned is that each language gets *its whole list*
+/// — the failure mode is a reader being served the other language's
+/// dishes, or a list arriving short.
 void main() {
   Future<void> show(WidgetTester tester, String locale) async {
     await tester.binding.setSurfaceSize(const Size(500, 2400));
@@ -35,29 +41,36 @@ void main() {
     expect(find.text('Linsen-Tomaten-Topf'), findsOneWidget);
   });
 
-  testWidgets('English does not get German recipes', (tester) async {
+  testWidgets('English gets its own recipes, never the German ones', (
+    tester,
+  ) async {
     // The failure this guards against is the one the drills screen had:
     // content that stays German whatever the locale says.
     await show(tester, 'en');
 
+    expect(find.text('Beans on toast'), findsOneWidget);
     expect(find.text('Couscous mit Kichererbsen'), findsNothing);
     expect(find.textContaining('Kichererbsen'), findsNothing);
   });
 
-  testWidgets('both languages offer the same number of recipes', (
+  testWidgets('each language gets its whole list, not a shortened one', (
     tester,
   ) async {
-    // A half-translated list is worse than an untranslated one, and two
-    // hand-maintained const lists are exactly how one goes short.
+    // Counted against the source lists rather than against each other:
+    // the lists are allowed to differ in length, but a screen that drops
+    // one dish is the failure nobody can see from the inside.
     await show(tester, 'de');
-    final german = tester.widgetList(find.byType(ExpansionTile)).length;
+    expect(
+      tester.widgetList(find.byType(ExpansionTile)),
+      hasLength(prepperRecipesDe.length),
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
     await show(tester, 'en');
-    final english = tester.widgetList(find.byType(ExpansionTile)).length;
-
-    expect(english, german);
-    expect(german, greaterThan(0));
+    expect(
+      tester.widgetList(find.byType(ExpansionTile)),
+      hasLength(prepperRecipesEn.length),
+    );
   });
 
   testWidgets('the screen meets the accessibility guidelines', (tester) async {

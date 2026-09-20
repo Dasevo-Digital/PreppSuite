@@ -6,9 +6,12 @@ import '../application/prepper_recipes.dart';
 /// Cooking out of the store cupboard.
 ///
 /// What is shown follows the language the app is set to — which is the
-/// system's unless somebody chose otherwise in the settings. Where a
-/// recipe exists in only one language it is shown in that one and said to
-/// be, rather than quietly left out; see `prepper_recipes.dart`.
+/// system's unless somebody chose otherwise in the settings. The recipes
+/// are written per language rather than translated, so each locale gets a
+/// whole list of its own. The preservation methods below them *are*
+/// translations, and one that exists in only one language is shown in that
+/// language and said to be, rather than quietly left out; see
+/// `prepper_recipes.dart`.
 class PrepperRecipesScreen extends StatelessWidget {
   const PrepperRecipesScreen({super.key});
 
