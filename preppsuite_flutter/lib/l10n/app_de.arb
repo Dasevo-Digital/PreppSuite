@@ -1788,5 +1788,7 @@
   "toolsDrillCommunicationTitle": "Kommunikation ausgefallen",
   "toolsDrillCommunicationStepA": "Lokales Radio und Warnungen prüfen",
   "toolsDrillCommunicationStepB": "Nahe Kontakte und Treffpunkt bereithalten",
-  "toolsDrillCommunicationStepC": "Funkgerät nur im erlaubten Funkdienst einsetzen"
+  "toolsDrillCommunicationStepC": "Funkgerät nur im erlaubten Funkdienst einsetzen",
+  "recipeOnlyInGerman": "Nur auf Deutsch verfügbar",
+  "recipeOnlyInEnglish": "Nur auf Englisch verfügbar"
 }

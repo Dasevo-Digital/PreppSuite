@@ -10060,6 +10060,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use a radio only on a service you are allowed to use'**
   String get toolsDrillCommunicationStepC;
+
+  /// No description provided for @recipeOnlyInGerman.
+  ///
+  /// In en, this message translates to:
+  /// **'Only available in German'**
+  String get recipeOnlyInGerman;
+
+  /// No description provided for @recipeOnlyInEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'Only available in English'**
+  String get recipeOnlyInEnglish;
 }
 
 class _AppLocalizationsDelegate

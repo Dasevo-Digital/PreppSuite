@@ -37,7 +37,21 @@ von Artikeln braucht die fertige App `libwebkit2gtk-4.1-0` auf dem
 Zielrechner.
 
 **Der Ton des Erste-Hilfe-Taktgebers läuft über GStreamer.** Zum Bauen
-braucht es nichts zusätzlich; zum Abspielen auf dem Zielrechner
+braucht es die Entwicklungspakete — hier stand einmal das Gegenteil, und
+ein frisches Ubuntu 26.04 hat sie nicht:
+
+```bash
+sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+```
+
+Ohne sie bricht CMake ab, und zwar in `audioplayers_linux`:
+
+```
+A required package was not found
+  - gstreamer-1.0
+```
+
+Zum Abspielen auf dem Zielrechner braucht es dann noch
 `gstreamer1.0-plugins-base` und `gstreamer1.0-plugins-good`, die ein
 Desktop meist schon hat. Fehlen sie, läuft der Taktgeber weiter und sagt
 auf dem Bildschirm, dass kein Ton kommt — er blinkt dann nur.

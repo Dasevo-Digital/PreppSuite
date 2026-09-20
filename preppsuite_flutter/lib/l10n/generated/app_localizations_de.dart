@@ -6012,4 +6012,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get toolsDrillCommunicationStepC =>
       'Funkgerät nur im erlaubten Funkdienst einsetzen';
+
+  @override
+  String get recipeOnlyInGerman => 'Nur auf Deutsch verfügbar';
+
+  @override
+  String get recipeOnlyInEnglish => 'Nur auf Englisch verfügbar';
 }

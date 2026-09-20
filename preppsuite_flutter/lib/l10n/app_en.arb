@@ -2595,5 +2595,7 @@
   "toolsDrillCommunicationTitle": "Communication is down",
   "toolsDrillCommunicationStepA": "Check local radio and the warnings",
   "toolsDrillCommunicationStepB": "Keep nearby contacts and the meeting point at hand",
-  "toolsDrillCommunicationStepC": "Use a radio only on a service you are allowed to use"
+  "toolsDrillCommunicationStepC": "Use a radio only on a service you are allowed to use",
+  "recipeOnlyInGerman": "Only available in German",
+  "recipeOnlyInEnglish": "Only available in English"
 }

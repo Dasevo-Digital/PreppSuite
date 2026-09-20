@@ -5984,4 +5984,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get toolsDrillCommunicationStepC =>
       'Use a radio only on a service you are allowed to use';
+
+  @override
+  String get recipeOnlyInGerman => 'Only available in German';
+
+  @override
+  String get recipeOnlyInEnglish => 'Only available in English';
 }
