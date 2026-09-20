@@ -3554,6 +3554,84 @@ abstract class AppLocalizations {
   /// **'Map'**
   String get navMap;
 
+  /// No description provided for @distressTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Distress signal'**
+  String get distressTitle;
+
+  /// No description provided for @distressIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'For when there is no network left but somebody might still see you. The screen flashes in a rhythm rescuers know — hold it up, towards the slope or the valley.'**
+  String get distressIntro;
+
+  /// No description provided for @distressBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'This costs brightness, and so battery. Switch it on when somebody might be there, not on the off chance.'**
+  String get distressBattery;
+
+  /// No description provided for @distressStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start signalling'**
+  String get distressStart;
+
+  /// No description provided for @distressStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get distressStop;
+
+  /// No description provided for @distressPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause — this is where the answer goes'**
+  String get distressPause;
+
+  /// No description provided for @distressFlash.
+  ///
+  /// In en, this message translates to:
+  /// **'Signal {number} of {total}'**
+  String distressFlash(int number, int total);
+
+  /// No description provided for @distressSos.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS'**
+  String get distressSos;
+
+  /// No description provided for @distressSosHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Three short, three long, three short — as one character, not as three letters.'**
+  String get distressSosHint;
+
+  /// No description provided for @distressAlpine.
+  ///
+  /// In en, this message translates to:
+  /// **'Alpine distress signal'**
+  String get distressAlpine;
+
+  /// No description provided for @distressAlpineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Six signals inside a minute, then a minute of nothing, then again. The pause is part of it: it tells the signal apart from somebody walking about with a torch.'**
+  String get distressAlpineHint;
+
+  /// No description provided for @distressAlpineAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer to a distress signal'**
+  String get distressAlpineAnswer;
+
+  /// No description provided for @distressAlpineAnswerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Three signals inside a minute, into the other one’s pause: I have seen you.'**
+  String get distressAlpineAnswerHint;
+
   /// No description provided for @myPositionAction.
   ///
   /// In en, this message translates to:

@@ -2096,6 +2096,52 @@ class AppLocalizationsDe extends AppLocalizations {
   String get navMap => 'Karte';
 
   @override
+  String get distressTitle => 'Notsignal';
+
+  @override
+  String get distressIntro =>
+      'Wenn kein Netz mehr da ist, dich aber jemand sehen könnte. Der Bildschirm blinkt in einem Rhythmus, den Rettungskräfte kennen — halte ihn hoch, zum Hang oder zum Tal.';
+
+  @override
+  String get distressBattery =>
+      'Das kostet Helligkeit und damit Akku. Schalte es ein, wenn jemand da sein könnte, nicht auf Verdacht.';
+
+  @override
+  String get distressStart => 'Signal starten';
+
+  @override
+  String get distressStop => 'Anhalten';
+
+  @override
+  String get distressPause => 'Pause — hier kommt die Antwort hinein';
+
+  @override
+  String distressFlash(int number, int total) {
+    return 'Zeichen $number von $total';
+  }
+
+  @override
+  String get distressSos => 'SOS';
+
+  @override
+  String get distressSosHint =>
+      'Dreimal kurz, dreimal lang, dreimal kurz — als ein Zeichen, nicht als drei Buchstaben.';
+
+  @override
+  String get distressAlpine => 'Alpines Notsignal';
+
+  @override
+  String get distressAlpineHint =>
+      'Sechs Zeichen in einer Minute, dann eine Minute nichts, dann wieder. Die Pause gehört dazu: sie unterscheidet das Signal von jemandem, der mit einer Lampe herumläuft.';
+
+  @override
+  String get distressAlpineAnswer => 'Antwort auf ein Notsignal';
+
+  @override
+  String get distressAlpineAnswerHint =>
+      'Drei Zeichen in einer Minute, in die Pause des anderen hinein: „Ich habe dich gesehen.“';
+
+  @override
   String get myPositionAction => 'Standort weitergeben';
 
   @override

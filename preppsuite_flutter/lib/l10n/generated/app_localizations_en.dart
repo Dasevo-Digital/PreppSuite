@@ -2081,6 +2081,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navMap => 'Map';
 
   @override
+  String get distressTitle => 'Distress signal';
+
+  @override
+  String get distressIntro =>
+      'For when there is no network left but somebody might still see you. The screen flashes in a rhythm rescuers know — hold it up, towards the slope or the valley.';
+
+  @override
+  String get distressBattery =>
+      'This costs brightness, and so battery. Switch it on when somebody might be there, not on the off chance.';
+
+  @override
+  String get distressStart => 'Start signalling';
+
+  @override
+  String get distressStop => 'Stop';
+
+  @override
+  String get distressPause => 'Pause — this is where the answer goes';
+
+  @override
+  String distressFlash(int number, int total) {
+    return 'Signal $number of $total';
+  }
+
+  @override
+  String get distressSos => 'SOS';
+
+  @override
+  String get distressSosHint =>
+      'Three short, three long, three short — as one character, not as three letters.';
+
+  @override
+  String get distressAlpine => 'Alpine distress signal';
+
+  @override
+  String get distressAlpineHint =>
+      'Six signals inside a minute, then a minute of nothing, then again. The pause is part of it: it tells the signal apart from somebody walking about with a torch.';
+
+  @override
+  String get distressAlpineAnswer => 'Answer to a distress signal';
+
+  @override
+  String get distressAlpineAnswerHint =>
+      'Three signals inside a minute, into the other one’s pause: I have seen you.';
+
+  @override
   String get myPositionAction => 'Pass on my position';
 
   @override

@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/adaptive_columns.dart';
 import '../../first_aid/application/poison_centres.dart';
 import '../../maps/presentation/my_position_screen.dart';
+import 'distress_signal_screen.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../daylight/presentation/daylight_screen.dart';
 import '../../maps/presentation/nearby_screen.dart';
@@ -181,6 +182,22 @@ class _EmergencyInformationScreenState
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const MyPositionScreen(),
+                ),
+              ),
+            ),
+          ),
+          // Beside it, because they answer the same question by two
+          // different roads: the coordinates are for somebody on the
+          // telephone, the rhythm for somebody who can only see you.
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.highlight_outlined),
+              title: Text(l10n.distressTitle),
+              subtitle: Text(l10n.distressAlpineHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DistressSignalScreen(),
                 ),
               ),
             ),
