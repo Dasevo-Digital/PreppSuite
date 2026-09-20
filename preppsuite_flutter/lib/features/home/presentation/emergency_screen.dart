@@ -221,8 +221,8 @@ class EmergencyScreen extends ConsumerWidget {
                   title: const Text('Offline-Karte'),
                   subtitle: Text(
                     mapReady
-                        ? 'Geöffnet und für die Nutzung bereit'
-                        : 'Noch kein geprüftes Kartenpaket',
+                        ? l10n.emergencyMapReady
+                        : l10n.emergencyMapMissing,
                   ),
                   onTap: () => onNavigate(ShellDestination.map),
                 ),
@@ -236,8 +236,8 @@ class EmergencyScreen extends ConsumerWidget {
                   title: const Text('Wissensarchive'),
                   subtitle: Text(
                     knowledgeReady
-                        ? 'Archiv geöffnet und für die Nutzung bereit'
-                        : 'Noch kein geprüftes Wissensarchiv',
+                        ? l10n.emergencyKnowledgeReady
+                        : l10n.emergencyKnowledgeMissing,
                   ),
                   onTap: () => onNavigate(ShellDestination.knowledge),
                 ),

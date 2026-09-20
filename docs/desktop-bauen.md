@@ -21,8 +21,25 @@ Baurechner zu starten beweist nichts. Einzelheiten in
 sudo apt install clang cmake ninja-build pkg-config \
   libgtk-3-dev liblzma-dev \
   libwebkit2gtk-4.1-dev libsoup-3.0-dev \
-  zlib1g-dev uuid-dev
+  zlib1g-dev uuid-dev \
+  libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+  libsecret-1-dev
 ```
+
+Diese Liste ist am 20.09.2026 gegen ein frisches Ubuntu 26.04 geprüft
+worden, und die letzten drei Zeilen fehlten darin. CMake meldet jedes
+fehlende Modul **einzeln und erst beim Bau**, also kostet jede Lücke einen
+weiteren Durchlauf. Was welches Paket verlangt:
+
+| Modul | Paket | wofür |
+|---|---|---|
+| `gstreamer-1.0`, `-app-`, `-audio-` | `libgstreamer1.0-dev`, `libgstreamer-plugins-base1.0-dev` | `audioplayers_linux`, der Ton des Erste-Hilfe-Taktgebers |
+| `libsecret-1` | `libsecret-1-dev` | `flutter_secure_storage_linux`, der Schlüssel der Ordner-Verschlüsselung |
+| `webkit2gtk-4.1`, `libsoup-3.0` | `libwebkit2gtk-4.1-dev`, `libsoup-3.0-dev` | das Artikelfenster |
+
+`webkit2gtk-4.0` und `libsoup-2.4` fehlen auf so einem System ebenfalls,
+und das ist in Ordnung: das Plugin probiert erst 4.1 und meldet nur das
+zweite — siehe unten.
 
 Die letzten beiden sind für das Artikelfenster. Ohne sie bricht CMake ab —
 mit einer irreführenden Meldung: das Plugin probiert erst `webkit2gtk-4.1`
@@ -37,14 +54,8 @@ von Artikeln braucht die fertige App `libwebkit2gtk-4.1-0` auf dem
 Zielrechner.
 
 **Der Ton des Erste-Hilfe-Taktgebers läuft über GStreamer.** Zum Bauen
-braucht es die Entwicklungspakete — hier stand einmal das Gegenteil, und
-ein frisches Ubuntu 26.04 hat sie nicht:
-
-```bash
-sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
-```
-
-Ohne sie bricht CMake ab, und zwar in `audioplayers_linux`:
+braucht es die Entwicklungspakete oben — hier stand einmal das Gegenteil.
+Ohne sie bricht CMake in `audioplayers_linux` ab:
 
 ```
 A required package was not found

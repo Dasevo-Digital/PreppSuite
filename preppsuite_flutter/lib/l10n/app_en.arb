@@ -2597,5 +2597,14 @@
   "toolsDrillCommunicationStepB": "Keep nearby contacts and the meeting point at hand",
   "toolsDrillCommunicationStepC": "Use a radio only on a service you are allowed to use",
   "recipeOnlyInGerman": "Only available in German",
-  "recipeOnlyInEnglish": "Only available in English"
+  "recipeOnlyInEnglish": "Only available in English",
+  "emergencyMapReady": "Opened and ready to use",
+  "emergencyMapMissing": "No checked map package yet",
+  "emergencyKnowledgeReady": "Archive opened and ready to use",
+  "emergencyKnowledgeMissing": "No checked knowledge archive yet",
+  "knowledgeNoBookmarks": "No bookmarks yet. Open an article and tap the bookmark symbol.",
+  "knowledgeInOpenArchive": "In the archive that is open",
+  "knowledgeOpenArchiveFirst": "Open the archive in the library first",
+  "radioCbCallingChannel": "The usual calling and distress channel on CB radio.",
+  "radioCbRoadChannel": "A channel widely used on the road and by lorry drivers."
 }

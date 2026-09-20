@@ -10072,6 +10072,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only available in English'**
   String get recipeOnlyInEnglish;
+
+  /// No description provided for @emergencyMapReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened and ready to use'**
+  String get emergencyMapReady;
+
+  /// No description provided for @emergencyMapMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No checked map package yet'**
+  String get emergencyMapMissing;
+
+  /// No description provided for @emergencyKnowledgeReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive opened and ready to use'**
+  String get emergencyKnowledgeReady;
+
+  /// No description provided for @emergencyKnowledgeMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No checked knowledge archive yet'**
+  String get emergencyKnowledgeMissing;
+
+  /// No description provided for @knowledgeNoBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookmarks yet. Open an article and tap the bookmark symbol.'**
+  String get knowledgeNoBookmarks;
+
+  /// No description provided for @knowledgeInOpenArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'In the archive that is open'**
+  String get knowledgeInOpenArchive;
+
+  /// No description provided for @knowledgeOpenArchiveFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the archive in the library first'**
+  String get knowledgeOpenArchiveFirst;
+
+  /// No description provided for @radioCbCallingChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'The usual calling and distress channel on CB radio.'**
+  String get radioCbCallingChannel;
+
+  /// No description provided for @radioCbRoadChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'A channel widely used on the road and by lorry drivers.'**
+  String get radioCbRoadChannel;
 }
 
 class _AppLocalizationsDelegate

@@ -5990,4 +5990,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recipeOnlyInEnglish => 'Only available in English';
+
+  @override
+  String get emergencyMapReady => 'Opened and ready to use';
+
+  @override
+  String get emergencyMapMissing => 'No checked map package yet';
+
+  @override
+  String get emergencyKnowledgeReady => 'Archive opened and ready to use';
+
+  @override
+  String get emergencyKnowledgeMissing => 'No checked knowledge archive yet';
+
+  @override
+  String get knowledgeNoBookmarks =>
+      'No bookmarks yet. Open an article and tap the bookmark symbol.';
+
+  @override
+  String get knowledgeInOpenArchive => 'In the archive that is open';
+
+  @override
+  String get knowledgeOpenArchiveFirst =>
+      'Open the archive in the library first';
+
+  @override
+  String get radioCbCallingChannel =>
+      'The usual calling and distress channel on CB radio.';
+
+  @override
+  String get radioCbRoadChannel =>
+      'A channel widely used on the road and by lorry drivers.';
 }

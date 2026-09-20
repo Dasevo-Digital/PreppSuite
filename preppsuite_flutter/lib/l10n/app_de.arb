@@ -1790,5 +1790,14 @@
   "toolsDrillCommunicationStepB": "Nahe Kontakte und Treffpunkt bereithalten",
   "toolsDrillCommunicationStepC": "Funkgerät nur im erlaubten Funkdienst einsetzen",
   "recipeOnlyInGerman": "Nur auf Deutsch verfügbar",
-  "recipeOnlyInEnglish": "Nur auf Englisch verfügbar"
+  "recipeOnlyInEnglish": "Nur auf Englisch verfügbar",
+  "emergencyMapReady": "Geöffnet und für die Nutzung bereit",
+  "emergencyMapMissing": "Noch kein geprüftes Kartenpaket",
+  "emergencyKnowledgeReady": "Archiv geöffnet und für die Nutzung bereit",
+  "emergencyKnowledgeMissing": "Noch kein geprüftes Wissensarchiv",
+  "knowledgeNoBookmarks": "Noch keine Lesezeichen. Öffne einen Artikel und tippe auf das Lesezeichen-Symbol.",
+  "knowledgeInOpenArchive": "Im geöffneten Archiv",
+  "knowledgeOpenArchiveFirst": "Archiv zuerst in der Bibliothek öffnen",
+  "radioCbCallingChannel": "Üblicher Anruf- und Hilfekanal im CB-Funk.",
+  "radioCbRoadChannel": "Häufig genutzter Straßen- und Fernfahrkanal."
 }

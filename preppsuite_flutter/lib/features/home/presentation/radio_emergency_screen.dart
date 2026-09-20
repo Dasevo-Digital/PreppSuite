@@ -93,16 +93,16 @@ class RadioEmergencyScreen extends StatelessWidget {
               const SizedBox(height: 8),
               _FrequencyCard(
                 color: Theme.of(context).colorScheme.tertiary,
-                rows: const [
+                rows: [
                   _FrequencyRow(
                     'Kanal 9 AM',
                     '27,065 MHz',
-                    'Üblicher Anruf- und Hilfekanal im CB-Funk.',
+                    l10n.radioCbCallingChannel,
                   ),
                   _FrequencyRow(
                     'Kanal 19 FM',
                     '27,185 MHz',
-                    'Häufig genutzter Straßen- und Fernfahrkanal.',
+                    l10n.radioCbRoadChannel,
                   ),
                 ],
               ),

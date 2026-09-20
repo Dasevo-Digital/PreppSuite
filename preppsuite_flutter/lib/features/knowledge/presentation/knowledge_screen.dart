@@ -519,10 +519,10 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       showDragHandle: true,
       builder: (context) => SafeArea(
         child: bookmarks.isEmpty
-            ? const Padding(
+            ? Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  'Noch keine Lesezeichen. Öffne einen Artikel und tippe auf das Lesezeichen-Symbol.',
+                  l10n.knowledgeNoBookmarks,
                 ),
               )
             : ListView(
@@ -535,8 +535,8 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                       title: Text(bookmark.title),
                       subtitle: Text(
                         state?.selectedId == bookmark.archiveId
-                            ? 'Im geöffneten Archiv'
-                            : 'Archiv zuerst in der Bibliothek öffnen',
+                            ? l10n.knowledgeInOpenArchive
+                            : l10n.knowledgeOpenArchiveFirst,
                       ),
                       onTap:
                           state?.selectedId == bookmark.archiveId &&

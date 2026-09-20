@@ -6018,4 +6018,36 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get recipeOnlyInEnglish => 'Nur auf Englisch verfügbar';
+
+  @override
+  String get emergencyMapReady => 'Geöffnet und für die Nutzung bereit';
+
+  @override
+  String get emergencyMapMissing => 'Noch kein geprüftes Kartenpaket';
+
+  @override
+  String get emergencyKnowledgeReady =>
+      'Archiv geöffnet und für die Nutzung bereit';
+
+  @override
+  String get emergencyKnowledgeMissing => 'Noch kein geprüftes Wissensarchiv';
+
+  @override
+  String get knowledgeNoBookmarks =>
+      'Noch keine Lesezeichen. Öffne einen Artikel und tippe auf das Lesezeichen-Symbol.';
+
+  @override
+  String get knowledgeInOpenArchive => 'Im geöffneten Archiv';
+
+  @override
+  String get knowledgeOpenArchiveFirst =>
+      'Archiv zuerst in der Bibliothek öffnen';
+
+  @override
+  String get radioCbCallingChannel =>
+      'Üblicher Anruf- und Hilfekanal im CB-Funk.';
+
+  @override
+  String get radioCbRoadChannel =>
+      'Häufig genutzter Straßen- und Fernfahrkanal.';
 }
