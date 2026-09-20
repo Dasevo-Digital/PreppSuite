@@ -1727,5 +1727,18 @@
   "@setupJoinFailed": {"placeholders": {"reason": {"type": "String"}}},
   "setupAdopted": "Haushalt „{name}“ übernommen.",
   "@setupAdopted": {"placeholders": {"name": {"type": "String"}}},
-  "transferAdoptHousehold": "Haushalt dieses Codes übernehmen"
+  "transferAdoptHousehold": "Haushalt dieses Codes übernehmen",
+  "transferConflictTitle": "Zwei verschiedene Haushalte",
+  "transferConflictBody": "Dieses Gerät gehört zu „{mine}“, der Code zu einem anderen Haushalt. Was jetzt passiert, lässt sich nicht rückgängig machen: zwei zusammengeführte Datenbestände sind nicht wieder zu trennen.",
+  "@transferConflictBody": {"placeholders": {"mine": {"type": "String"}}},
+  "transferConflictMerge": "Zusammenführen",
+  "transferConflictMergeBody": "{count,plural,=0{Dieses Gerät hat nichts einzubringen und übernimmt den anderen Haushalt.}=1{Der eine eigene Eintrag wandert mit in den anderen Haushalt, und dessen Daten kommen hierher. Nichts geht verloren.}other{Die {count} eigenen Einträge wandern mit in den anderen Haushalt, und dessen Daten kommen hierher. Nichts geht verloren.}}",
+  "@transferConflictMergeBody": {"placeholders": {"count": {"type": "int"}}},
+  "transferConflictReplace": "Eigene Daten verwerfen",
+  "transferConflictReplaceBody": "{count,plural,=1{Der eine eigene Eintrag wird gelöscht.}other{Die {count} eigenen Einträge werden gelöscht.}} Danach gilt hier nur noch der andere Haushalt.",
+  "@transferConflictReplaceBody": {"placeholders": {"count": {"type": "int"}}},
+  "transferConflictKeep": "Nichts ändern",
+  "transferConflictKeepBody": "Nichts wird übernommen. Soll stattdessen das andere Gerät diesem beitreten, zeige dort den Code und filme ihn dort ab.",
+  "transferConflictCancelled": "Abgebrochen. Es wurde nichts geändert.",
+  "transferConflictReplaced": "Eigene Daten verworfen, anderer Haushalt übernommen."
 }

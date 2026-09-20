@@ -9736,6 +9736,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Take over this code\'s household'**
   String get transferAdoptHousehold;
+
+  /// No description provided for @transferConflictTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Two different households'**
+  String get transferConflictTitle;
+
+  /// No description provided for @transferConflictBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This device belongs to “{mine}”, the code belongs to a different household. What happens next cannot be undone: two merged sets of data cannot be separated again.'**
+  String transferConflictBody(String mine);
+
+  /// No description provided for @transferConflictMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge them'**
+  String get transferConflictMerge;
+
+  /// No description provided for @transferConflictMergeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural,=0{This device has nothing to bring and simply joins the other household.}=1{The one entry of its own moves into the other household, and that household\'s data comes here. Nothing is lost.}other{The {count} entries of its own move into the other household, and that household\'s data comes here. Nothing is lost.}}'**
+  String transferConflictMergeBody(int count);
+
+  /// No description provided for @transferConflictReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard this device\'s data'**
+  String get transferConflictReplace;
+
+  /// No description provided for @transferConflictReplaceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural,=1{The one entry of its own is deleted.}other{The {count} entries of its own are deleted.}} Only the other household remains here afterwards.'**
+  String transferConflictReplaceBody(int count);
+
+  /// No description provided for @transferConflictKeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Change nothing'**
+  String get transferConflictKeep;
+
+  /// No description provided for @transferConflictKeepBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing is taken over. If the other device should join this one instead, show the code there and read it there.'**
+  String get transferConflictKeepBody;
+
+  /// No description provided for @transferConflictCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled. Nothing was changed.'**
+  String get transferConflictCancelled;
+
+  /// No description provided for @transferConflictReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'This device\'s data discarded, the other household taken over.'**
+  String get transferConflictReplaced;
 }
 
 class _AppLocalizationsDelegate

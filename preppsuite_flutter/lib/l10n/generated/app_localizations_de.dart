@@ -5798,4 +5798,59 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get transferAdoptHousehold => 'Haushalt dieses Codes übernehmen';
+
+  @override
+  String get transferConflictTitle => 'Zwei verschiedene Haushalte';
+
+  @override
+  String transferConflictBody(String mine) {
+    return 'Dieses Gerät gehört zu „$mine“, der Code zu einem anderen Haushalt. Was jetzt passiert, lässt sich nicht rückgängig machen: zwei zusammengeführte Datenbestände sind nicht wieder zu trennen.';
+  }
+
+  @override
+  String get transferConflictMerge => 'Zusammenführen';
+
+  @override
+  String transferConflictMergeBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Die $count eigenen Einträge wandern mit in den anderen Haushalt, und dessen Daten kommen hierher. Nichts geht verloren.',
+      one:
+          'Der eine eigene Eintrag wandert mit in den anderen Haushalt, und dessen Daten kommen hierher. Nichts geht verloren.',
+      zero:
+          'Dieses Gerät hat nichts einzubringen und übernimmt den anderen Haushalt.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get transferConflictReplace => 'Eigene Daten verwerfen';
+
+  @override
+  String transferConflictReplaceBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Die $count eigenen Einträge werden gelöscht.',
+      one: 'Der eine eigene Eintrag wird gelöscht.',
+    );
+    return '$_temp0 Danach gilt hier nur noch der andere Haushalt.';
+  }
+
+  @override
+  String get transferConflictKeep => 'Nichts ändern';
+
+  @override
+  String get transferConflictKeepBody =>
+      'Nichts wird übernommen. Soll stattdessen das andere Gerät diesem beitreten, zeige dort den Code und filme ihn dort ab.';
+
+  @override
+  String get transferConflictCancelled =>
+      'Abgebrochen. Es wurde nichts geändert.';
+
+  @override
+  String get transferConflictReplaced =>
+      'Eigene Daten verworfen, anderer Haushalt übernommen.';
 }

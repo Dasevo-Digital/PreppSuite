@@ -34,6 +34,21 @@ class DeviceSnapshot {
   /// file claiming a newer version is skipped, not guessed at.
   static const currentVersion = 1;
 
+  /// How many rows this snapshot carries.
+  ///
+  /// Every collection, `possessions` included — the counter this replaced
+  /// lived in `local_handover.dart` and had never been told about that
+  /// table, so a handover under-reported what it sent. Counting here is
+  /// what stops the next added table from being forgotten twice.
+  int get rowCount =>
+      inventoryItems.length +
+      checklistTemplates.length +
+      checklistItems.length +
+      budgetEntries.length +
+      householdPlans.length +
+      householdMembers.length +
+      possessions.length;
+
   final String deviceId;
   final String householdId;
   final DateTime writtenAt;

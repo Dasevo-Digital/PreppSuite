@@ -56,6 +56,38 @@ Bildschirm ist ablesbar, ob Bilder ankommen.
 Ein Haushalt mit zweihundert Vorratszeilen sind ungefähr **vier Bilder**.
 Die Daten werden vorher gepackt.
 
+## Zwei verschiedene Haushalte
+
+Nennt der Code einen anderen Haushalt als den, zu dem das Gerät gehört,
+wurde das früher abgelehnt. Als **Grundeinstellung** ist das richtig: zwei
+zusammengeführte Datenbestände sind nicht wieder zu trennen, das darf also
+nie versehentlich passieren. Als Antwort an jemanden, der es so *meint*,
+taugt es nicht — zwei Geräte eines Haushalts, die getrennt eingerichtet
+wurden, bevor es den Beitritt bei der Ersteinrichtung gab, hatten keinen
+Weg zueinander.
+
+Seit 1.9.1 wird deshalb gefragt statt entschieden, mit den Zeilenzahlen auf
+dem Bildschirm:
+
+- **Zusammenführen** — die eigenen Zeilen werden auf den anderen Haushalt
+  umgestempelt und wandern beim Abgleich mit hinüber, dessen Daten kommen
+  hierher. Nichts geht verloren. Das funktioniert ohne Änderung am
+  Protokoll, weil der Gast seinen Stand *nach* dem Umstempeln liest — der
+  Gastgeber sieht also einen Stand seines eigenen Haushalts und lehnt ihn
+  nicht mit 409 ab.
+- **Eigene Daten verwerfen** — gelöscht wird *vor* dem Umstempeln, sonst
+  wanderten die Zeilen unter der neuen Kennung mit und die Wahl liefe ins
+  Leere.
+- **Nichts ändern** — es wird nichts angefasst. Soll stattdessen das andere
+  Gerät beitreten, wird der Code in der anderen Richtung gezeigt.
+
+Bei der **Ersteinrichtung** wird nicht gefragt, sondern übernommen: dort
+hat das Gerät noch keine eigenen Zeilen, es ist also nichts abzuwägen.
+
+Der gemeinsame Ordner verhält sich hier anders und tut es ungefragt: wer
+einen Ordner mit fremdem Haushalt wählt, tritt ihm bei und erfährt es
+hinterher. Das ist eine offene Unstimmigkeit, keine Absicht.
+
 ## Was übertragen wird
 
 Derselbe Schnappschuss wie im gemeinsamen Ordner: Vorräte, Checklisten,

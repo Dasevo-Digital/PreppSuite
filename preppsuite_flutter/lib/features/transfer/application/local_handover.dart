@@ -202,7 +202,7 @@ class LocalHandoverHost {
           ..write(body);
         await request.response.close();
 
-        _done.add((received: received, sent: _rowsIn(ours)));
+        _done.add((received: received, sent: ours.rowCount));
       } on _HandoverTooLarge {
         try {
           request.response.statusCode = HttpStatus.requestEntityTooLarge;
@@ -303,7 +303,7 @@ Future<LocalHandoverResult> joinLocalHandover({
 
       return (
         received: await applyHouseholdSnapshot(db, theirs),
-        sent: _rowsIn(ours),
+        sent: ours.rowCount,
       );
     }
   } finally {
@@ -333,14 +333,6 @@ Future<List<String>> localAddresses() async {
     return const [];
   }
 }
-
-int _rowsIn(DeviceSnapshot snapshot) =>
-    snapshot.inventoryItems.length +
-    snapshot.checklistTemplates.length +
-    snapshot.checklistItems.length +
-    snapshot.budgetEntries.length +
-    snapshot.householdPlans.length +
-    snapshot.householdMembers.length;
 
 /// A key for this one handover, from the platform's own randomness.
 Uint8List _freshKey() {

@@ -5770,4 +5770,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transferAdoptHousehold => 'Take over this code\'s household';
+
+  @override
+  String get transferConflictTitle => 'Two different households';
+
+  @override
+  String transferConflictBody(String mine) {
+    return 'This device belongs to “$mine”, the code belongs to a different household. What happens next cannot be undone: two merged sets of data cannot be separated again.';
+  }
+
+  @override
+  String get transferConflictMerge => 'Merge them';
+
+  @override
+  String transferConflictMergeBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'The $count entries of its own move into the other household, and that household\'s data comes here. Nothing is lost.',
+      one:
+          'The one entry of its own moves into the other household, and that household\'s data comes here. Nothing is lost.',
+      zero:
+          'This device has nothing to bring and simply joins the other household.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get transferConflictReplace => 'Discard this device\'s data';
+
+  @override
+  String transferConflictReplaceBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'The $count entries of its own are deleted.',
+      one: 'The one entry of its own is deleted.',
+    );
+    return '$_temp0 Only the other household remains here afterwards.';
+  }
+
+  @override
+  String get transferConflictKeep => 'Change nothing';
+
+  @override
+  String get transferConflictKeepBody =>
+      'Nothing is taken over. If the other device should join this one instead, show the code there and read it there.';
+
+  @override
+  String get transferConflictCancelled => 'Cancelled. Nothing was changed.';
+
+  @override
+  String get transferConflictReplaced =>
+      'This device\'s data discarded, the other household taken over.';
 }

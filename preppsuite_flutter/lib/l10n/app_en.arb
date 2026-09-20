@@ -2534,5 +2534,18 @@
   "@setupJoinFailed": {"placeholders": {"reason": {"type": "String"}}},
   "setupAdopted": "Household “{name}” taken over.",
   "@setupAdopted": {"placeholders": {"name": {"type": "String"}}},
-  "transferAdoptHousehold": "Take over this code's household"
+  "transferAdoptHousehold": "Take over this code's household",
+  "transferConflictTitle": "Two different households",
+  "transferConflictBody": "This device belongs to “{mine}”, the code belongs to a different household. What happens next cannot be undone: two merged sets of data cannot be separated again.",
+  "@transferConflictBody": {"placeholders": {"mine": {"type": "String"}}},
+  "transferConflictMerge": "Merge them",
+  "transferConflictMergeBody": "{count,plural,=0{This device has nothing to bring and simply joins the other household.}=1{The one entry of its own moves into the other household, and that household's data comes here. Nothing is lost.}other{The {count} entries of its own move into the other household, and that household's data comes here. Nothing is lost.}}",
+  "@transferConflictMergeBody": {"placeholders": {"count": {"type": "int"}}},
+  "transferConflictReplace": "Discard this device's data",
+  "transferConflictReplaceBody": "{count,plural,=1{The one entry of its own is deleted.}other{The {count} entries of its own are deleted.}} Only the other household remains here afterwards.",
+  "@transferConflictReplaceBody": {"placeholders": {"count": {"type": "int"}}},
+  "transferConflictKeep": "Change nothing",
+  "transferConflictKeepBody": "Nothing is taken over. If the other device should join this one instead, show the code there and read it there.",
+  "transferConflictCancelled": "Cancelled. Nothing was changed.",
+  "transferConflictReplaced": "This device's data discarded, the other household taken over."
 }
