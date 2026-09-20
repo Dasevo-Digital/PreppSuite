@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/adaptive_columns.dart';
+import '../../first_aid/application/poison_centres.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../daylight/presentation/daylight_screen.dart';
 import '../../maps/presentation/nearby_screen.dart';
@@ -181,14 +182,14 @@ class _EmergencyInformationScreenState
               ),
               Text(l10n.emergencyPoisonHint),
               const SizedBox(height: 8),
-              for (final centre in _poisonCentres)
+              for (final centre in poisonCentresByRegion)
                 ListTile(
                   dense: true,
                   leading: const Icon(Icons.local_hospital_outlined),
-                  title: Text(centre.$1),
-                  subtitle: Text(centre.$2),
+                  title: Text(centre.label),
+                  subtitle: Text(centre.phone),
                   trailing: const Icon(Icons.call_outlined),
-                  onTap: () => _call(centre.$2),
+                  onTap: () => _call(centre.phone),
                 ),
             ],
           ),
@@ -480,16 +481,6 @@ class _EmergencyInformationScreenState
     );
   }
 }
-
-const _poisonCentres = [
-  ('Berlin/Brandenburg', '030 19240'),
-  ('Bonn (NRW)', '0228 19240'),
-  ('Erfurt (MV, SN, ST, TH)', '0361 730730'),
-  ('Freiburg (BW)', '0761 19240'),
-  ('Göttingen (HB, HH, NI, SH)', '0551 19240'),
-  ('Mainz (HE, RP, SL)', '06131 19240'),
-  ('München (BY)', '089 19240'),
-];
 
 class _NearbyContact {
   const _NearbyContact({

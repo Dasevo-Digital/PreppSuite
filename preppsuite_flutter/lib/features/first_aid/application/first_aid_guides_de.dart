@@ -1,4 +1,5 @@
 import 'first_aid_guide.dart';
+import 'poison_centres.dart';
 
 /// Die Erste-Hilfe-Anleitungen auf Deutsch.
 ///
@@ -855,17 +856,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
         'Bewusstlos und normale Atmung: stabile Seitenlage.',
       ),
     ],
-    facts: [
-      FirstAidFact('Berlin', '030 19240'),
-      FirstAidFact('Bonn', '0228 19240'),
-      FirstAidFact('Erfurt', '0361 730730'),
-      FirstAidFact('Freiburg', '0761 19240'),
-      FirstAidFact('Göttingen', '0551 19240'),
-      FirstAidFact('Homburg/Saar', '06841 19240'),
-      FirstAidFact('Mainz', '06131 19240'),
-      FirstAidFact('München', '089 19240'),
-      FirstAidFact('Nürnberg', '0911 3982451'),
-    ],
+    facts: poisonCentres,
     cautions: [
       'Kein Erbrechen auslösen. Bei Säuren, Laugen und Schäumern '
           'richtet der Weg zurück mehr Schaden an als der Weg hinunter.',

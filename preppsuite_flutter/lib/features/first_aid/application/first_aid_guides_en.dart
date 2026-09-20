@@ -1,4 +1,5 @@
 import 'first_aid_guide.dart';
+import 'poison_centres.dart';
 
 /// The first aid guides in English.
 ///
@@ -783,17 +784,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
         'Unconscious and breathing normally: recovery position.',
       ),
     ],
-    facts: [
-      FirstAidFact('Berlin', '030 19240'),
-      FirstAidFact('Bonn', '0228 19240'),
-      FirstAidFact('Erfurt', '0361 730730'),
-      FirstAidFact('Freiburg', '0761 19240'),
-      FirstAidFact('Göttingen', '0551 19240'),
-      FirstAidFact('Homburg/Saar', '06841 19240'),
-      FirstAidFact('Mainz', '06131 19240'),
-      FirstAidFact('Munich', '089 19240'),
-      FirstAidFact('Nuremberg', '0911 3982451'),
-    ],
+    facts: poisonCentres,
     cautions: [
       'Do not make them vomit. With acids, alkalis and foaming agents '
           'the way back up does more harm than the way down.',
