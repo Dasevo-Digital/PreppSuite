@@ -8,9 +8,10 @@ import '../../../core/app_database_providers.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
-import '../../sharing/application/device_snapshot.dart';
+import '../../sharing/application/carried_settings.dart';
 import '../../sharing/application/snapshot_exchange.dart';
 import '../../sharing/application/shared_folder_store.dart';
+import '../application/handover_payload.dart';
 import '../application/local_handover.dart';
 import 'household_conflict_dialog.dart';
 import '../application/qr_chain.dart';
@@ -56,6 +57,13 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
   var _done = false;
   String? _result;
   bool _failed = false;
+
+  /// How many rows arrived, once something did.
+  ///
+  /// Handed back when the screen closes, because the caller is the one
+  /// that has to say so: during first-run setup this screen is two routes
+  /// deep, and "it worked" has to survive both of them being popped.
+  int? _rows;
 
   Future<void> _onDetect(BarcodeCapture capture) async {
     if (_done) return;
@@ -162,6 +170,41 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
     return incoming;
   }
 
+  /// Sets this device up the way the other one is.
+  ///
+  /// First run only, and the restriction is the same one that governs
+  /// adopting the household id: on a device that has been in use, copying
+  /// somebody else's region, energy plan and reminder settings over its
+  /// own would be a silent loss rather than a convenience. On a device
+  /// that was created a minute ago there is nothing underneath.
+  ///
+  /// The profile is written last and deliberately with [householdId]
+  /// rather than the id that came in the file: the two agree by now, and
+  /// if they ever did not, the one this device has already re-stamped
+  /// every row with is the one that must win.
+  Future<void> _adoptSetup(String householdId, CarriedHousehold carried) async {
+    if (carried.isEmpty) return;
+    await applyCarriedSettings(carried.settings);
+
+    final theirs = carried.profile;
+    if (theirs == null || !mounted) return;
+    await ref
+        .read(householdProfileProvider.notifier)
+        .adopt(
+          HouseholdProfile(
+            id: householdId,
+            name: theirs.name,
+            countryCode: theirs.countryCode,
+            regionKey: theirs.regionKey,
+            personCount: theirs.personCount,
+            children: theirs.children,
+            dogs: theirs.dogs,
+            cats: theirs.cats,
+            extraRegions: theirs.extraRegions,
+          ),
+        );
+  }
+
   Future<void> _handover(LocalHandoverInvitation invitation) async {
     final l10n = AppLocalizations.of(context)!;
     setState(() {});
@@ -178,11 +221,18 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
         householdId: householdId,
         invitation: invitation,
       );
+      if (widget.adoptHousehold) {
+        await _adoptSetup(householdId, result.household);
+      }
       if (!mounted) return;
       setState(() {
-        _result = result.received == 0
+        _rows = result.received;
+        final rows = result.received == 0
             ? l10n.transferHandoverNothing
             : l10n.transferHandoverDone(result.received);
+        _result = result.photos == 0
+            ? rows
+            : '$rows ${l10n.transferHandoverPhotos(result.photos)}';
       });
     } on LocalHandoverException catch (error) {
       if (!mounted) return;
@@ -209,8 +259,9 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
       final bytes = _receiver.payload();
       if (bytes == null) return;
 
-      final snapshot = DeviceSnapshot.decode(utf8.decode(bytes));
-      if (snapshot == null) {
+      final payload = HandoverPayload.decode(utf8.decode(bytes));
+      final snapshot = payload?.snapshot;
+      if (payload == null || snapshot == null) {
         setState(() {
           _failed = true;
           _result = l10n.transferBroken;
@@ -235,8 +286,15 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
         ref.read(appDatabaseProvider),
         snapshot,
       );
+      // No photographs on this road — see `handover_payload.dart` — but
+      // the settings fit, and a device being set up should not have to
+      // type them again.
+      if (widget.adoptHousehold) {
+        await _adoptSetup(householdId, payload.household);
+      }
       if (!mounted) return;
       setState(() {
+        _rows = rows;
         _result = rows == 0 ? l10n.transferNothingNew : l10n.transferDone(rows);
       });
     } on Object {
@@ -256,6 +314,7 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
       _done = false;
       _failed = false;
       _result = null;
+      _rows = null;
     });
   }
 
@@ -301,7 +360,7 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
                     )
                   else
                     FilledButton(
-                      onPressed: () => Navigator.of(context).pop(true),
+                      onPressed: () => Navigator.of(context).pop(_rows),
                       child: Text(
                         MaterialLocalizations.of(context).okButtonLabel,
                       ),

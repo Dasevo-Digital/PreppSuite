@@ -1,8 +1,13 @@
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
+import 'package:preppsuite_flutter/features/sharing/application/carried_settings.dart';
 import 'package:preppsuite_flutter/features/sharing/application/folder_crypto.dart';
+import 'package:preppsuite_flutter/model/household_profile.dart';
 import 'package:preppsuite_flutter/features/transfer/application/local_handover.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
@@ -50,6 +55,7 @@ void main() {
     AppDatabase db, {
     String? household,
     int? maxRequestBytes,
+    CarriedHousehold offering = const CarriedHousehold(),
   }) async {
     final host = await LocalHandoverHost.start(
       db: db,
@@ -57,9 +63,17 @@ void main() {
       householdId: household ?? householdId,
       addresses: const ['127.0.0.1'],
       maxRequestBytes: maxRequestBytes ?? localHandoverMaxRequestBytes,
+      offering: offering,
     );
     addTearDown(host.stop);
     return host;
+  }
+
+  /// A directory that stands in for one device's photo folder.
+  Future<Directory> folder(String name) async {
+    final dir = await Directory.systemTemp.createTemp('preppsuite-$name');
+    addTearDown(() => dir.delete(recursive: true));
+    return dir;
   }
 
   test('both sides come out agreeing, not one copied onto the other', () async {
@@ -194,6 +208,116 @@ void main() {
       final kept = (await db.watchInventoryItems(householdId).first).single;
       expect(kept.quantity, 9);
     }
+  });
+
+  group('what rides along beside the rows', () {
+    test('the household setup comes back from the host', () async {
+      // Only the host offers it: a guest being set up is the one device
+      // with nothing of its own to lose, and it is never the host.
+      final host = await hostOn(
+        open(),
+        offering: const CarriedHousehold(
+          profile: HouseholdProfile(
+            id: householdId,
+            name: 'Zuhause',
+            countryCode: 'DE',
+            personCount: 4,
+            children: 2,
+          ),
+          settings: {'pegelStation': 'DRESDEN', 'expiryLeadDays': 21},
+        ),
+      );
+
+      final result = await joinLocalHandover(
+        db: open(),
+        deviceId: 'device-b',
+        householdId: householdId,
+        invitation: host.invitation,
+      );
+
+      expect(result.household.profile?.name, 'Zuhause');
+      expect(result.household.profile?.personCount, 4);
+      expect(result.household.profile?.children, 2);
+      expect(result.household.settings['pegelStation'], 'DRESDEN');
+    });
+
+    test('a photograph crosses the socket with its row', () async {
+      final a = open();
+      final b = open();
+      final theirs = await folder('host');
+      final mine = await folder('guest');
+
+      final file = File(p.join(theirs.path, 'a3f2.jpg'));
+      await file.writeAsBytes(Uint8List.fromList(List.filled(256, 42)));
+      await a.upsertInventoryItem(
+        InventoryItemsCompanion.insert(
+          clientId: 'item-a',
+          householdId: householdId,
+          name: 'Haferflocken',
+          category: 'Lebensmittel',
+          quantity: 2,
+          unit: 'kg',
+          storageLocation: 'Keller',
+          updatedAt: DateTime.utc(2026, 9, 13, 10),
+          photoPath: Value(file.path),
+        ),
+      );
+
+      final host = await hostOn(a);
+      final result = await joinLocalHandover(
+        db: b,
+        deviceId: 'device-b',
+        householdId: householdId,
+        invitation: host.invitation,
+        into: mine,
+      );
+
+      // The row arrived, and so did its picture — which is the half that
+      // was missing until now, because what the row stores is a path into
+      // the *other* machine's folder.
+      expect(result.received, 1);
+      expect(result.photos, 1);
+
+      final row = (await b.inventoryItemsForSync(householdId)).single;
+      expect(p.dirname(row.photoPath!), mine.path);
+      expect(await File(row.photoPath!).readAsBytes(), List.filled(256, 42));
+    });
+
+    test('a second handover does not carry the same picture twice', () async {
+      final a = open();
+      final b = open();
+      final theirs = await folder('host');
+      final mine = await folder('guest');
+
+      final file = File(p.join(theirs.path, 'a3f2.jpg'));
+      await file.writeAsBytes(Uint8List.fromList(List.filled(256, 42)));
+      await a.upsertInventoryItem(
+        InventoryItemsCompanion.insert(
+          clientId: 'item-a',
+          householdId: householdId,
+          name: 'Haferflocken',
+          category: 'Lebensmittel',
+          quantity: 2,
+          unit: 'kg',
+          storageLocation: 'Keller',
+          updatedAt: DateTime.utc(2026, 9, 13, 10),
+          photoPath: Value(file.path),
+        ),
+      );
+
+      final host = await hostOn(a);
+      Future<LocalHandoverResult> run() => joinLocalHandover(
+        db: b,
+        deviceId: 'device-b',
+        householdId: householdId,
+        invitation: host.invitation,
+        into: mine,
+      );
+
+      expect((await run()).photos, 1);
+      // The guest now names what it holds, so the host leaves it out.
+      expect((await run()).photos, 0);
+    });
   });
 
   group('who is allowed in', () {

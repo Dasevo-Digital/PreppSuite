@@ -74,7 +74,16 @@ class DeviceSnapshot {
   /// [_rows] answers an empty list for it.
   final List<Map<String, Object?>> possessions;
 
-  String encode() => const JsonEncoder.withIndent('  ').convert({
+  String encode() => const JsonEncoder.withIndent('  ').convert(toJson());
+
+  /// The same content as [encode], still as a map.
+  ///
+  /// A local handover sends a *superset* of this — the settings and the
+  /// photographs travel beside the rows — and it builds that by adding
+  /// keys to this map. Keys rather than a wrapper, so that an older app
+  /// on the other end reads the whole thing with [decode], ignores what
+  /// it does not know, and the handover still works.
+  Map<String, Object?> toJson() => {
     'version': currentVersion,
     'deviceId': deviceId,
     'householdId': householdId,
@@ -86,7 +95,7 @@ class DeviceSnapshot {
     'householdPlans': householdPlans,
     'householdMembers': householdMembers,
     'possessions': possessions,
-  });
+  };
 
   static DeviceSnapshot? decode(String raw) {
     try {

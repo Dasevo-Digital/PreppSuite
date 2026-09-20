@@ -5,9 +5,11 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import '../../../local_db/database.dart';
-import '../../sharing/application/device_snapshot.dart';
+import '../../sharing/application/carried_settings.dart';
 import '../../sharing/application/folder_crypto.dart';
 import '../../sharing/application/snapshot_exchange.dart';
+import 'handover_payload.dart';
+import 'handover_photos.dart';
 
 /// Two devices on the same network, swapping households directly.
 ///
@@ -35,7 +37,14 @@ import '../../sharing/application/snapshot_exchange.dart';
 /// The marker an invitation starts with, so the receiving screen can tell
 /// it from a QR chain frame or the barcode on a tin.
 const localHandoverPrefix = 'PSL1';
-const localHandoverMaxRequestBytes = 8 * 1024 * 1024;
+
+/// How large a handover body may be.
+///
+/// Raised from eight megabytes when the photographs began travelling with
+/// the stock. The ceiling is not the photo budget itself: base64 adds a
+/// third, and the body is encrypted whole, so the figure has to leave room
+/// for [handoverPhotoBudgetBytes] plus that overhead plus the rows.
+const localHandoverMaxRequestBytes = 32 * 1024 * 1024;
 
 /// What the host shows and the guest films.
 class LocalHandoverInvitation {
@@ -83,7 +92,18 @@ class LocalHandoverInvitation {
 }
 
 /// What came of a handover, from either side.
-typedef LocalHandoverResult = ({int received, int sent});
+///
+/// [household] is the far side's own setup, and is deliberately **not**
+/// applied here: this layer does not know whether this device is being set
+/// up or has been in use for a year, and that is the whole difference
+/// between a convenience and a device losing its own configuration. The
+/// screen decides — see `QrReceiveScreen`.
+typedef LocalHandoverResult = ({
+  int received,
+  int sent,
+  int photos,
+  CarriedHousehold household,
+});
 
 class LocalHandoverException implements Exception {
   const LocalHandoverException(this.reason);
@@ -123,10 +143,17 @@ class LocalHandoverHost {
   /// Port zero: the operating system picks a free one and it goes in the
   /// invitation. A fixed port would be one more thing to collide with
   /// something else on the machine, for no gain — nobody types this.
+  /// [offering] is how this device is set up, for a guest that is being
+  /// set up from it. Handed in rather than read here on purpose: this file
+  /// is the protocol and knows about a database and a socket, and reaching
+  /// into the platform's preferences from inside it would make every test
+  /// of the wire need a plugin binding. The screen knows where settings
+  /// live; this does not have to.
   static Future<LocalHandoverHost> start({
     required AppDatabase db,
     required String deviceId,
     required String householdId,
+    CarriedHousehold offering = const CarriedHousehold(),
     List<String>? addresses,
     int maxRequestBytes = localHandoverMaxRequestBytes,
   }) async {
@@ -151,7 +178,12 @@ class LocalHandoverHost {
     );
 
     unawaited(
-      host._serve(db: db, deviceId: deviceId, householdId: householdId),
+      host._serve(
+        db: db,
+        deviceId: deviceId,
+        householdId: householdId,
+        offering: offering,
+      ),
     );
     return host;
   }
@@ -160,6 +192,7 @@ class LocalHandoverHost {
     required AppDatabase db,
     required String deviceId,
     required String householdId,
+    required CarriedHousehold offering,
   }) async {
     await for (final request in _server) {
       try {
@@ -179,14 +212,21 @@ class LocalHandoverHost {
           continue;
         }
 
-        final incoming = DeviceSnapshot.decode(plain);
-        if (incoming == null || incoming.householdId != householdId) {
+        final incoming = HandoverPayload.decode(plain);
+        if (incoming == null || incoming.snapshot.householdId != householdId) {
           request.response.statusCode = HttpStatus.conflict;
           await request.response.close();
           continue;
         }
 
-        final received = await applyHouseholdSnapshot(db, incoming);
+        final received = await applyHouseholdSnapshot(db, incoming.snapshot);
+        // After the rows and not before: a picture belongs to a row, and
+        // on a device being set up that row arrived a moment ago.
+        final tookPhotos = await applyHouseholdPhotos(
+          db,
+          householdId: householdId,
+          photos: incoming.photos,
+        );
 
         // Answer with ours, so both sides end up agreeing rather than one
         // being copied onto the other.
@@ -195,14 +235,29 @@ class LocalHandoverHost {
           deviceId: deviceId,
           householdId: householdId,
         );
-        final body = await encryptForFolder(ours.encode(), invitation.key);
+        final answer = HandoverPayload(
+          snapshot: ours,
+          household: offering,
+          // Only what the other side said it was missing.
+          photos: await readHouseholdPhotos(
+            db,
+            householdId: householdId,
+            skip: incoming.knownPhotos,
+          ),
+        );
+        final body = await encryptForFolder(answer.encode(), invitation.key);
         request.response
           ..statusCode = HttpStatus.ok
           ..headers.contentType = ContentType.text
           ..write(body);
         await request.response.close();
 
-        _done.add((received: received, sent: ours.rowCount));
+        _done.add((
+          received: received,
+          sent: ours.rowCount,
+          photos: tookPhotos,
+          household: const CarriedHousehold(),
+        ));
       } on _HandoverTooLarge {
         try {
           request.response.statusCode = HttpStatus.requestEntityTooLarge;
@@ -254,6 +309,11 @@ Future<LocalHandoverResult> joinLocalHandover({
   required String householdId,
   required LocalHandoverInvitation invitation,
   Duration timeout = const Duration(seconds: 8),
+
+  /// Where arriving pictures are written. The app's own photo folder when
+  /// left out; a test hands in a temporary one so that exercising a real
+  /// socket needs no platform directory plugin.
+  Directory? into,
 }) async {
   if (invitation.householdId != householdId) {
     throw const LocalHandoverException(LocalHandoverFailure.otherHousehold);
@@ -264,7 +324,19 @@ Future<LocalHandoverResult> joinLocalHandover({
     deviceId: deviceId,
     householdId: householdId,
   );
-  final body = await encryptForFolder(ours.encode(), invitation.key);
+  final mine = await localPhotoNames(db, householdId: householdId);
+  final offer = HandoverPayload(
+    snapshot: ours,
+    // No settings going this way. Only a device being set up applies what
+    // it is handed, and that is never the host — so sending the guest's
+    // own would put its configuration on the wire for nothing.
+    // Everything this device has. It cannot know what the host is
+    // missing, so it offers the lot and the host keeps what is new.
+    photos: await readHouseholdPhotos(db, householdId: householdId),
+    // What it already holds, so the answer leaves those out.
+    knownPhotos: mine,
+  );
+  final body = await encryptForFolder(offer.encode(), invitation.key);
 
   final client = HttpClient()..connectionTimeout = timeout;
   try {
@@ -296,14 +368,22 @@ Future<LocalHandoverResult> joinLocalHandover({
       }
 
       final plain = await decryptFromFolder(answer, invitation.key);
-      final theirs = plain == null ? null : DeviceSnapshot.decode(plain);
-      if (theirs == null || theirs.householdId != householdId) {
+      final theirs = plain == null ? null : HandoverPayload.decode(plain);
+      if (theirs == null || theirs.snapshot.householdId != householdId) {
         throw const LocalHandoverException(LocalHandoverFailure.unreadable);
       }
 
+      final received = await applyHouseholdSnapshot(db, theirs.snapshot);
       return (
-        received: await applyHouseholdSnapshot(db, theirs),
+        received: received,
         sent: ours.rowCount,
+        photos: await applyHouseholdPhotos(
+          db,
+          householdId: householdId,
+          photos: theirs.photos,
+          into: into,
+        ),
+        household: theirs.household,
       );
     }
   } finally {

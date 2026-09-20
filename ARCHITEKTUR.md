@@ -1194,6 +1194,47 @@ because a picture on a screen can only be filmed by somebody present. The
 same payload over radio, network or a file must be encrypted -- the
 snapshot carries the emergency cards.
 
+**Two things travel beside the snapshot.** What both roads that reach a
+second device now send is a *superset* of the snapshot JSON, not a wrapper
+around it (`transfer/application/handover_payload.dart`): an older install
+decodes it with `DeviceSnapshot.decode`, never sees the extra keys, and
+the transfer works. A wrapper would have made the first handover between
+an old and a new install fail as "different household", which is both
+wrong and frightening. What rides along:
+
+  * **the household's own setup** -- the profile, plus the allow-list in
+    `sharing/application/carried_settings.dart`. Three kinds of setting
+    are deliberately *not* on it: what identifies the device
+    (`syncDeviceId`), anything naming a local file (the shared folder, the
+    map archive, the knowledge archives) and anything secret (the MapTiler
+    key lives in the platform keychain and must not be moved into a plain
+    preferences file). The warning-region keys are off the list too, for a
+    different reason: they are a copy of the profile kept where the
+    background isolate can read it, so carrying them would carry the
+    shadow. **Applied only by a device being set up** -- on one that has
+    been in use, the same copy would silently replace its own region,
+    energy plan and reminders. Carried by **both** the handover and the QR
+    chain: a couple of kilobytes is a few more frames to film, and it
+    spares somebody typing the whole energy plan again. The shared folder
+    does not carry it -- every device writes there, so it would need a
+    rule for whose settings win, and there is none;
+  * **the photographs** (`transfer/application/handover_photos.dart`),
+    on the **handover alone**. They are in no snapshot because what the
+    row stores is a path into one machine's own folder, and the other two
+    roads cannot carry the bytes: the QR chain would need some two hundred
+    extra frames per picture, and the
+    shared folder republishes a whole snapshot per device per sync, so the
+    same bytes would be re-uploaded forever. The receiving side sends the
+    names it already holds, so a second handover carries nothing twice,
+    and a row that already has a working picture keeps it. The incoming
+    file name is **not** trusted: it goes into a path, so it is rejected
+    unless it is a bare file name.
+
+Writing a received photo onto a row uses `setInventoryPhotoPath` /
+`setPossessionPhotoPath` and deliberately **not** an upsert: the path is
+local, so touching `updatedAt` or `dirty` would push the row straight back
+out carrying a path that means nothing on the other device.
+
 Two things about drawing the codes, both learned the hard way in
 `qr_code_view.dart`: the four-module quiet zone is not decoration (without
 it many readers cannot find the code at all), and anti-aliasing has to be

@@ -4235,6 +4235,17 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String transferHandoverPhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Bilder sind mitgekommen.',
+      one: 'Ein Bild ist mitgekommen.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get transferHandoverNothing =>
       'Abgeglichen. Beide Geräte waren schon auf demselben Stand.';
 
@@ -5790,6 +5801,26 @@ class AppLocalizationsDe extends AppLocalizations {
   String setupJoinFailed(String reason) {
     return 'Beitreten nicht möglich: $reason';
   }
+
+  @override
+  String get setupDoneFolder =>
+      'Ordner verbunden. Der Haushalt gleicht sich ab jetzt von allein ab.';
+
+  @override
+  String setupDoneScan(int rows) {
+    String _temp0 = intl.Intl.pluralLogic(
+      rows,
+      locale: localeName,
+      other: '$rows Einträge sind angekommen.',
+      one: 'Ein Eintrag ist angekommen.',
+      zero: 'Neues war nichts dabei.',
+    );
+    return 'Haushalt übernommen. $_temp0';
+  }
+
+  @override
+  String get setupScanCancelled =>
+      'Abgebrochen — es wurde kein Haushalt übernommen.';
 
   @override
   String setupAdopted(String name) {

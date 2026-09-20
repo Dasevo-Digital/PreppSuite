@@ -12,6 +12,29 @@ import 'accessibility.dart';
 class _NoProfile extends HouseholdProfileController {
   @override
   Future<HouseholdProfile?> build() async => null;
+
+  @override
+  Future<HouseholdProfile> create({
+    required String name,
+    required String countryCode,
+    String? regionKey,
+    int personCount = 1,
+    int children = 0,
+    int dogs = 0,
+    int cats = 0,
+  }) async => HouseholdProfile(
+    id: 'household-1',
+    name: name,
+    countryCode: countryCode,
+    regionKey: regionKey,
+    personCount: personCount,
+    children: children,
+    dogs: dogs,
+    cats: cats,
+  );
+
+  @override
+  Future<void> forget() async {}
 }
 
 /// The first question the app asks, and the one it never used to.
@@ -25,12 +48,13 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  Future<void> show(WidgetTester tester) async {
+  Future<_NoProfile> show(WidgetTester tester) async {
+    final controller = _NoProfile();
     await tester.binding.setSurfaceSize(const Size(500, 1200));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [householdProfileProvider.overrideWith(_NoProfile.new)],
+        overrides: [householdProfileProvider.overrideWith(() => controller)],
         child: const MaterialApp(
           locale: Locale('de'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -40,6 +64,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    return controller;
   }
 
   testWidgets('joining is offered before creating is done', (tester) async {
@@ -90,6 +115,24 @@ void main() {
     // times out behind them.
     expect(find.text('Name des Haushalts'), findsOneWidget);
     expect(find.text('Weiter zum Abfilmen'), findsOneWidget);
+  });
+
+  testWidgets('a finished setup leaves the form behind', (tester) async {
+    // The regression this pins: the gate below swaps itself for the app
+    // as soon as a profile exists, but these routes are *pushed* on top
+    // of it. Nothing used to pop them, so the last thing somebody saw
+    // after a successful setup was the form they had just filled in —
+    // which reads exactly like it did not work.
+    await show(tester);
+    await tester.tap(find.text('Neuen Haushalt anlegen'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextFormField).first, 'Zuhause');
+    await tester.tap(find.text("Los geht's"));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Name des Haushalts'), findsNothing);
+    expect(find.text('Neuen Haushalt anlegen'), findsOneWidget);
   });
 
   testWidgets('is accessible', (tester) async {

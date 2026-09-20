@@ -12,11 +12,13 @@ import '../../../core/portable_paths.dart';
 /// Captures or picks a product photo and stores it on local disk, inside
 /// the app's own support directory.
 ///
-/// Local-only for now: [InventoryItems.photoPath] is a plain local file
-/// path. Syncing photos across devices is a deliberately deferred, separate
-/// piece of work — binary uploads need their own endpoint, not the generic
-/// JSON push/pull sync channel (same reasoning the project already applies
-/// to map tiles; see docs/sync-protocol.md).
+/// [InventoryItems.photoPath] is a plain local file path, which is why no
+/// snapshot carries it: it would name a directory on somebody else's
+/// machine. The pictures themselves do travel, but on **one road only** —
+/// a local handover, two devices in one room, one request — where the
+/// bytes can ride beside the rows; see `handover_photos.dart`. The shared
+/// folder and the QR chain still carry none, for the reasons set out
+/// there.
 class InventoryPhotoService {
   const InventoryPhotoService();
 
@@ -24,6 +26,10 @@ class InventoryPhotoService {
   /// copy uses. Public because resolving an old absolute path falls back
   /// to looking for the same file name in here.
   static const subdirectory = 'inventory_photos';
+
+  /// Public because a handover writes the pictures it received straight
+  /// into it, without going through the picker.
+  Future<Directory> photosDirectory() => _photosDirectory();
 
   Future<Directory> _photosDirectory() async {
     final appDir = await appSupportDirectory();

@@ -370,6 +370,38 @@ class AppDatabase extends _$AppDatabase {
     )..where((t) => t.householdId.equals(householdId))).get();
   }
 
+  /// Points one row at a picture that has just arrived from another device.
+  ///
+  /// Deliberately **not** an upsert: the stored path is local to this
+  /// machine and belongs to no other device, so writing it must not touch
+  /// `updatedAt` or raise `dirty`. If it did, taking in a photo would look
+  /// to every other device like an edit and push the row straight back
+  /// out again, with a path that means nothing over there.
+  Future<int> setInventoryPhotoPath({
+    required String householdId,
+    required String clientId,
+    required String photoPath,
+  }) {
+    return (update(inventoryItems)..where(
+          (t) =>
+              t.householdId.equals(householdId) & t.clientId.equals(clientId),
+        ))
+        .write(InventoryItemsCompanion(photoPath: Value(photoPath)));
+  }
+
+  /// The same for the possessions list. See [setInventoryPhotoPath].
+  Future<int> setPossessionPhotoPath({
+    required String householdId,
+    required String clientId,
+    required String photoPath,
+  }) {
+    return (update(possessions)..where(
+          (t) =>
+              t.householdId.equals(householdId) & t.clientId.equals(clientId),
+        ))
+        .write(PossessionsCompanion(photoPath: Value(photoPath)));
+  }
+
   // --- Household plan --------------------------------------------------
 
   /// The household's plan, or null while there is none.

@@ -7,8 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_database_providers.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../sharing/application/carried_settings.dart';
 import '../../sharing/application/shared_folder_store.dart';
 import '../../sharing/application/snapshot_exchange.dart';
+import '../application/handover_payload.dart';
 import '../application/local_handover.dart';
 import '../application/local_discovery.dart';
 import '../application/qr_chain.dart';
@@ -92,6 +94,10 @@ class _QrSendScreenState extends ConsumerState<QrSendScreen> {
         db: ref.read(appDatabaseProvider),
         deviceId: await const SharedFolderStore().deviceId(),
         householdId: widget.householdId,
+        // What a guest being set up copies: the profile and the settings
+        // that belong to the household rather than to this machine. A
+        // guest that is not being set up ignores them.
+        offering: await readCarriedHousehold(),
       );
       if (!mounted) {
         await host.stop();
@@ -135,8 +141,16 @@ class _QrSendScreenState extends ConsumerState<QrSendScreen> {
         deviceId: await const SharedFolderStore().deviceId(),
         householdId: widget.householdId,
       );
+      // The same superset the handover sends, minus the photographs: a
+      // single picture would be some two hundred more frames to film, but
+      // the settings are a couple of kilobytes and spare whoever is
+      // setting up the second device from typing them all again.
+      final payload = HandoverPayload(
+        snapshot: snapshot,
+        household: await readCarriedHousehold(),
+      );
       final frames = qrChainFrames(
-        Uint8List.fromList(utf8.encode(snapshot.encode())),
+        Uint8List.fromList(utf8.encode(payload.encode())),
       );
       if (!mounted) return;
       setState(() => _frames = frames);

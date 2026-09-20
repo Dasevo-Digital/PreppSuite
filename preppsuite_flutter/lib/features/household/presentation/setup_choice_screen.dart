@@ -80,8 +80,27 @@ class _SetupChoiceScreenState extends ConsumerState<SetupChoiceScreen> {
     );
   }
 
+  /// Leaves first-run setup behind for good.
+  ///
+  /// Every road out of this screen runs through here, and it exists
+  /// because of what the screen is: the gate below swaps itself for the
+  /// app the moment a profile appears, but these routes were *pushed* on
+  /// top of it and nothing pops them. Without this the last thing
+  /// somebody sees after a successful setup is the form they just filled
+  /// in, which reads exactly like it did not work.
+  void _leaveSetup({String? confirmation}) {
+    final messenger = ScaffoldMessenger.of(context);
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    if (confirmation == null) return;
+    // Taken hold of before the pop: this screen is gone by the time the
+    // message is shown, and the messenger above it is not.
+    messenger.showSnackBar(SnackBar(content: Text(confirmation)));
+  }
+
   void _startFresh() => Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => const ProfileSetupScreen()),
+    MaterialPageRoute<void>(
+      builder: (_) => ProfileSetupScreen(onFilled: (_) async => _leaveSetup()),
+    ),
   );
 
   /// Reads the folder *before* asking anything.
@@ -134,7 +153,10 @@ class _SetupChoiceScreenState extends ConsumerState<SetupChoiceScreen> {
         .read(sharedFolderProvider.notifier)
         .joinFolder(location, profile: profile);
     if (!mounted) return;
-    if (error == null) return;
+    if (error == null) {
+      _leaveSetup(confirmation: l10n.setupDoneFolder);
+      return;
+    }
 
     // The profile exists by now, so the gate would let the app through
     // with a folder that was never joined. Undo it and say why.
@@ -171,13 +193,28 @@ class _SetupChoiceScreenState extends ConsumerState<SetupChoiceScreen> {
     );
   }
 
+  /// What the camera brought back decides whether setup is over.
+  ///
+  /// A number means the household is in. Null means the camera was closed
+  /// without one — and then the profile the form already wrote has to go
+  /// again, or the gate would let this device through with exactly the
+  /// freshly made second household this screen exists to prevent.
   Future<void> _finishScan(HouseholdProfile profile) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
+    final l10n = AppLocalizations.of(context)!;
+    final rows = await Navigator.of(context).push(
+      MaterialPageRoute<int>(
         builder: (_) =>
             QrReceiveScreen(householdId: profile.id, adoptHousehold: true),
       ),
     );
+    if (!mounted) return;
+    if (rows == null) {
+      await ref.read(householdProfileProvider.notifier).forget();
+      if (!mounted) return;
+      _leaveSetup(confirmation: l10n.setupScanCancelled);
+      return;
+    }
+    _leaveSetup(confirmation: l10n.setupDoneScan(rows));
   }
 }
 

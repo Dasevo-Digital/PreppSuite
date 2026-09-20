@@ -7148,6 +7148,12 @@ abstract class AppLocalizations {
   /// **'Synced. {rows} rows taken in.'**
   String transferHandoverDone(int rows);
 
+  /// No description provided for @transferHandoverPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One picture came with it.} other{{count} pictures came with it.}}'**
+  String transferHandoverPhotos(int count);
+
   /// No description provided for @transferHandoverNothing.
   ///
   /// In en, this message translates to:
@@ -9724,6 +9730,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not join: {reason}'**
   String setupJoinFailed(String reason);
+
+  /// No description provided for @setupDoneFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder connected. The household keeps itself in step from now on.'**
+  String get setupDoneFolder;
+
+  /// No description provided for @setupDoneScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Household taken over. {rows, plural, =0{Nothing new was in it.} =1{One entry arrived.} other{{rows} entries arrived.}}'**
+  String setupDoneScan(int rows);
+
+  /// No description provided for @setupScanCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled — no household was taken over.'**
+  String get setupScanCancelled;
 
   /// No description provided for @setupAdopted.
   ///
