@@ -2,8 +2,9 @@
 ///
 /// Open Food Facts reports energy per 100 g (or per 100 ml for drinks) and
 /// the package size separately, as free text like `"500 g"` or `"1,5 l"`.
-/// The inventory stores one number: the total for the item as it stands.
-/// Bridging the two is the job here.
+/// The inventory stores one number, and which number that is depends on
+/// what the household counts the item in — see [kcalPerStoredUnit], which
+/// is what the form actually calls. Bridging the two is the job here.
 ///
 /// Kept free of the Open Food Facts types on purpose, so the arithmetic and
 /// the unit parsing can be tested without a network round-trip.

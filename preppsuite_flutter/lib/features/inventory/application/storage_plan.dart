@@ -116,9 +116,16 @@ class StorageGroup {
   final String nameEn;
 
   /// The group total as printed — "3,3 kg", "4,0 kg", "20 l". Kept
-  /// separate from the sum of [foods] on purpose: the two agree in the
-  /// source, and if a transcription error ever made them disagree, silently
-  /// showing a computed sum would hide it.
+  /// separate from the sum of [foods], and not derived from it, because
+  /// the two do **not** agree: the BLE rounds its group totals to the
+  /// hundred grams while the rows are given to the ten, so the grain
+  /// group's rows come to 3,310 g under a printed 3,300 and the fruit
+  /// group's to 2,460 under 2,500.
+  ///
+  /// That is the source's own rounding and not a transcription error, but
+  /// it is also exactly why a computed sum would be wrong to show: it
+  /// would quietly replace the citation with this app's arithmetic, and a
+  /// real mistyped row would then look like more of the same rounding.
   final double totalAmount;
   final StorageUnit totalUnit;
 

@@ -33,9 +33,49 @@ void main() {
     });
 
     test('a hundred metres north is a hundred metres', () {
-      // One degree of latitude is 111.32 km, so 0.0008993 of one is 100 m.
+      // A degree of latitude on the sphere this uses is 111.19 km — R
+      // times pi over 180 — so 0.0008993 of one is 100 m. (111.32 km is
+      // a degree of *longitude* at the equator, which is a different
+      // number for a different direction.)
       const step = LatLng(52.3759 + 0.0008993, 9.7320);
       expect(distanceMeters(hannover, step), closeTo(100, 1));
+    });
+
+    // The three above are all inside Germany, where every wrong earth
+    // radius between 6,000 and 6,700 km is still within the tolerance.
+    // These are not: a whole quadrant and a whole half-circumference pin
+    // the constant itself, so a sphere of the wrong size cannot pass.
+    test('a quarter of the equator is a quarter of the equator', () {
+      // R * pi / 2 for the 6,371 km mean sphere.
+      expect(
+        distanceMeters(const LatLng(0, 0), const LatLng(0, 90)) / 1000,
+        closeTo(10007.5, 1),
+      );
+    });
+
+    test('the far side of the world is half the way round it', () {
+      expect(
+        distanceMeters(const LatLng(0, 0), const LatLng(0, 180)) / 1000,
+        closeTo(20015.1, 1),
+      );
+    });
+
+    test('a degree of latitude is the same everywhere', () {
+      // True on a sphere and the reason this uses one: the flat
+      // approximation in geo_bounds.dart is where latitude and longitude
+      // stop being interchangeable, and that one is only ever scoping a
+      // query box.
+      for (final latitude in [0.0, 25.0, 52.0, 71.0]) {
+        expect(
+          distanceMeters(
+                LatLng(latitude, 7),
+                LatLng(latitude + 1, 7),
+              ) /
+              1000,
+          closeTo(111.19, 0.01),
+          reason: 'bei $latitude Grad',
+        );
+      }
     });
   });
 

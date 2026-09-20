@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/inventory/application/shopping_list.dart';
 import 'package:preppsuite_flutter/features/inventory/application/supply_calculator.dart';
@@ -175,5 +177,66 @@ void main() {
     );
 
     expect(list.isEmpty, isTrue);
+  });
+
+  // Two numbers on one screen that answer the same question two ways:
+  // "noch X Liter zu kaufen" and "reicht Y Tage". A change to either
+  // half that forgets the other lets them disagree, and a household
+  // reading a green target beside a reach shorter than the plan has no
+  // way to tell which one lied. So the relation itself is the test,
+  // over households the cases above do not happen to cover.
+  group('the target and the reach are one statement, not two', () {
+    test('a met target is exactly a reach that carries the plan', () {
+      final random = Random(20260920);
+      var checked = 0;
+
+      for (var run = 0; run < 2000; run++) {
+        final household = SupplyHousehold(
+          adults: random.nextInt(4),
+          children: random.nextInt(3),
+          dogs: random.nextInt(2),
+          cats: random.nextInt(2),
+        );
+        // Dogs and cats drink but eat nothing human, so a household of
+        // pets alone has a water demand and no calorie one. That is a
+        // real case and it is covered above; here it would only make
+        // the relation vacuous on one side.
+        if (household.litersPerDay <= 0 || household.kcalPerDay <= 0) continue;
+
+        final days = 1 + random.nextInt(30);
+        final list = buildShoppingList(
+          items: [
+            item(
+              clientId: 'w',
+              category: 'water',
+              quantity: random.nextInt(200).toDouble(),
+              unit: 'l',
+            ),
+            item(
+              clientId: 'f',
+              quantity: random.nextInt(30).toDouble(),
+              unit: 'Dose',
+              calories: random.nextInt(1200),
+            ),
+          ],
+          days: days,
+          household: household,
+        );
+
+        checked++;
+        final covered = list.daysCovered;
+        expect(
+          list.targetMet,
+          covered != null && covered >= days,
+          reason:
+              'Haushalt ${household.adults}/${household.children}/'
+              '${household.dogs}/${household.cats}, $days Tage: '
+              'reicht $covered, fehlen ${list.waterShortfallLiters} l '
+              'und ${list.calorieShortfall} kcal',
+        );
+      }
+
+      expect(checked, greaterThan(1000));
+    });
   });
 }

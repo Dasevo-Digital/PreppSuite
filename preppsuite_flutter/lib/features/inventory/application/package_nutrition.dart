@@ -1,12 +1,22 @@
 import '../../../local_db/database.dart';
 
-/// What a stored item holds, in the unit the inventory thinks in.
+/// What a stored item holds, as the inventory records it.
 ///
-/// Every figure is a total for the item's current quantity, not a
-/// per-100 g value. That is what makes adding up a shelf a sum rather
-/// than a second calculation — and it is why scanning a barcode matters:
-/// a label states per 100 g, nobody converts that by hand, and an empty
-/// calorie column is what the supply calculator cannot work with.
+/// Two bases, not one, and the difference is in `inventory_items_table.dart`
+/// where the columns are: [kcal] is the energy in **one unit** — one tin,
+/// one kilogram — because the supply calculator multiplies it by the
+/// quantity; the macronutrients are for **one package**, as the label
+/// prints them, because nothing ever adds those up.
+///
+/// It used to say here that every figure was a total for the current
+/// quantity. That reading could not survive contact with `consumeQuantity`,
+/// which lowers the quantity and cannot rescale a number whose basis it
+/// does not know — and the calculator never multiplied anyway, so six tins
+/// of 900 kcal came to 900.
+///
+/// Either way it is why scanning a barcode matters: a label states per
+/// 100 g, nobody converts that by hand, and an empty calorie column is
+/// what the supply calculator cannot work with.
 ///
 /// Any field may be null, and usually several are. Open Food Facts is
 /// filled in by volunteers, so a product often carries energy and nothing
