@@ -42,9 +42,17 @@ Liste abbuchen.
 einstellbare Zahl an Tagen und Personen. Kinder bis zwölf zählen mit
 1 Liter Getränken, wie es die Fußnote der Vorratstabelle der Bundesanstalt
 für Landwirtschaft und Ernährung angibt; Hunde und Katzen mit der
-tierärztlichen Faustregel von rund 60 ml je Kilogramm. Die Kalorien kommen beim
-Barcode-Scan aus den Nährwerten von Open Food Facts, hochgerechnet auf die
-Packungsgrösse.
+tierärztlichen Faustregel von rund 60 ml je Kilogramm.
+
+Die Kalorien stehen seit 1.9.4 **je Einheit** in der Spalte – je Dose, je
+Kilogramm – und werden mit der Menge multipliziert. Vorher wurden sie
+einmal je Zeile addiert, sodass sechs Dosen à 900 kcal auf 900 kcal kamen.
+Eine Gesamtsumme wäre auch nicht zu halten: beim Verbrauchen sinkt die
+Menge, und keine Abbuchung kann eine Zahl umrechnen, deren Bezug sie nicht
+kennt. Beim Barcode-Scan rechnet die App die Nährwerte von Open Food Facts
+auf die Einheit um, in der Sie zählen – bei Gramm und Millilitern schreibt
+sie nichts, weil Kilokalorien je Gramm einstellig sind und eine ganze Zahl
+dort zu grob ist.
 
 **Checklisten.** 19 mitgelieferte Listen nach dem BBK-Ratgeber – von
 Wasser, Lebensmitteln und Erster Hilfe über Strom- und Heizungsausfall,
@@ -70,6 +78,13 @@ anlässt. Alles davon ist beim ersten Start da, ohne Netz und ohne
 Download. Videos sind ein eigenes, nachladbares Paket – siehe
 [`docs/erste-hilfe.md`](docs/erste-hilfe.md). Die Anleitungen ersetzen
 keinen Kurs und keinen Notruf, und jede nennt ihre Quelle.
+
+Dazu **siebzehn Fragen**, jede auf einen Irrtum gezielt, den Menschen
+wirklich haben: etwas zwischen die Zähne schieben, kalte Gliedmaßen warm
+reiben, Eis auf eine Verbrennung, Erbrechen auslösen. Das Quiz darf nichts
+wissen, was die Anleitungen nicht sagen – jede Begründung ist eine Warnung
+oder ein Schritt daraus, wörtlich, und ein Test hält beide Sprachen
+daran fest.
 
 **Warnungen.** Amtliche Meldungen für die eigene Region, im Banner über
 allen Ansichten und als Verlauf. Quellen sind das BBK über
@@ -121,10 +136,18 @@ sehr verschiedene Antworten.
 **Tageslicht und Mond.** Sonnenaufgang, Dämmerung, Höchststand,
 Untergang, Mondauf- und -untergang und der beleuchtete Anteil — auf dem
 Gerät gerechnet, nichts abgefragt, also auch am zehnten Tag ohne Netz
-richtig. Geprüft gegen die Tabellen der US Naval Observatory: bei 112
-verglichenen Zeiten liegen Sonne und Mond höchstens eine Minute daneben.
+richtig.
+
 Ohne Lichtschalter ist die Sonne der Arbeitstag, und ob der Mond scheint,
 entscheidet über Bewegung bei Nacht.
+
+Zweimal geprüft. Gegen die Tabellen der US Naval Observatory: bei 112
+verglichenen Zeiten höchstens eine Minute daneben. Und seit 1.9.4 gegen
+eine zweite Mondtheorie mit sechzig Termen, die mit der Reihe der App
+keinen einzigen Term teilt – über ein ganzes Jahr an vier deutschen Orten
+liegt der Median bei null Minuten und der schlechteste Fall bei drei. Die
+Sonne trifft die Zeitgleichung an ihren beiden Extrema und an allen vier
+Nulldurchgängen, und Berlins Sonnenwenden auf die Minute.
 
 **Energie und Brennstoff.** Die zweite Hälfte des Vorrats-Rechners: wie
 lange Strom, Gas, Brennstoff und Kerzenlicht reichen — und welcher Vorrat
@@ -137,6 +160,30 @@ Amateurfunk, jeweils mit der Verfügung darunter, aus der die Zahlen
 stammen. Für PMR446 und Freenet gibt es **keinen amtlichen Anrufkanal**;
 die verbreitete „Kanal 3"-Absprache steht als das da, was sie ist — eine
 private Initiative.
+
+**Wo man ist.** Die Karte konnte auf den blauen Punkt zentrieren; am
+Telefon half das nichts. Vier Schreibweisen desselben Punktes, sortiert
+danach, wer zuhört: **Grad, Minuten, Sekunden** für eine Leitstelle, die
+zurückliest; **UTM** als Meter auf dem Gitter, wie Rettungsdienst,
+Feuerwehr und THW arbeiten; **MGRS** als kurze Kennung desselben Gitters;
+und ein **Plus Code**, zehn Zeichen, die jemand ohne jede Karte
+weitergeben kann. Alles rechnet das Gerät selbst – kein Schlüssel, kein
+Abruf, kein Netz. Die Genauigkeit steht dabei: zehn Meter sind eine
+Haustür, achthundert das falsche Dorfende, und beide drucken gleich viele
+Ziffern.
+
+**Eigene Orte.** Treffpunkte, Brunnen, der Weg zu den Großeltern – als
+GPX oder KML herein und wieder hinaus. Ein Plan, der die App nicht
+verlassen kann, ist ein Plan, der mit der App endet. Dieselbe Datei
+zweimal einzulesen fügt nichts doppelt hinzu.
+
+**Um Hilfe blinken.** Der Bildschirm als Signallampe, in drei Rhythmen:
+**SOS** in Morse – als *ein* Zeichen gesendet, nicht als drei Buchstaben –,
+das **alpine Notsignal** mit sechs Zeichen in einer Minute und einer
+Minute Pause, und die **Antwort** darauf, drei Zeichen in die Pause des
+anderen hinein. Die Pause gehört zum Signal und steht auch so auf dem
+Bildschirm: sie unterscheidet es von jemandem, der mit einer Lampe
+herumläuft.
 
 **Karte offline.** Die Karte lässt sich in der App herunterladen: Ort
 suchen – Stadt, Kreis, Bundesland oder Land – oder den Ausschnitt auf der
