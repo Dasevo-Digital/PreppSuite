@@ -189,7 +189,7 @@ class _InventoryItemFormScreenState
           : '',
     );
     _caloriesController = TextEditingController(
-      text: nutrition.kcal != null ? '${nutrition.kcal}' : '',
+      text: nutrition.kcal != null ? _formatNumber(nutrition.kcal!) : '',
     );
     _proteinController = _gramsController(nutrition.proteinGrams);
     _carbohydrateController = _gramsController(nutrition.carbohydrateGrams);
@@ -424,13 +424,21 @@ class _InventoryItemFormScreenState
 
   /// What the stock comes to, or null while either half is missing.
   int? _caloriesTotal() {
-    final kcal = int.tryParse(_caloriesController.text.trim());
-    final quantity = double.tryParse(
-      _quantityController.text.trim().replaceAll(',', '.'),
-    );
+    final kcal = _decimal(_caloriesController.text);
+    final quantity = _decimal(_quantityController.text);
     if (kcal == null || quantity == null || quantity <= 0) return null;
     return (kcal * quantity).round();
   }
+
+  /// A number as this form's other fields read one: comma or point, both
+  /// meaning the same thing.
+  ///
+  /// The calorie field used to read its own with `int.tryParse` and no
+  /// comma handling, which is two refusals in one. A household counting
+  /// in grams has to write 2.13, and neither "2,13" nor "2.13" was
+  /// accepted — so the field asked for a figure it would not take.
+  static double? _decimal(String text) =>
+      double.tryParse(text.trim().replaceAll(',', '.'));
 
   String? _grams(double? value) =>
       value == null ? null : _formatNumber(_roundGrams(value));
@@ -440,18 +448,13 @@ class _InventoryItemFormScreenState
   /// these up, and a guessed zero would be indistinguishable from a real
   /// one.
   PackageNutrition _readNutrition() {
-    int? asInt(TextEditingController c) {
-      final text = c.text.trim();
-      return text.isEmpty ? null : int.parse(text);
-    }
-
     double? asDouble(TextEditingController c) {
       final text = c.text.trim().replaceAll(',', '.');
       return text.isEmpty ? null : double.parse(text);
     }
 
     return PackageNutrition(
-      kcal: asInt(_caloriesController),
+      kcal: asDouble(_caloriesController),
       proteinGrams: asDouble(_proteinController),
       carbohydrateGrams: asDouble(_carbohydrateController),
       fatGrams: asDouble(_fatController),
@@ -792,11 +795,13 @@ class _InventoryItemFormScreenState
                                     _unitController.text.trim(),
                                   ),
                           ),
-                          keyboardType: TextInputType.number,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           validator: (value) {
                             final trimmed = value?.trim() ?? '';
                             if (trimmed.isEmpty) return null;
-                            return int.tryParse(trimmed) == null
+                            return _decimal(trimmed) == null
                                 ? l10n.invalidNumber
                                 : null;
                           },

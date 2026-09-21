@@ -131,11 +131,11 @@ class $InventoryItemsTable extends InventoryItems
     'calories',
   );
   @override
-  late final GeneratedColumn<int> calories = GeneratedColumn<int>(
+  late final GeneratedColumn<double> calories = GeneratedColumn<double>(
     'calories',
     aliasedName,
     true,
-    type: DriftSqlType.int,
+    type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _proteinGramsMeta = const VerificationMeta(
@@ -509,7 +509,7 @@ class $InventoryItemsTable extends InventoryItems
         data['${effectivePrefix}min_quantity'],
       ),
       calories: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
+        DriftSqlType.double,
         data['${effectivePrefix}calories'],
       ),
       proteinGrams: attachedDatabase.typeMapping.read(
@@ -578,14 +578,31 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   final DateTime? expirationDate;
   final double? minQuantity;
 
-  /// Total kcal for the item's current [quantity] (not per-unit) — only
-  /// meaningful for `category: food`. Powers the "Vorräte für X Tage"
-  /// supply calculator (`supply_calculator.dart`).
-  final int? calories;
+  /// Kilocalories in **one** [unit] of this item — one tin, one kilogram,
+  /// one gram. Only meaningful for `category: food`, and multiplied by
+  /// [quantity] by the supply calculator (`supply_calculator.dart`).
+  ///
+  /// Per unit and not a total for the stock, because a total is a figure
+  /// nothing maintains: [quantity] changes every time somebody eats
+  /// something, and no consume path can rescale a number whose basis it
+  /// does not know. Per unit survives that untouched.
+  ///
+  /// Fractional since schema 15, and that is what makes "per unit" work
+  /// for every unit rather than most of them. Bread is 2.13 kcal a gram.
+  /// As an integer that was 2 — six percent off every gram in the cellar
+  /// — so the scanner refused to fill the field at all below 20 kcal, and
+  /// a household counting in grams was left with a field it could not
+  /// type a usable number into either. The refusal was never about the
+  /// unit; it was about the column.
+  final double? calories;
 
-  /// Macronutrients for the item's current [quantity], in grams — the
-  /// same "whole item, not per 100 g" convention as [calories], for the
-  /// same reason: a shelf is then a sum. Filled in from the barcode (see
+  /// Macronutrients for **one package**, in grams, as the label gives
+  /// them — deliberately *not* the per-unit basis [calories] uses.
+  ///
+  /// They differ because their jobs do. Kilocalories are added up across
+  /// the cellar, so they have to multiply by something; these are shown
+  /// on the item and nowhere else, so the figure that helps is the one
+  /// printed on the tin. Filled in from the barcode (see
   /// `open_food_facts_service.dart`) or by hand, and null wherever the
   /// label does not say, which is most non-food supplies.
   final double? proteinGrams;
@@ -663,7 +680,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       map['min_quantity'] = Variable<double>(minQuantity);
     }
     if (!nullToAbsent || calories != null) {
-      map['calories'] = Variable<int>(calories);
+      map['calories'] = Variable<double>(calories);
     }
     if (!nullToAbsent || proteinGrams != null) {
       map['protein_grams'] = Variable<double>(proteinGrams);
@@ -764,7 +781,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       storageLocation: serializer.fromJson<String>(json['storageLocation']),
       expirationDate: serializer.fromJson<DateTime?>(json['expirationDate']),
       minQuantity: serializer.fromJson<double?>(json['minQuantity']),
-      calories: serializer.fromJson<int?>(json['calories']),
+      calories: serializer.fromJson<double?>(json['calories']),
       proteinGrams: serializer.fromJson<double?>(json['proteinGrams']),
       carbohydrateGrams: serializer.fromJson<double?>(
         json['carbohydrateGrams'],
@@ -794,7 +811,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'storageLocation': serializer.toJson<String>(storageLocation),
       'expirationDate': serializer.toJson<DateTime?>(expirationDate),
       'minQuantity': serializer.toJson<double?>(minQuantity),
-      'calories': serializer.toJson<int?>(calories),
+      'calories': serializer.toJson<double?>(calories),
       'proteinGrams': serializer.toJson<double?>(proteinGrams),
       'carbohydrateGrams': serializer.toJson<double?>(carbohydrateGrams),
       'fatGrams': serializer.toJson<double?>(fatGrams),
@@ -820,7 +837,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     String? storageLocation,
     Value<DateTime?> expirationDate = const Value.absent(),
     Value<double?> minQuantity = const Value.absent(),
-    Value<int?> calories = const Value.absent(),
+    Value<double?> calories = const Value.absent(),
     Value<double?> proteinGrams = const Value.absent(),
     Value<double?> carbohydrateGrams = const Value.absent(),
     Value<double?> fatGrams = const Value.absent(),
@@ -996,7 +1013,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<String> storageLocation;
   final Value<DateTime?> expirationDate;
   final Value<double?> minQuantity;
-  final Value<int?> calories;
+  final Value<double?> calories;
   final Value<double?> proteinGrams;
   final Value<double?> carbohydrateGrams;
   final Value<double?> fatGrams;
@@ -1077,7 +1094,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<String>? storageLocation,
     Expression<DateTime>? expirationDate,
     Expression<double>? minQuantity,
-    Expression<int>? calories,
+    Expression<double>? calories,
     Expression<double>? proteinGrams,
     Expression<double>? carbohydrateGrams,
     Expression<double>? fatGrams,
@@ -1129,7 +1146,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Value<String>? storageLocation,
     Value<DateTime?>? expirationDate,
     Value<double?>? minQuantity,
-    Value<int?>? calories,
+    Value<double?>? calories,
     Value<double?>? proteinGrams,
     Value<double?>? carbohydrateGrams,
     Value<double?>? fatGrams,
@@ -1206,7 +1223,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       map['min_quantity'] = Variable<double>(minQuantity.value);
     }
     if (calories.present) {
-      map['calories'] = Variable<int>(calories.value);
+      map['calories'] = Variable<double>(calories.value);
     }
     if (proteinGrams.present) {
       map['protein_grams'] = Variable<double>(proteinGrams.value);

@@ -45,14 +45,16 @@ für Landwirtschaft und Ernährung angibt; Hunde und Katzen mit der
 tierärztlichen Faustregel von rund 60 ml je Kilogramm.
 
 Die Kalorien stehen seit 1.9.4 **je Einheit** in der Spalte – je Dose, je
-Kilogramm – und werden mit der Menge multipliziert. Vorher wurden sie
-einmal je Zeile addiert, sodass sechs Dosen à 900 kcal auf 900 kcal kamen.
-Eine Gesamtsumme wäre auch nicht zu halten: beim Verbrauchen sinkt die
-Menge, und keine Abbuchung kann eine Zahl umrechnen, deren Bezug sie nicht
-kennt. Beim Barcode-Scan rechnet die App die Nährwerte von Open Food Facts
-auf die Einheit um, in der Sie zählen – bei Gramm und Millilitern schreibt
-sie nichts, weil Kilokalorien je Gramm einstellig sind und eine ganze Zahl
-dort zu grob ist.
+Kilogramm, je Gramm – und werden mit der Menge multipliziert. Vorher
+wurden sie einmal je Zeile addiert, sodass sechs Dosen à 900 kcal auf
+900 kcal kamen. Eine Gesamtsumme wäre auch nicht zu halten: beim
+Verbrauchen sinkt die Menge, und keine Abbuchung kann eine Zahl
+umrechnen, deren Bezug sie nicht kennt.
+
+Kommazahlen sind erlaubt, mit Komma oder Punkt, und das ist der Grund,
+warum „je Einheit" für *jede* Einheit funktioniert: ein Gramm Vollkornbrot
+hat 2,13 kcal. Beim Barcode-Scan rechnet die App die Nährwerte von Open
+Food Facts selbst auf Ihre Einheit um.
 
 **Checklisten.** 19 mitgelieferte Listen nach dem BBK-Ratgeber – von
 Wasser, Lebensmitteln und Erster Hilfe über Strom- und Heizungsausfall,

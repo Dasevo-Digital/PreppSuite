@@ -354,10 +354,11 @@ two and the app prints no third; the screen names the rows a vegan
 household has to replace instead. `StorageNutrient` is the one thing the
 app adds, and it says so on screen.
 
-**Nutrition figures are totals for the item, never per 100 g.** Open
-Food Facts states per 100 g and the package size as free text; the
-conversion happens once, at scan time, so that adding up a shelf is a
-sum. A null means the label did not say and is never stored as zero —
+**Nutrition figures are never per 100 g.** Open Food Facts states per
+100 g and the package size as free text; the conversion happens once, at
+scan time. Energy lands **per unit** and the macronutrients **per
+package** — see "Nutrition figures: per unit" below for why the two
+differ. A null means the label did not say and is never stored as zero —
 the supply calculator adds these up, and a guessed zero is
 indistinguishable from a measured one. A nutrient heavier than the
 package it is in is rejected, which is what catches the common Open Food
@@ -1264,10 +1265,29 @@ the figure that helps is the one printed on the tin.
 What makes the per-unit basis safe is that the scanner respects it.
 `kcalPerStoredUnit` converts the label's per-100 figure according to the
 unit the household counts in -- from the package size for a tin, from the
-label alone for a kilogram, and **not at all** for grams and millilitres,
-where an integer column would be a tenth of a kilocalorie out on every
-gram in the cellar. Without that, a scan into an item counted in grams
-would have been multiplied by the gram count.
+label alone for anything the unit parser reads as mass or volume. Without
+it, a scan into an item counted in grams would have been multiplied by the
+gram count.
+
+**The column is a real, and that is what makes "per unit" work for every
+unit rather than most of them.** As an integer it could not hold 2.13 kcal
+for a gram of bread, so two things followed that both looked like design
+decisions and were neither: the scanner refused to fill the field below
+20 kcal, and the form read it with `int.tryParse` and no comma handling --
+so a household counting in grams faced a field named "Kalorien je g" that
+accepted neither `2,13` nor `2.13`. It asked for a figure it would not
+take. Schema 15 makes the column a real and both workarounds are gone
+rather than documented. Only the household's *total* rounds, once, at the
+end of `calculateSupply`.
+
+**A per-unit column changes what a caller may hand over.** The stockpiling
+table prints a total against an amount ("Vollkornbrot, 710 g, 1512 kcal"),
+and `storage_tips_screen.dart` passed that straight into the new item --
+correct while the column meant "total for the current quantity", and a
+factor-of-710 overstatement the moment it stopped meaning that, in the
+direction that tells a household it is stocked. It now divides by the
+amount, taken from the unscaled row because amount and energy scale
+together and the quotient does not.
 
 ### The knowledge check must not know anything the guides do not
 

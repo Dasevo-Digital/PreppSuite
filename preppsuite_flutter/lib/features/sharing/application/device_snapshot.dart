@@ -199,7 +199,7 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
     storageLocation: _string(json['storageLocation']) ?? '',
     expirationDate: Value(asUtcDate(json['expirationDate'])),
     minQuantity: Value(_double(json['minQuantity'])),
-    calories: Value(_int(json['calories'])),
+    calories: Value(_double(json['calories'])),
     // Absent in files written before these columns existed, which is why
     // every one of them is nullable and read through a tolerant helper:
     // an older device's snapshot has to stay readable.

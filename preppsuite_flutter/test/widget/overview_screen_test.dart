@@ -28,7 +28,7 @@ void main() {
     String unit = 'Packung',
     double? minQuantity,
     DateTime? expirationDate,
-    int? calories,
+    double? calories,
   }) => InventoryItem(
     clientId: clientId,
     householdId: householdId,

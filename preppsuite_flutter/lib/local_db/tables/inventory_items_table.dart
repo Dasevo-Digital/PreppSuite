@@ -24,14 +24,22 @@ class InventoryItems extends Table {
   RealColumn get minQuantity => real().nullable()();
 
   /// Kilocalories in **one** [unit] of this item — one tin, one kilogram,
-  /// one packet. Only meaningful for `category: food`, and multiplied by
+  /// one gram. Only meaningful for `category: food`, and multiplied by
   /// [quantity] by the supply calculator (`supply_calculator.dart`).
   ///
   /// Per unit and not a total for the stock, because a total is a figure
   /// nothing maintains: [quantity] changes every time somebody eats
   /// something, and no consume path can rescale a number whose basis it
   /// does not know. Per unit survives that untouched.
-  IntColumn get calories => integer().nullable()();
+  ///
+  /// Fractional since schema 15, and that is what makes "per unit" work
+  /// for every unit rather than most of them. Bread is 2.13 kcal a gram.
+  /// As an integer that was 2 — six percent off every gram in the cellar
+  /// — so the scanner refused to fill the field at all below 20 kcal, and
+  /// a household counting in grams was left with a field it could not
+  /// type a usable number into either. The refusal was never about the
+  /// unit; it was about the column.
+  RealColumn get calories => real().nullable()();
 
   /// Macronutrients for **one package**, in grams, as the label gives
   /// them — deliberately *not* the per-unit basis [calories] uses.

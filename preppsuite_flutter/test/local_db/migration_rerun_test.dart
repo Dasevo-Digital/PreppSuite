@@ -66,6 +66,19 @@ void main() {
         updatedAt: DateTime.utc(2026, 9, 10),
       ),
     );
+    await fresh.upsertInventoryItem(
+      InventoryItemsCompanion.insert(
+        clientId: 'item-3',
+        householdId: 'household-1',
+        name: 'Vollkornbrot',
+        category: 'food',
+        quantity: 400,
+        unit: 'g',
+        storageLocation: 'Keller',
+        calories: const Value(2.13),
+        updatedAt: DateTime.utc(2026, 9, 10),
+      ),
+    );
     await fresh.upsertPossession(
       PossessionsCompanion.insert(
         clientId: 'possession-1',
@@ -128,6 +141,13 @@ void main() {
       // the column did not exist there. Only this test can construct the
       // combination, by winding today's schema back.
       expect(medicine.dailyDose, version < 8 ? isNull : 2);
+
+      // Schema 15 made `calories` a real. The fraction has to come back
+      // whole from every rewind point, including the ones that rebuild
+      // the table twice -- a rebuild that dropped back to an integer
+      // column would round this to 2 and say nothing about it.
+      final bread = items.firstWhere((item) => item.name == 'Vollkornbrot');
+      expect(bread.calories, closeTo(2.13, 0.0001));
     });
   }
 

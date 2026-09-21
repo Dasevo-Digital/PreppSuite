@@ -132,7 +132,7 @@ SupplyCalculatorResult calculateSupply({
   SupplyHousehold household = const SupplyHousehold(),
 }) {
   var waterCurrent = 0.0;
-  var caloriesCurrent = 0;
+  var caloriesCurrent = 0.0;
 
   for (final item in items) {
     final category = InventoryItemCategoryX.fromName(item.category);
@@ -145,7 +145,12 @@ SupplyCalculatorResult calculateSupply({
       // be added once per *line*, so six tins of 900 kcal came to 900 —
       // a cellar counted as a sixth of itself. The column holds the
       // energy in one unit; how many of them there are is the quantity.
-      caloriesCurrent += (item.calories! * item.quantity).round();
+      //
+      // Summed as a real and rounded once at the end, not per row: four
+      // hundred grams of bread at 2.13 kcal a gram is 852, and rounding
+      // each row first would throw away the fraction the column now
+      // exists to carry.
+      caloriesCurrent += item.calories! * item.quantity;
     }
   }
 
@@ -153,7 +158,7 @@ SupplyCalculatorResult calculateSupply({
     waterTargetLiters: household.litersPerDay * days,
     waterCurrentLiters: waterCurrent,
     caloriesTarget: household.kcalPerDay * days,
-    caloriesCurrent: caloriesCurrent,
+    caloriesCurrent: caloriesCurrent.round(),
   );
 }
 

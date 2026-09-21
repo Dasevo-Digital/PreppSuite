@@ -106,10 +106,14 @@ void main() {
       expect(estimatePackageKcal(kcalPer100: 45, quantityText: '1 l'), 450);
     });
 
-    test('rounds to a whole kilocalorie', () {
+    test('keeps the fraction rather than rounding it away', () {
+      // It used to round to 583, because the column was an integer. The
+      // rounding belonged to the column and went with it: what is stored
+      // now is what the label says, and the one place that still rounds
+      // is the household's total.
       expect(
         estimatePackageKcal(kcalPer100: 333, quantityText: '175 g'),
-        583, // 582.75
+        closeTo(582.75, 0.001),
       );
     });
 
@@ -205,17 +209,20 @@ void main() {
       );
     });
 
-    test('grams and millilitres get no number at all', () {
-      // Kilocalories per gram run to single digits and the column is an
-      // integer: rounding 3.5 to 4 is a fourteen percent error on every
-      // gram in the cellar. Better none than that.
+    test('grams and millilitres are answered like any other unit', () {
+      // These two used to get nothing. Kilocalories per gram run to
+      // single digits, the column was an integer, and rounding 3.5 to 4
+      // is a fourteen percent error on every gram in the cellar — so the
+      // scanner left the field empty and a household counting in grams
+      // could not type a usable number into it either. The obstacle was
+      // the column's type, and it is gone.
       expect(
         kcalPerStoredUnit(
           kcalPer100: 350,
           packageSizeText: '500 g',
           storedUnit: 'g',
         ),
-        isNull,
+        closeTo(3.5, 0.001),
       );
       expect(
         kcalPerStoredUnit(
@@ -223,8 +230,24 @@ void main() {
           packageSizeText: '1 l',
           storedUnit: 'ml',
         ),
-        isNull,
+        closeTo(0.45, 0.001),
       );
+    });
+
+    test('the package size is beside the point for a unit of mass', () {
+      // A gram of bread is a gram of bread whether the loaf is 500 g or
+      // 750 g, so the same label gives the same figure either way.
+      for (final size in ['500 g', '750 g', null]) {
+        expect(
+          kcalPerStoredUnit(
+            kcalPer100: 213,
+            packageSizeText: size,
+            storedUnit: 'g',
+          ),
+          closeTo(2.13, 0.001),
+          reason: 'Packungsgroesse $size',
+        );
+      }
     });
 
     test('no figure on the label means no figure stored', () {

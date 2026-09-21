@@ -81,21 +81,18 @@ PackageSize? parsePackageSize(String? text) {
 /// or unreadable.
 ///
 /// [kcalPer100] is energy per 100 g / 100 ml, as Open Food Facts reports
-/// it. The result is rounded to a whole number — the inventory stores an
-/// int, and a tenth of a kilocalorie is noise next to a daily target of
-/// 2200.
-int? estimatePackageKcal({
+/// it.
+double? estimatePackageKcal({
   required double? kcalPer100,
   required String? quantityText,
 }) {
   // A single package above this is almost certainly a misread label rather
   // than real food — better no number than a nonsensical one.
-  final total = estimatePackageTotal(
+  return estimatePackageTotal(
     per100: kcalPer100,
     quantityText: quantityText,
     implausibleAbove: 100000,
   );
-  return total?.round();
 }
 
 /// Kilocalories for **one** of whatever the household counts this item in.
@@ -105,24 +102,27 @@ int? estimatePackageKcal({
 /// tin" but "the energy in one [storedUnit]", and those are the same
 /// number only when the unit *is* the tin.
 ///
-/// Three cases, and the package size text only matters in the third:
+/// Two cases, and the package size text only matters in the second:
 ///
-///  * the household counts in **kilograms or litres** — then the label's
-///    own per-100 figure answers it directly, and the package size is
-///    irrelevant;
-///  * it counts in **grams or millilitres** — then the honest answer is
-///    none at all. Kilocalories per gram run to single digits, the column
-///    is an integer, and rounding 3.6 to 4 is an eleven percent error on
-///    every gram in the cellar. Better no number than that one;
+///  * the household counts in a **unit of mass or volume** — grams,
+///    kilograms, millilitres, litres. Then the label's own per-100 figure
+///    answers it directly and the package size is irrelevant: a gram of
+///    bread is 2.13 kcal whether the loaf is 500 g or 750 g;
 ///  * it counts in **tins, packets, pieces** — anything the unit parser
-///    does not recognise as mass or volume. Then one unit is one package,
-///    and [estimatePackageKcal] is the answer.
-int? kcalPerStoredUnit({
+///    does not recognise. Then one unit is one package, and
+///    [estimatePackageKcal] is the answer.
+///
+/// There used to be a third case: grams and millilitres got no figure at
+/// all, because kilocalories per gram are single digits and the column was
+/// an integer, so 2.13 would have been stored as 2. That was a limit of
+/// the column and not of the arithmetic, and since schema 15 the column
+/// holds a real — so the case is gone rather than worked around.
+double? kcalPerStoredUnit({
   required double? kcalPer100,
   required String? packageSizeText,
   required String storedUnit,
 }) {
-  if (kcalPer100 == null) return null;
+  if (kcalPer100 == null || kcalPer100 <= 0) return null;
 
   // Asking the size parser what one of the stored unit weighs. It answers
   // for grams, kilograms, millilitres and litres, and gives up on "Dose"
@@ -135,12 +135,7 @@ int? kcalPerStoredUnit({
     );
   }
 
-  final perUnit = kcalPer100 * one.amount / 100;
-  // Below this an integer is too blunt to be worth storing: at 20 kcal a
-  // rounding of half a kilocalorie is already two and a half percent, and
-  // it gets worse all the way down to a single gram.
-  if (perUnit < 20) return null;
-  return perUnit.round();
+  return kcalPer100 * one.amount / 100;
 }
 
 /// Total grams of a nutrient in a package — protein, fat, carbohydrate,

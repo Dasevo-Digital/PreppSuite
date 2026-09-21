@@ -113,4 +113,59 @@ void main() {
       expect(scaleAmount(5, StorageUnit.piece, 2, 10), 10);
     });
   });
+
+  group('the table read as energy per unit', () {
+    // What the "add to inventory" button needs. The table prints a total
+    // against an amount -- "Vollkornbrot, 710 g, 1512 kcal" -- while the
+    // inventory column holds the energy in one unit, so the two are a
+    // division apart. Handing the printed total over unchanged was right
+    // while the column meant "total for the current quantity"; when that
+    // changed it became a factor-of-710 overstatement, in the direction
+    // that tells a household it is stocked when it is not.
+    test('dividing the total by the amount agrees with the label', () {
+      var checked = 0;
+      for (final diet in StorageDiet.values) {
+        for (final group in storagePlanFor(diet).groups) {
+          for (final food in group.foods) {
+            final total = food.totalKcal;
+            final per100 = food.kcalPer100;
+            if (total == null || per100 == null) continue;
+
+            // Grams and litres are the two the label can be checked
+            // against; a piece has no per-100 figure to check.
+            final expected = switch (food.unit) {
+              StorageUnit.gram => per100 / 100,
+              StorageUnit.liter => per100 * 10,
+              StorageUnit.piece => null,
+            };
+            if (expected == null) continue;
+
+            checked++;
+            expect(
+              total / food.amount,
+              closeTo(expected, expected * 0.01),
+              reason:
+                  '${food.name}: $total kcal auf ${food.amount} '
+                  '${food.unit.name}',
+            );
+          }
+        }
+      }
+      expect(checked, greaterThan(30));
+    });
+
+    test('and the quotient does not move when the table is scaled', () {
+      // Amount and energy scale by the same factor, so energy per unit is
+      // the one figure in this table that a household size cannot change.
+      // That is why the screen takes it from the unscaled row.
+      final bread = storagePlanFor(StorageDiet.mixed).groups.first.foods.first;
+      final perUnit = bread.totalKcal! / bread.amount;
+
+      for (final (people, days) in [(1, 10), (4, 14), (2, 3)]) {
+        final scaled = scaleAmount(bread.amount, bread.unit, people, days);
+        final scaledKcal = bread.totalKcal! * people * days / 10;
+        expect(scaledKcal / scaled, closeTo(perUnit, 0.001));
+      }
+    });
+  });
 }

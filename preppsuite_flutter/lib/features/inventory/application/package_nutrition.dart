@@ -40,7 +40,7 @@ class PackageNutrition {
     fiberGrams: item.fiberGrams,
   );
 
-  final int? kcal;
+  final double? kcal;
   final double? proteinGrams;
   final double? carbohydrateGrams;
   final double? fatGrams;

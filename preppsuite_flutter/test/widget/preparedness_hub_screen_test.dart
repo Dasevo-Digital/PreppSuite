@@ -25,7 +25,7 @@ void main() {
     required String category,
     required double quantity,
     String unit = 'Stk',
-    int? calories,
+    double? calories,
   }) => InventoryItem(
     clientId: clientId,
     householdId: 'home',

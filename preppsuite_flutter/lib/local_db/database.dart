@@ -32,7 +32,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 14;
+  static const currentSchemaVersion = 15;
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
@@ -264,6 +264,26 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(inventoryItems);
         } else {
           await _addColumnOnce(m, inventoryItems, inventoryItems.dailyDose);
+        }
+      }
+      if (from >= 8 && from < 15) {
+        // `calories` was an integer and is now a real, so that a household
+        // counting in grams can say 2.13 rather than 2.
+        //
+        // Nothing to convert: SQLite stores what it is given and every
+        // existing value is a whole number that reads back as one. The
+        // rebuild is only there so the column's declared type matches what
+        // the generated code now expects to read.
+        //
+        // `from >= 8` for the reason the two branches above give: anything
+        // older is rebuilt from today's definition in the schema-8 branch,
+        // which already declares this column as a real. And no
+        // `newColumns`, because at version 8 and later the table has every
+        // column it has today.
+        if (!await _hasTable('inventory_items')) {
+          await m.createTable(inventoryItems);
+        } else {
+          await m.alterTable(TableMigration(inventoryItems));
         }
       }
     },

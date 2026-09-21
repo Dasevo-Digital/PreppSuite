@@ -7,7 +7,7 @@ void main() {
     required String category,
     double quantity = 1,
     String unit = 'L',
-    int? calories,
+    double? calories,
   }) {
     return InventoryItem(
       clientId: 'c',
@@ -161,6 +161,48 @@ void main() {
       );
 
       expect(result.caloriesCurrent, 0);
+    });
+  });
+
+  group('a fraction of a kilocalorie', () {
+    test('four hundred grams of bread at 2.13 a gram is 852', () {
+      // The case the column became a real for. As an integer this was
+      // 2 kcal a gram and 800 in the cellar -- six percent light, every
+      // time, on the one figure a household plans against.
+      final result = calculateSupply(
+        items: [
+          item(category: 'food', quantity: 400, unit: 'g', calories: 2.13),
+        ],
+        days: 1,
+      );
+
+      expect(result.caloriesCurrent, 852);
+    });
+
+    test('the rounding happens once, at the end, not per row', () {
+      // Three rows that each end in a half. Rounded per row they come to
+      // 3; rounded once they come to 2 -- and the second is the number a
+      // household actually has.
+      final result = calculateSupply(
+        items: [
+          for (var i = 0; i < 3; i++)
+            item(category: 'food', quantity: 1, unit: 'Stueck', calories: 0.5),
+        ],
+        days: 1,
+      );
+
+      expect(result.caloriesCurrent, 2);
+    });
+
+    test('and a whole number still behaves exactly as it did', () {
+      final result = calculateSupply(
+        items: [
+          item(category: 'food', quantity: 6, unit: 'Dose', calories: 900),
+        ],
+        days: 1,
+      );
+
+      expect(result.caloriesCurrent, 5400);
     });
   });
 }

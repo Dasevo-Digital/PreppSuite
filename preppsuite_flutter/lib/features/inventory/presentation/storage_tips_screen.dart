@@ -302,7 +302,7 @@ class _FoodRow extends StatelessWidget {
       trailing: IconButton(
         icon: const Icon(Icons.add_shopping_cart_outlined),
         tooltip: l10n.storageAddToInventory,
-        onPressed: () => _addToInventory(context, l10n, amount, kcal),
+        onPressed: () => _addToInventory(context, l10n, amount, _perUnitKcal()),
       ),
     );
   }
@@ -312,11 +312,31 @@ class _FoodRow extends StatelessWidget {
       : (base * people * days / (StoragePlan.basePeople * StoragePlan.baseDays))
             .round();
 
+  /// The table's energy for **one** of this row's unit — one gram, one
+  /// litre, one egg.
+  ///
+  /// The table prints a total against an amount ("Vollkornbrot, 710 g,
+  /// 1512 kcal"), and the inventory column holds the energy in one unit,
+  /// so the two are a division apart. Handing the printed total straight
+  /// over was right while the column meant "total for the current
+  /// quantity" and became a factor-of-710 overstatement when it stopped
+  /// meaning that — in the direction that tells a household it is stocked.
+  ///
+  /// Taken from the unscaled row on purpose: amount and energy scale by
+  /// the same factor, so the quotient does not, and dividing the rounded
+  /// scaled figures would only add a rounding that the source does not
+  /// have.
+  double? _perUnitKcal() {
+    final total = food.totalKcal;
+    if (total == null || food.amount <= 0) return null;
+    return total / food.amount;
+  }
+
   Future<void> _addToInventory(
     BuildContext context,
     AppLocalizations l10n,
     double amount,
-    int? kcal,
+    double? kcalPerUnit,
   ) async {
     // The form opens rather than the row being written straight in: the
     // table says nothing about where this household keeps things or how
@@ -329,7 +349,7 @@ class _FoodRow extends StatelessWidget {
             name: storageFoodName(l10n, food),
             quantity: amount,
             unit: _unitLabel(l10n, food.unit),
-            nutrition: PackageNutrition(kcal: kcal),
+            nutrition: PackageNutrition(kcal: kcalPerUnit),
             notes: l10n.storageFromTableNote,
           ),
         ),

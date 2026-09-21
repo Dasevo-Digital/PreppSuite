@@ -16,7 +16,7 @@ void main() {
     double quantity = 1,
     String unit = 'Stück',
     double? minQuantity,
-    int? calories,
+    double? calories,
   }) => InventoryItem(
     clientId: clientId,
     householdId: 'h',
@@ -216,7 +216,7 @@ void main() {
               clientId: 'f',
               quantity: random.nextInt(30).toDouble(),
               unit: 'Dose',
-              calories: random.nextInt(1200),
+              calories: random.nextInt(1200).toDouble(),
             ),
           ],
           days: days,
