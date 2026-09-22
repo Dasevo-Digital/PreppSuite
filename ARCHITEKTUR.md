@@ -1567,6 +1567,44 @@ Beide Richtungen halten ihre zwei Fehlerfälle auseinander: Was sich nicht
 Haushalt (409).
 
 
+### Eine Liste sagt, was die App kann
+
+`core/app_destinations.dart` ist die einzige Stelle, die den Funktionsumfang
+als **Daten** führt statt als Widgets in Widgets. Sie entstand für die Suche,
+denn zweiundsechzig Bildschirme hinter zehn Reitern werden nicht mehr
+navigiert, sondern gesucht -- und eine Suche braucht etwas zum Durchsehen.
+Wer die Blackout-Uhr sucht, muss sonst wissen, dass sie unter Notfall liegt
+und nicht unter Energie.
+
+Die Hub-Bildschirme zeichnen weiter ihre eigenen Kacheln. Beide lesen
+dieselben `l10n`-Getter, ein umbenannter Bildschirm heißt also in beiden
+sofort anders. Auseinanderlaufen kann nur die *Menge*: ein Bildschirm, der
+einem Hub hinzugefügt und hier vergessen wird, ist ein Bildschirm, den die
+Suche nicht findet -- und das merkt niemand beim Benutzen, sondern nur beim
+vergeblichen Suchen.
+
+Deshalb liest `app_destinations_test.dart` den Quellbaum: Jeder
+`*_screen.dart` muss entweder im Register stehen oder namentlich mit Grund
+ausgenommen sein. Ausgenommen sind die, die ohne einen vorhandenen Datensatz
+nicht existieren -- ein Formular braucht die Zeile, die es bearbeitet, ein
+Artikel ein geöffnetes Archiv, der Foto-Editor ein Foto. Der Test prüft auch
+die Gegenrichtung: Eine Ausnahme für einen gelöschten Bildschirm würde still
+den nächsten decken, der denselben Namen bekommt.
+
+**Die Notfallkarten sind absichtlich nicht durchsuchbar.** Es sind
+Gesundheitsdaten, und eine allgemeine Trefferliste, die eine Diagnose zwei
+Zeilen unter eine Dose Bohnen setzt, ist der falsche Ort dafür -- auch vor
+demjenigen, der das Telefon gerade in der Hand hält. Sie haben ihren eigenen
+Bildschirm, der sagt, was sie sind, bevor etwas hineingeschrieben wird.
+
+**Die Suche rät nicht.** Kein Scoring, kein Fuzzy-Abstand: Wer "Pegel" tippt,
+will den Pegel, und eine Liste, die drei Beinahetreffer darüber setzt, hat
+eine Frage beantwortet, die niemand gestellt hat. Was sie sehr wohl tut, ist
+falten, wie Deutsch tatsächlich getippt wird -- "Notgepack" findet
+"Notgepäck" und umgekehrt, samt der kombinierenden Akzente, die eine
+Mac-Tastatur erzeugt.
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,

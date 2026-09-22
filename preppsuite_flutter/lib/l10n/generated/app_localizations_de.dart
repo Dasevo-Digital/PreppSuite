@@ -3350,6 +3350,36 @@ class AppLocalizationsDe extends AppLocalizations {
       'Öffnet die Kiwix-Bibliothek mit einer passenden Suche. Prüfe dort Sprache, Ausgabe und Speicherbedarf vor dem Download.';
 
   @override
+  String get searchTitle => 'Suchen';
+
+  @override
+  String get searchHint => 'Bildschirm, Vorrat, Checklistenpunkt …';
+
+  @override
+  String get searchStartHint =>
+      'Tippe, um die ganze App zu durchsuchen: Bildschirme, Vorräte, Checklistenpunkte und den Hausrat.';
+
+  @override
+  String searchNothingFound(String query) {
+    return 'Nichts gefunden für „$query“.';
+  }
+
+  @override
+  String get searchAction => 'Suchen';
+
+  @override
+  String get searchGroupScreens => 'Bildschirme';
+
+  @override
+  String get searchGroupInventory => 'Vorrat';
+
+  @override
+  String get searchGroupChecklists => 'Checklisten';
+
+  @override
+  String get searchGroupPossessions => 'Hausrat';
+
+  @override
   String get settingsVersionInfoTitle => 'Versionsinfo';
 
   @override

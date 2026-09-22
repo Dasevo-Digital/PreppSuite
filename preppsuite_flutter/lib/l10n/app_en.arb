@@ -2032,6 +2032,22 @@
   "knowledgeApolloPersonalTitle": "Add your own material",
   "knowledgeApolloPersonalBody": "Add local PDF, EPUB and Markdown files and make readable text available to offline full-text search.",
   "knowledgeApolloDownloadHint": "Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.",
+  "searchTitle": "Search",
+  "searchHint": "Screen, supply, checklist entry \u2026",
+  "searchStartHint": "Type to search the whole app: screens, supplies, checklist entries and the household inventory.",
+  "searchNothingFound": "Nothing found for \u201c{query}\u201d.",
+  "@searchNothingFound": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchAction": "Search",
+  "searchGroupScreens": "Screens",
+  "searchGroupInventory": "Supplies",
+  "searchGroupChecklists": "Checklists",
+  "searchGroupPossessions": "Household inventory",
   "settingsVersionInfoTitle": "Version information",
   "settingsVersionInfoApp": "PreppSuite app",
   "settingsVersionInfoAppValue": "{version} · build {build}",

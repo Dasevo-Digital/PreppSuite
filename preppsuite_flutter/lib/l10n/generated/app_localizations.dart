@@ -5678,6 +5678,60 @@ abstract class AppLocalizations {
   /// **'Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.'**
   String get knowledgeApolloDownloadHint;
 
+  /// No description provided for @searchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchTitle;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Screen, supply, checklist entry …'**
+  String get searchHint;
+
+  /// No description provided for @searchStartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type to search the whole app: screens, supplies, checklist entries and the household inventory.'**
+  String get searchStartHint;
+
+  /// No description provided for @searchNothingFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing found for “{query}”.'**
+  String searchNothingFound(String query);
+
+  /// No description provided for @searchAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchAction;
+
+  /// No description provided for @searchGroupScreens.
+  ///
+  /// In en, this message translates to:
+  /// **'Screens'**
+  String get searchGroupScreens;
+
+  /// No description provided for @searchGroupInventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplies'**
+  String get searchGroupInventory;
+
+  /// No description provided for @searchGroupChecklists.
+  ///
+  /// In en, this message translates to:
+  /// **'Checklists'**
+  String get searchGroupChecklists;
+
+  /// No description provided for @searchGroupPossessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Household inventory'**
+  String get searchGroupPossessions;
+
   /// No description provided for @settingsVersionInfoTitle.
   ///
   /// In en, this message translates to:

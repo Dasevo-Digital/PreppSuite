@@ -3326,6 +3326,36 @@ class AppLocalizationsEn extends AppLocalizations {
       'Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.';
 
   @override
+  String get searchTitle => 'Search';
+
+  @override
+  String get searchHint => 'Screen, supply, checklist entry …';
+
+  @override
+  String get searchStartHint =>
+      'Type to search the whole app: screens, supplies, checklist entries and the household inventory.';
+
+  @override
+  String searchNothingFound(String query) {
+    return 'Nothing found for “$query”.';
+  }
+
+  @override
+  String get searchAction => 'Search';
+
+  @override
+  String get searchGroupScreens => 'Screens';
+
+  @override
+  String get searchGroupInventory => 'Supplies';
+
+  @override
+  String get searchGroupChecklists => 'Checklists';
+
+  @override
+  String get searchGroupPossessions => 'Household inventory';
+
+  @override
   String get settingsVersionInfoTitle => 'Version information';
 
   @override

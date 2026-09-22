@@ -1,6 +1,10 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../search/presentation/app_search_screen.dart';
 import '../../../core/feature_activity.dart';
 import '../../../model/household_profile.dart';
 import '../../checklists/presentation/checklist_list_screen.dart';
@@ -58,6 +62,34 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     final navigation = shellNavigationFor(MediaQuery.sizeOf(context).width);
     final slots = shellSlotsFor(navigation: navigation, selected: _selected);
 
+    return CallbackShortcuts(
+      // The search is one screen deep from the overview and nowhere at
+      // all from the other nine. On a desktop that is a keystroke away
+      // instead — the one people already try before looking for a
+      // button, which is why it is bound to both spellings of it.
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyF, meta: true): _search,
+        const SingleActivator(LogicalKeyboardKey.keyF, control: true): _search,
+        const SingleActivator(LogicalKeyboardKey.keyK, meta: true): _search,
+        const SingleActivator(LogicalKeyboardKey.keyK, control: true): _search,
+      },
+      child: Focus(
+        autofocus: true,
+        child: _scaffold(l10n, navigation, slots, householdId),
+      ),
+    );
+  }
+
+  void _search() => unawaited(
+    openAppSearch(context, widget.profile, _select),
+  );
+
+  Widget _scaffold(
+    AppLocalizations l10n,
+    ShellNavigation navigation,
+    ShellSlots slots,
+    String householdId,
+  ) {
     // Build destinations on first use and retain their navigation state.
     // Inactive maps release renderers through FeatureActivity.
     final content = IndexedStack(
@@ -192,6 +224,19 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // First, and above a divider. On a phone the search button
+            // lives on the overview, which is one tab away from the
+            // other nine — and the whole point of a search is not having
+            // to go somewhere first.
+            ListTile(
+              leading: const Icon(Icons.search),
+              title: Text(l10n.searchTitle),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                _search();
+              },
+            ),
+            const Divider(height: 1),
             for (final destination in overflow)
               ListTile(
                 leading: _entry(l10n, destination).icon,

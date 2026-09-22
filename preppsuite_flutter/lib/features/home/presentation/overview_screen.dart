@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/progress_text.dart';
 import '../../../core/portable_data.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../search/presentation/app_search_screen.dart';
 import '../../settings/presentation/missing_data_folder_notice.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
@@ -63,7 +64,16 @@ class OverviewScreen extends ConsumerWidget {
       ),
     ];
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.navOverview)),
+      appBar: AppBar(
+        title: Text(l10n.navOverview),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: l10n.searchTitle,
+            onPressed: () => openAppSearch(context, profile, onNavigate),
+          ),
+        ],
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final wide =
