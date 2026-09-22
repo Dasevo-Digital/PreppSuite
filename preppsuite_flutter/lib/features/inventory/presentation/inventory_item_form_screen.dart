@@ -18,7 +18,7 @@ import '../application/open_food_facts_service.dart';
 import '../application/package_nutrition.dart';
 import 'barcode_scanner_screen.dart';
 import 'photo_editor_screen.dart';
-import '../application/package_energy.dart';
+import '../application/food_amount.dart';
 
 /// A form filled in from somewhere other than an existing row — the
 /// stockpiling table hands one over when a food is added from it.
@@ -273,7 +273,7 @@ class _InventoryItemFormScreenState
       if (product != null) {
         _nameController.text = product.name;
         _offProductId = product.barcode;
-        _fillNutrition(product.nutrition, product: product);
+        _fillNutrition(product.nutrition);
       }
     });
 
@@ -391,43 +391,59 @@ class _InventoryItemFormScreenState
   /// Writes what the label says into the nutrition fields.
   ///
   /// Only ever fills an empty one: a value already typed in is the user's
-  /// own correction, and it outranks a figure derived from a per-100 g
-  /// number and a free-text package size.
-  void _fillNutrition(
-    PackageNutrition nutrition, {
-    OpenFoodFactsProduct? product,
-  }) {
+  /// own correction and outranks the label.
+  void _fillNutrition(PackageNutrition nutrition) {
     void fill(TextEditingController controller, String? value) {
       if (value != null && controller.text.trim().isEmpty) {
         controller.text = value;
       }
     }
 
-    // The energy column holds kilocalories in **one** unit, and what one
-    // unit is depends on what the household counts in. A scan knows the
-    // label and the package size; only this screen knows whether the
-    // cellar is counted in tins or in kilograms, so the conversion
-    // belongs here and not in the lookup.
-    final kcal = product == null
-        ? nutrition.kcal
-        : kcalPerStoredUnit(
-            kcalPer100: product.energyKcalPer100,
-            packageSizeText: product.quantity,
-            storedUnit: _unitController.text,
-          );
-    fill(_caloriesController, kcal == null ? null : '$kcal');
+    // Nothing is converted here any more. The column holds what the
+    // label says — per 100 g, or per 100 ml on a drink — and the scan
+    // hands over exactly that. The screen used to redo the conversion
+    // because the basis depended on the unit the household counted in;
+    // it does not any more, and both bugs that came out of that
+    // conversion went with it.
+    fill(_caloriesController, _grams(nutrition.kcal));
     fill(_proteinController, _grams(nutrition.proteinGrams));
     fill(_carbohydrateController, _grams(nutrition.carbohydrateGrams));
     fill(_fatController, _grams(nutrition.fatGrams));
     fill(_fiberController, _grams(nutrition.fiberGrams));
   }
 
-  /// What the stock comes to, or null while either half is missing.
-  int? _caloriesTotal() {
-    final kcal = _decimal(_caloriesController.text);
+  /// Whether this row's unit has to name a measure.
+  ///
+  /// Food, because nutrition is printed per 100 g and a tin has no weight
+  /// until somebody reads it. Water, because the reach calculation has
+  /// always needed litres and quietly skipped anything else — this only
+  /// says so at the moment it can still be fixed.
+  bool get _needsMeasure =>
+      _category == InventoryItemCategory.food ||
+      _category == InventoryItemCategory.water;
+
+  /// The basis the nutrition fields are labelled with: "100 g" or
+  /// "100 ml", following the unit the household typed.
+  String get _per100Unit => switch (oneOf(_unitController.text)?.base) {
+    FoodBase.volume => '100 ml',
+    _ => '100 g',
+  };
+
+  /// The stock reduced to grams or millilitres, or null where it cannot
+  /// be.
+  FoodAmount? _stock() {
     final quantity = _decimal(_quantityController.text);
-    if (kcal == null || quantity == null || quantity <= 0) return null;
-    return (kcal * quantity).round();
+    if (quantity == null || quantity <= 0) return null;
+    return measure(quantity, _unitController.text);
+  }
+
+  /// What the stock comes to in kilocalories, or null while anything is
+  /// missing.
+  int? _caloriesTotal() {
+    final per100 = _decimal(_caloriesController.text);
+    final stock = _stock();
+    if (per100 == null || stock == null) return null;
+    return stock.per100(per100).round();
   }
 
   /// A number as this form's other fields read one: comma or point, both
@@ -703,11 +719,23 @@ class _InventoryItemFormScreenState
                               controller: _unitController,
                               decoration: InputDecoration(
                                 labelText: l10n.unitLabel,
+                                helperText: _needsMeasure
+                                    ? l10n.unitMeasureHelper
+                                    : null,
+                                helperMaxLines: 3,
                               ),
-                              validator: (value) =>
-                                  (value == null || value.trim().isEmpty)
-                                  ? l10n.fieldRequired
-                                  : null,
+                              validator: (value) {
+                                final trimmed = value?.trim() ?? '';
+                                if (trimmed.isEmpty) return l10n.fieldRequired;
+                                // Only food and water. A medicine is
+                                // counted in tablets and its daily dose
+                                // with it; a tool is counted in pieces.
+                                // Neither has a label to apply.
+                                if (!_needsMeasure) return null;
+                                return isMeasurableUnit(trimmed)
+                                    ? null
+                                    : l10n.unitMeasureRequired;
+                              },
                             ),
                           ),
                         ],
@@ -785,15 +813,11 @@ class _InventoryItemFormScreenState
                         TextFormField(
                           controller: _caloriesController,
                           decoration: InputDecoration(
-                            // Named after the unit the household typed,
-                            // because "per unit" is the whole point and a
-                            // label that does not say which unit is how
-                            // the figure was misread in the first place.
-                            labelText: _unitController.text.trim().isEmpty
-                                ? l10n.caloriesLabel
-                                : l10n.caloriesPerUnitLabel(
-                                    _unitController.text.trim(),
-                                  ),
+                            // Named after the basis, because the basis is
+                            // the whole point: a figure whose basis is
+                            // not on the label is how this was misread
+                            // twice before.
+                            labelText: l10n.caloriesPer100Label(_per100Unit),
                           ),
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -822,7 +846,10 @@ class _InventoryItemFormScreenState
                             Expanded(
                               child: _GramsField(
                                 controller: _proteinController,
-                                label: l10n.proteinLabel,
+                                label: l10n.nutritionPer100Label(
+                                  l10n.proteinLabel,
+                                  _per100Unit,
+                                ),
                                 validator: _gramsValidator(l10n),
                               ),
                             ),
@@ -830,7 +857,10 @@ class _InventoryItemFormScreenState
                             Expanded(
                               child: _GramsField(
                                 controller: _carbohydrateController,
-                                label: l10n.carbohydrateLabel,
+                                label: l10n.nutritionPer100Label(
+                                  l10n.carbohydrateLabel,
+                                  _per100Unit,
+                                ),
                                 validator: _gramsValidator(l10n),
                               ),
                             ),
@@ -842,7 +872,10 @@ class _InventoryItemFormScreenState
                             Expanded(
                               child: _GramsField(
                                 controller: _fatController,
-                                label: l10n.fatLabel,
+                                label: l10n.nutritionPer100Label(
+                                  l10n.fatLabel,
+                                  _per100Unit,
+                                ),
                                 validator: _gramsValidator(l10n),
                               ),
                             ),
@@ -850,7 +883,10 @@ class _InventoryItemFormScreenState
                             Expanded(
                               child: _GramsField(
                                 controller: _fiberController,
-                                label: l10n.fiberLabel,
+                                label: l10n.nutritionPer100Label(
+                                  l10n.fiberLabel,
+                                  _per100Unit,
+                                ),
                                 validator: _gramsValidator(l10n),
                               ),
                             ),

@@ -354,11 +354,12 @@ two and the app prints no third; the screen names the rows a vegan
 household has to replace instead. `StorageNutrient` is the one thing the
 app adds, and it says so on screen.
 
-**Nutrition figures are never per 100 g.** Open Food Facts states per
-100 g and the package size as free text; the conversion happens once, at
-scan time. Energy lands **per unit** and the macronutrients **per
-package** — see "Nutrition figures: per unit" below for why the two
-differ. A null means the label did not say and is never stored as zero —
+**Nutrition figures are stored exactly as the label prints them**, per
+100 g or per 100 ml, for all five. Nothing is converted at scan time any
+more — see "Nutrition is per 100 g" below for the two bugs that came out
+of converting there, and for why food and water are the only categories
+whose unit must name a measure. A null means the label did not say and is
+never stored as zero —
 the supply calculator adds these up, and a guessed zero is
 indistinguishable from a measured one. A nutrient heavier than the
 package it is in is rejected, which is what catches the common Open Food
@@ -1244,50 +1245,65 @@ switched off. Measured on a 600-character frame, the default paint left
 a value a decoder can read -- a code that looks perfectly fine and does
 not scan.
 
-### Nutrition figures: per unit, and only the energy is summed
+### Nutrition is per 100 g, and nothing converts on the way in
 
-`inventory_items.calories` is the energy in **one** `unit` -- one tin, one
-kilogram -- and `calculateSupply` multiplies it by `quantity`. It used to
-be documented as a total for the stock and added once per row, so six tins
-of 900 kcal came to 900: a cellar counted as a sixth of itself. Every test
-of it used a quantity of one, which is also how anybody tries the app out,
-and a quantity of one hides a missing multiplication perfectly.
+`inventory_items.calories` and the four macronutrient columns hold what a
+label prints: per 100 g, or per 100 ml on a drink. `calculateSupply`
+multiplies against the stock reduced to grams or millilitres by
+`food_amount.dart`, and that multiplication is the only conversion in the
+feature.
 
-Per unit rather than a total because a total is a figure nothing
-maintains: `consumeQuantity` changes the quantity and cannot rescale a
-number whose basis it does not know.
+**The column has meant three things, and the first two failed the same
+way.** It began as a total for the stock, which nothing could maintain:
+`consumeQuantity` lowers the quantity and cannot rescale a figure whose
+basis it does not know. It then became a figure per stored unit, which
+survived that but moved the conversion to scan time -- where it had to
+guess a package size out of free text. Both bugs after it came from that
+guess: a stockpiling-table row handed over as a per-unit figure was out by
+a factor of 710, and the integer column the guess was rounded into made
+"Kalorien je g" a field that accepted no usable number.
 
-The macronutrients beside it stay **per package**, and that difference is
-deliberate: energy is added up across the cellar and so has to multiply by
-something, while the grams are shown on the item and nowhere else, where
-the figure that helps is the one printed on the tin.
+Per 100 has no conversion on the way in, so there is nothing to get wrong
+on the way in. `package_energy.dart` -- the package-size parser, the
+multipack rule, `kcalPerStoredUnit` -- is **gone**, 180 lines of it, and
+`open_food_facts_service.dart` now copies five numbers across.
 
-What makes the per-unit basis safe is that the scanner respects it.
-`kcalPerStoredUnit` converts the label's per-100 figure according to the
-unit the household counts in -- from the package size for a tin, from the
-label alone for anything the unit parser reads as mass or volume. Without
-it, a scan into an item counted in grams would have been multiplied by the
-gram count.
+**Food and water are the only categories held to a measurable unit.** A
+per-100 figure only becomes a total if the stock can be said in grams, and
+"6 Dosen" cannot until somebody reads the tin. Everything else keeps free
+text on purpose: a medicine is counted in tablets and its daily dose with
+it, and `medication_range.dart` divides one by the other. Forcing grams
+there would destroy a working calculation to tidy up a field.
 
-**The column is a real, and that is what makes "per unit" work for every
-unit rather than most of them.** As an integer it could not hold 2.13 kcal
-for a gram of bread, so two things followed that both looked like design
-decisions and were neither: the scanner refused to fill the field below
-20 kcal, and the form read it with `int.tryParse` and no comma handling --
-so a household counting in grams faced a field named "Kalorien je g" that
-accepted neither `2,13` nor `2.13`. It asked for a figure it would not
-take. Schema 15 makes the column a real and both workarounds are gone
-rather than documented. Only the household's *total* rounds, once, at the
-end of `calculateSupply`.
+Rows already counted in tins are **kept and named**, never converted --
+`foodWithoutMeasure`, shown beside `foodWithoutCalories` on the crisis
+hub. There is no honest factor for a tin, and guessing one would turn a
+gap somebody can see into a wrong number nobody can.
 
-**A per-unit column changes what a caller may hand over.** The stockpiling
-table prints a total against an amount ("Vollkornbrot, 710 g, 1512 kcal"),
-and `storage_tips_screen.dart` passed that straight into the new item --
-correct while the column meant "total for the current quantity", and a
-factor-of-710 overstatement the moment it stopped meaning that, in the
-direction that tells a household it is stocked. It now divides by the
-amount, taken from the unscaled row because amount and energy scale
-together and the quotient does not.
+**Mass and volume never mix.** A hundred millilitres of oil is not a
+hundred grams of it, and Open Food Facts states per 100 g for solids and
+per 100 ml for liquids. `FoodAmount` carries which base it is in so a
+caller cannot lose track.
+
+### A value migration cannot simply be replayed
+
+Every migration before schema 16 changed a shape, and a shape can be asked
+about: `_addColumnOnce` reads `PRAGMA table_info` and steps over a column
+that is already there. Schema 16 changes *values*, and nothing in
+`calories = 213` says whether it was `2.13` a moment ago.
+
+That matters because drift writes the new version as a **separate**
+statement after `onUpgrade` returns. A process that dies in between leaves
+the schema changed and the version where it was, and the next launch
+replays the steps -- the exact state the real household database reached
+between 1.7.4 and 1.8.0. Adding a column twice throws, which is at least
+loud. Multiplying a figure by a hundred twice is silent and wrong.
+
+So a value migration writes its name into `migration_marks` and a replay
+reads it. `onCreate` writes every mark up front, because a database born
+at today's schema already has today's meanings -- without that, a fresh
+install is precisely the one a replayed upgrade would corrupt.
+`migration_rerun_test.dart` is what caught both halves.
 
 ### The knowledge check must not know anything the guides do not
 

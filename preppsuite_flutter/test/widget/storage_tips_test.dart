@@ -146,16 +146,16 @@ void main() {
     await pumpTips(tester, adults: 2, children: 1);
   });
 
-  testWidgets('adding a row hands over the energy of one unit, not the row', (
+  testWidgets('adding a row hands over the label, not the line total', (
     tester,
   ) async {
     // The regression this pins. The table prints "710 g · 1512 kcal", and
-    // the inventory column holds the energy in **one** unit — so what has
-    // to arrive in the form is 2.13, the kilocalories of a single gram.
+    // the inventory column holds what a label states — per 100 g. So what
+    // has to arrive in the form is 213, not 1512.
     //
-    // Passing the printed 1512 straight through was correct while the
+    // Passing the printed total straight through was correct while the
     // column meant "total for the current quantity". After that changed
-    // it read as 1512 kcal per gram: a factor of 710, and in the
+    // it read first as 1512 kcal per gram — a factor of 710, in the
     // direction that tells a household its cellar is full.
     await pumpTips(tester);
 
@@ -175,16 +175,45 @@ void main() {
 
     expect(find.byType(InventoryItemFormScreen), findsOneWidget);
 
-    // 1512 / 710. Not 1512, and not a whole number either — which is the
-    // second half of the same story: as an integer the only thing this
-    // could have said was 2.
     final field = tester.widget<TextFormField>(
-      find.widgetWithText(TextFormField, 'Kalorien je g (kcal, optional)'),
+      find.widgetWithText(TextFormField, 'Kalorien je 100 g (kcal, optional)'),
     );
-    expect(double.parse(field.controller!.text), closeTo(2.13, 0.01));
+    expect(double.parse(field.controller!.text), closeTo(213, 1));
 
-    // And the line underneath multiplies it back out to roughly what the
-    // table printed, which is how a wrong basis would be visible.
+    // And the line underneath multiplies it back out to what the table
+    // printed, which is how a wrong basis would be visible.
     expect(find.textContaining('1512'), findsOneWidget);
+  });
+
+  testWidgets('eggs come over as grams, because a label needs a weight', (
+    tester,
+  ) async {
+    // The only row the table counts in pieces, and food is counted in a
+    // measure now. The weight is the source's own arithmetic: the group
+    // totals 1200 g, the other rows come to 905 g, so five eggs are
+    // 295 g — 59 g each, which is weight class M.
+    await pumpTips(tester);
+
+    await tester.tap(find.text('Eier, Fleisch, Wurst und Fisch'));
+    await tester.pumpAndSettle();
+
+    final row = find.ancestor(
+      of: find.text('Eier (Gewichtsklasse M)'),
+      matching: find.byType(ListTile),
+    );
+    await tester.tap(
+      find.descendant(of: row, matching: find.byType(IconButton)),
+    );
+    await tester.pumpAndSettle();
+
+    final quantity = tester.widget<TextFormField>(
+      find.widgetWithText(TextFormField, 'Menge'),
+    );
+    expect(double.parse(quantity.controller!.text), closeTo(295, 1));
+
+    final unit = tester.widget<TextFormField>(
+      find.widgetWithText(TextFormField, 'Einheit'),
+    );
+    expect(unit.controller!.text, 'g');
   });
 }

@@ -1,6 +1,7 @@
 import '../../../model/categories.dart';
 
 import '../../../local_db/database.dart';
+import 'food_amount.dart';
 import 'inventory_category_l10n.dart';
 
 /// What one head costs a day.
@@ -141,16 +142,18 @@ SupplyCalculatorResult calculateSupply({
       if (liters != null) waterCurrent += liters;
     } else if (category == InventoryItemCategory.food &&
         item.calories != null) {
-      // Times the quantity, the same way the water above is. It used to
-      // be added once per *line*, so six tins of 900 kcal came to 900 —
-      // a cellar counted as a sixth of itself. The column holds the
-      // energy in one unit; how many of them there are is the quantity.
+      // The label's figure over the stock, reduced to grams or
+      // millilitres. A row whose unit names no measure is not counted —
+      // "6 Dosen" has no weight until somebody reads the tin — and
+      // [foodWithoutMeasure] is what says so out loud.
       //
       // Summed as a real and rounded once at the end, not per row: four
-      // hundred grams of bread at 2.13 kcal a gram is 852, and rounding
-      // each row first would throw away the fraction the column now
-      // exists to carry.
-      caloriesCurrent += item.calories! * item.quantity;
+      // hundred grams of bread at 213 kcal per 100 g is 852, and rounding
+      // each row first would throw the fraction away.
+      final measured = measure(item.quantity, item.unit);
+      if (measured != null) {
+        caloriesCurrent += measured.per100(item.calories!);
+      }
     }
   }
 
@@ -207,4 +210,22 @@ List<InventoryItem> foodWithoutCalories(List<InventoryItem> items) => [
         InventoryItemCategory.food)
       if (item.quantity > 0)
         if (item.calories == null || item.calories == 0) item,
+];
+
+/// Food counted in something a label cannot be applied to.
+///
+/// "6 Dosen", "2 Gläser", "1 Packung". Nutrition is printed per 100 g and
+/// a tin has no weight until somebody reads it, so these carry a figure
+/// the calculator cannot use — and the honest answer is to name them
+/// rather than to guess what a tin of this particular thing weighs.
+///
+/// Only food. A medicine counted in tablets is not a gap in anything:
+/// `medication_range.dart` divides tablets by a daily dose and never
+/// wanted grams.
+List<InventoryItem> foodWithoutMeasure(List<InventoryItem> items) => [
+  for (final item in items)
+    if (InventoryItemCategoryX.fromName(item.category) ==
+        InventoryItemCategory.food)
+      if (item.quantity > 0)
+        if (!isMeasurableUnit(item.unit)) item,
 ];

@@ -32,7 +32,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 15;
+  static const currentSchemaVersion = 16;
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
@@ -100,9 +100,52 @@ class AppDatabase extends _$AppDatabase {
     await m.addColumn(table, column);
   }
 
+  /// Steps that change values rather than shape, and have already run.
+  ///
+  /// A shape change can be asked about -- [_addColumnOnce] looks at
+  /// `PRAGMA table_info` and steps over a column that is there. A value
+  /// change cannot: nothing in `calories = 213` says whether it was 2.13
+  /// a moment ago. So such a step writes its name down, and a replay
+  /// reads it.
+  static const _migrationMarks = 'migration_marks';
+
+  /// Every value conversion the history holds, by the name it writes down.
+  static const _valueMigrations = ['nutrition_per_100'];
+
+  Future<void> _ensureMigrationMarks() => customStatement(
+    'CREATE TABLE IF NOT EXISTS $_migrationMarks ('
+    'name TEXT NOT NULL PRIMARY KEY)',
+  );
+
+  Future<bool> _migrationDone(String name) async {
+    await _ensureMigrationMarks();
+    final rows = await customSelect(
+      'SELECT 1 FROM $_migrationMarks WHERE name = ?',
+      variables: [Variable<String>(name)],
+    ).get();
+    return rows.isNotEmpty;
+  }
+
+  Future<void> _markMigrationDone(String name) async {
+    await _ensureMigrationMarks();
+    await customStatement(
+      "INSERT OR IGNORE INTO $_migrationMarks (name) VALUES ('$name')",
+    );
+  }
+
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) => m.createAll(),
+    onCreate: (m) async {
+      await m.createAll();
+      // A database born at today's schema has today's meanings already,
+      // so every value conversion in the history below is vacuously done.
+      // Without this it would be a fresh install that a replayed upgrade
+      // could still convert -- and converting correct values is exactly
+      // the damage the marks exist to prevent.
+      for (final mark in _valueMigrations) {
+        await _markMigrationDone(mark);
+      }
+    },
     onUpgrade: (m, from, to) async {
       if (from < 2) {
         await m.createTable(checklistTemplates);
@@ -285,6 +328,61 @@ class AppDatabase extends _$AppDatabase {
         } else {
           await m.alterTable(TableMigration(inventoryItems));
         }
+      }
+      if (from < 16) {
+        // Nutrition moves from "per stored unit" to "per 100 g / 100 ml",
+        // which is what a label prints and therefore what nothing has to
+        // convert on the way in.
+        //
+        // For energy the conversion is exact for every row the new rule
+        // accepts, and that is the whole reason it is done here rather
+        // than left to the household: a row counted in grams held
+        // kilocalories per gram, so per 100 is a hundred times that; one
+        // counted in kilograms held them per kilogram, so per 100 g is a
+        // tenth. No rounding, no guessing, no package size involved.
+        //
+        // Rows counted in tins and jars are left exactly as they are.
+        // There is no honest factor for them — what a tin of a particular
+        // thing weighs is on the tin — and they are the rows the new rule
+        // excludes from the calculator until somebody restates the unit.
+        // Converting them by a guessed factor is the one thing that would
+        // turn a visible gap into an invisible wrong number.
+        //
+        // **This one cannot simply be replayed**, which every migration
+        // before it could. Drift writes the new version as a separate
+        // statement after `onUpgrade` returns, so a process that dies in
+        // between leaves the schema changed and the version where it was,
+        // and the next launch runs these steps again -- see
+        // `migration_rerun_test.dart`, which is where this was caught.
+        // Adding a column twice throws and is at least loud; multiplying
+        // a figure by a hundred twice is silent and wrong. So the step
+        // records that it ran, and a replay steps over it.
+        if (await _hasTable('inventory_items') &&
+            !await _migrationDone('nutrition_per_100')) {
+          for (final (factor, units) in const [
+            (100.0, ['g', 'gr', 'gramm', 'gramme', 'gram', 'grams']),
+            (0.1, ['kg', 'kilo', 'kilogramm', 'kilogram']),
+            (100.0, ['ml', 'milliliter', 'millilitre']),
+            (10.0, ['cl']),
+            (1.0, ['dl']),
+            (0.1, ['l', 'ltr', 'liter', 'litre', 'liters', 'litres']),
+          ]) {
+            final list = units.map((u) => "'$u'").join(', ');
+            // Single quotes: SQLite reads a double-quoted token as an
+            // identifier, so "." asked for a column called ".".
+            await customStatement(
+              'UPDATE inventory_items SET calories = calories * $factor '
+              "WHERE calories IS NOT NULL AND category = 'food' "
+              "AND lower(trim(replace(unit, '.', ''))) IN ($list)",
+            );
+          }
+          await _markMigrationDone('nutrition_per_100');
+        }
+        // The macronutrients are deliberately **not** touched. They were
+        // per package, and no package size was ever stored, so there is
+        // no factor to apply. They are shown on the item and summed
+        // nowhere, so a stale one is a wrong label rather than a wrong
+        // plan — and one barcode scan replaces all four.
       }
     },
   );

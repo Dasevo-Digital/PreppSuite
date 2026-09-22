@@ -187,7 +187,13 @@ void main() {
       tester,
       items: [
         item(clientId: 'w', category: 'water', quantity: 40, unit: 'l'),
-        item(clientId: 'f', category: 'food', quantity: 1, calories: 8800),
+        item(
+          clientId: 'f',
+          category: 'food',
+          quantity: 1,
+          unit: 'kg',
+          calories: 880,
+        ),
       ],
     );
 

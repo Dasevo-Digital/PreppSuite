@@ -44,17 +44,20 @@ einstellbare Zahl an Tagen und Personen. Kinder bis zwölf zählen mit
 für Landwirtschaft und Ernährung angibt; Hunde und Katzen mit der
 tierärztlichen Faustregel von rund 60 ml je Kilogramm.
 
-Die Kalorien stehen seit 1.9.4 **je Einheit** in der Spalte – je Dose, je
-Kilogramm, je Gramm – und werden mit der Menge multipliziert. Vorher
-wurden sie einmal je Zeile addiert, sodass sechs Dosen à 900 kcal auf
-900 kcal kamen. Eine Gesamtsumme wäre auch nicht zu halten: beim
-Verbrauchen sinkt die Menge, und keine Abbuchung kann eine Zahl
-umrechnen, deren Bezug sie nicht kennt.
+Die Nährwerte stehen **je 100 g** – oder je 100 ml bei Getränken –, genau
+so, wie sie auf dem Etikett gedruckt sind. Alle fünf: Kalorien, Eiweiß,
+Kohlenhydrate, Fett, Ballaststoffe. Hochgerechnet wird beim Rechnen, nicht
+beim Eintragen.
 
-Kommazahlen sind erlaubt, mit Komma oder Punkt, und das ist der Grund,
-warum „je Einheit" für *jede* Einheit funktioniert: ein Gramm Vollkornbrot
-hat 2,13 kcal. Beim Barcode-Scan rechnet die App die Nährwerte von Open
-Food Facts selbst auf Ihre Einheit um.
+Dafür wird bei **Lebensmitteln und Wasser** ein Maß als Einheit verlangt –
+g, kg, ml oder l. „6 Dosen" hat kein Gewicht, bis jemand die Dose liest,
+und eine Angabe je 100 g lässt sich darauf nicht anwenden. Bei
+Medikamenten, Werkzeug und Dokumenten bleibt die Einheit frei: Tabletten
+werden gezählt, nicht gewogen.
+
+Vorhandene Posten in Dosen oder Gläsern bleiben stehen. Sie zählen nicht
+in den Vorrats-Rechner, und die Krisenübersicht nennt sie, statt sie still
+zu übergehen – geraten wird nichts.
 
 **Checklisten.** 19 mitgelieferte Listen nach dem BBK-Ratgeber – von
 Wasser, Lebensmitteln und Erster Hilfe über Strom- und Heizungsausfall,

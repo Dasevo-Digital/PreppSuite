@@ -63,7 +63,15 @@ void main() {
       final reach = reachFor(
         AutonomyResource.food,
         items: [
-          item(clientId: 'f', category: 'food', quantity: 1, calories: 22000),
+          // 1 kg at 2200 kcal per 100 g is 22,000 -- the same total as
+          // before, on the basis the column holds now.
+          item(
+            clientId: 'f',
+            category: 'food',
+            quantity: 1,
+            unit: 'kg',
+            calories: 2200,
+          ),
         ],
       );
 
@@ -209,7 +217,13 @@ void main() {
       final reaches = autonomyReaches(
         items: [
           item(clientId: 'w', category: 'water', quantity: 40, unit: 'l'),
-          item(clientId: 'f', category: 'food', quantity: 1, calories: 8800),
+          item(
+            clientId: 'f',
+            category: 'food',
+            quantity: 1,
+            unit: 'kg',
+            calories: 880,
+          ),
         ],
         household: twoAdults,
         energy: const EnergyPlan(),

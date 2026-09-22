@@ -16,10 +16,15 @@ void main() {
   }
 
   group('reading a scanned label', () {
-    test('each nutrient lands in its own field', () {
-      // The mapping itself is what this pins down: four numbers of the
+    test('each nutrient lands in its own field, unchanged', () {
+      // The mapping itself is what this pins down: five numbers of the
       // same shape and unit are exactly the kind that get swapped in an
       // edit and produce a plausible-looking wrong answer.
+      //
+      // Unchanged is the other half. This used to convert all five to
+      // package totals against a free-text package size, and every
+      // nutrition bug the app has had came out of that conversion. The
+      // column holds per 100 now, which is what the label already says.
       final nutrition = packageNutritionOf(
         nutriments({
           Nutrient.energyKCal: 250,
@@ -28,27 +33,13 @@ void main() {
           Nutrient.fat: 5,
           Nutrient.fiber: 2,
         }),
-        '200 g',
       );
 
-      expect(nutrition.kcal, 500);
-      expect(nutrition.proteinGrams, closeTo(20, 0.001));
-      expect(nutrition.carbohydrateGrams, closeTo(60, 0.001));
-      expect(nutrition.fatGrams, closeTo(10, 0.001));
-      expect(nutrition.fiberGrams, closeTo(4, 0.001));
-    });
-
-    test('a drink is measured in millilitres against the same base', () {
-      final nutrition = packageNutritionOf(
-        nutriments({
-          Nutrient.energyKCal: 45,
-          Nutrient.proteins: 0.5,
-        }),
-        '1,5 l',
-      );
-
-      expect(nutrition.kcal, 675);
-      expect(nutrition.proteinGrams, closeTo(7.5, 0.001));
+      expect(nutrition.kcal, 250);
+      expect(nutrition.proteinGrams, closeTo(10, 0.001));
+      expect(nutrition.carbohydrateGrams, closeTo(30, 0.001));
+      expect(nutrition.fatGrams, closeTo(5, 0.001));
+      expect(nutrition.fiberGrams, closeTo(2, 0.001));
     });
 
     test('a label that only states energy fills only that in', () {
@@ -57,10 +48,9 @@ void main() {
       // a shelf of unknowns would add up to a confident total.
       final nutrition = packageNutritionOf(
         nutriments({Nutrient.energyKCal: 350}),
-        '500 g',
       );
 
-      expect(nutrition.kcal, 1750);
+      expect(nutrition.kcal, 350);
       expect(nutrition.proteinGrams, isNull);
       expect(nutrition.carbohydrateGrams, isNull);
       expect(nutrition.fatGrams, isNull);
@@ -68,24 +58,25 @@ void main() {
       expect(nutrition.isEmpty, isFalse);
     });
 
-    test('an unreadable package size leaves everything empty', () {
-      // "6 Stück" states no weight, so there is no way from per 100 g to
-      // this box, and a per-100 figure stored as a package total would be
-      // wrong by whatever the box weighs.
+    test('a package size nobody could read no longer costs the label', () {
+      // It used to. "6 Stück" states no weight, there was no way from
+      // per 100 g to that box, and the whole label was therefore dropped
+      // — energy, protein, everything. Nothing needs the package size any
+      // more, so a box that states one badly keeps its figures.
       final nutrition = packageNutritionOf(
         nutriments({
           Nutrient.energyKCal: 250,
           Nutrient.proteins: 10,
         }),
-        '6 Stück',
       );
 
-      expect(nutrition.isEmpty, isTrue);
+      expect(nutrition.kcal, 250);
+      expect(nutrition.proteinGrams, closeTo(10, 0.001));
     });
 
     test('a product with no nutrition data at all is empty', () {
       // A tin of candles is in Open Food Facts too.
-      expect(packageNutritionOf(null, '500 g').isEmpty, isTrue);
+      expect(packageNutritionOf(null).isEmpty, isTrue);
     });
   });
 }

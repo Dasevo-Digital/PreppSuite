@@ -1,36 +1,29 @@
 import 'package:openfoodfacts/openfoodfacts.dart';
 
-import 'package_energy.dart';
 import 'package_nutrition.dart';
 
-/// Reads the per-100 figures off a scanned product and converts each to
-/// a package total against [quantityText].
+/// Reads the per-100 figures off a scanned product, and does nothing else
+/// to them.
 ///
-/// A missing package size therefore zeroes everything at once, which is
-/// correct: without it there is no way from "per 100 g" to "in this tin",
-/// and a per-100 number stored as a package total would be wrong by
-/// whatever the package weighs.
-PackageNutrition packageNutritionOf(
-  Nutriments? nutriments,
-  String? quantityText,
-) {
+/// This used to convert all five to package totals against the free-text
+/// package size, and that conversion was the source of every nutrition
+/// bug the app has had: a size it could not read zeroed the whole label,
+/// a multipack undercounted by the pack size, and the figure it produced
+/// meant something different depending on what the household counted in.
+///
+/// The column holds per 100 now, which is what the label already says, so
+/// there is nothing left to convert. The arithmetic happens once, in
+/// `supply_calculator.dart`, where the quantity is actually known.
+PackageNutrition packageNutritionOf(Nutriments? nutriments) {
   double? per100(Nutrient nutrient) =>
       nutriments?.getValue(nutrient, PerSize.oneHundredGrams);
 
-  double? grams(Nutrient nutrient) => estimatePackageNutrientGrams(
-    gramsPer100: per100(nutrient),
-    quantityText: quantityText,
-  );
-
   return PackageNutrition(
-    kcal: estimatePackageKcal(
-      kcalPer100: per100(Nutrient.energyKCal),
-      quantityText: quantityText,
-    ),
-    proteinGrams: grams(Nutrient.proteins),
-    carbohydrateGrams: grams(Nutrient.carbohydrates),
-    fatGrams: grams(Nutrient.fat),
-    fiberGrams: grams(Nutrient.fiber),
+    kcal: per100(Nutrient.energyKCal),
+    proteinGrams: per100(Nutrient.proteins),
+    carbohydrateGrams: per100(Nutrient.carbohydrates),
+    fatGrams: per100(Nutrient.fat),
+    fiberGrams: per100(Nutrient.fiber),
   );
 }
 
@@ -45,7 +38,6 @@ class OpenFoodFactsProduct {
     this.brand,
     this.quantity,
     this.nutrition = const PackageNutrition(),
-    this.energyKcalPer100,
   });
 
   final String barcode;
@@ -56,23 +48,19 @@ class OpenFoodFactsProduct {
   /// "1.5 l", "500g") — informational only, not parsed into a number/unit.
   final String? quantity;
 
-  /// What the label itself says, per 100 g or 100 ml, before anything is
-  /// worked out from it.
+  /// Energy and macronutrients per 100 g, or per 100 ml on a drink,
+  /// exactly as the label states them.
   ///
-  /// Carried raw because the conversion the inventory needs depends on a
-  /// thing this layer cannot know: the unit the household counts the item
-  /// in. Energy is stored per unit, and "per unit" is a different sum for
-  /// a tin than for a kilogram — see [kcalPerStoredUnit].
-  final double? energyKcalPer100;
-
-  /// Energy and macronutrients for the whole package, worked out from the
-  /// reported per-100 g figures and [quantity] — see `package_energy.dart`.
+  /// There used to be a second field beside this holding the raw per-100
+  /// energy, because this one carried package totals and the screen had
+  /// to redo the conversion from the raw figure. Both the field and the
+  /// conversion are gone: this *is* the raw figure, and the inventory
+  /// stores it unchanged.
   ///
   /// Mostly empty for non-food supplies, which carry no nutrition data at
-  /// all, and for package sizes like "6 Stück" that cannot be converted.
-  /// The supply calculator needs the calorie figure and nobody fills it in
-  /// by hand, so getting it from the barcode is what makes that screen work
-  /// at all.
+  /// all. The supply calculator needs the calorie figure and nobody fills
+  /// it in by hand, so getting it from the barcode is what makes that
+  /// screen work at all.
   final PackageNutrition nutrition;
 }
 
@@ -116,11 +104,7 @@ class OpenFoodFactsService {
         name: name,
         brand: product.brands,
         quantity: product.quantity,
-        nutrition: packageNutritionOf(product.nutriments, product.quantity),
-        energyKcalPer100: product.nutriments?.getValue(
-          Nutrient.energyKCal,
-          PerSize.oneHundredGrams,
-        ),
+        nutrition: packageNutritionOf(product.nutriments),
       );
     } catch (_) {
       // Network error, timeout, malformed response, etc. — the user can

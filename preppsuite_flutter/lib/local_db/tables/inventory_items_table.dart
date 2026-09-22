@@ -23,31 +23,32 @@ class InventoryItems extends Table {
   DateTimeColumn get expirationDate => dateTime().nullable()();
   RealColumn get minQuantity => real().nullable()();
 
-  /// Kilocalories in **one** [unit] of this item — one tin, one kilogram,
-  /// one gram. Only meaningful for `category: food`, and multiplied by
-  /// [quantity] by the supply calculator (`supply_calculator.dart`).
+  /// Kilocalories per **100 g**, or per 100 ml where [unit] is a volume
+  /// — exactly as a label prints it.
   ///
-  /// Per unit and not a total for the stock, because a total is a figure
-  /// nothing maintains: [quantity] changes every time somebody eats
-  /// something, and no consume path can rescale a number whose basis it
-  /// does not know. Per unit survives that untouched.
+  /// Only meaningful for `category: food`. The household's total is
+  /// `calories / 100 * ` the stock reduced to grams or millilitres; see
+  /// `food_amount.dart`, which is also what decides whether [unit] can be
+  /// reduced at all.
   ///
-  /// Fractional since schema 15, and that is what makes "per unit" work
-  /// for every unit rather than most of them. Bread is 2.13 kcal a gram.
-  /// As an integer that was 2 — six percent off every gram in the cellar
-  /// — so the scanner refused to fill the field at all below 20 kcal, and
-  /// a household counting in grams was left with a field it could not
-  /// type a usable number into either. The refusal was never about the
-  /// unit; it was about the column.
+  /// This column has meant three things, and the first two were both
+  /// wrong for the same reason. It began as a total for the stock, which
+  /// nothing could maintain: `consumeQuantity` lowers the quantity and
+  /// cannot rescale a figure whose basis it does not know. It then became
+  /// a figure per stored unit, which survived that but pushed the
+  /// conversion onto the scanner — and the scanner had to guess a package
+  /// size to do it, which is where both of the bugs after it came from.
+  ///
+  /// Per 100 is what the label says. Nothing converts on the way in, so
+  /// there is nothing to get wrong on the way in; the arithmetic happens
+  /// once, where the quantity is known.
   RealColumn get calories => real().nullable()();
 
-  /// Macronutrients for **one package**, in grams, as the label gives
-  /// them — deliberately *not* the per-unit basis [calories] uses.
+  /// Macronutrients on the same basis: grams per 100 g, or per 100 ml.
   ///
-  /// They differ because their jobs do. Kilocalories are added up across
-  /// the cellar, so they have to multiply by something; these are shown
-  /// on the item and nowhere else, so the figure that helps is the one
-  /// printed on the tin. Filled in from the barcode (see
+  /// The same basis as [calories] now, which it did not use to be — these
+  /// were per package while the energy was per unit, and a reader had to
+  /// know that. Filled in from the barcode (see
   /// `open_food_facts_service.dart`) or by hand, and null wherever the
   /// label does not say, which is most non-food supplies.
   RealColumn get proteinGrams => real().nullable()();

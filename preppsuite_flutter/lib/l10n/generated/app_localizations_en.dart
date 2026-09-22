@@ -273,15 +273,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get minQuantityLabel => 'Minimum quantity (optional)';
 
   @override
-  String get caloriesLabel => 'Calories per unit (kcal, optional)';
-
-  @override
-  String caloriesPerUnitLabel(String unit) {
-    return 'Calories per $unit (kcal, optional)';
-  }
-
-  @override
-  String caloriesTotalHint(int total) {
+  String caloriesTotalHint(Object total) {
     return 'Comes to $total kcal in stock.';
   }
 
@@ -2428,7 +2420,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nutritionSectionHint =>
-      'For the whole amount, not per 100 g. Scanning a barcode fills in whatever the label states.';
+      'Per 100 g each — or per 100 ml for drinks — exactly as the label states them. Scanning a barcode fills in what it says; the app does the multiplying.';
 
   @override
   String get proteinLabel => 'Protein';
@@ -6248,4 +6240,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get radioCbRoadChannel =>
       'A channel widely used on the road and by lorry drivers.';
+
+  @override
+  String caloriesPer100Label(String basis) {
+    return 'Calories per $basis (kcal, optional)';
+  }
+
+  @override
+  String get unitMeasureHelper =>
+      'For food and water: g, kg, ml or l. Nutrition is printed per 100 g, and a tin has no weight until somebody reads it.';
+
+  @override
+  String get unitMeasureRequired => 'This needs a measure: g, kg, ml or l.';
+
+  @override
+  String nutritionPer100Label(String nutrient, String basis) {
+    return '$nutrient per $basis';
+  }
+
+  @override
+  String get foodWithoutMeasureTitle => 'Not counted: a unit with no measure';
+
+  @override
+  String foodWithoutMeasureBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count foods are',
+      one: 'One food is',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'They do',
+      one: 'It does',
+    );
+    return '$_temp0 counted in a unit no label can be applied to — a tin, a jar. $_temp1 not count towards the supply calculator until the unit is g, kg, ml or l.';
+  }
 }

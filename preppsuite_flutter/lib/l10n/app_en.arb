@@ -14,11 +14,38 @@
   "airQualityIncomplete": "Not every pollutant this station measures reported this hour. The class covers what did.",
   "airQualityComponents": "Individual pollutants",
   "airQualityLeading": "Decisive: {code} at {value} {unit}",
-  "@airQualityLeading": {"placeholders": {"code": {"type": "String"}, "value": {"type": "String"}, "unit": {"type": "String"}}},
+  "@airQualityLeading": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "airQualitySpan": "{min} to {max}",
-  "@airQualitySpan": {"placeholders": {"min": {"type": "String"}, "max": {"type": "String"}}},
+  "@airQualitySpan": {
+    "placeholders": {
+      "min": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      }
+    }
+  },
   "airQualityMeasuredAt": "Measured on {when}",
-  "@airQualityMeasuredAt": {"placeholders": {"when": {"type": "String"}}},
+  "@airQualityMeasuredAt": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
   "airQualityVeryGood": "Very good",
   "airQualityGood": "Good",
   "airQualityModerate": "Moderate",
@@ -42,7 +69,13 @@
   "roadClosureLater": "Announced",
   "roadClosureBlocked": "Blocked",
   "roadClosureFrom": "From {when}",
-  "@roadClosureFrom": {"placeholders": {"when": {"type": "String"}}},
+  "@roadClosureFrom": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
   "roadClosureSource": "Source: Autobahn GmbH des Bundes open traffic data. Roadworks that block nothing are not listed.",
   "appTitle": "PreppSuite",
   "householdNameLabel": "Household name",
@@ -90,11 +123,7 @@
   "storageLocationLabel": "Storage location",
   "expirationDateLabel": "Expiration date (optional)",
   "minQuantityLabel": "Minimum quantity (optional)",
-  "caloriesLabel": "Calories per unit (kcal, optional)",
-  "caloriesPerUnitLabel": "Calories per {unit} (kcal, optional)",
-  "@caloriesPerUnitLabel": {"placeholders": {"unit": {"type": "String"}}},
   "caloriesTotalHint": "Comes to {total} kcal in stock.",
-  "@caloriesTotalHint": {"placeholders": {"total": {"type": "int"}}},
   "supplyCalculatorDaysLabel": "Supplies for {days} days",
   "@supplyCalculatorDaysLabel": {
     "placeholders": {
@@ -306,20 +335,20 @@
   "pegelStale": "More than an hour old. Inland gauges report every 15 minutes, so what is missing is the connection and not the water.",
   "pegelMeasuredAt": "Measured {time}",
   "@pegelMeasuredAt": {
-      "placeholders": {
-          "time": {
-              "type": "String"
-          }
+    "placeholders": {
+      "time": {
+        "type": "String"
       }
+    }
   },
   "pegelRefresh": "Refresh",
   "pegelKilometre": "River kilometre {km}",
   "@pegelKilometre": {
-      "placeholders": {
-          "km": {
-              "type": "String"
-          }
+    "placeholders": {
+      "km": {
+        "type": "String"
       }
+    }
   },
   "pegelReferences": "This gauge's reference values",
   "pegelNoReferences": "No reference values are published for this gauge, so the number stands without a scale.",
@@ -334,19 +363,19 @@
   "pegelBandUnknown": "Cannot be placed",
   "pegelTrendRising": "Rising, {change} cm in 24 hours",
   "@pegelTrendRising": {
-      "placeholders": {
-          "change": {
-              "type": "String"
-          }
+    "placeholders": {
+      "change": {
+        "type": "String"
       }
+    }
   },
   "pegelTrendFalling": "Falling, {change} cm in 24 hours",
   "@pegelTrendFalling": {
-      "placeholders": {
-          "change": {
-              "type": "String"
-          }
+    "placeholders": {
+      "change": {
+        "type": "String"
       }
+    }
   },
   "pegelTrendSteady": "Barely changed in 24 hours",
   "pegelTrendUnknown": "History not available",
@@ -435,9 +464,15 @@
   "shelterLegendSummary": "Green {green} · Yellow {yellow} · Red {red}",
   "@shelterLegendSummary": {
     "placeholders": {
-      "green": {"type": "int"},
-      "yellow": {"type": "int"},
-      "red": {"type": "int"}
+      "green": {
+        "type": "int"
+      },
+      "yellow": {
+        "type": "int"
+      },
+      "red": {
+        "type": "int"
+      }
     }
   },
   "shelterLegendGreenLabel": "Green",
@@ -501,7 +536,7 @@
       }
     }
   },
-  "shelterListSubtitle": "{distance} \u00b7 {confidence} \u00b7 {source}",
+  "shelterListSubtitle": "{distance} · {confidence} · {source}",
   "@shelterListSubtitle": {
     "placeholders": {
       "distance": {
@@ -539,7 +574,7 @@
       }
     }
   },
-  "shelterMarkerTooltip": "{name} \u00b7 {confidence} \u00b7 {source}",
+  "shelterMarkerTooltip": "{name} · {confidence} · {source}",
   "@shelterMarkerTooltip": {
     "placeholders": {
       "name": {
@@ -603,7 +638,13 @@
   },
   "settingsChargeReminderOff": "Off",
   "chargeReminderInterval": "every {days} days",
-  "@chargeReminderInterval": {"placeholders": {"days": {"type": "int"}}},
+  "@chargeReminderInterval": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "chargeReminderTitle": "Check batteries and devices",
   "chargeReminderBody": "Charge and test power banks, rechargeable batteries, torches and emergency radios.",
   "expiryLeadDaysLabel": "{days} days",
@@ -681,45 +722,116 @@
   "stepperDecrease": "One fewer: {label}",
   "@stepperDecrease": {
     "description": "Screen-reader name of the minus button beside a counter.",
-    "placeholders": { "label": { "type": "String" } }
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
   },
   "stepperIncrease": "One more: {label}",
   "@stepperIncrease": {
     "description": "Screen-reader name of the plus button beside a counter.",
-    "placeholders": { "label": { "type": "String" } }
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
   },
   "stepperValue": "{label}: {value}",
   "@stepperValue": {
     "description": "Spoken form of a counter, so the number is not read on its own.",
-    "placeholders": { "label": { "type": "String" }, "value": { "type": "int" } }
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "value": {
+        "type": "int"
+      }
+    }
   },
   "deleteItemAction": "Delete “{item}”",
   "@deleteItemAction": {
-    "placeholders": { "item": { "type": "String" } }
+    "placeholders": {
+      "item": {
+        "type": "String"
+      }
+    }
   },
   "mapDownloadSearchAction": "Search for this place",
   "warningBannerSeverity": "{severity}: {headline}",
   "@warningBannerSeverity": {
     "description": "Banner line, so severity is a word and not only a colour.",
-    "placeholders": { "severity": { "type": "String" }, "headline": { "type": "String" } }
+    "placeholders": {
+      "severity": {
+        "type": "String"
+      },
+      "headline": {
+        "type": "String"
+      }
+    }
   },
   "shoppingListTitle": "Shopping list",
   "shoppingListTargetHeading": "Against the target for {days} days",
-  "@shoppingListTargetHeading": { "placeholders": { "days": { "type": "int" } } },
+  "@shoppingListTargetHeading": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "shoppingListTargetMet": "Water and energy are covered for {days} days.",
-  "@shoppingListTargetMet": { "placeholders": { "days": { "type": "int" } } },
+  "@shoppingListTargetMet": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "shoppingListWaterGap": "{liters} l of water still to buy",
-  "@shoppingListWaterGap": { "placeholders": { "liters": { "type": "String" } } },
+  "@shoppingListWaterGap": {
+    "placeholders": {
+      "liters": {
+        "type": "String"
+      }
+    }
+  },
   "shoppingListEnergyGap": "{kcal} kcal of food still to buy",
-  "@shoppingListEnergyGap": { "placeholders": { "kcal": { "type": "String" } } },
+  "@shoppingListEnergyGap": {
+    "placeholders": {
+      "kcal": {
+        "type": "String"
+      }
+    }
+  },
   "shoppingListDaysCovered": "The stores currently last {covered} of {days} days.",
-  "@shoppingListDaysCovered": { "placeholders": { "covered": { "type": "int" }, "days": { "type": "int" } } },
+  "@shoppingListDaysCovered": {
+    "placeholders": {
+      "covered": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "shoppingListDaysUnknown": "No people in the household, so there is nothing to work out.",
   "shoppingListItemsHeading": "Below the minimum",
   "shoppingListItemsEmpty": "Nothing is below its minimum.",
   "shoppingListNoMinimums": "Only items you gave a minimum quantity appear here. Set one on an item and it will be watched.",
   "shoppingListShortfall": "{amount} {unit} short of {minimum}",
-  "@shoppingListShortfall": { "placeholders": { "amount": { "type": "String" }, "unit": { "type": "String" }, "minimum": { "type": "String" } } },
+  "@shoppingListShortfall": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "minimum": {
+        "type": "String"
+      }
+    }
+  },
   "shoppingListCopy": "Copy list",
   "shoppingListCopied": "Shopping list copied.",
   "rotationTitle": "Use next",
@@ -727,15 +839,33 @@
   "rotationSoonHeading": "Use soon",
   "rotationLaterHeading": "Keeps for now",
   "rotationExpiredSince": "{days} days past",
-  "@rotationExpiredSince": { "placeholders": { "days": { "type": "int" } } },
+  "@rotationExpiredSince": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "rotationExpiresToday": "Today",
   "rotationDaysLeft": "{days} days left",
-  "@rotationDaysLeft": { "placeholders": { "days": { "type": "int" } } },
+  "@rotationDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "rotationEmpty": "Nothing here to rotate. Only items with a date and something left in them are listed.",
   "rotationHint": "Salt and the like carry no date and are left out on purpose — they would bury the rows that do have one.",
   "consumeScanAction": "Scan to use",
   "consumeScanNotFound": "No item with barcode {barcode} in this household.",
-  "@consumeScanNotFound": { "placeholders": { "barcode": { "type": "String" } } },
+  "@consumeScanNotFound": {
+    "placeholders": {
+      "barcode": {
+        "type": "String"
+      }
+    }
+  },
   "sharingErrorLocked": "This folder is encrypted and this device does not have the passphrase. Nothing is being read or written until you enter it.",
   "folderEncryptionOff": "Off. Everything in the folder is readable by anyone who can see it — including your sync provider.",
   "folderEncryptionOn": "On. The folder holds only sealed files.",
@@ -745,7 +875,13 @@
   "folderEncryptionRepeat": "Repeat passphrase",
   "folderEncryptionMismatch": "The two entries are not the same.",
   "folderEncryptionTooShort": "At least {count} characters. This is the only thing standing between the folder and whoever can read it.",
-  "@folderEncryptionTooShort": { "placeholders": { "count": { "type": "int" } } },
+  "@folderEncryptionTooShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "folderEncryptionWrong": "That passphrase does not open this folder.",
   "folderEncryptionNoRecovery": "There is no way back in without it. PreppSuite cannot reset it, and neither can anyone else — write it down somewhere safe before you continue.",
   "folderEncryptionOtherDevices": "Every other device in this household has to be updated and given the same passphrase. Until it is, it stops seeing new rows.",
@@ -793,7 +929,13 @@
   "emergencyCardsIntro": "What an ambulance would want to know, for each person in the household. Only the name is needed — a card that says nothing but a name and an allergy is worth having.",
   "emergencyCardsEmpty": "No cards yet.",
   "emergencyCardsCount": "{count} people",
-  "@emergencyCardsCount": { "placeholders": { "count": { "type": "int" } } },
+  "@emergencyCardsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "emergencyCardAdd": "Add person",
   "emergencyCardEdit": "Edit card",
   "emergencyCardName": "Name",
@@ -811,7 +953,13 @@
   "emergencyCardNameRequired": "A card needs a name.",
   "emergencyCardRemoved": "Card removed.",
   "emergencyCardRemoveConfirm": "Remove the card for {name} from every device in this household?",
-  "@emergencyCardRemoveConfirm": { "placeholders": { "name": { "type": "String" } } },
+  "@emergencyCardRemoveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "emergencyCardsHealthWarning": "This is health data, and it travels through the shared folder to every device. Encrypt the folder before you put it in.",
   "emergencyCardsHealthEncrypted": "This is health data. The shared folder it travels through is encrypted.",
   "emergencyCardBirthYearInvalid": "That is not a year.",
@@ -1235,21 +1383,37 @@
   "mapDownloadScopeRegion": "With the state",
   "mapDownloadScopeCountry": "Whole country",
   "mapDownloadWorldBase": "World",
-  "@mapDownloadWorldBase": {"description": "Label for the whole-planet base band of a map download"},
+  "@mapDownloadWorldBase": {
+    "description": "Label for the whole-planet base band of a map download"
+  },
   "mapDownloadScopeContinent": "Whole continent",
-  "@mapDownloadScopeContinent": {"description": "Download scope covering the continent the place sits in"},
+  "@mapDownloadScopeContinent": {
+    "description": "Download scope covering the continent the place sits in"
+  },
   "mapContinentEurope": "Europe",
-  "@mapContinentEurope": {"description": "Continent name"},
+  "@mapContinentEurope": {
+    "description": "Continent name"
+  },
   "mapContinentAfrica": "Africa",
-  "@mapContinentAfrica": {"description": "Continent name"},
+  "@mapContinentAfrica": {
+    "description": "Continent name"
+  },
   "mapContinentAsia": "Asia",
-  "@mapContinentAsia": {"description": "Continent name"},
+  "@mapContinentAsia": {
+    "description": "Continent name"
+  },
   "mapContinentNorthAmerica": "North America",
-  "@mapContinentNorthAmerica": {"description": "Continent name"},
+  "@mapContinentNorthAmerica": {
+    "description": "Continent name"
+  },
   "mapContinentSouthAmerica": "South America",
-  "@mapContinentSouthAmerica": {"description": "Continent name"},
+  "@mapContinentSouthAmerica": {
+    "description": "Continent name"
+  },
   "mapContinentOceania": "Oceania",
-  "@mapContinentOceania": {"description": "Continent name"},
+  "@mapContinentOceania": {
+    "description": "Continent name"
+  },
   "mapDownloadStaggered": "Staggered: coarser further out, full detail in the middle.",
   "mapDownloadStep": "{label}: level {from} to {to}, {count} tiles",
   "@mapDownloadStep": {
@@ -1314,13 +1478,22 @@
   "distressStop": "Stop",
   "distressPause": "Pause — this is where the answer goes",
   "distressFlash": "Signal {number} of {total}",
-  "@distressFlash": {"placeholders": {"number": {"type": "int"}, "total": {"type": "int"}}},
+  "@distressFlash": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "distressSos": "SOS",
   "distressSosHint": "Three short, three long, three short — as one character, not as three letters.",
   "distressAlpine": "Alpine distress signal",
   "distressAlpineHint": "Six signals inside a minute, then a minute of nothing, then again. The pause is part of it: it tells the signal apart from somebody walking about with a torch.",
   "distressAlpineAnswer": "Answer to a distress signal",
-  "distressAlpineAnswerHint": "Three signals inside a minute, into the other one\u2019s pause: I have seen you.",
+  "distressAlpineAnswerHint": "Three signals inside a minute, into the other one’s pause: I have seen you.",
   "myPositionAction": "Pass on my position",
   "myPositionTitle": "My position",
   "myPositionIntro": "Read out whatever is asked for. A control room usually wants degrees and minutes, and reads them back.",
@@ -1328,7 +1501,13 @@
   "myPositionMeasure": "Measure again",
   "myPositionCopied": "Copied.",
   "myPositionAccuracy": "The receiver reports ±{metres} m.",
-  "@myPositionAccuracy": {"placeholders": {"metres": {"type": "int"}}},
+  "@myPositionAccuracy": {
+    "placeholders": {
+      "metres": {
+        "type": "int"
+      }
+    }
+  },
   "myPositionAccuracyPoor": "That will not reach a house number. Measure again under open sky, and tell the control room how rough it is.",
   "myPositionDms": "Degrees, minutes, seconds",
   "myPositionDmsHint": "What a control room asks for on the telephone — and what survives being read aloud and written down.",
@@ -1449,7 +1628,7 @@
   "storageSourceTitle": "Where the numbers come from",
   "storageSourceBody": "On its \"Bevorraten\" page the BBK gives ten days and 1.5 litres of fluid plus 0.5 litres for cooking a day; for the amounts it points at the stockpiling tables of the Federal Office for Agriculture and Food (BLE, 2024, ernaehrungsvorsorge.de). Every line here comes from there: a basic supply for one person and ten days at an average 2,200 kcal a day, once as a mixed diet and once ovo-lacto-vegetarian. The energy figures are from the Bundeslebensmittelschlüssel 3.02 of the Max Rubner Institute; the amounts follow the DGE, ÖGE and SGE reference values. Scaling is linear in people and days. The markers on the foods are this app's addition and appear in no official table.",
   "nutritionSectionTitle": "Nutrition",
-  "nutritionSectionHint": "For the whole amount, not per 100 g. Scanning a barcode fills in whatever the label states.",
+  "nutritionSectionHint": "Per 100 g each — or per 100 ml for drinks — exactly as the label states them. Scanning a barcode fills in what it says; the app does the multiplying.",
   "proteinLabel": "Protein",
   "carbohydrateLabel": "Carbohydrates",
   "fatLabel": "Fat",
@@ -1543,7 +1722,13 @@
   "undoAction": "Undo",
   "budgetEntryDeleted": "Expense deleted",
   "emergencyRadioChannels": "{count} channels",
-  "@emergencyRadioChannels": { "placeholders": { "count": { "type": "int" } } },
+  "@emergencyRadioChannels": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "overviewStartTitle": "Your first step towards preparedness",
   "overviewStartHint": "Add water or food to see how long your household supplies will last.",
   "overviewAddFirst": "Add your first supply",
@@ -1555,7 +1740,19 @@
   "checklistUnlinkStockAction": "Remove link",
   "checklistNoStockToLink": "There is no stock item to link yet.",
   "checklistLinkedStock": "{name}: {quantity} {unit} available",
-  "@checklistLinkedStock": { "placeholders": { "name": { "type": "String" }, "quantity": { "type": "num" }, "unit": { "type": "String" } } },
+  "@checklistLinkedStock": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "num"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
   "navEmergency": "Emergency",
   "emergencyTitle": "Emergency & readiness",
   "emergencyCall112": "Emergency 112",
@@ -1577,14 +1774,26 @@
   "knowledgeLibraryEmpty": "No archives left in the library.",
   "knowledgeManageArchives": "Manage archives",
   "knowledgeArchiveCount": "{count} archives on this device",
-  "@knowledgeArchiveCount": { "placeholders": { "count": { "type": "int" } } },
+  "@knowledgeArchiveCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "backupTitle": "Backup & restore",
   "backupCreate": "Create data backup",
   "backupRestore": "Restore data backup",
   "backupHint": "Stock, checklists, emergency plan and emergency cards. The file contains personal data and should be stored securely.",
   "backupCreated": "Data backup saved.",
   "backupRestored": "Backup restored: {count} newer records applied.",
-  "@backupRestored": { "placeholders": { "count": { "type": "int" } } },
+  "@backupRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "backupInvalid": "This backup belongs to a different household or is damaged.",
   "backupFailed": "The data backup could not be processed.",
   "backupPassphraseTitle": "Encrypt backup",
@@ -1592,7 +1801,13 @@
   "backupPassphraseRepeat": "Repeat password",
   "backupPassphraseWarning": "Without this passphrase the file cannot be opened again – not by you either. There is no way back and no back door. Write it down where the passports are kept, and not on the device this backup is meant to replace.",
   "backupPassphraseInvalid": "Enter at least {count} characters; both entries have to match.",
-  "@backupPassphraseInvalid": { "placeholders": { "count": { "type": "int" } } },
+  "@backupPassphraseInvalid": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "@overviewSupplyCalories": {
     "placeholders": {
       "current": {
@@ -1608,25 +1823,61 @@
   "warningInstructionsTitle": "Recommended actions",
   "warningShowMap": "Show area on map",
   "warningDetailsPeriod": "Alert from: {start} – {end}",
-  "@warningDetailsPeriod": {"placeholders": {"start": {"type": "String"}, "end": {"type": "String"}}},
+  "@warningDetailsPeriod": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "warningDetailsUntilFurtherNotice": "until further notice",
   "warningDetailsLevel": "Alert level: {severity}",
-  "@warningDetailsLevel": {"placeholders": {"severity": {"type": "String"}}},
+  "@warningDetailsLevel": {
+    "placeholders": {
+      "severity": {
+        "type": "String"
+      }
+    }
+  },
   "warningDetailsAffectedRegions": "Affected region(s)",
   "warningDetailsNoInstructions": "No recommended actions were provided for this alert.",
   "warningDetailsNoArea": "The warning source did not specify the affected area further.",
   "warningDetailsSource": "Warning source and publication",
   "warningDetailsPublished": "Published: {time}",
-  "@warningDetailsPublished": {"placeholders": {"time": {"type": "String"}}},
+  "@warningDetailsPublished": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "warningDetailsOfflineHint": "The map, area and recommended actions were saved with this alert and remain readable offline.",
   "knowledgeBrowseTitle": "Browse archive",
   "knowledgeBrowseBody": "Open the main page, choose an initial letter, or discover a random article.",
   "knowledgeMainPageAction": "Main page",
   "knowledgeRandomAction": "Random article",
   "knowledgeArchiveStats": "{articles} entries · approximately {size}",
-  "@knowledgeArchiveStats": {"placeholders": {"articles": {"type": "int"}, "size": {"type": "String"}}},
+  "@knowledgeArchiveStats": {
+    "placeholders": {
+      "articles": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "knowledgeTotalSize": "Total size: approximately {size}",
-  "@knowledgeTotalSize": {"placeholders": {"size": {"type": "String"}}},
+  "@knowledgeTotalSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "knowledgeDocumentsTitle": "Personal documents",
   "knowledgeDocumentsIntro": "PDF, EPUB and Markdown files remain in their original location and are not duplicated.",
   "knowledgeDocumentAdd": "Add document",
@@ -1684,7 +1935,16 @@
   "knowledgeDocumentClearIndex": "Delete search index",
   "knowledgeDocumentClearIndexBody": "The search data for all personal documents will be deleted. Original files remain untouched.",
   "knowledgeDocumentIndexSummary": "{indexed} of {total} documents searchable",
-  "@knowledgeDocumentIndexSummary": {"placeholders": {"indexed": {"type": "int"}, "total": {"type": "int"}}},
+  "@knowledgeDocumentIndexSummary": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "knowledgePersonalResults": "Personal documents",
   "knowledgePersonalResultHint": "Results from the local document index",
   "radioEmergencyTitle": "Emergency radio frequencies",
@@ -1709,7 +1969,16 @@
   "knowledgeApolloReady": "Offline library opened and ready",
   "knowledgeApolloNotReady": "No archive opened yet",
   "knowledgeApolloStatus": "{count} archives registered · known size: {size}",
-  "@knowledgeApolloStatus": {"placeholders": {"count": {"type": "int"}, "size": {"type": "String"}}},
+  "@knowledgeApolloStatus": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "knowledgeApolloStatusHint": "The bar is a guide for eight recommended core archives; you choose the size and selection.",
   "knowledgeApolloDownloadedTitle": "Downloaded content",
   "knowledgeApolloDownloaded": "Downloaded",
@@ -1735,36 +2004,90 @@
   "settingsVersionInfoTitle": "Version information",
   "settingsVersionInfoApp": "PreppSuite app",
   "settingsVersionInfoAppValue": "{version} · build {build}",
-  "@settingsVersionInfoAppValue": {"placeholders": {"version": {"type": "String"}, "build": {"type": "String"}}},
+  "@settingsVersionInfoAppValue": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
   "settingsVersionInfoDatabase": "Household database",
   "settingsVersionInfoKnowledgeIndex": "Knowledge archive full-text index",
   "settingsVersionInfoDocumentsIndex": "Document full-text index",
   "settingsVersionInfoSchema": "Schema {version}",
-  "@settingsVersionInfoSchema": {"placeholders": {"version": {"type": "int"}}},
+  "@settingsVersionInfoSchema": {
+    "placeholders": {
+      "version": {
+        "type": "int"
+      }
+    }
+  },
   "settingsVersionInfoOfflineMap": "Offline map format",
   "settingsVersionInfoPmtiles": "PMTiles v3",
   "settingsVersionInfoUnavailable": "Unavailable",
   "readinessOpenDashboard": "Check readiness",
   "readinessDashboardHint": "Offline packages and freshness of warning data",
   "readinessSummary": "{ready} of {total} areas ready",
-  "@readinessSummary": {"placeholders": {"ready": {"type": "int"}, "total": {"type": "int"}}},
+  "@readinessSummary": {
+    "placeholders": {
+      "ready": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "readinessSummaryHint": "Resolve missing items before an event and repeat the check after changes to the device.",
   "readinessOfflinePackages": "Offline packages",
   "readinessPackageReady": "Opened and readable",
   "readinessPackageMissing": "Not configured or unreadable",
   "readinessArchivesReady": "{count} archives registered; selected archive opened",
-  "@readinessArchivesReady": {"placeholders": {"count": {"type": "int"}}},
+  "@readinessArchivesReady": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "readinessWarningData": "Official warning data",
   "readinessWarningNeverUpdated": "No complete refresh on this device yet",
   "readinessWarningUpdated": "Last complete refresh: {age}",
-  "@readinessWarningUpdated": {"placeholders": {"age": {"type": "String"}}},
+  "@readinessWarningUpdated": {
+    "placeholders": {
+      "age": {
+        "type": "String"
+      }
+    }
+  },
   "readinessJustNow": "just now",
   "readinessMinutesAgo": "{minutes} minutes ago",
-  "@readinessMinutesAgo": {"placeholders": {"minutes": {"type": "int"}}},
+  "@readinessMinutesAgo": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "readinessHoursAgo": "{hours} hours ago",
-  "@readinessHoursAgo": {"placeholders": {"hours": {"type": "int"}}},
+  "@readinessHoursAgo": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "readinessDaysAgo": "{days} days ago",
-  "@readinessDaysAgo": {"placeholders": {"days": {"type": "int"}}},
+  "@readinessDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "emergencyPlanExport": "Emergency plan as PDF",
   "emergencyPlanPdfCards": "Emergency cards",
   "@emergencyPlanPdfCards": {},
@@ -1793,22 +2116,67 @@
   "settingsRegionKeyInvalid": "Enter five or twelve digits (for example 03101).",
   "shelterOverpassBusyMessage": "OpenStreetMap/Overpass is busy right now (request limit). Try again in a few seconds.",
   "shelterSourceFailureReason": "Reason: {reason}",
-  "@shelterSourceFailureReason": {"placeholders": {"reason": {"type": "String"}}},
+  "@shelterSourceFailureReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "kiwixLanguageSearchHint": "Search language",
   "kiwixLanguageCount": "{count} languages",
-  "@kiwixLanguageCount": {"placeholders": {"count": {"type": "int"}}},
+  "@kiwixLanguageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "kiwixLanguageNoMatch": "No language found.",
   "kiwixLanguageArchives": "{count} archives",
-  "@kiwixLanguageArchives": {"placeholders": {"count": {"type": "int"}}},
+  "@kiwixLanguageArchives": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "downloadRemainingHours": "{hours} h {minutes} min left",
-  "@downloadRemainingHours": {"placeholders": {"hours": {"type": "int"}, "minutes": {"type": "int"}}},
+  "@downloadRemainingHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "downloadRemainingMinutes": "{minutes} min left",
-  "@downloadRemainingMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "@downloadRemainingMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "downloadRemainingSeconds": "{seconds} s left",
-  "@downloadRemainingSeconds": {"placeholders": {"seconds": {"type": "int"}}},
+  "@downloadRemainingSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "articleLoadFailed": "The page could not be loaded.",
   "articleHttpStatus": "The archive answered with {status}.",
-  "@articleHttpStatus": {"placeholders": {"status": {"type": "String"}}},
+  "@articleHttpStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "articleReload": "Reload",
   "knowledgeArchiveNoCover": "No cover in this archive",
   "radiationTitle": "Gamma radiation",
@@ -1824,17 +2192,59 @@
   "radiationStale": "More than two hours old. The network reports hourly, so this is a missing connection and not a standing value.",
   "radiationUnvalidated": "Unchecked raw value. BfS publishes hourly readings unchecked at first; a technical fault looks like a measurement.",
   "radiationMeasuredAt": "Measured until {time}",
-  "@radiationMeasuredAt": {"placeholders": {"time": {"type": "String"}}},
+  "@radiationMeasuredAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "radiationHeight": "{metres} m above sea level",
-  "@radiationHeight": {"placeholders": {"metres": {"type": "String"}}},
+  "@radiationHeight": {
+    "placeholders": {
+      "metres": {
+        "type": "String"
+      }
+    }
+  },
   "radiationPostalCode": "Postal code {code}",
-  "@radiationPostalCode": {"placeholders": {"code": {"type": "String"}}},
+  "@radiationPostalCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "radiationBaseline": "Usual at this station: {value} µSv/h",
-  "@radiationBaseline": {"placeholders": {"value": {"type": "String"}}},
+  "@radiationBaseline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "radiationNoBaseline": "This station has no baseline of its own yet, so the reading is judged against the national natural range of {floor} to {ceiling} µSv/h, which is coarser — in the Black Forest 0.16 µSv/h is perfectly ordinary.",
-  "@radiationNoBaseline": {"placeholders": {"floor": {"type": "String"}, "ceiling": {"type": "String"}}},
+  "@radiationNoBaseline": {
+    "placeholders": {
+      "floor": {
+        "type": "String"
+      },
+      "ceiling": {
+        "type": "String"
+      }
+    }
+  },
   "radiationSplit": "Of which {terrestrial} µSv/h from the ground and {cosmic} µSv/h from space",
-  "@radiationSplit": {"placeholders": {"terrestrial": {"type": "String"}, "cosmic": {"type": "String"}}},
+  "@radiationSplit": {
+    "placeholders": {
+      "terrestrial": {
+        "type": "String"
+      },
+      "cosmic": {
+        "type": "String"
+      }
+    }
+  },
   "radiationBandOrdinary": "Ordinary for this station",
   "radiationBandWeather": "Raised — which is the normal case after rain",
   "radiationBandUnusual": "Beyond what weather explains",
@@ -1854,11 +2264,29 @@
   "fireDangerLoadFailed": "The forest fire danger index could not be loaded.",
   "fireDangerOffline": "Last known state. The DWD server could not be reached.",
   "fireDangerStale": "This is from {date} and not from today. The DWD issues the index only during the fire season, roughly March to October — outside it nothing new arrives.",
-  "@fireDangerStale": {"placeholders": {"date": {"type": "String"}}},
+  "@fireDangerStale": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "fireDangerStep": "Level {step} of 5",
-  "@fireDangerStep": {"placeholders": {"step": {"type": "int"}}},
+  "@fireDangerStep": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
   "fireDangerIssuedFor": "Issued for {date}",
-  "@fireDangerIssuedFor": {"placeholders": {"date": {"type": "String"}}},
+  "@fireDangerIssuedFor": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "fireDangerLevel1": "Very low danger",
   "fireDangerLevel2": "Low danger",
   "fireDangerLevel3": "Moderate danger",
@@ -1866,21 +2294,54 @@
   "fireDangerLevel5": "Very high danger",
   "fireDangerAhead": "The days ahead",
   "fireDangerPeak": "Rises to level {step} in {days} days",
-  "@fireDangerPeak": {"placeholders": {"step": {"type": "int"}, "days": {"type": "int"}}},
+  "@fireDangerPeak": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "fireDangerPeakTomorrow": "Rises to level {step} tomorrow",
-  "@fireDangerPeakTomorrow": {"placeholders": {"step": {"type": "int"}}},
+  "@fireDangerPeakTomorrow": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      }
+    }
+  },
   "fireDangerToday": "Today",
   "fireDangerInDays": "In {days} days",
-  "@fireDangerInDays": {"placeholders": {"days": {"type": "int"}}},
+  "@fireDangerInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "fireDangerTomorrow": "Tomorrow",
   "fireDangerNoWarning": "The index describes the meteorological potential for forest fire. It is not a warning and not a ban on entering a forest; bans are issued by the states, and official warnings arrive through this app’s warnings.",
   "fireDangerSource": "Source: Deutscher Wetterdienst (DWD), forest fire danger index WBI.",
   "fireDangerState": "State {state}",
-  "@fireDangerState": {"placeholders": {"state": {"type": "String"}}},
+  "@fireDangerState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
   "nearbyTitle": "Nearby",
   "nearbyEntryHint": "Pharmacy, water, fuel — from the downloaded map, without a network.",
   "nearbySearchFrom": "Searching around {place}",
-  "@nearbySearchFrom": {"placeholders": {"place": {"type": "String"}}},
+  "@nearbySearchFrom": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
   "nearbyMapCentre": "the map centre",
   "nearbyMyPosition": "your position",
   "nearbyUseMyLocation": "Use my location",
@@ -1889,9 +2350,24 @@
   "nearbyOpenMap": "Open the map",
   "nearbyRadius": "Radius",
   "nearbyRadiusKm": "{km} km",
-  "@nearbyRadiusKm": {"placeholders": {"km": {"type": "int"}}},
+  "@nearbyRadiusKm": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      }
+    }
+  },
   "nearbySearching": "{done} of {total} tiles read",
-  "@nearbySearching": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@nearbySearching": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "nearbyNothingFound": "Nothing found.",
   "nearbyNothingFoundWhy": "The map carries none of these points within this radius. A wider radius may help — or the area was only downloaded coarsely.",
   "nearbyNoArchive": "No map downloaded",
@@ -1949,16 +2425,34 @@
   "daylightNauticalDawn": "Twilight begins",
   "daylightNauticalDusk": "Twilight ends",
   "daylightDayLength": "Day length {duration}",
-  "@daylightDayLength": {"placeholders": {"duration": {"type": "String"}}},
+  "@daylightDayLength": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "daylightEveningTwilight": "Then {duration} of usable light",
-  "@daylightEveningTwilight": {"placeholders": {"duration": {"type": "String"}}},
+  "@daylightEveningTwilight": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "daylightAlwaysUp": "The sun does not set today.",
   "daylightAlwaysDown": "The sun does not rise today.",
   "daylightMoon": "Moon",
   "daylightMoonrise": "Moonrise",
   "daylightMoonset": "Moonset",
   "daylightMoonIllumination": "{percent} % lit",
-  "@daylightMoonIllumination": {"placeholders": {"percent": {"type": "int"}}},
+  "@daylightMoonIllumination": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "daylightMoonUpAllDay": "The moon stays above the horizon all day.",
   "daylightMoonDownAllDay": "The moon does not come above the horizon today.",
   "daylightMoonNoRise": "No moonrise today — the moon rises about 50 minutes later each day.",
@@ -1974,9 +2468,24 @@
   "moonPhaseLastQuarter": "Last quarter",
   "moonPhaseWaningCrescent": "Waning crescent",
   "durationHoursMinutes": "{hours} h {minutes} min",
-  "@durationHoursMinutes": {"placeholders": {"hours": {"type": "int"}, "minutes": {"type": "int"}}},
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "durationMinutes": "{minutes} min",
-  "@durationMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "@durationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "radioEverydayTitle": "Licence-free radio: PMR446 and Freenet",
   "radioEverydayIntro": "The two bands many households actually own. They need no registration and no examination — and no infrastructure: device to device, one to a few kilometres. That is exactly why they belong here beside CB and amateur radio.",
   "radioPmrTitle": "PMR446",
@@ -2022,15 +2531,42 @@
   "energyNumberNeeded": "A number greater than zero.",
   "energyLabelNeeded": "A name, so the row still says something later.",
   "energyDays": "{days} days",
-  "@energyDays": {"placeholders": {"days": {"type": "int"}}},
+  "@energyDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "energyOneDay": "1 day",
   "energyZeroDays": "Does not last a day",
   "energyPerDayIs": "{amount} {unit} a day out of {stored} {unit}",
-  "@energyPerDayIs": {"placeholders": {"amount": {"type": "String"}, "unit": {"type": "String"}, "stored": {"type": "String"}}},
+  "@energyPerDayIs": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "stored": {
+        "type": "String"
+      }
+    }
+  },
   "energyUnused": "Stored, but nothing uses it. Enter the consumer, or there is nothing to divide.",
   "energyEmpty": "Something uses it and there is none.",
   "energyShortest": "First to run out: {kind} – {days}",
-  "@energyShortest": {"placeholders": {"kind": {"type": "String"}, "days": {"type": "String"}}},
+  "@energyShortest": {
+    "placeholders": {
+      "kind": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
   "energyShortestWhy": "That is the household's range. Four reserves each with a reassuring number are not four answers — the smallest one counts.",
   "energyNoAnswer": "No range yet: every reserve needs a consumer, or there is nothing to divide.",
   "energySources": "Every figure here is your own. This app estimates no consumption — what a stove uses is written on the stove, and what a device draws is written on its power supply. All it does is the arithmetic.",
@@ -2060,17 +2596,41 @@
   "transferSendTitle": "Show household",
   "transferSendHint": "Point the other device's camera at this screen. The images run in a loop — one that is missed comes round again on its own.",
   "transferFrameOf": "Image {index} of {total}",
-  "@transferFrameOf": {"placeholders": {"index": {"type": "int"}, "total": {"type": "int"}}},
+  "@transferFrameOf": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "transferSendNothing": "This household has nothing in it yet that could be transferred.",
   "transferSlower": "Slower",
   "transferFaster": "Faster",
   "transferReceiveTitle": "Film household",
   "transferReceiveHint": "Hold it at the other device's screen and leave it there until it is full.",
   "transferProgress": "{received} of {total} images",
-  "@transferProgress": {"placeholders": {"received": {"type": "int"}, "total": {"type": "int"}}},
+  "@transferProgress": {
+    "placeholders": {
+      "received": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "transferWaiting": "No image recognised yet.",
   "transferDone": "Complete. {rows} rows taken in.",
-  "@transferDone": {"placeholders": {"rows": {"type": "int"}}},
+  "@transferDone": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      }
+    }
+  },
   "transferNothingNew": "Complete. All of it was already known.",
   "transferBroken": "The images do not fit together. Film it again.",
   "transferWrongHousehold": "That is a different household. Only what belongs to this one is taken in.",
@@ -2084,8 +2644,20 @@
   "transferSendChainHint": "Without a network: point the other device's camera at this screen. The images run in a loop — one that is missed comes round again on its own.",
   "transferHandoverDone": "Synced. {rows} rows taken in.",
   "transferHandoverPhotos": "{count, plural, =1{One picture came with it.} other{{count} pictures came with it.}}",
-  "@transferHandoverPhotos": {"placeholders": {"count": {"type": "int"}}},
-  "@transferHandoverDone": {"placeholders": {"rows": {"type": "int"}}},
+  "@transferHandoverPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@transferHandoverDone": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      }
+    }
+  },
   "transferHandoverNothing": "Synced. Both devices were already at the same point.",
   "transferUnreachable": "The other device cannot be reached. Are both on the same network?",
   "portableTitle": "Data folder",
@@ -2093,12 +2665,30 @@
   "portableInstalledHint": "Household, stock, photos and settings sit where this operating system keeps them for programs.",
   "portableCarried": "On a disk you carry",
   "portableSourceBeside": "Found as a folder named “{folder}” beside the program.",
-  "@portableSourceBeside": {"placeholders": {"folder": {"type": "String"}}},
+  "@portableSourceBeside": {
+    "placeholders": {
+      "folder": {
+        "type": "String"
+      }
+    }
+  },
   "portableSourceChosen": "Chosen once and remembered.",
   "portableSourceEnvironment": "Named by the environment variable {variable}.",
-  "@portableSourceEnvironment": {"placeholders": {"variable": {"type": "String"}}},
+  "@portableSourceEnvironment": {
+    "placeholders": {
+      "variable": {
+        "type": "String"
+      }
+    }
+  },
   "portableExplain": "Create a folder called “{folder}” beside the program and the next launch uses it. Nothing is created on its own: an installed copy behaves exactly as it always has.",
-  "@portableExplain": {"placeholders": {"folder": {"type": "String"}}},
+  "@portableExplain": {
+    "placeholders": {
+      "folder": {
+        "type": "String"
+      }
+    }
+  },
   "portableExplainMac": "On macOS the app runs sandboxed — deliberately, because that is what stops the system asking for folder access again after every update. A sandboxed app may not read a folder beside the program. So here the folder is chosen once per Mac instead of being found.",
   "portableChoose": "Choose a folder",
   "portableForget": "Back to this machine",
@@ -2109,7 +2699,13 @@
   "portableChoiceMissingTitle": "The chosen data folder is missing",
   "portableChoiceMissingBody": "You picked a data folder once and it cannot be reached right now. Until it is back, the app is working with the data on this machine — a different household. Anything you enter now is not in the folder you chose.",
   "portableChoiceMissingWhere": "You chose: {path}",
-  "@portableChoiceMissingWhere": {"placeholders": {"path": {"type": "String"}}},
+  "@portableChoiceMissingWhere": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
   "portableChoiceMissingHint": "Usually the disk is not plugged in. Plug it in and start the app again.",
   "portableUnsupported": "A carried data folder is possible on computers only, not on phones: there the system decides where an app's data lives.",
   "articleReaderSimple": "Simple view",
@@ -2133,20 +2729,59 @@
   "outageStart": "The power just went out",
   "outageEnded": "The power is back",
   "outageRunningSince": "Running since {time}",
-  "@outageRunningSince": {"placeholders": {"time": {"type": "String"}}},
+  "@outageRunningSince": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "outageChangeStart": "Different time",
   "outageStoreRefrigerator": "Refrigerator",
   "outageStoreFreezer": "Freezer",
   "outageRemaining": "{left} left",
-  "@outageRemaining": {"placeholders": {"left": {"type": "String"}}},
+  "@outageRemaining": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      }
+    }
+  },
   "outageRemainingHours": "{hours} h {minutes} min",
-  "@outageRemainingHours": {"placeholders": {"hours": {"type": "int"}, "minutes": {"type": "int"}}},
+  "@outageRemainingHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "outageRemainingMinutes": "{minutes} min",
-  "@outageRemainingMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "@outageRemainingMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "outageUntil": "Until {time}",
-  "@outageUntil": {"placeholders": {"time": {"type": "String"}}},
+  "@outageUntil": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "outageGrace": "Window over — discard in {left}",
-  "@outageGrace": {"placeholders": {"left": {"type": "String"}}},
+  "@outageGrace": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      }
+    }
+  },
   "outageSpoilt": "Discard perishable food",
   "outageFreezerFill": "Freezer",
   "outageFreezerFull": "Well filled",
@@ -2155,7 +2790,13 @@
   "outageRulesTitle": "Rules",
   "outageRuleClosed": "Keep the door shut. Every opening costs hours, and the figures here only hold for a closed door.",
   "outageRuleTwoHours": "Anything that spent two hours above {degrees} °C goes — meat, fish, eggs, dairy, leftovers.",
-  "@outageRuleTwoHours": {"placeholders": {"degrees": {"type": "int"}}},
+  "@outageRuleTwoHours": {
+    "placeholders": {
+      "degrees": {
+        "type": "int"
+      }
+    }
+  },
   "outageRuleTaste": "Never taste food to decide. You cannot taste it.",
   "outageRuleRefreeze": "Refreezing is allowed while ice crystals remain. Quality suffers, safety does not.",
   "outageRuleGenerator": "Run a generator outdoors only, at least 6 metres from windows, doors and an attached garage.",
@@ -2170,16 +2811,49 @@
   "medicationNothingYetWhy": "Enter a medicine as a supply item in the “medical” category and give what is taken per day. Only then is there something to work out.",
   "medicationNoAnswer": "No medicine has a daily amount entered — without one there is nothing to divide.",
   "medicationShortest": "Runs out first: {name} — {days}",
-  "@medicationShortest": {"placeholders": {"name": {"type": "String"}, "days": {"type": "String"}}},
+  "@medicationShortest": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
   "medicationShortestWhy": "That is the reach of the medicine cabinet. A refill needs a practice and a pharmacy, and in an emergency neither is available at once.",
   "medicationRunsOut": "Gone on {date}",
-  "@medicationRunsOut": {"placeholders": {"date": {"type": "String"}}},
+  "@medicationRunsOut": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "medicationDays": "{days} days",
-  "@medicationDays": {"placeholders": {"days": {"type": "int"}}},
+  "@medicationDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "medicationOneDay": "1 day",
   "medicationZeroDays": "Less than a day",
   "medicationStock": "{quantity} {unit} in stock, {dose} a day",
-  "@medicationStock": {"placeholders": {"quantity": {"type": "String"}, "unit": {"type": "String"}, "dose": {"type": "String"}}},
+  "@medicationStock": {
+    "placeholders": {
+      "quantity": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "dose": {
+        "type": "String"
+      }
+    }
+  },
   "medicationWithoutDoseTitle": "Without a daily amount",
   "medicationWithoutDoseWhy": "These are in the stores but not counted. They are named here instead of being quietly skipped — otherwise the figure above would read as covering the whole cabinet.",
   "medicationSource": "FEMA and the CDC both advise keeping a supply of prescription medication and knowing how long it lasts. How large that supply may be is a matter for the practice — the app only counts what is there.",
@@ -2189,9 +2863,21 @@
   "possessionsWhy": "After a fire, a flood or a break-in the insurer asks what was there. Nobody answers that from memory. This list is not the supply store — it is what would have to be replaced.",
   "possessionsNoRoom": "No room given",
   "possessionsTotal": "Total: {amount}",
-  "@possessionsTotal": {"placeholders": {"amount": {"type": "String"}}},
+  "@possessionsTotal": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "possessionsWithoutPrice": "{count} entries without a price are not in the total.",
-  "@possessionsWithoutPrice": {"placeholders": {"count": {"type": "int"}}},
+  "@possessionsWithoutPrice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "possessionsExport": "Export as PDF",
   "possessionsPdfTitle": "Household inventory",
   "possessionsKeepElsewhere": "This list does not belong only in the home it describes. Print it and keep it elsewhere, or mail it to yourself. The photos are not in this file — they are only on the device that took them.",
@@ -2215,9 +2901,21 @@
   "possessionPhotoRemove": "Remove photo",
   "possessionRemoveTitle": "Delete entry?",
   "possessionRemoveBody": "“{name}” will be removed on every device in the household.",
-  "@possessionRemoveBody": {"placeholders": {"name": {"type": "String"}}},
+  "@possessionRemoveBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "possessionsCount": "{count} items",
-  "@possessionsCount": {"placeholders": {"count": {"type": "int"}}},
+  "@possessionsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "firstAidTitle": "First aid",
   "firstAidEntryHint": "Instructions, drawings and a pacer for chest compressions. No network, no download.",
   "firstAidSearchHint": "What are you looking for?",
@@ -2233,7 +2931,13 @@
   "firstAidSteps": "Steps",
   "firstAidCautions": "Do not",
   "firstAidSource": "Source: {source}",
-  "@firstAidSource": {"placeholders": {"source": {"type": "String"}}},
+  "@firstAidSource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
   "firstAidOpenPacer": "Start the pacer",
   "firstAidVideos": "Videos",
   "firstAidVideosNone": "No video is installed for this guide.",
@@ -2254,16 +2958,55 @@
   "firstAidVideoPackImport": "Choose a pack file",
   "firstAidVideoPackNone": "No video pack installed yet.",
   "firstAidVideoPackInstalled": "{present} of {total} videos present, {size} on disk",
-  "@firstAidVideoPackInstalled": {"placeholders": {"present": {"type": "int"}, "total": {"type": "int"}, "size": {"type": "String"}}},
+  "@firstAidVideoPackInstalled": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "firstAidVideoPackRemove": "Delete the video pack",
   "firstAidVideoPackRemoveBody": "The video files and the pack description are removed from the device. The guides themselves are untouched.",
   "firstAidVideoPackOffer": "{count} videos, {size} in all",
-  "@firstAidVideoPackOffer": {"placeholders": {"count": {"type": "int"}, "size": {"type": "String"}}},
+  "@firstAidVideoPackOffer": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
   "firstAidVideoPackStart": "Fetch them all",
   "firstAidVideoPackProgress": "{done} of {total} done",
-  "@firstAidVideoPackProgress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@firstAidVideoPackProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "firstAidVideoPackDone": "{done} of {total} videos fetched",
-  "@firstAidVideoPackDone": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@firstAidVideoPackDone": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "firstAidVideoPackLicenceNote": "Every video names its author and its licence. Only fetch packs whose films may be passed on.",
   "firstAidVideoPackBadUrl": "That is not a complete address.",
   "firstAidVideoPackClose": "Close",
@@ -2272,13 +3015,34 @@
   "pacerStop": "Stop",
   "pacerIdle": "Sets the beat for chest compressions — as a tone, as a flash and, on a phone, as a vibration. The screen stays on while it runs.",
   "pacerElapsed": "Running {time}",
-  "@pacerElapsed": {"placeholders": {"time": {"type": "String"}}},
+  "@pacerElapsed": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "pacerDepth": "5–6 cm deep · vertically from above · let the chest come all the way back up",
   "pacerNoSound": "No sound on this device. The beat keeps flashing.",
   "pacerPerMinute": "{rate}/min",
-  "@pacerPerMinute": {"placeholders": {"rate": {"type": "int"}}},
+  "@pacerPerMinute": {
+    "placeholders": {
+      "rate": {
+        "type": "int"
+      }
+    }
+  },
   "pacerOfCycle": "of {total} · round {cycle}",
-  "@pacerOfCycle": {"placeholders": {"total": {"type": "int"}, "cycle": {"type": "int"}}},
+  "@pacerOfCycle": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      },
+      "cycle": {
+        "type": "int"
+      }
+    }
+  },
   "pacerBreathe": "Now 2 breaths",
   "pacerSwapNow": "Swap over if there are two of you",
   "pacerPushOnly": "Push without stopping",
@@ -2292,7 +3056,16 @@
   "warningSituationMapNothingHere": "None of the areas shown covers this spot.",
   "knowledgeApolloPackagesTitle": "APOLLO package status",
   "knowledgeApolloPackageSummary": "{installed} of {total} recommended sources available",
-  "@knowledgeApolloPackageSummary": {"placeholders": {"installed": {"type": "int"}, "total": {"type": "int"}}},
+  "@knowledgeApolloPackageSummary": {
+    "placeholders": {
+      "installed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "knowledgeApolloPackageInstalled": "Downloaded and registered in the library",
   "knowledgeApolloPackageMissing": "Not yet in the library",
   "readinessEquipment": "Equipment and batteries checked",
@@ -2311,16 +3084,43 @@
   "knowledgeCheckTitle": "Check your knowledge",
   "knowledgeCheckIntro": "First aid goes quiet without telling you. A few questions show what still holds — and what does not.",
   "knowledgeCheckProgress": "Question {number} of {total}",
-  "@knowledgeCheckProgress": {"placeholders": {"number": {"type": "int"}, "total": {"type": "int"}}},
+  "@knowledgeCheckProgress": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "knowledgeCheckRight": "Right.",
   "knowledgeCheckWrong": "Not quite.",
   "knowledgeCheckReadGuide": "Read the guide",
   "knowledgeCheckNext": "Next",
   "knowledgeCheckFinish": "Done",
   "knowledgeCheckResult": "{right} of {total} right.",
-  "@knowledgeCheckResult": {"placeholders": {"right": {"type": "int"}, "total": {"type": "int"}}},
+  "@knowledgeCheckResult": {
+    "placeholders": {
+      "right": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "knowledgeCheckHeld": "{held} of {total} questions hold.",
-  "@knowledgeCheckHeld": {"placeholders": {"held": {"type": "int"}, "total": {"type": "int"}}},
+  "@knowledgeCheckHeld": {
+    "placeholders": {
+      "held": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "knowledgeCheckComeBack": "Come back in a few months. Not tomorrow — that is not what this is for.",
   "knowledgeCheckReview": "Worth reading again",
   "knowledgeCheckAgain": "Another round",
@@ -2331,7 +3131,13 @@
   "mapPlacesExportFailed": "The file could not be written.",
   "mapPlacesImportNothing": "There is no place in this file that the app can read.",
   "mapPlacesImported": "{count, plural, =0{Every place was already here.} =1{One place was added.} other{{count} places were added.}}",
-  "@mapPlacesImported": {"placeholders": {"count": {"type": "int"}}},
+  "@mapPlacesImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mapPlacesTitle": "My places",
   "mapPlacesIntro": "Personal places appear as markers on the map. They stay on this device only.",
   "mapPlacesEmpty": "No personal places yet. Save meeting points, distribution points, or important supplies.",
@@ -2345,33 +3151,94 @@
   "mapPlaceNoteHint": "For example access, supplies, or meeting time",
   "mapPlaceCoordinatesInvalid": "Enter a label and valid coordinates.",
   "mapPlaceDeleteConfirm": "Remove “{label}”?",
-  "@mapPlaceDeleteConfirm": {"placeholders": {"label": {}}},
+  "@mapPlaceDeleteConfirm": {
+    "placeholders": {
+      "label": {}
+    }
+  },
   "drillsLastCompleted": "last completed: {date}",
-  "@drillsLastCompleted": {"placeholders": {"date": {"type": "String"}}},
+  "@drillsLastCompleted": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "hubTitle": "Crisis organisation",
   "hubPrivacyNote": "Everything here stays on this device. If you export an incident log, you decide who receives it.",
   "hubNotCheckedYet": "not checked yet",
   "hubAutonomyTitle": "Self-sufficiency",
   "hubAutonomyHint": "Range in days, worked out from your stock and your energy plan. The lowest figure is the next bottleneck.",
   "hubAutonomyIncomplete": "Self-sufficiency not yet complete. Open: {resources}.",
-  "@hubAutonomyIncomplete": {"placeholders": {"resources": {"type": "String"}}},
+  "@hubAutonomyIncomplete": {
+    "placeholders": {
+      "resources": {
+        "type": "String"
+      }
+    }
+  },
   "hubAutonomyKnownSoFar": "Of what is known: {days} days, bottleneck {resource}.",
-  "@hubAutonomyKnownSoFar": {"placeholders": {"days": {"type": "int"}, "resource": {"type": "String"}}},
+  "@hubAutonomyKnownSoFar": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "resource": {
+        "type": "String"
+      }
+    }
+  },
   "hubAutonomyRange": "{days} days on your own – bottleneck: {resource}",
-  "@hubAutonomyRange": {"placeholders": {"days": {"type": "int"}, "resource": {"type": "String"}}},
+  "@hubAutonomyRange": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "resource": {
+        "type": "String"
+      }
+    }
+  },
   "hubAutonomyOpen": "open",
   "hubAutonomyDays": "{days} days",
-  "@hubAutonomyDays": {"placeholders": {"days": {"type": "int"}}},
+  "@hubAutonomyDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "hubAutonomyAddByHand": "Fill in by hand",
   "hubAutonomyDialogTitle": "Range in days",
   "hubAutonomyDialogHint": "What the app can work out from your stock and energy plan is already on the screen. This is only for what it cannot divide.",
   "hubAutonomyDaysField": "{label} – days",
-  "@hubAutonomyDaysField": {"placeholders": {"label": {"type": "String"}}},
+  "@hubAutonomyDaysField": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "hubAutonomyFromStock": "Worked out from your stock",
   "hubAutonomyByHandWith": "Entered by hand – {reason}",
-  "@hubAutonomyByHandWith": {"placeholders": {"reason": {"type": "String"}}},
+  "@hubAutonomyByHandWith": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "hubAutonomyNotCounted": "{count,plural,=1{One entry not counted: {reason}}other{{count} entries not counted: {reason}}}",
-  "@hubAutonomyNotCounted": {"placeholders": {"count": {"type": "int"}, "reason": {"type": "String"}}},
+  "@hubAutonomyNotCounted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "hubResourceWater": "Water",
   "hubResourceFood": "Food",
   "hubResourceMedicine": "Medicines",
@@ -2413,7 +3280,25 @@
   "hubRadioReceiver": "Receiver",
   "hubRadioPower": "Power supply",
   "hubRadioDetails": "{band} · {frequency}\n{receiver} · {power}\nTested: {checked}",
-  "@hubRadioDetails": {"placeholders": {"band": {"type": "String"}, "frequency": {"type": "String"}, "receiver": {"type": "String"}, "power": {"type": "String"}, "checked": {"type": "String"}}},
+  "@hubRadioDetails": {
+    "placeholders": {
+      "band": {
+        "type": "String"
+      },
+      "frequency": {
+        "type": "String"
+      },
+      "receiver": {
+        "type": "String"
+      },
+      "power": {
+        "type": "String"
+      },
+      "checked": {
+        "type": "String"
+      }
+    }
+  },
   "hubFolderTitle": "Emergency folder",
   "hubFolderHint": "Keep track of the folder itself — no contents and no personal details.",
   "hubFolderLocation": "Where it is kept",
@@ -2444,7 +3329,13 @@
   "hubMaintenanceTitle": "Maintenance",
   "hubMaintenanceHint": "Check regularly, so the equipment that matters works when it is needed.",
   "hubMaintenanceLastChecked": "Last checked: {date}",
-  "@hubMaintenanceLastChecked": {"placeholders": {"date": {"type": "String"}}},
+  "@hubMaintenanceLastChecked": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "hubEvacuationTitle": "Evacuation cards",
   "hubEvacuationHint": "Meeting points and safe routes, written down so they can be read offline.",
   "hubEvacuationAdd": "Add a card",
@@ -2458,11 +3349,35 @@
   "hubEvacuationStartOpen": "Start not set",
   "hubEvacuationDestinationOpen": "Destination not set",
   "hubEvacuationSummary": "{start} → {destination}\nChecked: {checked}",
-  "@hubEvacuationSummary": {"placeholders": {"start": {"type": "String"}, "destination": {"type": "String"}, "checked": {"type": "String"}}},
+  "@hubEvacuationSummary": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      },
+      "checked": {
+        "type": "String"
+      }
+    }
+  },
   "hubEvacuationStartLine": "Start: {value}",
-  "@hubEvacuationStartLine": {"placeholders": {"value": {"type": "String"}}},
+  "@hubEvacuationStartLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "hubEvacuationDestinationLine": "Destination: {value}",
-  "@hubEvacuationDestinationLine": {"placeholders": {"value": {"type": "String"}}},
+  "@hubEvacuationDestinationLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "hubEvacuationPlacesLine": "Important places",
   "hubEventsTitle": "Incident log",
   "hubEventsHint": "Record observations and what was done, with the time, and export them as a PDF if needed.",
@@ -2474,9 +3389,21 @@
   "hubEventsNote": "Observation or damage",
   "hubEventsAction": "What was done",
   "hubEventsObservationLine": "Observation: {text}",
-  "@hubEventsObservationLine": {"placeholders": {"text": {"type": "String"}}},
+  "@hubEventsObservationLine": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "hubEventsActionLine": "Action: {text}",
-  "@hubEventsActionLine": {"placeholders": {"text": {"type": "String"}}},
+  "@hubEventsActionLine": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "hubEventsPdfTitle": "PreppSuite – incident log",
   "hubEventsPdfFile": "preppsuite-incident-log.pdf",
   "hubActionsTitle": "What to do, and when",
@@ -2488,7 +3415,13 @@
   "hubActionDaysTitle": "Several days ahead",
   "hubActionDaysBody": "Go over the evacuation card, arrange support, check the pet and utilities plans.",
   "hubActionDone": "Done: {date}",
-  "@hubActionDone": {"placeholders": {"date": {"type": "String"}}},
+  "@hubActionDone": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "hubCrisisTitle": "Crisis mode and briefing",
   "hubCrisisHint": "A larger display for this page, and a printable briefing for the household or the kit.",
   "hubCrisisSwitch": "Simplified, larger display",
@@ -2496,13 +3429,46 @@
   "hubBriefingButton": "Emergency briefing as PDF",
   "hubBriefingPdfTitle": "PreppSuite – emergency briefing",
   "hubBriefingCreated": "Created: {date}",
-  "@hubBriefingCreated": {"placeholders": {"date": {"type": "String"}}},
+  "@hubBriefingCreated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "hubBriefingRadio": "Radio",
   "hubBriefingRadioLine": "{station}: {band} {frequency} · {receiver}",
-  "@hubBriefingRadioLine": {"placeholders": {"station": {"type": "String"}, "band": {"type": "String"}, "frequency": {"type": "String"}, "receiver": {"type": "String"}}},
+  "@hubBriefingRadioLine": {
+    "placeholders": {
+      "station": {
+        "type": "String"
+      },
+      "band": {
+        "type": "String"
+      },
+      "frequency": {
+        "type": "String"
+      },
+      "receiver": {
+        "type": "String"
+      }
+    }
+  },
   "hubBriefingEvacuation": "Evacuation",
   "hubBriefingEvacuationLine": "{label}: {start} -> {destination}",
-  "@hubBriefingEvacuationLine": {"placeholders": {"label": {"type": "String"}, "start": {"type": "String"}, "destination": {"type": "String"}}},
+  "@hubBriefingEvacuationLine": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
   "hubBriefingPdfFile": "preppsuite-emergency-briefing.pdf",
   "hubAnalogTitle": "On paper",
   "hubAnalogHint": "Keep printouts, maps, notes and spare keys available without a battery or a network.",
@@ -2517,7 +3483,13 @@
   "hubPracticeTemplate": "Next practice: …\nTest the water filter: …\nCook without power: …\nCheck the radio and the kit: …",
   "hubNoteEmpty": "Not written down yet.",
   "hubNoteUpdated": "Last updated: {date}",
-  "@hubNoteUpdated": {"placeholders": {"date": {"type": "String"}}},
+  "@hubNoteUpdated": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "hubNoteCreate": "Write a plan",
   "hubNoteEdit": "Edit",
   "hubNoteCopyTemplate": "Copy template",
@@ -2526,7 +3498,16 @@
   "hubCancel": "Cancel",
   "hubSave": "Save",
   "hubDateTime": "{date} · {time}",
-  "@hubDateTime": {"placeholders": {"date": {"type": "String"}, "time": {"type": "String"}}},
+  "@hubDateTime": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "hubTaskBatteriesTitle": "Batteries and power banks",
   "hubTaskBatteriesHint": "Check the charge and the spares",
   "hubTaskRadioTitle": "Radio and reception plan",
@@ -2542,7 +3523,13 @@
   "hubTaskVehicleTitle": "Vehicle and getting about",
   "hubTaskVehicleHint": "Check fuel, tyres and alternative routes",
   "hubFolderCheckedTodayWith": "Checked today · last {date}",
-  "@hubFolderCheckedTodayWith": {"placeholders": {"date": {"type": "String"}}},
+  "@hubFolderCheckedTodayWith": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "hubBriefingCommunication": "Communication",
   "hubBriefingSupport": "Support",
   "hubBriefingPets": "Pets",
@@ -2554,12 +3541,33 @@
   "hubRadioPowerExample": "Batteries",
   "hubEventsNoteHint": "Observation",
   "hubEventSummary": "{when}\n{text}",
-  "@hubEventSummary": {"placeholders": {"when": {"type": "String"}, "text": {"type": "String"}}},
+  "@hubEventSummary": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      },
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "hubSituationTitle": "Something is happening",
   "hubSituationOutage": "{hours,plural,=0{Power cut, just started}=1{Power cut for an hour}other{Power cut for {hours} hours}}",
-  "@hubSituationOutage": {"placeholders": {"hours": {"type": "int"}}},
+  "@hubSituationOutage": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "hubSituationMoreWarnings": "{count,plural,=1{And one more warning}other{And {count} more warnings}}",
-  "@hubSituationMoreWarnings": {"placeholders": {"count": {"type": "int"}}},
+  "@hubSituationMoreWarnings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "hubSituationCrisisMode": "Switch to the larger display",
   "hubSituationLog": "Record it in the log",
   "hubSituationOutageKind": "Power cut",
@@ -2572,9 +3580,21 @@
   "hubFolderReportAutonomy": "Self-sufficiency",
   "mapWaterTitle": "Drinking water affected",
   "mapWaterStock": "Your own drinking water: {value}",
-  "@mapWaterStock": {"placeholders": {"value": {"type": "String"}}},
+  "@mapWaterStock": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "mapWaterStockUnknown": "How far your own supply reaches is still open: {reason}.",
-  "@mapWaterStockUnknown": {"placeholders": {"reason": {"type": "String"}}},
+  "@mapWaterStockUnknown": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "mapWaterNearby": "Drinking water nearby",
   "mapWaterAdviceNote": "What to do with the water is in the warning itself. This app publishes no figures of its own on that.",
   "setupChoiceTitle": "Set up a household",
@@ -2588,29 +3608,71 @@
   "setupChoiceSafeNote": "Now is the safest moment for this: this device has no data of its own yet that would have to be re-stamped.",
   "setupFolderSearching": "Reading the folder …",
   "setupFolderFound": "Household found: {name}",
-  "@setupFolderFound": {"placeholders": {"name": {"type": "String"}}},
+  "@setupFolderFound": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "setupFolderFoundBody": "This device will join it. Name and country come from the folder; region and household size stay with this device.",
   "setupFolderEmpty": "There is no household in this folder yet. A new one will be created and written into it.",
   "setupScanHint": "First fill in what belongs to this device. Then read the other device's QR code, and the household is taken over.",
   "setupScanContinue": "Continue to the scan",
   "setupJoinFailed": "Could not join: {reason}",
-  "@setupJoinFailed": {"placeholders": {"reason": {"type": "String"}}},
+  "@setupJoinFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "setupDoneFolder": "Folder connected. The household keeps itself in step from now on.",
   "setupDoneScan": "Household taken over. {rows, plural, =0{Nothing new was in it.} =1{One entry arrived.} other{{rows} entries arrived.}}",
-  "@setupDoneScan": {"placeholders": {"rows": {"type": "int"}}},
+  "@setupDoneScan": {
+    "placeholders": {
+      "rows": {
+        "type": "int"
+      }
+    }
+  },
   "setupScanCancelled": "Cancelled — no household was taken over.",
   "setupAdopted": "Household “{name}” taken over.",
-  "@setupAdopted": {"placeholders": {"name": {"type": "String"}}},
+  "@setupAdopted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "transferAdoptHousehold": "Take over this code's household",
   "transferConflictTitle": "Two different households",
   "transferConflictBody": "This device belongs to “{mine}”, the code belongs to a different household. What happens next cannot be undone: two merged sets of data cannot be separated again.",
-  "@transferConflictBody": {"placeholders": {"mine": {"type": "String"}}},
+  "@transferConflictBody": {
+    "placeholders": {
+      "mine": {
+        "type": "String"
+      }
+    }
+  },
   "transferConflictMerge": "Merge them",
   "transferConflictMergeBody": "{count,plural,=0{This device has nothing to bring and simply joins the other household.}=1{The one entry of its own moves into the other household, and that household's data comes here. Nothing is lost.}other{The {count} entries of its own move into the other household, and that household's data comes here. Nothing is lost.}}",
-  "@transferConflictMergeBody": {"placeholders": {"count": {"type": "int"}}},
+  "@transferConflictMergeBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "transferConflictReplace": "Discard this device's data",
   "transferConflictReplaceBody": "{count,plural,=1{The one entry of its own is deleted.}other{The {count} entries of its own are deleted.}} Only the other household remains here afterwards.",
-  "@transferConflictReplaceBody": {"placeholders": {"count": {"type": "int"}}},
+  "@transferConflictReplaceBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "transferConflictKeep": "Change nothing",
   "transferConflictKeepBody": "Nothing is taken over. If the other device should join this one instead, show the code there and read it there.",
   "transferConflictCancelled": "Cancelled. Nothing was changed.",
@@ -2623,13 +3685,40 @@
   "toolsLearnTitle": "A quick round",
   "toolsLearnBody": "Short offline refreshers, alongside the drills and the knowledge archive.",
   "toolsAnswerRight": "Correct. {explanation}",
-  "@toolsAnswerRight": {"placeholders": {"explanation": {"type": "String"}}},
+  "@toolsAnswerRight": {
+    "placeholders": {
+      "explanation": {
+        "type": "String"
+      }
+    }
+  },
   "toolsAnswerWrong": "Have another look: {explanation}",
-  "@toolsAnswerWrong": {"placeholders": {"explanation": {"type": "String"}}},
+  "@toolsAnswerWrong": {
+    "placeholders": {
+      "explanation": {
+        "type": "String"
+      }
+    }
+  },
   "toolsDrillDuration": "Preparation: {minutes} minutes",
-  "@toolsDrillDuration": {"placeholders": {"minutes": {"type": "int"}}},
+  "@toolsDrillDuration": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "toolsDrillMeta": "{duration} · {completed}",
-  "@toolsDrillMeta": {"placeholders": {"duration": {"type": "String"}, "completed": {"type": "String"}}},
+  "@toolsDrillMeta": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      },
+      "completed": {
+        "type": "String"
+      }
+    }
+  },
   "toolsLessonCommunicationTitle": "Communication",
   "toolsLessonCommunicationSummary": "Take load off the networks and coordinate contacts.",
   "toolsLessonCommunicationQuestion": "Which way usually works best when the mobile network is overloaded?",
@@ -2673,5 +3762,35 @@
   "knowledgeInOpenArchive": "In the archive that is open",
   "knowledgeOpenArchiveFirst": "Open the archive in the library first",
   "radioCbCallingChannel": "The usual calling and distress channel on CB radio.",
-  "radioCbRoadChannel": "A channel widely used on the road and by lorry drivers."
+  "radioCbRoadChannel": "A channel widely used on the road and by lorry drivers.",
+  "caloriesPer100Label": "Calories per {basis} (kcal, optional)",
+  "@caloriesPer100Label": {
+    "placeholders": {
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
+  "unitMeasureHelper": "For food and water: g, kg, ml or l. Nutrition is printed per 100 g, and a tin has no weight until somebody reads it.",
+  "unitMeasureRequired": "This needs a measure: g, kg, ml or l.",
+  "nutritionPer100Label": "{nutrient} per {basis}",
+  "@nutritionPer100Label": {
+    "placeholders": {
+      "nutrient": {
+        "type": "String"
+      },
+      "basis": {
+        "type": "String"
+      }
+    }
+  },
+  "foodWithoutMeasureTitle": "Not counted: a unit with no measure",
+  "foodWithoutMeasureBody": "{count, plural, =1{One food is} other{{count} foods are}} counted in a unit no label can be applied to — a tin, a jar. {count, plural, =1{It does} other{They do}} not count towards the supply calculator until the unit is g, kg, ml or l.",
+  "@foodWithoutMeasureBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

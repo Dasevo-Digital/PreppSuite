@@ -302,7 +302,7 @@ class _FoodRow extends StatelessWidget {
       trailing: IconButton(
         icon: const Icon(Icons.add_shopping_cart_outlined),
         tooltip: l10n.storageAddToInventory,
-        onPressed: () => _addToInventory(context, l10n, amount, _perUnitKcal()),
+        onPressed: () => _addToInventory(context, l10n, amount, _per100Kcal()),
       ),
     );
   }
@@ -312,32 +312,63 @@ class _FoodRow extends StatelessWidget {
       : (base * people * days / (StoragePlan.basePeople * StoragePlan.baseDays))
             .round();
 
-  /// The table's energy for **one** of this row's unit — one gram, one
-  /// litre, one egg.
+  /// The table's energy per 100 g, or per 100 ml for a drink.
   ///
-  /// The table prints a total against an amount ("Vollkornbrot, 710 g,
-  /// 1512 kcal"), and the inventory column holds the energy in one unit,
-  /// so the two are a division apart. Handing the printed total straight
-  /// over was right while the column meant "total for the current
-  /// quantity" and became a factor-of-710 overstatement when it stopped
-  /// meaning that — in the direction that tells a household it is stocked.
-  ///
-  /// Taken from the unscaled row on purpose: amount and energy scale by
-  /// the same factor, so the quotient does not, and dividing the rounded
-  /// scaled figures would only add a rounding that the source does not
-  /// have.
-  double? _perUnitKcal() {
+  /// The basis the inventory stores, and the one the table already
+  /// carries in `kcalPer100` — so for most rows this is simply that
+  /// figure. It is derived from the total and the amount instead, because
+  /// the two agree (a test holds them to it) and the quotient also
+  /// answers the rows that print no per-100 value of their own.
+  double? _per100Kcal() {
     final total = food.totalKcal;
     if (total == null || food.amount <= 0) return null;
-    return total / food.amount;
+
+    switch (food.unit) {
+      // Grams: the total over the amount is per gram, so times 100.
+      case StorageUnit.gram:
+        return total / food.amount * 100;
+      // Litres: the amount is in litres and the basis is 100 ml, so a
+      // litre holds ten times the per-100-ml figure.
+      case StorageUnit.liter:
+        return total / food.amount / 10;
+      // A piece has no per-100 basis of its own, so it goes through the
+      // weight [_pieceGrams] gives it — the same weight [_forInventory]
+      // uses to turn the row into grams, so the two cannot disagree.
+      case StorageUnit.piece:
+        final grams = _pieceGrams();
+        if (grams == null || grams <= 0) return null;
+        return total / (food.amount * grams) * 100;
+    }
   }
+
+  /// What one piece of this row weighs, from the table's own arithmetic.
+  ///
+  /// The BLE prints eggs as "5 Stück" inside a group it totals in grams,
+  /// and the group total minus the other rows leaves 295 g — 59 g an egg,
+  /// which is weight class M. The figure is the source's, not this app's.
+  double? _pieceGrams() => food.unit == StorageUnit.piece ? 59 : null;
+
+  /// The row's amount in the unit the inventory will hold it in.
+  ///
+  /// Pieces become grams, because food is counted in a measure now and a
+  /// per-100 figure cannot be applied to an egg. Everything else is the
+  /// table's own unit.
+  (double amount, String unit) _forInventory(AppLocalizations l10n, double amount) =>
+      switch (food.unit) {
+        StorageUnit.piece => (
+          amount * (_pieceGrams() ?? 1),
+          l10n.storageUnitGram,
+        ),
+        _ => (amount, _unitLabel(l10n, food.unit)),
+      };
 
   Future<void> _addToInventory(
     BuildContext context,
     AppLocalizations l10n,
     double amount,
-    double? kcalPerUnit,
+    double? kcalPer100,
   ) async {
+    final forInventory = _forInventory(l10n, amount);
     // The form opens rather than the row being written straight in: the
     // table says nothing about where this household keeps things or how
     // long its tin will last, and both are required fields.
@@ -347,9 +378,9 @@ class _FoodRow extends StatelessWidget {
           householdId: householdId,
           draft: InventoryItemDraft(
             name: storageFoodName(l10n, food),
-            quantity: amount,
-            unit: _unitLabel(l10n, food.unit),
-            nutrition: PackageNutrition(kcal: kcalPerUnit),
+            quantity: forInventory.$1,
+            unit: forInventory.$2,
+            nutrition: PackageNutrition(kcal: kcalPer100),
             notes: l10n.storageFromTableNote,
           ),
         ),

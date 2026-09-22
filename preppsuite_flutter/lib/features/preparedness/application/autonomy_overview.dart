@@ -175,7 +175,14 @@ AutonomyReach _food(
           InventoryItemCategory.food)
         if (item.quantity > 0) item,
   ];
-  final uncounted = foodWithoutCalories(items);
+  // Two ways a food row can fail to count, and both have to show here or
+  // the screen says "all of it" while rows fall out silently: no calorie
+  // figure at all, and a unit no label can be applied to. A row can be
+  // both, so they are joined by id rather than added up.
+  final uncounted = {
+    for (final item in foodWithoutCalories(items)) item.clientId: item,
+    for (final item in foodWithoutMeasure(items)) item.clientId: item,
+  }.values.toList();
   if (stocked.isEmpty) {
     return _fallback(
       AutonomyResource.food,

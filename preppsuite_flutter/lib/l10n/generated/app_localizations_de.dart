@@ -277,15 +277,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get minQuantityLabel => 'Mindestbestand (optional)';
 
   @override
-  String get caloriesLabel => 'Kalorien je Einheit (kcal, optional)';
-
-  @override
-  String caloriesPerUnitLabel(String unit) {
-    return 'Kalorien je $unit (kcal, optional)';
-  }
-
-  @override
-  String caloriesTotalHint(int total) {
+  String caloriesTotalHint(Object total) {
     return 'Macht $total kcal im Bestand.';
   }
 
@@ -2444,7 +2436,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get nutritionSectionHint =>
-      'Jeweils für die ganze Menge, nicht je 100 g. Beim Scannen trägt die App ein, was auf dem Etikett steht.';
+      'Jeweils je 100 g – oder je 100 ml bei Getränken –, genau wie auf dem Etikett. Beim Scannen trägt die App ein, was dort steht; hochgerechnet wird selbst.';
 
   @override
   String get proteinLabel => 'Eiweiß';
@@ -6278,4 +6270,42 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get radioCbRoadChannel =>
       'Häufig genutzter Straßen- und Fernfahrkanal.';
+
+  @override
+  String caloriesPer100Label(String basis) {
+    return 'Kalorien je $basis (kcal, optional)';
+  }
+
+  @override
+  String get unitMeasureHelper =>
+      'Bei Lebensmitteln und Wasser: g, kg, ml oder l. Nährwerte stehen je 100 g, und eine Dose hat kein Gewicht, bis jemand sie liest.';
+
+  @override
+  String get unitMeasureRequired =>
+      'Hier braucht es ein Maß: g, kg, ml oder l.';
+
+  @override
+  String nutritionPer100Label(String nutrient, String basis) {
+    return '$nutrient je $basis';
+  }
+
+  @override
+  String get foodWithoutMeasureTitle => 'Nicht mitgerechnet: Einheit ohne Maß';
+
+  @override
+  String foodWithoutMeasureBody(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Lebensmittel werden',
+      one: 'Ein Lebensmittel wird',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Sie zählen',
+      one: 'Es zählt',
+    );
+    return '$_temp0 in einer Einheit gezählt, auf die sich kein Etikett anwenden lässt – etwa „Dose\" oder „Glas\". $_temp1 nicht in den Vorrats-Rechner, bis die Einheit in g, kg, ml oder l steht.';
+  }
 }

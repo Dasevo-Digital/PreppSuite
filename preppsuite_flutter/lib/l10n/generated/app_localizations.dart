@@ -572,23 +572,11 @@ abstract class AppLocalizations {
   /// **'Minimum quantity (optional)'**
   String get minQuantityLabel;
 
-  /// No description provided for @caloriesLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Calories per unit (kcal, optional)'**
-  String get caloriesLabel;
-
-  /// No description provided for @caloriesPerUnitLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Calories per {unit} (kcal, optional)'**
-  String caloriesPerUnitLabel(String unit);
-
   /// No description provided for @caloriesTotalHint.
   ///
   /// In en, this message translates to:
   /// **'Comes to {total} kcal in stock.'**
-  String caloriesTotalHint(int total);
+  String caloriesTotalHint(Object total);
 
   /// No description provided for @supplyCalculatorDaysLabel.
   ///
@@ -4121,7 +4109,7 @@ abstract class AppLocalizations {
   /// No description provided for @nutritionSectionHint.
   ///
   /// In en, this message translates to:
-  /// **'For the whole amount, not per 100 g. Scanning a barcode fills in whatever the label states.'**
+  /// **'Per 100 g each — or per 100 ml for drinks — exactly as the label states them. Scanning a barcode fills in what it says; the app does the multiplying.'**
   String get nutritionSectionHint;
 
   /// No description provided for @proteinLabel.
@@ -10468,6 +10456,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A channel widely used on the road and by lorry drivers.'**
   String get radioCbRoadChannel;
+
+  /// No description provided for @caloriesPer100Label.
+  ///
+  /// In en, this message translates to:
+  /// **'Calories per {basis} (kcal, optional)'**
+  String caloriesPer100Label(String basis);
+
+  /// No description provided for @unitMeasureHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'For food and water: g, kg, ml or l. Nutrition is printed per 100 g, and a tin has no weight until somebody reads it.'**
+  String get unitMeasureHelper;
+
+  /// No description provided for @unitMeasureRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This needs a measure: g, kg, ml or l.'**
+  String get unitMeasureRequired;
+
+  /// No description provided for @nutritionPer100Label.
+  ///
+  /// In en, this message translates to:
+  /// **'{nutrient} per {basis}'**
+  String nutritionPer100Label(String nutrient, String basis);
+
+  /// No description provided for @foodWithoutMeasureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Not counted: a unit with no measure'**
+  String get foodWithoutMeasureTitle;
+
+  /// No description provided for @foodWithoutMeasureBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One food is} other{{count} foods are}} counted in a unit no label can be applied to — a tin, a jar. {count, plural, =1{It does} other{They do}} not count towards the supply calculator until the unit is g, kg, ml or l.'**
+  String foodWithoutMeasureBody(int count);
 }
 
 class _AppLocalizationsDelegate

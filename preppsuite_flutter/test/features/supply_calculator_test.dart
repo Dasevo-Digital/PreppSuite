@@ -98,12 +98,15 @@ void main() {
     });
 
     test('sums calories only for food-category items that have them set', () {
+      // 100 g each at the figures below: 2000 + 1500.
       final result = calculateSupply(
         items: [
-          item(category: 'food', calories: 2000),
-          item(category: 'food', calories: 1500),
-          item(category: 'food'), // no calories set — not counted
-          item(category: 'water', calories: 999), // wrong category
+          item(category: 'food', quantity: 100, unit: 'g', calories: 2000),
+          item(category: 'food', quantity: 100, unit: 'g', calories: 1500),
+          // No calories set — not counted.
+          item(category: 'food', quantity: 100, unit: 'g'),
+          // Wrong category.
+          item(category: 'water', quantity: 100, unit: 'ml', calories: 999),
         ],
         days: 1,
       );
@@ -111,26 +114,30 @@ void main() {
       expect(result.caloriesCurrent, 3500);
     });
 
-    test('six tins of 900 kcal are 5400, not 900', () {
+    test('the label is applied to the stock, not to the line', () {
       // The bug this pins, reported from the field: the calories were
-      // added once per *line* and never multiplied by how many there
-      // were, so a cellar was counted as a sixth of itself.
+      // added once per *line* and never multiplied by how much there was,
+      // so a cellar was counted as a fraction of itself. Two kilograms at
+      // 450 kcal per 100 g is 9,000.
       final result = calculateSupply(
         items: [
-          item(category: 'food', quantity: 6, unit: 'Dose', calories: 900),
+          item(category: 'food', quantity: 2, unit: 'kg', calories: 450),
         ],
         days: 1,
       );
 
-      expect(result.caloriesCurrent, 6 * 900);
+      expect(result.caloriesCurrent, 9000);
     });
 
-    test('and it was invisible because one is the same either way', () {
+    test('and it was invisible because 100 g of anything is the figure', () {
       // Every test above this one used the helper's default quantity of
       // one, which is also how anybody tries the app out first. A missing
-      // multiplication hides perfectly behind a single tin.
+      // multiplication hides perfectly behind a single unit — and behind
+      // exactly 100 g it hides even from this basis.
       final one = calculateSupply(
-        items: [item(category: 'food', quantity: 1, calories: 900)],
+        items: [
+          item(category: 'food', quantity: 100, unit: 'g', calories: 900),
+        ],
         days: 1,
       );
 
@@ -138,16 +145,72 @@ void main() {
     });
 
     test('a part of a unit counts as a part', () {
-      // Half a kilogram of something at 3500 kcal the kilogram. Stored as
-      // an int, so the result is rounded rather than truncated.
+      // Half a kilogram at 350 kcal per 100 g. Stored as an int, so the
+      // result is rounded rather than truncated.
       final result = calculateSupply(
         items: [
-          item(category: 'food', quantity: 0.5, unit: 'kg', calories: 3500),
+          item(category: 'food', quantity: 0.5, unit: 'kg', calories: 350),
         ],
         days: 1,
       );
 
       expect(result.caloriesCurrent, 1750);
+    });
+
+    test('a drink is measured against the same figure in millilitres', () {
+      // 1.5 litres at 45 kcal per 100 ml. Mass and volume are kept apart
+      // on purpose: a hundred millilitres of oil is not a hundred grams.
+      final result = calculateSupply(
+        items: [
+          item(category: 'food', quantity: 1.5, unit: 'l', calories: 45),
+        ],
+        days: 1,
+      );
+
+      expect(result.caloriesCurrent, 675);
+    });
+
+    group('a unit no label can be applied to', () {
+      test('is not counted, because a tin has no weight', () {
+        // "6 Dosen" states nothing a per-100 g figure can be applied to.
+        // Guessing what a tin of this particular thing weighs is the one
+        // thing that would turn a visible gap into an invisible wrong
+        // number.
+        final result = calculateSupply(
+          items: [
+            item(category: 'food', quantity: 6, unit: 'Dose', calories: 250),
+          ],
+          days: 1,
+        );
+
+        expect(result.caloriesCurrent, 0);
+      });
+
+      test('and is named rather than silently skipped', () {
+        // The rule the whole file follows: a reach that quietly omits
+        // half the cupboard is worse than one that says which half.
+        final items = [
+          item(category: 'food', quantity: 6, unit: 'Dose', calories: 250),
+          item(category: 'food', quantity: 2, unit: 'kg', calories: 350),
+          // Not food: a medicine is counted in tablets and its daily dose
+          // with it, and neither ever wanted grams.
+          item(category: 'medical', quantity: 60, unit: 'Tablette'),
+        ];
+
+        expect(
+          foodWithoutMeasure(items).map((item) => item.unit),
+          ['Dose'],
+        );
+      });
+
+      test('an empty row is nobody\'s gap', () {
+        expect(
+          foodWithoutMeasure([
+            item(category: 'food', quantity: 0, unit: 'Dose', calories: 250),
+          ]),
+          isEmpty,
+        );
+      });
     });
 
     test('an emptied item stops counting on its own', () {
@@ -165,13 +228,14 @@ void main() {
   });
 
   group('a fraction of a kilocalorie', () {
-    test('four hundred grams of bread at 2.13 a gram is 852', () {
-      // The case the column became a real for. As an integer this was
-      // 2 kcal a gram and 800 in the cellar -- six percent light, every
-      // time, on the one figure a household plans against.
+    test('four hundred grams of bread at 213 per 100 g is 852', () {
+      // Whole numbers on the label, a fraction in the arithmetic: 400 g
+      // is four fifths of the basis. That is the ordinary case now, which
+      // is why the column has to hold a real even though every label
+      // prints an integer.
       final result = calculateSupply(
         items: [
-          item(category: 'food', quantity: 400, unit: 'g', calories: 2.13),
+          item(category: 'food', quantity: 400, unit: 'g', calories: 213),
         ],
         days: 1,
       );
@@ -180,13 +244,13 @@ void main() {
     });
 
     test('the rounding happens once, at the end, not per row', () {
-      // Three rows that each end in a half. Rounded per row they come to
-      // 3; rounded once they come to 2 -- and the second is the number a
-      // household actually has.
+      // Three rows that each come to half a kilocalorie. Rounded per row
+      // they make 3; rounded once they make 2 — and the second is what
+      // the household actually has.
       final result = calculateSupply(
         items: [
           for (var i = 0; i < 3; i++)
-            item(category: 'food', quantity: 1, unit: 'Stueck', calories: 0.5),
+            item(category: 'food', quantity: 1, unit: 'g', calories: 50),
         ],
         days: 1,
       );
@@ -194,10 +258,11 @@ void main() {
       expect(result.caloriesCurrent, 2);
     });
 
-    test('and a whole number still behaves exactly as it did', () {
+    test('and a label of whole numbers still behaves plainly', () {
+      // Six kilograms at 90 kcal per 100 g: 5,400, no fraction anywhere.
       final result = calculateSupply(
         items: [
-          item(category: 'food', quantity: 6, unit: 'Dose', calories: 900),
+          item(category: 'food', quantity: 6, unit: 'kg', calories: 90),
         ],
         days: 1,
       );

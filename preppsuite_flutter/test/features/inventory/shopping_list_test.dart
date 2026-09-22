@@ -13,8 +13,11 @@ void main() {
     required String clientId,
     String name = 'Vorrat',
     String category = 'food',
-    double quantity = 1,
-    String unit = 'Stück',
+    // A hundred grams by default, which is one basis of the nutrition
+    // figures — so a row's calories and its contribution are the same
+    // number and the cases below read as they always did.
+    double quantity = 100,
+    String unit = 'g',
     double? minQuantity,
     double? calories,
   }) => InventoryItem(
@@ -214,9 +217,9 @@ void main() {
             ),
             item(
               clientId: 'f',
-              quantity: random.nextInt(30).toDouble(),
-              unit: 'Dose',
-              calories: random.nextInt(1200).toDouble(),
+              quantity: random.nextInt(3000).toDouble(),
+              unit: 'g',
+              calories: random.nextInt(600).toDouble(),
             ),
           ],
           days: days,

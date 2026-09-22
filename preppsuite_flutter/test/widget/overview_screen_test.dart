@@ -133,7 +133,9 @@ void main() {
       tester,
       items: [
         item(clientId: 'w', category: 'water', quantity: 10, unit: 'L'),
-        item(clientId: 'f', quantity: 5, unit: 'Packung', calories: 2200),
+        // Five kilograms at 220 kcal per 100 g is 11,000 -- five times
+        // one kilogram, so the multiplication is still visible here.
+        item(clientId: 'f', quantity: 5, unit: 'kg', calories: 220),
       ],
     );
 
