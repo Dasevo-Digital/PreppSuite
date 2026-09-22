@@ -201,7 +201,9 @@ anderen hinein. Die Pause gehört zum Signal und steht auch so auf dem
 Bildschirm: sie unterscheidet es von jemandem, der mit einer Lampe
 herumläuft.
 
-**Karte offline.** Die Karte lässt sich in der App herunterladen: Ort
+**Karte offline.** Im dunklen Erscheinungsbild ist auch die Karte dunkel –
+der Stil wird umgedreht statt das fertige Bild, sodass ein Park grün bleibt.
+Die Karte lässt sich in der App herunterladen: Ort
 suchen – Stadt, Kreis, Bundesland oder Land – oder den Ausschnitt auf der
 Karte einstellen, Detailstufe wählen, laden. Fertig ist ein
 PMTiles-Archiv auf dem Gerät, und die Karte braucht kein Netz mehr. Die
@@ -221,6 +223,14 @@ in [`docs/wissen-offline.md`](docs/wissen-offline.md).
 einen Ordner, den sie alle sehen – Nextcloud, Syncthing, iCloud Drive,
 Dropbox. PreppSuite legt dort nur Dateien ab; wer sie transportiert,
 entscheidest du. Kein Konto, kein Einladungscode, kein Dienst dazwischen.
+
+Mitgeteilt werden nicht nur die Zeilen, sondern auch **die Einstellungen des
+Haushalts** – welcher Pegel gelesen wird, der Energieplan, die vereinbarten
+Orte auf der Karte, wie weit im Voraus gewarnt wird. Nicht nur einmal bei der
+Einrichtung, sondern laufend: Wer ändert, hat recht, und der spätere Wert
+gewinnt. Was *dieses Gerät* betrifft – helles oder dunkles Bild, Sprache,
+Benachrichtigungen – reist weiterhin nur einmal mit. Sonst würde der Rechner
+dunkel, weil jemand im Zug das Telefon umgestellt hat.
 
 Jedes Gerät schreibt genau eine Datei und liest alle anderen, sodass zwei
 Personen nie dieselbe Datei beschreiben. Bei gleichzeitiger Änderung
@@ -299,6 +309,15 @@ Nötig ist nur der Name: eine Karte, auf der nichts steht außer „Lena,
 Penicillinallergie", ist es wert. Das sind Gesundheitsdaten, und der
 Bildschirm sagt vor dem ersten Buchstaben, ob der gemeinsame Ordner, über
 den sie wandern, verschlüsselt ist.
+
+**Übersicht mit zwei Ampeln.** Oben auf dem ersten Bildschirm: *Vorrat* gegen
+die Werte des BBK – zehn Tage, 2 l und 2200 kcal je Person und Tag –, und
+*Lage* mit der höchsten amtlichen Warnstufe, die gerade für eure Bereiche
+gilt. Verrechnet werden die beiden nicht: „Vorrat reicht, aber Unwetter" hat
+keine gemeinsame Farbe. Grau heißt „zu wenig eingetragen, um etwas zu sagen",
+nicht rot – eine leere Datenbank ist kein leerer Keller. Und auf der
+Lage-Ampel gibt es kein Grün: Behörden veröffentlichen Warnungen, keine
+Entwarnungen.
 
 **Suchen.** Eine Lupe über die ganze App: Bildschirme, Vorräte,
 Checklistenpunkte und Hausrat. Jeder Treffer sagt, wo er liegt – „Pegel ·
