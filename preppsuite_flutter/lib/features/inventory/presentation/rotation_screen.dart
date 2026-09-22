@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_providers.dart';
@@ -29,59 +30,61 @@ class RotationScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.rotationTitle)),
-      body: itemsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(describeError(l10n, error))),
-        data: (items) {
-          final rotation = buildRotation(items);
-          if (rotation.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Text(
-                  l10n.rotationEmpty,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
+      body: ContentSwap(
+        child: itemsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text(describeError(l10n, error))),
+          data: (items) {
+            final rotation = buildRotation(items);
+            if (rotation.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text(
+                    l10n.rotationEmpty,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                 ),
-              ),
-            );
-          }
-
-          // One flat list with headings rather than three lists, so the
-          // order the queue is in survives on screen — but as a plan of
-          // what each row *is*, not as the widgets themselves. Building
-          // the widgets here cost 170 ms at 300 entries against 12 ms
-          // built on demand, and the queue holds one row per stocked item
-          // with an expiry date.
-          final rows = <_Row>[];
-          RotationUrgency? lastUrgency;
-          for (final entry in rotation) {
-            if (entry.urgency != lastUrgency) {
-              rows.add(_Row.heading(entry.urgency));
-              lastUrgency = entry.urgency;
+              );
             }
-            rows.add(_Row.entry(entry));
-          }
-          rows.add(const _Row.hint());
 
-          return ListView.builder(
-            itemCount: rows.length,
-            itemBuilder: (context, index) {
-              final row = rows[index];
-              return switch (row.kind) {
-                _RowKind.heading => _Heading(
-                  urgency: row.urgency!,
-                  l10n: l10n,
-                ),
-                _RowKind.entry => _RotationTile(
-                  entry: row.entry!,
-                  l10n: l10n,
-                ),
-                _RowKind.hint => _Hint(l10n: l10n),
-              };
-            },
-          );
-        },
+            // One flat list with headings rather than three lists, so the
+            // order the queue is in survives on screen — but as a plan of
+            // what each row *is*, not as the widgets themselves. Building
+            // the widgets here cost 170 ms at 300 entries against 12 ms
+            // built on demand, and the queue holds one row per stocked item
+            // with an expiry date.
+            final rows = <_Row>[];
+            RotationUrgency? lastUrgency;
+            for (final entry in rotation) {
+              if (entry.urgency != lastUrgency) {
+                rows.add(_Row.heading(entry.urgency));
+                lastUrgency = entry.urgency;
+              }
+              rows.add(_Row.entry(entry));
+            }
+            rows.add(const _Row.hint());
+
+            return ListView.builder(
+              itemCount: rows.length,
+              itemBuilder: (context, index) {
+                final row = rows[index];
+                return switch (row.kind) {
+                  _RowKind.heading => _Heading(
+                    urgency: row.urgency!,
+                    l10n: l10n,
+                  ),
+                  _RowKind.entry => _RotationTile(
+                    entry: row.entry!,
+                    l10n: l10n,
+                  ),
+                  _RowKind.hint => _Hint(l10n: l10n),
+                };
+              },
+            );
+          },
+        ),
       ),
     );
   }

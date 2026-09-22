@@ -5,6 +5,7 @@ import 'package:printing/printing.dart';
 import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../../budget/application/missing_equipment_report.dart';
 import '../../household/application/household_providers.dart';
@@ -26,6 +27,16 @@ class ChecklistListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final templatesAsync = ref.watch(checklistTemplatesProvider(householdId));
+
+    // Once for the screen, not once per row. See
+    // [checklistProgressByTemplate] for what it used to cost.
+    final inventory =
+        ref.watch(inventoryItemsProvider(householdId)).value ?? const [];
+    final progress = checklistProgressByTemplate(
+      items:
+          ref.watch(allChecklistItemsProvider(householdId)).value ?? const [],
+      inventoryById: {for (final item in inventory) item.clientId: item},
+    );
 
     // Two tabs rather than two headings down one list: the question
     // "what do I do now" is asked at a different moment from "what
@@ -53,36 +64,39 @@ class ChecklistListScreen extends ConsumerWidget {
             ],
           ),
         ),
-        body: templatesAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) =>
-              Center(child: Text(describeError(l10n, error))),
-          data: (templates) => templates.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Text(
-                      l10n.checklistsEmpty,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ),
-                )
-              : TabBarView(
-                  children: [
-                    for (final kind in ChecklistKind.values)
-                      _GroupedTemplateList(
-                        kind: kind,
-                        templates: [
-                          for (final template in templates)
-                            if (ChecklistKind.fromName(template.kind) == kind)
-                              template,
-                        ],
-                        householdId: householdId,
-                        l10n: l10n,
+        body: ContentSwap(
+          child: templatesAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) =>
+                Center(child: Text(describeError(l10n, error))),
+            data: (templates) => templates.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Text(
+                        l10n.checklistsEmpty,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
-                  ],
-                ),
+                    ),
+                  )
+                : TabBarView(
+                    children: [
+                      for (final kind in ChecklistKind.values)
+                        _GroupedTemplateList(
+                          kind: kind,
+                          progress: progress,
+                          templates: [
+                            for (final template in templates)
+                              if (ChecklistKind.fromName(template.kind) == kind)
+                                template,
+                          ],
+                          householdId: householdId,
+                          l10n: l10n,
+                        ),
+                    ],
+                  ),
+          ),
         ),
         floatingActionButton: Builder(
           // Its own context, so the button can read which tab is open —
@@ -236,12 +250,16 @@ class _GroupedTemplateList extends StatelessWidget {
   const _GroupedTemplateList({
     required this.kind,
     required this.templates,
+    required this.progress,
     required this.householdId,
     required this.l10n,
   });
 
   final ChecklistKind kind;
   final List<ChecklistTemplate> templates;
+
+  /// Worked out once for the whole screen, keyed by template.
+  final Map<String, ({int done, int total})> progress;
   final String householdId;
   final AppLocalizations l10n;
 
@@ -312,6 +330,7 @@ class _GroupedTemplateList extends StatelessWidget {
             for (final template in group)
               _TemplateTile(
                 template: template,
+                progress: progress[template.clientId],
                 householdId: householdId,
                 l10n: l10n,
               ),
@@ -325,21 +344,25 @@ class _GroupedTemplateList extends StatelessWidget {
 class _TemplateTile extends ConsumerWidget {
   const _TemplateTile({
     required this.template,
+    required this.progress,
     required this.householdId,
     required this.l10n,
   });
 
   final ChecklistTemplate template;
+
+  /// This list's share of the screen's one pass. Null where the list has
+  /// no items, which is a list with nothing to report rather than one
+  /// that is nought out of nought.
+  final ({int done, int total})? progress;
+
   final String householdId;
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final itemsAsync = ref.watch(checklistItemsProvider(template.clientId));
-    final inventory =
-        ref.watch(inventoryItemsProvider(householdId)).value ?? const [];
-    final inventoryById = {for (final item in inventory) item.clientId: item};
-
+    // Watches nothing. It is handed its figures and reads the controller
+    // only when one of its menu items is chosen.
     return ListTile(
       leading: Icon(
         checklistCategoryIcon(ChecklistCategory.fromName(template.category)),
@@ -357,17 +380,9 @@ class _TemplateTile extends ConsumerWidget {
             ),
         ],
       ),
-      subtitle: itemsAsync.maybeWhen(
-        data: (items) => Text(
-          l10n.checklistProgress(
-            items
-                .where((i) => isChecklistItemSatisfied(i, inventoryById))
-                .length,
-            items.length,
-          ),
-        ),
-        orElse: () => null,
-      ),
+      subtitle: progress == null
+          ? null
+          : Text(l10n.checklistProgress(progress!.done, progress!.total)),
       trailing: PopupMenuButton<_TemplateAction>(
         onSelected: (action) {
           final controller = ref.read(

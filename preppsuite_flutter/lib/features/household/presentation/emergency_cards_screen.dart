@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../../sharing/presentation/folder_encryption_section.dart';
 import '../application/card_people.dart';
@@ -24,32 +25,34 @@ class EmergencyCardsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.emergencyCardsTitle)),
-      body: membersAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(describeError(l10n, error))),
-        data: (members) => ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-          children: [
-            Text(l10n.emergencyCardsIntro, style: theme.textTheme.bodyMedium),
-            const SizedBox(height: 12),
-            const _HealthDataNotice(),
-            const SizedBox(height: 12),
-            if (members.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                  l10n.emergencyCardsEmpty,
-                  style: theme.textTheme.bodyLarge,
-                ),
-              )
-            else
-              for (final member in members)
-                _MemberCard(
-                  member: member,
-                  householdId: householdId,
-                  l10n: l10n,
-                ),
-          ],
+      body: ContentSwap(
+        child: membersAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text(describeError(l10n, error))),
+          data: (members) => ListView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+            children: [
+              Text(l10n.emergencyCardsIntro, style: theme.textTheme.bodyMedium),
+              const SizedBox(height: 12),
+              const _HealthDataNotice(),
+              const SizedBox(height: 12),
+              if (members.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: Text(
+                    l10n.emergencyCardsEmpty,
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                )
+              else
+                for (final member in members)
+                  _MemberCard(
+                    member: member,
+                    householdId: householdId,
+                    l10n: l10n,
+                  ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(

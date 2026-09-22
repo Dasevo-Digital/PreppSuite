@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/article_viewer.dart';
 import '../application/article_viewer_choice.dart';
@@ -302,28 +303,30 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     }
 
     final results = ref.watch(knowledgeSearchProvider(_query));
-    return results.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => _Centered(
-        child: Text(describeError(l10n, error)),
-      ),
-      data: (matches) {
-        if (matches.isEmpty) {
-          return _Centered(text: l10n.knowledgeNoResults(_query.trim()));
-        }
+    return ContentSwap(
+      child: results.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => _Centered(
+          child: Text(describeError(l10n, error)),
+        ),
+        data: (matches) {
+          if (matches.isEmpty) {
+            return _Centered(text: l10n.knowledgeNoResults(_query.trim()));
+          }
 
-        return ListView.builder(
-          itemCount: matches.length,
-          itemBuilder: (context, index) {
-            final entry = matches[index];
-            return ListTile(
-              leading: const Icon(Icons.article_outlined),
-              title: Text(entry.title),
-              onTap: () => _open(l10n, state, entry),
-            );
-          },
-        );
-      },
+          return ListView.builder(
+            itemCount: matches.length,
+            itemBuilder: (context, index) {
+              final entry = matches[index];
+              return ListTile(
+                leading: const Icon(Icons.article_outlined),
+                title: Text(entry.title),
+                onTap: () => _open(l10n, state, entry),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 

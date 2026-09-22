@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../../household/application/household_providers.dart';
 import '../application/inventory_category_l10n.dart';
@@ -218,36 +219,38 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
             ),
           ),
         ],
-        body: itemsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) =>
-              Center(child: Text(describeError(l10n, error))),
-          data: (allItems) {
-            final items = filterInventory(
-              allItems,
-              query: _searchController.text,
-              filter: _filter,
-            );
-            return items.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Text(
-                        allItems.isEmpty
-                            ? l10n.inventoryEmpty
-                            : l10n.inventoryNoMatches,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge,
+        body: ContentSwap(
+          child: itemsAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stackTrace) =>
+                Center(child: Text(describeError(l10n, error))),
+            data: (allItems) {
+              final items = filterInventory(
+                allItems,
+                query: _searchController.text,
+                filter: _filter,
+              );
+              return items.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Text(
+                          allItems.isEmpty
+                              ? l10n.inventoryEmpty
+                              : l10n.inventoryNoMatches,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
                       ),
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 96),
-                    itemCount: items.length,
-                    itemBuilder: (context, index) =>
-                        _InventoryTile(item: items[index], l10n: l10n),
-                  );
-          },
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 96),
+                      itemCount: items.length,
+                      itemBuilder: (context, index) =>
+                          _InventoryTile(item: items[index], l10n: l10n),
+                    );
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(

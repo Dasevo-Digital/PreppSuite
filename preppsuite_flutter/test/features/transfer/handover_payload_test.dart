@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/sharing/application/carried_settings.dart';
 import 'package:preppsuite_flutter/features/sharing/application/device_snapshot.dart';
+import 'package:preppsuite_flutter/features/sharing/application/folder_crypto.dart';
 import 'package:preppsuite_flutter/features/transfer/application/handover_payload.dart';
 import 'package:preppsuite_flutter/features/transfer/application/handover_photos.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
@@ -98,5 +99,43 @@ void main() {
     expect(there.photos, hasLength(1));
     expect(there.photos.single.name, 'a3f2.jpg');
     expect(there.snapshot.inventoryItems, hasLength(1));
+  });
+
+  group('sealing it away from the screen', () {
+    // Encoding and encrypting a household with photographs is seconds of
+    // work that cannot be interrupted, so it happens on an isolate. That
+    // only works if everything in the payload can be sent to one -- which
+    // is a runtime property, not something the compiler checks.
+    final key = FolderKey(Uint8List.fromList(List.filled(32, 7)));
+
+    test('a payload with a picture in it survives the round trip', () async {
+      final there = (await HandoverPayload.unseal(
+        await full.seal(key),
+        key,
+      )).payload!;
+
+      expect(there.snapshot.householdId, 'home');
+      expect(there.household.profile?.name, 'Zuhause');
+      expect(there.photos.single.bytes, [1, 2, 3, 4]);
+      expect(there.knownPhotos, {'b7c1.jpg'});
+    });
+
+    test('a body that will not open is told from one that opens wrong', () {
+      // The host answers these differently: the first never saw the
+      // screen, the second did and belongs to another household.
+      final other = FolderKey(Uint8List.fromList(List.filled(32, 9)));
+
+      return expectLater(
+        full.seal(key).then((body) => HandoverPayload.unseal(body, other)),
+        completion((opened: false, payload: null)),
+      );
+    });
+
+    test('something that is not an envelope at all does not open', () async {
+      expect(
+        (await HandoverPayload.unseal('nicht einmal JSON', key)).opened,
+        isFalse,
+      );
+    });
   });
 }

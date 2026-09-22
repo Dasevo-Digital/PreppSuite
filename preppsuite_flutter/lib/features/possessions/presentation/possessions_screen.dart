@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
+import '../../../core/content_swap.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
@@ -47,89 +49,91 @@ class PossessionsScreen extends ConsumerWidget {
         icon: const Icon(Icons.add),
         label: Text(l10n.possessionAdd),
       ),
-      body: rows.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('$error')),
-        data: (data) {
-          if (data.isEmpty) {
-            // Centred while it fits and scrollable when it does not. At
-            // twice the system font size the explanation is taller than a
-            // phone, and a plain centred Column clips it -- silently, in
-            // a release build.
-            return LayoutBuilder(
-              builder: (context, constraints) => SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight - 48,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        l10n.possessionsEmpty,
-                        style: theme.textTheme.titleMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(l10n.possessionsWhy, textAlign: TextAlign.center),
-                    ],
+      body: ContentSwap(
+        child: rows.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text('$error')),
+          data: (data) {
+            if (data.isEmpty) {
+              // Centred while it fits and scrollable when it does not. At
+              // twice the system font size the explanation is taller than a
+              // phone, and a plain centred Column clips it -- silently, in
+              // a release build.
+              return LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 48,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          l10n.possessionsEmpty,
+                          style: theme.textTheme.titleMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(l10n.possessionsWhy, textAlign: TextAlign.center),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          }
+              );
+            }
 
-          final grouped = byRoom(data);
-          final totals = totalCentsByCurrency(data);
-          final missing = withoutPrice(data);
+            final grouped = byRoom(data);
+            final totals = totalCentsByCurrency(data);
+            final missing = withoutPrice(data);
 
-          return AdaptiveColumns(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
-            blocks: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(l10n.possessionsWhy),
-                  const SizedBox(height: 12),
-                  for (final entry in totals.entries)
-                    Text(
-                      l10n.possessionsTotal(
-                        _money(l10n, entry.value, entry.key),
+            return AdaptiveColumns(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 88),
+              blocks: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.possessionsWhy),
+                    const SizedBox(height: 12),
+                    for (final entry in totals.entries)
+                      Text(
+                        l10n.possessionsTotal(
+                          _money(l10n, entry.value, entry.key),
+                        ),
+                        style: theme.textTheme.titleMedium,
                       ),
+                    if (missing > 0) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.possessionsWithoutPrice(missing),
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ],
+                ),
+                // A section and not a Column: at desktop width a room's name
+                // must not end up in one column with its contents in the
+                // next, but on a phone a room of two hundred things is one
+                // block the list has to build whole. See [AdaptiveSection].
+                for (final entry in grouped.entries)
+                  AdaptiveSection(
+                    heading: Text(
+                      entry.key ?? l10n.possessionsNoRoom,
                       style: theme.textTheme.titleMedium,
                     ),
-                  if (missing > 0) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.possessionsWithoutPrice(missing),
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ],
-              ),
-              // A section and not a Column: at desktop width a room's name
-              // must not end up in one column with its contents in the
-              // next, but on a phone a room of two hundred things is one
-              // block the list has to build whole. See [AdaptiveSection].
-              for (final entry in grouped.entries)
-                AdaptiveSection(
-                  heading: Text(
-                    entry.key ?? l10n.possessionsNoRoom,
-                    style: theme.textTheme.titleMedium,
+                    rows: [
+                      for (final row in entry.value)
+                        _PossessionTile(
+                          row: row,
+                          l10n: l10n,
+                          householdId: householdId,
+                        ),
+                    ],
                   ),
-                  rows: [
-                    for (final row in entry.value)
-                      _PossessionTile(
-                        row: row,
-                        l10n: l10n,
-                        householdId: householdId,
-                      ),
-                  ],
-                ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

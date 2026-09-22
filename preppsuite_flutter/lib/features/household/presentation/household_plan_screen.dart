@@ -5,6 +5,7 @@ import 'package:printing/printing.dart';
 
 import '../application/household_member_controller.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../application/emergency_plan_report.dart';
 import '../application/household_providers.dart';
@@ -86,74 +87,79 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
             ),
         ],
       ),
-      body: planAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(describeError(l10n, error))),
-        data: (plan) {
-          _fillOnce(plan);
+      body: ContentSwap(
+        child: planAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text(describeError(l10n, error))),
+          data: (plan) {
+            _fillOnce(plan);
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-            children: [
-              Text(l10n.householdPlanIntro, style: theme.textTheme.bodyMedium),
-              const SizedBox(height: 20),
-              _Field(
-                controller: _field('near'),
-                label: l10n.householdPlanMeetingNear,
-                hint: l10n.householdPlanMeetingNearHint,
-                icon: Icons.place_outlined,
-              ),
-              _Field(
-                controller: _field('far'),
-                label: l10n.householdPlanMeetingFar,
-                hint: l10n.householdPlanMeetingFarHint,
-                icon: Icons.alt_route,
-              ),
-              _Field(
-                controller: _field('name'),
-                label: l10n.householdPlanContactName,
-                hint: l10n.householdPlanContactNameHint,
-                icon: Icons.person_outline,
-              ),
-              _Field(
-                controller: _field('phone'),
-                label: l10n.householdPlanContactPhone,
-                icon: Icons.phone_outlined,
-                keyboardType: TextInputType.phone,
-              ),
-              _Field(
-                controller: _field('contactPoint'),
-                label: l10n.householdPlanContactPoint,
-                hint: l10n.householdPlanContactPointHint,
-                icon: Icons.local_police_outlined,
-              ),
-              _Field(
-                controller: _field('kit'),
-                label: l10n.householdPlanKitLocation,
-                hint: l10n.householdPlanKitLocationHint,
-                icon: Icons.backpack_outlined,
-              ),
-              _Field(
-                controller: _field('shutoff'),
-                label: l10n.householdPlanShutoff,
-                icon: Icons.power_settings_new,
-              ),
-              _Field(
-                controller: _field('notes'),
-                label: l10n.householdPlanNotes,
-                icon: Icons.notes_outlined,
-                maxLines: 4,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.householdPlanShared,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+              children: [
+                Text(
+                  l10n.householdPlanIntro,
+                  style: theme.textTheme.bodyMedium,
                 ),
-              ),
-            ],
-          );
-        },
+                const SizedBox(height: 20),
+                _Field(
+                  controller: _field('near'),
+                  label: l10n.householdPlanMeetingNear,
+                  hint: l10n.householdPlanMeetingNearHint,
+                  icon: Icons.place_outlined,
+                ),
+                _Field(
+                  controller: _field('far'),
+                  label: l10n.householdPlanMeetingFar,
+                  hint: l10n.householdPlanMeetingFarHint,
+                  icon: Icons.alt_route,
+                ),
+                _Field(
+                  controller: _field('name'),
+                  label: l10n.householdPlanContactName,
+                  hint: l10n.householdPlanContactNameHint,
+                  icon: Icons.person_outline,
+                ),
+                _Field(
+                  controller: _field('phone'),
+                  label: l10n.householdPlanContactPhone,
+                  icon: Icons.phone_outlined,
+                  keyboardType: TextInputType.phone,
+                ),
+                _Field(
+                  controller: _field('contactPoint'),
+                  label: l10n.householdPlanContactPoint,
+                  hint: l10n.householdPlanContactPointHint,
+                  icon: Icons.local_police_outlined,
+                ),
+                _Field(
+                  controller: _field('kit'),
+                  label: l10n.householdPlanKitLocation,
+                  hint: l10n.householdPlanKitLocationHint,
+                  icon: Icons.backpack_outlined,
+                ),
+                _Field(
+                  controller: _field('shutoff'),
+                  label: l10n.householdPlanShutoff,
+                  icon: Icons.power_settings_new,
+                ),
+                _Field(
+                  controller: _field('notes'),
+                  label: l10n.householdPlanNotes,
+                  icon: Icons.notes_outlined,
+                  maxLines: 4,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.householdPlanShared,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _saving ? null : () => _save(l10n),

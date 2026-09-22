@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../../household/application/household_providers.dart';
 import '../../inventory/application/inventory_category_l10n.dart';
@@ -33,35 +34,37 @@ class BudgetListScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: entriesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) =>
-            Center(child: Text(describeError(l10n, error))),
-        data: (entries) => entries.isEmpty
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Text(
-                    l10n.budgetEmpty,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ),
-              )
-            : Column(
-                children: [
-                  _TotalCard(entries: entries, l10n: l10n),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: entries.length,
-                      itemBuilder: (context, index) => _EntryTile(
-                        entry: entries[index],
-                        householdId: householdId,
-                      ),
+      body: ContentSwap(
+        child: entriesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) =>
+              Center(child: Text(describeError(l10n, error))),
+          data: (entries) => entries.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Text(
+                      l10n.budgetEmpty,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ),
-                ],
-              ),
+                )
+              : Column(
+                  children: [
+                    _TotalCard(entries: entries, l10n: l10n),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: entries.length,
+                        itemBuilder: (context, index) => _EntryTile(
+                          entry: entries[index],
+                          householdId: householdId,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.of(context).push(

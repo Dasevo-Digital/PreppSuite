@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../household/application/household_providers.dart';
 import '../application/inventory_providers.dart';
 import '../application/shopping_list.dart';
@@ -42,44 +43,46 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.shoppingListTitle)),
-      body: itemsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(describeError(l10n, error))),
-        data: (items) {
-          final list = buildShoppingList(
-            items: items,
-            days: widget.days,
-            household: SupplyHousehold(
-              adults: profile?.personCount ?? 1,
-              children: profile?.children ?? 0,
-              dogs: profile?.dogs ?? 0,
-              cats: profile?.cats ?? 0,
-            ),
-          );
+      body: ContentSwap(
+        child: itemsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(child: Text(describeError(l10n, error))),
+          data: (items) {
+            final list = buildShoppingList(
+              items: items,
+              days: widget.days,
+              household: SupplyHousehold(
+                adults: profile?.personCount ?? 1,
+                children: profile?.children ?? 0,
+                dogs: profile?.dogs ?? 0,
+                cats: profile?.cats ?? 0,
+              ),
+            );
 
-          // Built by index rather than as a list of children. The items
-          // section used to be a `Column` inside this `ListView`, and a
-          // Column realises and lays out every child: at 300 entries —
-          // which is an ordinary number for a household that stocks up —
-          // that measured 201 ms against 12 ms, with all 300 tiles in the
-          // element tree instead of the nine on screen.
-          final entries = list.entries;
-          // The card, the heading, the entries (or the empty line), the
-          // footnote.
-          final rows = 3 + (entries.isEmpty ? 1 : entries.length);
+            // Built by index rather than as a list of children. The items
+            // section used to be a `Column` inside this `ListView`, and a
+            // Column realises and lays out every child: at 300 entries —
+            // which is an ordinary number for a household that stocks up —
+            // that measured 201 ms against 12 ms, with all 300 tiles in the
+            // element tree instead of the nine on screen.
+            final entries = list.entries;
+            // The card, the heading, the entries (or the empty line), the
+            // footnote.
+            final rows = 3 + (entries.isEmpty ? 1 : entries.length);
 
-          return ListView.builder(
-            padding: const EdgeInsets.only(bottom: 88),
-            itemCount: rows,
-            itemBuilder: (context, index) {
-              if (index == 0) return _TargetCard(list: list, l10n: l10n);
-              if (index == 1) return _ItemsHeading(l10n: l10n);
-              if (index == rows - 1) return _MinimumsNote(l10n: l10n);
-              if (entries.isEmpty) return _ItemsEmpty(l10n: l10n);
-              return _ShortfallTile(entry: entries[index - 2], l10n: l10n);
-            },
-          );
-        },
+            return ListView.builder(
+              padding: const EdgeInsets.only(bottom: 88),
+              itemCount: rows,
+              itemBuilder: (context, index) {
+                if (index == 0) return _TargetCard(list: list, l10n: l10n);
+                if (index == 1) return _ItemsHeading(l10n: l10n);
+                if (index == rows - 1) return _MinimumsNote(l10n: l10n);
+                if (entries.isEmpty) return _ItemsEmpty(l10n: l10n);
+                return _ShortfallTile(entry: entries[index - 2], l10n: l10n);
+              },
+            );
+          },
+        ),
       ),
       floatingActionButton: itemsAsync.maybeWhen(
         data: (items) {

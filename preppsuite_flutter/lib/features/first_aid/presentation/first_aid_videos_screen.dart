@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../downloads/application/byte_size.dart';
 import '../application/first_aid_providers.dart';
 import '../application/first_aid_video_pack.dart';
@@ -62,10 +63,12 @@ class _FirstAidVideosScreenState extends ConsumerState<FirstAidVideosScreen> {
           Text(l10n.firstAidVideoPackWhy),
           if (download.isRunning || download.finished)
             _Progress(state: download, l10n: l10n),
-          installed.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Text('$error'),
-            data: (state) => _Installed(state: state, l10n: l10n),
+          ContentSwap(
+            child: installed.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Text('$error'),
+              data: (state) => _Installed(state: state, l10n: l10n),
+            ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

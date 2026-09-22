@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:isolate';
 
 import '../../sharing/application/carried_settings.dart';
+import '../../sharing/application/folder_crypto.dart';
 import '../../sharing/application/device_snapshot.dart';
 import 'handover_photos.dart';
 
@@ -41,6 +43,42 @@ class HandoverPayload {
     'household': household.toJson(),
     'photos': [for (final photo in photos) photo.toJson()],
     'knownPhotos': knownPhotos.toList()..sort(),
+  });
+
+  /// [encode], sealed under [key], off the thread that draws the screen.
+  ///
+  /// Both halves are expensive and neither is interruptible. Twenty
+  /// megabytes of photos become twenty-seven of base64 inside a
+  /// thirty-five megabyte JSON string; AES-GCM here is plain Dart, which
+  /// moves tens of megabytes a second rather than hundreds. Together
+  /// that is seconds, and `async` does not help with any of it — an
+  /// `await` on work that never yields is the same freeze with extra
+  /// steps.
+  ///
+  /// The isolate is handed the payload and copies it, which costs one
+  /// pass over the bytes against the several the encoding itself makes.
+  /// It is also what keeps the progress indicator turning: a handover
+  /// that appears to have hung is one somebody cancels halfway.
+  Future<String> seal(FolderKey key) =>
+      Isolate.run(() => encryptForFolder(encode(), key));
+
+  /// The other direction, and the same reason.
+  ///
+  /// It runs on the device being set up, which is the one staring at the
+  /// screen with nothing else to look at.
+  ///
+  /// The two ways this fails are kept apart, because the host answers
+  /// them differently: a body that will not open belongs to somebody on
+  /// the network who never saw the screen, and one that opens into
+  /// something else is a device that did. Collapsing them would answer
+  /// "forbidden" to a household that is merely mismatched.
+  static Future<({bool opened, HandoverPayload? payload})> unseal(
+    String raw,
+    FolderKey key,
+  ) => Isolate.run(() async {
+    final plain = await decryptFromFolder(raw, key);
+    if (plain == null) return (opened: false, payload: null);
+    return (opened: true, payload: decode(plain));
   });
 
   /// Null only when there is no readable snapshot in [raw].

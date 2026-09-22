@@ -108,6 +108,9 @@ void main() {
           checklistTemplatesProvider(
             householdId,
           ).overrideWith((ref) => Stream.value(const [])),
+          allChecklistItemsProvider(
+            householdId,
+          ).overrideWith((ref) => Stream.value(const [])),
           householdMembersProvider(
             householdId,
           ).overrideWith((ref) => Stream.value(const [])),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../application/checklist_controller.dart';
 import '../application/checklist_providers.dart';
@@ -60,78 +61,80 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
       body: Column(
         children: [
           Expanded(
-            child: itemsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stackTrace) =>
-                  Center(child: Text(describeError(l10n, error))),
-              data: (items) => ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  final linked = inventoryById[item.linkedInventoryItemId];
-                  final complete = isChecklistItemSatisfied(
-                    item,
-                    inventoryById,
-                  );
-                  final supplied = complete && !item.isChecked;
-                  return CheckboxListTile(
-                    value: complete,
-                    onChanged: supplied
-                        ? null
-                        : (_) => controller.toggleItem(item),
-                    title: Text(
-                      item.title,
-                      style: complete
-                          ? const TextStyle(
-                              decoration: TextDecoration.lineThrough,
-                            )
-                          : null,
-                    ),
-                    subtitle: linked == null
-                        ? null
-                        : Text(
-                            l10n.checklistLinkedStock(
-                              linked.name,
-                              linked.quantity,
-                              linked.unit,
+            child: ContentSwap(
+              child: itemsAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stackTrace) =>
+                    Center(child: Text(describeError(l10n, error))),
+                data: (items) => ListView.builder(
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    final linked = inventoryById[item.linkedInventoryItemId];
+                    final complete = isChecklistItemSatisfied(
+                      item,
+                      inventoryById,
+                    );
+                    final supplied = complete && !item.isChecked;
+                    return CheckboxListTile(
+                      value: complete,
+                      onChanged: supplied
+                          ? null
+                          : (_) => controller.toggleItem(item),
+                      title: Text(
+                        item.title,
+                        style: complete
+                            ? const TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                              )
+                            : null,
+                      ),
+                      subtitle: linked == null
+                          ? null
+                          : Text(
+                              l10n.checklistLinkedStock(
+                                linked.name,
+                                linked.quantity,
+                                linked.unit,
+                              ),
                             ),
-                          ),
-                    secondary: PopupMenuButton<_ItemAction>(
-                      tooltip: l10n.moreActions,
-                      onSelected: (action) async {
-                        switch (action) {
-                          case _ItemAction.link:
-                            final id = await _chooseInventoryItem(
-                              context,
-                              inventory,
-                              item.linkedInventoryItemId,
-                              l10n,
-                            );
-                            if (id != null) {
-                              await controller.linkInventoryItem(
-                                item,
-                                id == _unlinkStock ? null : id,
+                      secondary: PopupMenuButton<_ItemAction>(
+                        tooltip: l10n.moreActions,
+                        onSelected: (action) async {
+                          switch (action) {
+                            case _ItemAction.link:
+                              final id = await _chooseInventoryItem(
+                                context,
+                                inventory,
+                                item.linkedInventoryItemId,
+                                l10n,
                               );
-                            }
-                            break;
-                          case _ItemAction.delete:
-                            await controller.deleteItem(item);
-                            break;
-                        }
-                      },
-                      itemBuilder: (_) => [
-                        PopupMenuItem(
-                          value: _ItemAction.link,
-                          child: Text(l10n.checklistLinkStockAction),
-                        ),
-                        PopupMenuItem(
-                          value: _ItemAction.delete,
-                          child: Text(l10n.deleteItemAction(item.title)),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                              if (id != null) {
+                                await controller.linkInventoryItem(
+                                  item,
+                                  id == _unlinkStock ? null : id,
+                                );
+                              }
+                              break;
+                            case _ItemAction.delete:
+                              await controller.deleteItem(item);
+                              break;
+                          }
+                        },
+                        itemBuilder: (_) => [
+                          PopupMenuItem(
+                            value: _ItemAction.link,
+                            child: Text(l10n.checklistLinkStockAction),
+                          ),
+                          PopupMenuItem(
+                            value: _ItemAction.delete,
+                            child: Text(l10n.deleteItemAction(item.title)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
           ),

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
 import '../../../model/household_profile.dart';
@@ -94,10 +95,12 @@ class _WarningSituationMapScreenState
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.warningSituationMapTitle)),
-      body: warnings.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: Text(l10n.warningSituationMapFailed)),
-        data: (all) => _body(context, l10n, all),
+      body: ContentSwap(
+        child: warnings.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => Center(child: Text(l10n.warningSituationMapFailed)),
+          data: (all) => _body(context, l10n, all),
+        ),
       ),
     );
   }

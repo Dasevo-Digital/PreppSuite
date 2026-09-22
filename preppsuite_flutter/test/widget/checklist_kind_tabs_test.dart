@@ -50,9 +50,9 @@ void main() {
           checklistTemplatesProvider(
             householdId,
           ).overrideWith((ref) => Stream.value(templates)),
-          checklistItemsProvider.overrideWith(
-            (ref, String templateId) => Stream.value(const []),
-          ),
+          allChecklistItemsProvider(
+            householdId,
+          ).overrideWith((ref) => Stream.value(const [])),
           inventoryItemsProvider(
             householdId,
           ).overrideWith((ref) => Stream.value(const [])),

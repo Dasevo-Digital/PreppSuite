@@ -231,8 +231,8 @@ class LocalHandoverHost {
         }
 
         final raw = await _readRequest(request);
-        final plain = await decryptFromFolder(raw, invitation.key);
-        if (plain == null) {
+        final read = await HandoverPayload.unseal(raw, invitation.key);
+        if (!read.opened) {
           // Wrong key: somebody on the network who did not see the
           // screen. Nothing to explain to them.
           request.response.statusCode = HttpStatus.forbidden;
@@ -240,7 +240,7 @@ class LocalHandoverHost {
           continue;
         }
 
-        final incoming = HandoverPayload.decode(plain);
+        final incoming = read.payload;
         if (incoming == null || incoming.snapshot.householdId != householdId) {
           request.response.statusCode = HttpStatus.conflict;
           await request.response.close();
@@ -273,7 +273,7 @@ class LocalHandoverHost {
             skip: incoming.knownPhotos,
           ),
         );
-        final body = await encryptForFolder(answer.encode(), invitation.key);
+        final body = await answer.seal(invitation.key);
         request.response
           ..statusCode = HttpStatus.ok
           ..headers.contentType = ContentType.text
@@ -391,7 +391,7 @@ Future<LocalHandoverResult> joinLocalHandover({
     // What it already holds, so the answer leaves those out.
     knownPhotos: mine,
   );
-  final body = await encryptForFolder(offer.encode(), invitation.key);
+  final body = await offer.seal(invitation.key);
 
   final exchange = exchangeTimeout ?? exchangeTimeoutFor(body.length);
 
@@ -446,8 +446,10 @@ Future<LocalHandoverResult> joinLocalHandover({
         continue;
       }
 
-      final plain = await decryptFromFolder(answer, invitation.key);
-      final theirs = plain == null ? null : HandoverPayload.decode(plain);
+      final theirs = (await HandoverPayload.unseal(
+        answer,
+        invitation.key,
+      )).payload;
       if (theirs == null || theirs.snapshot.householdId != householdId) {
         throw const LocalHandoverException(LocalHandoverFailure.unreadable);
       }

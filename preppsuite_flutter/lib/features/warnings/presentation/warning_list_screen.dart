@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/content_swap.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
@@ -124,114 +126,116 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
     Widget messageWithHint(Widget message) =>
         ListView(children: [?warningDay, message, ?hint]);
 
-    return warningsAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) =>
-          Center(child: Text(describeError(l10n, error))),
-      data: (all) {
-        if (all.isEmpty) {
-          return messageWithHint(
-            Padding(
-              padding: const EdgeInsets.all(32),
-              child: Text(
-                l10n.warningsEmpty,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
+    return ContentSwap(
+      child: warningsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) =>
+            Center(child: Text(describeError(l10n, error))),
+        data: (all) {
+          if (all.isEmpty) {
+            return messageWithHint(
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  l10n.warningsEmpty,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
               ),
-            ),
+            );
+          }
+
+          final warnings = applyWarningFilter(
+            all,
+            filter: _filter,
+            regions: profile.warningFilter,
           );
-        }
 
-        final warnings = applyWarningFilter(
-          all,
-          filter: _filter,
-          regions: profile.warningFilter,
-        );
-
-        if (warnings.isEmpty) {
-          // Distinct from "nothing has come in": one is the feeds being
-          // quiet, the other is this screen hiding what did arrive, and a
-          // list that cannot tell them apart looks broken.
-          return messageWithHint(
-            Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    l10n.warningsEmptyFiltered(all.length),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: _clearFilter,
-                    child: Text(l10n.warningFilterClear),
-                  ),
-                ],
+          if (warnings.isEmpty) {
+            // Distinct from "nothing has come in": one is the feeds being
+            // quiet, the other is this screen hiding what did arrive, and a
+            // list that cannot tell them apart looks broken.
+            return messageWithHint(
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.warningsEmptyFiltered(all.length),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: _clearFilter,
+                      child: Text(l10n.warningFilterClear),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        }
+            );
+          }
 
-        // "Show region-relevant warnings first" — relevance is the
-        // primary key here (unlike the banner, which prioritizes
-        // severity since it only ever shows a single, most-urgent
-        // warning); severity and recency break ties.
-        final sorted = [...warnings]
-          ..sort((a, b) {
-            final relevanceCompare =
-                warningRelevanceRank(
-                  warning: b,
-                  filter: profile.warningFilter,
-                ).compareTo(
+          // "Show region-relevant warnings first" — relevance is the
+          // primary key here (unlike the banner, which prioritizes
+          // severity since it only ever shows a single, most-urgent
+          // warning); severity and recency break ties.
+          final sorted = [...warnings]
+            ..sort((a, b) {
+              final relevanceCompare =
                   warningRelevanceRank(
-                    warning: a,
+                    warning: b,
                     filter: profile.warningFilter,
-                  ),
-                );
-            if (relevanceCompare != 0) return relevanceCompare;
+                  ).compareTo(
+                    warningRelevanceRank(
+                      warning: a,
+                      filter: profile.warningFilter,
+                    ),
+                  );
+              if (relevanceCompare != 0) return relevanceCompare;
 
-            final severityCompare =
-                warningSeverityRank(
-                  warningSeverityFromName(b.severity),
-                ).compareTo(
-                  warningSeverityRank(warningSeverityFromName(a.severity)),
-                );
-            if (severityCompare != 0) return severityCompare;
+              final severityCompare =
+                  warningSeverityRank(
+                    warningSeverityFromName(b.severity),
+                  ).compareTo(
+                    warningSeverityRank(warningSeverityFromName(a.severity)),
+                  );
+              if (severityCompare != 0) return severityCompare;
 
-            return b.sent.compareTo(a.sent);
-          });
+              return b.sent.compareTo(a.sent);
+            });
 
-        // Both are context for the whole list rather than entries in it,
-        // and the notice goes first: it explains what the list may be
-        // about to contain, while the count is about the filter.
-        final leading = <Widget>[
-          ?warningDay,
-          // WarningFilter has isEmpty and no isNotEmpty.
-          if (!_filter.isEmpty)
-            _ResultCount(
-              shown: sorted.length,
-              total: all.length,
-              onClear: _clearFilter,
-            ),
-        ];
+          // Both are context for the whole list rather than entries in it,
+          // and the notice goes first: it explains what the list may be
+          // about to contain, while the count is about the filter.
+          final leading = <Widget>[
+            ?warningDay,
+            // WarningFilter has isEmpty and no isNotEmpty.
+            if (!_filter.isEmpty)
+              _ResultCount(
+                shown: sorted.length,
+                total: all.length,
+                onClear: _clearFilter,
+              ),
+          ];
 
-        // Columns rather than one stretched list: a warning tile at
-        // desktop width puts its headline at one edge and its time at the
-        // other. Everything is built rather than only what is on screen,
-        // which is affordable here and nowhere else in the app -- this
-        // list is what the subscribed regions currently have out, tens of
-        // entries at the very worst, not a household's whole inventory.
-        return AdaptiveColumns(
-          blocks: [
-            ...leading,
-            for (final warning in sorted)
-              _WarningTile(warning: warning, l10n: l10n),
-            ?hint,
-          ],
-        );
-      },
+          // Columns rather than one stretched list: a warning tile at
+          // desktop width puts its headline at one edge and its time at the
+          // other. Everything is built rather than only what is on screen,
+          // which is affordable here and nowhere else in the app -- this
+          // list is what the subscribed regions currently have out, tens of
+          // entries at the very worst, not a household's whole inventory.
+          return AdaptiveColumns(
+            blocks: [
+              ...leading,
+              for (final warning in sorted)
+                _WarningTile(warning: warning, l10n: l10n),
+              ?hint,
+            ],
+          );
+        },
+      ),
     );
   }
 }

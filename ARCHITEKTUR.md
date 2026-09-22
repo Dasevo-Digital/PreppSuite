@@ -1508,6 +1508,65 @@ Die Offlinekarte wurde immer schon verwendet, wenn eine da war -- nur stand
 das nirgends.
 
 
+### Bewegung gibt es nur an den Nahtstellen
+
+Bis 1.9.8 stand in der App keine einzige Animation -- sechzehn Arten
+gesucht, null gefunden. Jeder Ladezustand sprang in einem Bild vom Kreisel
+auf die fertige Seite, und ein harter Schnitt liest sich wie ein Fehler,
+nicht wie ein Abschluss.
+
+Es gibt genau ein Widget dafür, `core/content_swap.dart`, und es sitzt an
+den `AsyncValue`-Nahtstellen: Kreisel wird Liste, Liste wird leerer
+Zustand. Es wechselt nur, wenn sich die *Art* des Inhalts ändert, weil
+`AnimatedSwitcher` Widgets so vergleicht, wie das Framework es tut. Eine
+Liste, die eine Zeile dazubekommt, ist dieselbe Art Sache und bleibt
+unangetastet -- sonst würde bei jedem Datenbank-Tick die Scrollposition
+gegen eine Überblendung kämpfen.
+
+Zwei Regeln für alles, was dazukommt: Es respektiert
+`MediaQuery.disableAnimationsOf` -- wer sein Gerät gebeten hat, nichts zu
+bewegen, bekommt die frühere Bild-zu-Bild-Änderung, nicht eine kürzere
+Fassung dieser. Und es bleibt unter 250 ms; darüber liest sich eine
+Überblendung als langsame App, was das Gegenteil des Zwecks ist.
+
+### Was eine Liste je Zeile kostet
+
+Die Checklistenansicht hat lange je Kachel einen eigenen Strom ihrer
+eigenen Punkte geöffnet *und* aus dem kompletten Inventar eine Map neu
+gebaut, um darin nachzuschlagen. Bei neunzehn eingebauten Listen sind das
+neunzehn Datenbank-Abonnements für einen Bildschirm und neunzehn Kopien
+derselben Inventar-Map, die bei jedem Tick weggeworfen werden. Die Map ist
+die teure Hälfte, weil sie so groß ist wie die ganze Vorratskammer und
+nicht wie die Liste, die gerade gezeichnet wird.
+
+`checklistProgressByTemplate` rechnet es einmal für den ganzen Bildschirm
+aus, und die Kachel bekommt ihre Zahlen gereicht. Die Regel dahinter:
+**ein `ref.watch` in einem Listenelement ist ein `ref.watch` mal Anzahl der
+Zeilen.** `allChecklistItemsProvider` existierte bereits genau dafür und
+wird von drei anderen Bildschirmen benutzt.
+
+### `async` verschiebt nichts
+
+`HandoverPayload.seal` und `.unseal` laufen auf einem Isolate, und das ist
+kein Feinschliff. Zwanzig Megabyte Fotos werden zu siebenundzwanzig
+base64 in einem fünfunddreißig Megabyte großen JSON-String; AES-GCM ist
+hier reines Dart und bewegt zehner- statt hunderter-Megabyte je Sekunde.
+Zusammen sind das Sekunden, in denen nichts auf dem Bildschirm reagiert --
+und ein `await` auf Arbeit, die nie nachgibt, ist genau derselbe
+Stillstand mit einem Schlüsselwort davor.
+
+Das Isolate bekommt die Nutzlast kopiert, was einen Durchgang über die
+Bytes kostet gegen die mehreren, die das Kodieren ohnehin macht. Es ist
+auch das, was den Fortschrittsbalken weiterdrehen lässt: Eine Übergabe,
+die hängen zu bleiben scheint, ist eine, die jemand auf halbem Weg
+abbricht.
+
+Beide Richtungen halten ihre zwei Fehlerfälle auseinander: Was sich nicht
+öffnen lässt, gehört jemandem im Netz, der den Bildschirm nie gesehen hat
+(403); was sich öffnet und etwas anderes enthält, gehört zu einem anderen
+Haushalt (409).
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,
