@@ -3360,6 +3360,59 @@ class AppLocalizationsDe extends AppLocalizations {
       'Öffnet die Kiwix-Bibliothek mit einer passenden Suche. Prüfe dort Sprache, Ausgabe und Speicherbedarf vor dem Download.';
 
   @override
+  String get statusSupplyTitle => 'Vorrat';
+
+  @override
+  String statusSupplyCovered(int days) {
+    return 'Reicht $days Tage';
+  }
+
+  @override
+  String statusSupplyShort(int days, int target) {
+    return 'Reicht $days von $target Tagen';
+  }
+
+  @override
+  String get statusSupplyUnknown => 'Noch nichts eingetragen';
+
+  @override
+  String statusSupplyBasis(int target) {
+    return 'Gegen die Empfehlung des BBK: $target Tage, 2 l und 2200 kcal je Person und Tag.';
+  }
+
+  @override
+  String statusSupplyUncounted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Posten sind nicht mitgerechnet',
+      one: 'Ein Posten ist nicht mitgerechnet',
+    );
+    return '$_temp0 – die Einheit nennt kein Maß.';
+  }
+
+  @override
+  String get statusSituationTitle => 'Lage';
+
+  @override
+  String get statusSituationQuiet => 'Keine amtliche Warnung';
+
+  @override
+  String get statusSituationQuietHint =>
+      'Behörden veröffentlichen Warnungen, keine Entwarnungen. Dass keine vorliegt, heißt nicht, dass nichts ist.';
+
+  @override
+  String statusSituationActive(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Warnungen',
+      one: 'Eine Warnung',
+    );
+    return '$_temp0 für euren Bereich';
+  }
+
+  @override
   String get searchTitle => 'Suchen';
 
   @override

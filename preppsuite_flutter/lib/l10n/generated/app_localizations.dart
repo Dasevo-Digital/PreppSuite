@@ -5690,6 +5690,66 @@ abstract class AppLocalizations {
   /// **'Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.'**
   String get knowledgeApolloDownloadHint;
 
+  /// No description provided for @statusSupplyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplies'**
+  String get statusSupplyTitle;
+
+  /// No description provided for @statusSupplyCovered.
+  ///
+  /// In en, this message translates to:
+  /// **'Lasts {days} days'**
+  String statusSupplyCovered(int days);
+
+  /// No description provided for @statusSupplyShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Lasts {days} of {target} days'**
+  String statusSupplyShort(int days, int target);
+
+  /// No description provided for @statusSupplyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing recorded yet'**
+  String get statusSupplyUnknown;
+
+  /// No description provided for @statusSupplyBasis.
+  ///
+  /// In en, this message translates to:
+  /// **'Against the BBK’s own figures: {target} days, 2 l and 2200 kcal per person per day.'**
+  String statusSupplyBasis(int target);
+
+  /// No description provided for @statusSupplyUncounted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One entry is not counted} other{{count} entries are not counted}} — its unit names no measure.'**
+  String statusSupplyUncounted(int count);
+
+  /// No description provided for @statusSituationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Situation'**
+  String get statusSituationTitle;
+
+  /// No description provided for @statusSituationQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'No official warning'**
+  String get statusSituationQuiet;
+
+  /// No description provided for @statusSituationQuietHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorities publish warnings, not all-clears. That none is in force is not a statement that nothing is wrong.'**
+  String get statusSituationQuietHint;
+
+  /// No description provided for @statusSituationActive.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One warning} other{{count} warnings}} for your area'**
+  String statusSituationActive(int count);
+
   /// No description provided for @searchTitle.
   ///
   /// In en, this message translates to:

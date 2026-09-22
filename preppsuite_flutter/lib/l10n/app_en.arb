@@ -2048,6 +2048,31 @@
   "knowledgeApolloPersonalTitle": "Add your own material",
   "knowledgeApolloPersonalBody": "Add local PDF, EPUB and Markdown files and make readable text available to offline full-text search.",
   "knowledgeApolloDownloadHint": "Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.",
+  "statusSupplyTitle": "Supplies",
+  "statusSupplyCovered": "Lasts {days} days",
+  "statusSupplyShort": "Lasts {days} of {target} days",
+  "statusSupplyUnknown": "Nothing recorded yet",
+  "statusSupplyBasis": "Against the BBK\u2019s own figures: {target} days, 2 l and 2200 kcal per person per day.",
+  "statusSupplyUncounted": "{count, plural, =1{One entry is not counted} other{{count} entries are not counted}} \u2014 its unit names no measure.",
+  "statusSituationTitle": "Situation",
+  "statusSituationQuiet": "No official warning",
+  "statusSituationQuietHint": "Authorities publish warnings, not all-clears. That none is in force is not a statement that nothing is wrong.",
+  "statusSituationActive": "{count, plural, =1{One warning} other{{count} warnings}} for your area",
+  "@statusSupplyCovered": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "@statusSupplyShort": {
+    "placeholders": { "days": { "type": "int" }, "target": { "type": "int" } }
+  },
+  "@statusSupplyBasis": {
+    "placeholders": { "target": { "type": "int" } }
+  },
+  "@statusSupplyUncounted": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "@statusSituationActive": {
+    "placeholders": { "count": { "type": "int" } }
+  },
   "searchTitle": "Search",
   "searchHint": "Screen, supply, checklist entry \u2026",
   "searchStartHint": "Type to search the whole app: screens, supplies, checklist entries and the household inventory.",

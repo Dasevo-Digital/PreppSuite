@@ -3336,6 +3336,59 @@ class AppLocalizationsEn extends AppLocalizations {
       'Opens the Kiwix library with a matching search. Check language, edition and storage need before downloading.';
 
   @override
+  String get statusSupplyTitle => 'Supplies';
+
+  @override
+  String statusSupplyCovered(int days) {
+    return 'Lasts $days days';
+  }
+
+  @override
+  String statusSupplyShort(int days, int target) {
+    return 'Lasts $days of $target days';
+  }
+
+  @override
+  String get statusSupplyUnknown => 'Nothing recorded yet';
+
+  @override
+  String statusSupplyBasis(int target) {
+    return 'Against the BBK’s own figures: $target days, 2 l and 2200 kcal per person per day.';
+  }
+
+  @override
+  String statusSupplyUncounted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries are not counted',
+      one: 'One entry is not counted',
+    );
+    return '$_temp0 — its unit names no measure.';
+  }
+
+  @override
+  String get statusSituationTitle => 'Situation';
+
+  @override
+  String get statusSituationQuiet => 'No official warning';
+
+  @override
+  String get statusSituationQuietHint =>
+      'Authorities publish warnings, not all-clears. That none is in force is not a statement that nothing is wrong.';
+
+  @override
+  String statusSituationActive(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count warnings',
+      one: 'One warning',
+    );
+    return '$_temp0 for your area';
+  }
+
+  @override
   String get searchTitle => 'Search';
 
   @override

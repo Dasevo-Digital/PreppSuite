@@ -6,6 +6,7 @@ import '../../../core/progress_text.dart';
 import '../../../core/portable_data.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../search/presentation/app_search_screen.dart';
+import 'status_lights_row.dart';
 import '../../settings/presentation/missing_data_folder_notice.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
@@ -121,6 +122,15 @@ class OverviewScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
+              ],
+              // Above the cards, because it answers the question they
+              // are read to work out. Not shown on a household that has
+              // recorded nothing at all: there the card above already
+              // says what to do first, and two grey lamps under it would
+              // only repeat it in a duller voice.
+              if (items.isNotEmpty) ...[
+                StatusLightsRow(profile: profile, onNavigate: onNavigate),
                 const SizedBox(height: 12),
               ],
               _SupplyCard(

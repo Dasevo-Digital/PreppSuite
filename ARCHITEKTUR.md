@@ -1723,6 +1723,50 @@ einmal gelesen und dann behalten wird. Sechzig Kilobyte durch den
 die Sonne untergeht.
 
 
+### Zwei Ampeln, und niemals eine
+
+Oben auf der Übersicht stehen zwei Lampen: **Vorrat** und **Lage**. Jede
+Karte darunter beantwortet eine Frage gut, und keine beantwortet die, mit
+der jemand diesen Bildschirm aufschlägt — das hieß bisher vier Karten
+lesen und selbst zusammenzählen.
+
+**Sie werden nicht zu einer verrechnet.** „Vorrat reicht, aber Unwetter"
+hat keine gemeinsame Farbe, und die Gewichtung, die eine ergäbe, wäre hier
+erfunden. Genau das macht diese App mit Skalen nicht.
+
+Beide Lampen nennen, wessen Zahl sie benutzen:
+
+* **Vorrat** vergleicht gegen die Werte des BBK — zehn Tage, 2 l und
+  2200 kcal je Person und Tag. Grün heißt erreicht, gelb heißt darunter,
+  **grau heißt „zu wenig eingetragen, um etwas zu sagen"**. Grau und nicht
+  rot: eine leere Datenbank ist kein leerer Keller, und Rot würde einem
+  Haushalt Unvorbereitetsein vorwerfen, der nur noch nichts eingetippt
+  hat. Was die Rechnung auslassen musste, steht auf der Lampe selbst —
+  eine Zahl, die weniger abdeckt als der Schrank, muss das zugeben können.
+* **Lage** zeigt die höchste amtliche Warnstufe, die gerade für eure
+  Bereiche gilt, in der Leiter des Herausgebers. **Hier gibt es kein
+  Grün.** Behörden veröffentlichen Warnungen, keine Entwarnungen; dass
+  keine vorliegt, ist keine Aussage über Sicherheit und wird nicht als
+  eine verkleidet. Gefiltert wird mit derselben Regel wie Banner und
+  Benachrichtigung, sonst könnte die Lampe „ruhig" sagen, während das
+  Banner eine zeigt.
+
+Eine Skala, deren Herausgeber nicht mitliefert, wie sie zu lesen ist,
+kommt weiterhin nicht in die App. Für Deutschland gibt es **keine
+öffentliche Gefährdungs- oder Terrorwarnstufe** — nachgeschlagen am
+22.09.2026, die Behörden warnen konkret über NINA, Katwarn und Sirenen und
+veröffentlichen keine Zahl. Eine selbst gebaute „Kriegsgefahr: 3 von 5"
+wäre genau die erfundene Skala, die hier nicht vorkommt, und auf einem
+Bildschirm, den jemand in echter Sorge öffnet, besonders schädlich.
+
+**Zum Layout:** die Reihe steckt in einem `IntrinsicHeight`. In einem
+`ListView` hat eine Reihe, die sich streckt, nichts zum Strecken — das
+ging beim ersten Mal als „BoxConstraints forces an infinite height"
+hinaus und wurde von `optimization_layout_test` gefangen, nicht vom Test
+neben dem Widget: der hatte einen begrenzten Kasten zum Sitzen. Der Test
+rendert es jetzt in einer Liste.
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,
