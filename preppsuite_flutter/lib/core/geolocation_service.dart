@@ -91,6 +91,10 @@ class GeolocationService {
       latitude: position.latitude,
       longitude: position.longitude,
       accuracyMetres: position.accuracy,
+      // What a stale fix has and a fresh one does not: an age worth
+      // saying. Somebody reading coordinates over a radio has to know
+      // whether they are standing in them.
+      takenAt: position.timestamp,
     );
   }
 
@@ -166,12 +170,27 @@ class GeolocationService {
           break;
       }
 
-      return await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
-          timeLimit: Duration(seconds: 15),
-        ),
-      );
+      try {
+        return await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.low,
+            timeLimit: Duration(seconds: 15),
+          ),
+        );
+      } on Object {
+        // A fresh fix is a receiver waking up, and indoors or on a
+        // desktop it often does not manage it inside fifteen seconds.
+        // The device meanwhile has a perfectly good position from three
+        // minutes ago lying about, and telling somebody "your location
+        // could not be determined" while holding it is simply wrong --
+        // it sends them to check a setting that was never off.
+        //
+        // Only reached once the permission questions above are settled,
+        // so this never papers over a refusal: those throw before here.
+        final last = await Geolocator.getLastKnownPosition();
+        if (last != null) return last;
+        rethrow;
+      }
     } on LocationUnavailableException {
       rethrow;
     } on Object catch (error) {

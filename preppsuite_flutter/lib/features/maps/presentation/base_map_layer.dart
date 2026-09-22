@@ -112,13 +112,14 @@ class _BaseMapLayerState extends ConsumerState<BaseMapLayer> {
     final active = FeatureActivity.of(context);
     if (!active && _released) return const SizedBox.shrink();
     final mobile = Platform.isAndroid || Platform.isIOS;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     final archive = usesOfflineMap(ref)
         ? ref.watch(offlineMapProvider).value?.archive
         : null;
 
     if (archive != null) {
       return VectorTileLayer(
-        theme: ref.watch(mapThemeProvider),
+        theme: ref.watch(mapThemeProvider(Theme.of(context).brightness)),
         // The source name is the one the built-in style refers to; the
         // archive it reads from is local, which is the whole difference.
         tileProviders: TileProviders({
@@ -159,6 +160,12 @@ class _BaseMapLayerState extends ConsumerState<BaseMapLayer> {
       key: ValueKey(_cacheGeneration),
       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       userAgentPackageName: 'de.status403.preppsuite',
+      // OpenStreetMap serves one set of tiles and they are light. The
+      // offline map is turned at the style, which keeps a park green;
+      // there is no style here to turn, only finished pictures, so this
+      // is the library's own filter over them. Not as good, and better
+      // than the brightest rectangle on a dark screen.
+      tileBuilder: dark ? darkModeTileBuilder : null,
       // A tile server that refuses leaves an empty square and says
       // nothing. On a map that is mostly there, that reads as a bug in
       // the app rather than as a connection that did not hold — and

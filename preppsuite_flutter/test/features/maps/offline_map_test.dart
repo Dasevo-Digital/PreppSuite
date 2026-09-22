@@ -1,3 +1,5 @@
+import 'dart:ui' show Brightness;
+
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,7 +40,9 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      expect(container.read(mapThemeProvider).tileSources, {'openmaptiles'});
+      expect(container.read(mapThemeProvider(Brightness.light)).tileSources, {
+        'openmaptiles',
+      });
     });
 
     test('keeps no layer that would reach for the network', () {
@@ -49,7 +53,7 @@ void main() {
       addTearDown(container.dispose);
 
       final types = container
-          .read(mapThemeProvider)
+          .read(mapThemeProvider(Brightness.light))
           .layers
           .map((layer) => layer.type)
           .toSet();

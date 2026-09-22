@@ -33,6 +33,7 @@ class ReadablePosition {
     required this.latitude,
     required this.longitude,
     this.accuracyMetres,
+    this.takenAt,
   });
 
   final double latitude;
@@ -42,6 +43,35 @@ class ReadablePosition {
   /// position did not come from a receiver — a point picked on the map is
   /// exact in itself.
   final double? accuracyMetres;
+
+  /// When the receiver recorded it. Null for a point that was not
+  /// measured at all.
+  ///
+  /// It matters because a fix is not always fresh: indoors the device
+  /// may hand over the last one it managed, which can be minutes or
+  /// hours old. Coordinates read out over a radio are a claim about
+  /// where somebody is *now*, and an hour-old claim is a different
+  /// sentence.
+  final DateTime? takenAt;
+
+  /// How stale the fix is, or null where there is nothing to be stale.
+  Duration? ageAt(DateTime now) {
+    final taken = takenAt;
+    if (taken == null) return null;
+    final age = now.difference(taken);
+    // A receiver clock that runs ahead would otherwise report a
+    // negative age, which reads as nonsense rather than as freshness.
+    return age.isNegative ? Duration.zero : age;
+  }
+
+  /// Whether it is old enough to be worth saying so.
+  ///
+  /// Two minutes: long enough that a fix taken while the screen was
+  /// being opened still counts as now, short enough that somebody who
+  /// has walked away from where it was taken is told.
+  static const staleAfter = Duration(minutes: 2);
+
+  bool isStaleAt(DateTime now) => (ageAt(now) ?? Duration.zero) >= staleAfter;
 
   /// `52.516275, 13.377704` — six places, about ten centimetres.
   String get decimal =>

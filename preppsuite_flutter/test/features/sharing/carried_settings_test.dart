@@ -162,4 +162,26 @@ void main() {
       expect(CarriedHousehold.fromJson('nonsense').isEmpty, isTrue);
     });
   });
+
+  group('what belongs to the household and used to stay behind', () {
+    test('the places the household agreed on travel', () {
+      // The meeting point, the way out, the well. They are coordinates,
+      // not paths, so nothing about them points at the other machine.
+      expect(carriedSettings['personalMapPlaces.v1'], CarriedKind.text);
+    });
+
+    test('and so does what the crisis overview was told by hand', () {
+      // The answers the records cannot supply. Re-entering them on every
+      // device is exactly the work a handover is supposed to save.
+      expect(carriedSettings['preparednessHubV1'], CarriedKind.text);
+    });
+
+    test('both are stored as one string, which is what is claimed', () {
+      // A kind that disagrees with the store is a setting that arrives
+      // where `getString` cannot read it — see [CarriedKind].
+      for (final key in ['personalMapPlaces.v1', 'preparednessHubV1']) {
+        expect(carriedSettings[key], CarriedKind.text, reason: key);
+      }
+    });
+  });
 }

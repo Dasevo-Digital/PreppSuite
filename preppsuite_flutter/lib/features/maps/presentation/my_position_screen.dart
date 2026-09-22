@@ -141,6 +141,21 @@ class _MyPositionScreenState extends State<MyPositionScreen> {
                     ),
                   ),
               ],
+              // A fix that is old is a different claim from one that is
+              // imprecise, and this screen exists to be read out loud.
+              // The device hands over its last known position when it
+              // cannot manage a fresh one, which is right — but saying
+              // so is part of the answer, not a footnote to it.
+              if (position?.ageAt(DateTime.now()) case final age?
+                  when age >= ReadablePosition.staleAfter) ...[
+                const SizedBox(height: 4),
+                Text(
+                  l10n.myPositionStale(age.inMinutes),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ],
             ],
           ),
           if (position != null) ...[

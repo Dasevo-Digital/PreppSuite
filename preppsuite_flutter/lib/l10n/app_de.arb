@@ -687,6 +687,8 @@
     }
   },
   "myPositionAccuracyPoor": "Das reicht nicht bis zur Hausnummer. Unter freiem Himmel noch einmal messen, und der Leitstelle die Ungenauigkeit mitsagen.",
+  "myPositionStale": "Diese Messung ist {minutes} Minuten alt. Das Gerät hat gerade keine frische bekommen – unter freiem Himmel noch einmal messen, bevor du sie durchgibst.",
+  "nearbyStale": "Gerechnet mit der letzten bekannten Position, {minutes} Minuten alt.",
   "myPositionDms": "Grad, Minuten, Sekunden",
   "myPositionDmsHint": "Was eine Leitstelle am Telefon verlangt — und was sich vorlesen und mitschreiben lässt.",
   "myPositionUtm": "UTM",

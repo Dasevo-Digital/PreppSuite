@@ -1661,6 +1661,68 @@ lange nicht mit, bis die Einheit ein Maß nennt. Die Einheiten darin sind
 zum Antippen, nicht zum Lesen: Das Feld steht direkt hinter dem Dialog.
 
 
+### Eine Ortung, die nicht kommt, heißt nicht „kein Standort"
+
+`getCurrentPosition` wartet auf eine **frische** Messung. In der Wohnung,
+am Rechner oder mit kaltem Empfänger reichen die fünfzehn Sekunden oft
+nicht — und das Gerät hält währenddessen eine völlig brauchbare Position
+von vor drei Minuten in der Hand. Wer in dieser Lage „Standort konnte
+nicht ermittelt werden" liest, geht eine Einstellung prüfen, die nie aus
+war.
+
+`GeolocationService._getPosition` fällt deshalb auf
+`getLastKnownPosition` zurück. Zwei Dinge daran sind wichtig:
+
+* Der Rückfall sitzt **nach** den Berechtigungsfragen, nie davor. „Ortung
+  ist aus" und „für immer abgelehnt" werfen vorher, und eine alte Position
+  darüberzulegen würde eine Frage beantworten, die der Haushalt nicht
+  gestellt hat, und eine verdecken, auf die er reagieren muss.
+  `geolocation_fallback_test.dart` prüft genau das mit.
+* Eine alte Messung wird **als alt ausgewiesen**. `ReadablePosition`
+  trägt `takenAt`, und der Bildschirm, auf dem Koordinaten vorgelesen
+  werden, sagt ab zwei Minuten dazu, wie alt sie sind. Koordinaten über
+  Funk sind eine Aussage darüber, wo jemand *jetzt* ist.
+
+Das sitzt im Dienst und nicht in den Bildschirmen: fünf davon fragen nach
+dem Standort, und fünf Rückfälle wären vier Gelegenheiten, einen zu
+vergessen.
+
+### Die dunkle Karte wird gedreht, nicht geschrieben
+
+Der Renderer bringt genau einen Stil mit und der ist hell. In dunkler
+Oberfläche war die Offlinekarte damit ein weißes Rechteck — das hellste
+auf dem Bildschirm, ausgerechnet auf der Funktion, die man nachts im
+Stromausfall aufschlägt.
+
+`dark_map_style.dart` läuft durch die Stildaten und dreht **jede** Farbe
+darin um: Farbton bleibt, Helligkeit kippt, Sättigung wird gedämpft. Ein
+Park bleibt dadurch grün, statt bei einer reinen Bildumkehr magenta zu
+werden. Gelaufen wird über jede Zeichenkette in der Struktur, nicht über
+die bekannten Farbschlüssel: ein Mapbox-Stil versteckt Farben auch in
+Ausdrücken und Stützstellen, und genau die wären beim schemakundigen Weg
+durchgerutscht.
+
+Weiß geht nicht auf reines Schwarz und Schwarz nicht auf reines Weiß
+(`clamp(0.06, 0.90)`). An den Enden verschluckt es die Haarlinien
+zwischen zwei Flächen, und die sind es, die eine Karte lesbar machen.
+
+Zwei Dinge, die dabei in Kauf genommen sind:
+
+* **Ein Implementierungs-Import.** `lightThemeData()` wird vom Paket nicht
+  exportiert, nur das fertige helle `Theme`. Die Alternative wäre, sechzig
+  Kilobyte Stil ins Repository zu kopieren, wo sie still gegen das Paket
+  veralten; so ist eine Änderung ein Übersetzungsfehler.
+* **Die Rasterkacheln werden nur gefiltert.** OpenStreetMap liefert ein
+  Kachelbild, keinen Stil — da gibt es nichts zu drehen, also läuft
+  `darkModeTileBuilder` darüber. Schlechter als der Vektorweg, und besser
+  als das hellste Rechteck auf dunklem Grund.
+
+`mapThemeProvider` ist eine Familie über die Helligkeit, damit jeder Stil
+einmal gelesen und dann behalten wird. Sechzig Kilobyte durch den
+`ThemeReader` bei jedem Themenwechsel wären ein Ruckler jedes Mal, wenn
+die Sonne untergeht.
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,

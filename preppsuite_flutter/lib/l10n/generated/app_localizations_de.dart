@@ -2223,6 +2223,16 @@ class AppLocalizationsDe extends AppLocalizations {
       'Das reicht nicht bis zur Hausnummer. Unter freiem Himmel noch einmal messen, und der Leitstelle die Ungenauigkeit mitsagen.';
 
   @override
+  String myPositionStale(int minutes) {
+    return 'Diese Messung ist $minutes Minuten alt. Das Gerät hat gerade keine frische bekommen – unter freiem Himmel noch einmal messen, bevor du sie durchgibst.';
+  }
+
+  @override
+  String nearbyStale(int minutes) {
+    return 'Gerechnet mit der letzten bekannten Position, $minutes Minuten alt.';
+  }
+
+  @override
   String get myPositionDms => 'Grad, Minuten, Sekunden';
 
   @override

@@ -1,3 +1,5 @@
+import 'dart:ui' show Brightness;
+
 import 'dart:io';
 import 'dart:math';
 
@@ -45,7 +47,7 @@ void main() {
 
       final container = ProviderContainer();
       addTearDown(container.dispose);
-      final theme = container.read(mapThemeProvider);
+      final theme = container.read(mapThemeProvider(Brightness.light));
 
       // The style's own labelling layers. Without `place` among the
       // layers the factory keeps, no name is drawn at all — which is the

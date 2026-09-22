@@ -1525,6 +1525,22 @@
     }
   },
   "myPositionAccuracyPoor": "That will not reach a house number. Measure again under open sky, and tell the control room how rough it is.",
+  "myPositionStale": "This fix is {minutes} minutes old. The device could not get a fresh one just now — measure again under open sky before passing it on.",
+  "@myPositionStale": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "nearbyStale": "Worked out from the last known position, {minutes} minutes old.",
+  "@nearbyStale": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "myPositionDms": "Degrees, minutes, seconds",
   "myPositionDmsHint": "What a control room asks for on the telephone — and what survives being read aloud and written down.",
   "myPositionUtm": "UTM",

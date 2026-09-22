@@ -158,6 +158,12 @@ dependencies:
   url_launcher: ^6.3.2
 
 dev_dependencies:
+  # Only so the geolocation test can stand in for the platform and
+  # prove the last-known-position fallback. Both arrive transitively
+  # through `geolocator`; naming them here is what lets a test import
+  # them without the analyzer objecting.
+  geolocator_platform_interface: ^4.2.0
+  plugin_platform_interface: ^2.1.0
   build_runner: ^2.15.1
   # Runs a test inside the real app on a real device, which is the only
   # place the Kotlin and Swift storage bridges exist at all. The unit

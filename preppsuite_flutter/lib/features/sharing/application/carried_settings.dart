@@ -76,6 +76,17 @@ const carriedSettings = <String, CarriedKind>{
   'drillProgress': CarriedKind.textList,
   'drillLastCompleted': CarriedKind.text,
 
+  // What the household has worked out about itself in the crisis
+  // overview: the answers the records cannot supply, entered by hand.
+  'preparednessHubV1': CarriedKind.text,
+
+  // The meeting point, the way out, the well. Places the household
+  // agreed on — the most useful thing on the map and, until now, the
+  // one thing about the map that did not travel with a handover. They
+  // are coordinates, not paths, so nothing here points at a file on the
+  // other machine.
+  'personalMapPlaces.v1': CarriedKind.text,
+
   // How far ahead the household wants to be warned.
   'expiryLeadDays': CarriedKind.integer,
   'chargeReminderDays': CarriedKind.integer,

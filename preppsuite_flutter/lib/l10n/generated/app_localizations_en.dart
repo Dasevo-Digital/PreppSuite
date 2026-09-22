@@ -2207,6 +2207,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'That will not reach a house number. Measure again under open sky, and tell the control room how rough it is.';
 
   @override
+  String myPositionStale(int minutes) {
+    return 'This fix is $minutes minutes old. The device could not get a fresh one just now — measure again under open sky before passing it on.';
+  }
+
+  @override
+  String nearbyStale(int minutes) {
+    return 'Worked out from the last known position, $minutes minutes old.';
+  }
+
+  @override
   String get myPositionDms => 'Degrees, minutes, seconds';
 
   @override

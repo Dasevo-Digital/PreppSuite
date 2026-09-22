@@ -3776,6 +3776,18 @@ abstract class AppLocalizations {
   /// **'That will not reach a house number. Measure again under open sky, and tell the control room how rough it is.'**
   String get myPositionAccuracyPoor;
 
+  /// No description provided for @myPositionStale.
+  ///
+  /// In en, this message translates to:
+  /// **'This fix is {minutes} minutes old. The device could not get a fresh one just now — measure again under open sky before passing it on.'**
+  String myPositionStale(int minutes);
+
+  /// No description provided for @nearbyStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Worked out from the last known position, {minutes} minutes old.'**
+  String nearbyStale(int minutes);
+
   /// No description provided for @myPositionDms.
   ///
   /// In en, this message translates to:

@@ -1,9 +1,19 @@
 import 'dart:async' show unawaited;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vector_tile_renderer/vector_tile_renderer.dart' show Theme;
+import 'package:flutter/material.dart' show Brightness;
 import 'package:vector_tile_renderer/vector_tile_renderer.dart'
-    show ProvidedThemes, ThemeLayerType;
+    show Theme, ThemeLayerType, ThemeReader;
+// The style data itself is not exported — only `ProvidedThemes`,
+// which hands back a finished light `Theme`. Darkening needs the map
+// it was read from. The alternative is copying sixty kilobytes of
+// style into this repository, where it would go stale against the
+// package silently; this way a changed style is a compile error.
+// ignore: implementation_imports
+import 'package:vector_tile_renderer/src/themes/light_theme.dart'
+    show lightThemeData;
+
+import 'dark_map_style.dart';
 
 import 'map_archive_access.dart';
 import 'offline_map_store.dart';
@@ -158,22 +168,41 @@ final offlineMapProvider =
       OfflineMapController.new,
     );
 
-/// The map's look, built once.
+/// The map's look, built once per brightness.
 ///
 /// The renderer ships an OpenMapTiles style derived from OSM Liberty, so
 /// there is no style file to bundle or keep in step with anything. Its one
 /// raster layer — a shaded relief from a web server — is dropped: this map
 /// exists to work without a network, and a layer that reaches for one has
 /// no business in it.
-final mapThemeProvider = Provider<Theme>((ref) {
-  final theme = ProvidedThemes.lightTheme();
-  return theme.copyWith(
-    types: {
-      ThemeLayerType.background,
-      ThemeLayerType.fill,
-      ThemeLayerType.fillExtrusion,
-      ThemeLayerType.line,
-      ThemeLayerType.symbol,
-    },
-  );
+///
+/// It ships exactly one style and it is light, which in a dark app made
+/// the map a white rectangle — the brightest thing on the screen, on the
+/// feature somebody opens at night in a power cut. The dark one is made
+/// from it; see `dark_map_style.dart` for why it is turned rather than
+/// written a second time.
+///
+/// A family rather than one provider, so each brightness is read and
+/// parsed once and then kept. Reading the style is real work — sixty
+/// kilobytes through `ThemeReader` — and doing it on every theme change
+/// would be a stutter every time the sun goes down.
+final mapThemeProvider = Provider.family<Theme, Brightness>((
+  ref,
+  brightness,
+) {
+  final data = brightness == Brightness.dark
+      ? darkenMapStyle(lightThemeData()) as Map<String, dynamic>
+      : lightThemeData();
+
+  return ThemeReader()
+      .read(data)
+      .copyWith(
+        types: {
+          ThemeLayerType.background,
+          ThemeLayerType.fill,
+          ThemeLayerType.fillExtrusion,
+          ThemeLayerType.line,
+          ThemeLayerType.symbol,
+        },
+      );
 });
