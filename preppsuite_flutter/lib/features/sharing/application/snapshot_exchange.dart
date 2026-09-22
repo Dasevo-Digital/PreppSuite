@@ -1,5 +1,6 @@
 import '../../../local_db/database.dart';
 import 'device_snapshot.dart';
+import 'settings_sync.dart';
 
 /// Reading a household out of the database and merging one back in.
 ///
@@ -18,8 +19,15 @@ Future<DeviceSnapshot> readHouseholdSnapshot(
   AppDatabase db, {
   required String deviceId,
   required String householdId,
+
+  /// The household's settings, stamped. Left out where the caller has
+  /// no business carrying them -- a backup is a copy of this device and
+  /// restoring one should not argue with the other devices about who
+  /// changed the river gauge last.
+  Map<String, StampedSetting> settings = const {},
 }) async {
   return DeviceSnapshot(
+    settings: settings,
     deviceId: deviceId,
     householdId: householdId,
     // Informational only. The merge compares each row's own version, not

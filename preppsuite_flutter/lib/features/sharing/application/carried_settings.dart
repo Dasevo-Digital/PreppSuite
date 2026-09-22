@@ -39,6 +39,32 @@ import '../../../model/household_profile_store.dart';
 /// cannot read it — a setting that works everywhere except at 52° exactly.
 enum CarriedKind { boolean, integer, decimal, text, textList }
 
+/// Whether a setting keeps travelling, or only goes over once.
+///
+/// The split exists because "the household's settings" and "how this
+/// device is set up" are two different things that sat in one list.
+/// Which river gauge the household watches is the household's, and a
+/// change to it should reach every device. Whether *this* screen is
+/// dark, whether *this* device sends notifications, and whether *this*
+/// one draws from an archive it may not even have are not — syncing
+/// those would mean changing the theme on the desktop because somebody
+/// turned the telephone dark on the train.
+enum CarriedWhen {
+  /// Carried at setup and kept in step afterwards.
+  always,
+
+  /// Carried once, when a device is being set up from another, and left
+  /// alone after that.
+  setupOnly,
+}
+
+/// What a carried setting is: the shape of its value, and whether it
+/// keeps travelling.
+typedef CarriedSetting = ({CarriedKind kind, CarriedWhen when});
+
+const _always = CarriedWhen.always;
+const _setupOnly = CarriedWhen.setupOnly;
+
 /// Every setting that travels with a household, and what it holds.
 /// Deliberately absent: `warningCountryCode`, `warningRegionKey` and
 /// `warningExtraRegions`. Those three are not settings but a *copy* of the
@@ -46,67 +72,67 @@ enum CarriedKind { boolean, integer, decimal, text, textList }
 /// Riverpod (see [WarningRegionStore]). Carrying them would be carrying the
 /// shadow instead of the thing — and the profile, which travels as
 /// [CarriedHousehold.profile], rewrites them the moment it lands.
-const carriedSettings = <String, CarriedKind>{
-  'watchedAutobahnen': CarriedKind.textList,
+const carriedSettings = <String, CarriedSetting>{
+  'watchedAutobahnen': (kind: CarriedKind.textList, when: _always),
 
   // The measuring stations it reads. Each is a place, and the household
   // is in one place.
-  'pegelStation': CarriedKind.text,
-  'radiationStation': CarriedKind.text,
-  'airQualityStation': CarriedKind.text,
-  'fireDangerStation': CarriedKind.text,
+  'pegelStation': (kind: CarriedKind.text, when: _always),
+  'radiationStation': (kind: CarriedKind.text, when: _always),
+  'airQualityStation': (kind: CarriedKind.text, when: _always),
+  'fireDangerStation': (kind: CarriedKind.text, when: _always),
 
   // Where the sun rises here.
-  'daylightLatitude': CarriedKind.decimal,
-  'daylightLongitude': CarriedKind.decimal,
-  'daylightPlaceName': CarriedKind.text,
+  'daylightLatitude': (kind: CarriedKind.decimal, when: _always),
+  'daylightLongitude': (kind: CarriedKind.decimal, when: _always),
+  'daylightPlaceName': (kind: CarriedKind.text, when: _always),
 
   // The energy plan: what the household draws and what it has put by.
   // Hand-entered, appliance by appliance, and the single most tedious
   // thing to type twice.
-  'energyDraws': CarriedKind.textList,
-  'energyReserves': CarriedKind.textList,
+  'energyDraws': (kind: CarriedKind.textList, when: _always),
+  'energyReserves': (kind: CarriedKind.textList, when: _always),
 
   // A blackout that is running is running for the whole household — the
   // fridge does not care which device is looking at the clock.
-  'outageStartedAt': CarriedKind.text,
-  'outageFreezerFull': CarriedKind.boolean,
+  'outageStartedAt': (kind: CarriedKind.text, when: _always),
+  'outageFreezerFull': (kind: CarriedKind.boolean, when: _always),
 
   // What has been practised, and when.
-  'drillProgress': CarriedKind.textList,
-  'drillLastCompleted': CarriedKind.text,
+  'drillProgress': (kind: CarriedKind.textList, when: _always),
+  'drillLastCompleted': (kind: CarriedKind.text, when: _always),
 
   // What the household has worked out about itself in the crisis
   // overview: the answers the records cannot supply, entered by hand.
-  'preparednessHubV1': CarriedKind.text,
+  'preparednessHubV1': (kind: CarriedKind.text, when: _always),
 
   // The meeting point, the way out, the well. Places the household
   // agreed on — the most useful thing on the map and, until now, the
   // one thing about the map that did not travel with a handover. They
   // are coordinates, not paths, so nothing here points at a file on the
   // other machine.
-  'personalMapPlaces.v1': CarriedKind.text,
+  'personalMapPlaces.v1': (kind: CarriedKind.text, when: _always),
 
   // How far ahead the household wants to be warned.
-  'expiryLeadDays': CarriedKind.integer,
-  'chargeReminderDays': CarriedKind.integer,
+  'expiryLeadDays': (kind: CarriedKind.integer, when: _always),
+  'chargeReminderDays': (kind: CarriedKind.integer, when: _always),
 
   // Which tiles new map downloads come from. The key for them does not
   // travel; see the note above.
-  'mapTileProvider': CarriedKind.text,
-  'mapSourcePreference': CarriedKind.text,
+  'mapTileProvider': (kind: CarriedKind.text, when: _always),
+  'mapSourcePreference': (kind: CarriedKind.text, when: _setupOnly),
 
   // The knowledge area: where a first-aid pack is fetched from, how
   // articles are opened, and what has been marked.
-  'firstAidPackUrl': CarriedKind.text,
-  'articleViewerChoice': CarriedKind.text,
-  'knowledgeArticleBookmarksV1': CarriedKind.textList,
+  'firstAidPackUrl': (kind: CarriedKind.text, when: _always),
+  'articleViewerChoice': (kind: CarriedKind.text, when: _setupOnly),
+  'knowledgeArticleBookmarksV1': (kind: CarriedKind.textList, when: _always),
 
   // Taste, strictly speaking, but a second device set up from a first is
   // meant to arrive looking like it.
-  'themeModeOverride': CarriedKind.text,
-  'localeOverride': CarriedKind.text,
-  'notificationsEnabled': CarriedKind.boolean,
+  'themeModeOverride': (kind: CarriedKind.text, when: _setupOnly),
+  'localeOverride': (kind: CarriedKind.text, when: _setupOnly),
+  'notificationsEnabled': (kind: CarriedKind.boolean, when: _setupOnly),
 };
 
 /// The household as one device has it set up, ready to hand to another.
@@ -156,7 +182,7 @@ Future<CarriedHousehold> readCarriedHousehold([
   SharedPreferences? preferences,
 ]) async => CarriedHousehold(
   profile: await const HouseholdProfileStore().load(),
-  settings: await readCarriedSettings(preferences),
+  settings: await readCarriedSettings(preferences: preferences),
 );
 
 /// Reads the carried settings out of this device, ready to send.
@@ -164,13 +190,15 @@ Future<CarriedHousehold> readCarriedHousehold([
 /// A setting that was never touched is left out entirely rather than sent
 /// as a null, so a household that has no opinion about something does not
 /// overwrite one that does.
-Future<Map<String, Object>> readCarriedSettings([
+Future<Map<String, Object>> readCarriedSettings({
   SharedPreferences? preferences,
-]) async {
+  CarriedWhen? when,
+}) async {
   final prefs = preferences ?? await SharedPreferences.getInstance();
   return {
     for (final entry in carriedSettings.entries)
-      entry.key: ?_read(prefs, entry.key, entry.value),
+      if (when == null || entry.value.when == when)
+        entry.key: ?_read(prefs, entry.key, entry.value.kind),
   };
 }
 
@@ -187,9 +215,9 @@ Future<int> applyCarriedSettings(
   final prefs = preferences ?? await SharedPreferences.getInstance();
   var applied = 0;
   for (final entry in values.entries) {
-    final kind = carriedSettings[entry.key];
-    if (kind == null) continue;
-    if (await _write(prefs, entry.key, kind, entry.value)) applied++;
+    final setting = carriedSettings[entry.key];
+    if (setting == null) continue;
+    if (await _write(prefs, entry.key, setting.kind, entry.value)) applied++;
   }
   return applied;
 }

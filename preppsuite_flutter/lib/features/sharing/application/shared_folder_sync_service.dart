@@ -1,6 +1,7 @@
 import '../../../local_db/database.dart';
 import 'device_snapshot.dart';
 import 'snapshot_exchange.dart';
+import 'settings_sync_store.dart';
 import 'folder_crypto.dart';
 import 'household_file.dart';
 import 'sync_folder.dart';
@@ -257,8 +258,13 @@ class SharedFolderSyncService {
     return decryptFromFolder(raw, folderKey);
   }
 
-  Future<int> _apply(DeviceSnapshot snapshot) =>
-      applyHouseholdSnapshot(_db, snapshot);
+  /// Rows first, settings after. The rows are the payload; a setting
+  /// that could not be stored must never cost them.
+  Future<int> _apply(DeviceSnapshot snapshot) async {
+    final rows = await applyHouseholdSnapshot(_db, snapshot);
+    await applySyncedSettings(snapshot.settings);
+    return rows;
+  }
 
   /// Writes this device's snapshot, unless there is demonstrably nothing
   /// to say.
@@ -295,6 +301,11 @@ class SharedFolderSyncService {
       _db,
       deviceId: deviceId,
       householdId: householdId,
+      // What turns "the settings came over once at setup" into "the
+      // settings stay in step": this file is republished every couple
+      // of minutes, so a station changed on the telephone reaches the
+      // desktop on its next round.
+      settings: await readSyncedSettings(),
     );
 
     final folderKey = key;

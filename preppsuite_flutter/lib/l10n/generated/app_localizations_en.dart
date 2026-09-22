@@ -4992,6 +4992,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'The guides need no video: the text, the figures and the drawings are complete and always there. Videos are an extra for the evening you sit down to learn the movements properly — and they are a separate download, because ten films weigh more than the whole app.';
 
   @override
+  String get firstAidVideoPackWhereTitle => 'Where to get one';
+
+  @override
+  String get firstAidVideoPackWhereBody =>
+      'There are no ready-made packs, and this app points at none. Every usable German first aid video is somebody’s copyright — the aid organisations’ material entirely. Freely licensed material exists mainly on Wikimedia Commons, but little of it: on 22 September 2026 the category “Videos of cardiopulmonary resuscitation” held eight files, mostly not in German, one of them a dog being resuscitated. Each licence is on its own file page and has to be checked one by one.';
+
+  @override
+  String get firstAidVideoPackWhereHow =>
+      'To build your own pack, see docs/erste-hilfe.md in the source. The credit and licence of each clip are shown under the video later.';
+
+  @override
   String get firstAidVideoPackFromNetwork => 'Over the network';
 
   @override

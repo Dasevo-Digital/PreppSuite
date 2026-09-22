@@ -13,6 +13,7 @@ import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
 import '../../sharing/application/carried_settings.dart';
 import '../../sharing/application/snapshot_exchange.dart';
+import '../../sharing/application/settings_sync_store.dart';
 import '../../sharing/application/shared_folder_store.dart';
 import '../application/handover_payload.dart';
 import '../application/local_handover.dart';
@@ -322,6 +323,7 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
         ref.read(appDatabaseProvider),
         snapshot,
       );
+      await applySyncedSettings(snapshot.settings);
       // No photographs on this road — see `handover_payload.dart` — but
       // the settings fit, and a device being set up should not have to
       // type them again.

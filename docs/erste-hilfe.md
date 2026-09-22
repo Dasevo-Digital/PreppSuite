@@ -120,6 +120,27 @@ nie öffnet.
 **Recht.** Das Material der Hilfsorganisationen ist durchweg „alle Rechte
 vorbehalten". Frei lizenzierte deutsche Erste-Hilfe-Videos gibt es kaum.
 
+### Woher man welche bekommt
+
+Die App verweist auf **kein** fertiges Paket, weil es keines gibt. Wer
+eines bauen will, fängt realistisch bei **Wikimedia Commons** an — der
+einzigen nachprüfbaren Quelle mit frei lizenziertem Bewegtbild zum Thema.
+
+Nachgesehen am **22.09.2026**, damit hier eine Zahl und keine Vermutung
+steht:
+
+* `Category:Videos of first aid` **existiert nicht**.
+* `Category:Videos of cardiopulmonary resuscitation` enthält **acht**
+  Dateien. Überwiegend nicht auf Deutsch — slowenisch, spanisch,
+  niederländisch, walisisch —, und eine davon zeigt die Reanimation eines
+  Hundes.
+
+Das ist genau die Dünnheit, die oben als Grund steht, und keine Basis für
+ein mitgeliefertes Paket. Die Lizenz steht bei Commons je Datei auf ihrer
+eigenen Seite und muss **einzeln** geprüft werden; die Kategorieseite sagt
+nichts darüber. Was am Ende im Paket landet, trägt `credit` und `licence`
+und steht später unter dem Video — siehe unten.
+
 **Nutzen im Ernstfall.** Video ist dort das falsche Medium: eine Hand ist
 belegt, spulen geht nicht, zurückgehen auch nicht. Was hilft, ist große
 Schrift und Ton. Ein Video ist etwas für den Abend, an dem man sich die

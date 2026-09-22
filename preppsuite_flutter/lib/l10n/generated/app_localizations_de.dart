@@ -5022,6 +5022,17 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Anleitungen brauchen kein Video: Text, Zahlen und Zeichnungen sind vollständig und immer da. Videos sind ein Zusatz für den Abend, an dem man sich die Handgriffe in Ruhe ansieht – und sie sind ein eigener Download, weil zehn Filme mehr wiegen als die ganze App.';
 
   @override
+  String get firstAidVideoPackWhereTitle => 'Woher nehmen?';
+
+  @override
+  String get firstAidVideoPackWhereBody =>
+      'Fertige Pakete gibt es nicht, und diese App verweist auf keines. Jedes brauchbare deutsche Erste-Hilfe-Video ist urheberrechtlich geschützt – das Material der Hilfsorganisationen vollständig. Frei lizenziert liegt vor allem auf Wikimedia Commons etwas, aber wenig: In „Videos of cardiopulmonary resuscitation\" standen am 22.09.2026 acht Dateien, überwiegend nicht auf Deutsch, eine davon zeigt die Reanimation eines Hundes. Jede Lizenz steht auf der Dateiseite und ist einzeln zu prüfen.';
+
+  @override
+  String get firstAidVideoPackWhereHow =>
+      'Ein eigenes Paket bauen: siehe docs/erste-hilfe.md im Quelltext. Credit und Lizenz jedes Films stehen später unter dem Video.';
+
+  @override
   String get firstAidVideoPackFromNetwork => 'Über das Netz';
 
   @override

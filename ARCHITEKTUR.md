@@ -1767,6 +1767,70 @@ neben dem Widget: der hatte einen begrenzten Kasten zum Sitzen. Der Test
 rendert es jetzt in einer Liste.
 
 
+### Einstellungen bleiben in Schritt, ohne dass ein Schreibort es merkt
+
+`CarriedHousehold` brachte die Einstellungen **einmal** herüber, bei der
+Einrichtung. Ein Pegel, der auf dem Telefon gewechselt wurde, erreichte
+den Rechner nie. Der Grund dafür war gut: Einstellungen hatten keinen
+Zeitstempel, und ohne den ist jede Zusammenführung auf einem benutzten
+Gerät ein stiller Verlust.
+
+Sie haben jetzt welche, und zwei Entscheidungen machen das billig:
+
+**Gestempelt beim Veröffentlichen, nicht beim Schreiben.** Nichts fängt
+`prefs.setString` ab. Stattdessen wird das, was hinausgeht, mit dem
+verglichen, was beim letzten Mal hinausging; was sich unterscheidet,
+bekommt diesen Moment. Kein Schreibort zu merken heißt kein Schreibort zu
+vergessen — die Fehlerklasse, die dieses Projekt immer wieder findet. Der
+Preis: eine Änderung ohne Netz trägt die Zeit der nächsten
+Veröffentlichung statt der Änderung. Für „wer ist weiter" ist das
+dieselbe Antwort.
+
+**Ein Boden, damit niemand beim Start schreit.** Die erste
+Veröffentlichung nach dieser Änderung würde sonst jeden Wert mit „jetzt"
+stempeln, und zwei Geräte eine Minute auseinander ließen das spätere
+alles überschreiben. Ungestempelte Werte starten deshalb bei
+`settingsEpoch` — derselbe Kniff wie `ChecklistSeeder.seededAt`. Beide
+Seiten stehen gleich, und die erste echte Änderung ist das Erste, was
+gewinnt.
+
+**Nicht alles reist.** `CarriedWhen` trennt, was dem Haushalt gehört, von
+dem, wie *dieses Gerät* eingerichtet ist. Welchen Pegel der Haushalt
+liest, gehört dem Haushalt. Ob dieser Bildschirm dunkel ist, ob dieses
+Gerät benachrichtigt und ob es aus einem Archiv zeichnet, das es
+vielleicht gar nicht hat, gehört ihm nicht — sonst würde der Rechner
+dunkel, weil jemand im Zug das Telefon umgestellt hat. Die reisen weiter
+**einmal**, bei der Einrichtung.
+
+**Die Zeilen zuerst, die Einstellungen danach.** Eine Einstellung, die
+sich nicht speichern lässt, darf die Zeilen nicht kosten: `readSynced-`
+und `applySyncedSettings` geben im Fehlerfall leer beziehungsweise null
+zurück, statt zu werfen. Genau diese Reihenfolge stand beim ersten Wurf
+falsch herum, und acht Abgleich-Tests haben es gemeldet.
+
+Getragen wird das im `DeviceSnapshot` — der Datei, die ohnehin alle zwei
+Minuten neu veröffentlicht wird. Damit reist es über **alle vier** Wege
+zugleich: gemeinsamer Ordner, Direktübergabe in beide Richtungen und
+QR-Kette. `settings_sync_store_test.dart` liest den Quellbaum und meldet
+jeden Weg, der Zeilen zusammenführt und die Einstellungen vergisst; die
+Sicherung ist namentlich ausgenommen, denn ein Rückspielen ist eine Kopie
+dieses Geräts aus seiner eigenen Vergangenheit und hat den anderen nicht
+zu sagen, wer den Pegel zuletzt geändert hat.
+
+### Bei den Videos steht die Zahl, nicht die Vermutung
+
+Die App verweist auf kein fertiges Videopaket, weil es keines gibt — und
+seit 1.9.9 sagt sie auch, **wo** man realistisch anfängt und wie dünn es
+dort ist. Nachgesehen am 22.09.2026: `Category:Videos of first aid` auf
+Wikimedia Commons existiert nicht, `Category:Videos of cardiopulmonary
+resuscitation` enthält acht Dateien, überwiegend nicht auf Deutsch, eine
+davon die Reanimation eines Hundes.
+
+Das steht so auf dem Bildschirm und in `docs/erste-hilfe.md`. Eine
+Quellenangabe ohne geprüfte Zahl wäre in dieser App dasselbe wie eine
+erfundene Skala.
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,

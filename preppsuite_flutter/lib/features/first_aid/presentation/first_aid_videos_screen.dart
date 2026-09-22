@@ -72,6 +72,37 @@ class _FirstAidVideosScreenState extends ConsumerState<FirstAidVideosScreen> {
               data: (state) => _Installed(state: state, l10n: l10n),
             ),
           ),
+          // The question the screen used to leave hanging. It said "enter
+          // the address you published your pack at", which assumes the
+          // pack already exists -- and the reason none ships is exactly
+          // the reason finding one is hard.
+          Card(
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.firstAidVideoPackWhereTitle,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.firstAidVideoPackWhereBody,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.firstAidVideoPackWhereHow,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

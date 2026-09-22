@@ -10,6 +10,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../sharing/application/carried_settings.dart';
 import '../../sharing/application/shared_folder_store.dart';
 import '../../sharing/application/snapshot_exchange.dart';
+import '../../sharing/application/settings_sync_store.dart';
 import '../application/handover_payload.dart';
 import '../application/local_handover.dart';
 import '../application/local_discovery.dart';
@@ -140,6 +141,7 @@ class _QrSendScreenState extends ConsumerState<QrSendScreen> {
         ref.read(appDatabaseProvider),
         deviceId: await const SharedFolderStore().deviceId(),
         householdId: widget.householdId,
+        settings: await readSyncedSettings(),
       );
       // The same superset the handover sends, minus the photographs: a
       // single picture would be some two hundred more frames to film, but

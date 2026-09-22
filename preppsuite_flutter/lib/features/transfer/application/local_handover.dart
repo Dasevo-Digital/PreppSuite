@@ -8,6 +8,7 @@ import '../../../local_db/database.dart';
 import '../../sharing/application/carried_settings.dart';
 import '../../sharing/application/folder_crypto.dart';
 import '../../sharing/application/snapshot_exchange.dart';
+import '../../sharing/application/settings_sync_store.dart';
 import 'handover_payload.dart';
 import 'handover_photos.dart';
 
@@ -248,6 +249,7 @@ class LocalHandoverHost {
         }
 
         final received = await applyHouseholdSnapshot(db, incoming.snapshot);
+        await applySyncedSettings(incoming.snapshot.settings);
         // After the rows and not before: a picture belongs to a row, and
         // on a device being set up that row arrived a moment ago.
         final tookPhotos = await applyHouseholdPhotos(
@@ -262,6 +264,7 @@ class LocalHandoverHost {
           db,
           deviceId: deviceId,
           householdId: householdId,
+          settings: await readSyncedSettings(),
         );
         final answer = HandoverPayload(
           snapshot: ours,
@@ -378,6 +381,7 @@ Future<LocalHandoverResult> joinLocalHandover({
     db,
     deviceId: deviceId,
     householdId: householdId,
+    settings: await readSyncedSettings(),
   );
   final mine = await localPhotoNames(db, householdId: householdId);
   final offer = HandoverPayload(
@@ -455,6 +459,7 @@ Future<LocalHandoverResult> joinLocalHandover({
       }
 
       final received = await applyHouseholdSnapshot(db, theirs.snapshot);
+      await applySyncedSettings(theirs.snapshot.settings);
       return (
         received: received,
         sent: ours.rowCount,

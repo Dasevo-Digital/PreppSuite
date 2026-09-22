@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../../../local_db/database.dart';
+import 'settings_sync.dart';
 
 /// Everything one device knows, as one file.
 ///
@@ -28,6 +29,7 @@ class DeviceSnapshot {
     this.householdPlans = const [],
     this.householdMembers = const [],
     this.possessions = const [],
+    this.settings = const {},
   });
 
   /// See [HouseholdFile.currentVersion] for how a mismatch is handled: a
@@ -74,6 +76,21 @@ class DeviceSnapshot {
   /// [_rows] answers an empty list for it.
   final List<Map<String, Object?>> possessions;
 
+  /// The household's settings, each with the moment this device last saw
+  /// it change — which river gauge it reads, what the energy plan is,
+  /// how far ahead it wants to be warned.
+  ///
+  /// Here rather than only in a handover, because this is the file that
+  /// keeps travelling: the folder republishes it every couple of
+  /// minutes, and that is what turns "the settings came over once at
+  /// setup" into "the settings stay in step". Not counted in [rowCount]
+  /// — these are not rows and a household that changed one setting has
+  /// not synced forty items.
+  ///
+  /// Added after the fact, like [possessions]: a file from an older
+  /// version simply has no such key.
+  final Map<String, StampedSetting> settings;
+
   String encode() => const JsonEncoder.withIndent('  ').convert(toJson());
 
   /// The same content as [encode], still as a map.
@@ -95,6 +112,7 @@ class DeviceSnapshot {
     'householdPlans': householdPlans,
     'householdMembers': householdMembers,
     'possessions': possessions,
+    if (settings.isNotEmpty) 'settings': encodeStampedSettings(settings),
   };
 
   static DeviceSnapshot? decode(String raw) {
@@ -121,6 +139,7 @@ class DeviceSnapshot {
         householdPlans: _rows(json['householdPlans']),
         householdMembers: _rows(json['householdMembers']),
         possessions: _rows(json['possessions']),
+        settings: decodeStampedSettings(json['settings']),
       );
     } on FormatException {
       return null;
