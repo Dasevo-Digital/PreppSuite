@@ -2850,5 +2850,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "transferInterrupted": "Die Verbindung stand, die Übertragung ist aber nicht fertig geworden. Beide Geräte wach lassen und noch einmal versuchen – bei vielen Fotos dauert es etwas."
 }

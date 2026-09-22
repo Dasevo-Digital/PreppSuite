@@ -6277,4 +6277,8 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0 counted in a unit no label can be applied to — a tin, a jar. $_temp1 not count towards the supply calculator until the unit is g, kg, ml or l.';
   }
+
+  @override
+  String get transferInterrupted =>
+      'The connection was made but the transfer did not finish. Keep both devices awake and try again — with a lot of photos it takes a moment.';
 }

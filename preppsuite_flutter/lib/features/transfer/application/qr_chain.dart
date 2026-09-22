@@ -47,14 +47,31 @@ import 'package:archive/archive.dart' show GZipEncoder, GZipDecoder, getCrc32;
 /// The marker every frame starts with.
 const qrChainPrefix = 'PS1';
 
-/// How many characters of payload go in one frame.
+/// How many characters of **payload** go in one frame.
 ///
 /// Not the maximum a QR code can hold — that is 2953 bytes, and a code
 /// that dense is a grey smudge to a phone camera pointed at a screen
-/// across a table. 700 lands around version 20 at medium error
-/// correction, which stays legible at arm's length, and the cost is only
-/// more frames in the loop.
-const qrChainFrameSize = 700;
+/// across a table. The aim is a code that stays legible at arm's length,
+/// and the cost of a smaller one is only more frames in the loop.
+///
+/// This was 700, with a comment saying that landed "around version 20".
+/// It did not: the header in front of the payload is another seventeen
+/// to twenty-three characters, so a frame came to 717–719 and the
+/// encoder went to **version 22** — 105 modules, about 3.4 logical
+/// pixels each on an ordinary phone. The figure has to be chosen for the
+/// whole frame, not for the part of it that varies.
+///
+/// Version 20 at medium correction holds 666 bytes, so [_frameOverhead]
+/// comes off that.
+const qrChainFrameSize = _version20Capacity - _frameOverhead;
+
+/// Bytes a version-20 code holds at medium error correction.
+const _version20Capacity = 666;
+
+/// The longest `PS1:<8 hex>:<index>:<total>:` can get — four digits each
+/// for the index and the total, which is ten thousand frames and far more
+/// than anyone would film.
+const _frameOverhead = 4 + 8 + 1 + 4 + 1 + 4 + 1;
 
 /// Cuts [payload] into frames to be shown one after another.
 ///

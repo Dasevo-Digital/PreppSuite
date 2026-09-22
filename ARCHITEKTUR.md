@@ -1285,6 +1285,57 @@ hundred grams of it, and Open Food Facts states per 100 g for solids and
 per 100 ml for liquids. `FoodAmount` carries which base it is in so a
 caller cannot lose track.
 
+### "Not reachable" must mean the network, and nothing else
+
+`joinLocalHandover` tries each address the invitation names and steps over
+the ones that do not answer, which is right: a machine can have several
+and only one of them reaches. What it used to do as well was step over
+every *other* failure the same way — so an exchange that timed out looked
+exactly like an address that was dead, the loop ran out, and the person
+was told "Das andere Geraet ist nicht erreichbar. Haengen beide im selben
+Netz?" while standing next to their own router.
+
+It became reachable once the photographs started travelling. The request
+carries the whole household in one body, the ceiling for that was raised
+from eight to thirty-two megabytes, and **the eight-second timeout was
+left where it was** — which is roughly what the upload alone costs. So the
+connection succeeded, the exchange ran out of time, and the app blamed the
+wifi.
+
+Two timeouts now, and they answer different questions. `connectTimeout`
+decides whether an address answers at all and stays short. The exchange
+gets `exchangeTimeoutFor`, which is a floor for the far side's own work
+plus an allowance at a deliberately pessimistic half a megabyte a second.
+And past the moment an address answers, a failure is no longer allowed to
+fall through to the next address: it is `LocalHandoverFailure.interrupted`,
+which says the connection was made and to try again, rather than sending
+somebody to look at the one thing that was demonstrably fine.
+
+### A QR chain is filmed, not scanned, and both ends have to allow for it
+
+Two settings decide whether a run of frames can be read at all, and both
+had drifted from what the comments beside them claimed.
+
+**The frame size is for the whole frame.** `qrChainFrameSize` was 700 with
+a comment saying that landed "around version 20". It did not: the
+`PS1:<crc>:<index>:<total>:` header is another seventeen to twenty-three
+characters, so a frame came to 717 and the encoder went to version 22 --
+105 modules, about 3.4 logical pixels each on an ordinary phone. The size
+is now derived from version 20's capacity minus the header, and
+`qr_chain_test.dart` holds every full frame to that rather than trusting
+the prose.
+
+**The camera is watching a sequence, not a till.** `MobileScanner`'s
+default is `DetectionSpeed.normal`, which ignores everything for 250 ms
+after a read. That is right where the same barcode sits in front of the
+lens and the saving is memory on an old phone. Here the thing being filmed
+is a *run* of different codes, each up for about half a second, and every
+one has to be caught -- so the throttle leaves roughly two chances per
+frame instead of the fifteen the camera offers. The receive screen passes
+its own controller with `DetectionSpeed.unrestricted`; the screen lives for
+seconds and holds one small collector, so the memory the default protects
+is not at stake.
+
 ### A value migration cannot simply be replayed
 
 Every migration before schema 16 changed a shape, and a shape can be asked

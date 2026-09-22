@@ -3792,5 +3792,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "transferInterrupted": "The connection was made but the transfer did not finish. Keep both devices awake and try again — with a lot of photos it takes a moment."
 }

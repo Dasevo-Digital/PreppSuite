@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -53,6 +54,25 @@ class QrReceiveScreen extends ConsumerStatefulWidget {
 }
 
 class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
+  /// The camera, told what it is actually being pointed at.
+  ///
+  /// The default is [DetectionSpeed.normal], which ignores everything for
+  /// 250 ms after each read — a sensible default for a till, where the
+  /// same barcode sits in front of the lens and the saving is memory on
+  /// an old phone. This screen is the opposite case: the thing being
+  /// filmed is a *run* of different codes, each on screen for about half
+  /// a second, and every one of them has to be caught. Throttling to one
+  /// look per 250 ms leaves roughly two chances per frame instead of the
+  /// fifteen the camera actually offers, and a frame missed on every pass
+  /// is a transfer that sits at "1 von 18" for ever.
+  ///
+  /// The screen lives for seconds and holds one small collector, so the
+  /// memory the default protects is not at stake here.
+  final _scanner = MobileScannerController(
+    detectionSpeed: DetectionSpeed.unrestricted,
+    formats: const [BarcodeFormat.qrCode],
+  );
+
   final _receiver = QrChainReceiver();
   var _done = false;
   String? _result;
@@ -242,6 +262,10 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
           LocalHandoverFailure.otherHousehold => l10n.transferWrongHousehold,
           LocalHandoverFailure.unreachable => l10n.transferUnreachable,
           LocalHandoverFailure.unreadable => l10n.transferBroken,
+          // Not the same sentence as unreachable on purpose: that one
+          // sends somebody to look at their wifi, and here the wifi is
+          // demonstrably fine.
+          LocalHandoverFailure.interrupted => l10n.transferInterrupted,
         };
       });
     } on Object {
@@ -308,6 +332,14 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    // Ours to make, ours to close: a controller handed to [MobileScanner]
+    // is not disposed by it.
+    unawaited(_scanner.dispose());
+    super.dispose();
+  }
+
   void _again() {
     _receiver.reset();
     setState(() {
@@ -339,7 +371,10 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
                           : theme.colorScheme.primary,
                     ),
                   )
-                : MobileScanner(onDetect: _onDetect),
+                : MobileScanner(
+                    controller: _scanner,
+                    onDetect: _onDetect,
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.all(16),

@@ -353,14 +353,16 @@ class _FoodRow extends StatelessWidget {
   /// Pieces become grams, because food is counted in a measure now and a
   /// per-100 figure cannot be applied to an egg. Everything else is the
   /// table's own unit.
-  (double amount, String unit) _forInventory(AppLocalizations l10n, double amount) =>
-      switch (food.unit) {
-        StorageUnit.piece => (
-          amount * (_pieceGrams() ?? 1),
-          l10n.storageUnitGram,
-        ),
-        _ => (amount, _unitLabel(l10n, food.unit)),
-      };
+  (double amount, String unit) _forInventory(
+    AppLocalizations l10n,
+    double amount,
+  ) => switch (food.unit) {
+    StorageUnit.piece => (
+      amount * (_pieceGrams() ?? 1),
+      l10n.storageUnitGram,
+    ),
+    _ => (amount, _unitLabel(l10n, food.unit)),
+  };
 
   Future<void> _addToInventory(
     BuildContext context,

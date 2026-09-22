@@ -123,6 +123,15 @@ enum LocalHandoverFailure {
 
   /// The body did not decrypt, or was not a snapshot.
   unreadable,
+
+  /// The other device answered and the exchange then did not finish.
+  ///
+  /// Kept apart from [unreachable] because the two send somebody to look
+  /// in completely different places. "Not reachable" asks whether both
+  /// are on the same network; this one means they are, the socket was
+  /// open, and something after that went wrong — so the answer is to try
+  /// again, not to go and check the wifi.
+  interrupted,
 }
 
 /// The side that waits.
@@ -308,7 +317,18 @@ Future<LocalHandoverResult> joinLocalHandover({
   required String deviceId,
   required String householdId,
   required LocalHandoverInvitation invitation,
-  Duration timeout = const Duration(seconds: 8),
+
+  /// How long one address gets to answer at all.
+  ///
+  /// Short on purpose: this is the figure that decides "nothing here",
+  /// and a device that is not listening says so at once. It is **not**
+  /// how long the exchange may take — see [exchangeTimeoutFor], which is
+  /// the distinction this used to lack.
+  Duration connectTimeout = const Duration(seconds: 8),
+
+  /// How long the exchange itself may take. Worked out from the body
+  /// when left out.
+  Duration? exchangeTimeout,
 
   /// Where arriving pictures are written. The app's own photo folder when
   /// left out; a test hands in a temporary one so that exercising a real
@@ -338,17 +358,34 @@ Future<LocalHandoverResult> joinLocalHandover({
   );
   final body = await encryptForFolder(offer.encode(), invitation.key);
 
-  final client = HttpClient()..connectionTimeout = timeout;
+  final exchange = exchangeTimeout ?? exchangeTimeoutFor(body.length);
+
+  final client = HttpClient()..connectionTimeout = connectTimeout;
   try {
     for (final address in invitation.addresses) {
+      final HttpClientRequest request;
+      try {
+        request = await client
+            .post(address, invitation.port, '/handover')
+            .timeout(connectTimeout);
+      } on Object {
+        // This address did not answer. A machine can have several and
+        // only one of them reaches the other device, so the next one
+        // gets a turn.
+        continue;
+      }
+
+      // Past here the address answered, and whatever happens next is
+      // this handover's failure rather than the network's. Falling
+      // through to the bottom of the loop would report "not reachable"
+      // for a device that plainly was — which is exactly what an
+      // eight-second ceiling on a body carrying twenty megabytes of
+      // photographs did.
       final String answer;
       try {
-        final request = await client
-            .post(address, invitation.port, '/handover')
-            .timeout(timeout);
         request.headers.contentType = ContentType.text;
         request.write(body);
-        final response = await request.close().timeout(timeout);
+        final response = await request.close().timeout(exchange);
 
         if (response.statusCode == HttpStatus.conflict) {
           throw const LocalHandoverException(
@@ -358,13 +395,11 @@ Future<LocalHandoverResult> joinLocalHandover({
         if (response.statusCode != HttpStatus.ok) {
           throw const LocalHandoverException(LocalHandoverFailure.unreadable);
         }
-        answer = await utf8.decoder.bind(response).join();
+        answer = await utf8.decoder.bind(response).join().timeout(exchange);
       } on LocalHandoverException {
         rethrow;
       } on Object {
-        // This address did not answer. A machine can have several and
-        // only one of them reaches the other device.
-        continue;
+        throw const LocalHandoverException(LocalHandoverFailure.interrupted);
       }
 
       final plain = await decryptFromFolder(answer, invitation.key);
@@ -392,6 +427,27 @@ Future<LocalHandoverResult> joinLocalHandover({
 
   throw const LocalHandoverException(LocalHandoverFailure.unreachable);
 }
+
+/// How long an exchange of [bodyBytes] is allowed to take.
+///
+/// The handover is one request carrying everything, and since the
+/// photographs began travelling that is up to
+/// [localHandoverMaxRequestBytes] — some thirty megabytes once base64 and
+/// the encryption have had their share. It used to get the same eight
+/// seconds as the connection, which is roughly the time the upload alone
+/// needs on a good day; the exchange therefore timed out, the timeout was
+/// read as "this address did not answer", and a household standing next
+/// to its own router was told to check the network.
+///
+/// A floor for the far side's own work — decrypting, writing pictures to
+/// disk, reading its own household back — plus an allowance at a
+/// deliberately pessimistic half a megabyte a second. Generous rather
+/// than tight: the cost of waiting too long is a person watching a
+/// spinner they can cancel, and the cost of waiting too little is a
+/// handover that fails while blaming the wrong thing.
+Duration exchangeTimeoutFor(int bodyBytes) =>
+    const Duration(seconds: 30) +
+    Duration(milliseconds: (bodyBytes / 500).round());
 
 /// Every address this device can be reached on from the same network.
 ///

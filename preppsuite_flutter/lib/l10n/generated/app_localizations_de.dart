@@ -6308,4 +6308,8 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     return '$_temp0 in einer Einheit gezählt, auf die sich kein Etikett anwenden lässt – etwa „Dose\" oder „Glas\". $_temp1 nicht in den Vorrats-Rechner, bis die Einheit in g, kg, ml oder l steht.';
   }
+
+  @override
+  String get transferInterrupted =>
+      'Die Verbindung stand, die Übertragung ist aber nicht fertig geworden. Beide Geräte wach lassen und noch einmal versuchen – bei vielen Fotos dauert es etwas.';
 }

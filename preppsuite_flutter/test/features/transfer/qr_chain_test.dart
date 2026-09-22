@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:qr/qr.dart';
 import 'package:preppsuite_flutter/features/transfer/application/qr_chain.dart';
 
 /// Showing data on one screen and filming it with another.
@@ -253,5 +254,56 @@ void main() {
     final frames = qrChainFrames(household(200));
 
     expect(frames.length, lessThan(20));
+  });
+
+  group('how dense a frame comes out', () {
+    // The figure that decides whether any of this works at all. A code
+    // the camera cannot read is not a slow transfer, it is a transfer
+    // that sits at "1 von 18" for ever — so the density is pinned here
+    // rather than left to a comment.
+    //
+    // It had drifted once already: the size was chosen for the payload
+    // while the header rode along unaccounted for, so a frame meant for
+    // version 20 came out at version 22.
+    int versionOf(String frame) => QrCode.fromData(
+      data: frame,
+      errorCorrectLevel: QrErrorCorrectLevel.M,
+    ).typeNumber;
+
+    test('a full frame stays inside version 20', () {
+      // Random bytes on purpose: the chain gzips before it cuts, and a
+      // repeating payload compresses to a single frame that proves
+      // nothing about a full one.
+      final noise = Random(20260922);
+      final frames = qrChainFrames(
+        Uint8List.fromList(
+          List.generate(30000, (_) => noise.nextInt(256)),
+        ),
+      );
+
+      expect(frames.length, greaterThan(20), reason: 'several full frames');
+      for (final frame in frames) {
+        expect(
+          versionOf(frame),
+          lessThanOrEqualTo(20),
+          reason: '${frame.length} Zeichen',
+        );
+      }
+    });
+
+    test('and the header is counted, not hoped over', () {
+      // The mistake itself: the payload is the size, the frame is longer.
+      final noise = Random(1);
+      final frames = qrChainFrames(
+        Uint8List.fromList(List.generate(9000, (_) => noise.nextInt(256))),
+      );
+
+      expect(
+        frames.first.length,
+        greaterThan(qrChainFrameSize),
+        reason: 'the header is really there',
+      );
+      expect(frames.first.length, lessThanOrEqualTo(666));
+    });
   });
 }

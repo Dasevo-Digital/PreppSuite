@@ -399,7 +399,7 @@ void main() {
           deviceId: 'device-b',
           householdId: householdId,
           invitation: invitation,
-          timeout: const Duration(milliseconds: 400),
+          connectTimeout: const Duration(milliseconds: 400),
         ),
         throwsA(
           isA<LocalHandoverException>().having(
@@ -457,12 +457,106 @@ void main() {
           deviceId: 'device-b',
           householdId: householdId,
           invitation: host.invitation,
-          timeout: const Duration(milliseconds: 600),
+          connectTimeout: const Duration(milliseconds: 600),
         );
 
         expect(result.received, 0, reason: 'it got through on the second');
       },
     );
+  });
+  group('a connection that was made and then did not finish', () {
+    test('is not reported as a device that could not be reached', () async {
+      // The report this pins: "kein Geraet gefunden, obwohl im gleichen
+      // Netz". The socket opened, the exchange ran out of time, the
+      // timeout was caught by the same `continue` that steps over a dead
+      // address, and the loop ended in "are you both on the same
+      // network?" -- pointing a household at the one thing that was
+      // demonstrably fine.
+      //
+      // A server that accepts the connection and then says nothing has
+      // exactly that shape, and is far quicker to arrange than twenty
+      // megabytes of photographs.
+      final silent = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(() => silent.close(force: true));
+      silent.listen((request) {
+        // Accepted, read, and deliberately never answered.
+      });
+
+      final guest = open();
+      await expectLater(
+        joinLocalHandover(
+          db: guest,
+          deviceId: 'device-b',
+          householdId: householdId,
+          invitation: LocalHandoverInvitation(
+            addresses: const ['127.0.0.1'],
+            port: silent.port,
+            householdId: householdId,
+            key: FolderKey(Uint8List(32)),
+          ),
+          exchangeTimeout: const Duration(milliseconds: 300),
+        ),
+        throwsA(
+          isA<LocalHandoverException>().having(
+            (error) => error.reason,
+            'reason',
+            LocalHandoverFailure.interrupted,
+          ),
+        ),
+      );
+    });
+
+    test('while nothing listening at all still is', () async {
+      // The other half of the distinction, so that widening the first one
+      // has not swallowed the case it was carved out of.
+      final guest = open();
+      await expectLater(
+        joinLocalHandover(
+          db: guest,
+          deviceId: 'device-b',
+          householdId: householdId,
+          invitation: LocalHandoverInvitation(
+            // Reserved for documentation, so nothing answers here.
+            addresses: const ['192.0.2.1'],
+            port: 9,
+            householdId: householdId,
+            key: FolderKey(Uint8List(32)),
+          ),
+          connectTimeout: const Duration(milliseconds: 300),
+        ),
+        throwsA(
+          isA<LocalHandoverException>().having(
+            (error) => error.reason,
+            'reason',
+            LocalHandoverFailure.unreachable,
+          ),
+        ),
+      );
+    });
+  });
+
+  group('how long an exchange may take', () {
+    test('grows with the body rather than staying at eight seconds', () {
+      // The ceiling that caused this. A body of rows is small and gets
+      // the floor; a body carrying the photo budget needs minutes, and
+      // eight seconds is about what the upload alone costs.
+      final rows = exchangeTimeoutFor(200 * 1024);
+      final withPhotos = exchangeTimeoutFor(localHandoverMaxRequestBytes);
+
+      expect(rows.inSeconds, greaterThanOrEqualTo(30));
+      expect(withPhotos, greaterThan(rows));
+      expect(
+        withPhotos.inSeconds,
+        greaterThan(60),
+        reason: 'thirty megabytes cannot cross in under a minute',
+      );
+    });
+
+    test('and never drops below the far side own work', () {
+      // An empty body still has a household to decrypt, rows to apply and
+      // pictures to write before it can answer.
+      expect(exchangeTimeoutFor(0).inSeconds, greaterThanOrEqualTo(30));
+    });
   });
 }
 

@@ -10492,6 +10492,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{One food is} other{{count} foods are}} counted in a unit no label can be applied to — a tin, a jar. {count, plural, =1{It does} other{They do}} not count towards the supply calculator until the unit is g, kg, ml or l.'**
   String foodWithoutMeasureBody(int count);
+
+  /// No description provided for @transferInterrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'The connection was made but the transfer did not finish. Keep both devices awake and try again — with a lot of photos it takes a moment.'**
+  String get transferInterrupted;
 }
 
 class _AppLocalizationsDelegate
