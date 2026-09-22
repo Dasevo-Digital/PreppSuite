@@ -57,7 +57,10 @@ werden gezählt, nicht gewogen.
 
 Vorhandene Posten in Dosen oder Gläsern bleiben stehen. Sie zählen nicht
 in den Vorrats-Rechner, und die Krisenübersicht nennt sie, statt sie still
-zu übergehen – geraten wird nichts.
+zu übergehen – geraten wird nichts. Die Vorratskarte sagt, wie viele das
+sind, und beantwortet auf einen Tipp die Frage, die man dabei wirklich
+hat: Nein, dein Vorrat wird nicht umgeschrieben. Die vier Einheiten im
+Hinweis sind zum Antippen, nicht zum Abschreiben.
 
 **Checklisten.** 19 mitgelieferte Listen nach dem BBK-Ratgeber – von
 Wasser, Lebensmitteln und Erster Hilfe über Strom- und Heizungsausfall,
@@ -65,6 +68,14 @@ Hochwasser, Hitze und Sturm bis zu Haustieren, Säuglingen und
 Falschmeldungen; eine davon, das Verhalten während eines Stromausfalls,
 folgt FEMA – dazu beliebig viele eigene. Einzelne Punkte lassen sich
 mit einem Vorratsartikel verknüpfen.
+
+Getrennt nach **Vorsorge** und **Im Ereignis**: was da sein muss, bevor
+etwas passiert, und was zu tun ist, während es passiert. Beides wird zu
+verschiedenen Zeitpunkten gefragt, und die Antwort auf das eine sollte
+nichts sein, an dem man vorbeiscrollt. „Strom- und Heizungsausfall" und
+„Wenn der Strom ausfällt" stehen deshalb auf verschiedenen Seiten –
+einmal, was zu kaufen ist, einmal, was zu tun ist. Eigene Listen wählen
+selbst, wohin sie gehören.
 
 **Budget.** Was die Vorsorge gekostet hat, nach Kategorie. Dazu ein
 PDF-Bericht der fehlenden Ausrüstung – der Bestände also, die unter ihrem
@@ -278,6 +289,25 @@ Ein Funkchat über LoRa an Menschen außerhalb des Haushalts ist **geplant,
 aber nicht gebaut**. Der Entwurf samt der Rechnung, warum darüber kein
 Haushaltsabgleich läuft, steht in
 [`docs/lora-funkchat-plan.md`](docs/lora-funkchat-plan.md).
+
+**Notfallkarten.** Für jede Person im Haushalt das, was ein Rettungsdienst
+wissen will: Geburtsjahr, Blutgruppe, Allergien, Dauermedikation,
+Vorerkrankungen, Versicherung. Dazu **mehrere Ärztinnen und Ärzte** und
+**mehrere Personen, die man wegen dieser Person anruft** – je mit Namen,
+Verhältnis oder Fachrichtung und Rufnummer, die sich direkt wählen lässt.
+Nötig ist nur der Name: eine Karte, auf der nichts steht außer „Lena,
+Penicillinallergie", ist es wert. Das sind Gesundheitsdaten, und der
+Bildschirm sagt vor dem ersten Buchstaben, ob der gemeinsame Ordner, über
+den sie wandern, verschlüsselt ist.
+
+**Suchen.** Eine Lupe über die ganze App: Bildschirme, Vorräte,
+Checklistenpunkte und Hausrat. Jeder Treffer sagt, wo er liegt – „Pegel ·
+Warnungen", „Basmatireis · Keller" –, denn beim nächsten Mal soll man es
+selbst finden. Wer „Hochwasser" tippt, bekommt den Pegel, auch wenn das
+Wort nirgends im Titel steht; wer die Umlaute weglässt, bekommt trotzdem
+das Notgepäck. Die Notfallkarten sind absichtlich nicht dabei: eine
+Diagnose gehört nicht zwei Zeilen unter eine Dose Bohnen. Am Rechner mit
+Strg+F oder Strg+K, auf dem Telefon im Mehr-Menü.
 
 Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
 Auf einem breiten Fenster legen sich die Bildschirme in Spalten lesbarer

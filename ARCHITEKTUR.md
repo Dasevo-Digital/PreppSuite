@@ -53,7 +53,16 @@ git archive --format=tar.gz --prefix=src/ -o /tmp/src.tar.gz v<version>
 The Xapian step has to run **before** the app or CMake will not bundle the
 library, and skipping it silently costs the archive's own full-text index —
 1.5.0 shipped a Linux package without `libzim_xapian.so` for exactly that
-reason. Windows has no shim at all; there the app searches its own index.
+reason.
+
+**Windows gets the same shim, and never builds it itself.** `flutter build
+windows` produces no `zim_xapian.dll` — the Visual Studio toolchain has
+nothing to build it from, because xapian-core 1.4 dropped its MSVC project
+files. It is cross-built on TestKubuntu with mingw-w64
+(`native/zim_xapian/build_windows.sh`, needs `mingw-w64` and
+`libz-mingw-w64-dev`), copied over, and placed beside the exe **before**
+the zip is made. Count the entries: **56 is right, 24 means the DLL and
+its dependencies are missing.**
 
 **After every release, put this Mac back in order** — the machine that
 builds is also the machine that uses the app, and a build leaves copies
