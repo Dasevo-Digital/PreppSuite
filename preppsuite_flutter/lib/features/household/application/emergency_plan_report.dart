@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../local_db/database.dart';
+import 'card_people.dart';
 
 class EmergencyPlanReportStrings {
   const EmergencyPlanReportStrings({
@@ -51,7 +52,9 @@ class EmergencyCardFieldStrings {
     required this.conditions,
     required this.insurance,
     required this.doctor,
+    required this.doctors,
     required this.contact,
+    required this.contacts,
     required this.notes,
   });
 
@@ -62,7 +65,14 @@ class EmergencyCardFieldStrings {
   final String conditions;
   final String insurance;
   final String doctor;
+
+  /// The same heading over more than one of them. A card under three
+  /// specialists would otherwise be printed under "Ärztin oder Arzt".
+  final String doctors;
+
   final String contact;
+  final String contacts;
+
   final String notes;
 }
 
@@ -211,6 +221,19 @@ List<({String label, String value})> emergencyCardRows(
     rows.add((label: label, value: value.trim()));
   }
 
+  // The doctors and the people to ring are lists, stored one entry per
+  // line (see `card_people.dart`). They print as one block under one
+  // heading, which is what a sheet handed to a paramedic should look
+  // like — not the same label four times down the page.
+  void addPeople(String one, String many, String? stored) {
+    final people = parseCardPeople(stored);
+    if (people.isEmpty) return;
+    rows.add((
+      label: people.length == 1 ? one : many,
+      value: people.map((person) => person.line).join('\n'),
+    ));
+  }
+
   if (member.birthYear != null) {
     add(fields.birthYear, '${member.birthYear}');
   }
@@ -219,8 +242,8 @@ List<({String label, String value})> emergencyCardRows(
   add(fields.medication, member.medication);
   add(fields.conditions, member.conditions);
   add(fields.insurance, member.insurance);
-  add(fields.doctor, member.doctor);
-  add(fields.contact, member.emergencyContact);
+  addPeople(fields.doctor, fields.doctors, member.doctor);
+  addPeople(fields.contact, fields.contacts, member.emergencyContact);
   add(fields.notes, member.notes);
   return rows;
 }

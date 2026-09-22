@@ -2,12 +2,16 @@ import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/error_text.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/presentation/base_map_layer.dart';
+import '../../maps/application/offline_map_providers.dart';
+import '../../maps/presentation/map_coverage_notice.dart';
+import '../../maps/presentation/map_source_bar.dart';
 import '../../maps/presentation/map_zoom_buttons.dart';
 import '../application/geo_bounds.dart';
 import '../application/shelter_search.dart';
@@ -189,6 +193,12 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
         ? _shelters
         : _shelters.where((s) => s.confidence == _filter).toList();
 
+    // The same box the shelters are looked for in, which is also the
+    // one the map is showing.
+    final bounds = _center == null
+        ? null
+        : boundingBoxForRadius(_center!, _radiusKm);
+
     final mapHeight = (MediaQuery.sizeOf(context).height * 0.26)
         .clamp(176.0, 240.0)
         .toDouble();
@@ -352,6 +362,32 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
                     ),
                 ],
               ),
+            ),
+          ),
+          // Which map is being drawn, and why it may not be all there.
+          // The shelter map is the one people open in a hurry, and a
+          // half-drawn map with nothing said about it is the kind of
+          // thing that gets blamed on the wrong part of the house.
+          Consumer(
+            builder: (context, ref, _) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                MapCoverageNotice(
+                  west: bounds?.west,
+                  south: bounds?.south,
+                  east: bounds?.east,
+                  north: bounds?.north,
+                  zoom: _zoomForRadius(_radiusKm).round(),
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: MapSourceBar(
+                    state: ref.watch(offlineMapProvider).value,
+                    l10n: l10n,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),

@@ -860,6 +860,42 @@ abstract class AppLocalizations {
   /// **'Checklists'**
   String get checklistsTitle;
 
+  /// No description provided for @checklistKindPreparation.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparation'**
+  String get checklistKindPreparation;
+
+  /// No description provided for @checklistKindResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'When it happens'**
+  String get checklistKindResponse;
+
+  /// No description provided for @checklistKindPreparationIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'What has to be there before anything happens.'**
+  String get checklistKindPreparationIntro;
+
+  /// No description provided for @checklistKindResponseIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do while it is happening.'**
+  String get checklistKindResponseIntro;
+
+  /// No description provided for @checklistKindLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind of list'**
+  String get checklistKindLabel;
+
+  /// No description provided for @checklistKindEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in this part yet.'**
+  String get checklistKindEmpty;
+
   /// No description provided for @checklistsEmpty.
   ///
   /// In en, this message translates to:
@@ -2546,6 +2582,66 @@ abstract class AppLocalizations {
   /// **'Who to call about this person'**
   String get emergencyCardContact;
 
+  /// No description provided for @emergencyCardDoctors.
+  ///
+  /// In en, this message translates to:
+  /// **'Doctors'**
+  String get emergencyCardDoctors;
+
+  /// No description provided for @emergencyCardDoctorAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a doctor'**
+  String get emergencyCardDoctorAdd;
+
+  /// No description provided for @emergencyCardSpecialty.
+  ///
+  /// In en, this message translates to:
+  /// **'Speciality'**
+  String get emergencyCardSpecialty;
+
+  /// No description provided for @emergencyCardSpecialtyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'GP, cardiologist'**
+  String get emergencyCardSpecialtyHint;
+
+  /// No description provided for @emergencyCardContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Who to call about this person'**
+  String get emergencyCardContacts;
+
+  /// No description provided for @emergencyCardContactAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a contact'**
+  String get emergencyCardContactAdd;
+
+  /// No description provided for @emergencyCardRelation.
+  ///
+  /// In en, this message translates to:
+  /// **'Relationship'**
+  String get emergencyCardRelation;
+
+  /// No description provided for @emergencyCardRelationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Partner, son, neighbour'**
+  String get emergencyCardRelationHint;
+
+  /// No description provided for @emergencyCardPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get emergencyCardPhone;
+
+  /// No description provided for @emergencyCardPersonRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove entry'**
+  String get emergencyCardPersonRemove;
+
   /// No description provided for @emergencyCardNotes.
   ///
   /// In en, this message translates to:
@@ -3745,6 +3841,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My location'**
   String get mapMyLocationAction;
+
+  /// No description provided for @mapCoverageMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The offline map does not reach this far. Nothing was ever downloaded for this area.'**
+  String get mapCoverageMissing;
+
+  /// No description provided for @mapCoverageIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'The offline map only covers part of this view — roughly {present} tiles out of {total}. The rest stays empty because it was never downloaded.'**
+  String mapCoverageIncomplete(int present, int total);
+
+  /// No description provided for @mapCoverageUseOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the online map'**
+  String get mapCoverageUseOnline;
+
+  /// No description provided for @mapCoverageUseOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the offline map'**
+  String get mapCoverageUseOffline;
+
+  /// No description provided for @mapTilesUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Some tiles never arrived from the tile server. What is missing is the connection, not the app.'**
+  String get mapTilesUnavailable;
 
   /// No description provided for @mapSourceOffline.
   ///

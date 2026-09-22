@@ -221,6 +221,7 @@ Map<String, Object?> encodeChecklistTemplate(ChecklistTemplate row) => {
   'householdId': row.householdId,
   'title': row.title,
   'category': row.category,
+  'kind': row.kind,
   'isBuiltIn': row.isBuiltIn,
   'updatedAt': _date(row.updatedAt),
   'deletedAt': _date(row.deletedAt),
@@ -245,6 +246,10 @@ ChecklistTemplatesCompanion? decodeChecklistTemplate(
     householdId: Value(_string(json['householdId'])),
     title: title,
     category: category,
+    // Absent from anything written before 1.9.8, and from any device
+    // still on it. The column's own default then applies, and the
+    // seeder puts the built-in ones right on the next launch.
+    kind: Value(_string(json['kind']) ?? 'preparation'),
     isBuiltIn: Value(json['isBuiltIn'] == true),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),

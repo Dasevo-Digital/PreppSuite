@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../sharing/presentation/folder_encryption_section.dart';
+import '../application/card_people.dart';
 import '../application/household_member_controller.dart';
 import 'emergency_card_form_screen.dart';
 import '../../../core/error_text.dart';
@@ -187,14 +189,19 @@ class _MemberCard extends ConsumerWidget {
                   SizedBox(
                     width: 140,
                     child: Text(
-                      line.$1,
+                      line.label,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
                   Expanded(
-                    child: Text(line.$2, style: theme.textTheme.bodyMedium),
+                    child: line.phone == null
+                        ? Text(line.value, style: theme.textTheme.bodyMedium)
+                        : _CallableValue(
+                            value: line.value,
+                            phone: line.phone!,
+                          ),
                   ),
                 ],
               ),
@@ -207,22 +214,61 @@ class _MemberCard extends ConsumerWidget {
 
   /// Only the fields that were filled in. An empty row would read as
   /// "no allergies" when it means "nobody said".
-  List<(String, String)> _lines() => [
+  List<_CardLine> _lines() => [
     if (member.bloodType != null)
-      (l10n.emergencyCardBloodType, member.bloodType!),
+      (
+        label: l10n.emergencyCardBloodType,
+        value: member.bloodType!,
+        phone: null,
+      ),
     if (member.allergies != null)
-      (l10n.emergencyCardAllergies, member.allergies!),
+      (
+        label: l10n.emergencyCardAllergies,
+        value: member.allergies!,
+        phone: null,
+      ),
     if (member.medication != null)
-      (l10n.emergencyCardMedication, member.medication!),
+      (
+        label: l10n.emergencyCardMedication,
+        value: member.medication!,
+        phone: null,
+      ),
     if (member.conditions != null)
-      (l10n.emergencyCardConditions, member.conditions!),
+      (
+        label: l10n.emergencyCardConditions,
+        value: member.conditions!,
+        phone: null,
+      ),
     if (member.insurance != null)
-      (l10n.emergencyCardInsurance, member.insurance!),
-    if (member.doctor != null) (l10n.emergencyCardDoctor, member.doctor!),
-    if (member.emergencyContact != null)
-      (l10n.emergencyCardContact, member.emergencyContact!),
-    if (member.notes != null) (l10n.emergencyCardNotes, member.notes!),
+      (
+        label: l10n.emergencyCardInsurance,
+        value: member.insurance!,
+        phone: null,
+      ),
+    ..._people(l10n.emergencyCardDoctor, member.doctor),
+    ..._people(l10n.emergencyCardContact, member.emergencyContact),
+    if (member.notes != null)
+      (label: l10n.emergencyCardNotes, value: member.notes!, phone: null),
   ];
+
+  /// One row per doctor, and one per person to ring.
+  ///
+  /// The heading is written once and the rest of the group runs under it
+  /// without repeating it — four rows all labelled "Ärztin oder Arzt"
+  /// would be a label doing no work. The number is carried separately so
+  /// it can be dialled; on this screen, of all screens, reading a phone
+  /// number off the glass and typing it again is the wrong ending.
+  Iterable<_CardLine> _people(String label, String? stored) sync* {
+    final people = parseCardPeople(stored);
+    for (var index = 0; index < people.length; index++) {
+      final person = people[index];
+      yield (
+        label: index == 0 ? label : '',
+        value: person.line,
+        phone: person.phone.trim().isEmpty ? null : person.phone.trim(),
+      );
+    }
+  }
 
   static String _initial(String name) {
     final trimmed = name.trim();
@@ -255,5 +301,44 @@ class _MemberCard extends ConsumerWidget {
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(l10n.emergencyCardRemoved)));
+  }
+}
+
+/// One row of a card: what it is called, what it says, and the number in
+/// it if there is one.
+typedef _CardLine = ({String label, String value, String? phone});
+
+/// A row whose number can be dialled.
+///
+/// The whole line stays selectable text rather than becoming a link:
+/// "Anna Weber (Partnerin) · 0170 987" is a sentence, and only the last
+/// part of it is a telephone number.
+class _CallableValue extends StatelessWidget {
+  const _CallableValue({required this.value, required this.phone});
+
+  final String value;
+  final String phone;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: Text(value, style: theme.textTheme.bodyMedium)),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          iconSize: 20,
+          icon: const Icon(Icons.call_outlined),
+          tooltip: phone,
+          // Silent where there is no dialler: a desktop without one is
+          // not a fault to report, and the number is right there to read.
+          onPressed: () => launchUrl(
+            Uri(scheme: 'tel', path: phone.replaceAll(' ', '')),
+          ).catchError((_) => false),
+        ),
+      ],
+    );
   }
 }

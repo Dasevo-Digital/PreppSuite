@@ -1443,6 +1443,71 @@ the one exception and says why in place: that list is what the subscribed
 regions currently have out, tens of entries at worst. The inventory is not
 converted for exactly this reason.
 
+### Ein Arzt ist Teil einer Karte, kein eigener Datensatz
+
+Auf einer Notfallkarte stehen mehrere Ärzte und mehrere Personen, die man
+wegen dieser Person anruft. Beides sind Listen, und beides liegt weiterhin
+in genau der Textspalte, in der vorher eine einzelne Zeile lag -- eine
+Zeile je Eintrag, geschrieben wie man es sagen würde:
+
+    Dr. Mira Sandoval (Hausärztin) · 0531 123456
+    Anna Weber (Partnerin) · 0170 9876543
+
+Keine zweite Tabelle, weil ein Arzt keine eigene Lebensdauer hat: Die Karte
+ist das, was synchronisiert, gelöscht und gedruckt wird. Eigene Zeilen
+müssten beim Löschen der Karte mitgelöscht, beim Zusammenführen mitgeführt
+und durch Ordner, Übergabe und QR-Kette mitgeschleppt werden -- Maschinerie
+für etwas, das ohne die Karte nicht existiert.
+
+Und kein JSON, weil das Format auch dort lesbar bleiben muss, wo es niemand
+auswertet: Ein Gerät auf einer älteren Fassung zeigt die Spalte roh an und
+zeigt damit genau obige Zeilen. Deshalb braucht es auch keine
+Wertmigration -- was vorher als freier Text dastand ("Dr. Müller, Praxis am
+Markt"), liest sich als ein Eintrag mit Namen und schreibt sich unverändert
+zurück. Siehe `features/household/application/card_people.dart`.
+
+### Checklisten haben zwei Achsen, nicht eine
+
+Eine Liste hat eine Kategorie (Wasser, Energie, Naturgefahren) *und* eine
+Art: Vorsorge oder Im Ereignis. Die eine lässt sich nicht aus der anderen
+ablesen -- "Strom- und Heizungsausfall" und "Wenn der Strom ausfällt" sind
+beide `energy`, und die eine sagt, was zu kaufen ist, die andere, was zu
+tun ist, während es dunkel ist.
+
+Die Zuordnung der eingebauten Listen steht in `built_in_templates.dart` und
+nirgends sonst. Sie erreicht bestehende Haushalte über den **Seeder**, nicht
+über die Migration: Der Seeder überspringt eine Vorlage, die er schon
+findet, läuft aber bei jedem Start -- also schreibt er bei jedem Start die
+Art auf die eingebauten Zeilen. Das ist die einzige Stelle im Projekt, an
+der sich eine Aussage über eingebaute Inhalte nachträglich korrigieren
+lässt; die Migration läuft einmal, der Seeder immer.
+
+Dieser Schreibvorgang ist bewusst **keine Änderung**: `updatedAt` und
+`dirty` bleiben, wie sie sind. Sonst würde ein Gerät, das gestern die Hälfte
+abgehakt hat, beim nächsten Abgleich von einem frisch gestarteten Gerät
+überschrieben. Er muss auch nicht reisen -- jedes Gerät kommt aus derselben
+Deklaration zur selben Antwort.
+
+### Eine halb gezeichnete Karte hat zwei sehr verschiedene Ursachen
+
+Ein Kartenausschnitt, der nur teilweise erscheint, heißt entweder "dieser
+Bereich wurde nie heruntergeladen" oder "der Kachelserver hat nicht
+geantwortet". Auf dem Bildschirm sehen beide gleich aus, und in beiden
+Fällen weiß die App, welcher Fall vorliegt:
+
+* `offline_map_coverage.dart` fragt das Archiv, wie viele Kacheln des
+  gezeigten Ausschnitts es überhaupt hat. Ein Auszug endet an seinem Rand;
+  darüber hinauszuschauen ist das Normale und nichts, worauf man warten
+  könnte.
+* `BaseMapLayer` meldet fehlgeschlagene Netzkacheln an
+  `onlineTileFailures`. Das kann sich von selbst erledigen.
+
+`MapCoverageNotice` sagt es und bietet jeweils die andere Quelle an. Ohne
+das wird aus "die Karte lädt nicht" ein Abend am falschen Ende des Hauses:
+Die Offlinekarte wurde immer schon verwendet, wenn eine da war -- nur stand
+das nirgends.
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,

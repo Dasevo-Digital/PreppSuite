@@ -449,6 +449,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checklistsTitle => 'Checklists';
 
   @override
+  String get checklistKindPreparation => 'Preparation';
+
+  @override
+  String get checklistKindResponse => 'When it happens';
+
+  @override
+  String get checklistKindPreparationIntro =>
+      'What has to be there before anything happens.';
+
+  @override
+  String get checklistKindResponseIntro => 'What to do while it is happening.';
+
+  @override
+  String get checklistKindLabel => 'Kind of list';
+
+  @override
+  String get checklistKindEmpty => 'Nothing in this part yet.';
+
+  @override
   String get checklistsEmpty =>
       'No checklists yet. Tap + to create your first one.';
 
@@ -1454,6 +1473,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyCardContact => 'Who to call about this person';
 
   @override
+  String get emergencyCardDoctors => 'Doctors';
+
+  @override
+  String get emergencyCardDoctorAdd => 'Add a doctor';
+
+  @override
+  String get emergencyCardSpecialty => 'Speciality';
+
+  @override
+  String get emergencyCardSpecialtyHint => 'GP, cardiologist';
+
+  @override
+  String get emergencyCardContacts => 'Who to call about this person';
+
+  @override
+  String get emergencyCardContactAdd => 'Add a contact';
+
+  @override
+  String get emergencyCardRelation => 'Relationship';
+
+  @override
+  String get emergencyCardRelationHint => 'Partner, son, neighbour';
+
+  @override
+  String get emergencyCardPhone => 'Phone number';
+
+  @override
+  String get emergencyCardPersonRemove => 'Remove entry';
+
+  @override
   String get emergencyCardNotes => 'Anything else';
 
   @override
@@ -2193,6 +2242,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapMyLocationAction => 'My location';
+
+  @override
+  String get mapCoverageMissing =>
+      'The offline map does not reach this far. Nothing was ever downloaded for this area.';
+
+  @override
+  String mapCoverageIncomplete(int present, int total) {
+    return 'The offline map only covers part of this view — roughly $present tiles out of $total. The rest stays empty because it was never downloaded.';
+  }
+
+  @override
+  String get mapCoverageUseOnline => 'Use the online map';
+
+  @override
+  String get mapCoverageUseOffline => 'Use the offline map';
+
+  @override
+  String get mapTilesUnavailable =>
+      'Some tiles never arrived from the tile server. What is missing is the connection, not the app.';
 
   @override
   String get mapSourceOffline => 'Offline';

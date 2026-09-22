@@ -17,6 +17,7 @@ class ChecklistController {
   Future<void> createTemplate({
     required String title,
     required ChecklistCategory category,
+    ChecklistKind kind = ChecklistKind.preparation,
   }) async {
     await _db.upsertChecklistTemplate(
       ChecklistTemplatesCompanion.insert(
@@ -24,6 +25,7 @@ class ChecklistController {
         householdId: Value(householdId),
         title: title,
         category: category.name,
+        kind: Value(kind.name),
         updatedAt: DateTime.now().toUtc(),
         dirty: const Value(true),
       ),
@@ -43,6 +45,7 @@ class ChecklistController {
         householdId: Value(householdId),
         title: source.title,
         category: source.category,
+        kind: Value(source.kind),
         updatedAt: DateTime.now().toUtc(),
         dirty: const Value(true),
       ),
@@ -73,6 +76,7 @@ class ChecklistController {
         householdId: Value(template.householdId),
         title: template.title,
         category: template.category,
+        kind: Value(template.kind),
         isBuiltIn: Value(template.isBuiltIn),
         updatedAt: now,
         dirty: const Value(true),

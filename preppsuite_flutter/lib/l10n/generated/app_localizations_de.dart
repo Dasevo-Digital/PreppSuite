@@ -453,6 +453,26 @@ class AppLocalizationsDe extends AppLocalizations {
   String get checklistsTitle => 'Checklisten';
 
   @override
+  String get checklistKindPreparation => 'Vorsorge';
+
+  @override
+  String get checklistKindResponse => 'Im Ereignis';
+
+  @override
+  String get checklistKindPreparationIntro =>
+      'Was da sein muss, bevor etwas passiert.';
+
+  @override
+  String get checklistKindResponseIntro =>
+      'Was zu tun ist, während es passiert.';
+
+  @override
+  String get checklistKindLabel => 'Art der Liste';
+
+  @override
+  String get checklistKindEmpty => 'In diesem Teil ist noch keine Liste.';
+
+  @override
   String get checklistsEmpty =>
       'Noch keine Checklisten. Tippe auf +, um die erste zu erstellen.';
 
@@ -1466,6 +1486,36 @@ class AppLocalizationsDe extends AppLocalizations {
   String get emergencyCardContact => 'Wen man wegen dieser Person anruft';
 
   @override
+  String get emergencyCardDoctors => 'Ärztinnen und Ärzte';
+
+  @override
+  String get emergencyCardDoctorAdd => 'Ärztin oder Arzt hinzufügen';
+
+  @override
+  String get emergencyCardSpecialty => 'Fachrichtung';
+
+  @override
+  String get emergencyCardSpecialtyHint => 'z. B. Hausärztin, Kardiologe';
+
+  @override
+  String get emergencyCardContacts => 'Wen man wegen dieser Person anruft';
+
+  @override
+  String get emergencyCardContactAdd => 'Kontakt hinzufügen';
+
+  @override
+  String get emergencyCardRelation => 'Verhältnis';
+
+  @override
+  String get emergencyCardRelationHint => 'z. B. Partnerin, Sohn, Nachbarin';
+
+  @override
+  String get emergencyCardPhone => 'Rufnummer';
+
+  @override
+  String get emergencyCardPersonRemove => 'Eintrag entfernen';
+
+  @override
   String get emergencyCardNotes => 'Sonstiges';
 
   @override
@@ -2208,6 +2258,25 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mapMyLocationAction => 'Mein Standort';
+
+  @override
+  String get mapCoverageMissing =>
+      'Die Offlinekarte reicht nicht bis hierher. Für diesen Ausschnitt wurde nie etwas heruntergeladen.';
+
+  @override
+  String mapCoverageIncomplete(int present, int total) {
+    return 'Die Offlinekarte deckt diesen Ausschnitt nur teilweise ab – etwa $present von $total Kacheln. Der Rest bleibt leer, weil er nie heruntergeladen wurde.';
+  }
+
+  @override
+  String get mapCoverageUseOnline => 'Online-Karte verwenden';
+
+  @override
+  String get mapCoverageUseOffline => 'Offlinekarte verwenden';
+
+  @override
+  String get mapTilesUnavailable =>
+      'Kacheln vom Kartenserver kamen nicht an. Was fehlt, liegt an der Verbindung, nicht an der App.';
 
   @override
   String get mapSourceOffline => 'Offline';

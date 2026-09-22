@@ -9,6 +9,7 @@ import '../../../local_db/database.dart';
 import '../../budget/application/missing_equipment_report.dart';
 import '../../household/application/household_providers.dart';
 import '../application/checklist_category_l10n.dart';
+import '../application/checklist_kind_l10n.dart';
 import '../application/checklist_controller.dart';
 import '../application/checklist_providers.dart';
 import '../application/checklist_satisfaction.dart';
@@ -26,42 +27,78 @@ class ChecklistListScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final templatesAsync = ref.watch(checklistTemplatesProvider(householdId));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.checklistsTitle),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf_outlined),
-            tooltip: l10n.exportPdfButton,
-            onPressed: () => _exportMissingEquipmentPdf(context, ref),
-          ),
-        ],
-      ),
-      body: templatesAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) =>
-            Center(child: Text(describeError(l10n, error))),
-        data: (templates) => templates.isEmpty
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Text(
-                    l10n.checklistsEmpty,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
+    // Two tabs rather than two headings down one list: the question
+    // "what do I do now" is asked at a different moment from "what
+    // should I have", and the answer to one must not be something to
+    // scroll past to reach the other.
+    return DefaultTabController(
+      length: ChecklistKind.values.length,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.checklistsTitle),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              tooltip: l10n.exportPdfButton,
+              onPressed: () => _exportMissingEquipmentPdf(context, ref),
+            ),
+          ],
+          bottom: TabBar(
+            tabs: [
+              for (final kind in ChecklistKind.values)
+                Tab(
+                  icon: Icon(checklistKindIcon(kind)),
+                  text: localizeChecklistKind(l10n, kind),
                 ),
-              )
-            : _GroupedTemplateList(
-                templates: templates,
-                householdId: householdId,
-                l10n: l10n,
-              ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showCreateTemplateDialog(context, ref, l10n),
-        icon: const Icon(Icons.add),
-        label: Text(l10n.createTemplateButton),
+            ],
+          ),
+        ),
+        body: templatesAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stackTrace) =>
+              Center(child: Text(describeError(l10n, error))),
+          data: (templates) => templates.isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Text(
+                      l10n.checklistsEmpty,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                )
+              : TabBarView(
+                  children: [
+                    for (final kind in ChecklistKind.values)
+                      _GroupedTemplateList(
+                        kind: kind,
+                        templates: [
+                          for (final template in templates)
+                            if (ChecklistKind.fromName(template.kind) == kind)
+                              template,
+                        ],
+                        householdId: householdId,
+                        l10n: l10n,
+                      ),
+                  ],
+                ),
+        ),
+        floatingActionButton: Builder(
+          // Its own context, so the button can read which tab is open —
+          // a new list almost always belongs in the part that is being
+          // looked at, and asking again would be asking twice.
+          builder: (context) => FloatingActionButton.extended(
+            onPressed: () => _showCreateTemplateDialog(
+              context,
+              ref,
+              l10n,
+              ChecklistKind.values[DefaultTabController.of(context).index],
+            ),
+            icon: const Icon(Icons.add),
+            label: Text(l10n.createTemplateButton),
+          ),
+        ),
       ),
     );
   }
@@ -104,9 +141,11 @@ class ChecklistListScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     AppLocalizations l10n,
+    ChecklistKind initialKind,
   ) async {
     final titleController = TextEditingController();
     var category = ChecklistCategory.custom;
+    var kind = initialKind;
 
     await showDialog<void>(
       context: context,
@@ -137,6 +176,26 @@ class ChecklistListScreen extends ConsumerWidget {
                   if (value != null) setState(() => category = value);
                 },
               ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<ChecklistKind>(
+                isExpanded: true,
+                initialValue: kind,
+                decoration: InputDecoration(
+                  labelText: l10n.checklistKindLabel,
+                  helperText: describeChecklistKind(l10n, kind),
+                  helperMaxLines: 2,
+                ),
+                items: [
+                  for (final value in ChecklistKind.values)
+                    DropdownMenuItem(
+                      value: value,
+                      child: Text(localizeChecklistKind(l10n, value)),
+                    ),
+                ],
+                onChanged: (value) {
+                  if (value != null) setState(() => kind = value);
+                },
+              ),
             ],
           ),
           actions: [
@@ -152,7 +211,11 @@ class ChecklistListScreen extends ConsumerWidget {
                 if (title.isEmpty) return;
                 ref
                     .read(checklistControllerProvider(householdId))
-                    .createTemplate(title: title, category: category);
+                    .createTemplate(
+                      title: title,
+                      category: category,
+                      kind: kind,
+                    );
                 Navigator.of(dialogContext).pop();
               },
               child: Text(l10n.createButton),
@@ -171,17 +234,32 @@ class ChecklistListScreen extends ConsumerWidget {
 /// area they have not thought about yet.
 class _GroupedTemplateList extends StatelessWidget {
   const _GroupedTemplateList({
+    required this.kind,
     required this.templates,
     required this.householdId,
     required this.l10n,
   });
 
+  final ChecklistKind kind;
   final List<ChecklistTemplate> templates;
   final String householdId;
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
+    if (templates.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Text(
+            l10n.checklistKindEmpty,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+        ),
+      );
+    }
+
     // Grouped in the enum's declaration order rather than the order rows
     // happen to come back in, so the sections do not move around when a
     // template is renamed.
@@ -201,9 +279,24 @@ class _GroupedTemplateList extends StatelessWidget {
     ];
 
     return ListView.builder(
-      itemCount: sections.length,
+      // One row ahead of the sections: the tab label is two words, and
+      // two words are not enough to say which of the two lists somebody
+      // is looking at.
+      itemCount: sections.length + 1,
       itemBuilder: (context, index) {
-        final (category, group) = sections[index];
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+            child: Text(
+              describeChecklistKind(l10n, kind),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          );
+        }
+
+        final (category, group) = sections[index - 1];
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

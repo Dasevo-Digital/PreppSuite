@@ -35,7 +35,9 @@ void main() {
       conditions: 'Vorerkrankungen',
       insurance: 'Versicherung',
       doctor: 'Arzt',
+      doctors: 'Aerzte',
       contact: 'Notfallkontakt',
+      contacts: 'Notfallkontakte',
       notes: 'Notizen',
     ),
   );

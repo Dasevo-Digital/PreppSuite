@@ -128,6 +128,7 @@ void main() {
       householdId: 'household-1',
       title: clientId,
       category: 'custom',
+      kind: 'preparation',
       isBuiltIn: true,
       updatedAt: now,
       dirty: false,

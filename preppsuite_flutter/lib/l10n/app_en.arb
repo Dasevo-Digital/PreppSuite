@@ -274,6 +274,12 @@
   "cancelButton": "Cancel",
   "navChecklists": "Checklists",
   "checklistsTitle": "Checklists",
+  "checklistKindPreparation": "Preparation",
+  "checklistKindResponse": "When it happens",
+  "checklistKindPreparationIntro": "What has to be there before anything happens.",
+  "checklistKindResponseIntro": "What to do while it is happening.",
+  "checklistKindLabel": "Kind of list",
+  "checklistKindEmpty": "Nothing in this part yet.",
   "checklistsEmpty": "No checklists yet. Tap + to create your first one.",
   "createTemplateButton": "New checklist",
   "createTemplateTitle": "New checklist",
@@ -949,6 +955,16 @@
   "emergencyCardInsurance": "Health insurance",
   "emergencyCardDoctor": "Doctor",
   "emergencyCardContact": "Who to call about this person",
+  "emergencyCardDoctors": "Doctors",
+  "emergencyCardDoctorAdd": "Add a doctor",
+  "emergencyCardSpecialty": "Speciality",
+  "emergencyCardSpecialtyHint": "GP, cardiologist",
+  "emergencyCardContacts": "Who to call about this person",
+  "emergencyCardContactAdd": "Add a contact",
+  "emergencyCardRelation": "Relationship",
+  "emergencyCardRelationHint": "Partner, son, neighbour",
+  "emergencyCardPhone": "Phone number",
+  "emergencyCardPersonRemove": "Remove entry",
   "emergencyCardNotes": "Anything else",
   "emergencyCardNameRequired": "A card needs a name.",
   "emergencyCardRemoved": "Card removed.",
@@ -1520,6 +1536,21 @@
   "myPositionDecimal": "Decimal degrees",
   "myPositionDecimalHint": "What goes into a map app.",
   "mapMyLocationAction": "My location",
+  "mapCoverageMissing": "The offline map does not reach this far. Nothing was ever downloaded for this area.",
+  "mapCoverageIncomplete": "The offline map only covers part of this view — roughly {present} tiles out of {total}. The rest stays empty because it was never downloaded.",
+  "mapCoverageUseOnline": "Use the online map",
+  "mapCoverageUseOffline": "Use the offline map",
+  "mapTilesUnavailable": "Some tiles never arrived from the tile server. What is missing is the connection, not the app.",
+  "@mapCoverageIncomplete": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "mapSourceOffline": "Offline",
   "mapSourceOnline": "Online",
   "mapSourceOfflineDetail": "Drawing from {name}, zoom {min} to {max}.",

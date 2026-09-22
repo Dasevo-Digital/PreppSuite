@@ -159,6 +159,11 @@ class _BaseMapLayerState extends ConsumerState<BaseMapLayer> {
       key: ValueKey(_cacheGeneration),
       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       userAgentPackageName: 'de.status403.preppsuite',
+      // A tile server that refuses leaves an empty square and says
+      // nothing. On a map that is mostly there, that reads as a bug in
+      // the app rather than as a connection that did not hold — and
+      // whoever sees it goes looking in the wrong place.
+      errorTileCallback: (_, _, _) => onlineTileFailures.report(),
     );
   }
 }
@@ -201,3 +206,46 @@ class BaseMapAttribution extends ConsumerWidget {
     );
   }
 }
+
+/// When a tile last failed to arrive from the network.
+///
+/// A counter and not a state: there is no "it is fine again" event to
+/// listen for, so what can honestly be said is "this was still happening
+/// a moment ago". The map layer is deep inside a [FlutterMap], and the
+/// sentence belongs outside it, which is why this is a listenable of its
+/// own rather than something handed down.
+class OnlineTileFailures extends ChangeNotifier {
+  DateTime? _last;
+
+  /// How long after the last failure the notice is still worth showing.
+  ///
+  /// Long enough to survive a screenful of tiles arriving one by one,
+  /// short enough that a connection which has come back stops being
+  /// accused of something it is no longer doing.
+  static const window = Duration(seconds: 20);
+
+  bool get recent {
+    final last = _last;
+    return last != null && DateTime.now().difference(last) < window;
+  }
+
+  void report() {
+    final previous = _last;
+    _last = DateTime.now();
+    // Only when it is news. A failing screenful is dozens of these a
+    // second, and every one of them would rebuild the notice.
+    if (previous == null || DateTime.now().difference(previous) > window) {
+      notifyListeners();
+    }
+  }
+
+  /// Forgets what happened — used when the map changes source, where
+  /// the old source's troubles are no longer the question.
+  void clear() {
+    if (_last == null) return;
+    _last = null;
+    notifyListeners();
+  }
+}
+
+final onlineTileFailures = OnlineTileFailures();

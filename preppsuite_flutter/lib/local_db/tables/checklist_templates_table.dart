@@ -12,6 +12,16 @@ class ChecklistTemplates extends Table {
   /// Stores a `ChecklistCategory` enum name (see
   /// `lib/model/categories.dart`) as plain text.
   TextColumn get category => text()();
+
+  /// Stores a `ChecklistKind` enum name — preparation or response.
+  ///
+  /// Defaulted rather than nullable, because every list is one or the
+  /// other and a third state would only have to be decided again on
+  /// every screen that reads it. Rows written before schema 17 come back
+  /// as `preparation`; the built-in ones are put right by
+  /// `ChecklistSeeder` on the next launch.
+  TextColumn get kind => text().withDefault(const Constant('preparation'))();
+
   BoolColumn get isBuiltIn => boolean().withDefault(const Constant(false))();
 
   DateTimeColumn get updatedAt => dateTime()();

@@ -250,6 +250,7 @@ void main() {
       householdId: householdId,
       title: 'Notgepäck',
       category: 'evacuation',
+      kind: 'preparation',
       isBuiltIn: true,
       updatedAt: DateTime.utc(2026),
       dirty: false,

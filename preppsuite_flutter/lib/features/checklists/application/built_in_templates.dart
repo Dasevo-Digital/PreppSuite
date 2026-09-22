@@ -36,12 +36,26 @@ import '../../../model/categories.dart';
 /// was already covered.
 
 class BuiltInTemplate {
-  const BuiltInTemplate(this.clientId, this.title, this.category, this.items);
+  const BuiltInTemplate(
+    this.clientId,
+    this.title,
+    this.category,
+    this.items, {
+    this.kind = ChecklistKind.preparation,
+  });
 
   final String clientId;
   final String title;
   final ChecklistCategory category;
   final List<BuiltInItem> items;
+
+  /// Having things ready, or acting while it happens.
+  ///
+  /// Defaulted, so only the lists that are about acting say so — and
+  /// they are the minority. [ChecklistSeeder] writes this onto the
+  /// built-in rows on every launch, which is what lets an assignment
+  /// here reach households that were seeded long ago.
+  final ChecklistKind kind;
 }
 
 class BuiltInItem {
@@ -467,6 +481,7 @@ const builtInTemplates = [
             'Landes',
       ),
     ],
+    kind: ChecklistKind.response,
   ),
   BuiltInTemplate(
     '00000000-0000-4000-8000-000000000012',
@@ -523,6 +538,7 @@ const builtInTemplates = [
             'trockenem Gras parken',
       ),
     ],
+    kind: ChecklistKind.response,
   ),
   BuiltInTemplate(
     '00000000-0000-4000-8000-000000000013',
@@ -576,6 +592,7 @@ const builtInTemplates = [
             'anfassen',
       ),
     ],
+    kind: ChecklistKind.response,
   ),
   BuiltInTemplate(
     '00000000-0000-4000-8000-000000000014',
@@ -622,6 +639,7 @@ const builtInTemplates = [
         'Wissen, wer in der Nachbarschaft helfen kann und wer Hilfe braucht',
       ),
     ],
+    kind: ChecklistKind.response,
   ),
   BuiltInTemplate(
     '00000000-0000-4000-8000-000000000015',
@@ -670,6 +688,7 @@ const builtInTemplates = [
             'angewiesen ist',
       ),
     ],
+    kind: ChecklistKind.response,
   ),
   BuiltInTemplate(
     '00000000-0000-4000-8000-000000000016',
@@ -824,6 +843,7 @@ const builtInTemplates = [
             'man selbst geteilt hat, kommt als scheinbare Bestätigung zurück',
       ),
     ],
+    kind: ChecklistKind.response,
   ),
   BuiltInTemplate(
     '00000000-0000-4000-8000-000000000019',
@@ -871,5 +891,6 @@ const builtInTemplates = [
             'niemals probieren, um das zu entscheiden',
       ),
     ],
+    kind: ChecklistKind.response,
   ),
 ];

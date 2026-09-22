@@ -38,6 +38,18 @@ class ChecklistSeeder {
 
     for (final template in builtInTemplates) {
       if (await _db.checklistTemplateByClientId(template.clientId) != null) {
+        // Already seeded, so its contents are the household's now and
+        // nothing here rewrites them. Its filing is not its contents:
+        // whether a list is about having things ready or about acting is
+        // decided in `built_in_templates.dart` and nowhere else, and a
+        // household seeded before that distinction existed has every one
+        // of them filed under `preparation`. This is the one write that
+        // reaches them — see [AppDatabase.setChecklistTemplateKind] for
+        // why it is not an edit.
+        await _db.setChecklistTemplateKind(
+          template.clientId,
+          template.kind.name,
+        );
         continue;
       }
 
@@ -47,6 +59,7 @@ class ChecklistSeeder {
           householdId: Value(householdId),
           title: template.title,
           category: template.category.name,
+          kind: Value(template.kind.name),
           isBuiltIn: const Value(true),
           updatedAt: seededAt,
           dirty: const Value(true),

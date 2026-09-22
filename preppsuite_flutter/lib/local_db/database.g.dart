@@ -578,31 +578,32 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   final DateTime? expirationDate;
   final double? minQuantity;
 
-  /// Kilocalories in **one** [unit] of this item — one tin, one kilogram,
-  /// one gram. Only meaningful for `category: food`, and multiplied by
-  /// [quantity] by the supply calculator (`supply_calculator.dart`).
+  /// Kilocalories per **100 g**, or per 100 ml where [unit] is a volume
+  /// — exactly as a label prints it.
   ///
-  /// Per unit and not a total for the stock, because a total is a figure
-  /// nothing maintains: [quantity] changes every time somebody eats
-  /// something, and no consume path can rescale a number whose basis it
-  /// does not know. Per unit survives that untouched.
+  /// Only meaningful for `category: food`. The household's total is
+  /// `calories / 100 * ` the stock reduced to grams or millilitres; see
+  /// `food_amount.dart`, which is also what decides whether [unit] can be
+  /// reduced at all.
   ///
-  /// Fractional since schema 15, and that is what makes "per unit" work
-  /// for every unit rather than most of them. Bread is 2.13 kcal a gram.
-  /// As an integer that was 2 — six percent off every gram in the cellar
-  /// — so the scanner refused to fill the field at all below 20 kcal, and
-  /// a household counting in grams was left with a field it could not
-  /// type a usable number into either. The refusal was never about the
-  /// unit; it was about the column.
+  /// This column has meant three things, and the first two were both
+  /// wrong for the same reason. It began as a total for the stock, which
+  /// nothing could maintain: `consumeQuantity` lowers the quantity and
+  /// cannot rescale a figure whose basis it does not know. It then became
+  /// a figure per stored unit, which survived that but pushed the
+  /// conversion onto the scanner — and the scanner had to guess a package
+  /// size to do it, which is where both of the bugs after it came from.
+  ///
+  /// Per 100 is what the label says. Nothing converts on the way in, so
+  /// there is nothing to get wrong on the way in; the arithmetic happens
+  /// once, where the quantity is known.
   final double? calories;
 
-  /// Macronutrients for **one package**, in grams, as the label gives
-  /// them — deliberately *not* the per-unit basis [calories] uses.
+  /// Macronutrients on the same basis: grams per 100 g, or per 100 ml.
   ///
-  /// They differ because their jobs do. Kilocalories are added up across
-  /// the cellar, so they have to multiply by something; these are shown
-  /// on the item and nowhere else, so the figure that helps is the one
-  /// printed on the tin. Filled in from the barcode (see
+  /// The same basis as [calories] now, which it did not use to be — these
+  /// were per package while the energy was per unit, and a reader had to
+  /// know that. Filled in from the barcode (see
   /// `open_food_facts_service.dart`) or by hand, and null wherever the
   /// label does not say, which is most non-food supplies.
   final double? proteinGrams;
@@ -1340,6 +1341,16 @@ class $ChecklistTemplatesTable extends ChecklistTemplates
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('preparation'),
+  );
   static const VerificationMeta _isBuiltInMeta = const VerificationMeta(
     'isBuiltIn',
   );
@@ -1396,6 +1407,7 @@ class $ChecklistTemplatesTable extends ChecklistTemplates
     householdId,
     title,
     category,
+    kind,
     isBuiltIn,
     updatedAt,
     deletedAt,
@@ -1445,6 +1457,12 @@ class $ChecklistTemplatesTable extends ChecklistTemplates
       );
     } else if (isInserting) {
       context.missing(_categoryMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
     }
     if (data.containsKey('is_built_in')) {
       context.handle(
@@ -1497,6 +1515,10 @@ class $ChecklistTemplatesTable extends ChecklistTemplates
         DriftSqlType.string,
         data['${effectivePrefix}category'],
       )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
       isBuiltIn: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_built_in'],
@@ -1531,6 +1553,15 @@ class ChecklistTemplate extends DataClass
   /// Stores a `ChecklistCategory` enum name (see
   /// `lib/model/categories.dart`) as plain text.
   final String category;
+
+  /// Stores a `ChecklistKind` enum name — preparation or response.
+  ///
+  /// Defaulted rather than nullable, because every list is one or the
+  /// other and a third state would only have to be decided again on
+  /// every screen that reads it. Rows written before schema 17 come back
+  /// as `preparation`; the built-in ones are put right by
+  /// `ChecklistSeeder` on the next launch.
+  final String kind;
   final bool isBuiltIn;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -1540,6 +1571,7 @@ class ChecklistTemplate extends DataClass
     this.householdId,
     required this.title,
     required this.category,
+    required this.kind,
     required this.isBuiltIn,
     required this.updatedAt,
     this.deletedAt,
@@ -1554,6 +1586,7 @@ class ChecklistTemplate extends DataClass
     }
     map['title'] = Variable<String>(title);
     map['category'] = Variable<String>(category);
+    map['kind'] = Variable<String>(kind);
     map['is_built_in'] = Variable<bool>(isBuiltIn);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -1571,6 +1604,7 @@ class ChecklistTemplate extends DataClass
           : Value(householdId),
       title: Value(title),
       category: Value(category),
+      kind: Value(kind),
       isBuiltIn: Value(isBuiltIn),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -1590,6 +1624,7 @@ class ChecklistTemplate extends DataClass
       householdId: serializer.fromJson<String?>(json['householdId']),
       title: serializer.fromJson<String>(json['title']),
       category: serializer.fromJson<String>(json['category']),
+      kind: serializer.fromJson<String>(json['kind']),
       isBuiltIn: serializer.fromJson<bool>(json['isBuiltIn']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -1604,6 +1639,7 @@ class ChecklistTemplate extends DataClass
       'householdId': serializer.toJson<String?>(householdId),
       'title': serializer.toJson<String>(title),
       'category': serializer.toJson<String>(category),
+      'kind': serializer.toJson<String>(kind),
       'isBuiltIn': serializer.toJson<bool>(isBuiltIn),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -1616,6 +1652,7 @@ class ChecklistTemplate extends DataClass
     Value<String?> householdId = const Value.absent(),
     String? title,
     String? category,
+    String? kind,
     bool? isBuiltIn,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -1625,6 +1662,7 @@ class ChecklistTemplate extends DataClass
     householdId: householdId.present ? householdId.value : this.householdId,
     title: title ?? this.title,
     category: category ?? this.category,
+    kind: kind ?? this.kind,
     isBuiltIn: isBuiltIn ?? this.isBuiltIn,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -1638,6 +1676,7 @@ class ChecklistTemplate extends DataClass
           : this.householdId,
       title: data.title.present ? data.title.value : this.title,
       category: data.category.present ? data.category.value : this.category,
+      kind: data.kind.present ? data.kind.value : this.kind,
       isBuiltIn: data.isBuiltIn.present ? data.isBuiltIn.value : this.isBuiltIn,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -1652,6 +1691,7 @@ class ChecklistTemplate extends DataClass
           ..write('householdId: $householdId, ')
           ..write('title: $title, ')
           ..write('category: $category, ')
+          ..write('kind: $kind, ')
           ..write('isBuiltIn: $isBuiltIn, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -1666,6 +1706,7 @@ class ChecklistTemplate extends DataClass
     householdId,
     title,
     category,
+    kind,
     isBuiltIn,
     updatedAt,
     deletedAt,
@@ -1679,6 +1720,7 @@ class ChecklistTemplate extends DataClass
           other.householdId == this.householdId &&
           other.title == this.title &&
           other.category == this.category &&
+          other.kind == this.kind &&
           other.isBuiltIn == this.isBuiltIn &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -1690,6 +1732,7 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
   final Value<String?> householdId;
   final Value<String> title;
   final Value<String> category;
+  final Value<String> kind;
   final Value<bool> isBuiltIn;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -1700,6 +1743,7 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
     this.householdId = const Value.absent(),
     this.title = const Value.absent(),
     this.category = const Value.absent(),
+    this.kind = const Value.absent(),
     this.isBuiltIn = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -1711,6 +1755,7 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
     this.householdId = const Value.absent(),
     required String title,
     required String category,
+    this.kind = const Value.absent(),
     this.isBuiltIn = const Value.absent(),
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -1725,6 +1770,7 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
     Expression<String>? householdId,
     Expression<String>? title,
     Expression<String>? category,
+    Expression<String>? kind,
     Expression<bool>? isBuiltIn,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -1736,6 +1782,7 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
       if (householdId != null) 'household_id': householdId,
       if (title != null) 'title': title,
       if (category != null) 'category': category,
+      if (kind != null) 'kind': kind,
       if (isBuiltIn != null) 'is_built_in': isBuiltIn,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -1749,6 +1796,7 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
     Value<String?>? householdId,
     Value<String>? title,
     Value<String>? category,
+    Value<String>? kind,
     Value<bool>? isBuiltIn,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -1760,6 +1808,7 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
       householdId: householdId ?? this.householdId,
       title: title ?? this.title,
       category: category ?? this.category,
+      kind: kind ?? this.kind,
       isBuiltIn: isBuiltIn ?? this.isBuiltIn,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -1782,6 +1831,9 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
     }
     if (category.present) {
       map['category'] = Variable<String>(category.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
     }
     if (isBuiltIn.present) {
       map['is_built_in'] = Variable<bool>(isBuiltIn.value);
@@ -1808,6 +1860,7 @@ class ChecklistTemplatesCompanion extends UpdateCompanion<ChecklistTemplate> {
           ..write('householdId: $householdId, ')
           ..write('title: $title, ')
           ..write('category: $category, ')
+          ..write('kind: $kind, ')
           ..write('isBuiltIn: $isBuiltIn, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')

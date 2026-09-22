@@ -32,7 +32,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 16;
+  static const currentSchemaVersion = 17;
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
@@ -200,7 +200,9 @@ class AppDatabase extends _$AppDatabase {
         // schema is one this SELECT reads out of a version-7 table that
         // never had it. Every such column therefore has to be named in
         // `newColumns` below — and its own branch has to skip installs
-        // older than 8, which already got it here.
+        // older than 8, which already got it here -- or, where the
+        // column's own step goes through [_addColumnOnce], simply find
+        // it already there.
         await m.alterTable(
           TableMigration(
             inventoryItems,
@@ -213,7 +215,12 @@ class AppDatabase extends _$AppDatabase {
             ],
           ),
         );
-        await m.alterTable(TableMigration(checklistTemplates));
+        await m.alterTable(
+          TableMigration(
+            checklistTemplates,
+            newColumns: [checklistTemplates.kind],
+          ),
+        );
         await m.alterTable(TableMigration(checklistItems));
         await m.alterTable(TableMigration(budgetEntries));
       }
@@ -383,6 +390,29 @@ class AppDatabase extends _$AppDatabase {
         // no factor to apply. They are shown on the item and summed
         // nowhere, so a stale one is a wrong label rather than a wrong
         // plan — and one barcode scan replaces all four.
+      }
+      if (from < 17) {
+        // A checklist now says whether it is about having things ready or
+        // about acting while something happens. Shape only: the column
+        // arrives defaulted to `preparation`, and nothing here guesses
+        // which of the existing rows are really response lists.
+        //
+        // The built-in ones are set by `ChecklistSeeder` on the next
+        // launch instead, from the same declaration new installs are
+        // seeded with. That is not a shortcut — it is the one way the
+        // assignment can still be corrected later, because the seeder
+        // runs every time and a migration runs once. It is also why this
+        // needs no entry in [_valueMigrations]: writing a fixed value
+        // from a fixed list is the same operation however often it runs.
+        // Asked rather than deduced, like every other step here: a
+        // database that never had the table cannot have the column
+        // either, and `ALTER TABLE` on a table that is not there fails
+        // the whole upgrade.
+        if (!await _hasTable('checklist_templates')) {
+          await m.createTable(checklistTemplates);
+        } else {
+          await _addColumnOnce(m, checklistTemplates, checklistTemplates.kind);
+        }
       }
     },
   );
@@ -731,6 +761,21 @@ class AppDatabase extends _$AppDatabase {
             dirty: const Value(true),
           ),
     );
+  }
+
+  /// Files a built-in template under [kind] without touching anything
+  /// else about it.
+  ///
+  /// Deliberately not an edit: `updatedAt` and `dirty` stay as they are,
+  /// so this never travels as a change and never wins a merge against a
+  /// device that ticked something off. It does not need to — every
+  /// device runs the seeder and reaches the same answer from the same
+  /// declaration.
+  Future<void> setChecklistTemplateKind(String clientId, String kind) {
+    return (update(checklistTemplates)..where(
+          (t) => t.clientId.equals(clientId) & t.kind.equals(kind).not(),
+        ))
+        .write(ChecklistTemplatesCompanion(kind: Value(kind)));
   }
 
   Future<ChecklistTemplate?> checklistTemplateByClientId(String clientId) {

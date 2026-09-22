@@ -23,6 +23,30 @@ enum InventoryItemCategory {
       values.asNameMap()[name] ?? InventoryItemCategory.other;
 }
 
+/// What a checklist is for: having things ready, or acting.
+///
+/// The second axis of the checklist screen, next to [ChecklistCategory].
+/// The two answer different questions and neither can be read off the
+/// other: "Strom- und Heizungsausfall" and "Wenn der Strom ausfällt" are
+/// both `energy`, and one is a list of what to buy while the other is a
+/// list of what to do at the moment the lights go out.
+///
+/// Stored as a plain enum name like the rest. An older app reading a
+/// newer row falls back to [preparation], which is the harmless way
+/// round: a response list filed under preparation is in the wrong
+/// section, a preparation list filed under response is advice at the
+/// worst possible moment.
+enum ChecklistKind {
+  /// What has to be there before anything happens.
+  preparation,
+
+  /// What to do while it is happening.
+  response;
+
+  static ChecklistKind fromName(String name) =>
+      values.asNameMap()[name] ?? ChecklistKind.preparation;
+}
+
 /// Broad grouping for a checklist template.
 ///
 /// Declaration order is display order — the list groups by it, roughly
