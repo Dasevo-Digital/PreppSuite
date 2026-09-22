@@ -1605,6 +1605,53 @@ falten, wie Deutsch tatsächlich getippt wird -- "Notgepack" findet
 Mac-Tastatur erzeugt.
 
 
+### Haptik ist eine Aussage, keine Vibration
+
+`core/feel.dart` ist die einzige Stelle, die `HapticFeedback` überhaupt
+aufruft. Aufrufer sagen, *was passiert ist* -- `Feel.removed()`,
+`Feel.failed()` -- und diese Datei entscheidet, wie sich das anfühlt.
+Verstreute Aufrufe sind der Weg, auf dem dieselbe Art Ereignis an zwei
+Stellen unterschiedlich brummt und am Ende alles brummt.
+
+Sie meldet sich nur in vier Fällen, alles andere bleibt still:
+
+* die Augen sind woanders -- Kamera auf einem Strichcode, ein Telefon
+  gegen ein zweites gehalten;
+* die Hände sind voll und die Liste ist lang -- ein Notgepäck abhaken,
+  während man es packt;
+* es lässt sich nicht zurücknehmen;
+* es ist schiefgegangen, und das einzige Zeichen ist eine Meldung, die von
+  selbst wieder verschwindet.
+
+Ein Brummen, das nichts hinzufügt, bringt Leuten bei, Brummen nicht mehr
+zu beachten. Das Löschen im Vorrat bekommt deshalb **keins**: dort steht
+acht Sekunden lang ein Rückgängig.
+
+Die Plattformabfrage steht einmal in `Feel` und nicht an den Aufrufstellen.
+Genau so war sie vorher: im Taktgeber vorhanden, im Notsignal vergessen.
+Ein Desktop hat nichts zu fühlen, und jeder Aufruf wäre trotzdem eine
+Runde über den Plattformkanal.
+
+### Ein Hinweis kostet die Höhe, die er einnimmt
+
+Die Notiz „Nicht mitgerechnet: Einheit ohne Maß" steht als **Fußnote in der
+Vorratskarte**, nicht als eigene Karte und nicht als erste Zeile der Liste.
+Beides wurde probiert, und beides schob die Liste um die eigene Höhe nach
+unten -- auf einem kurzen Bildschirm landeten damit die Knöpfe des ersten
+Eintrags unter dem schwebenden Aktionsknopf. Das ist ein schlimmerer Fehler
+als der, den die Notiz meldet, und `inventory_list_test.dart` hat ihn
+gefunden.
+
+Die Regel daraus: Ein Hinweis, der dauerhaft dasteht, gehört zu der Zahl,
+die er einschränkt, und bekommt eine Zeile. Der Absatz liegt hinter einem
+Tippen (`showUnitInfo`), denn dort hat jemand danach gefragt.
+
+Der Dialog beantwortet die Frage, die wirklich gestellt wird: Wird mein
+Vorrat jetzt umgeschrieben? Nein -- die Zeile bleibt, sie zählt nur so
+lange nicht mit, bis die Einheit ein Maß nennt. Die Einheiten darin sind
+zum Antippen, nicht zum Lesen: Das Feld steht direkt hinter dem Dialog.
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,

@@ -5,6 +5,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+
+import 'unit_info_dialog.dart';
+
+import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../model/categories.dart';
 
@@ -418,6 +422,19 @@ class _InventoryItemFormScreenState
   /// until somebody reads it. Water, because the reach calculation has
   /// always needed litres and quietly skipped anything else — this only
   /// says so at the moment it can still be fixed.
+  /// Says why the field is fussy, and fills it in if the answer was a
+  /// tap on one of the units rather than a read of the sentence.
+  Future<void> _explainUnit() async {
+    final chosen = await showUnitInfo(context);
+    if (chosen == null || !mounted) return;
+    setState(() {
+      _unitController.text = chosen;
+    });
+    // The field was refused a moment ago; saying so again about the
+    // answer it was just handed would be absurd.
+    _formKey.currentState?.validate();
+  }
+
   bool get _needsMeasure =>
       _category == InventoryItemCategory.food ||
       _category == InventoryItemCategory.water;
@@ -586,6 +603,7 @@ class _InventoryItemFormScreenState
         ),
       );
     } catch (error) {
+      Feel.failed();
       if (mounted) {
         messenger.showSnackBar(
           SnackBar(content: Text(describeError(l10n, error))),
@@ -723,6 +741,21 @@ class _InventoryItemFormScreenState
                                     ? l10n.unitMeasureHelper
                                     : null,
                                 helperMaxLines: 3,
+                                // Only where the rule applies. On a
+                                // medicine there is nothing to explain,
+                                // and a question mark beside a field
+                                // that takes anything is a question
+                                // nobody asked.
+                                suffixIcon: _needsMeasure
+                                    ? IconButton(
+                                        icon: const Icon(
+                                          Icons.info_outline,
+                                          size: 20,
+                                        ),
+                                        tooltip: l10n.unitInfoAction,
+                                        onPressed: _explainUnit,
+                                      )
+                                    : null,
                               ),
                               validator: (value) {
                                 final trimmed = value?.trim() ?? '';

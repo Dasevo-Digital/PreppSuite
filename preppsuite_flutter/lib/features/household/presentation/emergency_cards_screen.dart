@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -296,6 +298,7 @@ class _MemberCard extends ConsumerWidget {
       ),
     );
     if (confirmed != true || !context.mounted) return;
+    Feel.removed();
 
     await ref
         .read(householdMemberControllerProvider(householdId))

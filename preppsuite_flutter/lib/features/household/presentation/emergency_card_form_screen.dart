@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/error_text.dart';
@@ -239,6 +241,8 @@ class _EmergencyCardFormScreenState
       // stays as it was, which looks like nothing happened, and whoever
       // typed the card has no idea whether it is stored. Say so, and keep
       // the form open so the typing is not lost.
+      // A message that slides away by itself is the only sign otherwise.
+      Feel.failed();
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(content: Text(describeError(l10n, error))),

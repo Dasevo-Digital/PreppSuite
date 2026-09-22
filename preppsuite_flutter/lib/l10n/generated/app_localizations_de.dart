@@ -6376,6 +6376,28 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get unitInfoAction => 'Warum ein Maß?';
+
+  @override
+  String get unitInfoTitle => 'Warum g, kg, ml oder l?';
+
+  @override
+  String get unitInfoWhy =>
+      'Nährwerte stehen auf jeder Packung je 100 g oder je 100 ml. Aus einem Vorrat wird erst dann eine Tagesration, wenn sich die Menge auch in Gramm sagen lässt – und was sechs Dosen wiegen, steht auf der Dose und nicht in dieser App.';
+
+  @override
+  String get unitInfoAccepted =>
+      'Diese hier mit einem Tipp, ausgeschrieben geht ebenso: Gramm, Kilo, Milliliter, Liter.';
+
+  @override
+  String get unitInfoExempt =>
+      'Das gilt nur für Lebensmittel und Wasser. Medikamente werden weiter in Tabletten gezählt, sonst stimmt die Reichweite je Tagesdosis nicht mehr; Werkzeug wird in Stück gezählt.';
+
+  @override
+  String get unitInfoKept =>
+      'Ein Vorrat in „Dose\" oder „Glas\" bleibt stehen, wie er ist. Er zählt nur so lange nicht im Vorrats-Rechner mit, bis die Einheit ein Maß nennt.';
+
+  @override
   String get unitMeasureHelper =>
       'Bei Lebensmitteln und Wasser: g, kg, ml oder l. Nährwerte stehen je 100 g, und eine Dose hat kein Gewicht, bis jemand sie liest.';
 

@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -151,7 +151,7 @@ class _CompressionPacerScreenState extends State<CompressionPacerScreen>
       _swapsAnnounced = tick.swapsDue;
       // A stronger buzz than the beat's, so the changeover is felt and
       // not only seen.
-      unawaited(HapticFeedback.vibrate());
+      Feel.beatChange();
     }
     setState(() => _tick = tick);
   }
@@ -168,10 +168,7 @@ class _CompressionPacerScreenState extends State<CompressionPacerScreen>
             .catchError((Object _) {}),
       );
     }
-    if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS) {
-      unawaited(HapticFeedback.heavyImpact());
-    }
+    Feel.beat();
   }
 
   @override

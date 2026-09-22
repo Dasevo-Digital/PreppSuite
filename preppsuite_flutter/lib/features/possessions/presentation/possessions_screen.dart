@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/feel.dart';
+
 import '../../../core/content_swap.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -299,6 +301,7 @@ class _PossessionTile extends ConsumerWidget {
       ),
     );
     if (confirmed != true) return;
+    Feel.removed();
     await ref.read(possessionControllerProvider(householdId)).remove(row);
   }
 }

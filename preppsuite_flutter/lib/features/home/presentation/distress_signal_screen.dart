@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../../../core/feel.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -82,7 +83,7 @@ class _DistressSignalScreenState extends State<DistressSignalScreen> {
       final lit = pattern.isLitAt(elapsed);
       final flash = pattern.flashNumberAt(elapsed);
       if (lit == _lit && flash == _flash) return;
-      if (lit && !_lit) unawaited(HapticFeedback.heavyImpact());
+      if (lit && !_lit) Feel.beat();
       setState(() {
         _lit = lit;
         _flash = flash;

@@ -2,6 +2,8 @@ import 'dart:async' show unawaited;
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -116,6 +118,9 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
     if (!_receiver.isComplete) return;
 
     _done = true;
+    // Both hands are holding phones up against each other and the eyes
+    // are on the other one's screen. This is the moment to stop.
+    Feel.arrived();
     await _finish();
   }
 

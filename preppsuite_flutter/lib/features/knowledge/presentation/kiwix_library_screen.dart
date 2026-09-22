@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -150,6 +152,7 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
       ),
     );
     if (confirmed != true || !mounted) return;
+    Feel.removed();
 
     await ref
         .read(archiveDownloadProvider.notifier)

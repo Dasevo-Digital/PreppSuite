@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 /// Pushes a camera preview and pops with the first detected barcode's raw
@@ -19,6 +21,10 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     if (value == null || value.isEmpty) return;
 
     _handled = true;
+    // The one moment in the app where nobody is looking at the screen:
+    // the phone is held against a packet and the answer is the screen
+    // going away.
+    Feel.arrived();
     Navigator.of(context).pop(value);
   }
 

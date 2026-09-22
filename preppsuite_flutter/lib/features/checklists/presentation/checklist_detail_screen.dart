@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -80,7 +82,12 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
                       value: complete,
                       onChanged: supplied
                           ? null
-                          : (_) => controller.toggleItem(item),
+                          : (_) {
+                              // Packing a Notgepäck is one hand on the
+                              // phone and one in a cupboard.
+                              Feel.chose();
+                              controller.toggleItem(item);
+                            },
                       title: Text(
                         item.title,
                         style: complete

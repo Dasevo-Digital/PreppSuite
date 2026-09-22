@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -157,6 +159,8 @@ class _PossessionFormScreenState extends ConsumerState<PossessionFormScreen> {
     } catch (error) {
       if (!mounted) return;
       setState(() => _submitting = false);
+      // A message that slides away by itself is the only sign otherwise.
+      Feel.failed();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(describeError(l10n, error))),
       );

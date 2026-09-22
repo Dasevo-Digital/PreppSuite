@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+
+import '../../../core/app_theme.dart';
+import 'unit_info_dialog.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -230,25 +233,27 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
                 query: _searchController.text,
                 filter: _filter,
               );
-              return items.isEmpty
-                  ? Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Text(
-                          allItems.isEmpty
-                              ? l10n.inventoryEmpty
-                              : l10n.inventoryNoMatches,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.only(bottom: 96),
-                      itemCount: items.length,
-                      itemBuilder: (context, index) =>
-                          _InventoryTile(item: items[index], l10n: l10n),
-                    );
+              if (items.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Text(
+                      allItems.isEmpty
+                          ? l10n.inventoryEmpty
+                          : l10n.inventoryNoMatches,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.only(bottom: 96),
+                itemCount: items.length,
+                itemBuilder: (context, index) =>
+                    _InventoryTile(item: items[index], l10n: l10n),
+              );
             },
           ),
         ),
@@ -595,6 +600,11 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
                 ),
               ],
             ),
+            if (foodWithoutMeasure(items) case final uncounted
+                when uncounted.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              _UnmeasuredNotice(count: uncounted.length, l10n: l10n),
+            ],
           ],
         ),
       ),
@@ -771,6 +781,68 @@ class _SupplyRing extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Food the supply calculator has to leave out, and where to read why.
+///
+/// The household decided this rather than the app: a row counted in
+/// tins keeps its tin. What was missing was anybody being told — the
+/// wording for this has existed since the per-100 g change and was
+/// never put on a screen, so rows fell quietly out of the calculation
+/// and the total looked like the whole pantry.
+///
+/// **A footnote inside the supply card, not a card beside it.** It
+/// belongs to the figure it qualifies, and a card of its own cost the
+/// whole list its height: on a short screen that pushed the first
+/// item\'s buttons underneath the floating action button, which is a
+/// worse fault than the one it was reporting.
+///
+/// One line, and the paragraph behind a tap. It will sit there every
+/// time the inventory is opened until somebody changes a unit, and a
+/// paragraph in that position is a paragraph people learn to skip.
+class _UnmeasuredNotice extends StatelessWidget {
+  const _UnmeasuredNotice({required this.count, required this.l10n});
+
+  final int count;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppRadius.small),
+      onTap: () => showUnitInfo(context, uncounted: count),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        child: Row(
+          children: [
+            Icon(
+              Icons.scale_outlined,
+              size: 16,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                l10n.foodWithoutMeasureTitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              l10n.unitInfoAction,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

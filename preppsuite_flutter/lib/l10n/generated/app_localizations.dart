@@ -10643,6 +10643,42 @@ abstract class AppLocalizations {
   /// **'Calories per {basis} (kcal, optional)'**
   String caloriesPer100Label(String basis);
 
+  /// No description provided for @unitInfoAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Why a measure?'**
+  String get unitInfoAction;
+
+  /// No description provided for @unitInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why g, kg, ml or l?'**
+  String get unitInfoTitle;
+
+  /// No description provided for @unitInfoWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition is printed on every packet per 100 g or per 100 ml. A stock only becomes a day’s ration if the amount can be said in grams too — and what six tins weigh is on the tin, not in this app.'**
+  String get unitInfoWhy;
+
+  /// No description provided for @unitInfoAccepted.
+  ///
+  /// In en, this message translates to:
+  /// **'These with one tap, and spelled out works as well: gram, kilo, millilitre, litre.'**
+  String get unitInfoAccepted;
+
+  /// No description provided for @unitInfoExempt.
+  ///
+  /// In en, this message translates to:
+  /// **'This applies to food and water only. Medicines are still counted in tablets, or the reach per daily dose stops adding up; tools are counted in pieces.'**
+  String get unitInfoExempt;
+
+  /// No description provided for @unitInfoKept.
+  ///
+  /// In en, this message translates to:
+  /// **'A stock counted in tins or jars is left exactly as it is. It simply stays out of the supply calculator until the unit names a measure.'**
+  String get unitInfoKept;
+
   /// No description provided for @unitMeasureHelper.
   ///
   /// In en, this message translates to:

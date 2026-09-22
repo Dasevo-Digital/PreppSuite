@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
@@ -171,6 +173,7 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
       ),
     );
     if (confirmed != true || !mounted) return;
+    Feel.removed();
     setState(() => _places.removeWhere((item) => item.id == place.id));
     await _store.save(_places);
   }

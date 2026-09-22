@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
@@ -392,6 +394,9 @@ class _TemplateTile extends ConsumerWidget {
             case _TemplateAction.duplicate:
               controller.duplicateTemplate(template);
             case _TemplateAction.delete:
+              // No dialog and no undo behind this one: it happens on a
+              // menu tap and the list is simply gone.
+              Feel.removed();
               controller.deleteTemplate(template);
           }
         },

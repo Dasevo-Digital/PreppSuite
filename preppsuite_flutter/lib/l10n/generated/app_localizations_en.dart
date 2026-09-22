@@ -6345,6 +6345,28 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get unitInfoAction => 'Why a measure?';
+
+  @override
+  String get unitInfoTitle => 'Why g, kg, ml or l?';
+
+  @override
+  String get unitInfoWhy =>
+      'Nutrition is printed on every packet per 100 g or per 100 ml. A stock only becomes a day’s ration if the amount can be said in grams too — and what six tins weigh is on the tin, not in this app.';
+
+  @override
+  String get unitInfoAccepted =>
+      'These with one tap, and spelled out works as well: gram, kilo, millilitre, litre.';
+
+  @override
+  String get unitInfoExempt =>
+      'This applies to food and water only. Medicines are still counted in tablets, or the reach per daily dose stops adding up; tools are counted in pieces.';
+
+  @override
+  String get unitInfoKept =>
+      'A stock counted in tins or jars is left exactly as it is. It simply stays out of the supply calculator until the unit names a measure.';
+
+  @override
   String get unitMeasureHelper =>
       'For food and water: g, kg, ml or l. Nutrition is printed per 100 g, and a tin has no weight until somebody reads it.';
 

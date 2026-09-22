@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/feel.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/personal_document_index.dart';
@@ -132,6 +134,7 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
       ),
     );
     if (confirmed != true) return;
+    Feel.removed();
     final database = PersonalDocumentIndex();
     await database.clear();
     await database.close();
