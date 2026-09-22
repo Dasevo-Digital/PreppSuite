@@ -6312,4 +6312,14 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get transferInterrupted =>
       'Die Verbindung stand, die Übertragung ist aber nicht fertig geworden. Beide Geräte wach lassen und noch einmal versuchen – bei vielen Fotos dauert es etwas.';
+
+  @override
+  String transferLastSeen(int frame) {
+    return 'Zuletzt gelesen: Bild $frame';
+  }
+
+  @override
+  String transferLastSeenMixed(int frame, int discarded) {
+    return 'Zuletzt gelesen: Bild $frame · $discarded Bilder gehörten zu einer anderen Übertragung';
+  }
 }

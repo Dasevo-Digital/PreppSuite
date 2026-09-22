@@ -1311,6 +1311,32 @@ fall through to the next address: it is `LocalHandoverFailure.interrupted`,
 which says the connection was made and to try again, rather than sending
 somebody to look at the one thing that was demonstrably fine.
 
+### base64 runs twice on the way out, and the ceiling has to know it
+
+`localHandoverMaxRequestBytes` was a flat 32 MB, with a comment allowing
+for base64 adding "a third". base64 runs **twice**: once to put each
+picture's bytes into the JSON, and again on the ciphertext of the whole
+sealed body. Sixteen ninths, not four thirds -- so the 20 MB photo budget
+arrives as **35.6 MB** against a 32 MB ceiling, measured.
+
+What that looked like from the outside was not a size error. The host threw
+`_HandoverTooLarge` mid-stream, answered 413 while the guest was still
+uploading, and the connection broke under the answer -- so the guest never
+saw the status. It saw a broken pipe, reported a handover that started and
+did not finish, and sent a household off to check its wifi.
+
+Two things follow, and both are in the code now. The ceiling is **derived**
+from `handoverPhotoBudgetBytes` rather than picked, so the two cannot drift
+apart again. And `_readRequest` reads an oversized body **to the end**,
+dropping the buffer rather than the reading: nothing is held past the
+ceiling, so it costs the time to receive and no memory, and the 413
+actually reaches the guest.
+
+An address that answers and then fails still lets the remaining addresses
+have their turn -- a machine can have a VPN interface that accepts a
+connection and leads nowhere -- but the final failure is `interrupted`
+rather than `unreachable`, because something was demonstrably there.
+
 ### A QR chain is filmed, not scanned, and both ends have to allow for it
 
 Two settings decide whether a run of frames can be read at all, and both
@@ -1324,6 +1350,15 @@ characters, so a frame came to 717 and the encoder went to version 22 --
 is now derived from version 20's capacity minus the header, and
 `qr_chain_test.dart` holds every full frame to that rather than trusting
 the prose.
+
+**A count on its own cannot say why a run is stuck.** Sitting at "1 von
+18" has two very different causes: the camera reading the same picture
+over and over, or every picture arriving under a different checksum and
+clearing what came before. `QrChainReceiver` therefore reports `lastSeen`
+and `discarded` beside the count, and the screen shows them -- the first
+stands still in one case and moves in the other. The redraw is keyed to
+those moving rather than to each detection, so a camera reading thirty
+times a second does not rebuild the screen thirty times a second.
 
 **The camera is watching a sequence, not a till.** `MobileScanner`'s
 default is `DetectionSpeed.normal`, which ignores everything for 250 ms

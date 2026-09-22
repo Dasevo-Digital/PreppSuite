@@ -40,11 +40,30 @@ const localHandoverPrefix = 'PSL1';
 
 /// How large a handover body may be.
 ///
-/// Raised from eight megabytes when the photographs began travelling with
-/// the stock. The ceiling is not the photo budget itself: base64 adds a
-/// third, and the body is encrypted whole, so the figure has to leave room
-/// for [handoverPhotoBudgetBytes] plus that overhead plus the rows.
-const localHandoverMaxRequestBytes = 32 * 1024 * 1024;
+/// **Derived from the photo budget rather than picked**, because picking
+/// it is what went wrong. It was set to a flat 32 MB with a comment
+/// saying base64 "adds a third" — but base64 runs **twice** on the way
+/// out, and nobody did the second multiplication:
+///
+///   1. every picture's bytes become base64 to sit in the JSON — ×4/3;
+///   2. the whole thing is encrypted and the ciphertext comes back as
+///      base64 as well — ×4/3 again.
+///
+/// Sixteen ninths, not four thirds. A full budget of twenty megabytes of
+/// photographs therefore arrives as **35.6 MB** against a 32 MB ceiling,
+/// the host answers 413 while the guest is still uploading, the
+/// connection breaks mid-write, and the guest reports a handover that
+/// started and did not finish. Measured, not reasoned about: see
+/// `local_handover_test.dart`.
+///
+/// The slack on top is for the rows, which travel in the same body and
+/// are small beside the pictures but not nothing.
+const localHandoverMaxRequestBytes =
+    handoverPhotoBudgetBytes * 16 ~/ 9 + _rowsHeadroom;
+
+/// Room for the household's rows beside the pictures, after the same two
+/// base64 passes.
+const _rowsHeadroom = 8 * 1024 * 1024;
 
 /// What the host shows and the guest films.
 class LocalHandoverInvitation {
@@ -269,6 +288,8 @@ class LocalHandoverHost {
         ));
       } on _HandoverTooLarge {
         try {
+          // No draining needed: [_readRequest] has already read to the
+          // end, which is what makes this answer reach the guest at all.
           request.response.statusCode = HttpStatus.requestEntityTooLarge;
           await request.response.close();
         } on Object {
@@ -287,17 +308,31 @@ class LocalHandoverHost {
     }
   }
 
+  /// The body, or [_HandoverTooLarge] if it is over the ceiling.
+  ///
+  /// **Read to the end either way**, and that is the point of it. Bailing
+  /// out mid-stream leaves the guest still uploading into a socket the
+  /// host has stopped listening to, so the 413 never lands: the guest
+  /// gets a broken pipe and reports a handover that started and did not
+  /// finish, which sends somebody to look at their network. What is
+  /// dropped is the *buffer*, not the reading — nothing is held on to
+  /// past the ceiling, so an oversized body costs the time to receive it
+  /// and no memory.
   Future<String> _readRequest(HttpRequest request) async {
-    if (request.contentLength > _maxRequestBytes) {
-      throw const _HandoverTooLarge();
-    }
     final bytes = BytesBuilder(copy: false);
+    var tooLarge = request.contentLength > _maxRequestBytes;
+    var seen = 0;
+
     await for (final chunk in request) {
-      if (bytes.length + chunk.length > _maxRequestBytes) {
-        throw const _HandoverTooLarge();
+      seen += chunk.length;
+      if (!tooLarge && seen > _maxRequestBytes) {
+        tooLarge = true;
+        bytes.clear();
       }
-      bytes.add(chunk);
+      if (!tooLarge) bytes.add(chunk);
     }
+
+    if (tooLarge) throw const _HandoverTooLarge();
     return utf8.decode(bytes.takeBytes());
   }
 
@@ -360,6 +395,11 @@ Future<LocalHandoverResult> joinLocalHandover({
 
   final exchange = exchangeTimeout ?? exchangeTimeoutFor(body.length);
 
+  /// Whether any address answered at all. What separates "nothing there"
+  /// from "something there that did not finish", which are two different
+  /// things to go and do.
+  var connected = false;
+
   final client = HttpClient()..connectionTimeout = connectTimeout;
   try {
     for (final address in invitation.addresses) {
@@ -375,12 +415,16 @@ Future<LocalHandoverResult> joinLocalHandover({
         continue;
       }
 
-      // Past here the address answered, and whatever happens next is
-      // this handover's failure rather than the network's. Falling
-      // through to the bottom of the loop would report "not reachable"
-      // for a device that plainly was — which is exactly what an
-      // eight-second ceiling on a body carrying twenty megabytes of
-      // photographs did.
+      // Past here the address answered, so "not reachable" is already
+      // ruled out however this ends — a device that plainly was there
+      // must never be reported as absent.
+      //
+      // The remaining addresses still get their turn, though: a machine
+      // can have a VPN or a second interface that accepts a connection
+      // and leads nowhere useful, and giving up on the first one to
+      // answer would strand a handover the second address would have
+      // completed.
+      connected = true;
       final String answer;
       try {
         request.headers.contentType = ContentType.text;
@@ -399,7 +443,7 @@ Future<LocalHandoverResult> joinLocalHandover({
       } on LocalHandoverException {
         rethrow;
       } on Object {
-        throw const LocalHandoverException(LocalHandoverFailure.interrupted);
+        continue;
       }
 
       final plain = await decryptFromFolder(answer, invitation.key);
@@ -425,7 +469,11 @@ Future<LocalHandoverResult> joinLocalHandover({
     client.close(force: true);
   }
 
-  throw const LocalHandoverException(LocalHandoverFailure.unreachable);
+  throw LocalHandoverException(
+    connected
+        ? LocalHandoverFailure.interrupted
+        : LocalHandoverFailure.unreachable,
+  );
 }
 
 /// How long an exchange of [bodyBytes] is allowed to take.

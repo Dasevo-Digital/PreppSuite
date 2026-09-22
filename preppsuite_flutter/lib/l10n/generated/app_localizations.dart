@@ -10498,6 +10498,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The connection was made but the transfer did not finish. Keep both devices awake and try again — with a lot of photos it takes a moment.'**
   String get transferInterrupted;
+
+  /// No description provided for @transferLastSeen.
+  ///
+  /// In en, this message translates to:
+  /// **'Last read: frame {frame}'**
+  String transferLastSeen(int frame);
+
+  /// No description provided for @transferLastSeenMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Last read: frame {frame} · {discarded} frames belonged to a different transfer'**
+  String transferLastSeenMixed(int frame, int discarded);
 }
 
 class _AppLocalizationsDelegate

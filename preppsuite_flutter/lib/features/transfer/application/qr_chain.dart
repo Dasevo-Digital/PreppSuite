@@ -173,7 +173,9 @@ class QrChainReceiver {
     // over is the only honest answer: half of one payload and half of
     // another reassembles into rubbish that the checksum would then
     // reject anyway, after wasting the person's time.
+    _lastSeen = frame.index;
     if (_checksum != null && frame.checksum != _checksum) {
+      _discarded += _frames.length;
       _frames.clear();
     }
     _checksum = frame.checksum;
@@ -183,6 +185,26 @@ class QrChainReceiver {
     _frames[frame.index] = frame.data;
     return true;
   }
+
+  /// The last frame the camera actually read, whether it was new or not.
+  ///
+  /// Shown because a count on its own cannot tell two very different
+  /// failures apart. A run that sits at "1 von 18" means either the
+  /// camera is reading the same picture over and over — the sender is
+  /// not advancing, or the lens is locked on one spot — or every picture
+  /// arrives under a different checksum and clears what came before. The
+  /// first has this number standing still; the second has it moving
+  /// while the count does not.
+  int? get lastSeen => _lastSeen;
+  int? _lastSeen;
+
+  /// How many frames were read and thrown away because they belonged to
+  /// a different transfer.
+  ///
+  /// Zero in every healthy run. Anything else means two senders in view,
+  /// or one sender that rebuilt its payload mid-run.
+  int get discarded => _discarded;
+  var _discarded = 0;
 
   /// Which frames are still missing, so the screen can say so.
   List<int> get missing {
@@ -227,6 +249,8 @@ class QrChainReceiver {
     _frames.clear();
     _checksum = null;
     _total = null;
+    _lastSeen = null;
+    _discarded = 0;
   }
 }
 

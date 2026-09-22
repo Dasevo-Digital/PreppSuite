@@ -306,4 +306,57 @@ void main() {
       expect(frames.first.length, lessThanOrEqualTo(666));
     });
   });
+
+  group('what the collector reports about itself', () {
+    // A count on its own cannot tell two very different failures apart,
+    // and a run that sits at "1 von 18" is exactly where that matters.
+    final frames = qrChainFrames(
+      Uint8List.fromList(
+        List.generate(9000, (i) => Random(i).nextInt(256)),
+      ),
+    );
+
+    test('the last picture read moves even when nothing new arrives', () {
+      final receiver = QrChainReceiver();
+
+      expect(receiver.lastSeen, isNull);
+      receiver.take(frames[3]);
+      expect(receiver.lastSeen, 3);
+
+      // The same one again: nothing new, but the camera did read it.
+      expect(receiver.take(frames[3]), isFalse);
+      expect(receiver.lastSeen, 3);
+      expect(receiver.received, 1);
+
+      // A different one: this is what tells a stuck camera from a
+      // collector that keeps throwing its work away.
+      receiver.take(frames[5]);
+      expect(receiver.lastSeen, 5);
+      expect(receiver.received, 2);
+    });
+
+    test('and frames from another transfer are counted, not just dropped', () {
+      final receiver = QrChainReceiver();
+      receiver.take(frames[0]);
+      receiver.take(frames[1]);
+      expect(receiver.discarded, 0);
+
+      final other = qrChainFrames(
+        Uint8List.fromList(List.generate(500, (i) => (i * 31) % 256)),
+      );
+      receiver.take(other.first);
+
+      expect(receiver.received, 1, reason: 'it started over');
+      expect(receiver.discarded, 2, reason: 'and said what it threw away');
+    });
+
+    test('starting again forgets all of it', () {
+      final receiver = QrChainReceiver()..take(frames[2]);
+      receiver.reset();
+
+      expect(receiver.lastSeen, isNull);
+      expect(receiver.discarded, 0);
+      expect(receiver.received, 0);
+    });
+  });
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:drift/drift.dart' show Value;
@@ -8,6 +9,7 @@ import 'package:path/path.dart' as p;
 import 'package:preppsuite_flutter/features/sharing/application/carried_settings.dart';
 import 'package:preppsuite_flutter/features/sharing/application/folder_crypto.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
+import 'package:preppsuite_flutter/features/transfer/application/handover_photos.dart';
 import 'package:preppsuite_flutter/features/transfer/application/local_handover.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
@@ -556,6 +558,81 @@ void main() {
       // An empty body still has a household to decrypt, rows to apply and
       // pictures to write before it can answer.
       expect(exchangeTimeoutFor(0).inSeconds, greaterThanOrEqualTo(30));
+    });
+  });
+  group('a body carrying the full photo budget', () {
+    test('crosses, rather than being refused by its own ceiling', () async {
+      // Measured, because reasoning about it is what went wrong. Twenty
+      // megabytes of pictures leave this device as a **35.6 MB** body:
+      // base64 once to sit in the JSON, and again on the ciphertext. The
+      // ceiling was a flat 32 MB with a comment allowing for one of those
+      // two passes, so a full budget was rejected by the side meant to
+      // receive it -- and because the host answered while the guest was
+      // still uploading, the guest never saw the 413. It saw a broken
+      // pipe, and reported a handover that started and did not finish.
+      final here = await Directory.systemTemp.createTemp('ps-photos-here');
+      final there = await Directory.systemTemp.createTemp('ps-photos-there');
+      addTearDown(() async {
+        await here.delete(recursive: true);
+        await there.delete(recursive: true);
+      });
+
+      final hostDb = open();
+      final guestDb = open();
+
+      // Incompressible on purpose: a photograph is, and a body that
+      // squeezed down to nothing would prove nothing about the ceiling.
+      final noise = Random(20260922);
+      for (var i = 0; i < 40; i++) {
+        final file = File(p.join(here.path, 'photo-$i.jpg'));
+        await file.writeAsBytes(
+          Uint8List.fromList(
+            List.generate(512 * 1024, (_) => noise.nextInt(256)),
+          ),
+        );
+        await guestDb.upsertInventoryItem(
+          InventoryItemsCompanion.insert(
+            clientId: 'item-$i',
+            householdId: householdId,
+            name: 'Vorrat $i',
+            category: 'food',
+            quantity: 1,
+            unit: 'kg',
+            storageLocation: 'Keller',
+            updatedAt: DateTime.utc(2026, 9, 22),
+            photoPath: Value(file.path),
+          ),
+        );
+      }
+
+      final host = await LocalHandoverHost.start(
+        db: hostDb,
+        deviceId: 'host',
+        householdId: householdId,
+        addresses: const ['127.0.0.1'],
+      );
+      addTearDown(host.stop);
+
+      final result = await joinLocalHandover(
+        db: guestDb,
+        deviceId: 'guest',
+        householdId: householdId,
+        invitation: host.invitation,
+        into: there,
+      );
+
+      expect(result.sent, 40, reason: 'the whole stock went over');
+    });
+
+    test('and the ceiling really does allow for base64 twice', () {
+      // The arithmetic itself, so it cannot drift from the budget again.
+      // Sixteen ninths: four thirds for the pictures inside the JSON, and
+      // four thirds again for the sealed body.
+      expect(
+        localHandoverMaxRequestBytes,
+        greaterThan(handoverPhotoBudgetBytes * 16 ~/ 9),
+        reason: 'a full budget has to fit, with the rows on top',
+      );
     });
   });
 }

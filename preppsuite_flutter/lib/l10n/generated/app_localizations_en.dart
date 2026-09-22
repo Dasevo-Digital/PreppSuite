@@ -6281,4 +6281,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get transferInterrupted =>
       'The connection was made but the transfer did not finish. Keep both devices awake and try again — with a lot of photos it takes a moment.';
+
+  @override
+  String transferLastSeen(int frame) {
+    return 'Last read: frame $frame';
+  }
+
+  @override
+  String transferLastSeenMixed(int frame, int discarded) {
+    return 'Last read: frame $frame · $discarded frames belonged to a different transfer';
+  }
 }

@@ -3793,5 +3793,24 @@
       }
     }
   },
-  "transferInterrupted": "The connection was made but the transfer did not finish. Keep both devices awake and try again — with a lot of photos it takes a moment."
+  "transferInterrupted": "The connection was made but the transfer did not finish. Keep both devices awake and try again — with a lot of photos it takes a moment.",
+  "transferLastSeen": "Last read: frame {frame}",
+  "@transferLastSeen": {
+    "placeholders": {
+      "frame": {
+        "type": "int"
+      }
+    }
+  },
+  "transferLastSeenMixed": "Last read: frame {frame} · {discarded} frames belonged to a different transfer",
+  "@transferLastSeenMixed": {
+    "placeholders": {
+      "frame": {
+        "type": "int"
+      },
+      "discarded": {
+        "type": "int"
+      }
+    }
+  }
 }

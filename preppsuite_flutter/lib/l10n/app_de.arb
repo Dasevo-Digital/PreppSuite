@@ -2851,5 +2851,24 @@
       }
     }
   },
-  "transferInterrupted": "Die Verbindung stand, die Übertragung ist aber nicht fertig geworden. Beide Geräte wach lassen und noch einmal versuchen – bei vielen Fotos dauert es etwas."
+  "transferInterrupted": "Die Verbindung stand, die Übertragung ist aber nicht fertig geworden. Beide Geräte wach lassen und noch einmal versuchen – bei vielen Fotos dauert es etwas.",
+  "transferLastSeen": "Zuletzt gelesen: Bild {frame}",
+  "@transferLastSeen": {
+    "placeholders": {
+      "frame": {
+        "type": "int"
+      }
+    }
+  },
+  "transferLastSeenMixed": "Zuletzt gelesen: Bild {frame} · {discarded} Bilder gehörten zu einer anderen Übertragung",
+  "@transferLastSeenMixed": {
+    "placeholders": {
+      "frame": {
+        "type": "int"
+      },
+      "discarded": {
+        "type": "int"
+      }
+    }
+  }
 }

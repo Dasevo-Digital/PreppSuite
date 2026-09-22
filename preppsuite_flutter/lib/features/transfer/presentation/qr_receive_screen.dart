@@ -88,6 +88,10 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
   Future<void> _onDetect(BarcodeCapture capture) async {
     if (_done) return;
 
+    // Which picture was last read, so the screen can move even when the
+    // count does not. Without it a stuck run says "1 von 18" and nothing
+    // else, and the two ways it can be stuck look identical.
+    final before = _receiver.lastSeen;
     var changed = false;
     for (final barcode in capture.barcodes) {
       final value = barcode.rawValue;
@@ -104,7 +108,10 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
 
       if (_receiver.take(value)) changed = true;
     }
-    if (!changed) return;
+    // A camera reading the same picture thirty times a second must not
+    // rebuild the screen thirty times a second, so this redraws when
+    // something actually moved: a new frame, or a different one in view.
+    if (!changed && _receiver.lastSeen == before) return;
     if (mounted) setState(() {});
     if (!_receiver.isComplete) return;
 
@@ -410,6 +417,22 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
                     textAlign: TextAlign.center,
                     style: theme.textTheme.titleMedium,
                   ),
+                  // What the camera is looking at right now. A count that
+                  // stands still says nothing about why; this says
+                  // whether the pictures are changing at all.
+                  if (_receiver.lastSeen case final seen?) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _receiver.discarded > 0
+                          ? l10n.transferLastSeenMixed(
+                              seen + 1,
+                              _receiver.discarded,
+                            )
+                          : l10n.transferLastSeen(seen + 1),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
                   const SizedBox(height: 8),
                   // Indeterminate until the first frame says how many
                   // there are; a bar sitting at zero reads as broken.
