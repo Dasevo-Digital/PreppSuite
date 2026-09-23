@@ -4054,5 +4054,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "statusSupplyLimitWater": "Limiting factor: drinking water.",
+  "statusSupplyLimitCalories": "Limiting factor: available calories.",
+  "statusSupplyLimitBoth": "Limiting factors: drinking water and available calories."
 }

@@ -108,7 +108,11 @@ void main() {
 
     expect(find.text(l10n.statusSupplyCovered(10)), findsOneWidget);
     // Whose ten days these are, said on the lamp and not in a footnote.
-    expect(find.text(l10n.statusSupplyBasis(statusLightDays)), findsOneWidget);
+    expect(find.textContaining(l10n.statusSupplyLimitWater), findsOneWidget);
+    expect(
+      find.textContaining(l10n.statusSupplyBasis(statusLightDays)),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a short household says how far it gets', (tester) async {
@@ -121,6 +125,7 @@ void main() {
     );
 
     expect(find.textContaining('von $statusLightDays'), findsOneWidget);
+    expect(find.textContaining(l10n.statusSupplyLimitCalories), findsOneWidget);
   });
 
   testWidgets('the lamp admits what it could not count', (tester) async {
@@ -132,7 +137,43 @@ void main() {
       ],
     );
 
-    expect(find.text(l10n.statusSupplyUncounted(1)), findsOneWidget);
+    expect(find.textContaining(l10n.statusSupplyUncounted(1)), findsOneWidget);
+  });
+
+  testWidgets('the limiting factor remains readable on a narrow screen', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(360, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          inventoryItemsProvider(householdId).overrideWith(
+            (ref) => Stream.value([
+              item(clientId: 'w', category: 'water', quantity: 8, unit: 'l'),
+              item(clientId: 'f', quantity: 500, unit: 'g', calories: 250),
+            ]),
+          ),
+          activeWarningsProvider.overrideWith((ref) => Stream.value(const [])),
+        ],
+        child: MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: ListView(
+              children: [
+                StatusLightsRow(profile: profile, onNavigate: went.add),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Begrenzender Faktor:'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   group('the situation lamp', () {

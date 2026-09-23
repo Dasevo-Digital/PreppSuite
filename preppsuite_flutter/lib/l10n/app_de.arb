@@ -3043,5 +3043,8 @@
         "type": "int"
       }
     }
-  }
+  },
+  "statusSupplyLimitWater": "Begrenzender Faktor: Trinkwasser.",
+  "statusSupplyLimitCalories": "Begrenzender Faktor: verfügbare Kalorien.",
+  "statusSupplyLimitBoth": "Begrenzende Faktoren: Trinkwasser und verfügbare Kalorien."
 }

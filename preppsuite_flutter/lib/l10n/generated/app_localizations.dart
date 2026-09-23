@@ -11386,6 +11386,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Every {days} days'**
   String resilienceMaintenanceEveryDays(int days);
+
+  /// No description provided for @statusSupplyLimitWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Limiting factor: drinking water.'**
+  String get statusSupplyLimitWater;
+
+  /// No description provided for @statusSupplyLimitCalories.
+  ///
+  /// In en, this message translates to:
+  /// **'Limiting factor: available calories.'**
+  String get statusSupplyLimitCalories;
+
+  /// No description provided for @statusSupplyLimitBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Limiting factors: drinking water and available calories.'**
+  String get statusSupplyLimitBoth;
 }
 
 class _AppLocalizationsDelegate

@@ -6837,4 +6837,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String resilienceMaintenanceEveryDays(int days) {
     return 'Alle $days Tage';
   }
+
+  @override
+  String get statusSupplyLimitWater => 'Begrenzender Faktor: Trinkwasser.';
+
+  @override
+  String get statusSupplyLimitCalories =>
+      'Begrenzender Faktor: verfügbare Kalorien.';
+
+  @override
+  String get statusSupplyLimitBoth =>
+      'Begrenzende Faktoren: Trinkwasser und verfügbare Kalorien.';
 }

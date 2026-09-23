@@ -54,6 +54,7 @@ void main() {
 
       expect(status.light, SupplyLight.covered);
       expect(status.daysCovered, greaterThanOrEqualTo(10));
+      expect(status.limit, SupplyLimit.water);
     });
 
     test('short on one of the two is short', () {
@@ -67,6 +68,20 @@ void main() {
 
       expect(status.light, SupplyLight.short);
       expect(status.daysCovered, lessThan(10));
+      expect(status.limit, SupplyLimit.calories);
+    });
+
+    test('a genuine tie names both limiting resources', () {
+      final status = supplyStatus(
+        items: [
+          item(clientId: 'w', category: 'water', quantity: 8, unit: 'l'),
+          item(clientId: 'f', quantity: 8800, unit: 'g', calories: 100),
+        ],
+        household: oneAdult,
+      );
+
+      expect(status.daysCovered, 4);
+      expect(status.limit, SupplyLimit.both);
     });
 
     test('an empty database is grey, not red', () {

@@ -97,9 +97,7 @@ class StatusLightsRow extends ConsumerWidget {
               },
               // Whose number this is, said on the lamp rather than in a
               // footnote: ten days is the BBK's figure, not the app's.
-              detail: supply.uncounted > 0
-                  ? l10n.statusSupplyUncounted(supply.uncounted)
-                  : l10n.statusSupplyBasis(statusLightDays),
+              detail: _supplyDetail(l10n, supply),
               colour: supplyColour,
               filled: supplyOn,
               icon: Icons.inventory_2_outlined,
@@ -129,6 +127,21 @@ class StatusLightsRow extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _supplyDetail(AppLocalizations l10n, SupplyStatus supply) {
+    final limit = switch (supply.limit) {
+      SupplyLimit.water => l10n.statusSupplyLimitWater,
+      SupplyLimit.calories => l10n.statusSupplyLimitCalories,
+      SupplyLimit.both => l10n.statusSupplyLimitBoth,
+      null => l10n.statusSupplyBasis(statusLightDays),
+    };
+    final details = <String>[
+      limit,
+      if (supply.limit != null) l10n.statusSupplyBasis(statusLightDays),
+      if (supply.uncounted > 0) l10n.statusSupplyUncounted(supply.uncounted),
+    ];
+    return details.join('\n');
   }
 }
 

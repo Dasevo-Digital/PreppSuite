@@ -27,6 +27,11 @@ import '../../inventory/application/supply_calculator.dart';
 const statusLightDays = 10;
 
 /// What the supply lamp says.
+/// The resource that ends the recorded supply first.  This is deliberately
+/// separate from the colour: a ten-day target can be covered while water is
+/// still the first thing that would run out on day eleven.
+enum SupplyLimit { water, calories, both }
+
 enum SupplyLight {
   /// Too little recorded to answer. Grey, because an empty database is
   /// not an empty cellar — and colouring it red would accuse a household
@@ -45,6 +50,7 @@ class SupplyStatus {
   const SupplyStatus({
     required this.light,
     this.daysCovered,
+    this.limit,
     this.uncounted = 0,
   });
 
@@ -53,6 +59,9 @@ class SupplyStatus {
   /// How long the household lasts, as the shopping list works it out —
   /// the shorter of water and calories. Null when nothing can be said.
   final int? daysCovered;
+
+  /// The recorded resource that determines [daysCovered], when known.
+  final SupplyLimit? limit;
 
   /// Food rows the calculation had to leave out, because their unit
   /// names no measure. A figure with this above zero covers less than
@@ -94,11 +103,36 @@ SupplyStatus supplyStatus({
     return SupplyStatus(light: SupplyLight.unknown, uncounted: uncounted);
   }
 
+  final calculated = calculateSupply(
+    items: items,
+    days: statusLightDays,
+    household: household,
+  );
   return SupplyStatus(
     light: list.targetMet ? SupplyLight.covered : SupplyLight.short,
     daysCovered: days,
+    limit: _supplyLimit(calculated, household),
     uncounted: uncounted,
   );
+}
+
+SupplyLimit? _supplyLimit(
+  SupplyCalculatorResult supply,
+  SupplyHousehold household,
+) {
+  final waterDays = household.litersPerDay > 0
+      ? supply.waterCurrentLiters / household.litersPerDay
+      : null;
+  final calorieDays = household.kcalPerDay > 0
+      ? supply.caloriesCurrent / household.kcalPerDay
+      : null;
+  if (waterDays == null && calorieDays == null) return null;
+  if (waterDays == null) return SupplyLimit.calories;
+  if (calorieDays == null) return SupplyLimit.water;
+  // A true tie is useful: neither resource can be improved later than the
+  // other.  Near ties still name the shorter runway rather than hiding it.
+  if ((waterDays - calorieDays).abs() < 0.000001) return SupplyLimit.both;
+  return waterDays < calorieDays ? SupplyLimit.water : SupplyLimit.calories;
 }
 
 /// What the situation lamp says.
