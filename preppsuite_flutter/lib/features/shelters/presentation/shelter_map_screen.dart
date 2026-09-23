@@ -231,48 +231,6 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
             l10n.shelterInfoLine(_radiusKm.round()),
             style: Theme.of(context).textTheme.bodySmall,
           ),
-          const SizedBox(height: 8),
-          Card(
-            clipBehavior: Clip.antiAlias,
-            child: ExpansionTile(
-              title: Text(l10n.shelterLegendTitle),
-              subtitle: Text(
-                l10n.shelterLegendSummary(
-                  counts[ShelterConfidence.green] ?? 0,
-                  counts[ShelterConfidence.yellow] ?? 0,
-                  counts[ShelterConfidence.red] ?? 0,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              children: [
-                _LegendRow(
-                  color: _colorFor(ShelterConfidence.green),
-                  label: l10n.shelterLegendGreenLabel,
-                  count: counts[ShelterConfidence.green] ?? 0,
-                  description: l10n.shelterLegendGreenDescription,
-                ),
-                _LegendRow(
-                  color: _colorFor(ShelterConfidence.yellow),
-                  label: l10n.shelterLegendYellowLabel,
-                  count: counts[ShelterConfidence.yellow] ?? 0,
-                  description: l10n.shelterLegendYellowDescription,
-                ),
-                _LegendRow(
-                  color: _colorFor(ShelterConfidence.red),
-                  label: l10n.shelterLegendRedLabel,
-                  count: counts[ShelterConfidence.red] ?? 0,
-                  description: l10n.shelterLegendRedDescription,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.shelterDisclaimer,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          ),
           if ((counts[ShelterConfidence.green] ?? 0) == 0 &&
               _shelters.isNotEmpty) ...[
             const SizedBox(height: 8),
@@ -531,55 +489,6 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _LegendRow extends StatelessWidget {
-  const _LegendRow({
-    required this.color,
-    required this.label,
-    required this.count,
-    required this.description,
-  });
-
-  final Color color;
-  final String label;
-  final int count;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Container(
-              width: 10,
-              height: 10,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: DefaultTextStyle.of(context).style,
-                children: [
-                  TextSpan(
-                    text: '$label ($count)  ',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  TextSpan(text: description),
-                ],
-              ),
-            ),
-          ),
         ],
       ),
     );

@@ -18,9 +18,9 @@ class _OnlineMapSource extends MapSourceController {
 }
 
 /// On a phone the map used to be fixed above the only scrollable portion,
-/// together with a full-height legend. This checks that the page itself now
-/// scrolls, its first view keeps the legend compact, and all of the guide is
-/// still reachable when it is needed.
+/// together with a full-height legend. The map attribution's information
+/// affordance already explains its source, so the page now keeps the map and
+/// the actions in the one scroll view without repeating a large guide above it.
 void main() {
   Future<void> show(WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
@@ -42,7 +42,7 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('keeps the map compact and all controls in one scroll view', (
+  testWidgets('keeps the map compact without a duplicate marker guide', (
     tester,
   ) async {
     await show(tester);
@@ -59,17 +59,7 @@ void main() {
       ),
       findsNothing,
     );
-
-    await tester.tap(find.byType(ExpansionTile));
-    await tester.pumpAndSettle();
-    expect(
-      find.textContaining(
-        'offiziell als nutzbarer Schutzraum bestätigt',
-        findRichText: true,
-        skipOffstage: false,
-      ),
-      findsOneWidget,
-    );
+    expect(find.byType(ExpansionTile), findsNothing);
 
     final locationButton = find.text('Standort direkt untersuchen');
     await tester.dragUntilVisible(
