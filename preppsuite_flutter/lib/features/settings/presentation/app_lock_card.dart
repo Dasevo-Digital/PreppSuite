@@ -12,11 +12,13 @@ class AppLockCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final enabled = ref.watch(appLockProvider).when(
-      data: (value) => value,
-      loading: () => false,
-      error: (_, _) => false,
-    );
+    final enabled = ref
+        .watch(appLockProvider)
+        .when(
+          data: (value) => value,
+          loading: () => false,
+          error: (_, _) => false,
+        );
     return Card(
       child: ListTile(
         leading: Icon(enabled ? Icons.lock_outline : Icons.lock_open_outlined),
