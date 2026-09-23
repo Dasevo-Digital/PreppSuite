@@ -46,6 +46,7 @@ import '../features/maps/presentation/my_position_screen.dart';
 import '../features/maps/presentation/nearby_screen.dart';
 import '../features/possessions/presentation/possessions_screen.dart';
 import '../features/preparedness/presentation/preparedness_hub_screen.dart';
+import '../features/settings/presentation/followed_places_screen.dart';
 import '../features/transfer/presentation/local_devices_screen.dart';
 import '../features/transfer/presentation/qr_receive_screen.dart';
 import '../features/transfer/presentation/qr_send_screen.dart';
@@ -448,6 +449,14 @@ List<AppDestination> appDestinations() => [
   ),
 
   // --- under Einstellungen --------------------------------------------
+  AppDestination(
+    id: 'followed-places',
+    title: (l) => l.followedPlacesTitle,
+    icon: Icons.location_on_outlined,
+    area: ShellDestination.settings,
+    open: (p) => FollowedPlacesScreen(profile: p),
+    aliases: ['warnorte', 'orte', 'regionen', 'angehoerige', 'arbeit'],
+  ),
   AppDestination(
     id: 'transfer-nearby',
     title: (l) => l.transferNearbyTitle,

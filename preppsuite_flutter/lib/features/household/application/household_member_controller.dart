@@ -25,6 +25,7 @@ class HouseholdMemberDraft {
     this.insurance,
     this.doctor,
     this.emergencyContact,
+    this.careNeeds,
     this.notes,
   });
 
@@ -37,6 +38,7 @@ class HouseholdMemberDraft {
   final String? insurance;
   final String? doctor;
   final String? emergencyContact;
+  final String? careNeeds;
   final String? notes;
 }
 
@@ -72,6 +74,7 @@ class HouseholdMemberController {
         insurance: Value(_trimmed(draft.insurance)),
         doctor: Value(_trimmed(draft.doctor)),
         emergencyContact: Value(_trimmed(draft.emergencyContact)),
+        careNeeds: Value(_trimmed(draft.careNeeds)),
         notes: Value(_trimmed(draft.notes)),
         sortOrder: Value(sortOrder ?? existing?.sortOrder ?? 0),
         updatedAt: DateTime.now().toUtc(),

@@ -37,6 +37,7 @@ void main() {
       doctors: 'Aerzte',
       contact: 'Notfallkontakt',
       contacts: 'Notfallkontakte',
+      careNeeds: 'Unterstützungsbedarf',
       notes: 'Notizen',
     ),
     evacuation: 'Evakuierungs-Karten',

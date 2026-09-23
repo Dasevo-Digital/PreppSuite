@@ -22,6 +22,7 @@ import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
 import '../application/home_overview.dart';
 import '../application/shell_layout.dart';
+import 'operational_briefing_card.dart';
 
 /// The first thing the app shows: what state this household is in.
 ///
@@ -124,6 +125,11 @@ class OverviewScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
               ],
+              OperationalBriefingCard(
+                profile: profile,
+                onNavigate: onNavigate,
+              ),
+              const SizedBox(height: 12),
               // Above the cards, because it answers the question they
               // are read to work out. Not shown on a household that has
               // recorded nothing at all: there the card above already

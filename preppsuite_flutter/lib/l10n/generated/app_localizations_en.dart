@@ -6548,4 +6548,117 @@ class AppLocalizationsEn extends AppLocalizations {
   String transferLastSeenMixed(int frame, int discarded) {
     return 'Last read: frame $frame · $discarded frames belonged to a different transfer';
   }
+
+  @override
+  String get operationsTitle => 'Situation now';
+
+  @override
+  String get operationsWarning => 'Active warning for your places';
+
+  @override
+  String get operationsQuiet => 'Your followed places are quiet';
+
+  @override
+  String get operationsOpenWarnings => 'Check warnings';
+
+  @override
+  String get operationsOpenReadiness => 'Open readiness';
+
+  @override
+  String operationsNextTask(String task) {
+    return 'Next: $task';
+  }
+
+  @override
+  String get operationsChargeDue => 'Check batteries and equipment';
+
+  @override
+  String get operationsInventoryMissing => 'Set up supplies';
+
+  @override
+  String get operationsReady =>
+      'Core preparation is in place – check details when needed';
+
+  @override
+  String get followedPlacesTitle => 'My warning places';
+
+  @override
+  String get followedPlacesIntro =>
+      'Warnings for home and other important regions. Labels for additional places stay on this device.';
+
+  @override
+  String get followedPlacesPrimary => 'Primary place';
+
+  @override
+  String get followedPlacesAdditional => 'Additional places';
+
+  @override
+  String get followedPlacesOpen => 'Manage warning places';
+
+  @override
+  String get householdPlanShareSafety => 'Share safety message';
+
+  @override
+  String householdPlanSafetyMessage(String meetingPoint) {
+    return 'We are safe.\\nMeeting point: $meetingPoint\\nNext update: …';
+  }
+
+  @override
+  String get toolsDrillEquipmentTitle => 'Check batteries and equipment';
+
+  @override
+  String get toolsDrillEquipmentStepA =>
+      'Charge and label power banks, lights and spare batteries';
+
+  @override
+  String get toolsDrillEquipmentStepB =>
+      'Test radio, chargers and cables from mains or a power bank';
+
+  @override
+  String get toolsDrillEquipmentStepC => 'Set the due date for the next check';
+
+  @override
+  String get toolsDrillRadioTitle => 'Radio and information check';
+
+  @override
+  String get toolsDrillRadioStepA =>
+      'Check batteries, antenna and reception on the radio';
+
+  @override
+  String get toolsDrillRadioStepB =>
+      'Write down local stations, warning channels and agreed frequencies';
+
+  @override
+  String get toolsDrillRadioStepC =>
+      'Only transmit in an authorised radio service and record a short reception check';
+
+  @override
+  String get operationsWarningDetail =>
+      'Open details, affected areas and recommended actions';
+
+  @override
+  String get navGroupNow => 'Now';
+
+  @override
+  String get navGroupPrepare => 'Prepare';
+
+  @override
+  String get navGroupOffline => 'Offline';
+
+  @override
+  String get navGroupProfile => 'Profile and settings';
+
+  @override
+  String get emergencyCardCareTitle => 'Support and dependencies';
+
+  @override
+  String get emergencyCardCareHint =>
+      'For power needs, assistive devices, care or transport, write a short concrete note here, for example “wheelchair – spare battery in hall; transport: …”. This information is sensitive.';
+
+  @override
+  String get shareFailed => 'The share sheet could not be opened.';
+
+  @override
+  String get householdPlanSafetyHint =>
+      'Adjust the message and the time of the next update before sharing.';
 }

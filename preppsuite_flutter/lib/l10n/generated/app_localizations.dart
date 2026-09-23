@@ -10930,6 +10930,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last read: frame {frame} · {discarded} frames belonged to a different transfer'**
   String transferLastSeenMixed(int frame, int discarded);
+
+  /// No description provided for @operationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Situation now'**
+  String get operationsTitle;
+
+  /// No description provided for @operationsWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Active warning for your places'**
+  String get operationsWarning;
+
+  /// No description provided for @operationsQuiet.
+  ///
+  /// In en, this message translates to:
+  /// **'Your followed places are quiet'**
+  String get operationsQuiet;
+
+  /// No description provided for @operationsOpenWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Check warnings'**
+  String get operationsOpenWarnings;
+
+  /// No description provided for @operationsOpenReadiness.
+  ///
+  /// In en, this message translates to:
+  /// **'Open readiness'**
+  String get operationsOpenReadiness;
+
+  /// No description provided for @operationsNextTask.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {task}'**
+  String operationsNextTask(String task);
+
+  /// No description provided for @operationsChargeDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Check batteries and equipment'**
+  String get operationsChargeDue;
+
+  /// No description provided for @operationsInventoryMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up supplies'**
+  String get operationsInventoryMissing;
+
+  /// No description provided for @operationsReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Core preparation is in place – check details when needed'**
+  String get operationsReady;
+
+  /// No description provided for @followedPlacesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My warning places'**
+  String get followedPlacesTitle;
+
+  /// No description provided for @followedPlacesIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Warnings for home and other important regions. Labels for additional places stay on this device.'**
+  String get followedPlacesIntro;
+
+  /// No description provided for @followedPlacesPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary place'**
+  String get followedPlacesPrimary;
+
+  /// No description provided for @followedPlacesAdditional.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional places'**
+  String get followedPlacesAdditional;
+
+  /// No description provided for @followedPlacesOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage warning places'**
+  String get followedPlacesOpen;
+
+  /// No description provided for @householdPlanShareSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Share safety message'**
+  String get householdPlanShareSafety;
+
+  /// No description provided for @householdPlanSafetyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We are safe.\\nMeeting point: {meetingPoint}\\nNext update: …'**
+  String householdPlanSafetyMessage(String meetingPoint);
+
+  /// No description provided for @toolsDrillEquipmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check batteries and equipment'**
+  String get toolsDrillEquipmentTitle;
+
+  /// No description provided for @toolsDrillEquipmentStepA.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge and label power banks, lights and spare batteries'**
+  String get toolsDrillEquipmentStepA;
+
+  /// No description provided for @toolsDrillEquipmentStepB.
+  ///
+  /// In en, this message translates to:
+  /// **'Test radio, chargers and cables from mains or a power bank'**
+  String get toolsDrillEquipmentStepB;
+
+  /// No description provided for @toolsDrillEquipmentStepC.
+  ///
+  /// In en, this message translates to:
+  /// **'Set the due date for the next check'**
+  String get toolsDrillEquipmentStepC;
+
+  /// No description provided for @toolsDrillRadioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio and information check'**
+  String get toolsDrillRadioTitle;
+
+  /// No description provided for @toolsDrillRadioStepA.
+  ///
+  /// In en, this message translates to:
+  /// **'Check batteries, antenna and reception on the radio'**
+  String get toolsDrillRadioStepA;
+
+  /// No description provided for @toolsDrillRadioStepB.
+  ///
+  /// In en, this message translates to:
+  /// **'Write down local stations, warning channels and agreed frequencies'**
+  String get toolsDrillRadioStepB;
+
+  /// No description provided for @toolsDrillRadioStepC.
+  ///
+  /// In en, this message translates to:
+  /// **'Only transmit in an authorised radio service and record a short reception check'**
+  String get toolsDrillRadioStepC;
+
+  /// No description provided for @operationsWarningDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Open details, affected areas and recommended actions'**
+  String get operationsWarningDetail;
+
+  /// No description provided for @navGroupNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Now'**
+  String get navGroupNow;
+
+  /// No description provided for @navGroupPrepare.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare'**
+  String get navGroupPrepare;
+
+  /// No description provided for @navGroupOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get navGroupOffline;
+
+  /// No description provided for @navGroupProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile and settings'**
+  String get navGroupProfile;
+
+  /// No description provided for @emergencyCardCareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support and dependencies'**
+  String get emergencyCardCareTitle;
+
+  /// No description provided for @emergencyCardCareHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For power needs, assistive devices, care or transport, write a short concrete note here, for example “wheelchair – spare battery in hall; transport: …”. This information is sensitive.'**
+  String get emergencyCardCareHint;
+
+  /// No description provided for @shareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The share sheet could not be opened.'**
+  String get shareFailed;
+
+  /// No description provided for @householdPlanSafetyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the message and the time of the next update before sharing.'**
+  String get householdPlanSafetyHint;
 }
 
 class _AppLocalizationsDelegate

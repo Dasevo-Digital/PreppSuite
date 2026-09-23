@@ -16,12 +16,11 @@ import '../../inventory/presentation/charge_reminder_card.dart';
 import '../../maps/presentation/offline_map_card.dart';
 import '../../sharing/presentation/shared_folder_card.dart';
 import '../../transfer/presentation/transfer_card.dart';
-import 'additional_regions_card.dart';
 import 'app_lock_card.dart';
 import 'backup_card.dart';
-import 'my_region_card.dart';
 import 'reset_card.dart';
 import 'version_info_card.dart';
+import 'followed_places_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key, required this.profile});
@@ -72,18 +71,23 @@ class SettingsScreen extends ConsumerWidget {
           Card(child: _ThemeModePicker(l10n: l10n)),
           const SizedBox(height: 24),
           Text(
-            l10n.settingsMyRegionTitle,
+            l10n.followedPlacesTitle,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          MyRegionCard(profile: profile, l10n: l10n),
-          const SizedBox(height: 24),
-          Text(
-            l10n.settingsAdditionalRegionsTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.location_on_outlined),
+              title: Text(l10n.followedPlacesOpen),
+              subtitle: Text(l10n.followedPlacesIntro),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => FollowedPlacesScreen(profile: profile),
+                ),
+              ),
+            ),
           ),
-          const SizedBox(height: 8),
-          AdditionalRegionsCard(profile: profile, l10n: l10n),
           const SizedBox(height: 24),
           Text(
             l10n.settingsNotificationsTitle,

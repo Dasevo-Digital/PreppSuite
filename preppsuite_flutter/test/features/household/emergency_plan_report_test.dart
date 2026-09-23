@@ -38,6 +38,7 @@ void main() {
       doctors: 'Aerzte',
       contact: 'Notfallkontakt',
       contacts: 'Notfallkontakte',
+      careNeeds: 'Unterstützungsbedarf',
       notes: 'Notizen',
     ),
   );
@@ -59,6 +60,7 @@ void main() {
     String? allergies,
     String? medication,
     String? conditions,
+    String? careNeeds,
     String? notes,
   }) => HouseholdMember(
     clientId: clientId,
@@ -69,6 +71,7 @@ void main() {
     allergies: allergies,
     medication: medication,
     conditions: conditions,
+    careNeeds: careNeeds,
     notes: notes,
     sortOrder: 0,
     updatedAt: DateTime.utc(2026),
@@ -182,6 +185,25 @@ void main() {
 
     expect(text, isNot(contains('Allergien')));
   });
+
+  test(
+    'a practical support dependency reaches an explicitly requested card',
+    () async {
+      final text = textIn(
+        await render(
+          members: [
+            member(
+              careNeeds:
+                  'Elektrisches Hilfsmittel und barrierefreier Transport',
+            ),
+          ],
+        ),
+      );
+
+      expect(text, contains('Unterstützungsbedarf'));
+      expect(text, contains('Elektrisches Hilfsmittel'));
+    },
+  );
 
   test('every member of the household gets a card', () async {
     final text = textIn(

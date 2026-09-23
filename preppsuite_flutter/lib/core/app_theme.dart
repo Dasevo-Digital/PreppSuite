@@ -178,6 +178,18 @@ ThemeData _theme(Brightness brightness) {
       ),
     ),
 
+    expansionTileTheme: ExpansionTileThemeData(
+      shape: const RoundedRectangleBorder(),
+      collapsedShape: const RoundedRectangleBorder(),
+      tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+      childrenPadding: const EdgeInsets.only(bottom: 8),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: scheme.primary,
+      linearTrackColor: scheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(AppRadius.small),
+    ),
+
     chipTheme: ChipThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.small),
@@ -214,12 +226,19 @@ ThemeData _theme(Brightness brightness) {
       backgroundColor: scheme.surfaceContainerLow,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
+      indicatorColor: scheme.secondaryContainer,
+      labelTextStyle: WidgetStatePropertyAll(
+        _textTheme(base.textTheme).labelSmall,
+      ),
       indicatorShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.small),
       ),
     ),
     navigationRailTheme: NavigationRailThemeData(
-      backgroundColor: scheme.surface,
+      backgroundColor: scheme.surfaceContainerLow,
+      indicatorColor: scheme.secondaryContainer,
+      labelType: NavigationRailLabelType.all,
+      useIndicator: true,
       indicatorShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.small),
       ),

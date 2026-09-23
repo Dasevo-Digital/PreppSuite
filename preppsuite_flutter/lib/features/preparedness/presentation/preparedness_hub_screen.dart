@@ -968,6 +968,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
             contact: l10n.emergencyCardContact,
             contacts: l10n.emergencyCardContacts,
             notes: l10n.emergencyCardNotes,
+            careNeeds: l10n.emergencyCardCareTitle,
           ),
           evacuation: l10n.hubEvacuationTitle,
           evacuationRoute: l10n.hubFolderReportRoute,

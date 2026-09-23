@@ -237,19 +237,74 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               },
             ),
             const Divider(height: 1),
-            for (final destination in overflow)
-              ListTile(
-                leading: _entry(l10n, destination).icon,
-                title: Text(_entry(l10n, destination).label),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  _select(destination);
-                },
+            for (final group in _overflowGroups(l10n, overflow)) ...[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 4),
+                child: Text(
+                  group.title,
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
               ),
+              for (final destination in group.destinations)
+                ListTile(
+                  leading: _entry(l10n, destination).icon,
+                  title: Text(_entry(l10n, destination).label),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    _select(destination);
+                  },
+                ),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  /// Phones have one overflow sheet, but its destinations do not belong to
+  /// one mental bucket. Grouping them retains the familiar flat navigation
+  /// while letting somebody in a hurry scan by intent instead of by icon.
+  List<_OverflowGroup> _overflowGroups(
+    AppLocalizations l10n,
+    List<ShellDestination> destinations,
+  ) {
+    const order = [
+      (
+        _OverflowGroupKind.now,
+        [ShellDestination.emergency, ShellDestination.warnings],
+      ),
+      (
+        _OverflowGroupKind.prepare,
+        [
+          ShellDestination.inventory,
+          ShellDestination.checklists,
+          ShellDestination.household,
+        ],
+      ),
+      (
+        _OverflowGroupKind.offline,
+        [
+          ShellDestination.shelters,
+          ShellDestination.map,
+          ShellDestination.knowledge,
+        ],
+      ),
+      (_OverflowGroupKind.profile, [ShellDestination.settings]),
+    ];
+    return [
+      for (final (kind, candidates) in order)
+        if (candidates.where(destinations.contains).toList() case final grouped
+            when grouped.isNotEmpty)
+          _OverflowGroup(
+            title: switch (kind) {
+              _OverflowGroupKind.now => l10n.navGroupNow,
+              _OverflowGroupKind.prepare => l10n.navGroupPrepare,
+              _OverflowGroupKind.offline => l10n.navGroupOffline,
+              _OverflowGroupKind.profile => l10n.navGroupProfile,
+            },
+            destinations: grouped,
+          ),
+    ];
   }
 
   /// The rail, made to scroll rather than overflow.
@@ -402,4 +457,13 @@ class _Entry {
   final Widget icon;
   final Widget selectedIcon;
   final String label;
+}
+
+enum _OverflowGroupKind { now, prepare, offline, profile }
+
+class _OverflowGroup {
+  const _OverflowGroup({required this.title, required this.destinations});
+
+  final String title;
+  final List<ShellDestination> destinations;
 }

@@ -70,6 +70,9 @@ class _EmergencyCardFormScreenState
     );
     _doctors = _rowsFor(existing?.doctor);
     _contacts = _rowsFor(existing?.emergencyContact);
+    _fields['careNeeds'] = TextEditingController(
+      text: existing?.careNeeds ?? '',
+    );
     _fields['notes'] = TextEditingController(text: existing?.notes ?? '');
   }
 
@@ -179,6 +182,57 @@ class _EmergencyCardFormScreenState
             rows: _contacts,
             onChanged: () => setState(() {}),
           ),
+          Card(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.accessible_forward_outlined,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.emergencyCardCareTitle,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSecondaryContainer,
+                              ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.emergencyCardCareHint,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSecondaryContainer,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _Field(
+            controller: _fields['careNeeds']!,
+            label: l10n.emergencyCardCareTitle,
+            hint: l10n.emergencyCardCareHint,
+            icon: Icons.accessible_forward_outlined,
+            maxLines: 3,
+          ),
+          const SizedBox(height: 12),
           _Field(
             controller: _fields['notes']!,
             label: l10n.emergencyCardNotes,
@@ -229,6 +283,7 @@ class _EmergencyCardFormScreenState
               emergencyContact: encodeCardPeople(
                 _contacts.map((r) => r.person),
               ),
+              careNeeds: _fields['careNeeds']!.text,
               notes: _fields['notes']!.text,
             ),
             existing: widget.existing,

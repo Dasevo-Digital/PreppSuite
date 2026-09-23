@@ -1105,9 +1105,9 @@
   "statusSituationQuietHint": "Behörden veröffentlichen Warnungen, keine Entwarnungen. Dass keine vorliegt, heißt nicht, dass nichts ist.",
   "statusSituationActive": "{count, plural, =1{Eine Warnung} other{{count} Warnungen}} für euren Bereich",
   "searchTitle": "Suchen",
-  "searchHint": "Bildschirm, Vorrat, Checklistenpunkt \u2026",
-  "searchStartHint": "Tippe, um die ganze App zu durchsuchen: Bildschirme, Vorr\u00e4te, Checklistenpunkte und den Hausrat.",
-  "searchNothingFound": "Nichts gefunden f\u00fcr \u201e{query}\u201c.",
+  "searchHint": "Bildschirm, Vorrat, Checklistenpunkt …",
+  "searchStartHint": "Tippe, um die ganze App zu durchsuchen: Bildschirme, Vorräte, Checklistenpunkte und den Hausrat.",
+  "searchNothingFound": "Nichts gefunden für „{query}“.",
   "searchAction": "Suchen",
   "searchGroupScreens": "Bildschirme",
   "searchGroupInventory": "Vorrat",
@@ -2946,5 +2946,52 @@
         "type": "int"
       }
     }
-  }
+  },
+  "operationsTitle": "Lage jetzt",
+  "operationsWarning": "Aktive Warnung für deine Orte",
+  "operationsQuiet": "Lage für deine Orte ruhig",
+  "operationsOpenWarnings": "Warnungen prüfen",
+  "operationsOpenReadiness": "Bereitschaft öffnen",
+  "operationsNextTask": "Als Nächstes: {task}",
+  "@operationsNextTask": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "operationsChargeDue": "Akkus und Ausrüstung prüfen",
+  "operationsInventoryMissing": "Vorrat anlegen",
+  "operationsReady": "Grundlagen angelegt – Details bei Bedarf prüfen",
+  "followedPlacesTitle": "Meine Warnorte",
+  "followedPlacesIntro": "Warnungen für Zuhause und weitere wichtige Regionen. Bezeichnungen für weitere Orte bleiben auf diesem Gerät.",
+  "followedPlacesPrimary": "Hauptort",
+  "followedPlacesAdditional": "Weitere Orte",
+  "followedPlacesOpen": "Warnorte verwalten",
+  "householdPlanShareSafety": "Sicherheitsmeldung teilen",
+  "householdPlanSafetyMessage": "Wir sind sicher.\\nTreffpunkt: {meetingPoint}\\nNächste Rückmeldung: …",
+  "@householdPlanSafetyMessage": {
+    "placeholders": {
+      "meetingPoint": {
+        "type": "String"
+      }
+    }
+  },
+  "toolsDrillEquipmentTitle": "Akkus und Ausrüstung prüfen",
+  "toolsDrillEquipmentStepA": "Powerbanks, Lampen und Ersatzakkus aufladen und beschriften",
+  "toolsDrillEquipmentStepB": "Radio, Ladegeräte und Kabel mit einer Steckdose oder Powerbank testen",
+  "toolsDrillEquipmentStepC": "Fälligkeit für die nächste Prüfung festlegen",
+  "toolsDrillRadioTitle": "Funk- und Informationsprobe",
+  "toolsDrillRadioStepA": "Batterien, Antenne und Empfang am Radio prüfen",
+  "toolsDrillRadioStepB": "Lokale Sender, Warnkanäle und vereinbarte Frequenzen notieren",
+  "toolsDrillRadioStepC": "Nur im jeweils erlaubten Funkdienst senden und einen kurzen Empfangstest dokumentieren",
+  "operationsWarningDetail": "Details, betroffene Gebiete und Handlungsempfehlungen öffnen",
+  "navGroupNow": "Jetzt",
+  "navGroupPrepare": "Vorsorge",
+  "navGroupOffline": "Offline",
+  "navGroupProfile": "Profil und Einstellungen",
+  "emergencyCardCareTitle": "Unterstützung und Abhängigkeiten",
+  "emergencyCardCareHint": "Bei Strombedarf, Hilfsmitteln, Betreuung oder Transport: hier kurz und konkret notieren, zum Beispiel „Rollstuhl – Ersatzakku im Flur; Fahrdienst: …“. Diese Angaben sind sensibel.",
+  "shareFailed": "Teilen konnte nicht geöffnet werden.",
+  "householdPlanSafetyHint": "Passe die Nachricht und den Zeitpunkt der nächsten Rückmeldung vor dem Teilen an."
 }

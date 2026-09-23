@@ -32,7 +32,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 17;
+  static const currentSchemaVersion = 18;
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
@@ -412,6 +412,20 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(checklistTemplates);
         } else {
           await _addColumnOnce(m, checklistTemplates, checklistTemplates.kind);
+        }
+      }
+      if (from >= 11 && from < 18) {
+        // Emergency cards existed from schema 11 onward. A separate field
+        // avoids burying power, care and transport dependencies in notes,
+        // while preserving every existing card unchanged on upgrade.
+        if (!await _hasTable('household_members')) {
+          await m.createTable(householdMembers);
+        } else {
+          await _addColumnOnce(
+            m,
+            householdMembers,
+            householdMembers.careNeeds,
+          );
         }
       }
     },

@@ -203,6 +203,15 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
           for (final scenario in _Scenario.values)
             Card(
               child: ExpansionTile(
+                leading: CircleAvatar(
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer,
+                  foregroundColor: Theme.of(
+                    context,
+                  ).colorScheme.onPrimaryContainer,
+                  child: Icon(scenario.icon),
+                ),
                 title: Text(_drillTitle(l10n, scenario)),
                 subtitle: Text(
                   switch (_completed[scenario.id]) {
@@ -293,6 +302,8 @@ String _drillTitle(AppLocalizations l10n, _Scenario drill) => switch (drill) {
   _Scenario.powerOutage => l10n.toolsDrillPowerTitle,
   _Scenario.evacuation => l10n.toolsDrillEvacuationTitle,
   _Scenario.communication => l10n.toolsDrillCommunicationTitle,
+  _Scenario.equipment => l10n.toolsDrillEquipmentTitle,
+  _Scenario.radio => l10n.toolsDrillRadioTitle,
 };
 
 /// The steps, in the order they are ticked off.
@@ -313,6 +324,16 @@ List<String> _drillSteps(AppLocalizations l10n, _Scenario drill) =>
         l10n.toolsDrillCommunicationStepB,
         l10n.toolsDrillCommunicationStepC,
       ],
+      _Scenario.equipment => [
+        l10n.toolsDrillEquipmentStepA,
+        l10n.toolsDrillEquipmentStepB,
+        l10n.toolsDrillEquipmentStepC,
+      ],
+      _Scenario.radio => [
+        l10n.toolsDrillRadioStepA,
+        l10n.toolsDrillRadioStepB,
+        l10n.toolsDrillRadioStepC,
+      ],
     };
 
 /// The drills, as ids and nothing else.
@@ -322,15 +343,18 @@ List<String> _drillSteps(AppLocalizations l10n, _Scenario drill) =>
 /// heading would have orphaned every tick they had made. The text lives
 /// in the translations now; only the structure lives here.
 enum _Scenario {
-  powerOutage('power-outage', 20, 3),
-  evacuation('evacuation', 15, 3),
-  communication('communication', 10, 3);
+  powerOutage('power-outage', 20, 3, Icons.power_outlined),
+  evacuation('evacuation', 15, 3, Icons.route_outlined),
+  communication('communication', 10, 3, Icons.forum_outlined),
+  equipment('equipment', 15, 3, Icons.battery_charging_full_outlined),
+  radio('radio', 10, 3, Icons.radio_outlined);
 
-  const _Scenario(this.id, this.minutes, this.stepCount);
+  const _Scenario(this.id, this.minutes, this.stepCount, this.icon);
 
   final String id;
   final int minutes;
   final int stepCount;
+  final IconData icon;
 
   /// What a tick is stored against, one per step.
   ///

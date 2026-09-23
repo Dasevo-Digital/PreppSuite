@@ -56,6 +56,7 @@ class EmergencyCardFieldStrings {
     required this.contact,
     required this.contacts,
     required this.notes,
+    required this.careNeeds,
   });
 
   final String birthYear;
@@ -74,6 +75,7 @@ class EmergencyCardFieldStrings {
   final String contacts;
 
   final String notes;
+  final String careNeeds;
 }
 
 /// A compact paper copy of the household's agreement.
@@ -244,6 +246,7 @@ List<({String label, String value})> emergencyCardRows(
   add(fields.insurance, member.insurance);
   addPeople(fields.doctor, fields.doctors, member.doctor);
   addPeople(fields.contact, fields.contacts, member.emergencyContact);
+  add(fields.careNeeds, member.careNeeds);
   add(fields.notes, member.notes);
   return rows;
 }

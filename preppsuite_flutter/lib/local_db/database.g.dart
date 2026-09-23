@@ -3382,6 +3382,17 @@ class $HouseholdMembersTable extends HouseholdMembers
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _careNeedsMeta = const VerificationMeta(
+    'careNeeds',
+  );
+  @override
+  late final GeneratedColumn<String> careNeeds = GeneratedColumn<String>(
+    'care_needs',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -3451,6 +3462,7 @@ class $HouseholdMembersTable extends HouseholdMembers
     insurance,
     doctor,
     emergencyContact,
+    careNeeds,
     notes,
     sortOrder,
     updatedAt,
@@ -3547,6 +3559,12 @@ class $HouseholdMembersTable extends HouseholdMembers
         ),
       );
     }
+    if (data.containsKey('care_needs')) {
+      context.handle(
+        _careNeedsMeta,
+        careNeeds.isAcceptableOrUnknown(data['care_needs']!, _careNeedsMeta),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -3632,6 +3650,10 @@ class $HouseholdMembersTable extends HouseholdMembers
         DriftSqlType.string,
         data['${effectivePrefix}emergency_contact'],
       ),
+      careNeeds: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}care_needs'],
+      ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
@@ -3682,6 +3704,10 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
 
   /// Who to call about this person specifically.
   final String? emergencyContact;
+
+  /// Practical dependencies that matter before a diagnosis: an assistive
+  /// device, power requirement, care arrangement or accessible transport.
+  final String? careNeeds;
   final String? notes;
 
   /// Keeps the cards in the order the household put them in rather than
@@ -3703,6 +3729,7 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
     this.insurance,
     this.doctor,
     this.emergencyContact,
+    this.careNeeds,
     this.notes,
     required this.sortOrder,
     required this.updatedAt,
@@ -3738,6 +3765,9 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
     }
     if (!nullToAbsent || emergencyContact != null) {
       map['emergency_contact'] = Variable<String>(emergencyContact);
+    }
+    if (!nullToAbsent || careNeeds != null) {
+      map['care_needs'] = Variable<String>(careNeeds);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -3780,6 +3810,9 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
       emergencyContact: emergencyContact == null && nullToAbsent
           ? const Value.absent()
           : Value(emergencyContact),
+      careNeeds: careNeeds == null && nullToAbsent
+          ? const Value.absent()
+          : Value(careNeeds),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -3809,6 +3842,7 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
       insurance: serializer.fromJson<String?>(json['insurance']),
       doctor: serializer.fromJson<String?>(json['doctor']),
       emergencyContact: serializer.fromJson<String?>(json['emergencyContact']),
+      careNeeds: serializer.fromJson<String?>(json['careNeeds']),
       notes: serializer.fromJson<String?>(json['notes']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -3831,6 +3865,7 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
       'insurance': serializer.toJson<String?>(insurance),
       'doctor': serializer.toJson<String?>(doctor),
       'emergencyContact': serializer.toJson<String?>(emergencyContact),
+      'careNeeds': serializer.toJson<String?>(careNeeds),
       'notes': serializer.toJson<String?>(notes),
       'sortOrder': serializer.toJson<int>(sortOrder),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -3851,6 +3886,7 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
     Value<String?> insurance = const Value.absent(),
     Value<String?> doctor = const Value.absent(),
     Value<String?> emergencyContact = const Value.absent(),
+    Value<String?> careNeeds = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     int? sortOrder,
     DateTime? updatedAt,
@@ -3870,6 +3906,7 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
     emergencyContact: emergencyContact.present
         ? emergencyContact.value
         : this.emergencyContact,
+    careNeeds: careNeeds.present ? careNeeds.value : this.careNeeds,
     notes: notes.present ? notes.value : this.notes,
     sortOrder: sortOrder ?? this.sortOrder,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -3897,6 +3934,7 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
       emergencyContact: data.emergencyContact.present
           ? data.emergencyContact.value
           : this.emergencyContact,
+      careNeeds: data.careNeeds.present ? data.careNeeds.value : this.careNeeds,
       notes: data.notes.present ? data.notes.value : this.notes,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -3919,6 +3957,7 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
           ..write('insurance: $insurance, ')
           ..write('doctor: $doctor, ')
           ..write('emergencyContact: $emergencyContact, ')
+          ..write('careNeeds: $careNeeds, ')
           ..write('notes: $notes, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('updatedAt: $updatedAt, ')
@@ -3941,6 +3980,7 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
     insurance,
     doctor,
     emergencyContact,
+    careNeeds,
     notes,
     sortOrder,
     updatedAt,
@@ -3962,6 +4002,7 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
           other.insurance == this.insurance &&
           other.doctor == this.doctor &&
           other.emergencyContact == this.emergencyContact &&
+          other.careNeeds == this.careNeeds &&
           other.notes == this.notes &&
           other.sortOrder == this.sortOrder &&
           other.updatedAt == this.updatedAt &&
@@ -3981,6 +4022,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
   final Value<String?> insurance;
   final Value<String?> doctor;
   final Value<String?> emergencyContact;
+  final Value<String?> careNeeds;
   final Value<String?> notes;
   final Value<int> sortOrder;
   final Value<DateTime> updatedAt;
@@ -3999,6 +4041,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
     this.insurance = const Value.absent(),
     this.doctor = const Value.absent(),
     this.emergencyContact = const Value.absent(),
+    this.careNeeds = const Value.absent(),
     this.notes = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -4018,6 +4061,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
     this.insurance = const Value.absent(),
     this.doctor = const Value.absent(),
     this.emergencyContact = const Value.absent(),
+    this.careNeeds = const Value.absent(),
     this.notes = const Value.absent(),
     this.sortOrder = const Value.absent(),
     required DateTime updatedAt,
@@ -4040,6 +4084,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
     Expression<String>? insurance,
     Expression<String>? doctor,
     Expression<String>? emergencyContact,
+    Expression<String>? careNeeds,
     Expression<String>? notes,
     Expression<int>? sortOrder,
     Expression<DateTime>? updatedAt,
@@ -4059,6 +4104,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
       if (insurance != null) 'insurance': insurance,
       if (doctor != null) 'doctor': doctor,
       if (emergencyContact != null) 'emergency_contact': emergencyContact,
+      if (careNeeds != null) 'care_needs': careNeeds,
       if (notes != null) 'notes': notes,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -4080,6 +4126,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
     Value<String?>? insurance,
     Value<String?>? doctor,
     Value<String?>? emergencyContact,
+    Value<String?>? careNeeds,
     Value<String?>? notes,
     Value<int>? sortOrder,
     Value<DateTime>? updatedAt,
@@ -4099,6 +4146,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
       insurance: insurance ?? this.insurance,
       doctor: doctor ?? this.doctor,
       emergencyContact: emergencyContact ?? this.emergencyContact,
+      careNeeds: careNeeds ?? this.careNeeds,
       notes: notes ?? this.notes,
       sortOrder: sortOrder ?? this.sortOrder,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -4144,6 +4192,9 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
     if (emergencyContact.present) {
       map['emergency_contact'] = Variable<String>(emergencyContact.value);
     }
+    if (careNeeds.present) {
+      map['care_needs'] = Variable<String>(careNeeds.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -4179,6 +4230,7 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
           ..write('insurance: $insurance, ')
           ..write('doctor: $doctor, ')
           ..write('emergencyContact: $emergencyContact, ')
+          ..write('careNeeds: $careNeeds, ')
           ..write('notes: $notes, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('updatedAt: $updatedAt, ')

@@ -6581,4 +6581,118 @@ class AppLocalizationsDe extends AppLocalizations {
   String transferLastSeenMixed(int frame, int discarded) {
     return 'Zuletzt gelesen: Bild $frame · $discarded Bilder gehörten zu einer anderen Übertragung';
   }
+
+  @override
+  String get operationsTitle => 'Lage jetzt';
+
+  @override
+  String get operationsWarning => 'Aktive Warnung für deine Orte';
+
+  @override
+  String get operationsQuiet => 'Lage für deine Orte ruhig';
+
+  @override
+  String get operationsOpenWarnings => 'Warnungen prüfen';
+
+  @override
+  String get operationsOpenReadiness => 'Bereitschaft öffnen';
+
+  @override
+  String operationsNextTask(String task) {
+    return 'Als Nächstes: $task';
+  }
+
+  @override
+  String get operationsChargeDue => 'Akkus und Ausrüstung prüfen';
+
+  @override
+  String get operationsInventoryMissing => 'Vorrat anlegen';
+
+  @override
+  String get operationsReady =>
+      'Grundlagen angelegt – Details bei Bedarf prüfen';
+
+  @override
+  String get followedPlacesTitle => 'Meine Warnorte';
+
+  @override
+  String get followedPlacesIntro =>
+      'Warnungen für Zuhause und weitere wichtige Regionen. Bezeichnungen für weitere Orte bleiben auf diesem Gerät.';
+
+  @override
+  String get followedPlacesPrimary => 'Hauptort';
+
+  @override
+  String get followedPlacesAdditional => 'Weitere Orte';
+
+  @override
+  String get followedPlacesOpen => 'Warnorte verwalten';
+
+  @override
+  String get householdPlanShareSafety => 'Sicherheitsmeldung teilen';
+
+  @override
+  String householdPlanSafetyMessage(String meetingPoint) {
+    return 'Wir sind sicher.\\nTreffpunkt: $meetingPoint\\nNächste Rückmeldung: …';
+  }
+
+  @override
+  String get toolsDrillEquipmentTitle => 'Akkus und Ausrüstung prüfen';
+
+  @override
+  String get toolsDrillEquipmentStepA =>
+      'Powerbanks, Lampen und Ersatzakkus aufladen und beschriften';
+
+  @override
+  String get toolsDrillEquipmentStepB =>
+      'Radio, Ladegeräte und Kabel mit einer Steckdose oder Powerbank testen';
+
+  @override
+  String get toolsDrillEquipmentStepC =>
+      'Fälligkeit für die nächste Prüfung festlegen';
+
+  @override
+  String get toolsDrillRadioTitle => 'Funk- und Informationsprobe';
+
+  @override
+  String get toolsDrillRadioStepA =>
+      'Batterien, Antenne und Empfang am Radio prüfen';
+
+  @override
+  String get toolsDrillRadioStepB =>
+      'Lokale Sender, Warnkanäle und vereinbarte Frequenzen notieren';
+
+  @override
+  String get toolsDrillRadioStepC =>
+      'Nur im jeweils erlaubten Funkdienst senden und einen kurzen Empfangstest dokumentieren';
+
+  @override
+  String get operationsWarningDetail =>
+      'Details, betroffene Gebiete und Handlungsempfehlungen öffnen';
+
+  @override
+  String get navGroupNow => 'Jetzt';
+
+  @override
+  String get navGroupPrepare => 'Vorsorge';
+
+  @override
+  String get navGroupOffline => 'Offline';
+
+  @override
+  String get navGroupProfile => 'Profil und Einstellungen';
+
+  @override
+  String get emergencyCardCareTitle => 'Unterstützung und Abhängigkeiten';
+
+  @override
+  String get emergencyCardCareHint =>
+      'Bei Strombedarf, Hilfsmitteln, Betreuung oder Transport: hier kurz und konkret notieren, zum Beispiel „Rollstuhl – Ersatzakku im Flur; Fahrdienst: …“. Diese Angaben sind sensibel.';
+
+  @override
+  String get shareFailed => 'Teilen konnte nicht geöffnet werden.';
+
+  @override
+  String get householdPlanSafetyHint =>
+      'Passe die Nachricht und den Zeitpunkt der nächsten Rückmeldung vor dem Teilen an.';
 }

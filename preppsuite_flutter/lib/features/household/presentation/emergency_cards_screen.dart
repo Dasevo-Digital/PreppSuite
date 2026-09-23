@@ -252,6 +252,12 @@ class _MemberCard extends ConsumerWidget {
       ),
     ..._people(l10n.emergencyCardDoctor, member.doctor),
     ..._people(l10n.emergencyCardContact, member.emergencyContact),
+    if (member.careNeeds != null)
+      (
+        label: l10n.emergencyCardCareTitle,
+        value: member.careNeeds!,
+        phone: null,
+      ),
     if (member.notes != null)
       (label: l10n.emergencyCardNotes, value: member.notes!, phone: null),
   ];

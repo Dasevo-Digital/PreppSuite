@@ -47,6 +47,7 @@ void main() {
     String name = 'Lena',
     String? allergies,
     String? medication,
+    String? careNeeds,
     required DateTime updatedAt,
   }) => db.upsertHouseholdMember(
     HouseholdMembersCompanion.insert(
@@ -55,6 +56,7 @@ void main() {
       name: name,
       allergies: Value(allergies),
       medication: Value(medication),
+      careNeeds: Value(careNeeds),
       updatedAt: updatedAt,
       dirty: const Value(true),
     ),
@@ -64,6 +66,7 @@ void main() {
     await writeCard(
       phone,
       allergies: 'Penicillin',
+      careNeeds: 'Benötigt im Alltag Unterstützung bei Medikamenten',
       updatedAt: DateTime.utc(2026, 3, 1),
     );
     await serviceFor(phone, 'phone').sync();
@@ -72,6 +75,7 @@ void main() {
     final card = (await laptop.watchHouseholdMembers(householdId).first).single;
     expect(card.name, 'Lena');
     expect(card.allergies, 'Penicillin');
+    expect(card.careNeeds, 'Benötigt im Alltag Unterstützung bei Medikamenten');
   });
 
   test('two devices each adding a person end up with both', () async {

@@ -4,6 +4,7 @@ import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../application/household_member_controller.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -75,6 +76,12 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
       appBar: AppBar(
         title: Text(l10n.householdPlanTitle),
         actions: [
+          if (planAsync.value != null)
+            IconButton(
+              icon: const Icon(Icons.ios_share_outlined),
+              tooltip: l10n.householdPlanShareSafety,
+              onPressed: () => _shareSafety(planAsync.value!, l10n),
+            ),
           if (planAsync.value != null)
             IconButton(
               icon: const Icon(Icons.picture_as_pdf_outlined),
@@ -293,11 +300,64 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
             doctors: l10n.emergencyCardDoctors,
             contact: l10n.emergencyCardContact,
             contacts: l10n.emergencyCardContacts,
+            careNeeds: l10n.emergencyCardCareTitle,
             notes: l10n.emergencyCardNotes,
           ),
         ),
       ),
     );
+  }
+
+  /// Opens the system's own share sheet. No safety state is sent by the app;
+  /// the user chooses both the recipient and whether the message should leave
+  /// the device, each time.
+  Future<void> _shareSafety(HouseholdPlan plan, AppLocalizations l10n) async {
+    final meetingPoint =
+        plan.meetingPointNear ??
+        plan.meetingPointFar ??
+        l10n.householdPlanEmpty;
+    final controller = TextEditingController(
+      text: l10n.householdPlanSafetyMessage(meetingPoint),
+    );
+    final message = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.householdPlanShareSafety),
+        content: TextField(
+          controller: controller,
+          minLines: 3,
+          maxLines: 6,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: InputDecoration(hintText: l10n.householdPlanSafetyHint),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancelButton),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.of(context).pop(controller.text),
+            icon: const Icon(Icons.ios_share_outlined),
+            label: Text(l10n.householdPlanShareSafety),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (message == null || message.trim().isEmpty) return;
+    try {
+      await SharePlus.instance.share(
+        ShareParams(
+          text: message.trim(),
+          subject: l10n.householdPlanShareSafety,
+        ),
+      );
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.shareFailed)),
+      );
+    }
   }
 
   /// True to include the cards, false for the plan alone, null to abandon

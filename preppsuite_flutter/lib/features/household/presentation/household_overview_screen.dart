@@ -9,6 +9,7 @@ import 'household_plan_screen.dart';
 import '../application/household_member_controller.dart';
 import '../../possessions/application/possession_controller.dart';
 import '../../possessions/presentation/possessions_screen.dart';
+import '../../settings/presentation/followed_places_screen.dart';
 import 'emergency_cards_screen.dart';
 import 'count_tile.dart';
 
@@ -54,6 +55,24 @@ class HouseholdOverviewScreen extends ConsumerWidget {
                   ),
                 );
               },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.location_on_outlined),
+              title: Text(l10n.followedPlacesTitle),
+              subtitle: Text(
+                profile.extraRegions.isEmpty
+                    ? l10n.settingsNoAdditionalRegions
+                    : '${profile.extraRegions.length} ${l10n.followedPlacesAdditional.toLowerCase()}',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => FollowedPlacesScreen(profile: profile),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 12),

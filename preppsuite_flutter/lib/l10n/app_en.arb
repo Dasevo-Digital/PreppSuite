@@ -2052,31 +2052,54 @@
   "statusSupplyCovered": "Lasts {days} days",
   "statusSupplyShort": "Lasts {days} of {target} days",
   "statusSupplyUnknown": "Nothing recorded yet",
-  "statusSupplyBasis": "Against the BBK\u2019s own figures: {target} days, 2 l and 2200 kcal per person per day.",
-  "statusSupplyUncounted": "{count, plural, =1{One entry is not counted} other{{count} entries are not counted}} \u2014 its unit names no measure.",
+  "statusSupplyBasis": "Against the BBK’s own figures: {target} days, 2 l and 2200 kcal per person per day.",
+  "statusSupplyUncounted": "{count, plural, =1{One entry is not counted} other{{count} entries are not counted}} — its unit names no measure.",
   "statusSituationTitle": "Situation",
   "statusSituationQuiet": "No official warning",
   "statusSituationQuietHint": "Authorities publish warnings, not all-clears. That none is in force is not a statement that nothing is wrong.",
   "statusSituationActive": "{count, plural, =1{One warning} other{{count} warnings}} for your area",
   "@statusSupplyCovered": {
-    "placeholders": { "days": { "type": "int" } }
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
   },
   "@statusSupplyShort": {
-    "placeholders": { "days": { "type": "int" }, "target": { "type": "int" } }
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
   },
   "@statusSupplyBasis": {
-    "placeholders": { "target": { "type": "int" } }
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
   },
   "@statusSupplyUncounted": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "@statusSituationActive": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "searchTitle": "Search",
-  "searchHint": "Screen, supply, checklist entry \u2026",
+  "searchHint": "Screen, supply, checklist entry …",
   "searchStartHint": "Type to search the whole app: screens, supplies, checklist entries and the household inventory.",
-  "searchNothingFound": "Nothing found for \u201c{query}\u201d.",
+  "searchNothingFound": "Nothing found for “{query}”.",
   "@searchNothingFound": {
     "placeholders": {
       "query": {
@@ -3063,7 +3086,7 @@
   "firstAidVideoPackTitle": "Video pack",
   "firstAidVideoPackWhy": "The guides need no video: the text, the figures and the drawings are complete and always there. Videos are an extra for the evening you sit down to learn the movements properly — and they are a separate download, because ten films weigh more than the whole app.",
   "firstAidVideoPackWhereTitle": "Where to get one",
-  "firstAidVideoPackWhereBody": "There are no ready-made packs, and this app points at none. Every usable German first aid video is somebody\u2019s copyright \u2014 the aid organisations\u2019 material entirely. Freely licensed material exists mainly on Wikimedia Commons, but little of it: on 22 September 2026 the category \u201cVideos of cardiopulmonary resuscitation\u201d held eight files, mostly not in German, one of them a dog being resuscitated. Each licence is on its own file page and has to be checked one by one.",
+  "firstAidVideoPackWhereBody": "There are no ready-made packs, and this app points at none. Every usable German first aid video is somebody’s copyright — the aid organisations’ material entirely. Freely licensed material exists mainly on Wikimedia Commons, but little of it: on 22 September 2026 the category “Videos of cardiopulmonary resuscitation” held eight files, mostly not in German, one of them a dog being resuscitated. Each licence is on its own file page and has to be checked one by one.",
   "firstAidVideoPackWhereHow": "To build your own pack, see docs/erste-hilfe.md in the source. The credit and licence of each clip are shown under the video later.",
   "firstAidVideoPackFromNetwork": "Over the network",
   "firstAidVideoPackUrlLabel": "Address of the pack description",
@@ -3889,7 +3912,7 @@
   },
   "unitInfoAction": "Why a measure?",
   "unitInfoTitle": "Why g, kg, ml or l?",
-  "unitInfoWhy": "Nutrition is printed on every packet per 100 g or per 100 ml. A stock only becomes a day\u2019s ration if the amount can be said in grams too \u2014 and what six tins weigh is on the tin, not in this app.",
+  "unitInfoWhy": "Nutrition is printed on every packet per 100 g or per 100 ml. A stock only becomes a day’s ration if the amount can be said in grams too — and what six tins weigh is on the tin, not in this app.",
   "unitInfoAccepted": "These with one tap, and spelled out works as well: gram, kilo, millilitre, litre.",
   "unitInfoExempt": "This applies to food and water only. Medicines are still counted in tablets, or the reach per daily dose stops adding up; tools are counted in pieces.",
   "unitInfoKept": "A stock counted in tins or jars is left exactly as it is. It simply stays out of the supply calculator until the unit names a measure.",
@@ -3934,5 +3957,52 @@
         "type": "int"
       }
     }
-  }
+  },
+  "operationsTitle": "Situation now",
+  "operationsWarning": "Active warning for your places",
+  "operationsQuiet": "Your followed places are quiet",
+  "operationsOpenWarnings": "Check warnings",
+  "operationsOpenReadiness": "Open readiness",
+  "operationsNextTask": "Next: {task}",
+  "@operationsNextTask": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "operationsChargeDue": "Check batteries and equipment",
+  "operationsInventoryMissing": "Set up supplies",
+  "operationsReady": "Core preparation is in place – check details when needed",
+  "followedPlacesTitle": "My warning places",
+  "followedPlacesIntro": "Warnings for home and other important regions. Labels for additional places stay on this device.",
+  "followedPlacesPrimary": "Primary place",
+  "followedPlacesAdditional": "Additional places",
+  "followedPlacesOpen": "Manage warning places",
+  "householdPlanShareSafety": "Share safety message",
+  "householdPlanSafetyMessage": "We are safe.\\nMeeting point: {meetingPoint}\\nNext update: …",
+  "@householdPlanSafetyMessage": {
+    "placeholders": {
+      "meetingPoint": {
+        "type": "String"
+      }
+    }
+  },
+  "toolsDrillEquipmentTitle": "Check batteries and equipment",
+  "toolsDrillEquipmentStepA": "Charge and label power banks, lights and spare batteries",
+  "toolsDrillEquipmentStepB": "Test radio, chargers and cables from mains or a power bank",
+  "toolsDrillEquipmentStepC": "Set the due date for the next check",
+  "toolsDrillRadioTitle": "Radio and information check",
+  "toolsDrillRadioStepA": "Check batteries, antenna and reception on the radio",
+  "toolsDrillRadioStepB": "Write down local stations, warning channels and agreed frequencies",
+  "toolsDrillRadioStepC": "Only transmit in an authorised radio service and record a short reception check",
+  "operationsWarningDetail": "Open details, affected areas and recommended actions",
+  "navGroupNow": "Now",
+  "navGroupPrepare": "Prepare",
+  "navGroupOffline": "Offline",
+  "navGroupProfile": "Profile and settings",
+  "emergencyCardCareTitle": "Support and dependencies",
+  "emergencyCardCareHint": "For power needs, assistive devices, care or transport, write a short concrete note here, for example “wheelchair – spare battery in hall; transport: …”. This information is sensitive.",
+  "shareFailed": "The share sheet could not be opened.",
+  "householdPlanSafetyHint": "Adjust the message and the time of the next update before sharing."
 }

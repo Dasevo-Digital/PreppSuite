@@ -38,6 +38,10 @@ class HouseholdMembers extends Table {
   /// Who to call about this person specifically.
   TextColumn get emergencyContact => text().nullable()();
 
+  /// Practical dependencies that matter before a diagnosis: an assistive
+  /// device, power requirement, care arrangement or accessible transport.
+  TextColumn get careNeeds => text().nullable()();
+
   TextColumn get notes => text().nullable()();
 
   /// Keeps the cards in the order the household put them in rather than
