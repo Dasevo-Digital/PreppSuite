@@ -561,6 +561,16 @@
   "knowledgeIndexContinueAction": "Weiter aufbauen",
   "knowledgeIndexCancelAction": "Anhalten",
   "knowledgeIndexDiscardAction": "Index verwerfen",
+  "knowledgeIndexStorage": "Suchindex: {size}",
+  "@knowledgeIndexStorage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "knowledgeIndexCompactHint": "Dieser Index stammt aus einem älteren Format. Ein kompakter Neuaufbau spart Speicherplatz, ohne die normale Volltextsuche zu verändern.",
+  "knowledgeIndexCompactAction": "Kompakt neu aufbauen",
   "knowledgeIndexArticles": "{count} Artikel in dieser Datei.",
   "knowledgeIndexLargeWarning": "Das sind viele. Rechne mit einer Stunde oder mehr und mit mehreren Gigabyte auf der Platte. Anhalten geht jederzeit, das Angefangene bleibt.",
   "knowledgeIndexScanning": "Artikel werden gezählt: {done} von {total}.",
@@ -977,6 +987,7 @@
   "knowledgeDocumentsEmpty": "Noch keine eigenen Dokumente hinzugefügt.",
   "knowledgeDocumentRemove": "Aus Bibliothek entfernen",
   "knowledgeDocumentOpenFailed": "Das Dokument konnte nicht geöffnet werden.",
+  "knowledgeDocumentOpenExternal": "Extern öffnen",
   "emergencyDirectoryTitle": "Notruf, Kontakte & Funk",
   "emergencyMedicalService": "Ärztlicher Bereitschaftsdienst 116117",
   "emergencyPoisonTitle": "Giftnotrufzentralen",

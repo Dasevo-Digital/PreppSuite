@@ -1810,6 +1810,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get knowledgeIndexDiscardAction => 'Index verwerfen';
 
   @override
+  String knowledgeIndexStorage(String size) {
+    return 'Suchindex: $size';
+  }
+
+  @override
+  String get knowledgeIndexCompactHint =>
+      'Dieser Index stammt aus einem älteren Format. Ein kompakter Neuaufbau spart Speicherplatz, ohne die normale Volltextsuche zu verändern.';
+
+  @override
+  String get knowledgeIndexCompactAction => 'Kompakt neu aufbauen';
+
+  @override
   String knowledgeIndexArticles(int count) {
     return '$count Artikel in dieser Datei.';
   }
@@ -3023,6 +3035,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get knowledgeDocumentOpenFailed =>
       'Das Dokument konnte nicht geöffnet werden.';
+
+  @override
+  String get knowledgeDocumentOpenExternal => 'Extern öffnen';
 
   @override
   String get emergencyDirectoryTitle => 'Notruf, Kontakte & Funk';

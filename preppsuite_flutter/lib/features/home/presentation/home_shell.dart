@@ -219,43 +219,56 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   ) async {
     await showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // First, and above a divider. On a phone the search button
-            // lives on the overview, which is one tab away from the
-            // other nine — and the whole point of a search is not having
-            // to go somewhere first.
-            ListTile(
-              leading: const Icon(Icons.search),
-              title: Text(l10n.searchTitle),
-              onTap: () {
-                Navigator.of(sheetContext).pop();
-                _search();
-              },
-            ),
-            const Divider(height: 1),
-            for (final group in _overflowGroups(l10n, overflow)) ...[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 20, 24, 4),
-                child: Text(
-                  group.title,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
+      builder: (sheetContext) => DraggableScrollableSheet(
+        // On phones the list has ten destinations plus its group titles.
+        // A plain, shrink-wrapped column grows below the screen edge, which
+        // made Settings impossible to reach on Android.  This gives the
+        // sheet a useful initial height and, more importantly, a real scroll
+        // extent for every remaining destination.
+        initialChildSize: .74,
+        minChildSize: .42,
+        maxChildSize: .92,
+        expand: false,
+        builder: (context, scrollController) => SafeArea(
+          top: false,
+          child: ListView(
+            controller: scrollController,
+            children: [
+              // First, and above a divider. On a phone the search button
+              // lives on the overview, which is one tab away from the
+              // other nine — and the whole point of a search is not having
+              // to go somewhere first.
+              ListTile(
+                leading: const Icon(Icons.search),
+                title: Text(l10n.searchTitle),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _search();
+                },
               ),
-              for (final destination in group.destinations)
-                ListTile(
-                  leading: _entry(l10n, destination).icon,
-                  title: Text(_entry(l10n, destination).label),
-                  onTap: () {
-                    Navigator.of(sheetContext).pop();
-                    _select(destination);
-                  },
+              const Divider(height: 1),
+              for (final group in _overflowGroups(l10n, overflow)) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 4),
+                  child: Text(
+                    group.title,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
                 ),
+                for (final destination in group.destinations)
+                  ListTile(
+                    leading: _entry(l10n, destination).icon,
+                    title: Text(_entry(l10n, destination).label),
+                    onTap: () {
+                      Navigator.of(sheetContext).pop();
+                      _select(destination);
+                    },
+                  ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

@@ -252,6 +252,12 @@ void main() {
   });
 
   group('resuming and discarding', () {
+    test('a newly built index uses the compact term-only layout', () async {
+      await index.beginIndex('test', 1);
+
+      expect(await index.isCompact(), isTrue);
+    });
+
     test('an interrupted run picks up where it stopped', () async {
       final archive = await archiveWith([
         for (var i = 0; i < 6; i++)

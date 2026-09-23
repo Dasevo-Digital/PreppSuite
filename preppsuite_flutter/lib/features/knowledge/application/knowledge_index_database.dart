@@ -23,6 +23,7 @@ part 'knowledge_index_database.g.dart';
 class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   /// The schema of each derived, per-ZIM full-text index.
   static const currentSchemaVersion = 1;
+  static const _compactFormat = 'fts5-terms-v2';
 
   KnowledgeIndexDatabase(String archiveId)
     : super(
@@ -52,15 +53,18 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   /// puts it in the documents directory under the name above; the two
   /// journal files beside it go with it.
   static Future<void> deleteFor(String archiveId) async {
-    final directory = await appDatabaseDirectory();
-    final base =
-        '${directory.path}${Platform.pathSeparator}'
-        '${fileNameFor(archiveId)}.sqlite';
+    final base = await _databasePath(archiveId);
 
     for (final path in [base, '$base-wal', '$base-shm']) {
       final file = File(path);
       if (await file.exists()) await file.delete();
     }
+  }
+
+  static Future<String> _databasePath(String archiveId) async {
+    final directory = await appDatabaseDirectory();
+    return '${directory.path}${Platform.pathSeparator}'
+        '${fileNameFor(archiveId)}.sqlite';
   }
 
   @override
@@ -77,12 +81,18 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
     // afford. The trade is that snippets have to be built from the archive
     // when a result is shown.
     //
+    // `detail=none` and `columnsize=0` retain only the term-to-article map.
+    // We never render FTS snippets or run phrase/NEAR queries: results are
+    // opened from the archive itself. That makes a large archive's derived
+    // index materially smaller without dropping ordinary word search.
+    //
     // `remove_diacritics 2` so that "Notvorrate" finds "Notvorräte". There
     // is no German stemmer in SQLite, so "Vorräte" still will not find
     // "Vorrat" — see docs/wissen-offline.md.
     await customStatement(
       "CREATE VIRTUAL TABLE IF NOT EXISTS articles USING fts5("
-      "text, content='', tokenize='unicode61 remove_diacritics 2')",
+      "text, content='', detail=none, columnsize=0, "
+      "tokenize='unicode61 remove_diacritics 2')",
     );
     await customStatement(
       'CREATE TABLE IF NOT EXISTS index_state ('
@@ -105,6 +115,27 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   Future<int> total() async => int.tryParse(await _state('total') ?? '') ?? 0;
 
   Future<bool> isComplete() async => await _state('complete') == '1';
+
+  /// Whether this was built with the compact term-only layout.
+  ///
+  /// Older indexes remain usable.  They are deliberately not replaced at
+  /// startup, because rebuilding an encyclopedia can take a long time and is
+  /// a decision the household should make explicitly.
+  Future<bool> isCompact() async => await _state('format') == _compactFormat;
+
+  /// Bytes consumed by the SQLite database and its current journal files.
+  ///
+  /// This is deliberately file based rather than an SQLite page estimate, so
+  /// the size shown in the app matches storage the operating system reports.
+  Future<int> storageBytes(String archiveId) async {
+    final base = await _databasePath(archiveId);
+    var bytes = 0;
+    for (final path in [base, '$base-wal', '$base-shm']) {
+      final file = File(path);
+      if (await file.exists()) bytes += await file.length();
+    }
+    return bytes;
+  }
 
   /// Which stemmer this index was built with, or null for none.
   ///
@@ -134,6 +165,7 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
     await _setState('position', '0');
     await _setState('complete', '0');
     await _setState('stemmer', stemmer);
+    await _setState('format', _compactFormat);
   }
 
   /// Writes a batch of articles and moves the resume point.

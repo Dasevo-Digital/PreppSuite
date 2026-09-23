@@ -118,6 +118,44 @@ class PersonalDocumentMatch {
   final String excerpt;
 }
 
+/// Reads one personal document without copying it into app storage.
+///
+/// The file picker deliberately keeps the original where the person chose
+/// it.  Android therefore gives us a content URI rather than a path, while
+/// desktop platforms use ordinary files.  Both the indexer and the internal
+/// reader use this one bounded reader so a large or malformed document cannot
+/// make either feature allocate without a limit.
+Future<Uint8List> readPersonalDocumentBytes(
+  String location, {
+  required int maxBytes,
+}) async {
+  var path = location;
+  if (path.startsWith('bookmark://')) {
+    path = await resolveStoragePath(path) ?? path;
+  }
+  if (!isNativeStorageHandle(path)) {
+    final file = File(path);
+    if (await file.length() > maxBytes) throw const _DocumentTooLarge();
+    return file.readAsBytes();
+  }
+
+  final source = await NativeByteRangeSource.open(path);
+  final builder = BytesBuilder(copy: false);
+  const chunkSize = 1024 * 1024;
+  try {
+    for (var offset = 0; ; offset += chunkSize) {
+      final chunk = await source.read(offset, chunkSize);
+      if (builder.length + chunk.length > maxBytes) {
+        throw const _DocumentTooLarge();
+      }
+      builder.add(chunk);
+      if (chunk.length < chunkSize) return builder.takeBytes();
+    }
+  } finally {
+    await source.close();
+  }
+}
+
 /// Opens a registered source document with the operating system's reader.
 /// The index is deliberately independent from this: a hit can still be shown
 /// while a removable disk is disconnected, but opening then simply fails.
@@ -156,6 +194,7 @@ class PersonalDocumentIndexer {
       _ownsIndex = index == null;
 
   static const maxDocumentBytes = 48 * 1024 * 1024;
+  static const maxReaderDocumentBytes = 64 * 1024 * 1024;
   static const maxIndexCharacters = 4 * 1024 * 1024;
   static const _maxEpubEntries = 4096;
   static const _maxEpubEntryBytes = 8 * 1024 * 1024;
@@ -166,14 +205,11 @@ class PersonalDocumentIndexer {
 
   Future<PersonalDocumentIndexResult> index(PersonalDocument document) async {
     try {
-      final bytes = await _readBytes(document.location);
-      final extracted = switch (document.extension) {
-        'md' || 'markdown' => utf8.decode(bytes, allowMalformed: true),
-        'epub' => _extractEpub(bytes),
-        'pdf' => _extractPdf(bytes),
-        _ => '',
-      };
-      final text = _normalise(extracted);
+      final bytes = await readPersonalDocumentBytes(
+        document.location,
+        maxBytes: maxDocumentBytes,
+      );
+      final text = _normalise(_extractText(document.extension, bytes));
       if (text.isEmpty) {
         await _index.remove(document.id);
         return const PersonalDocumentIndexResult(
@@ -212,37 +248,29 @@ class PersonalDocumentIndexer {
     }
   }
 
-  Future<Uint8List> _readBytes(String location) async {
-    var path = location;
-    if (path.startsWith('bookmark://')) {
-      path = await resolveStoragePath(path) ?? path;
-    }
-    if (!isNativeStorageHandle(path)) {
-      final file = File(path);
-      if (await file.length() > maxDocumentBytes) {
-        throw const _DocumentTooLarge();
-      }
-      return file.readAsBytes();
-    }
-
-    final source = await NativeByteRangeSource.open(path);
-    final builder = BytesBuilder(copy: false);
-    const chunkSize = 1024 * 1024;
-    try {
-      for (var offset = 0; ; offset += chunkSize) {
-        final chunk = await source.read(offset, chunkSize);
-        if (builder.length + chunk.length > maxDocumentBytes) {
-          throw const _DocumentTooLarge();
-        }
-        builder.add(chunk);
-        if (chunk.length < chunkSize) return builder.takeBytes();
-      }
-    } finally {
-      await source.close();
-    }
+  /// The reader's local text view for EPUB and Markdown.
+  ///
+  /// PDFs are rendered page for page by the PDF renderer.  EPUB and Markdown
+  /// have no native renderer on every platform this app supports, so their
+  /// content is drawn here as selectable, offline text.  The reader allows a
+  /// little more input than the search index, but retains its hard bound.
+  static Future<String> readForReader(PersonalDocument document) async {
+    final bytes = await readPersonalDocumentBytes(
+      document.location,
+      maxBytes: maxReaderDocumentBytes,
+    );
+    return _normalise(_extractText(document.extension, bytes));
   }
 
-  String _extractEpub(Uint8List bytes) {
+  static String _extractText(String extension, Uint8List bytes) =>
+      switch (extension) {
+        'md' || 'markdown' => utf8.decode(bytes, allowMalformed: true),
+        'epub' => _extractEpub(bytes),
+        'pdf' => _extractPdf(bytes),
+        _ => '',
+      };
+
+  static String _extractEpub(Uint8List bytes) {
     final archive = ZipDecoder().decodeBytes(bytes, verify: true);
     if (archive.files.length > _maxEpubEntries) {
       throw const _DocumentTooLarge();
@@ -276,14 +304,14 @@ class PersonalDocumentIndexer {
     return buffer.toString();
   }
 
-  Uint8List _decodeEpubEntry(ArchiveFile file, int remainingBytes) {
+  static Uint8List _decodeEpubEntry(ArchiveFile file, int remainingBytes) {
     if (remainingBytes <= 0) throw const _DocumentTooLarge();
     final output = _BoundedEpubOutput(remainingBytes);
     file.decompress(output);
     return output.getBytes();
   }
 
-  String _extractPdf(Uint8List bytes) {
+  static String _extractPdf(Uint8List bytes) {
     final document = PdfDocument.open(bytes);
     final buffer = StringBuffer();
     for (var page = 0; page < document.pageCount; page++) {
@@ -295,14 +323,14 @@ class PersonalDocumentIndexer {
     return buffer.toString();
   }
 
-  String _normalise(String value) {
+  static String _normalise(String value) {
     final compact = _stripMarkup(value).replaceAll(RegExp(r'\s+'), ' ').trim();
     return compact.length <= maxIndexCharacters
         ? compact
         : compact.substring(0, maxIndexCharacters);
   }
 
-  String _stripMarkup(String value) => value
+  static String _stripMarkup(String value) => value
       .replaceAll(
         RegExp(r'<script\b[^>]*>[\s\S]*?</script>', caseSensitive: false),
         '',

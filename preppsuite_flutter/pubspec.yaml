@@ -54,6 +54,10 @@ dependencies:
   # without sending a document to a service.
   pdf_document: 3.8.0
   pdf_graphics: 3.8.0
+  # Local renderer for PDFs from the personal knowledge library.  It uses
+  # PDFium on every supported native platform, so a document never has to
+  # leave the device merely to be read.
+  pdfrx: 2.2.24
   printing: ^5.14.3
   shared_preferences: ^2.5.5
   flutter_secure_storage: ^10.3.4

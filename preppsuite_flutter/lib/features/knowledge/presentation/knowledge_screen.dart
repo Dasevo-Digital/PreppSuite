@@ -13,6 +13,7 @@ import '../application/knowledge_providers.dart';
 import '../application/knowledge_bookmark_store.dart';
 import '../application/personal_document_index.dart';
 import '../application/personal_document_store.dart';
+import 'personal_document_reader_screen.dart';
 import '../application/zim_store.dart';
 import '../application/recommended_archives.dart';
 import '../application/zim_archive.dart';
@@ -389,7 +390,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              onTap: () => _openPersonal(l10n, match.id),
+              onTap: () => _openPersonal(match.id),
             ),
         ],
         if (zimMatches.isNotEmpty) ...[
@@ -417,16 +418,17 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
     );
   }
 
-  Future<void> _openPersonal(AppLocalizations l10n, String id) async {
+  Future<void> _openPersonal(String id) async {
     final documents = await const PersonalDocumentStore().load();
     PersonalDocument? document;
     for (final item in documents) {
       if (item.id == id) document = item;
     }
-    if (document == null) return;
-    if (await openPersonalDocument(document) || !mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.knowledgeDocumentOpenFailed)),
+    if (document == null || !mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (context) => PersonalDocumentReaderScreen(document: document!),
+      ),
     );
   }
 

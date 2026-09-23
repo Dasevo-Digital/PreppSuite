@@ -205,6 +205,24 @@ class KnowledgeIndexPanel extends ConsumerWidget {
         l10n.knowledgeIndexReady(state.articleCount ?? 0),
         style: theme.textTheme.bodyMedium,
       ),
+      const SizedBox(height: 6),
+      Text(
+        l10n.knowledgeIndexStorage(_formatBytes(state.storageBytes)),
+        style: theme.textTheme.bodySmall,
+      ),
+      if (!state.compact) ...[
+        const SizedBox(height: 10),
+        Text(l10n.knowledgeIndexCompactHint, style: theme.textTheme.bodySmall),
+        const SizedBox(height: 4),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            onPressed: controller.rebuildCompact,
+            icon: const Icon(Icons.compress_outlined),
+            label: Text(l10n.knowledgeIndexCompactAction),
+          ),
+        ),
+      ],
       const SizedBox(height: 12),
       Align(
         alignment: Alignment.centerLeft,
@@ -214,5 +232,10 @@ class KnowledgeIndexPanel extends ConsumerWidget {
         ),
       ),
     ];
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).ceil()} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 }

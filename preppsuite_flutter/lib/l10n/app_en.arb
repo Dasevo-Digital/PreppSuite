@@ -1125,6 +1125,16 @@
   "knowledgeIndexContinueAction": "Keep building",
   "knowledgeIndexCancelAction": "Stop",
   "knowledgeIndexDiscardAction": "Discard index",
+  "knowledgeIndexStorage": "Search index: {size}",
+  "@knowledgeIndexStorage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "knowledgeIndexCompactHint": "This index uses an older format. Rebuilding it in compact form saves storage without changing normal full-text search.",
+  "knowledgeIndexCompactAction": "Rebuild compact index",
   "knowledgeIndexArticles": "{count} articles in this file.",
   "@knowledgeIndexArticles": {
     "placeholders": {
@@ -1931,6 +1941,7 @@
   "knowledgeDocumentsEmpty": "No personal documents have been added yet.",
   "knowledgeDocumentRemove": "Remove from library",
   "knowledgeDocumentOpenFailed": "The document could not be opened.",
+  "knowledgeDocumentOpenExternal": "Open externally",
   "emergencyDirectoryTitle": "Emergency calls, contacts & radio",
   "emergencyMedicalService": "Non-emergency medical service 116117",
   "emergencyPoisonTitle": "Poison control centres",

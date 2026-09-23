@@ -98,6 +98,43 @@ void main() {
     expect((await index.search('Trinkwasser')).single.id, 'pdf');
   });
 
+  test(
+    'the local reader obtains Markdown and EPUB content without an app',
+    () async {
+      final markdown = File('${workspace.path}/hinweise.md')
+        ..writeAsStringSync('# Funk\nPMR446 bleibt für kurze Wege sinnvoll.');
+      final epub = File('${workspace.path}/notizen.epub');
+      final archive = Archive()
+        ..addFile(
+          ArchiveFile.string(
+            'OPS/chapter.xhtml',
+            '<html><body><h1>Wasser</h1><p>Kanister dunkel lagern.</p></body></html>',
+          ),
+        );
+      epub.writeAsBytesSync(ZipEncoder().encodeBytes(archive));
+
+      final markdownText = await PersonalDocumentIndexer.readForReader(
+        PersonalDocument(
+          id: 'markdown-reader',
+          location: markdown.path,
+          label: 'hinweise.md',
+          addedAt: DateTime.now(),
+        ),
+      );
+      final epubText = await PersonalDocumentIndexer.readForReader(
+        PersonalDocument(
+          id: 'epub-reader',
+          location: epub.path,
+          label: 'notizen.epub',
+          addedAt: DateTime.now(),
+        ),
+      );
+
+      expect(markdownText, contains('PMR446'));
+      expect(epubText, contains('Kanister dunkel lagern'));
+    },
+  );
+
   test('refuses EPUBs with an excessive number of entries', () async {
     final archive = Archive();
     for (var number = 0; number < 4097; number++) {

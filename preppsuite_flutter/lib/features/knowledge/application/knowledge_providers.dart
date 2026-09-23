@@ -461,17 +461,23 @@ class KnowledgeIndexState {
     this.status = KnowledgeIndexStatus.none,
     this.progress,
     this.articleCount,
+    this.storageBytes = 0,
+    this.compact = true,
   });
 
   KnowledgeIndexState copyWith({
     KnowledgeIndexStatus? status,
     IndexProgress? progress,
     int? articleCount,
+    int? storageBytes,
+    bool? compact,
   }) {
     return KnowledgeIndexState(
       status: status ?? this.status,
       progress: progress ?? this.progress,
       articleCount: articleCount ?? this.articleCount,
+      storageBytes: storageBytes ?? this.storageBytes,
+      compact: compact ?? this.compact,
     );
   }
 
@@ -482,6 +488,12 @@ class KnowledgeIndexState {
 
   /// Articles the archive holds, once counted.
   final int? articleCount;
+
+  /// Disk use including SQLite's write-ahead log, if one exists.
+  final int storageBytes;
+
+  /// A legacy index can still answer queries but lacks the compact layout.
+  final bool compact;
 
   bool get isUsable =>
       status == KnowledgeIndexStatus.builtIn ||
@@ -494,8 +506,12 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
 
   @override
   Future<KnowledgeIndexState> build() async {
-    final fingerprint = ref.watch(knowledgeProvider).value?.fingerprint;
-    if (fingerprint == null) return const KnowledgeIndexState();
+    final knowledge = ref.watch(knowledgeProvider).value;
+    final fingerprint = knowledge?.fingerprint;
+    final archiveId = knowledge?.selectedId;
+    if (fingerprint == null || archiveId == null) {
+      return const KnowledgeIndexState();
+    }
 
     // An archive that brings its own index is never offered the choice of
     // building a second one. Asking someone to spend an hour on what they
@@ -518,6 +534,8 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
           ? KnowledgeIndexStatus.ready
           : KnowledgeIndexStatus.partial,
       articleCount: await index.total(),
+      storageBytes: await index.storageBytes(archiveId),
+      compact: await index.isCompact(),
     );
   }
 
@@ -544,7 +562,8 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
     final knowledge = ref.read(knowledgeProvider).value;
     final archive = knowledge?.archive;
     final fingerprint = knowledge?.fingerprint;
-    if (archive == null || fingerprint == null) return;
+    final archiveId = knowledge?.selectedId;
+    if (archive == null || fingerprint == null || archiveId == null) return;
 
     _cancelled = false;
     final indexer = _indexerFor(archive);
@@ -552,17 +571,26 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
 
     void report(IndexProgress progress) {
       if (!ref.mounted) return;
+      final current = state.value;
       state = AsyncData(
         KnowledgeIndexState(
           status: KnowledgeIndexStatus.running,
           progress: progress,
-          articleCount: state.value?.articleCount,
+          articleCount: current?.articleCount,
+          storageBytes: current?.storageBytes ?? 0,
+          compact: current?.compact ?? true,
         ),
       );
     }
 
-    state = const AsyncData(
-      KnowledgeIndexState(status: KnowledgeIndexStatus.running),
+    final current = state.value;
+    state = AsyncData(
+      KnowledgeIndexState(
+        status: KnowledgeIndexStatus.running,
+        articleCount: current?.articleCount,
+        storageBytes: current?.storageBytes ?? 0,
+        compact: current?.compact ?? true,
+      ),
     );
 
     final plan = await indexer.plan(
@@ -583,6 +611,10 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
             ? KnowledgeIndexStatus.ready
             : KnowledgeIndexStatus.partial,
         articleCount: plan.articleCount,
+        storageBytes: await ref
+            .read(knowledgeIndexDatabaseProvider)!
+            .storageBytes(archiveId),
+        compact: await ref.read(knowledgeIndexDatabaseProvider)!.isCompact(),
       ),
     );
   }
@@ -595,6 +627,13 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
     await ref.read(knowledgeIndexDatabaseProvider)?.discard();
     if (!ref.mounted) return;
     state = const AsyncData(KnowledgeIndexState());
+  }
+
+  /// Rebuilds an older, larger index with the current compact FTS layout.
+  Future<void> rebuildCompact() async {
+    await discard();
+    if (!ref.mounted) return;
+    await buildIndex();
   }
 
   /// Null when no archive is open, which is also when there is nothing to

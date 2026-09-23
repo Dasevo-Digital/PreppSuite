@@ -3122,6 +3122,24 @@ abstract class AppLocalizations {
   /// **'Discard index'**
   String get knowledgeIndexDiscardAction;
 
+  /// No description provided for @knowledgeIndexStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Search index: {size}'**
+  String knowledgeIndexStorage(String size);
+
+  /// No description provided for @knowledgeIndexCompactHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This index uses an older format. Rebuilding it in compact form saves storage without changing normal full-text search.'**
+  String get knowledgeIndexCompactHint;
+
+  /// No description provided for @knowledgeIndexCompactAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild compact index'**
+  String get knowledgeIndexCompactAction;
+
   /// No description provided for @knowledgeIndexArticles.
   ///
   /// In en, this message translates to:
@@ -5107,6 +5125,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The document could not be opened.'**
   String get knowledgeDocumentOpenFailed;
+
+  /// No description provided for @knowledgeDocumentOpenExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Open externally'**
+  String get knowledgeDocumentOpenExternal;
 
   /// No description provided for @emergencyDirectoryTitle.
   ///

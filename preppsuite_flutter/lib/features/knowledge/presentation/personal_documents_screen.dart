@@ -5,6 +5,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/personal_document_index.dart';
 import '../application/personal_document_store.dart';
+import 'personal_document_reader_screen.dart';
 
 class PersonalDocumentsScreen extends StatefulWidget {
   const PersonalDocumentsScreen({super.key});
@@ -95,18 +96,11 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
     }
   }
 
-  Future<void> _open(PersonalDocument document) async {
-    final opened = await openPersonalDocument(document);
-    if (!opened && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.knowledgeDocumentOpenFailed,
-          ),
-        ),
-      );
-    }
-  }
+  Future<void> _open(PersonalDocument document) => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (context) => PersonalDocumentReaderScreen(document: document),
+    ),
+  );
 
   Future<void> _remove(String id) async {
     await PersonalDocumentIndexer().remove(id);
