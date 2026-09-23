@@ -6661,4 +6661,146 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get householdPlanSafetyHint =>
       'Adjust the message and the time of the next update before sharing.';
+
+  @override
+  String get hubResilienceTitle => 'Warning paths and network';
+
+  @override
+  String get hubResilienceHint =>
+      'Prepare warning channels, personal support, sources, learning and nearby help locally.';
+
+  @override
+  String get resilienceWarningTitle => 'Check warning paths';
+
+  @override
+  String get resilienceWarningHint =>
+      'Mark a route successful only after it has actually been tested on this device or in the household.';
+
+  @override
+  String get resilienceWarningNina => 'NINA warning app set up and tested';
+
+  @override
+  String get resilienceWarningCell => 'Cell Broadcast checked on this device';
+
+  @override
+  String get resilienceWarningSiren =>
+      'Siren or municipal warning route clarified';
+
+  @override
+  String get resilienceWarningRadio => 'Radio and local warning station tested';
+
+  @override
+  String get resilienceSupportTitle => 'Personal support';
+
+  @override
+  String get resilienceSupportHint =>
+      'Optional plan for dependencies during an outage or evacuation. Do not store a medical diagnosis.';
+
+  @override
+  String get resilienceSupportPower =>
+      'Power-dependent aids and backup power reviewed';
+
+  @override
+  String get resilienceSupportEvacuation => 'Help leaving the home clarified';
+
+  @override
+  String get resilienceSupportTransport => 'Transport or pickup arranged';
+
+  @override
+  String get resilienceSupportMedicine => 'Medication plan and supply reviewed';
+
+  @override
+  String get resilienceSupportAssistance =>
+      'Care, assistance or animal needs clarified';
+
+  @override
+  String get resilienceSupportNote => 'Short personal plan';
+
+  @override
+  String get resilienceSourcesTitle => 'Source compass';
+
+  @override
+  String get resilienceSourcesHint =>
+      'Only record sources whose information you verify yourself. Always add a route without internet.';
+
+  @override
+  String get resilienceSourcesEmpty => 'No local source recorded yet.';
+
+  @override
+  String get resilienceSourceAdd => 'Add source';
+
+  @override
+  String get resilienceSourceLabel => 'Organisation or topic';
+
+  @override
+  String get resilienceSourceChannel => 'Access route';
+
+  @override
+  String get resilienceSourceFallback => 'Offline fallback';
+
+  @override
+  String get resilienceLearningTitle => 'APOLLO learning paths';
+
+  @override
+  String get resilienceLearningHint =>
+      'Only mark a path after downloading it and doing a short offline test.';
+
+  @override
+  String get resilienceLearningOpen => 'Open APOLLO';
+
+  @override
+  String get resilienceLearningMedical => 'First aid and medical basics';
+
+  @override
+  String get resilienceLearningWater => 'Water, hygiene and cooking';
+
+  @override
+  String get resilienceLearningRepair => 'Repair and energy';
+
+  @override
+  String get resilienceLearningNavigation =>
+      'Navigation, radio and communication';
+
+  @override
+  String get resilienceLearningSchool => 'Basics and learning with children';
+
+  @override
+  String get resilienceNeighborhoodTitle => 'Neighbourhood help';
+
+  @override
+  String get resilienceNeighborhoodHint =>
+      'Voluntary skills and safe contact paths. An alias is enough; real names are not needed.';
+
+  @override
+  String get resilienceNeighborhoodEmpty =>
+      'No nearby capability recorded yet.';
+
+  @override
+  String get resilienceNeighborhoodAdd => 'Add capability';
+
+  @override
+  String get resilienceNeighborAlias => 'Alias or role';
+
+  @override
+  String get resilienceNeighborSkill => 'Skill or equipment';
+
+  @override
+  String get resilienceNeighborContact => 'Agreed contact path';
+
+  @override
+  String get resilienceNeighborMeeting => 'Meeting point';
+
+  @override
+  String get resilienceMaintenanceSchedule => 'Check interval';
+
+  @override
+  String get resilienceMaintenanceOff => 'Not scheduled';
+
+  @override
+  String get resilienceMaintenanceDue => 'Check due';
+
+  @override
+  String resilienceMaintenanceEveryDays(int days) {
+    return 'Every $days days';
+  }
 }

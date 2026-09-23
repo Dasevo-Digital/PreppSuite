@@ -11128,6 +11128,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Adjust the message and the time of the next update before sharing.'**
   String get householdPlanSafetyHint;
+
+  /// No description provided for @hubResilienceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning paths and network'**
+  String get hubResilienceTitle;
+
+  /// No description provided for @hubResilienceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare warning channels, personal support, sources, learning and nearby help locally.'**
+  String get hubResilienceHint;
+
+  /// No description provided for @resilienceWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check warning paths'**
+  String get resilienceWarningTitle;
+
+  /// No description provided for @resilienceWarningHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark a route successful only after it has actually been tested on this device or in the household.'**
+  String get resilienceWarningHint;
+
+  /// No description provided for @resilienceWarningNina.
+  ///
+  /// In en, this message translates to:
+  /// **'NINA warning app set up and tested'**
+  String get resilienceWarningNina;
+
+  /// No description provided for @resilienceWarningCell.
+  ///
+  /// In en, this message translates to:
+  /// **'Cell Broadcast checked on this device'**
+  String get resilienceWarningCell;
+
+  /// No description provided for @resilienceWarningSiren.
+  ///
+  /// In en, this message translates to:
+  /// **'Siren or municipal warning route clarified'**
+  String get resilienceWarningSiren;
+
+  /// No description provided for @resilienceWarningRadio.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio and local warning station tested'**
+  String get resilienceWarningRadio;
+
+  /// No description provided for @resilienceSupportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal support'**
+  String get resilienceSupportTitle;
+
+  /// No description provided for @resilienceSupportHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional plan for dependencies during an outage or evacuation. Do not store a medical diagnosis.'**
+  String get resilienceSupportHint;
+
+  /// No description provided for @resilienceSupportPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power-dependent aids and backup power reviewed'**
+  String get resilienceSupportPower;
+
+  /// No description provided for @resilienceSupportEvacuation.
+  ///
+  /// In en, this message translates to:
+  /// **'Help leaving the home clarified'**
+  String get resilienceSupportEvacuation;
+
+  /// No description provided for @resilienceSupportTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport or pickup arranged'**
+  String get resilienceSupportTransport;
+
+  /// No description provided for @resilienceSupportMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Medication plan and supply reviewed'**
+  String get resilienceSupportMedicine;
+
+  /// No description provided for @resilienceSupportAssistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Care, assistance or animal needs clarified'**
+  String get resilienceSupportAssistance;
+
+  /// No description provided for @resilienceSupportNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Short personal plan'**
+  String get resilienceSupportNote;
+
+  /// No description provided for @resilienceSourcesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Source compass'**
+  String get resilienceSourcesTitle;
+
+  /// No description provided for @resilienceSourcesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only record sources whose information you verify yourself. Always add a route without internet.'**
+  String get resilienceSourcesHint;
+
+  /// No description provided for @resilienceSourcesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No local source recorded yet.'**
+  String get resilienceSourcesEmpty;
+
+  /// No description provided for @resilienceSourceAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add source'**
+  String get resilienceSourceAdd;
+
+  /// No description provided for @resilienceSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Organisation or topic'**
+  String get resilienceSourceLabel;
+
+  /// No description provided for @resilienceSourceChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Access route'**
+  String get resilienceSourceChannel;
+
+  /// No description provided for @resilienceSourceFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline fallback'**
+  String get resilienceSourceFallback;
+
+  /// No description provided for @resilienceLearningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'APOLLO learning paths'**
+  String get resilienceLearningTitle;
+
+  /// No description provided for @resilienceLearningHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only mark a path after downloading it and doing a short offline test.'**
+  String get resilienceLearningHint;
+
+  /// No description provided for @resilienceLearningOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open APOLLO'**
+  String get resilienceLearningOpen;
+
+  /// No description provided for @resilienceLearningMedical.
+  ///
+  /// In en, this message translates to:
+  /// **'First aid and medical basics'**
+  String get resilienceLearningMedical;
+
+  /// No description provided for @resilienceLearningWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Water, hygiene and cooking'**
+  String get resilienceLearningWater;
+
+  /// No description provided for @resilienceLearningRepair.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair and energy'**
+  String get resilienceLearningRepair;
+
+  /// No description provided for @resilienceLearningNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation, radio and communication'**
+  String get resilienceLearningNavigation;
+
+  /// No description provided for @resilienceLearningSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Basics and learning with children'**
+  String get resilienceLearningSchool;
+
+  /// No description provided for @resilienceNeighborhoodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Neighbourhood help'**
+  String get resilienceNeighborhoodTitle;
+
+  /// No description provided for @resilienceNeighborhoodHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Voluntary skills and safe contact paths. An alias is enough; real names are not needed.'**
+  String get resilienceNeighborhoodHint;
+
+  /// No description provided for @resilienceNeighborhoodEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No nearby capability recorded yet.'**
+  String get resilienceNeighborhoodEmpty;
+
+  /// No description provided for @resilienceNeighborhoodAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add capability'**
+  String get resilienceNeighborhoodAdd;
+
+  /// No description provided for @resilienceNeighborAlias.
+  ///
+  /// In en, this message translates to:
+  /// **'Alias or role'**
+  String get resilienceNeighborAlias;
+
+  /// No description provided for @resilienceNeighborSkill.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill or equipment'**
+  String get resilienceNeighborSkill;
+
+  /// No description provided for @resilienceNeighborContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Agreed contact path'**
+  String get resilienceNeighborContact;
+
+  /// No description provided for @resilienceNeighborMeeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Meeting point'**
+  String get resilienceNeighborMeeting;
+
+  /// No description provided for @resilienceMaintenanceSchedule.
+  ///
+  /// In en, this message translates to:
+  /// **'Check interval'**
+  String get resilienceMaintenanceSchedule;
+
+  /// No description provided for @resilienceMaintenanceOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Not scheduled'**
+  String get resilienceMaintenanceOff;
+
+  /// No description provided for @resilienceMaintenanceDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Check due'**
+  String get resilienceMaintenanceDue;
+
+  /// No description provided for @resilienceMaintenanceEveryDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Every {days} days'**
+  String resilienceMaintenanceEveryDays(int days);
 }
 
 class _AppLocalizationsDelegate

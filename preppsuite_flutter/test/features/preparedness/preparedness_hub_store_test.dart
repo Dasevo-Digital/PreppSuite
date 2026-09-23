@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:preppsuite_flutter/features/preparedness/application/preparedness_hub_store.dart';
+import 'package:preppsuite_flutter/features/preparedness/application/resilience_plan.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -72,6 +73,10 @@ void main() {
       analogFallback: PlanNote(text: 'Papierkarte', checkedAt: savedAt),
       mutualAid: PlanNote(text: 'Hilfeangebot', checkedAt: savedAt),
       practice: PlanNote(text: 'Filtertest', checkedAt: savedAt),
+      resilience: ResiliencePlan(
+        warningChecks: {'cell': savedAt},
+        maintenanceEveryDays: {'radio': 90},
+      ),
     );
 
     await store.save(data);
@@ -89,6 +94,8 @@ void main() {
     expect(restored.autonomy.medicineDays, 5);
     expect(restored.waterHygiene.text, 'Kanisterrotation');
     expect(restored.analogFallback.text, 'Papierkarte');
+    expect(restored.resilience.warningChecks['cell'], savedAt);
+    expect(restored.resilience.maintenanceEveryDays['radio'], 90);
   });
 
   test('invalid stored content falls back to an empty plan', () {

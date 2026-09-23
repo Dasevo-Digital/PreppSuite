@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import 'resilience_plan.dart';
+
 /// Local-only preparations. These are deliberately kept out of the shared
 /// household database: a radio frequency, document location, route, or event
 /// note must never leave the device just because household data is synced.
@@ -65,6 +67,7 @@ class PreparednessHubData {
     this.analogFallback = const PlanNote(),
     this.mutualAid = const PlanNote(),
     this.practice = const PlanNote(),
+    this.resilience = const ResiliencePlan(),
   });
 
   final List<RadioReceptionPlan> radioPlans;
@@ -90,6 +93,7 @@ class PreparednessHubData {
   final PlanNote analogFallback;
   final PlanNote mutualAid;
   final PlanNote practice;
+  final ResiliencePlan resilience;
 
   PreparednessHubData copyWith({
     List<RadioReceptionPlan>? radioPlans,
@@ -113,6 +117,7 @@ class PreparednessHubData {
     PlanNote? analogFallback,
     PlanNote? mutualAid,
     PlanNote? practice,
+    ResiliencePlan? resilience,
   }) => PreparednessHubData(
     radioPlans: radioPlans ?? this.radioPlans,
     folder: folder ?? this.folder,
@@ -135,6 +140,7 @@ class PreparednessHubData {
     analogFallback: analogFallback ?? this.analogFallback,
     mutualAid: mutualAid ?? this.mutualAid,
     practice: practice ?? this.practice,
+    resilience: resilience ?? this.resilience,
   );
 
   /// The same rule the household database uses for a shared folder, a QR
@@ -186,6 +192,7 @@ class PreparednessHubData {
         analogFallback: _mergeNote(analogFallback, incoming.analogFallback),
         mutualAid: _mergeNote(mutualAid, incoming.mutualAid),
         practice: _mergeNote(practice, incoming.practice),
+        resilience: resilience.mergeWith(incoming.resilience),
       );
 
   Map<String, Object?> toJson() => {
@@ -214,6 +221,7 @@ class PreparednessHubData {
     'analogFallback': analogFallback.toJson(),
     'mutualAid': mutualAid.toJson(),
     'practice': practice.toJson(),
+    'resilience': resilience.toJson(),
   };
 
   static PreparednessHubData fromJson(Object? value) {
@@ -262,6 +270,7 @@ class PreparednessHubData {
       analogFallback: PlanNote.fromJson(value['analogFallback']),
       mutualAid: PlanNote.fromJson(value['mutualAid']),
       practice: PlanNote.fromJson(value['practice']),
+      resilience: ResiliencePlan.fromJson(value['resilience']),
     );
   }
 }

@@ -6695,4 +6695,146 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get householdPlanSafetyHint =>
       'Passe die Nachricht und den Zeitpunkt der nächsten Rückmeldung vor dem Teilen an.';
+
+  @override
+  String get hubResilienceTitle => 'Warnwege und Netzwerk';
+
+  @override
+  String get hubResilienceHint =>
+      'Warnkanäle, persönliche Unterstützung, Quellen, Lernen und Hilfe im Umfeld lokal vorbereiten.';
+
+  @override
+  String get resilienceWarningTitle => 'Warnwege prüfen';
+
+  @override
+  String get resilienceWarningHint =>
+      'Nur als erfolgreich markieren, wenn der Weg auf diesem Gerät oder im Haushalt wirklich getestet wurde.';
+
+  @override
+  String get resilienceWarningNina => 'Warn-App NINA eingerichtet und getestet';
+
+  @override
+  String get resilienceWarningCell => 'Cell Broadcast am Gerät geprüft';
+
+  @override
+  String get resilienceWarningSiren => 'Sirene oder kommunalen Warnweg geklärt';
+
+  @override
+  String get resilienceWarningRadio => 'Radio und lokalen Warnsender getestet';
+
+  @override
+  String get resilienceSupportTitle => 'Persönliche Unterstützung';
+
+  @override
+  String get resilienceSupportHint =>
+      'Optionaler Plan für Abhängigkeiten bei Stromausfall oder Evakuierung. Keine medizinische Diagnose speichern.';
+
+  @override
+  String get resilienceSupportPower =>
+      'Stromabhängige Hilfsmittel und Ersatzenergie geprüft';
+
+  @override
+  String get resilienceSupportEvacuation =>
+      'Hilfe beim Verlassen der Wohnung geklärt';
+
+  @override
+  String get resilienceSupportTransport => 'Transport oder Abholung vereinbart';
+
+  @override
+  String get resilienceSupportMedicine => 'Medikamentenplan und Vorrat geprüft';
+
+  @override
+  String get resilienceSupportAssistance =>
+      'Betreuung, Assistenz oder Tierbedarf geklärt';
+
+  @override
+  String get resilienceSupportNote => 'Kurzer persönlicher Plan';
+
+  @override
+  String get resilienceSourcesTitle => 'Quellen-Kompass';
+
+  @override
+  String get resilienceSourcesHint =>
+      'Nur Stellen eintragen, deren Informationen du selbst prüfst. Ergänze stets einen Weg ohne Internet.';
+
+  @override
+  String get resilienceSourcesEmpty => 'Noch keine lokale Quelle hinterlegt.';
+
+  @override
+  String get resilienceSourceAdd => 'Quelle hinzufügen';
+
+  @override
+  String get resilienceSourceLabel => 'Stelle oder Thema';
+
+  @override
+  String get resilienceSourceChannel => 'Abrufweg';
+
+  @override
+  String get resilienceSourceFallback => 'Offline-Alternative';
+
+  @override
+  String get resilienceLearningTitle => 'APOLLO-Lernpfade';
+
+  @override
+  String get resilienceLearningHint =>
+      'Markiere einen Pfad erst nach dem Herunterladen und einem kurzen Offline-Test.';
+
+  @override
+  String get resilienceLearningOpen => 'APOLLO öffnen';
+
+  @override
+  String get resilienceLearningMedical => 'Erste Hilfe und Medizin-Grundlagen';
+
+  @override
+  String get resilienceLearningWater => 'Wasser, Hygiene und Kochen';
+
+  @override
+  String get resilienceLearningRepair => 'Reparatur und Energie';
+
+  @override
+  String get resilienceLearningNavigation =>
+      'Orientierung, Funk und Kommunikation';
+
+  @override
+  String get resilienceLearningSchool => 'Grundlagen und Lernen mit Kindern';
+
+  @override
+  String get resilienceNeighborhoodTitle => 'Nachbarschaftshilfe';
+
+  @override
+  String get resilienceNeighborhoodHint =>
+      'Freiwillige Fähigkeiten und sichere Kontaktwege. Ein Alias genügt; echte Namen sind nicht nötig.';
+
+  @override
+  String get resilienceNeighborhoodEmpty =>
+      'Noch keine Fähigkeit im Umfeld hinterlegt.';
+
+  @override
+  String get resilienceNeighborhoodAdd => 'Fähigkeit hinzufügen';
+
+  @override
+  String get resilienceNeighborAlias => 'Alias oder Rolle';
+
+  @override
+  String get resilienceNeighborSkill => 'Fähigkeit oder Ausrüstung';
+
+  @override
+  String get resilienceNeighborContact => 'Vereinbarter Kontaktweg';
+
+  @override
+  String get resilienceNeighborMeeting => 'Treffpunkt';
+
+  @override
+  String get resilienceMaintenanceSchedule => 'Prüfrhythmus';
+
+  @override
+  String get resilienceMaintenanceOff => 'Nicht geplant';
+
+  @override
+  String get resilienceMaintenanceDue => 'Prüfung fällig';
+
+  @override
+  String resilienceMaintenanceEveryDays(int days) {
+    return 'Alle $days Tage';
+  }
 }

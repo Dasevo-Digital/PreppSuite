@@ -21,6 +21,7 @@ import '../application/autonomy_overview.dart';
 import '../application/current_situation.dart';
 import '../application/emergency_folder_report.dart';
 import '../application/preparedness_hub_store.dart';
+import 'resilience_plan_panel.dart';
 
 /// Private, offline planning tools. The screen intentionally has no map or
 /// cloud action: routes and sensitive document locations stay on this device.
@@ -329,6 +330,28 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
                       hint: _l10n.hubPracticeTemplate,
                       onSave: (value) =>
                           _change(_data.copyWith(practice: value)),
+                    ),
+                  ),
+                  _section(
+                    _l10n.hubResilienceTitle,
+                    Icons.hub_outlined,
+                    _l10n.hubResilienceHint,
+                    ResiliencePlanPanel(
+                      plan: _data.resilience,
+                      maintenance: _data.maintenance,
+                      onPlanChanged: (value) =>
+                          _change(_data.copyWith(resilience: value)),
+                      onMaintenanceIntervalChanged: (task, everyDays) =>
+                          _change(
+                            _data.copyWith(
+                              resilience: _data.resilience.copyWith(
+                                maintenanceEveryDays: {
+                                  ..._data.resilience.maintenanceEveryDays,
+                                  task: everyDays,
+                                },
+                              ),
+                            ),
+                          ),
                     ),
                   ),
                 ],
@@ -1467,6 +1490,33 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
     }
   }
 
+  String _resilienceSupportBriefing() {
+    final support = _data.resilience.support;
+    final lines = <String>[
+      if (support.powerReviewed) _l10n.resilienceSupportPower,
+      if (support.evacuationReviewed) _l10n.resilienceSupportEvacuation,
+      if (support.transportReviewed) _l10n.resilienceSupportTransport,
+      if (support.medicineReviewed) _l10n.resilienceSupportMedicine,
+      if (support.assistanceReviewed) _l10n.resilienceSupportAssistance,
+      if (support.note.isNotEmpty) support.note,
+    ];
+    return lines.join('\n');
+  }
+
+  String _resilienceSourcesBriefing() => _data.resilience.sources
+      .map(
+        (source) =>
+            '${source.label}: ${source.channel} · ${source.offlineFallback}',
+      )
+      .join('\n');
+
+  String _resilienceNeighborhoodBriefing() => _data.resilience.neighborhood
+      .map(
+        (entry) =>
+            '${entry.alias}: ${entry.skill} · ${entry.contactMethod} · ${entry.meetingPoint}',
+      )
+      .join('\n');
+
   Future<void> _exportBriefing() async {
     final document = pw.Document();
     final plans = [
@@ -1484,6 +1534,9 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
       (_l10n.hubAnalogTitle, _data.analogFallback.text),
       (_l10n.hubMutualAidTitle, _data.mutualAid.text),
       (_l10n.hubPracticeTitle, _data.practice.text),
+      (_l10n.resilienceSupportTitle, _resilienceSupportBriefing()),
+      (_l10n.resilienceSourcesTitle, _resilienceSourcesBriefing()),
+      (_l10n.resilienceNeighborhoodTitle, _resilienceNeighborhoodBriefing()),
     ];
     document.addPage(
       pw.MultiPage(

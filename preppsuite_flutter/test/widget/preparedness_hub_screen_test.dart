@@ -129,6 +129,7 @@ void main() {
     expect(find.text('Zuhause'), findsOneWidget);
     expect(find.textContaining('Treffpunkt Sporthalle'), findsOneWidget);
     expect(find.text('Regionalradio'), findsOneWidget);
+    expect(find.text('Warnwege und Netzwerk'), findsOneWidget);
     // The shortest range is the one that decides, and the screen has to
     // say which supply it is rather than only how many days are left.
     expect(find.textContaining('Medikamente'), findsWidgets);
