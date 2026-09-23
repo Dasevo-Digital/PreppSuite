@@ -6050,6 +6050,120 @@ abstract class AppLocalizations {
   /// **'Reason: {reason}'**
   String shelterSourceFailureReason(String reason);
 
+  /// No description provided for @shelterCachedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing cached shelter data from {date}, {time} because at least one source is currently unavailable.'**
+  String shelterCachedAt(Object date, Object time);
+
+  /// No description provided for @settingsPrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy and device protection'**
+  String get settingsPrivacyTitle;
+
+  /// No description provided for @appLockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock'**
+  String get appLockTitle;
+
+  /// No description provided for @appLockDisabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Protects the app with a separate passphrase after you leave it.'**
+  String get appLockDisabledHint;
+
+  /// No description provided for @appLockEnabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The passphrase is required when you return to the app.'**
+  String get appLockEnabledHint;
+
+  /// No description provided for @appLockSetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up app lock'**
+  String get appLockSetTitle;
+
+  /// No description provided for @appLockDisableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off app lock'**
+  String get appLockDisableTitle;
+
+  /// No description provided for @appLockDialogHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The passphrase is not stored. It protects access to the open app.'**
+  String get appLockDialogHint;
+
+  /// No description provided for @appLockPassphraseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Passphrase'**
+  String get appLockPassphraseLabel;
+
+  /// No description provided for @appLockConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat passphrase'**
+  String get appLockConfirmLabel;
+
+  /// No description provided for @appLockPassphraseTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'The passphrase must contain at least 12 characters.'**
+  String get appLockPassphraseTooShort;
+
+  /// No description provided for @appLockPassphraseMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The passphrases do not match.'**
+  String get appLockPassphraseMismatch;
+
+  /// No description provided for @appLockEnableButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on lock'**
+  String get appLockEnableButton;
+
+  /// No description provided for @appLockDisableButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off lock'**
+  String get appLockDisableButton;
+
+  /// No description provided for @appLockUnlockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock PreppSuite'**
+  String get appLockUnlockTitle;
+
+  /// No description provided for @appLockUnlockButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get appLockUnlockButton;
+
+  /// No description provided for @appLockIncorrectPassphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'The passphrase is incorrect.'**
+  String get appLockIncorrectPassphrase;
+
+  /// No description provided for @appLockEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'The app lock is active.'**
+  String get appLockEnabled;
+
+  /// No description provided for @appLockDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'The app lock is turned off.'**
+  String get appLockDisabled;
+
   /// No description provided for @kiwixLanguageSearchHint.
   ///
   /// In en, this message translates to:

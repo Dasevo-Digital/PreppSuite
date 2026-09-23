@@ -2211,6 +2211,31 @@
       }
     }
   },
+  "shelterCachedAt": "Showing cached shelter data from {date}, {time} because at least one source is currently unavailable.",
+  "@shelterCachedAt": {
+    "placeholders": {
+      "date": {},
+      "time": {}
+    }
+  },
+  "settingsPrivacyTitle": "Privacy and device protection",
+  "appLockTitle": "App lock",
+  "appLockDisabledHint": "Protects the app with a separate passphrase after you leave it.",
+  "appLockEnabledHint": "The passphrase is required when you return to the app.",
+  "appLockSetTitle": "Set up app lock",
+  "appLockDisableTitle": "Turn off app lock",
+  "appLockDialogHint": "The passphrase is not stored. It protects access to the open app.",
+  "appLockPassphraseLabel": "Passphrase",
+  "appLockConfirmLabel": "Repeat passphrase",
+  "appLockPassphraseTooShort": "The passphrase must contain at least 12 characters.",
+  "appLockPassphraseMismatch": "The passphrases do not match.",
+  "appLockEnableButton": "Turn on lock",
+  "appLockDisableButton": "Turn off lock",
+  "appLockUnlockTitle": "Unlock PreppSuite",
+  "appLockUnlockButton": "Unlock",
+  "appLockIncorrectPassphrase": "The passphrase is incorrect.",
+  "appLockEnabled": "The app lock is active.",
+  "appLockDisabled": "The app lock is turned off.",
   "kiwixLanguageSearchHint": "Search language",
   "kiwixLanguageCount": "{count} languages",
   "@kiwixLanguageCount": {

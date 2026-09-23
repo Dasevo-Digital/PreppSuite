@@ -8,11 +8,13 @@ class ShelterSearchResult {
   const ShelterSearchResult(
     this.shelters,
     this.pending,
+    this.successfulSources,
     this.wwbotaError,
     this.overpassError,
   );
   final List<ClassifiedShelter> shelters;
   final int pending;
+  final int successfulSources;
 
   /// Why a source came back empty, or null when it did not.
   ///
@@ -25,6 +27,11 @@ class ShelterSearchResult {
 
   bool get wwbotaFailed => wwbotaError != null;
   bool get overpassFailed => overpassError != null;
+
+  /// An empty list can still be a current, successful answer. This matters
+  /// for the cache: replacing a known list with a confirmed empty result is
+  /// correct; replacing it because both public services timed out is not.
+  bool get hasSuccessfulSource => successfulSources > 0;
 }
 
 /// Independent sources publish partial results; only the newest search may win.
@@ -48,12 +55,14 @@ class ShelterSearch {
     final results = <List<ClassifiedShelter>>[[], []];
     final failed = <Object?>[null, null];
     var pending = 2;
+    var successfulSources = 0;
     void emit() {
       if (generation == _generation) {
         publish(
           ShelterSearchResult(
             [...results[0], ...results[1]],
             pending,
+            successfulSources,
             failed[0],
             failed[1],
           ),
@@ -65,6 +74,7 @@ class ShelterSearch {
     Future<void> load(int index, ShelterSource source) async {
       try {
         results[index] = await source(bounds).timeout(timeout);
+        successfulSources++;
       } catch (error) {
         failed[index] = error;
       }

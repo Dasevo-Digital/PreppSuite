@@ -17,6 +17,7 @@ import '../../maps/presentation/offline_map_card.dart';
 import '../../sharing/presentation/shared_folder_card.dart';
 import '../../transfer/presentation/transfer_card.dart';
 import 'additional_regions_card.dart';
+import 'app_lock_card.dart';
 import 'backup_card.dart';
 import 'my_region_card.dart';
 import 'reset_card.dart';
@@ -107,6 +108,13 @@ class SettingsScreen extends ConsumerWidget {
                 title: Text(l10n.settingsExpiryRemindersUnsupported),
               ),
             ),
+          const SizedBox(height: 24),
+          Text(
+            l10n.settingsPrivacyTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          AppLockCard(l10n: l10n),
           const SizedBox(height: 24),
           Text(
             l10n.settingsSharingTitle,

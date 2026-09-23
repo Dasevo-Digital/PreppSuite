@@ -226,7 +226,7 @@ class KiwixCatalogue {
   static String? _text(XmlElement parent, String name) {
     final element = parent
         .findElements(name)
-        .followedBy(parent.findElements(name, namespace: '*'))
+        .followedBy(parent.findElements(name, namespaceUri: '*'))
         .firstOrNull;
     final text = element?.innerText.trim();
     return text == null || text.isEmpty ? null : text;

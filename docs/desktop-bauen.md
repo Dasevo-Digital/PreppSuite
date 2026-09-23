@@ -4,7 +4,21 @@ macOS baut hier direkt. Linux und Windows sind die beiden, die unbemerkt
 kaputtgehen, weil hier niemand auf ihnen entwickelt — und beide brauchen
 etwas, das nicht mitkommt.
 
+## macOS
+
+macOS-Releases entstehen mit `tool/macos_release.sh --identity ...
+--notary-profile ...`. Das Skript verweigert Ad-hoc-Signaturen, notariert den
+Build, stapelt das Ticket, prueft Gatekeeper und erzeugt erst dann das ZIP. Die
+lokale Produktiv-/Testinstallation darf weiterhin explizit Ad-hoc-signiert sein;
+sie ist kein weiterzugebendes Release.
+
 ## Windows
+
+Ein Paket fuer andere Rechner wird **vor dem Verpacken** Authenticode-signiert.
+`tool/windows_release.ps1` akzeptiert ausschliesslich einen Zertifikat-Thumbprint
+aus dem lokalen Zertifikatsspeicher und eine Zeitstempel-URL; weder PFX noch
+Passwort gehoeren in das Repository. Es signiert die EXE und alle geladenen DLLs,
+prueft jede Signatur und schreibt danach ZIP und SHA-256-Datei.
 
 Die C++-Laufzeit wird seit `556df7f` mit ins Paket gelegt
 (`windows/CMakeLists.txt`). Ohne sie startet die App auf einem Rechner,

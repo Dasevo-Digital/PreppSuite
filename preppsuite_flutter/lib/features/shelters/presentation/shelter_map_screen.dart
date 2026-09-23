@@ -14,6 +14,7 @@ import '../../maps/presentation/map_coverage_notice.dart';
 import '../../maps/presentation/map_source_bar.dart';
 import '../../maps/presentation/map_zoom_buttons.dart';
 import '../application/geo_bounds.dart';
+import '../application/shelter_cache.dart';
 import '../application/shelter_search.dart';
 import '../application/overpass_shelter_client.dart';
 import '../application/shelter_classification.dart';
@@ -39,6 +40,7 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
   final _geolocationService = GeolocationService();
   final _wwbotaClient = WwbotaClient();
   final _overpassClient = OverpassShelterClient();
+  final _cache = const ShelterCache();
 
   LatLng? _center;
   double _radiusKm = 25;
@@ -47,6 +49,7 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
   bool _isLoading = false;
   Object? _wwbotaError;
   Object? _overpassError;
+  DateTime? _cachedAt;
   String? _locationError;
 
   int _lookupGeneration = 0;
@@ -128,17 +131,33 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
   Future<void> _fetchShelters() async {
     final center = _center;
     if (center == null) return;
+    final generation = ++_lookupGeneration;
+    _shelterSearch.cancel();
 
-    await _shelterSearch.search(boundingBoxForRadius(center, _radiusKm), (
-      result,
-    ) {
-      if (!mounted) return;
+    final bounds = boundingBoxForRadius(center, _radiusKm);
+    final cached = await _cache.load(bounds);
+    if (!mounted || generation != _lookupGeneration) return;
+    if (cached != null) {
       setState(() {
-        _shelters = result.shelters;
+        _shelters = cached.shelters;
+        _cachedAt = cached.savedAt;
+      });
+    }
+
+    await _shelterSearch.search(bounds, (result) {
+      if (!mounted || generation != _lookupGeneration) return;
+      setState(() {
+        if (result.hasSuccessfulSource) {
+          _shelters = result.shelters;
+          _cachedAt = null;
+        }
         _wwbotaError = result.wwbotaError;
         _overpassError = result.overpassError;
         _isLoading = result.pending > 0;
       });
+      if (result.pending == 0 && result.hasSuccessfulSource) {
+        unawaited(_cache.save(bounds, result.shelters));
+      }
     });
   }
 
@@ -495,6 +514,22 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
           if (_overpassError != null) ...[
             const SizedBox(height: 8),
             _overpassFailure(l10n),
+          ],
+          if (_cachedAt != null &&
+              _wwbotaError != null &&
+              _overpassError != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.shelterCachedAt(
+                MaterialLocalizations.of(
+                  context,
+                ).formatFullDate(_cachedAt!.toLocal()),
+                MaterialLocalizations.of(context).formatTimeOfDay(
+                  TimeOfDay.fromDateTime(_cachedAt!.toLocal()),
+                ),
+              ),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
           ],
         ],
       ),

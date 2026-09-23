@@ -1223,6 +1223,31 @@
       }
     }
   },
+  "shelterCachedAt": "Zwischengespeicherte Schutzraumdaten vom {date}, {time}. Sie werden angezeigt, weil mindestens eine Quelle gerade nicht erreichbar ist.",
+  "@shelterCachedAt": {
+    "placeholders": {
+      "date": {},
+      "time": {}
+    }
+  },
+  "settingsPrivacyTitle": "Privatsphäre und Geräteschutz",
+  "appLockTitle": "App-Sperre",
+  "appLockDisabledHint": "Schützt die App nach dem Verlassen mit einer eigenen Passphrase.",
+  "appLockEnabledHint": "Beim Zurückkehren in die App wird die Passphrase verlangt.",
+  "appLockSetTitle": "App-Sperre einrichten",
+  "appLockDisableTitle": "App-Sperre ausschalten",
+  "appLockDialogHint": "Die Passphrase wird nicht gespeichert. Sie schützt den Zugriff auf die geöffnete App.",
+  "appLockPassphraseLabel": "Passphrase",
+  "appLockConfirmLabel": "Passphrase wiederholen",
+  "appLockPassphraseTooShort": "Die Passphrase muss mindestens 12 Zeichen haben.",
+  "appLockPassphraseMismatch": "Die Passphrasen stimmen nicht überein.",
+  "appLockEnableButton": "Sperre einschalten",
+  "appLockDisableButton": "Sperre ausschalten",
+  "appLockUnlockTitle": "PreppSuite entsperren",
+  "appLockUnlockButton": "Entsperren",
+  "appLockIncorrectPassphrase": "Die Passphrase ist nicht korrekt.",
+  "appLockEnabled": "Die App-Sperre ist aktiv.",
+  "appLockDisabled": "Die App-Sperre ist ausgeschaltet.",
   "kiwixLanguageSearchHint": "Sprache suchen",
   "kiwixLanguageCount": "{count} Sprachen",
   "@kiwixLanguageCount": {

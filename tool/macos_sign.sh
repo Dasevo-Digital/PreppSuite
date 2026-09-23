@@ -5,6 +5,7 @@
 # Usage:
 #   tool/macos_sign.sh <path to .app> [--entitlements <plist>]
 #                                     [--identity <signing identity>]
+#                                     [--allow-ad-hoc]
 #
 # Why at all: the Flutter build signs ad-hoc and WITHOUT the hardened
 # runtime. Without it there is no library validation and no protection
@@ -32,12 +33,14 @@ note() { printf '  %s•%s %s\n' "$YELLOW" "$OFF" "$1"; }
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP=""
 ENTITLEMENTS="$ROOT/preppsuite_flutter/macos/Runner/Release.entitlements"
-IDENTITY="-"   # ad-hoc; pass a Developer ID's name to use one
+IDENTITY=""
+ALLOW_AD_HOC=false
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --entitlements) ENTITLEMENTS="$2"; shift 2 ;;
     --identity)     IDENTITY="$2"; shift 2 ;;
+    --allow-ad-hoc) ALLOW_AD_HOC=true; shift ;;
     -*) printf '%sUnknown option: %s%s\n' "$RED" "$1" "$OFF"; exit 2 ;;
     *)  APP="$1"; shift ;;
   esac
@@ -46,6 +49,12 @@ done
 [ -n "$APP" ] || { printf 'Usage: %s <path to .app> [--entitlements <plist>] [--identity <name>]\n' "$0"; exit 2; }
 [ -d "$APP" ] || { bad "no bundle at $APP"; exit 1; }
 [ -f "$ENTITLEMENTS" ] || { bad "no entitlements file at $ENTITLEMENTS"; exit 1; }
+[ -n "$IDENTITY" ] || $ALLOW_AD_HOC || {
+  bad "a distributable build requires --identity 'Developer ID Application: …'"
+  note "For a local production/test installation only, pass --allow-ad-hoc explicitly."
+  exit 2
+}
+[ -n "$IDENTITY" ] || IDENTITY="-"
 
 heading "Starting point"
 note "Bundle:       $APP"

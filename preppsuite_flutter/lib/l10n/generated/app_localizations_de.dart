@@ -3598,6 +3598,70 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String shelterCachedAt(Object date, Object time) {
+    return 'Zwischengespeicherte Schutzraumdaten vom $date, $time. Sie werden angezeigt, weil mindestens eine Quelle gerade nicht erreichbar ist.';
+  }
+
+  @override
+  String get settingsPrivacyTitle => 'Privatsphäre und Geräteschutz';
+
+  @override
+  String get appLockTitle => 'App-Sperre';
+
+  @override
+  String get appLockDisabledHint =>
+      'Schützt die App nach dem Verlassen mit einer eigenen Passphrase.';
+
+  @override
+  String get appLockEnabledHint =>
+      'Beim Zurückkehren in die App wird die Passphrase verlangt.';
+
+  @override
+  String get appLockSetTitle => 'App-Sperre einrichten';
+
+  @override
+  String get appLockDisableTitle => 'App-Sperre ausschalten';
+
+  @override
+  String get appLockDialogHint =>
+      'Die Passphrase wird nicht gespeichert. Sie schützt den Zugriff auf die geöffnete App.';
+
+  @override
+  String get appLockPassphraseLabel => 'Passphrase';
+
+  @override
+  String get appLockConfirmLabel => 'Passphrase wiederholen';
+
+  @override
+  String get appLockPassphraseTooShort =>
+      'Die Passphrase muss mindestens 12 Zeichen haben.';
+
+  @override
+  String get appLockPassphraseMismatch =>
+      'Die Passphrasen stimmen nicht überein.';
+
+  @override
+  String get appLockEnableButton => 'Sperre einschalten';
+
+  @override
+  String get appLockDisableButton => 'Sperre ausschalten';
+
+  @override
+  String get appLockUnlockTitle => 'PreppSuite entsperren';
+
+  @override
+  String get appLockUnlockButton => 'Entsperren';
+
+  @override
+  String get appLockIncorrectPassphrase => 'Die Passphrase ist nicht korrekt.';
+
+  @override
+  String get appLockEnabled => 'Die App-Sperre ist aktiv.';
+
+  @override
+  String get appLockDisabled => 'Die App-Sperre ist ausgeschaltet.';
+
+  @override
   String get kiwixLanguageSearchHint => 'Sprache suchen';
 
   @override

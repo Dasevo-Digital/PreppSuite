@@ -61,9 +61,9 @@ class MeteoAlarmClient {
 
   MeteoAlarmRawWarning _parseEntry(XmlElement entry) {
     String cap(String name) =>
-        entry.getElement(name, namespace: _capNs)?.innerText ?? '';
+        entry.getElement(name, namespaceUri: _capNs)?.innerText ?? '';
     String? capOrNull(String name) =>
-        entry.getElement(name, namespace: _capNs)?.innerText;
+        entry.getElement(name, namespaceUri: _capNs)?.innerText;
 
     return MeteoAlarmRawWarning(
       identifier: cap('identifier'),

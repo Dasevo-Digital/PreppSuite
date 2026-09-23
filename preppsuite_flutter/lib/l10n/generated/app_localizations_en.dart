@@ -3575,6 +3575,69 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String shelterCachedAt(Object date, Object time) {
+    return 'Showing cached shelter data from $date, $time because at least one source is currently unavailable.';
+  }
+
+  @override
+  String get settingsPrivacyTitle => 'Privacy and device protection';
+
+  @override
+  String get appLockTitle => 'App lock';
+
+  @override
+  String get appLockDisabledHint =>
+      'Protects the app with a separate passphrase after you leave it.';
+
+  @override
+  String get appLockEnabledHint =>
+      'The passphrase is required when you return to the app.';
+
+  @override
+  String get appLockSetTitle => 'Set up app lock';
+
+  @override
+  String get appLockDisableTitle => 'Turn off app lock';
+
+  @override
+  String get appLockDialogHint =>
+      'The passphrase is not stored. It protects access to the open app.';
+
+  @override
+  String get appLockPassphraseLabel => 'Passphrase';
+
+  @override
+  String get appLockConfirmLabel => 'Repeat passphrase';
+
+  @override
+  String get appLockPassphraseTooShort =>
+      'The passphrase must contain at least 12 characters.';
+
+  @override
+  String get appLockPassphraseMismatch => 'The passphrases do not match.';
+
+  @override
+  String get appLockEnableButton => 'Turn on lock';
+
+  @override
+  String get appLockDisableButton => 'Turn off lock';
+
+  @override
+  String get appLockUnlockTitle => 'Unlock PreppSuite';
+
+  @override
+  String get appLockUnlockButton => 'Unlock';
+
+  @override
+  String get appLockIncorrectPassphrase => 'The passphrase is incorrect.';
+
+  @override
+  String get appLockEnabled => 'The app lock is active.';
+
+  @override
+  String get appLockDisabled => 'The app lock is turned off.';
+
+  @override
   String get kiwixLanguageSearchHint => 'Search language';
 
   @override

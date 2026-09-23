@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/app_theme.dart';
+import 'core/app_lock_gate.dart';
 import 'core/locale_provider.dart';
 import 'core/theme_provider.dart';
 import 'features/household/presentation/household_gate.dart';
@@ -36,7 +37,7 @@ class PreppSuiteApp extends ConsumerWidget {
       // still scrolls and a slider still drags inside one, because those
       // recognizers win the gesture arena. See selection_test.dart, which
       // keeps that true.
-      home: const SelectionArea(child: HouseholdGate()),
+      home: const AppLockGate(child: SelectionArea(child: HouseholdGate())),
     );
   }
 }

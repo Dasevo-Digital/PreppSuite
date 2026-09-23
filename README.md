@@ -336,11 +336,12 @@ ziehen; auf dem Telefon bleibt alles wie es war.
 ## Installieren
 
 Fertige Fassungen für **macOS, Windows, Linux und Android** liegen unter
-*Releases*. Die drei Desktop-Bauten sind nicht mit einem gekauften
-Zertifikat signiert: Auf macOS meldet sich Gatekeeper beim ersten Start,
-über **Rechtsklick → Öffnen** startet die App trotzdem; auf Windows
-meldet sich SmartScreen, dort **Weitere Informationen → Trotzdem
-ausführen**. Die Android-Pakete *sind* signiert.
+*Releases*. Weiterzugebende macOS- und Windows-Pakete entstehen ausschließlich
+über die Signatur-Skripte in [`docs/desktop-bauen.md`](docs/desktop-bauen.md):
+macOS wird mit einer Developer-ID signiert und notariert, Windows mit einem
+Authenticode-Zertifikat inklusive Zeitstempel. Fehlen diese lokalen
+Zugangsdaten, bricht der Release-Schritt ab, statt ein Paket als produktiv
+auszugeben. Die Android-Pakete *sind* signiert.
 
 ### Von einem Datenträger betreiben
 
@@ -498,6 +499,16 @@ dart format --output=none --set-exit-if-changed .
 
 cd preppsuite_flutter && flutter test
 ```
+
+Vor einem Release läuft lokal dieselbe vollständige Sperre in einem Schritt:
+
+```bash
+./tool/pre_release_check.sh
+```
+
+Sie prüft die erreichbare Git-Historie auf personenbezogene Kennungen,
+Formatierung, statische Analyse und die Testsuite. Sie benötigt keinen
+externen CI-Runner.
 
 Die mobile CI (`.github/workflows/test-mobile.yml`) führt die nativen
 Speicher- und Webview-Tests auf einem Android-Emulator und einem iOS-Simulator

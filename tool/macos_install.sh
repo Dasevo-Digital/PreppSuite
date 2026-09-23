@@ -73,7 +73,7 @@ sign="$REPO_ROOT/tool/macos_sign.sh"
 echo "== $PROD_APP =="
 rm -rf "$PROD_APP"
 ditto "$source" "$PROD_APP"
-"$sign" "$PROD_APP" >/dev/null || die "$PROD_APP liess sich nicht signieren"
+"$sign" "$PROD_APP" --allow-ad-hoc >/dev/null || die "$PROD_APP liess sich nicht signieren"
 
 echo "== $TEST_APP =="
 rm -rf "$TEST_APP"
@@ -86,7 +86,7 @@ ditto "$source" "$TEST_APP"
 # Editing Info.plist invalidates the signature, and macOS kills a bundle
 # whose signature does not match rather than explaining itself. Ad-hoc,
 # like the build itself: there is no Developer ID here.
-"$sign" "$TEST_APP" >/dev/null || die "das Test-Bündel liess sich nicht signieren"
+"$sign" "$TEST_APP" --allow-ad-hoc >/dev/null || die "das Test-Bündel liess sich nicht signieren"
 
 # Nothing should be left where Spotlight would offer it as a third app,
 # and removing the bundle is only half of that: Launch Services keeps its
