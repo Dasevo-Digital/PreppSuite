@@ -60,6 +60,15 @@ readonly KEY_ALIAS="$(prop keyAlias)"
 
 readonly OUT_DIR="$APP_DIR/build/app/outputs/flutter-apk"
 
+# Flutter resolves the repository workspace before the member package. Pass
+# both values explicitly so a release always carries the version declared by
+# PreppSuite itself, rather than a stale workspace build configuration.
+version_line="$(sed -n 's/^version:[[:space:]]*//p' "$APP_DIR/pubspec.yaml" | head -1)"
+VERSION_NAME="${version_line%%+*}"
+VERSION_CODE="${version_line#*+}"
+[ -n "$VERSION_NAME" ] && [ "$VERSION_CODE" != "$version_line" ] && \
+  [[ "$VERSION_CODE" =~ ^[0-9]+$ ]] || die "ungueltige Version in $APP_DIR/pubspec.yaml"
+
 # One package per architecture instead of one holding both.
 #
 # A universal APK was 64.7 MB, of which 60.2 MB was native code for two
@@ -96,7 +105,8 @@ fi
 
 echo "== 1/5 bauen =="
 ( cd "$APP_DIR" && flutter build apk --release --split-per-abi \
-    --target-platform "$TARGET_PLATFORMS" )
+    --target-platform "$TARGET_PLATFORMS" \
+    --build-name "$VERSION_NAME" --build-number "$VERSION_CODE" )
 
 for abi in "${ABIS[@]}"; do
   [ -s "$OUT_DIR/app-$abi-release.apk" ] \

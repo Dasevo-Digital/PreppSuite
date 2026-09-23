@@ -22,8 +22,14 @@ done
 [ -n "$profile" ] || { echo "FEHLER: Notarytool-Keychain-Profil fehlt." >&2; exit 2; }
 command -v xcrun >/dev/null || { echo "FEHLER: Xcode command line tools fehlen." >&2; exit 1; }
 
+version_line="$(sed -n 's/^version:[[:space:]]*//p' "$APP_DIR/pubspec.yaml" | head -1)"
+version_name="${version_line%%+*}"
+version_code="${version_line#*+}"
+[ -n "$version_name" ] && [ "$version_code" != "$version_line" ] && \
+  [[ "$version_code" =~ ^[0-9]+$ ]] || { echo "FEHLER: ungueltige Version in $APP_DIR/pubspec.yaml" >&2; exit 1; }
+
 cd "$ROOT"
-flutter build macos --release
+flutter build macos --release --build-name "$version_name" --build-number "$version_code"
 "$ROOT/tool/macos_sign.sh" "$APP" --identity "$identity"
 
 version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Contents/Info.plist")"
