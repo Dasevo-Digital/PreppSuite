@@ -67,6 +67,11 @@ dependencies:
   printing: ^5.14.3
   shared_preferences: ^2.5.5
   flutter_secure_storage: ^10.3.4
+  # Reads the first aid steps out loud, for the one situation where both
+  # hands are busy. No Linux implementation exists -- see
+  # core/speech_capabilities.dart, which is what keeps the button off that
+  # platform rather than letting it throw.
+  flutter_tts: ^4.2.5
   # Direct, because a carried copy registers a settings store of its own
   # that writes into the folder on the disk rather than into the
   # platform's place. See lib/core/portable_preferences.dart.

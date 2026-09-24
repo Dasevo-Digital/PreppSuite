@@ -4334,6 +4334,96 @@ abstract class AppLocalizations {
   /// **'Storage tips'**
   String get storageTipsTitle;
 
+  /// No description provided for @waterTreatmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Making water drinkable'**
+  String get waterTreatmentTitle;
+
+  /// No description provided for @waterTreatmentIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The stock is one thing. When it runs low, or the tap is no longer safe, what counts is what can be done with what is there — and what cannot.'**
+  String get waterTreatmentIntro;
+
+  /// No description provided for @waterTreatmentChemistryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No method helps against chemistry'**
+  String get waterTreatmentChemistryTitle;
+
+  /// No description provided for @waterTreatmentChemistryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuel, chemicals and radioactive material come out of water by none of these methods. Water from a flooded street, or from near a heating oil tank that has floated loose, does not become drinkable by boiling. That water stays where it is.'**
+  String get waterTreatmentChemistryBody;
+
+  /// No description provided for @waterTreatmentBoilTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Boiling'**
+  String get waterTreatmentBoilTitle;
+
+  /// No description provided for @waterTreatmentBoilCloudy.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloudy water first through a clean cloth, paper towel or coffee filter — or let it settle and draw off the clear water.'**
+  String get waterTreatmentBoilCloudy;
+
+  /// No description provided for @waterTreatmentBoilStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring clear water to a rolling boil. The WHO holds a rolling boil to be enough to inactivate bacteria, viruses and parasites; the CDC recommends one minute at a rolling boil, three minutes at high altitude above about 2000 metres.'**
+  String get waterTreatmentBoilStep;
+
+  /// No description provided for @waterTreatmentBoilStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Let it cool and keep it in clean containers with tight covers.'**
+  String get waterTreatmentBoilStore;
+
+  /// No description provided for @waterTreatmentChlorineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disinfectant'**
+  String get waterTreatmentChlorineTitle;
+
+  /// No description provided for @waterTreatmentChlorineStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Dose as the label says, stir well, and let it stand for at least 30 minutes before drinking.'**
+  String get waterTreatmentChlorineStep;
+
+  /// No description provided for @waterTreatmentChlorineLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Works against bacteria and viruses, but less well than boiling against the parasites Cryptosporidium and Giardia — chlorine and iodine tablets do not kill Cryptosporidium. Where you can boil, boil.'**
+  String get waterTreatmentChlorineLimit;
+
+  /// No description provided for @waterTreatmentFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filtering'**
+  String get waterTreatmentFilterTitle;
+
+  /// No description provided for @waterTreatmentFilterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A filter takes out the cloudiness and, depending on the filter, germs as well. What it does is written on it — not every one holds back viruses. It replaces boiling only where it says so.'**
+  String get waterTreatmentFilterBody;
+
+  /// No description provided for @waterTreatmentSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources: WHO Guidelines for Drinking-water Quality and \"Boil water\"; CDC, making water safe in an emergency.'**
+  String get waterTreatmentSources;
+
+  /// No description provided for @waterTreatmentOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Making water drinkable'**
+  String get waterTreatmentOpen;
+
   /// No description provided for @storageTipsIntro.
   ///
   /// In en, this message translates to:
@@ -5059,6 +5149,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More information from the warning source'**
   String get warningMoreInformation;
+
+  /// No description provided for @warningWhatToDoNow.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do now'**
+  String get warningWhatToDoNow;
 
   /// No description provided for @moreActions.
   ///
@@ -8833,6 +8929,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Steps'**
   String get firstAidSteps;
+
+  /// No description provided for @firstAidReadAloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the steps aloud'**
+  String get firstAidReadAloud;
+
+  /// No description provided for @firstAidStopReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop reading'**
+  String get firstAidStopReading;
 
   /// No description provided for @firstAidCautions.
   ///

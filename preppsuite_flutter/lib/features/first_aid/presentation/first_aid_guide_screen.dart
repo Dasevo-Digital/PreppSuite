@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/first_aid_guides.dart';
+import '../application/step_speech.dart';
 import '../application/first_aid_providers.dart';
 import '../application/first_aid_video_pack.dart';
 import 'compression_pacer_screen.dart';
@@ -69,7 +70,17 @@ class FirstAidGuideScreen extends ConsumerWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.firstAidSteps, style: theme.textTheme.titleLarge),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.firstAidSteps,
+                            style: theme.textTheme.titleLarge,
+                          ),
+                        ),
+                        _ReadAloudButton(guide: guide, l10n: l10n),
+                      ],
+                    ),
                     const SizedBox(height: 8),
                     for (var i = 0; i < guide.steps.length; i++)
                       _StepTile(number: i + 1, step: guide.steps[i]),
@@ -373,6 +384,84 @@ class _Videos extends StatelessWidget {
               ),
             ),
       ],
+    );
+  }
+}
+
+/// Reads the steps out loud, for the case both hands are busy.
+///
+/// Absent rather than disabled where the device cannot speak: Linux has
+/// no implementation at all, and a phone that has never downloaded a
+/// German voice has nothing to say the words with. Asking the engine is
+/// the only way to know, so the button appears a frame late — which is
+/// better than a button that turns out to do nothing.
+class _ReadAloudButton extends StatefulWidget {
+  const _ReadAloudButton({required this.guide, required this.l10n});
+
+  final FirstAidGuide guide;
+  final AppLocalizations l10n;
+
+  @override
+  State<_ReadAloudButton> createState() => _ReadAloudButtonState();
+}
+
+class _ReadAloudButtonState extends State<_ReadAloudButton> {
+  final StepSpeech _speech = PlatformStepSpeech();
+  bool _available = false;
+  bool _speaking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ask();
+  }
+
+  @override
+  void dispose() {
+    _speech.stop();
+    super.dispose();
+  }
+
+  Future<void> _ask() async {
+    final available = await _speech.isAvailable(_language);
+    if (mounted) setState(() => _available = available);
+  }
+
+  String get _language =>
+      widget.l10n.localeName.startsWith('de') ? 'de-DE' : 'en-GB';
+
+  /// The steps as one utterance rather than one call per step: a pause
+  /// between them is what the engine's own punctuation gives, and
+  /// speaking them separately would need a queue the plugin does not
+  /// promise on every platform.
+  String get _text => [
+    widget.guide.when,
+    for (var i = 0; i < widget.guide.steps.length; i++)
+      [
+        '${i + 1}. ${widget.guide.steps[i].text}',
+        ?widget.guide.steps[i].detail,
+      ].join(' '),
+  ].join('\n');
+
+  Future<void> _toggle() async {
+    if (_speaking) {
+      await _speech.stop();
+      if (mounted) setState(() => _speaking = false);
+      return;
+    }
+    setState(() => _speaking = true);
+    await _speech.speak(_text, languageCode: _language);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_available) return const SizedBox.shrink();
+    return IconButton(
+      tooltip: _speaking
+          ? widget.l10n.firstAidStopReading
+          : widget.l10n.firstAidReadAloud,
+      icon: Icon(_speaking ? Icons.stop_circle_outlined : Icons.volume_up),
+      onPressed: _toggle,
     );
   }
 }

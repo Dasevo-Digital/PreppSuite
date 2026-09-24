@@ -27,6 +27,7 @@ import 'inventory_csv_import_screen.dart';
 import 'inventory_item_form_screen.dart';
 import 'medication_range_screen.dart';
 import 'storage_tips_screen.dart';
+import 'water_treatment_screen.dart';
 import '../application/inventory_filter.dart';
 import 'inventory_filter_sheet.dart';
 import 'package:intl/intl.dart';
@@ -37,6 +38,7 @@ enum _InventoryMenuAction {
   medication,
   energy,
   storageTips,
+  waterTreatment,
   exportCsv,
   importCsv,
 }
@@ -127,6 +129,13 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
                 child: ListTile(
                   leading: const Icon(Icons.menu_book_outlined),
                   title: Text(l10n.storageTipsTitle),
+                ),
+              ),
+              PopupMenuItem(
+                value: _InventoryMenuAction.waterTreatment,
+                child: ListTile(
+                  leading: const Icon(Icons.water_drop_outlined),
+                  title: Text(l10n.waterTreatmentTitle),
                 ),
               ),
               PopupMenuItem(
@@ -294,6 +303,12 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
         await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => StorageTipsScreen(householdId: householdId),
+          ),
+        );
+      case _InventoryMenuAction.waterTreatment:
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const WaterTreatmentScreen(),
           ),
         );
       case _InventoryMenuAction.exportCsv:

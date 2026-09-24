@@ -38,6 +38,7 @@ import '../features/inventory/presentation/prepper_recipes_screen.dart';
 import '../features/inventory/presentation/rotation_screen.dart';
 import '../features/inventory/presentation/shopping_list_screen.dart';
 import '../features/inventory/presentation/storage_tips_screen.dart';
+import '../features/inventory/presentation/water_treatment_screen.dart';
 import '../features/knowledge/presentation/apollo_library_screen.dart';
 import '../features/knowledge/presentation/kiwix_library_screen.dart';
 import '../features/knowledge/presentation/personal_documents_screen.dart';
@@ -288,6 +289,23 @@ List<AppDestination> appDestinations() => [
     area: ShellDestination.inventory,
     open: (p) => StorageTipsScreen(householdId: p.id),
     aliases: ['lagerung', 'lagern', 'storage'],
+  ),
+  AppDestination(
+    id: 'water-treatment',
+    title: (l) => l.waterTreatmentTitle,
+    icon: Icons.water_drop_outlined,
+    area: ShellDestination.inventory,
+    open: (p) => const WaterTreatmentScreen(),
+    aliases: [
+      'wasser',
+      'abkochen',
+      'trinkwasser',
+      'filter',
+      'entkeimen',
+      'chlor',
+      'boil',
+      'water',
+    ],
   ),
   AppDestination(
     id: 'recipes',

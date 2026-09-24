@@ -2550,6 +2550,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get storageTipsTitle => 'Storage tips';
 
   @override
+  String get waterTreatmentTitle => 'Making water drinkable';
+
+  @override
+  String get waterTreatmentIntro =>
+      'The stock is one thing. When it runs low, or the tap is no longer safe, what counts is what can be done with what is there — and what cannot.';
+
+  @override
+  String get waterTreatmentChemistryTitle =>
+      'No method helps against chemistry';
+
+  @override
+  String get waterTreatmentChemistryBody =>
+      'Fuel, chemicals and radioactive material come out of water by none of these methods. Water from a flooded street, or from near a heating oil tank that has floated loose, does not become drinkable by boiling. That water stays where it is.';
+
+  @override
+  String get waterTreatmentBoilTitle => 'Boiling';
+
+  @override
+  String get waterTreatmentBoilCloudy =>
+      'Cloudy water first through a clean cloth, paper towel or coffee filter — or let it settle and draw off the clear water.';
+
+  @override
+  String get waterTreatmentBoilStep =>
+      'Bring clear water to a rolling boil. The WHO holds a rolling boil to be enough to inactivate bacteria, viruses and parasites; the CDC recommends one minute at a rolling boil, three minutes at high altitude above about 2000 metres.';
+
+  @override
+  String get waterTreatmentBoilStore =>
+      'Let it cool and keep it in clean containers with tight covers.';
+
+  @override
+  String get waterTreatmentChlorineTitle => 'Disinfectant';
+
+  @override
+  String get waterTreatmentChlorineStep =>
+      'Dose as the label says, stir well, and let it stand for at least 30 minutes before drinking.';
+
+  @override
+  String get waterTreatmentChlorineLimit =>
+      'Works against bacteria and viruses, but less well than boiling against the parasites Cryptosporidium and Giardia — chlorine and iodine tablets do not kill Cryptosporidium. Where you can boil, boil.';
+
+  @override
+  String get waterTreatmentFilterTitle => 'Filtering';
+
+  @override
+  String get waterTreatmentFilterBody =>
+      'A filter takes out the cloudiness and, depending on the filter, germs as well. What it does is written on it — not every one holds back viruses. It replaces boiling only where it says so.';
+
+  @override
+  String get waterTreatmentSources =>
+      'Sources: WHO Guidelines for Drinking-water Quality and \"Boil water\"; CDC, making water safe in an emergency.';
+
+  @override
+  String get waterTreatmentOpen => 'Making water drinkable';
+
+  @override
   String get storageTipsIntro =>
       'The BBK recommends a ten-day supply and, for the amounts, points at the stockpiling tables of the Federal Office for Agriculture and Food. They are here — scaled to your household.';
 
@@ -2987,6 +3042,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get warningMoreInformation =>
       'More information from the warning source';
+
+  @override
+  String get warningWhatToDoNow => 'What to do now';
 
   @override
   String get moreActions => 'More actions';
@@ -5234,6 +5292,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstAidSteps => 'Steps';
+
+  @override
+  String get firstAidReadAloud => 'Read the steps aloud';
+
+  @override
+  String get firstAidStopReading => 'Stop reading';
 
   @override
   String get firstAidCautions => 'Do not';

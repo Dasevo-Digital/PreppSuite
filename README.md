@@ -37,6 +37,12 @@ Dokumente, Energie, Hygiene, Sonstiges. Vor dem Ablaufdatum erinnert die
 App mit einstellbarem Vorlauf; Verbrauchtes lässt sich direkt aus der
 Liste abbuchen.
 
+**Wasser trinkbar machen.** Was Abkochen, Filtern und Entkeimungsmittel
+leisten — und was nicht. Zuerst steht da, wogegen keines der drei hilft:
+Treibstoff, Chemie und radioaktives Material bleiben drin. Danach das
+Verfahren, nach WHO und CDC, mit den Grenzen dazu; Chlortabletten töten
+Cryptosporidium nicht.
+
 **Vorrats-Rechner.** Rechnet den Bestand gegen die Empfehlung des BBK –
 2 Liter Trinkwasser und 2200 kcal pro Person und Tag – für eine
 einstellbare Zahl an Tagen und Personen. Kinder bis zwölf zählen mit
@@ -107,6 +113,12 @@ wissen, was die Anleitungen nicht sagen – jede Begründung ist eine Warnung
 oder ein Schritt daraus, wörtlich, und ein Test hält beide Sprachen
 daran fest.
 
+**Die Schritte vorlesen lassen.** Bei einer Wiederbelebung sind beide
+Hände belegt und der Blick auch. Die Anleitungen lassen sich vorlesen, mit
+demselben Gedanken wie der Taktgeber. Die Schaltfläche erscheint nur, wo
+das Gerät wirklich sprechen kann: unter Linux gibt es dafür keine
+Umsetzung, und ein Telefon ohne deutsche Stimme meldet das selbst.
+
 **Warnungen.** Amtliche Meldungen für die eigene Region, im Banner über
 allen Ansichten und als Verlauf. Quellen sind das BBK über
 warnung.bund.de – alle sechs Kanäle, von MoWaS und DWD über Katwarn und
@@ -125,6 +137,14 @@ Stunden dauern kann.
 Bewusst ein Überblick, kein Alarm: NINA vom BBK stellt dieselben Meldungen
 in rund 30 Sekunden zu. Wer sofort gewarnt werden will, nutzt dafür NINA –
 die App sagt das an Ort und Stelle auch selbst.
+
+**Von der Warnung zur Handlung.** Eine Warnung nennt ihr Ereignis — und
+seit 2.0.2 führt sie von dort zu der Liste, die dazu gehört: „Hochwasser"
+auf „Hochwasser: wenn es soweit ist", „Orkanartige Böen" auf „Sturm und
+Unwetter". Der Weg nach draußen zur amtlichen Seite braucht einen Browser;
+dieser braucht nichts. Wo keine Liste passt — Glatteis, Nebel, ein
+Gefahrstoff —, bietet die App nichts an, statt das Nächstbeste
+vorzuschlagen.
 
 **Schutzräume.** Karte mit Schutzräumen und Bunkern aus OpenStreetMap und
 der WWBOTA-Datenbank, nach Entfernung und nach Belastbarkeit der Angabe

@@ -11,6 +11,10 @@ import '../../../model/household_profile.dart';
 import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
+import '../../checklists/application/checklist_providers.dart';
+import '../../checklists/application/hazard_response_lists.dart';
+import '../../checklists/presentation/checklist_detail_screen.dart';
+import '../../household/application/household_providers.dart';
 import '../application/warning_filter.dart';
 import '../application/warning_polygon_codec.dart';
 import 'warning_situation_map_screen.dart';
@@ -582,6 +586,10 @@ class _WarningDetails extends StatelessWidget {
             ].join('\n'),
           ),
           const SizedBox(height: 12),
+          // Before the link to the official page, which needs a browser
+          // and a network. This one is the app's own answer to the
+          // question the warning raises, and it works with neither.
+          _ResponseListButton(eventType: warning.eventType, l10n: l10n),
           Text(
             l10n.warningDetailsOfflineHint,
             style: theme.textTheme.bodySmall,
@@ -777,6 +785,56 @@ class _WarningAreaMap extends StatelessWidget {
           _WarningPolygons(polygons: polygons, colors: colors),
           BaseMapAttribution(l10n: AppLocalizations.of(context)!),
         ],
+      ),
+    );
+  }
+}
+
+/// The way from a warning to the list of what to do about it.
+///
+/// Renders nothing at all when the event has no matching list — most
+/// warnings do not, and an offer that does not fit is worse than none on
+/// a screen somebody is reading in a hurry. See `hazard_response_lists`.
+class _ResponseListButton extends ConsumerWidget {
+  const _ResponseListButton({required this.eventType, required this.l10n});
+
+  final String eventType;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final clientId = responseListFor(eventType);
+    if (clientId == null) return const SizedBox.shrink();
+
+    final profile = ref.watch(householdProfileProvider).value;
+    if (profile == null) return const SizedBox.shrink();
+
+    final templates =
+        ref.watch(checklistTemplatesProvider(profile.id)).value ?? const [];
+    final template = templates
+        .where((candidate) => candidate.clientId == clientId)
+        .firstOrNull;
+    // Absent on a household seeded before the list existed and not yet
+    // relaunched. Nothing to offer rather than a button that opens
+    // nothing.
+    if (template == null) return const SizedBox.shrink();
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 4),
+        child: FilledButton.tonalIcon(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => ChecklistDetailScreen(
+                template: template,
+                householdId: profile.id,
+              ),
+            ),
+          ),
+          icon: const Icon(Icons.checklist_rtl),
+          label: Text(l10n.warningWhatToDoNow),
+        ),
       ),
     );
   }

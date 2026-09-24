@@ -2571,6 +2571,61 @@ class AppLocalizationsDe extends AppLocalizations {
   String get storageTipsTitle => 'Tipps zum Einlagern';
 
   @override
+  String get waterTreatmentTitle => 'Wasser trinkbar machen';
+
+  @override
+  String get waterTreatmentIntro =>
+      'Der Vorrat ist das eine. Wenn er zu Ende geht oder das Leitungswasser nicht mehr sicher ist, zählt, was sich damit machen lässt — und was nicht.';
+
+  @override
+  String get waterTreatmentChemistryTitle =>
+      'Kein Verfahren hilft gegen Chemie';
+
+  @override
+  String get waterTreatmentChemistryBody =>
+      'Treibstoff, Chemikalien und radioaktives Material bekommt keines dieser Verfahren aus dem Wasser. Wasser von einer überfluteten Straße oder aus der Nähe eines aufgeschwommenen Heizöltanks wird durch Abkochen nicht trinkbar. Solches Wasser bleibt stehen.';
+
+  @override
+  String get waterTreatmentBoilTitle => 'Abkochen';
+
+  @override
+  String get waterTreatmentBoilCloudy =>
+      'Trübes Wasser zuerst durch ein sauberes Tuch, Küchenpapier oder einen Kaffeefilter geben — oder absetzen lassen und das klare Wasser abgießen.';
+
+  @override
+  String get waterTreatmentBoilStep =>
+      'Klares Wasser sprudelnd aufkochen. Die WHO hält das sprudelnde Aufkochen für ausreichend, um Bakterien, Viren und Parasiten abzutöten; die CDC empfiehlt, eine Minute sprudelnd zu kochen, in großer Höhe über rund 2000 Metern drei Minuten.';
+
+  @override
+  String get waterTreatmentBoilStore =>
+      'Abkühlen lassen und in sauberen, dicht verschließbaren Behältern aufbewahren.';
+
+  @override
+  String get waterTreatmentChlorineTitle => 'Entkeimungsmittel';
+
+  @override
+  String get waterTreatmentChlorineStep =>
+      'Nach Aufschrift dosieren, gut umrühren und mindestens 30 Minuten stehen lassen, bevor getrunken wird.';
+
+  @override
+  String get waterTreatmentChlorineLimit =>
+      'Wirkt gegen Bakterien und Viren, gegen die Parasiten Cryptosporidium und Giardia aber schlechter als Abkochen — Chlor- und Jodtabletten töten Cryptosporidium nicht. Wo gekocht werden kann, wird gekocht.';
+
+  @override
+  String get waterTreatmentFilterTitle => 'Filtern';
+
+  @override
+  String get waterTreatmentFilterBody =>
+      'Ein Filter nimmt die Trübung und, je nach Filter, auch Keime. Was er leistet, steht auf ihm — nicht jeder hält Viren zurück. Das Abkochen ersetzt er nur, wenn er ausdrücklich dafür ausgewiesen ist.';
+
+  @override
+  String get waterTreatmentSources =>
+      'Quellen: WHO-Leitlinien für Trinkwasserqualität und „Boil water“; CDC, Wasser im Notfall sicher machen.';
+
+  @override
+  String get waterTreatmentOpen => 'Wasser trinkbar machen';
+
+  @override
   String get storageTipsIntro =>
       'Das BBK empfiehlt einen Vorrat für zehn Tage und verweist für die Mengen auf die Vorratstabellen der Bundesanstalt für Landwirtschaft und Ernährung. Die stehen hier — umgerechnet auf deinen Haushalt.';
 
@@ -3010,6 +3065,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get warningMoreInformation =>
       'Weitere Informationen bei der Warnquelle';
+
+  @override
+  String get warningWhatToDoNow => 'Was jetzt zu tun ist';
 
   @override
   String get moreActions => 'Weitere Aktionen';
@@ -5269,6 +5327,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get firstAidSteps => 'Schritte';
+
+  @override
+  String get firstAidReadAloud => 'Schritte vorlesen';
+
+  @override
+  String get firstAidStopReading => 'Vorlesen beenden';
 
   @override
   String get firstAidCautions => 'Nicht tun';

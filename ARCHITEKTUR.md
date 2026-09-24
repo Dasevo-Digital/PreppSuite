@@ -1987,6 +1987,51 @@ eine Umstellung an, die beim Erzeugen des Schlüssels gescheitert wäre und
 mit einer Aufforderung zum Neustart für nichts geendet hätte.
 
 
+### Eine Warnung, die nirgendwohin führte
+
+`hazard_response_lists.dart` ordnet den Ereignistyp einer Warnung der
+Liste zu, die dazu gehört. Drei Dinge daran sind Absicht.
+
+**Schlüsselwörter statt einer Tabelle.** Der Wortlaut gehört dem Dienst:
+der DWD allein sagt „Sturmböen", „Schwere Sturmböen", „Orkanartige Böen"
+und „Orkanböen" für dasselbe Wetter. Eine Tabelle wäre am Tag nach der
+nächsten Textänderung still falsch.
+
+**Die Wörter stehen gefaltet da.** `foldForSearch` macht aus `ö` ein `o`,
+nicht `oe`. Ein Schlüsselwort in deutscher Schreibung träfe nie — und ein
+nicht getroffenes Schlüsselwort sieht genauso aus wie eine Warnung, zu der
+es keine Liste gibt.
+
+**Kein Treffer ist eine Antwort.** Glatteis, Nebel, ein Gefahrstoff: die
+Karte bietet nichts an, statt das Nächstbeste vorzuschlagen. Ein Angebot,
+das nicht passt, ist auf diesem Bildschirm schlechter als keines.
+„Sturmflut" steht deshalb bei Hochwasser und nicht bei Sturm, obwohl das
+Wort mit „Sturm" anfängt: was hereinkommt, ist Wasser.
+
+
+### Sprechen kann nicht jede Plattform
+
+`core/speech_capabilities.dart` hat dieselbe Form wie
+`notification_capabilities.dart`, aus demselben Grund: `flutter_tts`
+liefert keine Linux-Umsetzung, und es gibt nichts, worauf es dort
+ausweichen könnte. Eine Schaltfläche, die nichts tut, ist schlechter als
+keine.
+
+Dass das Plugin für eine Plattform existiert, heißt aber noch nicht, dass
+auf dem Gerät eine Stimme liegt. Deshalb zwei Tore: die Plattform wird
+statisch beantwortet, das Gerät wird gefragt (`StepSpeech.isAvailable`).
+Die Schaltfläche erscheint einen Frame später als der Rest des
+Bildschirms — besser als eine, die sich als wirkungslos herausstellt.
+
+Auf Android braucht es dafür seit Version 11 einen `<queries>`-Eintrag für
+`android.intent.action.TTS_SERVICE`. Ohne ihn ist die Sprachausgabe für
+die App unsichtbar, und jedes Gerät meldet, es könne nicht sprechen.
+
+**Ungeprüft:** ob auf Android, iOS, macOS und Windows tatsächlich eine
+deutsche Stimme vorliegt, ist hier nicht festzustellen. Der Code ist so
+gebaut, dass die Antwort „nein" nichts kostet.
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,
