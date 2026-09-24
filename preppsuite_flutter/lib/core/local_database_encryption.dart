@@ -63,6 +63,14 @@ class SecureLocalDatabaseKeyStorage implements LocalDatabaseKeyStorage {
   @override
   Future<void> delete(String key) => _storage.delete(key: key);
 
+  /// Swallowed here, and deliberately not in `app_lock.dart`.
+  ///
+  /// The asymmetry is the point. A lock whose state cannot be read must
+  /// never read as "no lock", because that opens the app. A *key* that
+  /// cannot be read reads as "no key", and what that means is then
+  /// decided by the files on the disk: encrypted ones without a key end
+  /// in recovery, plain ones simply stay plain. Nothing is opened that
+  /// should have stayed shut, and the app starts.
   @override
   Future<String?> read(String key) async {
     try {
@@ -161,6 +169,32 @@ class LocalDatabaseEncryption {
       return false;
     } finally {
       database.close();
+    }
+  }
+
+  /// Whether this installation can actually keep a key.
+  ///
+  /// Not "is there one" — whether the platform will take one at all. On
+  /// macOS the key store belongs to the signed application, and a build
+  /// without a certificate is refused; the app then works, unencrypted,
+  /// and the settings card has to be able to say why rather than offering
+  /// an upgrade that fails at its first step.
+  ///
+  /// Probed by writing a throwaway value and reading it back, because
+  /// asking is not the same as being allowed: the writes appear to
+  /// succeed on some platforms and nothing comes back.
+  Future<bool> keyStoreAccepts() async {
+    const probeKey = 'preppsuite.localDatabaseEncryption.probe.v1';
+    final token = base64UrlEncode(
+      List<int>.generate(8, (_) => Random.secure().nextInt(256)),
+    );
+    try {
+      await _storage.write(probeKey, token);
+      final back = await _storage.read(probeKey);
+      await _storage.delete(probeKey);
+      return back == token;
+    } on Object {
+      return false;
     }
   }
 

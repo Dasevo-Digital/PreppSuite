@@ -20,6 +20,7 @@ typedef LocalEncryptionStatus = ({
   LocalDatabaseEncryptionMode mode,
   List<String> pending,
   DateTime? backupVerifiedAt,
+  bool keyStore,
 });
 
 final localEncryptionStatusProvider =
@@ -32,6 +33,7 @@ final localEncryptionStatusProvider =
         pending: await encryption.pendingPlaintextDatabases(),
         backupVerifiedAt: await const LocalEncryptionReadinessStore()
             .lastVerified(),
+        keyStore: await encryption.keyStoreAccepts(),
       );
     });
 
@@ -74,9 +76,13 @@ class _LocalEncryptionCardState extends ConsumerState<LocalEncryptionCard> {
     final backupIsFresh = LocalEncryptionReadinessStore.isFresh(verifiedAt);
     final cipher = LocalDatabaseEncryption.cipherAvailable;
     final portable = portableLocation.isPortable;
+    // Unknown until the status has loaded. Offering the upgrade before
+    // that would mean offering it on a device that cannot take a key.
+    final keyStore = status?.keyStore ?? false;
 
     final canStart =
         cipher &&
+        keyStore &&
         !portable &&
         !_busy &&
         pending.isNotEmpty &&
@@ -97,7 +103,9 @@ class _LocalEncryptionCardState extends ConsumerState<LocalEncryptionCard> {
               },
             ),
             title: Text(l10n.settingsLocalEncryptionTitle),
-            subtitle: Text(_stateText(mode, pending, cipher)),
+            subtitle: Text(
+              _stateText(mode, pending, cipher, keyStore: keyStore),
+            ),
           ),
           ListTile(
             dense: true,
@@ -154,11 +162,17 @@ class _LocalEncryptionCardState extends ConsumerState<LocalEncryptionCard> {
   String _stateText(
     LocalDatabaseEncryptionMode mode,
     List<String> pending,
-    bool cipher,
-  ) {
+    bool cipher, {
+    required bool keyStore,
+  }) {
     if (!cipher) return l10n.settingsLocalEncryptionUnsupported;
     if (portableLocation.isPortable) {
       return l10n.settingsLocalEncryptionPortable;
+    }
+    // Said before "not encrypted", because it is the reason for it and
+    // the one thing on this card nobody can act on from inside the app.
+    if (!keyStore && mode != LocalDatabaseEncryptionMode.encrypted) {
+      return l10n.settingsLocalEncryptionNoKeyStore;
     }
     return switch (mode) {
       LocalDatabaseEncryptionMode.recoveryRequired =>

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// The optional lock in front of the app's local household data.
 ///
@@ -13,6 +14,15 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// fixed marker. This protects a running, unattended device without turning a
 /// forgotten passphrase into lost household data: resetting the device lock
 /// removes the verifier, not the database.
+/// The lock exists but its state cannot be read right now.
+///
+/// Kept apart from "no lock is set" on purpose, because the two look
+/// identical to a key store that will not answer and are opposites to the
+/// person in front of the screen. See [AppLockStore.isEnabled].
+class AppLockStatusUnavailable implements Exception {
+  const AppLockStatusUnavailable();
+}
+
 abstract interface class AppLockStorage {
   Future<String?> read(String key);
   Future<void> write(String key, String value);
@@ -28,14 +38,15 @@ class SecureAppLockStorage implements AppLockStorage {
   @override
   Future<void> delete(String key) => _storage.delete(key: key);
 
+  /// Throws rather than answering "nothing stored".
+  ///
+  /// It used to swallow this, so that a Mac whose key store cannot be
+  /// reached would still start. What it also did was turn an unreadable
+  /// lock into an absent one -- and an absent lock opens the app.
+  /// [AppLockStore.isEnabled] now makes that distinction with a marker
+  /// that is not a secret; this stays honest.
   @override
-  Future<String?> read(String key) async {
-    try {
-      return await _storage.read(key: key);
-    } on Object {
-      return null;
-    }
-  }
+  Future<String?> read(String key) => _storage.read(key: key);
 
   @override
   Future<void> write(String key, String value) =>
@@ -57,6 +68,15 @@ class AppLockStore {
   static const _checkKey = 'appLock.check.v1';
   static const _marker = 'preppsuite-app-lock-v1';
 
+  /// Says *that* a lock is set, never anything about it.
+  ///
+  /// In ordinary preferences rather than the key store, because its whole
+  /// job is to be readable when the key store is not. It carries no
+  /// passphrase, no salt and no verifier -- knowing that a device is
+  /// locked is what somebody standing in front of the locked screen can
+  /// already see.
+  static const _configuredKey = 'appLockConfigured.v1';
+
   static const _saltLength = 16;
   static const _defaultMemory = 65536;
   static const _defaultIterations = 3;
@@ -68,7 +88,53 @@ class AppLockStore {
   final int iterations;
   final int parallelism;
 
-  Future<bool> isEnabled() async => await _storage.read(_enabledKey) == 'true';
+  /// Whether the app is locked.
+  ///
+  /// Throws [AppLockStatusUnavailable] when a lock is known to exist but
+  /// its state cannot be read: the gate fails closed on that, which is the
+  /// only safe answer. Where no lock was ever set up, an unreachable key
+  /// store is not a reason to keep somebody out of an app that protects
+  /// nothing yet -- that is the case a Mac without a signing certificate
+  /// lands in, and it has to start.
+  Future<bool> isEnabled() async {
+    try {
+      final enabled = await _storage.read(_enabledKey) == 'true';
+      // Written from here rather than only in `enable`, so that an
+      // installation that was locked before this marker existed gets one
+      // the first time it is read successfully.
+      await _rememberConfigured(enabled);
+      return enabled;
+    } on Object {
+      if (await _wasConfigured()) throw const AppLockStatusUnavailable();
+      return false;
+    }
+  }
+
+  Future<bool> _wasConfigured() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getBool(_configuredKey) ?? false;
+    } on Object {
+      // Preferences are gone too. Nothing can be established about this
+      // device, and an app that cannot say whether it is locked must not
+      // claim it is open.
+      return true;
+    }
+  }
+
+  Future<void> _rememberConfigured(bool enabled) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (enabled) {
+        await prefs.setBool(_configuredKey, true);
+      } else {
+        await prefs.remove(_configuredKey);
+      }
+    } on Object {
+      // Best effort. A marker that cannot be written costs the
+      // distinction on the next start, and `_wasConfigured` errs closed.
+    }
+  }
 
   Future<void> enable(String passphrase) async {
     final salt = Uint8List.fromList(
@@ -89,6 +155,11 @@ class AppLockStore {
       }),
     );
     await _storage.write(_enabledKey, 'true');
+    // Last, and only once the key store has taken all three. A marker set
+    // before a write that then fails would claim a lock that does not
+    // exist -- and the gate, failing closed on it, would lock somebody out
+    // of their own household with no passphrase that opens it.
+    await _rememberConfigured(true);
   }
 
   Future<bool> verify(String passphrase) async {
@@ -116,6 +187,10 @@ class AppLockStore {
     await _storage.delete(_enabledKey);
     await _storage.delete(_saltKey);
     await _storage.delete(_checkKey);
+    // And here the other way round: the marker goes last, so a deletion
+    // that fails leaves it standing and the gate keeps failing closed
+    // rather than opening on a lock that is still there.
+    await _rememberConfigured(false);
   }
 
   Future<SecretKey> _keyFor(String passphrase, Uint8List salt) {

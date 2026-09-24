@@ -195,6 +195,95 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
     return counts;
   }
 
+  void _showLegend(
+    BuildContext context,
+    AppLocalizations l10n,
+    Map<ShelterConfidence, int> counts,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.shelterLegendTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.shelterLegendSummary(
+                  counts[ShelterConfidence.green] ?? 0,
+                  counts[ShelterConfidence.yellow] ?? 0,
+                  counts[ShelterConfidence.red] ?? 0,
+                ),
+                style: Theme.of(dialogContext).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+              for (final entry in [
+                (
+                  ShelterConfidence.green,
+                  l10n.shelterLegendGreenLabel,
+                  l10n.shelterLegendGreenDescription,
+                ),
+                (
+                  ShelterConfidence.yellow,
+                  l10n.shelterLegendYellowLabel,
+                  l10n.shelterLegendYellowDescription,
+                ),
+                (
+                  ShelterConfidence.red,
+                  l10n.shelterLegendRedLabel,
+                  l10n.shelterLegendRedDescription,
+                ),
+              ])
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, right: 10),
+                        child: Icon(
+                          Icons.shield,
+                          size: 18,
+                          color: _colorFor(entry.$1),
+                        ),
+                      ),
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: '${entry.$2}: ',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextSpan(text: entry.$3),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const Divider(),
+              Text(
+                l10n.shelterDisclaimer,
+                style: Theme.of(dialogContext).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.hubClose),
+          ),
+        ],
+      ),
+    );
+  }
+
   Color _colorFor(ShelterConfidence confidence) {
     return switch (confidence) {
       ShelterConfidence.green => Colors.green,
@@ -223,7 +312,22 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
         .toDouble();
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.shelterMapTitle)),
+      appBar: AppBar(
+        title: Text(l10n.shelterMapTitle),
+        actions: [
+          // Behind a button rather than on the screen: the simplification
+          // that took the legend off the map was right, and taking the
+          // explanation with it was not. Three marker colours where red
+          // means "not released, historic or for information only" are
+          // not self-explanatory, and the sentence about what this map is
+          // not had nowhere left to stand at all.
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: l10n.shelterLegendTitle,
+            onPressed: () => _showLegend(context, l10n, counts),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         children: [

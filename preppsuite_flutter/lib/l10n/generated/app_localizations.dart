@@ -1448,12 +1448,6 @@ abstract class AppLocalizations {
   /// **'{count} item(s) low on stock or expired'**
   String inventoryAttentionTooltip(int count);
 
-  /// No description provided for @settingsAppearanceTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Appearance'**
-  String get settingsAppearanceTitle;
-
   /// No description provided for @settingsCategoryWarnings.
   ///
   /// In en, this message translates to:
@@ -1556,12 +1550,6 @@ abstract class AppLocalizations {
   /// **'No region set'**
   String get settingsNoRegionSet;
 
-  /// No description provided for @settingsAdditionalRegionsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Additional regions'**
-  String get settingsAdditionalRegionsTitle;
-
   /// No description provided for @settingsNoAdditionalRegions.
   ///
   /// In en, this message translates to:
@@ -1621,12 +1609,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a federal state.'**
   String get settingsBundeslandRequired;
-
-  /// No description provided for @settingsNotificationsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Notifications'**
-  String get settingsNotificationsTitle;
 
   /// No description provided for @settingsWarningReadinessTitle.
   ///
@@ -1730,12 +1712,6 @@ abstract class AppLocalizations {
   /// **'Local encryption'**
   String get settingsLocalEncryptionTitle;
 
-  /// No description provided for @settingsLocalEncryptionBody.
-  ///
-  /// In en, this message translates to:
-  /// **'The databases this installation keeps on this device.'**
-  String get settingsLocalEncryptionBody;
-
   /// No description provided for @settingsLocalEncryptionStateEncrypted.
   ///
   /// In en, this message translates to:
@@ -1771,6 +1747,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A carried data folder is not encrypted: the key would stay on this computer and the folder would open nowhere else.'**
   String get settingsLocalEncryptionPortable;
+
+  /// No description provided for @settingsLocalEncryptionNoKeyStore.
+  ///
+  /// In en, this message translates to:
+  /// **'This device does not grant access to a key store. On macOS the app needs a signature for that; without one the local data stays unencrypted.'**
+  String get settingsLocalEncryptionNoKeyStore;
 
   /// No description provided for @settingsLocalEncryptionScope.
   ///
@@ -2156,18 +2138,6 @@ abstract class AppLocalizations {
   /// **'{name} expires tomorrow.'**
   String expiryReminderBodyTomorrow(String name);
 
-  /// No description provided for @settingsExpiryRemindersTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Expiry reminders'**
-  String get settingsExpiryRemindersTitle;
-
-  /// No description provided for @settingsExpiryRemindersUnsupported.
-  ///
-  /// In en, this message translates to:
-  /// **'Linux has no scheduled notifications — the desktop standard only knows immediate ones. Warnings still arrive.'**
-  String get settingsExpiryRemindersUnsupported;
-
   /// No description provided for @settingsExpiryRemindersHint.
   ///
   /// In en, this message translates to:
@@ -2191,12 +2161,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Linux does not support scheduled notifications.'**
   String get settingsScheduledRemindersUnsupported;
-
-  /// No description provided for @settingsChargeReminderTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Check batteries and devices'**
-  String get settingsChargeReminderTitle;
 
   /// No description provided for @settingsChargeReminderHint.
   ///
@@ -5258,12 +5222,6 @@ abstract class AppLocalizations {
   /// **'{count} archives on this device'**
   String knowledgeArchiveCount(int count);
 
-  /// No description provided for @backupTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Backup & restore'**
-  String get backupTitle;
-
   /// No description provided for @backupCreate.
   ///
   /// In en, this message translates to:
@@ -6182,12 +6140,6 @@ abstract class AppLocalizations {
   /// **'Household inventory'**
   String get searchGroupPossessions;
 
-  /// No description provided for @settingsVersionInfoTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Version information'**
-  String get settingsVersionInfoTitle;
-
   /// No description provided for @settingsVersionInfoFirstAid.
   ///
   /// In en, this message translates to:
@@ -6445,12 +6397,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Showing cached shelter data from {date}, {time} because at least one source is currently unavailable.'**
   String shelterCachedAt(Object date, Object time);
-
-  /// No description provided for @settingsPrivacyTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy and device protection'**
-  String get settingsPrivacyTitle;
 
   /// No description provided for @appLockTitle.
   ///

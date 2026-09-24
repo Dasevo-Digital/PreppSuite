@@ -789,9 +789,6 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get settingsAppearanceTitle => 'Erscheinungsbild';
-
-  @override
   String get settingsCategoryWarnings => 'Warnungen und Orte';
 
   @override
@@ -846,9 +843,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsNoRegionSet => 'Keine Region festgelegt';
 
   @override
-  String get settingsAdditionalRegionsTitle => 'Weitere Regionen';
-
-  @override
   String get settingsNoAdditionalRegions =>
       'Noch keine weiteren Regionen hinzugefügt.';
 
@@ -880,9 +874,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsBundeslandRequired => 'Bitte ein Bundesland auswählen.';
-
-  @override
-  String get settingsNotificationsTitle => 'Benachrichtigungen';
 
   @override
   String get settingsWarningReadinessTitle => 'Warnbereitschaft';
@@ -950,10 +941,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsLocalEncryptionTitle => 'Lokale Verschlüsselung';
 
   @override
-  String get settingsLocalEncryptionBody =>
-      'Die Datenbanken dieser Installation auf diesem Gerät.';
-
-  @override
   String get settingsLocalEncryptionStateEncrypted => 'Verschlüsselt';
 
   @override
@@ -975,6 +962,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get settingsLocalEncryptionPortable =>
       'Ein mitgeführter Datenordner wird nicht verschlüsselt: der Schlüssel bliebe auf diesem Rechner und der Ordner ließe sich nirgendwo sonst öffnen.';
+
+  @override
+  String get settingsLocalEncryptionNoKeyStore =>
+      'Dieses Gerät gibt keinen Schlüsselspeicher frei. Unter macOS braucht die App dafür eine Signatur; ohne sie bleiben die lokalen Daten unverschlüsselt.';
 
   @override
   String get settingsLocalEncryptionScope =>
@@ -1221,13 +1212,6 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get settingsExpiryRemindersTitle => 'Ablauf-Erinnerungen';
-
-  @override
-  String get settingsExpiryRemindersUnsupported =>
-      'Unter Linux gibt es keine geplanten Benachrichtigungen – der Desktop-Standard kennt nur sofortige. Warnmeldungen kommen trotzdem an.';
-
-  @override
   String get settingsExpiryRemindersHint =>
       'Erinnerung, bevor ein Vorrat abläuft. Wähle, wie viele Tage vorher.';
 
@@ -1242,9 +1226,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get settingsScheduledRemindersUnsupported =>
       'Unter Linux gibt es keine geplanten Benachrichtigungen.';
-
-  @override
-  String get settingsChargeReminderTitle => 'Akkus und Geräte prüfen';
 
   @override
   String get settingsChargeReminderHint =>
@@ -3117,9 +3098,6 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get backupTitle => 'Sicherung & Wiederherstellung';
-
-  @override
   String get backupCreate => 'Datensicherung erstellen';
 
   @override
@@ -3674,9 +3652,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get searchGroupPossessions => 'Hausrat';
 
   @override
-  String get settingsVersionInfoTitle => 'Versionsinfo';
-
-  @override
   String get settingsVersionInfoFirstAid => 'Erste-Hilfe-Inhalte';
 
   @override
@@ -3839,9 +3814,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String shelterCachedAt(Object date, Object time) {
     return 'Zwischengespeicherte Schutzraumdaten vom $date, $time. Sie werden angezeigt, weil mindestens eine Quelle gerade nicht erreichbar ist.';
   }
-
-  @override
-  String get settingsPrivacyTitle => 'Privatsphäre und Geräteschutz';
 
   @override
   String get appLockTitle => 'App-Sperre';

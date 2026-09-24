@@ -1948,6 +1948,45 @@ als fremde abweisen. Auf einem Gerät ohne Zeilen gibt es nichts zu
 verlieren, also wird die Kennung aus der Datei übernommen.
 
 
+### Ein unlesbarer Schlüsselspeicher heißt nicht „nichts eingerichtet"
+
+Als der macOS-Start daran scheiterte, dass die App keinen Schlüsselbund
+bekommt, wurde in drei Speicherklassen jeder Lesefehler verschluckt. Für
+die App-Sperre war das eine Umgehung: `isEnabled()` ist
+`read(...) == 'true'`, und aus „nicht lesbar" wurde damit „keine Sperre" —
+also eine App, die sich öffnet. Am selben Tag war die Weiche davor
+ausdrücklich auf Fail-Closed gestellt worden; der Fehler erreichte sie nur
+nicht mehr.
+
+Unterschieden wird jetzt mit einer Markierung in den gewöhnlichen
+Einstellungen: `appLockConfigured.v1` sagt **dass** eine Sperre besteht,
+nie etwas über sie. Sie gehört genau deshalb nicht in den Schlüsselspeicher
+— ihre Aufgabe ist, lesbar zu sein, wenn der es nicht ist. Daraus folgen
+drei Regeln:
+
+- Ohne Markierung und ohne lesbaren Speicher startet die App. Wo nie
+  etwas geschützt wurde, ist ein fehlender Schlüsselbund kein Grund,
+  jemanden auszusperren.
+- Mit Markierung wirft `isEnabled()` `AppLockStatusUnavailable`, und die
+  Weiche bleibt zu.
+- Die Markierung wird beim Einrichten **zuletzt** gesetzt und beim
+  Abschalten **zuletzt** entfernt. Andersherum sperrt ein fehlgeschlagener
+  Schreibvorgang jemanden aus seinem eigenen Haushalt aus, für den es
+  keine Passphrase gibt.
+
+Beim **Datenschlüssel** darf derselbe Fehler verschluckt werden, und das ist
+kein Widerspruch: „kein Schlüssel" wird dort von den Dateien auf der Platte
+beantwortet — verschlüsselte ohne Schlüssel führen in die Wiederherstellung,
+unverschlüsselte bleiben schlicht unverschlüsselt. Es öffnet sich nichts,
+was zu bleiben hatte.
+
+Was macOS ohne Signaturzertifikat angeht: dort nimmt der Schlüsselspeicher
+gar nichts an. `keyStoreAccepts()` probiert das mit einem Wegwerfwert aus,
+statt es zu behaupten, und die Einstellungskarte sagt es — vorher bot sie
+eine Umstellung an, die beim Erzeugen des Schlüssels gescheitert wäre und
+mit einer Aufforderung zum Neustart für nichts geendet hätte.
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,

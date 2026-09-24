@@ -42,101 +42,129 @@ class SettingsScreen extends ConsumerWidget {
             icon: Icons.notifications_active_outlined,
             title: l10n.settingsCategoryWarnings,
             subtitle: l10n.settingsCategoryWarningsBody,
-            onTap: () => _open(context, l10n.settingsCategoryWarnings, [
-              Card(
-                child: ListTile(
-                  leading: const Icon(Icons.location_on_outlined),
-                  title: Text(l10n.followedPlacesOpen),
-                  subtitle: Text(l10n.followedPlacesIntro),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).push(
+            onTap: () => _open(
+              context,
+              (l10n) => l10n.settingsCategoryWarnings,
+              (l10n) => [
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.location_on_outlined),
+                    title: Text(l10n.followedPlacesOpen),
+                    subtitle: Text(l10n.followedPlacesIntro),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => FollowedPlacesScreen(profile: profile),
+                      ),
+                    ),
+                  ),
+                ),
+                Card(child: _NotificationsToggle(l10n: l10n)),
+                WarningReadinessCard(
+                  profile: profile,
+                  l10n: l10n,
+                  onManagePlaces: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                       builder: (_) => FollowedPlacesScreen(profile: profile),
                     ),
                   ),
                 ),
-              ),
-              Card(child: _NotificationsToggle(l10n: l10n)),
-              WarningReadinessCard(
-                profile: profile,
-                l10n: l10n,
-                onManagePlaces: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => FollowedPlacesScreen(profile: profile),
-                  ),
-                ),
-              ),
-            ]),
+              ],
+            ),
           ),
           _CategoryTile(
             icon: Icons.schedule_outlined,
             title: l10n.settingsCategoryReminders,
             subtitle: l10n.settingsCategoryRemindersBody,
-            onTap: () => _open(context, l10n.settingsCategoryReminders, [
-              if (supportsScheduledNotifications) ...[
-                ChargeReminderCard(l10n: l10n),
-                ExpiryRemindersCard(l10n: l10n),
-              ] else
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.info_outline),
-                    title: Text(l10n.settingsScheduledRemindersUnsupported),
+            onTap: () => _open(
+              context,
+              (l10n) => l10n.settingsCategoryReminders,
+              (l10n) => [
+                if (supportsScheduledNotifications) ...[
+                  ChargeReminderCard(l10n: l10n),
+                  ExpiryRemindersCard(l10n: l10n),
+                ] else
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.info_outline),
+                      title: Text(l10n.settingsScheduledRemindersUnsupported),
+                    ),
                   ),
-                ),
-            ]),
+              ],
+            ),
           ),
           _CategoryTile(
             icon: Icons.palette_outlined,
             title: l10n.settingsCategoryAppearance,
             subtitle: l10n.settingsCategoryAppearanceBody,
-            onTap: () => _open(context, l10n.settingsCategoryAppearance, [
-              Card(
-                child: ListTile(
-                  title: Text(l10n.languageLabel),
-                  trailing: _LanguagePicker(l10n: l10n),
+            onTap: () => _open(
+              context,
+              (l10n) => l10n.settingsCategoryAppearance,
+              (l10n) => [
+                Card(
+                  child: ListTile(
+                    title: Text(l10n.languageLabel),
+                    trailing: _LanguagePicker(l10n: l10n),
+                  ),
                 ),
-              ),
-              Card(child: _ThemeModePicker(l10n: l10n)),
-            ]),
+                Card(child: _ThemeModePicker(l10n: l10n)),
+              ],
+            ),
           ),
           _CategoryTile(
             icon: Icons.security_outlined,
             title: l10n.settingsCategoryData,
             subtitle: l10n.settingsCategoryDataBody,
-            onTap: () => _open(context, l10n.settingsCategoryData, [
-              AppLockCard(l10n: l10n),
-              SharedFolderCard(profile: profile, l10n: l10n),
-              TransferCard(householdId: profile.id, l10n: l10n),
-              BackupCard(householdId: profile.id, l10n: l10n),
-              LocalEncryptionCard(householdId: profile.id, l10n: l10n),
-              ResetCard(profile: profile, l10n: l10n),
-            ]),
+            onTap: () => _open(
+              context,
+              (l10n) => l10n.settingsCategoryData,
+              (l10n) => [
+                AppLockCard(l10n: l10n),
+                SharedFolderCard(profile: profile, l10n: l10n),
+                TransferCard(householdId: profile.id, l10n: l10n),
+                BackupCard(householdId: profile.id, l10n: l10n),
+                LocalEncryptionCard(householdId: profile.id, l10n: l10n),
+                ResetCard(profile: profile, l10n: l10n),
+              ],
+            ),
           ),
           _CategoryTile(
             icon: Icons.offline_pin_outlined,
             title: l10n.settingsCategoryOffline,
             subtitle: l10n.settingsCategoryOfflineBody,
-            onTap: () => _open(context, l10n.settingsCategoryOffline, [
-              OfflineMapCard(l10n: l10n),
-              if (offersArticleViewerChoice) ArticleViewerCard(l10n: l10n),
-              DownloadFolderCard(l10n: l10n),
-              PortableDataCard(l10n: l10n),
-            ]),
+            onTap: () => _open(
+              context,
+              (l10n) => l10n.settingsCategoryOffline,
+              (l10n) => [
+                OfflineMapCard(l10n: l10n),
+                if (offersArticleViewerChoice) ArticleViewerCard(l10n: l10n),
+                DownloadFolderCard(l10n: l10n),
+                PortableDataCard(l10n: l10n),
+              ],
+            ),
           ),
           _CategoryTile(
             icon: Icons.info_outline,
             title: l10n.settingsCategoryAbout,
             subtitle: l10n.settingsCategoryAboutBody,
-            onTap: () => _open(context, l10n.settingsCategoryAbout, const [
-              VersionInfoCard(),
-            ]),
+            onTap: () => _open(
+              context,
+              (l10n) => l10n.settingsCategoryAbout,
+              (l10n) => const [
+                VersionInfoCard(),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _open(BuildContext context, String title, List<Widget> children) {
+  void _open(
+    BuildContext context,
+    String Function(AppLocalizations l10n) title,
+    List<Widget> Function(AppLocalizations l10n) children,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) =>
@@ -172,22 +200,33 @@ class _CategoryTile extends StatelessWidget {
   );
 }
 
+/// A category, built fresh on every frame.
+///
+/// It used to be handed a finished list of widgets, made with the
+/// `l10n` of the moment the tile was tapped. The language picker lives on
+/// one of these pages: switching to English there left the page one was
+/// looking at in German until it was popped, which reads exactly like the
+/// setting did not work.
 class _SettingsCategoryScreen extends StatelessWidget {
   const _SettingsCategoryScreen({required this.title, required this.children});
 
-  final String title;
-  final List<Widget> children;
+  final String Function(AppLocalizations l10n) title;
+  final List<Widget> Function(AppLocalizations l10n) children;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(title)),
-    body: ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: children.length,
-      itemBuilder: (context, index) => children[index],
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final items = children(l10n);
+    return Scaffold(
+      appBar: AppBar(title: Text(title(l10n))),
+      body: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: items.length,
+        itemBuilder: (context, index) => items[index],
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
+      ),
+    );
+  }
 }
 
 class _LanguagePicker extends ConsumerWidget {

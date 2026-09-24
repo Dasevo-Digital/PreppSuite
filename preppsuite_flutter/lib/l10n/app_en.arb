@@ -431,7 +431,6 @@
       }
     }
   },
-  "settingsAppearanceTitle": "Appearance",
   "settingsCategoryWarnings": "Warnings and places",
   "settingsCategoryWarningsBody": "Notifications, monitored places and refresh status",
   "settingsCategoryReminders": "Reminders",
@@ -449,7 +448,6 @@
   "themeDarkOption": "Dark",
   "settingsMyRegionTitle": "My region",
   "settingsNoRegionSet": "No region set",
-  "settingsAdditionalRegionsTitle": "Additional regions",
   "settingsNoAdditionalRegions": "No additional regions added yet.",
   "settingsAddRegionButton": "Add region",
   "settingsAddRegionDialogTitle": "Add region",
@@ -460,7 +458,6 @@
   "settingsKreisSchluesselHelper": "Five digits, e.g. 03241 for the Hannover region.",
   "settingsBundeslandLabel": "Federal state",
   "settingsBundeslandRequired": "Choose a federal state.",
-  "settingsNotificationsTitle": "Notifications",
   "settingsWarningReadinessTitle": "Warning readiness",
   "settingsWarningReadinessBody": "Checks the local setup. The operating system schedules background refreshes and does not guarantee them.",
   "settingsWarningReadinessNotifications": "Warning notifications",
@@ -482,7 +479,6 @@
   "settingsWarningReadinessBlockedTitle": "Background refresh skipped",
   "settingsWarningReadinessBlockedBody": "The last scheduled refresh could not open the local data. Open the app once after unlocking the device.",
   "settingsLocalEncryptionTitle": "Local encryption",
-  "settingsLocalEncryptionBody": "The databases this installation keeps on this device.",
   "settingsLocalEncryptionStateEncrypted": "Encrypted",
   "settingsLocalEncryptionStatePlain": "Not encrypted",
   "settingsLocalEncryptionStatePartial": "{count} databases still unencrypted",
@@ -490,6 +486,7 @@
   "settingsLocalEncryptionStateRecovery": "Key unavailable",
   "settingsLocalEncryptionUnsupported": "This build ships without an encryption library.",
   "settingsLocalEncryptionPortable": "A carried data folder is not encrypted: the key would stay on this computer and the folder would open nowhere else.",
+  "settingsLocalEncryptionNoKeyStore": "This device does not grant access to a key store. On macOS the app needs a signature for that; without one the local data stays unencrypted.",
   "settingsLocalEncryptionScope": "Not covered: PDFs, maps, ZIM archives, photos and anything you export.",
   "settingsLocalEncryptionTestBackup": "Test a backup",
   "settingsLocalEncryptionTestBackupHint": "Reads a backup file back. Nothing is changed.",
@@ -672,13 +669,10 @@
       }
     }
   },
-  "settingsExpiryRemindersTitle": "Expiry reminders",
-  "settingsExpiryRemindersUnsupported": "Linux has no scheduled notifications — the desktop standard only knows immediate ones. Warnings still arrive.",
   "settingsExpiryRemindersHint": "A reminder before a supply expires. Choose how many days ahead.",
   "settingsExpiryRemindersDisabledHint": "Turn on notifications above so reminders can be scheduled.",
   "settingsExpiryRemindersNoneHint": "No lead time selected — no reminders will be scheduled.",
   "settingsScheduledRemindersUnsupported": "Linux does not support scheduled notifications.",
-  "settingsChargeReminderTitle": "Check batteries and devices",
   "settingsChargeReminderHint": "Reminds you to charge and test power banks, rechargeable batteries, torches and emergency radios.",
   "settingsChargeReminderDisabledHint": "Turn on notifications above to schedule the charging reminder.",
   "settingsChargeReminderNoneHint": "No charging reminder is scheduled.",
@@ -1895,7 +1889,6 @@
       }
     }
   },
-  "backupTitle": "Backup & restore",
   "backupCreate": "Create data backup",
   "backupRestore": "Restore data backup",
   "backupHint": "Stock, checklists, emergency plan and emergency cards. The file contains personal data and should be stored securely.",
@@ -2181,7 +2174,6 @@
   "searchGroupInventory": "Supplies",
   "searchGroupChecklists": "Checklists",
   "searchGroupPossessions": "Household inventory",
-  "settingsVersionInfoTitle": "Version information",
   "settingsVersionInfoFirstAid": "First aid content",
   "settingsVersionInfoFirstAidValue": "ERC 2021 source status · 2025 review pending",
   "settingsVersionInfoApp": "PreppSuite app",
@@ -2312,7 +2304,6 @@
       "time": {}
     }
   },
-  "settingsPrivacyTitle": "Privacy and device protection",
   "appLockTitle": "App lock",
   "appLockDisabledHint": "Protects the app with a separate passphrase after you leave it.",
   "appLockEnabledHint": "The passphrase is required when you return to the app.",

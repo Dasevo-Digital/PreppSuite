@@ -784,9 +784,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settingsAppearanceTitle => 'Appearance';
-
-  @override
   String get settingsCategoryWarnings => 'Warnings and places';
 
   @override
@@ -842,9 +839,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsNoRegionSet => 'No region set';
 
   @override
-  String get settingsAdditionalRegionsTitle => 'Additional regions';
-
-  @override
   String get settingsNoAdditionalRegions => 'No additional regions added yet.';
 
   @override
@@ -875,9 +869,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsBundeslandRequired => 'Choose a federal state.';
-
-  @override
-  String get settingsNotificationsTitle => 'Notifications';
 
   @override
   String get settingsWarningReadinessTitle => 'Warning readiness';
@@ -943,10 +934,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLocalEncryptionTitle => 'Local encryption';
 
   @override
-  String get settingsLocalEncryptionBody =>
-      'The databases this installation keeps on this device.';
-
-  @override
   String get settingsLocalEncryptionStateEncrypted => 'Encrypted';
 
   @override
@@ -967,6 +954,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsLocalEncryptionPortable =>
       'A carried data folder is not encrypted: the key would stay on this computer and the folder would open nowhere else.';
+
+  @override
+  String get settingsLocalEncryptionNoKeyStore =>
+      'This device does not grant access to a key store. On macOS the app needs a signature for that; without one the local data stays unencrypted.';
 
   @override
   String get settingsLocalEncryptionScope =>
@@ -1209,13 +1200,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get settingsExpiryRemindersTitle => 'Expiry reminders';
-
-  @override
-  String get settingsExpiryRemindersUnsupported =>
-      'Linux has no scheduled notifications — the desktop standard only knows immediate ones. Warnings still arrive.';
-
-  @override
   String get settingsExpiryRemindersHint =>
       'A reminder before a supply expires. Choose how many days ahead.';
 
@@ -1230,9 +1214,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsScheduledRemindersUnsupported =>
       'Linux does not support scheduled notifications.';
-
-  @override
-  String get settingsChargeReminderTitle => 'Check batteries and devices';
 
   @override
   String get settingsChargeReminderHint =>
@@ -3093,9 +3074,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get backupTitle => 'Backup & restore';
-
-  @override
   String get backupCreate => 'Create data backup';
 
   @override
@@ -3645,9 +3623,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchGroupPossessions => 'Household inventory';
 
   @override
-  String get settingsVersionInfoTitle => 'Version information';
-
-  @override
   String get settingsVersionInfoFirstAid => 'First aid content';
 
   @override
@@ -3811,9 +3786,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String shelterCachedAt(Object date, Object time) {
     return 'Showing cached shelter data from $date, $time because at least one source is currently unavailable.';
   }
-
-  @override
-  String get settingsPrivacyTitle => 'Privacy and device protection';
 
   @override
   String get appLockTitle => 'App lock';

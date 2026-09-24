@@ -32,6 +32,7 @@ class NearbyScreen extends ConsumerStatefulWidget {
     this.centre,
     this.centreLabel,
     this.kinds,
+    this.geolocation,
   });
 
   /// Where to search around. Usually the map's centre, handed over when
@@ -47,6 +48,10 @@ class NearbyScreen extends ConsumerStatefulWidget {
   /// making them untick five chips first is making them work for it.
   final Set<PoiKind>? kinds;
 
+  /// Only ever passed by tests, which have no device to ask.
+  @visibleForTesting
+  final GeolocationService? geolocation;
+
   @override
   ConsumerState<NearbyScreen> createState() => _NearbyScreenState();
 }
@@ -59,9 +64,19 @@ class NearbyScreen extends ConsumerStatefulWidget {
 const _radii = [2000.0, 5000.0, 10000.0];
 
 class _NearbyScreenState extends ConsumerState<NearbyScreen> {
-  final _geolocation = GeolocationService();
+  late final _geolocation = widget.geolocation ?? GeolocationService();
 
   late LatLng? _centre = widget.centre;
+
+  /// How old the fix behind [_centre] was when it was taken, or null when
+  /// the centre came from somewhere other than the device.
+  ///
+  /// The service hands over the last known position when it cannot manage
+  /// a fresh one — which is what keeps this screen from timing out at all
+  /// — but a list of the nearest pharmacies computed from a position that
+  /// is ten minutes and two kilometres old is a different answer from the
+  /// same list computed from where somebody is standing.
+  Duration? _centreAge;
   late String? _centreLabel = widget.centreLabel;
 
   double _radius = 2000;
@@ -91,11 +106,13 @@ class _NearbyScreenState extends ConsumerState<NearbyScreen> {
   Future<void> _useMyLocation() async {
     setState(() => _locating = true);
     try {
-      final position = await _geolocation.getCurrentLatLng();
+      final fix = await _geolocation.getCurrentFix();
       if (!mounted) return;
+      final now = DateTime.now();
       setState(() {
-        _centre = position;
+        _centre = LatLng(fix.latitude, fix.longitude);
         _centreLabel = null;
+        _centreAge = fix.isStaleAt(now) ? fix.ageAt(now) : null;
       });
       await _run();
     } on LocationUnavailableException catch (error) {
@@ -243,6 +260,18 @@ class _NearbyScreenState extends ConsumerState<NearbyScreen> {
           ),
           style: theme.textTheme.titleMedium,
         ),
+        // Only when the device fell back to its last known fix. A
+        // pharmacy list is an answer to "from where", and the screen was
+        // quietly answering from a place somebody may have left.
+        if (_centreAge case final age?) ...[
+          const SizedBox(height: 4),
+          Text(
+            l10n.nearbyStale(age.inMinutes),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+        ],
         const SizedBox(height: 12),
         SegmentedButton<double>(
           segments: [

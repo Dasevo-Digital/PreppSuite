@@ -20,10 +20,11 @@ String localizeCompassPoint(AppLocalizations l10n, CompassPoint point) {
 /// The confidence in words.
 ///
 /// The legend labels, which are the words the screen already teaches: the
-/// three colours are explained once at the top, so naming them the same
-/// way in the list means the explanation covers both. It also means the
-/// colour is never the only thing carrying the grade — which it was on the
-/// markers, where a green and a red shield differ in nothing else.
+/// three colours are explained behind the info button on the map, so
+/// naming them the same way in the list means the explanation covers
+/// both. It also means the colour is never the only thing carrying the
+/// grade — which it was on the markers, where a green and a red shield
+/// differ in nothing else.
 String localizeShelterConfidence(
   AppLocalizations l10n,
   ShelterConfidence confidence,

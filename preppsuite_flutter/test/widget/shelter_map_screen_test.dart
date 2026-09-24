@@ -70,4 +70,36 @@ void main() {
     expect(locationButton, findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('explains the marker colours behind the info button', (
+    tester,
+  ) async {
+    // Off the page, not out of the app. Three colours where red means
+    // "not released, historic or for information only" are not
+    // self-explanatory, and the sentence saying this map replaces no
+    // official instruction had nowhere left to stand.
+    await show(tester);
+
+    await tester.tap(find.byIcon(Icons.info_outline));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining(
+        'offiziell als nutzbarer Schutzraum bestätigt',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining(
+        'nicht freigegeben, historisch oder nur Infozweck',
+        findRichText: true,
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('ersetzt keine behördliche Warnung'),
+      findsOneWidget,
+    );
+  });
 }

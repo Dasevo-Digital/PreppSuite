@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:preppsuite_flutter/core/geolocation_service.dart';
 import 'package:preppsuite_flutter/features/maps/application/offline_map_providers.dart';
+import 'package:preppsuite_flutter/features/maps/application/readable_position.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart';
 import 'package:preppsuite_flutter/features/maps/presentation/map_screen.dart';
 import 'package:preppsuite_flutter/features/maps/presentation/nearby_screen.dart';
@@ -24,6 +26,25 @@ class _FakeOfflineMap extends OfflineMapController {
 
   @override
   Future<OfflineMapState> build() async => _state;
+}
+
+/// A device that could not manage a fresh fix and handed over the last
+/// one it had — the fallback that keeps this screen from timing out.
+class _StaleGeolocation extends GeolocationService {
+  _StaleGeolocation(this.age);
+
+  final Duration age;
+
+  @override
+  Future<ReadablePosition> getCurrentFix() async => ReadablePosition(
+    latitude: 52.2689,
+    longitude: 10.5268,
+    accuracyMetres: 30,
+    takenAt: DateTime.now().subtract(age),
+  );
+
+  @override
+  void close() {}
 }
 
 void main() {
@@ -51,6 +72,7 @@ void main() {
     LatLng? at = centre,
     NavigatorObserver? observer,
     bool withArchive = true,
+    GeolocationService? geolocation,
   }) async {
     PmTilesArchive? archive;
     await tester.runAsync(() async {
@@ -86,7 +108,11 @@ void main() {
           locale: const Locale('de'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: NearbyScreen(centre: at, centreLabel: 'Kartenmitte'),
+          home: NearbyScreen(
+            centre: at,
+            centreLabel: at == null ? null : 'Kartenmitte',
+            geolocation: geolocation,
+          ),
         ),
       ),
     );
@@ -249,6 +275,32 @@ void main() {
     );
 
     await expectAccessible(tester);
+  });
+
+  testWidgets('says when the answer came from an old position', (
+    tester,
+  ) async {
+    // The screen falls back to the last known fix rather than timing out.
+    // A list of the nearest pharmacies is an answer to "from where", and
+    // it was quietly answering from a place somebody may have left.
+    await show(
+      tester,
+      points: [
+        (subclass: 'pharmacy', name: 'Apotheke am Markt', x: 2048, y: 2048),
+      ],
+      at: null,
+      geolocation: _StaleGeolocation(const Duration(minutes: 11)),
+    );
+
+    await tester.tap(find.byTooltip('Meinen Standort verwenden'));
+    for (var turn = 0; turn < 12; turn++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+
+    expect(find.textContaining('letzten bekannten Position'), findsOneWidget);
   });
 }
 

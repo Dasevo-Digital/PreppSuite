@@ -10,6 +10,7 @@ Widget _card({
   required LocalDatabaseEncryptionMode mode,
   required List<String> pending,
   DateTime? backupVerifiedAt,
+  bool keyStore = true,
 }) => ProviderScope(
   overrides: [
     localEncryptionStatusProvider.overrideWith(
@@ -17,6 +18,7 @@ Widget _card({
         mode: mode,
         pending: pending,
         backupVerifiedAt: backupVerifiedAt,
+        keyStore: keyStore,
       ),
     ),
   ],
@@ -119,5 +121,28 @@ void main() {
 
     expect(find.text('Verschlüsselt'), findsOneWidget);
     expect(find.text('Lokale Daten jetzt verschlüsseln'), findsNothing);
+  });
+
+  testWidgets('a device with no key store says so instead of offering', (
+    tester,
+  ) async {
+    // macOS without a signing certificate. The upgrade would fail at its
+    // first step -- creating the key -- and leave somebody with a restart
+    // prompt for nothing.
+    await tester.pumpWidget(
+      _card(
+        mode: LocalDatabaseEncryptionMode.plaintext,
+        pending: const ['preppsuite'],
+        backupVerifiedAt: DateTime.now().toUtc(),
+        keyStore: false,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('keinen Schlüsselspeicher frei'),
+      findsWidgets,
+    );
+    expect(_startTile(tester).enabled, isFalse);
   });
 }
