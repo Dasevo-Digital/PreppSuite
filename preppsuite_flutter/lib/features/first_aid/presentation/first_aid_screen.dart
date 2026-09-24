@@ -98,24 +98,6 @@ class _FirstAidScreenState extends ConsumerState<FirstAidScreen> {
                       if (searching)
                         for (final guide in matches) _GuideTile(guide: guide)
                       else ...[
-                        Card(
-                          color: theme.colorScheme.secondaryContainer,
-                          child: ListTile(
-                            leading: Icon(
-                              Icons.fact_check_outlined,
-                              color: theme.colorScheme.onSecondaryContainer,
-                            ),
-                            title: Text(l10n.firstAidContentVersionTitle),
-                            subtitle: Text(l10n.firstAidContentVersionBody),
-                            trailing: const Icon(Icons.open_in_new),
-                            onTap: () => launchUrl(
-                              Uri.parse(
-                                'https://www.erc.edu/science-research/guidelines/guidelines-2025/guidelines-2025-english',
-                              ),
-                              mode: LaunchMode.externalApplication,
-                            ),
-                          ),
-                        ),
                         // Above the guides, because reading one again is
                         // not how anybody finds out what they have
                         // forgotten.
@@ -150,6 +132,33 @@ class _FirstAidScreenState extends ConsumerState<FirstAidScreen> {
                         l10n.firstAidDisclaimer,
                         style: theme.textTheme.bodySmall,
                       ),
+                      // At the foot, not at the head. It is a note about
+                      // where these texts come from and when they were
+                      // last checked against the guidelines -- worth
+                      // saying, and worth nothing at all to somebody who
+                      // opened this screen because there is a person on
+                      // the floor. Its one action opens a website, which
+                      // is the one thing that will not work on the day it
+                      // matters. The same note is in Settings under the
+                      // versions, which is where somebody goes to ask it.
+                      if (!searching)
+                        Card(
+                          color: theme.colorScheme.surfaceContainerHighest,
+                          child: ListTile(
+                            leading: const Icon(Icons.fact_check_outlined),
+                            title: Text(l10n.firstAidContentVersionTitle),
+                            subtitle: Text(l10n.firstAidContentVersionBody),
+                            trailing: const Icon(Icons.open_in_new),
+                            onTap: () => launchUrl(
+                              Uri.parse(
+                                'https://www.erc.edu/science-research/'
+                                'guidelines/guidelines-2025/'
+                                'guidelines-2025-english',
+                              ),
+                              mode: LaunchMode.externalApplication,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
           ),

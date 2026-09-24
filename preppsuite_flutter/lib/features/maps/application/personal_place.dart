@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/private_preferences.dart';
 
 /// A user-owned point on the map, stored only on this device.
 ///
@@ -72,7 +72,7 @@ class PersonalPlaceStore {
 
   Future<List<PersonalPlace>> load() async {
     try {
-      final raw = (await SharedPreferences.getInstance()).getString(_key);
+      final raw = await const PrivatePreferences().getString(_key);
       if (raw == null) return const [];
       final decoded = jsonDecode(raw);
       if (decoded is! List) return const [];
@@ -84,12 +84,12 @@ class PersonalPlaceStore {
 
   Future<void> save(List<PersonalPlace> places) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      const store = PrivatePreferences();
       if (places.isEmpty) {
-        await prefs.remove(_key);
+        await store.remove(_key);
         return;
       }
-      await prefs.setString(
+      await store.setString(
         _key,
         jsonEncode([for (final place in places) place.toJson()]),
       );

@@ -4,6 +4,37 @@ macOS baut hier direkt. Linux und Windows sind die beiden, die unbemerkt
 kaputtgehen, weil hier niemand auf ihnen entwickelt — und beide brauchen
 etwas, das nicht mitkommt.
 
+
+## Wie das Linux-Paket aussehen muss
+
+```
+PreppSuite-x64/
+  bundle/
+    PreppSuite
+    lib/
+    data/
+```
+
+Also **mit** der Ebene `PreppSuite-x64` darüber, nicht mit `bundle/` an der
+Wurzel. Das Paket 2.0.1 hatte sie nicht, und das ist keine Kosmetik: die
+mitgeführte Fassung sucht den Ordner `PreppSuite-Daten` neben dem Programm
+und geht dafür vier Ebenen nach oben (siehe
+[`mitgefuehrte-fassung.md`](mitgefuehrte-fassung.md)). Wer das Archiv
+auspackt, bekommt bei der flachen Form einen Ordner namens `bundle` in sein
+Downloads-Verzeichnis geschüttet und legt seinen Datenordner irgendwo
+daneben, wo die Suche ihn je nach Tiefe noch findet oder eben nicht.
+
+Gepackt wird deshalb aus dem Elternverzeichnis:
+
+```bash
+mv build/linux/x64/release/bundle PreppSuite-x64/bundle
+tar czf PreppSuite-<version>-linux-x64.tar.gz PreppSuite-x64
+```
+
+Gegenprobe vor dem Hochladen: `tar tzf ... | head -3` muss mit
+`PreppSuite-x64/` anfangen.
+
+
 ## macOS
 
 macOS-Releases entstehen mit `tool/macos_release.sh --identity ...

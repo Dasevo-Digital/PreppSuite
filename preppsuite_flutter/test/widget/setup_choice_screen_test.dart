@@ -87,6 +87,14 @@ void main() {
       find.textContaining('nie wieder vereinigen'),
       findsOneWidget,
     );
+    // Below the fold since the restore route joined the list, so the
+    // list has to be taken there -- it is still the last word on the
+    // screen, which is where a footnote belongs.
+    await tester.scrollUntilVisible(
+      find.textContaining('noch keine eigenen Daten'),
+      120,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(
       find.textContaining('noch keine eigenen Daten'),
       findsOneWidget,

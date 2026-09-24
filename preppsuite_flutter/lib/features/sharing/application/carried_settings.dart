@@ -28,6 +28,7 @@ library;
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/private_preferences.dart';
 import '../../../model/household_profile.dart';
 import '../../../model/household_profile_store.dart';
 
@@ -64,6 +65,14 @@ typedef CarriedSetting = ({CarriedKind kind, CarriedWhen when});
 
 const _always = CarriedWhen.always;
 const _setupOnly = CarriedWhen.setupOnly;
+
+/// Carried settings that are kept encrypted on the device.
+///
+/// They are read and written through [PrivatePreferences] here too, so
+/// what travels is the value and not this device's envelope — the far
+/// side has a different key and could make nothing of it. The journey
+/// itself is already encrypted, whichever road it takes.
+const _privateSettings = {'preparednessHubV1', 'personalMapPlaces.v1'};
 
 /// Every setting that travels with a household, and what it holds.
 /// Deliberately absent: `warningCountryCode`, `warningRegionKey` and
@@ -195,11 +204,13 @@ Future<Map<String, Object>> readCarriedSettings({
   CarriedWhen? when,
 }) async {
   final prefs = preferences ?? await SharedPreferences.getInstance();
-  return {
-    for (final entry in carriedSettings.entries)
-      if (when == null || entry.value.when == when)
-        entry.key: ?_read(prefs, entry.key, entry.value.kind),
-  };
+  final values = <String, Object>{};
+  for (final entry in carriedSettings.entries) {
+    if (when != null && entry.value.when != when) continue;
+    final value = await _read(prefs, entry.key, entry.value.kind);
+    if (value != null) values[entry.key] = value;
+  }
+  return values;
 }
 
 /// Writes [values] into this device's settings and answers how many landed.
@@ -222,8 +233,18 @@ Future<int> applyCarriedSettings(
   return applied;
 }
 
-Object? _read(SharedPreferences prefs, String key, CarriedKind kind) {
+Future<Object?> _read(
+  SharedPreferences prefs,
+  String key,
+  CarriedKind kind,
+) async {
   try {
+    if (_privateSettings.contains(key)) {
+      const store = PrivatePreferences();
+      return kind == CarriedKind.textList
+          ? await store.getStringList(key)
+          : await store.getString(key);
+    }
     return switch (kind) {
       CarriedKind.boolean => prefs.getBool(key),
       CarriedKind.integer => prefs.getInt(key),
@@ -245,6 +266,20 @@ Future<bool> _write(
   Object? value,
 ) async {
   try {
+    if (_privateSettings.contains(key)) {
+      const store = PrivatePreferences();
+      if (kind == CarriedKind.textList) {
+        if (value is! List) return false;
+        await store.setStringList(key, [
+          for (final item in value)
+            if (item is String) item,
+        ]);
+        return true;
+      }
+      if (value is! String) return false;
+      await store.setString(key, value);
+      return true;
+    }
     switch (kind) {
       case CarriedKind.boolean:
         if (value is! bool) return false;

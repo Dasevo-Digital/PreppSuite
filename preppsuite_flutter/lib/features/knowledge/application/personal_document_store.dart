@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/private_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/portable_paths.dart';
@@ -100,9 +100,7 @@ class PersonalDocumentStore {
   const PersonalDocumentStore();
 
   Future<List<PersonalDocument>> load() async {
-    final raw = (await SharedPreferences.getInstance()).getString(
-      _documentsKey,
-    );
+    final raw = await const PrivatePreferences().getString(_documentsKey);
     if (raw == null) return const [];
     try {
       final decoded = jsonDecode(raw);
@@ -179,8 +177,7 @@ class PersonalDocumentStore {
   }
 
   Future<void> _save(List<PersonalDocument> documents) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
+    await const PrivatePreferences().setString(
       _documentsKey,
       jsonEncode([for (final document in documents) document.toJson()]),
     );

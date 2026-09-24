@@ -21,6 +21,7 @@ import '../features/maps/application/tile_source.dart' show TileSourceException;
 import '../features/shelters/application/overpass_shelter_client.dart'
     show OverpassException;
 import '../l10n/generated/app_localizations.dart';
+import 'local_database_encryption.dart';
 
 /// What to put on the screen when something failed.
 ///
@@ -73,9 +74,22 @@ String describeError(AppLocalizations l10n, Object error) {
     // Without this, an interrupted migration put SQLite's own words on
     // the screen -- "duplicate column name: local_contact_point, SQL
     // logic error (code 1)", followed by the ALTER TABLE statement.
+    // SQLITE_FULL, told apart from every other database error because it
+    // is the one somebody can actually act on, and the one the encryption
+    // upgrade runs into: copying a database needs room for a second copy
+    // of it, and the knowledge indexes are the largest files the app
+    // writes.
+    SqliteException(resultCode: 13) => l10n.errorDiskFull,
+
     DriftWrappedException() ||
     InvalidDataException() ||
     SqliteException() => l10n.errorDatabase,
+
+    // This installation cannot open its own databases, or is in the
+    // middle of replacing them. Both are states with a way out, and
+    // neither is worth a sentence that says nothing.
+    LocalDataUnavailable() => l10n.errorLocalDataLocked,
+    LocalDataBusy() => l10n.errorLocalDataBusy,
 
     // Camera, location, notifications, the file picker — everything the
     // system can refuse.

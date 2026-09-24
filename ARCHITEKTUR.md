@@ -1888,6 +1888,66 @@ Einstellungen liest sie zurück — aber nur, solange kein späterer
 vollständiger Abruf sie überholt hat.
 
 
+### Private Einstellungen: was neben der Datenbank liegt
+
+Die Datenbanken sind verschlüsselt, die Werte daneben waren es nicht — und
+einige davon sind die interessantere Hälfte: wo jemand wohnt, wen er
+anruft, der Schlüssel zu seinem gemeinsamen Ordner. `PrivatePreferences`
+(`lib/core/private_preferences.dart`) legt sie als AES-GCM-Umschlag ab,
+unter einem **abgeleiteten** Schlüssel: HKDF-SHA256 über den Datenschlüssel
+mit eigener Beschriftung. Ein Schlüssel, der zwei Dinge öffnet, ist ein
+Fehler davon entfernt, beide zu öffnen.
+
+Drei Eigenschaften machen es unter bestehende Stores schiebbar, ohne einen
+Migrationsschritt: Lesen nimmt beide Formen an, ein Klartextwert wird beim
+Lesen verschlüsselt zurückgeschrieben, und ohne Schlüssel wird geschrieben
+wie vorher. Die Migration ist der normale Gebrauch der App.
+
+Verschlüsselt sind: Profil, Warnregionen, persönliche Orte, Krisenplan,
+Dokumentliste und der Ordnerschlüssel. Absichtlich **nicht**: Sprache,
+Farbschema, Benachrichtigungsschalter und die Zwischenspeicher öffentlicher
+Daten — die App muss einen Bildschirm zeichnen können, bevor sie irgendetwas
+geöffnet hat.
+
+**Ein mitgeführter Ordner wird nie versiegelt.** Er geht zum nächsten
+Rechner, der Schlüssel bleibt im Schlüsselbund dieses einen. Deshalb
+verschlüsselt weder `PrivatePreferences` noch die Datenbankschicht, wenn
+`portableLocation.isPortable` gilt, und die Einstellungskarte sagt warum.
+Ein verschlüsselter Ordner, der ohne seinen Schlüssel ankommt, führt nicht
+in einen SQLite-Fehler drei Bildschirme später, sondern in
+`recoveryRequired`.
+
+**Was zwischen Geräten reist, reist im Klartext im verschlüsselten Kanal.**
+`carried_settings.dart` liest die beiden privaten Schlüssel
+(`preparednessHubV1`, `personalMapPlaces.v1`) ebenfalls durch den Container,
+sonst bekäme die Gegenseite den Umschlag dieses Geräts, den sie nie öffnen
+kann.
+
+
+### Sicherungsformat 2, und der Weg zurück
+
+Die Sicherung trug Datenbankzeilen und den Krisenplan. Nicht dabei waren
+Profil und die mitgeführten Einstellungen — ein wiederhergestellter Haushalt
+kannte seinen ganzen Vorrat, aber nicht, für wie viele Personen er reichen
+muss. Seit die Werte auf dem Gerät verschlüsselt liegen, ist die Sicherung
+zusätzlich der einzige Weg, auf dem sie einen verlorenen Schlüsselbund
+überleben. Format 2 legt sie in einen eigenen verschlüsselten Block;
+Format 1 bleibt lesbar.
+
+Der Plan wird dabei **nicht** aus diesem Block geschrieben, sondern weiter
+von `_restorePlan`, das ihn *zusammenführt*. Beides zu tun hieße, die ältere
+Fassung zurückzugeben — genau das, was die Zusammenführung verhindert. Ein
+Test hält das fest.
+
+`restoreAsNewHousehold` ist der Weg zurück nach einem verlorenen Schlüssel
+und steht auf dem Einrichtungsbildschirm. `restore` besteht darauf, dass
+Sicherung und Gerät vom selben Haushalt sprechen — richtig, solange es einen
+zu schützen gibt, und eine Sackgasse nach „Neu einrichten": der eben
+angelegte Haushalt trägt eine neue Kennung und würde seine eigene Sicherung
+als fremde abweisen. Auf einem Gerät ohne Zeilen gibt es nichts zu
+verlieren, also wird die Kennung aus der Datei übernommen.
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,

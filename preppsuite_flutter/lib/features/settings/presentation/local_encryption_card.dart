@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_database_providers.dart';
 import '../../../core/error_text.dart';
 import '../../../core/local_database_encryption.dart';
+import '../../../core/portable_data.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/backup_service.dart';
 import '../application/local_encryption_readiness_store.dart';
@@ -72,9 +73,11 @@ class _LocalEncryptionCardState extends ConsumerState<LocalEncryptionCard> {
     final verifiedAt = status?.backupVerifiedAt;
     final backupIsFresh = LocalEncryptionReadinessStore.isFresh(verifiedAt);
     final cipher = LocalDatabaseEncryption.cipherAvailable;
+    final portable = portableLocation.isPortable;
 
     final canStart =
         cipher &&
+        !portable &&
         !_busy &&
         pending.isNotEmpty &&
         backupIsFresh &&
@@ -128,6 +131,8 @@ class _LocalEncryptionCardState extends ConsumerState<LocalEncryptionCard> {
               subtitle: Text(
                 !cipher
                     ? l10n.settingsLocalEncryptionUnsupported
+                    : portable
+                    ? l10n.settingsLocalEncryptionPortable
                     : backupIsFresh
                     ? l10n.settingsLocalEncryptionConfirmBody
                     : l10n.settingsLocalEncryptionBackupNever,
@@ -152,6 +157,9 @@ class _LocalEncryptionCardState extends ConsumerState<LocalEncryptionCard> {
     bool cipher,
   ) {
     if (!cipher) return l10n.settingsLocalEncryptionUnsupported;
+    if (portableLocation.isPortable) {
+      return l10n.settingsLocalEncryptionPortable;
+    }
     return switch (mode) {
       LocalDatabaseEncryptionMode.recoveryRequired =>
         l10n.settingsLocalEncryptionStateRecovery,

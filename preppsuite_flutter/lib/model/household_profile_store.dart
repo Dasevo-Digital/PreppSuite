@@ -1,7 +1,6 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
-
+import '../core/private_preferences.dart';
 import 'household_profile.dart';
 
 const _profileKey = 'householdProfile';
@@ -11,12 +10,14 @@ const _profileKey = 'householdProfile';
 /// Preferences rather than the drift database on purpose: the profile has
 /// to be readable before the database is opened (it decides which rows are
 /// even relevant), and the background isolate reads preferences too.
+///
+/// Through [PrivatePreferences], because it is the most personal thing the
+/// app keeps outside the database: who lives here, how many, and where.
 class HouseholdProfileStore {
   const HouseholdProfileStore();
 
   Future<HouseholdProfile?> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_profileKey);
+    final raw = await const PrivatePreferences().getString(_profileKey);
     if (raw == null || raw.isEmpty) return null;
 
     try {
@@ -31,12 +32,13 @@ class HouseholdProfileStore {
   }
 
   Future<void> save(HouseholdProfile profile) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_profileKey, jsonEncode(profile.toJson()));
+    await const PrivatePreferences().setString(
+      _profileKey,
+      jsonEncode(profile.toJson()),
+    );
   }
 
   Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_profileKey);
+    await const PrivatePreferences().remove(_profileKey);
   }
 }

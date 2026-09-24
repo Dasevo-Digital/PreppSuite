@@ -6,10 +6,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
 
 import 'package:preppsuite_flutter/core/local_database_encryption.dart';
+import 'package:preppsuite_flutter/core/portable_data.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
 class _MemoryKeyStorage implements LocalDatabaseKeyStorage {
   final values = <String, String>{};
+
+  /// Lets a test look at the world in the middle of a migration.
+  void Function(String key, String value)? onWrite;
 
   @override
   Future<void> delete(String key) async => values.remove(key);
@@ -20,6 +24,7 @@ class _MemoryKeyStorage implements LocalDatabaseKeyStorage {
   @override
   Future<void> write(String key, String value) async {
     values[key] = value;
+    onWrite?.call(key, value);
   }
 }
 
@@ -87,6 +92,7 @@ void main() {
   });
 
   tearDown(() async {
+    resetPortableData();
     if (await directory.exists()) await directory.delete(recursive: true);
   });
 
@@ -189,6 +195,31 @@ void main() {
         _readHousehold(pathTo('preppsuite'), key: storage.values[_keyKey]!),
         'Marco',
       );
+    }, skip: noCipher);
+  });
+
+  group('while it runs', () {
+    test('nothing may open a database while it is being replaced', () async {
+      _writeHousehold(pathTo('preppsuite'), 'Marco');
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      Object? refusal;
+      storage.onWrite = (key, value) {
+        if (value != 'migrating') return;
+        try {
+          encryption.open('preppsuite');
+        } on Object catch (error) {
+          refusal = error;
+        }
+      };
+
+      await encryption.migrateExistingDatabases();
+
+      expect(refusal, isA<LocalDataBusy>());
+      expect(encryption.isMigrating, isFalse);
+      expect(() => encryption.open('preppsuite'), returnsNormally);
     }, skip: noCipher);
   });
 
@@ -313,7 +344,10 @@ void main() {
       // cannot open it, and saying `plaintext` here would start a second,
       // empty household beside it.
       expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
-      expect(() => encryption.open('preppsuite'), throwsStateError);
+      expect(
+        () => encryption.open('preppsuite'),
+        throwsA(isA<LocalDataUnavailable>()),
+      );
     }, skip: noCipher);
   });
 
@@ -359,18 +393,39 @@ void main() {
       expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
     }, skip: noCipher);
 
-    test(
-      'a start that cannot reach the key store still yields a state',
-      () async {
-        final encryption = LocalDatabaseEncryption(storage: _FailingStorage());
+    test('a device with no key store and no data runs unencrypted', () async {
+      // A Linux session without `libsecret` is exactly this: the plugin
+      // will not load, and on a first start there is nothing to protect
+      // yet. Refusing to come up would take a working offline app away
+      // over a key it does not need.
+      final encryption = LocalDatabaseEncryption(storage: _FailingStorage());
 
-        await encryption.initializeOrMarkUnavailable(directory: directory);
+      await encryption.initializeOrMarkUnavailable(directory: directory);
 
-        // Never a throw out of startup: the app has to come up far enough to
-        // say what is wrong.
-        expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
-      },
-    );
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+      expect(() => encryption.open('preppsuite'), returnsNormally);
+    });
+
+    test('a device with no key store keeps reading its household', () async {
+      _writeHousehold(pathTo('preppsuite'), 'Marco');
+
+      final encryption = LocalDatabaseEncryption(storage: _FailingStorage());
+      await encryption.initializeOrMarkUnavailable(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+      expect(_readHousehold(pathTo('preppsuite')), 'Marco');
+    });
+
+    test('a device with no key store and encrypted data says so', () async {
+      _writeHousehold(pathTo('preppsuite'), 'Marco', key: _freshKey());
+
+      final encryption = LocalDatabaseEncryption(storage: _FailingStorage());
+      await encryption.initializeOrMarkUnavailable(directory: directory);
+
+      // The same missing key store, and it means something else entirely:
+      // a household on the disk that this app cannot open.
+      expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+    }, skip: noCipher);
   });
 
   group('opening through Drift', () {
@@ -413,6 +468,37 @@ void main() {
       await database.close();
 
       expect(rows.single.read<String>('name'), 'Marco');
+    }, skip: noCipher);
+  });
+
+  group('a folder that travels', () {
+    test('is never encrypted on its own', () async {
+      // The key would stay in this machine's keychain while the folder
+      // goes to the next computer.
+      await startPortableData(
+        environment: {'PREPPSUITE_DATA': directory.path},
+        executablePath: '${directory.path}/PreppSuite',
+      );
+      expect(portableLocation.isPortable, isTrue);
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+      expect(encryption.canMigrate, isFalse);
+    });
+
+    test('arriving somewhere without its key says so', () async {
+      // An encrypted folder opened by an installation that knows nothing
+      // about it: a second computer, or one restored without its
+      // keychain. Reading it plainly would fail a screen later with
+      // SQLite's own words.
+      _writeHousehold(pathTo('preppsuite'), 'Marco', key: _freshKey());
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
     }, skip: noCipher);
   });
 }

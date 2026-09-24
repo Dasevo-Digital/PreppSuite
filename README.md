@@ -340,6 +340,22 @@ so auf der Karte. Findet ein Gerät seinen Schlüssel nicht mehr, sagt die
 App das, statt in einem Fehler zu enden, und benennt beim Neuanfang die
 unlesbaren Dateien um, statt sie zu löschen.
 
+Mitverschlüsselt sind seit 2.0.1 auch die persönlichen Werte, die neben der
+Datenbank liegen: Profil, beobachtete Regionen, eigene Kartenpunkte, der
+Krisenplan, die Liste eigener Dokumente und der Schlüssel zum gemeinsamen
+Ordner. Sprache, Farbschema und die Zwischenspeicher öffentlicher Daten
+bleiben lesbar — die App muss einen Bildschirm zeichnen können, bevor sie
+etwas geöffnet hat. Ein **mitgeführter Datenordner** wird nicht
+verschlüsselt: sein Schlüssel könnte nicht mitreisen, und ein Ordner, der
+sich am nächsten Rechner nicht öffnen lässt, ist das Gegenteil von dem,
+wofür es ihn gibt.
+
+Die Sicherung nimmt seit 2.0.1 Profil und Einstellungen mit. Das ist
+zugleich der Weg zurück, wenn ein Gerät seinen Schlüssel verliert: beim
+Einrichten steht „Aus einer Sicherung wiederherstellen", und der Haushalt
+kommt mit seiner bisherigen Kennung zurück statt als fremder abgewiesen zu
+werden.
+
 Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
 Auf einem breiten Fenster legen sich die Bildschirme in Spalten lesbarer
 Breite nebeneinander, statt eine einzelne Spalte über die ganze Breite zu
@@ -606,6 +622,14 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   Links und Bilder, ohne Skripte und ohne Formelsatz. Beides ist unter
   Einstellungen wählbar. Warum die Bibliothek nicht einfach beiliegt,
   steht in [`docs/wissen-offline.md`](docs/wissen-offline.md).
+- Der Schlüssel für die lokale Verschlüsselung liegt im Schlüsselspeicher
+  des Systems. Unter Linux ist das `libsecret-1-0`; die Bibliothek liegt
+  dem Paket nicht bei, weil sie zum Sitzungsdienst gehört und nicht zur
+  Anwendung. **Fehlt sie**, startet die App trotzdem und arbeitet
+  unverschlüsselt weiter — das steht dann auch so auf der Karte „Lokale
+  Verschlüsselung". Eine bereits verschlüsselte Installation sagt
+  stattdessen, dass sie ihren Schlüssel nicht findet, und rührt nichts an.
+
 - Fotos zu Vorratsartikeln liegen im gemeinsamen Ordner **nicht** – dort
   stehen nur die Daten. Auf einem mitgeführten Datenträger wandern sie mit,
   und seit 1.9.2 gehen sie auch über die Direktübergabe im örtlichen Netz

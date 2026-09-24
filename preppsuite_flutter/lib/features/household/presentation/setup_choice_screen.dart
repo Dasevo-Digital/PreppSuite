@@ -1,5 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/app_database_providers.dart';
+import '../../settings/application/backup_service.dart';
+import '../../settings/presentation/passphrase_dialog.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
@@ -67,6 +75,12 @@ class _SetupChoiceScreenState extends ConsumerState<SetupChoiceScreen> {
                   body: l10n.setupChoiceScanBody,
                   onTap: _busy ? null : _joinByScan,
                 ),
+                _Option(
+                  icon: Icons.settings_backup_restore,
+                  title: l10n.setupChoiceRestoreTitle,
+                  body: l10n.setupChoiceRestoreBody,
+                  onTap: _busy ? null : _restoreBackup,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.setupChoiceSafeNote,
@@ -95,6 +109,74 @@ class _SetupChoiceScreenState extends ConsumerState<SetupChoiceScreen> {
     // Taken hold of before the pop: this screen is gone by the time the
     // message is shown, and the messenger above it is not.
     messenger.showSnackBar(SnackBar(content: Text(confirmation)));
+  }
+
+  /// The way back after a device has lost the key to its own data.
+  ///
+  /// It has to live here rather than in the settings, because the road
+  /// through the settings requires a household — and the household the
+  /// app would have just created carries a new id, which its own backup
+  /// would then refuse. Here there is nothing to lose and the id in the
+  /// file is simply taken over.
+  Future<void> _restoreBackup() async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _busy = true);
+    try {
+      final picked = await FilePicker.platform.pickFiles(
+        dialogTitle: l10n.setupChoiceRestoreTitle,
+        type: FileType.custom,
+        allowedExtensions: const ['json'],
+        withData: true,
+      );
+      if (picked == null || !mounted) return;
+      final passphrase = await showDialog<String>(
+        context: context,
+        builder: (_) => PassphraseDialog(l10n: l10n, confirm: false),
+      );
+      if (passphrase == null) return;
+
+      final file = picked.files.single;
+      final raw = file.bytes != null
+          ? utf8.decode(file.bytes!)
+          : await File(file.path!).readAsString();
+      final restored = await BackupService(
+        ref.read(appDatabaseProvider),
+      ).restoreAsNewHousehold(raw, passphrase);
+
+      if (restored == null) {
+        messenger.showSnackBar(
+          SnackBar(content: Text(l10n.setupRestoreFailed)),
+        );
+        return;
+      }
+
+      // A backup from before the profile travelled with it leaves the
+      // household nameless. It is still the right household, and naming
+      // it is a rename in the settings rather than a reason to refuse.
+      final profile = restored.profile;
+      await ref
+          .read(householdProfileProvider.notifier)
+          .adopt(
+            HouseholdProfile(
+              id: restored.householdId,
+              name: profile?.name ?? l10n.setupRestoreDefaultName,
+              countryCode: profile?.countryCode ?? 'DE',
+              regionKey: profile?.regionKey,
+              personCount: profile?.personCount ?? 1,
+              children: profile?.children ?? 0,
+              dogs: profile?.dogs ?? 0,
+              cats: profile?.cats ?? 0,
+              extraRegions: profile?.extraRegions ?? const [],
+            ),
+          );
+      if (!mounted) return;
+      _leaveSetup(confirmation: l10n.setupRestoreDone(restored.rows));
+    } on Object {
+      messenger.showSnackBar(SnackBar(content: Text(l10n.setupRestoreFailed)));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   void _startFresh() => Navigator.of(context).push(

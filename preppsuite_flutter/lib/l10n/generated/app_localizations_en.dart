@@ -195,6 +195,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'The app\'s database reported a problem. Restarting usually clears it.';
 
   @override
+  String get errorDiskFull =>
+      'The disk is full. Free up some space and try again.';
+
+  @override
+  String get errorLocalDataLocked =>
+      'The local data is locked. Restart the app and read the notice on the first screen.';
+
+  @override
+  String get errorLocalDataBusy =>
+      'The databases are being encrypted. Please wait until that has finished.';
+
+  @override
   String get errorPlatformRefused =>
       'The system refused. Check in the settings whether PreppSuite has permission for it.';
 
@@ -953,6 +965,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This build ships without an encryption library.';
 
   @override
+  String get settingsLocalEncryptionPortable =>
+      'A carried data folder is not encrypted: the key would stay on this computer and the folder would open nowhere else.';
+
+  @override
   String get settingsLocalEncryptionScope =>
       'Not covered: PDFs, maps, ZIM archives, photos and anything you export.';
 
@@ -987,7 +1003,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLocalEncryptionConfirmBody =>
-      'Every local database is rewritten. Keep the device powered and the app open while it runs. PreppSuite has to be restarted afterwards.';
+      'Every local database is rewritten. It temporarily needs as much free space as the largest one takes. Keep the device powered and the app open while it runs. PreppSuite has to be restarted afterwards.';
 
   @override
   String get settingsLocalEncryptionRunning =>
@@ -1019,7 +1035,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localDataRecoveryStartOverBody =>
-      'The unreadable files are renamed, not deleted, and stay where they are. PreppSuite starts with an empty household you can restore a backup into.';
+      'The unreadable files are renamed, not deleted, and stay where they are. PreppSuite then asks from the beginning, where \"Restore from a backup\" brings the household back under the id it had.';
 
   @override
   String get settingsNotificationsToggleLabel => 'Notify me about new warnings';
@@ -6407,6 +6423,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get setupChoiceSafeNote =>
       'Now is the safest moment for this: this device has no data of its own yet that would have to be re-stamped.';
+
+  @override
+  String get setupChoiceRestoreTitle => 'Restore from a backup';
+
+  @override
+  String get setupChoiceRestoreBody =>
+      'Read a password-protected backup file. The household comes back under the id it had.';
+
+  @override
+  String setupRestoreDone(int count) {
+    return '$count records restored.';
+  }
+
+  @override
+  String get setupRestoreFailed =>
+      'This file could not be read. Wrong password, or not a PreppSuite backup.';
+
+  @override
+  String get setupRestoreDefaultName => 'Restored household';
 
   @override
   String get setupFolderSearching => 'Reading the folder …';

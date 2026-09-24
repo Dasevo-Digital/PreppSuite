@@ -422,6 +422,24 @@ abstract class AppLocalizations {
   /// **'The app\'s database reported a problem. Restarting usually clears it.'**
   String get errorDatabase;
 
+  /// No description provided for @errorDiskFull.
+  ///
+  /// In en, this message translates to:
+  /// **'The disk is full. Free up some space and try again.'**
+  String get errorDiskFull;
+
+  /// No description provided for @errorLocalDataLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The local data is locked. Restart the app and read the notice on the first screen.'**
+  String get errorLocalDataLocked;
+
+  /// No description provided for @errorLocalDataBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'The databases are being encrypted. Please wait until that has finished.'**
+  String get errorLocalDataBusy;
+
   /// No description provided for @errorPlatformRefused.
   ///
   /// In en, this message translates to:
@@ -1748,6 +1766,12 @@ abstract class AppLocalizations {
   /// **'This build ships without an encryption library.'**
   String get settingsLocalEncryptionUnsupported;
 
+  /// No description provided for @settingsLocalEncryptionPortable.
+  ///
+  /// In en, this message translates to:
+  /// **'A carried data folder is not encrypted: the key would stay on this computer and the folder would open nowhere else.'**
+  String get settingsLocalEncryptionPortable;
+
   /// No description provided for @settingsLocalEncryptionScope.
   ///
   /// In en, this message translates to:
@@ -1805,7 +1829,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsLocalEncryptionConfirmBody.
   ///
   /// In en, this message translates to:
-  /// **'Every local database is rewritten. Keep the device powered and the app open while it runs. PreppSuite has to be restarted afterwards.'**
+  /// **'Every local database is rewritten. It temporarily needs as much free space as the largest one takes. Keep the device powered and the app open while it runs. PreppSuite has to be restarted afterwards.'**
   String get settingsLocalEncryptionConfirmBody;
 
   /// No description provided for @settingsLocalEncryptionRunning.
@@ -1859,7 +1883,7 @@ abstract class AppLocalizations {
   /// No description provided for @localDataRecoveryStartOverBody.
   ///
   /// In en, this message translates to:
-  /// **'The unreadable files are renamed, not deleted, and stay where they are. PreppSuite starts with an empty household you can restore a backup into.'**
+  /// **'The unreadable files are renamed, not deleted, and stay where they are. PreppSuite then asks from the beginning, where \"Restore from a backup\" brings the household back under the id it had.'**
   String get localDataRecoveryStartOverBody;
 
   /// No description provided for @settingsNotificationsToggleLabel.
@@ -10780,6 +10804,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Now is the safest moment for this: this device has no data of its own yet that would have to be re-stamped.'**
   String get setupChoiceSafeNote;
+
+  /// No description provided for @setupChoiceRestoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from a backup'**
+  String get setupChoiceRestoreTitle;
+
+  /// No description provided for @setupChoiceRestoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Read a password-protected backup file. The household comes back under the id it had.'**
+  String get setupChoiceRestoreBody;
+
+  /// No description provided for @setupRestoreDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} records restored.'**
+  String setupRestoreDone(int count);
+
+  /// No description provided for @setupRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This file could not be read. Wrong password, or not a PreppSuite backup.'**
+  String get setupRestoreFailed;
+
+  /// No description provided for @setupRestoreDefaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored household'**
+  String get setupRestoreDefaultName;
 
   /// No description provided for @setupFolderSearching.
   ///

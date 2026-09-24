@@ -33,9 +33,20 @@ import 'qr_code_view.dart';
 ///     comes round again a few seconds later. Somebody holding a phone up
 ///     does not have to aim well, only to keep holding it.
 class QrSendScreen extends ConsumerStatefulWidget {
-  const QrSendScreen({super.key, required this.householdId});
+  const QrSendScreen({
+    super.key,
+    required this.householdId,
+    this.offerNetwork = true,
+  });
 
   final String householdId;
+
+  /// False only in tests. The fast road binds a socket and announces
+  /// itself on the network, which a test has no business doing; with it
+  /// off the screen goes straight to the pictures, which is also what a
+  /// device without a network sees.
+  @visibleForTesting
+  final bool offerNetwork;
 
   @override
   ConsumerState<QrSendScreen> createState() => _QrSendScreenState();
@@ -74,7 +85,12 @@ class _QrSendScreenState extends ConsumerState<QrSendScreen> {
   @override
   void initState() {
     super.initState();
-    _openNetwork();
+    if (widget.offerNetwork) {
+      _openNetwork();
+    } else {
+      _networkTried = true;
+      _overNetwork = false;
+    }
     _build();
   }
 

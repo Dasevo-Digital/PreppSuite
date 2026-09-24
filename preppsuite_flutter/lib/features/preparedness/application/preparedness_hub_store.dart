@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/private_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import 'resilience_plan.dart';
@@ -20,7 +20,7 @@ class PreparednessHubStore {
 
   Future<PreparednessHubData> load() async {
     try {
-      final raw = (await SharedPreferences.getInstance()).getString(_key);
+      final raw = await const PrivatePreferences().getString(_key);
       if (raw == null) return const PreparednessHubData();
       return PreparednessHubData.fromJson(jsonDecode(raw));
     } on Object {
@@ -29,8 +29,10 @@ class PreparednessHubStore {
   }
 
   Future<void> save(PreparednessHubData value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, jsonEncode(value.toJson()));
+    await const PrivatePreferences().setString(
+      _key,
+      jsonEncode(value.toJson()),
+    );
   }
 
   /// Folds a restored plan into the one this device holds.

@@ -6,6 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/preparedness/application/preparedness_hub_store.dart';
 import 'package:preppsuite_flutter/features/settings/application/backup_service.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_region_filter.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_region_store.dart';
+import 'package:preppsuite_flutter/model/household_profile.dart';
+import 'package:preppsuite_flutter/model/household_profile_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -200,6 +204,132 @@ void main() {
         db,
       ).restore(jsonEncode(envelope), 'home', 'secret-123'),
       0,
+    );
+  });
+
+  test('carries the profile and the settings, and brings them back', () async {
+    // Format 2. Without these a restored household knew its whole stock
+    // and not how many people it had to last, nor which district to
+    // watch -- and now that both are encrypted on the device, a backup is
+    // the only way they survive a lost keychain.
+    final source = AppDatabase.forTesting(NativeDatabase.memory());
+    final target = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(source.close);
+    addTearDown(target.close);
+
+    await const HouseholdProfileStore().save(
+      const HouseholdProfile(
+        id: 'home',
+        name: 'Familie Günther',
+        countryCode: 'DE',
+        regionKey: '053340000000',
+        personCount: 4,
+      ),
+    );
+    await const WarningRegionStore().save(
+      const WarningRegionFilter(
+        countryCode: 'DE',
+        ownRegionKey: '053340000000',
+      ),
+    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('pegelStation', '48900237');
+
+    final raw = await BackupService(source).exportHousehold('home', 'passwort');
+
+    // A different device: nothing of its own beyond the household id.
+    SharedPreferences.setMockInitialValues({});
+
+    final restored = await BackupService(target).restore(
+      raw,
+      'home',
+      'passwort',
+    );
+
+    expect(restored, isNotNull);
+    final profile = await const HouseholdProfileStore().load();
+    expect(profile?.name, 'Familie Günther');
+    expect(profile?.personCount, 4);
+    expect(
+      (await SharedPreferences.getInstance()).getString('pegelStation'),
+      '48900237',
+    );
+  });
+
+  test('a backup in the older format still restores', () async {
+    // Format 1 files are out there and have to keep working.
+    final source = AppDatabase.forTesting(NativeDatabase.memory());
+    final target = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(source.close);
+    addTearDown(target.close);
+
+    final raw = await BackupService(source).exportHousehold('home', 'passwort');
+    final envelope = jsonDecode(raw) as Map<String, Object?>;
+    envelope['preppsuiteBackup'] = 1;
+    envelope.remove('household');
+
+    expect(
+      await BackupService(
+        target,
+      ).restore(jsonEncode(envelope), 'home', 'passwort'),
+      isNotNull,
+    );
+  });
+
+  test('a device with nothing takes the household id from the file', () async {
+    // The way back after a lost key: "set up again" gives the household a
+    // new id, and its own backup would then be turned away as somebody
+    // else's.
+    final source = AppDatabase.forTesting(NativeDatabase.memory());
+    final target = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(source.close);
+    addTearDown(target.close);
+
+    await source.upsertInventoryItem(
+      InventoryItemsCompanion.insert(
+        clientId: 'water',
+        householdId: 'home',
+        name: 'Trinkwasser',
+        category: 'water',
+        quantity: 12,
+        unit: 'l',
+        storageLocation: 'Keller',
+        updatedAt: DateTime.utc(2026, 9, 8),
+        dirty: const Value(true),
+      ),
+    );
+    await const HouseholdProfileStore().save(
+      const HouseholdProfile(
+        id: 'home',
+        name: 'Familie Günther',
+        countryCode: 'DE',
+      ),
+    );
+
+    final raw = await BackupService(source).exportHousehold('home', 'passwort');
+    SharedPreferences.setMockInitialValues({});
+
+    final restored = await BackupService(
+      target,
+    ).restoreAsNewHousehold(raw, 'passwort');
+
+    expect(restored, isNotNull);
+    expect(restored!.householdId, 'home');
+    expect(restored.rows, greaterThan(0));
+    expect(restored.profile?.name, 'Familie Günther');
+  });
+
+  test('and still refuses the wrong password', () async {
+    final source = AppDatabase.forTesting(NativeDatabase.memory());
+    final target = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(source.close);
+    addTearDown(target.close);
+
+    final raw = await BackupService(source).exportHousehold('home', 'passwort');
+
+    expect(
+      await BackupService(target).restoreAsNewHousehold(raw, 'falsch'),
+      isNull,
     );
   });
 }

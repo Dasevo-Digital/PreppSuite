@@ -1,5 +1,4 @@
-import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../../core/private_preferences.dart';
 import 'warning_region_filter.dart';
 
 const _countryKey = 'warningCountryCode';
@@ -13,21 +12,26 @@ const _extraRegionsKey = 'warningExtraRegions';
 /// household fetched from anywhere — preferences are the only thing both
 /// sides can see. Written whenever the app knows the household; read once
 /// per background poll.
+///
+/// Encrypted like the profile it copies: which district somebody watches
+/// is where they live. The worker can read it because the device key is
+/// what opens it, and the worker asks the platform for that key before it
+/// touches anything (see `warning_background_worker.dart`).
 class WarningRegionStore {
   const WarningRegionStore();
 
   Future<void> save(WarningRegionFilter filter) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_countryKey, filter.countryCode);
+    const store = PrivatePreferences();
+    await store.setString(_countryKey, filter.countryCode);
 
     final region = filter.ownRegionKey;
     if (region == null || region.isEmpty) {
-      await prefs.remove(_regionKey);
+      await store.remove(_regionKey);
     } else {
-      await prefs.setString(_regionKey, region);
+      await store.setString(_regionKey, region);
     }
 
-    await prefs.setStringList(_extraRegionsKey, [
+    await store.setStringList(_extraRegionsKey, [
       for (final extra in filter.extraRegions) extra.encode(),
     ]);
   }
@@ -38,24 +42,25 @@ class WarningRegionStore {
   /// would mean traffic against a public API for warnings no one will
   /// read.
   Future<WarningRegionFilter?> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final country = prefs.getString(_countryKey);
+    const store = PrivatePreferences();
+    final country = await store.getString(_countryKey);
     if (country == null || country.isEmpty) return null;
 
     return WarningRegionFilter(
       countryCode: country,
-      ownRegionKey: prefs.getString(_regionKey),
+      ownRegionKey: await store.getString(_regionKey),
       extraRegions: [
-        for (final encoded in prefs.getStringList(_extraRegionsKey) ?? const [])
+        for (final encoded
+            in await store.getStringList(_extraRegionsKey) ?? const [])
           ?WarningRegion.decode(encoded),
       ],
     );
   }
 
   Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_countryKey);
-    await prefs.remove(_regionKey);
-    await prefs.remove(_extraRegionsKey);
+    const store = PrivatePreferences();
+    await store.remove(_countryKey);
+    await store.remove(_regionKey);
+    await store.remove(_extraRegionsKey);
   }
 }

@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sqlite3/sqlite3.dart' show sqlite3;
 
 import 'app_database_directory.dart';
+import 'portable_data.dart';
 
 /// The database files whose contents belong to the household.
 ///
@@ -27,6 +28,21 @@ const _recoverySuffix = '.plaintext-recovery';
 const _encryptingSuffix = '.encrypting';
 
 enum LocalDatabaseEncryptionMode { plaintext, encrypted, recoveryRequired }
+
+/// This installation holds databases it cannot open.
+///
+/// A type of its own rather than a `StateError`, so that the screens can
+/// say what it is. It reaches a screen only where something opened a
+/// database without going past `LocalDataGate` first, and "an unexpected
+/// error occurred" would be the least useful true sentence available.
+class LocalDataUnavailable implements Exception {
+  const LocalDataUnavailable();
+}
+
+/// The databases are being replaced right now, by the encryption upgrade.
+class LocalDataBusy implements Exception {
+  const LocalDataBusy();
+}
 
 /// Secure storage is deliberately a narrow interface.  It lets migration
 /// tests exercise lost-key and interrupted-upgrade paths without a platform
@@ -66,7 +82,13 @@ class LocalDatabaseEncryption {
   LocalDatabaseEncryption({LocalDatabaseKeyStorage? storage})
     : _storage = storage ?? const SecureLocalDatabaseKeyStorage();
 
-  static final instance = LocalDatabaseEncryption();
+  /// The app's one instance.
+  ///
+  /// Settable so that a test can install one with a key in it: the stores
+  /// that keep private values reach this through `PrivatePreferences`
+  /// rather than being handed an instance, and a device keychain is not
+  /// something a test has. Nothing in the app assigns to it.
+  static LocalDatabaseEncryption instance = LocalDatabaseEncryption();
 
   static const _modeKey = 'preppsuite.localDatabaseEncryption.mode.v1';
   static const _keyKey = 'preppsuite.localDatabaseEncryption.key.v1';
@@ -75,6 +97,10 @@ class LocalDatabaseEncryption {
   Directory? _directory;
   LocalDatabaseEncryptionMode? _mode;
   String? _key;
+  bool _migrating = false;
+
+  /// True while database files are being swapped underneath.
+  bool get isMigrating => _migrating;
 
   LocalDatabaseEncryptionMode get mode {
     final value = _mode;
@@ -85,6 +111,24 @@ class LocalDatabaseEncryption {
   }
 
   bool get isInitialized => _mode != null;
+
+  /// The raw data key, for deriving other local keys from.
+  ///
+  /// Null when this installation has none -- a device without a key store,
+  /// or one waiting for recovery. Callers derive a key of their own from
+  /// this with a label of their own (see `private_preferences.dart`) and
+  /// never store what they derived: one secret leaking must not hand over
+  /// the others.
+  Uint8List? get dataKeyBytes {
+    final key = _key;
+    if (key == null) return null;
+    try {
+      return base64Url.decode(key);
+    } on FormatException {
+      return null;
+    }
+  }
+
   bool get isEncrypted => mode == LocalDatabaseEncryptionMode.encrypted;
 
   /// Whether an upgrade can still be started or resumed.
@@ -93,7 +137,9 @@ class LocalDatabaseEncryption {
   /// way through leaves readable plaintext files behind, and the way to
   /// finish them is to run it again.  Use [pendingPlaintextDatabases] to
   /// find out whether there is anything left to do.
-  bool get canMigrate => mode != LocalDatabaseEncryptionMode.recoveryRequired;
+  bool get canMigrate =>
+      mode != LocalDatabaseEncryptionMode.recoveryRequired &&
+      !portableLocation.isPortable;
 
   /// True only when the bundled SQLite library exposes a cipher. A PRAGMA key
   /// is silently ignored by ordinary SQLite, so this check prevents a build
@@ -141,7 +187,18 @@ class LocalDatabaseEncryption {
       case 'recoveryRequired':
         _mode = LocalDatabaseEncryptionMode.recoveryRequired;
       default:
-        if (await _hasExistingDatabases(resolvedDirectory)) {
+        if (await _holdsEncryptedDatabase(resolvedDirectory)) {
+          // Nothing here says how to open this, and the files say they
+          // are encrypted. The ordinary way to arrive at that is a folder
+          // carried to a second computer, or an installation restored
+          // without its keychain. Opening them plainly would fail one
+          // screen later with SQLite's own words.
+          _mode = LocalDatabaseEncryptionMode.recoveryRequired;
+        } else if (portableLocation.isPortable ||
+            await _hasExistingDatabases(resolvedDirectory)) {
+          // A carried folder is never encrypted on its own: the key would
+          // stay behind on this machine and the folder would open nowhere
+          // else.
           await _storage.write(_modeKey, 'plaintext');
           _mode = LocalDatabaseEncryptionMode.plaintext;
         } else {
@@ -171,8 +228,28 @@ class LocalDatabaseEncryption {
     try {
       await initialize(directory: directory);
     } on Object {
-      _mode ??= LocalDatabaseEncryptionMode.recoveryRequired;
+      if (_mode != null) return;
+
+      // What a missing key store means depends entirely on what is on the
+      // disk. With an encrypted database in the folder it means a locked
+      // household and there is nothing to do but say so. With nothing, or
+      // with plain files, it means a device that cannot keep a secret --
+      // a Linux session without `libsecret`, a keychain that never came
+      // up. Refusing to start there would take a working offline app away
+      // from somebody over a key it does not need yet. It runs
+      // unencrypted, and the settings card says so in those words.
+      final folder = _directory;
+      _mode = folder == null || await _holdsEncryptedDatabase(folder)
+          ? LocalDatabaseEncryptionMode.recoveryRequired
+          : LocalDatabaseEncryptionMode.plaintext;
     }
+  }
+
+  static Future<bool> _holdsEncryptedDatabase(Directory directory) async {
+    for (final file in await _databaseBaseFiles(directory)) {
+      if (await _isEncryptedFile(file)) return true;
+    }
+    return false;
   }
 
   /// Asks the device again, for a key store that may have come back.
@@ -211,8 +288,15 @@ class LocalDatabaseEncryption {
         }
       }
     }
-    await _storage.delete(_modeKey);
-    await _storage.delete(_keyKey);
+    // A key store that cannot be read usually cannot be written either,
+    // and that must not stop the files from being moved out of the way --
+    // the whole point of this is to get somebody a usable app back.
+    try {
+      await _storage.delete(_modeKey);
+      await _storage.delete(_keyKey);
+    } on Object {
+      // Nothing to clear if the device will not talk to us.
+    }
     _mode = null;
     _key = null;
     await initializeOrMarkUnavailable(directory: directory);
@@ -229,7 +313,15 @@ class LocalDatabaseEncryption {
       throw StateError('Local database encryption has not been initialized.');
     }
     if (_mode == LocalDatabaseEncryptionMode.recoveryRequired) {
-      throw StateError('The local database key is unavailable.');
+      throw const LocalDataUnavailable();
+    }
+    // Nothing may open a file that is being replaced under a rename. A
+    // connection made now would keep the old file alive after the swap and
+    // write into something that is about to be deleted -- silently, and
+    // only for the rows somebody added in those seconds. Failing loudly is
+    // the cheaper of the two.
+    if (_migrating) {
+      throw const LocalDataBusy();
     }
 
     final file = File(
@@ -285,6 +377,9 @@ class LocalDatabaseEncryption {
         'The bundled SQLite library has no encryption cipher.',
       );
     }
+    // Set before anything is touched, including the key: from here on no
+    // part of the app may open one of these files.
+    _migrating = true;
     final directory = _directory!;
     final key = _key ?? await _storedKey() ?? await _createAndStoreKey();
     if (_key == null) await _storage.write(_keyKey, key);
@@ -317,6 +412,8 @@ class LocalDatabaseEncryption {
         // Deliberately ignored; the original error is the one that matters.
       }
       rethrow;
+    } finally {
+      _migrating = false;
     }
   }
 

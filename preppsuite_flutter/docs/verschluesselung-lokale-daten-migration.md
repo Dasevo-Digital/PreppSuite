@@ -2,39 +2,56 @@
 
 ## Stand der Umsetzung
 
-Gebaut (Code in `lib/core/local_database_encryption.dart`,
-`lib/core/local_data_gate.dart`,
-`lib/features/settings/presentation/local_encryption_card.dart`):
+Gebaut:
 
 - Schlüsselerzeugung, sicherer Speicher, Start-Koordinator mit den Zuständen
   `plaintext`, `migrating`, `encrypted` und `recoveryRequired`.
-- Verschlüsselte Drift-Executoren für alle drei Datenbanken. Die Entscheidung
-  fällt **pro Datei** beim Öffnen: ein `PRAGMA key` auf eine Klartextdatei
-  macht sie unlesbar, also bekommt sie keinen. Damit ist eine abgebrochene
-  Migration lesbar statt halb verloren.
+- Verschlüsselte Drift-Executoren für alle drei Datenbanken, mit einer
+  Entscheidung **pro Datei** beim Öffnen: ein `PRAGMA key` auf eine
+  Klartextdatei macht sie unlesbar, also bekommt sie keinen. Eine
+  abgebrochene Migration bleibt damit lesbar statt halb verloren.
 - Atomarer Wechsel mit Wiederherstellung nach Abbruch an jedem Punkt,
   nachgestellt in `test/core/local_database_encryption_test.dart`.
-- Die Migration läuft in einem eigenen Isolate und ist wiederaufnehmbar; ein
-  zweiter Lauf überspringt Fertiges und behält den ersten Schlüssel.
+- Die Migration läuft in einem eigenen Isolate, ist wiederaufnehmbar und
+  behält den Schlüssel des ersten Laufs. Während sie läuft, verweigert
+  `open` jede Datei.
 - Einstellungskarte „Lokale Verschlüsselung" mit Zustand, Sicherungstest und
-  dem ausdrücklichen Start. Ohne einen Sicherungstest der letzten 24 Stunden
-  ist der Start nicht anwählbar.
-- `BackupService.verify` liest eine Sicherung zurück, ohne etwas zu ändern.
+  ausdrücklichem Start. Ohne Sicherungstest der letzten 24 Stunden ist der
+  Start nicht anwählbar; `BackupService.verify` liest eine Sicherung zurück,
+  ohne etwas zu ändern.
+- Verschlüsselter Container für private Einstellungen
+  (`lib/core/private_preferences.dart`): Profil, Warnregionen, persönliche
+  Orte, Krisenplan, Dokumentliste und der Schlüssel zum gemeinsamen Ordner.
+  Abgeleiteter Schlüssel (HKDF), beide Formen lesbar, Umstellung beim
+  normalen Gebrauch.
+- Sicherungsformat 2 mit getrenntem Block für Profil und Einstellungen;
+  Format 1 bleibt lesbar.
 - Bildschirm für `recoveryRequired` vor der App-Sperre, mit „Neu einrichten",
-  das die unlesbaren Dateien umbenennt statt löscht.
+  das die unlesbaren Dateien umbenennt statt löscht — und auf dem
+  Einrichtungsbildschirm „Aus einer Sicherung wiederherstellen", das die
+  Haushaltskennung aus der Datei übernimmt.
+- Ein mitgeführter Ordner wird nie verschlüsselt, weil sein Schlüssel nicht
+  mitreisen kann; kommt ein verschlüsselter Ordner ohne Schlüssel an, sagt
+  die App das, statt ihn als Klartext zu öffnen.
+- Ein Gerät ohne Schlüsselspeicher (Linux ohne `libsecret`) startet und
+  arbeitet unverschlüsselt weiter, solange keine verschlüsselten Dateien da
+  sind.
 
 Offen:
 
-- Der verschlüsselte Container für private Einstellungen; die Klassen unten
-  beschreiben ihn, gebaut ist er nicht. `SharedPreferences` ist noch
-  unverschlüsselt.
-- Sicherungsformat 2 mit getrenntem Einstellungsblock.
-- Der Plattformprototyp auf Android, iOS und Windows. Nachgewiesen ist
-  bisher: macOS (Testlauf, `cipherAvailable` wahr) und Linux
-  (`libsqlite3mc.so` liegt im Paket).
-- Während der Migration können die Wissens- und Dokumentindizes von anderer
-  Stelle geöffnet sein. Die Karte schließt nur die Haushaltsdatenbank und
-  verlangt danach einen Neustart.
+- Der Plattformprototyp auf **Android, iOS und Windows**. Nachgewiesen ist
+  bisher macOS (Testlauf, `cipherAvailable` wahr) und Linux
+  (`libsqlite3mc.so` liegt im Paket, `libsecret-1.so.0` ist eine
+  Systemabhängigkeit des Schlüsselspeicher-Plugins).
+- Die Migration ist nie an echten, großen Daten gelaufen. `VACUUM INTO`
+  braucht vorübergehend so viel Platz wie die größte Datenbank; geprüft wird
+  er nicht, ein voller Datenträger endet in einer eigenen Fehlermeldung.
+- Wissens- und Dokumentindizes können während der Migration von anderer
+  Stelle geöffnet werden. `open` verweigert das inzwischen, aber eine
+  bereits offene Verbindung erreicht der Riegel nicht — daher der Neustart
+  am Ende.
+- Lesezeichen (`knowledgeArticleBookmarksV1`) und Übungsfortschritt liegen
+  weiter im Klartext.
 
 ## Ziel und Schutzmodell
 

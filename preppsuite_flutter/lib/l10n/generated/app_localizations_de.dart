@@ -199,6 +199,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Datenbank der App hat einen Fehler gemeldet. Ein Neustart hilft meistens.';
 
   @override
+  String get errorDiskFull =>
+      'Auf dem Datenträger ist kein Platz mehr. Schaffe Platz und versuche es erneut.';
+
+  @override
+  String get errorLocalDataLocked =>
+      'Die lokalen Daten sind gesperrt. Die App neu starten und den Hinweis auf dem Startbildschirm lesen.';
+
+  @override
+  String get errorLocalDataBusy =>
+      'Die Datenbanken werden gerade verschlüsselt. Bitte warten, bis das fertig ist.';
+
+  @override
   String get errorPlatformRefused =>
       'Das System hat das abgelehnt. Sieh in den Einstellungen nach, ob PreppSuite die Berechtigung dafür hat.';
 
@@ -961,6 +973,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Diese Fassung enthält keine Verschlüsselungsbibliothek.';
 
   @override
+  String get settingsLocalEncryptionPortable =>
+      'Ein mitgeführter Datenordner wird nicht verschlüsselt: der Schlüssel bliebe auf diesem Rechner und der Ordner ließe sich nirgendwo sonst öffnen.';
+
+  @override
   String get settingsLocalEncryptionScope =>
       'Nicht betroffen: PDFs, Karten, ZIM-Archive, Fotos und alles, was du exportierst.';
 
@@ -996,7 +1012,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsLocalEncryptionConfirmBody =>
-      'Alle lokalen Datenbanken werden neu geschrieben. Das Gerät sollte dabei am Strom sein und die App nicht geschlossen werden. Danach muss PreppSuite neu gestartet werden.';
+      'Alle lokalen Datenbanken werden neu geschrieben. Vorübergehend wird so viel freier Platz gebraucht, wie die größte davon belegt. Das Gerät sollte am Strom sein und die App nicht geschlossen werden. Danach muss PreppSuite neu gestartet werden.';
 
   @override
   String get settingsLocalEncryptionRunning =>
@@ -1029,7 +1045,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get localDataRecoveryStartOverBody =>
-      'Die unlesbaren Dateien werden nicht gelöscht, sondern umbenannt und bleiben liegen. PreppSuite startet mit einem leeren Haushalt, in den du eine Sicherung zurückspielen kannst.';
+      'Die unlesbaren Dateien werden nicht gelöscht, sondern umbenannt und bleiben liegen. Danach fragt PreppSuite von vorne — dort steht „Aus einer Sicherung wiederherstellen“, und der Haushalt kommt mit seiner bisherigen Kennung zurück.';
 
   @override
   String get settingsNotificationsToggleLabel =>
@@ -6442,6 +6458,25 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get setupChoiceSafeNote =>
       'Jetzt ist der ungefährlichste Zeitpunkt dafür: dieses Gerät hat noch keine eigenen Daten, die dabei umgestempelt werden müssten.';
+
+  @override
+  String get setupChoiceRestoreTitle => 'Aus einer Sicherung wiederherstellen';
+
+  @override
+  String get setupChoiceRestoreBody =>
+      'Eine passwortgeschützte Sicherungsdatei einlesen. Der Haushalt kommt mit seiner bisherigen Kennung zurück.';
+
+  @override
+  String setupRestoreDone(int count) {
+    return '$count Datensätze wiederhergestellt.';
+  }
+
+  @override
+  String get setupRestoreFailed =>
+      'Diese Datei liess sich nicht lesen. Passwort falsch oder keine PreppSuite-Sicherung.';
+
+  @override
+  String get setupRestoreDefaultName => 'Wiederhergestellter Haushalt';
 
   @override
   String get setupFolderSearching => 'Ordner wird gelesen …';
