@@ -138,6 +138,31 @@ zusätzlich der ATL-Komponente**:
 Microsoft.VisualStudio.Component.VC.ATL
 ```
 
+Dazu **`nuget.exe`**, seit `flutter_tts` dabei ist. Das Plugin holt sich
+das Windows-Runtime-Paket über NuGet und bricht die CMake-Erzeugung sonst ab,
+bevor irgendetwas übersetzt wird:
+
+```
+CMake Error at flutter/ephemeral/.plugin_symlinks/flutter_tts/windows/CMakeLists.txt:12 (message):
+  nuget.exe not found.  Please install it.
+```
+
+Es ist eine einzelne Datei und braucht keine Installation — auf der
+Testmaschine liegt sie in `C:\src\tools`, und der Bau bekommt sie über
+`set PATH=C:\src\tools;%PATH%`:
+
+```
+powershell -Command "Invoke-WebRequest -Uri https://dist.nuget.org/win-x86-commandline/latest/nuget.exe -OutFile C:\src\tools\nuget.exe"
+```
+
+**Ein Bau, der an dieser Stelle abgebrochen ist, muss anschliessend
+`flutter clean` bekommen.** Der abgebrochene Lauf hinterlaesst einen
+CMake-Zwischenstand, dessen Install-Praefix auf `C:/Program Files/...`
+zeigt statt in den Release-Ordner. Der naechste Lauf meldet dann Erfolg und
+legt **nur `PreppSuite.exe`** ab — ohne `flutter_windows.dll`, ohne `data\`
+und ohne die Plugin-DLLs. Das faellt erst auf, wenn jemand das Paket
+startet. `install_manifest.txt` im Bauverzeichnis verraet es vorher.
+
 Die ist in der Standardauswahl nicht dabei. Ohne sie bricht der Bau ab mit
 
 ```

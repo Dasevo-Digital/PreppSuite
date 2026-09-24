@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
+import 'core/closes_databases_on_exit.dart';
 import 'core/local_database_encryption.dart';
 import 'core/portable_data.dart';
 import 'features/inventory/application/open_food_facts_service.dart';
@@ -41,5 +42,9 @@ void main(List<String> args) async {
 
   OpenFoodFactsService.configure();
 
-  runApp(const ProviderScope(child: PreppSuiteApp()));
+  runApp(
+    const ProviderScope(
+      child: ClosesDatabasesOnExit(child: PreppSuiteApp()),
+    ),
+  );
 }
