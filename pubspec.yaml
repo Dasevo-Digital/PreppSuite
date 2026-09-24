@@ -14,3 +14,17 @@ hooks:
   user_defines:
     sqlite3:
       source: sqlite3mc
+
+# flutter_tts 4.2.5 laesst die Windows-App nicht starten: der Konstruktor des
+# Plugins aktiviert SpeechSynthesizer und MediaPlayer und wirft dabei aus
+# RegisterPlugins heraus, wo nichts faengt -- der Prozess endet vor dem
+# Fenster, ohne Meldung und ohne Absturzbericht. Gemessen: derselbe Baum ohne
+# das Plugin startete, mit ihm nicht. Eine neuere Fassung gibt es nicht.
+#
+# third_party/flutter_tts ist 4.2.5 mit genau diesem Fehler behoben; die
+# Aenderungen stehen unter "PreppSuite patch" im Quelltext. Beim Nachziehen
+# auf eine neue Fassung gehoeren sie erneut angebracht oder -- falls upstream
+# sie uebernimmt -- diese Ueberschreibung entfernt.
+dependency_overrides:
+  flutter_tts:
+    path: third_party/flutter_tts

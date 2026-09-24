@@ -199,8 +199,20 @@ die `.exe`.
 | | baut | gestartet |
 |---|---|---|
 | macOS | ja | ja |
-| Linux | ja, x64 auf echter Maschine | ja |
-| Windows | ja, x64 auf echter Maschine | nein |
+| Linux | ja, x64 auf `TestKubuntu` | ja, aus dem ausgepackten Paket |
+| Windows | ja, x64 auf `TestWindows` | ja, seit dem Patch an flutter_tts |
+
+Der Startnachweis auf Windows braucht einen Umweg: über ssh gibt es keine
+Fensterstation, eine GUI-App beendet sich dort sofort. Die Aufgabenplanung
+startet in der angemeldeten Sitzung — `schtasks /ru <benutzer> /it`, wie in
+[`../tool/windows-startcheck/LIESMICH.md`](../tool/windows-startcheck/LIESMICH.md).
+Dasselbe auf Linux mit `XAUTHORITY` und `WAYLAND_DISPLAY` der laufenden
+Sitzung; ohne sie meldet GTK „Could not open X display".
+
+**Dass Windows überhaupt wieder startet, kostet eine mitgeführte
+Bibliothek.** `flutter_tts` 4.2.5 nahm die App beim Start mit; warum und
+was daran geändert ist, steht in
+[`../third_party/LIESMICH.md`](../third_party/LIESMICH.md).
 
 Auf Linux gebaut und gestartet: die Rail-Navigation steht, das Warnbanner
 läuft mit echten BBK-Meldungen. Auf Windows liegen im Release-Ordner
