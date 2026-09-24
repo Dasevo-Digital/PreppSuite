@@ -28,7 +28,10 @@ version_code="${version_line#*+}"
 [ -n "$version_name" ] && [ "$version_code" != "$version_line" ] && \
   [[ "$version_code" =~ ^[0-9]+$ ]] || { echo "FEHLER: ungueltige Version in $APP_DIR/pubspec.yaml" >&2; exit 1; }
 
-cd "$ROOT"
+# `flutter build macos` resolves lib/main.dart relative to the working
+# directory, and the workspace root has none. Building from $ROOT dies on
+# "Target file lib/main.dart not found" before a single file is compiled.
+cd "$APP_DIR"
 flutter build macos --release --build-name "$version_name" --build-number "$version_code"
 "$ROOT/tool/macos_sign.sh" "$APP" --identity "$identity"
 
