@@ -81,7 +81,7 @@ verschiedenen Zeitpunkten gefragt, und die Antwort auf das eine sollte
 nichts sein, an dem man vorbeiscrollt. „Strom- und Heizungsausfall" und
 „Wenn der Strom ausfällt" stehen deshalb auf verschiedenen Seiten –
 einmal, was zu kaufen ist, einmal, was zu tun ist. Dasselbe gilt seit
-2.0.2 für Hochwasser und für Sturm: die alten Listen fragten nach
+2.1.0 für Hochwasser und für Sturm: die alten Listen fragten nach
 Rückstauklappe, Dach und Versicherung und lagen unter „Im Ereignis" –
 wer mit steigendem Wasser nachsah, las als Erstes, er möge seine Police
 prüfen. Die akuten Schritte stehen jetzt in „Hochwasser: wenn es soweit
@@ -139,7 +139,7 @@ in rund 30 Sekunden zu. Wer sofort gewarnt werden will, nutzt dafür NINA –
 die App sagt das an Ort und Stelle auch selbst.
 
 **Von der Warnung zur Handlung.** Eine Warnung nennt ihr Ereignis — und
-seit 2.0.2 führt sie von dort zu der Liste, die dazu gehört: „Hochwasser"
+seit 2.1.0 führt sie von dort zu der Liste, die dazu gehört: „Hochwasser"
 auf „Hochwasser: wenn es soweit ist", „Orkanartige Böen" auf „Sturm und
 Unwetter". Der Weg nach draußen zur amtlichen Seite braucht einen Browser;
 dieser braucht nichts. Wo keine Liste passt — Glatteis, Nebel, ein

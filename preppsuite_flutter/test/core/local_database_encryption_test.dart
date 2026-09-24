@@ -269,7 +269,10 @@ void main() {
       () async {
         final key = _freshKey();
         _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
-        _writeHousehold('${pathTo('preppsuite')}.plaintext-recovery', 'Beispielperson');
+        _writeHousehold(
+          '${pathTo('preppsuite')}.plaintext-recovery',
+          'Beispielperson',
+        );
         File('${pathTo('preppsuite')}-wal').writeAsStringSync('stale');
         storage.values[_modeKey] = 'migrating';
         storage.values[_keyKey] = key;
@@ -278,7 +281,10 @@ void main() {
         await encryption.initialize(directory: directory);
 
         expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
-        expect(_readHousehold(pathTo('preppsuite'), key: key), 'Beispielperson');
+        expect(
+          _readHousehold(pathTo('preppsuite'), key: key),
+          'Beispielperson',
+        );
         expect(
           File('${pathTo('preppsuite')}.plaintext-recovery').existsSync(),
           isFalse,
@@ -406,18 +412,20 @@ void main() {
       expect(() => encryption.open('preppsuite'), returnsNormally);
     });
 
-    test('a key-store failure and not-yet-created data folder never abort startup',
-        () async {
-      // A sandbox container can be created while the first keychain request
-      // fails. Flutter still has to reach runApp(); an absent folder has no
-      // encrypted household to protect and remains usable in plain mode.
-      await directory.delete(recursive: true);
-      final encryption = LocalDatabaseEncryption(storage: _FailingStorage());
+    test(
+      'a key-store failure and not-yet-created data folder never abort startup',
+      () async {
+        // A sandbox container can be created while the first keychain request
+        // fails. Flutter still has to reach runApp(); an absent folder has no
+        // encrypted household to protect and remains usable in plain mode.
+        await directory.delete(recursive: true);
+        final encryption = LocalDatabaseEncryption(storage: _FailingStorage());
 
-      await encryption.initializeOrMarkUnavailable(directory: directory);
+        await encryption.initializeOrMarkUnavailable(directory: directory);
 
-      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
-    });
+        expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+      },
+    );
 
     test('a device with no key store keeps reading its household', () async {
       _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
