@@ -3627,7 +3627,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsVersionInfoFirstAidValue =>
-      'ERC 2021 source status · 2025 review pending';
+      'ERC 2025 source status (GRC edition)';
 
   @override
   String get settingsVersionInfoApp => 'PreppSuite app';
@@ -5191,11 +5191,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get firstAidTitle => 'First aid';
 
   @override
-  String get firstAidContentVersionTitle => 'Check guideline status';
+  String get firstAidContentVersionTitle => 'Where these guides come from';
 
   @override
   String get firstAidContentVersionBody =>
-      'The guides name their sources and 2021 status. The 2025 ERC Guidelines require a professional, guide-by-guide review.';
+      'Content follows the 2025 Guidelines of the European Resuscitation Council. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.';
 
   @override
   String get firstAidEntryHint =>

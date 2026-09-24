@@ -22,10 +22,49 @@ beim allergischen Schock liest, muss zum Anrufen nicht zurückfinden.
 
 ## Woher die Inhalte kommen
 
-Die Anleitungen folgen den **Reanimationsleitlinien 2021 des European
+Die Anleitungen folgen den **Reanimationsleitlinien 2025 des European
 Resuscitation Council** in der deutschen Fassung des German Resuscitation
 Council und deren Erste-Hilfe-Kapitel. Die Vergiftungsseite nennt die
 Giftinformationszentren der Länder, die Hitzeseite zusätzlich die BZgA.
+
+### Was der Schritt von 2021 auf 2025 geändert hat
+
+Für Laien keine einzige Zahl: 30:2, 5 bis 6 cm, 100 bis 120 in der Minute
+stehen unverändert. Geändert hat sich die Reihenfolge und die Betonung.
+
+- Der **Notruf kommt vor die Atemkontrolle**, mit dem Telefon auf
+  Lautsprecher, und die Leitstelle leitet weiter an — damit früher
+  gedrückt wird. Die App hatte das schon so.
+- **Schnappatmung ist keine normale Atmung.** Stand ebenfalls schon da.
+- **Nicht erst umlagern und ausziehen.** Einer von zwei Punkten, an denen
+  die App der Fassung von 2025 widersprach: sie verlangte Brustkorb frei
+  und harte Unterlage, bevor jemand anfängt. Jetzt heißt der Schritt
+  „Sofort anfangen, wo die Person liegt".
+- **Bei Kindern geht der Notruf jetzt zuerst hinaus.** Der zweite. Bis
+  2021 galt für den Einzelhelfer: erst eine Minute wiederbeleben, dann
+  anrufen — begründet damit, dass ein Kind Sauerstoff braucht und der
+  Helfer zum Telefonieren weggeht. Mit dem Telefon auf Lautsprecher geht
+  niemand mehr weg, und 2025 gleicht die Kinderreanimation an die der
+  Erwachsenen an. Die fünf ersten Beatmungen, 15:2 und ein Drittel der
+  Brustkorbtiefe bleiben unverändert.
+
+  Zur Belastbarkeit dieses Punktes: er stützt sich auf die Kurzfassung
+  „Lebenserhaltende Maßnahmen bei Kindern" und auf eine zweite Darstellung
+  („Kinder sollen im Zweifelsfall wie Erwachsene reanimiert werden"),
+  nicht auf den Volltext — der liegt hinter einer Anmeldung. Die Änderung
+  geht in die ungefährliche Richtung: früher anrufen kostet nichts, eine
+  Minute später anrufen war genau das, was gestrichen wurde.
+
+Was diese Seite **nicht** behauptet: dass die deutschen Lehraussagen für
+Erste-Hilfe-Kurse umgestellt sind. Die stimmen Arbeiter-Samariter-Bund,
+DLRG, Johanniter, Malteser und DRK gemeinsam über die
+Bundesarbeitsgemeinschaft Erste Hilfe ab, zu einem festgelegten Zeitpunkt
+und nicht jede Organisation für sich — der DRK-Bundesarzt hat das im
+Rundschreiben vom 24.11.2025 ausdrücklich festgehalten: „Bis dahin gelten
+die bestehenden Lehraussagen unverändert weiter." Ob der gemeinsame
+Stichtag inzwischen liegt, war beim Schreiben dieser Zeilen nicht
+öffentlich zu belegen. Da sich keine Zahl ändert, widersprechen die
+Anleitungen einem Kurs in keinem Fall; wo doch, gilt der Kurs.
 
 Jede Anleitung nennt ihre Quelle auf dem Bildschirm. Das ist dieselbe
 Regel wie bei den Kältestunden im Stromausfall: Diese App stellt keine

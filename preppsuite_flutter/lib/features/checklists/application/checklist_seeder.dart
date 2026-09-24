@@ -27,6 +27,17 @@ class ChecklistSeeder {
     // drinking-water quantity. The checklist keeps the equipment needed
     // to store and treat it, without asking for the same stock twice.
     '00000000-0000-4000-8000-000000000101',
+
+    // Moved out of the two hazard lists, which are about having things
+    // ready, and into the lists that are about acting -- "Hochwasser:
+    // wenn es soweit ist" and "Sturm und Unwetter: wenn es soweit ist".
+    // Retired rather than left in place, because the same instruction
+    // with a tick box in two lists is two pieces of bookkeeping and one
+    // of them is always the stale one.
+    '00000000-0000-4000-8000-000000001109',
+    '00000000-0000-4000-8000-000000001110',
+    '00000000-0000-4000-8000-000000001302',
+    '00000000-0000-4000-8000-000000001310',
   ];
 
   Future<void> seed(String householdId) async {

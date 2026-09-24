@@ -62,7 +62,7 @@ sind, und beantwortet auf einen Tipp die Frage, die man dabei wirklich
 hat: Nein, dein Vorrat wird nicht umgeschrieben. Die vier Einheiten im
 Hinweis sind zum Antippen, nicht zum Abschreiben.
 
-**Checklisten.** 19 mitgelieferte Listen nach dem BBK-Ratgeber – von
+**Checklisten.** 21 mitgelieferte Listen nach dem BBK-Ratgeber – von
 Wasser, Lebensmitteln und Erster Hilfe über Strom- und Heizungsausfall,
 Hochwasser, Hitze und Sturm bis zu Haustieren, Säuglingen und
 Falschmeldungen; eine davon, das Verhalten während eines Stromausfalls,
@@ -74,7 +74,12 @@ etwas passiert, und was zu tun ist, während es passiert. Beides wird zu
 verschiedenen Zeitpunkten gefragt, und die Antwort auf das eine sollte
 nichts sein, an dem man vorbeiscrollt. „Strom- und Heizungsausfall" und
 „Wenn der Strom ausfällt" stehen deshalb auf verschiedenen Seiten –
-einmal, was zu kaufen ist, einmal, was zu tun ist. Eigene Listen wählen
+einmal, was zu kaufen ist, einmal, was zu tun ist. Dasselbe gilt seit
+2.0.2 für Hochwasser und für Sturm: die alten Listen fragten nach
+Rückstauklappe, Dach und Versicherung und lagen unter „Im Ereignis" –
+wer mit steigendem Wasser nachsah, las als Erstes, er möge seine Police
+prüfen. Die akuten Schritte stehen jetzt in „Hochwasser: wenn es soweit
+ist" und „Sturm und Unwetter: wenn es soweit ist". Eigene Listen wählen
 selbst, wohin sie gehören.
 
 **Budget.** Was die Vorsorge gekostet hat, nach Kategorie. Dazu ein

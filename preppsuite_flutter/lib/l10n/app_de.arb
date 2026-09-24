@@ -1183,7 +1183,7 @@
   "searchGroupChecklists": "Checklisten",
   "searchGroupPossessions": "Hausrat",
   "settingsVersionInfoFirstAid": "Erste-Hilfe-Inhalte",
-  "settingsVersionInfoFirstAidValue": "Quellenstand ERC 2021 · Prüfung 2025 offen",
+  "settingsVersionInfoFirstAidValue": "Quellenstand ERC 2025 (GRC-Fassung)",
   "settingsVersionInfoApp": "PreppSuite-App",
   "settingsVersionInfoAppValue": "{version} · Build {build}",
   "@settingsVersionInfoAppValue": {
@@ -2115,8 +2115,8 @@
     }
   },
   "firstAidTitle": "Erste Hilfe",
-  "firstAidContentVersionTitle": "Leitlinienstand prüfen",
-  "firstAidContentVersionBody": "Die Anleitungen sind mit Quellen und Stand 2021 gekennzeichnet. Die ERC-Leitlinien 2025 müssen fachlich für jede Anleitung geprüft werden.",
+  "firstAidContentVersionTitle": "Woher diese Anleitungen stammen",
+  "firstAidContentVersionBody": "Inhalt nach den Leitlinien 2025 des European Resuscitation Council, deutsche Fassung des German Resuscitation Council. Was in einem Erste-Hilfe-Kurs gelehrt wird, stimmen die Hilfsorganisationen gemeinsam ab; im Kurs gilt, was dort gesagt wird.",
   "firstAidEntryHint": "Anleitungen, Zeichnungen und ein Taktgeber für die Herzdruckmassage. Ohne Netz, ohne Download.",
   "firstAidSearchHint": "Wonach suchst du?",
   "firstAidSearchEmpty": "Dazu gibt es hier keine Anleitung.",

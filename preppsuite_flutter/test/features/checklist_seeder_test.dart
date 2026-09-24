@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/checklists/application/built_in_templates.dart';
 import 'package:preppsuite_flutter/features/checklists/application/checklist_seeder.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
+import 'package:preppsuite_flutter/model/categories.dart';
 
 void main() {
   late AppDatabase db;
@@ -238,6 +239,71 @@ void main() {
       final titles = list.items.map((i) => i.title).join(' | ');
 
       expect(titles, contains('PreppSuite'));
+    });
+  });
+
+  group('preparation and acting are separate lists', () {
+    BuiltInTemplate byId(String suffix) => builtInTemplates.firstWhere(
+      (template) => template.clientId.endsWith(suffix),
+    );
+
+    test('the hazard lists are filed as preparation', () async {
+      // They ask to check the backflow valve, the roof, the insurance and
+      // the grit. Filed under "while it happens", the first thing somebody
+      // read with the water rising was a reminder to review their policy.
+      expect(byId('000000000011').kind, ChecklistKind.preparation);
+      expect(byId('000000000013').kind, ChecklistKind.preparation);
+    });
+
+    test('and the acute steps have lists of their own', () async {
+      expect(byId('000000000020').kind, ChecklistKind.response);
+      expect(byId('000000000021').kind, ChecklistKind.response);
+      expect(
+        byId('000000000020').items.first.title,
+        contains('Nicht in den Keller'),
+      );
+    });
+
+    test('nothing stands in both', () async {
+      // The same instruction with a tick box in two lists is two pieces of
+      // bookkeeping, and one of them is always the stale one.
+      final titles = <String, String>{};
+      for (final template in builtInTemplates) {
+        for (final item in template.items) {
+          final earlier = titles[item.title];
+          expect(
+            earlier,
+            isNull,
+            reason:
+                '"${item.title}" steht in $earlier und '
+                '${template.title}',
+          );
+          titles[item.title] = template.title;
+        }
+      }
+    });
+
+    test('the moved steps are taken out of the preparation lists', () async {
+      // A retired item is soft-deleted rather than skipped, so a household
+      // seeded long ago loses it too -- otherwise it would sit in the old
+      // list forever beside its copy in the new one.
+      await ChecklistSeeder(db).seed(householdId);
+
+      final flood = await db
+          .watchChecklistItems('00000000-0000-4000-8000-000000000011')
+          .first;
+      expect(
+        flood.map((i) => i.title),
+        isNot(anyElement(contains('Keller nicht betreten'))),
+      );
+
+      final storm = await db
+          .watchChecklistItems('00000000-0000-4000-8000-000000000013')
+          .first;
+      expect(
+        storm.map((i) => i.title),
+        isNot(anyElement(contains('Nach dem Sturm'))),
+      );
     });
   });
 }

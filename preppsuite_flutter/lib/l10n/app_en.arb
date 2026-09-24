@@ -2175,7 +2175,7 @@
   "searchGroupChecklists": "Checklists",
   "searchGroupPossessions": "Household inventory",
   "settingsVersionInfoFirstAid": "First aid content",
-  "settingsVersionInfoFirstAidValue": "ERC 2021 source status · 2025 review pending",
+  "settingsVersionInfoFirstAidValue": "ERC 2025 source status (GRC edition)",
   "settingsVersionInfoApp": "PreppSuite app",
   "settingsVersionInfoAppValue": "{version} · build {build}",
   "@settingsVersionInfoAppValue": {
@@ -3119,8 +3119,8 @@
     }
   },
   "firstAidTitle": "First aid",
-  "firstAidContentVersionTitle": "Check guideline status",
-  "firstAidContentVersionBody": "The guides name their sources and 2021 status. The 2025 ERC Guidelines require a professional, guide-by-guide review.",
+  "firstAidContentVersionTitle": "Where these guides come from",
+  "firstAidContentVersionBody": "Content follows the 2025 Guidelines of the European Resuscitation Council. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.",
   "firstAidEntryHint": "Instructions, drawings and a pacer for chest compressions. No network, no download.",
   "firstAidSearchHint": "What are you looking for?",
   "firstAidSearchEmpty": "There is no guide here for that.",

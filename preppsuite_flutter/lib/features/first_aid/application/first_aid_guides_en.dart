@@ -104,7 +104,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
           'is still beating do far less harm than no resuscitation on '
           'somebody whose heart has stopped.',
     ],
-    source: 'European Resuscitation Council (ERC) Guidelines 2021',
+    source: 'European Resuscitation Council (ERC) Guidelines 2025',
   ),
   FirstAidGuide(
     id: 'cpr-adult',
@@ -122,8 +122,11 @@ const firstAidGuidesEn = <FirstAidGuide>[
             'else: they call and fetch the AED, you push.',
       ),
       FirstAidStep(
-        'Bare the chest and lay the person flat on their back on a firm '
-        'surface.',
+        'Start where the person is lying.',
+        detail:
+            'Open clothing only if you cannot find the pressure point '
+            'otherwise. Move them onto a firm surface only if it takes '
+            'seconds — any delay costs more than the soft surface.',
       ),
       FirstAidStep(
         'Heel of one hand on the centre of the chest, the other hand on '
@@ -171,7 +174,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
           'lets the pressure in the circulation collapse.',
       'Cracking sounds are normal and are not a reason to stop.',
     ],
-    source: 'European Resuscitation Council (ERC) Guidelines 2021',
+    source: 'European Resuscitation Council (ERC) Guidelines 2025',
   ),
   FirstAidGuide(
     id: 'cpr-child',
@@ -184,17 +187,20 @@ const firstAidGuidesEn = <FirstAidGuide>[
     hasPacer: true,
     steps: [
       FirstAidStep(
+        'Call 112 as soon as the child does not react and is not '
+        'breathing normally.',
+        detail:
+            'Speaker on, phone down — you stay with the child and keep '
+            'your hands free. Until 2021 the rule here was one minute of '
+            'resuscitation first; since the 2025 guidelines the order is '
+            'the same as for an adult.',
+      ),
+      FirstAidStep(
         'Start with 5 rescue breaths, not with compressions.',
         detail:
             'In children the heart nearly always stops for want of '
             'oxygen, not the other way round. On an infant, seal your '
             'mouth over mouth and nose together.',
-      ),
-      FirstAidStep(
-        'Alone: resuscitate for one minute, then call 112.',
-        detail:
-            'The opposite way round from an adult. With someone '
-            'else, they call straight away.',
       ),
       FirstAidStep(
         'Push 15 times, then give 2 breaths.',
@@ -225,7 +231,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
       'Pushing too gently is the commonest mistake. A child whose heart '
           'has stopped cannot be saved by timid compressions.',
     ],
-    source: 'European Resuscitation Council (ERC) Guidelines 2021',
+    source: 'European Resuscitation Council (ERC) Guidelines 2025',
   ),
   FirstAidGuide(
     id: 'aed',
@@ -264,7 +270,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
       'Do not put a pad over a pacemaker; a few centimetres to the side '
           'is enough. Peel off any medication patches first.',
     ],
-    source: 'European Resuscitation Council (ERC) Guidelines 2021',
+    source: 'European Resuscitation Council (ERC) Guidelines 2025',
   ),
   FirstAidGuide(
     id: 'recovery-position',
@@ -304,7 +310,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
       'With a suspected spinal injury, only turn them if the airway '
           'cannot be kept open any other way. The airway comes first.',
     ],
-    source: 'European Resuscitation Council (ERC) Guidelines 2021',
+    source: 'European Resuscitation Council (ERC) Guidelines 2025',
   ),
   FirstAidGuide(
     id: 'choking',
@@ -351,7 +357,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
       'After abdominal thrusts always have them checked by a doctor, '
           'even if all seems well — internal injuries are possible.',
     ],
-    source: 'European Resuscitation Council (ERC) Guidelines 2021',
+    source: 'European Resuscitation Council (ERC) Guidelines 2025',
   ),
   FirstAidGuide(
     id: 'severe-bleeding',
@@ -398,7 +404,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
     ],
     source:
         'European Resuscitation Council (ERC) First Aid Guidelines '
-        '2021',
+        '2025',
   ),
   FirstAidGuide(
     id: 'shock',
@@ -438,7 +444,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
     ],
     source:
         'European Resuscitation Council (ERC) First Aid Guidelines '
-        '2021',
+        '2025',
   ),
   FirstAidGuide(
     id: 'burns',
@@ -490,7 +496,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
     ],
     source:
         'European Resuscitation Council (ERC) First Aid Guidelines '
-        '2021',
+        '2025',
   ),
   FirstAidGuide(
     id: 'stroke',
@@ -541,7 +547,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
     ],
     source:
         'European Resuscitation Council (ERC) First Aid Guidelines '
-        '2021',
+        '2025',
   ),
   FirstAidGuide(
     id: 'heart-attack',
@@ -580,7 +586,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
     ],
     source:
         'European Resuscitation Council (ERC) First Aid Guidelines '
-        '2021',
+        '2025',
   ),
   FirstAidGuide(
     id: 'seizure',
@@ -625,7 +631,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
     ],
     source:
         'European Resuscitation Council (ERC) First Aid Guidelines '
-        '2021',
+        '2025',
   ),
   FirstAidGuide(
     id: 'anaphylaxis',
@@ -671,7 +677,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
     ],
     source:
         'European Resuscitation Council (ERC) First Aid Guidelines '
-        '2021',
+        '2025',
   ),
   FirstAidGuide(
     id: 'hypothermia',
@@ -714,7 +720,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
     ],
     source:
         'European Resuscitation Council (ERC) First Aid Guidelines '
-        '2021',
+        '2025',
   ),
   FirstAidGuide(
     id: 'heat',
@@ -747,7 +753,7 @@ const firstAidGuidesEn = <FirstAidGuide>[
     ],
     source:
         'German Federal Centre for Health Education (BZgA) and ERC '
-        'First Aid Guidelines 2021',
+        'First Aid Guidelines 2025',
   ),
   FirstAidGuide(
     id: 'poisoning',

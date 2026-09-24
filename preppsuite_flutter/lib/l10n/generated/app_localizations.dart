@@ -6149,7 +6149,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsVersionInfoFirstAidValue.
   ///
   /// In en, this message translates to:
-  /// **'ERC 2021 source status · 2025 review pending'**
+  /// **'ERC 2025 source status (GRC edition)'**
   String get settingsVersionInfoFirstAidValue;
 
   /// No description provided for @settingsVersionInfoApp.
@@ -8753,13 +8753,13 @@ abstract class AppLocalizations {
   /// No description provided for @firstAidContentVersionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Check guideline status'**
+  /// **'Where these guides come from'**
   String get firstAidContentVersionTitle;
 
   /// No description provided for @firstAidContentVersionBody.
   ///
   /// In en, this message translates to:
-  /// **'The guides name their sources and 2021 status. The 2025 ERC Guidelines require a professional, guide-by-guide review.'**
+  /// **'Content follows the 2025 Guidelines of the European Resuscitation Council. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.'**
   String get firstAidContentVersionBody;
 
   /// No description provided for @firstAidEntryHint.

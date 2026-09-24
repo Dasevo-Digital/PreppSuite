@@ -6,11 +6,25 @@ import 'poison_centres.dart';
 /// Die Reihenfolge ist die Reihenfolge auf dem Bildschirm und sie ist
 /// nach Dringlichkeit sortiert, nicht alphabetisch.
 ///
-/// Der Inhalt folgt den Reanimationsleitlinien 2021 des European
+/// Der Inhalt folgt den Reanimationsleitlinien 2025 des European
 /// Resuscitation Council in der deutschen Fassung des German Resuscitation
 /// Council sowie deren Erste-Hilfe-Kapitel. Die Zahlen sind deren Zahlen;
 /// die Worte sind die dieser App. Jede Anleitung nennt ihre Quelle auf dem
 /// Bildschirm.
+///
+/// Zum Schritt von 2021 auf 2025: die Zahlen für Laien haben sich nicht
+/// geändert — 30:2, 5 bis 6 cm, 100 bis 120 in der Minute. Geändert hat
+/// sich die Reihenfolge. Der Notruf kommt vor die Atemkontrolle und wird
+/// mit der Leitstelle am Lautsprecher weitergeführt, damit früher gedrückt
+/// wird; Schnappatmung ist ausdrücklich keine normale Atmung; und es wird
+/// nicht mehr erst umgelagert und ausgezogen, bevor jemand anfängt.
+///
+/// Was hier bewusst **nicht** behauptet wird: dass die deutschen
+/// Lehraussagen für Erste-Hilfe-Kurse schon umgestellt sind. Die stimmen
+/// die Hilfsorganisationen gemeinsam über die Bundesarbeitsgemeinschaft
+/// Erste Hilfe ab, zu einem festgelegten Zeitpunkt und nicht jede für
+/// sich. Wer einen Kurs besucht, lernt, was dort gilt — diese Anleitungen
+/// widersprechen dem in keiner Zahl.
 ///
 /// Was hier bewusst fehlt: alles, was ohne Ausbildung nicht sicher
 /// anzuwenden ist, und jede Dosierung eines Medikaments, das nicht dem
@@ -109,7 +123,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'Wiederbelebung bei jemandem, dessen Herz steht.',
     ],
     source:
-        'Reanimationsleitlinien 2021 des European Resuscitation '
+        'Reanimationsleitlinien 2025 des European Resuscitation '
         'Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
   FirstAidGuide(
@@ -129,8 +143,12 @@ const firstAidGuidesDe = <FirstAidGuide>[
             'du drückst.',
       ),
       FirstAidStep(
-        'Brustkorb frei machen und die Person flach auf den Rücken '
-        'legen, auf eine harte Unterlage.',
+        'Sofort anfangen, wo die Person liegt.',
+        detail:
+            'Kleidung nur öffnen, wenn du sonst den Druckpunkt nicht '
+            'findest. Auf eine harte Unterlage umlagern nur, wenn es '
+            'in Sekunden geht — jede Verzögerung kostet mehr, als die '
+            'weiche Unterlage.',
       ),
       FirstAidStep(
         'Einen Handballen auf die Mitte des Brustkorbs setzen, '
@@ -179,7 +197,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Knackende Geräusche sind normal und kein Grund aufzuhören.',
     ],
     source:
-        'Reanimationsleitlinien 2021 des European Resuscitation '
+        'Reanimationsleitlinien 2025 des European Resuscitation '
         'Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
   FirstAidGuide(
@@ -193,17 +211,21 @@ const firstAidGuidesDe = <FirstAidGuide>[
     hasPacer: true,
     steps: [
       FirstAidStep(
+        '112 anrufen, sobald das Kind nicht reagiert und nicht normal '
+        'atmet.',
+        detail:
+            'Telefon auf Lautsprecher und liegen lassen — so bleibst du '
+            'beim Kind und hast die Hände frei. Bis 2021 galt hier noch: '
+            'erst eine Minute wiederbeleben, dann anrufen. Seit den '
+            'Leitlinien 2025 ist die Reihenfolge dieselbe wie beim '
+            'Erwachsenen.',
+      ),
+      FirstAidStep(
         'Mit 5 Beatmungen beginnen, nicht mit dem Drücken.',
         detail:
             'Bei Kindern steht das Herz fast immer wegen '
             'Sauerstoffmangel still, nicht umgekehrt. Beim Säugling Mund '
             'und Nase zugleich umschließen.',
-      ),
-      FirstAidStep(
-        'Bist du allein: erst eine Minute wiederbeleben, dann 112.',
-        detail:
-            'Umgekehrt als beim Erwachsenen. Ist jemand bei dir, '
-            'ruft er sofort an.',
       ),
       FirstAidStep(
         '15-mal drücken, dann 2-mal beatmen.',
@@ -237,7 +259,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'gerettet werden.',
     ],
     source:
-        'Reanimationsleitlinien 2021 des European Resuscitation '
+        'Reanimationsleitlinien 2025 des European Resuscitation '
         'Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
   FirstAidGuide(
@@ -284,7 +306,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'abziehen.',
     ],
     source:
-        'Reanimationsleitlinien 2021 des European Resuscitation '
+        'Reanimationsleitlinien 2025 des European Resuscitation '
         'Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
   FirstAidGuide(
@@ -331,7 +353,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'Atemwege haben Vorrang.',
     ],
     source:
-        'Reanimationsleitlinien 2021 des European Resuscitation '
+        'Reanimationsleitlinien 2025 des European Resuscitation '
         'Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
   FirstAidGuide(
@@ -384,7 +406,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'möglich.',
     ],
     source:
-        'Reanimationsleitlinien 2021 des European Resuscitation '
+        'Reanimationsleitlinien 2025 des European Resuscitation '
         'Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
   FirstAidGuide(
@@ -435,7 +457,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'abpolstern.',
     ],
     source:
-        'Erste-Hilfe-Leitlinien 2021 des European Resuscitation '
+        'Erste-Hilfe-Leitlinien 2025 des European Resuscitation '
         'Council (ERC)',
   ),
   FirstAidGuide(
@@ -479,7 +501,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'Atmet sie nicht normal: Wiederbelebung.',
     ],
     source:
-        'Erste-Hilfe-Leitlinien 2021 des European Resuscitation '
+        'Erste-Hilfe-Leitlinien 2025 des European Resuscitation '
         'Council (ERC)',
   ),
   FirstAidGuide(
@@ -532,7 +554,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'abreißen.',
     ],
     source:
-        'Erste-Hilfe-Leitlinien 2021 des European Resuscitation '
+        'Erste-Hilfe-Leitlinien 2025 des European Resuscitation '
         'Council (ERC)',
   ),
   FirstAidGuide(
@@ -587,7 +609,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Nicht selbst fahren und nicht fahren lassen.',
     ],
     source:
-        'Erste-Hilfe-Leitlinien 2021 des European Resuscitation '
+        'Erste-Hilfe-Leitlinien 2025 des European Resuscitation '
         'Council (ERC)',
   ),
   FirstAidGuide(
@@ -631,7 +653,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Kein Medikament geben, das nicht dieser Person verordnet wurde.',
     ],
     source:
-        'Erste-Hilfe-Leitlinien 2021 des European Resuscitation '
+        'Erste-Hilfe-Leitlinien 2025 des European Resuscitation '
         'Council (ERC)',
   ),
   FirstAidGuide(
@@ -684,7 +706,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'ist.',
     ],
     source:
-        'Erste-Hilfe-Leitlinien 2021 des European Resuscitation '
+        'Erste-Hilfe-Leitlinien 2025 des European Resuscitation '
         'Council (ERC)',
   ),
   FirstAidGuide(
@@ -730,7 +752,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'die er verordnet ist – oder auf Anweisung der Leitstelle.',
     ],
     source:
-        'Erste-Hilfe-Leitlinien 2021 des European Resuscitation '
+        'Erste-Hilfe-Leitlinien 2025 des European Resuscitation '
         'Council (ERC)',
   ),
   FirstAidGuide(
@@ -776,7 +798,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
           'bevor er nicht warm und tot ist.',
     ],
     source:
-        'Erste-Hilfe-Leitlinien 2021 des European Resuscitation '
+        'Erste-Hilfe-Leitlinien 2025 des European Resuscitation '
         'Council (ERC)',
   ),
   FirstAidGuide(
@@ -818,7 +840,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
     ],
     source:
         'Bundeszentrale für gesundheitliche Aufklärung und '
-        'Erste-Hilfe-Leitlinien 2021 des ERC',
+        'Erste-Hilfe-Leitlinien 2025 des ERC',
   ),
   FirstAidGuide(
     id: 'poisoning',

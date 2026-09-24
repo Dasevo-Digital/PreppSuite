@@ -44,10 +44,30 @@ void main() {
 
     final hazards = builtInTemplates
         .where((t) => t.category == ChecklistCategory.hazards)
-        .map((t) => t.title)
         .toList();
 
     // Flood, heat and storm/cold — the three the guide separates.
-    expect(hazards, hasLength(3));
+    for (final subject in ['Hochwasser', 'Hitze', 'Sturm']) {
+      expect(
+        hazards.any((t) => t.title.contains(subject)),
+        isTrue,
+        reason: '$subject fehlt unter den Naturgefahren',
+      );
+    }
+
+    // Flood and storm each in both halves: what has to be ready, and what
+    // to do while it happens. A count would have said three and gone on
+    // saying three while one of them sat under the wrong heading.
+    for (final subject in ['Hochwasser', 'Sturm']) {
+      final kinds = hazards
+          .where((t) => t.title.contains(subject))
+          .map((t) => t.kind)
+          .toSet();
+      expect(
+        kinds,
+        containsAll([ChecklistKind.preparation, ChecklistKind.response]),
+        reason: '$subject braucht eine Vorsorge- und eine Ereignisliste',
+      );
+    }
   });
 }

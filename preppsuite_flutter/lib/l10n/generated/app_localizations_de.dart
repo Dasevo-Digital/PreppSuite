@@ -3656,7 +3656,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsVersionInfoFirstAidValue =>
-      'Quellenstand ERC 2021 · Prüfung 2025 offen';
+      'Quellenstand ERC 2025 (GRC-Fassung)';
 
   @override
   String get settingsVersionInfoApp => 'PreppSuite-App';
@@ -5226,11 +5226,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get firstAidTitle => 'Erste Hilfe';
 
   @override
-  String get firstAidContentVersionTitle => 'Leitlinienstand prüfen';
+  String get firstAidContentVersionTitle => 'Woher diese Anleitungen stammen';
 
   @override
   String get firstAidContentVersionBody =>
-      'Die Anleitungen sind mit Quellen und Stand 2021 gekennzeichnet. Die ERC-Leitlinien 2025 müssen fachlich für jede Anleitung geprüft werden.';
+      'Inhalt nach den Leitlinien 2025 des European Resuscitation Council, deutsche Fassung des German Resuscitation Council. Was in einem Erste-Hilfe-Kurs gelehrt wird, stimmen die Hilfsorganisationen gemeinsam ab; im Kurs gilt, was dort gesagt wird.';
 
   @override
   String get firstAidEntryHint =>

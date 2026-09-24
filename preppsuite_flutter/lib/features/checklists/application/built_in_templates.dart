@@ -470,18 +470,7 @@ const builtInTemplates = [
         '00000000-0000-4000-8000-000000001108',
         'Wissen, wo der Stromkreis für den Keller abgeschaltet wird',
       ),
-      BuiltInItem(
-        '00000000-0000-4000-8000-000000001109',
-        'Bei Hochwasser den Keller nicht betreten — Strom im Wasser, und '
-            'Räume laufen schneller voll, als man herauskommt',
-      ),
-      BuiltInItem(
-        '00000000-0000-4000-8000-000000001110',
-        'Pegelstände und Warnungen verfolgen: NINA und der Warndienst des '
-            'Landes',
-      ),
     ],
-    kind: ChecklistKind.response,
   ),
   BuiltInTemplate(
     '00000000-0000-4000-8000-000000000012',
@@ -551,11 +540,6 @@ const builtInTemplates = [
             'der Sturm da ist',
       ),
       BuiltInItem(
-        '00000000-0000-4000-8000-000000001302',
-        'Bei Sturm im Haus bleiben, Fenster und Türen schließen, nicht '
-            'unter Bäume stellen',
-      ),
-      BuiltInItem(
         '00000000-0000-4000-8000-000000001303',
         'Dach, Dachrinnen und Bäume am Haus regelmäßig prüfen lassen',
       ),
@@ -586,13 +570,7 @@ const builtInTemplates = [
         'Im Auto: Decke, Schaufel, warme Sachen — und im Winter nicht mit '
             'fast leerem Tank fahren',
       ),
-      BuiltInItem(
-        '00000000-0000-4000-8000-000000001310',
-        'Nach dem Sturm: heruntergefallene Leitungen melden, nie selbst '
-            'anfassen',
-      ),
     ],
-    kind: ChecklistKind.response,
   ),
   BuiltInTemplate(
     '00000000-0000-4000-8000-000000000014',
@@ -889,6 +867,103 @@ const builtInTemplates = [
         '00000000-0000-4000-8000-000000001908',
         'Verderbliches, das zwei Stunden über 4 °C lag, kommt weg — und '
             'niemals probieren, um das zu entscheiden',
+      ),
+    ],
+    kind: ChecklistKind.response,
+  ),
+  // Die beiden Listen darüber sind Vorsorge: Rückstauklappen, Dach,
+  // Versicherung, Streugut. Sie standen als "Im Ereignis" abgelegt, was
+  // niemandem hilft, der im Ereignis nachsieht -- dort steht dann eine
+  // Aufforderung, die Versicherung zu prüfen. Die akuten Schritte stehen
+  // deshalb hier, als eigene Listen: nur eine *neue* Liste erreicht
+  // Haushalte, die längst eingerichtet sind (siehe ChecklistSeeder).
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000020',
+    'Hochwasser: wenn es soweit ist',
+    ChecklistCategory.hazards,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002001',
+        'Nicht in den Keller. Auch nicht kurz, auch nicht zum Retten — '
+            'Räume laufen schneller voll, als man herauskommt',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002002',
+        'Geräte und Heizung in Räumen abschalten, die volllaufen können; '
+            'im Zweifel den Strom ganz aus (Sicherung raus)',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002003',
+        'Fenster, Türen und Abflussöffnungen abdichten',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002004',
+        'Auto rechtzeitig aus Garage und Tiefgarage fahren — eine '
+            'Tiefgarage wird bei Hochwasser zur Falle',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002005',
+        'Überflutete Straßen nicht befahren und nicht durchwaten; man '
+            'sieht nicht, ob die Fahrbahn noch da ist',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002006',
+        'Uferbereiche meiden — Unterspülung und Abbruch',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002007',
+        'Pegel und Warnungen verfolgen, Radio an, Anweisungen der '
+            'Einsatzkräfte befolgen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002008',
+        'Nach Nachbarn sehen, die nicht selbst heraufkommen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002009',
+        'Danach: überflutete Keller erst betreten, wenn der Strom '
+            'nachweislich aus ist',
+      ),
+    ],
+    kind: ChecklistKind.response,
+  ),
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000021',
+    'Sturm und Unwetter: wenn es soweit ist',
+    ChecklistCategory.hazards,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002101',
+        'Im Gebäude bleiben, nicht unter Bäume und nicht an die Fassade',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002102',
+        'Alle Fenster schließen, Rollläden herunter, auch die Dachfenster',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002103',
+        'In einen innen liegenden Raum im Erdgeschoss — nicht in den '
+            'Keller, der bei Starkregen volllaufen kann',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002104',
+        'Nicht auf den Dachboden und nicht aufs Dach, solange es weht',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002105',
+        'Empfindliche Geräte vom Netz nehmen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002106',
+        'Bei stark beschädigtem Dach das Haus weiträumig meiden',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002107',
+        'Danach: heruntergefallene Leitungen melden, nie selbst anfassen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002108',
+        'Danach: Schäden fotografieren, bevor aufgeräumt wird',
       ),
     ],
     kind: ChecklistKind.response,
