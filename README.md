@@ -328,6 +328,18 @@ das Notgepäck. Die Notfallkarten sind absichtlich nicht dabei: eine
 Diagnose gehört nicht zwei Zeilen unter eine Dose Bohnen. Am Rechner mit
 Strg+F oder Strg+K, auf dem Telefon im Mehr-Menü.
 
+**Verschlüsselte lokale Daten.** Der Haushalt, die Warnungen, der
+Dokumentindex — die Datenbanken auf dem Gerät liegen verschlüsselt, mit
+einem Schlüssel aus dem Schlüsselbund des Systems. Eine neue Installation
+fängt so an. Eine bestehende stellt **niemand außer dir** um: die Karte
+„Lokale Verschlüsselung" in den Einstellungen lässt den Schritt erst zu,
+wenn die App eine Sicherung vor deinen Augen wieder aufgemacht hat. Nicht
+verschlüsselt sind die Dateien, die du selbst hineingelegt hast — PDFs,
+Karten, ZIM-Archive, Fotos — und alles, was du exportierst; das steht auch
+so auf der Karte. Findet ein Gerät seinen Schlüssel nicht mehr, sagt die
+App das, statt in einem Fehler zu enden, und benennt beim Neuanfang die
+unlesbaren Dateien um, statt sie zu löschen.
+
 Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
 Auf einem breiten Fenster legen sich die Bildschirme in Spalten lesbarer
 Breite nebeneinander, statt eine einzelne Spalte über die ganze Breite zu

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/progress_text.dart';
+import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
 import '../application/continents.dart';
@@ -754,7 +755,7 @@ class _Failed extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          l10n.mapDownloadFailed(error.toString()),
+          describeError(l10n, error),
           style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
         const SizedBox(height: 8),

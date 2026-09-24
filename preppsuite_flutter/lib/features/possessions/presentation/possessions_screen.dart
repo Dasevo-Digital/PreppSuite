@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 
 import '../../../core/adaptive_columns.dart';
+import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../household/application/household_providers.dart';
@@ -54,7 +55,7 @@ class PossessionsScreen extends ConsumerWidget {
       body: ContentSwap(
         child: rows.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('$error')),
+          error: (error, _) => Center(child: Text(describeError(l10n, error))),
           data: (data) {
             if (data.isEmpty) {
               // Centred while it fits and scrollable when it does not. At

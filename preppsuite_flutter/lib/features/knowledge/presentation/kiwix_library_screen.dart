@@ -4,6 +4,7 @@ import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/error_text.dart';
 import '../../../core/platform_storage.dart';
 import '../../downloads/application/byte_size.dart';
 import '../../downloads/application/download_folder.dart';
@@ -261,7 +262,11 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Text(
-            l10n.kiwixLoadError(_error.toString()),
+            // A failed catalogue is actionable on its own (retry once a
+            // connection exists), while the raw exception can expose server
+            // addresses or local paths. Keep the familiar context but never
+            // render implementation text.
+            l10n.kiwixLoadError(describeError(l10n, _error!)),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall,
           ),

@@ -6,8 +6,10 @@ import 'package:workmanager/workmanager.dart';
 
 import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
+import '../../../core/local_database_encryption.dart';
 import '../../../local_db/database.dart';
 import 'warning_poll_service.dart';
+import 'warning_poll_status_store.dart';
 import 'warning_region_filter.dart';
 import 'warning_region_store.dart';
 import 'warning_relevance.dart';
@@ -72,6 +74,17 @@ Future<bool> runWarningBackgroundPoll({
     return true;
   }
 
+  // This task has its own isolate and must obtain the device-protected key
+  // before it opens Drift. It can genuinely be unavailable — an Android
+  // device rebooted and not yet unlocked has no keystore — but that is a
+  // failed run, not a finished one. Reporting success would let the device
+  // stop warning for good without anything anywhere saying so; the marker
+  // below is what the readiness card in Settings reads back.
+  if (database == null && !await _localDatabaseIsOpenable()) {
+    await const WarningPollStatusStore().recordBlocked();
+    return false;
+  }
+
   // Opened here rather than shared with the UI isolate: when the app is
   // closed there is nothing to share with, and when it is open SQLite's
   // own locking keeps the two consistent. The cost is that the UI does not
@@ -107,6 +120,22 @@ Future<bool> runWarningBackgroundPoll({
   } finally {
     if (database == null) await db.close();
   }
+}
+
+/// Whether this isolate can open the local databases at all.
+///
+/// Two ways it cannot: the key store is unreachable right now, or this
+/// installation has lost its key and is waiting to be restored from a
+/// backup. Neither is something a background task can fix, and neither
+/// should be reported as a poll that had nothing to do.
+Future<bool> _localDatabaseIsOpenable() async {
+  try {
+    await LocalDatabaseEncryption.instance.initialize();
+  } on Object {
+    return false;
+  }
+  return LocalDatabaseEncryption.instance.mode !=
+      LocalDatabaseEncryptionMode.recoveryRequired;
 }
 
 /// Registers the periodic poll, replacing any earlier registration.

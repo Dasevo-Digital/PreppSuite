@@ -30,10 +30,10 @@ import '../l10n/generated/app_localizations.dart';
 /// opened when something has already gone wrong. What somebody needs
 /// there is what happened and what they can do about it.
 ///
-/// The unknown case keeps the technical text on purpose. Replacing every
-/// failure with a soothing sentence would leave nothing to report and
-/// nothing to search for; the ones below are named because they are the
-/// ones that actually happen.
+/// Unknown failures stay deliberately generic. Platform error strings can
+/// contain filesystem paths, provider details, or untranslated internals;
+/// none belongs in an emergency-facing interface. Known failures below keep
+/// the useful recovery instruction instead.
 String describeError(AppLocalizations l10n, Object error) {
   return switch (error) {
     // No network. By far the most common of these, and the only one where
@@ -81,6 +81,6 @@ String describeError(AppLocalizations l10n, Object error) {
     // system can refuse.
     PlatformException() => l10n.errorPlatformRefused,
 
-    _ => l10n.errorGeneric(error.toString()),
+    _ => l10n.errorGeneric,
   };
 }

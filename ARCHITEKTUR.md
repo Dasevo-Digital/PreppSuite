@@ -1831,6 +1831,63 @@ Quellenangabe ohne geprüfte Zahl wäre in dieser App dasselbe wie eine
 erfundene Skala.
 
 
+### Verschlüsselung im Ruhezustand: pro Datei, nicht pro Installation
+
+`lib/core/local_database_encryption.dart` hält einen 256-Bit-Schlüssel im
+plattformgebundenen sicheren Speicher und öffnet damit die Drift-Dateien.
+Vier Dinge daran sind teuer erkauft und dürfen nicht zurückgedreht werden.
+
+**`PRAGMA key` auf einer Klartextdatei macht sie unlesbar.** Nicht "ignoriert"
+und nicht "verschlüsselt sie" — SQLite3MultipleCiphers versucht danach zu
+entschlüsseln und scheitert mit *file is not a database*. Die erste Fassung
+setzte vor dem `PRAGMA rekey` einen Schlüssel und konnte deshalb nie eine
+einzige Datenbank umstellen. Der Weg ist: schlicht öffnen, nur `PRAGMA
+cipher` wählen, `PRAGMA rekey` ausführen, danach mit dem Schlüssel neu
+öffnen und lesen.
+
+**Die Entscheidung fällt pro Datei, beim Öffnen.** `_configureCipherForFile`
+liest den Dateikopf und legt den Schlüssel nur auf etwas an, das kein
+lesbarer Klartext ist. Damit ist eine halb fertige Migration harmlos: die
+umgestellten Dateien öffnen mit Schlüssel, die noch nicht erreichten ohne,
+und eine Datei, die es noch nicht gibt, entsteht verschlüsselt. Ein Modus,
+der für die ganze Installation gilt, hatte genau den gegenteiligen Effekt —
+nach einem Abbruch war die Hälfte des Haushalts nicht mehr zu öffnen.
+
+**Die Wiederherstellung sucht über die Namen, nicht über `.sqlite`.** Im
+Moment zwischen den beiden `rename`-Aufrufen heißt die Datenbank weder wie
+sie selbst noch irgendwie auf `.sqlite`. Eine Aufräumschleife über
+`*.sqlite` besucht sie deshalb nie — der Haushalt blieb als
+`.plaintext-recovery` liegen, und die App legte daneben einen leeren an.
+`_databaseBaseFiles` faltet die beiden Migrationsendungen auf den
+eigentlichen Namen zurück; `local_database_encryption_test.dart` stellt
+jeden Abbruchpunkt nach.
+
+**Die Migration läuft in einem eigenen Isolate und ist wiederaufnehmbar.**
+`VACUUM INTO` kopiert die ganze Datei, und die Wissensindizes können
+Gigabyte groß sein. Ein zweiter Lauf überspringt, was bereits
+verschlüsselt ist, und benutzt **denselben** Schlüssel — ein neuer würde
+verwaisen lassen, was der erste Lauf geschafft hat.
+
+Ohne Schlüssel ist der Zustand `recoveryRequired`, und der hat seit 2.0.1
+einen Bildschirm: `lib/core/local_data_gate.dart` steht vor der App-Sperre,
+erklärt die Lage und bietet "Neu einrichten" an, das die unlesbaren Dateien
+**umbenennt statt löscht**.
+
+
+### Ein Hintergrundlauf, der nichts tun konnte, ist kein erledigter Lauf
+
+`runWarningBackgroundPoll` meldete `true`, wenn der Geräteschlüssel nicht
+zu bekommen war. Das ist die Antwort "fertig, nichts zu tun" — auf dem
+einen Weg, über den diese App im Hintergrund überhaupt warnt. Ein Android,
+das neu gestartet und noch nicht entsperrt wurde, hat keinen Keystore; das
+Gerät hätte still aufgehört zu warnen.
+
+Jetzt meldet der Lauf `false` und hinterlässt mit `recordBlocked()` die
+einzige Spur, die er hinterlassen kann. Die Karte "Warnbereitschaft" in den
+Einstellungen liest sie zurück — aber nur, solange kein späterer
+vollständiger Abruf sie überholt hat.
+
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,

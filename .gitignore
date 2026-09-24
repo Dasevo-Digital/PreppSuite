@@ -17,3 +17,7 @@ build/
 # unbemerkt wieder hereinlegt.
 google-services.json
 GoogleService-Info.plist
+
+# Gebaute Pakete. Sie gehoeren auf den Desktop, nicht in die Historie: ein
+# einziges "git add -A" wuerde hier 65 MB Binaerdateien dauerhaft einchecken.
+releases/

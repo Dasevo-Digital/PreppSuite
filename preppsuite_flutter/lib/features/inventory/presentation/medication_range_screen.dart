@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/adaptive_columns.dart';
+import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
 import '../application/inventory_providers.dart';
@@ -31,7 +32,7 @@ class MedicationRangeScreen extends ConsumerWidget {
       body: ContentSwap(
         child: items.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('$error')),
+          error: (error, _) => Center(child: Text(describeError(l10n, error))),
           data: (rows) {
             final ranges = medicationRanges(rows);
             final unanswered = medicationsWithoutDose(rows);

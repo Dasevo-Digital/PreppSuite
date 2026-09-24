@@ -1,9 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
-
-import '../core/app_database_directory.dart';
+import '../core/local_database_encryption.dart';
 
 import 'tables/budget_entries_table.dart';
 import 'tables/checklist_items_table.dart';
@@ -1338,12 +1336,7 @@ class AppDatabase extends _$AppDatabase {
 typedef IncomingRow<C> = ({String clientId, DateTime updatedAt, C companion});
 
 QueryExecutor _openConnection() {
-  // Not the default directory: see `appDatabaseDirectory` for why the
-  // documents folder is the wrong place for this file.
-  return driftDatabase(
-    name: 'preppsuite',
-    native: DriftNativeOptions(databaseDirectory: appDatabaseDirectory),
-  );
+  return LocalDatabaseEncryption.instance.open('preppsuite');
 }
 
 /// Identity of one immutable version acknowledged by a successful upload.

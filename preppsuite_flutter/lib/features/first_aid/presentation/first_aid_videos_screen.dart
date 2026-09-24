@@ -7,6 +7,7 @@ import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/adaptive_columns.dart';
+import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
 import '../../downloads/application/byte_size.dart';
@@ -68,7 +69,7 @@ class _FirstAidVideosScreenState extends ConsumerState<FirstAidVideosScreen> {
           ContentSwap(
             child: installed.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Text('$error'),
+              error: (error, _) => Text(describeError(l10n, error)),
               data: (state) => _Installed(state: state, l10n: l10n),
             ),
           ),

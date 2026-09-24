@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/app_theme.dart';
 import 'core/app_lock_gate.dart';
+import 'core/local_data_gate.dart';
 import 'core/locale_provider.dart';
 import 'core/theme_provider.dart';
 import 'features/household/presentation/household_gate.dart';
@@ -37,7 +38,12 @@ class PreppSuiteApp extends ConsumerWidget {
       // still scrolls and a slider still drags inside one, because those
       // recognizers win the gesture arena. See selection_test.dart, which
       // keeps that true.
-      home: const AppLockGate(child: SelectionArea(child: HouseholdGate())),
+      // Outside the app lock: a device that cannot open its databases
+      // cannot check the lock either, and the passphrase prompt would
+      // be asking for something that leads nowhere.
+      home: const LocalDataGate(
+        child: AppLockGate(child: SelectionArea(child: HouseholdGate())),
+      ),
     );
   }
 }

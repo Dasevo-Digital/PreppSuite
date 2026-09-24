@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/progress_text.dart';
+import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/byte_size.dart';
 import '../application/download_providers.dart';
@@ -33,7 +34,7 @@ class DownloadBanner extends ConsumerWidget {
           children: [
             Expanded(
               child: Text(
-                l10n.downloadFailedLabel(state.error.toString()),
+                describeError(l10n, state.error!),
                 style: theme.textTheme.bodySmall,
               ),
             ),

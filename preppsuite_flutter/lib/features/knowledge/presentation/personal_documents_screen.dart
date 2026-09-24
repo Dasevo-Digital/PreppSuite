@@ -193,7 +193,8 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
                       leading: Icon(_icon(document.extension)),
                       title: Text(document.label),
                       subtitle: Text(
-                        '${document.extension.toUpperCase()} · ${_indexStatus(l10n, document.indexStatus)}',
+                        '${document.extension.toUpperCase()} · ${_indexStatus(l10n, document.indexStatus)}'
+                        '${document.readerOffset > 0 ? ' · ${l10n.knowledgeDocumentContinue}' : ''}',
                       ),
                       onTap: () => _open(document),
                       trailing: Row(

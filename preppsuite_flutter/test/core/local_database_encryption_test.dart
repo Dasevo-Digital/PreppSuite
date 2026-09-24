@@ -1,0 +1,432 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:sqlite3/sqlite3.dart';
+
+import 'package:preppsuite_flutter/core/local_database_encryption.dart';
+import 'package:preppsuite_flutter/local_db/database.dart';
+
+class _MemoryKeyStorage implements LocalDatabaseKeyStorage {
+  final values = <String, String>{};
+
+  @override
+  Future<void> delete(String key) async => values.remove(key);
+
+  @override
+  Future<String?> read(String key) async => values[key];
+
+  @override
+  Future<void> write(String key, String value) async {
+    values[key] = value;
+  }
+}
+
+const _modeKey = 'preppsuite.localDatabaseEncryption.mode.v1';
+const _keyKey = 'preppsuite.localDatabaseEncryption.key.v1';
+
+String _freshKey() {
+  final random = Random.secure();
+  return base64UrlEncode(List<int>.generate(32, (_) => random.nextInt(256)));
+}
+
+String _sqlLiteral(String value) => "'${value.replaceAll("'", "''")}'";
+
+/// A database holding one recognisable row, so that "the household came
+/// back" can be asserted on its contents rather than on a file existing.
+void _writeHousehold(String path, String name, {String? key}) {
+  final database = sqlite3.open(path);
+  try {
+    if (key != null) {
+      database.execute("PRAGMA cipher = 'aes256cbc'");
+      database.execute('PRAGMA key = ${_sqlLiteral(key)}');
+    }
+    database
+      ..execute('CREATE TABLE household (name TEXT NOT NULL)')
+      ..execute('INSERT INTO household VALUES (${_sqlLiteral(name)})');
+  } finally {
+    database.close();
+  }
+}
+
+String _readHousehold(String path, {String? key}) {
+  final database = sqlite3.open(path);
+  try {
+    if (key != null) {
+      database.execute("PRAGMA cipher = 'aes256cbc'");
+      database.execute('PRAGMA key = ${_sqlLiteral(key)}');
+    }
+    return database.select('SELECT name FROM household').single['name']
+        as String;
+  } finally {
+    database.close();
+  }
+}
+
+bool _looksLikePlaintext(File file) {
+  final handle = file.openSync();
+  try {
+    return utf8.decode(handle.readSync(16), allowMalformed: true) ==
+        'SQLite format 3\u0000';
+  } finally {
+    handle.closeSync();
+  }
+}
+
+void main() {
+  late Directory directory;
+  late _MemoryKeyStorage storage;
+
+  String pathTo(String name) =>
+      '${directory.path}${Platform.pathSeparator}$name.sqlite';
+
+  setUp(() async {
+    directory = await Directory.systemTemp.createTemp('preppsuite-encryption-');
+    storage = _MemoryKeyStorage();
+  });
+
+  tearDown(() async {
+    if (await directory.exists()) await directory.delete(recursive: true);
+  });
+
+  // Skipped rather than silently passed where the build has no cipher: a
+  // test that quietly asserts nothing is worse than one that is missing,
+  // because the report says it ran.
+  final noCipher = LocalDatabaseEncryption.cipherAvailable
+      ? null
+      : 'The SQLite library in this build has no cipher.';
+
+  group('LocalDatabaseEncryption', () {
+    test('keeps a device-held 256-bit key for a compatible cipher', () async {
+      final encryption = LocalDatabaseEncryption(storage: storage);
+
+      await encryption.initialize(directory: directory);
+
+      expect(
+        encryption.mode,
+        LocalDatabaseEncryption.cipherAvailable
+            ? LocalDatabaseEncryptionMode.encrypted
+            : LocalDatabaseEncryptionMode.plaintext,
+      );
+      expect(base64Url.decode(storage.values[_keyKey]!), hasLength(32));
+    });
+
+    test('an existing plaintext household is left alone at first', () async {
+      _writeHousehold(pathTo('preppsuite'), 'Marco');
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+      expect(_readHousehold(pathTo('preppsuite')), 'Marco');
+      expect(await encryption.pendingPlaintextDatabases(), ['preppsuite']);
+    });
+
+    test(
+      'refuses an upgrade when the running SQLite lacks a cipher',
+      () async {
+        _writeHousehold(pathTo('preppsuite'), 'Marco');
+
+        final encryption = LocalDatabaseEncryption(storage: storage);
+        await encryption.initialize(directory: directory);
+        expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+
+        await expectLater(
+          encryption.migrateExistingDatabases(),
+          throwsA(isA<UnsupportedError>()),
+        );
+        expect(_readHousehold(pathTo('preppsuite')), 'Marco');
+      },
+      skip: LocalDatabaseEncryption.cipherAvailable ? 'Has a cipher.' : null,
+    );
+  });
+
+  group('upgrading an existing household', () {
+    test('encrypts every database and keeps every row', () async {
+      _writeHousehold(pathTo('preppsuite'), 'Marco');
+      _writeHousehold(pathTo('preppsuite_personal_documents'), 'Unterlagen');
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      await encryption.migrateExistingDatabases();
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+      expect(await encryption.pendingPlaintextDatabases(), isEmpty);
+
+      final key = storage.values[_keyKey]!;
+      expect(_looksLikePlaintext(File(pathTo('preppsuite'))), isFalse);
+      expect(_readHousehold(pathTo('preppsuite'), key: key), 'Marco');
+      expect(
+        _readHousehold(pathTo('preppsuite_personal_documents'), key: key),
+        'Unterlagen',
+      );
+    }, skip: noCipher);
+
+    test('the encrypted file does not open without the key', () async {
+      _writeHousehold(pathTo('preppsuite'), 'Marco');
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      await encryption.migrateExistingDatabases();
+
+      expect(() => _readHousehold(pathTo('preppsuite')), throwsA(anything));
+    }, skip: noCipher);
+
+    test('leaves nothing behind to be picked up as a second run', () async {
+      _writeHousehold(pathTo('preppsuite'), 'Marco');
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      await encryption.migrateExistingDatabases();
+      await encryption.migrateExistingDatabases();
+
+      expect(
+        directory.listSync().map((e) => e.uri.pathSegments.last).toList(),
+        ['preppsuite.sqlite'],
+      );
+      expect(
+        _readHousehold(pathTo('preppsuite'), key: storage.values[_keyKey]!),
+        'Marco',
+      );
+    }, skip: noCipher);
+  });
+
+  group('an upgrade interrupted', () {
+    test('between the two renames gives the household back', () async {
+      // The dangerous moment: the plaintext file has been renamed aside and
+      // the encrypted one has not yet taken its name. Nothing in the folder
+      // is called preppsuite.sqlite.
+      _writeHousehold(
+        '${pathTo('preppsuite')}.plaintext-recovery',
+        'Marco',
+      );
+      storage.values[_modeKey] = 'migrating';
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+      expect(_readHousehold(pathTo('preppsuite')), 'Marco');
+      expect(
+        File('${pathTo('preppsuite')}.plaintext-recovery').existsSync(),
+        isFalse,
+      );
+    });
+
+    test(
+      'before the copy was finished discards the half-written one',
+      () async {
+        _writeHousehold(pathTo('preppsuite'), 'Marco');
+        File('${pathTo('preppsuite')}.encrypting').writeAsStringSync('half');
+        storage.values[_modeKey] = 'migrating';
+
+        final encryption = LocalDatabaseEncryption(storage: storage);
+        await encryption.initialize(directory: directory);
+
+        expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+        expect(_readHousehold(pathTo('preppsuite')), 'Marco');
+        expect(
+          File('${pathTo('preppsuite')}.encrypting').existsSync(),
+          isFalse,
+        );
+      },
+    );
+
+    test(
+      'after the swap keeps the encrypted file and clears the copy',
+      () async {
+        final key = _freshKey();
+        _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+        _writeHousehold('${pathTo('preppsuite')}.plaintext-recovery', 'Marco');
+        File('${pathTo('preppsuite')}-wal').writeAsStringSync('stale');
+        storage.values[_modeKey] = 'migrating';
+        storage.values[_keyKey] = key;
+
+        final encryption = LocalDatabaseEncryption(storage: storage);
+        await encryption.initialize(directory: directory);
+
+        expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+        expect(_readHousehold(pathTo('preppsuite'), key: key), 'Marco');
+        expect(
+          File('${pathTo('preppsuite')}.plaintext-recovery').existsSync(),
+          isFalse,
+        );
+        // The journal belonged to the plaintext database that was renamed
+        // away; read against the encrypted file it is nonsense.
+        expect(File('${pathTo('preppsuite')}-wal').existsSync(), isFalse);
+      },
+      skip: noCipher,
+    );
+
+    test('part way through can be finished later', () async {
+      final key = _freshKey();
+      _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+      _writeHousehold(pathTo('preppsuite_personal_documents'), 'Unterlagen');
+      storage.values[_modeKey] = 'migrating';
+      storage.values[_keyKey] = key;
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      // Both are readable in this state -- the encrypted one with the key,
+      // the untouched one without it -- which is what makes it safe to
+      // report and finish rather than to panic about.
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+      expect(await encryption.pendingPlaintextDatabases(), [
+        'preppsuite_personal_documents',
+      ]);
+
+      await encryption.migrateExistingDatabases();
+
+      expect(await encryption.pendingPlaintextDatabases(), isEmpty);
+      expect(_readHousehold(pathTo('preppsuite'), key: key), 'Marco');
+      expect(
+        _readHousehold(pathTo('preppsuite_personal_documents'), key: key),
+        'Unterlagen',
+      );
+    }, skip: noCipher);
+
+    test('resuming keeps the key the first run used', () async {
+      final key = _freshKey();
+      _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+      _writeHousehold(pathTo('preppsuite_personal_documents'), 'Unterlagen');
+      storage.values[_modeKey] = 'migrating';
+      storage.values[_keyKey] = key;
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      await encryption.migrateExistingDatabases();
+
+      expect(storage.values[_keyKey], key);
+    }, skip: noCipher);
+
+    test('without a key left to open them asks for recovery', () async {
+      final key = _freshKey();
+      _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+      storage.values[_modeKey] = 'migrating';
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+
+      // No key in storage: the file is not lost, but this installation
+      // cannot open it, and saying `plaintext` here would start a second,
+      // empty household beside it.
+      expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+      expect(() => encryption.open('preppsuite'), throwsStateError);
+    }, skip: noCipher);
+  });
+
+  group('a device that lost its key', () {
+    test('keeps the unreadable files when it starts over', () async {
+      final key = _freshKey();
+      _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+      storage.values[_modeKey] = 'encrypted';
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+
+      await encryption.startOverKeepingUnreadableFiles();
+
+      // Usable again, and the old household is still on the disk under a
+      // name nothing will open by accident. A key that turns up later --
+      // a restored keychain -- still has something to open.
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+      final names = directory
+          .listSync()
+          .map((entity) => entity.uri.pathSegments.last)
+          .toList();
+      expect(names.where((name) => name.contains('.locked-')), hasLength(1));
+      expect(names, isNot(contains('preppsuite.sqlite')));
+      expect(storage.values[_keyKey], isNot(key));
+    }, skip: noCipher);
+
+    test('asks the device again rather than making anybody restart', () async {
+      final key = _freshKey();
+      _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+      storage.values[_modeKey] = 'encrypted';
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+
+      // The keychain comes back -- unlocked late, restored, plugin loaded
+      // on the second attempt.
+      storage.values[_keyKey] = key;
+      await encryption.retryInitialization();
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+    }, skip: noCipher);
+
+    test(
+      'a start that cannot reach the key store still yields a state',
+      () async {
+        final encryption = LocalDatabaseEncryption(storage: _FailingStorage());
+
+        await encryption.initializeOrMarkUnavailable(directory: directory);
+
+        // Never a throw out of startup: the app has to come up far enough to
+        // say what is wrong.
+        expect(encryption.mode, LocalDatabaseEncryptionMode.recoveryRequired);
+      },
+    );
+  });
+
+  group('opening through Drift', () {
+    test('creates a new database encrypted, across the isolate', () async {
+      // The setup callback is handed to Drift's background isolate. That it
+      // can be sent at all is a runtime property nothing checks at compile
+      // time, and a callback that fails to cross would leave a plaintext
+      // file behind a mode that says otherwise.
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+
+      final database = AppDatabase.forTesting(encryption.open('preppsuite'));
+      await database.customSelect('SELECT 1').get();
+      await database.close();
+
+      expect(_looksLikePlaintext(File(pathTo('preppsuite'))), isFalse);
+      expect(
+        () => sqlite3.open(pathTo('preppsuite')).select('SELECT 1'),
+        throwsA(anything),
+        reason: 'and not readable without the key',
+      );
+    }, skip: noCipher);
+
+    test('a file the migration has not reached yet still opens', () async {
+      // The other half of the per-file decision: in a folder that is part
+      // way through, the plaintext ones must open without the key.
+      _writeHousehold(pathTo('preppsuite'), 'Marco');
+      storage.values[_modeKey] = 'encrypted';
+      storage.values[_keyKey] = _freshKey();
+
+      final encryption = LocalDatabaseEncryption(storage: storage);
+      await encryption.initialize(directory: directory);
+      expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
+
+      final database = AppDatabase.forTesting(encryption.open('preppsuite'));
+      final rows = await database
+          .customSelect('SELECT name FROM household')
+          .get();
+      await database.close();
+
+      expect(rows.single.read<String>('name'), 'Marco');
+    }, skip: noCipher);
+  });
+}
+
+/// A key store that refuses, the way a Linux session without a keyring or
+/// a keychain that has not been unlocked does.
+class _FailingStorage implements LocalDatabaseKeyStorage {
+  @override
+  Future<void> delete(String key) async => throw StateError('no key store');
+
+  @override
+  Future<String?> read(String key) async => throw StateError('no key store');
+
+  @override
+  Future<void> write(String key, String value) async =>
+      throw StateError('no key store');
+}

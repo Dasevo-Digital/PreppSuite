@@ -79,6 +79,12 @@ class VersionInfoCard extends StatelessWidget {
             label: l10n.settingsVersionInfoOfflineMap,
             value: l10n.settingsVersionInfoPmtiles,
           ),
+          const Divider(height: 1),
+          _VersionRow(
+            icon: Icons.medical_information_outlined,
+            label: l10n.settingsVersionInfoFirstAid,
+            value: l10n.settingsVersionInfoFirstAidValue,
+          ),
         ],
       ),
     );

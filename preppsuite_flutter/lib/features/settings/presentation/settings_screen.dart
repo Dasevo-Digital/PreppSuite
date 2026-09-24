@@ -18,8 +18,10 @@ import '../../sharing/presentation/shared_folder_card.dart';
 import '../../transfer/presentation/transfer_card.dart';
 import 'app_lock_card.dart';
 import 'backup_card.dart';
+import 'local_encryption_card.dart';
 import 'reset_card.dart';
 import 'version_info_card.dart';
+import 'warning_readiness_card.dart';
 import 'followed_places_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -36,152 +38,156 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Text(
-            l10n.languageLabel,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              title: Text(l10n.languageLabel),
-              trailing: _LanguagePicker(l10n: l10n),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.settingsChargeReminderTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          if (supportsScheduledNotifications)
-            ChargeReminderCard(l10n: l10n)
-          else
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: Text(l10n.settingsScheduledRemindersUnsupported),
-              ),
-            ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.settingsAppearanceTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Card(child: _ThemeModePicker(l10n: l10n)),
-          const SizedBox(height: 24),
-          Text(
-            l10n.followedPlacesTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.location_on_outlined),
-              title: Text(l10n.followedPlacesOpen),
-              subtitle: Text(l10n.followedPlacesIntro),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => FollowedPlacesScreen(profile: profile),
+          _CategoryTile(
+            icon: Icons.notifications_active_outlined,
+            title: l10n.settingsCategoryWarnings,
+            subtitle: l10n.settingsCategoryWarningsBody,
+            onTap: () => _open(context, l10n.settingsCategoryWarnings, [
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.location_on_outlined),
+                  title: Text(l10n.followedPlacesOpen),
+                  subtitle: Text(l10n.followedPlacesIntro),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => FollowedPlacesScreen(profile: profile),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.settingsNotificationsTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Card(child: _NotificationsToggle(l10n: l10n)),
-          const SizedBox(height: 24),
-          Text(
-            l10n.settingsExpiryRemindersTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          // A switch that cannot do anything is worse than an
-          // explanation. Linux has no scheduled notifications at all.
-          if (supportsScheduledNotifications)
-            ExpiryRemindersCard(l10n: l10n)
-          else
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.info_outline),
-                title: Text(l10n.settingsExpiryRemindersUnsupported),
+              Card(child: _NotificationsToggle(l10n: l10n)),
+              WarningReadinessCard(
+                profile: profile,
+                l10n: l10n,
+                onManagePlaces: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => FollowedPlacesScreen(profile: profile),
+                  ),
+                ),
               ),
-            ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.settingsPrivacyTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+            ]),
           ),
-          const SizedBox(height: 8),
-          AppLockCard(l10n: l10n),
-          const SizedBox(height: 24),
-          Text(
-            l10n.settingsSharingTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+          _CategoryTile(
+            icon: Icons.schedule_outlined,
+            title: l10n.settingsCategoryReminders,
+            subtitle: l10n.settingsCategoryRemindersBody,
+            onTap: () => _open(context, l10n.settingsCategoryReminders, [
+              if (supportsScheduledNotifications) ...[
+                ChargeReminderCard(l10n: l10n),
+                ExpiryRemindersCard(l10n: l10n),
+              ] else
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.info_outline),
+                    title: Text(l10n.settingsScheduledRemindersUnsupported),
+                  ),
+                ),
+            ]),
           ),
-          const SizedBox(height: 8),
-          SharedFolderCard(profile: profile, l10n: l10n),
-          const SizedBox(height: 12),
-          TransferCard(householdId: profile.id, l10n: l10n),
-          const SizedBox(height: 24),
-          Text(
-            l10n.settingsOfflineMapTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+          _CategoryTile(
+            icon: Icons.palette_outlined,
+            title: l10n.settingsCategoryAppearance,
+            subtitle: l10n.settingsCategoryAppearanceBody,
+            onTap: () => _open(context, l10n.settingsCategoryAppearance, [
+              Card(
+                child: ListTile(
+                  title: Text(l10n.languageLabel),
+                  trailing: _LanguagePicker(l10n: l10n),
+                ),
+              ),
+              Card(child: _ThemeModePicker(l10n: l10n)),
+            ]),
           ),
-          const SizedBox(height: 8),
-          OfflineMapCard(l10n: l10n),
-          // Only where there is something to choose between: Linux and
-          // Windows reach no embedded engine, every other platform does.
-          if (offersArticleViewerChoice) ...[
-            const SizedBox(height: 24),
-            Text(
-              l10n.articleViewerChoiceTitle,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            ArticleViewerCard(l10n: l10n),
-          ],
-          const SizedBox(height: 24),
-          Text(
-            l10n.downloadFolderTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+          _CategoryTile(
+            icon: Icons.security_outlined,
+            title: l10n.settingsCategoryData,
+            subtitle: l10n.settingsCategoryDataBody,
+            onTap: () => _open(context, l10n.settingsCategoryData, [
+              AppLockCard(l10n: l10n),
+              SharedFolderCard(profile: profile, l10n: l10n),
+              TransferCard(householdId: profile.id, l10n: l10n),
+              BackupCard(householdId: profile.id, l10n: l10n),
+              LocalEncryptionCard(householdId: profile.id, l10n: l10n),
+              ResetCard(profile: profile, l10n: l10n),
+            ]),
           ),
-          const SizedBox(height: 8),
-          DownloadFolderCard(l10n: l10n),
-          // Under the download folder, because the two are the same kind
-          // of question — where do the files go — and because this one
-          // is the answer for everything the app writes for itself.
-          PortableDataCard(l10n: l10n),
-          const SizedBox(height: 24),
-          Text(
-            l10n.backupTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+          _CategoryTile(
+            icon: Icons.offline_pin_outlined,
+            title: l10n.settingsCategoryOffline,
+            subtitle: l10n.settingsCategoryOfflineBody,
+            onTap: () => _open(context, l10n.settingsCategoryOffline, [
+              OfflineMapCard(l10n: l10n),
+              if (offersArticleViewerChoice) ArticleViewerCard(l10n: l10n),
+              DownloadFolderCard(l10n: l10n),
+              PortableDataCard(l10n: l10n),
+            ]),
           ),
-          const SizedBox(height: 8),
-          BackupCard(householdId: profile.id, l10n: l10n),
-          const SizedBox(height: 24),
-          Text(
-            l10n.settingsVersionInfoTitle,
-            style: Theme.of(context).textTheme.titleMedium,
+          _CategoryTile(
+            icon: Icons.info_outline,
+            title: l10n.settingsCategoryAbout,
+            subtitle: l10n.settingsCategoryAboutBody,
+            onTap: () => _open(context, l10n.settingsCategoryAbout, const [
+              VersionInfoCard(),
+            ]),
           ),
-          const SizedBox(height: 8),
-          const VersionInfoCard(),
-          const SizedBox(height: 24),
-          Text(
-            l10n.resetTitle,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          ResetCard(profile: profile, l10n: l10n),
         ],
       ),
     );
   }
+
+  void _open(BuildContext context, String title, List<Widget> children) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            _SettingsCategoryScreen(title: title, children: children),
+      ),
+    );
+  }
+}
+
+class _CategoryTile extends StatelessWidget {
+  const _CategoryTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: const EdgeInsets.only(bottom: 12),
+    child: ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
+    ),
+  );
+}
+
+class _SettingsCategoryScreen extends StatelessWidget {
+  const _SettingsCategoryScreen({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: Text(title)),
+    body: ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: children.length,
+      itemBuilder: (context, index) => children[index],
+      separatorBuilder: (context, index) => const SizedBox(height: 12),
+    ),
+  );
 }
 
 class _LanguagePicker extends ConsumerWidget {

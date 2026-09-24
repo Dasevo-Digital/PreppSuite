@@ -15,13 +15,20 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 2.0.0+200
+version: 2.0.1+201
 
 environment:
   sdk: '^3.8.0'
   flutter: '^3.32.0'
 
 resolution: workspace
+
+# Flutter resolves the executable's native assets from this package.  The
+# workspace root carries the same configuration for command-line tooling.
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc
 
 dependencies:
   flutter:
@@ -32,7 +39,6 @@ dependencies:
   intl: any
   flutter_riverpod: ^3.4.2
   drift: ^2.35.0
-  drift_flutter: ^0.3.1
   # Named directly only so that core/error_text.dart can recognise a
   # raw SqliteException. Drift wraps most database errors, but not the
   # ones thrown while the database is being opened -- which is exactly

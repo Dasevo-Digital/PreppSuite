@@ -65,7 +65,12 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
     return enabled.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (_, _) => widget.child,
+      // A lock whose state cannot be read must never reveal the protected
+      // surface. Secure storage can temporarily be unavailable after an OS
+      // update or a restored device; offer recovery, but fail closed.
+      error: (_, _) => _LockStatusUnavailable(
+        onRetry: () => ref.invalidate(appLockProvider),
+      ),
       data: (isEnabled) {
         if (!isEnabled || _unlocked) return widget.child;
         final l10n = AppLocalizations.of(context)!;
@@ -120,6 +125,50 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
           ),
         );
       },
+    );
+  }
+}
+
+class _LockStatusUnavailable extends StatelessWidget {
+  const _LockStatusUnavailable({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Scaffold(
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Icon(Icons.lock_outline, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.appLockStatusUnavailableTitle,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.appLockStatusUnavailableBody,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                FilledButton(
+                  onPressed: onRetry,
+                  child: Text(l10n.appLockRetry),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

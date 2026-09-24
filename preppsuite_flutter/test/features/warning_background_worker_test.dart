@@ -5,6 +5,7 @@ import 'package:preppsuite_flutter/core/notification_service.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_background_worker.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_region_filter.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_poll_service.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_poll_status_store.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_region_store.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -180,5 +181,27 @@ void main() {
 
     expect(await db.watchAllWarnings().first, hasLength(1));
     expect(notifications.shown, isEmpty);
+  });
+
+  test('reports failure when the local data cannot be opened', () async {
+    // No injected database, so the worker has to open its own -- which in
+    // this isolate means asking for the device key and not getting one.
+    // That is the shape of an Android device that has rebooted and not yet
+    // been unlocked.
+    SharedPreferences.setMockInitialValues({'notificationsEnabled': true});
+    await const WarningRegionStore().save(
+      const WarningRegionFilter(
+        countryCode: 'DE',
+        ownRegionKey: '053340000000',
+      ),
+    );
+
+    final ok = await runWarningBackgroundPoll();
+
+    // False, not true: a run that never reached the feeds must not be
+    // filed as a completed one, or the device stops warning in silence.
+    expect(ok, isFalse);
+    final status = await const WarningPollStatusStore().load();
+    expect(status.isBlocked, isTrue);
   });
 }

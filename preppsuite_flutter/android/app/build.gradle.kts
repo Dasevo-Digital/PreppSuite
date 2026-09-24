@@ -129,6 +129,32 @@ dependencies {
     implementation("androidx.documentfile:documentfile:1.0.1")
 }
 
+// Flutter 3.44 currently writes the dev-only integration_test plugin into
+// GeneratedPluginRegistrant.java for every Android variant, but does not put
+// that plugin on a release variant's Java classpath.  Remove precisely that
+// generated block immediately before release compilation. Debug and
+// integration-test variants keep it, so device tests still register their
+// harness normally.
+tasks.matching { it.name == "compileReleaseJavaWithJavac" }.configureEach {
+    doFirst {
+        val registrant = file(
+            "src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java",
+        )
+        if (!registrant.exists()) return@doFirst
+        val source = registrant.readText()
+        val start = "    try {\n" +
+            "      flutterEngine.getPlugins().add(" +
+            "new dev.flutter.plugins.integration_test.IntegrationTestPlugin());"
+        val startIndex = source.indexOf(start)
+        if (startIndex < 0) return@doFirst
+        val endIndex = source.indexOf("    }\n", startIndex)
+        if (endIndex < 0) {
+            throw GradleException("Could not isolate the generated integration-test registration.")
+        }
+        registrant.writeText(source.removeRange(startIndex, endIndex + "    }\n".length))
+    }
+}
+
 flutter {
     source = "../.."
 }

@@ -383,8 +383,8 @@ abstract class AppLocalizations {
   /// No description provided for @errorGeneric.
   ///
   /// In en, this message translates to:
-  /// **'Something went wrong: {error}'**
-  String errorGeneric(String error);
+  /// **'An unexpected error occurred. Please try again.'**
+  String get errorGeneric;
 
   /// No description provided for @errorNoConnection.
   ///
@@ -1436,6 +1436,78 @@ abstract class AppLocalizations {
   /// **'Appearance'**
   String get settingsAppearanceTitle;
 
+  /// No description provided for @settingsCategoryWarnings.
+  ///
+  /// In en, this message translates to:
+  /// **'Warnings and places'**
+  String get settingsCategoryWarnings;
+
+  /// No description provided for @settingsCategoryWarningsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications, monitored places and refresh status'**
+  String get settingsCategoryWarningsBody;
+
+  /// No description provided for @settingsCategoryReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get settingsCategoryReminders;
+
+  /// No description provided for @settingsCategoryRemindersBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Batteries, equipment and expiry dates'**
+  String get settingsCategoryRemindersBody;
+
+  /// No description provided for @settingsCategoryAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance and language'**
+  String get settingsCategoryAppearance;
+
+  /// No description provided for @settingsCategoryAppearanceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Colour scheme and app language'**
+  String get settingsCategoryAppearanceBody;
+
+  /// No description provided for @settingsCategoryData.
+  ///
+  /// In en, this message translates to:
+  /// **'Data and security'**
+  String get settingsCategoryData;
+
+  /// No description provided for @settingsCategoryDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock, sharing, backup and reset'**
+  String get settingsCategoryDataBody;
+
+  /// No description provided for @settingsCategoryOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline and storage'**
+  String get settingsCategoryOffline;
+
+  /// No description provided for @settingsCategoryOfflineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Maps, archives and storage locations'**
+  String get settingsCategoryOfflineBody;
+
+  /// No description provided for @settingsCategoryAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About PreppSuite'**
+  String get settingsCategoryAbout;
+
+  /// No description provided for @settingsCategoryAboutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Versions of the app and local modules'**
+  String get settingsCategoryAboutBody;
+
   /// No description provided for @themeSystemOption.
   ///
   /// In en, this message translates to:
@@ -1537,6 +1609,258 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notifications'**
   String get settingsNotificationsTitle;
+
+  /// No description provided for @settingsWarningReadinessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning readiness'**
+  String get settingsWarningReadinessTitle;
+
+  /// No description provided for @settingsWarningReadinessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Checks the local setup. The operating system schedules background refreshes and does not guarantee them.'**
+  String get settingsWarningReadinessBody;
+
+  /// No description provided for @settingsWarningReadinessNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning notifications'**
+  String get settingsWarningReadinessNotifications;
+
+  /// No description provided for @settingsWarningReadinessRegions.
+  ///
+  /// In en, this message translates to:
+  /// **'Monitored regions'**
+  String get settingsWarningReadinessRegions;
+
+  /// No description provided for @settingsWarningReadinessRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Last complete refresh'**
+  String get settingsWarningReadinessRefresh;
+
+  /// No description provided for @settingsWarningReadinessEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get settingsWarningReadinessEnabled;
+
+  /// No description provided for @settingsWarningReadinessDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enabled'**
+  String get settingsWarningReadinessDisabled;
+
+  /// No description provided for @settingsWarningReadinessRegionsSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary place and {count} additional regions'**
+  String settingsWarningReadinessRegionsSet(int count);
+
+  /// No description provided for @settingsWarningReadinessRegionsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No primary place configured yet'**
+  String get settingsWarningReadinessRegionsMissing;
+
+  /// No description provided for @settingsWarningReadinessNeverUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'No complete refresh yet'**
+  String get settingsWarningReadinessNeverUpdated;
+
+  /// No description provided for @settingsWarningReadinessJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated just now'**
+  String get settingsWarningReadinessJustNow;
+
+  /// No description provided for @settingsWarningReadinessMinutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {minutes} minutes ago'**
+  String settingsWarningReadinessMinutesAgo(int minutes);
+
+  /// No description provided for @settingsWarningReadinessHoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {hours} hours ago'**
+  String settingsWarningReadinessHoursAgo(int hours);
+
+  /// No description provided for @settingsWarningReadinessDaysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {days} days ago'**
+  String settingsWarningReadinessDaysAgo(int days);
+
+  /// No description provided for @settingsWarningReadinessBlockedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Background refresh skipped'**
+  String get settingsWarningReadinessBlockedTitle;
+
+  /// No description provided for @settingsWarningReadinessBlockedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The last scheduled refresh could not open the local data. Open the app once after unlocking the device.'**
+  String get settingsWarningReadinessBlockedBody;
+
+  /// No description provided for @settingsLocalEncryptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Local encryption'**
+  String get settingsLocalEncryptionTitle;
+
+  /// No description provided for @settingsLocalEncryptionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The databases this installation keeps on this device.'**
+  String get settingsLocalEncryptionBody;
+
+  /// No description provided for @settingsLocalEncryptionStateEncrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted'**
+  String get settingsLocalEncryptionStateEncrypted;
+
+  /// No description provided for @settingsLocalEncryptionStatePlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Not encrypted'**
+  String get settingsLocalEncryptionStatePlain;
+
+  /// No description provided for @settingsLocalEncryptionStatePartial.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} databases still unencrypted'**
+  String settingsLocalEncryptionStatePartial(int count);
+
+  /// No description provided for @settingsLocalEncryptionStateRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Key unavailable'**
+  String get settingsLocalEncryptionStateRecovery;
+
+  /// No description provided for @settingsLocalEncryptionUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This build ships without an encryption library.'**
+  String get settingsLocalEncryptionUnsupported;
+
+  /// No description provided for @settingsLocalEncryptionScope.
+  ///
+  /// In en, this message translates to:
+  /// **'Not covered: PDFs, maps, ZIM archives, photos and anything you export.'**
+  String get settingsLocalEncryptionScope;
+
+  /// No description provided for @settingsLocalEncryptionTestBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Test a backup'**
+  String get settingsLocalEncryptionTestBackup;
+
+  /// No description provided for @settingsLocalEncryptionTestBackupHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reads a backup file back. Nothing is changed.'**
+  String get settingsLocalEncryptionTestBackupHint;
+
+  /// No description provided for @settingsLocalEncryptionBackupVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup read: {rows} records.'**
+  String settingsLocalEncryptionBackupVerified(int rows);
+
+  /// No description provided for @settingsLocalEncryptionBackupUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'This file could not be read as a backup of this household.'**
+  String get settingsLocalEncryptionBackupUnreadable;
+
+  /// No description provided for @settingsLocalEncryptionBackupNever.
+  ///
+  /// In en, this message translates to:
+  /// **'No backup tested yet.'**
+  String get settingsLocalEncryptionBackupNever;
+
+  /// No description provided for @settingsLocalEncryptionBackupStale.
+  ///
+  /// In en, this message translates to:
+  /// **'The last test is more than a day old.'**
+  String get settingsLocalEncryptionBackupStale;
+
+  /// No description provided for @settingsLocalEncryptionStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt local data now'**
+  String get settingsLocalEncryptionStart;
+
+  /// No description provided for @settingsLocalEncryptionConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypt now?'**
+  String get settingsLocalEncryptionConfirmTitle;
+
+  /// No description provided for @settingsLocalEncryptionConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every local database is rewritten. Keep the device powered and the app open while it runs. PreppSuite has to be restarted afterwards.'**
+  String get settingsLocalEncryptionConfirmBody;
+
+  /// No description provided for @settingsLocalEncryptionRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypting the databases. Please leave the app open.'**
+  String get settingsLocalEncryptionRunning;
+
+  /// No description provided for @settingsLocalEncryptionDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Encryption finished'**
+  String get settingsLocalEncryptionDoneTitle;
+
+  /// No description provided for @settingsLocalEncryptionDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Close PreppSuite now and open it again.'**
+  String get settingsLocalEncryptionDoneBody;
+
+  /// No description provided for @settingsLocalEncryptionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The upgrade stopped. The data is readable and unchanged.'**
+  String get settingsLocalEncryptionFailed;
+
+  /// No description provided for @localDataRecoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Local data locked'**
+  String get localDataRecoveryTitle;
+
+  /// No description provided for @localDataRecoveryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This device can no longer find the key for its local databases. The files are still there, but unreadable without it. The way back is a backup.'**
+  String get localDataRecoveryBody;
+
+  /// No description provided for @localDataRecoveryRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get localDataRecoveryRetry;
+
+  /// No description provided for @localDataRecoveryStartOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up again'**
+  String get localDataRecoveryStartOver;
+
+  /// No description provided for @localDataRecoveryStartOverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The unreadable files are renamed, not deleted, and stay where they are. PreppSuite starts with an empty household you can restore a backup into.'**
+  String get localDataRecoveryStartOverBody;
 
   /// No description provided for @settingsNotificationsToggleLabel.
   ///
@@ -5132,6 +5456,12 @@ abstract class AppLocalizations {
   /// **'Open externally'**
   String get knowledgeDocumentOpenExternal;
 
+  /// No description provided for @knowledgeDocumentContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue reading'**
+  String get knowledgeDocumentContinue;
+
   /// No description provided for @emergencyDirectoryTitle.
   ///
   /// In en, this message translates to:
@@ -5834,6 +6164,18 @@ abstract class AppLocalizations {
   /// **'Version information'**
   String get settingsVersionInfoTitle;
 
+  /// No description provided for @settingsVersionInfoFirstAid.
+  ///
+  /// In en, this message translates to:
+  /// **'First aid content'**
+  String get settingsVersionInfoFirstAid;
+
+  /// No description provided for @settingsVersionInfoFirstAidValue.
+  ///
+  /// In en, this message translates to:
+  /// **'ERC 2021 source status · 2025 review pending'**
+  String get settingsVersionInfoFirstAidValue;
+
   /// No description provided for @settingsVersionInfoApp.
   ///
   /// In en, this message translates to:
@@ -6187,6 +6529,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The app lock is turned off.'**
   String get appLockDisabled;
+
+  /// No description provided for @appLockStatusUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock status unavailable'**
+  String get appLockStatusUnavailableTitle;
+
+  /// No description provided for @appLockStatusUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The lock status cannot be read safely right now. The app stays closed until it is available again.'**
+  String get appLockStatusUnavailableBody;
+
+  /// No description provided for @appLockSettingsUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The lock status cannot be read safely right now.'**
+  String get appLockSettingsUnavailable;
+
+  /// No description provided for @appLockRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get appLockRetry;
 
   /// No description provided for @kiwixLanguageSearchHint.
   ///
@@ -8413,6 +8779,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'First aid'**
   String get firstAidTitle;
+
+  /// No description provided for @firstAidContentVersionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check guideline status'**
+  String get firstAidContentVersionTitle;
+
+  /// No description provided for @firstAidContentVersionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The guides name their sources and 2021 status. The 2025 ERC Guidelines require a professional, guide-by-guide review.'**
+  String get firstAidContentVersionBody;
 
   /// No description provided for @firstAidEntryHint.
   ///

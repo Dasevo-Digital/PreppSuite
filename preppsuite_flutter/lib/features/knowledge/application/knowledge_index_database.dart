@@ -1,9 +1,8 @@
 import 'dart:io';
 
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
-
 import '../../../core/app_database_directory.dart';
+import '../../../core/local_database_encryption.dart';
 import 'german_stemmer.dart';
 import 'zim_store.dart' show legacyArchiveId;
 
@@ -26,12 +25,7 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   static const _compactFormat = 'fts5-terms-v2';
 
   KnowledgeIndexDatabase(String archiveId)
-    : super(
-        driftDatabase(
-          name: fileNameFor(archiveId),
-          native: DriftNativeOptions(databaseDirectory: appDatabaseDirectory),
-        ),
-      );
+    : super(LocalDatabaseEncryption.instance.open(fileNameFor(archiveId)));
 
   KnowledgeIndexDatabase.forTesting(super.executor);
 
@@ -49,8 +43,8 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   /// been taken out of the library.
   ///
   /// The file rather than the contents: nothing will ever reach this index
-  /// again, and it is the largest thing the app writes. `drift_flutter`
-  /// puts it in the documents directory under the name above; the two
+  /// again, and it is the largest thing the app writes. The native executor
+  /// puts it in the app-private directory under the name above; the two
   /// journal files beside it go with it.
   static Future<void> deleteFor(String archiveId) async {
     final base = await _databasePath(archiveId);

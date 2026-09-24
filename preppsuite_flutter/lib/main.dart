@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
+import 'core/local_database_encryption.dart';
 import 'core/portable_data.dart';
 import 'features/inventory/application/open_food_facts_service.dart';
 
@@ -28,6 +29,15 @@ void main(List<String> args) async {
   // and it cannot stop startup — the worst it does is decide that this
   // is an ordinary installation.
   await startPortableData();
+
+  // Establish the data-key state before any provider can open Drift. New
+  // households start encrypted; existing ones remain recoverably readable
+  // until Settings has created a backup and starts the explicit upgrade.
+  //
+  // It never throws out of here. A device that cannot hand over the key
+  // right now leaves the app in recovery, where `LocalDataGate` explains
+  // it -- a crash before `runApp` would leave nothing at all.
+  await LocalDatabaseEncryption.instance.initializeOrMarkUnavailable();
 
   OpenFoodFactsService.configure();
 

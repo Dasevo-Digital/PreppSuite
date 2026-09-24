@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -97,25 +98,78 @@ class _PdfReader extends StatelessWidget {
   );
 }
 
-class _TextReader extends StatelessWidget {
+class _TextReader extends StatefulWidget {
   const _TextReader({required this.document});
 
   final PersonalDocument document;
 
   @override
+  State<_TextReader> createState() => _TextReaderState();
+}
+
+class _TextReaderState extends State<_TextReader> {
+  final _scroll = ScrollController();
+  var _restored = false;
+  var _lastSaved = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastSaved = widget.document.readerOffset;
+    _scroll.addListener(_saveIfNeeded);
+  }
+
+  @override
+  void dispose() {
+    _scroll.removeListener(_saveIfNeeded);
+    unawaited(_save(force: true));
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _restorePosition() {
+    if (_restored || !_scroll.hasClients) return;
+    _restored = true;
+    final offset = widget.document.readerOffset
+        .clamp(0, _scroll.position.maxScrollExtent)
+        .toDouble();
+    if (offset > 0) _scroll.jumpTo(offset);
+  }
+
+  void _saveIfNeeded() {
+    if ((_scroll.offset - _lastSaved).abs() >= 240) {
+      unawaited(_save());
+    }
+  }
+
+  Future<void> _save({bool force = false}) async {
+    if (!_scroll.hasClients) return;
+    final offset = _scroll.offset;
+    if (!force && (offset - _lastSaved).abs() < 240) return;
+    _lastSaved = offset;
+    await const PersonalDocumentStore().updateReaderOffset(
+      widget.document.id,
+      offset,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) => FutureBuilder(
-    future: PersonalDocumentIndexer.readForReader(document),
+    future: PersonalDocumentIndexer.readForReader(widget.document),
     builder: (context, snapshot) {
       if (snapshot.connectionState != ConnectionState.done) {
         return const Center(child: CircularProgressIndicator());
       }
       final text = snapshot.data;
       if (snapshot.hasError || text == null || text.isEmpty) {
-        return _ReaderFailure(document: document);
+        return _ReaderFailure(document: widget.document);
       }
+      WidgetsBinding.instance.addPostFrameCallback((_) => _restorePosition());
       return Scrollbar(
+        controller: _scroll,
         child: SelectionArea(
           child: ListView(
+            controller: _scroll,
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 48),
             children: [
               Text(

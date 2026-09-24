@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../core/geolocation_service.dart';
+import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../shelters/application/shelter_l10n.dart';
 import '../application/offline_map_providers.dart';
@@ -101,7 +102,11 @@ class _NearbyScreenState extends ConsumerState<NearbyScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('$error')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(describeError(AppLocalizations.of(context)!, error)),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _locating = false);

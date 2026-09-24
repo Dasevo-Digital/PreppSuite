@@ -6,3 +6,11 @@ environment:
 
 workspace:
   - preppsuite_flutter
+
+# The local databases contain household and emergency data.  sqlite3.dart
+# fetches the matching, signed SQLite3MultipleCiphers asset for every native
+# release target through its build hook.
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/geolocation_service.dart';
+import '../../../core/error_text.dart';
 import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/daylight_l10n.dart';
@@ -73,7 +74,11 @@ class _DaylightScreenState extends State<DaylightScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('$error')));
+        ).showSnackBar(
+          SnackBar(
+            content: Text(describeError(AppLocalizations.of(context)!, error)),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _locating = false);

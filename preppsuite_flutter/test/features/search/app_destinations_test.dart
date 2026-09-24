@@ -87,6 +87,7 @@ void main() {
       'ArticleScreen',
       'FirstAidGuideScreen',
       'FirstAidVideoScreen',
+      'PersonalDocumentReaderScreen',
       'PhotoEditorScreen',
       'PersonalPlacesScreen',
       // Needs a camera.

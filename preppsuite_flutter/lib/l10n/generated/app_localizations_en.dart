@@ -169,9 +169,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fieldRequired => 'This field is required.';
 
   @override
-  String errorGeneric(String error) {
-    return 'Something went wrong: $error';
-  }
+  String get errorGeneric => 'An unexpected error occurred. Please try again.';
 
   @override
   String get errorNoConnection =>
@@ -777,6 +775,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsAppearanceTitle => 'Appearance';
 
   @override
+  String get settingsCategoryWarnings => 'Warnings and places';
+
+  @override
+  String get settingsCategoryWarningsBody =>
+      'Notifications, monitored places and refresh status';
+
+  @override
+  String get settingsCategoryReminders => 'Reminders';
+
+  @override
+  String get settingsCategoryRemindersBody =>
+      'Batteries, equipment and expiry dates';
+
+  @override
+  String get settingsCategoryAppearance => 'Appearance and language';
+
+  @override
+  String get settingsCategoryAppearanceBody => 'Colour scheme and app language';
+
+  @override
+  String get settingsCategoryData => 'Data and security';
+
+  @override
+  String get settingsCategoryDataBody => 'Lock, sharing, backup and reset';
+
+  @override
+  String get settingsCategoryOffline => 'Offline and storage';
+
+  @override
+  String get settingsCategoryOfflineBody =>
+      'Maps, archives and storage locations';
+
+  @override
+  String get settingsCategoryAbout => 'About PreppSuite';
+
+  @override
+  String get settingsCategoryAboutBody =>
+      'Versions of the app and local modules';
+
+  @override
   String get themeSystemOption => 'System';
 
   @override
@@ -828,6 +866,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsNotificationsTitle => 'Notifications';
+
+  @override
+  String get settingsWarningReadinessTitle => 'Warning readiness';
+
+  @override
+  String get settingsWarningReadinessBody =>
+      'Checks the local setup. The operating system schedules background refreshes and does not guarantee them.';
+
+  @override
+  String get settingsWarningReadinessNotifications => 'Warning notifications';
+
+  @override
+  String get settingsWarningReadinessRegions => 'Monitored regions';
+
+  @override
+  String get settingsWarningReadinessRefresh => 'Last complete refresh';
+
+  @override
+  String get settingsWarningReadinessEnabled => 'Enabled';
+
+  @override
+  String get settingsWarningReadinessDisabled => 'Not enabled';
+
+  @override
+  String settingsWarningReadinessRegionsSet(int count) {
+    return 'Primary place and $count additional regions';
+  }
+
+  @override
+  String get settingsWarningReadinessRegionsMissing =>
+      'No primary place configured yet';
+
+  @override
+  String get settingsWarningReadinessNeverUpdated => 'No complete refresh yet';
+
+  @override
+  String get settingsWarningReadinessJustNow => 'Updated just now';
+
+  @override
+  String settingsWarningReadinessMinutesAgo(int minutes) {
+    return 'Updated $minutes minutes ago';
+  }
+
+  @override
+  String settingsWarningReadinessHoursAgo(int hours) {
+    return 'Updated $hours hours ago';
+  }
+
+  @override
+  String settingsWarningReadinessDaysAgo(int days) {
+    return 'Updated $days days ago';
+  }
+
+  @override
+  String get settingsWarningReadinessBlockedTitle =>
+      'Background refresh skipped';
+
+  @override
+  String get settingsWarningReadinessBlockedBody =>
+      'The last scheduled refresh could not open the local data. Open the app once after unlocking the device.';
+
+  @override
+  String get settingsLocalEncryptionTitle => 'Local encryption';
+
+  @override
+  String get settingsLocalEncryptionBody =>
+      'The databases this installation keeps on this device.';
+
+  @override
+  String get settingsLocalEncryptionStateEncrypted => 'Encrypted';
+
+  @override
+  String get settingsLocalEncryptionStatePlain => 'Not encrypted';
+
+  @override
+  String settingsLocalEncryptionStatePartial(int count) {
+    return '$count databases still unencrypted';
+  }
+
+  @override
+  String get settingsLocalEncryptionStateRecovery => 'Key unavailable';
+
+  @override
+  String get settingsLocalEncryptionUnsupported =>
+      'This build ships without an encryption library.';
+
+  @override
+  String get settingsLocalEncryptionScope =>
+      'Not covered: PDFs, maps, ZIM archives, photos and anything you export.';
+
+  @override
+  String get settingsLocalEncryptionTestBackup => 'Test a backup';
+
+  @override
+  String get settingsLocalEncryptionTestBackupHint =>
+      'Reads a backup file back. Nothing is changed.';
+
+  @override
+  String settingsLocalEncryptionBackupVerified(int rows) {
+    return 'Backup read: $rows records.';
+  }
+
+  @override
+  String get settingsLocalEncryptionBackupUnreadable =>
+      'This file could not be read as a backup of this household.';
+
+  @override
+  String get settingsLocalEncryptionBackupNever => 'No backup tested yet.';
+
+  @override
+  String get settingsLocalEncryptionBackupStale =>
+      'The last test is more than a day old.';
+
+  @override
+  String get settingsLocalEncryptionStart => 'Encrypt local data now';
+
+  @override
+  String get settingsLocalEncryptionConfirmTitle => 'Encrypt now?';
+
+  @override
+  String get settingsLocalEncryptionConfirmBody =>
+      'Every local database is rewritten. Keep the device powered and the app open while it runs. PreppSuite has to be restarted afterwards.';
+
+  @override
+  String get settingsLocalEncryptionRunning =>
+      'Encrypting the databases. Please leave the app open.';
+
+  @override
+  String get settingsLocalEncryptionDoneTitle => 'Encryption finished';
+
+  @override
+  String get settingsLocalEncryptionDoneBody =>
+      'Close PreppSuite now and open it again.';
+
+  @override
+  String get settingsLocalEncryptionFailed =>
+      'The upgrade stopped. The data is readable and unchanged.';
+
+  @override
+  String get localDataRecoveryTitle => 'Local data locked';
+
+  @override
+  String get localDataRecoveryBody =>
+      'This device can no longer find the key for its local databases. The files are still there, but unreadable without it. The way back is a backup.';
+
+  @override
+  String get localDataRecoveryRetry => 'Try again';
+
+  @override
+  String get localDataRecoveryStartOver => 'Set up again';
+
+  @override
+  String get localDataRecoveryStartOverBody =>
+      'The unreadable files are renamed, not deleted, and stay where they are. PreppSuite starts with an empty household you can restore a backup into.';
 
   @override
   String get settingsNotificationsToggleLabel => 'Notify me about new warnings';
@@ -3019,6 +3211,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get knowledgeDocumentOpenExternal => 'Open externally';
 
   @override
+  String get knowledgeDocumentContinue => 'Continue reading';
+
+  @override
   String get emergencyDirectoryTitle => 'Emergency calls, contacts & radio';
 
   @override
@@ -3437,6 +3632,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsVersionInfoTitle => 'Version information';
 
   @override
+  String get settingsVersionInfoFirstAid => 'First aid content';
+
+  @override
+  String get settingsVersionInfoFirstAidValue =>
+      'ERC 2021 source status · 2025 review pending';
+
+  @override
   String get settingsVersionInfoApp => 'PreppSuite app';
 
   @override
@@ -3651,6 +3853,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLockDisabled => 'The app lock is turned off.';
+
+  @override
+  String get appLockStatusUnavailableTitle => 'Lock status unavailable';
+
+  @override
+  String get appLockStatusUnavailableBody =>
+      'The lock status cannot be read safely right now. The app stays closed until it is available again.';
+
+  @override
+  String get appLockSettingsUnavailable =>
+      'The lock status cannot be read safely right now.';
+
+  @override
+  String get appLockRetry => 'Try again';
 
   @override
   String get kiwixLanguageSearchHint => 'Search language';
@@ -4985,6 +5201,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstAidTitle => 'First aid';
+
+  @override
+  String get firstAidContentVersionTitle => 'Check guideline status';
+
+  @override
+  String get firstAidContentVersionBody =>
+      'The guides name their sources and 2021 status. The 2025 ERC Guidelines require a professional, guide-by-guide review.';
 
   @override
   String get firstAidEntryHint =>

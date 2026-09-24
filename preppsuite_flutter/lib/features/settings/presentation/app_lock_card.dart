@@ -12,46 +12,52 @@ class AppLockCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final enabled = ref
-        .watch(appLockProvider)
-        .when(
-          data: (value) => value,
-          loading: () => false,
-          error: (_, _) => false,
-        );
+    final status = ref.watch(appLockProvider);
+    final enabled = status.when(
+      data: (value) => value,
+      loading: () => false,
+      error: (_, _) => false,
+    );
+    final unavailable = status.hasError;
     return Card(
       child: ListTile(
         leading: Icon(enabled ? Icons.lock_outline : Icons.lock_open_outlined),
         title: Text(l10n.appLockTitle),
         subtitle: Text(
-          enabled ? l10n.appLockEnabledHint : l10n.appLockDisabledHint,
+          unavailable
+              ? l10n.appLockSettingsUnavailable
+              : enabled
+              ? l10n.appLockEnabledHint
+              : l10n.appLockDisabledHint,
         ),
         trailing: Switch(
           value: enabled,
-          onChanged: (value) async {
-            if (value) {
-              final passphrase = await _choosePassphrase(context);
-              if (passphrase == null || !context.mounted) return;
-              await ref.read(appLockProvider.notifier).enable(passphrase);
-              if (context.mounted) _show(context, l10n.appLockEnabled);
-              return;
-            }
+          onChanged: unavailable || status.isLoading
+              ? null
+              : (value) async {
+                  if (value) {
+                    final passphrase = await _choosePassphrase(context);
+                    if (passphrase == null || !context.mounted) return;
+                    await ref.read(appLockProvider.notifier).enable(passphrase);
+                    if (context.mounted) _show(context, l10n.appLockEnabled);
+                    return;
+                  }
 
-            final passphrase = await _askPassphrase(
-              context,
-              title: l10n.appLockDisableTitle,
-              confirmLabel: l10n.appLockDisableButton,
-            );
-            if (passphrase == null || !context.mounted) return;
-            final verified = await AppLockStore().verify(passphrase);
-            if (!context.mounted) return;
-            if (!verified) {
-              _show(context, l10n.appLockIncorrectPassphrase);
-              return;
-            }
-            await ref.read(appLockProvider.notifier).disable();
-            if (context.mounted) _show(context, l10n.appLockDisabled);
-          },
+                  final passphrase = await _askPassphrase(
+                    context,
+                    title: l10n.appLockDisableTitle,
+                    confirmLabel: l10n.appLockDisableButton,
+                  );
+                  if (passphrase == null || !context.mounted) return;
+                  final verified = await AppLockStore().verify(passphrase);
+                  if (!context.mounted) return;
+                  if (!verified) {
+                    _show(context, l10n.appLockIncorrectPassphrase);
+                    return;
+                  }
+                  await ref.read(appLockProvider.notifier).disable();
+                  if (context.mounted) _show(context, l10n.appLockDisabled);
+                },
         ),
       ),
     );

@@ -58,13 +58,11 @@ void main() {
     });
   });
 
-  test('nothing named keeps the technical text', () {
-    // Deliberately not softened away: an unknown failure with no detail
-    // left is one nobody can report and nobody can look up.
+  test('an unknown failure does not disclose technical text', () {
     final described = describeError(de, StateError('kaputt'));
 
-    expect(described, contains('kaputt'));
-    expect(described, de.errorGeneric('Bad state: kaputt'));
+    expect(described, de.errorGeneric);
+    expect(described, isNot(contains('kaputt')));
   });
 
   test('none of the named ones leak the exception text', () {

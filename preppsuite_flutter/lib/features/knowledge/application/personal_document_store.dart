@@ -15,6 +15,7 @@ class PersonalDocument {
     required this.addedAt,
     this.indexStatus = 'notIndexed',
     this.indexedCharacters = 0,
+    this.readerOffset = 0,
   });
 
   final String id;
@@ -25,6 +26,11 @@ class PersonalDocument {
   /// `ready`, `noText`, `failed`, `tooLarge`, or `notIndexed`.
   final String indexStatus;
   final int indexedCharacters;
+
+  /// Last local scroll position in a text document. This is deliberately a
+  /// pixel offset only: no passage, annotation or document text is copied
+  /// into preferences merely to offer "continue reading".
+  final double readerOffset;
 
   bool get isSearchable => indexStatus == 'ready';
 
@@ -43,6 +49,7 @@ class PersonalDocument {
     'addedAt': addedAt.toUtc().toIso8601String(),
     'indexStatus': indexStatus,
     'indexedCharacters': indexedCharacters,
+    'readerOffset': readerOffset,
   };
 
   static PersonalDocument? fromJson(Object? value) {
@@ -68,18 +75,25 @@ class PersonalDocument {
       indexedCharacters: value['indexedCharacters'] is int
           ? value['indexedCharacters'] as int
           : 0,
+      readerOffset: value['readerOffset'] is num
+          ? (value['readerOffset'] as num).toDouble().clamp(0, double.infinity)
+          : 0,
     );
   }
 
-  PersonalDocument copyWith({String? indexStatus, int? indexedCharacters}) =>
-      PersonalDocument(
-        id: id,
-        location: location,
-        label: label,
-        addedAt: addedAt,
-        indexStatus: indexStatus ?? this.indexStatus,
-        indexedCharacters: indexedCharacters ?? this.indexedCharacters,
-      );
+  PersonalDocument copyWith({
+    String? indexStatus,
+    int? indexedCharacters,
+    double? readerOffset,
+  }) => PersonalDocument(
+    id: id,
+    location: location,
+    label: label,
+    addedAt: addedAt,
+    indexStatus: indexStatus ?? this.indexStatus,
+    indexedCharacters: indexedCharacters ?? this.indexedCharacters,
+    readerOffset: readerOffset ?? this.readerOffset,
+  );
 }
 
 class PersonalDocumentStore {
@@ -154,6 +168,14 @@ class PersonalDocumentStore {
     ];
     await _save(updated);
     return updated;
+  }
+
+  Future<void> updateReaderOffset(String id, double offset) async {
+    final updated = [
+      for (final item in await load())
+        if (item.id == id) item.copyWith(readerOffset: offset) else item,
+    ];
+    await _save(updated);
   }
 
   Future<void> _save(List<PersonalDocument> documents) async {

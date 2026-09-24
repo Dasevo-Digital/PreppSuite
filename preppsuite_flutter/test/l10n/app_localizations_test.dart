@@ -17,10 +17,9 @@ void main() {
     ]) {
       final locale = l10n.localeName;
 
-      test('[$locale] errorGeneric interpolates the error text', () {
-        final result = l10n.errorGeneric('boom');
+      test('[$locale] errorGeneric is safe generic copy', () {
+        final result = l10n.errorGeneric;
         expect(result, isNotEmpty);
-        expect(result, contains('boom'));
       });
 
       test('[$locale] scannedBarcodeLabel interpolates the barcode', () {

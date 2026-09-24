@@ -54,7 +54,50 @@ class BackupService {
     });
   }
 
+  /// Opens a backup without changing anything, and says what is in it.
+  ///
+  /// Null for every way it can fail to be this household's backup: not a
+  /// backup file, wrong passphrase, damaged payload, or somebody else's
+  /// household. The caller cannot tell those apart, deliberately — a file
+  /// picker plus a passphrase field is not a place to explain which half
+  /// of the two was wrong.
+  ///
+  /// This is what "verified backup" means before the at-rest encryption
+  /// upgrade: not that a file exists, but that this installation could
+  /// read a household back out of it.
+  Future<BackupCheck?> verify(
+    String raw,
+    String householdId,
+    String passphrase,
+  ) async {
+    final opened = await _open(raw, householdId, passphrase);
+    if (opened == null) return null;
+    return BackupCheck(rows: opened.$1.rowCount);
+  }
+
   Future<int?> restore(
+    String raw,
+    String householdId,
+    String passphrase,
+  ) async {
+    final opened = await _open(raw, householdId, passphrase);
+    if (opened == null) return null;
+    final (snapshot, key, device) = opened;
+    await _restorePlan(device, key);
+
+    // The same merge as a shared folder, a QR chain and a handover: a
+    // row is taken only when it is newer than what is held, so restoring
+    // an old backup over a current household changes nothing rather than
+    // winding it back.
+    return applyHouseholdSnapshot(database, snapshot);
+  }
+
+  /// The one place that turns a file and a passphrase into a household.
+  ///
+  /// Shared by [verify] and [restore] so that "the app could read this
+  /// backup" and "the app restored this backup" can never mean two
+  /// different amounts of checking.
+  Future<(DeviceSnapshot, FolderKey, Object?)?> _open(
     String raw,
     String householdId,
     String passphrase,
@@ -80,13 +123,7 @@ class BackupService {
     if (clear == null) return null;
     final snapshot = DeviceSnapshot.decode(clear);
     if (snapshot == null || snapshot.householdId != householdId) return null;
-    await _restorePlan(envelope['device'], key);
-
-    // The same merge as a shared folder, a QR chain and a handover: a
-    // row is taken only when it is newer than what is held, so restoring
-    // an old backup over a current household changes nothing rather than
-    // winding it back.
-    return applyHouseholdSnapshot(database, snapshot);
+    return (snapshot, key, envelope['device']);
   }
 
   /// A backup written before this section existed, or one whose plan is
@@ -103,4 +140,13 @@ class BackupService {
       return;
     }
   }
+}
+
+/// What a backup was found to contain, for a check that changes nothing.
+class BackupCheck {
+  const BackupCheck({required this.rows});
+
+  /// Rows the file would restore. Shown to the person so that a backup of
+  /// an empty household cannot pass as a safety net for a full one.
+  final int rows;
 }

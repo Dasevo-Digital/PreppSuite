@@ -172,9 +172,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get fieldRequired => 'Dieses Feld darf nicht leer sein.';
 
   @override
-  String errorGeneric(String error) {
-    return 'Es ist ein Fehler aufgetreten: $error';
-  }
+  String get errorGeneric =>
+      'Es ist ein unerwarteter Fehler aufgetreten. Versuch es noch einmal.';
 
   @override
   String get errorNoConnection =>
@@ -781,6 +780,45 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsAppearanceTitle => 'Erscheinungsbild';
 
   @override
+  String get settingsCategoryWarnings => 'Warnungen und Orte';
+
+  @override
+  String get settingsCategoryWarningsBody =>
+      'Benachrichtigungen, Warnorte und Aktualisierungsstatus';
+
+  @override
+  String get settingsCategoryReminders => 'Erinnerungen';
+
+  @override
+  String get settingsCategoryRemindersBody => 'Akkus, Geräte und Ablaufdaten';
+
+  @override
+  String get settingsCategoryAppearance => 'Darstellung und Sprache';
+
+  @override
+  String get settingsCategoryAppearanceBody => 'Farbschema und App-Sprache';
+
+  @override
+  String get settingsCategoryData => 'Daten und Sicherheit';
+
+  @override
+  String get settingsCategoryDataBody =>
+      'Sperre, Freigabe, Sicherung und Zurücksetzen';
+
+  @override
+  String get settingsCategoryOffline => 'Offline und Speicher';
+
+  @override
+  String get settingsCategoryOfflineBody => 'Karten, Archive und Speicherorte';
+
+  @override
+  String get settingsCategoryAbout => 'Über PreppSuite';
+
+  @override
+  String get settingsCategoryAboutBody =>
+      'Versionen der App und lokaler Module';
+
+  @override
   String get themeSystemOption => 'System';
 
   @override
@@ -833,6 +871,165 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsNotificationsTitle => 'Benachrichtigungen';
+
+  @override
+  String get settingsWarningReadinessTitle => 'Warnbereitschaft';
+
+  @override
+  String get settingsWarningReadinessBody =>
+      'Prüft die lokale Einrichtung. Hintergrundaktualisierungen werden vom Betriebssystem geplant und sind nicht garantiert.';
+
+  @override
+  String get settingsWarningReadinessNotifications => 'Warnbenachrichtigungen';
+
+  @override
+  String get settingsWarningReadinessRegions => 'Beobachtete Regionen';
+
+  @override
+  String get settingsWarningReadinessRefresh =>
+      'Letzte vollständige Aktualisierung';
+
+  @override
+  String get settingsWarningReadinessEnabled => 'Aktiviert';
+
+  @override
+  String get settingsWarningReadinessDisabled => 'Nicht aktiviert';
+
+  @override
+  String settingsWarningReadinessRegionsSet(int count) {
+    return 'Hauptort und $count weitere Regionen';
+  }
+
+  @override
+  String get settingsWarningReadinessRegionsMissing =>
+      'Noch kein Hauptort festgelegt';
+
+  @override
+  String get settingsWarningReadinessNeverUpdated =>
+      'Noch keine vollständige Aktualisierung';
+
+  @override
+  String get settingsWarningReadinessJustNow => 'Gerade eben aktualisiert';
+
+  @override
+  String settingsWarningReadinessMinutesAgo(int minutes) {
+    return 'Vor $minutes Minuten aktualisiert';
+  }
+
+  @override
+  String settingsWarningReadinessHoursAgo(int hours) {
+    return 'Vor $hours Stunden aktualisiert';
+  }
+
+  @override
+  String settingsWarningReadinessDaysAgo(int days) {
+    return 'Vor $days Tagen aktualisiert';
+  }
+
+  @override
+  String get settingsWarningReadinessBlockedTitle =>
+      'Hintergrundabruf ausgesetzt';
+
+  @override
+  String get settingsWarningReadinessBlockedBody =>
+      'Der letzte geplante Abruf konnte die lokalen Daten nicht öffnen. Nach dem Entsperren des Geräts die App einmal öffnen.';
+
+  @override
+  String get settingsLocalEncryptionTitle => 'Lokale Verschlüsselung';
+
+  @override
+  String get settingsLocalEncryptionBody =>
+      'Die Datenbanken dieser Installation auf diesem Gerät.';
+
+  @override
+  String get settingsLocalEncryptionStateEncrypted => 'Verschlüsselt';
+
+  @override
+  String get settingsLocalEncryptionStatePlain => 'Nicht verschlüsselt';
+
+  @override
+  String settingsLocalEncryptionStatePartial(int count) {
+    return 'Noch $count Datenbanken unverschlüsselt';
+  }
+
+  @override
+  String get settingsLocalEncryptionStateRecovery =>
+      'Schlüssel nicht verfügbar';
+
+  @override
+  String get settingsLocalEncryptionUnsupported =>
+      'Diese Fassung enthält keine Verschlüsselungsbibliothek.';
+
+  @override
+  String get settingsLocalEncryptionScope =>
+      'Nicht betroffen: PDFs, Karten, ZIM-Archive, Fotos und alles, was du exportierst.';
+
+  @override
+  String get settingsLocalEncryptionTestBackup => 'Sicherung prüfen';
+
+  @override
+  String get settingsLocalEncryptionTestBackupHint =>
+      'Liest eine Sicherungsdatei zurück. Es wird nichts verändert.';
+
+  @override
+  String settingsLocalEncryptionBackupVerified(int rows) {
+    return 'Sicherung gelesen: $rows Datensätze.';
+  }
+
+  @override
+  String get settingsLocalEncryptionBackupUnreadable =>
+      'Diese Datei liess sich nicht als Sicherung dieses Haushalts lesen.';
+
+  @override
+  String get settingsLocalEncryptionBackupNever =>
+      'Noch keine Sicherung geprüft.';
+
+  @override
+  String get settingsLocalEncryptionBackupStale =>
+      'Die letzte Prüfung ist über einen Tag her.';
+
+  @override
+  String get settingsLocalEncryptionStart => 'Lokale Daten jetzt verschlüsseln';
+
+  @override
+  String get settingsLocalEncryptionConfirmTitle => 'Jetzt verschlüsseln?';
+
+  @override
+  String get settingsLocalEncryptionConfirmBody =>
+      'Alle lokalen Datenbanken werden neu geschrieben. Das Gerät sollte dabei am Strom sein und die App nicht geschlossen werden. Danach muss PreppSuite neu gestartet werden.';
+
+  @override
+  String get settingsLocalEncryptionRunning =>
+      'Die Datenbanken werden verschlüsselt. Bitte die App nicht schliessen.';
+
+  @override
+  String get settingsLocalEncryptionDoneTitle =>
+      'Verschlüsselung abgeschlossen';
+
+  @override
+  String get settingsLocalEncryptionDoneBody =>
+      'PreppSuite jetzt schliessen und neu öffnen.';
+
+  @override
+  String get settingsLocalEncryptionFailed =>
+      'Die Verschlüsselung wurde abgebrochen. Die Daten sind unverändert lesbar.';
+
+  @override
+  String get localDataRecoveryTitle => 'Lokale Daten gesperrt';
+
+  @override
+  String get localDataRecoveryBody =>
+      'Dieses Gerät findet den Schlüssel für die lokalen Datenbanken nicht mehr. Die Dateien sind noch da, ohne den Schlüssel aber nicht lesbar. Der Weg zurück führt über eine Sicherung.';
+
+  @override
+  String get localDataRecoveryRetry => 'Erneut versuchen';
+
+  @override
+  String get localDataRecoveryStartOver => 'Neu einrichten';
+
+  @override
+  String get localDataRecoveryStartOverBody =>
+      'Die unlesbaren Dateien werden nicht gelöscht, sondern umbenannt und bleiben liegen. PreppSuite startet mit einem leeren Haushalt, in den du eine Sicherung zurückspielen kannst.';
 
   @override
   String get settingsNotificationsToggleLabel =>
@@ -3040,6 +3237,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get knowledgeDocumentOpenExternal => 'Extern öffnen';
 
   @override
+  String get knowledgeDocumentContinue => 'Weiterlesen';
+
+  @override
   String get emergencyDirectoryTitle => 'Notruf, Kontakte & Funk';
 
   @override
@@ -3461,6 +3661,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsVersionInfoTitle => 'Versionsinfo';
 
   @override
+  String get settingsVersionInfoFirstAid => 'Erste-Hilfe-Inhalte';
+
+  @override
+  String get settingsVersionInfoFirstAidValue =>
+      'Quellenstand ERC 2021 · Prüfung 2025 offen';
+
+  @override
   String get settingsVersionInfoApp => 'PreppSuite-App';
 
   @override
@@ -3675,6 +3882,20 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get appLockDisabled => 'Die App-Sperre ist ausgeschaltet.';
+
+  @override
+  String get appLockStatusUnavailableTitle => 'Sperrstatus nicht verfügbar';
+
+  @override
+  String get appLockStatusUnavailableBody =>
+      'Der Sperrstatus kann gerade nicht sicher gelesen werden. Die App bleibt geschlossen, bis der Status wieder verfügbar ist.';
+
+  @override
+  String get appLockSettingsUnavailable =>
+      'Der Sperrstatus kann gerade nicht sicher gelesen werden.';
+
+  @override
+  String get appLockRetry => 'Erneut versuchen';
 
   @override
   String get kiwixLanguageSearchHint => 'Sprache suchen';
@@ -5015,6 +5236,13 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get firstAidTitle => 'Erste Hilfe';
+
+  @override
+  String get firstAidContentVersionTitle => 'Leitlinienstand prüfen';
+
+  @override
+  String get firstAidContentVersionBody =>
+      'Die Anleitungen sind mit Quellen und Stand 2021 gekennzeichnet. Die ERC-Leitlinien 2025 müssen fachlich für jede Anleitung geprüft werden.';
 
   @override
   String get firstAidEntryHint =>

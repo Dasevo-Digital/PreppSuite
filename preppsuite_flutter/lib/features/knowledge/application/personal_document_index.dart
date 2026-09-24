@@ -5,13 +5,12 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:drift/drift.dart';
-import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf_document/pdf_document.dart';
 import 'package:pdf_graphics/pdf_graphics.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/app_database_directory.dart';
+import '../../../core/local_database_encryption.dart';
 import '../../../core/platform_storage.dart';
 import '../../maps/application/map_archive_access.dart';
 import 'knowledge_index_database.dart' show fts5QueryFor;
@@ -29,10 +28,7 @@ class PersonalDocumentIndex extends _$PersonalDocumentIndex {
 
   PersonalDocumentIndex()
     : super(
-        driftDatabase(
-          name: 'preppsuite_personal_documents',
-          native: DriftNativeOptions(databaseDirectory: appDatabaseDirectory),
-        ),
+        LocalDatabaseEncryption.instance.open('preppsuite_personal_documents'),
       );
 
   PersonalDocumentIndex.forTesting(super.executor);
