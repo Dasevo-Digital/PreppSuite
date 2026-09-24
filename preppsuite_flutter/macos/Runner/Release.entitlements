@@ -17,6 +17,14 @@
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
 
+	<!-- flutter_secure_storage stores the local database key in Keychain.
+	     On a sandboxed macOS app Keychain Sharing has to be declared even
+	     when no group is shared with another app.  Without this empty list
+	     SecItemAdd fails with errSecMissingEntitlement (-34018) before Flutter
+	     can draw its first frame. -->
+	<key>keychain-access-groups</key>
+	<array/>
+
 	<!-- What the user picks in a panel, and the bookmarks made from it. -->
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>

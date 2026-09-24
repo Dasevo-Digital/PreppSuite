@@ -239,9 +239,19 @@ class LocalDatabaseEncryption {
       // from somebody over a key it does not need yet. It runs
       // unencrypted, and the settings card says so in those words.
       final folder = _directory;
-      _mode = folder == null || await _holdsEncryptedDatabase(folder)
-          ? LocalDatabaseEncryptionMode.recoveryRequired
-          : LocalDatabaseEncryptionMode.plaintext;
+      try {
+        _mode = folder == null || await _holdsEncryptedDatabase(folder)
+            ? LocalDatabaseEncryptionMode.recoveryRequired
+            : LocalDatabaseEncryptionMode.plaintext;
+      } on Object {
+        // This is the last line of defence for startup.  A failing platform
+        // key store can coincide with a temporarily inaccessible application
+        // folder (for example while a macOS container is first created).
+        // Keep the app visible and protect the household until its state can
+        // be checked again; never turn an infrastructure failure into a
+        // blank window before runApp().
+        _mode = LocalDatabaseEncryptionMode.recoveryRequired;
+      }
     }
   }
 

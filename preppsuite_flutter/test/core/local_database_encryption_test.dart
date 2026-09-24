@@ -119,20 +119,20 @@ void main() {
     });
 
     test('an existing plaintext household is left alone at first', () async {
-      _writeHousehold(pathTo('preppsuite'), 'Marco');
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
 
       final encryption = LocalDatabaseEncryption(storage: storage);
       await encryption.initialize(directory: directory);
 
       expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
-      expect(_readHousehold(pathTo('preppsuite')), 'Marco');
+      expect(_readHousehold(pathTo('preppsuite')), 'Beispielperson');
       expect(await encryption.pendingPlaintextDatabases(), ['preppsuite']);
     });
 
     test(
       'refuses an upgrade when the running SQLite lacks a cipher',
       () async {
-        _writeHousehold(pathTo('preppsuite'), 'Marco');
+        _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
 
         final encryption = LocalDatabaseEncryption(storage: storage);
         await encryption.initialize(directory: directory);
@@ -142,7 +142,7 @@ void main() {
           encryption.migrateExistingDatabases(),
           throwsA(isA<UnsupportedError>()),
         );
-        expect(_readHousehold(pathTo('preppsuite')), 'Marco');
+        expect(_readHousehold(pathTo('preppsuite')), 'Beispielperson');
       },
       skip: LocalDatabaseEncryption.cipherAvailable ? 'Has a cipher.' : null,
     );
@@ -150,7 +150,7 @@ void main() {
 
   group('upgrading an existing household', () {
     test('encrypts every database and keeps every row', () async {
-      _writeHousehold(pathTo('preppsuite'), 'Marco');
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
       _writeHousehold(pathTo('preppsuite_personal_documents'), 'Unterlagen');
 
       final encryption = LocalDatabaseEncryption(storage: storage);
@@ -162,7 +162,7 @@ void main() {
 
       final key = storage.values[_keyKey]!;
       expect(_looksLikePlaintext(File(pathTo('preppsuite'))), isFalse);
-      expect(_readHousehold(pathTo('preppsuite'), key: key), 'Marco');
+      expect(_readHousehold(pathTo('preppsuite'), key: key), 'Beispielperson');
       expect(
         _readHousehold(pathTo('preppsuite_personal_documents'), key: key),
         'Unterlagen',
@@ -170,7 +170,7 @@ void main() {
     }, skip: noCipher);
 
     test('the encrypted file does not open without the key', () async {
-      _writeHousehold(pathTo('preppsuite'), 'Marco');
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
 
       final encryption = LocalDatabaseEncryption(storage: storage);
       await encryption.initialize(directory: directory);
@@ -180,7 +180,7 @@ void main() {
     }, skip: noCipher);
 
     test('leaves nothing behind to be picked up as a second run', () async {
-      _writeHousehold(pathTo('preppsuite'), 'Marco');
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
 
       final encryption = LocalDatabaseEncryption(storage: storage);
       await encryption.initialize(directory: directory);
@@ -193,14 +193,14 @@ void main() {
       );
       expect(
         _readHousehold(pathTo('preppsuite'), key: storage.values[_keyKey]!),
-        'Marco',
+        'Beispielperson',
       );
     }, skip: noCipher);
   });
 
   group('while it runs', () {
     test('nothing may open a database while it is being replaced', () async {
-      _writeHousehold(pathTo('preppsuite'), 'Marco');
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
 
       final encryption = LocalDatabaseEncryption(storage: storage);
       await encryption.initialize(directory: directory);
@@ -230,7 +230,7 @@ void main() {
       // is called preppsuite.sqlite.
       _writeHousehold(
         '${pathTo('preppsuite')}.plaintext-recovery',
-        'Marco',
+        'Beispielperson',
       );
       storage.values[_modeKey] = 'migrating';
 
@@ -238,7 +238,7 @@ void main() {
       await encryption.initialize(directory: directory);
 
       expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
-      expect(_readHousehold(pathTo('preppsuite')), 'Marco');
+      expect(_readHousehold(pathTo('preppsuite')), 'Beispielperson');
       expect(
         File('${pathTo('preppsuite')}.plaintext-recovery').existsSync(),
         isFalse,
@@ -248,7 +248,7 @@ void main() {
     test(
       'before the copy was finished discards the half-written one',
       () async {
-        _writeHousehold(pathTo('preppsuite'), 'Marco');
+        _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
         File('${pathTo('preppsuite')}.encrypting').writeAsStringSync('half');
         storage.values[_modeKey] = 'migrating';
 
@@ -256,7 +256,7 @@ void main() {
         await encryption.initialize(directory: directory);
 
         expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
-        expect(_readHousehold(pathTo('preppsuite')), 'Marco');
+        expect(_readHousehold(pathTo('preppsuite')), 'Beispielperson');
         expect(
           File('${pathTo('preppsuite')}.encrypting').existsSync(),
           isFalse,
@@ -268,8 +268,8 @@ void main() {
       'after the swap keeps the encrypted file and clears the copy',
       () async {
         final key = _freshKey();
-        _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
-        _writeHousehold('${pathTo('preppsuite')}.plaintext-recovery', 'Marco');
+        _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
+        _writeHousehold('${pathTo('preppsuite')}.plaintext-recovery', 'Beispielperson');
         File('${pathTo('preppsuite')}-wal').writeAsStringSync('stale');
         storage.values[_modeKey] = 'migrating';
         storage.values[_keyKey] = key;
@@ -278,7 +278,7 @@ void main() {
         await encryption.initialize(directory: directory);
 
         expect(encryption.mode, LocalDatabaseEncryptionMode.encrypted);
-        expect(_readHousehold(pathTo('preppsuite'), key: key), 'Marco');
+        expect(_readHousehold(pathTo('preppsuite'), key: key), 'Beispielperson');
         expect(
           File('${pathTo('preppsuite')}.plaintext-recovery').existsSync(),
           isFalse,
@@ -292,7 +292,7 @@ void main() {
 
     test('part way through can be finished later', () async {
       final key = _freshKey();
-      _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
       _writeHousehold(pathTo('preppsuite_personal_documents'), 'Unterlagen');
       storage.values[_modeKey] = 'migrating';
       storage.values[_keyKey] = key;
@@ -311,7 +311,7 @@ void main() {
       await encryption.migrateExistingDatabases();
 
       expect(await encryption.pendingPlaintextDatabases(), isEmpty);
-      expect(_readHousehold(pathTo('preppsuite'), key: key), 'Marco');
+      expect(_readHousehold(pathTo('preppsuite'), key: key), 'Beispielperson');
       expect(
         _readHousehold(pathTo('preppsuite_personal_documents'), key: key),
         'Unterlagen',
@@ -320,7 +320,7 @@ void main() {
 
     test('resuming keeps the key the first run used', () async {
       final key = _freshKey();
-      _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
       _writeHousehold(pathTo('preppsuite_personal_documents'), 'Unterlagen');
       storage.values[_modeKey] = 'migrating';
       storage.values[_keyKey] = key;
@@ -334,7 +334,7 @@ void main() {
 
     test('without a key left to open them asks for recovery', () async {
       final key = _freshKey();
-      _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
       storage.values[_modeKey] = 'migrating';
 
       final encryption = LocalDatabaseEncryption(storage: storage);
@@ -354,7 +354,7 @@ void main() {
   group('a device that lost its key', () {
     test('keeps the unreadable files when it starts over', () async {
       final key = _freshKey();
-      _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
       storage.values[_modeKey] = 'encrypted';
 
       final encryption = LocalDatabaseEncryption(storage: storage);
@@ -378,7 +378,7 @@ void main() {
 
     test('asks the device again rather than making anybody restart', () async {
       final key = _freshKey();
-      _writeHousehold(pathTo('preppsuite'), 'Marco', key: key);
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: key);
       storage.values[_modeKey] = 'encrypted';
 
       final encryption = LocalDatabaseEncryption(storage: storage);
@@ -406,18 +406,31 @@ void main() {
       expect(() => encryption.open('preppsuite'), returnsNormally);
     });
 
+    test('a key-store failure and not-yet-created data folder never abort startup',
+        () async {
+      // A sandbox container can be created while the first keychain request
+      // fails. Flutter still has to reach runApp(); an absent folder has no
+      // encrypted household to protect and remains usable in plain mode.
+      await directory.delete(recursive: true);
+      final encryption = LocalDatabaseEncryption(storage: _FailingStorage());
+
+      await encryption.initializeOrMarkUnavailable(directory: directory);
+
+      expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
+    });
+
     test('a device with no key store keeps reading its household', () async {
-      _writeHousehold(pathTo('preppsuite'), 'Marco');
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
 
       final encryption = LocalDatabaseEncryption(storage: _FailingStorage());
       await encryption.initializeOrMarkUnavailable(directory: directory);
 
       expect(encryption.mode, LocalDatabaseEncryptionMode.plaintext);
-      expect(_readHousehold(pathTo('preppsuite')), 'Marco');
+      expect(_readHousehold(pathTo('preppsuite')), 'Beispielperson');
     });
 
     test('a device with no key store and encrypted data says so', () async {
-      _writeHousehold(pathTo('preppsuite'), 'Marco', key: _freshKey());
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: _freshKey());
 
       final encryption = LocalDatabaseEncryption(storage: _FailingStorage());
       await encryption.initializeOrMarkUnavailable(directory: directory);
@@ -453,7 +466,7 @@ void main() {
     test('a file the migration has not reached yet still opens', () async {
       // The other half of the per-file decision: in a folder that is part
       // way through, the plaintext ones must open without the key.
-      _writeHousehold(pathTo('preppsuite'), 'Marco');
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
       storage.values[_modeKey] = 'encrypted';
       storage.values[_keyKey] = _freshKey();
 
@@ -467,7 +480,7 @@ void main() {
           .get();
       await database.close();
 
-      expect(rows.single.read<String>('name'), 'Marco');
+      expect(rows.single.read<String>('name'), 'Beispielperson');
     }, skip: noCipher);
   });
 
@@ -493,7 +506,7 @@ void main() {
       // about it: a second computer, or one restored without its
       // keychain. Reading it plainly would fail a screen later with
       // SQLite's own words.
-      _writeHousehold(pathTo('preppsuite'), 'Marco', key: _freshKey());
+      _writeHousehold(pathTo('preppsuite'), 'Beispielperson', key: _freshKey());
 
       final encryption = LocalDatabaseEncryption(storage: storage);
       await encryption.initialize(directory: directory);
