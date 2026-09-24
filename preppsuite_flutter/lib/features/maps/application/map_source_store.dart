@@ -24,7 +24,13 @@ class SecureMapApiKeyStore implements MapApiKeyStore {
   final FlutterSecureStorage _storage;
 
   @override
-  Future<String?> read() => _storage.read(key: _secureKey);
+  Future<String?> read() async {
+    try {
+      return await _storage.read(key: _secureKey);
+    } on Object {
+      return null;
+    }
+  }
 
   @override
   Future<void> write(String value) =>
