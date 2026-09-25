@@ -54,6 +54,19 @@ Die Seite verweist auf das Hausratverzeichnis, das die App ohnehin hat —
 die Polizei nennt es „Wertgegenstandsliste" und rät, sie zu haben, bevor
 etwas passiert.
 
+**Prepper-Rezepte, die den Vorrat kennen.** Neun deutsche und sechs
+englische Gerichte aus dem Vorratsschrank, jedes mit dem Hinweis, was es
+an Hitze kostet — ein Topf, eine Pfanne oder gar nichts. Jedes Rezept
+nennt jetzt seine Zutaten, und die Seite zeigt je Zutat, ob im Vorrat ein
+Artikel steht, dessen Name sie enthält, samt diesem Namen. Ein Schalter
+blendet auf das ein, wozu der Vorrat die Wörter hat.
+
+Was dabei ausdrücklich dabeisteht: **verglichen werden Namen, nicht
+Inhalte.** Die App sieht, dass „Kichererbsen" im Vorrat steht — nicht, ob
+die Dose noch voll ist und ob die Menge reicht. Der Satz steht direkt am
+Schalter und nicht in einer Legende, weil dort entschieden wird, ob man
+der Liste glaubt.
+
 **Vorratsgruppen.** Zehn Tage Kalorien können zehn Tage Nudeln sein. Der
 Vorratskalkulator der Bundesanstalt für Landwirtschaft und Ernährung nennt
 je Lebensmittelgruppe eine Menge pro Person und Tag — Getreide 0,33 kg,

@@ -51,7 +51,8 @@ class _StorageTipsScreenState extends ConsumerState<StorageTipsScreen> {
             icon: const Icon(Icons.soup_kitchen_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => const PrepperRecipesScreen(),
+                builder: (_) =>
+                    PrepperRecipesScreen(householdId: widget.householdId),
               ),
             ),
           ),

@@ -358,7 +358,7 @@ List<AppDestination> appDestinations() => [
     title: (l) => l.prepperRecipesTitle,
     icon: Icons.restaurant_outlined,
     area: ShellDestination.inventory,
-    open: (_) => const PrepperRecipesScreen(),
+    open: (p) => PrepperRecipesScreen(householdId: p.id),
     aliases: ['rezepte', 'kochen', 'recipes'],
   ),
 

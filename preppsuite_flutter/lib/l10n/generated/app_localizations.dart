@@ -1508,6 +1508,42 @@ abstract class AppLocalizations {
   /// **'{have} of {target}'**
   String supplyGroupsShare(String have, String target);
 
+  /// No description provided for @recipeIngredientsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ingredients'**
+  String get recipeIngredientsTitle;
+
+  /// No description provided for @recipeInStock.
+  ///
+  /// In en, this message translates to:
+  /// **'In the inventory: {names}'**
+  String recipeInStock(String names);
+
+  /// No description provided for @recipeNotInStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Not found in the inventory'**
+  String get recipeNotInStock;
+
+  /// No description provided for @recipeOnlyCookable.
+  ///
+  /// In en, this message translates to:
+  /// **'Only show what the inventory has the words for'**
+  String get recipeOnlyCookable;
+
+  /// No description provided for @recipeMatchNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Names are compared, not contents: the app can see that \"chickpeas\" appears in your inventory — not whether the tin is still full or the amount is enough.'**
+  String get recipeMatchNote;
+
+  /// No description provided for @recipeNoneCookable.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipe has all of its ingredients named in the inventory.'**
+  String get recipeNoneCookable;
+
   /// No description provided for @cancelButton.
   ///
   /// In en, this message translates to:

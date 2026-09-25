@@ -696,7 +696,10 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
       const SizedBox(height: 8),
       OutlinedButton.icon(
         onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const PrepperRecipesScreen()),
+          MaterialPageRoute<void>(
+            builder: (_) =>
+                PrepperRecipesScreen(householdId: widget.householdId),
+          ),
         ),
         icon: const Icon(Icons.menu_book_outlined),
         label: Text(_l10n.hubCookingRecipes),

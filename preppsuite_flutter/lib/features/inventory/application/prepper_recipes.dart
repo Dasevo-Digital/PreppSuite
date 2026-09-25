@@ -20,6 +20,9 @@
 /// instead of five cannot.
 library;
 
+import '../../../local_db/database.dart';
+import '../../search/application/app_search.dart' show foldForSearch;
+
 /// One dish.
 class PrepperRecipe {
   const PrepperRecipe({
@@ -27,6 +30,7 @@ class PrepperRecipe {
     required this.title,
     required this.hint,
     required this.steps,
+    this.ingredients = const [],
   });
 
   /// Stable across languages, and never shown.
@@ -39,7 +43,80 @@ class PrepperRecipe {
   final String hint;
 
   final String steps;
+
+  /// What it is made of, as short words to look for in the inventory.
+  ///
+  /// Deliberately without amounts. A portion size would have to be
+  /// invented — the steps say "Kichererbsen", not "240 g Kichererbsen",
+  /// and picking a number would be this app stating something no recipe
+  /// here states. So the comparison below answers "is there any" and
+  /// never "is there enough", and the screen says so.
+  final List<String> ingredients;
 }
+
+/// One ingredient beside what the inventory calls it.
+class RecipeIngredientMatch {
+  const RecipeIngredientMatch(this.ingredient, this.found);
+
+  final String ingredient;
+
+  /// The names of the rows that matched, or empty.
+  final List<String> found;
+
+  bool get isFound => found.isNotEmpty;
+}
+
+/// Whether the cupboard names what a recipe asks for.
+///
+/// **This compares names and nothing else**, which is the honest limit of
+/// what the app can do here and is said on the screen too. A row called
+/// "Kichererbsen 400 g Dose" answers "Kichererbsen"; a row called
+/// "Erbsensuppe" does not, and neither does an empty tin somebody forgot
+/// to write off. Matching goes through [foldForSearch], so "Öl" finds
+/// "Rapsoel" and the umlaut is not a trap.
+/// [foldForSearch] plus the spelling out of the umlauts.
+///
+/// The app's search folds "Öl" to "ol" — right for a search box, where
+/// the reader sees the results and corrects themselves. Here nobody sees
+/// the miss: a cupboard that holds "Rapsoel" would simply be reported as
+/// having no oil, and the recipe filter would quietly hide a dish that is
+/// perfectly possible.
+///
+/// So "ae", "oe" and "ue" collapse the same way the umlaut does. Applied
+/// to **both** sides, which is what keeps it safe: "Sauerkraut" becomes
+/// "saurkraut" on the shelf and in the recipe alike, so the pair still
+/// meets. Local to this file on purpose — the search box wants the other
+/// behaviour, and one rule cannot be both.
+String _foldPantry(String text) => foldForSearch(
+  text,
+).replaceAll('ae', 'a').replaceAll('oe', 'o').replaceAll('ue', 'u');
+
+List<RecipeIngredientMatch> matchIngredients({
+  required List<String> ingredients,
+  required List<InventoryItem> items,
+}) {
+  final pantry = [
+    for (final item in items)
+      if (item.deletedAt == null &&
+          (item.category == 'food' || item.category == 'water') &&
+          item.quantity > 0)
+        (name: item.name, folded: _foldPantry(item.name)),
+  ];
+
+  return [
+    for (final ingredient in ingredients)
+      RecipeIngredientMatch(ingredient, [
+        for (final row in pantry)
+          if (row.folded.contains(_foldPantry(ingredient))) row.name,
+      ]),
+  ];
+}
+
+/// Whether every ingredient was found. Used only for the filter, and
+/// named for what it is: the cupboard has the words, which is not the
+/// same as the meal being possible.
+bool namesEverything(List<RecipeIngredientMatch> matches) =>
+    matches.isNotEmpty && matches.every((match) => match.isFound);
 
 /// One way of making food last.
 class PreservationMethod {
@@ -128,6 +205,7 @@ const prepperRecipesDe = [
     steps:
         'Couscous mit heißem Wasser quellen lassen. Kichererbsen, '
         'Dosentomaten, Öl und Gewürze unterheben.',
+    ingredients: ['Couscous', 'Kichererbsen', 'Tomaten', 'Öl'],
   ),
   PrepperRecipe(
     id: 'lentil-tomato',
@@ -136,6 +214,7 @@ const prepperRecipesDe = [
     steps:
         'Rote Linsen mit Dosentomaten und wenig Wasser 12–15 Minuten '
         'garen. Mit Brühe und getrockneten Kräutern würzen.',
+    ingredients: ['Linsen', 'Tomaten', 'Brühe'],
   ),
   PrepperRecipe(
     id: 'porridge',
@@ -144,6 +223,7 @@ const prepperRecipesDe = [
     steps:
         'Haferflocken mit H-Milch, Pflanzengetränk oder Wasser anrühren. '
         'Trockenobst, Nüsse und Zimt ergänzen.',
+    ingredients: ['Haferflocken', 'Milch', 'Trockenobst'],
   ),
   PrepperRecipe(
     id: 'bean-corn-salad',
@@ -152,6 +232,7 @@ const prepperRecipesDe = [
     steps:
         'Bohnen und Mais abgießen, mit Öl, Essig, Salz und Kräutern '
         'mischen. Abtropfwasser soweit sinnvoll weiterverwenden.',
+    ingredients: ['Bohnen', 'Mais', 'Öl', 'Essig'],
   ),
   PrepperRecipe(
     id: 'tuna-pasta',
@@ -160,6 +241,48 @@ const prepperRecipesDe = [
     steps:
         'Nudeln in knapp bemessenem Wasser garen. Thunfisch, Erbsen aus '
         'der Dose und Gewürze untermischen.',
+    ingredients: ['Nudeln', 'Thunfisch', 'Erbsen'],
+  ),
+  // Die vier hier sind nach den Vorratsgruppen der BLE ausgesucht und
+  // nicht nach Geschmack: die fuenf darueber decken Getreide, Gemuese
+  // und Eiweiss ab und lassen Obst und Milch fast leer. Ein
+  // Rezeptvorschlag, der dreimal dasselbe Regal leerraeumt, hilft dem
+  // Vorrat nicht.
+  PrepperRecipe(
+    id: 'milk-rice',
+    title: 'Milchreis mit Trockenobst',
+    hint: 'Kaum Hitze',
+    steps:
+        'Milchreis aus der Dose erwärmen oder kalt löffeln. Rosinen, '
+        'getrocknete Aprikosen oder Apfelmus unterrühren, Zimt darüber.',
+    ingredients: ['Milchreis', 'Trockenobst', 'Zimt'],
+  ),
+  PrepperRecipe(
+    id: 'potato-veg-pan',
+    title: 'Kartoffel-Gemüse-Pfanne',
+    hint: 'Eine Pfanne',
+    steps:
+        'Kartoffeln aus dem Glas abgießen und würfeln. Mit Öl anbraten, '
+        'Dosengemüse dazugeben, mit Salz, Pfeffer und Kräutern würzen.',
+    ingredients: ['Kartoffeln', 'Gemüse', 'Öl'],
+  ),
+  PrepperRecipe(
+    id: 'canned-stew',
+    title: 'Dosen-Eintopf mit Wurst',
+    hint: 'Ein Topf',
+    steps:
+        'Gemüsekonserven mit ihrem Sud erwärmen. Dosenwurst in Scheiben '
+        'dazugeben und ziehen lassen. Mit Brühe abschmecken.',
+    ingredients: ['Gemüse', 'Wurst', 'Brühe'],
+  ),
+  PrepperRecipe(
+    id: 'bread-soup',
+    title: 'Brotsuppe',
+    hint: 'Ein Topf, verwertet altes Brot',
+    steps:
+        'Altbackenes Brot in Würfel schneiden. In heißer Brühe einweichen, '
+        'Zwiebel und Öl dazu, kurz ziehen lassen.',
+    ingredients: ['Brot', 'Brühe', 'Zwiebel', 'Öl'],
   ),
 ];
 
@@ -176,6 +299,7 @@ const prepperRecipesEn = [
     steps:
         'Warm a tin of baked beans. Toast bread over whatever heat there '
         'is, or spoon the beans straight onto crackers or flatbread.',
+    ingredients: ['baked beans', 'bread'],
   ),
   PrepperRecipe(
     id: 'corned-beef-hash',
@@ -185,6 +309,7 @@ const prepperRecipesEn = [
         'Fry drained tinned potatoes until they colour, break in tinned '
         'corned beef and press flat. Pepper and a dash of Worcestershire '
         'sauce; tinned peas alongside.',
+    ingredients: ['corned beef', 'potato', 'onion'],
   ),
   PrepperRecipe(
     id: 'curried-chickpeas',
@@ -194,6 +319,7 @@ const prepperRecipesEn = [
         'Let curry powder sizzle in oil for a moment, add chickpeas and '
         'chopped tomatoes with the juice from the tin, simmer ten minutes. '
         'Rice cooked in measured water alongside.',
+    ingredients: ['chickpeas', 'rice', 'curry'],
   ),
   PrepperRecipe(
     id: 'tuna-sweetcorn',
@@ -203,6 +329,7 @@ const prepperRecipesEn = [
         'Drain tuna and sweetcorn, mix with mayonnaise or oil and plenty '
         'of black pepper. An opened jar of mayonnaise needs cold storage, '
         'so use oil when the power is out.',
+    ingredients: ['tuna', 'sweetcorn', 'crackers'],
   ),
   PrepperRecipe(
     id: 'soda-bread',
@@ -213,6 +340,7 @@ const prepperRecipesEn = [
         'or with milk soured by a spoon of vinegar. Shape flat, cut a '
         'cross, bake in a covered heavy pan over low heat and turn once. '
         'No yeast and no proving time.',
+    ingredients: ['flour', 'bicarbonate of soda', 'milk'],
   ),
   PrepperRecipe(
     id: 'pea-ham-soup',
@@ -222,6 +350,7 @@ const prepperRecipesEn = [
         'Simmer dried split peas in plenty of water until they collapse, '
         'about an hour. Stir in tinned ham and a stock cube. The hour costs '
         'fuel, so cook enough for two meals at once.',
+    ingredients: ['split peas', 'ham', 'stock'],
   ),
 ];
 

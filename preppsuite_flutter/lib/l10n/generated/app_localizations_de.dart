@@ -852,6 +852,28 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get recipeIngredientsTitle => 'Zutaten';
+
+  @override
+  String recipeInStock(String names) {
+    return 'Im Vorrat: $names';
+  }
+
+  @override
+  String get recipeNotInStock => 'Im Vorrat nicht gefunden';
+
+  @override
+  String get recipeOnlyCookable => 'Nur zeigen, wozu der Vorrat die Namen hat';
+
+  @override
+  String get recipeMatchNote =>
+      'Verglichen werden Namen, nicht Inhalte: die App sieht, dass „Kichererbsen\" in deinem Vorrat steht — nicht, ob die Dose noch voll ist und ob die Menge reicht.';
+
+  @override
+  String get recipeNoneCookable =>
+      'Zu keinem Rezept stehen alle Zutaten namentlich im Vorrat.';
+
+  @override
   String get cancelButton => 'Abbrechen';
 
   @override

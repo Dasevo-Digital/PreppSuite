@@ -847,6 +847,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get recipeIngredientsTitle => 'Ingredients';
+
+  @override
+  String recipeInStock(String names) {
+    return 'In the inventory: $names';
+  }
+
+  @override
+  String get recipeNotInStock => 'Not found in the inventory';
+
+  @override
+  String get recipeOnlyCookable =>
+      'Only show what the inventory has the words for';
+
+  @override
+  String get recipeMatchNote =>
+      'Names are compared, not contents: the app can see that \"chickpeas\" appears in your inventory — not whether the tin is still full or the amount is enough.';
+
+  @override
+  String get recipeNoneCookable =>
+      'No recipe has all of its ingredients named in the inventory.';
+
+  @override
   String get cancelButton => 'Cancel';
 
   @override
