@@ -34,8 +34,13 @@ den eigenen Geräten läuft, ließe sich über „private purposes" streiten.
 **Sie soll künftig öffentlich verteilt werden** — kostenlos, über die
 App-Läden und zum unmittelbaren Herunterladen. Damit ist die Frage
 entschieden: das ist Weiterverbreitung an Fremde, und dafür gibt es keine
-Auslegung, die ohne schriftliche Erlaubnis auskommt. Der Brief sagt das
-deshalb im ersten Absatz, statt es zu verschweigen und später aufzufallen.
+Auslegung, die ohne schriftliche Erlaubnis auskommt.
+
+Deshalb steht die Verteilung schon jetzt im Brief, obwohl sie noch nicht
+ansteht und kein Datum hat. Wer erst um den privaten Gebrauch bittet und
+ein Jahr später um die Veröffentlichung, stellt dieselbe Anfrage zweimal
+— und die zweite ist die unangenehmere, weil sie nach einer Erweiterung
+klingt, die vorher verschwiegen wurde. Einmal fragen, für beides.
 
 ## An wen
 
@@ -94,6 +99,12 @@ That takes any use of your material out of the "private or educational
 purposes" your Terms of use allow without asking, which is precisely why I
 am writing rather than assuming.
 
+No date is fixed for that release, and I raise it now on purpose. I would
+rather ask you once, for the private use of today and the public
+distribution of later, than come back in a year with what would look like
+an extension quietly left out the first time. Please read this request as
+covering both.
+
 To be exact about what "free" means here: the application costs nothing,
 contains nothing to buy and carries no advertising. The stores do charge a
 developer fee for publishing, which I pay; nothing flows the other way.
@@ -111,10 +122,11 @@ entirely.
 
 Concretely, I ask for three things:
 
-1. Permission to redistribute those eleven films **unchanged**, to the
-   public and free of charge, inside an optional video pack that users
-   download and then play offline. Each film would name the Global First
-   Aid Reference Centre as its author and state your terms on the screen
+1. Permission to redistribute those eleven films **unchanged** and free of
+   charge, inside an optional video pack that users download and then play
+   offline — both while the application is used privately and once it is
+   distributed publicly. Each film would name the Global First Aid
+   Reference Centre as its author and state your terms on the screen
    directly beneath it.
 2. Access to the source files. Your resource pages link the films on
    YouTube only, and downloading from there is neither permitted nor
@@ -139,8 +151,9 @@ distress — psychological first aid after Look/Listen/Link, suicidal
 thoughts, anxiety and panic, after a traumatic event, and acute grief —
 now ship in the application, with the Guidelines as their cited source.
 The wording is our own, this is not a translation, and each guide names
-the chapter it came from on the screen where it is read. These five will
-go out with the public release described above.
+the chapter it came from on the screen where it is read. They are in the
+application today and would go out unchanged with the public release
+described above.
 
 Three questions follow from that.
 
