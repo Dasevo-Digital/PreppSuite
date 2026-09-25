@@ -26,6 +26,14 @@ struct Options {
     var fast = false
     var correction = true
     var revision = 0
+    /// Wie klein eine Zeile sein darf, als Anteil der Bildhoehe.
+    ///
+    /// Vision setzt hier von Haus aus 1/32. Auf einer A4-Doppelseite bei
+    /// 200 dpi sind das 51 Pixel — mehr als dreimal die Hoehe einer
+    /// normalen Textzeile. Die Erkennung uebergeht sie dann vollstaendig
+    /// und meldet trotzdem Zuversicht 1,000. Genau so verlor ein Lauf
+    /// ueber die BBK-Broschuere 50 000 von 52 000 Zeichen.
+    var minimumTextHeight = 0.008
     var dumpDirectory: String?
     /// Writes the bitmap that was actually handed to the recognition.
     /// Worth having: the first thing to doubt when text goes missing is
@@ -47,21 +55,27 @@ func parseArguments() -> Options {
         case "--fast": options.fast = true
         case "--no-correction": options.correction = false
         case "--revision": options.revision = Int(rest.removeFirst()) ?? 0
+        case "--min-height":
+            options.minimumTextHeight = Double(rest.removeFirst()) ?? 0.008
         default: options.path = argument
         }
     }
     return options
 }
 
-func render(page: PDFPage, dpi: Double) -> CGImage? {
-    // A page may carry a /Rotate of its own — the BBK booklet that this
-    // was first measured on carries 90 on every page. `bounds` reports
-    // the box before that rotation, so a bitmap sized from it is
-    // portrait while the content is landscape, and a third of every
-    // line falls off the right-hand edge. Nothing about it looks
-    // broken: the text that *is* recognised is perfect.
-    let box = page.bounds(for: .mediaBox)
-    let turned = page.rotation % 180 != 0
+/// Renders a page the way a PDF viewer would.
+///
+/// Through Core Graphics and not PDFKit, and that is the whole point.
+/// The PDFKit route — size the bitmap from `bounds(for:)`, then
+/// `draw(with:to:)` — silently clipped a third of every page of the BBK
+/// booklet, whose pages carry a `/Rotate 90`. Nothing looked broken: the
+/// text that survived was perfect, only a column was missing, and the
+/// same page read whole on Android. `getDrawingTransform` is the answer
+/// Core Graphics has for exactly this: it fits the page into the given
+/// rectangle and takes the rotation with it.
+func render(page: CGPDFPage, dpi: Double) -> CGImage? {
+    let box = page.getBoxRect(.mediaBox)
+    let turned = page.rotationAngle % 180 != 0
     let scale = dpi / 72.0
     let width = Int(((turned ? box.height : box.width) * scale).rounded())
     let height = Int(((turned ? box.width : box.height) * scale).rounded())
@@ -72,10 +86,9 @@ func render(page: PDFPage, dpi: Double) -> CGImage? {
             height: height,
             bitsPerComponent: 8,
             bytesPerRow: 0,
-            // sRGB and not grayscale. Measured: on the same page the
-            // grayscale bitmap loses whole paragraphs in the accurate
-            // recognition while the colour one reads them, which is the
-            // kind of thing that would otherwise be blamed on the scan.
+            // sRGB and not grayscale: it costs nothing here and keeps the
+            // bitmap the same shape as anything a camera or scanner hands
+            // over.
             space: CGColorSpace(name: CGColorSpace.sRGB)!,
             bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
           )
@@ -83,10 +96,26 @@ func render(page: PDFPage, dpi: Double) -> CGImage? {
 
     context.setFillColor(gray: 1, alpha: 1)
     context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+    // Die Vergroesserung hier und nicht in `getDrawingTransform`: gibt
+    // man dem Transform das Pixelrechteck, faellt die Seite bei 200 dpi
+    // auf halbe Groesse in eine Ecke. Der Transform bekommt deshalb das
+    // Rechteck in Punkten und macht nur, wofuer es ihn braucht — Drehung
+    // und Ursprung.
     context.scaleBy(x: scale, y: scale)
-    // Lets PDFKit set up the rotation and the origin itself.
-    page.transform(context, for: .mediaBox)
-    page.draw(with: .mediaBox, to: context)
+    context.concatenate(
+        page.getDrawingTransform(
+            .mediaBox,
+            rect: CGRect(
+                x: 0,
+                y: 0,
+                width: turned ? box.height : box.width,
+                height: turned ? box.width : box.height
+            ),
+            rotate: 0,
+            preserveAspectRatio: true
+        )
+    )
+    context.drawPDFPage(page)
     return context.makeImage()
 }
 
@@ -95,7 +124,8 @@ func recognise(
     language: String,
     fast: Bool,
     correction: Bool,
-    revision: Int
+    revision: Int,
+    minimumTextHeight: Double
 ) throws -> (text: String, confidence: Double) {
     let request = VNRecognizeTextRequest()
     if revision > 0 { request.revision = revision }
@@ -103,6 +133,7 @@ func recognise(
     request.recognitionLanguages = language.isEmpty ? [] : [language]
     request.automaticallyDetectsLanguage = language.isEmpty
     request.usesLanguageCorrection = correction
+    request.minimumTextHeight = Float(minimumTextHeight)
     try VNImageRequestHandler(cgImage: image, options: [:]).perform([request])
 
     let observations = request.results ?? []
@@ -119,8 +150,10 @@ func recognise(
 }
 
 let options = parseArguments()
+let url = URL(fileURLWithPath: options.path)
 guard !options.path.isEmpty,
-      let document = PDFDocument(url: URL(fileURLWithPath: options.path))
+      let document = PDFDocument(url: url),
+      let graphics = CGPDFDocument(url as CFURL)
 else {
     FileHandle.standardError.write("ocr_probe: cannot open PDF\n".data(using: .utf8)!)
     exit(1)
@@ -145,7 +178,8 @@ for index in 0..<pageCount {
     // it the same run stays flat. On a phone the difference is between
     // a feature and a process the system kills.
     autoreleasepool {
-    guard let page = document.page(at: index) else { return }
+    // Seitenzahlen: Core Graphics zaehlt ab eins.
+    guard let page = graphics.page(at: index + 1) else { return }
 
     let renderStart = Date()
     guard let image = render(page: page, dpi: options.dpi) else { return }
@@ -157,7 +191,8 @@ for index in 0..<pageCount {
         language: options.language,
         fast: options.fast,
         correction: options.correction,
-        revision: options.revision
+        revision: options.revision,
+        minimumTextHeight: options.minimumTextHeight
     )) ?? (text: "", confidence: 0.0)
     let recogniseSeconds = Date().timeIntervalSince(recogniseStart)
 

@@ -13,7 +13,8 @@ set -euo pipefail
 
 readonly HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly PACKAGE=de.status403.ocrprobe
-readonly REMOTE=/sdcard/Download/ocr-probe.pdf
+readonly REMOTE=/sdcard/Android/data/de.status403.ocrprobe/files/probe.pdf
+readonly REPORT=/sdcard/Android/data/de.status403.ocrprobe/files/ocr-probe.jsonl
 
 export JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@21}"
 export ANDROID_HOME="${ANDROID_HOME:-/opt/homebrew/share/android-commandlinetools}"
@@ -50,7 +51,20 @@ echo "== bauen =="
 
 echo "== aufspielen =="
 adb install -r "$HERE/app/build/outputs/apk/release/app-release.apk" >/dev/null
+# Der app-eigene Ordner auf dem gemeinsamen Speicher: die einzige Stelle,
+# an die adb schreiben und die App ohne Berechtigung lesen darf.
+adb shell mkdir -p "$(dirname "$REMOTE")"
+adb shell rm -f "$REPORT"
 adb push "$PDF" "$REMOTE" >/dev/null
+
+# Der Bildschirm muss an bleiben, sonst doest das Geraet weg und die
+# Messung steht still. Wird am Ende zurueckgenommen.
+# Nicht in einem EXIT-Trap zurueckgenommen: bei einem langen Dokument
+# laeuft die Messung noch, wenn dieses Skript sein Warten aufgibt, und
+# ein zurueckgesetztes stayon legt das Telefon dann schlafen — ein Lauf
+# blieb so bei Seite 14 stehen. Zurueckgenommen wird erst, wenn die
+# Schlusszeile da ist.
+adb shell svc power stayon usb >/dev/null 2>&1 || true
 
 echo "== messen: $PAGES Seiten bei $DPI dpi =="
 adb shell am force-stop "$PACKAGE" >/dev/null
@@ -59,15 +73,20 @@ adb shell am start -n "$PACKAGE/.MeasureActivity" \
 
 # Die App schreibt Zeile für Zeile; gewartet wird auf die Schlusszeile,
 # die als einzige `pss_peak_kb` traegt.
-for _ in $(seq 1 120); do
-  if adb shell run-as "$PACKAGE" cat files/ocr-probe.jsonl 2>/dev/null | grep -q pss_peak_kb; then
+for _ in $(seq 1 240); do
+  if adb shell cat "$REPORT" 2>/dev/null | grep -q pss_peak_kb; then
     break
   fi
   sleep 2
 done
 
 echo
-adb shell run-as "$PACKAGE" cat files/ocr-probe.jsonl 2>/dev/null || {
+if adb shell cat "$REPORT" 2>/dev/null | grep -q pss_peak_kb; then
+  adb shell svc power stayon false >/dev/null 2>&1 || true
+else
+  echo "(laeuft noch — Bildschirm bleibt an, bis die Schlusszeile da ist)" >&2
+fi
+adb shell cat "$REPORT" 2>/dev/null || {
   echo "Keine Ausgabe. Mit 'adb logcat -s ocr-probe' nachsehen." >&2
   exit 1
 }

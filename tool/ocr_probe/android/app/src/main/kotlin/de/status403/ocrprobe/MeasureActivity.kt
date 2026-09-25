@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Debug
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import android.view.WindowManager
 import android.widget.TextView
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
@@ -24,10 +25,16 @@ import kotlin.concurrent.thread
  * platform's own recognition, write down what it cost and what came out.
  * Nothing here is part of PreppSuite.
  *
- *   adb push <datei.pdf> /sdcard/Download/probe.pdf
- *   adb shell am start -n de.status403.ocrprobe/.MeasureActivity \
- *       -e pdf /sdcard/Download/probe.pdf -e pages 26 -e dpi 200
- *   adb shell run-as de.status403.ocrprobe cat files/ocr-probe.jsonl
+ * Datei und Bericht liegen beide im app-eigenen Ordner auf dem
+ * gemeinsamen Speicher. Das ist kein Umweg, sondern der einzige Weg, der
+ * ohne Berechtigung auskommt: seit Android 11 kommt eine App nicht mehr
+ * an `/sdcard/Download`, und `run-as` gibt es nur fuer eine
+ * debug-baubare App.
+ *
+ *   adb shell mkdir -p /sdcard/Android/data/de.status403.ocrprobe/files
+ *   adb push <datei.pdf> /sdcard/Android/data/de.status403.ocrprobe/files/probe.pdf
+ *   adb shell am start -n de.status403.ocrprobe/.MeasureActivity -e pages 26 -e dpi 200
+ *   adb shell cat /sdcard/Android/data/de.status403.ocrprobe/files/ocr-probe.jsonl
  *
  * The numbers that matter are the memory ones. On macOS the recognition
  * needed 600 MB before the first page was done, and that is the figure a
@@ -39,11 +46,18 @@ class MeasureActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Ohne das haelt das Telefon nach kurzer Zeit an: sobald der
+        // Bildschirm ausgeht, geht es in den Doze-Zustand und die
+        // Erkennung kommt nicht mehr voran. Gemessen: bei Seite 17 blieb
+        // ein Lauf stehen, der Prozess lebte weiter. Eine echte
+        // Stapelverarbeitung braeuchte daher einen Vordergrunddienst.
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         output = TextView(this)
         output.textSize = 11f
         setContentView(output)
 
-        val path = intent.getStringExtra("pdf") ?: "/sdcard/Download/probe.pdf"
+        val own = getExternalFilesDir(null) ?: filesDir
+        val path = intent.getStringExtra("pdf") ?: File(own, "probe.pdf").path
         val pages = intent.getStringExtra("pages")?.toIntOrNull() ?: 10
         val dpi = intent.getStringExtra("dpi")?.toIntOrNull() ?: 200
 
@@ -51,7 +65,7 @@ class MeasureActivity : Activity() {
     }
 
     private fun measure(path: String, maxPages: Int, dpi: Int) {
-        val report = File(filesDir, "ocr-probe.jsonl")
+        val report = File(getExternalFilesDir(null) ?: filesDir, "ocr-probe.jsonl")
         report.writeText("")
 
         val file = File(path)
@@ -68,12 +82,16 @@ class MeasureActivity : Activity() {
         )
         val renderer = PdfRenderer(descriptor)
         val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+        // Vor dem Schliessen gemerkt: `pageCount` wirft danach.
+        val pageCount = renderer.pageCount
+        val texts = File(report.parentFile, "ocr-probe-text")
+        texts.mkdirs()
 
         var renderTotal = 0L
         var ocrTotal = 0L
         var characters = 0
         var peak = baseline
-        val count = minOf(maxPages, renderer.pageCount)
+        val count = minOf(maxPages, pageCount)
 
         for (index in 0 until count) {
             val page = renderer.openPage(index)
@@ -107,6 +125,10 @@ class MeasureActivity : Activity() {
             renderTotal += renderMillis
             ocrTotal += ocrMillis
             characters += text.length
+            // Der Wortlaut, nicht nur seine Laenge: ohne ihn laesst sich
+            // nicht sagen, ob mehr Zeichen mehr Text oder mehr Rauschen
+            // sind. Auf macOS liegt derselbe Text daneben.
+            File(texts, "page-${index + 1}.txt").writeText(text)
 
             say(
                 report,
@@ -122,7 +144,7 @@ class MeasureActivity : Activity() {
 
         say(
             report,
-            """{"file":"${file.name}","pages_in_document":${renderer.pageCount},""" +
+            """{"file":"${file.name}","pages_in_document":$pageCount,""" +
                 """"pages_measured":$count,"dpi":$dpi,""" +
                 """"render_ms_total":$renderTotal,"ocr_ms_total":$ocrTotal,""" +
                 """"characters_total":$characters,""" +

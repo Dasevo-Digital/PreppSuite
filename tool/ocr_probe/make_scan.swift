@@ -29,8 +29,10 @@ while let argument = rest.first {
     }
 }
 
+let inputURL = URL(fileURLWithPath: input)
 guard !input.isEmpty, !output.isEmpty,
-      let document = PDFDocument(url: URL(fileURLWithPath: input))
+      let document = PDFDocument(url: inputURL),
+      let graphics = CGPDFDocument(inputURL as CFURL)
 else {
     FileHandle.standardError.write("make_scan: cannot open PDF\n".data(using: .utf8)!)
     exit(1)
@@ -38,18 +40,17 @@ else {
 
 let scanned = PDFDocument()
 for index in 0..<document.pageCount {
-    guard let page = document.page(at: index) else { continue }
-    // A page may carry a /Rotate of its own — the BBK booklet that this
-    // was first measured on carries 90 on every page. `bounds` reports
-    // the box before that rotation, so a bitmap sized from it is
-    // portrait while the content is landscape, and a third of every
-    // line falls off the right-hand edge. Nothing about it looks
-    // broken: the text that *is* recognised is perfect.
-    let box = page.bounds(for: .mediaBox)
-    let turned = page.rotation % 180 != 0
+    // Ueber Core Graphics und nicht ueber PDFKit, aus demselben Grund
+    // wie im ocr_probe: der PDFKit-Weg schneidet eine gedrehte Seite an,
+    // ohne dass es auffiele.
+    guard let page = graphics.page(at: index + 1) else { continue }
+    let box = page.getBoxRect(.mediaBox)
+    let turned = page.rotationAngle % 180 != 0
     let scale = dpi / 72.0
-    let width = Int(((turned ? box.height : box.width) * scale).rounded())
-    let height = Int(((turned ? box.width : box.height) * scale).rounded())
+    let pointsWide = turned ? box.height : box.width
+    let pointsHigh = turned ? box.width : box.height
+    let width = Int((pointsWide * scale).rounded())
+    let height = Int((pointsHigh * scale).rounded())
     guard let context = CGContext(
         data: nil,
         width: width,
@@ -63,9 +64,15 @@ for index in 0..<document.pageCount {
     context.setFillColor(gray: 1, alpha: 1)
     context.fill(CGRect(x: 0, y: 0, width: width, height: height))
     context.scaleBy(x: scale, y: scale)
-    // Lets PDFKit set up the rotation and the origin itself.
-    page.transform(context, for: .mediaBox)
-    page.draw(with: .mediaBox, to: context)
+    context.concatenate(
+        page.getDrawingTransform(
+            .mediaBox,
+            rect: CGRect(x: 0, y: 0, width: pointsWide, height: pointsHigh),
+            rotate: 0,
+            preserveAspectRatio: true
+        )
+    )
+    context.drawPDFPage(page)
     guard let rendered = context.makeImage() else { continue }
 
     // Through JPEG on purpose: a scanner's own compression is part of
