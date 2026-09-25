@@ -828,6 +828,17 @@ const builtInTemplates = [
     'Wenn der Strom ausfällt',
     ChecklistCategory.energy,
     [
+      // Das eine, was an einem Stromausfall regelmaessig ueberrascht,
+      // und es steht beim BBK gleich im ersten Absatz: "Es kommt kein
+      // Wasser mehr aus der Leitung." Bewusst nur die Tatsache und der
+      // Verweis auf den eigenen Vorrat -- eine Handlungsanweisung dazu
+      // veroeffentlicht das BBK an dieser Stelle nicht, und diese App
+      // erfindet keine.
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001910',
+        'Ohne Strom kommt auch kein Wasser mehr aus der Leitung — dann '
+            'zählt nur noch der eigene Trinkwasservorrat',
+      ),
       BuiltInItem(
         '00000000-0000-4000-8000-000000001901',
         'Kühl- und Gefriergerät geschlossen halten — jedes Öffnen kostet '
