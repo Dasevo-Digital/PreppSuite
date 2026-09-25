@@ -4009,7 +4009,6 @@
   "unitInfoAccepted": "These with one tap, and spelled out works as well: gram, kilo, millilitre, litre.",
   "unitInfoExempt": "This applies to food and water only. Medicines are still counted in tablets, or the reach per daily dose stops adding up; tools are counted in pieces.",
   "unitInfoKept": "A stock counted in tins or jars is left exactly as it is. It simply stays out of the supply calculator until the unit names a measure.",
-  "unitMeasureHelper": "For food and water: g, kg, ml or l. Nutrition is printed per 100 g, and a tin has no weight until somebody reads it.",
   "unitMeasureRequired": "This needs a measure: g, kg, ml or l.",
   "nutritionPer100Label": "{nutrient} per {basis}",
   "@nutritionPer100Label": {

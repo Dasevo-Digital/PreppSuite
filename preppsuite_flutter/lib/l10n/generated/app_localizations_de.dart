@@ -6853,10 +6853,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Ein Vorrat in „Dose\" oder „Glas\" bleibt stehen, wie er ist. Er zählt nur so lange nicht im Vorrats-Rechner mit, bis die Einheit ein Maß nennt.';
 
   @override
-  String get unitMeasureHelper =>
-      'Bei Lebensmitteln und Wasser: g, kg, ml oder l. Nährwerte stehen je 100 g, und eine Dose hat kein Gewicht, bis jemand sie liest.';
-
-  @override
   String get unitMeasureRequired =>
       'Hier braucht es ein Maß: g, kg, ml oder l.';
 

@@ -6816,10 +6816,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'A stock counted in tins or jars is left exactly as it is. It simply stays out of the supply calculator until the unit names a measure.';
 
   @override
-  String get unitMeasureHelper =>
-      'For food and water: g, kg, ml or l. Nutrition is printed per 100 g, and a tin has no weight until somebody reads it.';
-
-  @override
   String get unitMeasureRequired => 'This needs a measure: g, kg, ml or l.';
 
   @override

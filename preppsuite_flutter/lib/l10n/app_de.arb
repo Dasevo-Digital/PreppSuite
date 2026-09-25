@@ -3005,7 +3005,6 @@
   "unitInfoAccepted": "Diese hier mit einem Tipp, ausgeschrieben geht ebenso: Gramm, Kilo, Milliliter, Liter.",
   "unitInfoExempt": "Das gilt nur für Lebensmittel und Wasser. Medikamente werden weiter in Tabletten gezählt, sonst stimmt die Reichweite je Tagesdosis nicht mehr; Werkzeug wird in Stück gezählt.",
   "unitInfoKept": "Ein Vorrat in „Dose\" oder „Glas\" bleibt stehen, wie er ist. Er zählt nur so lange nicht im Vorrats-Rechner mit, bis die Einheit ein Maß nennt.",
-  "unitMeasureHelper": "Bei Lebensmitteln und Wasser: g, kg, ml oder l. Nährwerte stehen je 100 g, und eine Dose hat kein Gewicht, bis jemand sie liest.",
   "unitMeasureRequired": "Hier braucht es ein Maß: g, kg, ml oder l.",
   "nutritionPer100Label": "{nutrient} je {basis}",
   "@nutritionPer100Label": {

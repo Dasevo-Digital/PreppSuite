@@ -737,15 +737,20 @@ class _InventoryItemFormScreenState
                               controller: _unitController,
                               decoration: InputDecoration(
                                 labelText: l10n.unitLabel,
-                                helperText: _needsMeasure
-                                    ? l10n.unitMeasureHelper
-                                    : null,
-                                helperMaxLines: 3,
-                                // Only where the rule applies. On a
-                                // medicine there is nothing to explain,
-                                // and a question mark beside a field
-                                // that takes anything is a question
-                                // nobody asked.
+                                // No helper text under the field. It
+                                // said the same as the dialog behind the
+                                // (i), and three lines of it pushed the
+                                // row out of line with everything else
+                                // on the form. The rule is still
+                                // reachable two ways: the icon, and the
+                                // validator that refuses a unit which is
+                                // not a measure.
+                                //
+                                // The icon is shown only where the rule
+                                // applies. On a medicine there is
+                                // nothing to explain, and a question
+                                // mark beside a field that takes
+                                // anything is a question nobody asked.
                                 suffixIcon: _needsMeasure
                                     ? IconButton(
                                         icon: const Icon(

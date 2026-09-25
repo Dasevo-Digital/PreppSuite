@@ -11399,12 +11399,6 @@ abstract class AppLocalizations {
   /// **'A stock counted in tins or jars is left exactly as it is. It simply stays out of the supply calculator until the unit names a measure.'**
   String get unitInfoKept;
 
-  /// No description provided for @unitMeasureHelper.
-  ///
-  /// In en, this message translates to:
-  /// **'For food and water: g, kg, ml or l. Nutrition is printed per 100 g, and a tin has no weight until somebody reads it.'**
-  String get unitMeasureHelper;
-
   /// No description provided for @unitMeasureRequired.
   ///
   /// In en, this message translates to:
