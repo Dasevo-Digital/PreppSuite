@@ -194,6 +194,36 @@ Die entstandene `zim_xapian.dll` gehört vor dem Bau nach
 `preppsuite_flutter/native/zim_xapian/build/`; CMake legt sie dann neben
 die `.exe`.
 
+## Woher PDFium kommt
+
+PDFium ist die einzige fremde Binärdatei, die in ein PreppSuite-Paket
+gelangt, ohne hier gebaut zu werden. Sie wird **beim Übersetzen aus dem
+Netz geladen** — früher vom CMake des Plugins, seit pdfrx 2.4.8 vom
+Build-Hook in `pdfium_dart` — und keiner der beiden prüft, was ankommt.
+Das SQLite-Gegenstück daneben ist signiert, und die Wurzel-`pubspec.yaml`
+hält das ausdrücklich fest; beim PDF-Motor galt das nicht.
+
+`tool/pdfium_provenance.sh` schließt das für die ausgelieferten Pakete:
+
+```bash
+tool/pdfium_provenance.sh ~/Desktop/PreppSuite-Release-v<Fassung>-Upload/*
+```
+
+Verglichen wird gegen `tool/pdfium_provenance.txt`, und was dort steht,
+stammt aus der **SLSA-Provenance-Attestation**, die GitHub für jede
+Veröffentlichung von `bblanchon/pdfium-binaries` signiert — nicht aus
+einem Download, den zufällig jemand gemacht hat.
+
+Auf Linux, Windows und Android wird die Bibliothek Byte für Byte kopiert,
+dort genügt der SHA-256. **macOS ist die Ausnahme und keine Lücke:** die
+dylib wandert in ein Framework und wird beim Bauen ad-hoc signiert, ihre
+Bytes müssen sich also unterscheiden. Eine Mach-O-UUID überlebt das
+Signieren, deshalb wird dort sie verglichen — je eine pro Architektur,
+denn das Framework ist universell.
+
+Nach einem Wechsel von `pdfium_dart` gehört die Tabelle neu erzeugt;
+`tool/pdfium_provenance.sh --help` sagt, wie.
+
 ## Stand
 
 | | baut | gestartet |
