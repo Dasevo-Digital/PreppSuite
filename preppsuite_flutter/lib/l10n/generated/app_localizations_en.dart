@@ -863,7 +863,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recipeMatchNote =>
-      'Names are compared, not contents: the app can see that \"chickpeas\" appears in your inventory — not whether the tin is still full or the amount is enough.';
+      'Names are compared, not contents: the app can see that \"chickpeas\" appears in your inventory — not whether the tin is still full or the amount is enough. A generic ingredient counts whatever you have assigned to the matching food group.';
 
   @override
   String get recipeNoneCookable =>

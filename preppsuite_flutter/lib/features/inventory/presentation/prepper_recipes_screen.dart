@@ -41,6 +41,7 @@ class _PrepperRecipesScreenState extends ConsumerState<PrepperRecipesScreen> {
         entry.value.id: matchIngredients(
           ingredients: entry.value.ingredients,
           items: items,
+          language: language,
         ),
     };
     final recipes = _onlyCookable

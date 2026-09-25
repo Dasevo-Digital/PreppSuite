@@ -1535,7 +1535,7 @@ abstract class AppLocalizations {
   /// No description provided for @recipeMatchNote.
   ///
   /// In en, this message translates to:
-  /// **'Names are compared, not contents: the app can see that \"chickpeas\" appears in your inventory — not whether the tin is still full or the amount is enough.'**
+  /// **'Names are compared, not contents: the app can see that \"chickpeas\" appears in your inventory — not whether the tin is still full or the amount is enough. A generic ingredient counts whatever you have assigned to the matching food group.'**
   String get recipeMatchNote;
 
   /// No description provided for @recipeNoneCookable.

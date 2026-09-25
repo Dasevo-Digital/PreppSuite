@@ -867,7 +867,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get recipeMatchNote =>
-      'Verglichen werden Namen, nicht Inhalte: die App sieht, dass „Kichererbsen\" in deinem Vorrat steht — nicht, ob die Dose noch voll ist und ob die Menge reicht.';
+      'Verglichen werden Namen, nicht Inhalte: die App sieht, dass „Kichererbsen\" in deinem Vorrat steht — nicht, ob die Dose noch voll ist und ob die Menge reicht. Eine allgemeine Zutat wie „Gemüse“ zählt, was du der passenden Lebensmittelgruppe zugeordnet hast.';
 
   @override
   String get recipeNoneCookable =>

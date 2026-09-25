@@ -22,6 +22,7 @@ library;
 
 import '../../../local_db/database.dart';
 import '../../search/application/app_search.dart' show foldForSearch;
+import 'supply_groups.dart';
 
 /// One dish.
 class PrepperRecipe {
@@ -70,46 +71,150 @@ class RecipeIngredientMatch {
 ///
 /// **This compares names and nothing else**, which is the honest limit of
 /// what the app can do here and is said on the screen too. A row called
-/// "Kichererbsen 400 g Dose" answers "Kichererbsen"; a row called
-/// "Erbsensuppe" does not, and neither does an empty tin somebody forgot
-/// to write off. Matching goes through [foldForSearch], so "Öl" finds
-/// "Rapsoel" and the umlaut is not a trap.
-/// [foldForSearch] plus the spelling out of the umlauts.
+/// "Kichererbsen 400 g Dose" answers "Kichererbsen"; an empty tin
+/// somebody forgot to write off does not.
+///
+/// The comparison used to be a plain substring, and a substring is not a
+/// word. "Öl" found "Schokolade", because `schokolade` carries the
+/// letters `ol`; "Gemüse" found "Gemüsebrühe"; "Mais" found
+/// "Maisstärke". It missed in the other direction too: a shelf holding
+/// "Kartoffel 2,5 kg" was reported as having no "Kartoffeln", so the
+/// filter hid a dish that was perfectly possible.
+///
+/// What replaces it is one fact about German: **the head of a compound
+/// sits at the end.** A Gemüsebrühe is a Brühe. A Vollmilch is a Milch.
+/// An Olivenöl is an Öl, and a Schokolade is not. So a shelf word counts
+/// when it *ends* in the ingredient — never when it merely contains it.
+///
+/// English does not build words that way, so there the rule is plain word
+/// equality. It is the same fact seen from the other side: without it
+/// "ham" finds *Graham crackers*, "rice" finds *Liquorice* and "stock"
+/// finds *Stockfish*.
+///
+/// Both sides are folded through [foldForSearch] plus the spelled-out
+/// umlauts, so "Öl" still finds "Rapsoel", and both sides are stemmed, so
+/// "Kartoffeln" meets "Kartoffel" and "Zwiebel" meets "Zwiebeln".
 ///
 /// The app's search folds "Öl" to "ol" — right for a search box, where
 /// the reader sees the results and corrects themselves. Here nobody sees
 /// the miss: a cupboard that holds "Rapsoel" would simply be reported as
-/// having no oil, and the recipe filter would quietly hide a dish that is
-/// perfectly possible.
-///
-/// So "ae", "oe" and "ue" collapse the same way the umlaut does. Applied
-/// to **both** sides, which is what keeps it safe: "Sauerkraut" becomes
-/// "saurkraut" on the shelf and in the recipe alike, so the pair still
-/// meets. Local to this file on purpose — the search box wants the other
-/// behaviour, and one rule cannot be both.
+/// having no oil. So "ae", "oe" and "ue" collapse the same way the umlaut
+/// does, applied to **both** sides, which is what keeps it safe:
+/// "Sauerkraut" becomes "saurkraut" on the shelf and in the recipe alike,
+/// so the pair still meets. Local to this file on purpose — the search box
+/// wants the other behaviour, and one rule cannot be both.
 String _foldPantry(String text) => foldForSearch(
   text,
 ).replaceAll('ae', 'a').replaceAll('oe', 'o').replaceAll('ue', 'u');
 
+/// The folded words of [text]. Digits and units fall out on their own:
+/// "400" and "g" are words here, they simply never match an ingredient.
+List<String> _wordsOf(String text) => [
+  for (final word in _foldPantry(text).split(RegExp(r'[^a-z0-9]+')))
+    if (word.isNotEmpty) word,
+];
+
+/// [word] and the shorter forms inflection leaves behind.
+///
+/// Not a stemmer: four endings, cut only when enough word is left to
+/// still mean something. A real stemmer lives in
+/// `features/knowledge/german_stemmer.dart` and is far too eager for this
+/// — it is built to make a search box generous, and a generous match here
+/// is a tick beside food that is not in the house.
+Set<String> _stems(String word) => {
+  word,
+  for (final ending in const ['en', 'n', 'e', 's'])
+    if (word.endsWith(ending) && word.length - ending.length >= 4)
+      word.substring(0, word.length - ending.length),
+};
+
+/// Compounds that are not what they end in.
+///
+/// The rule above is right about German far more often than not, and
+/// where it is wrong it is wrong for a reason that no rule can see: a
+/// Kichererbse is a different plant from an Erbse, and Alkohol is not an
+/// Öl. Naming the handful of exceptions is honest; guessing at them with
+/// a longer rule would not be.
+const _notACompoundOf = <String, Set<String>>{
+  'kichererbsen': {'erbsen'},
+  'kichererbse': {'erbse'},
+  'alkohol': {'ol'},
+};
+
+/// The ingredients that name a kind of food rather than a product.
+///
+/// "Gemüse" is written on almost no tin, so after the rule above it would
+/// match nothing at all — and the two dishes that ask for it would never
+/// be cookable. The way out is not a longer word list but the tagging
+/// that is already there: since the supply groups came in, a row can
+/// carry the BLE group it belongs to, and that tag is the household's own
+/// statement rather than a guess by the app.
+///
+/// Kept deliberately short. "Milch" is not mapped to the dairy group —
+/// that would let cheese answer for milk — and "Öl" is not mapped to
+/// fats, which would let butter do it. Only where the ingredient really
+/// is the category does the category answer.
+const _ingredientGroups = <String, SupplyGroup>{
+  'gemuse': SupplyGroup.vegetables,
+};
+
+/// Whether the shelf word [shelf] names the ingredient word [ingredient].
+bool _wordNames(String ingredient, String shelf, bool german) {
+  if (_notACompoundOf[shelf]?.contains(ingredient) ?? false) return false;
+  final wanted = _stems(ingredient);
+  for (final form in _stems(shelf)) {
+    for (final want in wanted) {
+      if (form == want) return true;
+      if (german && form.endsWith(want)) return true;
+    }
+  }
+  return false;
+}
+
 List<RecipeIngredientMatch> matchIngredients({
   required List<String> ingredients,
   required List<InventoryItem> items,
+  required String language,
 }) {
+  // The recipe lists never fall back into the other language, so the
+  // language of the screen is the language of the ingredient words.
+  final german = language == 'de';
   final pantry = [
     for (final item in items)
       if (item.deletedAt == null &&
           (item.category == 'food' || item.category == 'water') &&
           item.quantity > 0)
-        (name: item.name, folded: _foldPantry(item.name)),
+        (
+          name: item.name,
+          words: _wordsOf(item.name),
+          group: supplyGroupFromName(item.foodGroup),
+        ),
   ];
 
   return [
     for (final ingredient in ingredients)
       RecipeIngredientMatch(ingredient, [
         for (final row in pantry)
-          if (row.folded.contains(_foldPantry(ingredient))) row.name,
+          if (_rowNames(ingredient, row.words, row.group, german)) row.name,
       ]),
   ];
+}
+
+/// An ingredient of several words needs all of them — "split peas" is not
+/// answered by a bag of peas alone.
+bool _rowNames(
+  String ingredient,
+  List<String> shelfWords,
+  SupplyGroup? shelfGroup,
+  bool german,
+) {
+  final group = _ingredientGroups[_foldPantry(ingredient)];
+  if (group != null && shelfGroup == group) return true;
+  final wanted = _wordsOf(ingredient);
+  if (wanted.isEmpty) return false;
+  return wanted.every(
+    (word) => shelfWords.any((shelf) => _wordNames(word, shelf, german)),
+  );
 }
 
 /// Whether every ingredient was found. Used only for the filter, and
