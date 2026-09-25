@@ -205,7 +205,8 @@ kann, steht auf diesen Geräten ein Satz, der das sagt.
 **Gescannte PDFs bleiben außen vor.** Ein PDF ohne Textebene ist für den
 Index ein leeres Dokument; die App meldet das als „Kein auslesbarer Text
 (möglicherweise ein Scan)" statt so zu tun, als wäre nichts gewesen. Eine
-Texterkennung bringt sie nicht mit.
+Texterkennung bringt sie nicht mit. Was eine kosten würde und wie viel
+sie läse, ist gemessen und steht in `texterkennung-messung.md`.
 
 ## Grenzen
 
