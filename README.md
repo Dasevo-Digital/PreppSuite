@@ -81,7 +81,7 @@ verschiedenen Zeitpunkten gefragt, und die Antwort auf das eine sollte
 nichts sein, an dem man vorbeiscrollt. „Strom- und Heizungsausfall" und
 „Wenn der Strom ausfällt" stehen deshalb auf verschiedenen Seiten –
 einmal, was zu kaufen ist, einmal, was zu tun ist. Dasselbe gilt seit
-2.1.0 für Hochwasser und für Sturm: die alten Listen fragten nach
+2.1.2 für Hochwasser und für Sturm: die alten Listen fragten nach
 Rückstauklappe, Dach und Versicherung und lagen unter „Im Ereignis" –
 wer mit steigendem Wasser nachsah, las als Erstes, er möge seine Police
 prüfen. Die akuten Schritte stehen jetzt in „Hochwasser: wenn es soweit
@@ -139,7 +139,7 @@ in rund 30 Sekunden zu. Wer sofort gewarnt werden will, nutzt dafür NINA –
 die App sagt das an Ort und Stelle auch selbst.
 
 **Von der Warnung zur Handlung.** Eine Warnung nennt ihr Ereignis — und
-seit 2.1.0 führt sie von dort zu der Liste, die dazu gehört: „Hochwasser"
+seit 2.1.2 führt sie von dort zu der Liste, die dazu gehört: „Hochwasser"
 auf „Hochwasser: wenn es soweit ist", „Orkanartige Böen" auf „Sturm und
 Unwetter". Der Weg nach draußen zur amtlichen Seite braucht einen Browser;
 dieser braucht nichts. Wo keine Liste passt — Glatteis, Nebel, ein
@@ -520,10 +520,17 @@ er selbst kontrolliert.
 
 ## Aufbau
 
-Ein einziges Paket, `preppsuite_flutter`. Darin liegt der Code nach
-Funktion getrennt: `lib/local_db` die Datenbank, `lib/model` die einfachen
-Typen, `lib/features/<name>/application` die Logik und `presentation` die
+Ein Paket, `preppsuite_flutter`. Darin liegt der Code nach Funktion
+getrennt: `lib/local_db` die Datenbank, `lib/model` die einfachen Typen,
+`lib/features/<name>/application` die Logik und `presentation` die
 Oberfläche.
+
+Daneben `third_party/`. Was dort liegt, gehört nicht diesem Projekt: es
+liegt dort, weil die veröffentlichte Fassung einen Fehler hat, den wir
+nicht umgehen können, und weil es keine neuere gibt. Derzeit betrifft das
+`flutter_tts`, dessen Windows-Teil die App beim Start mitnahm. Was geändert
+wurde und was beim Nachziehen zu tun ist, steht in
+[`third_party/LIESMICH.md`](third_party/LIESMICH.md).
 
 Die Anwendung liest ausschliesslich aus einer lokalen Datenbank auf dem
 Gerät. Änderungen bekommen dort eine Kennung und werden als offen
@@ -601,9 +608,16 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   beim Zurückkehren in die App – dazu die Laufzeit des Dienstes, der die
   Dateien transportiert.
 - Die Ordner-Verschlüsselung ist optional und schützt die geteilten
-  Gerätedateien. Die lokale SQLite-Datenbank bleibt unverschlüsselt.
-  Beim Aktivieren müssen alle Geräte ihre bisherigen Klartextdateien neu
-  veröffentlichen; alte Cloud-Versionen verschwinden dadurch nicht.
+  Gerätedateien. Beim Aktivieren müssen alle Geräte ihre bisherigen
+  Klartextdateien neu veröffentlichen; alte Cloud-Versionen verschwinden
+  dadurch nicht.
+- Die **lokale** Datenbank lässt sich seit 2.1.2 verschlüsseln, unter
+  Einstellungen → Daten und Sicherheit. Sie ist nicht von allein
+  verschlüsselt: die Umstellung wird ausdrücklich gestartet und verlangt
+  vorher einen Sicherungstest. **Auf macOS greift sie derzeit nicht** —
+  ohne Signaturzertifikat nimmt der Schlüsselbund nichts an, und die App
+  sagt das an Ort und Stelle, statt eine Umstellung anzubieten, die
+  scheitern würde.
 - Deutsche MeteoAlarm-Gebiete werden über die DWD-Gebietsliste auf Kreise
   abgebildet. Nicht zuordenbare Gebiete und Meldungen anderer Länder gelten
   für das ganze Land. BBK-Warnungen werden bis auf Kreisebene gefiltert.
