@@ -450,6 +450,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get csvImportEditRowTitle => 'Edit row';
 
   @override
+  String get cameraDeniedTitle => 'Camera not allowed';
+
+  @override
+  String get cameraDeniedBody =>
+      'PreppSuite is not allowed to use the camera. Allow it in the system settings, then open this screen again.';
+
+  @override
+  String get cameraUnsupportedTitle => 'No camera';
+
+  @override
+  String get cameraUnsupportedBody => 'This device cannot scan with a camera.';
+
+  @override
+  String get cameraFailedTitle => 'The camera did not come';
+
+  @override
+  String get cameraFailedBody => 'The viewfinder would not start.';
+
+  @override
+  String get cameraAlternativeBarcode =>
+      'Without a camera, by hand: go back and type the name, quantity and unit yourself.';
+
+  @override
+  String get cameraAlternativeTransfer =>
+      'Without a camera, a household travels through the shared folder or through a file.';
+
+  @override
   String get cancelButton => 'Cancel';
 
   @override

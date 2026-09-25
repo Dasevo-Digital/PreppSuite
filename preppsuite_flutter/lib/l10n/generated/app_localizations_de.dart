@@ -455,6 +455,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get csvImportEditRowTitle => 'Eintrag bearbeiten';
 
   @override
+  String get cameraDeniedTitle => 'Kamera nicht freigegeben';
+
+  @override
+  String get cameraDeniedBody =>
+      'PreppSuite darf die Kamera nicht benutzen. Erlaube sie in den Systemeinstellungen und öffne diesen Bildschirm danach noch einmal.';
+
+  @override
+  String get cameraUnsupportedTitle => 'Keine Kamera';
+
+  @override
+  String get cameraUnsupportedBody =>
+      'Dieses Gerät kann nicht mit der Kamera scannen.';
+
+  @override
+  String get cameraFailedTitle => 'Die Kamera kam nicht';
+
+  @override
+  String get cameraFailedBody => 'Der Bildsucher ließ sich nicht starten.';
+
+  @override
+  String get cameraAlternativeBarcode =>
+      'Ohne Kamera geht es von Hand: zurück, und Name, Menge und Einheit selbst eintragen.';
+
+  @override
+  String get cameraAlternativeTransfer =>
+      'Ohne Kamera geht die Übergabe über den gemeinsamen Ordner oder über eine Datei.';
+
+  @override
   String get cancelButton => 'Abbrechen';
 
   @override

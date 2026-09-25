@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/feel.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+
+import '../../../core/camera_unavailable.dart';
+import '../../../core/feel.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 /// Pushes a camera preview and pops with the first detected barcode's raw
 /// value, or `null` if the user backs out without scanning anything.
@@ -32,7 +35,13 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: MobileScanner(onDetect: _onDetect),
+      body: MobileScanner(
+        onDetect: _onDetect,
+        errorBuilder: (context, error) => CameraUnavailable(
+          error: error,
+          alternative: AppLocalizations.of(context)!.cameraAlternativeBarcode,
+        ),
+      ),
     );
   }
 }

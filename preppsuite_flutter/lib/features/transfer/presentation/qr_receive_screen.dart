@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/app_database_providers.dart';
+import '../../../core/camera_unavailable.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
@@ -388,6 +389,10 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
                 : MobileScanner(
                     controller: _scanner,
                     onDetect: _onDetect,
+                    errorBuilder: (context, error) => CameraUnavailable(
+                      error: error,
+                      alternative: l10n.cameraAlternativeTransfer,
+                    ),
                   ),
           ),
           Padding(

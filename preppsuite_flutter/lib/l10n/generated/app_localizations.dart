@@ -860,6 +860,54 @@ abstract class AppLocalizations {
   /// **'Edit row'**
   String get csvImportEditRowTitle;
 
+  /// No description provided for @cameraDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera not allowed'**
+  String get cameraDeniedTitle;
+
+  /// No description provided for @cameraDeniedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'PreppSuite is not allowed to use the camera. Allow it in the system settings, then open this screen again.'**
+  String get cameraDeniedBody;
+
+  /// No description provided for @cameraUnsupportedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No camera'**
+  String get cameraUnsupportedTitle;
+
+  /// No description provided for @cameraUnsupportedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This device cannot scan with a camera.'**
+  String get cameraUnsupportedBody;
+
+  /// No description provided for @cameraFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The camera did not come'**
+  String get cameraFailedTitle;
+
+  /// No description provided for @cameraFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The viewfinder would not start.'**
+  String get cameraFailedBody;
+
+  /// No description provided for @cameraAlternativeBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a camera, by hand: go back and type the name, quantity and unit yourself.'**
+  String get cameraAlternativeBarcode;
+
+  /// No description provided for @cameraAlternativeTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a camera, a household travels through the shared folder or through a file.'**
+  String get cameraAlternativeTransfer;
+
   /// No description provided for @cancelButton.
   ///
   /// In en, this message translates to:
