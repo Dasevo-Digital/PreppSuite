@@ -1076,6 +1076,15 @@ const firstAidGuidesEn = <FirstAidGuide>[
         'Dress it with sterile gauze. Where several digits are affected, '
         'put gauze between them.',
       ),
+      FirstAidStep(
+        'The guidelines additionally put a painkiller up for '
+        'consideration.',
+        detail:
+            'A high dose of ibuprofen, 400 to 800 mg, or — where that is '
+            'not available — a low dose of acetylsalicylic acid, 75 to '
+            '81 mg. It may improve healing. The amounts are the '
+            "guidelines', not this app's.",
+      ),
     ],
     facts: [FirstAidFact('Rewarming', 'body-temperature water, ~30 minutes')],
     cautions: [

@@ -151,13 +151,20 @@ dem Bildschirm. Der Programmcode steht unter der MIT-Lizenz, die den
 Weiterverkauf erlaubt — fremder Inhalt unter einer Nicht-kommerziell-
 Bedingung darf darin nicht wörtlich liegen.
 
-### Eine Dosierung, die bewusst fehlt
+### Die eine Dosierung, die hier steht
 
-Die Leitlinie nennt bei **Erfrierungen** eine hohe Dosis Ibuprofen, die
-die Heilung verbessern kann. Sie steht hier nicht. Dosierungen von
-Medikamenten, die dem Verletzten nicht selbst verordnet sind, führt diese
-App nicht — und diese Regel gilt auch gegenüber einer Quelle, der die App
-ansonsten Wort für Wort folgt. Alles andere des Kapitels ist da.
+Bei **Erfrierungen** stellt die Leitlinie ein Schmerzmittel zur Erwägung
+und nennt dazu Mengen: hochdosiertes Ibuprofen, 400 bis 800 mg, oder
+ersatzweise niedrig dosierte Acetylsalicylsäure, 75 bis 81 mg. Das steht
+auf der Seite, und der Schritt sagt selbst dazu, dass die Mengen die der
+Leitlinie sind und nicht die dieser App.
+
+Das ist die einzige Stelle im ganzen Bereich mit einer Dosis. Die Regel
+dahinter ist unverändert und sie war nie „keine Zahlen": sie lautet, dass
+diese App keine medizinische Aussage **erfindet**. Eine Menge, die eine
+Leitlinie nennt und die die App als deren Menge kenntlich macht, ist
+keine Erfindung — eine Menge, die sich die App selbst ausdenken müsste,
+wäre eine, und die steht hier weiterhin nicht.
 
 ### Was bewusst fehlt, obwohl es überall steht
 

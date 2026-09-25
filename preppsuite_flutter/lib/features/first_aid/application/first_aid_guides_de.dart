@@ -416,11 +416,12 @@ const firstAidGuidesDe = <FirstAidGuide>[
   // Bildschirm; die Impressumsseite der Leitlinien erlaubt die
   // nicht-kommerzielle Wiedergabe unter Nennung der Quelle.
   //
-  // Eine Stelle ist bewusst ausgelassen: die Leitlinie erwaehnt bei
-  // Erfrierungen eine hohe Dosis Ibuprofen. Dosierungen von Medikamenten,
-  // die dem Verletzten nicht selbst verordnet sind, stehen in dieser App
-  // nicht -- dieselbe Regel, die auch sonst gilt, und sie gilt auch
-  // gegenueber einer Quelle, der die App ansonsten Wort fuer Wort folgt.
+  // Eine Ausnahme von der Regel, dass hier keine Medikamentendosis steht:
+  // die Leitlinie stellt bei Erfrierungen ein Schmerzmittel zur Erwaegung,
+  // mit Mengen, und die stehen dort. Der Schritt sagt selbst, dass die
+  // Mengen die der Leitlinie sind. Die Regel gilt unveraendert fuer alles,
+  // was sich die App selbst ausdenken muesste -- und die Leitlinie denkt
+  // sich hier nichts aus.
   FirstAidGuide(
     id: 'drowning',
     group: FirstAidGroup.lifeThreatening,
@@ -1192,6 +1193,14 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidStep(
         'Mit steriler Gaze verbinden. Sind mehrere Finger oder Zehen '
         'betroffen, Gaze dazwischenlegen.',
+      ),
+      FirstAidStep(
+        'Die Leitlinie stellt zusätzlich ein Schmerzmittel zur Erwägung.',
+        detail:
+            'Hochdosiertes Ibuprofen, 400 bis 800 mg, oder – wenn das '
+            'nicht da ist – niedrig dosierte Acetylsalicylsäure, 75 bis '
+            '81 mg. Das kann die Heilung verbessern. Die Mengen sind die '
+            'der Leitlinie, nicht die dieser App.',
       ),
     ],
     facts: [FirstAidFact('Aufwärmen', 'körperwarmes Wasser, ~30 Minuten')],
