@@ -117,7 +117,9 @@ check_macos_framework() {
 }
 
 workspace="$(mktemp -d)"
-trap 'rm -rf "$workspace"' EXIT
+# chmod davor: aus einem Windows-Zip kommen Verzeichnisse ohne Schreibrecht,
+# und `rm -rf` kommt dann nicht hinein.
+trap 'chmod -R u+rwX "$workspace" 2>/dev/null; rm -rf "$workspace"' EXIT
 
 check_package() {
   local package="$1"
@@ -143,7 +145,11 @@ check_package() {
       check_library "$so" linux-x64
       ;;
     *windows*.zip)
-      unzip -q -o "$package" -d "$room" || { bad "liess sich nicht auspacken"; return; }
+      # Nicht am Rueckgabewert gemessen: PowerShells Compress-Archive
+      # schreibt Backslashes als Trenner, worauf unzip warnt und mit 1
+      # endet -- ausgepackt hat es trotzdem. Was zaehlt, ist ob die Datei
+      # danach da ist.
+      unzip -q -o "$package" -d "$room" >/dev/null 2>&1
       local dll; dll="$(find "$room" -iname 'pdfium.dll' | head -1)"
       [ -n "$dll" ] || { bad "keine pdfium.dll im Paket"; return; }
       check_library "$dll" windows-x64

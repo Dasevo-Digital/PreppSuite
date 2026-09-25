@@ -103,6 +103,44 @@ sign() { # path [extra arguments]
 count=0
 failed=0
 
+# An install name that does not match the framework it sits in keeps the
+# app from starting at all.
+#
+# PDFium arrives through Flutter's native assets as `PDFium.framework`,
+# and the app links against `@rpath/PDFium.framework/PDFium` -- but the
+# dylib inside carries `@rpath/pdfium.framework/pdfium`, in lower case.
+# A case-insensitive disk finds the file anyway; dyld compares the leaf
+# name literally, refuses it, and the process dies in `dyld4::prepare`
+# before a single line of Dart runs. It says so plainly:
+#
+#   Library not loaded: @rpath/PDFium.framework/PDFium
+#   ... with install name '@rpath/pdfium.framework/pdfium' and security
+#   level requires its leaf name to match requested 'PDFium'
+#
+# Corrected here rather than anywhere else because this is the last place
+# that touches the bundle before signing, and rewriting an install name
+# invalidates the signature -- doing it afterwards would break what was
+# just signed.
+#
+# Only the leaf name is judged, and only when it really differs. The
+# ordinary form for a versioned framework is
+# `@rpath/X.framework/Versions/A/X`, which is correct and must be left
+# alone; rewriting those as well is a way of breaking three frameworks
+# while fixing one.
+while IFS= read -r framework; do
+  name="$(basename "$framework" .framework)"
+  binary="$framework/Versions/A/$name"
+  [ -f "$binary" ] || binary="$framework/$name"
+  [ -f "$binary" ] || continue
+  have="$(otool -D "$binary" 2>/dev/null | sed -n '2p')"
+  [ -n "$have" ] || continue
+  [ "$(basename "$have")" = "$name" ] && continue
+  want="@rpath/$name.framework/$name"
+  echo "  Install-Name berichtigt: $name ($have -> $want)"
+  install_name_tool -id "$want" "$binary" 2>/dev/null \
+    || echo "  WARNUNG: $name liess sich nicht berichtigen" >&2
+done < <(find "$APP/Contents/Frameworks" -maxdepth 1 -name '*.framework' 2>/dev/null)
+
 # Everything loose inside the frameworks first (dylibs, .so), then the
 # framework bundles themselves. The other way round the bundle signature
 # would be invalidated again the moment its contents changed.
