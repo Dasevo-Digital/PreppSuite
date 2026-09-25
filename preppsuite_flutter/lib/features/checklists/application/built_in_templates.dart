@@ -73,7 +73,8 @@ const builtInTemplates = [
     [
       BuiltInItem(
         '00000000-0000-4000-8000-000000000102',
-        'Wasserkanister/-behälter',
+        'Wasserkanister/-behälter — auch für Lösch- und Brauchwasser, so '
+            'nennt es die Liste des BBK',
       ),
       BuiltInItem(
         '00000000-0000-4000-8000-000000000103',
