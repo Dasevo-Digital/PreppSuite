@@ -4715,7 +4715,7 @@ abstract class AppLocalizations {
   /// No description provided for @supplyCalculatorSourceBody.
   ///
   /// In en, this message translates to:
-  /// **'For adults the BBK states 1.5 litres of fluid a day plus 0.5 litres for cooking, and around 2200 kcal. For children the BBK itself states nothing, but points at the Federal Office for Agriculture and Food, whose stockpiling table says it in a footnote: children up to 12 (not infants) need an average of 1 litre a day, per the DGE and the Max Rubner Institute. The app uses that — 1 litre plus the same 0.5 litres for cooking. From 65 the same footnote recommends 2 litres a day; age is not in the household profile, so that appears only as a note on the inventory screen. The 1400 kcal for a child remain this app\'s own cautious estimate — there is no official figure. For dogs and cats only water is counted, at the veterinary rule of thumb of roughly 60 ml per kilogram: 1.2 litres for a 20 kg dog, 0.25 litres for a 4 kg cat. For anything exact, the BMEL\'s Vorratskalkulator.'**
+  /// **'For adults the BBK states 1.5 litres of fluid a day plus 0.5 litres for cooking, and around 2200 kcal. For children the BBK itself states nothing, but points at the Federal Office for Agriculture and Food, whose stockpiling table says it in a footnote: children up to 12 (not infants) need an average of 1 litre a day, per the DGE and the Max Rubner Institute. The app uses that — 1 litre plus the same 0.5 litres for cooking. From 65 the same footnote recommends 2 litres a day; age is not in the household profile, so that appears only as a note on the inventory screen. The 1400 kcal for a child remain this app\'s own cautious estimate — there is no official figure. For infants nobody states an amount: the footnote excludes them in so many words — “children (not infants)” — and this app invents no figure for it. The BZfE names only the kind of supply: formula or infant food, purees, clean water to prepare them with, plus nappies and care products. Enter those as items of their own and size them by what your child actually gets through in a day. For dogs and cats only water is counted, at the veterinary rule of thumb of roughly 60 ml per kilogram: 1.2 litres for a 20 kg dog, 0.25 litres for a 4 kg cat. For anything exact, the BMEL\'s Vorratskalkulator.'**
   String get supplyCalculatorSourceBody;
 
   /// No description provided for @householdChildrenLabel.
@@ -5107,6 +5107,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fibre'**
   String get fiberLabel;
+
+  /// No description provided for @supplyCalculatorInfantNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Infants are not counted here — what to stock for them is under “Where the figures come from”.'**
+  String get supplyCalculatorInfantNote;
 
   /// No description provided for @supplyCalculatorSeniorNote.
   ///

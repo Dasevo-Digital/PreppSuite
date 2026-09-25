@@ -166,6 +166,17 @@ class HouseholdOverviewScreen extends ConsumerWidget {
                   onChanged: (value) =>
                       _save(ref, profile.copyWith(children: value)),
                 ),
+                // Direkt unter der Kinderzahl, weil genau hier die Frage
+                // aufkommt -- und weil die Vorratsliste dafuer der
+                // falsche Ort waere: dort kostet jede weitere graue Zeile
+                // die Hoehe, in der sonst der erste Artikel steht.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: Text(
+                    l10n.supplyCalculatorInfantNote,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
                 CountTile(
                   icon: Icons.pets_outlined,
                   label: l10n.householdDogsLabel,
