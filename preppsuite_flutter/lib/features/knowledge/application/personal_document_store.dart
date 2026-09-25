@@ -134,6 +134,39 @@ class PersonalDocumentStore {
     return updated;
   }
 
+  /// Adds several at once, in one read and one write.
+  ///
+  /// A folder import would otherwise load and save the whole list once
+  /// per file, and that list lives in the encrypted preferences — every
+  /// round trip is a decrypt and an encrypt. What comes back is the whole
+  /// library and, separately, only the entries that were actually new, so
+  /// the caller indexes exactly those and not the ones that were already
+  /// there.
+  Future<({List<PersonalDocument> all, List<PersonalDocument> added})> addAll(
+    List<({String location, String label})> entries,
+  ) async {
+    final documents = await load();
+    final known = {for (final document in documents) document.location};
+    final added = <PersonalDocument>[];
+    for (final entry in entries) {
+      if (!known.add(entry.location)) continue;
+      added.add(
+        PersonalDocument(
+          id: const Uuid().v4(),
+          location: entry.location,
+          label: entry.label,
+          addedAt: DateTime.now().toUtc(),
+        ),
+      );
+    }
+    if (added.isEmpty) {
+      return (all: documents, added: const <PersonalDocument>[]);
+    }
+    final updated = [...documents, ...added];
+    await _save(updated);
+    return (all: updated, added: added);
+  }
+
   Future<List<PersonalDocument>> remove(String id) async {
     final updated = [
       for (final item in await load())

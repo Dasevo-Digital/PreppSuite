@@ -3704,6 +3704,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String get knowledgeDocumentAdd => 'Add document';
 
   @override
+  String get knowledgeDocumentAddFolder => 'Add folder';
+
+  @override
+  String get knowledgeDocumentFolderScope =>
+      'PDF, EPUB and Markdown files lying directly in this folder are taken in — no subfolders.';
+
+  @override
+  String knowledgeDocumentFolderFound(int found) {
+    return '$found files found';
+  }
+
+  @override
+  String knowledgeDocumentFolderLimit(int limit) {
+    return 'The first $limit will be taken in.';
+  }
+
+  @override
+  String get knowledgeDocumentFolderEmpty =>
+      'There are no PDF, EPUB or Markdown files in this folder.';
+
+  @override
+  String get knowledgeDocumentFolderUnreadable =>
+      'The folder could not be read.';
+
+  @override
+  String knowledgeDocumentFolderAdded(int added, int known) {
+    return '$added newly added, $known were already in the library';
+  }
+
+  @override
+  String knowledgeDocumentFolderProgress(int done, int total) {
+    return '$done of $total read';
+  }
+
+  @override
+  String get knowledgeDocumentFolderOnComputer =>
+      'Whole folders can be added on a computer; on a phone, one file at a time.';
+
+  @override
   String get knowledgeDocumentsEmpty =>
       'No personal documents have been added yet.';
 

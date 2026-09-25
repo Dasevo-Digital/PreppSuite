@@ -3729,6 +3729,45 @@ class AppLocalizationsDe extends AppLocalizations {
   String get knowledgeDocumentAdd => 'Dokument hinzufügen';
 
   @override
+  String get knowledgeDocumentAddFolder => 'Ordner hinzufügen';
+
+  @override
+  String get knowledgeDocumentFolderScope =>
+      'Übernommen werden PDF-, EPUB- und Markdown-Dateien, die direkt in diesem Ordner liegen — keine Unterordner.';
+
+  @override
+  String knowledgeDocumentFolderFound(int found) {
+    return '$found Dateien gefunden';
+  }
+
+  @override
+  String knowledgeDocumentFolderLimit(int limit) {
+    return 'Es werden die ersten $limit übernommen.';
+  }
+
+  @override
+  String get knowledgeDocumentFolderEmpty =>
+      'In diesem Ordner liegen keine PDF-, EPUB- oder Markdown-Dateien.';
+
+  @override
+  String get knowledgeDocumentFolderUnreadable =>
+      'Der Ordner konnte nicht gelesen werden.';
+
+  @override
+  String knowledgeDocumentFolderAdded(int added, int known) {
+    return '$added neu hinzugefügt, $known waren schon in der Bibliothek';
+  }
+
+  @override
+  String knowledgeDocumentFolderProgress(int done, int total) {
+    return '$done von $total eingelesen';
+  }
+
+  @override
+  String get knowledgeDocumentFolderOnComputer =>
+      'Ganze Ordner lassen sich am Computer hinzufügen, auf dem Telefon einzelne Dateien.';
+
+  @override
   String get knowledgeDocumentsEmpty =>
       'Noch keine eigenen Dokumente hinzugefügt.';
 

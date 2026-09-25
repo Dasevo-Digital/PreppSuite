@@ -6254,6 +6254,60 @@ abstract class AppLocalizations {
   /// **'Add document'**
   String get knowledgeDocumentAdd;
 
+  /// No description provided for @knowledgeDocumentAddFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add folder'**
+  String get knowledgeDocumentAddFolder;
+
+  /// No description provided for @knowledgeDocumentFolderScope.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF, EPUB and Markdown files lying directly in this folder are taken in — no subfolders.'**
+  String get knowledgeDocumentFolderScope;
+
+  /// No description provided for @knowledgeDocumentFolderFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{found} files found'**
+  String knowledgeDocumentFolderFound(int found);
+
+  /// No description provided for @knowledgeDocumentFolderLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'The first {limit} will be taken in.'**
+  String knowledgeDocumentFolderLimit(int limit);
+
+  /// No description provided for @knowledgeDocumentFolderEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no PDF, EPUB or Markdown files in this folder.'**
+  String get knowledgeDocumentFolderEmpty;
+
+  /// No description provided for @knowledgeDocumentFolderUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'The folder could not be read.'**
+  String get knowledgeDocumentFolderUnreadable;
+
+  /// No description provided for @knowledgeDocumentFolderAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{added} newly added, {known} were already in the library'**
+  String knowledgeDocumentFolderAdded(int added, int known);
+
+  /// No description provided for @knowledgeDocumentFolderProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} read'**
+  String knowledgeDocumentFolderProgress(int done, int total);
+
+  /// No description provided for @knowledgeDocumentFolderOnComputer.
+  ///
+  /// In en, this message translates to:
+  /// **'Whole folders can be added on a computer; on a phone, one file at a time.'**
+  String get knowledgeDocumentFolderOnComputer;
+
   /// No description provided for @knowledgeDocumentsEmpty.
   ///
   /// In en, this message translates to:

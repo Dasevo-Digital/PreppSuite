@@ -180,6 +180,33 @@ statt einfach loszulaufen.
 egal – `remove_diacritics` sorgt dafür, dass „Notvorrate" von einer
 Telefontastatur auch trifft.
 
+## Eigene Dokumente
+
+Neben den Archiven nimmt die App Dateien auf, die dir selbst gehören: PDF,
+EPUB, Markdown. Sie werden **nicht kopiert** — die Bibliothek merkt sich,
+wo sie liegen, und liest sie von dort. Auf Wunsch wird ihr Text in einen
+eigenen Volltextindex gelegt, der wie alles andere auf dem Gerät bleibt.
+
+**Ganze Ordner.** Ein Ordner lässt sich auf einmal übernehmen: Was direkt
+darin liegt und lesbar ist, kommt in die Bibliothek, höchstens
+zweihundert Dateien auf einmal. Unterordner bleiben außen vor — ein
+Dokumentenarchiv ist oft tief und breit, und aus einem Klick sollen nicht
+tausende Einträge werden.
+
+Das geht **am Computer**, nicht am Telefon. Unter Linux und Windows gibt
+der Ordnerdialog einen gewöhnlichen Pfad heraus, unter macOS ein
+Sicherheits-Lesezeichen, hinter dem sich der Ordner öffnen lässt und für
+jede gefundene Datei ein eigenes Lesezeichen entsteht. Android und iOS
+geben dagegen einen Baum heraus, den die App nur über die Plattformbrücke
+erreicht, und für ein einzelnes Kind darin gibt es bisher keine Form, die
+sich speichern ließe. Statt eines Knopfes, der dort nicht funktionieren
+kann, steht auf diesen Geräten ein Satz, der das sagt.
+
+**Gescannte PDFs bleiben außen vor.** Ein PDF ohne Textebene ist für den
+Index ein leeres Dokument; die App meldet das als „Kein auslesbarer Text
+(möglicherweise ein Scan)" statt so zu tun, als wäre nichts gewesen. Eine
+Texterkennung bringt sie nicht mit.
+
 ## Grenzen
 
 **Unter Linux und Windows muss die Browser-Komponente da sein.** Unter
