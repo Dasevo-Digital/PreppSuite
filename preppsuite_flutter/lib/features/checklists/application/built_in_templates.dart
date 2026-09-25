@@ -979,4 +979,118 @@ const builtInTemplates = [
     ],
     kind: ChecklistKind.response,
   ),
+  // Die einzige Vorlage hier, deren erste drei Punkte nicht aus einer
+  // Empfehlung stammen, sondern aus einer Verordnung -- und der Grund,
+  // warum sie in zwei Haelften zerfaellt. Was Pflicht ist, nennt seinen
+  // Paragraphen; alles danach ist es ausdruecklich nicht.
+  //
+  // Zwei Stellen, an denen die ueblichen Listen im Netz danebenliegen und
+  // die deshalb hier woertlich nach dem Gesetzestext stehen:
+  //
+  // Die StVZO verlangt in einem PKW **eine** Warnweste (Paragraph 53a
+  // Absatz 2 Nummer 3), nicht eine je Insasse. Eine je Insasse ist eine
+  // gute Idee und steht deshalb unten bei den guten Ideen.
+  //
+  // Und der Verbandkasten richtet sich nach DIN 13164 "Ausgabe Januar
+  // 1998 oder Ausgabe Januar 2014" -- so steht es in Paragraph 35h
+  // Absatz 3. Die Fassung von 2022 mit den zwei Masken ist damit nicht
+  // vorgeschrieben, so oft das auch anders zu lesen ist.
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000024',
+    'Fahrzeug',
+    ChecklistCategory.evacuation,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002201',
+        'Pflicht: ein Warndreieck (§ 53a Abs. 2 Nr. 1 StVZO)',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002202',
+        'Pflicht: eine Warnweste nach DIN EN 471 oder EN ISO 20471 '
+            '(§ 53a Abs. 2 Nr. 3 StVZO)',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002203',
+        'Pflicht: Verbandkasten nach DIN 13164, Ausgabe 1998 oder 2014, '
+            'im geschlossenen Behältnis (§ 35h Abs. 3 StVZO)',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002204',
+        'Verfallsdatum im Verbandkasten prüfen — Pflicht ist der Kasten, '
+            'nicht sein Alter, aber altes Material klebt nicht mehr',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002205',
+        'Keine Pflicht, aber sinnvoll: eine Warnweste je Sitzplatz, '
+            'griffbereit im Innenraum und nicht im Kofferraum',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002206',
+        'Tank oder Akku nie unter die Hälfte fallen lassen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002207',
+        'Reifendruck, Profiltiefe und Ersatzrad oder Pannenset geprüft',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002208',
+        'Öl, Kühlwasser und Scheibenwischwasser aufgefüllt',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002209',
+        'Beleuchtung rundum geprüft, Ersatzlampen dabei',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002210',
+        'Starthilfekabel und Abschleppseil',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002211',
+        'Taschen- oder Stirnlampe mit geladenen Batterien',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002212',
+        'Geladene Powerbank und Ladekabel für das Telefon',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002213',
+        'Wasser und etwas Haltbares zu essen im Fahrzeug',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002214',
+        'Decke, feste Schuhe und Regenjacke',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002215',
+        'Bargeld in kleinen Scheinen — Kartenzahlung fällt mit dem Strom '
+            'aus',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002216',
+        'Papierkarte der Umgebung, für den Fall ohne Netz und ohne Akku',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002217',
+        'Treffpunkt und Ausweichroute mit den Angehörigen abgesprochen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002218',
+        'Winter: Eiskratzer, Handfeger, Frostschutz im Wischwasser, '
+            'Decke',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002219',
+        'Winter: Schneeketten, wo sie gebraucht werden — und einmal '
+            'trocken geübt',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002220',
+        'Sommer: Sonnenschutz und Wasser auch für kurze Fahrten',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002221',
+        'Fahrzeug so parken, dass es ohne Rangieren wegkommt',
+      ),
+    ],
+  ),
 ];

@@ -54,6 +54,19 @@ Die Seite verweist auf das Hausratverzeichnis, das die App ohnehin hat —
 die Polizei nennt es „Wertgegenstandsliste" und rät, sie zu haben, bevor
 etwas passiert.
 
+**Fahrzeug-Checkliste.** Einundzwanzig Punkte, und die ersten drei sind
+die einzigen im ganzen Programm, die aus einer Verordnung stammen statt
+aus einer Empfehlung: Warndreieck und Warnweste nach § 53a Abs. 2 StVZO,
+Verbandkasten nach § 35h Abs. 3. Jeder nennt seinen Paragraphen, alles
+danach ausdrücklich nicht.
+
+Zwei Stellen, an denen die üblichen Listen danebenliegen und die deshalb
+wörtlich nach dem Gesetzestext stehen: die StVZO verlangt im PKW **eine**
+Warnweste, nicht eine je Insasse — eine je Sitzplatz steht unten bei den
+guten Ideen. Und der Verbandkasten richtet sich nach DIN 13164 „Ausgabe
+Januar 1998 oder Ausgabe Januar 2014"; die Fassung von 2022 mit den zwei
+Masken ist damit **nicht** vorgeschrieben. Vier Tests halten beides fest.
+
 **Prepper-Rezepte, die den Vorrat kennen.** Neun deutsche und sechs
 englische Gerichte aus dem Vorratsschrank, jedes mit dem Hinweis, was es
 an Hitze kostet — ein Topf, eine Pfanne oder gar nichts. Jedes Rezept
