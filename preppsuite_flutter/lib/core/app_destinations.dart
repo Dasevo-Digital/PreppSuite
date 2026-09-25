@@ -26,6 +26,7 @@ import '../features/first_aid/presentation/first_aid_screen.dart';
 import '../features/first_aid/presentation/first_aid_videos_screen.dart';
 import '../features/first_aid/presentation/knowledge_check_screen.dart';
 import '../features/home/application/shell_layout.dart';
+import '../features/home/presentation/burglary_screen.dart';
 import '../features/home/presentation/distress_signal_screen.dart';
 import '../features/home/presentation/emergency_information_screen.dart';
 import '../features/home/presentation/preparedness_tools_screen.dart';
@@ -228,6 +229,22 @@ List<AppDestination> appDestinations() => [
     area: ShellDestination.emergency,
     open: (_) => const EmergencyInformationScreen(),
     aliases: ['112', '110', 'giftnotruf', 'nummern'],
+  ),
+  AppDestination(
+    id: 'burglary',
+    title: (l) => l.burglaryTitle,
+    icon: Icons.lock_outline,
+    area: ShellDestination.emergency,
+    open: (p) => BurglaryScreen(householdId: p.id),
+    aliases: [
+      'einbruch',
+      'einbruchschutz',
+      'eingebrochen',
+      'aufgebrochen',
+      'polizei',
+      '110',
+      'sperrnotruf',
+    ],
   ),
   AppDestination(
     id: 'radio-emergency',

@@ -673,6 +673,107 @@ class AppLocalizationsEn extends AppLocalizations {
       'Source: Federal Office for Radiation Protection (BfS), \"Einnahme und Wirkung von Jodtabletten\".';
 
   @override
+  String get burglaryTitle => 'Burglary';
+
+  @override
+  String get burglaryEntryHint =>
+      'Catching somebody at it, what follows, and how to prevent it.';
+
+  @override
+  String get burglaryRuleTitle => 'The rule that comes first';
+
+  @override
+  String get burglaryRuleBody =>
+      'Do not put yourself or anybody else in danger. Avoid any confrontation where you can, and on no account put yourself in the burglar\'s way.';
+
+  @override
+  String get burglaryCaughtTitle => 'If you catch somebody at it';
+
+  @override
+  String get burglaryCaughtLeave =>
+      'Try to leave the flat or the house, and tell the neighbours.';
+
+  @override
+  String get burglaryCaughtWindow =>
+      'If you cannot get out: open a window if you can and call for help.';
+
+  @override
+  String get burglaryCaughtCall => 'Call 110 at once.';
+
+  @override
+  String get burglaryCaughtDescribe =>
+      'Give the police as good a description as you can: the person, any getaway vehicle, and which way they went.';
+
+  @override
+  String get burglaryAfterTitle => 'Afterwards';
+
+  @override
+  String get burglaryAfterThreat => 'Call 110 if you are under acute threat.';
+
+  @override
+  String get burglaryAfterReport =>
+      'Report it, at any police station. Also where the attempt failed or nothing was taken.';
+
+  @override
+  String get burglaryAfterNoTidy =>
+      'Do not tidy up. Leave everything as you found it and touch as little as possible until the traces have been secured.';
+
+  @override
+  String get burglaryAfterList =>
+      'Put together a list of what was taken, as precisely as you can. Receipts and serial numbers help if something turns up again.';
+
+  @override
+  String get burglaryAfterKeys =>
+      'If keys have gone: have the lock cylinders replaced as a precaution.';
+
+  @override
+  String get burglaryAfterPhone =>
+      'Have stolen cards and phones blocked, through the German blocking hotline 116 116.';
+
+  @override
+  String get burglaryPossessionsLink =>
+      'The list of valuables the police mean here, you already have';
+
+  @override
+  String get burglaryPossessionsHint =>
+      'This app\'s household inventory is exactly that — filled in before anything happens, it is the list you will be asked for afterwards.';
+
+  @override
+  String get burglaryPreventTitle => 'Prevention';
+
+  @override
+  String get burglaryPreventWho =>
+      'Most burglaries are not the work of professionals but of opportunists going at windows and doors with simple levering tools. The way in is usually an easily reachable window, or a window or flat door.';
+
+  @override
+  String get burglaryPreventDay =>
+      'Contrary to the common belief, burglaries often happen in daylight — during school, work and shopping hours, in the early evening and at weekends. More than a third of all home burglaries are daytime ones.';
+
+  @override
+  String get burglaryPreventMechanical =>
+      'The police recommend mechanically securing every window and door. Technology does not deter what it lets in.';
+
+  @override
+  String get burglaryPreventNew =>
+      'For new building and conversions: tested burglar-resistant windows and doors to DIN EN 1627 ff., from resistance class RC 2. There it is established that leaf, frame, lock and fittings together leave no weak point.';
+
+  @override
+  String get burglaryPreventRetro =>
+      'For retrofitting: systems to DIN 18104 parts 1 and 2. The parts have to be matched to one another in their effect.';
+
+  @override
+  String get burglaryPreventSide =>
+      'Side doors can be retrofitted with solid bolts, strong bars or a crossbar lock.';
+
+  @override
+  String get burglaryPreventFit =>
+      'Fitted security works only where it is fitted properly. And technology does not replace the second thing the police name: security-aware behaviour and an attentive neighbourhood.';
+
+  @override
+  String get burglarySource =>
+      'Source: the crime prevention body of the German federal states and the federation (polizei-beratung.de) and the K-EINBRUCH campaign. Figures from the 2025 police crime statistics.';
+
+  @override
   String get cancelButton => 'Cancel';
 
   @override

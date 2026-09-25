@@ -677,6 +677,108 @@ class AppLocalizationsDe extends AppLocalizations {
       'Quelle: Bundesamt für Strahlenschutz (BfS), „Einnahme und Wirkung von Jodtabletten\".';
 
   @override
+  String get burglaryTitle => 'Einbruch';
+
+  @override
+  String get burglaryEntryHint =>
+      'Auf frischer Tat, danach, und wie man vorbeugt.';
+
+  @override
+  String get burglaryRuleTitle => 'Die wichtigste Regel';
+
+  @override
+  String get burglaryRuleBody =>
+      'Sich und andere nicht in Gefahr bringen. Vermeide nach Möglichkeit jede Konfrontation und stelle dich dem Einbrecher keinesfalls in den Weg.';
+
+  @override
+  String get burglaryCaughtTitle =>
+      'Wenn du jemanden auf frischer Tat ertappst';
+
+  @override
+  String get burglaryCaughtLeave =>
+      'Versuche, die Wohnung oder das Haus zu verlassen, und informiere die Nachbarn.';
+
+  @override
+  String get burglaryCaughtWindow =>
+      'Kommst du nicht heraus: wenn möglich ein Fenster öffnen und um Hilfe rufen.';
+
+  @override
+  String get burglaryCaughtCall => 'Sofort 110.';
+
+  @override
+  String get burglaryCaughtDescribe =>
+      'Der Polizei eine möglichst gute Beschreibung geben: die Person, ein etwaiges Fluchtfahrzeug und die Fluchtrichtung.';
+
+  @override
+  String get burglaryAfterTitle => 'Danach';
+
+  @override
+  String get burglaryAfterThreat => 'Bei akuter Bedrohung 110.';
+
+  @override
+  String get burglaryAfterReport =>
+      'Anzeige erstatten – bei jeder Polizeidienststelle. Auch dann, wenn der Versuch gescheitert ist oder nichts gestohlen wurde.';
+
+  @override
+  String get burglaryAfterNoTidy =>
+      'Nicht aufräumen. Alles so lassen, wie du es vorgefunden hast, und möglichst nichts anfassen, bis die Spuren gesichert sind.';
+
+  @override
+  String get burglaryAfterList =>
+      'Eine Liste des Gestohlenen zusammenstellen, so genau wie möglich. Kaufbelege und Gerätenummern helfen, wenn etwas wieder auftaucht.';
+
+  @override
+  String get burglaryAfterKeys =>
+      'Sind Schlüssel weg: die Schließzylinder vorsichtshalber austauschen lassen.';
+
+  @override
+  String get burglaryAfterPhone =>
+      'Gestohlene Karten und Telefone sperren lassen, über den Sperrnotruf 116 116.';
+
+  @override
+  String get burglaryPossessionsLink =>
+      'Die Wertgegenstandsliste, die die Polizei hier meint, hast du schon';
+
+  @override
+  String get burglaryPossessionsHint =>
+      'Das Hausratverzeichnis dieser App ist genau das – ausgefüllt, bevor etwas passiert, ist es nach einem Einbruch die Liste, nach der gefragt wird.';
+
+  @override
+  String get burglaryPreventTitle => 'Vorbeugen';
+
+  @override
+  String get burglaryPreventWho =>
+      'Die Mehrzahl der Einbrüche geht nicht auf Profis zurück, sondern auf Gelegenheitstäter, die mit einfachem Hebelwerkzeug an Fenster und Türen gehen. Eingebrochen wird meist über leicht erreichbare Fenster und Fenster- oder Wohnungstüren.';
+
+  @override
+  String get burglaryPreventDay =>
+      'Entgegen der landläufigen Meinung wird häufig am Tag eingebrochen – zur Schul-, Arbeits- und Einkaufszeit, am frühen Abend und an Wochenenden. Über ein Drittel aller Wohnungseinbrüche sind Tageswohnungseinbrüche.';
+
+  @override
+  String get burglaryPreventMechanical =>
+      'Die Polizei empfiehlt die mechanische Sicherung aller Fenster und Türen. Technik hält nicht ab, wenn sie nicht hineinlässt.';
+
+  @override
+  String get burglaryPreventNew =>
+      'Bei Neu- und Umbauten: geprüfte einbruchhemmende Fenster und Türen nach DIN EN 1627 ff., ab Widerstandsklasse RC 2. Dort ist sichergestellt, dass Türblatt, Zarge, Schloss und Beschlag zusammen keinen Schwachpunkt haben.';
+
+  @override
+  String get burglaryPreventRetro =>
+      'Zum Nachrüsten: Systeme nach DIN 18104 Teil 1 und 2. Die Teile müssen in ihrer Wirkung aufeinander abgestimmt sein.';
+
+  @override
+  String get burglaryPreventSide =>
+      'Nebeneingangstüren lassen sich mit massiven Schubriegeln, starken Vorlegestangen oder einem Querriegelschloss nachrüsten.';
+
+  @override
+  String get burglaryPreventFit =>
+      'Eingebaute Sicherungen wirken nur bei fachgerechter Montage. Und Technik ersetzt nicht das Zweite, was die Polizei nennt: sicherheitsbewusstes Verhalten und eine aufmerksame Nachbarschaft.';
+
+  @override
+  String get burglarySource =>
+      'Quelle: Polizeiliche Kriminalprävention der Länder und des Bundes (polizei-beratung.de) und die Initiative K-EINBRUCH. Zahlen aus der Polizeilichen Kriminalstatistik 2025.';
+
+  @override
   String get cancelButton => 'Abbrechen';
 
   @override

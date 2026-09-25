@@ -38,6 +38,22 @@ App mit einstellbarem Vorlauf – für den ganzen Haushalt, und wo nötig für
 einen einzelnen Artikel abweichend davon, bis hin zu „für diesen nie".
 Verbrauchtes lässt sich direkt aus der Liste abbuchen.
 
+
+**Einbruch.** Was die Polizei sagt — und in der Reihenfolge, in der sie es
+sagt. Oben die Regel, mit der alles andere anfängt: sich und andere nicht
+in Gefahr bringen, jede Konfrontation vermeiden. Dann, was auf frischer
+Tat zu tun ist, dann was danach kommt: Anzeige auch bei gescheitertem
+Versuch, **nicht aufräumen**, bis die Spuren gesichert sind, Schließzylinder
+tauschen, Karten und Telefone über den Sperrnotruf 116 116 sperren. Die
+Vorbeugung steht unten, weil sie die Hälfte ist, die man an einem ruhigen
+Nachmittag liest: Widerstandsklasse RC 2 nach DIN EN 1627 ff., Nachrüsten
+nach DIN 18104. Quelle ist die polizeiliche Kriminalprävention der Länder
+und des Bundes mit ihrer Initiative K-EINBRUCH.
+
+Die Seite verweist auf das Hausratverzeichnis, das die App ohnehin hat —
+die Polizei nennt es „Wertgegenstandsliste" und rät, sie zu haben, bevor
+etwas passiert.
+
 **Wasser trinkbar machen.** Was Abkochen, Filtern und Entkeimungsmittel
 leisten — und was nicht. Zuerst steht da, wogegen keines der drei hilft:
 Treibstoff, Chemie und radioaktives Material bleiben drin. Danach das

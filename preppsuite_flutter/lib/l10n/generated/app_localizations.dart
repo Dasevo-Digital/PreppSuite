@@ -1220,6 +1220,168 @@ abstract class AppLocalizations {
   /// **'Source: Federal Office for Radiation Protection (BfS), \"Einnahme und Wirkung von Jodtabletten\".'**
   String get iodineSource;
 
+  /// No description provided for @burglaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Burglary'**
+  String get burglaryTitle;
+
+  /// No description provided for @burglaryEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Catching somebody at it, what follows, and how to prevent it.'**
+  String get burglaryEntryHint;
+
+  /// No description provided for @burglaryRuleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The rule that comes first'**
+  String get burglaryRuleTitle;
+
+  /// No description provided for @burglaryRuleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not put yourself or anybody else in danger. Avoid any confrontation where you can, and on no account put yourself in the burglar\'s way.'**
+  String get burglaryRuleBody;
+
+  /// No description provided for @burglaryCaughtTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'If you catch somebody at it'**
+  String get burglaryCaughtTitle;
+
+  /// No description provided for @burglaryCaughtLeave.
+  ///
+  /// In en, this message translates to:
+  /// **'Try to leave the flat or the house, and tell the neighbours.'**
+  String get burglaryCaughtLeave;
+
+  /// No description provided for @burglaryCaughtWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'If you cannot get out: open a window if you can and call for help.'**
+  String get burglaryCaughtWindow;
+
+  /// No description provided for @burglaryCaughtCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call 110 at once.'**
+  String get burglaryCaughtCall;
+
+  /// No description provided for @burglaryCaughtDescribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the police as good a description as you can: the person, any getaway vehicle, and which way they went.'**
+  String get burglaryCaughtDescribe;
+
+  /// No description provided for @burglaryAfterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Afterwards'**
+  String get burglaryAfterTitle;
+
+  /// No description provided for @burglaryAfterThreat.
+  ///
+  /// In en, this message translates to:
+  /// **'Call 110 if you are under acute threat.'**
+  String get burglaryAfterThreat;
+
+  /// No description provided for @burglaryAfterReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Report it, at any police station. Also where the attempt failed or nothing was taken.'**
+  String get burglaryAfterReport;
+
+  /// No description provided for @burglaryAfterNoTidy.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not tidy up. Leave everything as you found it and touch as little as possible until the traces have been secured.'**
+  String get burglaryAfterNoTidy;
+
+  /// No description provided for @burglaryAfterList.
+  ///
+  /// In en, this message translates to:
+  /// **'Put together a list of what was taken, as precisely as you can. Receipts and serial numbers help if something turns up again.'**
+  String get burglaryAfterList;
+
+  /// No description provided for @burglaryAfterKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'If keys have gone: have the lock cylinders replaced as a precaution.'**
+  String get burglaryAfterKeys;
+
+  /// No description provided for @burglaryAfterPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Have stolen cards and phones blocked, through the German blocking hotline 116 116.'**
+  String get burglaryAfterPhone;
+
+  /// No description provided for @burglaryPossessionsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'The list of valuables the police mean here, you already have'**
+  String get burglaryPossessionsLink;
+
+  /// No description provided for @burglaryPossessionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This app\'s household inventory is exactly that — filled in before anything happens, it is the list you will be asked for afterwards.'**
+  String get burglaryPossessionsHint;
+
+  /// No description provided for @burglaryPreventTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevention'**
+  String get burglaryPreventTitle;
+
+  /// No description provided for @burglaryPreventWho.
+  ///
+  /// In en, this message translates to:
+  /// **'Most burglaries are not the work of professionals but of opportunists going at windows and doors with simple levering tools. The way in is usually an easily reachable window, or a window or flat door.'**
+  String get burglaryPreventWho;
+
+  /// No description provided for @burglaryPreventDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Contrary to the common belief, burglaries often happen in daylight — during school, work and shopping hours, in the early evening and at weekends. More than a third of all home burglaries are daytime ones.'**
+  String get burglaryPreventDay;
+
+  /// No description provided for @burglaryPreventMechanical.
+  ///
+  /// In en, this message translates to:
+  /// **'The police recommend mechanically securing every window and door. Technology does not deter what it lets in.'**
+  String get burglaryPreventMechanical;
+
+  /// No description provided for @burglaryPreventNew.
+  ///
+  /// In en, this message translates to:
+  /// **'For new building and conversions: tested burglar-resistant windows and doors to DIN EN 1627 ff., from resistance class RC 2. There it is established that leaf, frame, lock and fittings together leave no weak point.'**
+  String get burglaryPreventNew;
+
+  /// No description provided for @burglaryPreventRetro.
+  ///
+  /// In en, this message translates to:
+  /// **'For retrofitting: systems to DIN 18104 parts 1 and 2. The parts have to be matched to one another in their effect.'**
+  String get burglaryPreventRetro;
+
+  /// No description provided for @burglaryPreventSide.
+  ///
+  /// In en, this message translates to:
+  /// **'Side doors can be retrofitted with solid bolts, strong bars or a crossbar lock.'**
+  String get burglaryPreventSide;
+
+  /// No description provided for @burglaryPreventFit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitted security works only where it is fitted properly. And technology does not replace the second thing the police name: security-aware behaviour and an attentive neighbourhood.'**
+  String get burglaryPreventFit;
+
+  /// No description provided for @burglarySource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: the crime prevention body of the German federal states and the federation (polizei-beratung.de) and the K-EINBRUCH campaign. Figures from the 2025 police crime statistics.'**
+  String get burglarySource;
+
   /// No description provided for @cancelButton.
   ///
   /// In en, this message translates to:
