@@ -235,4 +235,35 @@ const knowledgeQuestionsEn = <KnowledgeQuestion>[
         'Turn them onto the other side after 30 minutes at the '
         'latest.',
   ),
+  KnowledgeQuestion(
+    id: 'suicide-asking',
+    guideId: 'suicidal-ideation',
+    question:
+        'Somebody hints they do not want to live any more. Ask them '
+        'directly?',
+    answers: [
+      'Yes, ask directly',
+      'No, that is what puts the idea there',
+      'Only hint at it and wait',
+    ],
+    correct: 0,
+    because:
+        'Talking about it does not make it more likely that somebody '
+        'does it.',
+  ),
+  KnowledgeQuestion(
+    id: 'panic-bag',
+    guideId: 'anxiety-panic',
+    question: 'Does a paper bag help during a panic attack?',
+    answers: [
+      'No, breathe with them instead',
+      'Yes, it evens the breathing out again',
+      'Only if somebody is hyperventilating',
+    ],
+    correct: 0,
+    because:
+        'No paper bag over the mouth. The 2025 guidelines endorse '
+        'neither that nor similar home remedies; what they recommend is '
+        'breathing with the person.',
+  ),
 ];

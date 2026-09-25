@@ -22,10 +22,15 @@ beim allergischen Schock liest, muss zum Anrufen nicht zurückfinden.
 
 ## Woher die Inhalte kommen
 
-Die Anleitungen folgen den **Reanimationsleitlinien 2025 des European
-Resuscitation Council** in der deutschen Fassung des German Resuscitation
-Council und deren Erste-Hilfe-Kapitel. Die Vergiftungsseite nennt die
+Siebzehn der zweiundzwanzig Anleitungen folgen den
+**Reanimationsleitlinien 2025 des European Resuscitation Council** in der
+deutschen Fassung des German Resuscitation Council und deren
+Erste-Hilfe-Kapitel. Die Vergiftungsseite nennt die
 Giftinformationszentren der Länder, die Hitzeseite zusätzlich die BZgA.
+
+Die fünf Anleitungen unter **Seelische Not** folgen einer anderen Quelle,
+den *International first aid, resuscitation and education guidelines 2025*
+der IFRC — warum, steht weiter unten in einem eigenen Abschnitt.
 
 ### Was der Schritt von 2021 auf 2025 geändert hat
 
@@ -85,9 +90,9 @@ Abgleich von einem Gerät mit einer älteren Fassung ankommt, wäre
 schlimmer als keine.
 
 Nicht in den ARB-Dateien, weil medizinischer Text als Fließtext prüfbar
-sein muss. Siebzehn Anleitungen sind rund zweihundert Zeichenketten;
-verteilt über tausendvierhundert Zeilen Oberflächentext könnte sie
-niemand am Stück gegen die Leitlinie lesen.
+sein muss. Zweiundzwanzig Anleitungen sind rund dreihundert
+Zeichenketten; verteilt über tausendvierhundert Zeilen Oberflächentext
+könnte sie niemand am Stück gegen die Leitlinie lesen.
 
 Sie liegen in
 
@@ -104,6 +109,70 @@ Die Kennung einer Anleitung (`cpr-adult`, `recovery-position`, …) ist über
 Fassungen und Sprachen hinweg stabil. Ein Video aus einem Paket nennt sie,
 um zu sagen, wozu es gehört – wer eine umbenennt, verwaist jedes Video,
 das darauf zeigte.
+
+## Seelische Not
+
+Fünf Anleitungen, die nicht dem ERC folgen: psychische Erste Hilfe,
+Suizidgedanken, Angst und Panikattacke, nach einem schweren Erlebnis,
+akute Trauer.
+
+### Warum sie hierhergehören
+
+Weil diese App von Krisen handelt und eine Krise ihren Schaden auch bei
+denen anrichtet, die nicht bluten. Nach Hochwasser, Brand, Unfall oder
+einer Todesnachricht steht jemand daneben, der etwas tun will und nicht
+weiß, was. Das ist dieselbe Lage wie bei einer Blutung — nur dass es dafür
+bisher keine Seite gab.
+
+Sie stehen **zuletzt** in der Liste, und das ist Absicht: die Reihenfolge
+ist Dringlichkeitsreihenfolge, und nichts davon tötet in den nächsten vier
+Minuten.
+
+### Woher sie kommen
+
+Aus den *International first aid, resuscitation and education guidelines
+2025* der IFRC, veröffentlicht am 23.03.2026. Jedes ihrer Themen hat einen
+Block „First aid steps" mit nummerierten Laienschritten — dieselbe Form,
+die diese App ohnehin benutzt.
+
+Die Impressumsseite der Leitlinien erlaubt das ausdrücklich:
+
+> Copies of all or part of this study may be made for non-commercial use,
+> providing the source is acknowledged.
+
+Das ist keine Creative-Commons-Lizenz und es ist auch keine
+Übersetzungserlaubnis. Deshalb ist hier **nichts übersetzt**: die
+Reihenfolge der Handgriffe ist die der Leitlinien, die Worte sind die
+dieser App, und jede Anleitung nennt das Kapitel, aus dem sie stammt, auf
+dem Bildschirm. Der Programmcode steht unter der MIT-Lizenz, die den
+Weiterverkauf erlaubt — fremder Inhalt unter einer Nicht-kommerziell-
+Bedingung darf darin nicht wörtlich liegen.
+
+### Was bewusst fehlt, obwohl es überall steht
+
+**Die Tüte vor dem Mund** und **die „fünf Dinge, die du siehst"**. Beides
+ist weit verbreitet, und die Leitlinien 2025 sprechen für beides
+ausdrücklich keine Empfehlung aus (Kapitel „Anxiety and panic", Abschnitt
+zur Delphi-Methode: *„Guidance on specific treatments for a panic attack
+(e.g. breathing into a paper bag, repeating coping statements, grounding
+techniques) was not endorsed"*). Empfohlen ist das Vor- und Mitatmen —
+ein auf 1 durch die Nase ein, auf 3 durch den Mund aus —, und mehr steht
+deshalb auch nicht da.
+
+Das ist dieselbe Regel wie überall sonst in diesem Bereich: was hier steht,
+steht in einer Leitlinie, und was nicht drinsteht, steht hier nicht.
+
+### Die Rufnummern
+
+Auf den Seiten stehen die deutschen Nummern, jede zum Antippen: die
+TelefonSeelsorge (0800 111 0 111, 0800 111 0 222 und die europaweite
+116 123), die Nummer gegen Kummer für Kinder und Jugendliche (116 111),
+der ärztliche Bereitschaftsdienst (116 117) und 112.
+
+Die Leitlinien nennen keine Rufnummern — sie sind international und
+verweisen für Anlaufstellen auf den jeweiligen Landesverband. Die Nummern
+hier sind deshalb ausdrücklich als zweite Quelle auf dem Bildschirm
+genannt.
 
 ## Der Taktgeber
 
@@ -158,6 +227,7 @@ nie öffnet.
 
 **Recht.** Das Material der Hilfsorganisationen ist durchweg „alle Rechte
 vorbehalten". Frei lizenzierte deutsche Erste-Hilfe-Videos gibt es kaum.
+Nachgezählt statt vermutet — siehe unten.
 
 ### Woher man welche bekommt
 
@@ -179,6 +249,32 @@ ein mitgeliefertes Paket. Die Lizenz steht bei Commons je Datei auf ihrer
 eigenen Seite und muss **einzeln** geprüft werden; die Kategorieseite sagt
 nichts darüber. Was am Ende im Paket landet, trägt `credit` und `licence`
 und steht später unter dem Video — siehe unten.
+
+#### Was beim Roten Kreuz liegt, nachgezählt am 25.09.2026
+
+Die e-Library des Global First Aid Reference Centre hat **409 Einträge**.
+Maschinell geprüft, welche davon eine herunterladbare Videodatei
+enthalten:
+
+* **neun Dateien** — und das sind drei Filme in je vier Sprachen, Englisch,
+  Französisch, Spanisch, Arabisch. **Kein Deutsch.** Kampagnenclips, keine
+  Anleitungen.
+* Alles andere sind Verweise auf YouTube.
+
+Darunter die elf Filme der Reihe **„Mime first aid"** — Erdbeben,
+Hochwasser, Giftwolke, Warnzeichen, starke Blutung, Bewusstlosigkeit,
+Wunden, Vergiftung, Trauma, Sicherheitsmaßnahmen. Sie sind pantomimisch,
+also **ganz ohne Sprache**, und lösen damit genau das Problem, an dem
+deutsche Erste-Hilfe-Videos scheitern. Genommen werden dürfen sie
+trotzdem nicht: auf den YouTube-Seiten steht keine
+Creative-Commons-Kennzeichnung, also gilt die Standardlizenz; die
+Nutzungsbedingungen des GFARC verlangen für alles außer privatem und
+Unterrichtsgebrauch eine vorherige schriftliche Erlaubnis; und jeder
+dieser Filme zeigt das **Rote Kreuz**, das in Deutschland durch das
+Rotkreuzgesetz unabhängig vom Urheberrecht geschützt ist.
+
+Bleibt: fragen. Der Entwurf dafür liegt in
+[`anfrage-ifrc.md`](anfrage-ifrc.md).
 
 **Nutzen im Ernstfall.** Video ist dort das falsche Medium: eine Hand ist
 belegt, spulen geht nicht, zurückgehen auch nicht. Was hilft, ist große

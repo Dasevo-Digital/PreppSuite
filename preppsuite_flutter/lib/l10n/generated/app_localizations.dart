@@ -8855,7 +8855,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstAidContentVersionBody.
   ///
   /// In en, this message translates to:
-  /// **'Content follows the 2025 Guidelines of the European Resuscitation Council. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.'**
+  /// **'Content follows the 2025 Guidelines of the European Resuscitation Council. The pages under \"Mental distress\" follow the IFRC International first aid, resuscitation and education guidelines 2025. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.'**
   String get firstAidContentVersionBody;
 
   /// No description provided for @firstAidEntryHint.
@@ -8911,6 +8911,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cold, heat, poison'**
   String get firstAidGroupEnvironment;
+
+  /// No description provided for @firstAidGroupMental.
+  ///
+  /// In en, this message translates to:
+  /// **'Mental distress'**
+  String get firstAidGroupMental;
 
   /// No description provided for @firstAidCallNow.
   ///

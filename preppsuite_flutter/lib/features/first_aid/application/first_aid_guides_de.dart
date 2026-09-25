@@ -892,4 +892,334 @@ const firstAidGuidesDe = <FirstAidGuide>[
         'Giftinformationszentren der Länder, Bundesinstitut für '
         'Risikobewertung',
   ),
+  // ---------------------------------------------------------------------
+  // Seelische Not.
+  //
+  // Diese fünf folgen nicht dem ERC, sondern den `International first aid,
+  // resuscitation and education guidelines 2025` der IFRC. Die Zahlen und
+  // die Reihenfolge der Handgriffe sind deren, die Worte sind die dieser
+  // App; die Impressumsseite der Leitlinien erlaubt die nicht-kommerzielle
+  // Wiedergabe unter Nennung der Quelle, und genannt wird sie auf jedem
+  // dieser Bildschirme.
+  //
+  // Was hier bewusst **nicht** steht, obwohl es überall zu lesen ist: die
+  // Tüte vor dem Mund und die „fünf Dinge, die du siehst". Die Leitlinien
+  // 2025 sprechen für beides ausdrücklich keine Empfehlung aus (Kapitel
+  // „Anxiety and panic", Abschnitt Delphi). Empfohlen ist das Vor- und
+  // Mitatmen, und mehr steht deshalb auch nicht da.
+  //
+  // Die Rufnummern sind die deutschen: Telefonseelsorge und Nummer gegen
+  // Kummer, beide kostenfrei und rund um die Uhr.
+  FirstAidGuide(
+    id: 'psychological-first-aid',
+    group: FirstAidGroup.mentalDistress,
+    title: 'Psychische Erste Hilfe',
+    when:
+        'Jemand ist nach einem Unglück verstört, erstarrt oder außer '
+        'sich. Diese Seite gilt für alle folgenden.',
+    steps: [
+      FirstAidStep(
+        'Erst die Sicherheit, dann alles andere.',
+        detail:
+            'Ist der Ort nicht sicher, wird hier nicht angefangen – '
+            'weder für dich noch für die andere Person.',
+      ),
+      FirstAidStep(
+        'Hinsehen: Wer braucht Hilfe, und wer am dringendsten?',
+        detail:
+            'Verletzungen zuerst. Wer still in der Ecke sitzt, wird '
+            'dabei leicht übersehen; laut ist nicht gleich schlimm.',
+      ),
+      FirstAidStep(
+        'Ruhig zugehen, dich mit Namen vorstellen und sagen, dass du '
+        'helfen willst.',
+        detail: 'Auf gleicher Höhe, ohne das Telefon in der Hand.',
+      ),
+      FirstAidStep(
+        'Zuhören und jede Reaktion gelten lassen.',
+        detail:
+            'Weinen, Wut, Schweigen, Gleichgültigkeit – alles davon '
+            'kommt vor, und nichts davon muss weggeredet werden.',
+      ),
+      FirstAidStep(
+        'Fragen, was jetzt gebraucht wird, statt es zu erraten.',
+        detail:
+            'Offene Fragen, und die Entscheidung bleibt bei der '
+            'Person. Wer wieder selbst entscheidet, kommt zur Ruhe.',
+      ),
+      FirstAidStep(
+        'Für das Nächstliegende sorgen: Wärme, etwas zu trinken, ein '
+        'ruhiger Platz.',
+        detail:
+            'Bei Kindern zählt vor allem dazu, die Bezugsperson '
+            'wiederzufinden.',
+      ),
+      FirstAidStep(
+        'Verbinden: zu Angehörigen, zu verlässlicher Auskunft, zu '
+        'weiterer Hilfe.',
+        detail:
+            'Sagen, was du weißt und was du nicht weißt. Unklarheit '
+            'macht mehr Angst als eine schlechte Nachricht.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Telefonseelsorge, rund um die Uhr', '0800 111 0 111'),
+      FirstAidFact('Telefonseelsorge, europaweit', '116 123'),
+      FirstAidFact('Ärztlicher Bereitschaftsdienst', '116 117'),
+    ],
+    cautions: [
+      'Nicht nach Einzelheiten des Erlebten fragen. Wer erzählen will, '
+          'erzählt von selbst – und darf jederzeit aufhören.',
+      'Nicht deuten und nicht bewerten. Psychische Erste Hilfe ist kein '
+          'Gespräch über Ursachen und keine Therapie.',
+      'Keine Hilfe gegen den Willen der Person, und keine Berührung ohne '
+          'Erlaubnis.',
+      'Nicht weggehen, um Hilfe zu holen, ohne vorher jemanden gefunden '
+          'zu haben, der nach der Person sieht.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Psychological first aid" (Look – Listen '
+        '– Link nach der WHO)',
+  ),
+  FirstAidGuide(
+    id: 'suicidal-ideation',
+    group: FirstAidGroup.mentalDistress,
+    title: 'Suizidgedanken',
+    when: 'Jemand sagt oder zeigt, dass er nicht mehr leben will.',
+    steps: [
+      FirstAidStep(
+        'Ernst nehmen. Jede Äußerung, auch eine beiläufige.',
+      ),
+      FirstAidStep(
+        'Direkt danach fragen.',
+        detail:
+            'Darüber zu sprechen erhöht die Wahrscheinlichkeit nicht, '
+            'dass jemand es tut. Offen und behutsam zu fragen nimmt der '
+            'Sache das Verbotene.',
+      ),
+      FirstAidStep(
+        'Von Anfang an sagen, dass du nichts für dich behalten kannst, '
+        'was lebensgefährlich ist.',
+        detail:
+            'Das gehört an den Anfang, nicht ans Ende – sonst ist es '
+            'ein Vertrauensbruch statt einer Bedingung.',
+      ),
+      FirstAidStep(
+        'Die Person nicht allein lassen.',
+        detail:
+            'Am Telefon: nach dem Aufenthaltsort fragen und nach '
+            'jemandem, dem sie vertraut.',
+      ),
+      FirstAidStep(
+        'Alles wegräumen lassen, womit sie sich verletzen könnte.',
+        detail:
+            'Medikamente, Werkzeug, Waffen. Wenn jemand aus dem '
+            'Haushalt dabei hilft, umso besser.',
+      ),
+      FirstAidStep(
+        'Den Ort sicher machen.',
+        detail:
+            'Ein ruhiger Raum weiter unten im Haus, Fenster zu, weg '
+            'von allem Gefährlichen.',
+      ),
+      FirstAidStep(
+        'Gemeinsam Hilfe holen – im Beisein anrufen, nicht als Auftrag '
+        'mitgeben.',
+        detail:
+            'Telefonseelsorge, Hausarzt, sozialpsychiatrischer Dienst, '
+            'psychiatrische Klinik.',
+      ),
+      FirstAidStep(
+        'Bei unmittelbarer Gefahr oder nach einem Versuch: 112.',
+        detail:
+            'Nach einem Versuch zuerst die körperliche Erste Hilfe – '
+            'Blutung, Vergiftung, Bewusstlosigkeit.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Telefonseelsorge, rund um die Uhr', '0800 111 0 111'),
+      FirstAidFact('Telefonseelsorge, zweite Nummer', '0800 111 0 222'),
+      FirstAidFact('Telefonseelsorge, europaweit', '116 123'),
+      FirstAidFact('Kinder- und Jugendtelefon', '116 111'),
+      FirstAidFact('Notruf bei unmittelbarer Gefahr', '112'),
+    ],
+    cautions: [
+      'Nicht versprechen, es für dich zu behalten. Dieses Versprechen '
+          'kann man nicht halten.',
+      'Nicht bewerten und nicht widersprechen. Was hilft, ist Zuhören.',
+      'Nicht weggehen, um Hilfe zu holen. Erst dafür sorgen, dass jemand '
+          'bleibt.',
+      'Diese Seite ersetzt keine Ausbildung. Sie soll aufmerksam machen, '
+          'nicht zum Fachmann.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Suicidal ideation"; Rufnummern der '
+        'TelefonSeelsorge Deutschland und der Nummer gegen Kummer',
+  ),
+  FirstAidGuide(
+    id: 'anxiety-panic',
+    group: FirstAidGroup.mentalDistress,
+    title: 'Angst und Panikattacke',
+    when:
+        'Herzrasen, Atemnot, Enge in der Brust, Todesangst – und nach '
+        'Minuten geht es von selbst zurück.',
+    steps: [
+      FirstAidStep(
+        'Vorstellen und sagen, dass du bleibst.',
+      ),
+      FirstAidStep(
+        'An einen ruhigen Platz gehen, weg von Zuschauern.',
+        detail: 'Enge Kleidung öffnen.',
+      ),
+      FirstAidStep(
+        'Fragen, ob die Person so etwas schon einmal hatte.',
+        detail:
+            'Wer die Attacke wiedererkennt, hat die Hälfte der Angst '
+            'schon verloren.',
+      ),
+      FirstAidStep(
+        'Sagen, dass es eine Reaktion auf Anspannung ist und von selbst '
+        'nachlässt.',
+        detail: 'Der Höhepunkt ist nach zehn bis fünfzehn Minuten vorbei.',
+      ),
+      FirstAidStep(
+        'Langsam und leise sprechen, in kurzen Sätzen.',
+      ),
+      FirstAidStep(
+        'Voratmen und mitatmen lassen.',
+        detail:
+            'Auf eins durch die Nase ein, auf drei durch den Mund aus, '
+            'und in den Bauch atmen lassen.',
+      ),
+      FirstAidStep(
+        'Sagen, dass daran nichts peinlich ist und niemand verrückt '
+        'wird.',
+      ),
+      FirstAidStep(
+        'Bleiben, bis es vorbei ist.',
+        detail:
+            'Kommt es öfter vor oder richtet jemand sein Leben danach '
+            'ein, zum Arzt raten: dagegen gibt es wirksame Hilfe.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Höhepunkt der Attacke', 'nach 10 bis 15 Minuten'),
+      FirstAidFact('Atmen', 'ein auf 1, aus auf 3'),
+      FirstAidFact('Telefonseelsorge, europaweit', '116 123'),
+    ],
+    cautions: [
+      'Keine Tüte vor den Mund. Die Leitlinien 2025 sprechen für dieses '
+          'und ähnliche Hausmittel keine Empfehlung aus; empfohlen ist '
+          'das Vor- und Mitatmen.',
+      'Nicht „beruhige dich" und nicht „da ist doch nichts". Die Angst '
+          'ist echt, auch wenn die Gefahr es nicht ist.',
+      'Im Zweifel, ob Panikattacke oder Notfall: 112. Brustschmerz und '
+          'Atemnot können auch vom Herzen kommen.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Anxiety and panic"',
+  ),
+  FirstAidGuide(
+    id: 'traumatic-event',
+    group: FirstAidGroup.mentalDistress,
+    title: 'Nach einem schweren Erlebnis',
+    when:
+        'Kurz nach Unglück, Unfall oder Gewalt – bei Betroffenen und bei '
+        'Helfern.',
+    steps: [
+      FirstAidStep(
+        'Zuerst das Körperliche: Blutung stillen, versorgen, '
+        'wiederbeleben.',
+        detail: 'Ruhig und zugewandt dabei bleiben. Beides geht zugleich.',
+      ),
+      FirstAidStep(
+        'In kurzen, einfachen Sätzen sagen, was du gerade tust.',
+      ),
+      FirstAidStep(
+        'Dableiben, zuhören, und die Gefühle gelten lassen.',
+      ),
+      FirstAidStep(
+        'Die Person über ihre Versorgung mitentscheiden lassen.',
+        detail:
+            'Wer gefragt wird und wählen darf, bekommt ein Stück '
+            'Kontrolle zurück.',
+      ),
+      FirstAidStep(
+        'Angehörige oder Freunde dazuholen, wenn es geht.',
+      ),
+      FirstAidStep(
+        'Dem Rettungsdienst sagen, wie es der Person körperlich und '
+        'seelisch geht.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Ärztlicher Bereitschaftsdienst', '116 117'),
+      FirstAidFact('Telefonseelsorge, europaweit', '116 123'),
+    ],
+    cautions: [
+      'Nicht zum Erzählen drängen und nicht nach Einzelheiten fragen.',
+      'Starke Reaktionen in den ersten Tagen sind gewöhnlich und noch '
+          'keine Krankheit.',
+      'Sie können auch erst nach Wochen oder Monaten kommen. Hält es an '
+          'oder wird es schlimmer, gehört es ärztlich abgeklärt.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Traumatic event"',
+  ),
+  FirstAidGuide(
+    id: 'acute-grief',
+    group: FirstAidGroup.mentalDistress,
+    title: 'Akute Trauer',
+    when: 'Jemand hat gerade erfahren, dass ein Mensch gestorben ist.',
+    steps: [
+      FirstAidStep(
+        'Vorstellen und sagen, dass du da bist, wenn die Person dich '
+        'nicht kennt.',
+      ),
+      FirstAidStep(
+        'An einen sicheren Platz gehen und Raum schaffen.',
+        detail: 'Niemand soll sich umstellt fühlen.',
+      ),
+      FirstAidStep(
+        'Direkt fragen, womit du helfen kannst.',
+      ),
+      FirstAidStep(
+        'Ganz da sein und jede Reaktion gelten lassen.',
+        detail:
+            'Schock, Wut, Schuldgefühle, Gleichgültigkeit – bei einem '
+            'plötzlichen Tod ist all das gewöhnlich.',
+      ),
+      FirstAidStep(
+        'Fragen, ob die Person den Verstorbenen sehen möchte, wenn das '
+        'möglich ist.',
+        detail:
+            'Vorher sagen, wie er aussieht. Zeit beim Verstorbenen '
+            'erleichtert das Trauern und nimmt Schuldgefühle.',
+      ),
+      FirstAidStep(
+        'Helfen, Angehörige zu erreichen, statt allein zu bleiben.',
+      ),
+      FirstAidStep(
+        'Zu Pausen ermutigen – etwas tun, das für eine Weile ablenkt.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Telefonseelsorge, rund um die Uhr', '0800 111 0 111'),
+      FirstAidFact('Telefonseelsorge, europaweit', '116 123'),
+    ],
+    cautions: [
+      'Nicht allein lassen, ohne dich vergewissert zu haben, dass es '
+          'geht.',
+      'Keine Vergleiche und keine Fristen. Trauer hat keine Dauer, nach '
+          'der sie vorbei zu sein hätte.',
+      'Nicht sagen, was die Person jetzt zu fühlen hätte.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Acute grief"',
+  ),
 ];

@@ -240,4 +240,35 @@ const knowledgeQuestionsDe = <KnowledgeQuestion>[
     correct: 0,
     because: 'Nach spätestens 30 Minuten auf die andere Seite drehen.',
   ),
+  KnowledgeQuestion(
+    id: 'suicide-asking',
+    guideId: 'suicidal-ideation',
+    question:
+        'Jemand deutet an, nicht mehr leben zu wollen. Direkt danach '
+        'fragen?',
+    answers: [
+      'Ja, direkt fragen',
+      'Nein, das bringt ihn erst auf den Gedanken',
+      'Nur andeuten und abwarten',
+    ],
+    correct: 0,
+    because:
+        'Darüber zu sprechen erhöht die Wahrscheinlichkeit nicht, dass '
+        'jemand es tut.',
+  ),
+  KnowledgeQuestion(
+    id: 'panic-bag',
+    guideId: 'anxiety-panic',
+    question: 'Hilft eine Tüte vor dem Mund bei einer Panikattacke?',
+    answers: [
+      'Nein, vor- und mitatmen',
+      'Ja, das gleicht die Atmung wieder aus',
+      'Nur wenn jemand hyperventiliert',
+    ],
+    correct: 0,
+    because:
+        'Keine Tüte vor den Mund. Die Leitlinien 2025 sprechen für '
+        'dieses und ähnliche Hausmittel keine Empfehlung aus; empfohlen '
+        'ist das Vor- und Mitatmen.',
+  ),
 ];

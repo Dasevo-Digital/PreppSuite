@@ -182,7 +182,18 @@ List<AppDestination> appDestinations() => [
     icon: Icons.medical_services_outlined,
     area: ShellDestination.emergency,
     open: (_) => const FirstAidScreen(),
-    aliases: ['erste hilfe', 'first aid', 'reanimation'],
+    aliases: [
+      'erste hilfe',
+      'first aid',
+      'reanimation',
+      // Die Seiten zur seelischen Not heissen anders als das, was
+      // jemand eintippt, der sie sucht.
+      'panik',
+      'panikattacke',
+      'trauer',
+      'suizid',
+      'psychische erste hilfe',
+    ],
   ),
   AppDestination(
     id: 'compression-pacer',

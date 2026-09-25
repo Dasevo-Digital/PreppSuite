@@ -5288,7 +5288,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get firstAidContentVersionBody =>
-      'Inhalt nach den Leitlinien 2025 des European Resuscitation Council, deutsche Fassung des German Resuscitation Council. Was in einem Erste-Hilfe-Kurs gelehrt wird, stimmen die Hilfsorganisationen gemeinsam ab; im Kurs gilt, was dort gesagt wird.';
+      'Inhalt nach den Leitlinien 2025 des European Resuscitation Council, deutsche Fassung des German Resuscitation Council. Die Seiten unter „Seelische Not\" folgen den International first aid, resuscitation and education guidelines 2025 der IFRC. Was in einem Erste-Hilfe-Kurs gelehrt wird, stimmen die Hilfsorganisationen gemeinsam ab; im Kurs gilt, was dort gesagt wird.';
 
   @override
   String get firstAidEntryHint =>
@@ -5318,6 +5318,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get firstAidGroupEnvironment => 'Kälte, Hitze, Gift';
+
+  @override
+  String get firstAidGroupMental => 'Seelische Not';
 
   @override
   String get firstAidCallNow => 'Notruf 112 wählen';

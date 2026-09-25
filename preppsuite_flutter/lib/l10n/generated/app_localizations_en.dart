@@ -5253,7 +5253,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstAidContentVersionBody =>
-      'Content follows the 2025 Guidelines of the European Resuscitation Council. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.';
+      'Content follows the 2025 Guidelines of the European Resuscitation Council. The pages under \"Mental distress\" follow the IFRC International first aid, resuscitation and education guidelines 2025. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.';
 
   @override
   String get firstAidEntryHint =>
@@ -5283,6 +5283,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstAidGroupEnvironment => 'Cold, heat, poison';
+
+  @override
+  String get firstAidGroupMental => 'Mental distress';
 
   @override
   String get firstAidCallNow => 'Call 112';

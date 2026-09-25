@@ -7,9 +7,9 @@
 /// running an older version would be worse than no guide at all.
 ///
 /// Not the ARB files, because medical text has to be reviewable as prose.
-/// Fifteen guides are about two hundred strings; scattered through eleven
-/// hundred lines of interface wording, nobody could ever read them end to
-/// end and check them against the guideline they came from. They live in
+/// Twenty-two guides are some three hundred strings; scattered through
+/// eleven hundred lines of interface wording, nobody could ever read them
+/// end to end and check them against the guideline they came from. They live in
 /// `first_aid_guides_de.dart` and `first_aid_guides_en.dart` instead, one
 /// file per language, each readable in one sitting.
 /// `first_aid_guides_test.dart` holds the two files to the same ids and
@@ -35,6 +35,14 @@ enum FirstAidGroup {
 
   /// Cold, heat, poison.
   environment,
+
+  /// Shock, panic, grief, the wish not to go on.
+  ///
+  /// Last in the list, and deliberately so: the order is triage order,
+  /// and nothing here kills in the next four minutes. It is in the list
+  /// at all because this is an app about crises, and a crisis does its
+  /// damage to people who are not bleeding as well.
+  mentalDistress,
 }
 
 /// A picture the app draws itself.

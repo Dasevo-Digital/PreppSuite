@@ -804,4 +804,326 @@ const firstAidGuidesEn = <FirstAidGuide>[
         'German poison information centres, Federal Institute for '
         'Risk Assessment (BfR)',
   ),
+  // ---------------------------------------------------------------------
+  // Mental distress.
+  //
+  // These five do not follow the ERC but the IFRC's `International first
+  // aid, resuscitation and education guidelines 2025`. The order of the
+  // actions is theirs, the words are this app's; the guidelines' copyright
+  // page permits non-commercial reproduction with the source named, and
+  // named it is, on every one of these screens.
+  //
+  // What is deliberately absent although it is everywhere: the paper bag
+  // and the "five things you can see". The 2025 guidelines explicitly
+  // endorse neither ("Anxiety and panic", the Delphi section). What they
+  // do recommend is breathing with the person, so that is all that is
+  // here.
+  FirstAidGuide(
+    id: 'psychological-first-aid',
+    group: FirstAidGroup.mentalDistress,
+    title: 'Psychological first aid',
+    when:
+        'Somebody is shaken, frozen or beside themselves after an '
+        'incident. This page applies to all the ones that follow.',
+    steps: [
+      FirstAidStep(
+        'Safety first, then everything else.',
+        detail:
+            'If the place is not safe, this does not start here — not '
+            'for you and not for the other person.',
+      ),
+      FirstAidStep(
+        'Look: who needs help, and who needs it most?',
+        detail:
+            'Injuries first. Whoever sits quietly in the corner is '
+            'easily overlooked; loud is not the same as badly off.',
+      ),
+      FirstAidStep(
+        'Approach calmly, give your name, and say that you want to '
+        'help.',
+        detail: 'At the same height, with no phone in your hand.',
+      ),
+      FirstAidStep(
+        'Listen, and let every reaction stand.',
+        detail:
+            'Crying, anger, silence, indifference — all of it happens, '
+            'and none of it has to be talked away.',
+      ),
+      FirstAidStep(
+        'Ask what is needed rather than guessing.',
+        detail:
+            'Open questions, and the decision stays with the person. '
+            'Deciding for themselves again is what settles people.',
+      ),
+      FirstAidStep(
+        'See to what is nearest: warmth, something to drink, a quiet '
+        'place.',
+        detail:
+            'For a child that means above all finding their caregiver '
+            'again.',
+      ),
+      FirstAidStep(
+        'Link: to relatives, to reliable information, to further help.',
+        detail:
+            'Say what you know and what you do not. Uncertainty '
+            'frightens people more than bad news does.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Crisis helpline, around the clock', '0800 111 0 111'),
+      FirstAidFact('Crisis helpline, EU-wide', '116 123'),
+      FirstAidFact('Out-of-hours medical service', '116 117'),
+    ],
+    cautions: [
+      'Do not ask for details of what happened. Whoever wants to tell '
+          'you will tell you — and may stop at any point.',
+      'Do not interpret and do not judge. Psychological first aid is not '
+          'a conversation about causes and not therapy.',
+      'No help against the person\'s will, and no touching without '
+          'permission.',
+      'Do not leave to fetch help without first finding somebody who '
+          'will look after the person.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Psychological first aid" (Look – Listen – Link, '
+        'after the WHO)',
+  ),
+  FirstAidGuide(
+    id: 'suicidal-ideation',
+    group: FirstAidGroup.mentalDistress,
+    title: 'Suicidal thoughts',
+    when: 'Somebody says or shows that they do not want to live any more.',
+    steps: [
+      FirstAidStep(
+        'Take it seriously. Every mention, including a passing one.',
+      ),
+      FirstAidStep(
+        'Ask directly.',
+        detail:
+            'Talking about it does not make it more likely that '
+            'somebody does it. Asking openly and gently takes away what '
+            'is forbidden about the subject.',
+      ),
+      FirstAidStep(
+        'Say from the start that you cannot keep to yourself anything '
+        'that is life-threatening.',
+        detail:
+            'That belongs at the beginning, not at the end — otherwise '
+            'it is a breach of trust instead of a condition.',
+      ),
+      FirstAidStep(
+        'Do not leave the person alone.',
+        detail: 'On the phone: ask where they are and who they trust.',
+      ),
+      FirstAidStep(
+        'Have them put away anything they could hurt themselves with.',
+        detail:
+            'Medicines, tools, weapons. Better still if somebody in the '
+            'household helps with it.',
+      ),
+      FirstAidStep(
+        'Make the place safe.',
+        detail:
+            'A quiet room lower down the building, windows shut, away '
+            'from anything dangerous.',
+      ),
+      FirstAidStep(
+        'Get help together — call while you are there, do not send them '
+        'off with a task.',
+        detail:
+            'Crisis line, family doctor, community mental health '
+            'service, psychiatric hospital.',
+      ),
+      FirstAidStep(
+        'In immediate danger, or after an attempt: 112.',
+        detail:
+            'After an attempt, physical first aid comes first — '
+            'bleeding, poisoning, unconsciousness.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Crisis helpline, around the clock', '0800 111 0 111'),
+      FirstAidFact('Crisis helpline, second number', '0800 111 0 222'),
+      FirstAidFact('Crisis helpline, EU-wide', '116 123'),
+      FirstAidFact('Children and young people', '116 111'),
+      FirstAidFact('Emergency number, immediate danger', '112'),
+    ],
+    cautions: [
+      'Do not promise to keep it to yourself. That is a promise nobody '
+          'can keep.',
+      'Do not judge and do not argue. What helps is listening.',
+      'Do not walk away to fetch help. First make sure somebody stays.',
+      'This page is no substitute for training. It is meant to make you '
+          'aware, not expert.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Suicidal ideation"; telephone numbers of '
+        'TelefonSeelsorge Deutschland and Nummer gegen Kummer',
+  ),
+  FirstAidGuide(
+    id: 'anxiety-panic',
+    group: FirstAidGroup.mentalDistress,
+    title: 'Anxiety and panic attack',
+    when:
+        'Racing heart, breathlessness, a tight chest, the fear of dying '
+        '— and after minutes it recedes by itself.',
+    steps: [
+      FirstAidStep(
+        'Introduce yourself and say that you are staying.',
+      ),
+      FirstAidStep(
+        'Move to a quiet place, away from onlookers.',
+        detail: 'Loosen tight clothing.',
+      ),
+      FirstAidStep(
+        'Ask whether they have had this before.',
+        detail:
+            'Somebody who recognises the attack has already lost half '
+            'the fear of it.',
+      ),
+      FirstAidStep(
+        'Say that it is a reaction to strain and that it eases by '
+        'itself.',
+        detail: 'The peak is past after ten to fifteen minutes.',
+      ),
+      FirstAidStep(
+        'Speak slowly and quietly, in short sentences.',
+      ),
+      FirstAidStep(
+        'Breathe in front of them and have them breathe with you.',
+        detail:
+            'In through the nose for one count, out through the mouth '
+            'for three, and let the breath go into the belly.',
+      ),
+      FirstAidStep(
+        'Say there is nothing shameful about it and nobody is going '
+        'mad.',
+      ),
+      FirstAidStep(
+        'Stay until it is over.',
+        detail:
+            'If it happens repeatedly, or somebody arranges their life '
+            'around it, advise a doctor: there is effective help.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Peak of the attack', 'after 10 to 15 minutes'),
+      FirstAidFact('Breathing', 'in for 1, out for 3'),
+      FirstAidFact('Crisis helpline, EU-wide', '116 123'),
+    ],
+    cautions: [
+      'No paper bag over the mouth. The 2025 guidelines endorse neither '
+          'that nor similar home remedies; what they recommend is '
+          'breathing with the person.',
+      'Not "calm down" and not "there is nothing there". The fear is '
+          'real even when the danger is not.',
+      'If in doubt whether it is a panic attack or an emergency: 112. '
+          'Chest pain and breathlessness can come from the heart.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Anxiety and panic"',
+  ),
+  FirstAidGuide(
+    id: 'traumatic-event',
+    group: FirstAidGroup.mentalDistress,
+    title: 'After a traumatic event',
+    when:
+        'Shortly after an accident, a disaster or violence — for those '
+        'affected and for helpers.',
+    steps: [
+      FirstAidStep(
+        'The physical first: stop the bleeding, treat, resuscitate.',
+        detail: 'Stay calm and present while you do. Both happen at once.',
+      ),
+      FirstAidStep(
+        'Say what you are doing, in short and simple sentences.',
+      ),
+      FirstAidStep(
+        'Stay, listen, and let the feelings stand.',
+      ),
+      FirstAidStep(
+        'Let the person share in the decisions about their care.',
+        detail:
+            'Being asked and allowed to choose hands back a piece of '
+            'control.',
+      ),
+      FirstAidStep(
+        'Bring in relatives or friends where you can.',
+      ),
+      FirstAidStep(
+        'Tell the ambulance crew how the person is, physically and '
+        'emotionally.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Out-of-hours medical service', '116 117'),
+      FirstAidFact('Crisis helpline, EU-wide', '116 123'),
+    ],
+    cautions: [
+      'Do not press them to talk and do not ask for details.',
+      'Strong reactions in the first days are ordinary and not yet an '
+          'illness.',
+      'They can also arrive weeks or months later. If they persist or '
+          'worsen, that belongs in a doctor\'s hands.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Traumatic event"',
+  ),
+  FirstAidGuide(
+    id: 'acute-grief',
+    group: FirstAidGroup.mentalDistress,
+    title: 'Acute grief',
+    when: 'Somebody has just learned that a person has died.',
+    steps: [
+      FirstAidStep(
+        'Introduce yourself and say you are there, if the person does '
+        'not know you.',
+      ),
+      FirstAidStep(
+        'Move somewhere safe and make room.',
+        detail: 'Nobody should feel crowded.',
+      ),
+      FirstAidStep(
+        'Ask directly what you can help with.',
+      ),
+      FirstAidStep(
+        'Be fully there and let every reaction stand.',
+        detail:
+            'Shock, anger, guilt, indifference — after a sudden death '
+            'all of that is ordinary.',
+      ),
+      FirstAidStep(
+        'Ask whether they would like to see the person who died, where '
+        'that is possible.',
+        detail:
+            'Say beforehand how they will look. Time with the body '
+            'eases grieving and takes away guilt.',
+      ),
+      FirstAidStep(
+        'Help them reach relatives rather than being left alone.',
+      ),
+      FirstAidStep(
+        'Encourage breaks — something to do that takes the mind '
+        'elsewhere for a while.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Crisis helpline, around the clock', '0800 111 0 111'),
+      FirstAidFact('Crisis helpline, EU-wide', '116 123'),
+    ],
+    cautions: [
+      'Do not leave without having satisfied yourself that they are all '
+          'right.',
+      'No comparisons and no deadlines. Grief has no duration after '
+          'which it is meant to be over.',
+      'Do not tell the person what they ought to be feeling.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Acute grief"',
+  ),
 ];

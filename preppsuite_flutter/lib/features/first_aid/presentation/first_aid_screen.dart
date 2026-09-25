@@ -174,6 +174,7 @@ class _FirstAidScreenState extends ConsumerState<FirstAidScreen> {
       FirstAidGroup.injury => l10n.firstAidGroupInjury,
       FirstAidGroup.illness => l10n.firstAidGroupIllness,
       FirstAidGroup.environment => l10n.firstAidGroupEnvironment,
+      FirstAidGroup.mentalDistress => l10n.firstAidGroupMental,
     };
   }
 }
