@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import 'hazard_release_screen.dart';
+import 'iodine_tablets_screen.dart';
 import '../application/radiation_client.dart';
 import '../application/radiation_level.dart';
 import '../application/radiation_store.dart';
@@ -162,6 +164,37 @@ class _RadiationScreenState extends State<RadiationScreen> {
           ..._readingCards(l10n, reading),
         const SizedBox(height: 16),
         OutlinedButton(onPressed: _choose, child: Text(l10n.radiationChange)),
+        const SizedBox(height: 16),
+        // Below the measurement and above the disclaimer, because this
+        // screen deliberately never says what to do -- and somebody who
+        // just read "ueber dem, was Wetter erklaert" is owed somewhere to
+        // go with that.
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.masks_outlined),
+            title: Text(l10n.hazardReleaseTitle),
+            subtitle: Text(l10n.hazardReleaseEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HazardReleaseScreen(),
+              ),
+            ),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.medication_outlined),
+            title: Text(l10n.iodineTitle),
+            subtitle: Text(l10n.iodineEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const IodineTabletsScreen(),
+              ),
+            ),
+          ),
+        ),
         const SizedBox(height: 16),
         Text(l10n.radiationNoWarning, style: theme.textTheme.bodySmall),
         const SizedBox(height: 8),

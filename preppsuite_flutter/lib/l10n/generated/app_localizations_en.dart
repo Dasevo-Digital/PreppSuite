@@ -477,6 +477,202 @@ class AppLocalizationsEn extends AppLocalizations {
       'Without a camera, a household travels through the shared folder or through a file.';
 
   @override
+  String get hazardReleaseTitle => 'Hazardous material in the air';
+
+  @override
+  String get hazardReleaseEntryHint =>
+      'What to do when something has been released — indoors, outdoors, in the car.';
+
+  @override
+  String get hazardReleaseIntro =>
+      'When a warning says hazardous material has been released, the first minutes decide. What follows is the instruction of the German Federal Office of Civil Protection and Disaster Assistance (BBK), reproduced and not interpreted.';
+
+  @override
+  String get hazardReleaseHomeTitle => 'If you are at home';
+
+  @override
+  String get hazardReleaseHomeStay =>
+      'Stay in the building. Take in passers-by who are at risk, and tell the other residents.';
+
+  @override
+  String get hazardReleaseHomeWindows => 'Close windows and doors.';
+
+  @override
+  String get hazardReleaseHomeVent =>
+      'Switch off fans and air conditioning, close the ventilation slots in the window frames.';
+
+  @override
+  String get hazardReleaseHomeRoom =>
+      'Go to a sheltered inner room, ideally one with no outside window.';
+
+  @override
+  String get hazardReleaseHomeCandles =>
+      'No candles or anything like them — they use up oxygen for nothing.';
+
+  @override
+  String get hazardReleaseHomeRadio =>
+      'Switch on the radio, FM and the regional station, or the television. Follow the announcements from the authorities and emergency services.';
+
+  @override
+  String get hazardReleaseHomePhone =>
+      'Use the telephone only in an emergency.';
+
+  @override
+  String get hazardReleaseHomeMask =>
+      'If the material gets in: use whatever breathing protection you have, improvise a mask if you must.';
+
+  @override
+  String get hazardReleaseHomeWait =>
+      'Wait for the all-clear before leaving the building or opening a window.';
+
+  @override
+  String get hazardReleaseOutsideTitle => 'If you are outdoors';
+
+  @override
+  String get hazardReleaseOutsideCross =>
+      'Move across the wind, neither with it nor against it. Breathe through protection, through a handkerchief if that is all there is.';
+
+  @override
+  String get hazardReleaseOutsideBuilding =>
+      'Get to the nearest closed building and ask to be let in.';
+
+  @override
+  String get hazardReleaseOutsideClothes =>
+      'After contact, change outer clothing and shoes as you enter, bag them in plastic and leave them out of the living area, in front of the building if you can.';
+
+  @override
+  String get hazardReleaseOutsideWash =>
+      'Wash in this order: hands thoroughly first, then face and hair, then nose and ears — with soap and water.';
+
+  @override
+  String get hazardReleaseOutsideBio =>
+      'For biological material, disinfect your hands as well.';
+
+  @override
+  String get hazardReleaseCarTitle => 'If you are in the car';
+
+  @override
+  String get hazardReleaseCarVent =>
+      'Switch off the ventilation and close the windows.';
+
+  @override
+  String get hazardReleaseCarRadio =>
+      'Listen to the radio, FM and the regional station, and follow the instructions.';
+
+  @override
+  String get hazardReleaseCarBuilding =>
+      'Get to the nearest closed building, unless the authorities say otherwise.';
+
+  @override
+  String get hazardReleaseCellarTitle =>
+      'Cellar or upper floor? That depends on the material';
+
+  @override
+  String get hazardReleaseCellarChemical =>
+      'With chemicals, avoid the cellar. Most gases and vapours are heavier than air and collect in hollows and cellars.';
+
+  @override
+  String get hazardReleaseCellarRadio =>
+      'With radioactive material it is the other way round: go to a cellar room by preference. Ionising radiation is attenuated as it passes through matter, and in a cellar the attenuation by the surrounding earth and the floors above is particularly large.';
+
+  @override
+  String get hazardReleaseCellarNote =>
+      'This is not a contradiction but the same thought twice: gas sinks, radiation is slowed by mass. Which case it is, the warning says.';
+
+  @override
+  String get hazardReleaseIodineLink =>
+      'Radioactive iodine: what iodine tablets do';
+
+  @override
+  String get hazardReleaseSource =>
+      'Source: Federal Office of Civil Protection and Disaster Assistance (BBK), \"Handeln bei Gefahrstoff-Freisetzung\".';
+
+  @override
+  String get iodineTitle => 'Iodine tablets';
+
+  @override
+  String get iodineEntryHint =>
+      'Who takes them, when — and why only when told to.';
+
+  @override
+  String get iodineIntro =>
+      'A nuclear accident can release radioactive iodine. It gathers in the thyroid and can cause cancer there later. A high-dose iodine tablet saturates the thyroid with non-radioactive iodine beforehand, so that it takes up no more. This is called thyroid blocking.';
+
+  @override
+  String get iodineOnlyOnOrderTitle => 'Only when explicitly told to';
+
+  @override
+  String get iodineOnlyOnOrderBody =>
+      'High-dose iodine tablets should be taken only when the civil protection authorities explicitly call for it — and only at the dose they name. The BfS strongly advises against taking them on your own judgement, because the side effects can reach acute cardiovascular failure.';
+
+  @override
+  String get iodineOnlyThyroidTitle =>
+      'They protect the thyroid and nothing else';
+
+  @override
+  String get iodineOnlyThyroidBody =>
+      'And only against radioactive iodine. Against every other radioactive substance they do nothing. Having taken one is not protection and does not replace following the instructions.';
+
+  @override
+  String get iodineWhoTitle => 'Who';
+
+  @override
+  String get iodineWhoUnder45 =>
+      'Everybody up to 45, in the affected areas. The dose depends on age and is named by the authorities.';
+
+  @override
+  String get iodineWhoChildren =>
+      'Particularly important for children and adolescents up to 18 — their thyroid is especially sensitive.';
+
+  @override
+  String get iodineWhoPregnant =>
+      'Pregnant women as well, there above all to protect the unborn child.';
+
+  @override
+  String get iodineWhoOver45 =>
+      'Over 45 it is advised against. There the risk of side effects outweighs the thyroid cancer avoided.';
+
+  @override
+  String get iodineWhoThyroid =>
+      'Anybody with a thyroid condition takes them only after talking to their own doctor.';
+
+  @override
+  String get iodineWhenTitle => 'When';
+
+  @override
+  String get iodineWhenBody =>
+      'The timing decides whether they work. About an hour before contact with the air carrying the radioactive iodine is ideal. Taken too early, the iodine has already been broken down; taken too late, the thyroid has already taken up the radioactive kind. The civil protection authorities announce the moment through the media.';
+
+  @override
+  String get iodineHowOftenTitle => 'How often';
+
+  @override
+  String get iodineHowOftenBody =>
+      'Once is generally enough. A further tablet only if the authority recommends it.';
+
+  @override
+  String get iodineWhereTitle => 'Where from';
+
+  @override
+  String get iodineWhereBody =>
+      'The federal states are responsible. Around nuclear power stations the tablets are either pre-distributed to households or held locally, in town halls and fire stations. Beyond that, more than 180 million tablets are stored across the country; in an event they are handed out at fire stations, town halls, pharmacies or well-known polling stations, after a call in the media.';
+
+  @override
+  String get iodineRangeTitle => 'How far';
+
+  @override
+  String get iodineRangeBody =>
+      'In an accident with substantial release, taking them can be recommended for adults up to 100 kilometres away — and for children across the whole of Germany.';
+
+  @override
+  String get iodineHazardLink =>
+      'What else to do: hazardous material in the air';
+
+  @override
+  String get iodineSource =>
+      'Source: Federal Office for Radiation Protection (BfS), \"Einnahme und Wirkung von Jodtabletten\".';
+
+  @override
   String get cancelButton => 'Cancel';
 
   @override

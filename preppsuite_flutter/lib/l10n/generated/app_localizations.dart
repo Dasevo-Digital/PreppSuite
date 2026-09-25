@@ -908,6 +908,318 @@ abstract class AppLocalizations {
   /// **'Without a camera, a household travels through the shared folder or through a file.'**
   String get cameraAlternativeTransfer;
 
+  /// No description provided for @hazardReleaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Hazardous material in the air'**
+  String get hazardReleaseTitle;
+
+  /// No description provided for @hazardReleaseEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do when something has been released — indoors, outdoors, in the car.'**
+  String get hazardReleaseEntryHint;
+
+  /// No description provided for @hazardReleaseIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'When a warning says hazardous material has been released, the first minutes decide. What follows is the instruction of the German Federal Office of Civil Protection and Disaster Assistance (BBK), reproduced and not interpreted.'**
+  String get hazardReleaseIntro;
+
+  /// No description provided for @hazardReleaseHomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'If you are at home'**
+  String get hazardReleaseHomeTitle;
+
+  /// No description provided for @hazardReleaseHomeStay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay in the building. Take in passers-by who are at risk, and tell the other residents.'**
+  String get hazardReleaseHomeStay;
+
+  /// No description provided for @hazardReleaseHomeWindows.
+  ///
+  /// In en, this message translates to:
+  /// **'Close windows and doors.'**
+  String get hazardReleaseHomeWindows;
+
+  /// No description provided for @hazardReleaseHomeVent.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch off fans and air conditioning, close the ventilation slots in the window frames.'**
+  String get hazardReleaseHomeVent;
+
+  /// No description provided for @hazardReleaseHomeRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to a sheltered inner room, ideally one with no outside window.'**
+  String get hazardReleaseHomeRoom;
+
+  /// No description provided for @hazardReleaseHomeCandles.
+  ///
+  /// In en, this message translates to:
+  /// **'No candles or anything like them — they use up oxygen for nothing.'**
+  String get hazardReleaseHomeCandles;
+
+  /// No description provided for @hazardReleaseHomeRadio.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch on the radio, FM and the regional station, or the television. Follow the announcements from the authorities and emergency services.'**
+  String get hazardReleaseHomeRadio;
+
+  /// No description provided for @hazardReleaseHomePhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the telephone only in an emergency.'**
+  String get hazardReleaseHomePhone;
+
+  /// No description provided for @hazardReleaseHomeMask.
+  ///
+  /// In en, this message translates to:
+  /// **'If the material gets in: use whatever breathing protection you have, improvise a mask if you must.'**
+  String get hazardReleaseHomeMask;
+
+  /// No description provided for @hazardReleaseHomeWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for the all-clear before leaving the building or opening a window.'**
+  String get hazardReleaseHomeWait;
+
+  /// No description provided for @hazardReleaseOutsideTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'If you are outdoors'**
+  String get hazardReleaseOutsideTitle;
+
+  /// No description provided for @hazardReleaseOutsideCross.
+  ///
+  /// In en, this message translates to:
+  /// **'Move across the wind, neither with it nor against it. Breathe through protection, through a handkerchief if that is all there is.'**
+  String get hazardReleaseOutsideCross;
+
+  /// No description provided for @hazardReleaseOutsideBuilding.
+  ///
+  /// In en, this message translates to:
+  /// **'Get to the nearest closed building and ask to be let in.'**
+  String get hazardReleaseOutsideBuilding;
+
+  /// No description provided for @hazardReleaseOutsideClothes.
+  ///
+  /// In en, this message translates to:
+  /// **'After contact, change outer clothing and shoes as you enter, bag them in plastic and leave them out of the living area, in front of the building if you can.'**
+  String get hazardReleaseOutsideClothes;
+
+  /// No description provided for @hazardReleaseOutsideWash.
+  ///
+  /// In en, this message translates to:
+  /// **'Wash in this order: hands thoroughly first, then face and hair, then nose and ears — with soap and water.'**
+  String get hazardReleaseOutsideWash;
+
+  /// No description provided for @hazardReleaseOutsideBio.
+  ///
+  /// In en, this message translates to:
+  /// **'For biological material, disinfect your hands as well.'**
+  String get hazardReleaseOutsideBio;
+
+  /// No description provided for @hazardReleaseCarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'If you are in the car'**
+  String get hazardReleaseCarTitle;
+
+  /// No description provided for @hazardReleaseCarVent.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch off the ventilation and close the windows.'**
+  String get hazardReleaseCarVent;
+
+  /// No description provided for @hazardReleaseCarRadio.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen to the radio, FM and the regional station, and follow the instructions.'**
+  String get hazardReleaseCarRadio;
+
+  /// No description provided for @hazardReleaseCarBuilding.
+  ///
+  /// In en, this message translates to:
+  /// **'Get to the nearest closed building, unless the authorities say otherwise.'**
+  String get hazardReleaseCarBuilding;
+
+  /// No description provided for @hazardReleaseCellarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cellar or upper floor? That depends on the material'**
+  String get hazardReleaseCellarTitle;
+
+  /// No description provided for @hazardReleaseCellarChemical.
+  ///
+  /// In en, this message translates to:
+  /// **'With chemicals, avoid the cellar. Most gases and vapours are heavier than air and collect in hollows and cellars.'**
+  String get hazardReleaseCellarChemical;
+
+  /// No description provided for @hazardReleaseCellarRadio.
+  ///
+  /// In en, this message translates to:
+  /// **'With radioactive material it is the other way round: go to a cellar room by preference. Ionising radiation is attenuated as it passes through matter, and in a cellar the attenuation by the surrounding earth and the floors above is particularly large.'**
+  String get hazardReleaseCellarRadio;
+
+  /// No description provided for @hazardReleaseCellarNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not a contradiction but the same thought twice: gas sinks, radiation is slowed by mass. Which case it is, the warning says.'**
+  String get hazardReleaseCellarNote;
+
+  /// No description provided for @hazardReleaseIodineLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Radioactive iodine: what iodine tablets do'**
+  String get hazardReleaseIodineLink;
+
+  /// No description provided for @hazardReleaseSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: Federal Office of Civil Protection and Disaster Assistance (BBK), \"Handeln bei Gefahrstoff-Freisetzung\".'**
+  String get hazardReleaseSource;
+
+  /// No description provided for @iodineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Iodine tablets'**
+  String get iodineTitle;
+
+  /// No description provided for @iodineEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Who takes them, when — and why only when told to.'**
+  String get iodineEntryHint;
+
+  /// No description provided for @iodineIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'A nuclear accident can release radioactive iodine. It gathers in the thyroid and can cause cancer there later. A high-dose iodine tablet saturates the thyroid with non-radioactive iodine beforehand, so that it takes up no more. This is called thyroid blocking.'**
+  String get iodineIntro;
+
+  /// No description provided for @iodineOnlyOnOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Only when explicitly told to'**
+  String get iodineOnlyOnOrderTitle;
+
+  /// No description provided for @iodineOnlyOnOrderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'High-dose iodine tablets should be taken only when the civil protection authorities explicitly call for it — and only at the dose they name. The BfS strongly advises against taking them on your own judgement, because the side effects can reach acute cardiovascular failure.'**
+  String get iodineOnlyOnOrderBody;
+
+  /// No description provided for @iodineOnlyThyroidTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'They protect the thyroid and nothing else'**
+  String get iodineOnlyThyroidTitle;
+
+  /// No description provided for @iodineOnlyThyroidBody.
+  ///
+  /// In en, this message translates to:
+  /// **'And only against radioactive iodine. Against every other radioactive substance they do nothing. Having taken one is not protection and does not replace following the instructions.'**
+  String get iodineOnlyThyroidBody;
+
+  /// No description provided for @iodineWhoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who'**
+  String get iodineWhoTitle;
+
+  /// No description provided for @iodineWhoUnder45.
+  ///
+  /// In en, this message translates to:
+  /// **'Everybody up to 45, in the affected areas. The dose depends on age and is named by the authorities.'**
+  String get iodineWhoUnder45;
+
+  /// No description provided for @iodineWhoChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Particularly important for children and adolescents up to 18 — their thyroid is especially sensitive.'**
+  String get iodineWhoChildren;
+
+  /// No description provided for @iodineWhoPregnant.
+  ///
+  /// In en, this message translates to:
+  /// **'Pregnant women as well, there above all to protect the unborn child.'**
+  String get iodineWhoPregnant;
+
+  /// No description provided for @iodineWhoOver45.
+  ///
+  /// In en, this message translates to:
+  /// **'Over 45 it is advised against. There the risk of side effects outweighs the thyroid cancer avoided.'**
+  String get iodineWhoOver45;
+
+  /// No description provided for @iodineWhoThyroid.
+  ///
+  /// In en, this message translates to:
+  /// **'Anybody with a thyroid condition takes them only after talking to their own doctor.'**
+  String get iodineWhoThyroid;
+
+  /// No description provided for @iodineWhenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When'**
+  String get iodineWhenTitle;
+
+  /// No description provided for @iodineWhenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The timing decides whether they work. About an hour before contact with the air carrying the radioactive iodine is ideal. Taken too early, the iodine has already been broken down; taken too late, the thyroid has already taken up the radioactive kind. The civil protection authorities announce the moment through the media.'**
+  String get iodineWhenBody;
+
+  /// No description provided for @iodineHowOftenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How often'**
+  String get iodineHowOftenTitle;
+
+  /// No description provided for @iodineHowOftenBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Once is generally enough. A further tablet only if the authority recommends it.'**
+  String get iodineHowOftenBody;
+
+  /// No description provided for @iodineWhereTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Where from'**
+  String get iodineWhereTitle;
+
+  /// No description provided for @iodineWhereBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The federal states are responsible. Around nuclear power stations the tablets are either pre-distributed to households or held locally, in town halls and fire stations. Beyond that, more than 180 million tablets are stored across the country; in an event they are handed out at fire stations, town halls, pharmacies or well-known polling stations, after a call in the media.'**
+  String get iodineWhereBody;
+
+  /// No description provided for @iodineRangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How far'**
+  String get iodineRangeTitle;
+
+  /// No description provided for @iodineRangeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'In an accident with substantial release, taking them can be recommended for adults up to 100 kilometres away — and for children across the whole of Germany.'**
+  String get iodineRangeBody;
+
+  /// No description provided for @iodineHazardLink.
+  ///
+  /// In en, this message translates to:
+  /// **'What else to do: hazardous material in the air'**
+  String get iodineHazardLink;
+
+  /// No description provided for @iodineSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: Federal Office for Radiation Protection (BfS), \"Einnahme und Wirkung von Jodtabletten\".'**
+  String get iodineSource;
+
   /// No description provided for @cancelButton.
   ///
   /// In en, this message translates to:

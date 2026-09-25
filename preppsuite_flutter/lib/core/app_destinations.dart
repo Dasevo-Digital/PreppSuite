@@ -54,6 +54,8 @@ import '../features/transfer/presentation/qr_send_screen.dart';
 import '../features/warnings/presentation/air_quality_screen.dart';
 import '../features/warnings/presentation/fire_danger_screen.dart';
 import '../features/warnings/presentation/pegel_screen.dart';
+import '../features/warnings/presentation/hazard_release_screen.dart';
+import '../features/warnings/presentation/iodine_tablets_screen.dart';
 import '../features/warnings/presentation/radiation_screen.dart';
 import '../features/warnings/presentation/road_closure_screen.dart';
 import '../features/warnings/presentation/warning_situation_map_screen.dart';
@@ -351,6 +353,36 @@ List<AppDestination> appDestinations() => [
     area: ShellDestination.warnings,
     open: (_) => const FireDangerScreen(),
     aliases: ['waldbrand', 'wbi', 'duerre', 'wildfire'],
+  ),
+  AppDestination(
+    id: 'hazard-release',
+    title: (l) => l.hazardReleaseTitle,
+    icon: Icons.masks_outlined,
+    area: ShellDestination.warnings,
+    open: (_) => const HazardReleaseScreen(),
+    aliases: [
+      'gefahrstoff',
+      'chemieunfall',
+      'giftwolke',
+      'fenster schliessen',
+      'austritt',
+      'cbrn',
+      'entwarnung',
+    ],
+  ),
+  AppDestination(
+    id: 'iodine-tablets',
+    title: (l) => l.iodineTitle,
+    icon: Icons.medication_outlined,
+    area: ShellDestination.warnings,
+    open: (_) => const IodineTabletsScreen(),
+    aliases: [
+      'jod',
+      'jodtabletten',
+      'kaliumiodid',
+      'jodblockade',
+      'schilddruese',
+    ],
   ),
   AppDestination(
     id: 'radiation',

@@ -483,6 +483,200 @@ class AppLocalizationsDe extends AppLocalizations {
       'Ohne Kamera geht die Übergabe über den gemeinsamen Ordner oder über eine Datei.';
 
   @override
+  String get hazardReleaseTitle => 'Gefahrstoff in der Luft';
+
+  @override
+  String get hazardReleaseEntryHint =>
+      'Was zu tun ist, wenn etwas freigesetzt wurde — im Haus, draußen, im Auto.';
+
+  @override
+  String get hazardReleaseIntro =>
+      'Wenn eine Warnung meldet, dass Gefahrstoffe freigesetzt wurden, entscheiden die ersten Minuten. Was hier steht, ist die Handlungsanweisung des Bundesamtes für Bevölkerungsschutz und Katastrophenhilfe, wiedergegeben und nicht ausgelegt.';
+
+  @override
+  String get hazardReleaseHomeTitle => 'Wenn du zu Hause bist';
+
+  @override
+  String get hazardReleaseHomeStay =>
+      'Im Gebäude bleiben. Gefährdete Passanten vorübergehend aufnehmen und andere Hausbewohner informieren.';
+
+  @override
+  String get hazardReleaseHomeWindows => 'Fenster und Türen schließen.';
+
+  @override
+  String get hazardReleaseHomeVent =>
+      'Ventilatoren und Klimaanlagen ausschalten, die Lüftungsschlitze der Fensterrahmen schließen.';
+
+  @override
+  String get hazardReleaseHomeRoom =>
+      'Einen geschützten Innenraum aufsuchen, möglichst einen ohne Außenfenster.';
+
+  @override
+  String get hazardReleaseHomeCandles =>
+      'Keine Kerzen und nichts Ähnliches — das verbraucht unnötig Sauerstoff.';
+
+  @override
+  String get hazardReleaseHomeRadio =>
+      'Radio einschalten, UKW und Regionalsender, oder den Fernseher. Durchsagen von Behörden und Einsatzkräften beachten.';
+
+  @override
+  String get hazardReleaseHomePhone => 'Nur in Notfällen telefonieren.';
+
+  @override
+  String get hazardReleaseHomeMask =>
+      'Dringen Gefahrstoffe ein: vorhandenen Atemschutz benutzen, notfalls einen improvisierten Mundschutz.';
+
+  @override
+  String get hazardReleaseHomeWait =>
+      'Auf die Entwarnung warten, bevor du das Gebäude verlässt oder ein Fenster öffnest.';
+
+  @override
+  String get hazardReleaseOutsideTitle => 'Wenn du draußen bist';
+
+  @override
+  String get hazardReleaseOutsideCross =>
+      'Quer zur Windrichtung gehen, nicht mit ihm und nicht gegen ihn. Durch einen Atemschutz atmen, zur Not durch ein Taschentuch.';
+
+  @override
+  String get hazardReleaseOutsideBuilding =>
+      'Das nächste geschlossene Gebäude aufsuchen und um Einlass bitten.';
+
+  @override
+  String get hazardReleaseOutsideClothes =>
+      'Nach Kontakt beim Betreten Oberbekleidung und Schuhe wechseln, in Plastikbeutel packen und außerhalb des Wohnbereichs lassen, möglichst vor dem Gebäude.';
+
+  @override
+  String get hazardReleaseOutsideWash =>
+      'Waschen in dieser Reihenfolge: zuerst gründlich die Hände, dann Gesicht und Haare, dann Nase und Ohren — mit Wasser und Seife.';
+
+  @override
+  String get hazardReleaseOutsideBio =>
+      'Bei biologischen Stoffen zusätzlich die Hände desinfizieren.';
+
+  @override
+  String get hazardReleaseCarTitle => 'Wenn du im Auto bist';
+
+  @override
+  String get hazardReleaseCarVent =>
+      'Belüftung ausschalten und die Fenster schließen.';
+
+  @override
+  String get hazardReleaseCarRadio =>
+      'Radio hören, UKW und Regionalsender, und den Anweisungen folgen.';
+
+  @override
+  String get hazardReleaseCarBuilding =>
+      'Das nächste geschlossene Gebäude aufsuchen, sofern Behörden und Einsatzkräfte nichts anderes anweisen.';
+
+  @override
+  String get hazardReleaseCellarTitle =>
+      'Keller oder oberes Stockwerk? Das kommt auf den Stoff an';
+
+  @override
+  String get hazardReleaseCellarChemical =>
+      'Bei Chemikalien den Keller meiden. Die meisten Gase und Dämpfe sind schwerer als Luft und sammeln sich in Senken und Kellerräumen.';
+
+  @override
+  String get hazardReleaseCellarRadio =>
+      'Bei radioaktiven Stoffen umgekehrt: vorzugsweise einen Kellerraum aufsuchen. Ionisierende Strahlung wird beim Durchdringen von Materie abgeschwächt, und im Keller ist die Abschwächung durch die Erdschicht ringsum und die Stockwerke darüber besonders groß.';
+
+  @override
+  String get hazardReleaseCellarNote =>
+      'Das ist kein Widerspruch, sondern zweimal dieselbe Überlegung: Gas sinkt, Strahlung wird von Masse gebremst. Welcher Fall vorliegt, sagt die Warnung.';
+
+  @override
+  String get hazardReleaseIodineLink =>
+      'Radioaktives Jod: was Jodtabletten leisten';
+
+  @override
+  String get hazardReleaseSource =>
+      'Quelle: Bundesamt für Bevölkerungsschutz und Katastrophenhilfe (BBK), „Handeln bei Gefahrstoff-Freisetzung\".';
+
+  @override
+  String get iodineTitle => 'Jodtabletten';
+
+  @override
+  String get iodineEntryHint =>
+      'Wer sie nimmt, wann — und warum nur auf Aufforderung.';
+
+  @override
+  String get iodineIntro =>
+      'Bei einem nuklearen Unfall kann radioaktives Jod frei werden. Es reichert sich in der Schilddrüse an und kann dort später Krebs auslösen. Eine hochdosierte Jodtablette sättigt die Schilddrüse vorher mit nicht-radioaktivem Jod, so dass sie das radioaktive nicht mehr aufnimmt. Das nennt sich Jodblockade.';
+
+  @override
+  String get iodineOnlyOnOrderTitle => 'Nur nach ausdrücklicher Aufforderung';
+
+  @override
+  String get iodineOnlyOnOrderBody =>
+      'Hochdosierte Jodtabletten sollen nur eingenommen werden, wenn die Katastrophenschutzbehörden ausdrücklich dazu auffordern — und nur in der von ihnen genannten Dosis. Vom Einnehmen auf eigene Faust rät das BfS dringend ab, weil die Nebenwirkungen bis zum akuten Herz-Kreislauf-Versagen reichen können.';
+
+  @override
+  String get iodineOnlyThyroidTitle => 'Sie schützen nur die Schilddrüse';
+
+  @override
+  String get iodineOnlyThyroidBody =>
+      'Und nur vor radioaktivem Jod. Gegen alle anderen radioaktiven Stoffe wirken sie nicht. Wer sie genommen hat, ist nicht geschützt und muss sich weiter an die Anweisungen halten.';
+
+  @override
+  String get iodineWhoTitle => 'Wer';
+
+  @override
+  String get iodineWhoUnder45 =>
+      'Alle bis 45 Jahre, in den betroffenen Gebieten. Die Dosis hängt vom Alter ab und wird von den Behörden genannt.';
+
+  @override
+  String get iodineWhoChildren =>
+      'Für Kinder und Jugendliche bis 18 besonders wichtig — ihre Schilddrüse ist besonders empfindlich.';
+
+  @override
+  String get iodineWhoPregnant =>
+      'Auch Schwangere, dort vor allem zum Schutz des ungeborenen Kindes.';
+
+  @override
+  String get iodineWhoOver45 =>
+      'Über 45 wird davon abgeraten. Das Risiko der Nebenwirkungen wiegt dort schwerer als der vermiedene Schilddrüsenkrebs.';
+
+  @override
+  String get iodineWhoThyroid =>
+      'Wer eine Schilddrüsenerkrankung hat, nimmt sie erst nach Rücksprache mit dem behandelnden Arzt.';
+
+  @override
+  String get iodineWhenTitle => 'Wann';
+
+  @override
+  String get iodineWhenBody =>
+      'Der Zeitpunkt entscheidet über die Wirkung. Ideal ist etwa eine Stunde vor dem Kontakt mit den Luftmassen, die das radioaktive Jod tragen. Zu früh eingenommen ist das Jod schon wieder abgebaut, zu spät hat die Schilddrüse das radioaktive bereits aufgenommen. Wann es so weit ist, geben die Katastrophenschutzbehörden über die Medien bekannt.';
+
+  @override
+  String get iodineHowOftenTitle => 'Wie oft';
+
+  @override
+  String get iodineHowOftenBody =>
+      'Einmal reicht grundsätzlich. Eine weitere Tablette nur, wenn die Behörde das empfiehlt.';
+
+  @override
+  String get iodineWhereTitle => 'Woher';
+
+  @override
+  String get iodineWhereBody =>
+      'Zuständig sind die Bundesländer. In der Umgebung von Kernkraftwerken sind die Tabletten je nach Land an die Haushalte vorverteilt oder liegen örtlich bereit, etwa in Rathäusern und Feuerwehrhäusern. Darüber hinaus lagern bundesweit mehr als 180 Millionen Tabletten; im Ereignisfall werden sie an Feuerwehrwachen, Rathäusern, Apotheken oder bekannten Wahllokalen ausgegeben, nach einem Aufruf in den Medien.';
+
+  @override
+  String get iodineRangeTitle => 'Wie weit';
+
+  @override
+  String get iodineRangeBody =>
+      'Bei einem Unfall mit erheblicher Freisetzung kann die Einnahme für Erwachsene bis in 100 Kilometer Entfernung empfohlen werden — und für Kinder in ganz Deutschland.';
+
+  @override
+  String get iodineHazardLink =>
+      'Was sonst zu tun ist: Gefahrstoff in der Luft';
+
+  @override
+  String get iodineSource =>
+      'Quelle: Bundesamt für Strahlenschutz (BfS), „Einnahme und Wirkung von Jodtabletten\".';
+
+  @override
   String get cancelButton => 'Abbrechen';
 
   @override
