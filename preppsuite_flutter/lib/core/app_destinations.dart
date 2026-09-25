@@ -37,6 +37,7 @@ import '../features/household/presentation/household_plan_screen.dart';
 import '../features/inventory/presentation/medication_range_screen.dart';
 import '../features/inventory/presentation/prepper_recipes_screen.dart';
 import '../features/inventory/presentation/rotation_screen.dart';
+import '../features/inventory/presentation/supply_groups_screen.dart';
 import '../features/inventory/presentation/shopping_list_screen.dart';
 import '../features/inventory/presentation/storage_tips_screen.dart';
 import '../features/inventory/presentation/water_treatment_screen.dart';
@@ -288,6 +289,21 @@ List<AppDestination> appDestinations() => [
   ),
 
   // --- under Vorrat ---------------------------------------------------
+  AppDestination(
+    id: 'supply-groups',
+    title: (l) => l.supplyGroupsTitle,
+    icon: Icons.donut_small_outlined,
+    area: ShellDestination.inventory,
+    open: (p) => SupplyGroupsScreen(householdId: p.id),
+    aliases: [
+      'gruppen',
+      'lebensmittelgruppen',
+      'abdeckung',
+      'ble',
+      'einseitig',
+      'ausgewogen',
+    ],
+  ),
   AppDestination(
     id: 'shopping-list',
     title: (l) => l.shoppingListTitle,

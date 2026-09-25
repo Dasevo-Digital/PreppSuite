@@ -774,6 +774,79 @@ class AppLocalizationsEn extends AppLocalizations {
       'Source: the crime prevention body of the German federal states and the federation (polizei-beratung.de) and the K-EINBRUCH campaign. Figures from the 2025 police crime statistics.';
 
   @override
+  String get supplyGroupsTitle => 'Supply groups';
+
+  @override
+  String get supplyGroupsEntryHint =>
+      'Does the supply cover every group, not only the calories?';
+
+  @override
+  String get supplyGroupsIntro =>
+      'Ten days of calories can be ten days of pasta. The German Federal Office for Agriculture and Food states, in its stockpiling calculator, an amount per person and day for each food group. This is your stock beside it.';
+
+  @override
+  String get supplyGroupsPersonsNote =>
+      'Counted per person and day, without distinguishing by age — that is how the BLE table works. Drinking water is different: there their footnote names children separately, and the supply calculator follows the footnote.';
+
+  @override
+  String get supplyGroupGrain => 'Grain products, bread, potatoes';
+
+  @override
+  String get supplyGroupVegetables => 'Vegetables, mushrooms';
+
+  @override
+  String get supplyGroupFruit => 'Fruit';
+
+  @override
+  String get supplyGroupDrinks => 'Drinks';
+
+  @override
+  String get supplyGroupDairy => 'Milk and dairy';
+
+  @override
+  String get supplyGroupProtein => 'Eggs, meat, sausage and fish';
+
+  @override
+  String get supplyGroupFats => 'Fats and oil';
+
+  @override
+  String get supplyGroupNone => 'In no group';
+
+  @override
+  String get supplyGroupLabel => 'Supply group';
+
+  @override
+  String get supplyGroupHelper =>
+      'Food and water only. Without one, the item counts towards no group.';
+
+  @override
+  String get supplyGroupsUnassignedTitle => 'Without a group';
+
+  @override
+  String get supplyGroupsUnassignedBody =>
+      'These items count nowhere above. The app does not assign them itself — \"pasta bake seasoning\" is not grain, and guessing here would be wrong once too often.';
+
+  @override
+  String get supplyGroupsUnmeasuredTitle => 'Group yes, amount no';
+
+  @override
+  String get supplyGroupsUnmeasuredBody =>
+      'These have a group, but their unit cannot be reduced to grams or millilitres — or it does not match the group. They are missing from the figures above too.';
+
+  @override
+  String get supplyGroupsAllAssigned =>
+      'Every food and water item is in a group.';
+
+  @override
+  String get supplyGroupsSource =>
+      'Source: the stockpiling calculator of the German Federal Office for Agriculture and Food (BLE), amounts per person and day at 2200 kcal.';
+
+  @override
+  String supplyGroupsShare(String have, String target) {
+    return '$have of $target';
+  }
+
+  @override
   String get cancelButton => 'Cancel';
 
   @override

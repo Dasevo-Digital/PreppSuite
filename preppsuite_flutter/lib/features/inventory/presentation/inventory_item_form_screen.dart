@@ -18,6 +18,8 @@ import '../../../core/error_text.dart';
 import '../../../local_db/database.dart';
 import '../application/inventory_category_l10n.dart';
 import '../application/expiry_reminder_provider.dart';
+import '../application/supply_group_l10n.dart';
+import '../application/supply_groups.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_photo_service.dart';
 import '../application/open_food_facts_service.dart';
@@ -87,6 +89,9 @@ class _InventoryItemFormScreenState
   /// Null means this item follows the household setting; see
   /// `InventoryItems.expiryLeadDays`.
   String? _expiryLeadDays;
+
+  /// Which BLE supply group this row counts towards, or null.
+  SupplyGroup? _foodGroup;
   String? _barcode;
   String? _offProductId;
   String? _photoPath;
@@ -115,6 +120,7 @@ class _InventoryItemFormScreenState
     _category.name,
     _expirationDate?.toIso8601String(),
     _expiryLeadDays,
+    _foodGroup?.name,
     _barcode,
     _offProductId,
     _photoPath,
@@ -214,6 +220,7 @@ class _InventoryItemFormScreenState
         : draft?.category ?? InventoryItemCategory.food;
     _expirationDate = existing?.expirationDate;
     _expiryLeadDays = existing?.expiryLeadDays;
+    _foodGroup = supplyGroupFromName(existing?.foodGroup);
     _barcode = existing?.barcode;
     _offProductId = existing?.offProductId;
     _photoPath = existing?.photoPath;
@@ -553,6 +560,7 @@ class _InventoryItemFormScreenState
           minQuantity: minQuantity,
           dailyDose: dailyDose,
           expiryLeadDays: _expiryLeadDays,
+          foodGroup: _needsMeasure ? _foodGroup?.name : null,
           notes: notes.isEmpty ? null : notes,
           barcode: _barcode,
           offProductId: _offProductId,
@@ -570,6 +578,7 @@ class _InventoryItemFormScreenState
           minQuantity: minQuantity,
           dailyDose: dailyDose,
           expiryLeadDays: _expiryLeadDays,
+          foodGroup: _needsMeasure ? _foodGroup?.name : null,
           notes: notes.isEmpty ? null : notes,
           barcode: _barcode,
           offProductId: _offProductId,
@@ -739,6 +748,35 @@ class _InventoryItemFormScreenState
                           if (value != null) setState(() => _category = value);
                         },
                       ),
+                      // Nur bei Lebensmitteln und Wasser, und direkt
+                      // unter der Kategorie, weil es an ihr haengt: eine
+                      // Taschenlampe gehoert in keine Vorratsgruppe und
+                      // vermisst auch keine.
+                      if (_needsMeasure) ...[
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<SupplyGroup?>(
+                          isExpanded: true,
+                          initialValue: _foodGroup,
+                          decoration: InputDecoration(
+                            labelText: l10n.supplyGroupLabel,
+                            helperText: l10n.supplyGroupHelper,
+                            helperMaxLines: 2,
+                          ),
+                          items: [
+                            DropdownMenuItem(
+                              value: null,
+                              child: Text(l10n.supplyGroupNone),
+                            ),
+                            for (final group in SupplyGroup.values)
+                              DropdownMenuItem(
+                                value: group,
+                                child: Text(localizeSupplyGroup(l10n, group)),
+                              ),
+                          ],
+                          onChanged: (value) =>
+                              setState(() => _foodGroup = value),
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       Row(
                         children: [

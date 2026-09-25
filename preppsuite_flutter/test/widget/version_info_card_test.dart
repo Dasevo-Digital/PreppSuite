@@ -37,7 +37,7 @@ void main() {
     // Deliberately the literal and not AppDatabase.currentSchemaVersion:
     // a migration that bumps the schema should make this test say so, and
     // reading the constant back would only prove the card can print it.
-    expect(find.text('Schema 19'), findsOneWidget);
+    expect(find.text('Schema 20'), findsOneWidget);
     expect(find.text('Schema 1'), findsNWidgets(2));
     expect(find.text('PMTiles v3'), findsOneWidget);
   });

@@ -779,6 +779,79 @@ class AppLocalizationsDe extends AppLocalizations {
       'Quelle: Polizeiliche Kriminalprävention der Länder und des Bundes (polizei-beratung.de) und die Initiative K-EINBRUCH. Zahlen aus der Polizeilichen Kriminalstatistik 2025.';
 
   @override
+  String get supplyGroupsTitle => 'Vorratsgruppen';
+
+  @override
+  String get supplyGroupsEntryHint =>
+      'Deckt der Vorrat alle Gruppen ab, nicht nur die Kalorien?';
+
+  @override
+  String get supplyGroupsIntro =>
+      'Zehn Tage Kalorien können zehn Tage Nudeln sein. Die Bundesanstalt für Landwirtschaft und Ernährung nennt in ihrem Vorratskalkulator für jede Lebensmittelgruppe eine Menge je Person und Tag. Das hier ist dein Bestand daneben.';
+
+  @override
+  String get supplyGroupsPersonsNote =>
+      'Gerechnet wird je Person und Tag, ohne nach Alter zu unterscheiden — so macht es die BLE-Tabelle. Beim Trinkwasser ist das anders, da nennt ihre Fußnote Kinder gesondert; der Vorratsrechner folgt dort der Fußnote.';
+
+  @override
+  String get supplyGroupGrain => 'Getreideprodukte, Brot, Kartoffeln';
+
+  @override
+  String get supplyGroupVegetables => 'Gemüse, Pilze';
+
+  @override
+  String get supplyGroupFruit => 'Obst';
+
+  @override
+  String get supplyGroupDrinks => 'Getränke';
+
+  @override
+  String get supplyGroupDairy => 'Milch, Milcherzeugnisse';
+
+  @override
+  String get supplyGroupProtein => 'Eier, Fleisch, Wurst und Fisch';
+
+  @override
+  String get supplyGroupFats => 'Fette, Öl';
+
+  @override
+  String get supplyGroupNone => 'Keiner Gruppe zugeordnet';
+
+  @override
+  String get supplyGroupLabel => 'Vorratsgruppe';
+
+  @override
+  String get supplyGroupHelper =>
+      'Nur für Lebensmittel und Wasser. Ohne Angabe zählt der Artikel in keiner Gruppe mit.';
+
+  @override
+  String get supplyGroupsUnassignedTitle => 'Ohne Gruppe';
+
+  @override
+  String get supplyGroupsUnassignedBody =>
+      'Diese Artikel zählen oben nirgends mit. Die App ordnet sie nicht selbst zu — „Nudeln‑Auflauf‑Gewürz\" ist kein Getreide, und Raten wäre hier einmal zu oft falsch.';
+
+  @override
+  String get supplyGroupsUnmeasuredTitle => 'Gruppe ja, Menge nein';
+
+  @override
+  String get supplyGroupsUnmeasuredBody =>
+      'Diese Artikel haben eine Gruppe, aber ihre Einheit lässt sich nicht in Gramm oder Milliliter umrechnen — oder sie passt nicht zur Gruppe. Auch sie fehlen in den Zahlen oben.';
+
+  @override
+  String get supplyGroupsAllAssigned =>
+      'Jeder Lebensmittel- und Wasserartikel ist einer Gruppe zugeordnet.';
+
+  @override
+  String get supplyGroupsSource =>
+      'Quelle: Vorratskalkulator der Bundesanstalt für Landwirtschaft und Ernährung (BLE), Mengen je Person und Tag bei 2200 kcal.';
+
+  @override
+  String supplyGroupsShare(String have, String target) {
+    return '$have von $target';
+  }
+
+  @override
   String get cancelButton => 'Abbrechen';
 
   @override

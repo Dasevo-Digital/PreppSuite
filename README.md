@@ -54,6 +54,27 @@ Die Seite verweist auf das Hausratverzeichnis, das die App ohnehin hat —
 die Polizei nennt es „Wertgegenstandsliste" und rät, sie zu haben, bevor
 etwas passiert.
 
+**Vorratsgruppen.** Zehn Tage Kalorien können zehn Tage Nudeln sein. Der
+Vorratskalkulator der Bundesanstalt für Landwirtschaft und Ernährung nennt
+je Lebensmittelgruppe eine Menge pro Person und Tag — Getreide 0,33 kg,
+Gemüse 0,40 kg, Obst 0,25 kg, Getränke 2 l, Milch 0,25 kg, Eier/Fleisch/
+Fisch 0,12 kg, Fette 33 g. Ein eigener Bildschirm stellt den eigenen
+Bestand daneben.
+
+Die Gruppe steht am Artikel und wird **nicht geraten**. „Nudeln" ist fast
+immer Getreide, und fast immer ist keine Regel, die diese App auf einen
+fremden Vorrat anwendet. Was keiner Gruppe zugeordnet ist oder dessen
+Einheit sich nicht in Gramm umrechnen lässt, wird namentlich aufgeführt
+statt stillschweigend weggelassen — eine Zahl, die den halben Schrank
+unterschlägt, ist schlechter als keine.
+
+Warum Gruppen und nicht Nährstoffe: Mikronährstoffe stehen auf deutschen
+Etiketten nur, wenn damit geworben wird, und fehlen bei Open Food Facts
+für fast alles. Eine Nährstoffansicht würde bei einem Vorrat voller
+Vitamin C „kein Vitamin C" anzeigen. Die Gruppen der BLE sind dagegen eine
+veröffentlichte Tabelle mit veröffentlichten Mengen — und sie decken die
+Nährstoffe ab, dafür sind sie gemacht.
+
 **Wasser trinkbar machen.** Was Abkochen, Filtern und Entkeimungsmittel
 leisten — und was nicht. Zuerst steht da, wogegen keines der drei hilft:
 Treibstoff, Chemie und radioaktives Material bleiben drin. Danach das

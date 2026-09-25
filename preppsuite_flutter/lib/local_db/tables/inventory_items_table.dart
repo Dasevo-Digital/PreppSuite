@@ -69,6 +69,20 @@ class InventoryItems extends Table {
   /// tablets knows how many a day.
   RealColumn get dailyDose => real().nullable()();
 
+  /// Which of the BLE's supply groups this row counts towards, as a
+  /// `SupplyGroup` enum name — or null, which is what almost every row
+  /// starts as.
+  ///
+  /// Set by the household and never guessed. "Nudeln" is grain and
+  /// "Öl" is fats often enough that a keyword rule would look clever, and
+  /// it would be wrong the once somebody stored nut oil under a brand
+  /// name. The same reason `dailyDose` is asked for rather than derived.
+  ///
+  /// Only meaningful on `food` and `water` rows; see
+  /// `supply_groups.dart`, which also explains why the axis is the BLE's
+  /// groups and not nutrients.
+  TextColumn get foodGroup => text().nullable()();
+
   /// Lead times for this one item's expiry reminders, as a
   /// comma-separated list of days — or null to follow the household's
   /// own setting, which is what nearly every row does.

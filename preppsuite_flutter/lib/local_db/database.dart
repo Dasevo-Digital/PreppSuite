@@ -30,7 +30,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 19;
+  static const currentSchemaVersion = 20;
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
@@ -211,6 +211,7 @@ class AppDatabase extends _$AppDatabase {
               inventoryItems.fiberGrams,
               inventoryItems.dailyDose,
               inventoryItems.expiryLeadDays,
+              inventoryItems.foodGroup,
             ],
           ),
         );
@@ -348,7 +349,10 @@ class AppDatabase extends _$AppDatabase {
           await m.alterTable(
             TableMigration(
               inventoryItems,
-              newColumns: [inventoryItems.expiryLeadDays],
+              newColumns: [
+                inventoryItems.expiryLeadDays,
+                inventoryItems.foodGroup,
+              ],
             ),
           );
         }
@@ -462,6 +466,17 @@ class AppDatabase extends _$AppDatabase {
             inventoryItems,
             inventoryItems.expiryLeadDays,
           );
+        }
+      }
+      if (from < 20) {
+        // A row may now say which of the BLE's supply groups it counts
+        // towards. Null everywhere, and null means "not stated" -- the
+        // group screen names those rows rather than guessing at them, so
+        // an upgrade adds a question, never an answer.
+        if (!await _hasTable('inventory_items')) {
+          await m.createTable(inventoryItems);
+        } else {
+          await _addColumnOnce(m, inventoryItems, inventoryItems.foodGroup);
         }
       }
     },

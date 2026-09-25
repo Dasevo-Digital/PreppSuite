@@ -1382,6 +1382,132 @@ abstract class AppLocalizations {
   /// **'Source: the crime prevention body of the German federal states and the federation (polizei-beratung.de) and the K-EINBRUCH campaign. Figures from the 2025 police crime statistics.'**
   String get burglarySource;
 
+  /// No description provided for @supplyGroupsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Supply groups'**
+  String get supplyGroupsTitle;
+
+  /// No description provided for @supplyGroupsEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Does the supply cover every group, not only the calories?'**
+  String get supplyGroupsEntryHint;
+
+  /// No description provided for @supplyGroupsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Ten days of calories can be ten days of pasta. The German Federal Office for Agriculture and Food states, in its stockpiling calculator, an amount per person and day for each food group. This is your stock beside it.'**
+  String get supplyGroupsIntro;
+
+  /// No description provided for @supplyGroupsPersonsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Counted per person and day, without distinguishing by age — that is how the BLE table works. Drinking water is different: there their footnote names children separately, and the supply calculator follows the footnote.'**
+  String get supplyGroupsPersonsNote;
+
+  /// No description provided for @supplyGroupGrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Grain products, bread, potatoes'**
+  String get supplyGroupGrain;
+
+  /// No description provided for @supplyGroupVegetables.
+  ///
+  /// In en, this message translates to:
+  /// **'Vegetables, mushrooms'**
+  String get supplyGroupVegetables;
+
+  /// No description provided for @supplyGroupFruit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fruit'**
+  String get supplyGroupFruit;
+
+  /// No description provided for @supplyGroupDrinks.
+  ///
+  /// In en, this message translates to:
+  /// **'Drinks'**
+  String get supplyGroupDrinks;
+
+  /// No description provided for @supplyGroupDairy.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk and dairy'**
+  String get supplyGroupDairy;
+
+  /// No description provided for @supplyGroupProtein.
+  ///
+  /// In en, this message translates to:
+  /// **'Eggs, meat, sausage and fish'**
+  String get supplyGroupProtein;
+
+  /// No description provided for @supplyGroupFats.
+  ///
+  /// In en, this message translates to:
+  /// **'Fats and oil'**
+  String get supplyGroupFats;
+
+  /// No description provided for @supplyGroupNone.
+  ///
+  /// In en, this message translates to:
+  /// **'In no group'**
+  String get supplyGroupNone;
+
+  /// No description provided for @supplyGroupLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Supply group'**
+  String get supplyGroupLabel;
+
+  /// No description provided for @supplyGroupHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Food and water only. Without one, the item counts towards no group.'**
+  String get supplyGroupHelper;
+
+  /// No description provided for @supplyGroupsUnassignedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a group'**
+  String get supplyGroupsUnassignedTitle;
+
+  /// No description provided for @supplyGroupsUnassignedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These items count nowhere above. The app does not assign them itself — \"pasta bake seasoning\" is not grain, and guessing here would be wrong once too often.'**
+  String get supplyGroupsUnassignedBody;
+
+  /// No description provided for @supplyGroupsUnmeasuredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Group yes, amount no'**
+  String get supplyGroupsUnmeasuredTitle;
+
+  /// No description provided for @supplyGroupsUnmeasuredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These have a group, but their unit cannot be reduced to grams or millilitres — or it does not match the group. They are missing from the figures above too.'**
+  String get supplyGroupsUnmeasuredBody;
+
+  /// No description provided for @supplyGroupsAllAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Every food and water item is in a group.'**
+  String get supplyGroupsAllAssigned;
+
+  /// No description provided for @supplyGroupsSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: the stockpiling calculator of the German Federal Office for Agriculture and Food (BLE), amounts per person and day at 2200 kcal.'**
+  String get supplyGroupsSource;
+
+  /// No description provided for @supplyGroupsShare.
+  ///
+  /// In en, this message translates to:
+  /// **'{have} of {target}'**
+  String supplyGroupsShare(String have, String target);
+
   /// No description provided for @cancelButton.
   ///
   /// In en, this message translates to:

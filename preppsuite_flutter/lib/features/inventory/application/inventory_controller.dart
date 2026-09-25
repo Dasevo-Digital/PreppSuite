@@ -36,6 +36,9 @@ class InventoryController {
 
     /// Null keeps the household's own lead times for this item.
     String? expiryLeadDays,
+
+    /// A `SupplyGroup` name, or null where the household has not said.
+    String? foodGroup,
     PackageNutrition nutrition = const PackageNutrition(),
   }) async {
     await _db.upsertInventoryItem(
@@ -51,6 +54,7 @@ class InventoryController {
         minQuantity: Value(minQuantity),
         dailyDose: Value(dailyDose),
         expiryLeadDays: Value(expiryLeadDays),
+        foodGroup: Value(foodGroup),
         notes: Value(notes),
         barcode: Value(barcode),
         offProductId: Value(offProductId),
@@ -83,6 +87,9 @@ class InventoryController {
 
     /// Null keeps the household's own lead times for this item.
     String? expiryLeadDays,
+
+    /// A `SupplyGroup` name, or null where the household has not said.
+    String? foodGroup,
     PackageNutrition nutrition = const PackageNutrition(),
   }) async {
     await _db.upsertInventoryItem(
@@ -100,6 +107,7 @@ class InventoryController {
         minQuantity: Value(minQuantity),
         dailyDose: Value(dailyDose),
         expiryLeadDays: Value(expiryLeadDays),
+        foodGroup: Value(foodGroup),
         notes: Value(notes),
         photoPath: Value(photoPath),
         calories: Value(nutrition.kcal),
