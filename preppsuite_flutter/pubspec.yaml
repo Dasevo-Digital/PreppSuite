@@ -63,7 +63,20 @@ dependencies:
   # Local renderer for PDFs from the personal knowledge library.  It uses
   # PDFium on every supported native platform, so a document never has to
   # leave the device merely to be read.
-  pdfrx: 2.2.24
+  #
+  # Pinned exactly, as before: this brings PDFium in, and PDFium is what
+  # takes apart files nobody in this project wrote.
+  #
+  # 2.4.8 rather than 2.2.24 for two reasons.  It carries PDFium
+  # chromium/7811 instead of chromium/7520 -- some three hundred revisions
+  # of fixes in the one component that parses untrusted input.  And it
+  # declares its web assets as `platforms: [web]`, so the 4 MB pdfium.wasm
+  # stops riding along in the macOS, Linux, Windows and Android packages,
+  # where nothing can execute it.
+  #
+  # Nothing above 2.4.8 fits yet: 2.5.0 wants Flutter 3.47 and 2.6.x wants
+  # Dart 3.13.
+  pdfrx: 2.4.8
   printing: ^5.14.3
   shared_preferences: ^2.5.5
   flutter_secure_storage: ^10.3.4
