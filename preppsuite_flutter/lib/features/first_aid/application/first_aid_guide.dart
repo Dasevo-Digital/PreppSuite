@@ -7,7 +7,7 @@
 /// running an older version would be worse than no guide at all.
 ///
 /// Not the ARB files, because medical text has to be reviewable as prose.
-/// Twenty-two guides are some three hundred strings; scattered through
+/// Thirty guides are some four hundred strings; scattered through
 /// eleven hundred lines of interface wording, nobody could ever read them
 /// end to end and check them against the guideline they came from. They live in
 /// `first_aid_guides_de.dart` and `first_aid_guides_en.dart` instead, one

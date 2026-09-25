@@ -271,4 +271,44 @@ const knowledgeQuestionsDe = <KnowledgeQuestion>[
         'dieses und ähnliche Hausmittel keine Empfehlung aus; empfohlen '
         'ist das Vor- und Mitatmen.',
   ),
+  KnowledgeQuestion(
+    id: 'drowning-breaths',
+    guideId: 'drowning',
+    question:
+        'Jemand wurde aus dem Wasser geholt und atmet nicht. Nur drücken '
+        'oder auch beatmen?',
+    answers: [
+      'Auch beatmen, 30 zu 2',
+      'Nur drücken, wie beim Herzstillstand',
+      'Erst das Wasser herausdrücken',
+    ],
+    correct: 0,
+    because:
+        'Beim Ertrinken gehören die Beatmungen dazu – anders als beim '
+        'Herzstillstand. Angefangen wird trotzdem mit dem Drücken.',
+  ),
+  KnowledgeQuestion(
+    id: 'hypo-diet-drink',
+    guideId: 'hypoglycaemia',
+    question: 'Unterzuckerung, und im Kühlschrank steht Cola light. Hilft die?',
+    answers: [
+      'Nein, da ist kein Zucker drin',
+      'Ja, Cola ist Cola',
+      'Ja, aber nur in größerer Menge',
+    ],
+    correct: 0,
+    because: 'Keine Diät- oder Light-Getränke. Da ist kein Zucker drin.',
+  ),
+  KnowledgeQuestion(
+    id: 'frostbite-heater',
+    guideId: 'frostbite',
+    question: 'Erfrorene Finger an den Heizlüfter halten?',
+    answers: [
+      'Nein, körperwarmes Wasser',
+      'Ja, Hauptsache schnell warm',
+      'Ja, aber nur kurz',
+    ],
+    correct: 0,
+    because: 'Nicht an direkte Hitze wie Heizlüfter oder Herd.',
+  ),
 ];

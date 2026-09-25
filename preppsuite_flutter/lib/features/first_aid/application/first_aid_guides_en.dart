@@ -360,6 +360,52 @@ const firstAidGuidesEn = <FirstAidGuide>[
     source: 'European Resuscitation Council (ERC) Guidelines 2025',
   ),
   FirstAidGuide(
+    id: 'drowning',
+    group: FirstAidGroup.lifeThreatening,
+    title: 'Drowning',
+    when: 'Somebody is in trouble in the water, or has just been got out.',
+    steps: [
+      FirstAidStep(
+        'Do not go into the water.',
+        detail:
+            'Somebody actively drowning holds on and pulls the helper '
+            'under. Help from the bank or from a boat.',
+      ),
+      FirstAidStep(
+        'Reach out with something rigid, or throw something that floats.',
+        detail: 'A pole, a branch, an oar, a rope, a ring buoy.',
+      ),
+      FirstAidStep('Call 112.'),
+      FirstAidStep('On land, speak to them loudly and check the breathing.'),
+      FirstAidStep(
+        'Not breathing normally: resuscitate at once, 30 compressions and '
+        '2 rescue breaths.',
+        detail:
+            'With drowning the rescue breaths belong to it — unlike a '
+            'cardiac arrest. Start with the compressions all the same.',
+      ),
+      FirstAidStep('Defibrillator: dry the skin before the pads go on.'),
+      FirstAidStep(
+        'Breathing normally: recovery position, head placed so that fluid '
+        'can drain from the mouth.',
+      ),
+      FirstAidStep(
+        'Take vomit or debris out only where it is genuinely blocking the '
+        'breathing.',
+      ),
+    ],
+    facts: [FirstAidFact('Ratio', '30 compressions, 2 breaths')],
+    cautions: [
+      'No resuscitation in the water. That is for rescuers specifically '
+          'and repeatedly trained for it, not for a bystander.',
+      'Do not take hold of somebody who is actively drowning.',
+      'No pressure on the chest that makes breathing harder.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Drowning"',
+  ),
+  FirstAidGuide(
     id: 'severe-bleeding',
     group: FirstAidGroup.injury,
     title: 'Severe bleeding',
@@ -497,6 +543,117 @@ const firstAidGuidesEn = <FirstAidGuide>[
     source:
         'European Resuscitation Council (ERC) First Aid Guidelines '
         '2025',
+  ),
+  FirstAidGuide(
+    id: 'fracture',
+    group: FirstAidGroup.injury,
+    title: 'Fracture, sprain, strain',
+    when: 'After a fall or a blow: pain, swelling, a limb out of shape.',
+    steps: [
+      FirstAidStep('Keep the injured part still.'),
+      FirstAidStep(
+        'Support it in a comfortable position so nothing moves.',
+        detail: 'Keeping it raised can reduce the swelling.',
+      ),
+      FirstAidStep(
+        'Cool it for up to 20 minutes.',
+        detail:
+            'Longer damages the skin. As soon after the injury as you can, '
+            'and always wrap the cold pack in a cloth.',
+      ),
+      FirstAidStep(
+        'Call 112 for a lot of pain, a lot of swelling, signs of shock, a '
+        'fracture of the thigh bone, or a limb in an abnormal position.',
+      ),
+      FirstAidStep(
+        'Open fracture: stop the bleeding first, then stabilize the limb.',
+      ),
+    ],
+    facts: [FirstAidFact('Cooling', '20 minutes at most')],
+    cautions: [
+      'Never put a cold pack straight onto the skin.',
+      'Stop cooling if it becomes too painful. If the pain returns and the '
+          'skin is back to its normal temperature, you may cool again.',
+      'Fractures and dislocations always belong in medical hands. In doubt '
+          'whether it is a fracture, a sprain or a strain: see a doctor.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Fractures, sprains and strains"',
+  ),
+  FirstAidGuide(
+    id: 'spinal-injury',
+    group: FirstAidGroup.injury,
+    title: 'Suspected spinal injury',
+    when:
+        'A fall from height, a dive, a road collision — and pain in the '
+        'neck or back.',
+    steps: [
+      FirstAidStep('Do not move them. They stay as you found them.'),
+      FirstAidStep(
+        'If they are responsive: reassure them and ask them to stay as '
+        'still as they can.',
+      ),
+      FirstAidStep(
+        'For a child, for somebody drowsy, or where somebody cannot '
+        'follow: support the head gently.',
+        detail: 'So that neck and spine do not move.',
+      ),
+      FirstAidStep('Call 112.'),
+      FirstAidStep(
+        'Unresponsive and breathing normally: leave them, open the airway '
+        'and support the head in that position.',
+      ),
+      FirstAidStep(
+        'Keep them warm and watch breathing and response until the '
+        'ambulance arrives.',
+      ),
+    ],
+    facts: [FirstAidFact('If they must be moved', 'at least two helpers')],
+    cautions: [
+      'Do not reposition them while the breathing is normal and there is '
+          'no danger.',
+      'If they must be moved after all, for danger: at least two helpers, '
+          'one keeping the head in line with the spine.',
+      'With a suspected pelvic fracture, do not rock or rotate the pelvis '
+          '— that can restart bleeding.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Spinal injury"',
+  ),
+  FirstAidGuide(
+    id: 'head-injury',
+    group: FirstAidGroup.injury,
+    title: 'Head injury and concussion',
+    when: 'A blow to the head, or a fall onto it.',
+    steps: [
+      FirstAidStep('Take them out of the activity and have them rest.'),
+      FirstAidStep(
+        'Watch for the signs of concussion, and for any change in response '
+        'and breathing.',
+      ),
+      FirstAidStep(
+        'Severe head injury: call 112, reassure them, keep head and neck '
+        'as still as possible.',
+        detail:
+            'If they are lying down you can hold the head still with your '
+            'hands or knees.',
+      ),
+      FirstAidStep(
+        'Watch response and breathing until the ambulance arrives.',
+      ),
+    ],
+    cautions: [
+      'Not every knock on the head is a concussion. Where the signs are '
+          'absent or mild, rest helps — they still have to be watched.',
+      'A concussion can develop over hours or days.',
+      'Back to work, the wheel, machinery or sport only once the signs '
+          'have gone.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Head injury and concussion"',
   ),
   FirstAidGuide(
     id: 'stroke',
@@ -680,6 +837,83 @@ const firstAidGuidesEn = <FirstAidGuide>[
         '2025',
   ),
   FirstAidGuide(
+    id: 'asthma',
+    group: FirstAidGroup.illness,
+    title: 'Asthma attack',
+    when: 'Wheezing, laboured breathing and tightness in the chest.',
+    steps: [
+      FirstAidStep(
+        'Sit them comfortably and reassure them.',
+        detail:
+            'Sitting upright, leaning forward with the arms braced, often '
+            'helps.',
+      ),
+      FirstAidStep(
+        'Help them use their own inhaler. Loosen tight clothing.',
+      ),
+      FirstAidStep(
+        'Call 112.',
+        detail:
+            'If there is no inhaler and the attack lasts several minutes; '
+            'if the inhaler does not work within a few minutes; for severe '
+            'breathing difficulty; for bluish lips, ears, fingers or toes; '
+            'for confusion; or if the breathing becomes slower and less '
+            'noisy.',
+      ),
+      FirstAidStep(
+        'No inhaler: keep them calm, sitting upright, fresh air, away from '
+        'the trigger.',
+      ),
+      FirstAidStep(
+        'Stay until the attack is over, and help with further doses of '
+        'their own prescription.',
+      ),
+    ],
+    cautions: [
+      'Only the inhaler prescribed to this person.',
+      'Breathing that becomes slower and quieter, or somebody getting '
+          'tired, is not an improvement.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Asthma attack"',
+  ),
+  FirstAidGuide(
+    id: 'hypoglycaemia',
+    group: FirstAidGroup.illness,
+    title: 'Low blood sugar',
+    when:
+        'Known diabetes, with shaking, sweating, confusion or sudden '
+        'irritability.',
+    steps: [
+      FirstAidStep('Sit or lay them down comfortably.'),
+      FirstAidStep(
+        'Give them their own glucose: 15 to 20 grams.',
+        detail:
+            'Otherwise a sugary drink that is not a diet one, such as '
+            'fruit juice, or sugar — about three teaspoons, or three '
+            'jellybeans.',
+      ),
+      FirstAidStep('No better after 15 minutes: give the same amount again.'),
+      FirstAidStep(
+        'No better after about 30 minutes, or they become unresponsive: '
+        'call 112.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Sugar', '15 to 20 g'),
+      FirstAidFact('Repeat after', '15 minutes'),
+    ],
+    cautions: [
+      'Give something to eat or drink only if they are responsive and able '
+          'to swallow.',
+      'No diet or light drinks. There is no sugar in them.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Diabetic emergency (hypoglycemia)"',
+  ),
+  FirstAidGuide(
     id: 'hypothermia',
     group: FirstAidGroup.environment,
     title: 'Hypothermia',
@@ -818,6 +1052,81 @@ const firstAidGuidesEn = <FirstAidGuide>[
   // endorse neither ("Anxiety and panic", the Delphi section). What they
   // do recommend is breathing with the person, so that is all that is
   // here.
+  FirstAidGuide(
+    id: 'frostbite',
+    group: FirstAidGroup.environment,
+    title: 'Frostbite',
+    when: 'White, hard, numb patches on fingers, toes, nose or ears.',
+    steps: [
+      FirstAidStep(
+        'Protect them from hypothermia first.',
+        detail:
+            'Move them somewhere warmer, take off wet clothing, keep them '
+            'dry and warm.',
+      ),
+      FirstAidStep(
+        'Take off jewellery carefully, while that is possible without '
+        'damaging the skin.',
+      ),
+      FirstAidStep(
+        'Warm the area gently in water at body temperature.',
+        detail: 'Usually about 30 minutes, until it is warmed through.',
+      ),
+      FirstAidStep(
+        'Dress it with sterile gauze. Where several digits are affected, '
+        'put gauze between them.',
+      ),
+    ],
+    facts: [FirstAidFact('Rewarming', 'body-temperature water, ~30 minutes')],
+    cautions: [
+      'Do not rub and do not handle roughly — that damages the skin.',
+      'Not near direct heat such as a fan heater or a stove.',
+      'Do not break blisters.',
+      'Rewarm only where refreezing is ruled out. Frostbite always needs '
+          'medical care.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Frostbite"',
+  ),
+  FirstAidGuide(
+    id: 'dehydration',
+    group: FirstAidGroup.environment,
+    title: 'Dehydration',
+    when:
+        'After diarrhoea, vomiting, fever or heat: thirst, little and dark '
+        'urine, weakness.',
+    steps: [
+      FirstAidStep('Reassure them and give them plenty to drink.'),
+      FirstAidStep('Mild case: water is enough.'),
+      FirstAidStep(
+        'More severe: an oral rehydration solution.',
+        detail: 'If there is none: apple juice, coconut water or water.',
+      ),
+      FirstAidStep(
+        'To make it yourself: half a teaspoon of salt and six teaspoons of '
+        'sugar in one litre of drinking water.',
+      ),
+      FirstAidStep(
+        'Call 112 if they become confused or stop responding.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Solution per litre', 'half tsp salt, 6 tsp sugar'),
+      FirstAidFact('Children 2 to 5 years', '10 ml per kg'),
+    ],
+    cautions: [
+      'Nothing alcoholic.',
+      'No rehydration solution during a diabetic high-sugar crisis — it '
+          'makes the dehydration worse.',
+      'Seek medical advice for babies, children and older people, where '
+          'more is being lost than taken in, where there is very little or '
+          'very dark urine, with fever or heat exhaustion, and in doubt.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Dehydration"',
+  ),
   FirstAidGuide(
     id: 'psychological-first-aid',
     group: FirstAidGroup.mentalDistress,

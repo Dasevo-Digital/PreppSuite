@@ -22,15 +22,18 @@ beim allergischen Schock liest, muss zum Anrufen nicht zurückfinden.
 
 ## Woher die Inhalte kommen
 
-Siebzehn der zweiundzwanzig Anleitungen folgen den
-**Reanimationsleitlinien 2025 des European Resuscitation Council** in der
-deutschen Fassung des German Resuscitation Council und deren
-Erste-Hilfe-Kapitel. Die Vergiftungsseite nennt die
-Giftinformationszentren der Länder, die Hitzeseite zusätzlich die BZgA.
+Siebzehn der dreißig Anleitungen folgen den **Reanimationsleitlinien
+2025 des European Resuscitation Council** in der deutschen Fassung des
+German Resuscitation Council und deren Erste-Hilfe-Kapitel. Die
+Vergiftungsseite nennt die Giftinformationszentren der Länder, die
+Hitzeseite zusätzlich die BZgA.
 
-Die fünf Anleitungen unter **Seelische Not** folgen einer anderen Quelle,
-den *International first aid, resuscitation and education guidelines 2025*
-der IFRC — warum, steht weiter unten in einem eigenen Abschnitt.
+Die übrigen dreizehn folgen den *International first aid, resuscitation
+and education guidelines 2025* der IFRC: die fünf unter **Seelische Not**
+sowie Ertrinken, Knochenbruch, Wirbelsäulenverletzung, Kopfverletzung,
+Asthmaanfall, Unterzuckerung, Erfrierungen und Austrocknung. Jede nennt
+ihr Kapitel auf dem Bildschirm; warum diese Quelle und was ihre Lizenz
+erlaubt, steht weiter unten.
 
 ### Was der Schritt von 2021 auf 2025 geändert hat
 
@@ -90,9 +93,9 @@ Abgleich von einem Gerät mit einer älteren Fassung ankommt, wäre
 schlimmer als keine.
 
 Nicht in den ARB-Dateien, weil medizinischer Text als Fließtext prüfbar
-sein muss. Zweiundzwanzig Anleitungen sind rund dreihundert
-Zeichenketten; verteilt über tausendvierhundert Zeilen Oberflächentext
-könnte sie niemand am Stück gegen die Leitlinie lesen.
+sein muss. Dreißig Anleitungen sind rund vierhundert Zeichenketten;
+verteilt über tausendvierhundert Zeilen Oberflächentext könnte sie
+niemand am Stück gegen die Leitlinie lesen.
 
 Sie liegen in
 
@@ -147,6 +150,14 @@ dieser App, und jede Anleitung nennt das Kapitel, aus dem sie stammt, auf
 dem Bildschirm. Der Programmcode steht unter der MIT-Lizenz, die den
 Weiterverkauf erlaubt — fremder Inhalt unter einer Nicht-kommerziell-
 Bedingung darf darin nicht wörtlich liegen.
+
+### Eine Dosierung, die bewusst fehlt
+
+Die Leitlinie nennt bei **Erfrierungen** eine hohe Dosis Ibuprofen, die
+die Heilung verbessern kann. Sie steht hier nicht. Dosierungen von
+Medikamenten, die dem Verletzten nicht selbst verordnet sind, führt diese
+App nicht — und diese Regel gilt auch gegenüber einer Quelle, der die App
+ansonsten Wort für Wort folgt. Alles andere des Kapitels ist da.
 
 ### Was bewusst fehlt, obwohl es überall steht
 

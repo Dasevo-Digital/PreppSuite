@@ -266,4 +266,46 @@ const knowledgeQuestionsEn = <KnowledgeQuestion>[
         'neither that nor similar home remedies; what they recommend is '
         'breathing with the person.',
   ),
+  KnowledgeQuestion(
+    id: 'drowning-breaths',
+    guideId: 'drowning',
+    question:
+        'Somebody has been pulled from the water and is not breathing. '
+        'Compressions only, or breaths as well?',
+    answers: [
+      'Breaths as well, 30 to 2',
+      'Compressions only, as for a cardiac arrest',
+      'Press the water out first',
+    ],
+    correct: 0,
+    because:
+        'With drowning the rescue breaths belong to it — unlike a cardiac '
+        'arrest. Start with the compressions all the same.',
+  ),
+  KnowledgeQuestion(
+    id: 'hypo-diet-drink',
+    guideId: 'hypoglycaemia',
+    question:
+        'Low blood sugar, and there is a diet cola in the fridge. Will it '
+        'do?',
+    answers: [
+      'No, there is no sugar in it',
+      'Yes, cola is cola',
+      'Yes, but only in a larger amount',
+    ],
+    correct: 0,
+    because: 'No diet or light drinks. There is no sugar in them.',
+  ),
+  KnowledgeQuestion(
+    id: 'frostbite-heater',
+    guideId: 'frostbite',
+    question: 'Hold frostbitten fingers up to a fan heater?',
+    answers: [
+      'No, water at body temperature',
+      'Yes, warm is warm',
+      'Yes, but only briefly',
+    ],
+    correct: 0,
+    because: 'Not near direct heat such as a fan heater or a stove.',
+  ),
 ];

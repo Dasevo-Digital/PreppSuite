@@ -93,7 +93,7 @@ selbst, wohin sie gehören.
 PDF-Bericht der fehlenden Ausrüstung – der Bestände also, die unter ihrem
 Mindestbestand liegen.
 
-**Erste Hilfe.** Zweiundzwanzig Anleitungen in Dringlichkeitsreihenfolge.
+**Erste Hilfe.** Dreißig Anleitungen in Dringlichkeitsreihenfolge.
 Siebzehn davon nach den Reanimations- und Erste-Hilfe-Leitlinien 2025 des
 European Resuscitation Council, deutsche Fassung des German Resuscitation
 Council: Notruf, bewusstlose Person, Wiederbelebung für Erwachsene, Kinder
@@ -102,12 +102,14 @@ Blutung, Schock, Verbrennung, Schlaganfall, Herzinfarkt, Krampfanfall,
 allergischer Schock, Unterkühlung, Hitzschlag und Vergiftung – letztere
 mit den Nummern der Giftinformationszentren.
 
-Die letzten fünf sind **seelische Not** und folgen den *International
-first aid, resuscitation and education guidelines 2025* der IFRC:
-psychische Erste Hilfe nach Look – Listen – Link, Suizidgedanken, Angst
-und Panikattacke, nach einem schweren Erlebnis, akute Trauer. Sie tragen
-die Nummern der TelefonSeelsorge und der Nummer gegen Kummer, jede zum
-Antippen. Dazu
+Die übrigen dreizehn folgen den *International first aid, resuscitation
+and education guidelines 2025* der IFRC. Fünf davon sind **seelische
+Not** — psychische Erste Hilfe nach Look – Listen – Link, Suizidgedanken,
+Angst und Panikattacke, nach einem schweren Erlebnis, akute Trauer — und
+tragen die Nummern der TelefonSeelsorge und der Nummer gegen Kummer, jede
+zum Antippen. Die anderen acht sind Ertrinken, Knochenbruch,
+Wirbelsäulenverletzung, Kopfverletzung, Asthmaanfall, Unterzuckerung,
+Erfrierungen und Austrocknung. Dazu
 Strichzeichnungen, die die App selbst zeichnet, und ein **Taktgeber für
 die Herzdruckmassage** mit Ton, Blinken und Vibration, der den Bildschirm
 anlässt. Alles davon ist beim ersten Start da, ohne Netz und ohne
@@ -115,11 +117,12 @@ Download. Videos sind ein eigenes, nachladbares Paket – siehe
 [`docs/erste-hilfe.md`](docs/erste-hilfe.md). Die Anleitungen ersetzen
 keinen Kurs und keinen Notruf, und jede nennt ihre Quelle.
 
-Dazu **neunzehn Fragen**, jede auf einen Irrtum gezielt, den Menschen
-wirklich haben: etwas zwischen die Zähne schieben, kalte Gliedmaßen warm
-reiben, Eis auf eine Verbrennung, Erbrechen auslösen, eine Tüte vor den
-Mund bei einer Panikattacke, und die Sorge, das Fragen nach Suizidgedanken
-bringe jemanden erst auf den Gedanken. Das Quiz darf nichts
+Dazu **zweiundzwanzig Fragen**, jede auf einen Irrtum gezielt, den
+Menschen wirklich haben: etwas zwischen die Zähne schieben, kalte
+Gliedmaßen warm reiben, Eis auf eine Verbrennung, Erbrechen auslösen, eine
+Tüte vor den Mund bei einer Panikattacke, erfrorene Finger an den
+Heizlüfter, ein Light-Getränk bei Unterzuckerung, und die Sorge, das
+Fragen nach Suizidgedanken bringe jemanden erst auf den Gedanken. Das Quiz darf nichts
 wissen, was die Anleitungen nicht sagen – jede Begründung ist eine Warnung
 oder ein Schritt daraus, wörtlich, und ein Test hält beide Sprachen
 daran fest.

@@ -409,6 +409,66 @@ const firstAidGuidesDe = <FirstAidGuide>[
         'Reanimationsleitlinien 2025 des European Resuscitation '
         'Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
+  // ---------------------------------------------------------------------
+  // Ab hier und in den Gruppen darunter stehen Anleitungen nach den
+  // `International first aid, resuscitation and education guidelines 2025`
+  // der IFRC statt nach dem ERC. Jede nennt ihr Kapitel auf dem
+  // Bildschirm; die Impressumsseite der Leitlinien erlaubt die
+  // nicht-kommerzielle Wiedergabe unter Nennung der Quelle.
+  //
+  // Eine Stelle ist bewusst ausgelassen: die Leitlinie erwaehnt bei
+  // Erfrierungen eine hohe Dosis Ibuprofen. Dosierungen von Medikamenten,
+  // die dem Verletzten nicht selbst verordnet sind, stehen in dieser App
+  // nicht -- dieselbe Regel, die auch sonst gilt, und sie gilt auch
+  // gegenueber einer Quelle, der die App ansonsten Wort fuer Wort folgt.
+  FirstAidGuide(
+    id: 'drowning',
+    group: FirstAidGroup.lifeThreatening,
+    title: 'Ertrinken',
+    when: 'Jemand ist im Wasser in Not oder wurde gerade herausgeholt.',
+    steps: [
+      FirstAidStep(
+        'Nicht ins Wasser gehen.',
+        detail:
+            'Wer aktiv ertrinkt, klammert sich fest und zieht den Helfer '
+            'mit hinunter. Geholfen wird vom Ufer oder vom Boot aus.',
+      ),
+      FirstAidStep(
+        'Etwas Festes hinhalten oder etwas Schwimmfähiges zuwerfen.',
+        detail: 'Stange, Ast, Ruder, Seil, Rettungsring.',
+      ),
+      FirstAidStep('Notruf 112.'),
+      FirstAidStep('An Land laut ansprechen und die Atmung prüfen.'),
+      FirstAidStep(
+        'Atmet nicht normal: sofort wiederbeleben, 30 Drücken und '
+        '2 Beatmungen.',
+        detail:
+            'Beim Ertrinken gehören die Beatmungen dazu – anders als beim '
+            'Herzstillstand. Angefangen wird trotzdem mit dem Drücken.',
+      ),
+      FirstAidStep(
+        'Defibrillator: die Klebestellen vorher abtrocknen.',
+      ),
+      FirstAidStep(
+        'Atmet normal: stabile Seitenlage, den Kopf so, dass Flüssigkeit '
+        'aus dem Mund ablaufen kann.',
+      ),
+      FirstAidStep(
+        'Erbrochenes oder Fremdkörper nur herausholen, wenn sie die '
+        'Atmung wirklich blockieren.',
+      ),
+    ],
+    facts: [FirstAidFact('Verhältnis', '30 Drücken, 2 Beatmen')],
+    cautions: [
+      'Keine Wiederbelebung im Wasser. Das ist etwas für eigens und '
+          'wiederholt ausgebildete Retter, nicht für Ersthelfer.',
+      'Eine aktiv ertrinkende Person nicht anfassen.',
+      'Keinen Druck auf den Brustkorb, der das Atmen erschwert.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Drowning"',
+  ),
   FirstAidGuide(
     id: 'severe-bleeding',
     group: FirstAidGroup.injury,
@@ -556,6 +616,128 @@ const firstAidGuidesDe = <FirstAidGuide>[
     source:
         'Erste-Hilfe-Leitlinien 2025 des European Resuscitation '
         'Council (ERC)',
+  ),
+  FirstAidGuide(
+    id: 'fracture',
+    group: FirstAidGroup.injury,
+    title: 'Knochenbruch, Verstauchung, Zerrung',
+    when:
+        'Nach Sturz oder Stoß: Schmerz, Schwellung, ein Glied in falscher '
+        'Stellung.',
+    steps: [
+      FirstAidStep('Die verletzte Stelle ruhig stellen.'),
+      FirstAidStep(
+        'In bequemer Lage abstützen, damit sich nichts bewegt.',
+        detail: 'Hochlagern kann die Schwellung mindern.',
+      ),
+      FirstAidStep(
+        'Bis zu 20 Minuten kühlen.',
+        detail:
+            'Länger schadet der Haut. So früh wie möglich nach der '
+            'Verletzung, und das Kühlelement immer in ein Tuch wickeln.',
+      ),
+      FirstAidStep(
+        'Notruf 112 bei starken Schmerzen, starker Schwellung, Anzeichen '
+        'eines Schocks, einem Bruch des Oberschenkels oder einem Glied in '
+        'falscher Stellung.',
+      ),
+      FirstAidStep(
+        'Offener Bruch: zuerst die Blutung stillen, dann das Glied '
+        'stabilisieren.',
+      ),
+    ],
+    facts: [FirstAidFact('Kühlen', 'höchstens 20 Minuten')],
+    cautions: [
+      'Kühlelemente nie direkt auf die Haut.',
+      'Kühlen abbrechen, wenn es zu schmerzhaft wird. Kehrt der Schmerz '
+          'zurück und ist die Haut wieder normal warm, darf weiter gekühlt '
+          'werden.',
+      'Brüche und Ausrenkungen gehören immer in ärztliche Behandlung. Im '
+          'Zweifel, ob Bruch, Verstauchung oder Zerrung: zum Arzt.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Fractures, sprains and strains"',
+  ),
+  FirstAidGuide(
+    id: 'spinal-injury',
+    group: FirstAidGroup.injury,
+    title: 'Verdacht auf Wirbelsäulenverletzung',
+    when:
+        'Sturz aus Höhe, Kopfsprung, Verkehrsunfall – und Schmerz im '
+        'Nacken oder Rücken.',
+    steps: [
+      FirstAidStep(
+        'Nicht bewegen. Die Person bleibt, wie du sie vorfindest.',
+      ),
+      FirstAidStep(
+        'Ist sie ansprechbar: beruhigen und bitten, sich so still wie '
+        'möglich zu halten.',
+      ),
+      FirstAidStep(
+        'Bei einem Kind, bei Benommenheit oder wenn jemand nicht folgen '
+        'kann: den Kopf behutsam stützen.',
+        detail: 'So, dass Nacken und Wirbelsäule sich nicht bewegen.',
+      ),
+      FirstAidStep('Notruf 112.'),
+      FirstAidStep(
+        'Bewusstlos und atmet normal: liegen lassen, Atemwege öffnen und '
+        'den Kopf in dieser Lage stützen.',
+      ),
+      FirstAidStep(
+        'Warm halten und Atmung und Reaktion bis zum Rettungsdienst '
+        'beobachten.',
+      ),
+    ],
+    facts: [FirstAidFact('Wenn bewegt werden muss', 'mindestens zwei Helfer')],
+    cautions: [
+      'Nicht umlagern, solange die Atmung normal ist und keine Gefahr '
+          'besteht.',
+      'Muss die Person doch bewegt werden, etwa wegen Gefahr: mit '
+          'mindestens zwei Helfern, einer hält den Kopf in Linie mit der '
+          'Wirbelsäule.',
+      'Bei Verdacht auf Beckenbruch das Becken nicht wackeln und nicht '
+          'drehen – das kann eine Blutung wieder in Gang bringen.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Spinal injury"',
+  ),
+  FirstAidGuide(
+    id: 'head-injury',
+    group: FirstAidGroup.injury,
+    title: 'Kopfverletzung und Gehirnerschütterung',
+    when: 'Schlag oder Sturz auf den Kopf.',
+    steps: [
+      FirstAidStep('Aus der Tätigkeit herausnehmen und ausruhen lassen.'),
+      FirstAidStep(
+        'Auf Anzeichen einer Gehirnerschütterung achten und darauf, ob '
+        'Reaktion und Atmung sich ändern.',
+      ),
+      FirstAidStep(
+        'Schwere Kopfverletzung: Notruf 112, beruhigen, Kopf und Nacken so '
+        'still wie möglich halten.',
+        detail:
+            'Liegt die Person, kannst du den Kopf mit Händen oder Knien '
+            'ruhig halten.',
+      ),
+      FirstAidStep(
+        'Reaktion und Atmung bis zum Eintreffen des Rettungsdienstes '
+        'beobachten.',
+      ),
+    ],
+    cautions: [
+      'Nicht jeder Stoß gegen den Kopf ist eine Gehirnerschütterung. '
+          'Fehlen die Anzeichen oder sind sie schwach, hilft Ausruhen – '
+          'beobachtet werden muss die Person trotzdem.',
+      'Eine Gehirnerschütterung kann sich über Stunden oder Tage erst '
+          'entwickeln.',
+      'Erst zurück an Arbeit, Steuer, Maschine oder Sport, wenn die '
+          'Beschwerden weg sind.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Head injury and concussion"',
   ),
   FirstAidGuide(
     id: 'stroke',
@@ -756,6 +938,82 @@ const firstAidGuidesDe = <FirstAidGuide>[
         'Council (ERC)',
   ),
   FirstAidGuide(
+    id: 'asthma',
+    group: FirstAidGroup.illness,
+    title: 'Asthmaanfall',
+    when: 'Pfeifende, schwere Atmung und Enge in der Brust.',
+    steps: [
+      FirstAidStep(
+        'Bequem hinsetzen lassen und beruhigen.',
+        detail:
+            'Oft hilft aufrecht sitzen, nach vorn gelehnt, die Arme '
+            'aufgestützt.',
+      ),
+      FirstAidStep('Beim eigenen Spray helfen. Enge Kleidung öffnen.'),
+      FirstAidStep(
+        'Notruf 112.',
+        detail:
+            'Wenn kein Spray da ist und der Anfall mehrere Minuten dauert; '
+            'wenn das Spray nach wenigen Minuten nicht wirkt; bei schwerer '
+            'Atemnot; bei bläulichen Lippen, Ohren, Fingern oder Zehen; bei '
+            'Verwirrtheit; oder wenn die Atmung langsamer und leiser wird.',
+      ),
+      FirstAidStep(
+        'Kein Spray da: ruhig halten, aufrecht setzen, frische Luft, weg '
+        'vom Auslöser.',
+      ),
+      FirstAidStep(
+        'Dableiben, bis der Anfall vorbei ist, und beim Nachdosieren nach '
+        'der eigenen Verordnung helfen.',
+      ),
+    ],
+    cautions: [
+      'Nur das Spray, das dieser Person selbst verordnet ist.',
+      'Wird die Atmung langsamer und leiser oder die Person müde, ist das '
+          'keine Besserung.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Asthma attack"',
+  ),
+  FirstAidGuide(
+    id: 'hypoglycaemia',
+    group: FirstAidGroup.illness,
+    title: 'Unterzuckerung',
+    when:
+        'Bekannter Diabetes, dazu Zittern, Schwitzen, Verwirrtheit oder '
+        'plötzliche Gereiztheit.',
+    steps: [
+      FirstAidStep('Bequem hinsetzen oder hinlegen lassen.'),
+      FirstAidStep(
+        'Eigenen Traubenzucker geben: 15 bis 20 Gramm.',
+        detail:
+            'Sonst ein zuckerhaltiges Getränk ohne Süßstoff, etwa '
+            'Fruchtsaft, oder Zucker – etwa drei Teelöffel oder drei Stück '
+            'Weingummi.',
+      ),
+      FirstAidStep(
+        'Nach 15 Minuten keine Besserung: dieselbe Menge noch einmal.',
+      ),
+      FirstAidStep(
+        'Nach etwa 30 Minuten keine Besserung, oder die Person wird '
+        'bewusstlos: Notruf 112.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Zucker', '15 bis 20 g'),
+      FirstAidFact('Nachlegen nach', '15 Minuten'),
+    ],
+    cautions: [
+      'Nur etwas zu essen oder zu trinken geben, wenn die Person '
+          'ansprechbar ist und schlucken kann.',
+      'Keine Diät- oder Light-Getränke. Da ist kein Zucker drin.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Diabetic emergency (hypoglycemia)"',
+  ),
+  FirstAidGuide(
     id: 'hypothermia',
     group: FirstAidGroup.environment,
     title: 'Unterkühlung',
@@ -910,6 +1168,84 @@ const firstAidGuidesDe = <FirstAidGuide>[
   //
   // Die Rufnummern sind die deutschen: Telefonseelsorge und Nummer gegen
   // Kummer, beide kostenfrei und rund um die Uhr.
+  FirstAidGuide(
+    id: 'frostbite',
+    group: FirstAidGroup.environment,
+    title: 'Erfrierungen',
+    when:
+        'Weiße, harte, gefühllose Stellen an Fingern, Zehen, Nase oder '
+        'Ohren.',
+    steps: [
+      FirstAidStep(
+        'Zuerst vor Unterkühlung schützen.',
+        detail:
+            'An einen wärmeren Ort bringen, nasse Kleidung ausziehen, '
+            'trocken und warm halten.',
+      ),
+      FirstAidStep(
+        'Schmuck vorsichtig abnehmen, solange das ohne Verletzung geht.',
+      ),
+      FirstAidStep(
+        'Die Stelle behutsam in körperwarmem Wasser aufwärmen.',
+        detail: 'Meist etwa 30 Minuten, bis sie wieder durchwärmt ist.',
+      ),
+      FirstAidStep(
+        'Mit steriler Gaze verbinden. Sind mehrere Finger oder Zehen '
+        'betroffen, Gaze dazwischenlegen.',
+      ),
+    ],
+    facts: [FirstAidFact('Aufwärmen', 'körperwarmes Wasser, ~30 Minuten')],
+    cautions: [
+      'Nicht reiben und nicht grob anfassen – das schädigt die Haut.',
+      'Nicht an direkte Hitze wie Heizlüfter oder Herd.',
+      'Blasen nicht öffnen.',
+      'Nur aufwärmen, wenn ein erneutes Durchfrieren ausgeschlossen ist. '
+          'Ärztliche Hilfe ist bei Erfrierungen immer nötig.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Frostbite"',
+  ),
+  FirstAidGuide(
+    id: 'dehydration',
+    group: FirstAidGroup.environment,
+    title: 'Austrocknung',
+    when:
+        'Nach Durchfall, Erbrechen, Fieber oder Hitze: Durst, wenig und '
+        'dunkler Urin, Schwäche.',
+    steps: [
+      FirstAidStep('Beruhigen und reichlich zu trinken geben.'),
+      FirstAidStep('Leichter Fall: Wasser genügt.'),
+      FirstAidStep(
+        'Schwerer Fall: eine Trinklösung.',
+        detail: 'Ist keine da: Apfelsaft, Kokoswasser oder Wasser.',
+      ),
+      FirstAidStep(
+        'Trinklösung selbst ansetzen: auf einen Liter Trinkwasser einen '
+        'halben Teelöffel Salz und sechs Teelöffel Zucker.',
+      ),
+      FirstAidStep(
+        'Notruf 112, wenn die Person verwirrt wird oder nicht mehr '
+        'ansprechbar ist.',
+      ),
+    ],
+    facts: [
+      FirstAidFact('Trinklösung je Liter', 'halber TL Salz, 6 TL Zucker'),
+      FirstAidFact('Kinder von 2 bis 5 Jahren', '10 ml je kg'),
+    ],
+    cautions: [
+      'Nichts Alkoholisches.',
+      'Keine Trinklösung bei einer diabetischen Überzuckerung – das '
+          'verschlimmert die Austrocknung.',
+      'Ärztlichen Rat holen bei Säuglingen, Kindern und alten Menschen, '
+          'wenn mehr verloren geht als hineinkommt, wenn kaum noch oder sehr '
+          'dunkler Urin kommt, bei Fieber oder Hitzeerschöpfung, und im '
+          'Zweifel.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Dehydration"',
+  ),
   FirstAidGuide(
     id: 'psychological-first-aid',
     group: FirstAidGroup.mentalDistress,
