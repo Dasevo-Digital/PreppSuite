@@ -2234,6 +2234,60 @@ abstract class AppLocalizations {
   /// **'{days} days'**
   String expiryLeadDaysLabel(int days);
 
+  /// No description provided for @itemExpiryRemindersLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders for this item'**
+  String get itemExpiryRemindersLabel;
+
+  /// No description provided for @itemExpiryRemindersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lead time for this item'**
+  String get itemExpiryRemindersTitle;
+
+  /// No description provided for @itemExpiryRemindersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies to this entry only. Without one of its own, what counts is the setting made for the whole household.'**
+  String get itemExpiryRemindersHint;
+
+  /// No description provided for @itemExpiryRemindersDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'As set for the household'**
+  String get itemExpiryRemindersDefault;
+
+  /// No description provided for @itemExpiryRemindersOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'Its own lead times'**
+  String get itemExpiryRemindersOwn;
+
+  /// No description provided for @itemExpiryRemindersNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never remind me about this item'**
+  String get itemExpiryRemindersNever;
+
+  /// No description provided for @itemExpiryRemindersNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get itemExpiryRemindersNone;
+
+  /// No description provided for @itemExpiryRemindersDefaultNone.
+  ///
+  /// In en, this message translates to:
+  /// **'As the household: no reminder'**
+  String get itemExpiryRemindersDefaultNone;
+
+  /// No description provided for @itemExpiryRemindersDefaultWith.
+  ///
+  /// In en, this message translates to:
+  /// **'As the household: {days}'**
+  String itemExpiryRemindersDefaultWith(String days);
+
   /// No description provided for @expiryLeadDayOneLabel.
   ///
   /// In en, this message translates to:

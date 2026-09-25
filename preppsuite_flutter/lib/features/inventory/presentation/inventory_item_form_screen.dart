@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
+import 'item_expiry_lead_days_dialog.dart';
 import 'unit_info_dialog.dart';
 
 import '../../../core/feel.dart';
@@ -16,6 +17,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/error_text.dart';
 import '../../../local_db/database.dart';
 import '../application/inventory_category_l10n.dart';
+import '../application/expiry_reminder_provider.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_photo_service.dart';
 import '../application/open_food_facts_service.dart';
@@ -81,6 +83,10 @@ class _InventoryItemFormScreenState
   late final TextEditingController _notesController;
   late InventoryItemCategory _category;
   DateTime? _expirationDate;
+
+  /// Null means this item follows the household setting; see
+  /// `InventoryItems.expiryLeadDays`.
+  String? _expiryLeadDays;
   String? _barcode;
   String? _offProductId;
   String? _photoPath;
@@ -108,6 +114,7 @@ class _InventoryItemFormScreenState
     for (final controller in _controllers) controller.text,
     _category.name,
     _expirationDate?.toIso8601String(),
+    _expiryLeadDays,
     _barcode,
     _offProductId,
     _photoPath,
@@ -206,6 +213,7 @@ class _InventoryItemFormScreenState
         ? InventoryItemCategoryX.fromName(existing.category)
         : draft?.category ?? InventoryItemCategory.food;
     _expirationDate = existing?.expirationDate;
+    _expiryLeadDays = existing?.expiryLeadDays;
     _barcode = existing?.barcode;
     _offProductId = existing?.offProductId;
     _photoPath = existing?.photoPath;
@@ -424,6 +432,20 @@ class _InventoryItemFormScreenState
   /// says so at the moment it can still be fixed.
   /// Says why the field is fussy, and fills it in if the answer was a
   /// tap on one of the units rather than a read of the sentence.
+  /// The lead times for this one item.
+  ///
+  /// Only reachable where the item has an expiration date, because a lead
+  /// time without one counts down from nothing.
+  Future<void> _pickLeadDays() async {
+    final choice = await showItemLeadDays(
+      context,
+      current: _expiryLeadDays,
+      householdLeadDays: ref.read(expiryLeadDaysProvider),
+    );
+    if (choice == null || !mounted) return;
+    setState(() => _expiryLeadDays = choice.value);
+  }
+
   Future<void> _explainUnit() async {
     final chosen = await showUnitInfo(context);
     if (chosen == null || !mounted) return;
@@ -530,6 +552,7 @@ class _InventoryItemFormScreenState
           expirationDate: _expirationDate,
           minQuantity: minQuantity,
           dailyDose: dailyDose,
+          expiryLeadDays: _expiryLeadDays,
           notes: notes.isEmpty ? null : notes,
           barcode: _barcode,
           offProductId: _offProductId,
@@ -546,6 +569,7 @@ class _InventoryItemFormScreenState
           expirationDate: _expirationDate,
           minQuantity: minQuantity,
           dailyDose: dailyDose,
+          expiryLeadDays: _expiryLeadDays,
           notes: notes.isEmpty ? null : notes,
           barcode: _barcode,
           offProductId: _offProductId,
@@ -810,6 +834,27 @@ class _InventoryItemFormScreenState
                               ),
                         onTap: _pickExpirationDate,
                       ),
+                      // Only with a date. A lead time counts backwards
+                      // from the expiration, so without one there is
+                      // nothing for it to count from and the row would be
+                      // a control that does nothing.
+                      if (_expirationDate != null)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(
+                            Icons.notifications_outlined,
+                          ),
+                          title: Text(l10n.itemExpiryRemindersLabel),
+                          subtitle: Text(
+                            itemLeadDaysSummary(
+                              l10n,
+                              _expiryLeadDays,
+                              ref.watch(expiryLeadDaysProvider),
+                            ),
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: _pickLeadDays,
+                        ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _minQuantityController,

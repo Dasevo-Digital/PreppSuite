@@ -1274,6 +1274,37 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get itemExpiryRemindersLabel => 'Erinnerungen für diesen Artikel';
+
+  @override
+  String get itemExpiryRemindersTitle => 'Vorlaufzeit für diesen Artikel';
+
+  @override
+  String get itemExpiryRemindersHint =>
+      'Gilt nur für diesen Eintrag. Ohne eigene Angabe zählt, was unter Einstellungen für den ganzen Haushalt eingestellt ist.';
+
+  @override
+  String get itemExpiryRemindersDefault => 'Wie im Haushalt eingestellt';
+
+  @override
+  String get itemExpiryRemindersOwn => 'Eigene Vorlaufzeit';
+
+  @override
+  String get itemExpiryRemindersNever => 'Für diesen Artikel nie erinnern';
+
+  @override
+  String get itemExpiryRemindersNone => 'Keine';
+
+  @override
+  String get itemExpiryRemindersDefaultNone =>
+      'Wie im Haushalt: keine Erinnerung';
+
+  @override
+  String itemExpiryRemindersDefaultWith(String days) {
+    return 'Wie im Haushalt: $days';
+  }
+
+  @override
   String get expiryLeadDayOneLabel => '1 Tag';
 
   @override

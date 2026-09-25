@@ -419,6 +419,22 @@
   "chargeReminderTitle": "Akkus und Geräte prüfen",
   "chargeReminderBody": "Powerbanks, Akkus, Taschenlampen und Notfunkgeräte aufladen und testen.",
   "expiryLeadDaysLabel": "{days} Tage",
+  "itemExpiryRemindersLabel": "Erinnerungen für diesen Artikel",
+  "itemExpiryRemindersTitle": "Vorlaufzeit für diesen Artikel",
+  "itemExpiryRemindersHint": "Gilt nur für diesen Eintrag. Ohne eigene Angabe zählt, was unter Einstellungen für den ganzen Haushalt eingestellt ist.",
+  "itemExpiryRemindersDefault": "Wie im Haushalt eingestellt",
+  "itemExpiryRemindersOwn": "Eigene Vorlaufzeit",
+  "itemExpiryRemindersNever": "Für diesen Artikel nie erinnern",
+  "itemExpiryRemindersNone": "Keine",
+  "itemExpiryRemindersDefaultNone": "Wie im Haushalt: keine Erinnerung",
+  "itemExpiryRemindersDefaultWith": "Wie im Haushalt: {days}",
+  "@itemExpiryRemindersDefaultWith": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
   "expiryLeadDayOneLabel": "1 Tag",
   "consumeAction": "Verbrauchen",
   "consumeDialogTitle": "{name} verbrauchen",

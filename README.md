@@ -34,8 +34,9 @@ Ablaufdatum. Erfassung per Barcode über Open Food Facts, wahlweise mit
 Foto. Bestehende Listen lassen sich als CSV einlesen, samt Behandlung
 fehlerhafter Zeilen. Kategorien: Wasser, Lebensmittel, Medizin, Werkzeug,
 Dokumente, Energie, Hygiene, Sonstiges. Vor dem Ablaufdatum erinnert die
-App mit einstellbarem Vorlauf; Verbrauchtes lässt sich direkt aus der
-Liste abbuchen.
+App mit einstellbarem Vorlauf – für den ganzen Haushalt, und wo nötig für
+einen einzelnen Artikel abweichend davon, bis hin zu „für diesen nie".
+Verbrauchtes lässt sich direkt aus der Liste abbuchen.
 
 **Wasser trinkbar machen.** Was Abkochen, Filtern und Entkeimungsmittel
 leisten — und was nicht. Zuerst steht da, wogegen keines der drei hilft:

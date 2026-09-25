@@ -8,6 +8,7 @@ void main() {
     String name = 'Test',
     DateTime? expirationDate,
     DateTime? deletedAt,
+    String? expiryLeadDays,
   }) {
     return InventoryItem(
       clientId: clientId,
@@ -18,6 +19,7 @@ void main() {
       unit: 'Stk',
       storageLocation: 'Keller',
       expirationDate: expirationDate,
+      expiryLeadDays: expiryLeadDays,
       deletedAt: deletedAt,
       updatedAt: DateTime.utc(2026),
       dirty: false,
@@ -176,6 +178,81 @@ void main() {
       );
 
       expect(reminders.map((r) => r.leadDays), [7]);
+    });
+  });
+
+  group('an item with its own lead times', () {
+    test('uses them instead of the household\'s', () {
+      final reminders = planExpiryReminders(
+        items: [
+          item(
+            clientId: 'a',
+            expirationDate: DateTime(2026, 12, 1),
+            expiryLeadDays: '14',
+          ),
+        ],
+        now: now,
+        leadDays: const [30, 7],
+      );
+
+      expect(reminders.map((r) => r.leadDays), [14]);
+    });
+
+    test('an empty list means never, which is not the same as null', () {
+      // The distinction the column exists for: null follows the
+      // household, an empty string is a deliberate silence. A single
+      // integer column could not have said both.
+      final reminders = planExpiryReminders(
+        items: [
+          item(
+            clientId: 'quiet',
+            expirationDate: DateTime(2026, 12, 1),
+            expiryLeadDays: '',
+          ),
+          item(clientId: 'normal', expirationDate: DateTime(2026, 12, 1)),
+        ],
+        now: now,
+        leadDays: const [30],
+      );
+
+      expect(reminders.map((r) => r.itemClientId), ['normal']);
+    });
+
+    test('still gets reminders when the household has switched its own '
+        'off', () {
+      // The case the scheduler used to short-circuit: no household lead
+      // times at all, but one item that asked for its own.
+      final reminders = planExpiryReminders(
+        items: [
+          item(
+            clientId: 'a',
+            expirationDate: DateTime(2026, 12, 1),
+            expiryLeadDays: '7',
+          ),
+          item(clientId: 'b', expirationDate: DateTime(2026, 12, 1)),
+        ],
+        now: now,
+        leadDays: const [],
+      );
+
+      expect(reminders.map((r) => r.itemClientId), ['a']);
+    });
+  });
+
+  group('decoding what is stored', () {
+    test('null is the household, empty is never', () {
+      expect(decodeItemLeadDays(null), isNull);
+      expect(decodeItemLeadDays(''), isEmpty);
+    });
+
+    test('sorts far to near, removes duplicates and survives rubbish', () {
+      expect(decodeItemLeadDays('7, 30,7'), [30, 7]);
+      expect(decodeItemLeadDays('30,,x,-3, 7 '), [30, 7]);
+    });
+
+    test('round-trips', () {
+      expect(decodeItemLeadDays(encodeItemLeadDays([7, 30])), [30, 7]);
+      expect(encodeItemLeadDays(const []), '');
     });
   });
 }

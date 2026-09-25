@@ -69,6 +69,22 @@ class InventoryItems extends Table {
   /// tablets knows how many a day.
   RealColumn get dailyDose => real().nullable()();
 
+  /// Lead times for this one item's expiry reminders, as a
+  /// comma-separated list of days — or null to follow the household's
+  /// own setting, which is what nearly every row does.
+  ///
+  /// Three states, and the middle one is the reason this is text and not
+  /// a number: null is "whatever the household picked", an empty string
+  /// is "this item, never" — a jar of salt that outlives everyone does
+  /// not need a reminder at all — and a list is this item's own.
+  /// A single integer column could not tell the first two apart, and
+  /// could not carry two reminders either.
+  ///
+  /// Not validated by the database. The form only ever writes the same
+  /// round numbers the settings offer, and `decodeItemLeadDays` throws
+  /// nothing away except what cannot be a day.
+  TextColumn get expiryLeadDays => text().nullable()();
+
   TextColumn get notes => text().nullable()();
 
   /// Path to a locally-stored photo of the item (see

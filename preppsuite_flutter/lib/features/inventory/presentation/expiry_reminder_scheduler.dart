@@ -56,10 +56,17 @@ class _ExpiryReminderSchedulerState
     final items =
         ref.read(inventoryItemsProvider(widget.householdId)).value ?? const [];
 
-    // Switching notifications off, or clearing every lead time, has to
-    // clear what is already pending — otherwise reminders scheduled
-    // earlier would keep firing after the user opted out.
-    if (!enabled || leadDays.isEmpty) {
+    // Switching notifications off has to clear what is already pending —
+    // otherwise reminders scheduled earlier would keep firing after the
+    // user opted out.
+    //
+    // An empty household list is deliberately **not** shortcut here any
+    // more. Since an item may carry its own lead times, "the household
+    // picked none" no longer means "nobody gets one", and a shortcut
+    // would silently swallow every per-item reminder. Planning with an
+    // empty default simply yields nothing for the items that follow it,
+    // and scheduling an empty list is itself a full cancel.
+    if (!enabled) {
       await NotificationService.instance.cancelExpiryReminders();
       return;
     }

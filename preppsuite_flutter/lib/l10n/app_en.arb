@@ -712,6 +712,22 @@
       }
     }
   },
+  "itemExpiryRemindersLabel": "Reminders for this item",
+  "itemExpiryRemindersTitle": "Lead time for this item",
+  "itemExpiryRemindersHint": "Applies to this entry only. Without one of its own, what counts is the setting made for the whole household.",
+  "itemExpiryRemindersDefault": "As set for the household",
+  "itemExpiryRemindersOwn": "Its own lead times",
+  "itemExpiryRemindersNever": "Never remind me about this item",
+  "itemExpiryRemindersNone": "None",
+  "itemExpiryRemindersDefaultNone": "As the household: no reminder",
+  "itemExpiryRemindersDefaultWith": "As the household: {days}",
+  "@itemExpiryRemindersDefaultWith": {
+    "placeholders": {
+      "days": {
+        "type": "String"
+      }
+    }
+  },
   "expiryLeadDayOneLabel": "1 day",
   "consumeAction": "Use up",
   "consumeDialogTitle": "Use up {name}",

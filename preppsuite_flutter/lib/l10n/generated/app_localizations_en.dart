@@ -1262,6 +1262,36 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get itemExpiryRemindersLabel => 'Reminders for this item';
+
+  @override
+  String get itemExpiryRemindersTitle => 'Lead time for this item';
+
+  @override
+  String get itemExpiryRemindersHint =>
+      'Applies to this entry only. Without one of its own, what counts is the setting made for the whole household.';
+
+  @override
+  String get itemExpiryRemindersDefault => 'As set for the household';
+
+  @override
+  String get itemExpiryRemindersOwn => 'Its own lead times';
+
+  @override
+  String get itemExpiryRemindersNever => 'Never remind me about this item';
+
+  @override
+  String get itemExpiryRemindersNone => 'None';
+
+  @override
+  String get itemExpiryRemindersDefaultNone => 'As the household: no reminder';
+
+  @override
+  String itemExpiryRemindersDefaultWith(String days) {
+    return 'As the household: $days';
+  }
+
+  @override
   String get expiryLeadDayOneLabel => '1 day';
 
   @override

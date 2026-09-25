@@ -33,6 +33,9 @@ class InventoryController {
     String? offProductId,
     String? photoPath,
     double? dailyDose,
+
+    /// Null keeps the household's own lead times for this item.
+    String? expiryLeadDays,
     PackageNutrition nutrition = const PackageNutrition(),
   }) async {
     await _db.upsertInventoryItem(
@@ -47,6 +50,7 @@ class InventoryController {
         expirationDate: Value(expirationDate),
         minQuantity: Value(minQuantity),
         dailyDose: Value(dailyDose),
+        expiryLeadDays: Value(expiryLeadDays),
         notes: Value(notes),
         barcode: Value(barcode),
         offProductId: Value(offProductId),
@@ -76,6 +80,9 @@ class InventoryController {
     String? offProductId,
     String? photoPath,
     double? dailyDose,
+
+    /// Null keeps the household's own lead times for this item.
+    String? expiryLeadDays,
     PackageNutrition nutrition = const PackageNutrition(),
   }) async {
     await _db.upsertInventoryItem(
@@ -92,6 +99,7 @@ class InventoryController {
         expirationDate: Value(expirationDate),
         minQuantity: Value(minQuantity),
         dailyDose: Value(dailyDose),
+        expiryLeadDays: Value(expiryLeadDays),
         notes: Value(notes),
         photoPath: Value(photoPath),
         calories: Value(nutrition.kcal),

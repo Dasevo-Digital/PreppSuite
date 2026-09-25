@@ -30,7 +30,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 18;
+  static const currentSchemaVersion = 19;
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
@@ -210,6 +210,7 @@ class AppDatabase extends _$AppDatabase {
               inventoryItems.fatGrams,
               inventoryItems.fiberGrams,
               inventoryItems.dailyDose,
+              inventoryItems.expiryLeadDays,
             ],
           ),
         );
@@ -325,13 +326,31 @@ class AppDatabase extends _$AppDatabase {
         //
         // `from >= 8` for the reason the two branches above give: anything
         // older is rebuilt from today's definition in the schema-8 branch,
-        // which already declares this column as a real. And no
-        // `newColumns`, because at version 8 and later the table has every
-        // column it has today.
+        // which already declares this column as a real.
+        //
+        // **`newColumns` has to name every column added after 15.** The
+        // rebuild copies the table into one built from today's
+        // definition, so drift writes a `SELECT` naming today's columns
+        // against a table that predates them, and the upgrade dies on
+        // "no such column". This comment used to say the opposite -- that
+        // at version 8 and later the table has every column it has today
+        // -- which was true when it was written and stopped being true
+        // the moment schema 19 added one. `migration_to_15_test` is what
+        // caught it.
+        //
+        // Nothing has to be filled in: the column is nullable and null is
+        // its meaning ("follow the household"). The later `from < 19`
+        // branch then finds it already there and steps over, which is
+        // what [_addColumnOnce] is for.
         if (!await _hasTable('inventory_items')) {
           await m.createTable(inventoryItems);
         } else {
-          await m.alterTable(TableMigration(inventoryItems));
+          await m.alterTable(
+            TableMigration(
+              inventoryItems,
+              newColumns: [inventoryItems.expiryLeadDays],
+            ),
+          );
         }
       }
       if (from < 16) {
@@ -423,6 +442,25 @@ class AppDatabase extends _$AppDatabase {
             m,
             householdMembers,
             householdMembers.careNeeds,
+          );
+        }
+      }
+      if (from < 19) {
+        // An item may now carry its own expiry lead times instead of the
+        // household's. Shape only: the column arrives null everywhere,
+        // which means "follow the household setting" -- so every
+        // existing row keeps exactly the reminders it had.
+        //
+        // Nothing to record in [_valueMigrations]: adding a null column
+        // is the same operation however often it runs, and
+        // `_addColumnOnce` steps over a replay anyway.
+        if (!await _hasTable('inventory_items')) {
+          await m.createTable(inventoryItems);
+        } else {
+          await _addColumnOnce(
+            m,
+            inventoryItems,
+            inventoryItems.expiryLeadDays,
           );
         }
       }

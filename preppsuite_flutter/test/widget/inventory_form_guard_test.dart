@@ -40,7 +40,7 @@ void main() {
     updatedAt: DateTime(2026),
     dirty: false,
   );
-  Future<void> open(WidgetTester tester) async {
+  Future<void> open(WidgetTester tester, {InventoryItem? existing}) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -58,7 +58,7 @@ void main() {
                   MaterialPageRoute<void>(
                     builder: (_) => InventoryItemFormScreen(
                       householdId: 'h',
-                      existing: item,
+                      existing: existing ?? item,
                     ),
                   ),
                 ),
@@ -123,5 +123,43 @@ void main() {
     await tester.tap(find.text(l10n.undoAction));
     await tester.pumpAndSettle();
     expect(controller.restored, ['a']);
+  });
+
+  testWidgets('no expiry date, no reminder row', (tester) async {
+    // A lead time counts backwards from the expiration. With no date
+    // there is nothing to count from, so the row would be a control that
+    // cannot do anything.
+    await open(tester);
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(InventoryItemFormScreen)),
+    )!;
+    expect(find.text(l10n.itemExpiryRemindersLabel), findsNothing);
+  });
+
+  testWidgets('with an expiry date the row appears and says the item '
+      'follows the household', (tester) async {
+    await open(
+      tester,
+      existing: InventoryItem(
+        clientId: 'b',
+        householdId: 'h',
+        name: 'Bohnen',
+        category: 'food',
+        quantity: 2,
+        unit: 'kg',
+        storageLocation: 'Keller',
+        expirationDate: DateTime(2027, 3, 1),
+        updatedAt: DateTime(2026),
+        dirty: false,
+      ),
+    );
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(InventoryItemFormScreen)),
+    )!;
+
+    expect(find.text(l10n.itemExpiryRemindersLabel), findsOneWidget);
+    // Null in the column, so the line has to name the household's own
+    // setting rather than claim the item has one.
+    expect(find.text('Wie im Haushalt: 30 Tage, 7 Tage'), findsOneWidget);
   });
 }

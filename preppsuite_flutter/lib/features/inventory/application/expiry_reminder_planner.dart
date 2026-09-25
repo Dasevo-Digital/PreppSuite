@@ -16,6 +16,36 @@ const expiryReminderHour = 9;
 /// subset chosen by the OS.
 const maxScheduledExpiryReminders = 60;
 
+/// This item's own lead times, or null where it follows the household.
+///
+/// Null and empty mean different things and both are real answers: null is
+/// "whatever the household picked", an empty list is "this item, never".
+/// Anything that is not a whole number of days is dropped rather than
+/// refused — the column is written by a picker, so a bad value there is a
+/// corrupted row, and a corrupted row should cost its own reminders and
+/// nothing else.
+List<int>? decodeItemLeadDays(String? stored) {
+  if (stored == null) return null;
+  final days =
+      stored
+          .split(',')
+          .map((part) => int.tryParse(part.trim()))
+          .whereType<int>()
+          .where((day) => day >= 0)
+          .toSet()
+          .toList()
+        ..sort((a, b) => b.compareTo(a));
+  return days;
+}
+
+/// The stored form of [leadDays]. An empty list is an empty string, which
+/// is deliberately not null: see [decodeItemLeadDays].
+String encodeItemLeadDays(List<int> leadDays) {
+  final days = leadDays.where((day) => day >= 0).toSet().toList()
+    ..sort((a, b) => b.compareTo(a));
+  return days.join(',');
+}
+
 /// One reminder for one item at one lead time.
 class ExpiryReminder {
   const ExpiryReminder({
@@ -53,6 +83,10 @@ class ExpiryReminder {
 /// every inventory change rather than diffed, so the result is always the
 /// complete set that should be pending.
 ///
+/// [leadDays] is the household's setting and applies to every item that
+/// does not carry its own; `InventoryItem.expiryLeadDays` overrides it per
+/// row, including with an empty list to mean "never for this one".
+///
 /// Items without an expiration date are skipped, as are reminders whose
 /// moment has already passed: an item expiring tomorrow gets no 30-day
 /// reminder, and an already-expired item gets none at all. Expiry that has
@@ -74,7 +108,10 @@ List<ExpiryReminder> planExpiryReminders({
     if (expiration == null) continue;
     if (item.deletedAt != null) continue;
 
-    for (final lead in leadDays) {
+    // The item's own list wins where it has one, and an item with an
+    // empty list is asking for silence -- which the loop below gives it
+    // by having nothing to iterate.
+    for (final lead in decodeItemLeadDays(item.expiryLeadDays) ?? leadDays) {
       if (lead < 0) continue;
 
       // Built from the date parts rather than by subtracting a Duration:
