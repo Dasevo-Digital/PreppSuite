@@ -66,10 +66,11 @@ void main() {
     List<ChecklistTemplate> templates = const [],
     List<ChecklistItem> checklistItems = const [],
     int adults = 2,
+    Size size = const Size(900, 1600),
   }) async {
     final navigated = <ShellDestination>[];
 
-    await tester.binding.setSurfaceSize(const Size(900, 1600));
+    await tester.binding.setSurfaceSize(size);
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
@@ -192,6 +193,53 @@ void main() {
 
     expect(find.text('Wasser · 1'), findsOneWidget);
     expect(find.text('Dokumente · 0'), findsOneWidget);
+  });
+
+  testWidgets('the short card on the right leaves no gap under it', (
+    tester,
+  ) async {
+    // Der Wrap davor legte zeilenweise aus, und eine Zeile war so hoch wie
+    // ihre hoechste Karte. Neben "Braucht Aufmerksamkeit" liess die kurze
+    // "Warnungen" darunter Leere stehen, bis die naechste Zeile begann --
+    // auf einem Haushalt ohne Warnung der groesste leere Fleck des
+    // Bildschirms. Gemessen statt angesehen, weil genau das im Bild
+    // auffaellt und in keinem Test.
+    await pumpOverview(tester, size: const Size(1400, 1600));
+
+    Rect boxOf(String title) => tester.getRect(
+      find.ancestor(of: find.text(title), matching: find.byType(Card)).first,
+    );
+
+    final attention = boxOf('Braucht Aufmerksamkeit');
+    final warning = boxOf('Warnungen');
+    final checklists = boxOf('Checklisten');
+    final resources = boxOf('Ressourcen');
+
+    // Zwei Spalten, dieselbe Verteilung wie zuvor.
+    expect(attention.left, lessThan(warning.left));
+    expect(checklists.left, closeTo(attention.left, 0.5));
+    expect(resources.left, closeTo(warning.left, 0.5));
+
+    // Und beide Spalten stapeln dicht: genau der Zwischenraum, kein Rest
+    // einer Zeilenhoehe. Die kurze Karte ist dabei wirklich kuerzer, sonst
+    // wuerde dieser Test auch ueber einem Wrap gruen.
+    expect(warning.height, lessThan(attention.height));
+    expect(resources.top - warning.bottom, closeTo(12, 0.5));
+    expect(checklists.top - attention.bottom, closeTo(12, 0.5));
+  });
+
+  testWidgets('narrow, the cards stay in one column', (tester) async {
+    await pumpOverview(tester, size: const Size(600, 1600));
+
+    Rect boxOf(String title) => tester.getRect(
+      find.ancestor(of: find.text(title), matching: find.byType(Card)).first,
+    );
+
+    final attention = boxOf('Braucht Aufmerksamkeit');
+    final warning = boxOf('Warnungen');
+
+    expect(warning.left, closeTo(attention.left, 0.5));
+    expect(warning.top, greaterThan(attention.bottom - 1));
   });
 
   testWidgets('a card leads to the screen that can act on it', (tester) async {

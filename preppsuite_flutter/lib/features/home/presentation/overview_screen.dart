@@ -81,7 +81,6 @@ class OverviewScreen extends ConsumerWidget {
           final wide =
               constraints.maxWidth >= 1000 &&
               MediaQuery.textScalerOf(context).scale(16) <= 22;
-          final width = constraints.maxWidth - 32;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
             children: [
@@ -145,23 +144,86 @@ class OverviewScreen extends ConsumerWidget {
                 onOpen: () => onNavigate(ShellDestination.inventory),
               ),
               const SizedBox(height: 12),
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  for (final card in cards)
-                    SizedBox(
-                      width: wide ? (width - 12) / 2 : width,
-                      child: card,
-                    ),
-                ],
-              ),
+              _CardColumns(cards: cards, wide: wide),
             ],
           );
         },
       ),
     );
   }
+}
+
+/// Die Karten der Übersicht, zweispaltig ab 1000 Pixeln.
+///
+/// Vorher ein `Wrap`. Der legt zeilenweise aus, und eine Zeile ist so hoch
+/// wie ihre höchste Karte: neben der hohen "Braucht Aufmerksamkeit" liess
+/// die kurze "Warnungen" darunter Leere stehen, bis die nächste Zeile
+/// begann. Auf einem Haushalt ohne Warnung war das der grösste leere Fleck
+/// des Bildschirms.
+///
+/// Zwei Spalten, die unabhängig voneinander stapeln, schliessen die Lücke,
+/// ohne irgendetwas zu verschieben: die Karten wechseln sich ab, also steht
+/// dieselbe links und dieselbe rechts wie zuvor. Nur rückt die untere
+/// Karte jeder Spalte dicht an ihre obere heran.
+///
+/// Die Vorlesereihenfolge folgt jetzt den Spalten, nicht den Zeilen -- erst
+/// die linke von oben nach unten, dann die rechte. Das ist die Reihenfolge,
+/// in der auch ein sehender Blick eine Spalte liest; über Zeilen zu lesen
+/// hat keinen Sinn mehr, sobald die Karten nicht mehr auf einer Linie
+/// enden.
+class _CardColumns extends StatelessWidget {
+  const _CardColumns({required this.cards, required this.wide});
+
+  final List<Widget> cards;
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!wide) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (index, card) in cards.indexed) ...[
+            if (index > 0) const SizedBox(height: 12),
+            card,
+          ],
+        ],
+      );
+    }
+
+    final left = <Widget>[];
+    final right = <Widget>[];
+    for (final (index, card) in cards.indexed) {
+      (index.isEven ? left : right).add(card);
+    }
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: _Stack(cards: left)),
+        const SizedBox(width: 12),
+        Expanded(child: _Stack(cards: right)),
+      ],
+    );
+  }
+}
+
+class _Stack extends StatelessWidget {
+  const _Stack({required this.cards});
+
+  final List<Widget> cards;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      for (final (index, card) in cards.indexed) ...[
+        if (index > 0) const SizedBox(height: 12),
+        card,
+      ],
+    ],
+  );
 }
 
 /// A card with a heading, a body and one place it leads.
