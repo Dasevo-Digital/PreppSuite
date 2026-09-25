@@ -189,8 +189,30 @@ class PersonalDocumentIndexer {
     : _index = index ?? PersonalDocumentIndex(),
       _ownsIndex = index == null;
 
-  static const maxDocumentBytes = 48 * 1024 * 1024;
-  static const maxReaderDocumentBytes = 64 * 1024 * 1024;
+  /// The largest file that is read at all — for the index and for the
+  /// reader alike.
+  ///
+  /// This is a bound on the *file*, not on the text: of whatever comes
+  /// out, only [maxIndexCharacters] is ever kept, so raising this does
+  /// not make the index bigger. What it does is admit the large scanned
+  /// PDFs and picture-heavy EPUBs that used to be refused outright.
+  ///
+  /// It is read whole, because neither the ZIP decoder nor the PDF
+  /// parser can work from a stream, so this number is also the peak
+  /// allocation. On a phone that is a real risk, and it is accepted
+  /// knowingly: a document that will not fit is refused before a byte is
+  /// read (the length is checked first), and a document that fails
+  /// halfway is reported as failed rather than silently dropped.
+  ///
+  /// Index and reader used to differ — 48 MB against 64 MB. They are one
+  /// number now, because the gap meant a document could be opened and
+  /// read but never found by a search, which is the worse surprise of
+  /// the two.
+  static const maxDocumentBytes = 256 * 1024 * 1024;
+  static const maxReaderDocumentBytes = maxDocumentBytes;
+
+  /// How much extracted text is kept per document. Roughly two thousand
+  /// printed pages; unchanged, because it was never the binding limit.
   static const maxIndexCharacters = 4 * 1024 * 1024;
   static const _maxEpubEntries = 4096;
   static const _maxEpubEntryBytes = 8 * 1024 * 1024;
@@ -248,8 +270,8 @@ class PersonalDocumentIndexer {
   ///
   /// PDFs are rendered page for page by the PDF renderer.  EPUB and Markdown
   /// have no native renderer on every platform this app supports, so their
-  /// content is drawn here as selectable, offline text.  The reader allows a
-  /// little more input than the search index, but retains its hard bound.
+  /// content is drawn here as selectable, offline text.  Bounded by the same
+  /// [maxDocumentBytes] as the index, so what can be read can also be found.
   static Future<String> readForReader(PersonalDocument document) async {
     final bytes = await readPersonalDocumentBytes(
       document.location,

@@ -5813,7 +5813,7 @@ abstract class AppLocalizations {
   /// No description provided for @knowledgeDocumentTooLarge.
   ///
   /// In en, this message translates to:
-  /// **'Too large for the index (48 MB maximum)'**
+  /// **'Too large for the index (256 MB maximum)'**
   String get knowledgeDocumentTooLarge;
 
   /// No description provided for @knowledgeDocumentIndexFailed.

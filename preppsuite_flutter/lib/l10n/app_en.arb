@@ -2054,7 +2054,7 @@
   "knowledgeDocumentIndexing": "Building index …",
   "knowledgeDocumentNotIndexed": "Not in search",
   "knowledgeDocumentNoText": "No readable text (possibly a scan)",
-  "knowledgeDocumentTooLarge": "Too large for the index (48 MB maximum)",
+  "knowledgeDocumentTooLarge": "Too large for the index (256 MB maximum)",
   "knowledgeDocumentIndexFailed": "Could not build index",
   "knowledgeDocumentReindex": "Rebuild search index",
   "knowledgeDocumentClearIndex": "Delete search index",

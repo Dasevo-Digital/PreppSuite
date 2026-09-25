@@ -1107,7 +1107,7 @@
   "knowledgeDocumentIndexing": "Index wird erstellt …",
   "knowledgeDocumentNotIndexed": "Nicht in der Suche",
   "knowledgeDocumentNoText": "Kein auslesbarer Text (möglicherweise ein Scan)",
-  "knowledgeDocumentTooLarge": "Für den Index zu groß (maximal 48 MB)",
+  "knowledgeDocumentTooLarge": "Für den Index zu groß (maximal 256 MB)",
   "knowledgeDocumentIndexFailed": "Index konnte nicht erstellt werden",
   "knowledgeDocumentReindex": "Suchindex erneuern",
   "knowledgeDocumentClearIndex": "Suchindex löschen",

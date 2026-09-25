@@ -3414,7 +3414,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeDocumentTooLarge =>
-      'Too large for the index (48 MB maximum)';
+      'Too large for the index (256 MB maximum)';
 
   @override
   String get knowledgeDocumentIndexFailed => 'Could not build index';

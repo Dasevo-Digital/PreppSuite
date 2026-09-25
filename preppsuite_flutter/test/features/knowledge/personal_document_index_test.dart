@@ -157,4 +157,32 @@ void main() {
     expect(result.status, PersonalDocumentIndexStatus.tooLarge);
     expect(await index.search('Kapitel'), isEmpty);
   });
+
+  test('a file over the bound is refused, and one under it is read', () async {
+    // The bound is checked against the file length before a byte is read,
+    // which is the only reason a limit of a few hundred megabytes is
+    // survivable at all: an oversized document costs a stat, not an
+    // allocation.
+    final file = File('${workspace.path}/gross.md')
+      ..writeAsStringSync('x' * 4096);
+
+    expect(
+      readPersonalDocumentBytes(file.path, maxBytes: 1024),
+      throwsA(anything),
+    );
+    expect(
+      (await readPersonalDocumentBytes(file.path, maxBytes: 8192)).length,
+      4096,
+    );
+  });
+
+  test('what the reader will open, the index will also read', () {
+    // These were 64 MB and 48 MB, and the gap meant a document could be
+    // opened and read from end to end and still never turn up in a
+    // search. One number now; this test is what keeps it one.
+    expect(
+      PersonalDocumentIndexer.maxReaderDocumentBytes,
+      PersonalDocumentIndexer.maxDocumentBytes,
+    );
+  });
 }
