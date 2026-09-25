@@ -105,17 +105,45 @@ Gemessen ist macOS. Der Rest steht weiter da, wo er vorher stand:
 |---|---|---|---|
 | macOS, iOS | Apple Vision, im System | ja | **gemessen: sehr gut** |
 | Windows | `Windows.Media.Ocr`, im System | ja | nur mit installiertem Sprachpaket |
-| Android | ML Kit, Modell mitliefern (~4 MB) | ja | lateinische Schrift |
+| Android | ML Kit, Modell mitliefern (**~11 MB je ABI**) | ja | lateinische Schrift |
 | Linux | Tesseract | **liegt nicht bei** | ~15 MB `deu.traineddata` nötig |
 
 Vier der fünf Plattformen könnten es ohne fremden Dienst und ohne Netz.
 Linux bliebe außen vor, solange Tesseract nicht mitgeliefert wird — und
 das wäre eine eigene Entscheidung über Paketgröße und Herkunft.
 
+## Android: das Gerüst steht, das Gerät fehlt
+
+Unter `tool/ocr_probe/android/` liegt das Gegenstück zur macOS-Messung:
+ein eigenständiges Gradle-Projekt mit einer einzigen Activity, die eine
+PDF-Seite mit Androids eigenem `PdfRenderer` rendert und an ML Kit gibt —
+mit **mitgeliefertem** Modell, also ohne Netz und ohne Play-Dienste.
+Gemessen werden dieselben Größen wie auf macOS: Zeit je Seite, erkannte
+Zeichen und der Speicher (`Debug.getPss()`) vor der ersten und nach jeder
+Seite.
+
+```
+tool/ocr_probe/android/run.sh <datei.pdf> [Seiten] [dpi]
+```
+
+Das Skript baut, spielt auf, schiebt die Datei hinüber, startet die
+Messung und holt die Zeilen wieder ab. Gebraucht wird ein angeschlossenes
+Gerät mit eingeschaltetem USB-Debugging; einen Emulator gibt es auf
+diesem Rechner nicht, und für die Frage nach dem Speicher wäre er auch
+die falsche Antwort.
+
+**Eine Zahl steht schon fest, ohne Gerät:** das mitgelieferte Modell
+kostet Platz im Paket. Die Messungs-APK enthält
+`libmlkit_google_ocr_pipeline.so` mit **10,8 MB für arm64-v8a** und
+6,6 MB für armeabi-v7a, dazu rund 1 MB Modelldateien. Für PreppSuite
+hieße das etwa **+11 MB je APK** — auf heute 47 MB. Das ist keine
+Kleinigkeit und gehört mit auf die Waage.
+
 ## Was die Messung nicht beantwortet
 
 * **Nichts davon ist auf einem Telefon gemessen.** Die 600 MB sind die
-  Zahl, die dort zählt, und sie stammen von einem Rechner mit 24 GB.
+  Zahl, die dort zählt, und sie stammen von einem Rechner mit 24 GB. Das
+  Werkzeug für Android steht bereit, es fehlt das Gerät.
 * Gemessen wurden zwei echte Scans und eine selbst gebaute Seite. Ein
   schiefer, fleckiger Scan einer alten Broschüre ist etwas anderes als
   ein sauberer Prospekt.
@@ -130,7 +158,7 @@ genug, und bei 150 dpi bereits am Ende dessen, was mehr Auflösung bringt.
 Das Hindernis ist der Speicher auf dem Telefon und der Umstand, dass eine
 unvollständige Erkennung sich nicht von einer vollständigen unterscheidet.
 
-Der nächste Schritt wäre deshalb nicht der Einbau, sondern dieselbe
-Messung auf einem iPhone. Fällt sie dort ähnlich aus, ist die Funktion
-für macOS und iOS eine überschaubare Arbeit; fällt sie schlecht aus, ist
-sie eine Funktion für den Rechner — so wie der Ordner-Import es schon ist.
+Der nächste Schritt ist deshalb nicht der Einbau, sondern dieselbe
+Messung auf einem Telefon. Fällt sie dort ähnlich aus, ist die Funktion
+eine überschaubare Arbeit; fällt sie schlecht aus, ist sie eine Funktion
+für den Rechner — so wie der Ordner-Import es schon ist.

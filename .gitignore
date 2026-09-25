@@ -21,3 +21,13 @@ GoogleService-Info.plist
 # Gebaute Pakete. Sie gehoeren auf den Desktop, nicht in die Historie: ein
 # einziges "git add -A" wuerde hier 65 MB Binaerdateien dauerhaft einchecken.
 releases/
+
+# Die Mess-App unter tool/ocr_probe/android ist ein eigenes Gradle-Projekt.
+tool/ocr_probe/android/build/
+tool/ocr_probe/android/app/build/
+tool/ocr_probe/android/.gradle/
+tool/ocr_probe/android/local.properties
+# Der Wrapper wird nicht mitgeliefert -- wie beim Flutter-Projekt daneben,
+# das ihn sich beim Bauen selbst holt. `run.sh` kopiert ihn von dort.
+tool/ocr_probe/android/gradlew
+tool/ocr_probe/android/gradle/wrapper/gradle-wrapper.jar
