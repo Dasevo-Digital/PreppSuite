@@ -566,6 +566,88 @@ const firstAidGuidesDe = <FirstAidGuide>[
         'Council (ERC)',
   ),
   FirstAidGuide(
+    id: 'amputation',
+    group: FirstAidGroup.injury,
+    title: 'Abgetrenntes Körperteil',
+    when: 'Ein Finger, eine Hand, ein Fuß ist ganz oder teilweise ab.',
+    steps: [
+      FirstAidStep('Notruf 112.'),
+      FirstAidStep(
+        'Blutet es stark: zuerst die Blutung stillen wie bei starker '
+        'Blutung, und die Person gegen den Schock versorgen.',
+      ),
+      FirstAidStep(
+        'Teilweise abgetrennt: das Glied so still wie möglich halten, '
+        'möglichst in normaler Stellung, und mit sterilem Verband oder '
+        'sauberem Tuch abdecken.',
+      ),
+      FirstAidStep(
+        'Ganz abgetrennt: die Wunde mit sterilem Verband oder sauberem '
+        'Tuch abdecken.',
+      ),
+      FirstAidStep(
+        'Das abgetrennte Teil trocken und kühl halten.',
+        detail:
+            'In einen sauberen, wasserdichten Beutel, fest verschließen, '
+            'und diesen in einen größeren Behälter mit Eis und Wasser. '
+            'Mit der Person in die Klinik schicken.',
+      ),
+      FirstAidStep(
+        'Bei der Person bleiben und auch an sie denken, nicht nur an die '
+        'Wunde.',
+        detail:
+            'Psychische Erste Hilfe gilt hier für Verletzte, Angehörige – '
+            'und für dich.',
+      ),
+    ],
+    cautions: [
+      'Das Körperteil nicht direkt ins Wasser und nicht direkt auf Eis. '
+          'Das schädigt das Gewebe und kann das Wiederannähen unmöglich '
+          'machen.',
+      'Das ist eine große offene Wunde. Auf den eigenen Schutz achten.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Amputation"',
+  ),
+  FirstAidGuide(
+    id: 'chest-abdomen-injury',
+    group: FirstAidGroup.injury,
+    title: 'Verletzung an Brust oder Bauch',
+    when: 'Stich, Schuss, Pfählung oder stumpfe Gewalt gegen Rumpf.',
+    steps: [
+      FirstAidStep(
+        'Bauch: flach hinlegen mit angezogenen Knien.',
+        detail: 'Das nimmt Spannung aus der Bauchdecke.',
+      ),
+      FirstAidStep(
+        'Brust: sitzend, leicht zur verletzten Seite geneigt.',
+        detail: 'So arbeitet die gesunde Lunge am besten.',
+      ),
+      FirstAidStep('Blutung durch Druck stillen.'),
+      FirstAidStep('Notruf 112.'),
+      FirstAidStep(
+        'Wunde am Bauch nach dem Stillen mit einem sauberen Verband '
+        'abdecken.',
+        detail:
+            'Treten Organe heraus, nicht zurückschieben – mit einem '
+            'sauberen, feuchten Tuch abdecken.',
+      ),
+      FirstAidStep(
+        'Beruhigen und Atmung, Kreislauf und Reaktion beobachten, '
+        'besonders auf Anzeichen eines Schocks.',
+      ),
+    ],
+    cautions: [
+      'Eine offene Brustwunde nicht luftdicht verschließen. Sonst sammelt '
+          'sich Luft im Brustkorb.',
+      'Beim Druck auf eine Brustwunde die Wunde nicht ganz zudrücken.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Chest and abdomen injuries"',
+  ),
+  FirstAidGuide(
     id: 'burns',
     group: FirstAidGroup.injury,
     title: 'Verbrennung und Verbrühung',
@@ -739,6 +821,340 @@ const firstAidGuidesDe = <FirstAidGuide>[
     source:
         'International first aid, resuscitation and education guidelines '
         '2025 der IFRC, Kapitel „Head injury and concussion"',
+  ),
+  FirstAidGuide(
+    id: 'cuts-and-grazes',
+    group: FirstAidGroup.injury,
+    title: 'Wunden und Schürfwunden',
+    when: 'Die kleine Verletzung, die es am häufigsten gibt.',
+    steps: [
+      FirstAidStep(
+        'Blutet es stark: zuerst Druck auf die Wunde, dann weiter hier.',
+      ),
+      FirstAidStep(
+        'Mit sauberem Trinkwasser spülen, am besten lauwarm und aus dem '
+        'Hahn.',
+        detail:
+            'Kein Hahn da: eine saubere, unbenutzte Wasserflasche '
+            'anstechen – das gibt einen sanften Strahl.',
+      ),
+      FirstAidStep(
+        'Schmutzreste mit Wasser und einer sauberen Kompresse entfernen.',
+      ),
+      FirstAidStep(
+        'Die Haut ringsum trocknen und die Wunde abdecken.',
+        detail: 'Verband, Folie, Hydrokolloid – oder schlicht ein Pflaster.',
+      ),
+    ],
+    facts: [FirstAidFact('Tetanus nach schmutziger Wunde', 'alle 5 Jahre')],
+    cautions: [
+      'Ist der Tetanusschutz nicht sicher, zum Arzt. Nach einer '
+          'schmutzigen Wunde gilt eine Auffrischung alle fünf Jahre, sonst '
+          'alle zehn.',
+      'Den Verband nur wechseln, wenn er sichtbar durchgefeuchtet ist. Ist '
+          'er sauber, bleibt er drauf.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Cuts and grazes"',
+  ),
+  FirstAidGuide(
+    id: 'nosebleed',
+    group: FirstAidGroup.injury,
+    title: 'Nasenbluten',
+    when: 'Blut aus der Nase, von selbst oder nach einem Stoß.',
+    steps: [
+      FirstAidStep(
+        'Hinsetzen und den Kopf leicht nach vorn neigen.',
+        detail: 'Nach vorn, nicht in den Nacken.',
+      ),
+      FirstAidStep(
+        'Die Nasenflügel zusammendrücken, 10 bis 15 Minuten am Stück.',
+      ),
+      FirstAidStep(
+        'Hört es nach 15 Minuten nicht auf, oder wird der Person schwindlig '
+        'vom Blutverlust: ärztliche Hilfe.',
+      ),
+      FirstAidStep(
+        'Nach einem Stoß und mit Anzeichen einer Hirnverletzung, verformter '
+        'Nase, Gesichtsbruch – oder wenn die Person Blutverdünner nimmt: '
+        'sofort Notruf 112.',
+      ),
+    ],
+    facts: [FirstAidFact('Drücken', '10 bis 15 Minuten am Stück')],
+    cautions: [
+      'Den Kopf nicht in den Nacken legen. Das Blut läuft dann in den '
+          'Rachen.',
+      'Zum Arzt, wenn es sich in kurzer Zeit häuft – oder wenn ein Kind '
+          'unter zwei Jahren Nasenbluten hatte.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Nosebleeds"',
+  ),
+  FirstAidGuide(
+    id: 'animal-bite',
+    group: FirstAidGroup.injury,
+    title: 'Tierbiss',
+    when: 'Gebissen von Hund, Katze oder einem wilden Tier.',
+    steps: [
+      FirstAidStep('Blutet es: zuerst Druck auf die Wunde.'),
+      FirstAidStep('Danach weiter wie bei einer Wunde: spülen und abdecken.'),
+      FirstAidStep(
+        'Zum Arzt, wenn die Wunde genäht werden muss oder der Tetanusschutz '
+        'fehlt.',
+      ),
+      FirstAidStep(
+        'Bei einem wilden Tier und fehlendem Tollwutschutz: ärztliche Hilfe '
+        'suchen.',
+      ),
+    ],
+    cautions: [
+      'Tierbisse können Krankheiten übertragen. Auch eine kleine '
+          'Bisswunde ist keine gewöhnliche kleine Wunde.',
+      'Auf Zeichen einer Entzündung achten: wird es warm oder schmerzt es '
+          'stärker, zum Arzt.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Mammal bites"',
+  ),
+  FirstAidGuide(
+    id: 'tick',
+    group: FirstAidGroup.injury,
+    title: 'Zeckenstich',
+    when: 'Eine Zecke sitzt in der Haut.',
+    steps: [
+      FirstAidStep(
+        'So schnell wie möglich entfernen.',
+        detail:
+            'Mit einer Zeckenkarte oder -zange nach deren Anleitung. Sonst '
+            'mit einer Pinzette so dicht wie möglich an der Haut fassen und '
+            'gleichmäßig und fest herausziehen.',
+      ),
+      FirstAidStep('Die Stelle mit Wasser und Seife waschen.'),
+      FirstAidStep(
+        'Datum und Ort des Stichs aufschreiben und die Stelle im Auge '
+        'behalten.',
+      ),
+      FirstAidStep(
+        'Zum Arzt bei Fieber, unerklärlicher Müdigkeit, Gelenkschmerzen '
+        'oder wenn ein Ausschlag auftritt.',
+        detail:
+            'Der Ausschlag bei Borreliose ist ein Fleck mit einem Ring '
+            'darum. Er tritt aber nicht immer auf.',
+      ),
+    ],
+    cautions: [
+      'Den Körper der Zecke nicht quetschen. Das drückt die Erreger in die '
+          'Haut.',
+      'Keine Chemie und keine Hitze, um die Zecke zu betäuben oder zu '
+          'töten.',
+      'Ein Zeckenstich wird anders behandelt als ein Schlangenbiss.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Insect bites or stings"',
+  ),
+  FirstAidGuide(
+    id: 'insect-bite',
+    group: FirstAidGroup.injury,
+    title: 'Insektenstich',
+    when: 'Biene, Wespe, Hornisse, Mücke.',
+    steps: [
+      FirstAidStep('Beruhigen und vom Kratzen abhalten.'),
+      FirstAidStep(
+        'Steckt der Stachel noch: so schnell wie möglich heraus.',
+        detail:
+            'Mit etwas Flachem abschaben – Bankkarte, stumpfe '
+            'Messerseite.',
+      ),
+      FirstAidStep('Die Stelle gründlich mit Wasser reinigen.'),
+      FirstAidStep(
+        'Kühlen, gegen Schwellung, Juckreiz und Schmerz.',
+        detail: 'Sitzt der Stich an der Hand: Ringe abnehmen.',
+      ),
+      FirstAidStep(
+        'Sofort Notruf 112 bei einem Stich im Mund oder Rachen, oder bei '
+        'Anzeichen einer allergischen Reaktion.',
+        detail:
+            'Im Mund kann die Schwellung die Atemwege verschließen. Bis '
+            'Hilfe da ist, einen Eiswürfel lutschen lassen.',
+      ),
+    ],
+    cautions: [
+      'Den Stachel nicht mit Pinzette oder Fingern fassen. Das drückt den '
+          'Giftbeutel aus.',
+      'Nicht kratzen.',
+      'Bei Atemnot, Schwellung im Gesicht oder Kreislaufproblemen ist es '
+          'ein allergischer Schock – siehe die eigene Anleitung dazu.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Insect bites or stings"',
+  ),
+  FirstAidGuide(
+    id: 'snakebite',
+    group: FirstAidGroup.injury,
+    title: 'Schlangenbiss',
+    when: 'In Deutschland die Kreuzotter – oder eine gehaltene Schlange.',
+    steps: [
+      FirstAidStep('Weg von der Schlange, an einen sicheren Platz.'),
+      FirstAidStep(
+        'Bequem hinlegen und so wenig wie möglich bewegen lassen.',
+      ),
+      FirstAidStep('Notruf 112.'),
+      FirstAidStep(
+        'Schmuck, Uhr und enge Kleidung abnehmen, bevor es anschwillt.',
+        detail: 'Dabei das Glied so wenig wie möglich bewegen.',
+      ),
+      FirstAidStep(
+        'Die Bissstelle markieren und die Uhrzeit notieren.',
+      ),
+      FirstAidStep(
+        'Reaktion und Atmung beobachten, ruhig zusprechen und bleiben.',
+      ),
+    ],
+    cautions: [
+      'Nichts davon hilft, und alles davon kann schaden: abbinden, Gift '
+          'aussaugen, kühlen, die Stelle reiben, die Wunde aufschneiden.',
+      'Schlangen werden gehandelt und reisen. Es kann eine Art sein, die '
+          'hier nicht vorkommt.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Snakebites"',
+  ),
+  FirstAidGuide(
+    id: 'jellyfish',
+    group: FirstAidGroup.injury,
+    title: 'Quallenkontakt',
+    when: 'Brennende Striemen nach dem Baden in der See.',
+    steps: [
+      FirstAidStep(
+        'Die Nesselzellen von der Haut entfernen und sich dabei selbst '
+        'schützen.',
+      ),
+      FirstAidStep('Die Stelle mit Meerwasser abspülen.'),
+      FirstAidStep(
+        'Wärme auf die Stelle, 20 bis 30 Minuten.',
+        detail:
+            'Warmes Wasser oder ein Wärmekissen, höchstens 45 °C. Heiß '
+            'genug gegen den Schmerz, nicht so heiß, dass es verbrennt.',
+      ),
+      FirstAidStep(
+        'Zum Arzt bei Tetanusgefahr oder wenn der Schmerz bleibt.',
+      ),
+    ],
+    facts: [FirstAidFact('Wärme', 'höchstens 45 °C, 20 bis 30 Minuten')],
+    cautions: [
+      'Nicht mit Süßwasser abspülen – Meerwasser.',
+      'Bei einer schweren allergischen Reaktion sofort Notruf 112.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Aquatic animal injuries"',
+  ),
+  FirstAidGuide(
+    id: 'blisters',
+    group: FirstAidGroup.injury,
+    title: 'Blasen an den Füßen',
+    when:
+        'Nach langem Gehen – und damit die Verletzung, die eine Flucht zu '
+        'Fuß beendet.',
+    steps: [
+      FirstAidStep(
+        'Die Blase und die Haut ringsum mit sauberem Wasser waschen und '
+        'vorsichtig trocken tupfen.',
+      ),
+      FirstAidStep(
+        'Ist die Blase heil: mit einem Blasenpflaster abdecken.',
+      ),
+      FirstAidStep(
+        'Ist sie von selbst aufgegangen: die Wunde reinigen und steril '
+        'abdecken.',
+        detail:
+            'Muss weitergelaufen werden, hilft eine zweite Lage Polster '
+            'darüber.',
+      ),
+    ],
+    cautions: [
+      'Zum Arzt, wenn daraus eine offene Wunde wird oder sie sich '
+          'entzündet – warm, zunehmend schmerzhaft, Fieber.',
+      'Bei Diabetes oder geschwächter Abwehr früher zum Arzt: solche '
+          'Wunden entzünden sich leichter und heilen schlechter.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Friction blisters"',
+  ),
+  FirstAidGuide(
+    id: 'dental-avulsion',
+    group: FirstAidGroup.injury,
+    title: 'Ausgeschlagener Zahn',
+    when: 'Ein bleibender Zahn ist ganz herausgeschlagen.',
+    steps: [
+      FirstAidStep(
+        'Die Blutung im Mund mit einer Kompresse aus Gaze oder sauberer '
+        'Watte stillen.',
+      ),
+      FirstAidStep(
+        'Den Zahn suchen und nur an der Krone anfassen, nicht an der '
+        'Wurzel.',
+      ),
+      FirstAidStep(
+        'Feucht aufbewahren.',
+        detail:
+            'Salzlösung, eine Trinklösung oder Frischhaltefolie – bei '
+            'Folie genug Speichel dazu, damit der Zahn nicht austrocknet. '
+            'Sonst H-Milch oder der eigene Speichel.',
+      ),
+      FirstAidStep(
+        'So schnell wie möglich zum Zahnarzt oder in die Notaufnahme, den '
+        'Zahn mitnehmen.',
+      ),
+    ],
+    cautions: [
+      'Den Zahn nicht im Mund transportieren, außer die Person ist '
+          'erwachsen, ganz wach und kann es sicher. Der freie Atemweg geht '
+          'vor allem anderen.',
+      'Ein ausgeschlagener Zahn kann auf eine weitere Verletzung hindeuten '
+          '– etwa am Kopf. Die geht vor.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Dental avulsion"',
+  ),
+  FirstAidGuide(
+    id: 'flash-eye',
+    group: FirstAidGroup.injury,
+    title: 'Verblitzte Augen',
+    when:
+        'Stunden nach Schweißen, Höhensonne, Schnee oder See: Schmerz, '
+        'als läge Sand im Auge.',
+    steps: [
+      FirstAidStep('Weg von der Lichtquelle und beruhigen.'),
+      FirstAidStep('Kontaktlinsen herausnehmen lassen.'),
+      FirstAidStep(
+        'Die Augen schonen: drinnen bleiben, Sonnenbrille, Augen so viel '
+        'wie möglich geschlossen halten.',
+        detail:
+            'Ein kühles, feuchtes Tuch auf die geschlossenen Lider. '
+            'Kochsalzlösung oder Augentropfen halten sie feucht.',
+      ),
+      FirstAidStep(
+        'Bessert es sich in 24 Stunden nicht, oder wird es schlimmer: zum '
+        'Arzt.',
+      ),
+    ],
+    cautions: [
+      'Nicht reiben.',
+      'Das kommt nicht nur im Schnee vor – auch am Wasser, am Strand und '
+          'beim Schweißen.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Flash eye"',
   ),
   FirstAidGuide(
     id: 'stroke',
@@ -1013,6 +1429,164 @@ const firstAidGuidesDe = <FirstAidGuide>[
     source:
         'International first aid, resuscitation and education guidelines '
         '2025 der IFRC, Kapitel „Diabetic emergency (hypoglycemia)"',
+  ),
+  FirstAidGuide(
+    id: 'croup',
+    group: FirstAidGroup.illness,
+    title: 'Pseudokrupp',
+    when:
+        'Ein Kind wacht nachts mit bellendem Husten und pfeifendem Einatmen '
+        'auf.',
+    steps: [
+      FirstAidStep(
+        'Ruhig bleiben und das Kind beruhigen, meist im Sitzen.',
+        detail:
+            'Das ist kein Nebensatz: bleibst du ruhig, wird es ruhiger, und '
+            'die Atemnot lässt nach.',
+      ),
+      FirstAidStep('Fieber messen und, wenn vorhanden, behandeln.'),
+      FirstAidStep(
+        'Feuchte, warme Luft einatmen lassen.',
+        detail:
+            'Neben der laufenden Dusche sitzen oder über eine Schüssel mit '
+            'heißem Wasser beugen – nicht so heiß, dass es verbrüht.',
+      ),
+      FirstAidStep(
+        'Atmung und Reaktion genau beobachten. Bei schwerem oder anhaltendem '
+        'Anfall: Notruf 112.',
+      ),
+    ],
+    cautions: [
+      'Sofort 112 bei schwerer Atemnot: aufrecht und vorgebeugt, Mund '
+          'offen, Hals- und Schultermuskeln arbeiten mit, Nasenflügel '
+          'beben, über dem Brustbein zieht es ein.',
+      'Aus leicht kann in wenigen Stunden schwer werden. Und es gibt eine '
+          'ähnlich aussehende Entzündung des Kehldeckels, die sofort in '
+          'ärztliche Hände gehört. Im Zweifel anrufen.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Croup"',
+  ),
+  FirstAidGuide(
+    id: 'faint',
+    group: FirstAidGroup.illness,
+    title: 'Drohende Ohnmacht',
+    when: 'Schwarz vor Augen, blass, schwindlig – noch bei Bewusstsein.',
+    steps: [
+      FirstAidStep(
+        'Hinsetzen oder hinlegen, dort wo niemand fallen kann.',
+      ),
+      FirstAidStep(
+        'Muskeln anspannen lassen, das treibt das Blut zum Kopf.',
+        detail:
+            'In die Hocke gehen; oder die Beine kreuzen und Bein-, Bauch- '
+            'und Gesäßmuskeln fest anspannen. Die untere Körperhälfte wirkt '
+            'besser als die obere.',
+      ),
+      FirstAidStep(
+        'Wer liegt: die Beine hochhalten, wenn er das möchte.',
+      ),
+      FirstAidStep(
+        'Dableiben, beobachten und herausfinden, woran es liegt.',
+      ),
+    ],
+    cautions: [
+      'Nach einer Ohnmacht nur langsam wieder aufstehen und weitermachen '
+          '– sonst kippt die Person gleich noch einmal um.',
+      'Ist jemand gestürzt, an Kopf und Knochen denken.',
+      'Wer ohnmächtig wird, kommt sehr schnell wieder zu sich. Bleibt er '
+          'ohne Reaktion, ist es keine Ohnmacht: Atmung prüfen.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Feeling faint"',
+  ),
+  FirstAidGuide(
+    id: 'fever',
+    group: FirstAidGroup.illness,
+    title: 'Fieber',
+    when: 'Erhöhte Temperatur, Frösteln, Schwäche.',
+    steps: [
+      FirstAidStep('Ruhen lassen und leicht anziehen.'),
+      FirstAidStep('Zu trinken geben – Schwitzen kostet Flüssigkeit.'),
+      FirstAidStep(
+        'Oft braucht es kein Medikament.',
+        detail:
+            'Geht es der Person schlecht, kann Paracetamol in der '
+            'empfohlenen Dosis das Fieber senken. Auch Abwaschen mit '
+            'lauwarmem Wasser hilft, solange es nicht unangenehm ist.',
+      ),
+      FirstAidStep('Den Zustand beobachten und auf neue Zeichen achten.'),
+    ],
+    cautions: [
+      'Nicht mit Kleidung und Decken einpacken.',
+      'Nicht mit kaltem Wasser abwaschen. Das ist unangenehm und hält die '
+          'Wärme im Körper.',
+      'Paracetamol ist das Mittel der Wahl. Ibuprofen kann den Magen '
+          'reizen und die Nieren schädigen. Zwei Fiebermittel nebeneinander '
+          'nur mit genauem Plan, sonst wird doppelt dosiert.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Fever"',
+  ),
+  FirstAidGuide(
+    id: 'childbirth',
+    group: FirstAidGroup.illness,
+    title: 'Geburt ohne Hilfe',
+    when:
+        'Die Wehen kommen, und Rettungsdienst oder Hebamme sind nicht da '
+        'oder kommen nicht durch.',
+    steps: [
+      FirstAidStep(
+        'Hilfe holen – Klinik, Rettungsdienst, Hebamme – und die Person '
+        'entscheiden lassen, wen sie dabeihaben will.',
+      ),
+      FirstAidStep(
+        'Erste Phase: einen sicheren, ruhigen, geschützten Platz schaffen.',
+        detail: 'Die Haltung wählt die Gebärende: sitzen, stehen, umhergehen.',
+      ),
+      FirstAidStep(
+        'Wärme und Berührung anbieten, wenn sie das möchte.',
+        detail:
+            'Den Rücken massieren; ein warmer Umschlag oder eine Wärmflasche '
+            'auf Kreuzbein, Bauch oder Damm kann den Schmerz mindern.',
+      ),
+      FirstAidStep(
+        'Zweite Phase: eine bequeme, möglichst aufrechte Haltung.',
+        detail:
+            'Liegt sie auf dem Rücken, ein kleines Kissen unter die rechte '
+            'Hüfte – sonst drückt das Kind auf große Blutgefäße.',
+      ),
+      FirstAidStep(
+        'Hände mit Wasser und Seife waschen und ein sauberes Tuch '
+        'unterlegen.',
+      ),
+      FirstAidStep(
+        'Den Kopf des Kindes beim Austreten stützen.',
+        detail:
+            'Neugeborene sind glitschig. Mund und Nase von Flüssigkeit und '
+            'Schleim frei wischen.',
+      ),
+      FirstAidStep(
+        'Das Kind mit einem sauberen Tuch abtrocknen, einwickeln, den Kopf '
+        'bedecken und sofort auf Brust oder Bauch der Mutter legen.',
+        detail: 'Die Mutter genauso warm halten.',
+      ),
+      FirstAidStep(
+        'Dritte Phase: die Nachgeburt abwarten und aufheben.',
+        detail: 'Sie wird von Fachleuten noch gebraucht.',
+      ),
+    ],
+    cautions: [
+      'Von hier an sind es zwei Patienten: die Mutter und das Kind.',
+      'Nichts erzwingen und nicht ziehen. Was hier steht, ist Begleiten, '
+          'nicht Entbinden.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 der IFRC, Kapitel „Emergency childbirth"',
   ),
   FirstAidGuide(
     id: 'hypothermia',

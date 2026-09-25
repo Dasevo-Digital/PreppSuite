@@ -493,6 +493,86 @@ const firstAidGuidesEn = <FirstAidGuide>[
         '2025',
   ),
   FirstAidGuide(
+    id: 'amputation',
+    group: FirstAidGroup.injury,
+    title: 'Severed body part',
+    when: 'A finger, a hand, a foot is off, wholly or partly.',
+    steps: [
+      FirstAidStep('Call 112.'),
+      FirstAidStep(
+        'If it is bleeding heavily: stop the bleeding first as for severe '
+        'bleeding, and treat the person for shock.',
+      ),
+      FirstAidStep(
+        'Partly severed: keep the limb as still as possible, preferably in '
+        'normal alignment, and cover it with a sterile dressing or clean '
+        'cloth.',
+      ),
+      FirstAidStep(
+        'Completely severed: cover the wound with a sterile dressing or '
+        'clean cloth.',
+      ),
+      FirstAidStep(
+        'Keep the severed part dry and cool.',
+        detail:
+            'Into a clean, watertight bag, sealed firmly, and that bag '
+            'into a larger container of ice and water. Send it with the '
+            'person to the hospital.',
+      ),
+      FirstAidStep(
+        'Stay with the person and think of them, not only of the wound.',
+        detail:
+            'Psychological first aid applies here to the injured, to '
+            'their family — and to you.',
+      ),
+    ],
+    cautions: [
+      'Not straight into water and not straight onto ice. That damages '
+          'the tissue and can make reattachment impossible.',
+      'This is a large open wound. Mind your own protection.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Amputation"',
+  ),
+  FirstAidGuide(
+    id: 'chest-abdomen-injury',
+    group: FirstAidGroup.injury,
+    title: 'Chest or abdomen injury',
+    when: 'A stab, a gunshot, an impalement or blunt force to the trunk.',
+    steps: [
+      FirstAidStep(
+        'Abdomen: lying flat with the knees drawn up.',
+        detail: 'That takes the tension out of the abdominal wall.',
+      ),
+      FirstAidStep(
+        'Chest: sitting, leaning slightly towards the injured side.',
+        detail: 'That is how the good lung works best.',
+      ),
+      FirstAidStep('Control bleeding with pressure.'),
+      FirstAidStep('Call 112.'),
+      FirstAidStep(
+        'Cover an abdominal wound with a clean dressing once the bleeding '
+        'is controlled.',
+        detail:
+            'If organs are bulging out, do not push them back — cover '
+            'them with a clean, wet dressing.',
+      ),
+      FirstAidStep(
+        'Reassure them and watch breathing, circulation and response, '
+        'particularly for signs of shock.',
+      ),
+    ],
+    cautions: [
+      'Do not seal an open chest wound airtight. Air then builds up '
+          'inside the chest.',
+      'When pressing on a chest wound, do not close the wound completely.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Chest and abdomen injuries"',
+  ),
+  FirstAidGuide(
     id: 'burns',
     group: FirstAidGroup.injury,
     title: 'Burns and scalds',
@@ -654,6 +734,332 @@ const firstAidGuidesEn = <FirstAidGuide>[
     source:
         'International first aid, resuscitation and education guidelines '
         '2025 (IFRC), "Head injury and concussion"',
+  ),
+  FirstAidGuide(
+    id: 'cuts-and-grazes',
+    group: FirstAidGroup.injury,
+    title: 'Cuts and grazes',
+    when: 'The small injury there is most of.',
+    steps: [
+      FirstAidStep(
+        'If it is bleeding heavily: pressure on the wound first, then on '
+        'from here.',
+      ),
+      FirstAidStep(
+        'Rinse with clean drinking water, lukewarm and from a tap if you '
+        'can.',
+        detail:
+            'No tap: pierce a clean, unused water bottle — that gives a '
+            'gentle stream.',
+      ),
+      FirstAidStep(
+        'Take out what dirt is left with water and a clean compress.',
+      ),
+      FirstAidStep(
+        'Dry the skin around it and cover the wound.',
+        detail: 'A dressing, film, hydrocolloid — or simply a plaster.',
+      ),
+    ],
+    facts: [FirstAidFact('Tetanus after a dirty wound', 'every 5 years')],
+    cautions: [
+      'If tetanus cover is uncertain, see a doctor. After a dirty wound a '
+          'booster counts every five years, otherwise every ten.',
+      'Change the dressing only when it is visibly soaked through. While '
+          'it is clean, it stays on.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Cuts and grazes"',
+  ),
+  FirstAidGuide(
+    id: 'nosebleed',
+    group: FirstAidGroup.injury,
+    title: 'Nosebleed',
+    when: 'Blood from the nose, by itself or after a knock.',
+    steps: [
+      FirstAidStep(
+        'Sit down and tip the head slightly forward.',
+        detail: 'Forward, not back.',
+      ),
+      FirstAidStep(
+        'Pinch the nostrils together, 10 to 15 minutes without letting go.',
+      ),
+      FirstAidStep(
+        'If it has not stopped after 15 minutes, or they go lightheaded '
+        'from the blood loss: medical help.',
+      ),
+      FirstAidStep(
+        'After a blow, with signs of a brain injury, a misshapen nose, a '
+        'facial fracture — or if they take anticoagulants: call 112 at '
+        'once.',
+      ),
+    ],
+    facts: [FirstAidFact('Pinching', '10 to 15 minutes without letting go')],
+    cautions: [
+      'Do not tip the head back. The blood then runs down the throat.',
+      'See a doctor if they come often in a short time — or if a child '
+          'under two has had one.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Nosebleeds"',
+  ),
+  FirstAidGuide(
+    id: 'animal-bite',
+    group: FirstAidGroup.injury,
+    title: 'Animal bite',
+    when: 'Bitten by a dog, a cat or a wild animal.',
+    steps: [
+      FirstAidStep('If it is bleeding: pressure on the wound first.'),
+      FirstAidStep('Then as for a wound: rinse it and cover it.'),
+      FirstAidStep(
+        'See a doctor if the wound needs closing or tetanus cover is '
+        'missing.',
+      ),
+      FirstAidStep(
+        'From a wild animal, without rabies cover: seek medical care.',
+      ),
+    ],
+    cautions: [
+      'Animal bites can pass on disease. Even a small bite is not an '
+          'ordinary small wound.',
+      'Watch for infection: if it becomes warm or more painful, see a '
+          'doctor.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Mammal bites"',
+  ),
+  FirstAidGuide(
+    id: 'tick',
+    group: FirstAidGroup.injury,
+    title: 'Tick bite',
+    when: 'A tick is sitting in the skin.',
+    steps: [
+      FirstAidStep(
+        'Get it out as quickly as you can.',
+        detail:
+            'With a tick card or tool, following its instructions. '
+            'Otherwise grip it with tweezers as close to the skin as '
+            'possible and pull it out steadily and firmly.',
+      ),
+      FirstAidStep('Wash the site with soap and water.'),
+      FirstAidStep(
+        'Write down the date and where it happened, and keep an eye on the '
+        'spot.',
+      ),
+      FirstAidStep(
+        'See a doctor for fever, unexplained tiredness, joint pain, or if '
+        'a rash appears.',
+        detail:
+            'The Lyme rash is a patch with a ring around it. It does not '
+            'always appear.',
+      ),
+    ],
+    cautions: [
+      'Do not squeeze the tick\'s body. That pushes the organisms into '
+          'the skin.',
+      'No chemicals and no heat to stun or kill it.',
+      'A tick bite is treated differently from a snakebite.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Insect bites or stings"',
+  ),
+  FirstAidGuide(
+    id: 'insect-bite',
+    group: FirstAidGroup.injury,
+    title: 'Insect sting',
+    when: 'Bee, wasp, hornet, mosquito.',
+    steps: [
+      FirstAidStep('Reassure them and keep them from scratching.'),
+      FirstAidStep(
+        'If the stinger is still in: out as fast as possible.',
+        detail:
+            'Scrape it off with something flat — a bank card, the blunt '
+            'side of a knife.',
+      ),
+      FirstAidStep('Clean the site thoroughly with water.'),
+      FirstAidStep(
+        'Cool it, against swelling, itching and pain.',
+        detail: 'If it is on the hand: take the rings off.',
+      ),
+      FirstAidStep(
+        'Call 112 at once for a sting in the mouth or throat, or at any '
+        'sign of an allergic reaction.',
+        detail:
+            'In the mouth the swelling can close the airway. While you '
+            'wait, let them suck an ice cube.',
+      ),
+    ],
+    cautions: [
+      'Do not take the stinger with tweezers or fingers. That squeezes '
+          'the venom sac.',
+      'No scratching.',
+      'Breathlessness, a swelling face or circulatory trouble make it '
+          'anaphylaxis — see its own guide.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Insect bites or stings"',
+  ),
+  FirstAidGuide(
+    id: 'snakebite',
+    group: FirstAidGroup.injury,
+    title: 'Snakebite',
+    when: 'In Germany the adder — or a snake somebody keeps.',
+    steps: [
+      FirstAidStep('Away from the snake, somewhere safe.'),
+      FirstAidStep(
+        'Have them lie down comfortably and move as little as possible.',
+      ),
+      FirstAidStep('Call 112.'),
+      FirstAidStep(
+        'Take off jewellery, watch and tight clothing before it swells.',
+        detail: 'Moving the limb as little as you can while you do.',
+      ),
+      FirstAidStep('Mark the bite and note the time.'),
+      FirstAidStep(
+        'Watch response and breathing, talk to them calmly and stay.',
+      ),
+    ],
+    cautions: [
+      'None of this helps and all of it can harm: a tourniquet, sucking '
+          'the venom out, a cold compress, rubbing the bite, cutting it '
+          'open.',
+      'Snakes are traded and travel. It may be a species that does not '
+          'belong here.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Snakebites"',
+  ),
+  FirstAidGuide(
+    id: 'jellyfish',
+    group: FirstAidGroup.injury,
+    title: 'Jellyfish sting',
+    when: 'Burning weals after swimming in the sea.',
+    steps: [
+      FirstAidStep(
+        'Take the stinging cells off the skin, protecting yourself as you '
+        'do.',
+      ),
+      FirstAidStep('Rinse the area with seawater.'),
+      FirstAidStep(
+        'Heat on the area, 20 to 30 minutes.',
+        detail:
+            'Warm water or a heat pack, 45 °C at most. Hot enough against '
+            'the pain, not so hot that it burns.',
+      ),
+      FirstAidStep(
+        'See a doctor where there is a tetanus risk or the pain stays.',
+      ),
+    ],
+    facts: [FirstAidFact('Heat', '45 °C at most, 20 to 30 minutes')],
+    cautions: [
+      'Do not rinse with fresh water — seawater.',
+      'For a severe allergic reaction, call 112 at once.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Aquatic animal injuries"',
+  ),
+  FirstAidGuide(
+    id: 'blisters',
+    group: FirstAidGroup.injury,
+    title: 'Blisters on the feet',
+    when:
+        'After a long walk — and so the injury that ends an evacuation on '
+        'foot.',
+    steps: [
+      FirstAidStep(
+        'Wash the blister and the skin around it with clean water and pat '
+        'it dry gently.',
+      ),
+      FirstAidStep('If the blister is intact: cover it with a blister pad.'),
+      FirstAidStep(
+        'If it has drained by itself: clean the wound and cover it with a '
+        'sterile dressing.',
+        detail:
+            'If they have to keep walking, a second layer of padding on '
+            'top helps.',
+      ),
+    ],
+    cautions: [
+      'See a doctor if it becomes an open wound or shows infection — hot, '
+          'increasingly painful, fever.',
+      'With diabetes or a weakened immune system, see a doctor sooner: '
+          'such wounds infect more easily and heal worse.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Friction blisters"',
+  ),
+  FirstAidGuide(
+    id: 'dental-avulsion',
+    group: FirstAidGroup.injury,
+    title: 'Knocked-out tooth',
+    when: 'An adult tooth has come out whole.',
+    steps: [
+      FirstAidStep(
+        'Stop the bleeding in the mouth with a compress of gauze or clean '
+        'cotton.',
+      ),
+      FirstAidStep(
+        'Find the tooth and pick it up by the crown only, not the root.',
+      ),
+      FirstAidStep(
+        'Keep it moist.',
+        detail:
+            'Saline, a rehydration solution or clingfilm — with clingfilm, '
+            'add enough of their saliva so the tooth does not dry out. '
+            'Otherwise milk or their own saliva.',
+      ),
+      FirstAidStep(
+        'To a dentist or emergency department as fast as possible, taking '
+        'the tooth.',
+      ),
+    ],
+    cautions: [
+      'Do not carry the tooth in the mouth unless the person is an adult, '
+          'fully awake and can do it safely. A clear airway comes before '
+          'everything.',
+      'A knocked-out tooth can point to another injury — to the head, for '
+          'instance. That comes first.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Dental avulsion"',
+  ),
+  FirstAidGuide(
+    id: 'flash-eye',
+    group: FirstAidGroup.injury,
+    title: 'Flash eye',
+    when:
+        'Hours after welding, a sunbed, snow or the sea: pain, as though '
+        'there were sand in the eye.',
+    steps: [
+      FirstAidStep('Away from the light source, and reassure them.'),
+      FirstAidStep('Have them take contact lenses out.'),
+      FirstAidStep(
+        'Spare the eyes: stay indoors, sunglasses, eyes closed as much as '
+        'possible.',
+        detail:
+            'A cool, damp cloth over the closed lids. Saline or eye drops '
+            'keep them moist.',
+      ),
+      FirstAidStep(
+        'If it is no better in 24 hours, or gets worse: see a doctor.',
+      ),
+    ],
+    cautions: [
+      'No rubbing.',
+      'This is not only a snow thing — it happens by water, on a beach '
+          'and at a welding bench.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Flash eye"',
   ),
   FirstAidGuide(
     id: 'stroke',
@@ -912,6 +1318,159 @@ const firstAidGuidesEn = <FirstAidGuide>[
     source:
         'International first aid, resuscitation and education guidelines '
         '2025 (IFRC), "Diabetic emergency (hypoglycemia)"',
+  ),
+  FirstAidGuide(
+    id: 'croup',
+    group: FirstAidGroup.illness,
+    title: 'Croup',
+    when:
+        'A child wakes in the night with a barking cough and a whistling '
+        'breath in.',
+    steps: [
+      FirstAidStep(
+        'Stay calm and settle the child, usually sitting up.',
+        detail:
+            'That is not a throwaway line: if you stay calm they become '
+            'calmer, and the breathing eases.',
+      ),
+      FirstAidStep('Take their temperature and treat a fever if there is one.'),
+      FirstAidStep(
+        'Let them breathe warm, humid air.',
+        detail:
+            'Sitting by a running shower, or leaning over a bowl of hot '
+            'water — not hot enough to scald.',
+      ),
+      FirstAidStep(
+        'Watch breathing and response closely. For a severe or persisting '
+        'episode: call 112.',
+      ),
+    ],
+    cautions: [
+      'Call 112 at once for severe breathing difficulty: sitting up and '
+          'leaning forward, mouth open, neck and shoulder muscles working, '
+          'nostrils flaring, a hollow forming at the base of the neck.',
+      'Mild can become severe within a few hours. And there is a '
+          'croup-like inflammation of the epiglottis that needs urgent '
+          'medical care. In any doubt, call.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Croup"',
+  ),
+  FirstAidGuide(
+    id: 'faint',
+    group: FirstAidGroup.illness,
+    title: 'About to faint',
+    when: 'Going black, pale, dizzy — still conscious.',
+    steps: [
+      FirstAidStep('Sit or lie down, somewhere nobody can fall.'),
+      FirstAidStep(
+        'Have them tense their muscles; that drives blood to the head.',
+        detail:
+            'Squat down; or cross the legs and tense leg, abdominal and '
+            'buttock muscles hard. The lower half works better than the '
+            'upper.',
+      ),
+      FirstAidStep('If they are lying down: raise their legs if they want.'),
+      FirstAidStep('Stay, watch, and work out what is behind it.'),
+    ],
+    cautions: [
+      'After a faint, get up and carry on only gradually — otherwise they '
+          'go straight down again.',
+      'If somebody has fallen, think of the head and of bones.',
+      'Somebody who faints comes round very quickly. If they stay '
+          'unresponsive it was not a faint: check the breathing.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Feeling faint"',
+  ),
+  FirstAidGuide(
+    id: 'fever',
+    group: FirstAidGroup.illness,
+    title: 'Fever',
+    when: 'A raised temperature, shivering, weakness.',
+    steps: [
+      FirstAidStep('Let them rest and dress lightly.'),
+      FirstAidStep('Give them something to drink — sweating costs fluid.'),
+      FirstAidStep(
+        'Often no medicine is needed.',
+        detail:
+            'If they feel unwell, paracetamol at the recommended dose can '
+            'bring the fever down. Sponging with lukewarm water helps too, '
+            'as long as it does not upset them.',
+      ),
+      FirstAidStep('Watch how they are and look out for new signs.'),
+    ],
+    cautions: [
+      'Do not pack them in clothes and blankets.',
+      'Do not sponge with cold water. It is unpleasant and keeps the heat '
+          'in the body.',
+      'Paracetamol is the one to reach for. Ibuprofen can irritate the '
+          'stomach and damage the kidneys. Two antipyretics alongside each '
+          'other only with a careful plan, or the dose is doubled.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Fever"',
+  ),
+  FirstAidGuide(
+    id: 'childbirth',
+    group: FirstAidGroup.illness,
+    title: 'Birth with no help coming',
+    when:
+        'Labour has started and the ambulance or midwife is not there, or '
+        'cannot get through.',
+    steps: [
+      FirstAidStep(
+        'Get help — hospital, ambulance, midwife — and let her decide who '
+        'she wants with her.',
+      ),
+      FirstAidStep(
+        'First stage: make a safe, quiet, private place.',
+        detail: 'She chooses the position: sitting, standing, walking about.',
+      ),
+      FirstAidStep(
+        'Offer warmth and touch if she wants them.',
+        detail:
+            'Massage the lower back; a warm compress or hot water bottle on '
+            'the sacrum, abdomen or perineum can take the edge off the '
+            'pain.',
+      ),
+      FirstAidStep(
+        'Second stage: a comfortable position, upright if possible.',
+        detail:
+            'If she is on her back, a small pillow under the right hip — '
+            'otherwise the baby presses on large blood vessels.',
+      ),
+      FirstAidStep(
+        'Wash your hands with soap and water and put a clean cloth '
+        'underneath.',
+      ),
+      FirstAidStep(
+        'Support the baby\'s head as it comes.',
+        detail:
+            'Newborns are slippery. Wipe fluid and mucus away from mouth '
+            'and nose.',
+      ),
+      FirstAidStep(
+        'Dry the baby with a clean cloth, wrap it, cover its head and put '
+        'it on the mother\'s chest or belly at once.',
+        detail: 'Keep the mother just as warm.',
+      ),
+      FirstAidStep(
+        'Third stage: wait for the afterbirth and keep it.',
+        detail: 'The professionals will still need it.',
+      ),
+    ],
+    cautions: [
+      'From here on there are two patients: the mother and the baby.',
+      'Force nothing and pull on nothing. What is written here is '
+          'accompanying a birth, not delivering one.',
+    ],
+    source:
+        'International first aid, resuscitation and education guidelines '
+        '2025 (IFRC), "Emergency childbirth"',
   ),
   FirstAidGuide(
     id: 'hypothermia',

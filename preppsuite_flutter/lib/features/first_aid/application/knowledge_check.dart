@@ -5,7 +5,7 @@ import 'knowledge_check_en.dart';
 
 /// Asking back, because first aid is knowledge that goes quiet.
 ///
-/// The app has thirty guides and a pacer, and both assume somebody
+/// The app has forty-six guides and a pacer, and both assume somebody
 /// opens them. In the moment they are needed, most people do not: they do
 /// what they remember, and what they remember is a course from years ago
 /// with the wrong half worn away. Reading a guide again does not find that

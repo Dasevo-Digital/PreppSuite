@@ -311,4 +311,73 @@ const knowledgeQuestionsDe = <KnowledgeQuestion>[
     correct: 0,
     because: 'Nicht an direkte Hitze wie Heizlüfter oder Herd.',
   ),
+  KnowledgeQuestion(
+    id: 'nosebleed-head',
+    guideId: 'nosebleed',
+    question: 'Nasenbluten. Kopf in den Nacken?',
+    answers: [
+      'Nein, leicht nach vorn',
+      'Ja, dann hört es schneller auf',
+      'Egal, Hauptsache zudrücken',
+    ],
+    correct: 0,
+    because:
+        'Den Kopf nicht in den Nacken legen. Das Blut läuft dann in den '
+        'Rachen.',
+  ),
+  KnowledgeQuestion(
+    id: 'snakebite-suck',
+    guideId: 'snakebite',
+    question: 'Kreuzotterbiss. Abbinden und Gift aussaugen?',
+    answers: [
+      'Nein, beides schadet',
+      'Abbinden ja, aussaugen nein',
+      'Beides, so schnell wie möglich',
+    ],
+    correct: 0,
+    because:
+        'Nichts davon hilft, und alles davon kann schaden: abbinden, Gift '
+        'aussaugen, kühlen, die Stelle reiben, die Wunde aufschneiden.',
+  ),
+  KnowledgeQuestion(
+    id: 'tick-oil',
+    guideId: 'tick',
+    question: 'Zecke mit Öl oder einem Streichholz lösen?',
+    answers: [
+      'Nein, einfach herausziehen',
+      'Ja, dann lässt sie von selbst los',
+      'Nur Öl, keine Hitze',
+    ],
+    correct: 0,
+    because:
+        'Keine Chemie und keine Hitze, um die Zecke zu betäuben oder zu '
+        'töten.',
+  ),
+  KnowledgeQuestion(
+    id: 'amputation-ice',
+    guideId: 'amputation',
+    question: 'Abgetrennter Finger – direkt auf Eis legen?',
+    answers: [
+      'Nein, erst in einen Beutel, dann in Eiswasser',
+      'Ja, je kälter desto besser',
+      'Nein, in Wasser legen',
+    ],
+    correct: 0,
+    because:
+        'Das Körperteil nicht direkt ins Wasser und nicht direkt auf Eis. '
+        'Das schädigt das Gewebe und kann das Wiederannähen unmöglich '
+        'machen.',
+  ),
+  KnowledgeQuestion(
+    id: 'jellyfish-water',
+    guideId: 'jellyfish',
+    question: 'Quallenstrieme mit Leitungswasser abspülen?',
+    answers: [
+      'Nein, mit Meerwasser',
+      'Ja, Hauptsache sauber',
+      'Ja, und danach kühlen',
+    ],
+    correct: 0,
+    because: 'Nicht mit Süßwasser abspülen – Meerwasser.',
+  ),
 ];

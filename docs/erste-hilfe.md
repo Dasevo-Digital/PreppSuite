@@ -22,18 +22,34 @@ beim allergischen Schock liest, muss zum Anrufen nicht zurückfinden.
 
 ## Woher die Inhalte kommen
 
-Siebzehn der dreißig Anleitungen folgen den **Reanimationsleitlinien
-2025 des European Resuscitation Council** in der deutschen Fassung des
-German Resuscitation Council und deren Erste-Hilfe-Kapitel. Die
-Vergiftungsseite nennt die Giftinformationszentren der Länder, die
-Hitzeseite zusätzlich die BZgA.
+Siebzehn der sechsundvierzig Anleitungen folgen den
+**Reanimationsleitlinien 2025 des European Resuscitation Council** in der
+deutschen Fassung des German Resuscitation Council und deren
+Erste-Hilfe-Kapitel. Die Vergiftungsseite nennt die
+Giftinformationszentren der Länder, die Hitzeseite zusätzlich die BZgA.
 
-Die übrigen dreizehn folgen den *International first aid, resuscitation
-and education guidelines 2025* der IFRC: die fünf unter **Seelische Not**
-sowie Ertrinken, Knochenbruch, Wirbelsäulenverletzung, Kopfverletzung,
-Asthmaanfall, Unterzuckerung, Erfrierungen und Austrocknung. Jede nennt
-ihr Kapitel auf dem Bildschirm; warum diese Quelle und was ihre Lizenz
+Die übrigen neunundzwanzig folgen den *International first aid,
+resuscitation and education guidelines 2025* der IFRC. Jede nennt ihr
+Kapitel auf dem Bildschirm; warum diese Quelle und was ihre Lizenz
 erlaubt, steht weiter unten.
+
+### Was aus den Leitlinien bewusst nicht übernommen ist
+
+Die Leitlinien haben dreiundfünfzig Themen mit Handlungsschritten. Neun
+davon stehen hier nicht, und zwar diese:
+
+| | Grund |
+|---|---|
+| Schluckauf, Reisekrankheit, Höhenkrankheit, Dekompressionskrankheit | Keine Lage, für die ein Haushalt in Deutschland vorsorgt. Eine Liste, die im Ernstfall gelesen wird, verliert durch jeden Eintrag, der nicht dazugehört. |
+| Halsschmerzen, Ohrenschmerzen, Kopfschmerzen, Bauchschmerzen | Alltagsbeschwerden. Fieber ist aufgenommen, weil es bei Kindern kippen kann; diese vier nicht. |
+| Sauerstoffgabe | Braucht Gerät und Ausbildung. Was ohne Ausbildung nicht sicher anzuwenden ist, steht in diesem Bereich grundsätzlich nicht. |
+| Opioid-Überdosis | Läuft über Naloxon. Die Abgabe und der Umgang damit sind in Deutschland anders geregelt als in der Leitlinie unterstellt; das wäre erst zu klären. |
+| Akuter Kreuzschmerz | Alltagsbeschwerde. |
+| Händehygiene, Allgemeines Vorgehen | Haben in den Leitlinien keinen eigenen Schrittblock; das Nötige steht in „Notruf absetzen" und „Bewusstlose Person prüfen". |
+| Atemnot allgemein | Die Schritte sind dieselben wie beim Asthmaanfall, der da ist. |
+
+Das ist eine Auswahl und keine Vollständigkeit — wenn eines davon doch
+hineinsoll, ist es eine Frage von Minuten.
 
 ### Was der Schritt von 2021 auf 2025 geändert hat
 
@@ -93,9 +109,9 @@ Abgleich von einem Gerät mit einer älteren Fassung ankommt, wäre
 schlimmer als keine.
 
 Nicht in den ARB-Dateien, weil medizinischer Text als Fließtext prüfbar
-sein muss. Dreißig Anleitungen sind rund vierhundert Zeichenketten;
-verteilt über tausendvierhundert Zeilen Oberflächentext könnte sie
-niemand am Stück gegen die Leitlinie lesen.
+sein muss. Sechsundvierzig Anleitungen sind rund sechshundert
+Zeichenketten; verteilt über tausendvierhundert Zeilen Oberflächentext
+könnte sie niemand am Stück gegen die Leitlinie lesen.
 
 Sie liegen in
 

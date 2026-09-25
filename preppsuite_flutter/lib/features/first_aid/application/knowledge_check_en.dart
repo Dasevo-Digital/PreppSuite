@@ -308,4 +308,69 @@ const knowledgeQuestionsEn = <KnowledgeQuestion>[
     correct: 0,
     because: 'Not near direct heat such as a fan heater or a stove.',
   ),
+  KnowledgeQuestion(
+    id: 'nosebleed-head',
+    guideId: 'nosebleed',
+    question: 'Nosebleed. Tip the head back?',
+    answers: [
+      'No, slightly forward',
+      'Yes, it stops sooner that way',
+      'Does not matter, just pinch',
+    ],
+    correct: 0,
+    because: 'Do not tip the head back. The blood then runs down the throat.',
+  ),
+  KnowledgeQuestion(
+    id: 'snakebite-suck',
+    guideId: 'snakebite',
+    question: 'Adder bite. Tourniquet and suck the venom out?',
+    answers: [
+      'No, both do harm',
+      'Tourniquet yes, sucking no',
+      'Both, as fast as possible',
+    ],
+    correct: 0,
+    because:
+        'None of this helps and all of it can harm: a tourniquet, sucking '
+        'the venom out, a cold compress, rubbing the bite, cutting it '
+        'open.',
+  ),
+  KnowledgeQuestion(
+    id: 'tick-oil',
+    guideId: 'tick',
+    question: 'Loosen a tick with oil or a match?',
+    answers: [
+      'No, just pull it out',
+      'Yes, then it lets go by itself',
+      'Oil only, never heat',
+    ],
+    correct: 0,
+    because: 'No chemicals and no heat to stun or kill it.',
+  ),
+  KnowledgeQuestion(
+    id: 'amputation-ice',
+    guideId: 'amputation',
+    question: 'A severed finger — straight onto ice?',
+    answers: [
+      'No, into a bag first, then into iced water',
+      'Yes, the colder the better',
+      'No, put it in water',
+    ],
+    correct: 0,
+    because:
+        'Not straight into water and not straight onto ice. That damages '
+        'the tissue and can make reattachment impossible.',
+  ),
+  KnowledgeQuestion(
+    id: 'jellyfish-water',
+    guideId: 'jellyfish',
+    question: 'Rinse a jellyfish weal with tap water?',
+    answers: [
+      'No, with seawater',
+      'Yes, as long as it is clean',
+      'Yes, and cool it afterwards',
+    ],
+    correct: 0,
+    because: 'Do not rinse with fresh water — seawater.',
+  ),
 ];

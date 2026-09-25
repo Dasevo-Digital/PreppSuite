@@ -93,7 +93,7 @@ selbst, wohin sie gehören.
 PDF-Bericht der fehlenden Ausrüstung – der Bestände also, die unter ihrem
 Mindestbestand liegen.
 
-**Erste Hilfe.** Dreißig Anleitungen in Dringlichkeitsreihenfolge.
+**Erste Hilfe.** Sechsundvierzig Anleitungen in Dringlichkeitsreihenfolge.
 Siebzehn davon nach den Reanimations- und Erste-Hilfe-Leitlinien 2025 des
 European Resuscitation Council, deutsche Fassung des German Resuscitation
 Council: Notruf, bewusstlose Person, Wiederbelebung für Erwachsene, Kinder
@@ -102,14 +102,20 @@ Blutung, Schock, Verbrennung, Schlaganfall, Herzinfarkt, Krampfanfall,
 allergischer Schock, Unterkühlung, Hitzschlag und Vergiftung – letztere
 mit den Nummern der Giftinformationszentren.
 
-Die übrigen dreizehn folgen den *International first aid, resuscitation
-and education guidelines 2025* der IFRC. Fünf davon sind **seelische
-Not** — psychische Erste Hilfe nach Look – Listen – Link, Suizidgedanken,
-Angst und Panikattacke, nach einem schweren Erlebnis, akute Trauer — und
-tragen die Nummern der TelefonSeelsorge und der Nummer gegen Kummer, jede
-zum Antippen. Die anderen acht sind Ertrinken, Knochenbruch,
-Wirbelsäulenverletzung, Kopfverletzung, Asthmaanfall, Unterzuckerung,
-Erfrierungen und Austrocknung. Dazu
+Die übrigen neunundzwanzig folgen den *International first aid,
+resuscitation and education guidelines 2025* der IFRC. Fünf davon sind
+**seelische Not** — psychische Erste Hilfe nach Look – Listen – Link,
+Suizidgedanken, Angst und Panikattacke, nach einem schweren Erlebnis,
+akute Trauer — und tragen die Nummern der TelefonSeelsorge und der Nummer
+gegen Kummer, jede zum Antippen. Dazu Ertrinken, Knochenbruch,
+Wirbelsäulenverletzung, Kopfverletzung, abgetrenntes Körperteil,
+Verletzung an Brust oder Bauch, Wunden, Nasenbluten, Tierbiss,
+Zeckenstich, Insektenstich, Schlangenbiss, Quallenkontakt, Blasen,
+ausgeschlagener Zahn, verblitzte Augen, Asthmaanfall, Pseudokrupp,
+Unterzuckerung, drohende Ohnmacht, Fieber, Geburt ohne Hilfe,
+Erfrierungen und Austrocknung. Neun Themen der Leitlinien sind bewusst
+nicht dabei; welche und warum, steht in
+[`docs/erste-hilfe.md`](docs/erste-hilfe.md). Dazu
 Strichzeichnungen, die die App selbst zeichnet, und ein **Taktgeber für
 die Herzdruckmassage** mit Ton, Blinken und Vibration, der den Bildschirm
 anlässt. Alles davon ist beim ersten Start da, ohne Netz und ohne
@@ -117,12 +123,14 @@ Download. Videos sind ein eigenes, nachladbares Paket – siehe
 [`docs/erste-hilfe.md`](docs/erste-hilfe.md). Die Anleitungen ersetzen
 keinen Kurs und keinen Notruf, und jede nennt ihre Quelle.
 
-Dazu **zweiundzwanzig Fragen**, jede auf einen Irrtum gezielt, den
+Dazu **siebenundzwanzig Fragen**, jede auf einen Irrtum gezielt, den
 Menschen wirklich haben: etwas zwischen die Zähne schieben, kalte
 Gliedmaßen warm reiben, Eis auf eine Verbrennung, Erbrechen auslösen, eine
 Tüte vor den Mund bei einer Panikattacke, erfrorene Finger an den
-Heizlüfter, ein Light-Getränk bei Unterzuckerung, und die Sorge, das
-Fragen nach Suizidgedanken bringe jemanden erst auf den Gedanken. Das Quiz darf nichts
+Heizlüfter, ein Light-Getränk bei Unterzuckerung, den Kopf in den Nacken
+beim Nasenbluten, die Zecke mit Öl, das Gift aussaugen, den abgetrennten
+Finger auf Eis, und die Sorge, das Fragen nach Suizidgedanken bringe
+jemanden erst auf den Gedanken. Das Quiz darf nichts
 wissen, was die Anleitungen nicht sagen – jede Begründung ist eine Warnung
 oder ein Schritt daraus, wörtlich, und ein Test hält beide Sprachen
 daran fest.
