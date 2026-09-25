@@ -51,8 +51,12 @@ klingt, die vorher verschwiegen wurde. Einmal fragen, für beides.
 
 ## Was du vor dem Abschicken entscheiden musst
 
-1. **Absender.** Unten steht `<Name>`. Ich setze deinen Namen und deine
-   Anschrift nicht selbst ein.
+1. **Absender.** Unten stehen Platzhalter, und die bleiben hier auch
+   stehen. Name, Anschrift und E-Mail gehören **nicht** in dieses
+   Repository: `tool/repo_privacy_check.sh` schlägt darauf an, und der
+   Quelltext soll öffentlich werden. Die absendefertige Fassung mit den
+   echten Angaben liegt außerhalb, unter
+   `~/Desktop/Anfrage-IFRC-PreppSuite.md`.
 2. **Quelltext.** Der Brief sagt, dass die App öffentlich verteilt werden
    soll, und bietet an, sie oder ihren Quelltext auf Anfrage zu schicken.
    Er behauptet **nicht**, dass der Quelltext heute schon öffentlich
