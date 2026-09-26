@@ -14,6 +14,7 @@ import 'package:vector_tile_renderer/src/themes/light_theme.dart'
     show lightThemeData;
 
 import 'dark_map_style.dart';
+import 'map_label_language.dart';
 
 import 'map_archive_access.dart';
 import 'offline_map_store.dart';
@@ -190,9 +191,13 @@ final mapThemeProvider = Provider.family<Theme, Brightness>((
   ref,
   brightness,
 ) {
-  final data = brightness == Brightness.dark
+  // Two passes over the same style: one for the light, one for the
+  // language. Neither replaces the package's style, so a changed style
+  // stays a compile error rather than a silent drift.
+  final lit = brightness == Brightness.dark
       ? darkenMapStyle(lightThemeData()) as Map<String, dynamic>
       : lightThemeData();
+  final data = germanMapLabels(lit) as Map<String, dynamic>;
 
   return ThemeReader()
       .read(data)
