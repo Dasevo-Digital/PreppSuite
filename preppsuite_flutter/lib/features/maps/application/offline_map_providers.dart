@@ -15,6 +15,7 @@ import 'package:vector_tile_renderer/src/themes/light_theme.dart'
 
 import 'dark_map_style.dart';
 import 'map_label_language.dart';
+import 'map_style_fingerprint.dart';
 
 import 'map_archive_access.dart';
 import 'offline_map_store.dart';
@@ -198,16 +199,19 @@ final mapThemeProvider = Provider.family<Theme, Brightness>((
       ? darkenMapStyle(lightThemeData()) as Map<String, dynamic>
       : lightThemeData();
   final data = germanMapLabels(lit) as Map<String, dynamic>;
-
-  return ThemeReader()
-      .read(data)
-      .copyWith(
-        types: {
-          ThemeLayerType.background,
-          ThemeLayerType.fill,
-          ThemeLayerType.fillExtrusion,
-          ThemeLayerType.line,
-          ThemeLayerType.symbol,
-        },
-      );
+  // The id carries a fingerprint of the finished style, because the
+  // rendered tiles on disk are filed under it; see
+  // [mapStyleFingerprint]. Without it the map kept handing back
+  // pictures drawn before the style changed.
+  final theme = ThemeReader().read(data);
+  return theme.copyWith(
+    id: '${theme.id}-${mapStyleFingerprint(data)}',
+    types: {
+      ThemeLayerType.background,
+      ThemeLayerType.fill,
+      ThemeLayerType.fillExtrusion,
+      ThemeLayerType.line,
+      ThemeLayerType.symbol,
+    },
+  );
 });
