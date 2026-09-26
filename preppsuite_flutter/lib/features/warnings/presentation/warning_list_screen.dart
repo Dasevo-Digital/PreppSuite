@@ -20,7 +20,7 @@ import '../application/warning_polygon_codec.dart';
 import 'warning_situation_map_screen.dart';
 import 'warning_day_notice.dart';
 import '../application/warning_providers.dart';
-import '../application/warning_relevance.dart';
+import '../application/warning_order.dart';
 import '../application/warning_severity_l10n.dart';
 import '../../../core/error_text.dart';
 import '../../maps/presentation/base_map_layer.dart';
@@ -181,34 +181,19 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
             );
           }
 
-          // "Show region-relevant warnings first" — relevance is the
-          // primary key here (unlike the banner, which prioritizes
-          // severity since it only ever shows a single, most-urgent
-          // warning); severity and recency break ties.
+          // Region first, then what is still running; see
+          // [compareWarningsForList]. Unlike the banner, which only ever
+          // shows one warning and therefore leads with severity.
+          final now = DateTime.now();
           final sorted = [...warnings]
-            ..sort((a, b) {
-              final relevanceCompare =
-                  warningRelevanceRank(
-                    warning: b,
-                    filter: profile.warningFilter,
-                  ).compareTo(
-                    warningRelevanceRank(
-                      warning: a,
-                      filter: profile.warningFilter,
-                    ),
-                  );
-              if (relevanceCompare != 0) return relevanceCompare;
-
-              final severityCompare =
-                  warningSeverityRank(
-                    warningSeverityFromName(b.severity),
-                  ).compareTo(
-                    warningSeverityRank(warningSeverityFromName(a.severity)),
-                  );
-              if (severityCompare != 0) return severityCompare;
-
-              return b.sent.compareTo(a.sent);
-            });
+            ..sort(
+              (a, b) => compareWarningsForList(
+                a,
+                b,
+                filter: profile.warningFilter,
+                now: now,
+              ),
+            );
 
           // Both are context for the whole list rather than entries in it,
           // and the notice goes first: it explains what the list may be
