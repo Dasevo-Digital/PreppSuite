@@ -63,9 +63,13 @@ class HouseholdOverviewScreen extends ConsumerWidget {
               leading: const Icon(Icons.location_on_outlined),
               title: Text(l10n.followedPlacesTitle),
               subtitle: Text(
+                // Not a heading with a number glued in front and made
+                // lowercase: that produced „1 weitere orte" — a plural
+                // for one place, and a German noun in lower case. The
+                // count and its word belong in one translated message.
                 profile.extraRegions.isEmpty
                     ? l10n.settingsNoAdditionalRegions
-                    : '${profile.extraRegions.length} ${l10n.followedPlacesAdditional.toLowerCase()}',
+                    : l10n.followedPlacesCount(profile.extraRegions.length),
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(

@@ -1490,6 +1490,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String shelterInfoLineIdle(int radius) {
+    return 'Quellen: OpenStreetMap und WWBOTA/DLBOTA, Umkreis $radius km.';
+  }
+
+  @override
   String get shelterLegendTitle => 'Einordnung der Markierungen';
 
   @override
@@ -2328,7 +2333,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get offlineMapErrorSchema =>
-      'Das Archiv benutzt ein anderes Schema als das mitgelieferte Kartenbild. Gebraucht wird ein Archiv im OpenMapTiles-Schema – siehe docs/karte-offline.md.';
+      'Das Archiv benutzt ein anderes Schema als das mitgelieferte Kartenbild. Gebraucht wird ein Archiv im OpenMapTiles-Schema – siehe docs/karte-offline.md im Quelltext.';
 
   @override
   String get navKnowledge => 'Wissen';
@@ -2341,7 +2346,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get knowledgeEmptyBody =>
-      'Eine ZIM-Datei auf dem Gerät – etwa die deutsche Wikipedia von Kiwix – macht das Nachschlagen unabhängig vom Netz. Wo man sie bekommt, steht in docs/wissen-offline.md.';
+      'Eine ZIM-Datei auf dem Gerät – etwa die deutsche Wikipedia von Kiwix – macht das Nachschlagen unabhängig vom Netz. Der Knopf unten holt eine aus der Kiwix-Bibliothek; eine Datei, die schon da ist, lässt sich auswählen.';
 
   @override
   String get knowledgeChooseAction => 'Datei wählen';
@@ -7445,6 +7450,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get followedPlacesAdditional => 'Weitere Orte';
+
+  @override
+  String followedPlacesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weitere Orte',
+      one: '1 weiterer Ort',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get followedPlacesOpen => 'Warnorte verwalten';

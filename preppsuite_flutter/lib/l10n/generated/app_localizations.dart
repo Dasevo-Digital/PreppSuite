@@ -2606,6 +2606,12 @@ abstract class AppLocalizations {
   /// **'OpenStreetMap and WWBOTA/DLBOTA loaded within {radius} km.'**
   String shelterInfoLine(int radius);
 
+  /// No description provided for @shelterInfoLineIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources: OpenStreetMap and WWBOTA/DLBOTA, within {radius} km.'**
+  String shelterInfoLineIdle(int radius);
+
   /// No description provided for @shelterLegendTitle.
   ///
   /// In en, this message translates to:
@@ -3965,7 +3971,7 @@ abstract class AppLocalizations {
   /// No description provided for @offlineMapErrorSchema.
   ///
   /// In en, this message translates to:
-  /// **'The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md.'**
+  /// **'The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md in the source.'**
   String get offlineMapErrorSchema;
 
   /// No description provided for @navKnowledge.
@@ -3989,7 +3995,7 @@ abstract class AppLocalizations {
   /// No description provided for @knowledgeEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'A ZIM file on the device — Kiwix\'s Wikipedia, for instance — makes looking things up independent of the network. Where to get one is in docs/wissen-offline.md.'**
+  /// **'A ZIM file on the device — Kiwix\'s Wikipedia, for instance — makes looking things up independent of the network. The button below fetches one from the Kiwix library; a file that is already here can be picked.'**
   String get knowledgeEmptyBody;
 
   /// No description provided for @knowledgeChooseAction.
@@ -12346,6 +12352,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Additional places'**
   String get followedPlacesAdditional;
+
+  /// No description provided for @followedPlacesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 additional place} other{{count} additional places}}'**
+  String followedPlacesCount(int count);
 
   /// No description provided for @followedPlacesOpen.
   ///

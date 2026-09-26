@@ -463,6 +463,14 @@
   "settingsLocationNoMatchMessage": "Aus deinem Standort konnte kein Bundesland ermittelt werden.",
   "shelterMapTitle": "Schutzräume",
   "shelterInfoLine": "OpenStreetMap und WWBOTA/DLBOTA im Umkreis von {radius} km geladen.",
+  "shelterInfoLineIdle": "Quellen: OpenStreetMap und WWBOTA/DLBOTA, Umkreis {radius} km.",
+  "@shelterInfoLineIdle": {
+    "placeholders": {
+      "radius": {
+        "type": "int"
+      }
+    }
+  },
   "shelterLegendTitle": "Einordnung der Markierungen",
   "shelterLegendSummary": "Grün {green} · Gelb {yellow} · Rot {red}",
   "@shelterLegendSummary": {
@@ -716,11 +724,11 @@
   "offlineMapForgetAction": "Wieder online",
   "offlineMapErrorUnreadable": "Die Datei lässt sich nicht lesen. Erwartet wird ein PMTiles-Archiv der Version 3.",
   "offlineMapErrorNotVector": "Das Archiv enthält fertige Bildkacheln statt Vektordaten. PreppSuite zeichnet die Karte selbst und braucht Vektorkacheln.",
-  "offlineMapErrorSchema": "Das Archiv benutzt ein anderes Schema als das mitgelieferte Kartenbild. Gebraucht wird ein Archiv im OpenMapTiles-Schema – siehe docs/karte-offline.md.",
+  "offlineMapErrorSchema": "Das Archiv benutzt ein anderes Schema als das mitgelieferte Kartenbild. Gebraucht wird ein Archiv im OpenMapTiles-Schema – siehe docs/karte-offline.md im Quelltext.",
   "navKnowledge": "Wissen",
   "knowledgeTitle": "Wissen",
   "knowledgeEmptyTitle": "Noch keine Wissensdatei",
-  "knowledgeEmptyBody": "Eine ZIM-Datei auf dem Gerät – etwa die deutsche Wikipedia von Kiwix – macht das Nachschlagen unabhängig vom Netz. Wo man sie bekommt, steht in docs/wissen-offline.md.",
+  "knowledgeEmptyBody": "Eine ZIM-Datei auf dem Gerät – etwa die deutsche Wikipedia von Kiwix – macht das Nachschlagen unabhängig vom Netz. Der Knopf unten holt eine aus der Kiwix-Bibliothek; eine Datei, die schon da ist, lässt sich auswählen.",
   "knowledgeChooseAction": "Datei wählen",
   "knowledgeChangeAction": "Andere Datei wählen",
   "articleLinkLeavesArchive": "Dieser Verweis führt aus dem Archiv heraus. PreppSuite zeigt nur, was in der Datei steht.",
@@ -3217,6 +3225,14 @@
   "followedPlacesIntro": "Warnungen für Zuhause und weitere wichtige Regionen. Bezeichnungen für weitere Orte bleiben auf diesem Gerät.",
   "followedPlacesPrimary": "Hauptort",
   "followedPlacesAdditional": "Weitere Orte",
+  "followedPlacesCount": "{count, plural, =1{1 weiterer Ort} other{{count} weitere Orte}}",
+  "@followedPlacesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "followedPlacesOpen": "Warnorte verwalten",
   "householdPlanShareSafety": "Sicherheitsmeldung teilen",
   "householdPlanSafetyMessage": "Wir sind sicher.\\nTreffpunkt: {meetingPoint}\\nNächste Rückmeldung: …",

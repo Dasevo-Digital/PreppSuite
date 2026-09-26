@@ -639,6 +639,14 @@
       }
     }
   },
+  "shelterInfoLineIdle": "Sources: OpenStreetMap and WWBOTA/DLBOTA, within {radius} km.",
+  "@shelterInfoLineIdle": {
+    "placeholders": {
+      "radius": {
+        "type": "int"
+      }
+    }
+  },
   "shelterLegendTitle": "Marker guide",
   "shelterLegendSummary": "Green {green} · Yellow {yellow} · Red {red}",
   "@shelterLegendSummary": {
@@ -1252,11 +1260,11 @@
   "offlineMapForgetAction": "Back online",
   "offlineMapErrorUnreadable": "The file cannot be read. A PMTiles version 3 archive is expected.",
   "offlineMapErrorNotVector": "The archive holds finished image tiles rather than vector data. PreppSuite draws the map itself and needs vector tiles.",
-  "offlineMapErrorSchema": "The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md.",
+  "offlineMapErrorSchema": "The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md in the source.",
   "navKnowledge": "Knowledge",
   "knowledgeTitle": "Knowledge",
   "knowledgeEmptyTitle": "No knowledge file yet",
-  "knowledgeEmptyBody": "A ZIM file on the device — Kiwix's Wikipedia, for instance — makes looking things up independent of the network. Where to get one is in docs/wissen-offline.md.",
+  "knowledgeEmptyBody": "A ZIM file on the device — Kiwix's Wikipedia, for instance — makes looking things up independent of the network. The button below fetches one from the Kiwix library; a file that is already here can be picked.",
   "knowledgeChooseAction": "Choose a file",
   "knowledgeChangeAction": "Choose a different file",
   "articleLinkLeavesArchive": "That link points outside the archive. PreppSuite only shows what is in the file.",
@@ -4221,6 +4229,14 @@
   "followedPlacesIntro": "Warnings for home and other important regions. Labels for additional places stay on this device.",
   "followedPlacesPrimary": "Primary place",
   "followedPlacesAdditional": "Additional places",
+  "followedPlacesCount": "{count, plural, =1{1 additional place} other{{count} additional places}}",
+  "@followedPlacesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "followedPlacesOpen": "Manage warning places",
   "householdPlanShareSafety": "Share safety message",
   "householdPlanSafetyMessage": "We are safe.\\nMeeting point: {meetingPoint}\\nNext update: …",

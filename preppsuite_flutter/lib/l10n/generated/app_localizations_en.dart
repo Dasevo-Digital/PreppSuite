@@ -1480,6 +1480,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String shelterInfoLineIdle(int radius) {
+    return 'Sources: OpenStreetMap and WWBOTA/DLBOTA, within $radius km.';
+  }
+
+  @override
   String get shelterLegendTitle => 'Marker guide';
 
   @override
@@ -2310,7 +2315,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offlineMapErrorSchema =>
-      'The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md.';
+      'The archive uses a different schema than the built-in map style. An OpenMapTiles-schema archive is needed — see docs/karte-offline.md in the source.';
 
   @override
   String get navKnowledge => 'Knowledge';
@@ -2323,7 +2328,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeEmptyBody =>
-      'A ZIM file on the device — Kiwix\'s Wikipedia, for instance — makes looking things up independent of the network. Where to get one is in docs/wissen-offline.md.';
+      'A ZIM file on the device — Kiwix\'s Wikipedia, for instance — makes looking things up independent of the network. The button below fetches one from the Kiwix library; a file that is already here can be picked.';
 
   @override
   String get knowledgeChooseAction => 'Choose a file';
@@ -7407,6 +7412,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get followedPlacesAdditional => 'Additional places';
+
+  @override
+  String followedPlacesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count additional places',
+      one: '1 additional place',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get followedPlacesOpen => 'Manage warning places';

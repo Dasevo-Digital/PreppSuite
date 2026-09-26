@@ -332,7 +332,15 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
         children: [
           Text(
-            l10n.shelterInfoLine(_radiusKm.round()),
+            // Before a place is picked, nothing has been loaded, and the
+            // screen said the opposite: the header claimed both sources
+            // were "geladen" while the map said "Noch keine Standortdaten
+            // geladen" and every counter stood at zero. Until there is
+            // something to report, the line names the sources instead of
+            // claiming a result.
+            _center == null
+                ? l10n.shelterInfoLineIdle(_radiusKm.round())
+                : l10n.shelterInfoLine(_radiusKm.round()),
             style: Theme.of(context).textTheme.bodySmall,
           ),
           if ((counts[ShelterConfidence.green] ?? 0) == 0 &&
