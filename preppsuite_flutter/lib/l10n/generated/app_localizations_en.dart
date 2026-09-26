@@ -328,6 +328,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanBarcodeButton => 'Scan barcode';
 
   @override
+  String get scannerHint => 'Hold the barcode in view';
+
+  @override
+  String get scannerTorchOn => 'Turn the light on';
+
+  @override
+  String get scannerTorchOff => 'Turn the light off';
+
+  @override
   String scannedBarcodeLabel(String barcode) {
     return 'Barcode: $barcode';
   }
@@ -3564,6 +3573,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readinessKnowledge => 'Offline knowledge available';
+
+  @override
+  String get readinessMapMissing => 'No offline map';
+
+  @override
+  String get readinessKnowledgeMissing => 'No offline knowledge';
 
   @override
   String get emergencyPlanMissing => 'Emergency plan has not been completed';

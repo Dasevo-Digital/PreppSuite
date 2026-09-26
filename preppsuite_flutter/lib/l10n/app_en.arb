@@ -152,6 +152,9 @@
   "invalidNumber": "Enter a valid number.",
   "clearDateButton": "Clear date",
   "scanBarcodeButton": "Scan barcode",
+  "scannerHint": "Hold the barcode in view",
+  "scannerTorchOn": "Turn the light on",
+  "scannerTorchOff": "Turn the light off",
   "scannedBarcodeLabel": "Barcode: {barcode}",
   "@scannedBarcodeLabel": {
     "placeholders": {
@@ -2025,6 +2028,8 @@
   "readinessCards": "Emergency cards recorded",
   "readinessMap": "Offline map available",
   "readinessKnowledge": "Offline knowledge available",
+  "readinessMapMissing": "No offline map",
+  "readinessKnowledgeMissing": "No offline knowledge",
   "emergencyPlanMissing": "Emergency plan has not been completed",
   "emergencyPlanHeading": "Important details",
   "knowledgeLibraryTitle": "Your archives",

@@ -120,6 +120,21 @@ void main() {
     );
   });
 
+  testWidgets('a missing offline package is not called available', (
+    tester,
+  ) async {
+    // On a phone with no knowledge file at all the card read
+    // "Offline-Wissen verfuegbar". The chip carried the same words in
+    // both states and left the difference to a grey icon instead of a
+    // green tick — a sentence that says the opposite of the truth.
+    await pumpOverview(tester);
+
+    expect(find.text('Offline-Wissen fehlt'), findsOneWidget);
+    expect(find.text('Offline-Karte fehlt'), findsOneWidget);
+    expect(find.text('Offline-Wissen verfügbar'), findsNothing);
+    expect(find.text('Offline-Karte verfügbar'), findsNothing);
+  });
+
   testWidgets('the supply card counts water and calories for ten days', (
     tester,
   ) async {

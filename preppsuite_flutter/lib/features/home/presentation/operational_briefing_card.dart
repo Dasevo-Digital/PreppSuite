@@ -153,14 +153,25 @@ class OperationalBriefingCard extends ConsumerWidget {
                       spacing: 8,
                       runSpacing: 6,
                       children: [
+                        // Zwei Beschriftungen und nicht eine: der Chip
+                        // steht fuer sich, und „Offline-Wissen
+                        // verfuegbar" ist eine Behauptung. Sie stand auf
+                        // einem Telefon, auf dem gar keine Wissensdatei
+                        // lag — daneben nur ein graues Buchsymbol statt
+                        // eines gruenen Hakens. Wer liest, liest den
+                        // Satz.
                         _ReadinessChip(
                           icon: Icons.map_outlined,
-                          label: l10n.readinessMap,
+                          label: mapReady
+                              ? l10n.readinessMap
+                              : l10n.readinessMapMissing,
                           ready: mapReady,
                         ),
                         _ReadinessChip(
                           icon: Icons.menu_book_outlined,
-                          label: l10n.readinessKnowledge,
+                          label: knowledgeReady
+                              ? l10n.readinessKnowledge
+                              : l10n.readinessKnowledgeMissing,
                           ready: knowledgeReady,
                         ),
                       ],

@@ -673,7 +673,11 @@ class _ChecklistCard extends ConsumerWidget {
 
     return _OverviewCard(
       icon: Icons.checklist_outlined,
-      title: l10n.navChecklists,
+      // Der Titel der Sache und nicht die Beschriftung der Navigation:
+      // `navChecklists` ist bewusst auf „Listen" gekuerzt, weil es in
+      // einen Platz der unteren Leiste passen muss. Eine Karte hat die
+      // Breite fuer das ganze Wort.
+      title: l10n.checklistsTitle,
       onOpen: onOpen,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

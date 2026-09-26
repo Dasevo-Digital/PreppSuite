@@ -668,6 +668,24 @@ abstract class AppLocalizations {
   /// **'Scan barcode'**
   String get scanBarcodeButton;
 
+  /// No description provided for @scannerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the barcode in view'**
+  String get scannerHint;
+
+  /// No description provided for @scannerTorchOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the light on'**
+  String get scannerTorchOn;
+
+  /// No description provided for @scannerTorchOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the light off'**
+  String get scannerTorchOff;
+
   /// No description provided for @scannedBarcodeLabel.
   ///
   /// In en, this message translates to:
@@ -6025,6 +6043,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Offline knowledge available'**
   String get readinessKnowledge;
+
+  /// No description provided for @readinessMapMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No offline map'**
+  String get readinessMapMissing;
+
+  /// No description provided for @readinessKnowledgeMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No offline knowledge'**
+  String get readinessKnowledgeMissing;
 
   /// No description provided for @emergencyPlanMissing.
   ///
