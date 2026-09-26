@@ -57,9 +57,47 @@ version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' \
 echo "Quelle: $source (Fassung $version)"
 
 # Replacing a running app leaves the running one on a deleted bundle,
-# which is how you get a version number that lies.
+# which is how you get a version number that lies — and worse.
+#
+# Worse, on 26.09.2026: quitting is an Apple Event, not a promise.
+# `osascript` returns as soon as the app has been *asked*, and this went
+# straight on to `rm -rf`. Five seconds after the new files landed, the
+# still-quitting app segfaulted: a worker isolate branched to address
+# zero inside `sqlite3Close`, with sqlite3mc mapped **twice** in the one
+# process — the deleted copy it started with and the new one it faulted
+# a page in from.
+#
+# Our own `ClosesDatabasesOnExit` made that window wider rather than
+# narrower. It spends up to five seconds closing the databases before the
+# app goes, which is exactly the stretch this script used to spend
+# deleting the bundle out from under it.
+#
+# So: ask, then wait until it is really gone, and refuse rather than
+# replace a bundle somebody is still running out of.
+# Overridable so the waiting itself can be tested without waiting.
+QUIT_GRACE="${QUIT_GRACE:-30}"
+
 for id in de.status403.preppsuite "$TEST_ID"; do
   osascript -e "quit app id \"$id\"" >/dev/null 2>&1 || true
+done
+
+# Matches on the executable path, so it cannot mistake this script — or a
+# build sitting somewhere else — for the installed app.
+still_running() { pgrep -f "$1/Contents/MacOS/" >/dev/null 2>&1; }
+
+for app in "$PROD_APP" "$TEST_APP"; do
+  [ -e "$app" ] || continue
+  still_running "$app" || continue
+  echo "== warte, bis $(basename "$app") beendet ist =="
+  waited=0
+  while still_running "$app"; do
+    if [ "$waited" -ge "$QUIT_GRACE" ]; then
+      die "$(basename "$app") laeuft nach $QUIT_GRACE s immer noch. Beende es von Hand und starte noch einmal — das Buendel jetzt zu ersetzen bringt den laufenden Vorgang zum Absturz."
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  echo "   nach ${waited} s beendet"
 done
 
 # Both are signed from the repository's Release.entitlements rather than
