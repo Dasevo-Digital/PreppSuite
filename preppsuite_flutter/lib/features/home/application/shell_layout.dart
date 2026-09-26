@@ -51,7 +51,11 @@ const barSlotLimit = 5;
 
 /// Which destinations a bar shows, and which are behind the "more" button.
 class ShellSlots {
-  const ShellSlots({required this.visible, required this.overflow});
+  const ShellSlots({
+    required this.visible,
+    required this.overflow,
+    this.selectedIsBehindMore = false,
+  });
 
   /// In bar order, left to right. Never longer than [barSlotLimit].
   final List<ShellDestination> visible;
@@ -59,6 +63,10 @@ class ShellSlots {
   /// What the "more" sheet lists. Empty when everything fits, and the bar
   /// then has no "more" button at all.
   final List<ShellDestination> overflow;
+
+  /// Whether the open screen is one of the [overflow] ones, in which case
+  /// the bar marks the "more" button itself as the place you are.
+  final bool selectedIsBehindMore;
 
   bool get hasOverflow => overflow.isNotEmpty;
 }
@@ -68,10 +76,20 @@ class ShellSlots {
 /// A rail hides nothing — it scrolls, and a desktop window has the height.
 /// A bar keeps the first few and puts the rest behind one more button.
 ///
-/// [selected] is what makes this more than a `take`: when the open screen
-/// is one of the hidden ones, it takes the last visible slot. Otherwise
-/// the bar would show no selection at all while that screen is on
-/// display, which reads as "you are nowhere".
+/// **The bar never rearranges itself.** The same five things stand in the
+/// same places whatever screen is open, because in an emergency a thumb
+/// goes where it went last time. When the open screen is one of the
+/// hidden ones, the "more" button is marked as the place you are — see
+/// [selectedIsBehindMore]. That answers the one objection to a fixed bar,
+/// which is that it would otherwise show nothing selected at all and read
+/// as "you are nowhere".
+///
+/// The earlier answer was to give the open screen the last slot. It cost
+/// more than it looked: the slot then has to hold any of the ten labels,
+/// and two German ones do not fit a fifth of a phone — "Einstellungen"
+/// wrapped, and the bar's fixed height cut the second line off. A bar of
+/// five fixed words can be measured once and kept short; a slot that
+/// takes any word cannot.
 ShellSlots shellSlotsFor({
   required ShellNavigation navigation,
   required ShellDestination selected,
@@ -84,17 +102,14 @@ ShellSlots shellSlotsFor({
 
   // One slot goes to the "more" button itself.
   final kept = destinations.take(barSlotLimit - 1).toList();
-
-  // Taking the last slot rather than being appended: the bar has exactly
-  // this many, and the first few staying put is what keeps the bar from
-  // rearranging itself under someone's thumb.
-  if (!kept.contains(selected)) kept[kept.length - 1] = selected;
+  final hidden = [
+    for (final destination in destinations)
+      if (!kept.contains(destination)) destination,
+  ];
 
   return ShellSlots(
     visible: kept,
-    overflow: [
-      for (final destination in destinations)
-        if (!kept.contains(destination)) destination,
-    ],
+    overflow: hidden,
+    selectedIsBehindMore: hidden.contains(selected),
   );
 }

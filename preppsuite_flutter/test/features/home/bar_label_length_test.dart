@@ -16,7 +16,13 @@ import 'package:preppsuite_flutter/l10n/generated/app_localizations_en.dart';
 /// It cannot be fixed anywhere else. Flutter builds the label as a bare
 /// `Text` with neither `maxLines` nor `overflow`, and a `DefaultTextStyle`
 /// around the bar never reaches it, because the bar's own `Material`
-/// resets one. The label has to fit.
+/// resets one. `NavigationDestinationBuilder`, which would let the label
+/// be a widget of our own, is private. The label has to fit.
+///
+/// Which is why the bar stands still: these five words are every word it
+/// can ever show, so five words can be measured and kept short. While the
+/// open screen could take the last slot, that slot had to hold any of the
+/// ten, and "Einstellungen" does not fit a fifth of a phone.
 ///
 /// A widget test cannot stand in for this: the test environment measures
 /// text with its own font, so a pixel assertion there would be about that
@@ -24,8 +30,9 @@ import 'package:preppsuite_flutter/l10n/generated/app_localizations_en.dart';
 const _maxBarLabel = 10;
 
 void main() {
-  // The destinations the bar always shows. The last slot goes to the
-  // "more" button, and the sheet behind it has room for any word.
+  // Every word the bar can show: the fixed destinations and the "more"
+  // button. The sheet behind that button has room for any word, and the
+  // rail has the width, so neither is measured here.
   final fixed = ShellDestination.values.take(barSlotLimit - 1);
 
   for (final AppLocalizations l10n in [

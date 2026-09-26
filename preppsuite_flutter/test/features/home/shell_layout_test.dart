@@ -93,31 +93,51 @@ void main() {
       expect(result.hasOverflow, isFalse);
     });
 
-    test('the open destination is always on the bar', () {
-      // Otherwise the bar shows nothing selected while that screen is on
-      // display, which reads as "you are nowhere".
+    test('the bar stands still whatever is open', () {
+      // A thumb goes where it went last time. Whichever of the ten is on
+      // display, the same four words stand in the same four places.
+      const fixed = [
+        ShellDestination.overview,
+        ShellDestination.emergency,
+        ShellDestination.inventory,
+        ShellDestination.checklists,
+      ];
       for (final destination in ShellDestination.values) {
         final result = slots(ShellNavigation.bar, destination);
         expect(
           result.visible,
-          contains(destination),
-          reason: '$destination was open but not on the bar',
+          fixed,
+          reason: 'the bar rearranged itself for $destination',
         );
-        expect(result.overflow, isNot(contains(destination)));
       }
     });
 
-    test('a hidden destination takes the last slot, not an extra one', () {
-      final result = slots(ShellNavigation.bar, ShellDestination.settings);
+    test('a hidden screen marks the more button instead', () {
+      // Not nothing: a bar with no selection at all reads as "you are
+      // nowhere". The button you came through is where you are.
+      final hidden = slots(ShellNavigation.bar, ShellDestination.settings);
+      expect(hidden.selectedIsBehindMore, isTrue);
+      expect(hidden.overflow, contains(ShellDestination.settings));
 
-      expect(result.visible, hasLength(barSlotLimit - 1));
-      expect(result.visible.last, ShellDestination.settings);
-      // The ones before it stay where a thumb last found them.
-      expect(result.visible.take(3), [
+      final shown = slots(ShellNavigation.bar, ShellDestination.inventory);
+      expect(shown.selectedIsBehindMore, isFalse);
+    });
+
+    test('a bar without a more button never points at one', () {
+      final three = [
         ShellDestination.overview,
-        ShellDestination.emergency,
         ShellDestination.inventory,
-      ]);
+        ShellDestination.checklists,
+      ];
+      final result = slots(ShellNavigation.bar, three.last, three);
+
+      expect(result.hasOverflow, isFalse);
+      expect(result.selectedIsBehindMore, isFalse);
+    });
+
+    test('a rail has no more button to point at', () {
+      final result = slots(ShellNavigation.rail, ShellDestination.settings);
+      expect(result.selectedIsBehindMore, isFalse);
     });
 
     test('the overflow keeps the declared order', () {

@@ -185,10 +185,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       for (final destination in slots.visible) _entry(l10n, destination),
     ];
 
-    // `shellSlotsFor` guarantees the open destination is among the
-    // visible ones, so this never comes back -1.
+    // The open screen is either one of the visible ones or behind the
+    // "more" button, and `shellSlotsFor` says which — so this never comes
+    // back -1.
     return NavigationBar(
-      selectedIndex: slots.visible.indexOf(_selected),
+      selectedIndex: slots.selectedIsBehindMore
+          ? entries.length
+          : slots.visible.indexOf(_selected),
       onDestinationSelected: (index) {
         if (slots.hasOverflow && index == entries.length) {
           _showMore(l10n, slots.overflow);
@@ -259,6 +262,9 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                 ),
                 for (final destination in group.destinations)
                   ListTile(
+                    // The bar can only say that you are somewhere behind
+                    // this button; which one is said here.
+                    selected: destination == _selected,
                     leading: _entry(l10n, destination).icon,
                     title: Text(_entry(l10n, destination).label),
                     onTap: () {
