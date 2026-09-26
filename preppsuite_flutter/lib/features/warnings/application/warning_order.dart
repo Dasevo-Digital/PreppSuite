@@ -5,23 +5,26 @@ import 'warning_severity_l10n.dart';
 
 /// The order the warning list puts its entries in.
 ///
-/// Four keys, and the first two are the ones that matter:
+/// Four keys, and the first one is the one that decides:
 ///
-/// 1. **Region.** A warning for a followed region comes before one that
-///    concerns everybody, which comes before one for somewhere else. This
-///    is first because the question the screen answers is "what is going
-///    on *here*"; a severe alert two states away is not a better answer
-///    than a mild one at home.
-/// 2. **Still in force.** Within a region, what is running comes before
-///    what is over. This key was missing, and the screen showed it: on a
-///    device with one active warning, the top four entries were all
-///    expired — an expired severe one outranked a running mild one,
-///    because severity came straight after relevance. A feed leaves an
-///    expired warning in place for a while on purpose, so the list holds
-///    plenty of them and they are *never* the answer to what is going on
-///    now.
+/// 1. **Still in force.** What is running comes before what is over, and
+///    it comes before it whatever region either of them names. A feed
+///    leaves an expired warning in place for a while on purpose, so the
+///    list is full of them — and an expired warning is *never* the answer
+///    to "what is going on now". Once it is over, being nearby does not
+///    make it current again.
+/// 2. **Region.** Within what is running, and again within what is over,
+///    a warning for a followed district comes first, then one for a
+///    followed state, then one that names no region at all, and last one
+///    meant for somewhere else. See [warningRelevanceRank].
 /// 3. **Severity**, and then
 /// 4. **recency**, both only to break ties among equals.
+///
+/// Region used to be the first key. On a telephone that put „Amtliche
+/// WARNUNG vor STURMBÖEN · Abgelaufen" above a warning that was in force,
+/// because the expired one named the device's own district. The list
+/// answers "what is going on", and the first thing that has to be true of
+/// an answer is that it is still happening.
 ///
 /// [now] is passed in rather than read, so this can be tested without
 /// waiting for a warning to expire.
@@ -31,13 +34,13 @@ int compareWarningsForList(
   required WarningRegionFilter filter,
   required DateTime now,
 }) {
+  final inForce = _inForce(b, now).compareTo(_inForce(a, now));
+  if (inForce != 0) return inForce;
+
   final relevance = warningRelevanceRank(warning: b, filter: filter).compareTo(
     warningRelevanceRank(warning: a, filter: filter),
   );
   if (relevance != 0) return relevance;
-
-  final inForce = _inForce(b, now).compareTo(_inForce(a, now));
-  if (inForce != 0) return inForce;
 
   final severity = warningSeverityRank(
     warningSeverityFromName(b.severity),

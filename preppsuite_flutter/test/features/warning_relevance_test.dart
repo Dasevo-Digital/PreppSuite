@@ -34,13 +34,17 @@ void main() {
   }
 
   group('warningRelevanceRank', () {
-    test('a nationwide warning (no regionKey) ranks lowest', () {
+    test('a nationwide warning (no regionKey) concerns everyone', () {
+      // Above somebody else's region, below the ones this device
+      // follows. It used to share rank 0 with "not your problem", and a
+      // telephone showed what that costs: a nationwide alert in force
+      // sorted below a local one that was over.
       expect(
         warningRelevanceRank(
           warning: warning(regionKey: null),
           filter: filter(),
         ),
-        0,
+        1,
       );
     });
 
@@ -50,7 +54,7 @@ void main() {
           warning: warning(regionKey: '05334'),
           filter: filter(),
         ),
-        2,
+        3,
       );
     });
 
@@ -60,7 +64,7 @@ void main() {
           warning: warning(regionKey: 'NW'),
           filter: filter(),
         ),
-        1,
+        2,
       );
     });
 
@@ -74,7 +78,7 @@ void main() {
             ],
           ),
         ),
-        2,
+        3,
       );
     });
 
@@ -88,7 +92,7 @@ void main() {
             ],
           ),
         ),
-        1,
+        2,
       );
     });
 
@@ -99,6 +103,37 @@ void main() {
           filter: filter(),
         ),
         0,
+      );
+    });
+
+    test('and lower than one that names no region at all', () {
+      // The distinction the rank exists to make. Sorting them together
+      // is what put a nationwide warning behind a foreign one.
+      expect(
+        warningRelevanceRank(
+          warning: warning(regionKey: null),
+          filter: filter(),
+        ),
+        greaterThan(
+          warningRelevanceRank(
+            warning: warning(regionKey: 'SN'),
+            filter: filter(),
+          ),
+        ),
+      );
+    });
+
+    test('a device that has not said where it is ranks everything alike', () {
+      final nowhere = filter(regionKey: null);
+      expect(
+        warningRelevanceRank(
+          warning: warning(regionKey: 'SN'),
+          filter: nowhere,
+        ),
+        warningRelevanceRank(
+          warning: warning(regionKey: null),
+          filter: nowhere,
+        ),
       );
     });
   });

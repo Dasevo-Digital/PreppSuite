@@ -74,16 +74,50 @@ void main() {
     expect(order([over, warning(id: 'ohne-ende')]), ['ohne-ende', 'vorbei']);
   });
 
-  test('but the followed region still comes first', () {
-    // Deliberately not changed: the screen answers "what is going on
-    // here". A running warning two states away is not a better answer
-    // than a finished one at home.
+  test('and it comes before the region, not after it', () {
+    // This was the other way round, and a telephone showed what that
+    // cost: „Amtliche WARNUNG vor STURMBÖEN · Abgelaufen" stood above a
+    // warning that was in force, because the expired one named the
+    // device's own district. Being nearby does not make something that
+    // is over current again.
+    final farAway = warning(
+      id: 'weit-weg',
+      severity: 'minor',
+      region: elsewhere,
+    );
+    expect(order([over, farAway]), ['weit-weg', 'vorbei']);
+  });
+
+  test('and the region decides among the ones that are running', () {
+    final here = warning(id: 'hier', severity: 'minor');
     final farAway = warning(
       id: 'weit-weg',
       severity: 'severe',
       region: elsewhere,
     );
-    expect(order([farAway, over]), ['vorbei', 'weit-weg']);
+    expect(order([farAway, here]), ['hier', 'weit-weg']);
+  });
+
+  test('and among the ones that are over', () {
+    final overElsewhere = warning(
+      id: 'vorbei-woanders',
+      severity: 'severe',
+      region: elsewhere,
+      expires: now.subtract(const Duration(hours: 2)),
+    );
+    expect(order([overElsewhere, over]), ['vorbei', 'vorbei-woanders']);
+  });
+
+  test('a warning that names no region outranks a foreign one', () {
+    // It concerns everybody, this household included. It used to share a
+    // rank with "meant for somebody else" and sorted as if it were.
+    final everyone = warning(id: 'alle', severity: 'minor', region: null);
+    final farAway = warning(
+      id: 'weit-weg',
+      severity: 'severe',
+      region: elsewhere,
+    );
+    expect(order([farAway, everyone]), ['alle', 'weit-weg']);
   });
 
   test('severity and recency still break ties among equals', () {
