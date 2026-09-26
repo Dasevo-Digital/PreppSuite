@@ -873,7 +873,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancelButton => 'Cancel';
 
   @override
-  String get navChecklists => 'Checklists';
+  String get navChecklists => 'Lists';
 
   @override
   String get checklistsTitle => 'Checklists';

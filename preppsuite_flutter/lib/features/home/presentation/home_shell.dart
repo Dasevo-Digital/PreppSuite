@@ -378,6 +378,16 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         label: l10n.navEmergency,
       ),
       ShellDestination.inventory => _inventoryEntry(l10n),
+      // `navChecklists` ist absichtlich kuerzer als `checklistsTitle`:
+      // ein Balken mit fuenf Zielen gibt jedem rund siebzig Pixel, und
+      // "Checklisten" passt da nicht hinein. Flutter baut das Label als
+      // blankes `Text` ohne `maxLines` und ohne `overflow`, also bricht
+      // ein zu langes Wort um, und die feste Hoehe des Balkens schneidet
+      // die zweite Zeile ab — auf einem OnePlus Nord stand dort
+      // "Checkliste" ueber einem einzelnen "n". Ein DefaultTextStyle
+      // darueber hilft nicht: das Material im NavigationBar setzt ihn
+      // zurueck. Bleibt das kuerzere Wort, und das ist fuer ein
+      // Navigationsziel ohnehin das richtige.
       ShellDestination.checklists => _Entry(
         icon: const Icon(Icons.checklist_outlined),
         selectedIcon: const Icon(Icons.checklist),

@@ -281,7 +281,7 @@
   "recipeMatchNote": "Verglichen werden Namen, nicht Inhalte: die App sieht, dass „Kichererbsen\" in deinem Vorrat steht — nicht, ob die Dose noch voll ist und ob die Menge reicht. Eine allgemeine Zutat wie „Gemüse“ zählt, was du der passenden Lebensmittelgruppe zugeordnet hast.",
   "recipeNoneCookable": "Zu keinem Rezept stehen alle Zutaten namentlich im Vorrat.",
   "cancelButton": "Abbrechen",
-  "navChecklists": "Checklisten",
+  "navChecklists": "Listen",
   "checklistsTitle": "Checklisten",
   "checklistKindPreparation": "Vorsorge",
   "checklistKindResponse": "Im Ereignis",

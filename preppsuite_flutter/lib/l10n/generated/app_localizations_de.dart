@@ -877,7 +877,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get cancelButton => 'Abbrechen';
 
   @override
-  String get navChecklists => 'Checklisten';
+  String get navChecklists => 'Listen';
 
   @override
   String get checklistsTitle => 'Checklisten';

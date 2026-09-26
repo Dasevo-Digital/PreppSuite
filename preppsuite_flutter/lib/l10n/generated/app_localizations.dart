@@ -1553,7 +1553,7 @@ abstract class AppLocalizations {
   /// No description provided for @navChecklists.
   ///
   /// In en, this message translates to:
-  /// **'Checklists'**
+  /// **'Lists'**
   String get navChecklists;
 
   /// No description provided for @checklistsTitle.
