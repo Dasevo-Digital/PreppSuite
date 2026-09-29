@@ -1,28 +1,28 @@
 PODS:
   - Flutter (1.0.0)
-  - printing (1.0.0):
+  - flutter_tts (0.0.1):
     - Flutter
   - zstandard_ios (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - printing (from `.symlinks/plugins/printing/ios`)
+  - flutter_tts (from `.symlinks/plugins/flutter_tts/ios`)
   - zstandard_ios (from `.symlinks/plugins/zstandard_ios/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  printing:
-    :path: ".symlinks/plugins/printing/ios"
+  flutter_tts:
+    :path: ".symlinks/plugins/flutter_tts/ios"
   zstandard_ios:
     :path: ".symlinks/plugins/zstandard_ios/ios"
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  printing: 54ff03f28fe9ba3aa93358afb80a8595a071dd07
+  flutter_tts: 35ac3c7d42412733e795ea96ad2d7e05d0a75113
   zstandard_ios: b20c54862b56c31c7a47074b79fcf181780268b0
 
-PODFILE CHECKSUM: e30f02f9d1c72c47bb6344a0a748c9d268180865
+PODFILE CHECKSUM: f3c03524802b9b058ab1ee95db24feb8815654e2
 
 COCOAPODS: 1.17.0
