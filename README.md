@@ -10,11 +10,16 @@ OpenStreetMap. Sie ist offline vollständig benutzbar.
 
 ## Aus der App
 
-![Einrichtung eines Haushalts in der PreppSuite-Test-App](docs/bilder/app-einrichtung.jpeg)
+| | |
+|---|---|
+| ![Übersicht der PreppSuite-Test-App](docs/bilder/app-uebersicht.jpeg) | ![Vorräte in der PreppSuite-Test-App](docs/bilder/app-vorrat.jpeg) |
+| **Übersicht** – Versorgungslage, Warnungen und die nächsten Schritte auf einen Blick. | **Vorrat** – Bedarf für den Beispielhaushalt und der Einstieg zur Erfassung. |
+| ![Wissensbereich der PreppSuite-Test-App](docs/bilder/app-wissen.jpeg) | ![Einrichtung eines Haushalts in der PreppSuite-Test-App](docs/bilder/app-einrichtung.jpeg) |
+| **Wissen** – Offline-Archive und Lerninhalte auswählen. | **Einrichtung** – ein neutraler Beispielhaushalt ohne persönliche Angaben. |
 
-Die Aufnahme stammt aus der installierten PreppSuite-Test-App. Sie zeigt
-die tatsächliche macOS-Oberfläche bei der Einrichtung eines leeren
-Beispielhaushalts; es wurden keine Produktiv- oder Standortdaten verwendet.
+Alle Aufnahmen stammen aus der installierten PreppSuite-Test-App mit
+neutralen Beispieldaten. Es wurden keine Produktiv-, Kontakt- oder
+Standortdaten verwendet.
 
 ## Was sie kann
 
