@@ -46,8 +46,8 @@ klingt, die vorher verschwiegen wurde. Einmal fragen, für beides.
 
 | | |
 |---|---|
-| **first.aid@ifrc.org** | Der „webmaster", den die Nutzungsbedingungen des GFARC für solche Anfragen nennen. Hauptadressat. |
-| **secretariat@ifrc.org** | Die Adresse von der Impressumsseite der Leitlinien. In Kopie, wegen des zweiten Punktes. |
+| **[Kontaktadresse 1 der Quelle]** | Die in den Nutzungsbedingungen genannte Kontaktstelle. Hauptadressat. |
+| **[Kontaktadresse 2 der Quelle]** | Die Kontaktstelle aus dem Impressum der Leitlinien. In Kopie, wegen des zweiten Punkts. |
 
 ## Was du vor dem Abschicken entscheiden musst
 
