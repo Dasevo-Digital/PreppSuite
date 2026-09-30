@@ -4,9 +4,12 @@ Vorrats- und Notfallplanung für den eigenen Haushalt – vollständig auf dem
 eigenen Gerät.
 
 Kein Konto, kein Server, keine Anmeldung. Die App speichert alles lokal und
-holt sich nur das, was ohnehin öffentlich ist: amtliche Warnungen vom BBK und
-von MeteoAlarm, Produktdaten von Open Food Facts, Karten und Schutzräume von
-OpenStreetMap. Sie ist offline vollständig benutzbar.
+ruft für ausdrücklich netzabhängige Funktionen öffentliche Quellen ab:
+amtliche Warnungen und Messwerte, Produktdaten von Open Food Facts, Karten,
+Ortssuche, Schutzräume und den Kiwix-Katalog. Welche Anfrage welche Daten
+überträgt, steht in den [Datenschutzinformationen](docs/datenschutz.md). Mit
+vorher geladenen Karten und Wissensarchiven bleiben die Kernfunktionen auch
+offline benutzbar.
 
 ## Aus der App
 
@@ -668,12 +671,14 @@ Der Projektcode steht unter der Lizenz in [LICENSE](LICENSE).
 
 Die Daten stammen aus fremden Quellen und stehen unter deren eigenen
 Bedingungen: Kartenkacheln und Schutzraum-Einträge von OpenStreetMap
-(ODbL, Namensnennung in der Karte), Produktdaten von Open Food Facts
-(ODbL), Warnungen vom BBK und von MeteoAlarm, Ortssuche über Nominatim.
-Das Kartenbild der Offline-Karte stammt von OpenMapTiles (CC-BY 4.0),
+(ODbL-1.0, Namensnennung in der Karte), Produktdaten von Open Food Facts
+(ODbL-1.0), Warnungen vom BBK und von MeteoAlarm, Ortssuche über Nominatim.
+Das Kartenbild der Offline-Karte stammt von OpenMapTiles (CC-BY-4.0),
 abgeleitet von OSM Liberty.
-Die mitgelieferte Schrift Noto Sans steht unter der SIL Open Font License
+Die mitgelieferte Schrift Noto Sans steht unter OFL-1.1
 (`preppsuite_flutter/assets/fonts/OFL.txt`).
+Weitere Quellen und mitgelieferte Komponenten sind in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) zusammengefasst.
 
 ## Stand
 
