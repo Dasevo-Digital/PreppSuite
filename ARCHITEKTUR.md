@@ -865,6 +865,20 @@ tree; the test suite deliberately targets that layer rather than the UI.
   thing that fixes it for camera and location; the sandbox is what fixes
   it for folders. `tool/macos_sign.sh --identity <name>` takes one when
   there is one.
+- **An ad-hoc signed macOS build has no data key, so nothing on it is
+  encrypted at rest.** `flutter_secure_storage` uses the data protection
+  keychain on macOS, and writing to it needs an application identifier the
+  ad-hoc signature does not carry: every write fails with `-34018`
+  ("A required entitlement is not present"), while reads return nothing.
+  `initializeOrMarkUnavailable` then runs the installation as plaintext —
+  database, private preferences and photos alike. Measured on 2026-10-01
+  with `integration_test/native_photo_vault_test.dart` under a bundle id
+  of its own; the pictures are still shown in that state, sealed or not.
+  Run it the same way: switch `PRODUCT_BUNDLE_IDENTIFIER` in
+  `macos/Runner/Configs/AppInfo.xcconfig` to a throwaway id for the run
+  and back afterwards — under the ordinary id it would open the real
+  household's container. The entries of different ids are kept apart (a
+  read-only probe under the throwaway id saw none of the others).
 - **The macOS build runs sandboxed since 0.14.0**, with
   `macos/Runner/StorageBridge.swift` as the AppKit twin of the iOS file —
   same method names, same `bookmark://` scheme, same Dart above it. The
