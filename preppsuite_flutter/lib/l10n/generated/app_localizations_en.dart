@@ -1393,11 +1393,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLocalEncryptionNoKeyStore =>
-      'This device does not grant access to a key store. On macOS the app needs a signature for that; without one the local data stays unencrypted.';
+      'This device does not grant access to a key store. On macOS the app needs a signature for that, which current builds do not have yet. Without one, the database, personal settings and photos stay unencrypted.';
 
   @override
   String get settingsLocalEncryptionScope =>
-      'Not covered: PDFs, maps, ZIM archives, photos and anything you export.';
+      'Also encrypted: personal settings and photos of supplies and possessions. Not covered: PDFs, maps, ZIM archives and anything you export.';
 
   @override
   String get settingsLocalEncryptionTestBackup => 'Test a backup';

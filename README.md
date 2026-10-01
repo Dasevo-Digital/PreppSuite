@@ -440,10 +440,19 @@ Dokumentindex — die Datenbanken auf dem Gerät liegen verschlüsselt, mit
 einem Schlüssel aus dem Schlüsselbund des Systems. Eine neue Installation
 fängt so an. Eine bestehende stellt **niemand außer dir** um: die Karte
 „Lokale Verschlüsselung" in den Einstellungen lässt den Schritt erst zu,
-wenn die App eine Sicherung vor deinen Augen wieder aufgemacht hat. Nicht
-verschlüsselt sind die Dateien, die du selbst hineingelegt hast — PDFs,
-Karten, ZIM-Archive, Fotos — und alles, was du exportierst; das steht auch
-so auf der Karte. Findet ein Gerät seinen Schlüssel nicht mehr, sagt die
+wenn die App eine Sicherung vor deinen Augen wieder aufgemacht hat. Die
+Fotos von Vorräten und Besitz sind mitverschlüsselt; ältere werden beim
+nächsten Start nachträglich versiegelt. Nicht verschlüsselt sind die
+Dateien, die du selbst hineingelegt hast — PDFs, Karten, ZIM-Archive — und
+alles, was du exportierst; das steht auch so auf der Karte.
+
+> **Auf macOS ist derzeit nichts davon verschlüsselt.** Die Mac-Pakete sind
+> noch nicht mit einem Entwicklerzertifikat signiert, und ohne Signatur
+> nimmt der Schlüsselbund keinen Schlüssel an. Datenbank, persönliche
+> Einstellungen und Fotos liegen dort deshalb im Klartext im Container der
+> App; die Karte „Lokale Verschlüsselung" sagt das. Wer das Gerät nicht
+> allein benutzt, sollte die Festplattenverschlüsselung von macOS
+> (FileVault) eingeschaltet haben. Das ändert sich mit der Signierung. Findet ein Gerät seinen Schlüssel nicht mehr, sagt die
 App das, statt in einem Fehler zu enden, und benennt beim Neuanfang die
 unlesbaren Dateien um, statt sie zu löschen.
 
@@ -699,9 +708,11 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   Einstellungen → Daten und Sicherheit. Sie ist nicht von allein
   verschlüsselt: die Umstellung wird ausdrücklich gestartet und verlangt
   vorher einen Sicherungstest. **Auf macOS greift sie derzeit nicht** —
-  ohne Signaturzertifikat nimmt der Schlüsselbund nichts an, und die App
-  sagt das an Ort und Stelle, statt eine Umstellung anzubieten, die
-  scheitern würde.
+  ohne Signaturzertifikat nimmt der Schlüsselbund nichts an (gemessen:
+  Fehler `-34018`, fehlende Berechtigung), und die App sagt das an Ort und
+  Stelle, statt eine Umstellung anzubieten, die scheitern würde. Dasselbe
+  gilt für die persönlichen Einstellungen und die Fotos: auch sie bleiben
+  auf dem Mac unverschlüsselt.
 - Deutsche MeteoAlarm-Gebiete werden über die DWD-Gebietsliste auf Kreise
   abgebildet. Nicht zuordenbare Gebiete und Meldungen anderer Länder gelten
   für das ganze Land. BBK-Warnungen werden bis auf Kreisebene gefiltert.

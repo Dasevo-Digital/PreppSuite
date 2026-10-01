@@ -17,6 +17,16 @@ erfolgreicher Prüfsummenprüfung lässt sich die App gezielt über Finder öffn
 `ctrl`-Klick auf die App, **Öffnen**, dann die Nachfrage bestätigen. Die
 globale Gatekeeper-Einstellung muss dafür nicht verändert werden.
 
+## macOS: keine Verschlüsselung der lokalen Daten
+
+Ohne Signatur nimmt der Schlüsselbund von macOS keinen Schlüssel an. Auf dem
+Mac bleiben deshalb Datenbank, persönliche Einstellungen und Fotos
+unverschlüsselt im Container der App. Auf den anderen Plattformen hängt der
+Schlüsselspeicher nicht an dieser Signatur; dort betrifft es nur Geräte ohne
+nutzbaren Schlüsselspeicher, unter Linux etwa ohne `libsecret`. Die Karte „Lokale
+Verschlüsselung" in den Einstellungen zeigt den Zustand. Wer den Mac nicht
+allein benutzt, sollte FileVault eingeschaltet haben.
+
 ## Windows: Smart App Control und SmartScreen
 
 Windows Smart App Control oder SmartScreen kann eine nicht signierte Anwendung

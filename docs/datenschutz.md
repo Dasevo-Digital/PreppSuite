@@ -26,11 +26,19 @@ Versionen werden beim nächsten Start nachträglich verschlüsselt. Das schützt
 die Dateien im Ruhezustand, nicht vor Zugriff auf ein bereits entsperrtes
 Gerät.
 
-Ohne Schlüssel bleiben Fotos und private Einstellungen unverschlüsselt: in
-der mitgeführten Fassung auf einem USB-Stick (der Schlüssel liegt im
-Schlüsselbund des jeweiligen Rechners und reist nicht mit), auf Geräten ohne
-nutzbaren Schlüsselspeicher und solange eine Installation auf ihre
-Wiederherstellung wartet.
+Ohne Schlüssel bleiben Datenbank, Fotos und private Einstellungen
+unverschlüsselt: in der mitgeführten Fassung auf einem USB-Stick (der
+Schlüssel liegt im Schlüsselbund des jeweiligen Rechners und reist nicht
+mit), auf Geräten ohne nutzbaren Schlüsselspeicher und solange eine
+Installation auf ihre Wiederherstellung wartet.
+
+**Das gilt derzeit für jede Mac-Installation.** Die macOS-Pakete sind noch
+nicht mit einem Entwicklerzertifikat signiert, und ohne Signatur verweigert
+der Schlüsselbund von macOS das Ablegen eines Schlüssels. Die lokalen Daten
+liegen dort im Klartext im Container der App, geschützt nur durch die
+Benutzerrechte und – falls eingeschaltet – durch FileVault. Die Karte
+„Lokale Verschlüsselung" in den Einstellungen weist darauf hin. Mit der
+Signierung der Pakete entfällt diese Einschränkung.
 
 Beim Teilen über einen gemeinsamen Ordner schreibt PreppSuite verschlüsselte
 Gerätedateien in den gewählten Ordner. Nextcloud, Syncthing, iCloud Drive,

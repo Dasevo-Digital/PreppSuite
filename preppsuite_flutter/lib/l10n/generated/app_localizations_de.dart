@@ -1400,11 +1400,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsLocalEncryptionNoKeyStore =>
-      'Dieses Gerät gibt keinen Schlüsselspeicher frei. Unter macOS braucht die App dafür eine Signatur; ohne sie bleiben die lokalen Daten unverschlüsselt.';
+      'Dieses Gerät gibt keinen Schlüsselspeicher frei. Unter macOS braucht die App dafür eine Signatur, die die derzeitigen Fassungen noch nicht haben. Ohne sie bleiben Datenbank, persönliche Einstellungen und Fotos unverschlüsselt.';
 
   @override
   String get settingsLocalEncryptionScope =>
-      'Nicht betroffen: PDFs, Karten, ZIM-Archive, Fotos und alles, was du exportierst.';
+      'Mitverschlüsselt: persönliche Einstellungen und Fotos von Vorräten und Besitz. Nicht betroffen: PDFs, Karten, ZIM-Archive und alles, was du exportierst.';
 
   @override
   String get settingsLocalEncryptionTestBackup => 'Sicherung prüfen';
