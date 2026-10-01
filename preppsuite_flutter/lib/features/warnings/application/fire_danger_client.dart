@@ -1,7 +1,8 @@
 import 'dart:convert';
-import 'dart:io' show gzip;
 
 import 'package:http/http.dart' as http;
+
+import '../../../core/bounded_gzip.dart';
 
 import 'fire_danger_level.dart';
 
@@ -121,13 +122,15 @@ class FireDangerClient {
           .timeout(const Duration(seconds: 30));
       if (response.statusCode != 200) return null;
 
-      // Bounded before decoding: a station's season file is about
-      // 4 KB compressed, and this app has a rule about not handing an
-      // unbounded stream to a decompressor.
+      // Bounded on both sides: a station's season file is about 4 KB
+      // compressed and a few hundred unpacked, and this app has a rule
+      // about not handing an unbounded stream to a decompressor. The
+      // input limit alone did not keep it — two megabytes of gzip can
+      // unpack to two gigabytes.
       if (response.bodyBytes.length > 2 * 1024 * 1024) return null;
 
       final csv = utf8.decode(
-        gzip.decode(response.bodyBytes),
+        gunzipBounded(response.bodyBytes, limit: 8 * 1024 * 1024),
         allowMalformed: true,
       );
       final rows = parseForecast(csv, station: station.name);

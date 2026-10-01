@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -12,6 +11,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../inventory/application/inventory_photo_service.dart';
 import '../application/possession_controller.dart';
+import '../../inventory/presentation/stored_photo_image.dart';
 
 /// One entry in the household's list of what it owns.
 ///
@@ -278,15 +278,20 @@ class _PossessionFormScreenState extends ConsumerState<PossessionFormScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      File(InventoryPhotoService.resolvePhotoPath(photoPath)),
+                    child: Image(
+                      image: ResizeImage.resizeIfNeeded(
+                        1080,
+                        null,
+                        StoredPhotoImage(
+                          InventoryPhotoService.resolvePhotoPath(photoPath),
+                        ),
+                      ),
                       height: 180,
                       width: double.infinity,
                       // The stored picture is up to 2000 pixels wide; this
                       // strip is 180 tall. 1080 covers a phone at triple
                       // density and a desktop card at its widest, for a
                       // third of the memory.
-                      cacheWidth: 1080,
                       fit: BoxFit.cover,
                     ),
                   ),

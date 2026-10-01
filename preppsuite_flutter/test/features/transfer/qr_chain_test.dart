@@ -359,4 +359,18 @@ void main() {
       expect(receiver.received, 0);
     });
   });
+
+  test('a chain that unpacks past the limit is refused', () {
+    // The frames are whatever the camera was pointed at. A few kilobytes
+    // of gzip in them could ask for gigabytes once unpacked.
+    final receiver = QrChainReceiver();
+    for (final frame in qrChainFrames(
+      Uint8List(maxQrChainPayloadBytes + 1),
+    )) {
+      receiver.take(frame);
+    }
+
+    expect(receiver.isComplete, isTrue);
+    expect(receiver.payload, throwsA(isA<QrChainException>()));
+  });
 }

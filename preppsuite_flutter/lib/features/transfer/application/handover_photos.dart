@@ -7,6 +7,7 @@ import 'package:path/path.dart' as p;
 import '../../../core/portable_paths.dart';
 import '../../../local_db/database.dart';
 import '../../inventory/application/inventory_photo_service.dart';
+import '../../../core/photo_vault.dart';
 
 /// The pictures of the stock, travelling with it.
 ///
@@ -164,14 +165,17 @@ Future<List<HandoverPhoto>> readHouseholdPhotos(
     if (skip.contains(name)) continue;
     if (!await file.exists()) continue;
 
-    final Uint8List bytes;
+    // Opened before it goes: the other device holds a different key, and
+    // the handover payload is sealed for this one exchange anyway.
+    Uint8List? bytes;
     try {
-      bytes = await file.readAsBytes();
+      bytes = await const PhotoVault().read(file);
     } on Object {
-      // Unreadable on this machine. One missing picture is not worth
-      // failing a handover somebody is standing there waiting for.
-      continue;
+      bytes = null;
     }
+    // Unreadable on this machine. One missing picture is not worth
+    // failing a handover somebody is standing there waiting for.
+    if (bytes == null) continue;
     if (used + bytes.length > budgetBytes) continue;
     used += bytes.length;
     photos.add(
@@ -228,7 +232,7 @@ Future<int> applyHouseholdPhotos(
     final target = File(p.join(directory.path, photo.name));
     try {
       if (!await target.exists()) {
-        await target.writeAsBytes(photo.bytes, flush: true);
+        await const PhotoVault().write(target, photo.bytes);
       }
     } on Object {
       continue;

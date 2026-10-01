@@ -27,6 +27,7 @@ import '../application/package_nutrition.dart';
 import 'barcode_scanner_screen.dart';
 import 'photo_editor_screen.dart';
 import '../application/food_amount.dart';
+import 'stored_photo_image.dart';
 
 /// A form filled in from somewhere other than an existing row — the
 /// stockpiling table hands one over when a food is added from it.
@@ -1135,10 +1136,15 @@ class _PhotoPicker extends StatelessWidget {
             border: Border.all(color: colorScheme.outlineVariant),
           ),
           child: photoPath != null
-              ? Image.file(
-                  File(InventoryPhotoService.resolvePhotoPath(photoPath)),
+              ? Image(
+                  image: ResizeImage.resizeIfNeeded(
+                    600,
+                    null,
+                    StoredPhotoImage(
+                      InventoryPhotoService.resolvePhotoPath(photoPath),
+                    ),
+                  ),
                   fit: BoxFit.cover,
-                  cacheWidth: 600,
                 )
               : Column(
                   mainAxisAlignment: MainAxisAlignment.center,

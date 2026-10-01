@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/photo_edit.dart';
+import '../../../core/photo_vault.dart';
 
 /// Turn and trim a photo before it goes into the inventory.
 ///
@@ -46,7 +47,15 @@ class _PhotoEditorScreenState extends State<PhotoEditorScreen> {
   }
 
   Future<void> _load() async {
-    final bytes = await widget.file.readAsBytes();
+    // Through the vault: the stored picture is sealed, and the editor
+    // works on the image inside it.
+    final bytes = await const PhotoVault().read(widget.file);
+    if (bytes == null) {
+      // Gone, or sealed under a key this installation does not hold.
+      // Nothing to edit, and staying would leave a spinner for ever.
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
     final image = await decodeImageFromList(bytes);
     if (!mounted) return;
     setState(() {

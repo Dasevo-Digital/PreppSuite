@@ -17,9 +17,20 @@ Wohn-, Reise- oder Suchbereich erkennen lassen.
 ## Lokale Daten und Sicherungen
 
 Die lokale Datenbank kann sensible Haushalts-, Inventar-, Finanz-, Dokument-
-und Gesundheitsangaben enthalten. Eine optionale lokale
-Datenbankverschlüsselung schützt die Datei im Ruhezustand. Sie schützt nicht
-vor Zugriff auf ein bereits entsperrtes Gerät.
+und Gesundheitsangaben enthalten. Neue Installationen verschlüsseln sie von
+Anfang an; ältere stellen nach einer Sicherung in den Einstellungen um. Mit
+einem davon abgeleiteten Schlüssel werden auch die Fotos von Vorräten und
+Besitz sowie die privaten Einstellungen (Haushaltsprofil, Schlüssel des
+gemeinsamen Ordners, Notfallkontakte) verschlüsselt; Fotos aus älteren
+Versionen werden beim nächsten Start nachträglich verschlüsselt. Das schützt
+die Dateien im Ruhezustand, nicht vor Zugriff auf ein bereits entsperrtes
+Gerät.
+
+Ohne Schlüssel bleiben Fotos und private Einstellungen unverschlüsselt: in
+der mitgeführten Fassung auf einem USB-Stick (der Schlüssel liegt im
+Schlüsselbund des jeweiligen Rechners und reist nicht mit), auf Geräten ohne
+nutzbaren Schlüsselspeicher und solange eine Installation auf ihre
+Wiederherstellung wartet.
 
 Beim Teilen über einen gemeinsamen Ordner schreibt PreppSuite verschlüsselte
 Gerätedateien in den gewählten Ordner. Nextcloud, Syncthing, iCloud Drive,

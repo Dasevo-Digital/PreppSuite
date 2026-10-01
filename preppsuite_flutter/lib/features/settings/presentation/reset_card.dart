@@ -9,6 +9,7 @@ import '../../../core/theme_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
+import '../../inventory/application/inventory_photo_service.dart';
 import '../../maps/application/map_source_preference.dart';
 import '../../sharing/application/folder_key_store.dart';
 import '../../sharing/application/shared_folder_store.dart';
@@ -98,7 +99,11 @@ class ResetCard extends ConsumerWidget {
 
   Future<void> _resetHousehold(BuildContext context, WidgetRef ref) async {
     if (!await _confirm(context, l10n.resetConfirmHousehold)) return;
-    await ref.read(appDatabaseProvider).deleteHouseholdData(profile.id);
+    final db = ref.read(appDatabaseProvider);
+    // Pictures first: the rows are the only record of which files were
+    // this household's.
+    await deleteHouseholdPhotos(db, householdId: profile.id);
+    await db.deleteHouseholdData(profile.id);
     await const SharedFolderStore().clearLocation();
     await const FolderKeyStore().clear(profile.id);
     final prefs = await SharedPreferences.getInstance();

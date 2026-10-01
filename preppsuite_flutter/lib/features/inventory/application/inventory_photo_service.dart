@@ -8,6 +8,8 @@ import 'package:uuid/uuid.dart';
 import '../../../core/app_database_directory.dart';
 import '../../../core/portable_data.dart';
 import '../../../core/portable_paths.dart';
+import '../../../local_db/database.dart';
+import '../../../core/photo_vault.dart';
 
 /// Captures or picks a product photo and stores it on local disk, inside
 /// the app's own support directory.
@@ -68,7 +70,12 @@ class InventoryPhotoService {
       dir.path,
       '${const Uuid().v4()}${extension.isEmpty ? '.jpg' : extension}',
     );
-    await File(picked.path).copy(destination);
+    // Read and written rather than copied: the copy in the app's folder is
+    // the one that is sealed, and the picker's own stays where it was.
+    await const PhotoVault().write(
+      File(destination),
+      await File(picked.path).readAsBytes(),
+    );
     // Written down relative to the data folder where there is one, so a
     // photo carried on the same disk is still found when the disk comes
     // up under another letter.
@@ -83,7 +90,7 @@ class InventoryPhotoService {
   Future<String> saveBytes(Uint8List bytes) async {
     final dir = await _photosDirectory();
     final destination = p.join(dir.path, '${const Uuid().v4()}.jpg');
-    await File(destination).writeAsBytes(bytes, flush: true);
+    await const PhotoVault().write(File(destination), bytes);
     return storeLocation(destination);
   }
 
@@ -127,4 +134,37 @@ class InventoryPhotoService {
     final root = portableSupportDirectory;
     return root == null ? null : p.join(root.path, subdirectory);
   }
+}
+
+/// Deletes the pictures of every inventory item and possession in
+/// [householdId], and returns how many files went.
+///
+/// For the two places that delete a household's rows — "reset household"
+/// and "replace" on the way into another one. Deleting the rows alone
+/// left the pictures behind: no longer shown anywhere, no longer in any
+/// backup, and still on the disk. Among them the possessions list, which
+/// exists to photograph valuables with their serial numbers.
+///
+/// Called before the rows go, because the rows are the only record of
+/// which files belonged to the household.
+Future<int> deleteHouseholdPhotos(
+  AppDatabase db, {
+  required String householdId,
+}) async {
+  final paths = [
+    for (final row in await db.inventoryItemsForSync(householdId))
+      ?row.photoPath,
+    for (final row in await db.possessionsForSync(householdId)) ?row.photoPath,
+  ];
+  var deleted = 0;
+  for (final stored in paths) {
+    if (stored.isEmpty) continue;
+    try {
+      await File(InventoryPhotoService.resolvePhotoPath(stored)).delete();
+      deleted++;
+    } on FileSystemException {
+      // Already gone. The point is that it is not there afterwards.
+    }
+  }
+  return deleted;
 }

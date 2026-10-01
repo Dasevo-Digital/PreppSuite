@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,7 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'core/closes_databases_on_exit.dart';
 import 'core/local_database_encryption.dart';
+import 'core/photo_vault.dart';
 import 'core/portable_data.dart';
+import 'features/inventory/application/inventory_photo_service.dart';
 import 'features/inventory/application/open_food_facts_service.dart';
 
 /// PreppSuite runs entirely on the device.
@@ -40,6 +44,11 @@ void main(List<String> args) async {
   // it -- a crash before `runApp` would leave nothing at all.
   await LocalDatabaseEncryption.instance.initializeOrMarkUnavailable();
 
+  // Seals the pictures an older version left in the clear, in the
+  // background. A picture that is opened first is sealed by that read;
+  // this is for the ones nobody looks at. See `photo_vault.dart`.
+  unawaited(_sealStoredPhotos());
+
   OpenFoodFactsService.configure();
 
   runApp(
@@ -47,4 +56,15 @@ void main(List<String> args) async {
       child: ClosesDatabasesOnExit(child: PreppSuiteApp()),
     ),
   );
+}
+
+Future<void> _sealStoredPhotos() async {
+  try {
+    await const PhotoVault().sealDirectory(
+      await const InventoryPhotoService().photosDirectory(),
+    );
+  } on Object {
+    // No support directory yet, or no key: nothing to seal, and the
+    // next start tries again.
+  }
 }

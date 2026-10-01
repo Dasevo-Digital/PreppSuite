@@ -1849,6 +1849,17 @@ erfundene Skala.
 
 ### Verschlüsselung im Ruhezustand: pro Datei, nicht pro Installation
 
+**Fotos gehen durch `PhotoVault`, nie direkt über `File`.** Vorrats- und
+Besitzfotos liegen versiegelt (`PSPHOTO1`, AES-256-GCM, Schlüssel per HKDF
+aus dem Datenschlüssel, eigenes Label). Angezeigt werden sie über
+`StoredPhotoImage`; `Image.file` oder `FileImage` sähen in einem versiegelten
+Foto kein Bild. Wie bei `PrivatePreferences`: Klartext wird gelesen und dabei
+versiegelt, `main.dart` versiegelt beim Start den Rest, und ohne Schlüssel
+(mitgeführte Fassung, kein Schlüsselspeicher, Wiederherstellung) wird wie
+früher im Klartext geschrieben. Die lokale Übergabe öffnet ein Foto vor dem
+Versand — das andere Gerät hat einen anderen Schlüssel — und versiegelt es
+beim Empfang neu.
+
 `lib/core/local_database_encryption.dart` hält einen 256-Bit-Schlüssel im
 plattformgebundenen sicheren Speicher und öffnet damit die Drift-Dateien.
 Vier Dinge daran sind teuer erkauft und dürfen nicht zurückgedreht werden.

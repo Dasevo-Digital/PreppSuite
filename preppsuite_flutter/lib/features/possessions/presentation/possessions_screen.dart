@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../../../core/feel.dart';
@@ -18,6 +16,7 @@ import '../../inventory/application/inventory_photo_service.dart';
 import '../application/possession_controller.dart';
 import '../application/possession_report.dart';
 import 'possession_form_screen.dart';
+import '../../inventory/presentation/stored_photo_image.dart';
 
 /// What the household owns, written down before it is gone.
 ///
@@ -235,9 +234,13 @@ class _PossessionTile extends ConsumerWidget {
             ? const Icon(Icons.inventory_2_outlined)
             : ClipRRect(
                 borderRadius: BorderRadius.circular(6),
-                child: Image.file(
-                  File(
-                    InventoryPhotoService.resolvePhotoPath(row.photoPath!),
+                child: Image(
+                  image: ResizeImage.resizeIfNeeded(
+                    192,
+                    null,
+                    StoredPhotoImage(
+                      InventoryPhotoService.resolvePhotoPath(row.photoPath!),
+                    ),
                   ),
                   width: 48,
                   height: 48,
@@ -256,7 +259,6 @@ class _PossessionTile extends ConsumerWidget {
                   // fills the square from the picture's *short* side —
                   // on a landscape photo that is the height, and asking
                   // for 144 across would leave only 108 down.
-                  cacheWidth: 192,
                   fit: BoxFit.cover,
                   // A picture whose file is gone must not take the list
                   // down with it -- the row is still worth showing.

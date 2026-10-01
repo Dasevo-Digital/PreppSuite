@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/app_database_providers.dart';
 import '../../../model/household_profile.dart';
+import '../../inventory/application/inventory_photo_service.dart';
 import '../../../model/household_profile_store.dart';
 import '../../warnings/application/warning_region_filter.dart';
 import '../../warnings/application/warning_region_store.dart';
@@ -84,6 +85,7 @@ class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
 
     final db = ref.read(appDatabaseProvider);
     if (discardOwnRows) {
+      await deleteHouseholdPhotos(db, householdId: from.id);
       await db.deleteHouseholdData(from.id);
     } else {
       // Without the re-stamp the rows do not merge — they stop being

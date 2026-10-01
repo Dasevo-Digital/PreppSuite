@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import '../../../core/bounded_gzip.dart';
+
 /// Reads a PMTiles v3 archive from local storage.
 ///
 /// Written by hand rather than taken from pub: the `pmtiles` package moved
@@ -155,13 +157,21 @@ class PmTilesArchive {
     return source.read(offset, length);
   }
 
+  static Uint8List _gunzip(Uint8List bytes) {
+    try {
+      return gunzipBounded(bytes, limit: maxBytes);
+    } on DecompressionLimitException {
+      throw const PmTilesException('decompressed entry exceeds the limit');
+    }
+  }
+
   static Uint8List _decompress(
     Uint8List bytes,
     PmTilesCompression compression,
   ) {
     return switch (compression) {
       PmTilesCompression.none => bytes,
-      PmTilesCompression.gzip => _gunzipBounded(bytes),
+      PmTilesCompression.gzip => _gunzip(bytes),
       // Brotli and zstd are legal in the format and not implemented here.
       // Saying so beats handing the renderer bytes it cannot parse.
       _ => throw PmTilesException(
@@ -169,43 +179,6 @@ class PmTilesArchive {
       ),
     };
   }
-}
-
-/// Gunzips [bytes], stopping at [PmTilesArchive.maxBytes] of output rather
-/// than at the end of memory. `gzip.decode` has no limit of its own, and a
-/// gzip stream expands by up to a factor of a thousand.
-Uint8List _gunzipBounded(Uint8List bytes) {
-  final output = _BoundedSink();
-  final input = gzip.decoder.startChunkedConversion(output);
-  try {
-    for (var offset = 0; offset < bytes.length; offset += 16384) {
-      final end = (offset + 16384).clamp(0, bytes.length);
-      input.add(Uint8List.sublistView(bytes, offset, end));
-    }
-    input.close();
-  } catch (_) {
-    // Closing a failed converter may throw again; keep the first cause.
-    try {
-      input.close();
-    } catch (_) {}
-    rethrow;
-  }
-  return output.bytes.takeBytes();
-}
-
-class _BoundedSink implements Sink<List<int>> {
-  final bytes = BytesBuilder(copy: false);
-
-  @override
-  void add(List<int> data) {
-    if (bytes.length + data.length > PmTilesArchive.maxBytes) {
-      throw const PmTilesException('decompressed entry exceeds the limit');
-    }
-    bytes.add(data);
-  }
-
-  @override
-  void close() {}
 }
 
 /// Random access to a file, wherever it happens to live.

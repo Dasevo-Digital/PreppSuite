@@ -42,7 +42,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart' show GZipEncoder, GZipDecoder, getCrc32;
+import 'package:archive/archive.dart' show GZipEncoder, getCrc32;
+
+import '../../../core/bounded_gzip.dart';
 
 /// The marker every frame starts with.
 const qrChainPrefix = 'PS1';
@@ -134,6 +136,9 @@ class QrChainFrame {
     );
   }
 }
+
+/// The most a chain may unpack to.
+const maxQrChainPayloadBytes = 16 * 1024 * 1024;
 
 /// Collects frames until the whole payload is there.
 ///
@@ -231,8 +236,12 @@ class QrChainReceiver {
 
     final Uint8List bytes;
     try {
-      bytes = Uint8List.fromList(
-        GZipDecoder().decodeBytes(base64Url.decode(packed.toString())),
+      // Bounded: the frames are whatever a camera was pointed at, and a
+      // few kilobytes of gzip in them can unpack to gigabytes. The
+      // largest household a chain carries is a fraction of this.
+      bytes = gunzipBounded(
+        base64Url.decode(packed.toString()),
+        limit: maxQrChainPayloadBytes,
       );
     } on Object {
       throw const QrChainException('the frames did not unpack');

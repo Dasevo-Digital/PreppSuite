@@ -154,21 +154,15 @@ class _SetupChoiceScreenState extends ConsumerState<SetupChoiceScreen> {
       // A backup from before the profile travelled with it leaves the
       // household nameless. It is still the right household, and naming
       // it is a rename in the settings rather than a reason to refuse.
-      final profile = restored.profile;
       await ref
           .read(householdProfileProvider.notifier)
           .adopt(
-            HouseholdProfile(
-              id: restored.householdId,
-              name: profile?.name ?? l10n.setupRestoreDefaultName,
-              countryCode: profile?.countryCode ?? 'DE',
-              regionKey: profile?.regionKey,
-              personCount: profile?.personCount ?? 1,
-              children: profile?.children ?? 0,
-              dogs: profile?.dogs ?? 0,
-              cats: profile?.cats ?? 0,
-              extraRegions: profile?.extraRegions ?? const [],
-            ),
+            restored.profile?.copyWith(id: restored.householdId) ??
+                HouseholdProfile(
+                  id: restored.householdId,
+                  name: l10n.setupRestoreDefaultName,
+                  countryCode: 'DE',
+                ),
           );
       if (!mounted) return;
       _leaveSetup(confirmation: l10n.setupRestoreDone(restored.rows));

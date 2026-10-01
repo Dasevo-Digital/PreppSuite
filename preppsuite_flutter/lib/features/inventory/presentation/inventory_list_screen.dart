@@ -32,6 +32,7 @@ import '../application/inventory_filter.dart';
 import 'inventory_filter_sheet.dart';
 import 'package:intl/intl.dart';
 import '../../../core/error_text.dart';
+import 'stored_photo_image.dart';
 
 enum _InventoryMenuAction {
   consumeByScan,
@@ -454,10 +455,8 @@ class _InventoryTile extends ConsumerWidget {
               backgroundImage: ResizeImage.resizeIfNeeded(
                 96,
                 96,
-                FileImage(
-                  File(
-                    InventoryPhotoService.resolvePhotoPath(photoPath),
-                  ),
+                StoredPhotoImage(
+                  InventoryPhotoService.resolvePhotoPath(photoPath),
                 ),
               ),
             )

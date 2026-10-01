@@ -8,6 +8,7 @@ import '../../sharing/application/device_snapshot.dart';
 import '../../sharing/application/folder_crypto.dart';
 import '../../sharing/application/carried_settings.dart';
 import '../../sharing/application/snapshot_exchange.dart';
+import '../../warnings/application/warning_region_store.dart';
 import '../../../model/household_profile.dart';
 import '../../../model/household_profile_store.dart';
 
@@ -107,26 +108,46 @@ class BackupService {
     final householdId = snapshot.householdId;
 
     await _restorePlan(envelope['device'], key);
-    await _restoreCarried(envelope['household'], key, householdId);
+    // Handed back rather than written: the caller adopts it through the
+    // profile provider, which is the one place that keeps the stores and
+    // the screen in step.
+    final profile = await _restoreCarried(
+      envelope['household'],
+      key,
+      householdId,
+    );
     final rows = await applyHouseholdSnapshot(database, snapshot);
 
     return RestoredHousehold(
       householdId: householdId,
       rows: rows,
-      profile: await const HouseholdProfileStore().load(),
+      profile: profile,
     );
   }
 
+  ///
+  /// [saveProfile] is where the restored profile goes. The settings screen
+  /// passes the profile provider's own `adopt`: writing the store
+  /// directly, as this used to, left the provider holding the old profile
+  /// — the next change on screen wrote it back over the restored one — and
+  /// skipped the copy of the warning regions the background poll reads.
+  /// Left out, the profile is written to both stores here.
   Future<int?> restore(
     String raw,
     String householdId,
-    String passphrase,
-  ) async {
+    String passphrase, {
+    Future<void> Function(HouseholdProfile profile)? saveProfile,
+  }) async {
     final opened = await _open(raw, householdId, passphrase);
     if (opened == null) return null;
     final (snapshot, key, envelope) = opened;
     await _restorePlan(envelope['device'], key);
-    await _restoreCarried(envelope['household'], key, householdId);
+    final profile = await _restoreCarried(
+      envelope['household'],
+      key,
+      householdId,
+    );
+    if (profile != null) await (saveProfile ?? _saveProfile)(profile);
 
     // The same merge as a shared folder, a QR chain and a handover: a
     // row is taken only when it is newer than what is held, so restoring
@@ -184,14 +205,14 @@ class BackupService {
   /// Skipped without complaint for a format 1 backup, which has no such
   /// section, and for one whose section is damaged: it is the smaller
   /// half of the file and must not cost somebody the household.
-  Future<void> _restoreCarried(
+  Future<HouseholdProfile?> _restoreCarried(
     Object? section,
     FolderKey key,
     String householdId,
   ) async {
-    if (section is! String) return;
+    if (section is! String) return null;
     final clear = await decryptFromFolder(section, key);
-    if (clear == null) return;
+    if (clear == null) return null;
     try {
       final carried = CarriedHousehold.fromJson(jsonDecode(clear));
       await applyCarriedSettings({
@@ -201,24 +222,18 @@ class BackupService {
           // two -- the exact thing that merge exists to prevent.
           if (entry.key != 'preparednessHubV1') entry.key: entry.value,
       });
-      final profile = carried.profile;
-      if (profile == null) return;
-      await const HouseholdProfileStore().save(
-        HouseholdProfile(
-          id: householdId,
-          name: profile.name,
-          countryCode: profile.countryCode,
-          regionKey: profile.regionKey,
-          personCount: profile.personCount,
-          children: profile.children,
-          dogs: profile.dogs,
-          cats: profile.cats,
-          extraRegions: profile.extraRegions,
-        ),
-      );
+      return carried.profile?.copyWith(id: householdId);
     } on Object {
       // Same reasoning as the plan below.
+      return null;
     }
+  }
+
+  /// Both places a profile lives: the store, and the copy of its warning
+  /// regions for the background poll, which has no provider to ask.
+  static Future<void> _saveProfile(HouseholdProfile profile) async {
+    await const HouseholdProfileStore().save(profile);
+    await const WarningRegionStore().save(profile.warningFilter);
   }
 
   /// A backup written before this section existed, or one whose plan is

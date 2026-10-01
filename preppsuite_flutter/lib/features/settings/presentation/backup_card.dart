@@ -13,6 +13,7 @@ import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/backup_service.dart';
 import 'passphrase_dialog.dart';
+import '../../household/application/household_providers.dart';
 
 class BackupCard extends ConsumerWidget {
   const BackupCard({super.key, required this.householdId, required this.l10n});
@@ -144,9 +145,12 @@ class BackupCard extends ConsumerWidget {
       final raw = file.bytes != null
           ? utf8.decode(file.bytes!)
           : await File(file.path!).readAsString();
-      final count = await BackupService(
-        ref.read(appDatabaseProvider),
-      ).restore(raw, householdId, passphrase);
+      final count = await BackupService(ref.read(appDatabaseProvider)).restore(
+        raw,
+        householdId,
+        passphrase,
+        saveProfile: ref.read(householdProfileProvider.notifier).adopt,
+      );
       messenger.showSnackBar(
         SnackBar(
           content: Text(

@@ -256,6 +256,49 @@ void main() {
     );
   });
 
+  test(
+    'a restored profile reaches the background poll and the caller',
+    () async {
+      // Restoring used to write the profile store and nothing else: the
+      // background poll kept asking for the old regions, and the provider —
+      // still holding the old profile — wrote it back on the next change.
+      final source = AppDatabase.forTesting(NativeDatabase.memory());
+      final target = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(source.close);
+      addTearDown(target.close);
+
+      await const HouseholdProfileStore().save(
+        const HouseholdProfile(
+          id: 'home',
+          name: 'Familie',
+          countryCode: 'DE',
+          regionKey: '031010000000',
+          children: 2,
+        ),
+      );
+      final raw = await BackupService(
+        source,
+      ).exportHousehold('home', 'passwort');
+      SharedPreferences.setMockInitialValues({});
+
+      await BackupService(target).restore(raw, 'home', 'passwort');
+      expect(
+        (await const WarningRegionStore().load())?.ownRegionKey,
+        '031010000000',
+      );
+
+      HouseholdProfile? handed;
+      await BackupService(target).restore(
+        raw,
+        'home',
+        'passwort',
+        saveProfile: (profile) async => handed = profile,
+      );
+      expect(handed?.id, 'home');
+      expect(handed?.children, 2);
+    },
+  );
+
   test('a backup in the older format still restores', () async {
     // Format 1 files are out there and have to keep working.
     final source = AppDatabase.forTesting(NativeDatabase.memory());
