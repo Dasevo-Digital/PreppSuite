@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/app_theme.dart';
 import 'core/app_lock_gate.dart';
+import 'core/crisis_mode_provider.dart';
 import 'core/local_data_gate.dart';
 import 'core/locale_provider.dart';
 import 'core/theme_provider.dart';
@@ -14,6 +15,7 @@ class PreppSuiteApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final crisisMode = ref.watch(crisisModeProvider);
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
       locale: ref.watch(localeOverrideProvider),
@@ -22,6 +24,19 @@ class PreppSuiteApp extends ConsumerWidget {
       theme: appLightTheme,
       darkTheme: appDarkTheme,
       themeMode: ref.watch(themeModeProvider),
+      builder: (context, child) {
+        final media = MediaQuery.of(context);
+        if (!crisisMode) return child!;
+        final scale =
+            media.textScaler.scale(16).clamp(20.0, double.infinity) / 16;
+        return MediaQuery(
+          data: media.copyWith(
+            textScaler: TextScaler.linear(scale),
+            disableAnimations: true,
+          ),
+          child: child!,
+        );
+      },
       // Nothing in this app was selectable. A Flutter `Text` is not, on
       // its own, and there are 667 of them against no `SelectableText` and
       // no `SelectionArea` at all — so right-click-copy worked inside

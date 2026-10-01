@@ -1236,6 +1236,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsCategoryAppearanceBody => 'Farbschema und App-Sprache';
 
   @override
+  String get settingsCrisisModeTitle => 'Krisenmodus';
+
+  @override
+  String get settingsCrisisModeHint =>
+      'Vergrößert Texte und Bedienelemente in der ganzen App und reduziert Animationen.';
+
+  @override
   String get settingsCategoryData => 'Daten und Sicherheit';
 
   @override

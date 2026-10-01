@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
@@ -227,7 +228,7 @@ class PersonalDocumentIndexer {
         document.location,
         maxBytes: maxDocumentBytes,
       );
-      final text = _normalise(_extractText(document.extension, bytes));
+      final text = await _extractForIndex(document.extension, bytes);
       if (text.isEmpty) {
         await _index.remove(document.id);
         return const PersonalDocumentIndexResult(
@@ -287,6 +288,17 @@ class PersonalDocumentIndexer {
         'pdf' => _extractPdf(bytes),
         _ => '',
       };
+
+  static Future<String> _extractForIndex(
+    String extension,
+    Uint8List bytes,
+  ) async {
+    final transferable = TransferableTypedData.fromList([bytes]);
+    return Isolate.run(() {
+      final source = transferable.materialize().asUint8List();
+      return _normalise(_extractText(extension, source));
+    });
+  }
 
   static String _extractEpub(Uint8List bytes) {
     final archive = ZipDecoder().decodeBytes(bytes, verify: true);

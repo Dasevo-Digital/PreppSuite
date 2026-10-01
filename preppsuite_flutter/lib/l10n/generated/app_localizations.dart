@@ -2186,6 +2186,18 @@ abstract class AppLocalizations {
   /// **'Colour scheme and app language'**
   String get settingsCategoryAppearanceBody;
 
+  /// No description provided for @settingsCrisisModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Crisis mode'**
+  String get settingsCrisisModeTitle;
+
+  /// No description provided for @settingsCrisisModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Makes text and controls larger throughout the app and reduces animations.'**
+  String get settingsCrisisModeHint;
+
   /// No description provided for @settingsCategoryData.
   ///
   /// In en, this message translates to:

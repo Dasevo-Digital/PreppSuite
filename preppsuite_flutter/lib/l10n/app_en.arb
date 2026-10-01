@@ -556,6 +556,8 @@
   "settingsCategoryRemindersBody": "Batteries, equipment and expiry dates",
   "settingsCategoryAppearance": "Appearance and language",
   "settingsCategoryAppearanceBody": "Colour scheme and app language",
+  "settingsCrisisModeTitle": "Crisis mode",
+  "settingsCrisisModeHint": "Makes text and controls larger throughout the app and reduces animations.",
   "settingsCategoryData": "Data and security",
   "settingsCategoryDataBody": "Lock, sharing, backup and reset",
   "settingsCategoryOffline": "Offline and storage",

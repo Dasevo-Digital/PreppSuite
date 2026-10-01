@@ -387,6 +387,8 @@
   "settingsCategoryRemindersBody": "Akkus, Geräte und Ablaufdaten",
   "settingsCategoryAppearance": "Darstellung und Sprache",
   "settingsCategoryAppearanceBody": "Farbschema und App-Sprache",
+  "settingsCrisisModeTitle": "Krisenmodus",
+  "settingsCrisisModeHint": "Vergrößert Texte und Bedienelemente in der ganzen App und reduziert Animationen.",
   "settingsCategoryData": "Daten und Sicherheit",
   "settingsCategoryDataBody": "Sperre, Freigabe, Sicherung und Zurücksetzen",
   "settingsCategoryOffline": "Offline und Speicher",

@@ -5,6 +5,7 @@ import '../../../core/locale_provider.dart';
 import '../../../core/notification_capabilities.dart';
 import '../../../core/notifications_provider.dart';
 import '../../../core/theme_provider.dart';
+import '../../../core/crisis_mode_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../downloads/presentation/download_folder_card.dart';
@@ -108,6 +109,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
                 Card(child: _ThemeModePicker(l10n: l10n)),
+                Card(child: _CrisisModeToggle(l10n: l10n)),
               ],
             ),
           ),
@@ -293,6 +295,25 @@ class _ThemeModePicker extends ConsumerWidget {
         onSelectionChanged: (selection) =>
             ref.read(themeModeProvider.notifier).setThemeMode(selection.first),
       ),
+    );
+  }
+}
+
+class _CrisisModeToggle extends ConsumerWidget {
+  const _CrisisModeToggle({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(crisisModeProvider);
+    return SwitchListTile(
+      secondary: const Icon(Icons.emergency_outlined),
+      title: Text(l10n.settingsCrisisModeTitle),
+      subtitle: Text(l10n.settingsCrisisModeHint),
+      value: enabled,
+      onChanged: (value) =>
+          ref.read(crisisModeProvider.notifier).setEnabled(value),
     );
   }
 }
