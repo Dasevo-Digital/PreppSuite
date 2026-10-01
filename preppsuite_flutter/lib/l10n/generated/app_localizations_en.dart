@@ -6728,14 +6728,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hubCrisisHint =>
-      'A larger display for this page, and a printable briefing for the household or the kit.';
+      'A larger display throughout the app, and a printable briefing for the household or the kit.';
 
   @override
-  String get hubCrisisSwitch => 'Simplified, larger display';
+  String get hubCrisisSwitch => 'Crisis mode';
 
   @override
   String get hubCrisisSwitchHint =>
-      'Makes the text and controls in the crisis organisation larger.';
+      'Makes text and controls larger throughout the app and reduces animations – the same switch as in the settings.';
 
   @override
   String get hubBriefingButton => 'Emergency briefing as PDF';
@@ -6961,7 +6961,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get hubSituationCrisisMode => 'Switch to the larger display';
+  String get hubSituationCrisisMode => 'Switch on crisis mode';
 
   @override
   String get hubSituationLog => 'Record it in the log';

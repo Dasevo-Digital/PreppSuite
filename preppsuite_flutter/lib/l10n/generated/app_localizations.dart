@@ -11285,19 +11285,19 @@ abstract class AppLocalizations {
   /// No description provided for @hubCrisisHint.
   ///
   /// In en, this message translates to:
-  /// **'A larger display for this page, and a printable briefing for the household or the kit.'**
+  /// **'A larger display throughout the app, and a printable briefing for the household or the kit.'**
   String get hubCrisisHint;
 
   /// No description provided for @hubCrisisSwitch.
   ///
   /// In en, this message translates to:
-  /// **'Simplified, larger display'**
+  /// **'Crisis mode'**
   String get hubCrisisSwitch;
 
   /// No description provided for @hubCrisisSwitchHint.
   ///
   /// In en, this message translates to:
-  /// **'Makes the text and controls in the crisis organisation larger.'**
+  /// **'Makes text and controls larger throughout the app and reduces animations – the same switch as in the settings.'**
   String get hubCrisisSwitchHint;
 
   /// No description provided for @hubBriefingButton.
@@ -11660,7 +11660,7 @@ abstract class AppLocalizations {
   /// No description provided for @hubSituationCrisisMode.
   ///
   /// In en, this message translates to:
-  /// **'Switch to the larger display'**
+  /// **'Switch on crisis mode'**
   String get hubSituationCrisisMode;
 
   /// No description provided for @hubSituationLog.

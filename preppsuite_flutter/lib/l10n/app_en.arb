@@ -3841,9 +3841,9 @@
     }
   },
   "hubCrisisTitle": "Crisis mode and briefing",
-  "hubCrisisHint": "A larger display for this page, and a printable briefing for the household or the kit.",
-  "hubCrisisSwitch": "Simplified, larger display",
-  "hubCrisisSwitchHint": "Makes the text and controls in the crisis organisation larger.",
+  "hubCrisisHint": "A larger display throughout the app, and a printable briefing for the household or the kit.",
+  "hubCrisisSwitch": "Crisis mode",
+  "hubCrisisSwitchHint": "Makes text and controls larger throughout the app and reduces animations – the same switch as in the settings.",
   "hubBriefingButton": "Emergency briefing as PDF",
   "hubBriefingPdfTitle": "PreppSuite – emergency briefing",
   "hubBriefingCreated": "Created: {date}",
@@ -3986,7 +3986,7 @@
       }
     }
   },
-  "hubSituationCrisisMode": "Switch to the larger display",
+  "hubSituationCrisisMode": "Switch on crisis mode",
   "hubSituationLog": "Record it in the log",
   "hubSituationOutageKind": "Power cut",
   "hubFolderReportButton": "Emergency folder as PDF",

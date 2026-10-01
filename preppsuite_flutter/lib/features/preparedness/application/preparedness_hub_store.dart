@@ -59,7 +59,6 @@ class PreparednessHubData {
     this.mobility = const PlanNote(),
     this.utilities = const PlanNote(),
     this.actionDone = const {},
-    this.crisisMode = false,
     this.autonomy = const AutonomySnapshot(),
     this.waterHygiene = const PlanNote(),
     this.powerOutage = const PlanNote(),
@@ -85,7 +84,6 @@ class PreparednessHubData {
   final PlanNote mobility;
   final PlanNote utilities;
   final Map<String, DateTime> actionDone;
-  final bool crisisMode;
   final AutonomySnapshot autonomy;
   final PlanNote waterHygiene;
   final PlanNote powerOutage;
@@ -109,7 +107,6 @@ class PreparednessHubData {
     PlanNote? mobility,
     PlanNote? utilities,
     Map<String, DateTime>? actionDone,
-    bool? crisisMode,
     AutonomySnapshot? autonomy,
     PlanNote? waterHygiene,
     PlanNote? powerOutage,
@@ -132,7 +129,6 @@ class PreparednessHubData {
     mobility: mobility ?? this.mobility,
     utilities: utilities ?? this.utilities,
     actionDone: actionDone ?? this.actionDone,
-    crisisMode: crisisMode ?? this.crisisMode,
     autonomy: autonomy ?? this.autonomy,
     waterHygiene: waterHygiene ?? this.waterHygiene,
     powerOutage: powerOutage ?? this.powerOutage,
@@ -181,10 +177,6 @@ class PreparednessHubData {
         mobility: _mergeNote(mobility, incoming.mobility),
         utilities: _mergeNote(utilities, incoming.utilities),
         actionDone: _mergeDates(actionDone, incoming.actionDone),
-        // Crisis mode describes what this device is showing right now,
-        // not what the household has planned, so a restore never switches
-        // it on or off behind somebody's back.
-        crisisMode: crisisMode,
         autonomy: _mergeAutonomy(autonomy, incoming.autonomy),
         waterHygiene: _mergeNote(waterHygiene, incoming.waterHygiene),
         powerOutage: _mergeNote(powerOutage, incoming.powerOutage),
@@ -213,7 +205,6 @@ class PreparednessHubData {
     'actionDone': actionDone.map(
       (key, value) => MapEntry(key, value.toUtc().toIso8601String()),
     ),
-    'crisisMode': crisisMode,
     'autonomy': autonomy.toJson(),
     'waterHygiene': waterHygiene.toJson(),
     'powerOutage': powerOutage.toJson(),
@@ -262,7 +253,6 @@ class PreparednessHubData {
       mobility: PlanNote.fromJson(value['mobility']),
       utilities: PlanNote.fromJson(value['utilities']),
       actionDone: dates('actionDone'),
-      crisisMode: value['crisisMode'] == true,
       autonomy: AutonomySnapshot.fromJson(value['autonomy']),
       waterHygiene: PlanNote.fromJson(value['waterHygiene']),
       powerOutage: PlanNote.fromJson(value['powerOutage']),

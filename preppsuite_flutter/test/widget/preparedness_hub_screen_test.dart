@@ -87,33 +87,23 @@ void main() {
   }
 
   group('the text size', () {
-    // The hub used to set a fixed 1.25 in crisis mode and 1.0 otherwise,
-    // over whatever the system said — somebody reading at 1.5 got smaller
-    // text on this screen, and smaller still from asking for larger.
+    // The hub used to set a fixed 1.0 over whatever the system said, and
+    // its own crisis mode a fixed 1.25 — somebody reading at 1.5 got
+    // smaller text on this screen. Crisis mode is app-wide now, and this
+    // screen leaves the size alone.
     double scaleInList(WidgetTester tester) => MediaQuery.textScalerOf(
       tester.element(find.byType(ListView).first),
     ).scale(1);
 
-    for (final (system, crisis, expected) in [
-      (1.5, false, 1.5),
-      (1.5, true, 1.5),
-      (1.0, true, 1.25),
-      (1.0, false, 1.0),
-    ]) {
-      testWidgets(
-        'is $expected at a system size of $system, crisis mode $crisis',
-        (tester) async {
-          tester.platformDispatcher.textScaleFactorTestValue = system;
-          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-          if (crisis) {
-            await store.save(const PreparednessHubData(crisisMode: true));
-          }
+    for (final system in [1.0, 1.5]) {
+      testWidgets('follows the system at $system', (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = system;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
-          await show(tester);
+        await show(tester);
 
-          expect(scaleInList(tester), closeTo(expected, 1e-9));
-        },
-      );
+        expect(scaleInList(tester), closeTo(system, 1e-9));
+      });
     }
   });
 
@@ -189,15 +179,22 @@ void main() {
     expect((await store.load()).evacuationCards, isEmpty);
   });
 
-  testWidgets('crisis mode is kept for the next time the screen opens', (
+  testWidgets('the switch here is the app-wide crisis mode', (
     tester,
   ) async {
     await show(tester);
 
-    await tester.tap(find.text('Vereinfachte, größere Darstellung'));
+    await tester.tap(find.widgetWithText(SwitchListTile, 'Krisenmodus'));
     await tester.pumpAndSettle();
 
-    expect((await store.load()).crisisMode, isTrue);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getBool('crisisModeGlobal'), isTrue);
+    // And not in the plan, which the shared folder carries to every
+    // other device of the household.
+    expect(
+      prefs.getString('preparednessHubV1') ?? '',
+      isNot(contains('crisisMode')),
+    );
   });
 
   testWidgets('is accessible', (tester) async {
@@ -331,12 +328,15 @@ void main() {
       );
 
       // Offered, and off until somebody says so.
-      expect((await store.load()).crisisMode, isFalse);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool('crisisModeGlobal') ?? false, isFalse);
 
-      await tester.tap(find.text('Größere Darstellung einschalten'));
+      await tester.tap(find.text('Krisenmodus einschalten'));
       await tester.pumpAndSettle();
 
-      expect((await store.load()).crisisMode, isTrue);
+      expect(prefs.getBool('crisisModeGlobal'), isTrue);
+      // Offered once: switched on, the button has nothing left to do.
+      expect(find.text('Krisenmodus einschalten'), findsNothing);
     });
 
     testWidgets('the log opens with the warning already in it', (

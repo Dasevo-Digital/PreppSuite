@@ -56,7 +56,6 @@ void main() {
       mobility: PlanNote(text: 'Fahrzeug', checkedAt: savedAt),
       utilities: PlanNote(text: 'Absperrort', checkedAt: savedAt),
       actionDone: {'now': savedAt},
-      crisisMode: true,
       autonomy: AutonomySnapshot(
         waterDays: 8,
         foodDays: 12,
@@ -90,7 +89,6 @@ void main() {
     expect(restored.communication.text, 'Kontaktkette');
     expect(restored.pets.text, 'Transportbox');
     expect(restored.actionDone['now'], savedAt);
-    expect(restored.crisisMode, isTrue);
     expect(restored.autonomy.medicineDays, 5);
     expect(restored.waterHygiene.text, 'Kanisterrotation');
     expect(restored.analogFallback.text, 'Papierkarte');
@@ -215,19 +213,23 @@ void main() {
       expect(merged.actionDone['now'], DateTime(2026, 9, 14));
     });
 
-    test('a restore never switches crisis mode on or off', () {
+    test('the plan does not carry crisis mode any more', () {
+      // It used to, and the plan travels through the shared folder: one
+      // device switching it on switched it on for every other. Crisis
+      // mode is the app-wide switch now, kept on this device alone.
       expect(
-        const PreparednessHubData(
-          crisisMode: false,
-        ).mergeWith(const PreparednessHubData(crisisMode: true)).crisisMode,
-        isFalse,
+        const PreparednessHubData().toJson(),
+        isNot(contains('crisisMode')),
       );
-      expect(
-        const PreparednessHubData(
-          crisisMode: true,
-        ).mergeWith(const PreparednessHubData(crisisMode: false)).crisisMode,
-        isTrue,
-      );
+    });
+
+    test('a plan written with it still reads', () {
+      final old = {
+        ...const PreparednessHubData().toJson(),
+        'crisisMode': true,
+      };
+
+      expect(PreparednessHubData.fromJson(old), isNotNull);
     });
 
     test('the store folds a restored plan into what it holds', () async {

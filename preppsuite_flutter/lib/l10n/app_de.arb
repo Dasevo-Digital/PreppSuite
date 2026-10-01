@@ -2837,9 +2837,9 @@
     }
   },
   "hubCrisisTitle": "Krisenmodus und Briefing",
-  "hubCrisisHint": "Größere Darstellung für diese Seite und ein druckbares Briefing für Haushalt oder Notgepäck.",
-  "hubCrisisSwitch": "Vereinfachte, größere Darstellung",
-  "hubCrisisSwitchHint": "Vergrößert Text und Bedienelemente in der Krisenorganisation.",
+  "hubCrisisHint": "Größere Darstellung in der ganzen App und ein druckbares Briefing für Haushalt oder Notgepäck.",
+  "hubCrisisSwitch": "Krisenmodus",
+  "hubCrisisSwitchHint": "Vergrößert Texte und Bedienelemente in der ganzen App und reduziert Animationen – derselbe Schalter wie in den Einstellungen.",
   "hubBriefingButton": "Notfallbriefing als PDF",
   "hubBriefingPdfTitle": "PreppSuite – Notfallbriefing",
   "hubBriefingCreated": "Erstellt: {date}",
@@ -2982,7 +2982,7 @@
       }
     }
   },
-  "hubSituationCrisisMode": "Größere Darstellung einschalten",
+  "hubSituationCrisisMode": "Krisenmodus einschalten",
   "hubSituationLog": "Im Protokoll festhalten",
   "hubSituationOutageKind": "Stromausfall",
   "hubFolderReportButton": "Notfallordner als PDF",

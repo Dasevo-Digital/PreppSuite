@@ -116,253 +116,238 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
       appBar: AppBar(title: Text(_l10n.hubTitle)),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : MediaQuery(
-              // Always this widget, switched or not, so that turning the
-              // mode on does not rebuild the list and lose its place.
-              data: _data.crisisMode
-                  ? MediaQuery.of(context).copyWith(
-                      textScaler: crisisTextScaler(
-                        MediaQuery.textScalerOf(context),
-                      ),
-                    )
-                  : MediaQuery.of(context),
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  if (!situation.isQuiet) ...[
-                    _situationCard(situation),
-                    const SizedBox(height: 16),
-                  ],
-                  Text(
-                    _l10n.hubPrivacyNote,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                if (!situation.isQuiet) ...[
+                  _situationCard(situation),
                   const SizedBox(height: 16),
-                  _section(
-                    _l10n.hubAutonomyTitle,
-                    Icons.monitor_heart_outlined,
-                    _l10n.hubAutonomyHint,
-                    _autonomy(reaches),
-                  ),
-                  _section(
-                    _l10n.hubWaterHygieneTitle,
-                    Icons.water_drop_outlined,
-                    _l10n.hubWaterHygieneHint,
-                    _planNote(
-                      note: _data.waterHygiene,
-                      label: _l10n.hubWaterHygieneLabel,
-                      hint: _l10n.hubWaterHygieneTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(waterHygiene: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubPowerOutageTitle,
-                    Icons.power_outlined,
-                    _l10n.hubPowerOutageHint,
-                    _planNote(
-                      note: _data.powerOutage,
-                      label: _l10n.hubPowerOutageTitle,
-                      hint: _l10n.hubPowerOutageTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(powerOutage: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubCookingTitle,
-                    Icons.soup_kitchen_outlined,
-                    _l10n.hubCookingHint,
-                    _cookingPlan(),
-                  ),
-                  _section(
-                    _l10n.hubRedundancyTitle,
-                    Icons.account_tree_outlined,
-                    _l10n.hubRedundancyHint,
-                    _planNote(
-                      note: _data.redundancy,
-                      label: _l10n.hubRedundancyTitle,
-                      hint: _l10n.hubRedundancyTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(redundancy: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubClimateRoomTitle,
-                    Icons.thermostat_outlined,
-                    _l10n.hubClimateRoomHint,
-                    _planNote(
-                      note: _data.climateRoom,
-                      label: _l10n.hubClimateRoomLabel,
-                      hint: _l10n.hubClimateRoomTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(climateRoom: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubRadioTitle,
-                    Icons.radio_outlined,
-                    _l10n.hubRadioHint,
-                    _radioPlan(),
-                  ),
-                  _section(
-                    _l10n.hubFolderTitle,
-                    Icons.folder_copy_outlined,
-                    _l10n.hubFolderHint,
-                    _folder(reaches),
-                  ),
-                  _section(
-                    _l10n.hubCommunicationTitle,
-                    Icons.forum_outlined,
-                    _l10n.hubCommunicationHint,
-                    _planNote(
-                      note: _data.communication,
-                      label: _l10n.hubCommunicationTitle,
-                      hint: _l10n.hubCommunicationTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(communication: value)),
-                      templates: [
-                        _l10n.hubStatusSafe,
-                        _l10n.hubStatusHelp,
-                      ],
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubSupportTitle,
-                    Icons.accessible_forward_outlined,
-                    _l10n.hubSupportHint,
-                    _planNote(
-                      note: _data.support,
-                      label: _l10n.hubSupportTitle,
-                      hint: _l10n.hubSupportTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(support: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubPetsTitle,
-                    Icons.pets_outlined,
-                    _l10n.hubPetsHint,
-                    _planNote(
-                      note: _data.pets,
-                      label: _l10n.hubPetsTitle,
-                      hint: _l10n.hubPetsTemplate,
-                      onSave: (value) => _change(_data.copyWith(pets: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubMobilityTitle,
-                    Icons.directions_car_outlined,
-                    _l10n.hubMobilityHint,
-                    _planNote(
-                      note: _data.mobility,
-                      label: _l10n.hubMobilityLabel,
-                      hint: _l10n.hubMobilityTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(mobility: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubUtilitiesTitle,
-                    Icons.power_off_outlined,
-                    _l10n.hubUtilitiesHint,
-                    _planNote(
-                      note: _data.utilities,
-                      label: _l10n.hubUtilitiesLabel,
-                      hint: _l10n.hubUtilitiesTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(utilities: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubMaintenanceTitle,
-                    Icons.build_outlined,
-                    _l10n.hubMaintenanceHint,
-                    _maintenance(),
-                  ),
-                  _section(
-                    _l10n.hubEvacuationTitle,
-                    Icons.route_outlined,
-                    _l10n.hubEvacuationHint,
-                    _evacuation(),
-                  ),
-                  _section(
-                    _l10n.hubEventsTitle,
-                    Icons.history_edu_outlined,
-                    _l10n.hubEventsHint,
-                    _events(),
-                  ),
-                  _section(
-                    _l10n.hubActionsTitle,
-                    Icons.timer_outlined,
-                    _l10n.hubActionsHint,
-                    _actionCards(),
-                  ),
-                  _section(
-                    _l10n.hubCrisisTitle,
-                    Icons.visibility_outlined,
-                    _l10n.hubCrisisHint,
-                    _crisisTools(),
-                  ),
-                  _section(
-                    _l10n.hubAnalogTitle,
-                    Icons.print_outlined,
-                    _l10n.hubAnalogHint,
-                    _planNote(
-                      note: _data.analogFallback,
-                      label: _l10n.hubAnalogTitle,
-                      hint: _l10n.hubAnalogTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(analogFallback: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubMutualAidTitle,
-                    Icons.volunteer_activism_outlined,
-                    _l10n.hubMutualAidHint,
-                    _planNote(
-                      note: _data.mutualAid,
-                      label: _l10n.hubMutualAidLabel,
-                      hint: _l10n.hubMutualAidTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(mutualAid: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubPracticeTitle,
-                    Icons.event_repeat_outlined,
-                    _l10n.hubPracticeHint,
-                    _planNote(
-                      note: _data.practice,
-                      label: _l10n.hubPracticeLabel,
-                      hint: _l10n.hubPracticeTemplate,
-                      onSave: (value) =>
-                          _change(_data.copyWith(practice: value)),
-                    ),
-                  ),
-                  _section(
-                    _l10n.hubResilienceTitle,
-                    Icons.hub_outlined,
-                    _l10n.hubResilienceHint,
-                    ResiliencePlanPanel(
-                      plan: _data.resilience,
-                      maintenance: _data.maintenance,
-                      onPlanChanged: (value) =>
-                          _change(_data.copyWith(resilience: value)),
-                      onMaintenanceIntervalChanged: (task, everyDays) =>
-                          _change(
-                            _data.copyWith(
-                              resilience: _data.resilience.copyWith(
-                                maintenanceEveryDays: {
-                                  ..._data.resilience.maintenanceEveryDays,
-                                  task: everyDays,
-                                },
-                              ),
-                            ),
-                          ),
-                    ),
-                  ),
                 ],
-              ),
+                Text(
+                  _l10n.hubPrivacyNote,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 16),
+                _section(
+                  _l10n.hubAutonomyTitle,
+                  Icons.monitor_heart_outlined,
+                  _l10n.hubAutonomyHint,
+                  _autonomy(reaches),
+                ),
+                _section(
+                  _l10n.hubWaterHygieneTitle,
+                  Icons.water_drop_outlined,
+                  _l10n.hubWaterHygieneHint,
+                  _planNote(
+                    note: _data.waterHygiene,
+                    label: _l10n.hubWaterHygieneLabel,
+                    hint: _l10n.hubWaterHygieneTemplate,
+                    onSave: (value) =>
+                        _change(_data.copyWith(waterHygiene: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubPowerOutageTitle,
+                  Icons.power_outlined,
+                  _l10n.hubPowerOutageHint,
+                  _planNote(
+                    note: _data.powerOutage,
+                    label: _l10n.hubPowerOutageTitle,
+                    hint: _l10n.hubPowerOutageTemplate,
+                    onSave: (value) =>
+                        _change(_data.copyWith(powerOutage: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubCookingTitle,
+                  Icons.soup_kitchen_outlined,
+                  _l10n.hubCookingHint,
+                  _cookingPlan(),
+                ),
+                _section(
+                  _l10n.hubRedundancyTitle,
+                  Icons.account_tree_outlined,
+                  _l10n.hubRedundancyHint,
+                  _planNote(
+                    note: _data.redundancy,
+                    label: _l10n.hubRedundancyTitle,
+                    hint: _l10n.hubRedundancyTemplate,
+                    onSave: (value) =>
+                        _change(_data.copyWith(redundancy: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubClimateRoomTitle,
+                  Icons.thermostat_outlined,
+                  _l10n.hubClimateRoomHint,
+                  _planNote(
+                    note: _data.climateRoom,
+                    label: _l10n.hubClimateRoomLabel,
+                    hint: _l10n.hubClimateRoomTemplate,
+                    onSave: (value) =>
+                        _change(_data.copyWith(climateRoom: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubRadioTitle,
+                  Icons.radio_outlined,
+                  _l10n.hubRadioHint,
+                  _radioPlan(),
+                ),
+                _section(
+                  _l10n.hubFolderTitle,
+                  Icons.folder_copy_outlined,
+                  _l10n.hubFolderHint,
+                  _folder(reaches),
+                ),
+                _section(
+                  _l10n.hubCommunicationTitle,
+                  Icons.forum_outlined,
+                  _l10n.hubCommunicationHint,
+                  _planNote(
+                    note: _data.communication,
+                    label: _l10n.hubCommunicationTitle,
+                    hint: _l10n.hubCommunicationTemplate,
+                    onSave: (value) =>
+                        _change(_data.copyWith(communication: value)),
+                    templates: [
+                      _l10n.hubStatusSafe,
+                      _l10n.hubStatusHelp,
+                    ],
+                  ),
+                ),
+                _section(
+                  _l10n.hubSupportTitle,
+                  Icons.accessible_forward_outlined,
+                  _l10n.hubSupportHint,
+                  _planNote(
+                    note: _data.support,
+                    label: _l10n.hubSupportTitle,
+                    hint: _l10n.hubSupportTemplate,
+                    onSave: (value) => _change(_data.copyWith(support: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubPetsTitle,
+                  Icons.pets_outlined,
+                  _l10n.hubPetsHint,
+                  _planNote(
+                    note: _data.pets,
+                    label: _l10n.hubPetsTitle,
+                    hint: _l10n.hubPetsTemplate,
+                    onSave: (value) => _change(_data.copyWith(pets: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubMobilityTitle,
+                  Icons.directions_car_outlined,
+                  _l10n.hubMobilityHint,
+                  _planNote(
+                    note: _data.mobility,
+                    label: _l10n.hubMobilityLabel,
+                    hint: _l10n.hubMobilityTemplate,
+                    onSave: (value) => _change(_data.copyWith(mobility: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubUtilitiesTitle,
+                  Icons.power_off_outlined,
+                  _l10n.hubUtilitiesHint,
+                  _planNote(
+                    note: _data.utilities,
+                    label: _l10n.hubUtilitiesLabel,
+                    hint: _l10n.hubUtilitiesTemplate,
+                    onSave: (value) =>
+                        _change(_data.copyWith(utilities: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubMaintenanceTitle,
+                  Icons.build_outlined,
+                  _l10n.hubMaintenanceHint,
+                  _maintenance(),
+                ),
+                _section(
+                  _l10n.hubEvacuationTitle,
+                  Icons.route_outlined,
+                  _l10n.hubEvacuationHint,
+                  _evacuation(),
+                ),
+                _section(
+                  _l10n.hubEventsTitle,
+                  Icons.history_edu_outlined,
+                  _l10n.hubEventsHint,
+                  _events(),
+                ),
+                _section(
+                  _l10n.hubActionsTitle,
+                  Icons.timer_outlined,
+                  _l10n.hubActionsHint,
+                  _actionCards(),
+                ),
+                _section(
+                  _l10n.hubCrisisTitle,
+                  Icons.visibility_outlined,
+                  _l10n.hubCrisisHint,
+                  _crisisTools(),
+                ),
+                _section(
+                  _l10n.hubAnalogTitle,
+                  Icons.print_outlined,
+                  _l10n.hubAnalogHint,
+                  _planNote(
+                    note: _data.analogFallback,
+                    label: _l10n.hubAnalogTitle,
+                    hint: _l10n.hubAnalogTemplate,
+                    onSave: (value) =>
+                        _change(_data.copyWith(analogFallback: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubMutualAidTitle,
+                  Icons.volunteer_activism_outlined,
+                  _l10n.hubMutualAidHint,
+                  _planNote(
+                    note: _data.mutualAid,
+                    label: _l10n.hubMutualAidLabel,
+                    hint: _l10n.hubMutualAidTemplate,
+                    onSave: (value) =>
+                        _change(_data.copyWith(mutualAid: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubPracticeTitle,
+                  Icons.event_repeat_outlined,
+                  _l10n.hubPracticeHint,
+                  _planNote(
+                    note: _data.practice,
+                    label: _l10n.hubPracticeLabel,
+                    hint: _l10n.hubPracticeTemplate,
+                    onSave: (value) => _change(_data.copyWith(practice: value)),
+                  ),
+                ),
+                _section(
+                  _l10n.hubResilienceTitle,
+                  Icons.hub_outlined,
+                  _l10n.hubResilienceHint,
+                  ResiliencePlanPanel(
+                    plan: _data.resilience,
+                    maintenance: _data.maintenance,
+                    onPlanChanged: (value) =>
+                        _change(_data.copyWith(resilience: value)),
+                    onMaintenanceIntervalChanged: (task, everyDays) => _change(
+                      _data.copyWith(
+                        resilience: _data.resilience.copyWith(
+                          maintenanceEveryDays: {
+                            ..._data.resilience.maintenanceEveryDays,
+                            task: everyDays,
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
     );
   }
@@ -423,9 +408,14 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                if (!_data.crisisMode)
+                // The app-wide mode, not one for this page: in a crisis
+                // the first aid steps and the emergency numbers need the
+                // larger display more than the plans do. Still an offer —
+                // the app reports, the household decides.
+                if (!ref.watch(crisisModeProvider))
                   OutlinedButton.icon(
-                    onPressed: () => _change(_data.copyWith(crisisMode: true)),
+                    onPressed: () =>
+                        ref.read(crisisModeProvider.notifier).setEnabled(true),
                     icon: const Icon(Icons.format_size),
                     label: Text(_l10n.hubSituationCrisisMode),
                   ),
@@ -810,14 +800,19 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
 
   Widget _crisisTools() => Column(
     children: [
+      // The same switch as in the settings. There used to be a second
+      // crisis mode here, for this page only, kept in the plan — which
+      // the shared folder carries, so switching it on one device switched
+      // it on every other.
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
-        value: _data.crisisMode,
+        value: ref.watch(crisisModeProvider),
         title: Text(_l10n.hubCrisisSwitch),
         subtitle: Text(
           _l10n.hubCrisisSwitchHint,
         ),
-        onChanged: (value) => _change(_data.copyWith(crisisMode: value)),
+        onChanged: (value) =>
+            ref.read(crisisModeProvider.notifier).setEnabled(value),
       ),
       Align(
         alignment: Alignment.centerLeft,

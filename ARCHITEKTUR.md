@@ -339,9 +339,8 @@ and outside the snapshot, so an older version reads the household from a
 newer file and a newer version finds no plan in an older one. Restoring
 merges rather than overwrites: every note, card and station carries the
 date it was last checked, and the later one wins, so a restore onto a
-device somebody kept using cannot wind the plan back. Crisis mode is the
-exception to the exception — it describes what this device is showing
-right now, so a restore never switches it.
+device somebody kept using cannot wind the plan back. Crisis mode is not
+in the plan at all — see below.
 
 Anything else that grows outside drift inherits this problem. A new
 `SharedPreferences` key that holds something a household would be sorry
@@ -531,7 +530,21 @@ wolf over a wind advisory is one people learn to scroll past.
 
 What it must not do is act. The larger display stays an offer, and the
 incident log opens the ordinary dialog with the warning's own words
-filled in rather than writing an entry itself. A screen that rearranges
+filled in rather than writing an entry itself.
+
+**There is one crisis mode, and it belongs to the device.** The hub had a
+second one, for its own page only, kept in the plan — and the plan
+travels through the shared folder, so switching it on the telephone
+switched it on the laptop two minutes later. Both the hub's switch and the
+banner's offer now set `crisisModeProvider`, the same switch as in the
+settings, stored in preferences that do not travel. It enlarges the whole
+app (`crisisTextScaler`: at least 1.25, never below the system size) and
+turns animations off: in a crisis it is the first aid steps and the
+emergency numbers that need it, more than the plans. A plan written with
+the old field still reads; the field is ignored and not written again.
+An old page-only setting was deliberately not carried over — switching
+the whole app to a larger display unannounced after an update would be
+the screen rearranging itself that the rule above forbids. A screen that rearranges
 itself because a feed said so is a screen nobody can rely on, and a log
 the app wrote is not a record of what the household saw.
 
