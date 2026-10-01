@@ -7771,4 +7771,37 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get statusSupplyLimitBoth =>
       'Begrenzende Faktoren: Trinkwasser und verfügbare Kalorien.';
+
+  @override
+  String get hubComicTitle => 'Mit Kindern über Notfälle sprechen';
+
+  @override
+  String get hubComicHint =>
+      'Der Comic „Mila und Nuss“ erklärt Kindern in sechs kurzen Kapiteln, was sie bei Stromausfall, Sirene, Sturm, Feuer und Krieg tun können. Er ist in der App enthalten und braucht kein Internet.';
+
+  @override
+  String get hubComicOpen => 'Comic lesen';
+
+  @override
+  String comicChapterNumber(int number) {
+    return 'Kapitel $number';
+  }
+
+  @override
+  String get comicRulesTitle => 'Zum Merken';
+
+  @override
+  String get comicRulesHint =>
+      'Alle Regeln und die Notrufnummern auf einen Blick';
+
+  @override
+  String get comicNumbersTitle => 'Notrufnummern';
+
+  @override
+  String get comicParentsTitle => 'Für Eltern und Erziehende';
+
+  @override
+  String comicNext(String title) {
+    return 'Weiter: $title';
+  }
 }

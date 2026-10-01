@@ -7731,4 +7731,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get statusSupplyLimitBoth =>
       'Limiting factors: drinking water and available calories.';
+
+  @override
+  String get hubComicTitle => 'Talking to children about emergencies';
+
+  @override
+  String get hubComicHint =>
+      'The comic “Mila and Nuss” explains to children in six short chapters what they can do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war. It comes with the app and needs no internet.';
+
+  @override
+  String get hubComicOpen => 'Read the comic';
+
+  @override
+  String comicChapterNumber(int number) {
+    return 'Chapter $number';
+  }
+
+  @override
+  String get comicRulesTitle => 'To remember';
+
+  @override
+  String get comicRulesHint =>
+      'All the rules and the emergency numbers at a glance';
+
+  @override
+  String get comicNumbersTitle => 'Emergency numbers';
+
+  @override
+  String get comicParentsTitle => 'For parents and carers';
+
+  @override
+  String comicNext(String title) {
+    return 'Next: $title';
+  }
 }

@@ -18,6 +18,7 @@ import '../../household/application/household_providers.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/application/supply_calculator.dart';
 import '../../inventory/presentation/prepper_recipes_screen.dart';
+import '../../kids_comic/presentation/kids_comic_screen.dart';
 import '../application/autonomy_overview.dart';
 import '../application/current_situation.dart';
 import '../application/emergency_folder_report.dart';
@@ -290,6 +291,23 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
                   Icons.visibility_outlined,
                   _l10n.hubCrisisHint,
                   _crisisTools(),
+                ),
+                _section(
+                  _l10n.hubComicTitle,
+                  Icons.auto_stories_outlined,
+                  _l10n.hubComicHint,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const KidsComicScreen(),
+                        ),
+                      ),
+                      icon: const Icon(Icons.menu_book_outlined),
+                      label: Text(_l10n.hubComicOpen),
+                    ),
+                  ),
                 ),
                 _section(
                   _l10n.hubAnalogTitle,

@@ -153,6 +153,15 @@ selbst, wohin sie gehören.
 PDF-Bericht der fehlenden Ausrüstung – der Bestände also, die unter ihrem
 Mindestbestand liegen.
 
+**Mila und Nuss.** Ein Notfall-Comic für Kinder in sechs Kapiteln:
+Vorräte, Stromausfall, Sirene, Sturm und Hochwasser, Feuer und – bewusst
+ruhig erzählt – was man tut, wenn die Großen von Krieg reden. Dazu ein
+Merkzettel mit allen Regeln und Hinweise für Eltern. Mila ist ein Mädchen,
+Nuss ein Eichhörnchen, das Vorräte anlegt. Die Regeln folgen den
+Empfehlungen des BBK; Figuren und Zeichnungen sind eigene. Der Comic ist in
+der App enthalten, auf Deutsch und Englisch, und braucht kein Internet; zu
+finden in der Vorsorge-Zentrale.
+
 **Erste Hilfe.** Sechsundvierzig Anleitungen in Dringlichkeitsreihenfolge.
 Siebzehn davon nach den Reanimations- und Erste-Hilfe-Leitlinien 2025 des
 European Resuscitation Council, deutsche Fassung des German Resuscitation

@@ -61,6 +61,8 @@ import '../features/warnings/presentation/iodine_tablets_screen.dart';
 import '../features/warnings/presentation/radiation_screen.dart';
 import '../features/warnings/presentation/road_closure_screen.dart';
 import '../features/warnings/presentation/warning_situation_map_screen.dart';
+import '../features/kids_comic/application/kids_comic.dart';
+import '../features/kids_comic/presentation/kids_comic_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../model/household_profile.dart';
 
@@ -532,6 +534,25 @@ List<AppDestination> appDestinations() => [
     icon: Icons.hub_outlined,
     area: ShellDestination.household,
     open: (p) => PreparednessHubScreen(householdId: p.id),
+  ),
+  AppDestination(
+    id: 'kids-comic',
+    // The comic's own name, from its content file: it is a title, not
+    // interface wording.
+    title: (l) => kidsComic(l.localeName).title,
+    icon: Icons.auto_stories_outlined,
+    area: ShellDestination.household,
+    open: (p) => const KidsComicScreen(),
+    aliases: [
+      'kinder',
+      'kind',
+      'comic',
+      'familie',
+      'mila',
+      'nuss',
+      'children',
+      'kids',
+    ],
   ),
   AppDestination(
     id: 'drills',

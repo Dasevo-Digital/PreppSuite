@@ -4355,5 +4355,16 @@
   },
   "statusSupplyLimitWater": "Limiting factor: drinking water.",
   "statusSupplyLimitCalories": "Limiting factor: available calories.",
-  "statusSupplyLimitBoth": "Limiting factors: drinking water and available calories."
+  "statusSupplyLimitBoth": "Limiting factors: drinking water and available calories.",
+  "hubComicTitle": "Talking to children about emergencies",
+  "hubComicHint": "The comic “Mila and Nuss” explains to children in six short chapters what they can do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war. It comes with the app and needs no internet.",
+  "hubComicOpen": "Read the comic",
+  "comicChapterNumber": "Chapter {number}",
+  "@comicChapterNumber": {"placeholders": {"number": {"type": "int"}}},
+  "comicRulesTitle": "To remember",
+  "comicRulesHint": "All the rules and the emergency numbers at a glance",
+  "comicNumbersTitle": "Emergency numbers",
+  "comicParentsTitle": "For parents and carers",
+  "comicNext": "Next: {title}",
+  "@comicNext": {"placeholders": {"title": {"type": "String"}}}
 }

@@ -12892,6 +12892,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Limiting factors: drinking water and available calories.'**
   String get statusSupplyLimitBoth;
+
+  /// No description provided for @hubComicTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Talking to children about emergencies'**
+  String get hubComicTitle;
+
+  /// No description provided for @hubComicHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The comic “Mila and Nuss” explains to children in six short chapters what they can do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war. It comes with the app and needs no internet.'**
+  String get hubComicHint;
+
+  /// No description provided for @hubComicOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the comic'**
+  String get hubComicOpen;
+
+  /// No description provided for @comicChapterNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter {number}'**
+  String comicChapterNumber(int number);
+
+  /// No description provided for @comicRulesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'To remember'**
+  String get comicRulesTitle;
+
+  /// No description provided for @comicRulesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'All the rules and the emergency numbers at a glance'**
+  String get comicRulesHint;
+
+  /// No description provided for @comicNumbersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency numbers'**
+  String get comicNumbersTitle;
+
+  /// No description provided for @comicParentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'For parents and carers'**
+  String get comicParentsTitle;
+
+  /// No description provided for @comicNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: {title}'**
+  String comicNext(String title);
 }
 
 class _AppLocalizationsDelegate

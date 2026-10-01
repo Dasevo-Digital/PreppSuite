@@ -467,6 +467,21 @@ steps, cautions and figures â a translation that quietly drops a step
 drops a step of a resuscitation. Buttons and headings on those screens go
 through the ARB files like everything else.
 
+**The children's comic is the second exception, for the same reason.**
+"Mila und Nuss" is a story, and a story has to read end to end: its words
+live in `kids_comic_de.dart` and `kids_comic_en.dart`, and
+`kids_comic_test.dart` holds the two to the same chapters, pictures and
+speakers in the same order. Its drawings are made once, as SVG, in
+`tool/comic/mila_und_nuss.html` — which is also the web edition — and
+rendered to `assets/comic/` by `tool/comic/render_panels.py` (macOS, Quick
+Look and `sips`, nothing to install). Pictures carry no words, so both
+languages share them; change a drawing in the HTML and run the script, never
+edit a PNG. The test checks that every picture the text names is carried and
+drawn. What the comic advises follows the BBK; the characters are this
+app's own. The BBK declined the use of its "Max und Flocke" comics on
+2026-10-01, so nothing of theirs may go into the repository or a package,
+and a link or embed was ruled out as well.
+
 **First aid works on a fresh install with no network, no download and no
 setting.** That is the whole reason it is its own feature rather than a
 corner of `features/knowledge/`, which is an encyclopedia behind a

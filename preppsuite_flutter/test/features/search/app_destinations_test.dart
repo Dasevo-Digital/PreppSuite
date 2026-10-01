@@ -86,6 +86,10 @@ void main() {
       'ArticleReaderScreen',
       'ArticleScreen',
       'FirstAidGuideScreen',
+      // One chapter of the comic, and its summary sheet: pages of a story
+      // that is itself a destination, read in order from its cover.
+      'KidsComicChapterScreen',
+      'KidsComicRulesScreen',
       'FirstAidVideoScreen',
       'PersonalDocumentReaderScreen',
       'PhotoEditorScreen',

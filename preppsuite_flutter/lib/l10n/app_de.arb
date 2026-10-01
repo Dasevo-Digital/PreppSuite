@@ -3351,5 +3351,14 @@
   },
   "statusSupplyLimitWater": "Begrenzender Faktor: Trinkwasser.",
   "statusSupplyLimitCalories": "Begrenzender Faktor: verfügbare Kalorien.",
-  "statusSupplyLimitBoth": "Begrenzende Faktoren: Trinkwasser und verfügbare Kalorien."
+  "statusSupplyLimitBoth": "Begrenzende Faktoren: Trinkwasser und verfügbare Kalorien.",
+  "hubComicTitle": "Mit Kindern über Notfälle sprechen",
+  "hubComicHint": "Der Comic „Mila und Nuss“ erklärt Kindern in sechs kurzen Kapiteln, was sie bei Stromausfall, Sirene, Sturm, Feuer und Krieg tun können. Er ist in der App enthalten und braucht kein Internet.",
+  "hubComicOpen": "Comic lesen",
+  "comicChapterNumber": "Kapitel {number}",
+  "comicRulesTitle": "Zum Merken",
+  "comicRulesHint": "Alle Regeln und die Notrufnummern auf einen Blick",
+  "comicNumbersTitle": "Notrufnummern",
+  "comicParentsTitle": "Für Eltern und Erziehende",
+  "comicNext": "Weiter: {title}"
 }

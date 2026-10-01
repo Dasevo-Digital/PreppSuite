@@ -1,0 +1,1003 @@
+<title>Mila und Nuss</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Grandstander:wght@600;800&display=swap">
+<style>
+/* Layout: a printed comic sheet — ink-framed panels in a two-up grid,
+   speech below each drawing, one chapter per crisis; paper stays paper
+   in both themes, only the table it lies on changes. */
+:root {
+  --bg: #e6eef4;          /* the table the comic lies on */
+  --fg: #1f2a3a;
+  --muted: #4c5b70;
+  --paper: #fffdf7;       /* comic paper, same in both themes */
+  --ink: #1d2433;         /* drawing ink, same in both themes */
+  --nuss: #d9702a;        /* squirrel orange, the accent */
+  --mila: #f2c21b;
+  --papa: #4f8f6b;
+  --sky: #bfe3f5;
+  --night: #24315c;
+  --wall: #f3e2c6;
+  --floor: #c99e6e;
+  --alert: #c8352c;
+  --note: #fff1b8;
+  --chip: #ffffff;
+  --display: "Grandstander", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+  --read: "Andika", "Atkinson Hyperlegible", "Verdana", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141b26; --fg: #e8edf4; --muted: #a9b6c8; --chip: #1f2836; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141b26; --fg: #e8edf4; --muted: #a9b6c8; --chip: #1f2836; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--read);
+  font-size: 1.05rem;
+  line-height: 1.5;
+  padding-block: 24px 64px;
+  padding-inline: 16px;
+}
+.sheet { max-width: 1040px; margin: 0 auto; display: grid; gap: 48px; }
+
+/* Cover */
+.cover {
+  background: var(--paper);
+  color: var(--ink);
+  border: 4px solid var(--ink);
+  box-shadow: 8px 8px 0 var(--ink);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  overflow: hidden;
+}
+.cover-text { padding: 28px clamp(20px, 4vw, 40px); display: grid; gap: 14px; min-width: 0; }
+.cover h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  line-height: 0.95;
+  margin: 0;
+  text-wrap: balance;
+}
+.cover h1 span { color: var(--nuss); }
+.cover .tag {
+  font-family: var(--display); font-weight: 600; font-size: 1.25rem; margin: 0;
+}
+.cover p { margin: 0; max-width: 46ch; }
+.cover svg { width: 100%; height: auto; display: block; background: var(--sky); border-left: 4px solid var(--ink); }
+
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 0; padding: 0; list-style: none; }
+.toc a {
+  display: inline-block; padding: 6px 12px;
+  border: 2px solid var(--ink); border-radius: 999px;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--display); font-weight: 600; font-size: 0.95rem;
+  text-decoration: none;
+}
+.toc a:hover, .toc a:focus-visible { background: var(--note); outline: none; }
+
+/* Chapters */
+.chapter { display: grid; gap: 18px; scroll-margin-top: 16px; }
+.chapter header { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.chapter .num {
+  font-family: var(--display); font-weight: 800; font-size: 1rem;
+  background: var(--ink); color: var(--paper);
+  padding: 2px 10px; border-radius: 4px; letter-spacing: 0.04em;
+}
+.chapter h2 {
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(1.7rem, 4vw, 2.4rem); margin: 0; line-height: 1.1;
+  text-wrap: balance;
+}
+.chapter .lede { margin: 0; color: var(--muted); max-width: 62ch; }
+
+.strip { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.panel {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+.panel.wide { grid-column: 1 / -1; }
+.panel svg { display: block; width: 100%; height: auto; border-bottom: 3px solid var(--ink); }
+.talk { display: grid; gap: 10px; padding: 14px 14px 16px; align-content: start; }
+
+.say {
+  position: relative;
+  margin: 0;
+  padding: 8px 12px 9px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: var(--paper);
+  font-size: 1.08rem;
+  line-height: 1.4;
+}
+.say b {
+  font-family: var(--display); font-weight: 800; font-size: 0.82rem;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  display: inline-block; margin-right: 6px; padding: 0 6px; border-radius: 4px;
+  border: 1.5px solid var(--ink);
+}
+.say.mila b { background: var(--mila); }
+.say.nuss b { background: var(--nuss); color: #fff; }
+.say.papa b { background: var(--papa); color: #fff; }
+.say.nachbarin b { background: #b48ad6; }
+.say::before {
+  content: ""; position: absolute; top: -9px; left: 22px;
+  width: 14px; height: 14px; background: var(--paper);
+  border-left: 2px solid var(--ink); border-top: 2px solid var(--ink);
+  transform: rotate(45deg);
+}
+.cap {
+  margin: 0; padding: 8px 12px;
+  background: var(--note); border: 2px solid var(--ink);
+  font-size: 1rem; line-height: 1.4;
+}
+.cap strong { font-weight: 700; }
+
+/* Rules sheet */
+.rules { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.rule {
+  background: var(--paper); color: var(--ink);
+  border: 3px solid var(--ink); padding: 14px 16px; min-width: 0;
+  display: grid; gap: 6px; align-content: start;
+}
+.rule h3 { font-family: var(--display); font-weight: 800; margin: 0; font-size: 1.2rem; }
+.rule ul { margin: 0; padding-left: 1.1em; display: grid; gap: 3px; }
+
+.pack {
+  background: var(--paper); color: var(--ink);
+  border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--nuss);
+  padding: 18px 20px; display: grid; gap: 12px;
+}
+.pack h3 { font-family: var(--display); font-weight: 800; margin: 0; font-size: 1.5rem; }
+.pack ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px 16px; }
+.pack label { display: flex; gap: 10px; align-items: center; cursor: pointer; font-size: 1.08rem; }
+.pack input { width: 22px; height: 22px; accent-color: var(--nuss); flex: none; }
+.pack input:focus-visible { outline: 3px solid var(--nuss); outline-offset: 2px; }
+.pack .count { font-family: var(--display); font-weight: 600; margin: 0; }
+.pack button {
+  justify-self: start; font: inherit; font-family: var(--display); font-weight: 600;
+  padding: 6px 14px; border: 2px solid var(--ink); background: var(--paper); color: var(--ink);
+  border-radius: 999px; cursor: pointer;
+}
+.pack button:focus-visible { outline: 3px solid var(--nuss); outline-offset: 2px; }
+
+.numbers { display: flex; flex-wrap: wrap; gap: 12px; }
+.numbers div {
+  background: var(--alert); color: #fff; border: 3px solid var(--ink);
+  padding: 8px 16px; font-family: var(--display); font-weight: 800; font-size: 1.15rem;
+}
+.numbers div span { font-size: 2rem; margin-right: 8px; font-variant-numeric: tabular-nums; }
+
+.parents {
+  border-top: 3px dashed var(--muted);
+  padding-top: 24px; display: grid; gap: 12px; max-width: 70ch;
+}
+.parents h2 { font-family: var(--display); font-weight: 800; margin: 0; font-size: 1.6rem; }
+.parents p, .parents ul { margin: 0; }
+.parents ul { padding-left: 1.2em; display: grid; gap: 6px; }
+.parents .src { color: var(--muted); font-size: 0.95rem; }
+
+@media (max-width: 760px) {
+  .cover { grid-template-columns: minmax(0, 1fr); }
+  .cover svg { border-left: 0; border-top: 4px solid var(--ink); }
+  .strip { grid-template-columns: minmax(0, 1fr); }
+  .rules { grid-template-columns: minmax(0, 1fr); }
+}
+@media (min-width: 761px) and (max-width: 980px) {
+  .rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .waves { animation: pulse 1.6s ease-in-out infinite; transform-origin: center; }
+  @keyframes pulse { 50% { opacity: 0.35; } }
+}
+</style>
+
+<!-- The cast and the props, drawn once and placed in every panel. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="mila" viewBox="0 0 60 110">
+      <circle cx="12" cy="22" r="7" fill="#6b3f24" stroke="#1d2433" stroke-width="2"/>
+      <circle cx="48" cy="22" r="7" fill="#6b3f24" stroke="#1d2433" stroke-width="2"/>
+      <path d="M17 48 L7 68" stroke="#f2c7a5" stroke-width="6" stroke-linecap="round"/>
+      <path d="M43 48 L53 68" stroke="#f2c7a5" stroke-width="6" stroke-linecap="round"/>
+      <path d="M18 44 Q30 40 42 44 L47 80 L13 80 Z" fill="#f2c21b" stroke="#1d2433" stroke-width="2"/>
+      <rect x="20" y="80" width="7" height="22" fill="#3d5a99" stroke="#1d2433" stroke-width="1.5"/>
+      <rect x="33" y="80" width="7" height="22" fill="#3d5a99" stroke="#1d2433" stroke-width="1.5"/>
+      <ellipse cx="23" cy="104" rx="7" ry="3.5" fill="#c8352c" stroke="#1d2433" stroke-width="1.5"/>
+      <ellipse cx="37" cy="104" rx="7" ry="3.5" fill="#c8352c" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="30" cy="26" r="16" fill="#f2c7a5" stroke="#1d2433" stroke-width="2"/>
+      <path d="M14 24 Q30 0 46 24 Q40 13 30 13 Q20 13 14 24 Z" fill="#6b3f24" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="20" cy="32" r="3" fill="#f29a8a" opacity="0.7"/>
+      <circle cx="40" cy="32" r="3" fill="#f29a8a" opacity="0.7"/>
+      <circle cx="24" cy="27" r="2" fill="#1d2433"/>
+      <circle cx="36" cy="27" r="2" fill="#1d2433"/>
+      <path d="M24 34 Q30 39 36 34" stroke="#1d2433" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="mila-sorge" viewBox="0 0 60 110">
+      <use href="#mila"/>
+      <rect x="22" y="31.5" width="16" height="8" fill="#f2c7a5"/>
+      <ellipse cx="30" cy="36" rx="2.6" ry="3.2" fill="#1d2433"/>
+      <path d="M20 23.5 L26.5 21 M40 23.5 L33.5 21" stroke="#1d2433" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="mila-krabbelt" viewBox="0 0 120 70">
+      <path d="M40 40 L30 58 L10 60" stroke="#3d5a99" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M48 40 L42 58 L22 62" stroke="#34508c" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <ellipse cx="8" cy="60" rx="6" ry="4" fill="#c8352c" stroke="#1d2433" stroke-width="1.5"/>
+      <ellipse cx="20" cy="62" rx="6" ry="4" fill="#c8352c" stroke="#1d2433" stroke-width="1.5"/>
+      <path d="M80 36 L84 60" stroke="#f2c7a5" stroke-width="6" stroke-linecap="round"/>
+      <path d="M70 38 L72 61" stroke="#e8b48f" stroke-width="6" stroke-linecap="round"/>
+      <path d="M36 28 Q60 20 84 30 L82 44 Q60 48 38 44 Z" fill="#f2c21b" stroke="#1d2433" stroke-width="2"/>
+      <circle cx="86" cy="10" r="6" fill="#6b3f24" stroke="#1d2433" stroke-width="2"/>
+      <circle cx="110" cy="14" r="6" fill="#6b3f24" stroke="#1d2433" stroke-width="2"/>
+      <circle cx="98" cy="24" r="14" fill="#f2c7a5" stroke="#1d2433" stroke-width="2"/>
+      <path d="M85 20 Q98 2 111 20 Q105 12 98 12 Q91 12 85 20 Z" fill="#6b3f24" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="96" cy="24" r="1.9" fill="#1d2433"/>
+      <circle cx="106" cy="24" r="1.9" fill="#1d2433"/>
+      <path d="M97 31 L105 31" stroke="#1d2433" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="nuss" viewBox="0 0 80 70">
+      <path d="M22 60 C0 56 -2 20 18 9 C31 2 38 16 29 24 C22 30 26 42 35 46 Z" fill="#c8641e" stroke="#1d2433" stroke-width="2"/>
+      <path d="M12 30 C10 22 14 15 20 13" stroke="#f0a060" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="44" cy="50" rx="16" ry="14" fill="#e07a2e" stroke="#1d2433" stroke-width="2"/>
+      <ellipse cx="48" cy="52" rx="8" ry="9" fill="#f6d2a8"/>
+      <path d="M46 20 L48 9 L54 18 Z" fill="#e07a2e" stroke="#1d2433" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M58 17 L62 7 L65 19 Z" fill="#e07a2e" stroke="#1d2433" stroke-width="2" stroke-linejoin="round"/>
+      <circle cx="55" cy="28" r="12" fill="#e07a2e" stroke="#1d2433" stroke-width="2"/>
+      <circle cx="59" cy="26" r="2.3" fill="#1d2433"/>
+      <circle cx="66" cy="30" r="2.2" fill="#1d2433"/>
+      <path d="M58 33 Q61 35.5 64 33" stroke="#1d2433" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <circle cx="60" cy="46" r="3.5" fill="#e07a2e" stroke="#1d2433" stroke-width="1.5"/>
+      <ellipse cx="40" cy="63" rx="6" ry="3" fill="#c8641e" stroke="#1d2433" stroke-width="1.5"/>
+      <ellipse cx="53" cy="63" rx="6" ry="3" fill="#c8641e" stroke="#1d2433" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="papa" viewBox="0 0 70 160">
+      <path d="M16 56 L5 92" stroke="#e8b48f" stroke-width="7" stroke-linecap="round"/>
+      <path d="M54 56 L65 92" stroke="#e8b48f" stroke-width="7" stroke-linecap="round"/>
+      <path d="M15 54 Q35 46 55 54 L58 110 L12 110 Z" fill="#4f8f6b" stroke="#1d2433" stroke-width="2"/>
+      <rect x="18" y="110" width="12" height="40" fill="#2f3b52" stroke="#1d2433" stroke-width="1.5"/>
+      <rect x="40" y="110" width="12" height="40" fill="#2f3b52" stroke="#1d2433" stroke-width="1.5"/>
+      <ellipse cx="23" cy="153" rx="9" ry="4" fill="#5a3a26" stroke="#1d2433" stroke-width="1.5"/>
+      <ellipse cx="47" cy="153" rx="9" ry="4" fill="#5a3a26" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="35" cy="30" r="18" fill="#e8b48f" stroke="#1d2433" stroke-width="2"/>
+      <path d="M17 28 Q20 8 35 9 Q52 9 53 28 Q47 18 35 18 Q24 18 17 28 Z" fill="#3b2b22" stroke="#1d2433" stroke-width="1.5"/>
+      <path d="M19 34 Q22 50 35 50 Q48 50 51 34 Q46 42 35 42 Q24 42 19 34 Z" fill="#3b2b22"/>
+      <circle cx="28" cy="29" r="5.5" fill="none" stroke="#1d2433" stroke-width="1.8"/>
+      <circle cx="42" cy="29" r="5.5" fill="none" stroke="#1d2433" stroke-width="1.8"/>
+      <path d="M33.5 29 L36.5 29" stroke="#1d2433" stroke-width="1.8"/>
+      <circle cx="28" cy="29" r="1.8" fill="#1d2433"/>
+      <circle cx="42" cy="29" r="1.8" fill="#1d2433"/>
+      <path d="M30 40 Q35 43 40 40" stroke="#e8b48f" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="nachbarin" viewBox="0 0 64 150">
+      <path d="M14 56 L6 88" stroke="#c99a78" stroke-width="6" stroke-linecap="round"/>
+      <path d="M50 56 L58 88" stroke="#c99a78" stroke-width="6" stroke-linecap="round"/>
+      <path d="M13 52 Q32 45 51 52 L58 120 L6 120 Z" fill="#8d5bb8" stroke="#1d2433" stroke-width="2"/>
+      <rect x="18" y="120" width="10" height="22" fill="#3a3a48"/>
+      <rect x="36" y="120" width="10" height="22" fill="#3a3a48"/>
+      <ellipse cx="23" cy="144" rx="8" ry="3.5" fill="#1d2433"/>
+      <ellipse cx="41" cy="144" rx="8" ry="3.5" fill="#1d2433"/>
+      <circle cx="32" cy="9" r="8" fill="#d8d8de" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="32" cy="30" r="17" fill="#c99a78" stroke="#1d2433" stroke-width="2"/>
+      <path d="M15 28 Q18 12 32 12 Q46 12 49 28 Q42 19 32 19 Q22 19 15 28 Z" fill="#d8d8de" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="26" cy="30" r="2" fill="#1d2433"/>
+      <circle cx="38" cy="30" r="2" fill="#1d2433"/>
+      <path d="M26 38 Q32 42 38 38" stroke="#1d2433" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="lampe" viewBox="0 0 80 30">
+      <polygon points="24,10 80,0 80,30 24,20" fill="#fff3a6" opacity="0.85"/>
+      <rect x="1" y="9" width="24" height="12" rx="3" fill="#2b6cb0" stroke="#1d2433" stroke-width="2"/>
+      <rect x="22" y="7" width="5" height="16" rx="1.5" fill="#9cc3e8" stroke="#1d2433" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="radio" viewBox="0 0 56 40">
+      <path d="M42 10 L52 1" stroke="#1d2433" stroke-width="2" stroke-linecap="round"/>
+      <rect x="2" y="10" width="46" height="28" rx="5" fill="#b5523b" stroke="#1d2433" stroke-width="2"/>
+      <circle cx="16" cy="24" r="8" fill="#3a2a24" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="16" cy="24" r="3" fill="#6b5148"/>
+      <rect x="29" y="16" width="15" height="7" rx="1.5" fill="#f2e6c8" stroke="#1d2433" stroke-width="1.2"/>
+      <circle cx="36" cy="31" r="3" fill="#f2e6c8" stroke="#1d2433" stroke-width="1.2"/>
+      <path d="M48 24 L54 24 L54 32" stroke="#1d2433" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="rucksack" viewBox="0 0 44 50">
+      <path d="M12 10 Q22 0 32 10" stroke="#1d2433" stroke-width="3" fill="none"/>
+      <rect x="4" y="9" width="36" height="38" rx="9" fill="#6fae5c" stroke="#1d2433" stroke-width="2"/>
+      <path d="M6 22 Q22 30 38 22" stroke="#1d2433" stroke-width="2" fill="#5c9a4a"/>
+      <rect x="15" y="31" width="14" height="10" rx="3" fill="#5c9a4a" stroke="#1d2433" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="hase" viewBox="0 0 30 36">
+      <ellipse cx="10" cy="8" rx="3.5" ry="8" fill="#f1e4f0" stroke="#1d2433" stroke-width="1.5"/>
+      <ellipse cx="20" cy="8" rx="3.5" ry="8" fill="#f1e4f0" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="15" cy="20" r="8" fill="#f1e4f0" stroke="#1d2433" stroke-width="1.5"/>
+      <ellipse cx="15" cy="31" rx="8" ry="5" fill="#f1e4f0" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="12" cy="19" r="1.3" fill="#1d2433"/><circle cx="18" cy="19" r="1.3" fill="#1d2433"/>
+      <circle cx="15" cy="22.5" r="1.2" fill="#e7849a"/>
+    </symbol>
+    <symbol id="kerze-nein" viewBox="0 0 40 50">
+      <path d="M20 4 Q26 12 20 18 Q14 12 20 4 Z" fill="#f7a823" stroke="#1d2433" stroke-width="1.5"/>
+      <rect x="15" y="18" width="10" height="26" fill="#ffffff" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="20" cy="26" r="17" fill="none" stroke="#c8352c" stroke-width="4"/>
+      <path d="M8 38 L32 14" stroke="#c8352c" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="sirene" viewBox="0 0 100 120">
+      <rect x="47" y="34" width="6" height="86" fill="#8b93a1" stroke="#1d2433" stroke-width="1.5"/>
+      <rect x="32" y="12" width="36" height="24" rx="6" fill="#c9ccd3" stroke="#1d2433" stroke-width="2"/>
+      <path d="M36 18 L64 18 M36 24 L64 24 M36 30 L64 30" stroke="#1d2433" stroke-width="1.2"/>
+      <g class="waves" stroke="#c8352c" stroke-width="3" fill="none" stroke-linecap="round">
+        <path d="M24 10 Q14 24 24 38"/><path d="M14 4 Q0 24 14 44"/>
+        <path d="M76 10 Q86 24 76 38"/><path d="M86 4 Q100 24 86 44"/>
+      </g>
+    </symbol>
+    <symbol id="sirene-still" viewBox="0 0 100 120">
+      <rect x="47" y="34" width="6" height="86" fill="#8b93a1" stroke="#1d2433" stroke-width="1.5"/>
+      <rect x="32" y="12" width="36" height="24" rx="6" fill="#c9ccd3" stroke="#1d2433" stroke-width="2"/>
+      <path d="M36 18 L64 18 M36 24 L64 24 M36 30 L64 30" stroke="#1d2433" stroke-width="1.2"/>
+      <path d="M8 24 L26 24 M74 24 L92 24" stroke="#4f8f6b" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="wolke" viewBox="0 0 100 70">
+      <path d="M20 44 Q4 44 6 30 Q8 18 22 20 Q26 4 44 6 Q60 6 64 18 Q82 14 88 28 Q96 44 78 46 Z" fill="#6b7a90" stroke="#1d2433" stroke-width="2"/>
+      <polygon points="46,44 36,62 46,60 40,74 60,52 50,54 56,44" fill="#f7d026" stroke="#1d2433" stroke-width="1.5"/>
+    </symbol>
+    <symbol id="baum" viewBox="0 0 80 120">
+      <rect x="34" y="60" width="12" height="60" fill="#7a5132" stroke="#1d2433" stroke-width="2"/>
+      <circle cx="40" cy="40" r="32" fill="#6fae5c" stroke="#1d2433" stroke-width="2"/>
+      <circle cx="22" cy="52" r="16" fill="#5c9a4a" stroke="#1d2433" stroke-width="2"/>
+      <circle cx="58" cy="52" r="16" fill="#5c9a4a" stroke="#1d2433" stroke-width="2"/>
+    </symbol>
+    <symbol id="rauch" viewBox="0 0 100 60">
+      <g fill="#9aa2ad" stroke="#1d2433" stroke-width="1.5" opacity="0.9">
+        <circle cx="20" cy="36" r="16"/><circle cx="42" cy="24" r="20"/><circle cx="66" cy="30" r="17"/><circle cx="84" cy="40" r="13"/>
+      </g>
+    </symbol>
+    <symbol id="melder" viewBox="0 0 70 40">
+      <ellipse cx="35" cy="10" rx="20" ry="8" fill="#ffffff" stroke="#1d2433" stroke-width="2"/>
+      <circle cx="35" cy="10" r="2.5" fill="#c8352c"/>
+      <g stroke="#c8352c" stroke-width="2.5" stroke-linecap="round">
+        <path d="M14 22 L6 32"/><path d="M35 24 L35 36"/><path d="M56 22 L64 32"/>
+      </g>
+    </symbol>
+    <symbol id="fenster" viewBox="0 0 70 60">
+      <rect x="2" y="2" width="66" height="56" fill="#bfe3f5" stroke="#1d2433" stroke-width="3"/>
+      <path d="M35 2 L35 58 M2 30 L68 30" stroke="#1d2433" stroke-width="3"/>
+    </symbol>
+    <symbol id="fenster-nacht" viewBox="0 0 70 60">
+      <rect x="2" y="2" width="66" height="56" fill="#24315c" stroke="#1d2433" stroke-width="3"/>
+      <circle cx="52" cy="16" r="7" fill="#f4eecb"/>
+      <path d="M35 2 L35 58 M2 30 L68 30" stroke="#1d2433" stroke-width="3"/>
+    </symbol>
+    <symbol id="kuehlschrank" viewBox="0 0 44 90">
+      <rect x="2" y="2" width="40" height="86" rx="4" fill="#e9eef3" stroke="#1d2433" stroke-width="2"/>
+      <path d="M2 34 L42 34" stroke="#1d2433" stroke-width="2"/>
+      <rect x="33" y="12" width="4" height="14" rx="2" fill="#1d2433"/>
+      <rect x="33" y="44" width="4" height="20" rx="2" fill="#1d2433"/>
+      <circle cx="22" cy="58" r="10" fill="#ffffff" stroke="#c8352c" stroke-width="2.5"/>
+      <path d="M17 58 L27 58" stroke="#c8352c" stroke-width="3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="regal" viewBox="0 0 110 90">
+      <rect x="2" y="2" width="106" height="86" fill="#d8b98e" stroke="#1d2433" stroke-width="2"/>
+      <path d="M2 44 L108 44" stroke="#1d2433" stroke-width="2"/>
+      <g stroke="#1d2433" stroke-width="1.5">
+        <rect x="10" y="14" width="12" height="28" rx="3" fill="#9fd3f0"/><rect x="26" y="14" width="12" height="28" rx="3" fill="#9fd3f0"/><rect x="42" y="14" width="12" height="28" rx="3" fill="#9fd3f0"/>
+        <rect x="62" y="26" width="16" height="16" fill="#c8352c"/><rect x="82" y="26" width="16" height="16" fill="#f2c21b"/>
+        <rect x="10" y="60" width="18" height="26" fill="#e9d6a8"/><rect x="32" y="66" width="16" height="20" fill="#4f8f6b"/>
+        <rect x="54" y="62" width="22" height="24" fill="#f6efe0"/><rect x="80" y="70" width="20" height="16" fill="#b5523b"/>
+      </g>
+    </symbol>
+    <symbol id="nuesse" viewBox="0 0 60 30">
+      <g stroke="#1d2433" stroke-width="1.5" fill="#a8672e">
+        <ellipse cx="10" cy="22" rx="7" ry="6"/><ellipse cx="24" cy="23" rx="7" ry="6"/><ellipse cx="38" cy="22" rx="7" ry="6"/><ellipse cx="52" cy="23" rx="7" ry="6"/>
+        <ellipse cx="17" cy="12" rx="7" ry="6"/><ellipse cx="31" cy="12" rx="7" ry="6"/><ellipse cx="45" cy="12" rx="7" ry="6"/>
+      </g>
+    </symbol>
+    <symbol id="schild" viewBox="0 0 90 100">
+      <rect x="42" y="56" width="6" height="44" fill="#7a5132" stroke="#1d2433" stroke-width="1.5"/>
+      <rect x="15" y="2" width="60" height="60" rx="4" fill="#2e8b57" stroke="#1d2433" stroke-width="2"/>
+      <g fill="#ffffff">
+        <polygon points="20,7 33,10 29,14 34,19 29,24 24,19 20,23"/>
+        <polygon points="70,7 57,10 61,14 56,19 61,24 66,19 70,23"/>
+        <polygon points="20,57 33,54 29,50 34,45 29,40 24,45 20,41"/>
+        <polygon points="70,57 57,54 61,50 56,45 61,40 66,45 70,41"/>
+        <circle cx="38" cy="27" r="3.2"/><circle cx="45" cy="25" r="3.2"/><circle cx="52" cy="27" r="3.2"/>
+        <path d="M33 42 Q34 31 38 31 Q42 31 43 42 Z M40 42 Q41 29 45 29 Q49 29 50 42 Z M47 42 Q48 31 52 31 Q56 31 57 42 Z"/>
+      </g>
+    </symbol>
+    <symbol id="tuer" viewBox="0 0 50 100">
+      <rect x="2" y="2" width="46" height="96" fill="#b77b4a" stroke="#1d2433" stroke-width="2"/>
+      <rect x="8" y="10" width="34" height="34" fill="none" stroke="#1d2433" stroke-width="1.5"/>
+      <circle cx="40" cy="58" r="3" fill="#f2c21b" stroke="#1d2433" stroke-width="1"/>
+      <rect x="14" y="66" width="22" height="9" rx="2" fill="#fffdf7" stroke="#1d2433" stroke-width="1"/>
+    </symbol>
+    <symbol id="haus" viewBox="0 0 120 110">
+      <polygon points="6,48 60,4 114,48" fill="#c8352c" stroke="#1d2433" stroke-width="2" stroke-linejoin="round"/>
+      <rect x="16" y="46" width="88" height="62" fill="#f3e2c6" stroke="#1d2433" stroke-width="2"/>
+      <rect x="26" y="58" width="22" height="18" fill="#bfe3f5" stroke="#1d2433" stroke-width="2"/>
+      <rect x="72" y="58" width="22" height="18" fill="#bfe3f5" stroke="#1d2433" stroke-width="2"/>
+      <rect x="50" y="78" width="20" height="30" fill="#b77b4a" stroke="#1d2433" stroke-width="2"/>
+    </symbol>
+    <symbol id="telefon" viewBox="0 0 40 60">
+      <rect x="4" y="2" width="32" height="56" rx="6" fill="#2f3b52" stroke="#1d2433" stroke-width="2"/>
+      <rect x="8" y="9" width="24" height="38" rx="2" fill="#bfe3f5"/>
+      <text x="20" y="34" text-anchor="middle" font-family="Grandstander, Verdana, sans-serif" font-weight="800" font-size="12" fill="#c8352c">112</text>
+    </symbol>
+    <symbol id="herz" viewBox="0 0 40 36">
+      <path d="M20 34 C2 22 0 10 8 4 C14 0 20 4 20 9 C20 4 26 0 32 4 C40 10 38 22 20 34 Z" fill="#e45a6b" stroke="#1d2433" stroke-width="2"/>
+    </symbol>
+    <symbol id="papier" viewBox="0 0 60 70">
+      <rect x="4" y="4" width="52" height="62" fill="#ffffff" stroke="#1d2433" stroke-width="2" transform="rotate(-4 30 35)"/>
+      <g stroke="#4c5b70" stroke-width="2" transform="rotate(-4 30 35)">
+        <path d="M12 18 L48 18 M12 28 L44 28 M12 38 L48 38 M12 48 L36 48"/>
+      </g>
+      <circle cx="40" cy="56" r="7" fill="#e45a6b" transform="rotate(-4 30 35)"/>
+    </symbol>
+    <symbol id="handy-gerucht" viewBox="0 0 60 70">
+      <rect x="10" y="4" width="40" height="62" rx="7" fill="#2f3b52" stroke="#1d2433" stroke-width="2"/>
+      <rect x="14" y="12" width="32" height="44" rx="2" fill="#f3e2c6"/>
+      <text x="30" y="42" text-anchor="middle" font-family="Grandstander, Verdana, sans-serif" font-weight="800" font-size="22" fill="#c8352c">?!</text>
+    </symbol>
+    <symbol id="seltsam" viewBox="0 0 50 30">
+      <rect x="8" y="10" width="34" height="14" rx="6" fill="#7d8a6a" stroke="#1d2433" stroke-width="2"/>
+      <path d="M42 17 L48 17" stroke="#1d2433" stroke-width="3"/>
+      <path d="M2 28 Q25 20 48 28" stroke="#6fae5c" stroke-width="3" fill="none"/>
+    </symbol>
+    <symbol id="sonne" viewBox="0 0 60 60">
+      <circle cx="30" cy="30" r="13" fill="#f7d026" stroke="#1d2433" stroke-width="2"/>
+      <g stroke="#f7a823" stroke-width="3" stroke-linecap="round">
+        <path d="M30 4 L30 12 M30 48 L30 56 M4 30 L12 30 M48 30 L56 30 M11 11 L17 17 M43 43 L49 49 M11 49 L17 43 M43 17 L49 11"/>
+      </g>
+    </symbol>
+    <symbol id="wasserflasche" viewBox="0 0 16 40">
+      <rect x="5" y="1" width="6" height="6" fill="#2b6cb0" stroke="#1d2433" stroke-width="1"/>
+      <rect x="2" y="7" width="12" height="32" rx="4" fill="#9fd3f0" stroke="#1d2433" stroke-width="1.5"/>
+    </symbol>
+  </defs>
+</svg>
+
+<main class="sheet">
+
+  <section class="cover" aria-labelledby="titel">
+    <div class="cover-text">
+      <p class="tag">Ein Notfall-Comic für Kinder</p>
+      <h1 id="titel">Mila <span>und</span> Nuss</h1>
+      <p>Nuss ist ein Eichhörnchen und legt jeden Herbst Vorräte an. Mila lernt von ihm und von Papa, was man tut, wenn plötzlich etwas anders ist als sonst: wenn der Strom weg ist, die Sirene heult, ein Sturm kommt, es brennt oder die Großen von Krieg reden.</p>
+      <ul class="toc" aria-label="Kapitel">
+        <li><a href="#vorrat">Vorräte</a></li>
+        <li><a href="#strom">Stromausfall</a></li>
+        <li><a href="#sirene">Sirene</a></li>
+        <li><a href="#sturm">Sturm &amp; Hochwasser</a></li>
+        <li><a href="#feuer">Feuer</a></li>
+        <li><a href="#krieg">Krieg</a></li>
+        <li><a href="#merken">Merkzettel</a></li>
+      </ul>
+    </div>
+    <svg data-panel="titel" viewBox="0 0 300 220" role="img" aria-label="Mila und das Eichhörnchen Nuss unter einem Baum mit einem Haufen Nüsse">
+      <rect width="300" height="220" fill="#bfe3f5"/>
+      <use href="#sonne" x="222" y="10" width="56" height="56"/>
+      <rect y="176" width="300" height="44" fill="#8cc46f"/>
+      <use href="#baum" x="20" y="40" width="110" height="160"/>
+      <use href="#mila" x="138" y="76" width="76" height="140"/>
+      <use href="#nuss" x="200" y="134" width="90" height="80"/>
+      <use href="#nuesse" x="226" y="196" width="60" height="24"/>
+      <use href="#rucksack" x="96" y="160" width="40" height="46"/>
+    </svg>
+  </section>
+
+  <!-- 1 -->
+  <section class="chapter" id="vorrat" aria-labelledby="h-vorrat">
+    <header><span class="num">Kapitel 1</span><h2 id="h-vorrat">Nuss legt Vorräte an</h2></header>
+    <p class="lede">Wer vorbereitet ist, hat weniger Angst. Darum fängt alles hier an, an einem ganz normalen Tag.</p>
+    <div class="strip">
+      <figure class="panel" data-panel="vorrat-1">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Nuss sitzt unter einem Baum neben einem Haufen Nüsse, Mila schaut zu">
+          <rect width="300" height="180" fill="#bfe3f5"/>
+          <rect y="150" width="300" height="30" fill="#8cc46f"/>
+          <use href="#baum" x="170" y="20" width="110" height="160"/>
+          <use href="#mila" x="40" y="56" width="62" height="114"/>
+          <use href="#nuss" x="140" y="108" width="74" height="66"/>
+          <use href="#nuesse" x="210" y="150" width="56" height="26"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say nuss"><b>Nuss</b>Ich sammle Nüsse für den Winter. Dann habe ich genug, auch wenn draußen alles zugeschneit ist.</p>
+          <p class="say mila"><b>Mila</b>Schlau! Brauchen wir Menschen auch so einen Vorrat?</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="vorrat-2">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Papa zeigt Mila ein Regal mit Wasserflaschen und Dosen">
+          <rect width="300" height="180" fill="#f3e2c6"/>
+          <rect y="152" width="300" height="28" fill="#c99e6e"/>
+          <use href="#regal" x="150" y="40" width="130" height="106"/>
+          <use href="#papa" x="70" y="10" width="72" height="164"/>
+          <use href="#mila" x="16" y="70" width="52" height="96"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say papa"><b>Papa</b>Ja. Wir haben Wasser und Essen für ein paar Tage. Falls die Geschäfte mal zu sind, kommen wir trotzdem zurecht.</p>
+          <p class="cap"><strong>Wie viel Wasser?</strong> Rund 2 Liter pro Mensch und Tag, zum Trinken und Kochen.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="vorrat-3">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Mila packt einen Rucksack mit Taschenlampe, Trinkflasche und Kuschelhase">
+          <rect width="300" height="180" fill="#f3e2c6"/>
+          <rect y="152" width="300" height="28" fill="#c99e6e"/>
+          <use href="#mila" x="24" y="52" width="64" height="118"/>
+          <use href="#rucksack" x="110" y="104" width="52" height="58"/>
+          <use href="#hase" x="172" y="122" width="32" height="38"/>
+          <use href="#wasserflasche" x="212" y="118" width="16" height="40"/>
+          <use href="#lampe" x="236" y="140" width="56" height="20"/>
+          <use href="#papier" x="214" y="56" width="50" height="58"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say mila"><b>Mila</b>In mein Notgepäck kommen: Taschenlampe, Trinkflasche, warme Jacke und mein Kuschelhase Momo!</p>
+          <p class="say nuss"><b>Nuss</b>Und ein Zettel mit den Telefonnummern von Mama und Papa. Wenn das Handy leer ist, hilft Papier.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="vorrat-4">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Ein Schild Treffpunkt am Baum vor dem Haus, Papa und Mila daneben">
+          <rect width="300" height="180" fill="#bfe3f5"/>
+          <rect y="150" width="300" height="30" fill="#8cc46f"/>
+          <use href="#haus" x="186" y="44" width="110" height="106"/>
+          <use href="#schild" x="110" y="56" width="80" height="94"/>
+          <use href="#papa" x="10" y="8" width="70" height="160"/>
+          <use href="#mila" x="66" y="64" width="54" height="100"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say papa"><b>Papa</b>Wenn wir uns einmal verlieren, treffen wir uns hier am Schild vor dem Haus.</p>
+          <p class="say mila"><b>Mila</b>Und meine Adresse weiß ich auswendig: Lindenweg 4!</p>
+          <p class="cap"><strong>Notruf:</strong> 112 für Feuerwehr und Rettungsdienst, 110 für die Polizei. Beide Nummern kosten nichts.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="chapter" id="strom" aria-labelledby="h-strom">
+    <header><span class="num">Kapitel 2</span><h2 id="h-strom">Plötzlich ist es dunkel</h2></header>
+    <p class="lede">Ein Stromausfall kommt ohne Vorwarnung. Licht, Fernseher und Heizung gehen aus, und das Handy lädt nicht mehr.</p>
+    <div class="strip">
+      <figure class="panel" data-panel="strom-1">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Dunkles Zimmer bei Nacht, Mila erschrocken, Papa neben ihr">
+          <rect width="300" height="180" fill="#3b3f58"/>
+          <rect y="152" width="300" height="28" fill="#5a4a3e"/>
+          <use href="#fenster-nacht" x="196" y="26" width="80" height="68"/>
+          <use href="#papa" x="110" y="10" width="72" height="164"/>
+          <use href="#mila-sorge" x="40" y="64" width="58" height="106"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say mila"><b>Mila</b>Papa! Das Licht ist aus und der Fernseher auch!</p>
+          <p class="say papa"><b>Papa</b>Das ist ein Stromausfall. Zuerst bleiben wir ruhig. Ich bin da.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="strom-2">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Nuss leuchtet mit einer Taschenlampe, daneben eine durchgestrichene Kerze">
+          <rect width="300" height="180" fill="#3b3f58"/>
+          <rect y="152" width="300" height="28" fill="#5a4a3e"/>
+          <use href="#lampe" x="80" y="60" width="200" height="74"/>
+          <use href="#nuss" x="20" y="88" width="88" height="78"/>
+          <use href="#kerze-nein" x="214" y="96" width="52" height="64"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say nuss"><b>Nuss</b>Taschenlampe statt Kerze! Eine Kerze kann umfallen, und dann brennt es.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="strom-3">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Papa hält den Kühlschrank zu, Mila schaut">
+          <rect width="300" height="180" fill="#3b3f58"/>
+          <rect y="152" width="300" height="28" fill="#5a4a3e"/>
+          <use href="#kuehlschrank" x="170" y="40" width="58" height="114"/>
+          <use href="#papa" x="96" y="10" width="72" height="164"/>
+          <use href="#mila" x="28" y="66" width="56" height="102"/>
+          <use href="#lampe" x="234" y="132" width="56" height="20"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say papa"><b>Papa</b>Den Kühlschrank lassen wir zu. Dann bleibt es drinnen länger kalt.</p>
+          <p class="say mila"><b>Mila</b>Und der Aufzug im Haus?</p>
+          <p class="say papa"><b>Papa</b>Der fährt ohne Strom nicht. Wir nehmen die Treppe.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="strom-4">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Papa kurbelt an einem Radio, Mila und Nuss hören zu">
+          <rect width="300" height="180" fill="#3b3f58"/>
+          <rect y="152" width="300" height="28" fill="#5a4a3e"/>
+          <use href="#papa" x="16" y="10" width="72" height="164"/>
+          <use href="#radio" x="92" y="104" width="78" height="56"/>
+          <use href="#mila" x="176" y="66" width="56" height="102"/>
+          <use href="#nuss" x="228" y="106" width="68" height="62"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say papa"><b>Papa</b>Dieses Radio läuft mit Batterien oder mit der Kurbel. Im Radio sagen sie, was los ist und wie lange es dauert.</p>
+          <p class="cap">Warm anziehen, zusammenrücken und mit der Taschenlampe Schattentheater spielen. So vergeht die Zeit schneller.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel wide" data-panel="strom-5">
+        <svg viewBox="0 0 600 180" role="img" aria-label="Mila und Papa klopfen bei der Nachbarin, die freundlich die Tür öffnet">
+          <rect width="600" height="180" fill="#4a4e68"/>
+          <rect y="152" width="600" height="28" fill="#5a4a3e"/>
+          <use href="#tuer" x="330" y="50" width="54" height="104"/>
+          <use href="#nachbarin" x="392" y="14" width="66" height="154"/>
+          <use href="#papa" x="170" y="10" width="72" height="164"/>
+          <use href="#mila" x="248" y="66" width="56" height="102"/>
+          <use href="#lampe" x="70" y="118" width="96" height="34"/>
+          <use href="#herz" x="490" y="40" width="44" height="40"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say mila"><b>Mila</b>Frau Yilmaz von nebenan wohnt allein. Sollen wir fragen, ob sie etwas braucht?</p>
+          <p class="say nachbarin"><b>Frau Yilmaz</b>Wie lieb von euch! Eine Decke hätte ich gern.</p>
+          <p class="say papa"><b>Papa</b>Gute Idee, Mila. Wenn Nachbarn sich helfen, ist es für alle leichter.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="chapter" id="sirene" aria-labelledby="h-sirene">
+    <header><span class="num">Kapitel 3</span><h2 id="h-sirene">Die Sirene heult</h2></header>
+    <p class="lede">Sirenen warnen alle Menschen gleichzeitig. Wichtig ist, wie sie klingen.</p>
+    <div class="strip">
+      <figure class="panel" data-panel="sirene-1">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Eine Sirene auf einem Mast mit roten Schallwellen, Mila hält sich die Ohren">
+          <rect width="300" height="180" fill="#bfe3f5"/>
+          <rect y="150" width="300" height="30" fill="#b9bfc8"/>
+          <use href="#sirene" x="150" y="10" width="130" height="156"/>
+          <use href="#mila-sorge" x="40" y="58" width="60" height="110"/>
+          <use href="#nuss" x="96" y="108" width="64" height="58"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="cap"><strong>Ein Heulton, der eine Minute lang auf und ab geht:</strong> Das ist eine Warnung.</p>
+          <p class="say mila"><b>Mila</b>Was bedeutet das?</p>
+          <p class="say nuss"><b>Nuss</b>Achtung! Etwas ist passiert. Jetzt hören wir gut hin.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="sirene-2">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Mila geht mit Nuss auf ein Haus zu">
+          <rect width="300" height="180" fill="#bfe3f5"/>
+          <rect y="150" width="300" height="30" fill="#b9bfc8"/>
+          <use href="#haus" x="168" y="40" width="118" height="110"/>
+          <use href="#mila" x="70" y="56" width="60" height="110"/>
+          <use href="#nuss" x="14" y="110" width="62" height="56"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say nuss"><b>Nuss</b>Geh ins nächste Haus. Bist du unterwegs, bleib bei deiner Lehrerin oder einem Erwachsenen, den du kennst.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="sirene-3">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Drinnen: Papa schließt das Fenster, das Radio steht auf dem Tisch">
+          <rect width="300" height="180" fill="#f3e2c6"/>
+          <rect y="152" width="300" height="28" fill="#c99e6e"/>
+          <use href="#fenster" x="186" y="24" width="90" height="78"/>
+          <use href="#papa" x="120" y="10" width="72" height="164"/>
+          <use href="#mila" x="20" y="66" width="56" height="102"/>
+          <use href="#radio" x="64" y="118" width="54" height="40"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say papa"><b>Papa</b>Fenster und Türen zu, Radio an. Im Radio und in der Warn-App sagen sie, was wir jetzt tun sollen.</p>
+          <p class="say mila"><b>Mila</b>Ich bleibe bei dir.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="sirene-4">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Die Sirene mit einem ruhigen grünen Ton, Mila atmet auf">
+          <rect width="300" height="180" fill="#bfe3f5"/>
+          <rect y="150" width="300" height="30" fill="#b9bfc8"/>
+          <use href="#sirene-still" x="150" y="10" width="130" height="156"/>
+          <use href="#mila" x="40" y="58" width="60" height="110"/>
+          <use href="#nuss" x="96" y="108" width="64" height="58"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="cap"><strong>Ein langer Ton, ohne Auf und Ab:</strong> Entwarnung. Die Gefahr ist vorbei.</p>
+          <p class="say mila"><b>Mila</b>Puh!</p>
+          <p class="say nuss"><b>Nuss</b>Einmal im Jahr, am Warntag im September, üben alle Sirenen zugleich. Dann musst du dich nicht erschrecken.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="chapter" id="sturm" aria-labelledby="h-sturm">
+    <header><span class="num">Kapitel 4</span><h2 id="h-sturm">Sturm und Hochwasser</h2></header>
+    <p class="lede">Gewitter, Sturm und viel Regen kommen bei uns am häufigsten vor. Dagegen hilft fast immer dasselbe: rein ins Haus.</p>
+    <div class="strip">
+      <figure class="panel" data-panel="sturm-1">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Gewitterwolke mit Blitz über einem Baum, Mila läuft weg vom Baum">
+          <rect width="300" height="180" fill="#8e9bb0"/>
+          <rect y="150" width="300" height="30" fill="#6f9a5c"/>
+          <use href="#wolke" x="150" y="4" width="120" height="84"/>
+          <use href="#baum" x="190" y="50" width="80" height="120"/>
+          <use href="#mila-sorge" x="40" y="58" width="60" height="110"/>
+          <use href="#nuss" x="100" y="110" width="62" height="56"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say nuss"><b>Nuss</b>Bei Gewitter schnell ins Haus. Stell dich nicht unter einen Baum!</p>
+          <p class="say mila"><b>Mila</b>Und drinnen?</p>
+          <p class="say nuss"><b>Nuss</b>Weg vom Fenster. Draußen kann der Sturm Äste und Ziegel herumwirbeln.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="sturm-2">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Papa und Mila bleiben auf dem trockenen Gehweg stehen, vor ihnen ist die Straße überflutet">
+          <rect width="300" height="180" fill="#9aa8bb"/>
+          <use href="#haus" x="186" y="34" width="106" height="100"/>
+          <rect y="150" width="150" height="30" fill="#b9bfc8" stroke="#1d2433" stroke-width="2"/>
+          <path d="M150 128 Q162 121 174 128 T198 128 T222 128 T246 128 T270 128 T300 128 L300 180 L150 180 Z" fill="#5aa0d8" stroke="#1d2433" stroke-width="2"/>
+          <use href="#papa" x="16" y="-6" width="68" height="156"/>
+          <use href="#mila-sorge" x="80" y="50" width="54" height="100"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="cap"><strong>Hochwasser:</strong> Wasser ist oft stärker und tiefer, als es aussieht.</p>
+          <p class="say papa"><b>Papa</b>Wir gehen nie durch Wasser auf der Straße. Und bei Hochwasser auch nicht in den Keller!</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="sturm-3">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Mila und Nuss oben im Haus mit Rucksack, unten ist Wasser">
+          <rect width="300" height="180" fill="#f3e2c6"/>
+          <rect y="100" width="300" height="6" fill="#1d2433"/>
+          <rect y="106" width="300" height="74" fill="#cfd9e3"/>
+          <path d="M0 150 Q25 144 50 150 T100 150 T150 150 T200 150 T250 150 T300 150 L300 180 L0 180 Z" fill="#5aa0d8"/>
+          <use href="#mila" x="60" y="6" width="50" height="92"/>
+          <use href="#rucksack" x="112" y="56" width="38" height="42"/>
+          <use href="#nuss" x="160" y="48" width="56" height="50"/>
+          <use href="#radio" x="230" y="66" width="44" height="32"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say mila"><b>Mila</b>Wir gehen nach oben und warten, bis die Feuerwehr sagt, dass es wieder sicher ist.</p>
+          <p class="say nuss"><b>Nuss</b>Das Notgepäck und das Radio nehmen wir mit.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="sturm-4">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Heißer Sommertag, Mila trinkt im Schatten eines Baums">
+          <rect width="300" height="180" fill="#ffe6a3"/>
+          <use href="#sonne" x="232" y="6" width="60" height="60"/>
+          <rect y="150" width="300" height="30" fill="#c6c47a"/>
+          <use href="#baum" x="20" y="30" width="110" height="150"/>
+          <use href="#mila" x="120" y="56" width="60" height="110"/>
+          <use href="#wasserflasche" x="176" y="100" width="18" height="44"/>
+          <use href="#nuss" x="200" y="110" width="62" height="56"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="cap"><strong>Große Hitze</strong> ist auch eine Gefahr.</p>
+          <p class="say nuss"><b>Nuss</b>Viel trinken, im Schatten bleiben und mittags lieber drinnen spielen.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="chapter" id="feuer" aria-labelledby="h-feuer">
+    <header><span class="num">Kapitel 5</span><h2 id="h-feuer">Es piept und riecht nach Rauch</h2></header>
+    <p class="lede">Feuer in der Wohnung ist die Gefahr, die Kinder am ehesten selbst erleben. Hier zählt jede Sekunde.</p>
+    <div class="strip">
+      <figure class="panel" data-panel="feuer-1">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Ein piepender Rauchmelder an der Decke, darunter Rauch, Mila erschrocken">
+          <rect width="300" height="180" fill="#e7d6bb"/>
+          <rect y="152" width="300" height="28" fill="#c99e6e"/>
+          <use href="#melder" x="160" y="0" width="90" height="50"/>
+          <use href="#rauch" x="130" y="34" width="170" height="90"/>
+          <use href="#mila-sorge" x="40" y="58" width="60" height="110"/>
+          <use href="#nuss" x="98" y="110" width="62" height="56"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say mila"><b>Mila</b>Der Rauchmelder piept!</p>
+          <p class="say nuss"><b>Nuss</b>Sofort raus aus der Wohnung! Und laut „Feuer!“ rufen, damit alle es hören.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="feuer-2">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Mila krabbelt auf allen vieren unter dem Rauch zur Tür">
+          <rect width="300" height="180" fill="#e7d6bb"/>
+          <rect y="152" width="300" height="28" fill="#c99e6e"/>
+          <use href="#rauch" x="0" y="0" width="300" height="96"/>
+          <use href="#tuer" x="236" y="50" width="54" height="104"/>
+          <use href="#mila-krabbelt" x="104" y="104" width="112" height="66"/>
+          <use href="#nuss" x="20" y="112" width="58" height="52"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="cap">Unten am Boden ist weniger Rauch. Darum: <strong>bücken oder krabbeln.</strong></p>
+          <p class="say nuss"><b>Nuss</b>Versteck dich nie, nicht unterm Bett und nicht im Schrank! Die Feuerwehr muss dich finden können.</p>
+          <p class="say mila"><b>Mila</b>Und die Tür mache ich hinter mir zu.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="feuer-3">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Draußen am Treffpunkt: Papa ruft mit dem Handy 112 an, Mila hält sich an ihm fest">
+          <rect width="300" height="180" fill="#bfe3f5"/>
+          <rect y="150" width="300" height="30" fill="#8cc46f"/>
+          <use href="#haus" x="190" y="46" width="104" height="100"/>
+          <use href="#rauch" x="204" y="0" width="90" height="56"/>
+          <use href="#schild" x="124" y="62" width="74" height="88"/>
+          <use href="#papa" x="12" y="8" width="70" height="160"/>
+          <use href="#telefon" x="72" y="56" width="22" height="34"/>
+          <use href="#mila-sorge" x="88" y="66" width="52" height="98"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say mila"><b>Mila</b>Momo ist noch drinnen!</p>
+          <p class="say papa"><b>Papa</b>Wir gehen niemals zurück ins Haus. Das macht die Feuerwehr. Sachen kann man ersetzen, dich nicht.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="feuer-4">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Großes Handy mit der Nummer 112, Nuss zeigt darauf">
+          <rect width="300" height="180" fill="#fff1b8"/>
+          <use href="#telefon" x="110" y="12" width="96" height="150"/>
+          <use href="#nuss" x="200" y="96" width="84" height="76"/>
+          <use href="#mila" x="22" y="58" width="60" height="110"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say mila"><b>Mila</b>Und wenn ich allein bin?</p>
+          <p class="say nuss"><b>Nuss</b>Dann rufst du selbst die 112 an. Das kostet nichts und geht auch ohne Guthaben.</p>
+          <p class="cap"><strong>Am Telefon sagst du:</strong> Wo ist es? Was ist passiert? Dann wartest du. Die Leitstelle stellt Fragen und legt als Erste auf.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="chapter" id="krieg" aria-labelledby="h-krieg">
+    <header><span class="num">Kapitel 6</span><h2 id="h-krieg">Wenn die Großen von Krieg reden</h2></header>
+    <p class="lede">Manchmal hören Kinder Nachrichten, die ihnen Angst machen. Darüber zu reden hilft mehr als Schweigen.</p>
+    <div class="strip">
+      <figure class="panel" data-panel="krieg-1">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Mila sitzt bedrückt neben dem Radio, Papa kniet sich zu ihr">
+          <rect width="300" height="180" fill="#f3e2c6"/>
+          <rect y="152" width="300" height="28" fill="#c99e6e"/>
+          <use href="#fenster" x="200" y="22" width="80" height="68"/>
+          <use href="#radio" x="20" y="118" width="54" height="40"/>
+          <use href="#mila-sorge" x="80" y="64" width="56" height="102"/>
+          <use href="#papa" x="150" y="10" width="72" height="164"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say mila"><b>Mila</b>Im Radio reden sie von Krieg. Kommt der auch zu uns?</p>
+          <p class="say papa"><b>Papa</b>Gut, dass du fragst. Hier bei uns ist es gerade sicher. Und sehr viele Menschen arbeiten jeden Tag dafür, dass das so bleibt.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="krieg-2">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Mila malt ein Bild mit einem Herz, Nuss sitzt bei ihr">
+          <rect width="300" height="180" fill="#f3e2c6"/>
+          <rect y="152" width="300" height="28" fill="#c99e6e"/>
+          <use href="#papier" x="140" y="76" width="66" height="76"/>
+          <use href="#herz" x="148" y="20" width="56" height="50"/>
+          <use href="#mila" x="40" y="58" width="60" height="110"/>
+          <use href="#nuss" x="210" y="106" width="70" height="62"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say nuss"><b>Nuss</b>Angst zu haben ist in Ordnung. Erzähl jemandem davon: Papa, deiner Lehrerin oder Oma.</p>
+          <p class="say mila"><b>Mila</b>Mir hilft auch Malen. Und Kuscheln mit Momo.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="krieg-3">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Die Familie sitzt in einem fensterlosen Raum mit Rucksack, Radio und Taschenlampe">
+          <rect width="300" height="180" fill="#d9cdb8"/>
+          <rect y="152" width="300" height="28" fill="#a98b68"/>
+          <path d="M0 0 L300 0 L300 6 L0 6 Z" fill="#1d2433"/>
+          <use href="#papa" x="150" y="10" width="72" height="164"/>
+          <use href="#mila" x="96" y="64" width="56" height="102"/>
+          <use href="#nuss" x="222" y="110" width="66" height="58"/>
+          <use href="#rucksack" x="44" y="112" width="42" height="46"/>
+          <use href="#radio" x="4" y="122" width="44" height="32"/>
+          <use href="#hase" x="130" y="128" width="24" height="28"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="cap"><strong>Falls es doch einmal eine Warnung gibt:</strong></p>
+          <p class="say papa"><b>Papa</b>Dann gehen wir in einen Raum ohne Fenster, zum Beispiel in den Flur oder in den Keller. Notgepäck, Radio und Taschenlampe nehmen wir mit.</p>
+          <p class="say mila"><b>Mila</b>Und wir bleiben zusammen.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel" data-panel="krieg-4">
+        <svg viewBox="0 0 300 180" role="img" aria-label="Ein Handy mit Fragezeichen, daneben im Gras ein seltsamer Gegenstand, den niemand anfasst">
+          <rect width="300" height="180" fill="#bfe3f5"/>
+          <rect y="150" width="300" height="30" fill="#8cc46f"/>
+          <use href="#handy-gerucht" x="16" y="24" width="90" height="106"/>
+          <use href="#seltsam" x="206" y="132" width="70" height="40"/>
+          <use href="#mila" x="118" y="56" width="60" height="110"/>
+          <use href="#nuss" x="224" y="64" width="62" height="56"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say nuss"><b>Nuss</b>Nicht alles, was im Internet steht, stimmt. Frag lieber Erwachsene oder hör die Nachrichten im Radio.</p>
+          <p class="say mila"><b>Mila</b>Und wenn ich draußen etwas Seltsames finde, fasse ich es nicht an und sage einem Erwachsenen Bescheid.</p>
+        </figcaption>
+      </figure>
+      <figure class="panel wide" data-panel="krieg-5">
+        <svg viewBox="0 0 600 180" role="img" aria-label="Mila, Papa und Nuss sitzen zufrieden unter dem großen Baum">
+          <rect width="600" height="180" fill="#bfe3f5"/>
+          <use href="#sonne" x="520" y="10" width="60" height="60"/>
+          <rect y="150" width="600" height="30" fill="#8cc46f"/>
+          <use href="#baum" x="40" y="10" width="120" height="170"/>
+          <use href="#papa" x="200" y="8" width="72" height="164"/>
+          <use href="#mila" x="276" y="62" width="58" height="106"/>
+          <use href="#nuss" x="338" y="106" width="70" height="62"/>
+          <use href="#nuesse" x="414" y="146" width="56" height="24"/>
+          <use href="#herz" x="470" y="70" width="44" height="40"/>
+        </svg>
+        <figcaption class="talk">
+          <p class="say mila"><b>Mila</b>Jetzt weiß ich, was ich tun kann. Das fühlt sich viel besser an.</p>
+          <p class="say nuss"><b>Nuss</b>Siehst du? Wer vorbereitet ist, hat weniger Angst.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Merkzettel -->
+  <section class="chapter" id="merken" aria-labelledby="h-merken">
+    <header><span class="num">Zum Merken</span><h2 id="h-merken">Milas Merkzettel</h2></header>
+
+    <div class="numbers" aria-label="Notrufnummern">
+      <div><span>112</span>Feuerwehr und Rettungsdienst</div>
+      <div><span>110</span>Polizei</div>
+    </div>
+
+    <div class="rules">
+      <article class="rule"><h3>Vorräte</h3><ul><li>Wasser und Essen für ein paar Tage</li><li>Notgepäck für jeden</li><li>Telefonnummern auf Papier</li><li>Treffpunkt ausmachen</li></ul></article>
+      <article class="rule"><h3>Stromausfall</h3><ul><li>Ruhig bleiben</li><li>Taschenlampe statt Kerze</li><li>Kühlschrank zu lassen</li><li>Radio hören, Nachbarn fragen</li></ul></article>
+      <article class="rule"><h3>Sirene</h3><ul><li>Auf und ab: Warnung, ins Haus</li><li>Fenster und Türen zu</li><li>Radio oder Warn-App an</li><li>Langer Ton: Entwarnung</li></ul></article>
+      <article class="rule"><h3>Sturm &amp; Hochwasser</h3><ul><li>Bei Gewitter ins Haus, weg von Bäumen</li><li>Drinnen weg vom Fenster</li><li>Nie durch Wasser laufen</li><li>Bei Hochwasser nach oben, nicht in den Keller</li></ul></article>
+      <article class="rule"><h3>Feuer</h3><ul><li>Raus und laut „Feuer!“ rufen</li><li>Bücken oder krabbeln</li><li>Nie verstecken, nie zurückgehen</li><li>112: Wo? Was? Dann warten</li></ul></article>
+      <article class="rule"><h3>Wenn ich Angst habe</h3><ul><li>Darüber reden</li><li>Erwachsene fragen, nicht dem Internet glauben</li><li>Bei Warnung: Raum ohne Fenster, zusammen bleiben</li><li>Seltsame Dinge nicht anfassen</li></ul></article>
+    </div>
+
+    <div class="pack" id="notgepaeck">
+      <h3>Mein Notgepäck</h3>
+      <p class="count" id="pack-count" aria-live="polite">0 von 10 eingepackt</p>
+      <ul>
+        <li><label for="p1"><input type="checkbox" id="p1">Taschenlampe</label></li>
+        <li><label for="p2"><input type="checkbox" id="p2">Trinkflasche mit Wasser</label></li>
+        <li><label for="p3"><input type="checkbox" id="p3">Etwas zu essen, zum Beispiel Kekse</label></li>
+        <li><label for="p4"><input type="checkbox" id="p4">Warme Jacke und Mütze</label></li>
+        <li><label for="p5"><input type="checkbox" id="p5">Wechselsocken und Unterwäsche</label></li>
+        <li><label for="p6"><input type="checkbox" id="p6">Zettel mit Telefonnummern und Adresse</label></li>
+        <li><label for="p7"><input type="checkbox" id="p7">Kuscheltier</label></li>
+        <li><label for="p8"><input type="checkbox" id="p8">Ein Buch oder ein Spiel</label></li>
+        <li><label for="p9"><input type="checkbox" id="p9">Zahnbürste</label></li>
+        <li><label for="p10"><input type="checkbox" id="p10">Meine Medikamente, wenn ich welche brauche</label></li>
+      </ul>
+      <button type="button" id="pack-reset">Liste leeren</button>
+    </div>
+  </section>
+
+  <section class="parents" aria-labelledby="h-eltern">
+    <h2 id="h-eltern">Für Eltern und Erziehende</h2>
+    <p>Der Comic eignet sich zum gemeinsamen Lesen ab etwa fünf Jahren. Ein Kapitel pro Abend reicht. Kapitel 6 ist bewusst ruhig gehalten. Lesen Sie es, wenn Ihr Kind Fragen zu Nachrichten stellt, und nicht als Einstieg.</p>
+    <ul>
+      <li>Fragen ehrlich und kurz beantworten. Kinder brauchen keine Einzelheiten, aber sie merken, wenn etwas verschwiegen wird.</li>
+      <li>Das Notgepäck gemeinsam packen. Wer selbst etwas tun kann, fühlt sich weniger ausgeliefert.</li>
+      <li>Treffpunkt, Adresse und die Nummern 112 und 110 zusammen üben, am besten draußen vor der Tür.</li>
+      <li>Den Warntag im September als Anlass nehmen, über die Sirenensignale zu sprechen.</li>
+      <li>Rauchmelder gemeinsam testen, damit das Piepen bekannt ist und nicht erschreckt.</li>
+    </ul>
+    <p class="src">Die Verhaltensregeln folgen den Empfehlungen des Bundesamts für Bevölkerungsschutz und Katastrophenhilfe zur Notfallvorsorge. Mila, Nuss und ihre Geschichte sind eigene Figuren und keine Veröffentlichung des BBK.</p>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('.pack input[type="checkbox"]'));
+  var count = document.getElementById('pack-count');
+  var key = 'mila-und-nuss.notgepaeck';
+  function load() {
+    try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) { return {}; }
+  }
+  function save(state) {
+    try { localStorage.setItem(key, JSON.stringify(state)); } catch (e) { /* only a convenience */ }
+  }
+  function update() {
+    var n = boxes.filter(function (b) { return b.checked; }).length;
+    count.textContent = n === boxes.length
+      ? 'Alles eingepackt! Nuss ist stolz auf dich.'
+      : n + ' von ' + boxes.length + ' eingepackt';
+  }
+  var state = load();
+  boxes.forEach(function (b) {
+    b.checked = !!state[b.id];
+    b.addEventListener('change', function () {
+      state[b.id] = b.checked; save(state); update();
+    });
+  });
+  document.getElementById('pack-reset').addEventListener('click', function () {
+    boxes.forEach(function (b) { b.checked = false; });
+    state = {}; save(state); update();
+  });
+  update();
+})();
+</script>
