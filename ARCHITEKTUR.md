@@ -879,6 +879,28 @@ tree; the test suite deliberately targets that layer rather than the UI.
   and back afterwards — under the ordinary id it would open the real
   household's container. The entries of different ids are kept apart (a
   read-only probe under the throwaway id saw none of the others).
+
+  The same test passed on TestKubuntu (KWallet through the Secret
+  Service) and on TestWindows on 2026-10-01: a key, an encrypted
+  database, old pictures sealed and still shown. Each needs its own
+  throwaway identity in the copied source, never in the repository —
+  `APPLICATION_ID` in `linux/CMakeLists.txt`, `ProductName` in
+  `windows/runner/Runner.rc` (the key store file lives under
+  `%APPDATA%\<CompanyName>\<ProductName>`; the Credential Manager entry
+  that wraps it is shared by every app using the plugin, so leave it
+  alone). Linux runs over ssh with the Plasma session's `DISPLAY`,
+  `WAYLAND_DISPLAY`, `XDG_RUNTIME_DIR` and `DBUS_SESSION_BUS_ADDRESS`
+  exported. Windows does not run under `flutter test` at all from here:
+  over ssh the Credential Manager has no logon session behind a key
+  login, and in a scheduled task in the console session the tool never
+  gets the app's log connection. What works is building the test as an
+  app over ssh (`flutter build windows --release -t <test>`, with
+  `C:\src\tools` on `PATH` for `nuget.exe`) and starting that exe from a
+  scheduled task with `/it`, the test writing its results to a file.
+  **Never configure that build from an elevated task:** a first CMake run
+  there left `CMAKE_INSTALL_PREFIX` at `C:/Program Files/preppsuite_flutter`,
+  the install step wrote the bundle there, and the build folder held
+  nothing but the exe — which then exits with `0xC0000135`.
 - **The macOS build runs sandboxed since 0.14.0**, with
   `macos/Runner/StorageBridge.swift` as the AppKit twin of the iOS file —
   same method names, same `bookmark://` scheme, same Dart above it. The
