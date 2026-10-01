@@ -31,3 +31,6 @@ tool/ocr_probe/android/local.properties
 # das ihn sich beim Bauen selbst holt. `run.sh` kopiert ihn von dort.
 tool/ocr_probe/android/gradlew
 tool/ocr_probe/android/gradle/wrapper/gradle-wrapper.jar
+
+# Lokale Arbeitsanweisungen, nicht veröffentlichen
+/AGENTS.md
