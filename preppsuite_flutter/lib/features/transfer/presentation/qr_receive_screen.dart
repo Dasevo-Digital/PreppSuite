@@ -10,7 +10,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../core/app_database_providers.dart';
 import '../../../core/camera_unavailable.dart';
 import '../../../l10n/generated/app_localizations.dart';
-import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
 import '../../sharing/application/carried_settings.dart';
 import '../../sharing/application/snapshot_exchange.dart';
@@ -20,6 +19,10 @@ import '../application/handover_payload.dart';
 import '../application/local_handover.dart';
 import 'household_conflict_dialog.dart';
 import '../application/qr_chain.dart';
+
+/// Where a transfer carries on: the household id, and whether this
+/// device's own rows are discarded on the way rather than re-stamped.
+typedef _Move = ({String id, bool discard});
 
 /// Films the other device's screen until the household is in.
 ///
@@ -133,15 +136,19 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
     householdId: widget.householdId,
   )).rowCount;
 
-  /// Settles a differing household, then returns the id to carry on with.
+  /// Settles a differing household, then says where to carry on.
   ///
-  /// Null means the person said no and nothing was touched.
-  Future<String?> _resolve(String incoming) async {
-    if (incoming == widget.householdId) return widget.householdId;
+  /// Null means the person said no and nothing was touched. Nothing is
+  /// touched on a yes either: the move happens in [_moveInto], once the
+  /// caller knows when it is safe to.
+  Future<_Move?> _resolve(String incoming) async {
+    if (incoming == widget.householdId) {
+      return (id: widget.householdId, discard: false);
+    }
 
     // First run adopts without asking: the device has no rows of its own
     // yet, so there is nothing to weigh up and nothing to lose.
-    if (widget.adoptHousehold) return _adopt(incoming);
+    if (widget.adoptHousehold) return (id: incoming, discard: false);
 
     final profile = ref.read(householdProfileProvider).value;
     if (profile == null) return null;
@@ -153,55 +160,25 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
       rows: rows,
     );
     if (!mounted) return null;
-    switch (choice) {
-      case null:
-      case HouseholdConflictChoice.keep:
-        return null;
-      case HouseholdConflictChoice.merge:
-        return _adopt(incoming);
-      case HouseholdConflictChoice.replace:
-        // Deleted before the id moves, or the rows would travel along
-        // under the new household and defeat the point of choosing this.
-        await ref
-            .read(appDatabaseProvider)
-            .deleteHouseholdData(widget.householdId);
-        return _adopt(incoming);
-    }
+    return switch (choice) {
+      null || HouseholdConflictChoice.keep => null,
+      HouseholdConflictChoice.merge => (id: incoming, discard: false),
+      HouseholdConflictChoice.replace => (id: incoming, discard: true),
+    };
   }
 
-  /// Takes over [incoming] as this device's household.
+  /// Takes over [move] as this device's household.
   ///
-  /// The same two steps `joinFolder` does for a shared folder: re-stamp
-  /// the local rows, then move the profile onto the new id. Which
-  /// warnings this device wants and how many people it plans for stay
-  /// where they are — those belong to the device, not to the shared data.
-  ///
-  /// Returns the id to carry on with, which is the old one whenever
-  /// there is nothing to adopt.
-  Future<String> _adopt(String incoming) async {
-    if (incoming == widget.householdId) return widget.householdId;
+  /// This device keeps its own name for the household — the other one's
+  /// arrives with [_adoptSetup] on first run, where there is no name yet
+  /// worth keeping.
+  Future<void> _moveInto(_Move move) async {
+    if (move.id == widget.householdId) return;
     final profile = ref.read(householdProfileProvider).value;
-    if (profile == null) return widget.householdId;
-
-    await ref
-        .read(appDatabaseProvider)
-        .adoptHouseholdId(from: profile.id, to: incoming);
+    if (profile == null) return;
     await ref
         .read(householdProfileProvider.notifier)
-        .adopt(
-          HouseholdProfile(
-            id: incoming,
-            name: profile.name,
-            countryCode: profile.countryCode,
-            regionKey: profile.regionKey,
-            personCount: profile.personCount,
-            children: profile.children,
-            dogs: profile.dogs,
-            cats: profile.cats,
-            extraRegions: profile.extraRegions,
-          ),
-        );
-    return incoming;
+        .moveInto(profile, move.id, discardOwnRows: move.discard);
   }
 
   /// Sets this device up the way the other one is.
@@ -224,37 +201,36 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
     if (theirs == null || !mounted) return;
     await ref
         .read(householdProfileProvider.notifier)
-        .adopt(
-          HouseholdProfile(
-            id: householdId,
-            name: theirs.name,
-            countryCode: theirs.countryCode,
-            regionKey: theirs.regionKey,
-            personCount: theirs.personCount,
-            children: theirs.children,
-            dogs: theirs.dogs,
-            cats: theirs.cats,
-            extraRegions: theirs.extraRegions,
-          ),
-        );
+        .adopt(theirs.copyWith(id: householdId));
   }
 
   Future<void> _handover(LocalHandoverInvitation invitation) async {
     final l10n = AppLocalizations.of(context)!;
     setState(() {});
     try {
-      final householdId = await _resolve(invitation.householdId);
-      if (householdId == null) {
+      final move = await _resolve(invitation.householdId);
+      if (move == null) {
         if (!mounted) return;
         setState(() => _result = l10n.transferConflictCancelled);
         return;
       }
+      final householdId = move.id;
+      // Merging has to move first: what this device offers is read under
+      // the new id, so its rows must already be there. That costs nothing
+      // if the handover then fails — they are re-stamped, not gone.
+      //
+      // Replacing waits until the other device's rows are in. Its offer is
+      // read under the new id too, where this device holds nothing, so
+      // none of what it is about to discard goes across — and nothing is
+      // discarded for a handover that never arrived.
+      if (!move.discard) await _moveInto(move);
       final result = await joinLocalHandover(
         db: ref.read(appDatabaseProvider),
         deviceId: await const SharedFolderStore().deviceId(),
         householdId: householdId,
         invitation: invitation,
       );
+      if (move.discard) await _moveInto(move);
       if (widget.adoptHousehold) {
         await _adoptSetup(householdId, result.household);
       }
@@ -306,12 +282,13 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
         });
         return;
       }
-      final householdId = await _resolve(snapshot.householdId);
+      final move = await _resolve(snapshot.householdId);
       if (!mounted) return;
-      if (householdId == null) {
+      if (move == null) {
         setState(() => _result = l10n.transferConflictCancelled);
         return;
       }
+      final householdId = move.id;
       if (snapshot.householdId != householdId) {
         setState(() {
           _failed = true;
@@ -320,10 +297,14 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
         return;
       }
 
+      // Applied before the move, for the same reason as the handover's
+      // replace: the rows land under the new id either way, and a device
+      // that is told to discard its own has the others' in hand first.
       final rows = await applyHouseholdSnapshot(
         ref.read(appDatabaseProvider),
         snapshot,
       );
+      await _moveInto(move);
       await applySyncedSettings(snapshot.settings);
       // No photographs on this road — see `handover_payload.dart` — but
       // the settings fit, and a device being set up should not have to

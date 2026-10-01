@@ -239,10 +239,22 @@ ausgesperrt, an dem ein Mitglied aktualisiert.
 
 ### Beim Umschalten
 
-Während umgestellt wird, liegen beide Formen nebeneinander, und beide werden
-gelesen. Ein Gerät ohne Schlüssel meldet `locked` und **schreibt nichts** –
-eine Klartextdatei in einem verschlüsselten Ordner würde die Verschlüsselung
-für alle Zeilen dieses Geräts wieder aufheben.
+Während umgestellt wird, liegen beide Formen nebeneinander, aber **gelesen
+werden in einem verschlüsselten Ordner nur verschlüsselte Gerätedateien**.
+Die `household.json` nennt die Haushalts-ID im Klartext; wer nur in den
+Ordner schreiben kann – der Cloud-Anbieter, ein Syncthing-Partner –, könnte
+sonst ohne Kennwort Zeilen einschleusen oder über Löschmarker entfernen, und
+jedes Gerät würde das Ergebnis verschlüsselt weiterreichen.
+
+Verloren geht dabei nichts: Die Zeilen eines noch nicht umgestellten Geräts
+liegen in dessen eigener Datenbank. Sobald es entsperrt ist, ersetzt es
+seine Klartextdatei beim nächsten Lauf durch eine verschlüsselte, auch wenn
+sich seither nichts geändert hat. Bis dahin sehen die anderen seine Zeilen
+nicht.
+
+Ein Gerät ohne Schlüssel meldet `locked` und **schreibt nichts** – eine
+Klartextdatei in einem verschlüsselten Ordner würde die Verschlüsselung für
+alle Zeilen dieses Geräts wieder aufheben.
 
 ### Kein Weg zurück
 

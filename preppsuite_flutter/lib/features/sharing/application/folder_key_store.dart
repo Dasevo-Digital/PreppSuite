@@ -56,6 +56,21 @@ class FolderKeyStore {
     );
   }
 
+  /// Takes back a [write] whose folder was never switched over.
+  ///
+  /// The one case where the requirement may go again: turning encryption
+  /// on stores the key first, and if `household.json` then could not be
+  /// written, the folder is still plain and nobody was ever told it was
+  /// sealed. Keeping the requirement would stop every sync with
+  /// `encryptionChanged` and refuse every new attempt, with nothing left
+  /// to do but reset the household. Anything else wanting to lift it is
+  /// the downgrade the requirement exists to stop.
+  Future<void> withdraw(String householdId) async {
+    await const PrivatePreferences().remove(_keyFor(householdId));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_requiredKey(householdId));
+  }
+
   /// Forgets the key, which locks this device out until the passphrase is
   /// entered again. Used when leaving a folder — a key left behind would
   /// open a folder this device is no longer part of.

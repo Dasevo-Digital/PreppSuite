@@ -138,13 +138,21 @@ class _Body extends ConsumerWidget {
     // here unannounced, with a line afterwards saying it had — which made
     // this the careless road into somebody else's household while the QR
     // code, doing the very same thing, asked first.
-    if (!await _settleConflict(context, ref, picked)) return;
+    final choice = await _settleConflict(context, ref, picked);
+    if (choice == null) return;
     if (!context.mounted) return;
 
     final previousId = profile.id;
     final error = await ref
         .read(sharedFolderProvider.notifier)
-        .joinFolder(picked, profile: profile);
+        .joinFolder(
+          picked,
+          profile: profile,
+          // Deleted inside the join rather than here, and only once the
+          // folder has been read: deleting first left a device with
+          // nothing whenever the join then failed.
+          discardOwnRows: choice == HouseholdConflictChoice.replace,
+        );
     if (!context.mounted) return;
 
     if (error != null) {
@@ -164,11 +172,12 @@ class _Body extends ConsumerWidget {
     }
   }
 
-  /// True when the join may go ahead.
+  /// How the join should go ahead, or null when it should not.
   ///
   /// A folder that holds no household, or this one's, needs no question:
   /// the first is being founded and the second is a device coming back.
-  Future<bool> _settleConflict(
+  /// Nothing is deleted here, whatever the answer — see [joinFolder].
+  Future<HouseholdConflictChoice?> _settleConflict(
     BuildContext context,
     WidgetRef ref,
     SharedFolderLocation location,
@@ -180,9 +189,11 @@ class _Body extends ConsumerWidget {
     } on Object {
       // Unreadable is not this question's business: `joinFolder` reports
       // it properly a moment later, in the user's own words.
-      return true;
+      return HouseholdConflictChoice.merge;
     }
-    if (existing == null || existing.householdId == profile.id) return true;
+    if (existing == null || existing.householdId == profile.id) {
+      return HouseholdConflictChoice.merge;
+    }
 
     final db = ref.read(appDatabaseProvider);
     final rows = (await readHouseholdSnapshot(
@@ -190,26 +201,14 @@ class _Body extends ConsumerWidget {
       deviceId: 'conflict',
       householdId: profile.id,
     )).rowCount;
-    if (!context.mounted) return false;
+    if (!context.mounted) return null;
 
     final choice = await askAboutHouseholdConflict(
       context,
       mine: profile.name,
       rows: rows,
     );
-    switch (choice) {
-      case null:
-      case HouseholdConflictChoice.keep:
-        return false;
-      case HouseholdConflictChoice.merge:
-        return true;
-      case HouseholdConflictChoice.replace:
-        // Before the join, or the rows would be re-stamped onto the new
-        // household and travel along — which is what this answer says
-        // not to do.
-        await db.deleteHouseholdData(profile.id);
-        return true;
-    }
+    return choice == HouseholdConflictChoice.keep ? null : choice;
   }
 
   Future<void> _confirmLeave(BuildContext context, WidgetRef ref) async {

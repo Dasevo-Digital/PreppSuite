@@ -154,9 +154,21 @@ class SharedFolderSyncService {
         // Our own file can only contain what we already have.
         if (id == deviceId) continue;
 
+        final raw = await _folder.readDeviceFile(id);
+        // A plain file in a sealed folder is never read. Anybody who can
+        // write to the folder — the cloud provider, a Syncthing peer —
+        // could otherwise put rows and tombstones into every device
+        // without knowing the passphrase, and this device would publish
+        // them onwards under the seal. A device not switched over yet
+        // loses nothing by it: its rows wait in its own database, and
+        // its first run after unlocking replaces the plain file (see
+        // [_publishIfNeeded]). Not counted as skipped, either: a folder
+        // whose other devices have not caught up yet is not one this
+        // version cannot read.
+        if (raw != null && _sealing && !looksEncrypted(raw)) continue;
+
         foreignFiles++;
 
-        final raw = await _folder.readDeviceFile(id);
         final opened = raw == null ? null : await _open(raw);
         final snapshot = opened == null ? null : DeviceSnapshot.decode(opened);
         if (snapshot == null) {
@@ -178,9 +190,13 @@ class SharedFolderSyncService {
           error: beforePublishError,
         );
       }
+      final ourFile = deviceIds.contains(deviceId)
+          ? await _folder.readDeviceFile(deviceId)
+          : null;
       final published = await _publishIfNeeded(
         learnedSomething: received > 0,
-        ourFileExists: deviceIds.contains(deviceId),
+        ourFileExists: ourFile != null,
+        ourFileIsPlain: _sealing && ourFile != null && !looksEncrypted(ourFile),
       );
 
       await _db.setLastPulledAt(syncStateEntity, DateTime.now().toUtc());
@@ -245,12 +261,10 @@ class SharedFolderSyncService {
   /// Whether this run has to seal what it writes.
   bool get _sealing => (_folderIdentity ?? identity).isEncrypted;
 
-  /// Opens a file from the folder, whichever shape it is in.
+  /// Opens a file from the folder.
   ///
-  /// Both shapes are accepted on purpose: while a household is switching
-  /// over, the device that turned encryption on has a sealed file in
-  /// there and the others still have plain ones. Refusing the plain ones
-  /// would drop those households' rows until every device had caught up.
+  /// A plain file only reaches here in a plain folder; [sync] drops the
+  /// plain ones from a sealed folder before they get this far.
   Future<String?> _open(String raw) async {
     if (!looksEncrypted(raw)) return raw;
     final folderKey = key;
@@ -277,9 +291,15 @@ class SharedFolderSyncService {
   /// Republishing rows we only just learned about is on purpose. It means
   /// every device carries the whole household, so losing one device — or
   /// simply never turning it on again — costs nothing.
+  ///
+  /// A plain file of our own in a sealed folder is always replaced. It is
+  /// what a device leaves behind from before encryption was switched on,
+  /// and since the others no longer read plain files, the rows in it
+  /// reach nobody until it is.
   Future<bool> _publishIfNeeded({
     required bool learnedSomething,
     required bool ourFileExists,
+    required bool ourFileIsPlain,
   }) async {
     // Re-offer clean rows once after upgrading the conflict rule. The old
     // second-granularity acknowledgement could mark an unpublished edit
@@ -287,6 +307,7 @@ class SharedFolderSyncService {
     final repairEntity = 'sharedFolderVersion2:$householdId:$deviceId';
     final needsRepair = await _db.lastPulledAt(repairEntity) == null;
     if (!republish &&
+        !ourFileIsPlain &&
         !needsRepair &&
         !learnedSomething &&
         ourFileExists &&

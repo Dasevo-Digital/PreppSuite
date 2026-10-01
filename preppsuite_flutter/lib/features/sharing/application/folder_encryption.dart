@@ -52,6 +52,11 @@ class FolderEncryption {
   /// written, so a crash in between leaves a device that can still open
   /// what it wrote — the other way round would produce a folder marked
   /// encrypted that nobody holds a key for.
+  ///
+  /// A write that fails is taken back, though, as long as the folder is
+  /// demonstrably still plain: a key with nothing sealed under it used to
+  /// leave the household stuck, every sync stopping on a downgrade that
+  /// never happened and every new attempt refused.
   Future<FolderEncryptionError?> enable({
     required String householdId,
     required String passphrase,
@@ -77,20 +82,42 @@ class FolderEncryption {
       final parameters = VaultParameters(salt: newSalt());
       final key = await deriveFolderKey(passphrase, parameters);
 
+      final sealed = HouseholdFile(
+        householdId: stored.householdId,
+        name: stored.name,
+        countryCode: stored.countryCode,
+        createdAt: stored.createdAt,
+        vault: parameters,
+        check: await buildCheckValue(key),
+      ).encode();
+
       await _keyStore.write(householdId, key);
-      await _folder.writeHouseholdFile(
-        HouseholdFile(
-          householdId: stored.householdId,
-          name: stored.name,
-          countryCode: stored.countryCode,
-          createdAt: stored.createdAt,
-          vault: parameters,
-          check: await buildCheckValue(key),
-        ).encode(),
-      );
+      try {
+        await _folder.writeHouseholdFile(sealed);
+      } on Object {
+        await _withdrawIfStillPlain(householdId);
+        return FolderEncryptionError.failed;
+      }
       return null;
     } on Object {
       return FolderEncryptionError.failed;
+    }
+  }
+
+  /// Takes the key back after a failed switch, if nothing was sealed.
+  ///
+  /// Only on proof: a write can fail after the bytes arrived, and a sealed
+  /// file whose key this device dropped is the folder nobody can open.
+  /// Unreadable counts as "might be sealed", and the key stays.
+  Future<void> _withdrawIfStillPlain(String householdId) async {
+    try {
+      final raw = await _folder.readHouseholdFile();
+      final now = raw == null ? null : HouseholdFile.decode(raw);
+      if (now != null && now.householdId == householdId && !now.isEncrypted) {
+        await _keyStore.withdraw(householdId);
+      }
+    } on Object {
+      // Left as it is: see above.
     }
   }
 

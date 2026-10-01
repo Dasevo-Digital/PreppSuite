@@ -54,7 +54,13 @@ class HouseholdProfile {
     extraRegions: extraRegions,
   );
 
+  /// [id] only for moving into another household — see
+  /// `HouseholdProfileController.moveInto`, which is the one place that
+  /// should pass it. Every other field travels along, which is the point:
+  /// building a new profile by hand is how the children and the pets
+  /// once got left behind on the way into a shared folder.
   HouseholdProfile copyWith({
+    String? id,
     String? name,
     String? countryCode,
     String? regionKey,
@@ -66,7 +72,7 @@ class HouseholdProfile {
     List<WarningRegion>? extraRegions,
   }) {
     return HouseholdProfile(
-      id: id,
+      id: id ?? this.id,
       name: name ?? this.name,
       countryCode: countryCode ?? this.countryCode,
       regionKey: clearRegionKey ? null : (regionKey ?? this.regionKey),

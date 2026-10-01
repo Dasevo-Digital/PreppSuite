@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/sharing/application/folder_crypto.dart';
 import 'package:preppsuite_flutter/features/sharing/application/folder_encryption.dart';
@@ -112,6 +114,40 @@ void main() {
     );
   });
 
+  group('a switch whose household.json could not be written', () {
+    // The key is stored first, on purpose. A write that then failed used
+    // to leave it there over a plain folder: every sync stopped with
+    // `encryptionChanged`, and every new attempt was refused.
+    test('is taken back, and can be tried again', () async {
+      final failing = _FailingFolder(folder, landed: false);
+      final error = await FolderEncryption(
+        folder: failing,
+      ).enable(householdId: 'h1', passphrase: passphrase);
+
+      expect(error, FolderEncryptionError.failed);
+      expect(await const FolderKeyStore().read('h1'), isNull);
+      expect(await const FolderKeyStore().requiresEncryption('h1'), isFalse);
+
+      expect(
+        await encryption.enable(householdId: 'h1', passphrase: passphrase),
+        isNull,
+      );
+      expect(await encryption.isEncrypted(), isTrue);
+    });
+
+    test('keeps the key when the sealed file landed after all', () async {
+      // A write can fail after its bytes arrived. Dropping the key then
+      // would make this the folder nobody can open.
+      final failing = _FailingFolder(folder, landed: true);
+      await FolderEncryption(
+        folder: failing,
+      ).enable(householdId: 'h1', passphrase: passphrase);
+
+      expect(await encryption.isEncrypted(), isTrue);
+      expect(await const FolderKeyStore().read('h1'), isNotNull);
+    });
+  });
+
   group('a second device', () {
     setUp(() async {
       await encryption.enable(householdId: 'h1', passphrase: passphrase);
@@ -152,4 +188,21 @@ void main() {
       expect(await const FolderKeyStore().read('h1'), isNull);
     });
   });
+}
+
+/// Fails writing `household.json`, with or without the bytes landing.
+class _FailingFolder extends InMemorySyncFolder {
+  _FailingFolder(InMemorySyncFolder source, {required this.landed}) {
+    householdFile = source.householdFile;
+    _source = source;
+  }
+
+  final bool landed;
+  late final InMemorySyncFolder _source;
+
+  @override
+  Future<void> writeHouseholdFile(String contents) async {
+    if (landed) _source.householdFile = householdFile = contents;
+    throw const FileSystemException('the disk is full');
+  }
 }

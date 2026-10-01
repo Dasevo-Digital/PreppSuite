@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as p;
 
 import 'archive_downloader.dart';
 import 'download_folder.dart';
@@ -19,7 +20,20 @@ class ArchiveDownloadRequest {
   final Uri url;
 
   /// What the file is called on disk.
+  ///
+  /// Comes from a catalogue somebody else serves, so it is untrusted:
+  /// [start] refuses anything that is not a plain name inside the folder.
   final String fileName;
+
+  /// Whether [fileName] is a plain name that stays inside the folder.
+  bool get hasSafeFileName =>
+      fileName.isNotEmpty &&
+      // Both separators on every platform: a name is checked where it
+      // arrives, not where it was meant for.
+      fileName == p.posix.basename(fileName) &&
+      fileName == p.windows.basename(fileName) &&
+      fileName != '.' &&
+      fileName != '..';
 
   /// What to call it in the interface, and what the feature stores as the
   /// archive's label once it is taken into use.
@@ -109,6 +123,17 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
     onFinished,
   }) async {
     if (state.isRunning) return;
+
+    // `Uri.pathSegments` decodes `%2F`, so a catalogue entry ending in
+    // `..%2F..%2Fx` arrives here as `../../x`. Joined onto the folder,
+    // that wrote wherever the app may write.
+    if (!request.hasSafeFileName) {
+      state = ArchiveDownloadState(
+        request: request,
+        error: const DownloadException('the file name leaves the folder'),
+      );
+      return;
+    }
 
     state = ArchiveDownloadState(request: request);
 

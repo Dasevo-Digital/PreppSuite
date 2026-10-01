@@ -132,6 +132,17 @@ holds a household adopts that id, and `adoptHouseholdId` re-stamps every
 existing row onto it. Without the re-stamp those rows do not merge — they
 stop being visible, because every query selects by this column.
 
+**Moving into another household goes through
+`HouseholdProfileController.moveInto`, on every road.** The folder, the QR
+chain and the local handover each used to spell it out, and the copies
+drifted: the folder's rebuilt the profile by hand and left the children and
+the pets behind. "Replace" deletes this device's rows inside the move
+(`discardOwnRows`), and the caller only moves once it holds what it is
+moving into — the folder read and checked, the other device's rows
+applied. Deleting first used to leave a device with nothing whenever the
+join or the handover then failed. Merging a handover still moves first,
+because the offer is read under the new id; that loses nothing.
+
 **A device only ever writes its own file in the shared folder.** That is
 what makes the whole design work without locking: two people editing at the
 same time write different paths, so the cloud engine underneath never has to
@@ -806,10 +817,15 @@ tree; the test suite deliberately targets that layer rather than the UI.
 - **A device without the folder key writes nothing at all**
   (`SharedFolderSyncError.locked`). Publishing a plaintext device file
   into an encrypted folder would silently undo the encryption for every
-  row that device owns, and no later sync would put it back. Both shapes
-  are *read*, though: a household does not update every device in the same
-  minute, and dropping the plain files would make rows vanish for
-  everyone until it had.
+  row that device owns, and no later sync would put it back.
+- **A sealed folder reads sealed device files only.** The household id is
+  in the clear in `household.json`, so anybody with write access to the
+  folder could otherwise plant rows or tombstones without the passphrase,
+  and every device would publish them onwards under the seal. A device not
+  switched over yet loses nothing: its rows wait in its own database, and
+  a plain file of its own in a sealed folder makes its next run publish
+  regardless of `dirty`. Such files are not counted as skipped, so they do
+  not turn into `unsupportedVersion`.
 - **`HouseholdPlans.clientId` is the household id, not a generated one.**
   Every other table follows "a client id is generated once, on one
   device"; the plan deliberately does not, because it is a single record

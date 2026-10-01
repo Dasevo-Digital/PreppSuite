@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/sharing/application/snapshot_exchange.dart';
 import 'package:preppsuite_flutter/features/sharing/application/folder_crypto.dart';
 import 'package:preppsuite_flutter/features/sharing/application/household_file.dart';
 import 'package:preppsuite_flutter/features/sharing/application/shared_folder_sync_service.dart';
@@ -209,13 +210,50 @@ void main() {
     expect(await laptop.watchInventoryItems(householdId).first, isEmpty);
   });
 
+  test('a plain file in a sealed folder is not read', () async {
+    // Anybody who can write to the folder can drop a plain file in it —
+    // the household id is in the clear in household.json. Reading it would
+    // let them add rows, or delete them through tombstones, without the
+    // passphrase, and this device would publish the result under the seal.
+    final intruder = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(intruder.close);
+    await intruder.upsertInventoryItem(
+      InventoryItemsCompanion.insert(
+        clientId: 'planted',
+        householdId: householdId,
+        name: 'Untergeschoben',
+        category: 'water',
+        quantity: 1,
+        unit: 'Flasche',
+        storageLocation: 'Keller',
+        updatedAt: DateTime.utc(2099),
+        dirty: const Value(true),
+      ),
+    );
+    folder.deviceFiles['intruder'] = (await readHouseholdSnapshot(
+      intruder,
+      deviceId: 'intruder',
+      householdId: householdId,
+    )).encode();
+
+    final result = await (await serviceFor(
+      phone,
+      'phone',
+      withKey: key,
+    )).sync();
+
+    expect(await phone.watchInventoryItems(householdId).first, isEmpty);
+    // Not "a newer version wrote this folder" either: a device that has
+    // not switched over yet looks exactly like this.
+    expect(result.error, isNull);
+  });
+
   test(
-    'a plaintext file from a device not switched over is still read',
+    'a device not switched over yet catches up once it is unlocked',
     () async {
-      // A household does not update every device in the same minute. Until
-      // it has, the folder holds both shapes, and dropping the old ones
-      // would make rows disappear for everyone.
-      // The folder is still plain while the old device publishes into it.
+      // A household does not update every device in the same minute. The
+      // laptop published in the clear before the switch; its rows are
+      // clean, so nothing dirty would ever make it write again.
       folder.householdFile = plainIdentity().encode();
       await addWater(laptop);
       await SharedFolderSyncService(
@@ -225,11 +263,20 @@ void main() {
         identity: plainIdentity(),
       ).sync();
       expect(looksEncrypted(folder.deviceFiles['laptop']!), isFalse);
+      expect(await laptop.dirtyInventoryItems(householdId), isEmpty);
 
-      // Now someone switches encryption on from the other device.
+      // Someone switches encryption on from the phone. Until the laptop is
+      // unlocked, its plain file reaches nobody.
       folder.householdFile = (await sealedIdentity()).encode();
       await (await serviceFor(phone, 'phone', withKey: key)).sync();
+      expect(await phone.watchInventoryItems(householdId).first, isEmpty);
 
+      // The laptop is given the passphrase. An ordinary run, no republish
+      // flag — the plain file of its own is reason enough to write.
+      await (await serviceFor(laptop, 'laptop', withKey: key)).sync();
+      expect(looksEncrypted(folder.deviceFiles['laptop']!), isTrue);
+
+      await (await serviceFor(phone, 'phone', withKey: key)).sync();
       final received = await phone.watchInventoryItems(householdId).first;
       expect(received.single.name, 'Trinkwasser');
     },

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/downloads/application/archive_downloader.dart';
 import 'package:preppsuite_flutter/features/downloads/application/download_folder.dart';
 import 'package:preppsuite_flutter/features/downloads/application/download_providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -83,6 +84,84 @@ void main() {
         state.takeUpProblem,
         contains('the screen is gone'),
         reason: 'the banner must not say the download simply finished',
+      );
+    });
+  });
+
+  // A catalogue is somebody else's server, and the file name comes out of
+  // its download link — `Uri.pathSegments` decodes `%2F`, so a link ending
+  // in `..%2F..%2Fx.zim` used to land two folders above the download one.
+  group('a file name from a catalogue', () {
+    late Directory folder;
+    late ProviderContainer container;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      container = ProviderContainer();
+      folder = Directory.systemTemp.createTempSync('preppsuite-name');
+      await const DownloadFolder().use(
+        '${folder.path}${Platform.pathSeparator}downloads',
+      );
+      Directory(
+        '${folder.path}${Platform.pathSeparator}downloads',
+      ).createSync();
+    });
+
+    tearDown(() {
+      container.dispose();
+      folder.deleteSync(recursive: true);
+    });
+
+    final link = Uri.parse('https://example.invalid/zim/..%2Fescaped.zim');
+
+    test('decodes to a path, which is why it has to be checked', () {
+      expect(link.pathSegments.last, '../escaped.zim');
+    });
+
+    for (final name in [
+      link.pathSegments.last,
+      r'..\escaped.zim',
+      'sub/escaped.zim',
+      '..',
+      '',
+    ]) {
+      test('is refused when it is "$name"', () async {
+        // Lying where it would land, so a refusal that only checked for
+        // an existing file would still be caught taking it up.
+        File(
+          '${folder.path}${Platform.pathSeparator}escaped.zim',
+        ).writeAsStringSync('outside');
+        var takenUp = false;
+
+        await container
+            .read(archiveDownloadProvider.notifier)
+            .start(
+              ArchiveDownloadRequest(
+                url: link,
+                fileName: name,
+                label: 'Klexikon',
+              ),
+              onFinished: (ref, path, label) async {
+                takenUp = true;
+                return null;
+              },
+            );
+
+        final state = container.read(archiveDownloadProvider);
+        expect(state.error, isA<DownloadException>());
+        expect(state.finishedPath, isNull);
+        expect(takenUp, isFalse);
+      });
+    }
+
+    test('is accepted when it is a plain name', () {
+      expect(
+        ArchiveDownloadRequest(
+          url: link,
+          fileName: 'wikipedia_de_all_nopic_2026-09.zim',
+          label: 'Wikipedia',
+        ).hasSafeFileName,
+        isTrue,
       );
     });
   });

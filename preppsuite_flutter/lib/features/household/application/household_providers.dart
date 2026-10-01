@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/app_database_providers.dart';
 import '../../../model/household_profile.dart';
 import '../../../model/household_profile_store.dart';
 import '../../warnings/application/warning_region_filter.dart';
@@ -52,6 +53,46 @@ class HouseholdProfileController extends AsyncNotifier<HouseholdProfile?> {
   /// Adopts a profile that came from somewhere else — a shared folder, a
   /// restored backup — keeping its id so the data merges.
   Future<void> adopt(HouseholdProfile profile) => _persist(profile);
+
+  /// Moves this device from [from] into the household [id].
+  ///
+  /// The one place this happens, for every road into another household —
+  /// a shared folder, a QR chain, a local handover. It used to be spelled
+  /// out on each of them, and the copies drifted: the folder's left the
+  /// children and the pets behind, so a household that joined one planned
+  /// for adults only from then on.
+  ///
+  /// With [discardOwnRows] this device's rows are deleted rather than
+  /// re-stamped. The caller must already hold what it is moving into —
+  /// the folder checked, the other device's rows received — because this
+  /// cannot be undone, and deleting first is how a handover that then
+  /// failed once left a device with nothing at all.
+  ///
+  /// Everything else in the profile stays: which warnings this device
+  /// follows and whom it plans for belong to the device, not to the
+  /// shared data. [name] and [countryCode] replace this device's own
+  /// where the caller has the other household's.
+  Future<HouseholdProfile> moveInto(
+    HouseholdProfile from,
+    String id, {
+    String? name,
+    String? countryCode,
+    bool discardOwnRows = false,
+  }) async {
+    final moved = from.copyWith(id: id, name: name, countryCode: countryCode);
+    if (id == from.id) return moved;
+
+    final db = ref.read(appDatabaseProvider);
+    if (discardOwnRows) {
+      await db.deleteHouseholdData(from.id);
+    } else {
+      // Without the re-stamp the rows do not merge — they stop being
+      // visible, because every query selects by this id.
+      await db.adoptHouseholdId(from: from.id, to: id);
+    }
+    await _persist(moved);
+    return moved;
+  }
 
   /// Drops the profile, putting the app back on the setup screen.
   ///

@@ -95,9 +95,15 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   /// twice: joining a folder that already belongs to a household re-stamps
   /// this device's rows with that household's id, because otherwise they
   /// would simply stop being visible — every table is partitioned by it.
+  ///
+  /// [discardOwnRows] is the answer "replace" to the conflict question:
+  /// this device's rows are deleted instead of re-stamped — but only once
+  /// the folder has been checked and is known to hold a household, so a
+  /// join that fails leaves them where they were.
   Future<SharedFolderJoinError?> joinFolder(
     SharedFolderLocation location, {
     required HouseholdProfile profile,
+    bool discardOwnRows = false,
   }) async {
     final folder = syncFolderFor(location.value);
     if (!await folder.isWritable()) return SharedFolderJoinError.unwritable;
@@ -123,22 +129,13 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
 
       if (existing.householdId != profile.id) {
         await ref
-            .read(appDatabaseProvider)
-            .adoptHouseholdId(from: profile.id, to: existing.householdId);
-        await ref
             .read(householdProfileProvider.notifier)
-            .adopt(
-              HouseholdProfile(
-                id: existing.householdId,
-                name: existing.name,
-                countryCode: existing.countryCode,
-                // Kept local on purpose: which warnings this device wants and
-                // how many people it plans for are properties of the device
-                // and the person holding it, not of the shared data.
-                regionKey: profile.regionKey,
-                personCount: profile.personCount,
-                extraRegions: profile.extraRegions,
-              ),
+            .moveInto(
+              profile,
+              existing.householdId,
+              name: existing.name,
+              countryCode: existing.countryCode,
+              discardOwnRows: discardOwnRows,
             );
       }
     }
