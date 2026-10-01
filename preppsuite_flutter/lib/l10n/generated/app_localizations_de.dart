@@ -7378,6 +7378,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get emergencyMapReady => 'Geöffnet und für die Nutzung bereit';
 
   @override
+  String get emergencyOfflineMapTitle => 'Offline-Karte';
+
+  @override
+  String get emergencyKnowledgeArchivesTitle => 'Wissensarchive';
+
+  @override
+  String get knowledgeBookmarksTitle => 'Lesezeichen';
+
+  @override
+  String get emergencyRadioFm => 'UKW / FM';
+
+  @override
+  String get emergencyRadioMediumWave => 'Mittelwelle / AM';
+
+  @override
+  String get emergencyRadioFreenet => 'Freenet Deutschland';
+
+  @override
   String get emergencyMapMissing => 'Noch kein geprüftes Kartenpaket';
 
   @override

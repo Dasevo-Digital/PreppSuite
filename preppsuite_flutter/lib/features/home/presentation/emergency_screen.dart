@@ -207,7 +207,10 @@ class EmergencyScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Text('Offline-Pakete', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            l10n.readinessOfflinePackages,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 8),
           Card(
             child: Column(
@@ -218,7 +221,7 @@ class EmergencyScreen extends ConsumerWidget {
                         ? Icons.verified_outlined
                         : Icons.download_outlined,
                   ),
-                  title: const Text('Offline-Karte'),
+                  title: Text(l10n.emergencyOfflineMapTitle),
                   subtitle: Text(
                     mapReady
                         ? l10n.emergencyMapReady
@@ -233,7 +236,7 @@ class EmergencyScreen extends ConsumerWidget {
                         ? Icons.verified_outlined
                         : Icons.download_outlined,
                   ),
-                  title: const Text('Wissensarchive'),
+                  title: Text(l10n.emergencyKnowledgeArchivesTitle),
                   subtitle: Text(
                     knowledgeReady
                         ? l10n.emergencyKnowledgeReady

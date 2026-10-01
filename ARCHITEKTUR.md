@@ -2074,6 +2074,15 @@ parallel one.
   cache. Zlib/XZ output is bounded while decoding; Zstandard frame windows,
   content sizes and conservative block expansion bounds are checked before the
   native decoder is called. Archives requiring larger clusters are refused.
+- PMTiles reads and gzip output are limited to 32 MiB each
+  (`PmTilesArchive.maxBytes`). Every length in a map archive is a claim the
+  file makes about itself, and a few kilobytes of gzip can expand into
+  gigabytes. A refused tile is missing on the map and skipped by the nearby
+  search and the coverage count (`tileOrNull`); it does not end either run.
+- The built-in article reader draws only pictures served from the archive's
+  own origin, and hands links out only as `http`, `https` or `mailto`. The
+  desktop article window refuses navigation off the archive on Windows; on
+  Linux the plugin only reports it, so the load is stopped after the fact.
 - `ShelterSearch` starts both sources together and publishes partial results.
   Timeouts produce a source failure, not an empty successful search. A generation
   counter rejects responses to superseded or canceled searches. Geocoding has

@@ -38,7 +38,7 @@ class PmTilesArchive {
       );
       final root = _Directory.parse(
         _decompress(
-          await source.read(header.rootOffset, header.rootLength),
+          await _readBounded(source, header.rootOffset, header.rootLength),
           header.internalCompression,
         ),
       );
@@ -67,7 +67,8 @@ class PmTilesArchive {
       if (entry == null) return null;
 
       if (entry.runLength > 0) {
-        final bytes = await _source.read(
+        final bytes = await _readBounded(
+          _source,
           header.tileDataOffset + entry.offset,
           entry.length,
         );
@@ -79,13 +80,32 @@ class PmTilesArchive {
     return null;
   }
 
+  /// [tile], with a damaged or oversized entry treated as absent.
+  ///
+  /// For callers that walk many tiles — the nearby search, the coverage
+  /// count — where one bad entry should cost that tile and not the run.
+  Future<Uint8List?> tileOrNull(int z, int x, int y) async {
+    try {
+      return await tile(z, x, y);
+    } on PmTilesException {
+      return null;
+    } on FormatException {
+      // A gzip stream that is not one.
+      return null;
+    }
+  }
+
   /// The archive's own description of what is in it — under `vector_layers`
   /// for a vector archive, which is how the schema is recognized.
   Future<Map<String, Object?>> metadata() async {
     if (header.metadataLength == 0) return const {};
 
     final raw = _decompress(
-      await _source.read(header.metadataOffset, header.metadataLength),
+      await _readBounded(
+        _source,
+        header.metadataOffset,
+        header.metadataLength,
+      ),
       header.internalCompression,
     );
     final decoded = jsonDecode(utf8.decode(raw));
@@ -101,7 +121,7 @@ class PmTilesArchive {
 
     final leaf = _Directory.parse(
       _decompress(
-        await _source.read(offset, entry.length),
+        await _readBounded(_source, offset, entry.length),
         header.internalCompression,
       ),
     );
@@ -112,13 +132,36 @@ class PmTilesArchive {
     return _leafCache[offset] = leaf;
   }
 
+  /// The most one read or one decompression may come to.
+  ///
+  /// A map archive is somebody else's file as often as not — handed over
+  /// on a stick, downloaded from a forum — and every length in it is a
+  /// number that file states about itself. Read and unpacked as stated, a
+  /// directory entry claiming four gigabytes, or a tile of a few kilobytes
+  /// that gunzips to several, ended the app the moment the map was panned
+  /// onto it. A real vector tile is well under a megabyte unpacked and a
+  /// leaf directory a few hundred kilobytes, so this is generous by two
+  /// orders of magnitude and still small enough for any phone.
+  static const maxBytes = 32 * 1024 * 1024;
+
+  static Future<Uint8List> _readBounded(
+    ByteRangeSource source,
+    int offset,
+    int length,
+  ) {
+    if (offset < 0 || length < 0 || length > maxBytes) {
+      throw PmTilesException('entry of $length bytes exceeds the limit');
+    }
+    return source.read(offset, length);
+  }
+
   static Uint8List _decompress(
     Uint8List bytes,
     PmTilesCompression compression,
   ) {
     return switch (compression) {
       PmTilesCompression.none => bytes,
-      PmTilesCompression.gzip => Uint8List.fromList(gzip.decode(bytes)),
+      PmTilesCompression.gzip => _gunzipBounded(bytes),
       // Brotli and zstd are legal in the format and not implemented here.
       // Saying so beats handing the renderer bytes it cannot parse.
       _ => throw PmTilesException(
@@ -126,6 +169,43 @@ class PmTilesArchive {
       ),
     };
   }
+}
+
+/// Gunzips [bytes], stopping at [PmTilesArchive.maxBytes] of output rather
+/// than at the end of memory. `gzip.decode` has no limit of its own, and a
+/// gzip stream expands by up to a factor of a thousand.
+Uint8List _gunzipBounded(Uint8List bytes) {
+  final output = _BoundedSink();
+  final input = gzip.decoder.startChunkedConversion(output);
+  try {
+    for (var offset = 0; offset < bytes.length; offset += 16384) {
+      final end = (offset + 16384).clamp(0, bytes.length);
+      input.add(Uint8List.sublistView(bytes, offset, end));
+    }
+    input.close();
+  } catch (_) {
+    // Closing a failed converter may throw again; keep the first cause.
+    try {
+      input.close();
+    } catch (_) {}
+    rethrow;
+  }
+  return output.bytes.takeBytes();
+}
+
+class _BoundedSink implements Sink<List<int>> {
+  final bytes = BytesBuilder(copy: false);
+
+  @override
+  void add(List<int> data) {
+    if (bytes.length + data.length > PmTilesArchive.maxBytes) {
+      throw const PmTilesException('decompressed entry exceeds the limit');
+    }
+    bytes.add(data);
+  }
+
+  @override
+  void close() {}
 }
 
 /// Random access to a file, wherever it happens to live.

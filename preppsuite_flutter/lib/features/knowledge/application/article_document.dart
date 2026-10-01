@@ -373,7 +373,7 @@ class _Builder {
   }
 
   void _addImage(dom.Element node) {
-    final source = _resolve(node.attributes['src']);
+    final source = _resolveImage(node.attributes['src']);
     if (source == null) return;
     flush();
     blocks.add(
@@ -383,7 +383,7 @@ class _Builder {
 
   void _addFigure(dom.Element node, _Style style) {
     final image = node.querySelector('img');
-    final source = _resolve(image?.attributes['src']);
+    final source = _resolveImage(image?.attributes['src']);
     final caption = _trimmed(node.querySelector('figcaption')?.text);
 
     if (source == null) {
@@ -472,6 +472,32 @@ class _Builder {
 
   ArticleText _plain(String text, _Style style) =>
       ArticleText([style.span(text)]);
+
+  /// A picture's address, or null for one that is not in the archive.
+  ///
+  /// A link is only followed when somebody taps it, and the reader asks
+  /// first before leaving; a picture is fetched the moment the page is
+  /// drawn. An `<img src="https://…">` in an archive therefore told
+  /// whoever served it the reader's address and when the article was
+  /// opened — and `//upload.wikimedia.org`, which resolves against the
+  /// loopback server's `http:`, did so in the clear. The web view's
+  /// content policy stops that; this reader has none, so it is stopped
+  /// here, and a figure keeps its caption as it would without a picture.
+  String? _resolveImage(String? src) {
+    final resolved = _resolve(src);
+    if (resolved == null) return null;
+    final target = Uri.tryParse(resolved);
+    if (target == null) return null;
+    final base = baseUrl;
+    if (base == null) {
+      return target.hasScheme || resolved.startsWith('//') ? null : resolved;
+    }
+    final inArchive =
+        target.scheme == base.scheme &&
+        target.host == base.host &&
+        target.port == base.port;
+    return inArchive ? resolved : null;
+  }
 
   String? _resolve(String? href) {
     final trimmed = _trimmed(href);

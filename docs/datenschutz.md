@@ -62,7 +62,11 @@ gesendet.
 Beim Herunterladen eines ZIM-Archivs erhält dessen Downloadanbieter
 IP-Adresse und die gewählte Archivdatei. Gelesene Artikel werden danach lokal
 über einen ausschließlich an `127.0.0.1` gebundenen Hilfsserver angezeigt;
-externe Inhalte und Skripte aus Archiven werden nicht nachgeladen.
+externe Inhalte und Skripte aus Archiven werden nicht nachgeladen. Unter
+Linux öffnet sich der Artikel in einem eigenen Fenster, dessen Bibliothek
+einen Seitenwechsel nur melden, nicht verhindern kann; führt ein Link oder
+ein Skript aus dem Archiv hinaus, bricht die App das Laden sofort ab, die
+erste Anfrage kann den Rechner dabei aber schon verlassen haben.
 
 **Links im Browser.** Einige Quellenhinweise öffnen auf ausdrücklichen Klick
 eine externe Webseite. Ab diesem Zeitpunkt gelten die Datenschutzbedingungen

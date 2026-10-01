@@ -73,7 +73,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
         title: Text(l10n.knowledgeTitle),
         actions: [
           IconButton(
-            tooltip: 'Lesezeichen',
+            tooltip: l10n.knowledgeBookmarksTitle,
             icon: const Icon(Icons.bookmarks_outlined),
             onPressed: () => _showBookmarks(l10n, async.value),
           ),
@@ -533,7 +533,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
             : ListView(
                 shrinkWrap: true,
                 children: [
-                  const ListTile(title: Text('Lesezeichen')),
+                  ListTile(title: Text(l10n.knowledgeBookmarksTitle)),
                   for (final bookmark in bookmarks)
                     ListTile(
                       leading: const Icon(Icons.bookmark),

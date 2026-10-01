@@ -2297,13 +2297,13 @@ abstract class AppLocalizations {
   /// No description provided for @settingsKreisSchluesselLabel.
   ///
   /// In en, this message translates to:
-  /// **'Kreisschlüssel (5 digits)'**
+  /// **'District key (Kreisschlüssel, 5 digits)'**
   String get settingsKreisSchluesselLabel;
 
   /// No description provided for @settingsKreisSchluesselInvalid.
   ///
   /// In en, this message translates to:
-  /// **'Enter a 5-digit Kreisschlüssel.'**
+  /// **'Enter a 5-digit district key.'**
   String get settingsKreisSchluesselInvalid;
 
   /// No description provided for @settingsKreisSchluesselHelper.
@@ -12244,6 +12244,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opened and ready to use'**
   String get emergencyMapReady;
+
+  /// No description provided for @emergencyOfflineMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline map'**
+  String get emergencyOfflineMapTitle;
+
+  /// No description provided for @emergencyKnowledgeArchivesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge archives'**
+  String get emergencyKnowledgeArchivesTitle;
+
+  /// No description provided for @knowledgeBookmarksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarks'**
+  String get knowledgeBookmarksTitle;
+
+  /// No description provided for @emergencyRadioFm.
+  ///
+  /// In en, this message translates to:
+  /// **'FM (VHF)'**
+  String get emergencyRadioFm;
+
+  /// No description provided for @emergencyRadioMediumWave.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium wave / AM'**
+  String get emergencyRadioMediumWave;
+
+  /// No description provided for @emergencyRadioFreenet.
+  ///
+  /// In en, this message translates to:
+  /// **'Freenet (Germany)'**
+  String get emergencyRadioFreenet;
 
   /// No description provided for @emergencyMapMissing.
   ///

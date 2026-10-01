@@ -23,6 +23,9 @@ import '../application/article_viewer.dart';
 /// lists, tables, links and pictures — which for a reference work is
 /// nearly all of it. What it gains over a web view is that the app's own
 /// text size and colours finally apply to the article as well.
+/// The schemes a link out of an archive may be handed on with.
+const externalLinkSchemes = {'http', 'https', 'mailto'};
+
 class ArticleReaderScreen extends StatefulWidget {
   const ArticleReaderScreen({
     super.key,
@@ -102,10 +105,13 @@ class _ArticleReaderScreenState extends State<ArticleReaderScreen> {
     if (target == null) return;
 
     if (!isArchiveUrl(target, widget.uri)) {
-      final opened = await launchUrl(
-        target,
-        mode: LaunchMode.externalApplication,
-      );
+      // Only what a browser or a mail program is for. The address comes
+      // out of an archive somebody else made, and the system would hand
+      // `file:`, `smb:` or another app's own scheme to whatever claims
+      // it — a local file opened, an app started with chosen arguments.
+      final opened =
+          externalLinkSchemes.contains(target.scheme.toLowerCase()) &&
+          await launchUrl(target, mode: LaunchMode.externalApplication);
       if (!opened && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.articleReaderExternal)),

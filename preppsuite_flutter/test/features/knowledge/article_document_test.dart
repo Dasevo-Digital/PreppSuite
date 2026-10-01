@@ -88,6 +88,45 @@ void main() {
     expect(image.alt, 'Eine Quelle');
   });
 
+  group('a picture from outside the archive', () {
+    // Fetched the moment the page is drawn, so it told whoever served it
+    // the reader's address and when the article was opened. The web view
+    // has a content policy for that; this reader has none.
+    for (final src in [
+      'https://tracker.example/pixel.png',
+      '//upload.wikimedia.org/x.png',
+      'http://127.0.0.1:9999/I/other-port.png',
+    ]) {
+      test('is left out when it is $src', () {
+        expect(parse('<img src="$src" alt="x">').blocks, isEmpty);
+      });
+    }
+
+    test('leaves a figure its caption', () {
+      final document = parse(
+        '<figure><img src="https://tracker.example/p.png">'
+        '<figcaption>Eine Quelle im Harz</figcaption></figure>',
+      );
+
+      expect(
+        (document.blocks.single as ArticleParagraph).text.plain,
+        'Eine Quelle im Harz',
+      );
+    });
+
+    test('is left out without a base address too', () {
+      final document = parseArticle(
+        '<html><body><img src="https://tracker.example/p.png">'
+        '<img src="I/quelle.png"></body></html>',
+      );
+
+      expect(
+        document.blocks.whereType<ArticleImage>().map((i) => i.source),
+        ['I/quelle.png'],
+      );
+    });
+  });
+
   test('a figure carries its caption', () {
     final document = parse(
       '<figure><img src="../I/quelle.png"><figcaption>Eine Quelle im Harz</figcaption></figure>',

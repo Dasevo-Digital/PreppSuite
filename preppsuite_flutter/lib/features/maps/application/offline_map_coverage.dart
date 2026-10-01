@@ -76,7 +76,7 @@ Future<OfflineMapCoverage> offlineMapCoverage(
   for (var index = 0; index < tiles.length; index += step) {
     final tile = tiles[index];
     total++;
-    if (await archive.tile(tile.z, tile.x, tile.y) != null) present++;
+    if (await archive.tileOrNull(tile.z, tile.x, tile.y) != null) present++;
   }
 
   return OfflineMapCoverage(present: present, total: total);

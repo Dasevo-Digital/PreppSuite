@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
@@ -88,6 +90,23 @@ Future<bool> openArticleWindow({
         userDataFolderWindows: await _windowsUserDataFolder(),
       ),
     );
+    // The same rule the embedded panel enforces: an archive may contain
+    // anything, and a link or a script that leaves it must not take the
+    // reader — and what the page says — onto the internet. The window
+    // had no such rule at all.
+    //
+    // On Windows the answer is honoured: WebView2 holds the navigation
+    // until this returns. On Linux the plugin only reports it and lets
+    // WebKitGTK carry on whatever comes back, so there it is stopped by
+    // hand. That is a race the request can win; a hard block on Linux
+    // needs the plugin's `decide-policy` handler patched.
+    window.setOnUrlRequestCallback((url) {
+      if (isArchiveUrl(Uri.tryParse(url), uri)) return true;
+      if (defaultTargetPlatform == TargetPlatform.linux) {
+        unawaited(window.stop());
+      }
+      return false;
+    });
     window.launch(uri.toString());
     return true;
   } on Object {

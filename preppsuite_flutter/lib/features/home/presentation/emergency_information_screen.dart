@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
@@ -160,6 +161,23 @@ class _EmergencyInformationScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // A frequency band in the reader's own numbers: "87,5" was written
+    // into the code, which an English locale reads as two values.
+    final number = NumberFormat.decimalPattern(l10n.localeName)
+      ..turnOffGrouping();
+    // Whole numbers as they are ("108"), the rest to [digits] places, so
+    // a channel raster like 149,0250 keeps its last zero.
+    String figure(num value, int digits) {
+      final places = value == value.roundToDouble() ? 0 : digits;
+      number
+        ..minimumFractionDigits = places
+        ..maximumFractionDigits = places;
+      return number.format(value);
+    }
+
+    String band(num from, num to, int digits, String unit) =>
+        '${figure(from, digits)}–${figure(to, digits)} $unit';
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.emergencyDirectoryTitle)),
       body: AdaptiveColumns(
@@ -276,29 +294,29 @@ class _EmergencyInformationScreenState
               Card(
                 child: Column(
                   children: [
-                    const ListTile(
-                      title: Text('UKW / FM'),
-                      subtitle: Text('87,5–108 MHz'),
+                    ListTile(
+                      title: Text(l10n.emergencyRadioFm),
+                      subtitle: Text(band(87.5, 108, 1, 'MHz')),
                     ),
-                    const ListTile(
-                      title: Text('DAB+ Band III'),
-                      subtitle: Text('174–240 MHz'),
+                    ListTile(
+                      title: const Text('DAB+ Band III'),
+                      subtitle: Text(band(174, 240, 0, 'MHz')),
                     ),
-                    const ListTile(
-                      title: Text('Mittelwelle / AM'),
-                      subtitle: Text('526,5–1606,5 kHz'),
+                    ListTile(
+                      title: Text(l10n.emergencyRadioMediumWave),
+                      subtitle: Text(band(526.5, 1606.5, 1, 'kHz')),
                     ),
                     ListTile(
                       title: const Text('PMR446'),
                       subtitle: Text(
-                        '446,00625–446,19375 MHz · '
+                        '${band(446.00625, 446.19375, 5, 'MHz')} · '
                         '${l10n.emergencyRadioChannels(16)}',
                       ),
                     ),
                     ListTile(
-                      title: const Text('Freenet Deutschland'),
+                      title: Text(l10n.emergencyRadioFreenet),
                       subtitle: Text(
-                        '149,0250–149,1125 MHz · '
+                        '${band(149.025, 149.1125, 4, 'MHz')} · '
                         '${l10n.emergencyRadioChannels(6)}',
                       ),
                     ),

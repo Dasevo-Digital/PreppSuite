@@ -63,6 +63,25 @@ void main() {
       return archive;
     }
 
+    test(
+      'a tile that unpacks past the limit is refused, not unpacked',
+      () async {
+        // A few kilobytes of gzip that expand into more than the limit: the
+        // shape of a map file meant to end the app when it is panned onto.
+        final archive = await archiveOf(
+          buildBinaryArchive(
+            maxZoom: 0,
+            tiles: {(0, 0, 0): Uint8List(PmTilesArchive.maxBytes + 1)},
+          ),
+        );
+
+        await expectLater(
+          archive.tile(0, 0, 0),
+          throwsA(isA<PmTilesException>()),
+        );
+      },
+    );
+
     test('a tile written at a zoom/x/y comes back at the same one', () async {
       final archive = await archiveOf(
         buildArchive(

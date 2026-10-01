@@ -181,7 +181,7 @@ class OfflinePoiSearch {
     var read = 0;
 
     for (final tile in tiles) {
-      final bytes = await archive.tile(poiZoom, tile.x, tile.y);
+      final bytes = await archive.tileOrNull(poiZoom, tile.x, tile.y);
       read++;
 
       if (bytes != null) {

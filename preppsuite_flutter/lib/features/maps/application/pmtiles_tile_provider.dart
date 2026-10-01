@@ -31,7 +31,17 @@ class PmTilesVectorTileProvider implements VectorTileProvider {
 
   @override
   Future<Uint8List> provide(TileIdentity tile) async {
-    final bytes = await archive.tile(tile.z, tile.x, tile.y);
+    final Uint8List? bytes;
+    try {
+      bytes = await archive.tile(tile.z, tile.x, tile.y);
+    } on PmTilesException catch (error) {
+      // Damaged or past the size limit: asking again reads the same bytes.
+      throw ProviderException(
+        message: '$error',
+        statusCode: 422,
+        retryable: Retryable.none,
+      );
+    }
     if (bytes == null) {
       // An extract covers a region; asking past its edge is what panning
       // does. Not retryable — the tile will not appear on a second look.

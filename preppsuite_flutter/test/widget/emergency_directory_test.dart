@@ -16,13 +16,16 @@ import 'accessibility.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  Future<void> show(WidgetTester tester) async {
+  Future<void> show(
+    WidgetTester tester, {
+    Locale locale = const Locale('de'),
+  }) async {
     await tester.binding.setSurfaceSize(const Size(500, 2400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
     await tester.pumpWidget(
       MaterialApp(
-        locale: const Locale('de'),
+        locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: const EmergencyInformationScreen(),
@@ -131,5 +134,27 @@ void main() {
   testWidgets('the screen survives twice the font size', (tester) async {
     useLargeText(tester);
     await show(tester);
+  });
+
+  testWidgets('radio bands are written in the reader\'s own numbers', (
+    tester,
+  ) async {
+    // "87,5–108 MHz" was in the code, which an English reader takes for
+    // two values, and the medium-wave band was German on both locales.
+    await show(tester, locale: const Locale('en'));
+
+    expect(find.text('87.5–108 MHz'), findsOneWidget);
+    expect(find.text('Medium wave / AM'), findsOneWidget);
+    expect(find.text('526.5–1606.5 kHz'), findsOneWidget);
+    expect(find.textContaining('446.00625–446.19375 MHz'), findsOneWidget);
+    expect(find.textContaining('149.0250–149.1125 MHz'), findsOneWidget);
+  });
+
+  testWidgets('and stay as they were in German', (tester) async {
+    await show(tester);
+
+    expect(find.text('87,5–108 MHz'), findsOneWidget);
+    expect(find.text('Mittelwelle / AM'), findsOneWidget);
+    expect(find.text('526,5–1606,5 kHz'), findsOneWidget);
   });
 }

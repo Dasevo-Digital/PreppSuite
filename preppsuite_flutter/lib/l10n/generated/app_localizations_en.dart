@@ -1290,11 +1290,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsRegionTypeBundesland => 'State (Bundesland)';
 
   @override
-  String get settingsKreisSchluesselLabel => 'Kreisschlüssel (5 digits)';
+  String get settingsKreisSchluesselLabel =>
+      'District key (Kreisschlüssel, 5 digits)';
 
   @override
-  String get settingsKreisSchluesselInvalid =>
-      'Enter a 5-digit Kreisschlüssel.';
+  String get settingsKreisSchluesselInvalid => 'Enter a 5-digit district key.';
 
   @override
   String get settingsKreisSchluesselHelper =>
@@ -7339,6 +7339,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emergencyMapReady => 'Opened and ready to use';
+
+  @override
+  String get emergencyOfflineMapTitle => 'Offline map';
+
+  @override
+  String get emergencyKnowledgeArchivesTitle => 'Knowledge archives';
+
+  @override
+  String get knowledgeBookmarksTitle => 'Bookmarks';
+
+  @override
+  String get emergencyRadioFm => 'FM (VHF)';
+
+  @override
+  String get emergencyRadioMediumWave => 'Medium wave / AM';
+
+  @override
+  String get emergencyRadioFreenet => 'Freenet (Germany)';
 
   @override
   String get emergencyMapMissing => 'No checked map package yet';
