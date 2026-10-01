@@ -42,8 +42,12 @@ ab. Übertragen werden IP-Adresse sowie gewählte Region, Station oder Strecke.
 **Karten und Ortssuche.** Ohne Offline-Archiv werden Kartenkacheln von
 OpenStreetMap geladen. Orts- und Rückwärtssuche verwendet Nominatim;
 Schutzräume kommen über Overpass und WWBOTA. Übertragen werden IP-Adresse,
-Suchtext, Koordinaten oder Kartenausschnitt. Offline-Karte und lokale
-Umgebungssuche vermeiden diese Abrufe nach dem Download.
+Suchtext, Koordinaten oder Kartenausschnitt. Der eigene Standort geht dabei
+nur gerundet hinaus: für die Bestimmung des Bundeslands auf zwei
+Nachkommastellen (etwa ein Kilometer), für die Schutzraumsuche als
+Suchgebiet um einen Rasterpunkt im selben Abstand statt um die genaue
+Position. Offline-Karte und lokale Umgebungssuche vermeiden diese Abrufe
+nach dem Download.
 
 **Kartendownload.** Kartenarchive werden von OpenFreeMap oder – nach eigener
 Konfiguration – MapTiler geladen. Der Anbieter erhält IP-Adresse und das

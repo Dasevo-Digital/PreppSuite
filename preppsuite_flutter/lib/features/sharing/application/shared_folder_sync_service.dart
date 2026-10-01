@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import '../../../local_db/database.dart';
 import 'device_snapshot.dart';
 import 'snapshot_exchange.dart';
@@ -212,10 +214,19 @@ class SharedFolderSyncService {
             ? SharedFolderSyncError.unsupportedVersion
             : null,
       );
-    } catch (_) {
+    } catch (error, stack) {
       // A folder mid-download, a file the sync engine is holding open, a
       // disk that filled up. None of it is worth losing the app over: the
       // local database is untouched and the next run tries again.
+      //
+      // Logged, though: a programming error lands here too, and from the
+      // outside it is indistinguishable from a busy disk.
+      developer.log(
+        'shared folder sync failed',
+        name: 'preppsuite.sharing',
+        error: error,
+        stackTrace: stack,
+      );
       return const SharedFolderSyncResult(
         error: SharedFolderSyncError.failed,
       );

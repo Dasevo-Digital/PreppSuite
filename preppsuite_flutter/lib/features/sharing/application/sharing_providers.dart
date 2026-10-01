@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -180,7 +181,40 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
     _syncing = true;
     _update((current) => current.copyWith(syncing: true));
     try {
-      final service = SharedFolderSyncService(
+      final service = await _serviceFor(folder, profile, republish);
+      final result = service == null
+          ? const SharedFolderSyncResult(error: SharedFolderSyncError.failed)
+          : await service.sync();
+
+      if (!ref.mounted) return;
+      _update(
+        (current) => current.copyWith(
+          syncing: false,
+          lastResult: result,
+          lastSyncedAt: result.succeeded
+              ? DateTime.now().toUtc()
+              : current.lastSyncedAt,
+        ),
+      );
+    } finally {
+      _syncing = false;
+    }
+  }
+
+  /// Everything the run needs that is read before it starts.
+  ///
+  /// Null when any of it cannot be read — a keychain that is locked, a
+  /// preferences file that is not there. That used to throw out of
+  /// [syncNow] past the line that clears `syncing`, so the settings card
+  /// said "syncing" from then on, and out of a timer callback, where
+  /// nothing caught it at all.
+  Future<SharedFolderSyncService?> _serviceFor(
+    SharedFolderLocation folder,
+    HouseholdProfile profile,
+    bool republish,
+  ) async {
+    try {
+      return SharedFolderSyncService(
         database: ref.read(appDatabaseProvider),
         folder: syncFolderFor(folder.value),
         deviceId: await _store.deviceId(),
@@ -196,20 +230,14 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
             const FolderKeyStore().rememberEncryption(profile.id),
         republish: republish,
       );
-      final result = await service.sync();
-
-      if (!ref.mounted) return;
-      _update(
-        (current) => current.copyWith(
-          syncing: false,
-          lastResult: result,
-          lastSyncedAt: result.succeeded
-              ? DateTime.now().toUtc()
-              : current.lastSyncedAt,
-        ),
+    } on Object catch (error, stack) {
+      developer.log(
+        'shared folder sync could not start',
+        name: 'preppsuite.sharing',
+        error: error,
+        stackTrace: stack,
       );
-    } finally {
-      _syncing = false;
+      return null;
     }
   }
 

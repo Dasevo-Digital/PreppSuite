@@ -86,6 +86,37 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  group('the text size', () {
+    // The hub used to set a fixed 1.25 in crisis mode and 1.0 otherwise,
+    // over whatever the system said — somebody reading at 1.5 got smaller
+    // text on this screen, and smaller still from asking for larger.
+    double scaleInList(WidgetTester tester) => MediaQuery.textScalerOf(
+      tester.element(find.byType(ListView).first),
+    ).scale(1);
+
+    for (final (system, crisis, expected) in [
+      (1.5, false, 1.5),
+      (1.5, true, 1.5),
+      (1.0, true, 1.25),
+      (1.0, false, 1.0),
+    ]) {
+      testWidgets(
+        'is $expected at a system size of $system, crisis mode $crisis',
+        (tester) async {
+          tester.platformDispatcher.textScaleFactorTestValue = system;
+          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+          if (crisis) {
+            await store.save(const PreparednessHubData(crisisMode: true));
+          }
+
+          await show(tester);
+
+          expect(scaleInList(tester), closeTo(expected, 1e-9));
+        },
+      );
+    }
+  });
+
   testWidgets('shows what the household has already written down', (
     tester,
   ) async {

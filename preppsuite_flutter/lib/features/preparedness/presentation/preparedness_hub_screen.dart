@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../../core/crisis_mode_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../energy/application/energy_store.dart';
 import '../../energy/application/outage_store.dart';
@@ -116,9 +117,15 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : MediaQuery(
-              data: MediaQuery.of(context).copyWith(
-                textScaler: TextScaler.linear(_data.crisisMode ? 1.25 : 1),
-              ),
+              // Always this widget, switched or not, so that turning the
+              // mode on does not rebuild the list and lose its place.
+              data: _data.crisisMode
+                  ? MediaQuery.of(context).copyWith(
+                      textScaler: crisisTextScaler(
+                        MediaQuery.textScalerOf(context),
+                      ),
+                    )
+                  : MediaQuery.of(context),
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [

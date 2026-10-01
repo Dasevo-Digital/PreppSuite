@@ -27,11 +27,9 @@ class PreppSuiteApp extends ConsumerWidget {
       builder: (context, child) {
         final media = MediaQuery.of(context);
         if (!crisisMode) return child!;
-        final scale =
-            media.textScaler.scale(16).clamp(20.0, double.infinity) / 16;
         return MediaQuery(
           data: media.copyWith(
-            textScaler: TextScaler.linear(scale),
+            textScaler: crisisTextScaler(media.textScaler),
             disableAnimations: true,
           ),
           child: child!,

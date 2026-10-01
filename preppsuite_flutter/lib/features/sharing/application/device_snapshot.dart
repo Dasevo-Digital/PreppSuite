@@ -229,8 +229,11 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
     fatGrams: Value(_double(json['fatGrams'])),
     fiberGrams: Value(_double(json['fiberGrams'])),
     dailyDose: Value(_double(json['dailyDose'])),
-    expiryLeadDays: Value(json['expiryLeadDays'] as String?),
-    foodGroup: Value(json['foodGroup'] as String?),
+    // Through `_text`, never a cast: a number where a string belongs
+    // threw a TypeError here, which nothing on the way up expected — one
+    // damaged device file stopped the whole sync, on every run.
+    expiryLeadDays: Value(_text(json['expiryLeadDays'])),
+    foodGroup: Value(_text(json['foodGroup'])),
     notes: Value(_string(json['notes'])),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),
@@ -521,6 +524,10 @@ DateTime? asUtcDate(Object? value) {
 
 String? _string(Object? value) =>
     value is String && value.isNotEmpty ? value : null;
+
+/// A string as it is, empty included — for fields where empty is a value
+/// rather than an absence.
+String? _text(Object? value) => value is String ? value : null;
 
 int? _int(Object? value) => value is num ? value.toInt() : null;
 

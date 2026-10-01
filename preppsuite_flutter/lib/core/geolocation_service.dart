@@ -202,10 +202,18 @@ class GeolocationService {
   }
 
   Future<String?> _reverseGeocodeState(Position position) async {
+    // Only the state is wanted, so only that much of the position goes
+    // out: two decimals, about a kilometre. No `zoom` to go with it —
+    // at the state level Berlin, Hamburg and Bremen are answered as
+    // cities, and `address.state` would go missing for exactly those.
+    // The fix itself names a front door, and Nominatim's logs are not the
+    // place for this household's address. A device within a kilometre of
+    // a state border may be told the neighbouring one — the setting it
+    // fills in can be corrected by hand.
     final uri = Uri.https('nominatim.openstreetmap.org', '/reverse', {
       'format': 'jsonv2',
-      'lat': '${position.latitude}',
-      'lon': '${position.longitude}',
+      'lat': position.latitude.toStringAsFixed(2),
+      'lon': position.longitude.toStringAsFixed(2),
       'accept-language': 'de',
     });
 

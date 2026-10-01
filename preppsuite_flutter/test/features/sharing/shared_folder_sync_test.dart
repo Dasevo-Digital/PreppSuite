@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -374,6 +376,43 @@ void main() {
 
     expect(result.received, 1, reason: "the phone's rows still arrived");
     expect(result.succeeded, isTrue);
+  });
+
+  test('a field of the wrong type costs that field, not the run', () async {
+    // Valid JSON, wrong shape: a number where the lead days are a string.
+    // That used to throw a TypeError out of the row codec, which the run
+    // only caught as a whole — every sync failed while the file was there.
+    await phone.upsertInventoryItem(water());
+    await serviceFor(phone, 'phone').sync();
+    final odd = (jsonDecode(folder.deviceFiles['phone']!) as Map)
+        .cast<String, Object?>();
+    final rows = (odd['inventoryItems']! as List).cast<Map<String, Object?>>();
+    folder.deviceFiles['odd'] = jsonEncode({
+      ...odd,
+      'deviceId': 'odd',
+      'inventoryItems': [
+        {
+          ...rows.single,
+          'clientId': 'odd-row',
+          'expiryLeadDays': 7,
+          'foodGroup': false,
+        },
+      ],
+    });
+
+    final result = await serviceFor(laptop, 'laptop').sync();
+
+    expect(result.succeeded, isTrue);
+    expect(result.published, isTrue);
+    final stored = await laptop.inventoryItemsForSync(householdId);
+    expect(
+      stored.map((row) => row.clientId),
+      containsAll(['water', 'odd-row']),
+    );
+    expect(
+      stored.firstWhere((row) => row.clientId == 'odd-row').expiryLeadDays,
+      isNull,
+    );
   });
 
   test('a folder written entirely by a newer version is reported', () async {

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:geolocator_platform_interface/geolocator_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:preppsuite_flutter/core/geolocation_service.dart';
@@ -174,5 +178,31 @@ void main() {
     expect(fix.latitude, closeTo(52.5, 1e-6));
     expect(fix.isStaleAt(now), isFalse);
     expect(platform.askedForLast, 0);
+  });
+
+  test('the state lookup sends a kilometre, not the front door', () async {
+    // Only the state is wanted. A fix to the metre in Nominatim's logs is
+    // this household's address.
+    GeolocatorPlatform.instance = _FakeGeolocator(
+      current: at(52.268874, 10.526770, now),
+    );
+    Uri? asked;
+    final service = GeolocationService(
+      httpClient: MockClient((request) async {
+        asked = request.url;
+        return http.Response(
+          jsonEncode({
+            'address': {'state': 'Niedersachsen'},
+          }),
+          200,
+        );
+      }),
+    );
+
+    final state = await service.determineBundesland();
+
+    expect(state, isNotNull);
+    expect(asked!.queryParameters['lat'], '52.27');
+    expect(asked!.queryParameters['lon'], '10.53');
   });
 }
