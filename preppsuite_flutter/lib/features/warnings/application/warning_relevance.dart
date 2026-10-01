@@ -2,6 +2,60 @@ import '../../../local_db/database.dart';
 import '../../household/application/german_states.dart';
 import 'warning_region_filter.dart';
 
+/// The human-readable reason a warning is part of a household's view.
+///
+/// This is deliberately separate from [warningRelevanceRank]. The rank is
+/// useful for ordering; this value is what lets the UI answer the important
+/// question "why am I seeing this?" without exposing implementation details
+/// such as ARS prefixes.
+enum WarningRelevance {
+  ownDistrict,
+  followedDistrict,
+  ownState,
+  followedState,
+  nationwide,
+  noPlacesSelected,
+  otherRegion,
+}
+
+/// Classifies the regional relationship between [warning] and [filter].
+WarningRelevance warningRelevance({
+  required Warning warning,
+  required WarningRegionFilter filter,
+}) {
+  final regionKey = warning.regionKey;
+  if (regionKey == null) return WarningRelevance.nationwide;
+  if (!filter.hasAnyRegion) return WarningRelevance.noPlacesSelected;
+
+  final ownKreis = filter.ownKreisSchluessel;
+  if (ownKreis != null) {
+    if (regionKey == ownKreis) return WarningRelevance.ownDistrict;
+    final ownState = germanStateForKreisSchluessel(ownKreis);
+    if (ownState != null &&
+        (regionKey == ownState.bbkCode ||
+            regionKey.startsWith(ownState.arsPrefix))) {
+      return WarningRelevance.ownState;
+    }
+  }
+
+  for (final region in filter.extraRegions) {
+    switch (region.kind) {
+      case WarningRegionKind.kreis:
+        if (regionKey == region.value) {
+          return WarningRelevance.followedDistrict;
+        }
+      case WarningRegionKind.bundesland:
+        final state = germanStateByBbkCode(region.value);
+        if (state != null &&
+            (regionKey == state.bbkCode ||
+                regionKey.startsWith(state.arsPrefix))) {
+          return WarningRelevance.followedState;
+        }
+    }
+  }
+  return WarningRelevance.otherRegion;
+}
+
 /// How closely a warning matches the regions a device follows — a rank
 /// rather than a yes/no, so the UI can put closer matches first among
 /// warnings that are all technically relevant. Higher is more relevant.
@@ -28,39 +82,12 @@ int warningRelevanceRank({
   required Warning warning,
   required WarningRegionFilter filter,
 }) {
-  final regionKey = warning.regionKey;
-  // Both of these concern everybody here: a warning that names no region,
-  // and every warning at all when the device has not said where it is.
-  if (regionKey == null) return 1;
-  if (!filter.hasAnyRegion) return 1;
-
-  final ownKreis = filter.ownKreisSchluessel;
-  if (ownKreis != null) {
-    if (regionKey == ownKreis) return 3;
-
-    final ownState = germanStateForKreisSchluessel(ownKreis);
-    if (ownState != null &&
-        (regionKey == ownState.bbkCode ||
-            regionKey.startsWith(ownState.arsPrefix))) {
-      return 2;
-    }
-  }
-
-  for (final region in filter.extraRegions) {
-    switch (region.kind) {
-      case WarningRegionKind.kreis:
-        if (regionKey == region.value) return 3;
-      case WarningRegionKind.bundesland:
-        final state = germanStateByBbkCode(region.value);
-        if (state != null &&
-            (regionKey == state.bbkCode ||
-                regionKey.startsWith(state.arsPrefix))) {
-          return 2;
-        }
-    }
-  }
-
-  return 0;
+  return switch (warningRelevance(warning: warning, filter: filter)) {
+    WarningRelevance.ownDistrict || WarningRelevance.followedDistrict => 3,
+    WarningRelevance.ownState || WarningRelevance.followedState => 2,
+    WarningRelevance.nationwide || WarningRelevance.noPlacesSelected => 1,
+    WarningRelevance.otherRegion => 0,
+  };
 }
 
 /// Whether [warning] concerns this device at all.

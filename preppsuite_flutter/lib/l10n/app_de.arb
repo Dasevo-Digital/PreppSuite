@@ -1168,6 +1168,14 @@
   "warningDetailsNoInstructions": "Für diese Warnung liegen keine Handlungsempfehlungen vor.",
   "warningDetailsNoArea": "Das betroffene Gebiet wurde von der Warnquelle nicht näher angegeben.",
   "warningDetailsSource": "Warnquelle und Veröffentlichung",
+  "warningDetailsRelevance": "Warum diese Warnung angezeigt wird",
+  "warningRelevanceOwnDistrict": "Sie betrifft deinen eigenen Landkreis.",
+  "warningRelevanceFollowedDistrict": "Sie betrifft einen zusätzlich gespeicherten Landkreis.",
+  "warningRelevanceOwnState": "Sie betrifft dein Bundesland.",
+  "warningRelevanceFollowedState": "Sie betrifft ein zusätzlich gespeichertes Bundesland.",
+  "warningRelevanceNationwide": "Sie gilt bundesweit oder die Warnquelle nennt kein genaueres Gebiet.",
+  "warningRelevanceNoPlaces": "Es ist kein Warnort eingerichtet; deshalb zeigt die App Warnungen für Deutschland an.",
+  "warningRelevanceOtherRegion": "Sie ist keiner deiner gespeicherten Regionen zugeordnet.",
   "warningDetailsPublished": "Veröffentlicht: {time}",
   "@warningDetailsPublished": {
     "placeholders": {
@@ -1413,6 +1421,29 @@
   "readinessWarningData": "Amtliche Warnungsdaten",
   "readinessWarningNeverUpdated": "Noch keine vollständige Aktualisierung auf diesem Gerät",
   "readinessWarningUpdated": "Zuletzt vollständig aktualisiert: {age}",
+  "readinessWarningBlocked": "Die letzte Hintergrundaktualisierung konnte nicht auf lokale Daten zugreifen.",
+  "readinessBackup": "Sicherung geprüft",
+  "readinessBackupNeverVerified": "Noch keine Sicherung hier erfolgreich geöffnet und geprüft",
+  "readinessBackupVerified": "Sicherung erfolgreich lesbar geprüft: {age}",
+  "@readinessBackupVerified": {
+    "placeholders": {"age": {"type": "String"}}
+  },
+  "readinessBackupStale": "Letzte Sicherungsprüfung: {age}; vor Änderungen erneut prüfen",
+  "@readinessBackupStale": {
+    "placeholders": {"age": {"type": "String"}}
+  },
+  "readinessMapReadyNoPlaces": "{label} ist lesbar; keine gespeicherten Orte für eine Abdeckungsprüfung",
+  "@readinessMapReadyNoPlaces": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+  "readinessMapCoverage": "{covered} von {total} gespeicherten Orten liegen in {label}",
+  "@readinessMapCoverage": {
+    "placeholders": {
+      "covered": {"type": "int"},
+      "total": {"type": "int"},
+      "label": {"type": "String"}
+    }
+  },
   "@readinessWarningUpdated": {
     "placeholders": {
       "age": {

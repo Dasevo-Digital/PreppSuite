@@ -34,6 +34,34 @@ void main() {
   }
 
   group('warningRelevanceRank', () {
+    test('keeps a concrete reason for every relevance rank', () {
+      expect(
+        warningRelevance(
+          warning: warning(regionKey: '05334'),
+          filter: filter(),
+        ),
+        WarningRelevance.ownDistrict,
+      );
+      expect(
+        warningRelevance(
+          warning: warning(regionKey: 'NW'),
+          filter: filter(),
+        ),
+        WarningRelevance.ownState,
+      );
+      expect(
+        warningRelevance(warning: warning(regionKey: null), filter: filter()),
+        WarningRelevance.nationwide,
+      );
+      expect(
+        warningRelevance(
+          warning: warning(regionKey: 'SN'),
+          filter: filter(),
+        ),
+        WarningRelevance.otherRegion,
+      );
+    });
+
     test('a nationwide warning (no regionKey) concerns everyone', () {
       // Above somebody else's region, below the ones this device
       // follows. It used to share rank 0 with "not your problem", and a

@@ -2115,6 +2115,14 @@
   "warningDetailsNoInstructions": "No recommended actions were provided for this alert.",
   "warningDetailsNoArea": "The warning source did not specify the affected area further.",
   "warningDetailsSource": "Warning source and publication",
+  "warningDetailsRelevance": "Why this warning is shown",
+  "warningRelevanceOwnDistrict": "It affects your own district.",
+  "warningRelevanceFollowedDistrict": "It affects an additional saved district.",
+  "warningRelevanceOwnState": "It affects your federal state.",
+  "warningRelevanceFollowedState": "It affects an additional saved federal state.",
+  "warningRelevanceNationwide": "It applies nationwide or the source does not name a more precise area.",
+  "warningRelevanceNoPlaces": "No warning place is set up, so the app shows warnings for Germany.",
+  "warningRelevanceOtherRegion": "It is not assigned to one of your saved regions.",
   "warningDetailsPublished": "Published: {time}",
   "@warningDetailsPublished": {
     "placeholders": {
@@ -2405,6 +2413,29 @@
   "readinessWarningData": "Official warning data",
   "readinessWarningNeverUpdated": "No complete refresh on this device yet",
   "readinessWarningUpdated": "Last complete refresh: {age}",
+  "readinessWarningBlocked": "The latest background refresh could not access local data.",
+  "readinessBackup": "Backup verified",
+  "readinessBackupNeverVerified": "No backup has been opened and verified successfully on this device yet",
+  "readinessBackupVerified": "Backup opened successfully: {age}",
+  "@readinessBackupVerified": {
+    "placeholders": {"age": {"type": "String"}}
+  },
+  "readinessBackupStale": "Last backup verification: {age}; verify again before changes",
+  "@readinessBackupStale": {
+    "placeholders": {"age": {"type": "String"}}
+  },
+  "readinessMapReadyNoPlaces": "{label} is readable; no saved places are available for a coverage check",
+  "@readinessMapReadyNoPlaces": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+  "readinessMapCoverage": "{covered} of {total} saved places are covered by {label}",
+  "@readinessMapCoverage": {
+    "placeholders": {
+      "covered": {"type": "int"},
+      "total": {"type": "int"},
+      "label": {"type": "String"}
+    }
+  },
   "@readinessWarningUpdated": {
     "placeholders": {
       "age": {

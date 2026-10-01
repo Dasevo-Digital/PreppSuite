@@ -100,6 +100,21 @@ void main() {
     expect(find.text('1 von 2 Warnungen'), findsOneWidget);
   });
 
+  testWidgets('an expanded warning explains its regional relevance', (
+    tester,
+  ) async {
+    await pumpScreen(tester, [storm]);
+
+    await tester.tap(find.text('Sturmböen Hannover'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Warum diese Warnung angezeigt wird'),
+      findsOneWidget,
+    );
+    expect(find.text('Sie betrifft deinen eigenen Landkreis.'), findsOneWidget);
+  });
+
   testWidgets('"Akut" hides what has already run out', (tester) async {
     await pumpScreen(tester, [storm, past]);
 

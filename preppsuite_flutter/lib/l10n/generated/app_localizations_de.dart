@@ -3707,6 +3707,36 @@ class AppLocalizationsDe extends AppLocalizations {
   String get warningDetailsSource => 'Warnquelle und Veröffentlichung';
 
   @override
+  String get warningDetailsRelevance => 'Warum diese Warnung angezeigt wird';
+
+  @override
+  String get warningRelevanceOwnDistrict =>
+      'Sie betrifft deinen eigenen Landkreis.';
+
+  @override
+  String get warningRelevanceFollowedDistrict =>
+      'Sie betrifft einen zusätzlich gespeicherten Landkreis.';
+
+  @override
+  String get warningRelevanceOwnState => 'Sie betrifft dein Bundesland.';
+
+  @override
+  String get warningRelevanceFollowedState =>
+      'Sie betrifft ein zusätzlich gespeichertes Bundesland.';
+
+  @override
+  String get warningRelevanceNationwide =>
+      'Sie gilt bundesweit oder die Warnquelle nennt kein genaueres Gebiet.';
+
+  @override
+  String get warningRelevanceNoPlaces =>
+      'Es ist kein Warnort eingerichtet; deshalb zeigt die App Warnungen für Deutschland an.';
+
+  @override
+  String get warningRelevanceOtherRegion =>
+      'Sie ist keiner deiner gespeicherten Regionen zugeordnet.';
+
+  @override
   String warningDetailsPublished(String time) {
     return 'Veröffentlicht: $time';
   }
@@ -4300,6 +4330,37 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String readinessWarningUpdated(String age) {
     return 'Zuletzt vollständig aktualisiert: $age';
+  }
+
+  @override
+  String get readinessWarningBlocked =>
+      'Die letzte Hintergrundaktualisierung konnte nicht auf lokale Daten zugreifen.';
+
+  @override
+  String get readinessBackup => 'Sicherung geprüft';
+
+  @override
+  String get readinessBackupNeverVerified =>
+      'Noch keine Sicherung hier erfolgreich geöffnet und geprüft';
+
+  @override
+  String readinessBackupVerified(String age) {
+    return 'Sicherung erfolgreich lesbar geprüft: $age';
+  }
+
+  @override
+  String readinessBackupStale(String age) {
+    return 'Letzte Sicherungsprüfung: $age; vor Änderungen erneut prüfen';
+  }
+
+  @override
+  String readinessMapReadyNoPlaces(String label) {
+    return '$label ist lesbar; keine gespeicherten Orte für eine Abdeckungsprüfung';
+  }
+
+  @override
+  String readinessMapCoverage(int covered, int total, String label) {
+    return '$covered von $total gespeicherten Orten liegen in $label';
   }
 
   @override

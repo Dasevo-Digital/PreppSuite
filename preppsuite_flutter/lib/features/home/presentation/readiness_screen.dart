@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
+import '../../settings/application/local_encryption_readiness_store.dart';
 import '../../checklists/application/checklist_providers.dart';
 import '../../checklists/application/checklist_satisfaction.dart';
 import '../../household/application/household_member_controller.dart';
@@ -11,10 +12,20 @@ import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/application/charge_reminder_provider.dart';
 import '../../knowledge/application/knowledge_providers.dart';
 import '../../maps/application/offline_map_providers.dart';
+import '../../maps/application/personal_place.dart';
+import '../../maps/application/pmtiles_archive.dart';
 import '../../warnings/application/warning_poll_status_store.dart';
 
 final _warningPollStatusProvider = FutureProvider(
   (ref) => const WarningPollStatusStore().load(),
+);
+
+final _backupVerificationProvider = FutureProvider(
+  (ref) => const LocalEncryptionReadinessStore().lastVerified(),
+);
+
+final _personalPlacesProvider = FutureProvider(
+  (ref) => const PersonalPlaceStore().load(),
 );
 
 /// Shows whether the data and offline packages on this device are ready for
@@ -35,10 +46,17 @@ class ReadinessScreen extends ConsumerWidget {
     final plan = ref.watch(householdPlanProvider(profile.id)).value;
     final members =
         ref.watch(householdMembersProvider(profile.id)).value ?? const [];
-    final mapReady = ref.watch(offlineMapProvider).value?.isReady ?? false;
+    final map = ref.watch(offlineMapProvider).value;
+    final mapReady = map?.isReady ?? false;
+    final places = ref.watch(_personalPlacesProvider).value ?? const [];
+    final coveredPlaces = map?.archive == null
+        ? 0
+        : places.where((place) => _covers(map!.archive!, place)).length;
     final knowledge = ref.watch(knowledgeProvider).value;
     final knowledgeReady = knowledge?.isReady ?? false;
     final warningStatus = ref.watch(_warningPollStatusProvider).value;
+    final backupVerifiedAt = ref.watch(_backupVerificationProvider).value;
+    final backupReady = LocalEncryptionReadinessStore.isFresh(backupVerifiedAt);
     final equipment = ref.watch(chargeCheckProvider);
     final equipmentReady =
         !equipment.isOff && equipment.lastChecked != null && !equipment.isDue();
@@ -61,6 +79,7 @@ class ReadinessScreen extends ConsumerWidget {
       (l10n.readinessMap, mapReady),
       (l10n.readinessKnowledge, knowledgeReady),
       (l10n.readinessEquipment, equipmentReady),
+      (l10n.readinessBackup, backupReady),
     ];
     final readyCount = checks.where((check) => check.$2).length;
 
@@ -120,7 +139,13 @@ class ReadinessScreen extends ConsumerWidget {
                   icon: Icons.map_outlined,
                   title: l10n.readinessMap,
                   value: mapReady
-                      ? l10n.readinessPackageReady
+                      ? places.isEmpty
+                            ? l10n.readinessMapReadyNoPlaces(map!.label ?? '')
+                            : l10n.readinessMapCoverage(
+                                coveredPlaces,
+                                places.length,
+                                map!.label ?? '',
+                              )
                       : l10n.readinessPackageMissing,
                 ),
                 const Divider(height: 1),
@@ -143,6 +168,26 @@ class ReadinessScreen extends ConsumerWidget {
                       ? l10n.readinessArchivesReady(knowledge!.library.length)
                       : l10n.readinessPackageMissing,
                 ),
+                const Divider(height: 1),
+                _StatusRow(
+                  icon: Icons.fact_check_outlined,
+                  title: l10n.readinessBackup,
+                  value: backupVerifiedAt == null
+                      ? l10n.readinessBackupNeverVerified
+                      : backupReady
+                      ? l10n.readinessBackupVerified(
+                          _age(
+                            l10n,
+                            DateTime.now().toUtc().difference(backupVerifiedAt),
+                          ),
+                        )
+                      : l10n.readinessBackupStale(
+                          _age(
+                            l10n,
+                            DateTime.now().toUtc().difference(backupVerifiedAt),
+                          ),
+                        ),
+                ),
               ],
             ),
           ),
@@ -158,11 +203,13 @@ class ReadinessScreen extends ConsumerWidget {
               title: l10n.readinessWarningData,
               value: warningStatus?.lastComplete == null
                   ? l10n.readinessWarningNeverUpdated
+                  : warningStatus!.isBlocked
+                  ? l10n.readinessWarningBlocked
                   : l10n.readinessWarningUpdated(
                       _age(
                         l10n,
                         DateTime.now().toUtc().difference(
-                          warningStatus!.lastComplete!,
+                          warningStatus.lastComplete!,
                         ),
                       ),
                     ),
@@ -172,6 +219,14 @@ class ReadinessScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+bool _covers(PmTilesArchive archive, PersonalPlace place) {
+  final header = archive.header;
+  return place.longitude >= header.minLongitude &&
+      place.longitude <= header.maxLongitude &&
+      place.latitude >= header.minLatitude &&
+      place.latitude <= header.maxLatitude;
 }
 
 class _StatusRow extends StatelessWidget {

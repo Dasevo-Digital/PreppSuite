@@ -3682,6 +3682,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warningDetailsSource => 'Warning source and publication';
 
   @override
+  String get warningDetailsRelevance => 'Why this warning is shown';
+
+  @override
+  String get warningRelevanceOwnDistrict => 'It affects your own district.';
+
+  @override
+  String get warningRelevanceFollowedDistrict =>
+      'It affects an additional saved district.';
+
+  @override
+  String get warningRelevanceOwnState => 'It affects your federal state.';
+
+  @override
+  String get warningRelevanceFollowedState =>
+      'It affects an additional saved federal state.';
+
+  @override
+  String get warningRelevanceNationwide =>
+      'It applies nationwide or the source does not name a more precise area.';
+
+  @override
+  String get warningRelevanceNoPlaces =>
+      'No warning place is set up, so the app shows warnings for Germany.';
+
+  @override
+  String get warningRelevanceOtherRegion =>
+      'It is not assigned to one of your saved regions.';
+
+  @override
   String warningDetailsPublished(String time) {
     return 'Published: $time';
   }
@@ -4272,6 +4301,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String readinessWarningUpdated(String age) {
     return 'Last complete refresh: $age';
+  }
+
+  @override
+  String get readinessWarningBlocked =>
+      'The latest background refresh could not access local data.';
+
+  @override
+  String get readinessBackup => 'Backup verified';
+
+  @override
+  String get readinessBackupNeverVerified =>
+      'No backup has been opened and verified successfully on this device yet';
+
+  @override
+  String readinessBackupVerified(String age) {
+    return 'Backup opened successfully: $age';
+  }
+
+  @override
+  String readinessBackupStale(String age) {
+    return 'Last backup verification: $age; verify again before changes';
+  }
+
+  @override
+  String readinessMapReadyNoPlaces(String label) {
+    return '$label is readable; no saved places are available for a coverage check';
+  }
+
+  @override
+  String readinessMapCoverage(int covered, int total, String label) {
+    return '$covered of $total saved places are covered by $label';
   }
 
   @override

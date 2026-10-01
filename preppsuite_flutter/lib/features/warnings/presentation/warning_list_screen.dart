@@ -17,6 +17,8 @@ import '../../checklists/presentation/checklist_detail_screen.dart';
 import '../../household/application/household_providers.dart';
 import '../application/warning_filter.dart';
 import '../application/warning_polygon_codec.dart';
+import '../application/warning_relevance.dart';
+import '../application/warning_region_filter.dart';
 import 'warning_situation_map_screen.dart';
 import 'warning_day_notice.dart';
 import '../application/warning_providers.dart';
@@ -219,7 +221,11 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
             blocks: [
               ...leading,
               for (final warning in sorted)
-                _WarningTile(warning: warning, l10n: l10n),
+                _WarningTile(
+                  warning: warning,
+                  l10n: l10n,
+                  regions: profile.warningFilter,
+                ),
               ?hint,
             ],
           );
@@ -413,10 +419,15 @@ class _NinaHint extends StatelessWidget {
 }
 
 class _WarningTile extends StatelessWidget {
-  const _WarningTile({required this.warning, required this.l10n});
+  const _WarningTile({
+    required this.warning,
+    required this.l10n,
+    required this.regions,
+  });
 
   final Warning warning;
   final AppLocalizations l10n;
+  final WarningRegionFilter regions;
 
   @override
   Widget build(BuildContext context) {
@@ -449,6 +460,7 @@ class _WarningTile extends StatelessWidget {
           colors: colors,
           source: source,
           l10n: l10n,
+          regions: regions,
         ),
       ],
     );
@@ -465,6 +477,7 @@ class _WarningDetails extends StatelessWidget {
     required this.colors,
     required this.source,
     required this.l10n,
+    required this.regions,
   });
 
   final Warning warning;
@@ -472,6 +485,7 @@ class _WarningDetails extends StatelessWidget {
   final WarningSeverityColors colors;
   final WarningSource source;
   final AppLocalizations l10n;
+  final WarningRegionFilter regions;
 
   @override
   Widget build(BuildContext context) {
@@ -560,6 +574,15 @@ class _WarningDetails extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           _DetailSection(
+            icon: Icons.my_location_outlined,
+            title: l10n.warningDetailsRelevance,
+            body: _relevanceText(
+              l10n,
+              warningRelevance(warning: warning, filter: regions),
+            ),
+          ),
+          const SizedBox(height: 24),
+          _DetailSection(
             icon: Icons.info_outline,
             title: l10n.warningDetailsSource,
             body: [
@@ -604,6 +627,19 @@ class _WarningDetails extends StatelessWidget {
     );
   }
 }
+
+String _relevanceText(
+  AppLocalizations l10n,
+  WarningRelevance relevance,
+) => switch (relevance) {
+  WarningRelevance.ownDistrict => l10n.warningRelevanceOwnDistrict,
+  WarningRelevance.followedDistrict => l10n.warningRelevanceFollowedDistrict,
+  WarningRelevance.ownState => l10n.warningRelevanceOwnState,
+  WarningRelevance.followedState => l10n.warningRelevanceFollowedState,
+  WarningRelevance.nationwide => l10n.warningRelevanceNationwide,
+  WarningRelevance.noPlacesSelected => l10n.warningRelevanceNoPlaces,
+  WarningRelevance.otherRegion => l10n.warningRelevanceOtherRegion,
+};
 
 String _formatDateTime(MaterialLocalizations material, DateTime value) =>
     '${material.formatMediumDate(value)} · '

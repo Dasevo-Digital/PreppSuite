@@ -6224,6 +6224,54 @@ abstract class AppLocalizations {
   /// **'Warning source and publication'**
   String get warningDetailsSource;
 
+  /// No description provided for @warningDetailsRelevance.
+  ///
+  /// In en, this message translates to:
+  /// **'Why this warning is shown'**
+  String get warningDetailsRelevance;
+
+  /// No description provided for @warningRelevanceOwnDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'It affects your own district.'**
+  String get warningRelevanceOwnDistrict;
+
+  /// No description provided for @warningRelevanceFollowedDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'It affects an additional saved district.'**
+  String get warningRelevanceFollowedDistrict;
+
+  /// No description provided for @warningRelevanceOwnState.
+  ///
+  /// In en, this message translates to:
+  /// **'It affects your federal state.'**
+  String get warningRelevanceOwnState;
+
+  /// No description provided for @warningRelevanceFollowedState.
+  ///
+  /// In en, this message translates to:
+  /// **'It affects an additional saved federal state.'**
+  String get warningRelevanceFollowedState;
+
+  /// No description provided for @warningRelevanceNationwide.
+  ///
+  /// In en, this message translates to:
+  /// **'It applies nationwide or the source does not name a more precise area.'**
+  String get warningRelevanceNationwide;
+
+  /// No description provided for @warningRelevanceNoPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'No warning place is set up, so the app shows warnings for Germany.'**
+  String get warningRelevanceNoPlaces;
+
+  /// No description provided for @warningRelevanceOtherRegion.
+  ///
+  /// In en, this message translates to:
+  /// **'It is not assigned to one of your saved regions.'**
+  String get warningRelevanceOtherRegion;
+
   /// No description provided for @warningDetailsPublished.
   ///
   /// In en, this message translates to:
@@ -7201,6 +7249,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last complete refresh: {age}'**
   String readinessWarningUpdated(String age);
+
+  /// No description provided for @readinessWarningBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The latest background refresh could not access local data.'**
+  String get readinessWarningBlocked;
+
+  /// No description provided for @readinessBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup verified'**
+  String get readinessBackup;
+
+  /// No description provided for @readinessBackupNeverVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'No backup has been opened and verified successfully on this device yet'**
+  String get readinessBackupNeverVerified;
+
+  /// No description provided for @readinessBackupVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup opened successfully: {age}'**
+  String readinessBackupVerified(String age);
+
+  /// No description provided for @readinessBackupStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup verification: {age}; verify again before changes'**
+  String readinessBackupStale(String age);
+
+  /// No description provided for @readinessMapReadyNoPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} is readable; no saved places are available for a coverage check'**
+  String readinessMapReadyNoPlaces(String label);
+
+  /// No description provided for @readinessMapCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'{covered} of {total} saved places are covered by {label}'**
+  String readinessMapCoverage(int covered, int total, String label);
 
   /// No description provided for @readinessJustNow.
   ///
