@@ -11,6 +11,8 @@ import '../../first_aid/presentation/first_aid_screen.dart';
 import '../../household/application/household_member_controller.dart';
 import '../../household/application/household_plan_controller.dart';
 import '../../inventory/application/inventory_providers.dart';
+import '../../kids_comic/application/kids_comic.dart';
+import '../../kids_comic/presentation/kids_comic_screen.dart';
 import '../../knowledge/application/knowledge_providers.dart';
 import '../../maps/application/offline_map_providers.dart';
 import '../../warnings/application/warning_providers.dart';
@@ -109,6 +111,19 @@ class EmergencyScreen extends ConsumerWidget {
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const FirstAidScreen()),
               ),
+            ),
+          ),
+          // Second, and with a name of its own rather than three screens
+          // down in the crisis organisation, where it was the nineteenth
+          // section of twenty: a child, or a parent reading with one, has
+          // to be able to find it.
+          ListTile(
+            leading: const Icon(Icons.auto_stories_outlined),
+            title: Text(kidsComic(l10n.localeName).title),
+            subtitle: Text(l10n.emergencyComicHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const KidsComicScreen()),
             ),
           ),
           ListTile(

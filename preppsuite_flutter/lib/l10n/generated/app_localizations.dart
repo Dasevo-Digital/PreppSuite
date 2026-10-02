@@ -12982,6 +12982,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'From here on the document is too long for the built-in reader. Another app shows the rest.'**
   String get knowledgeDocumentTruncated;
+
+  /// No description provided for @emergencyComicHint.
+  ///
+  /// In en, this message translates to:
+  /// **'An emergency comic for children: what to do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war.'**
+  String get emergencyComicHint;
 }
 
 class _AppLocalizationsDelegate

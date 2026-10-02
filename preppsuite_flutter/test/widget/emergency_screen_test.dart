@@ -90,4 +90,24 @@ void main() {
     expect(find.text('Offline-Karte'), findsOneWidget);
     expect(find.text('Wissensarchive'), findsOneWidget);
   });
+
+  testWidgets('the comic has an entry of its own and opens from it', (
+    tester,
+  ) async {
+    // It used to be the nineteenth section of the crisis organisation,
+    // three screens down. A child has to be able to find it.
+    await show(tester, const Locale('de'));
+
+    expect(find.text('Mila und Nuss'), findsOneWidget);
+    await tester.tap(find.text('Mila und Nuss'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nuss legt Vorräte an'), findsOneWidget);
+  });
+
+  testWidgets('and is named in English on an English locale', (tester) async {
+    await show(tester, const Locale('en'));
+
+    expect(find.text('Mila and Nuss'), findsOneWidget);
+  });
 }

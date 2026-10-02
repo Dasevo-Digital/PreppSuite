@@ -160,7 +160,7 @@ Merkzettel mit allen Regeln und Hinweise für Eltern. Mila ist ein Mädchen,
 Nuss ein Eichhörnchen, das Vorräte anlegt. Die Regeln folgen den
 Empfehlungen des BBK; Figuren und Zeichnungen sind eigene. Der Comic ist in
 der App enthalten, auf Deutsch und Englisch, und braucht kein Internet; zu
-finden in der Vorsorge-Zentrale.
+finden im Reiter „Notfall“ direkt unter „Erste Hilfe“ und über die Suche.
 
 **Erste Hilfe.** Sechsundvierzig Anleitungen in Dringlichkeitsreihenfolge.
 Siebzehn davon nach den Reanimations- und Erste-Hilfe-Leitlinien 2025 des

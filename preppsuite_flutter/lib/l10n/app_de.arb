@@ -3366,5 +3366,6 @@
   "knowledgeDocumentPreparing": "Text wird aufbereitet: {done} von {total}",
   "knowledgeDocumentTooLargeForReader": "Diese Datei ist {size} groß. Auf diesem Gerät öffnet der eingebaute Reader Dateien bis {limit}. Mit einer anderen App lässt sie sich trotzdem lesen.",
   "knowledgeDocumentTooLargeInside": "Dieses Dokument enthält mehr, als der eingebaute Reader auf diesem Gerät verarbeiten kann. Mit einer anderen App lässt es sich trotzdem lesen.",
-  "knowledgeDocumentTruncated": "Ab hier ist das Dokument für den eingebauten Reader zu lang. Den Rest zeigt eine andere App."
+  "knowledgeDocumentTruncated": "Ab hier ist das Dokument für den eingebauten Reader zu lang. Den Rest zeigt eine andere App.",
+  "emergencyComicHint": "Notfall-Comic für Kinder: was tun bei Stromausfall, Sirene, Sturm, Feuer und wenn von Krieg die Rede ist."
 }

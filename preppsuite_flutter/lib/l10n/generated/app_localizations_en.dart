@@ -7793,4 +7793,8 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get knowledgeDocumentTruncated =>
       'From here on the document is too long for the built-in reader. Another app shows the rest.';
+
+  @override
+  String get emergencyComicHint =>
+      'An emergency comic for children: what to do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war.';
 }

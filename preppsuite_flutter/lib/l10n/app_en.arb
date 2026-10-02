@@ -4377,5 +4377,6 @@
   "knowledgeDocumentTooLargeForReader": "This file is {size}. On this device the built-in reader opens files up to {limit}. Another app can still read it.",
   "@knowledgeDocumentTooLargeForReader": {"placeholders": {"size": {"type": "String"}, "limit": {"type": "String"}}},
   "knowledgeDocumentTooLargeInside": "This document holds more than the built-in reader can handle on this device. Another app can still read it.",
-  "knowledgeDocumentTruncated": "From here on the document is too long for the built-in reader. Another app shows the rest."
+  "knowledgeDocumentTruncated": "From here on the document is too long for the built-in reader. Another app shows the rest.",
+  "emergencyComicHint": "An emergency comic for children: what to do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war."
 }
