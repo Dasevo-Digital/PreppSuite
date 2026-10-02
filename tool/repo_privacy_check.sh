@@ -6,9 +6,7 @@ set -euo pipefail
 
 readonly PROJECT_EMAIL='noreply'@'preppsuite.invalid'
 readonly IDENTITY="PreppSuite Contributors <$PROJECT_EMAIL>"
-# Commits through this already published Gitea revision are immutable here.
-# New release commits must use the neutral project identity.
-readonly PUBLISHED_IDENTITY_BASE='86b0c03c0e6ea7ebdea3f3ce947d14f25462de1a'
+# Every commit in the reachable history must use the neutral project identity.
 readonly EXCLUDED=(
   ':(exclude)preppsuite_flutter/assets/fonts/OFL.txt'
   ':(exclude)preppsuite_flutter/ios/**/Package.resolved'
@@ -40,13 +38,9 @@ if matches=$(git grep -n -I -E '[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}' -- . "${E
   fi
 fi
 
-# The published base contains one earlier, non-personal localhost identity.
-# Rewriting that public history would disrupt existing clones, so enforce the
-# neutral identity strictly for every commit added after the recorded base.
-if ! git merge-base --is-ancestor "$PUBLISHED_IDENTITY_BASE" HEAD; then
-  report "Published identity baseline is not an ancestor of HEAD."
-fi
-if identities=$(git log "$PUBLISHED_IDENTITY_BASE"..HEAD --format='%aN <%aE>%n%cN <%cE>' | sort -u | grep -vFx "$IDENTITY" || true); then
+# The history was rewritten on 2026-10-02 to the neutral identity throughout,
+# so the whole reachable history is checked.
+if identities=$(git log HEAD --format='%aN <%aE>%n%cN <%cE>' | sort -u | grep -vFx "$IDENTITY" || true); then
   if [[ -n "$identities" ]]; then
     report "Personal author or committer identity in reachable Git history:"
     printf '%s\n' "$identities" >&2
