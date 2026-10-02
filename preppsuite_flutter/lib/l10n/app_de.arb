@@ -1276,7 +1276,7 @@
   "knowledgeDocumentIndexing": "Index wird erstellt …",
   "knowledgeDocumentNotIndexed": "Nicht in der Suche",
   "knowledgeDocumentNoText": "Kein auslesbarer Text (möglicherweise ein Scan)",
-  "knowledgeDocumentTooLarge": "Für den Index zu groß (maximal 256 MB)",
+  "knowledgeDocumentTooLarge": "Für den Index zu groß (maximal {limit})",
   "knowledgeDocumentIndexFailed": "Index konnte nicht erstellt werden",
   "knowledgeDocumentReindex": "Suchindex erneuern",
   "knowledgeDocumentClearIndex": "Suchindex löschen",
@@ -3360,5 +3360,11 @@
   "comicRulesHint": "Alle Regeln und die Notrufnummern auf einen Blick",
   "comicNumbersTitle": "Notrufnummern",
   "comicParentsTitle": "Für Eltern und Erziehende",
-  "comicNext": "Weiter: {title}"
+  "comicNext": "Weiter: {title}",
+  "knowledgeDocumentReadingProgress": "Datei wird gelesen: {received} von {total}",
+  "knowledgeDocumentReadingBytes": "Datei wird gelesen: {received}",
+  "knowledgeDocumentPreparing": "Text wird aufbereitet: {done} von {total}",
+  "knowledgeDocumentTooLargeForReader": "Diese Datei ist {size} groß. Auf diesem Gerät öffnet der eingebaute Reader Dateien bis {limit}. Mit einer anderen App lässt sie sich trotzdem lesen.",
+  "knowledgeDocumentTooLargeInside": "Dieses Dokument enthält mehr, als der eingebaute Reader auf diesem Gerät verarbeiten kann. Mit einer anderen App lässt es sich trotzdem lesen.",
+  "knowledgeDocumentTruncated": "Ab hier ist das Dokument für den eingebauten Reader zu lang. Den Rest zeigt eine andere App."
 }

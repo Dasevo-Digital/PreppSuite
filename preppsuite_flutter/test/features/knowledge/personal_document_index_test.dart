@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:archive/archive.dart';
@@ -102,38 +104,141 @@ void main() {
     'the local reader obtains Markdown and EPUB content without an app',
     () async {
       final markdown = File('${workspace.path}/hinweise.md')
-        ..writeAsStringSync('# Funk\nPMR446 bleibt für kurze Wege sinnvoll.');
+        ..writeAsStringSync(
+          '# Funk\n\nPMR446 bleibt für kurze Wege sinnvoll.\n\n'
+          'Ein zweiter Absatz,\nüber zwei Zeilen.',
+        );
       final epub = File('${workspace.path}/notizen.epub');
       final archive = Archive()
         ..addFile(
           ArchiveFile.string(
             'OPS/chapter.xhtml',
-            '<html><body><h1>Wasser</h1><p>Kanister dunkel lagern.</p></body></html>',
+            '<html><body><h1>Wasser</h1><p>Kanister dunkel lagern.</p>'
+                '<p>Alle sechs Monate tauschen.</p></body></html>',
           ),
         );
       epub.writeAsBytesSync(ZipEncoder().encodeBytes(archive));
 
-      final markdownText = await PersonalDocumentIndexer.readForReader(
+      final markdownText = await PersonalDocumentTextJob.start(
         PersonalDocument(
           id: 'markdown-reader',
           location: markdown.path,
           label: 'hinweise.md',
           addedAt: DateTime.now(),
         ),
-      );
-      final epubText = await PersonalDocumentIndexer.readForReader(
+      ).result;
+      final epubText = await PersonalDocumentTextJob.start(
         PersonalDocument(
           id: 'epub-reader',
           location: epub.path,
           label: 'notizen.epub',
           addedAt: DateTime.now(),
         ),
-      );
+      ).result;
 
-      expect(markdownText, contains('PMR446'));
-      expect(epubText, contains('Kanister dunkel lagern'));
+      // Paragraphs stay paragraphs: the reader lays them out one at a
+      // time, which is what keeps a long document from freezing it.
+      expect(markdownText.paragraphs, [
+        '# Funk',
+        'PMR446 bleibt für kurze Wege sinnvoll.',
+        'Ein zweiter Absatz, über zwei Zeilen.',
+      ]);
+      expect(epubText.paragraphs, [
+        'Wasser',
+        'Kanister dunkel lagern.',
+        'Alle sechs Monate tauschen.',
+      ]);
+      expect(epubText.truncated, isFalse);
     },
   );
+
+  test('the reading says how far it has got', () async {
+    final archive = Archive();
+    for (var chapter = 0; chapter < 3; chapter++) {
+      archive.addFile(
+        ArchiveFile.string('OPS/c$chapter.xhtml', '<p>Kapitel $chapter</p>'),
+      );
+    }
+    final epub = File('${workspace.path}/kapitel.epub')
+      ..writeAsBytesSync(ZipEncoder().encodeBytes(archive));
+
+    final job = PersonalDocumentTextJob.start(
+      PersonalDocument(
+        id: 'progress',
+        location: epub.path,
+        label: 'kapitel.epub',
+        addedAt: DateTime.now(),
+      ),
+    );
+    final seen = <PersonalDocumentProgress>[];
+    job.progress.listen(seen.add);
+    await job.result;
+    await Future<void>.delayed(Duration.zero);
+
+    final read = seen.whereType<PersonalDocumentReading>().last;
+    expect(read.received, epub.lengthSync());
+    expect(read.total, epub.lengthSync());
+    final extracted = seen.whereType<PersonalDocumentExtracting>().last;
+    expect((extracted.done, extracted.total), (3, 3));
+  });
+
+  test('a file too large says how large, and what the limit is', () async {
+    final file = File('${workspace.path}/gross.md')
+      ..writeAsStringSync('x' * 4096);
+
+    await expectLater(
+      PersonalDocumentTextJob.start(
+        PersonalDocument(
+          id: 'gross',
+          location: file.path,
+          label: 'gross.md',
+          addedAt: DateTime.now(),
+        ),
+        maxBytes: 1000,
+      ).result,
+      throwsA(
+        isA<PersonalDocumentTooLarge>()
+            .having((e) => e.bytes, 'bytes', 4096)
+            .having((e) => e.limit, 'limit', 1000),
+      ),
+    );
+  });
+
+  test('cancelling stops the reading', () async {
+    final file = File('${workspace.path}/lang.md')
+      ..writeAsStringSync('Absatz\n\n' * 200000);
+
+    final job = PersonalDocumentTextJob.start(
+      PersonalDocument(
+        id: 'lang',
+        location: file.path,
+        label: 'lang.md',
+        addedAt: DateTime.now(),
+      ),
+    )..cancel();
+
+    await expectLater(job.result, throwsA(isA<PersonalDocumentCancelled>()));
+  });
+
+  test('text past the limit is cut, and says so', () {
+    final text = extractPersonalDocumentText(
+      'md',
+      Uint8List.fromList(
+        utf8.encode(
+          List.filled(
+            personalDocumentMaxCharacters ~/ 1000 + 10,
+            'y' * 999,
+          ).join('\n\n'),
+        ),
+      ),
+    );
+
+    expect(text.truncated, isTrue);
+    expect(
+      text.paragraphs.fold<int>(0, (sum, p) => sum + p.length),
+      lessThanOrEqualTo(personalDocumentMaxCharacters),
+    );
+  });
 
   test('refuses EPUBs with an excessive number of entries', () async {
     final archive = Archive();
@@ -168,7 +273,7 @@ void main() {
 
     expect(
       readPersonalDocumentBytes(file.path, maxBytes: 1024),
-      throwsA(anything),
+      throwsA(isA<PersonalDocumentTooLarge>()),
     );
     expect(
       (await readPersonalDocumentBytes(file.path, maxBytes: 8192)).length,
@@ -176,13 +281,41 @@ void main() {
     );
   });
 
-  test('what the reader will open, the index will also read', () {
-    // These were 64 MB and 48 MB, and the gap meant a document could be
-    // opened and read from end to end and still never turn up in a
-    // search. One number now; this test is what keeps it one.
-    expect(
-      PersonalDocumentIndexer.maxReaderDocumentBytes,
-      PersonalDocumentIndexer.maxDocumentBytes,
+  test('what the reader refuses, the index refuses too', () async {
+    // One job reads for both, so one limit applies to both: a document
+    // that could be read and never found, or found and never read, was
+    // the gap this closes.
+    final file = File('${workspace.path}/grenze.md')
+      ..writeAsStringSync('Wasser ' * 1000);
+    final document = PersonalDocument(
+      id: 'grenze',
+      location: file.path,
+      label: 'grenze.md',
+      addedAt: DateTime.now(),
     );
+
+    final result = await PersonalDocumentIndexer(
+      index: index,
+      maxBytes: 1000,
+    ).index(document);
+
+    expect(result.status, PersonalDocumentIndexStatus.tooLarge);
+    await expectLater(
+      PersonalDocumentTextJob.start(document, maxBytes: 1000).result,
+      throwsA(isA<PersonalDocumentTooLarge>()),
+    );
+  });
+
+  test('a phone or tablet reads less than a computer', () {
+    // The file is read whole, so the limit is also the peak allocation.
+    expect(personalDocumentByteLimit(TargetPlatform.android), 128000000);
+    expect(personalDocumentByteLimit(TargetPlatform.iOS), 128000000);
+    for (final platform in [
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+      TargetPlatform.linux,
+    ]) {
+      expect(personalDocumentByteLimit(platform), 256000000);
+    }
   });
 }

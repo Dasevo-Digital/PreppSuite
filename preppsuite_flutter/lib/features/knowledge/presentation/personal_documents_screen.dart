@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/feel.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../downloads/application/byte_size.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/document_folder_import.dart';
 import '../application/personal_document_index.dart';
@@ -375,7 +376,9 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
     'ready' => l10n.knowledgeDocumentIndexed,
     'indexing' => l10n.knowledgeDocumentIndexing,
     'noText' => l10n.knowledgeDocumentNoText,
-    'tooLarge' => l10n.knowledgeDocumentTooLarge,
+    'tooLarge' => l10n.knowledgeDocumentTooLarge(
+      formatByteSize(personalDocumentByteLimit()),
+    ),
     'failed' => l10n.knowledgeDocumentIndexFailed,
     _ => l10n.knowledgeDocumentNotIndexed,
   };

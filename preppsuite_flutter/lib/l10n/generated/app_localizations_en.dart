@@ -3962,8 +3962,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get knowledgeDocumentNoText => 'No readable text (possibly a scan)';
 
   @override
-  String get knowledgeDocumentTooLarge =>
-      'Too large for the index (256 MB maximum)';
+  String knowledgeDocumentTooLarge(String limit) {
+    return 'Too large for the index ($limit maximum)';
+  }
 
   @override
   String get knowledgeDocumentIndexFailed => 'Could not build index';
@@ -7764,4 +7765,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String comicNext(String title) {
     return 'Next: $title';
   }
+
+  @override
+  String knowledgeDocumentReadingProgress(String received, String total) {
+    return 'Reading the file: $received of $total';
+  }
+
+  @override
+  String knowledgeDocumentReadingBytes(String received) {
+    return 'Reading the file: $received';
+  }
+
+  @override
+  String knowledgeDocumentPreparing(int done, int total) {
+    return 'Preparing the text: $done of $total';
+  }
+
+  @override
+  String knowledgeDocumentTooLargeForReader(String size, String limit) {
+    return 'This file is $size. On this device the built-in reader opens files up to $limit. Another app can still read it.';
+  }
+
+  @override
+  String get knowledgeDocumentTooLargeInside =>
+      'This document holds more than the built-in reader can handle on this device. Another app can still read it.';
+
+  @override
+  String get knowledgeDocumentTruncated =>
+      'From here on the document is too long for the built-in reader. Another app shows the rest.';
 }

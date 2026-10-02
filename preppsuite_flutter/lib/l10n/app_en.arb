@@ -2223,7 +2223,8 @@
   "knowledgeDocumentIndexing": "Building index …",
   "knowledgeDocumentNotIndexed": "Not in search",
   "knowledgeDocumentNoText": "No readable text (possibly a scan)",
-  "knowledgeDocumentTooLarge": "Too large for the index (256 MB maximum)",
+  "knowledgeDocumentTooLarge": "Too large for the index ({limit} maximum)",
+  "@knowledgeDocumentTooLarge": {"placeholders": {"limit": {"type": "String"}}},
   "knowledgeDocumentIndexFailed": "Could not build index",
   "knowledgeDocumentReindex": "Rebuild search index",
   "knowledgeDocumentClearIndex": "Delete search index",
@@ -4366,5 +4367,15 @@
   "comicNumbersTitle": "Emergency numbers",
   "comicParentsTitle": "For parents and carers",
   "comicNext": "Next: {title}",
-  "@comicNext": {"placeholders": {"title": {"type": "String"}}}
+  "@comicNext": {"placeholders": {"title": {"type": "String"}}},
+  "knowledgeDocumentReadingProgress": "Reading the file: {received} of {total}",
+  "@knowledgeDocumentReadingProgress": {"placeholders": {"received": {"type": "String"}, "total": {"type": "String"}}},
+  "knowledgeDocumentReadingBytes": "Reading the file: {received}",
+  "@knowledgeDocumentReadingBytes": {"placeholders": {"received": {"type": "String"}}},
+  "knowledgeDocumentPreparing": "Preparing the text: {done} of {total}",
+  "@knowledgeDocumentPreparing": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "knowledgeDocumentTooLargeForReader": "This file is {size}. On this device the built-in reader opens files up to {limit}. Another app can still read it.",
+  "@knowledgeDocumentTooLargeForReader": {"placeholders": {"size": {"type": "String"}, "limit": {"type": "String"}}},
+  "knowledgeDocumentTooLargeInside": "This document holds more than the built-in reader can handle on this device. Another app can still read it.",
+  "knowledgeDocumentTruncated": "From here on the document is too long for the built-in reader. Another app shows the rest."
 }

@@ -3993,8 +3993,9 @@ class AppLocalizationsDe extends AppLocalizations {
       'Kein auslesbarer Text (möglicherweise ein Scan)';
 
   @override
-  String get knowledgeDocumentTooLarge =>
-      'Für den Index zu groß (maximal 256 MB)';
+  String knowledgeDocumentTooLarge(String limit) {
+    return 'Für den Index zu groß (maximal $limit)';
+  }
 
   @override
   String get knowledgeDocumentIndexFailed =>
@@ -7804,4 +7805,32 @@ class AppLocalizationsDe extends AppLocalizations {
   String comicNext(String title) {
     return 'Weiter: $title';
   }
+
+  @override
+  String knowledgeDocumentReadingProgress(String received, String total) {
+    return 'Datei wird gelesen: $received von $total';
+  }
+
+  @override
+  String knowledgeDocumentReadingBytes(String received) {
+    return 'Datei wird gelesen: $received';
+  }
+
+  @override
+  String knowledgeDocumentPreparing(int done, int total) {
+    return 'Text wird aufbereitet: $done von $total';
+  }
+
+  @override
+  String knowledgeDocumentTooLargeForReader(String size, String limit) {
+    return 'Diese Datei ist $size groß. Auf diesem Gerät öffnet der eingebaute Reader Dateien bis $limit. Mit einer anderen App lässt sie sich trotzdem lesen.';
+  }
+
+  @override
+  String get knowledgeDocumentTooLargeInside =>
+      'Dieses Dokument enthält mehr, als der eingebaute Reader auf diesem Gerät verarbeiten kann. Mit einer anderen App lässt es sich trotzdem lesen.';
+
+  @override
+  String get knowledgeDocumentTruncated =>
+      'Ab hier ist das Dokument für den eingebauten Reader zu lang. Den Rest zeigt eine andere App.';
 }

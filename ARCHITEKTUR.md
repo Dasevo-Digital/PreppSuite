@@ -2149,6 +2149,17 @@ parallel one.
   cache. Zlib/XZ output is bounded while decoding; Zstandard frame windows,
   content sizes and conservative block expansion bounds are checked before the
   native decoder is called. Archives requiring larger clusters are refused.
+- Personal documents (PDF, EPUB, Markdown) are read and extracted by
+  `PersonalDocumentTextJob`, for the reader and the search index alike, in
+  an isolate that cancelling kills — neither the ZIP decoder nor the PDF
+  parser can be stopped from outside. A file on disk is read inside that
+  isolate; only an Android content URI is read on the main isolate, in
+  chunks, because the platform channel lives there. One limit for both,
+  `personalDocumentByteLimit()`: 128 MB on Android and iOS, 256 MB
+  elsewhere, decimal so the message can name it. The file is read whole,
+  so the limit is the peak allocation. The reader lays the text out one
+  paragraph at a time in a lazy list; it used to extract on the interface's
+  thread and set up to four million characters as a single `Text`.
 - PMTiles reads and gzip output are limited to 32 MiB each
   (`PmTilesArchive.maxBytes`). Every length in a map archive is a claim the
   file makes about itself, and a few kilobytes of gzip can expand into

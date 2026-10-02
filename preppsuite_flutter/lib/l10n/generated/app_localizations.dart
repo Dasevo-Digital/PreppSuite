@@ -6707,8 +6707,8 @@ abstract class AppLocalizations {
   /// No description provided for @knowledgeDocumentTooLarge.
   ///
   /// In en, this message translates to:
-  /// **'Too large for the index (256 MB maximum)'**
-  String get knowledgeDocumentTooLarge;
+  /// **'Too large for the index ({limit} maximum)'**
+  String knowledgeDocumentTooLarge(String limit);
 
   /// No description provided for @knowledgeDocumentIndexFailed.
   ///
@@ -12946,6 +12946,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next: {title}'**
   String comicNext(String title);
+
+  /// No description provided for @knowledgeDocumentReadingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the file: {received} of {total}'**
+  String knowledgeDocumentReadingProgress(String received, String total);
+
+  /// No description provided for @knowledgeDocumentReadingBytes.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the file: {received}'**
+  String knowledgeDocumentReadingBytes(String received);
+
+  /// No description provided for @knowledgeDocumentPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing the text: {done} of {total}'**
+  String knowledgeDocumentPreparing(int done, int total);
+
+  /// No description provided for @knowledgeDocumentTooLargeForReader.
+  ///
+  /// In en, this message translates to:
+  /// **'This file is {size}. On this device the built-in reader opens files up to {limit}. Another app can still read it.'**
+  String knowledgeDocumentTooLargeForReader(String size, String limit);
+
+  /// No description provided for @knowledgeDocumentTooLargeInside.
+  ///
+  /// In en, this message translates to:
+  /// **'This document holds more than the built-in reader can handle on this device. Another app can still read it.'**
+  String get knowledgeDocumentTooLargeInside;
+
+  /// No description provided for @knowledgeDocumentTruncated.
+  ///
+  /// In en, this message translates to:
+  /// **'From here on the document is too long for the built-in reader. Another app shows the rest.'**
+  String get knowledgeDocumentTruncated;
 }
 
 class _AppLocalizationsDelegate
