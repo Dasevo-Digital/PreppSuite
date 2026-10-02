@@ -685,7 +685,10 @@ cd preppsuite_flutter && dart run build_runner build
 
 ## Lizenz
 
-Der Projektcode steht unter der Lizenz in [LICENSE](LICENSE).
+Der Projektcode steht unter der [PolyForm Strict License 1.0.0](LICENSE) (© 2026 Dasevo Digital
+und superkuh). Erlaubt sind die nichtkommerzielle Nutzung der App und das
+Prüfen des Quellcodes; Kopieren, Ändern, Weitergeben und jede kommerzielle
+Nutzung sind ohne gesonderte schriftliche Genehmigung nicht gestattet.
 
 Die Daten stammen aus fremden Quellen und stehen unter deren eigenen
 Bedingungen: Kartenkacheln und Schutzraum-Einträge von OpenStreetMap
