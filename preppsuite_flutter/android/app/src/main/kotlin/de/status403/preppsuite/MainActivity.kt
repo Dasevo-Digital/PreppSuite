@@ -273,7 +273,13 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun directoryAt(uri: String, path: String, create: Boolean): DocumentFile? {
-        val root = DocumentFile.fromTreeUri(this, Uri.parse(uri)) ?: return null
+        // A handle that is not (or no longer) a document tree, such as one
+        // restored from another platform, is simply not there.
+        val root = try {
+            DocumentFile.fromTreeUri(this, Uri.parse(uri))
+        } catch (e: IllegalArgumentException) {
+            null
+        } ?: return null
         val segments = path.split('/').filter { it.isNotEmpty() }
         return resolveDirectory(root, segments, create)
     }
