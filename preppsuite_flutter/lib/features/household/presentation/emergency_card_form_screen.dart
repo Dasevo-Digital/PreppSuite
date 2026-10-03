@@ -45,6 +45,14 @@ class _EmergencyCardFormScreenState
 
   String? _nameError;
   String? _yearError;
+
+  /// The two fields that can refuse a save sit at the top of a long form,
+  /// and the save button at the bottom. A refusal printed under a field
+  /// that has scrolled away is a tap on save that does nothing anybody
+  /// can see, so a refusal brings its field back into view (#43).
+  final _nameKey = GlobalKey();
+  final _yearKey = GlobalKey();
+  final _scroll = ScrollController();
   bool _saving = false;
 
   @override
@@ -78,6 +86,7 @@ class _EmergencyCardFormScreenState
 
   @override
   void dispose() {
+    _scroll.dispose();
     for (final controller in _fields.values) {
       controller.dispose();
     }
@@ -113,15 +122,18 @@ class _EmergencyCardFormScreenState
         ),
       ),
       body: ListView(
+        controller: _scroll,
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
         children: [
           _Field(
+            key: _nameKey,
             controller: _fields['name']!,
             label: l10n.emergencyCardName,
             icon: Icons.person_outline,
             error: _nameError,
           ),
           _Field(
+            key: _yearKey,
             controller: _fields['year']!,
             label: l10n.emergencyCardBirthYear,
             hint: l10n.emergencyCardBirthYearHint,
@@ -263,7 +275,11 @@ class _EmergencyCardFormScreenState
           ? l10n.emergencyCardBirthYearInvalid
           : null;
     });
-    if (_nameError != null || _yearError != null) return;
+    if (_nameError != null || _yearError != null) {
+      Feel.failed();
+      await _showRefusedField(_nameError != null ? _nameKey : _yearKey);
+      return;
+    }
 
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _saving = true);
@@ -306,10 +322,33 @@ class _EmergencyCardFormScreenState
       if (mounted) setState(() => _saving = false);
     }
   }
+
+  /// Scrolls the refused field back into view.
+  ///
+  /// The list builds lazily, so a field far enough above has no context
+  /// at all: the list is first taken to its top, which builds it, and
+  /// only then is the field placed. Waiting a frame between the two is
+  /// what gives the field its context.
+  Future<void> _showRefusedField(GlobalKey key) async {
+    var target = key.currentContext;
+    if (target == null) {
+      if (_scroll.hasClients) _scroll.jumpTo(0);
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+      target = key.currentContext;
+    }
+    if (target == null || !target.mounted) return;
+    await Scrollable.ensureVisible(
+      target,
+      duration: const Duration(milliseconds: 250),
+      alignment: 0.1,
+    );
+  }
 }
 
 class _Field extends StatelessWidget {
   const _Field({
+    super.key,
     required this.controller,
     required this.label,
     required this.icon,
