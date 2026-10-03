@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../local_db/database.dart';
 import 'inventory_csv_import.dart';
 import 'inventory_providers.dart';
+import 'item_package.dart';
 import 'package_nutrition.dart';
 
 /// Local writes: create, update, and delete-as-tombstone. The UI never
@@ -39,6 +40,9 @@ class InventoryController {
 
     /// A `SupplyGroup` name, or null where the household has not said.
     String? foodGroup,
+
+    /// The package the item comes in, or null; see `item_package.dart`.
+    ItemPackage? package,
     PackageNutrition nutrition = const PackageNutrition(),
   }) async {
     await _db.upsertInventoryItem(
@@ -55,6 +59,8 @@ class InventoryController {
         dailyDose: Value(dailyDose),
         expiryLeadDays: Value(expiryLeadDays),
         foodGroup: Value(foodGroup),
+        packageName: Value(package?.name),
+        packageSize: Value(package?.size),
         notes: Value(notes),
         barcode: Value(barcode),
         offProductId: Value(offProductId),
@@ -90,6 +96,9 @@ class InventoryController {
 
     /// A `SupplyGroup` name, or null where the household has not said.
     String? foodGroup,
+
+    /// The package the item comes in, or null; see `item_package.dart`.
+    ItemPackage? package,
     PackageNutrition nutrition = const PackageNutrition(),
   }) async {
     await _db.upsertInventoryItem(
@@ -108,6 +117,8 @@ class InventoryController {
         dailyDose: Value(dailyDose),
         expiryLeadDays: Value(expiryLeadDays),
         foodGroup: Value(foodGroup),
+        packageName: Value(package?.name),
+        packageSize: Value(package?.size),
         notes: Value(notes),
         photoPath: Value(photoPath),
         calories: Value(nutrition.kcal),

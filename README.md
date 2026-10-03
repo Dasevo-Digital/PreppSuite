@@ -33,7 +33,11 @@ fehlerhafter Zeilen. Kategorien: Wasser, Lebensmittel, Medizin, Werkzeug,
 Dokumente, Energie, Hygiene, Sonstiges. Vor dem Ablaufdatum erinnert die
 App mit einstellbarem Vorlauf – für den ganzen Haushalt, und wo nötig für
 einen einzelnen Artikel abweichend davon, bis hin zu „für diesen nie".
-Verbrauchtes lässt sich direkt aus der Liste abbuchen.
+Verbrauchtes lässt sich direkt aus der Liste abbuchen. Wer zu einem
+Artikel die Packung angibt, etwa „Glas“ mit 370 g, bucht in ganzen
+Gläsern ab. Die App rechnet das in Gramm um, und die Kalorien im
+Vorrats-Rechner sinken entsprechend. Die Liste zeigt dann neben der
+Menge, wie viele Gläser das sind.
 
 
 **Einbruch.** Was die Polizei sagt — und in der Reihenfolge, in der sie es

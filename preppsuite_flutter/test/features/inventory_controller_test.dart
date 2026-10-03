@@ -5,6 +5,8 @@ import 'package:preppsuite_flutter/model/categories.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_controller.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
+import 'package:preppsuite_flutter/features/inventory/application/item_package.dart';
+import 'package:preppsuite_flutter/features/inventory/application/supply_calculator.dart';
 import 'package:preppsuite_flutter/features/inventory/application/package_nutrition.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
@@ -193,6 +195,72 @@ void main() {
       expect(item.carbohydrateGrams, isNull);
       expect(item.fatGrams, isNull);
       expect(item.fiberGrams, isNull);
+    });
+  });
+
+  /// A package is a second way to say an amount (#90). These hold the
+  /// two things that make it worth having: it survives every rewrite of
+  /// the row, and taking one jar off takes that jar's calories off the
+  /// supply total.
+  group('package', () {
+    const jar = ItemPackage(name: 'Glas', size: 370);
+
+    Future<void> addJars() => controller.addItem(
+      name: 'Bohnen',
+      category: InventoryItemCategory.food,
+      quantity: 1110,
+      unit: 'g',
+      storageLocation: 'Keller',
+      package: jar,
+      nutrition: const PackageNutrition(kcal: 100),
+    );
+
+    test('what the form names is what the row holds', () async {
+      await addJars();
+
+      final item = await storedItem();
+      expect(item.packageName, 'Glas');
+      expect(item.packageSize, 370);
+    });
+
+    test('consuming keeps the package', () async {
+      await addJars();
+
+      await controller.consumeQuantity(await storedItem(), 370);
+
+      final item = await storedItem();
+      expect(item.quantity, 740);
+      expect(ItemPackage.of(item)?.size, 370);
+    });
+
+    test('one jar consumed is one jar of calories gone', () async {
+      await addJars();
+      int kcal(InventoryItem item) =>
+          calculateSupply(items: [item], days: 10).caloriesCurrent;
+      final before = await storedItem();
+      expect(kcal(before), 1110);
+
+      await controller.consumeQuantity(before, jar.toUnits(1));
+
+      expect(kcal(await storedItem()), 740);
+    });
+
+    test('an edit without a package removes it', () async {
+      await addJars();
+      final item = await storedItem();
+
+      await controller.updateItem(
+        item,
+        name: item.name,
+        category: InventoryItemCategory.food,
+        quantity: item.quantity,
+        unit: item.unit,
+        storageLocation: item.storageLocation,
+      );
+
+      final edited = await storedItem();
+      expect(edited.packageName, isNull);
+      expect(edited.packageSize, isNull);
     });
   });
 

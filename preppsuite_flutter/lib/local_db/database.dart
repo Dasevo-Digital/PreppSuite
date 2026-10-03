@@ -30,7 +30,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 20;
+  static const currentSchemaVersion = 21;
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
@@ -212,6 +212,8 @@ class AppDatabase extends _$AppDatabase {
               inventoryItems.dailyDose,
               inventoryItems.expiryLeadDays,
               inventoryItems.foodGroup,
+              inventoryItems.packageName,
+              inventoryItems.packageSize,
             ],
           ),
         );
@@ -352,6 +354,8 @@ class AppDatabase extends _$AppDatabase {
               newColumns: [
                 inventoryItems.expiryLeadDays,
                 inventoryItems.foodGroup,
+                inventoryItems.packageName,
+                inventoryItems.packageSize,
               ],
             ),
           );
@@ -477,6 +481,18 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(inventoryItems);
         } else {
           await _addColumnOnce(m, inventoryItems, inventoryItems.foodGroup);
+        }
+      }
+      if (from < 21) {
+        // A row may now name its package ("Glas", 370) so that consuming
+        // can be counted in jars. Null everywhere after the upgrade: the
+        // size is on the jar, not in the database, and an upgrade that
+        // guessed it would deduct the wrong amount on the first tap.
+        if (!await _hasTable('inventory_items')) {
+          await m.createTable(inventoryItems);
+        } else {
+          await _addColumnOnce(m, inventoryItems, inventoryItems.packageName);
+          await _addColumnOnce(m, inventoryItems, inventoryItems.packageSize);
         }
       }
     },

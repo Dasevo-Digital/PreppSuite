@@ -1,3 +1,5 @@
+import 'package:drift/drift.dart' show Value;
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/sharing/application/device_snapshot.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
@@ -58,6 +60,63 @@ void main() {
 
       expect(companion.proteinGrams.value, isNull);
       expect(companion.fiberGrams.value, isNull);
+    });
+
+    group('the package (#90)', () {
+      InventoryItem jarRow({String? name = 'Glas', double? size = 370}) =>
+          InventoryItem(
+            clientId: 'beans',
+            householdId: 'household-1',
+            name: 'Bohnen',
+            category: 'food',
+            quantity: 1110,
+            unit: 'g',
+            storageLocation: 'Keller',
+            packageName: name,
+            packageSize: size,
+            updatedAt: DateTime.utc(2026),
+            dirty: true,
+          );
+
+      test('travels between devices', () {
+        final companion = decodeInventoryItem(encodeInventoryItem(jarRow()))!;
+
+        expect(companion.packageName.value, 'Glas');
+        expect(companion.packageSize.value, 370);
+      });
+
+      test('a cleared package is written as cleared', () {
+        final json = encodeInventoryItem(jarRow(name: null, size: null));
+        final companion = decodeInventoryItem(json)!;
+
+        expect(json.containsKey('packageName'), isTrue);
+        expect(companion.packageName, const Value<String?>(null));
+        expect(companion.packageSize, const Value<double?>(null));
+      });
+
+      // An app before schema 21 writes no package keys -- also for a row
+      // it edited and wrote back. Decoded as null, that edit would strip
+      // the jar size typed on a newer device.
+      test('an older device leaves it alone', () async {
+        final db = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(db.close);
+        await db.upsertInventoryItem(jarRow().toCompanion(false));
+
+        final fromOlder = Map.of(encodeInventoryItem(jarRow()))
+          ..remove('packageName')
+          ..remove('packageSize')
+          ..['quantity'] = 740.0
+          ..['updatedAt'] = '2026-02-01T00:00:00.000Z';
+        final companion = decodeInventoryItem(fromOlder)!;
+        expect(companion.packageName.present, isFalse);
+        await db.into(db.inventoryItems).insertOnConflictUpdate(companion);
+
+        final stored =
+            (await db.watchInventoryItems('household-1').first).single;
+        expect(stored.quantity, 740);
+        expect(stored.packageName, 'Glas');
+        expect(stored.packageSize, 370);
+      });
     });
 
     test('a row that arrived from elsewhere is not marked for publishing', () {

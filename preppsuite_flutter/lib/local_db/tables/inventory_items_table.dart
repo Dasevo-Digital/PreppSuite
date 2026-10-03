@@ -83,6 +83,29 @@ class InventoryItems extends Table {
   /// groups and not nutrients.
   TextColumn get foodGroup => text().nullable()();
 
+  /// What one package of this item is called — "Glas", "Dose", "Stück" —
+  /// or null where the household counts in the unit alone.
+  ///
+  /// Free text, like [unit] has always been, and never a measure of its
+  /// own: a jar has no weight until somebody reads it, which is why food
+  /// is stored in grams or millilitres at all (see `food_amount.dart`).
+  /// The package rides on top of that measure, it does not replace it.
+  /// What it buys is the everyday case at the shelf: "one jar is gone",
+  /// without anybody working out that a jar is 370 g.
+  ///
+  /// Set together with [packageSize] or not at all; the form refuses one
+  /// without the other, and `item_package.dart` ignores a half.
+  TextColumn get packageName => text().nullable()();
+
+  /// How much one [packageName] holds, in the item's own [unit] — 370
+  /// for a jar of an item counted in grams.
+  ///
+  /// In the item's unit and not in grams, so that a medicine counted in
+  /// tablets can say "Packung à 20" with the same two fields. The
+  /// calculations never read it: the quantity is still the stock, and
+  /// this only converts what the consume dialog is told.
+  RealColumn get packageSize => real().nullable()();
+
   /// Lead times for this one item's expiry reminders, as a
   /// comma-separated list of days — or null to follow the household's
   /// own setting, which is what nearly every row does.

@@ -181,6 +181,8 @@ Map<String, Object?> encodeInventoryItem(InventoryItem row) => {
   'dailyDose': row.dailyDose,
   'expiryLeadDays': row.expiryLeadDays,
   'foodGroup': row.foodGroup,
+  'packageName': row.packageName,
+  'packageSize': row.packageSize,
   'notes': row.notes,
   'updatedAt': _date(row.updatedAt),
   'deletedAt': _date(row.deletedAt),
@@ -234,6 +236,17 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
     // damaged device file stopped the whole sync, on every run.
     expiryLeadDays: Value(_text(json['expiryLeadDays'])),
     foodGroup: Value(_text(json['foodGroup'])),
+    // Absent in everything an app before schema 21 writes -- including a
+    // row such a device edited and wrote back. Read as null, that edit
+    // would quietly strip the jar size somebody typed on a newer device,
+    // so a missing key leaves the column as it is. A newer device that
+    // clears the package writes the key with null, and that does clear it.
+    packageName: json.containsKey('packageName')
+        ? Value(_text(json['packageName']))
+        : const Value.absent(),
+    packageSize: json.containsKey('packageSize')
+        ? Value(_double(json['packageSize']))
+        : const Value.absent(),
     notes: Value(_string(json['notes'])),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),

@@ -165,6 +165,123 @@ void main() {
     useLargeText(tester);
     await openDialog(tester, item());
   });
+
+  /// What the dialog suggests and hands back once an item names its
+  /// package (#90). It used to suggest "1" for everything, so a quick tap
+  /// on an item in grams took one gram off a kilo and the calorie total
+  /// barely moved. Whatever is typed, the caller gets the item's unit.
+  group('with a package', () {
+    InventoryItem jars({double quantity = 1110}) => InventoryItem(
+      clientId: 'beans',
+      householdId: 'h',
+      name: 'Bohnen',
+      category: 'food',
+      quantity: quantity,
+      unit: 'g',
+      storageLocation: 'Keller',
+      packageName: 'Glas',
+      packageSize: 370,
+      updatedAt: DateTime.utc(2026),
+      dirty: false,
+    );
+
+    String fieldText(WidgetTester tester) =>
+        tester.widget<TextField>(find.byType(TextField)).controller!.text;
+
+    Future<void> confirm(WidgetTester tester) async {
+      await tester.tap(find.text('Abbuchen'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('suggests one jar, and hands back its grams', (tester) async {
+      final result = await openDialog(tester, jars());
+
+      expect(fieldText(tester), '1');
+      expect(find.text('Das sind 370 g.'), findsOneWidget);
+
+      await confirm(tester);
+      expect(result.value, 370);
+    });
+
+    testWidgets('two jars are two jars of grams', (tester) async {
+      final result = await openDialog(tester, jars());
+
+      await tester.enterText(find.byType(TextField), '2');
+      await tester.pump();
+      expect(find.text('Das sind 740 g.'), findsOneWidget);
+
+      await confirm(tester);
+      expect(result.value, 740);
+    });
+
+    testWidgets('less than a jar left suggests what is left', (tester) async {
+      final result = await openDialog(tester, jars(quantity: 185));
+
+      expect(fieldText(tester), '0,5');
+      await confirm(tester);
+      expect(result.value, 185);
+    });
+
+    testWidgets('switching to grams carries the amount across', (
+      tester,
+    ) async {
+      final result = await openDialog(tester, jars());
+
+      await tester.tap(find.text('g').first);
+      await tester.pumpAndSettle();
+      expect(fieldText(tester), '370');
+
+      await tester.enterText(find.byType(TextField), '100');
+      await confirm(tester);
+      expect(result.value, 100);
+    });
+
+    testWidgets('more jars than there are is refused', (tester) async {
+      final result = await openDialog(tester, jars());
+
+      await tester.enterText(find.byType(TextField), '4');
+      await confirm(tester);
+
+      expect(find.byType(ConsumeDialog), findsOneWidget);
+      expect(result.closed, isFalse);
+    });
+
+    testWidgets('all three jars of a stock of exactly three are accepted', (
+      tester,
+    ) async {
+      final result = await openDialog(tester, jars());
+
+      await tester.enterText(find.byType(TextField), '3');
+      await confirm(tester);
+      expect(result.value, 1110);
+    });
+
+    testWidgets('meets the accessibility guidelines', (tester) async {
+      await openDialog(tester, jars());
+      await expectAccessible(tester);
+    });
+
+    testWidgets('survives twice the font size', (tester) async {
+      useLargeText(tester);
+      await openDialog(tester, jars());
+    });
+  });
+
+  testWidgets('grams without a package suggest nothing, not one gram', (
+    tester,
+  ) async {
+    final result = await openDialog(tester, item(quantity: 1000, unit: 'g'));
+
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller!.text,
+      isEmpty,
+    );
+    expect(find.byType(SegmentedButton<bool>), findsNothing);
+
+    await tester.tap(find.text('Abbuchen'));
+    await tester.pumpAndSettle();
+    expect(result.closed, isFalse);
+  });
 }
 
 /// Mutable holder for what the dialog popped: [value] is the amount, and

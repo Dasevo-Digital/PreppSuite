@@ -1762,6 +1762,47 @@ class AppLocalizationsEn extends AppLocalizations {
       'Amount must be greater than 0 and at most the stock on hand.';
 
   @override
+  String consumeDialogEquals(String amount, String unit) {
+    return 'That is $amount $unit.';
+  }
+
+  @override
+  String consumeDialogAmountHint(String unit) {
+    return 'How much $unit?';
+  }
+
+  @override
+  String get packageNameLabel => 'Package (optional)';
+
+  @override
+  String get packageNameHint => 'e.g. jar, tin, piece';
+
+  @override
+  String get packageSizeLabel => 'Contents per package';
+
+  @override
+  String packageHelp(String unit) {
+    return 'Lets you deduct what was used in whole packages; the app converts to $unit.';
+  }
+
+  @override
+  String get packageIncomplete =>
+      'A package needs both a name and its contents.';
+
+  @override
+  String get packageSizeInvalid => 'Enter a number above 0.';
+
+  @override
+  String inventoryPackageCount(String count, String package) {
+    return '$count × $package';
+  }
+
+  @override
+  String inventoryPackageCountApprox(String count, String package) {
+    return '≈ $count × $package';
+  }
+
+  @override
   String syncAgeMinutes(int count) {
     return '$count minutes';
   }

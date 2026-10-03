@@ -205,6 +205,28 @@ class $InventoryItemsTable extends InventoryItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _packageNameMeta = const VerificationMeta(
+    'packageName',
+  );
+  @override
+  late final GeneratedColumn<String> packageName = GeneratedColumn<String>(
+    'package_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _packageSizeMeta = const VerificationMeta(
+    'packageSize',
+  );
+  @override
+  late final GeneratedColumn<double> packageSize = GeneratedColumn<double>(
+    'package_size',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _expiryLeadDaysMeta = const VerificationMeta(
     'expiryLeadDays',
   );
@@ -291,6 +313,8 @@ class $InventoryItemsTable extends InventoryItems
     fiberGrams,
     dailyDose,
     foodGroup,
+    packageName,
+    packageSize,
     expiryLeadDays,
     notes,
     photoPath,
@@ -453,6 +477,24 @@ class $InventoryItemsTable extends InventoryItems
         foodGroup.isAcceptableOrUnknown(data['food_group']!, _foodGroupMeta),
       );
     }
+    if (data.containsKey('package_name')) {
+      context.handle(
+        _packageNameMeta,
+        packageName.isAcceptableOrUnknown(
+          data['package_name']!,
+          _packageNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('package_size')) {
+      context.handle(
+        _packageSizeMeta,
+        packageSize.isAcceptableOrUnknown(
+          data['package_size']!,
+          _packageSizeMeta,
+        ),
+      );
+    }
     if (data.containsKey('expiry_lead_days')) {
       context.handle(
         _expiryLeadDaysMeta,
@@ -575,6 +617,14 @@ class $InventoryItemsTable extends InventoryItems
         DriftSqlType.string,
         data['${effectivePrefix}food_group'],
       ),
+      packageName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}package_name'],
+      ),
+      packageSize: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}package_size'],
+      ),
       expiryLeadDays: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}expiry_lead_days'],
@@ -685,6 +735,29 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   /// groups and not nutrients.
   final String? foodGroup;
 
+  /// What one package of this item is called — "Glas", "Dose", "Stück" —
+  /// or null where the household counts in the unit alone.
+  ///
+  /// Free text, like [unit] has always been, and never a measure of its
+  /// own: a jar has no weight until somebody reads it, which is why food
+  /// is stored in grams or millilitres at all (see `food_amount.dart`).
+  /// The package rides on top of that measure, it does not replace it.
+  /// What it buys is the everyday case at the shelf: "one jar is gone",
+  /// without anybody working out that a jar is 370 g.
+  ///
+  /// Set together with [packageSize] or not at all; the form refuses one
+  /// without the other, and `item_package.dart` ignores a half.
+  final String? packageName;
+
+  /// How much one [packageName] holds, in the item's own [unit] — 370
+  /// for a jar of an item counted in grams.
+  ///
+  /// In the item's unit and not in grams, so that a medicine counted in
+  /// tablets can say "Packung à 20" with the same two fields. The
+  /// calculations never read it: the quantity is still the stock, and
+  /// this only converts what the consume dialog is told.
+  final double? packageSize;
+
   /// Lead times for this one item's expiry reminders, as a
   /// comma-separated list of days — or null to follow the household's
   /// own setting, which is what nearly every row does.
@@ -730,6 +803,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     this.fiberGrams,
     this.dailyDose,
     this.foodGroup,
+    this.packageName,
+    this.packageSize,
     this.expiryLeadDays,
     this.notes,
     this.photoPath,
@@ -779,6 +854,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     }
     if (!nullToAbsent || foodGroup != null) {
       map['food_group'] = Variable<String>(foodGroup);
+    }
+    if (!nullToAbsent || packageName != null) {
+      map['package_name'] = Variable<String>(packageName);
+    }
+    if (!nullToAbsent || packageSize != null) {
+      map['package_size'] = Variable<double>(packageSize);
     }
     if (!nullToAbsent || expiryLeadDays != null) {
       map['expiry_lead_days'] = Variable<String>(expiryLeadDays);
@@ -839,6 +920,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       foodGroup: foodGroup == null && nullToAbsent
           ? const Value.absent()
           : Value(foodGroup),
+      packageName: packageName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(packageName),
+      packageSize: packageSize == null && nullToAbsent
+          ? const Value.absent()
+          : Value(packageSize),
       expiryLeadDays: expiryLeadDays == null && nullToAbsent
           ? const Value.absent()
           : Value(expiryLeadDays),
@@ -882,6 +969,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       fiberGrams: serializer.fromJson<double?>(json['fiberGrams']),
       dailyDose: serializer.fromJson<double?>(json['dailyDose']),
       foodGroup: serializer.fromJson<String?>(json['foodGroup']),
+      packageName: serializer.fromJson<String?>(json['packageName']),
+      packageSize: serializer.fromJson<double?>(json['packageSize']),
       expiryLeadDays: serializer.fromJson<String?>(json['expiryLeadDays']),
       notes: serializer.fromJson<String?>(json['notes']),
       photoPath: serializer.fromJson<String?>(json['photoPath']),
@@ -912,6 +1001,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'fiberGrams': serializer.toJson<double?>(fiberGrams),
       'dailyDose': serializer.toJson<double?>(dailyDose),
       'foodGroup': serializer.toJson<String?>(foodGroup),
+      'packageName': serializer.toJson<String?>(packageName),
+      'packageSize': serializer.toJson<double?>(packageSize),
       'expiryLeadDays': serializer.toJson<String?>(expiryLeadDays),
       'notes': serializer.toJson<String?>(notes),
       'photoPath': serializer.toJson<String?>(photoPath),
@@ -940,6 +1031,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     Value<double?> fiberGrams = const Value.absent(),
     Value<double?> dailyDose = const Value.absent(),
     Value<String?> foodGroup = const Value.absent(),
+    Value<String?> packageName = const Value.absent(),
+    Value<double?> packageSize = const Value.absent(),
     Value<String?> expiryLeadDays = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<String?> photoPath = const Value.absent(),
@@ -969,6 +1062,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     fiberGrams: fiberGrams.present ? fiberGrams.value : this.fiberGrams,
     dailyDose: dailyDose.present ? dailyDose.value : this.dailyDose,
     foodGroup: foodGroup.present ? foodGroup.value : this.foodGroup,
+    packageName: packageName.present ? packageName.value : this.packageName,
+    packageSize: packageSize.present ? packageSize.value : this.packageSize,
     expiryLeadDays: expiryLeadDays.present
         ? expiryLeadDays.value
         : this.expiryLeadDays,
@@ -1014,6 +1109,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           : this.fiberGrams,
       dailyDose: data.dailyDose.present ? data.dailyDose.value : this.dailyDose,
       foodGroup: data.foodGroup.present ? data.foodGroup.value : this.foodGroup,
+      packageName: data.packageName.present
+          ? data.packageName.value
+          : this.packageName,
+      packageSize: data.packageSize.present
+          ? data.packageSize.value
+          : this.packageSize,
       expiryLeadDays: data.expiryLeadDays.present
           ? data.expiryLeadDays.value
           : this.expiryLeadDays,
@@ -1046,6 +1147,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ..write('fiberGrams: $fiberGrams, ')
           ..write('dailyDose: $dailyDose, ')
           ..write('foodGroup: $foodGroup, ')
+          ..write('packageName: $packageName, ')
+          ..write('packageSize: $packageSize, ')
           ..write('expiryLeadDays: $expiryLeadDays, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
@@ -1076,6 +1179,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     fiberGrams,
     dailyDose,
     foodGroup,
+    packageName,
+    packageSize,
     expiryLeadDays,
     notes,
     photoPath,
@@ -1105,6 +1210,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           other.fiberGrams == this.fiberGrams &&
           other.dailyDose == this.dailyDose &&
           other.foodGroup == this.foodGroup &&
+          other.packageName == this.packageName &&
+          other.packageSize == this.packageSize &&
           other.expiryLeadDays == this.expiryLeadDays &&
           other.notes == this.notes &&
           other.photoPath == this.photoPath &&
@@ -1132,6 +1239,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<double?> fiberGrams;
   final Value<double?> dailyDose;
   final Value<String?> foodGroup;
+  final Value<String?> packageName;
+  final Value<double?> packageSize;
   final Value<String?> expiryLeadDays;
   final Value<String?> notes;
   final Value<String?> photoPath;
@@ -1158,6 +1267,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.fiberGrams = const Value.absent(),
     this.dailyDose = const Value.absent(),
     this.foodGroup = const Value.absent(),
+    this.packageName = const Value.absent(),
+    this.packageSize = const Value.absent(),
     this.expiryLeadDays = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
@@ -1185,6 +1296,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.fiberGrams = const Value.absent(),
     this.dailyDose = const Value.absent(),
     this.foodGroup = const Value.absent(),
+    this.packageName = const Value.absent(),
+    this.packageSize = const Value.absent(),
     this.expiryLeadDays = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
@@ -1219,6 +1332,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<double>? fiberGrams,
     Expression<double>? dailyDose,
     Expression<String>? foodGroup,
+    Expression<String>? packageName,
+    Expression<double>? packageSize,
     Expression<String>? expiryLeadDays,
     Expression<String>? notes,
     Expression<String>? photoPath,
@@ -1246,6 +1361,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       if (fiberGrams != null) 'fiber_grams': fiberGrams,
       if (dailyDose != null) 'daily_dose': dailyDose,
       if (foodGroup != null) 'food_group': foodGroup,
+      if (packageName != null) 'package_name': packageName,
+      if (packageSize != null) 'package_size': packageSize,
       if (expiryLeadDays != null) 'expiry_lead_days': expiryLeadDays,
       if (notes != null) 'notes': notes,
       if (photoPath != null) 'photo_path': photoPath,
@@ -1275,6 +1392,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Value<double?>? fiberGrams,
     Value<double?>? dailyDose,
     Value<String?>? foodGroup,
+    Value<String?>? packageName,
+    Value<double?>? packageSize,
     Value<String?>? expiryLeadDays,
     Value<String?>? notes,
     Value<String?>? photoPath,
@@ -1302,6 +1421,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       fiberGrams: fiberGrams ?? this.fiberGrams,
       dailyDose: dailyDose ?? this.dailyDose,
       foodGroup: foodGroup ?? this.foodGroup,
+      packageName: packageName ?? this.packageName,
+      packageSize: packageSize ?? this.packageSize,
       expiryLeadDays: expiryLeadDays ?? this.expiryLeadDays,
       notes: notes ?? this.notes,
       photoPath: photoPath ?? this.photoPath,
@@ -1369,6 +1490,12 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     if (foodGroup.present) {
       map['food_group'] = Variable<String>(foodGroup.value);
     }
+    if (packageName.present) {
+      map['package_name'] = Variable<String>(packageName.value);
+    }
+    if (packageSize.present) {
+      map['package_size'] = Variable<double>(packageSize.value);
+    }
     if (expiryLeadDays.present) {
       map['expiry_lead_days'] = Variable<String>(expiryLeadDays.value);
     }
@@ -1414,6 +1541,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
           ..write('fiberGrams: $fiberGrams, ')
           ..write('dailyDose: $dailyDose, ')
           ..write('foodGroup: $foodGroup, ')
+          ..write('packageName: $packageName, ')
+          ..write('packageSize: $packageSize, ')
           ..write('expiryLeadDays: $expiryLeadDays, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')

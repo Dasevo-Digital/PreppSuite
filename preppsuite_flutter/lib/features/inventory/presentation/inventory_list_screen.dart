@@ -22,6 +22,7 @@ import 'barcode_scanner_screen.dart';
 import 'rotation_screen.dart';
 import 'shopping_list_screen.dart';
 import '../application/supply_calculator.dart';
+import '../application/item_package.dart';
 import 'consume_dialog.dart';
 import 'inventory_csv_import_screen.dart';
 import 'inventory_item_form_screen.dart';
@@ -466,7 +467,11 @@ class _InventoryTile extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${_formatQuantity(item.quantity)} ${item.unit} · ${item.storageLocation}',
+            [
+              '${_formatQuantity(item.quantity)} ${item.unit}',
+              ?_packages(item),
+              item.storageLocation,
+            ].join(' · '),
           ),
           if (isExpired || isLowStock)
             Padding(
@@ -528,6 +533,18 @@ class _InventoryTile extends ConsumerWidget {
 
   String _formatQuantity(double quantity) {
     return NumberFormat.decimalPattern(l10n.localeName).format(quantity);
+  }
+
+  /// "3 × Glas", or "≈ 2,7 × Glas" when the stock is not whole jars.
+  /// Null for an item without a package, and for one used up entirely.
+  String? _packages(InventoryItem item) {
+    final package = ItemPackage.of(item);
+    if (package == null || item.quantity <= 0) return null;
+    final (:count, :exact) = packageCount(item.quantity, package);
+    final formatted = _formatQuantity(count);
+    return exact
+        ? l10n.inventoryPackageCount(formatted, package.name)
+        : l10n.inventoryPackageCountApprox(formatted, package.name);
   }
 }
 

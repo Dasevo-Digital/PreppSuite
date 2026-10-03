@@ -179,10 +179,13 @@ void main() {
       await tester.tap(find.widgetWithText(ActionChip, 'kg'));
       await tester.pumpAndSettle();
 
-      expect(
-        find.widgetWithText(TextFormField, 'kg'),
-        findsOneWidget,
+      // Read from the unit field itself: since #90 the package size
+      // beside it shows the unit as its suffix, so "a field showing kg"
+      // is two fields.
+      final unitField = tester.widget<TextFormField>(
+        find.widgetWithText(TextFormField, l10n.unitLabel),
       );
+      expect(unitField.controller!.text, 'kg');
     });
   });
 }

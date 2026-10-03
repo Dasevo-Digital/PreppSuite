@@ -384,6 +384,25 @@ indistinguishable from a measured one. A nutrient heavier than the
 package it is in is rejected, which is what catches the common Open Food
 Facts error of a per-package figure typed into the per-100 g field.
 
+**A package is a way of saying an amount, never a measure of its own.**
+`packageName` and `packageSize` ("Glas", 370) let the consume dialog
+count in jars, but the stock stays in the item's unit and nothing that
+calculates ever reads the package: one jar consumed is 370 g taken off
+the quantity, and the calories follow from that. The size is in the
+item's unit, so a medicine can say "Packung à 20" with the same two
+fields. Both or neither — `ItemPackage.of` ignores a half. The dialog
+also no longer suggests "1" for an item counted in a measure: one gram
+off a kilo moved the calorie total by four and read as "consuming does
+not reduce the calories" (#90).
+
+**A snapshot key a newer schema added leaves the column alone when it is
+missing.** The package is the first column decoded that way, with
+`Value.absent()` rather than null: an app before schema 21 writes no
+package keys, including for a row it edited and wrote back, and reading
+that as null would strip the size somebody typed on a newer device. A
+newer device that clears a package writes the key with null, which does
+clear it. `device_snapshot_test` holds both halves.
+
 **Where a public authority publishes the interpretation, the app uses
 theirs.** Three live feeds now show a bare number, and a bare number is
 unreadable or frightening or both: a gauge reading, a gamma dose rate and

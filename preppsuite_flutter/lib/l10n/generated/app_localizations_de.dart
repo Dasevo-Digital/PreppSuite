@@ -1774,6 +1774,46 @@ class AppLocalizationsDe extends AppLocalizations {
       'Menge muss grösser als 0 und höchstens der Bestand sein.';
 
   @override
+  String consumeDialogEquals(String amount, String unit) {
+    return 'Das sind $amount $unit.';
+  }
+
+  @override
+  String consumeDialogAmountHint(String unit) {
+    return 'Wie viel $unit?';
+  }
+
+  @override
+  String get packageNameLabel => 'Packung (optional)';
+
+  @override
+  String get packageNameHint => 'z. B. Glas, Dose, Stück';
+
+  @override
+  String get packageSizeLabel => 'Inhalt je Packung';
+
+  @override
+  String packageHelp(String unit) {
+    return 'Dann lässt sich der Verbrauch in ganzen Packungen abbuchen, und die App rechnet in $unit um.';
+  }
+
+  @override
+  String get packageIncomplete => 'Packung und Inhalt gehören zusammen.';
+
+  @override
+  String get packageSizeInvalid => 'Eine Zahl über 0 eintragen.';
+
+  @override
+  String inventoryPackageCount(String count, String package) {
+    return '$count × $package';
+  }
+
+  @override
+  String inventoryPackageCountApprox(String count, String package) {
+    return '≈ $count × $package';
+  }
+
+  @override
   String syncAgeMinutes(int count) {
     return '$count Minuten';
   }

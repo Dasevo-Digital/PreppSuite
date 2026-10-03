@@ -882,6 +882,60 @@
   "consumeDialogConfirm": "Deduct",
   "consumeDialogAll": "Used up entirely",
   "consumeInvalidAmount": "Amount must be greater than 0 and at most the stock on hand.",
+  "consumeDialogEquals": "That is {amount} {unit}.",
+  "@consumeDialogEquals": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "consumeDialogAmountHint": "How much {unit}?",
+  "@consumeDialogAmountHint": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "packageNameLabel": "Package (optional)",
+  "packageNameHint": "e.g. jar, tin, piece",
+  "packageSizeLabel": "Contents per package",
+  "packageHelp": "Lets you deduct what was used in whole packages; the app converts to {unit}.",
+  "@packageHelp": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "packageIncomplete": "A package needs both a name and its contents.",
+  "packageSizeInvalid": "Enter a number above 0.",
+  "inventoryPackageCount": "{count} × {package}",
+  "@inventoryPackageCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "package": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryPackageCountApprox": "≈ {count} × {package}",
+  "@inventoryPackageCountApprox": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      },
+      "package": {
+        "type": "String"
+      }
+    }
+  },
   "syncAgeMinutes": "{count} minutes",
   "@syncAgeMinutes": {
     "placeholders": {

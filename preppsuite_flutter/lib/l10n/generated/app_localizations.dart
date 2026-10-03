@@ -3056,6 +3056,66 @@ abstract class AppLocalizations {
   /// **'Amount must be greater than 0 and at most the stock on hand.'**
   String get consumeInvalidAmount;
 
+  /// No description provided for @consumeDialogEquals.
+  ///
+  /// In en, this message translates to:
+  /// **'That is {amount} {unit}.'**
+  String consumeDialogEquals(String amount, String unit);
+
+  /// No description provided for @consumeDialogAmountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How much {unit}?'**
+  String consumeDialogAmountHint(String unit);
+
+  /// No description provided for @packageNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Package (optional)'**
+  String get packageNameLabel;
+
+  /// No description provided for @packageNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. jar, tin, piece'**
+  String get packageNameHint;
+
+  /// No description provided for @packageSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Contents per package'**
+  String get packageSizeLabel;
+
+  /// No description provided for @packageHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Lets you deduct what was used in whole packages; the app converts to {unit}.'**
+  String packageHelp(String unit);
+
+  /// No description provided for @packageIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'A package needs both a name and its contents.'**
+  String get packageIncomplete;
+
+  /// No description provided for @packageSizeInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a number above 0.'**
+  String get packageSizeInvalid;
+
+  /// No description provided for @inventoryPackageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} × {package}'**
+  String inventoryPackageCount(String count, String package);
+
+  /// No description provided for @inventoryPackageCountApprox.
+  ///
+  /// In en, this message translates to:
+  /// **'≈ {count} × {package}'**
+  String inventoryPackageCountApprox(String count, String package);
+
   /// No description provided for @syncAgeMinutes.
   ///
   /// In en, this message translates to:

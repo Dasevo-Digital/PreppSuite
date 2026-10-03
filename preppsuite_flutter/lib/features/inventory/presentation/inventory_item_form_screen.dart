@@ -23,6 +23,7 @@ import '../application/supply_groups.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_photo_service.dart';
 import '../application/open_food_facts_service.dart';
+import '../application/item_package.dart';
 import '../application/package_nutrition.dart';
 import 'barcode_scanner_screen.dart';
 import 'photo_editor_screen.dart';
@@ -75,6 +76,8 @@ class _InventoryItemFormScreenState
   late final TextEditingController _nameController;
   late final TextEditingController _quantityController;
   late final TextEditingController _unitController;
+  late final TextEditingController _packageNameController;
+  late final TextEditingController _packageSizeController;
   late final TextEditingController _storageLocationController;
   late final TextEditingController _minQuantityController;
   late final TextEditingController _dailyDoseController;
@@ -106,6 +109,8 @@ class _InventoryItemFormScreenState
     _nameController,
     _quantityController,
     _unitController,
+    _packageNameController,
+    _packageSizeController,
     _storageLocationController,
     _minQuantityController,
     _dailyDoseController,
@@ -196,6 +201,14 @@ class _InventoryItemFormScreenState
     _storageLocationController = TextEditingController(
       text: existing?.storageLocation ?? '',
     );
+    _packageNameController = TextEditingController(
+      text: existing?.packageName ?? '',
+    );
+    _packageSizeController = TextEditingController(
+      text: existing?.packageSize != null
+          ? _formatNumber(existing!.packageSize!)
+          : '',
+    );
     _minQuantityController = TextEditingController(
       text: existing?.minQuantity != null
           ? _formatNumber(existing!.minQuantity!)
@@ -248,6 +261,8 @@ class _InventoryItemFormScreenState
     _nameController.dispose();
     _quantityController.dispose();
     _unitController.dispose();
+    _packageNameController.dispose();
+    _packageSizeController.dispose();
     _storageLocationController.dispose();
     _minQuantityController.dispose();
     _dailyDoseController.dispose();
@@ -503,6 +518,24 @@ class _InventoryItemFormScreenState
   static double? _decimal(String text) =>
       double.tryParse(text.trim().replaceAll(',', '.'));
 
+  /// A package is a name and a size, or nothing. Either half alone is
+  /// refused: a jar of unknown size cannot convert anything, and a size
+  /// with no name cannot be shown.
+  String? _packageError(AppLocalizations l10n) {
+    final hasName = _packageNameController.text.trim().isNotEmpty;
+    final hasSize = _packageSizeController.text.trim().isNotEmpty;
+    return hasName != hasSize ? l10n.packageIncomplete : null;
+  }
+
+  String? _packageSizeError(AppLocalizations l10n) {
+    final text = _packageSizeController.text.trim();
+    if (text.isEmpty) return null;
+    final size = _decimal(text);
+    return size == null || !size.isFinite || size <= 0
+        ? l10n.packageSizeInvalid
+        : null;
+  }
+
   String? _grams(double? value) =>
       value == null ? null : _formatNumber(_roundGrams(value));
 
@@ -548,6 +581,10 @@ class _InventoryItemFormScreenState
           ? double.parse(doseText)
           : null;
       final notes = _notesController.text.trim();
+      final package = ItemPackage.from(
+        _packageNameController.text,
+        _decimal(_packageSizeController.text),
+      );
 
       if (_isEditing) {
         await controller.updateItem(
@@ -562,6 +599,7 @@ class _InventoryItemFormScreenState
           dailyDose: dailyDose,
           expiryLeadDays: _expiryLeadDays,
           foodGroup: _needsMeasure ? _foodGroup?.name : null,
+          package: package,
           notes: notes.isEmpty ? null : notes,
           barcode: _barcode,
           offProductId: _offProductId,
@@ -580,6 +618,7 @@ class _InventoryItemFormScreenState
           dailyDose: dailyDose,
           expiryLeadDays: _expiryLeadDays,
           foodGroup: _needsMeasure ? _foodGroup?.name : null,
+          package: package,
           notes: notes.isEmpty ? null : notes,
           barcode: _barcode,
           offProductId: _offProductId,
@@ -841,6 +880,54 @@ class _InventoryItemFormScreenState
                           ),
                         ],
                       ),
+                      const SizedBox(height: 16),
+                      // Optional, and for every category: a jar of jam,
+                      // a pack of twenty tablets, a box of matches. The
+                      // stock stays in the unit above; this only lets
+                      // the consume dialog count in packages (#90).
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _packageNameController,
+                              decoration: InputDecoration(
+                                labelText: l10n.packageNameLabel,
+                                hintText: l10n.packageNameHint,
+                              ),
+                              validator: (_) => _packageError(l10n),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _packageSizeController,
+                              decoration: InputDecoration(
+                                labelText: l10n.packageSizeLabel,
+                                suffixText: _unitController.text.trim(),
+                              ),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                              validator: (_) => _packageSizeError(l10n),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (_unitController.text.trim().isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 6, 12, 0),
+                          child: Text(
+                            l10n.packageHelp(_unitController.text.trim()),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _storageLocationController,
