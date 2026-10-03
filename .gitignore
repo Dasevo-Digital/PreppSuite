@@ -34,3 +34,6 @@ tool/ocr_probe/android/gradle/wrapper/gradle-wrapper.jar
 
 # Lokale Arbeitsanweisungen, nicht veröffentlichen
 /AGENTS.md
+
+# Finder metadata
+.DS_Store
