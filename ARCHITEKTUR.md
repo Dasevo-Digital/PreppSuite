@@ -946,9 +946,12 @@ tree; the test suite deliberately targets that layer rather than the UI.
   sandboxed launch makes it skip silently, and the app then starts on an
   empty household while the real one sits outside, unreachable. That is
   not hypothetical — it is what the development machine looked like.
-  `macos/Runner/SandboxMigration.swift` does it explicitly instead, before
-  the engine runs any Dart, because the Dart-side migration would
-  otherwise settle for the container's empty Documents folder first.
+  From 0.14.0 to 2.3.8 `SandboxMigration.swift` did it explicitly, with
+  read-only temporary-exception entitlements for the app's own two old
+  locations. Both were removed after 2.3.8 (#80): every installation had
+  long been carried over, and an exception kept "for now" is one nobody
+  ever removes. **Coming from 0.13.1 or older means installing a version
+  up to 2.3.8 first**, starting it once, and only then updating.
 - **`flutter build macos` puts `com.apple.security.get-task-allow` in the
   Release bundle** — a debug entitlement that would be rejected by
   notarization. `tool/macos_sign.sh` re-signs from `Release.entitlements`
