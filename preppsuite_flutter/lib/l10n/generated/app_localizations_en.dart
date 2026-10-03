@@ -4021,6 +4021,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get knowledgeDocumentReindex => 'Rebuild search index';
 
   @override
+  String get knowledgeDocumentChanged =>
+      'File changed, search index out of date';
+
+  @override
+  String knowledgeDocumentChangedSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count documents have changed since they were indexed. Search still finds their old contents.',
+      one:
+          'One document has changed since it was indexed. Search still finds its old contents.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get knowledgeDocumentRefreshChanged => 'Update index';
+
+  @override
   String get knowledgeDocumentClearIndex => 'Delete search index';
 
   @override

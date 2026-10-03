@@ -6,6 +6,7 @@ import '../../downloads/application/byte_size.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/document_folder_import.dart';
 import '../application/personal_document_index.dart';
+import '../application/document_fingerprint.dart';
 import '../application/personal_document_store.dart';
 import 'personal_document_reader_screen.dart';
 
@@ -20,6 +21,37 @@ class PersonalDocumentsScreen extends StatefulWidget {
 class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
   static const _store = PersonalDocumentStore();
   late Future<List<PersonalDocument>> _documents = _store.load();
+
+  /// Documents whose file no longer matches the one their index was
+  /// built from (#77). Found after the list is shown, not before it: a
+  /// library of large files should not wait on its own check to appear.
+  Set<String> _changed = const {};
+
+  @override
+  void initState() {
+    super.initState();
+    _checkForChanges();
+  }
+
+  Future<void> _checkForChanges() async {
+    final documents = await _documents;
+    final changed = <String>{};
+    for (final document in documents) {
+      if (!document.isSearchable) continue;
+      final current = await documentFingerprint(document.location);
+      if (documentChanged(document.sourceFingerprint, current)) {
+        changed.add(document.id);
+      }
+    }
+    if (mounted) setState(() => _changed = changed);
+  }
+
+  Future<void> _refreshChanged() async {
+    final documents = await _documents;
+    for (final document in documents) {
+      if (_changed.contains(document.id)) await _index(document, quiet: true);
+    }
+  }
 
   /// How far a folder import has got, or null when none is running.
   ({int done, int total})? _import;
@@ -196,14 +228,22 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
     setState(
       () => _documents = _store.updateIndex(document.id, status: 'indexing'),
     );
+    // Taken before the text is read, so it describes at worst an older
+    // file than the one indexed -- which reports a change that is not
+    // there rather than hiding one that is.
+    final fingerprint = await documentFingerprint(document.location);
     final result = await PersonalDocumentIndexer().index(document);
     final updated = await _store.updateIndex(
       document.id,
       status: result.status.name,
       characters: result.characters,
+      fingerprint: fingerprint,
     );
     if (mounted) {
-      setState(() => _documents = Future.value(updated));
+      setState(() {
+        _documents = Future.value(updated);
+        _changed = {..._changed}..remove(document.id);
+      });
       // During a folder import the outcome of each file is already in
       // its own row; a snackbar per document would bury the list it is
       // reporting on.
@@ -311,6 +351,22 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
                   ),
                 ),
               ),
+              if (_changed.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Card(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  child: ListTile(
+                    leading: const Icon(Icons.update_outlined),
+                    title: Text(
+                      l10n.knowledgeDocumentChangedSummary(_changed.length),
+                    ),
+                    trailing: TextButton(
+                      onPressed: _refreshChanged,
+                      child: Text(l10n.knowledgeDocumentRefreshChanged),
+                    ),
+                  ),
+                ),
+              ],
               if (_import case final progress?) ...[
                 const SizedBox(height: 8),
                 LinearProgressIndicator(
@@ -342,7 +398,8 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
                       leading: Icon(_icon(document.extension)),
                       title: Text(document.label),
                       subtitle: Text(
-                        '${document.extension.toUpperCase()} · ${_indexStatus(l10n, document.indexStatus)}'
+                        '${document.extension.toUpperCase()} · '
+                        '${_changed.contains(document.id) ? l10n.knowledgeDocumentChanged : _indexStatus(l10n, document.indexStatus)}'
                         '${document.readerOffset > 0 ? ' · ${l10n.knowledgeDocumentContinue}' : ''}',
                       ),
                       onTap: () => _open(document),

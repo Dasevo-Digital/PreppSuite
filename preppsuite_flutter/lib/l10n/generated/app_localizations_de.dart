@@ -4053,6 +4053,25 @@ class AppLocalizationsDe extends AppLocalizations {
   String get knowledgeDocumentReindex => 'Suchindex erneuern';
 
   @override
+  String get knowledgeDocumentChanged => 'Datei geändert, Suchindex veraltet';
+
+  @override
+  String knowledgeDocumentChangedSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count Dokumente haben sich seit dem Indizieren geändert. Die Suche findet noch den alten Inhalt.',
+      one:
+          'Ein Dokument hat sich seit dem Indizieren geändert. Die Suche findet noch den alten Inhalt.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get knowledgeDocumentRefreshChanged => 'Index aktualisieren';
+
+  @override
   String get knowledgeDocumentClearIndex => 'Suchindex löschen';
 
   @override

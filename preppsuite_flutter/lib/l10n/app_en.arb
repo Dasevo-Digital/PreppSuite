@@ -2283,6 +2283,16 @@
   "@knowledgeDocumentTooLarge": {"placeholders": {"limit": {"type": "String"}}},
   "knowledgeDocumentIndexFailed": "Could not build index",
   "knowledgeDocumentReindex": "Rebuild search index",
+  "knowledgeDocumentChanged": "File changed, search index out of date",
+  "knowledgeDocumentChangedSummary": "{count, plural, =1{One document has changed since it was indexed. Search still finds its old contents.} other{{count} documents have changed since they were indexed. Search still finds their old contents.}}",
+  "@knowledgeDocumentChangedSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeDocumentRefreshChanged": "Update index",
   "knowledgeDocumentClearIndex": "Delete search index",
   "knowledgeDocumentClearIndexBody": "The search data for all personal documents will be deleted. Original files remain untouched.",
   "knowledgeDocumentIndexSummary": "{indexed} of {total} documents searchable",

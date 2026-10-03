@@ -6794,6 +6794,24 @@ abstract class AppLocalizations {
   /// **'Rebuild search index'**
   String get knowledgeDocumentReindex;
 
+  /// No description provided for @knowledgeDocumentChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'File changed, search index out of date'**
+  String get knowledgeDocumentChanged;
+
+  /// No description provided for @knowledgeDocumentChangedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One document has changed since it was indexed. Search still finds its old contents.} other{{count} documents have changed since they were indexed. Search still finds their old contents.}}'**
+  String knowledgeDocumentChangedSummary(int count);
+
+  /// No description provided for @knowledgeDocumentRefreshChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Update index'**
+  String get knowledgeDocumentRefreshChanged;
+
   /// No description provided for @knowledgeDocumentClearIndex.
   ///
   /// In en, this message translates to:

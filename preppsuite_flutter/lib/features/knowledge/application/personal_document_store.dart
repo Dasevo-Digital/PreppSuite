@@ -16,6 +16,7 @@ class PersonalDocument {
     this.indexStatus = 'notIndexed',
     this.indexedCharacters = 0,
     this.readerOffset = 0,
+    this.sourceFingerprint,
   });
 
   final String id;
@@ -31,6 +32,11 @@ class PersonalDocument {
   /// pixel offset only: no passage, annotation or document text is copied
   /// into preferences merely to offer "continue reading".
   final double readerOffset;
+
+  /// What the file looked like when its index was built, as
+  /// `document_fingerprint.dart` describes it — or null for a document
+  /// never indexed, or indexed before fingerprints were kept.
+  final String? sourceFingerprint;
 
   bool get isSearchable => indexStatus == 'ready';
 
@@ -50,6 +56,7 @@ class PersonalDocument {
     'indexStatus': indexStatus,
     'indexedCharacters': indexedCharacters,
     'readerOffset': readerOffset,
+    'sourceFingerprint': ?sourceFingerprint,
   };
 
   static PersonalDocument? fromJson(Object? value) {
@@ -78,6 +85,9 @@ class PersonalDocument {
       readerOffset: value['readerOffset'] is num
           ? (value['readerOffset'] as num).toDouble().clamp(0, double.infinity)
           : 0,
+      sourceFingerprint: value['sourceFingerprint'] is String
+          ? value['sourceFingerprint'] as String
+          : null,
     );
   }
 
@@ -85,6 +95,8 @@ class PersonalDocument {
     String? indexStatus,
     int? indexedCharacters,
     double? readerOffset,
+    String? sourceFingerprint,
+    bool clearFingerprint = false,
   }) => PersonalDocument(
     id: id,
     location: location,
@@ -93,6 +105,9 @@ class PersonalDocument {
     indexStatus: indexStatus ?? this.indexStatus,
     indexedCharacters: indexedCharacters ?? this.indexedCharacters,
     readerOffset: readerOffset ?? this.readerOffset,
+    sourceFingerprint: clearFingerprint
+        ? null
+        : sourceFingerprint ?? this.sourceFingerprint,
   );
 }
 
@@ -176,15 +191,23 @@ class PersonalDocumentStore {
     return updated;
   }
 
+  /// [fingerprint] is the file as it was read for this index, and is
+  /// written whenever it is given; a status without one (`indexing`)
+  /// keeps the previous fingerprint until the run has an answer.
   Future<List<PersonalDocument>> updateIndex(
     String id, {
     required String status,
     int characters = 0,
+    String? fingerprint,
   }) async {
     final updated = [
       for (final item in await load())
         if (item.id == id)
-          item.copyWith(indexStatus: status, indexedCharacters: characters)
+          item.copyWith(
+            indexStatus: status,
+            indexedCharacters: characters,
+            sourceFingerprint: fingerprint,
+          )
         else
           item,
     ];
@@ -195,7 +218,11 @@ class PersonalDocumentStore {
   Future<List<PersonalDocument>> clearIndex() async {
     final updated = [
       for (final item in await load())
-        item.copyWith(indexStatus: 'notIndexed', indexedCharacters: 0),
+        item.copyWith(
+          indexStatus: 'notIndexed',
+          indexedCharacters: 0,
+          clearFingerprint: true,
+        ),
     ];
     await _save(updated);
     return updated;
