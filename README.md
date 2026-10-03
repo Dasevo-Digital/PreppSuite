@@ -690,6 +690,9 @@ und superkuh). Erlaubt sind die nichtkommerzielle Nutzung der App und das
 Prüfen des Quellcodes; Kopieren, Ändern, Weitergeben und jede kommerzielle
 Nutzung sind ohne gesonderte schriftliche Genehmigung nicht gestattet.
 
+Das gilt ab Version 2.3.5. Bis einschließlich 2.3.4 stand der Code unter
+der MIT-Lizenz; für diese Fassungen bleibt es dabei.
+
 Die Daten stammen aus fremden Quellen und stehen unter deren eigenen
 Bedingungen: Kartenkacheln und Schutzraum-Einträge von OpenStreetMap
 (ODbL-1.0, Namensnennung in der Karte), Produktdaten von Open Food Facts

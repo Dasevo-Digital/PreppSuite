@@ -1,6 +1,7 @@
 # Hinweise zu Komponenten, Daten und Diensten Dritter
 
-Der PreppSuite-Projektcode steht unter MIT; siehe [LICENSE](LICENSE).
+Der PreppSuite-Projektcode steht unter der PolyForm Strict License 1.0.0;
+siehe [LICENSE](LICENSE).
 Bibliotheken, Schriften, Datenquellen und heruntergeladene Inhalte behalten
 ihre jeweils eigenen Bedingungen.
 
