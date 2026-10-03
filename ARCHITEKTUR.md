@@ -42,7 +42,9 @@ because that log carries this machine's paths. It runs the four files
 one at a time and retries a file once on "Build input file cannot be
 found": `zstandard_ios` deletes its synced sources at the end of every
 build, so every second incremental build fails on inputs that are gone.
-A release build starts clean and never meets this.
+The same race catches the first `flutter build ios` after a device check
+(seen on 2.3.9): it fails with the same message and the second attempt
+builds. Nothing is wrong with the tree when that happens.
 
 Linux is built in a container from here — see [`tool/docker/`](tool/docker/),
 but on Apple silicon that produces **arm64**. Windows cannot be built on a
