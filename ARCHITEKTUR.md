@@ -24,6 +24,26 @@ cd preppsuite_flutter && flutter test
 cd preppsuite_flutter && flutter test integration_test/ -d <device>
 ```
 
+**Before every release, both gates run, and the second leaves a record.**
+There is no runner on Gitea (#79), so nothing checks this unless it is
+run here:
+
+```bash
+tool/pre_release_check.sh                                   # no device needed
+tool/release_device_check.py ~/Desktop/PreppSuite-Release-v<version>-Upload
+```
+
+The device check runs the integration tests on an **iPhone simulator,
+never this Mac** — `flutter test -d macos` would start the app under its
+production identifier beside the household's real data. It writes
+`GERAETETEST-v<version>.txt` into the release folder, which is uploaded
+and listed in `SHA256SUMS.txt`, and keeps the full log beside it locally,
+because that log carries this machine's paths. It runs the four files
+one at a time and retries a file once on "Build input file cannot be
+found": `zstandard_ios` deletes its synced sources at the end of every
+build, so every second incremental build fails on inputs that are gone.
+A release build starts clean and never meets this.
+
 Linux is built in a container from here — see [`tool/docker/`](tool/docker/),
 but on Apple silicon that produces **arm64**. Windows cannot be built on a
 Mac at all.

@@ -681,6 +681,12 @@ iPhone-Simulator und beendet ihn danach wieder, sofern das Skript ihn
 selbst gestartet hat. Echte Hintergrundzustellung und der interaktive
 Ordner-Picker benötigen weiterhin Tests auf physischen Geräten.
 
+Vor jedem Release läuft dasselbe als Release-Schranke mit Nachweis:
+`tool/release_device_check.py <Upload-Ordner>` führt die Gerätetests im
+iPhone-Simulator aus und legt `GERAETETEST-v<Version>.txt` in den
+Release-Ordner. Das Protokoll wird mit veröffentlicht und nennt Stand,
+Simulator, Flutter-Version und jedes Testergebnis.
+
 Nach jeder Änderung an einer Tabelle:
 
 ```bash
