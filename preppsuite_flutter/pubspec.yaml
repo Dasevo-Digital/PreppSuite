@@ -58,8 +58,12 @@ dependencies:
   # Pure-Dart PDF parser used for the offline full-text index of personal
   # documents. Unlike a platform PDF viewer, it works on mobile and desktop
   # without sending a document to a service.
-  pdf_document: 3.8.0
-  pdf_graphics: 3.8.0
+  #
+  # 6.0.0 since 2.3.9 (#78), from 3.8.0: the parts used here -- opening a
+  # document and reading its text -- did not change, and the personal
+  # document tests run against generated PDFs on every check.
+  pdf_document: 6.0.0
+  pdf_graphics: 6.0.0
   # Local renderer for PDFs from the personal knowledge library.  It uses
   # PDFium on every supported native platform, so a document never has to
   # leave the device merely to be read.
@@ -75,7 +79,9 @@ dependencies:
   # where nothing can execute it.
   #
   # Nothing above 2.4.8 fits yet: 2.5.0 wants Flutter 3.47 and 2.6.x wants
-  # Dart 3.13.
+  # Dart 3.13. sqlite3 3.7 is held back by the same SDK (it needs a newer
+  # `meta` than flutter_test pins), so both move with a Flutter upgrade --
+  # here and on the two build machines at once.
   pdfrx: 2.4.8
   printing: ^5.14.3
   shared_preferences: ^2.5.5

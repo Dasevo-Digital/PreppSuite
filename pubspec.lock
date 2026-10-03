@@ -317,18 +317,18 @@ packages:
     dependency: transitive
     description:
       name: drift
-      sha256: e3b6352aa02e60bed6ffc3cc9894c421578dad5fbef21b1f7f57cdc0e4edabcb
+      sha256: a21a6a7a9e6a0bcabdf47a9af4247c556d38dc9bfe9f05c4fdf72a488bb57eab
       url: "https://pub.dev"
     source: hosted
-    version: "2.35.0"
+    version: "2.35.1"
   drift_dev:
     dependency: transitive
     description:
       name: drift_dev
-      sha256: fbad5c1e3a73820cdb1f32161eb2f40bb5e5f03c0c1a3d236595725aec7efc6d
+      sha256: e0d16aaa21f3408cbe2dd4bfc56c36cea43e53a537e6613b91380c0924b3bd30
       url: "https://pub.dev"
     source: hosted
-    version: "2.35.0"
+    version: "2.35.1"
   executor_lib:
     dependency: transitive
     description:
@@ -1055,26 +1055,26 @@ packages:
     dependency: transitive
     description:
       name: pdf_cos
-      sha256: "61861bbd9f3c7bd11d7cc3df40d6a735ddf55bd65fd0e876b9026d920b7618b5"
+      sha256: bbcebd153bfc0560d9576292d9c4de6ec59b82a1356e80cafee30f662d0a651e
       url: "https://pub.dev"
     source: hosted
-    version: "3.8.0"
+    version: "6.0.0"
   pdf_document:
     dependency: transitive
     description:
       name: pdf_document
-      sha256: "3c76e1ec069bf32c74af2d28c65fb2749ce93a375ab5b5415c19f7f591203ff0"
+      sha256: "18357a3121641ad4b7f01cd90e49ea333776baa4fd1bf944d2fbf4b507a7ded1"
       url: "https://pub.dev"
     source: hosted
-    version: "3.8.0"
+    version: "6.0.0"
   pdf_graphics:
     dependency: transitive
     description:
       name: pdf_graphics
-      sha256: aece60a0c98b4faef3129a3c0cf6b7cbfdf2ad2fb1900cf54d3d1fdd006663fe
+      sha256: edb99ccc756dae86d0efa1e8922f8b0b761ca3c5e1b6eac24c3f0ee6fdc72b7b
       url: "https://pub.dev"
     source: hosted
-    version: "3.8.0"
+    version: "6.0.0"
   pdf_widget_wrapper:
     dependency: transitive
     description:
