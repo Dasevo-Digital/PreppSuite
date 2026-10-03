@@ -1373,6 +1373,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Der letzte geplante Abruf konnte die lokalen Daten nicht öffnen. Nach dem Entsperren des Geräts die App einmal öffnen.';
 
   @override
+  String get settingsWarningReadinessLaggingTitle =>
+      'Teilweise nicht erreichbar';
+
+  @override
+  String get warningSourceLaggingMeteoAlarm =>
+      'Die europäischen Wetterwarnungen (MeteoAlarm) waren beim letzten Abruf nicht erreichbar. Die amtlichen Warnungen des BBK sind davon nicht betroffen.';
+
+  @override
   String get settingsLocalEncryptionTitle => 'Lokale Verschlüsselung';
 
   @override

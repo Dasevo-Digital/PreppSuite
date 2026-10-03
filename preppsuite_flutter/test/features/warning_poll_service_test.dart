@@ -7,7 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/warnings/application/bbk_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/meteoalarm_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_poll_service.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_poll_status_store.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fixture_http_client.dart';
 
@@ -152,13 +154,58 @@ void main() {
     expect(result.complete, isFalse);
   });
 
+  group('status per feed (#92)', () {
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    test('MeteoAlarm down leaves the BBK current', () async {
+      await service({
+        ...allBbkSources(mowasBody: mowas),
+        meteoUrl: '<feed><entry>',
+      }).poll(countryCode: 'DE');
+
+      final status = await const WarningPollStatusStore().load();
+      expect(status.lastComplete, isNull);
+      expect(status.currentAt('DE'), status.lastAttempt);
+      expect(status.lagging('DE'), ['meteoalarm']);
+    });
+
+    test(
+      'an HTTP error from MeteoAlarm is an outage, not an empty feed',
+      () async {
+        // The fixture client answers 404 for a URL it does not know.
+        final result = await service({
+          ...allBbkSources(mowasBody: mowas),
+        }).poll(countryCode: 'DE');
+
+        expect(result.complete, isFalse);
+        final status = await const WarningPollStatusStore().load();
+        expect(status.lagging('DE'), ['meteoalarm']);
+      },
+    );
+
+    test('both answering makes the whole run current', () async {
+      await service({
+        ...allBbkSources(mowasBody: mowas),
+        meteoUrl: meteoalarm,
+      }).poll(countryCode: 'DE');
+
+      final status = await const WarningPollStatusStore().load();
+      expect(status.lastComplete, status.lastAttempt);
+      expect(status.lagging('DE'), isEmpty);
+    });
+  });
+
   test('a warning that drops out of a complete poll is ended', () async {
     await service({
       ...allBbkSources(mowasBody: mowas),
     }).poll(countryCode: 'DE');
 
+    // MeteoAlarm answers too, with nothing in force: since #92 a feed that
+    // is not there at all (the fixture client's 404) is an outage and
+    // leaves the run incomplete.
     final result = await service({
       ...allBbkSources(mowasBody: '[]'),
+      meteoUrl: '<feed xmlns="http://www.w3.org/2005/Atom"></feed>',
     }).poll(countryCode: 'DE');
 
     expect(result.complete, isTrue);

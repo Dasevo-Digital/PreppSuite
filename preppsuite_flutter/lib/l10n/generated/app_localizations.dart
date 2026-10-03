@@ -2420,6 +2420,18 @@ abstract class AppLocalizations {
   /// **'The last scheduled refresh could not open the local data. Open the app once after unlocking the device.'**
   String get settingsWarningReadinessBlockedBody;
 
+  /// No description provided for @settingsWarningReadinessLaggingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly unreachable'**
+  String get settingsWarningReadinessLaggingTitle;
+
+  /// No description provided for @warningSourceLaggingMeteoAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'The European weather warnings (MeteoAlarm) could not be reached in the last refresh. The official BBK warnings are not affected.'**
+  String get warningSourceLaggingMeteoAlarm;
+
   /// No description provided for @settingsLocalEncryptionTitle.
   ///
   /// In en, this message translates to:

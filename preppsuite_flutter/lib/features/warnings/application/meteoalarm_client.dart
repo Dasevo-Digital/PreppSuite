@@ -51,7 +51,14 @@ class MeteoAlarmClient {
         'https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-$countrySlug',
       ),
     );
-    if (response.statusCode != 200) return [];
+    // Thrown, not an empty list. An empty list is "no warnings in force",
+    // and that is what a 503 used to be filed as: the status then called
+    // MeteoAlarm current while it was down (#92). The poll catches this
+    // and marks the run incomplete; the stored warnings keep their own
+    // expiry either way.
+    if (response.statusCode != 200) {
+      throw MeteoAlarmUnavailable(response.statusCode);
+    }
 
     final document = XmlDocument.parse(response.body);
     return [
@@ -115,3 +122,13 @@ const meteoAlarmCountrySlugs = <String, String>{
   'IE': 'ireland',
   'GB': 'united-kingdom',
 };
+
+/// MeteoAlarm answered, but not with a feed.
+class MeteoAlarmUnavailable implements Exception {
+  const MeteoAlarmUnavailable(this.statusCode);
+
+  final int statusCode;
+
+  @override
+  String toString() => 'MeteoAlarm answered HTTP $statusCode';
+}

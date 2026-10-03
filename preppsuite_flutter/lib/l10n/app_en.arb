@@ -599,6 +599,8 @@
   "@settingsWarningReadinessDaysAgo": {"placeholders": {"days": {"type": "int"}}},
   "settingsWarningReadinessBlockedTitle": "Background refresh skipped",
   "settingsWarningReadinessBlockedBody": "The last scheduled refresh could not open the local data. Open the app once after unlocking the device.",
+  "settingsWarningReadinessLaggingTitle": "Partly unreachable",
+  "warningSourceLaggingMeteoAlarm": "The European weather warnings (MeteoAlarm) could not be reached in the last refresh. The official BBK warnings are not affected.",
   "settingsLocalEncryptionTitle": "Local encryption",
   "settingsLocalEncryptionStateEncrypted": "Encrypted",
   "settingsLocalEncryptionStatePlain": "Not encrypted",

@@ -201,23 +201,29 @@ class ReadinessScreen extends ConsumerWidget {
             child: _StatusRow(
               icon: Icons.warning_amber_outlined,
               title: l10n.readinessWarningData,
-              value: warningStatus?.lastComplete == null
-                  ? l10n.readinessWarningNeverUpdated
-                  : warningStatus!.isBlocked
-                  ? l10n.readinessWarningBlocked
-                  : l10n.readinessWarningUpdated(
-                      _age(
-                        l10n,
-                        DateTime.now().toUtc().difference(
-                          warningStatus.lastComplete!,
-                        ),
-                      ),
-                    ),
+              value: _warningStatusText(l10n, warningStatus),
             ),
           ),
         ],
       ),
     );
+  }
+
+  /// Current is what the household's own feed says: the BBK in Germany.
+  /// A MeteoAlarm outage is added as a sentence of its own, rather than
+  /// making the official German state look stale (#92).
+  String _warningStatusText(AppLocalizations l10n, WarningPollStatus? status) {
+    final current = status?.currentAt(profile.countryCode);
+    if (status == null || current == null) {
+      return l10n.readinessWarningNeverUpdated;
+    }
+    if (status.isBlocked) return l10n.readinessWarningBlocked;
+    final updated = l10n.readinessWarningUpdated(
+      _age(l10n, DateTime.now().toUtc().difference(current)),
+    );
+    return status.lagging(profile.countryCode).contains('meteoalarm')
+        ? '$updated\n${l10n.warningSourceLaggingMeteoAlarm}'
+        : updated;
   }
 }
 

@@ -90,4 +90,43 @@ void main() {
 
     expect(find.text('Hintergrundabruf ausgesetzt'), findsNothing);
   });
+
+  /// #92: a German household is current when the BBK is. A MeteoAlarm
+  /// outage in the same run is named on its own line instead of making
+  /// the official German warnings look stale.
+  group('one feed down', () {
+    const attempt = '2026-10-03T08:00:00.000Z';
+
+    testWidgets('BBK current, MeteoAlarm named as unreachable', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        'warningPollLastAttempt': attempt,
+        'warningPollLastComplete': '2026-09-20T08:00:00.000Z',
+        'warningPollLastComplete.bbk': attempt,
+        'warningPollLastComplete.meteoalarm': '2026-09-20T08:00:00.000Z',
+      });
+
+      await tester.pumpWidget(_card());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Teilweise nicht erreichbar'), findsOneWidget);
+      expect(find.textContaining('MeteoAlarm'), findsOneWidget);
+      expect(find.text('Noch keine vollständige Aktualisierung'), findsNothing);
+    });
+
+    testWidgets('both answered, nothing to say', (tester) async {
+      SharedPreferences.setMockInitialValues({
+        'warningPollLastAttempt': attempt,
+        'warningPollLastComplete': attempt,
+        'warningPollLastComplete.bbk': attempt,
+        'warningPollLastComplete.meteoalarm': attempt,
+      });
+
+      await tester.pumpWidget(_card());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Teilweise nicht erreichbar'), findsNothing);
+    });
+  });
 }

@@ -33,7 +33,11 @@ class WarningReadinessCard extends ConsumerWidget {
     final status = ref.watch(warningReadinessProvider).value;
     final hasPrimaryRegion = profile.regionKey != null;
     final additionalRegions = profile.extraRegions.length;
-    final refreshedAt = status?.lastComplete;
+    // The household's own feed decides "current"; see
+    // `WarningPollStatus.currentAt` (#92).
+    final refreshedAt = status?.currentAt(profile.countryCode);
+    final meteoAlarmLagging =
+        status?.lagging(profile.countryCode).contains('meteoalarm') ?? false;
     final refreshText = refreshedAt == null
         ? l10n.settingsWarningReadinessNeverUpdated
         : _refreshText(
@@ -74,6 +78,14 @@ class WarningReadinessCard extends ConsumerWidget {
               title: l10n.settingsWarningReadinessRefresh,
               value: refreshText,
             ),
+            if (meteoAlarmLagging) ...[
+              const Divider(height: 1),
+              _ReadinessRow(
+                icon: Icons.cloud_off_outlined,
+                title: l10n.settingsWarningReadinessLaggingTitle,
+                value: l10n.warningSourceLaggingMeteoAlarm,
+              ),
+            ],
             // Only while it is the most recent thing that happened. A device
             // that has started refreshing again has nothing to report here,
             // and a permanent warning nobody can clear is one nobody reads.

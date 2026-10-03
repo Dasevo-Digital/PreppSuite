@@ -430,6 +430,8 @@
   "@settingsWarningReadinessDaysAgo": {"placeholders": {"days": {"type": "int"}}},
   "settingsWarningReadinessBlockedTitle": "Hintergrundabruf ausgesetzt",
   "settingsWarningReadinessBlockedBody": "Der letzte geplante Abruf konnte die lokalen Daten nicht öffnen. Nach dem Entsperren des Geräts die App einmal öffnen.",
+  "settingsWarningReadinessLaggingTitle": "Teilweise nicht erreichbar",
+  "warningSourceLaggingMeteoAlarm": "Die europäischen Wetterwarnungen (MeteoAlarm) waren beim letzten Abruf nicht erreichbar. Die amtlichen Warnungen des BBK sind davon nicht betroffen.",
   "settingsLocalEncryptionTitle": "Lokale Verschlüsselung",
   "settingsLocalEncryptionStateEncrypted": "Verschlüsselt",
   "settingsLocalEncryptionStatePlain": "Nicht verschlüsselt",

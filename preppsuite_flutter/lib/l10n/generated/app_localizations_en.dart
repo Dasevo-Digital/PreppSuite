@@ -1367,6 +1367,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'The last scheduled refresh could not open the local data. Open the app once after unlocking the device.';
 
   @override
+  String get settingsWarningReadinessLaggingTitle => 'Partly unreachable';
+
+  @override
+  String get warningSourceLaggingMeteoAlarm =>
+      'The European weather warnings (MeteoAlarm) could not be reached in the last refresh. The official BBK warnings are not affected.';
+
+  @override
   String get settingsLocalEncryptionTitle => 'Local encryption';
 
   @override

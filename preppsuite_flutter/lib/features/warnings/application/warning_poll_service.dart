@@ -73,6 +73,8 @@ class WarningPollService {
     var fetched = 0;
     var retired = 0;
     var complete = true;
+    // Per feed, for the status: whether each one asked answered in full.
+    final sourcesOk = <String, bool>{};
 
     // Loaded once for the whole poll and shared by both feeds. Only
     // Germany has a table to place areas with; a table that will not load
@@ -93,6 +95,7 @@ class WarningPollService {
         nationwide.warnings,
       );
       complete = nationwide.complete;
+      sourcesOk['bbk'] = nationwide.complete;
       fetched += nationwide.warnings.length;
       newsworthy.addAll(
         await _ingest.ingestBbk(
@@ -160,15 +163,20 @@ class WarningPollService {
             areas: areas,
           ),
         );
+        sourcesOk['meteoalarm'] = true;
       } on Object {
         complete = false;
+        sourcesOk['meteoalarm'] = false;
       }
     }
 
     // MeteoAlarm carries its own expiry, so those rows age out on their
     // own; this only keeps the table from growing without bound.
     await _db.pruneExpiredWarnings();
-    await const WarningPollStatusStore().record(complete: complete);
+    await const WarningPollStatusStore().record(
+      complete: complete,
+      sourcesOk: sourcesOk,
+    );
 
     return WarningPollResult(
       fetched: fetched,
