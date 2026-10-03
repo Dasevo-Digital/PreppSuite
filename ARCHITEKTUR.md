@@ -463,7 +463,7 @@ reviewable as prose against the guideline it came from, and two hundred
 strings scattered through fourteen hundred lines of interface wording
 cannot be read end to end by anybody. `first_aid_guides_test.dart` holds
 the two files to the same ids, the same order and the same number of
-steps, cautions and figures â a translation that quietly drops a step
+steps, cautions and figures — a translation that quietly drops a step
 drops a step of a resuscitation. Buttons and headings on those screens go
 through the ARB files like everything else.
 
@@ -494,9 +494,9 @@ names it to say which guide a clip belongs to, so renaming one orphans
 every video that pointed at it. Adding is free; renaming is not.
 
 **The compression pacer is a pure function of elapsed time,** never a
-counter a timer increments. 110 a minute is 545,454.54â¦ Âµs; a counting
+counter a timer increments. 110 a minute is 545,454.54… µs; a counting
 pacer is several beats adrift after two minutes, which puts the count of
-thirty â and therefore the breaths â in the wrong place. See
+thirty — and therefore the breaths — in the wrong place. See
 `compression_pacer.dart`.
 
 **A video pack manifest is untrusted input.** It arrives from an address

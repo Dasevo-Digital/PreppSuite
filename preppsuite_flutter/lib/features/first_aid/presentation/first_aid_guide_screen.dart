@@ -215,8 +215,8 @@ class _Facts extends StatelessWidget {
   final FirstAidGuide guide;
 
   /// A value that is only digits, spaces and the usual punctuation is a
-  /// telephone number, and worth making tappable. Everything else â a
-  /// depth, a rate â is just text.
+  /// telephone number, and worth making tappable. Everything else — a
+  /// depth, a rate — is just text.
   static final _dialable = RegExp(r'^[0-9][0-9 /+()-]{2,}$');
 
   @override
@@ -237,8 +237,8 @@ class _Facts extends StatelessWidget {
 /// One labelled figure.
 ///
 /// Deliberately not a `ListTile` with a `trailing`. At twice the system
-/// font size "100â120 pro Minute" as a trailing widget consumes the whole
-/// tile and the tile asserts rather than wrapping â which is exactly what
+/// font size "100–120 pro Minute" as a trailing widget consumes the whole
+/// tile and the tile asserts rather than wrapping — which is exactly what
 /// `large_text_test` caught. A [Wrap] puts the two beside each other while
 /// they fit and underneath each other when they do not.
 class _FactRow extends StatelessWidget {
