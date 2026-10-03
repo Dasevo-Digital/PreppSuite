@@ -145,15 +145,24 @@ class WarningPollService {
 
     final slug = meteoAlarmCountrySlugs[countryCode];
     if (slug != null) {
-      final warnings = await _meteoAlarm.fetchCountry(slug);
-      fetched += warnings.length;
-      newsworthy.addAll(
-        await _ingest.ingestMeteoAlarm(
-          warnings,
-          countryCode: countryCode,
-          areas: areas,
-        ),
-      );
+      // Asked last, after BBK is already stored. A feed that times out or
+      // arrives cut off used to throw out of the whole poll, which then
+      // counted as failed and recorded no status although every German
+      // warning had arrived (#46). It makes the picture incomplete, no
+      // more.
+      try {
+        final warnings = await _meteoAlarm.fetchCountry(slug);
+        fetched += warnings.length;
+        newsworthy.addAll(
+          await _ingest.ingestMeteoAlarm(
+            warnings,
+            countryCode: countryCode,
+            areas: areas,
+          ),
+        );
+      } on Object {
+        complete = false;
+      }
     }
 
     // MeteoAlarm carries its own expiry, so those rows age out on their

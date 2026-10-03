@@ -137,6 +137,21 @@ void main() {
     expect(await db.watchAllWarnings().first, hasLength(before));
   });
 
+  test('a broken MeteoAlarm feed does not cost the BBK warnings', () async {
+    // MeteoAlarm is asked last, after BBK has been stored. A feed that
+    // timed out or arrived cut off used to throw out of the whole poll,
+    // so the run was reported as failed and the status never recorded —
+    // although every German warning had arrived (#46).
+    final result = await service({
+      ...allBbkSources(mowasBody: mowas),
+      meteoUrl: '<feed><entry>',
+    }).poll(countryCode: 'DE');
+
+    final stored = await db.watchAllWarnings().first;
+    expect(stored.map((w) => w.source).toSet(), {'bbk'});
+    expect(result.complete, isFalse);
+  });
+
   test('a warning that drops out of a complete poll is ended', () async {
     await service({
       ...allBbkSources(mowasBody: mowas),
