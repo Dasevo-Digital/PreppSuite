@@ -101,6 +101,11 @@ dependencies:
   # native macOS handler only implements the older "pickFiles"-style API —
   # every pick fails with MissingPluginException on this platform. 8.x's
   # macOS implementation uses "pickFiles" and works correctly.
+  #
+  # This pin is also what holds back most of the platform plugins (#78):
+  # file_picker 8 needs win32 5, and share_plus 13, package_info_plus 10,
+  # geolocator 14.1 and wakelock_plus 1.8 all need win32 6. Moving it means
+  # checking a real file pick on macOS first -- nothing automated can.
   file_picker: ^8.3.7
   # Only so a backup can be handed to the system's share sheet. The file
   # picker cannot reach OneDrive or Google Drive on Android -- neither
