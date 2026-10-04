@@ -9,7 +9,10 @@ APP="$ROOT/preppsuite_flutter"
 
 "$ROOT/tool/repo_privacy_check.sh"
 
+# The whole repository, as the pre-push hook checks it: third_party/
+# carries Dart too, and a gate narrower than the hook only moves the
+# surprise to the push.
+dart format --output=none --set-exit-if-changed "$ROOT"
 cd "$APP"
-dart format --output=none --set-exit-if-changed lib test
 flutter analyze
 flutter test --no-pub
