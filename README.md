@@ -439,6 +439,11 @@ nicht rot – eine leere Datenbank ist kein leerer Keller. Und auf der
 Lage-Ampel gibt es kein Grün: Behörden veröffentlichen Warnungen, keine
 Entwarnungen.
 
+Beide Ampeln gibt es auch als **Widget für den Homescreen**, auf Android
+und iPhone. Es zeigt denselben Stand wie die Übersicht, mit der Uhrzeit,
+zu der die App ihn zuletzt geschrieben hat, und öffnet beim Antippen die
+App.
+
 **Suchen.** Eine Lupe über die ganze App: Bildschirme, Vorräte,
 Checklistenpunkte und Hausrat. Jeder Treffer sagt, wo er liegt – „Pegel ·
 Warnungen", „Basmatireis · Keller" –, denn beim nächsten Mal soll man es

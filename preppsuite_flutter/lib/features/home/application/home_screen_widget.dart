@@ -110,9 +110,9 @@ String _severity(AppLocalizations l10n, WarningSeverity severity) =>
 
 /// Hands snapshots to the platform, skipping ones that changed nothing.
 ///
-/// Android only for now. iOS needs an App Group to share the data with a
-/// widget extension, and the group is not registered on the developer
-/// account that signs the app (#105); the desktop systems have no home
+/// Android and iOS. On iOS the widget is an extension in its own process,
+/// so the app writes into the App Group both share
+/// (`ios/Runner/Runner.entitlements`). The desktop systems have no home
 /// screen widgets of this kind.
 class HomeWidgetPublisher {
   HomeWidgetPublisher({@visibleForTesting this.enabled});
@@ -124,7 +124,17 @@ class HomeWidgetPublisher {
 
   static const androidProvider = 'PreppSuiteWidgetProvider';
 
-  bool get _enabled => enabled ?? (!kIsWeb && Platform.isAndroid);
+  /// The `kind` of the WidgetKit widget in `ios/PreppSuiteWidget`.
+  static const iosWidget = 'PreppSuiteWidget';
+
+  /// Shared by the app and the widget extension; registered on the
+  /// signing account, and named in both entitlements files.
+  static const appGroup = 'group.de.dasevo.preppsuite';
+
+  bool get _enabled =>
+      enabled ?? (!kIsWeb && (Platform.isAndroid || Platform.isIOS));
+
+  var _groupSet = false;
 
   /// Publishes [snapshot] unless it is the one already there. Failures are
   /// swallowed: a home screen widget that could not be refreshed must not
@@ -133,10 +143,17 @@ class HomeWidgetPublisher {
     if (!_enabled || snapshot == _last) return false;
     _last = snapshot;
     try {
+      if (!_groupSet) {
+        await HomeWidget.setAppGroupId(appGroup);
+        _groupSet = true;
+      }
       for (final MapEntry(:key, :value) in snapshot.toData().entries) {
         await HomeWidget.saveWidgetData<String>(key, value);
       }
-      await HomeWidget.updateWidget(androidName: androidProvider);
+      await HomeWidget.updateWidget(
+        androidName: androidProvider,
+        iOSName: iosWidget,
+      );
       return true;
     } on Object {
       _last = null;

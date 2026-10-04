@@ -1,0 +1,4 @@
+// Only the version numbers Flutter writes for the app, so the extension
+// carries the same ones. Not the Pods configuration: the widget links no
+// plugin and must not.
+#include "../Flutter/Generated.xcconfig"

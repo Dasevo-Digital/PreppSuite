@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Shared with the home screen widget extension (#105): the app writes
+	     the two lamps here, the widget reads them. Nothing else uses it. -->
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.de.dasevo.preppsuite</string>
+	</array>
+</dict>
+</plist>

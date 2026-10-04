@@ -410,6 +410,18 @@ indistinguishable from a measured one. A nutrient heavier than the
 package it is in is rejected, which is what catches the common Open Food
 Facts error of a per-package figure typed into the per-100 g field.
 
+**The home screen widget draws, it never computes** (#105). Android's
+`PreppSuiteWidgetProvider.kt` and the iOS extension in
+`ios/PreppSuiteWidget/` only show what `HomeWidgetPublisher` wrote: the
+overview's two lamps from the same `supplyStatus`/`situationStatus` and
+the same relevance rule, already translated, with an "as of" time. A
+widget that worked anything out on its own could disagree with the app.
+On iOS the data travels through the App Group `group.de.dasevo.preppsuite`,
+named in both entitlements files and registered on the signing account
+once, in Xcode. Xcode writes the team ID into `project.pbxproj` when the
+team is chosen there; it does not belong in the repository (Flutter passes
+the team at build time) and is removed before committing.
+
 **A package is a way of saying an amount, never a measure of its own.**
 `packageName` and `packageSize` ("Glas", 370) let the consume dialog
 count in jars, but the stock stays in the item's unit and nothing that
