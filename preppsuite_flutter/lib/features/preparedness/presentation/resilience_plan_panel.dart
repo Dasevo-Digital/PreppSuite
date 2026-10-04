@@ -501,7 +501,14 @@ class _MaintenanceScheduleRow extends StatelessWidget {
         everyDays > 0 &&
         (lastChecked == null ||
             !DateTime.now().isBefore(
-              lastChecked!.add(Duration(days: everyDays)),
+              // Calendar days, not 24-hour blocks, as in `ChargeCheck`.
+              DateTime(
+                lastChecked!.year,
+                lastChecked!.month,
+                lastChecked!.day + everyDays,
+                lastChecked!.hour,
+                lastChecked!.minute,
+              ),
             ));
     return ListTile(
       contentPadding: EdgeInsets.zero,

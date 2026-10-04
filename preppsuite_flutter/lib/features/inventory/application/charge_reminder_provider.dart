@@ -80,11 +80,25 @@ class ChargeCheck {
 
   bool get isOff => everyDays == 0;
 
+  /// Calendar days, not blocks of 24 hours. `add(Duration(days: 90))`
+  /// across the end of summer time lands an hour short -- 23:00 on the
+  /// day before -- and [daysUntilDue], which counts from midnight, then
+  /// called the check due a day early. Found by the calendar export's
+  /// test (#102).
   DateTime? get dueAt {
     if (isOff) return null;
     final from = lastChecked;
     if (from == null) return null;
-    return from.add(Duration(days: everyDays));
+    // In the zone the check was recorded in: a UTC stamp stays UTC.
+    final make = from.isUtc ? DateTime.utc : DateTime.new;
+    return make(
+      from.year,
+      from.month,
+      from.day + everyDays,
+      from.hour,
+      from.minute,
+      from.second,
+    );
   }
 
   /// Days until the next check, negative once it has passed.

@@ -35,8 +35,12 @@ class MedicationRange {
   int get wholeDays => days.floor();
 
   /// The date the stock is gone, counted in whole days from [from].
+  ///
+  /// Calendar days: midnight plus whole days of 24 hours lands at 23:00 on
+  /// the day before once the end of summer time lies in between, and the
+  /// date shown was then a day early.
   DateTime runsOutOn(DateTime from) =>
-      DateTime(from.year, from.month, from.day).add(Duration(days: wholeDays));
+      DateTime(from.year, from.month, from.day + wholeDays);
 }
 
 /// Every medicine that can be answered, soonest to run out first.

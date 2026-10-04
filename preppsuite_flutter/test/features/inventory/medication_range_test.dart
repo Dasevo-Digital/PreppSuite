@@ -120,6 +120,15 @@ void main() {
       );
     });
 
+    test('is not a day early across the end of summer time', () {
+      // 30 days from 10 October cross the clock change on 25 October.
+      // Midnight plus 30 blocks of 24 hours was 23:00 on 8 November.
+      final range = medicationRanges([
+        item(name: 'Ramipril', quantity: 30, dailyDose: 1),
+      ]).single;
+      expect(range.runsOutOn(DateTime(2026, 10, 10, 9)), DateTime(2026, 11, 9));
+    });
+
     test('ignores the time of day it is asked at', () {
       final range = medicationRanges([
         item(name: 'Ramipril', quantity: 10, dailyDose: 1),

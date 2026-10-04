@@ -204,4 +204,18 @@ void main() {
       expect(check.dueAt, DateTime.utc(2026, 9, 21));
     });
   });
+
+  test('the end of summer time does not make a check due a day early', () {
+    // 90 days from 1 October cross the clock change on 25 October. As
+    // 90 blocks of 24 hours that was 23:00 on 29 December, and counted
+    // from midnight the check came due on the 29th instead of the 30th.
+    final check = ChargeCheck(
+      lastChecked: DateTime(2026, 10, 1),
+      everyDays: 90,
+    );
+
+    expect(check.dueAt, DateTime(2026, 12, 30));
+    expect(check.isDue(now: DateTime(2026, 12, 29, 12)), isFalse);
+    expect(check.isDue(now: DateTime(2026, 12, 30, 8)), isTrue);
+  });
 }
