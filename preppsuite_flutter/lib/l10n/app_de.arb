@@ -380,6 +380,7 @@
   "languageSystemOption": "System",
   "languageGermanOption": "Deutsch",
   "languageEnglishOption": "English",
+  "languageSpanishOption": "Español",
   "inventoryAttentionTooltip": "{count} Artikel mit niedrigem Bestand oder abgelaufen",
   "settingsCategoryWarnings": "Warnungen und Orte",
   "settingsCategoryWarningsBody": "Benachrichtigungen, Warnorte und Aktualisierungsstatus",

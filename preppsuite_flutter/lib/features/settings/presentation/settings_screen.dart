@@ -258,6 +258,10 @@ class _LanguagePicker extends ConsumerWidget {
           value: const Locale('en'),
           child: Text(l10n.languageEnglishOption),
         ),
+        DropdownMenuItem(
+          value: const Locale('es'),
+          child: Text(l10n.languageSpanishOption),
+        ),
       ],
       onChanged: (locale) =>
           ref.read(localeOverrideProvider.notifier).setLocale(locale),

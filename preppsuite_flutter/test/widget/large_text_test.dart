@@ -66,7 +66,17 @@ class _FixedProfile extends HouseholdProfileController {
 /// archive open, `PhotoEditorScreen` an image on disk, `ShelterMapScreen`
 /// reaches two web services from `initState` (its list is covered in
 /// `shelter_list_test.dart`), and `BarcodeScannerScreen` wants a camera.
+///
+/// Run once per language that is not the template (#104): Spanish words
+/// run longer than German ones about as often as the other way round,
+/// and a label that fits in one language can overflow in the next.
 void main() {
+  for (final locale in const [Locale('de'), Locale('es')]) {
+    group('[${locale.languageCode}]', () => _screens(locale));
+  }
+}
+
+void _screens(Locale locale) {
   const householdId = 'household-1';
   late AppDatabase db;
 
@@ -134,7 +144,7 @@ void main() {
           firstAidPackUrlProvider.overrideWith((ref) async => ''),
         ],
         child: MaterialApp(
-          locale: const Locale('de'),
+          locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: home,

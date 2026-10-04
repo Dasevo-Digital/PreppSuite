@@ -498,8 +498,21 @@ and counting dog food in them would report a household as fed when it is
 not.
 
 **No hard-coded user-facing strings.** Every one goes through
-`AppLocalizations` with entries in both `app_de.arb` and `app_en.arb`.
-Enum-to-label mapping lives in the feature's `*_l10n.dart` helper.
+`AppLocalizations` with entries in `app_de.arb`, `app_en.arb` and
+`app_es.arb`. Enum-to-label mapping lives in the feature's `*_l10n.dart`
+helper. gen-l10n falls back to the English template for a missing key
+without a word, so `app_localizations_test` holds all three files to the
+same keys, placeholders and plural cases.
+
+**Spanish is the interface, not yet the content** (#104). The texts kept
+in Dart as German/English pairs — first aid guides, the comic, the
+built-in checklists, the BLE tables, recipes and the knowledge check —
+choose German or else English, so a Spanish household reads them in
+English. That is deliberate for now: the first aid guides are medical
+text that has to be checked against the guideline it came from, and an
+unchecked translation of a resuscitation sequence is not shipped. Adding
+Spanish there means a third file per content set and its review, not a
+switch.
 
 **The first aid guides are the one deliberate exception to that,** and
 they are content rather than interface: `first_aid_guides_de.dart` and

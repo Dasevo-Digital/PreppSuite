@@ -542,6 +542,7 @@
   "languageSystemOption": "System",
   "languageGermanOption": "Deutsch",
   "languageEnglishOption": "English",
+  "languageSpanishOption": "Español",
   "inventoryAttentionTooltip": "{count} item(s) low on stock or expired",
   "@inventoryAttentionTooltip": {
     "placeholders": {

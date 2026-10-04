@@ -73,10 +73,11 @@ class _ConsumeDialogState extends State<ConsumeDialog> {
     final text = rounded == rounded.roundToDouble()
         ? rounded.toStringAsFixed(0)
         : rounded.toString();
-    // The field takes a comma, and a German reader expects one back.
-    return widget.l10n.localeName.startsWith('de')
-        ? text.replaceAll('.', ',')
-        : text;
+    // The field takes a comma, and a German or Spanish reader expects
+    // one back. English is the only language here that writes a point.
+    return widget.l10n.localeName.startsWith('en')
+        ? text
+        : text.replaceAll('.', ',');
   }
 
   double? get _typed =>

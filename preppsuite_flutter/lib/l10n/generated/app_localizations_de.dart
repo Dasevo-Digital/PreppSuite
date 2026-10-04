@@ -1212,6 +1212,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get languageEnglishOption => 'English';
 
   @override
+  String get languageSpanishOption => 'Español';
+
+  @override
   String inventoryAttentionTooltip(int count) {
     return '$count Artikel mit niedrigem Bestand oder abgelaufen';
   }

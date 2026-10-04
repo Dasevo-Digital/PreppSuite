@@ -485,7 +485,11 @@ Einrichten steht „Aus einer Sicherung wiederherstellen", und der Haushalt
 kommt mit seiner bisherigen Kennung zurück statt als fremder abgewiesen zu
 werden.
 
-Oberfläche auf Deutsch und Englisch, helles und dunkles Erscheinungsbild.
+Oberfläche auf Deutsch, Englisch und Spanisch, helles und dunkles
+Erscheinungsbild. Auf Spanisch sind vorerst nur die Bedienoberfläche und
+ihre Erklärtexte übersetzt; Erste Hilfe, Comic, Checklisten, Rezepte und
+die Vorratstabellen erscheinen dort auf Englisch, bis eine geprüfte
+spanische Fassung vorliegt.
 Auf einem breiten Fenster legen sich die Bildschirme in Spalten lesbarer
 Breite nebeneinander, statt eine einzelne Spalte über die ganze Breite zu
 ziehen; auf dem Telefon bleibt alles wie es war.
