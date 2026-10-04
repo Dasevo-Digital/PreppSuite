@@ -1,9 +1,39 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../local_db/database.dart' show Warning;
+import '../model/categories.dart' show WarningSeverity;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../features/inventory/application/expiry_reminder_planner.dart';
 import 'notification_capabilities.dart';
+
+/// How insistently a warning may interrupt on iOS (#101).
+///
+/// Severe and extreme warnings are time-sensitive: they reach the lock
+/// screen through a Focus mode and "Do not disturb", which is the whole
+/// point of a warning that arrives at night. Everything below stays an
+/// ordinary notification -- a minor one is never announced at all (see
+/// `WarningPollService.notifySeverityFloor`), and letting a moderate one
+/// through every Focus would teach people to switch the channel off.
+///
+/// Time-sensitive and not critical: a critical alert also overrides the
+/// mute switch, and needs Apple's approval case by case.
+///
+/// **Without effect for now.** Time-sensitive delivery needs the
+/// `com.apple.developer.usernotifications.time-sensitive` entitlement, and
+/// a personal development team cannot have it: Xcode refuses to create a
+/// profile, and with the entitlement in place no device build signs at all
+/// (tried 2026-10-04). Without it iOS treats the level as `active`, so this
+/// is harmless today and takes effect once the app is signed by a paid
+/// developer account -- add the entitlement then (#101). macOS keeps the
+/// default: its packages are signed ad hoc, and a restricted entitlement
+/// there stops the app from starting at all.
+InterruptionLevel warningInterruptionLevel(WarningSeverity severity) =>
+    switch (severity) {
+      WarningSeverity.severe ||
+      WarningSeverity.extreme => InterruptionLevel.timeSensitive,
+      WarningSeverity.minor ||
+      WarningSeverity.moderate => InterruptionLevel.active,
+    };
 
 /// On-device notifications.
 ///
@@ -102,10 +132,14 @@ class NotificationService {
       id: warning.externalId.hashCode,
       title: warning.headline,
       body: warning.eventType,
-      notificationDetails: const NotificationDetails(
-        macOS: DarwinNotificationDetails(),
-        iOS: DarwinNotificationDetails(),
-        android: AndroidNotificationDetails(
+      notificationDetails: NotificationDetails(
+        macOS: const DarwinNotificationDetails(),
+        iOS: DarwinNotificationDetails(
+          interruptionLevel: warningInterruptionLevel(
+            WarningSeverity.fromName(warning.severity),
+          ),
+        ),
+        android: const AndroidNotificationDetails(
           'warnings',
           'Warnungen',
           importance: Importance.high,
