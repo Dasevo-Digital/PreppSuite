@@ -11,6 +11,9 @@ ihre jeweils eigenen Bedingungen.
   `preppsuite_flutter/assets/fonts/OFL.txt`
 - Angepasste Kopie von `flutter_tts` — MIT; vollständiger Text:
   `third_party/flutter_tts/LICENSE`
+- Angepasste Kopien von `zstandard_ios` und `zstandard_macos` — BSD;
+  vollständiger Text: `third_party/zstandard_ios/LICENSE` und
+  `third_party/zstandard_macos/LICENSE`
 - Weitere Flutter- und Dart-Abhängigkeiten — jeweilige Paketlizenz; Anzeige
   über Flutters Lizenzübersicht im erzeugten Programm
 

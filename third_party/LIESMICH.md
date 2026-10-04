@@ -52,3 +52,35 @@ Konstruktor, wenn `CoInitializeEx` oder `CoCreateInstance` scheitert.
 **Beim Nachziehen.** Gibt es eine neuere Fassung, gehören diese vier
 Stellen erneut angebracht — oder, falls upstream sie übernimmt, gehört die
 `dependency_overrides` in der Wurzel-`pubspec.yaml` ersatzlos gestrichen.
+
+## zstandard_ios und zstandard_macos 1.5.0
+
+BSD, Copyright Meta Platforms (zstd) und die Autoren des Plugins
+(github.com/vypdev/zstandard). Die Lizenz liegt jeweils unverändert bei.
+
+**Warum.** Beide Plugins kopieren beim Bauen die zstd-Quellen aus
+`zstandard_native` nach `Classes/zstd` (Phase „Sync zstd“) und löschen sie
+am Ende desselben Builds wieder (Phase „Remove synced zstd“). Xcode hat sich
+die Dateien aber als Eingaben gemerkt. Der nächste inkrementelle Build
+findet sie nicht und bricht mit „Build input file cannot be found“ ab, genau
+jeder zweite.
+
+Gemessen am 3. Oktober 2026: Der Gerätetest baut viermal hintereinander, und
+die Dateien eins und drei scheiterten, zwei und vier liefen. Der erste
+Release-Build für das iPhone nach einem Gerätetest scheiterte ebenso. Mit
+den Kopien liefen drei iOS- und zwei macOS-Builds hintereinander durch, und
+der Gerätetest brauchte keinen zweiten Versuch mehr.
+
+**Was geändert wurde.** Je eine Stelle im Podspec, mit `PreppSuite patch`
+gekennzeichnet: Die Phase „Remove synced zstd“ ist entfernt. Die
+synchronisierten Quellen bleiben liegen. Die Sync-Phase überschreibt sie
+ohnehin bei jedem Build, und `.gitignore` hält sie aus dem Repository.
+Beispiel, Bilder und Tests des Plugins sind nicht mitkopiert, und die
+zwei Dart-Dateien sind mit `dart format` umgebrochen, weil der Pre-Push-Hook
+das ganze Repository prüft. Am Code ändert das nichts.
+
+**Beim Nachziehen.** Bei einer neueren Fassung prüfen, ob die Lösch-Phase
+noch drin ist. Wenn ja, die Kopien erneuern und die Zeile wieder entfernen.
+Wenn nein, die beiden Einträge in `dependency_overrides` der
+Wurzel-`pubspec.yaml` streichen.
+

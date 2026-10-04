@@ -39,12 +39,16 @@ production identifier beside the household's real data. It writes
 `GERAETETEST-v<version>.txt` into the release folder, which is uploaded
 and listed in `SHA256SUMS.txt`, and keeps the full log beside it locally,
 because that log carries this machine's paths. It runs the four files
-one at a time and retries a file once on "Build input file cannot be
-found": `zstandard_ios` deletes its synced sources at the end of every
-build, so every second incremental build fails on inputs that are gone.
-The same race catches the first `flutter build ios` after a device check
-(seen on 2.3.9): it fails with the same message and the second attempt
-builds. Nothing is wrong with the tree when that happens.
+one at a time.
+
+**`zstandard_ios` and `zstandard_macos` are patched copies in
+`third_party/`** (#100). Version 1.5.0 of both deleted its synced zstd
+sources at the end of every build, so every second incremental build —
+a device check runs four, and the release build after it was one more —
+failed with "Build input file cannot be found". The copies leave the
+sources in place; see [`third_party/LIESMICH.md`](third_party/LIESMICH.md).
+The device check still retries once on exactly that message, which has
+not fired since.
 
 Linux is built in a container from here — see [`tool/docker/`](tool/docker/),
 but on Apple silicon that produces **arm64**. Windows cannot be built on a

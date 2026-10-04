@@ -72,13 +72,12 @@ def flutter_version():
     return json.loads(out[out.index("{"):]).get("frameworkVersion", "?")
 
 
-# zstandard_ios copies its zstd sources in with a build phase and deletes
-# them again in another ("Remove synced zstd"), so the next incremental
-# build finds its inputs gone and fails -- every second build, exactly. A
-# release build starts clean and never meets it; a run of four test files
-# builds four times. Measured on 2026-10-03: files one and three failed with
-# this message, two and four passed. One retry on exactly this message, and
-# on nothing else.
+# zstandard_ios 1.5.0 copied its zstd sources in with a build phase and
+# deleted them again in another ("Remove synced zstd"), so the next
+# incremental build found its inputs gone -- every second build, exactly.
+# third_party/zstandard_ios is patched not to delete them (#100), and since
+# then this has not fired. Kept as a safety net for an upstream update that
+# brings the phase back: one retry on exactly this message, nothing else.
 _PLUGIN_RACE = "Build input file cannot be found"
 
 

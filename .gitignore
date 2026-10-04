@@ -37,3 +37,7 @@ tool/ocr_probe/android/gradle/wrapper/gradle-wrapper.jar
 
 # Finder metadata
 .DS_Store
+
+# zstd sources the zstandard plugins sync in at build time (third_party/LIESMICH.md)
+third_party/zstandard_ios/ios/Classes/zstd/
+third_party/zstandard_macos/macos/Classes/zstd/

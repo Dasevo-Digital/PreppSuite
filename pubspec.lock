@@ -1833,12 +1833,11 @@ packages:
     source: hosted
     version: "1.5.0"
   zstandard_ios:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: zstandard_ios
-      sha256: a992ee46aef915029abce6acd54f03a4bf7076e92d9148000fc56e9e6068f6d9
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/zstandard_ios"
+      relative: true
+    source: path
     version: "1.5.0"
   zstandard_linux:
     dependency: transitive
@@ -1849,12 +1848,11 @@ packages:
     source: hosted
     version: "1.5.0"
   zstandard_macos:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: zstandard_macos
-      sha256: "121dd02005b7bb0f5f2a2e7f952e640931d5c9855444f13551348206023f6e38"
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/zstandard_macos"
+      relative: true
+    source: path
     version: "1.5.0"
   zstandard_native:
     dependency: transitive

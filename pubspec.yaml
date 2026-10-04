@@ -28,3 +28,12 @@ hooks:
 dependency_overrides:
   flutter_tts:
     path: third_party/flutter_tts
+  # zstandard_ios und zstandard_macos 1.5.0 loeschen am Ende jedes Builds
+  # die zstd-Quellen, die sie zu Beginn hineinkopieren. Der naechste
+  # inkrementelle Build findet sie nicht und scheitert -- genau jeder
+  # zweite. Die Kopien unter third_party/ lassen die Quellen liegen; sonst
+  # unveraendert. Siehe third_party/LIESMICH.md.
+  zstandard_ios:
+    path: third_party/zstandard_ios
+  zstandard_macos:
+    path: third_party/zstandard_macos
