@@ -2248,6 +2248,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyCardRemoved => 'Card removed.';
 
   @override
+  String get lockScreenCardAction => 'As lock-screen picture';
+
+  @override
+  String get lockScreenCardTitle => 'Picture for the lock screen';
+
+  @override
+  String get lockScreenCardIntro =>
+      'Paramedics do not unlock a stranger\'s phone, but they see its lock screen. The picture opens in the share sheet: choose \"Save Image\" there and set it as the lock-screen wallpaper in Settings.';
+
+  @override
+  String get lockScreenCardPrivacy =>
+      'Anybody who holds the phone can read what is on the picture. Choose only what should help in an emergency.';
+
+  @override
+  String get lockScreenCardCreate => 'Create picture';
+
+  @override
+  String get lockScreenCardHeading => 'IN CASE OF EMERGENCY';
+
+  @override
+  String get lockScreenCardCall => 'Call in an emergency';
+
+  @override
+  String get lockScreenCardFailed => 'The picture could not be created.';
+
+  @override
   String emergencyCardRemoveConfirm(String name) {
     return 'Remove the card for $name from every device in this household?';
   }

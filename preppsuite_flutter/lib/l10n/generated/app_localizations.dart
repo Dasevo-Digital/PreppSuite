@@ -3848,6 +3848,54 @@ abstract class AppLocalizations {
   /// **'Card removed.'**
   String get emergencyCardRemoved;
 
+  /// No description provided for @lockScreenCardAction.
+  ///
+  /// In en, this message translates to:
+  /// **'As lock-screen picture'**
+  String get lockScreenCardAction;
+
+  /// No description provided for @lockScreenCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Picture for the lock screen'**
+  String get lockScreenCardTitle;
+
+  /// No description provided for @lockScreenCardIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Paramedics do not unlock a stranger\'s phone, but they see its lock screen. The picture opens in the share sheet: choose \"Save Image\" there and set it as the lock-screen wallpaper in Settings.'**
+  String get lockScreenCardIntro;
+
+  /// No description provided for @lockScreenCardPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Anybody who holds the phone can read what is on the picture. Choose only what should help in an emergency.'**
+  String get lockScreenCardPrivacy;
+
+  /// No description provided for @lockScreenCardCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create picture'**
+  String get lockScreenCardCreate;
+
+  /// No description provided for @lockScreenCardHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'IN CASE OF EMERGENCY'**
+  String get lockScreenCardHeading;
+
+  /// No description provided for @lockScreenCardCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call in an emergency'**
+  String get lockScreenCardCall;
+
+  /// No description provided for @lockScreenCardFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The picture could not be created.'**
+  String get lockScreenCardFailed;
+
   /// No description provided for @emergencyCardRemoveConfirm.
   ///
   /// In en, this message translates to:

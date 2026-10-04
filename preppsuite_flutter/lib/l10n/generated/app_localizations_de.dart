@@ -2266,6 +2266,32 @@ class AppLocalizationsDe extends AppLocalizations {
   String get emergencyCardRemoved => 'Karte entfernt.';
 
   @override
+  String get lockScreenCardAction => 'Als Sperrbildschirm-Bild';
+
+  @override
+  String get lockScreenCardTitle => 'Bild für den Sperrbildschirm';
+
+  @override
+  String get lockScreenCardIntro =>
+      'Ein Rettungsdienst entsperrt kein fremdes Telefon, aber er sieht den Sperrbildschirm. Das Bild öffnet sich im Teilen-Menü: dort „Bild sichern“ wählen und es in den Einstellungen als Hintergrund für den Sperrbildschirm festlegen.';
+
+  @override
+  String get lockScreenCardPrivacy =>
+      'Was auf dem Bild steht, kann jeder lesen, der das Telefon in der Hand hat. Wähle nur aus, was im Notfall helfen soll.';
+
+  @override
+  String get lockScreenCardCreate => 'Bild erstellen';
+
+  @override
+  String get lockScreenCardHeading => 'IM NOTFALL';
+
+  @override
+  String get lockScreenCardCall => 'Im Notfall anrufen';
+
+  @override
+  String get lockScreenCardFailed => 'Das Bild konnte nicht erstellt werden.';
+
+  @override
   String emergencyCardRemoveConfirm(String name) {
     return 'Die Karte von $name auf allen Geräten dieses Haushalts entfernen?';
   }

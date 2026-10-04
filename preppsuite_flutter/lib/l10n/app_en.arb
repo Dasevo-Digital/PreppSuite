@@ -1239,6 +1239,14 @@
   "emergencyCardNotes": "Anything else",
   "emergencyCardNameRequired": "A card needs a name.",
   "emergencyCardRemoved": "Card removed.",
+  "lockScreenCardAction": "As lock-screen picture",
+  "lockScreenCardTitle": "Picture for the lock screen",
+  "lockScreenCardIntro": "Paramedics do not unlock a stranger's phone, but they see its lock screen. The picture opens in the share sheet: choose \"Save Image\" there and set it as the lock-screen wallpaper in Settings.",
+  "lockScreenCardPrivacy": "Anybody who holds the phone can read what is on the picture. Choose only what should help in an emergency.",
+  "lockScreenCardCreate": "Create picture",
+  "lockScreenCardHeading": "IN CASE OF EMERGENCY",
+  "lockScreenCardCall": "Call in an emergency",
+  "lockScreenCardFailed": "The picture could not be created.",
   "emergencyCardRemoveConfirm": "Remove the card for {name} from every device in this household?",
   "@emergencyCardRemoveConfirm": {
     "placeholders": {

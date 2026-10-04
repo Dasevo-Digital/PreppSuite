@@ -11,6 +11,7 @@ import '../../sharing/presentation/folder_encryption_section.dart';
 import '../application/card_people.dart';
 import '../application/household_member_controller.dart';
 import 'emergency_card_form_screen.dart';
+import 'lock_screen_card_dialog.dart';
 import '../../../core/error_text.dart';
 
 /// The household's people, and what an ambulance would want to know.
@@ -172,6 +173,14 @@ class _MemberCard extends ConsumerWidget {
                         existing: member,
                       ),
                     ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.wallpaper_outlined),
+                  tooltip: l10n.lockScreenCardAction,
+                  onPressed: () => showDialog<void>(
+                    context: context,
+                    builder: (_) => LockScreenCardDialog(card: member),
                   ),
                 ),
                 IconButton(
