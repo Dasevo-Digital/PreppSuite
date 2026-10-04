@@ -2400,6 +2400,14 @@
   "statusSituationQuiet": "No official warning",
   "statusSituationQuietHint": "Authorities publish warnings, not all-clears. That none is in force is not a statement that nothing is wrong.",
   "statusSituationActive": "{count, plural, =1{One warning} other{{count} warnings}} for your area",
+  "homeWidgetUpdated": "As of {time}",
+  "@homeWidgetUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "@statusSupplyCovered": {
     "placeholders": {
       "days": {

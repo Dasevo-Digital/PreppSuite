@@ -4355,6 +4355,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String homeWidgetUpdated(String time) {
+    return 'Stand: $time';
+  }
+
+  @override
   String get searchTitle => 'Suchen';
 
   @override

@@ -25,6 +25,7 @@ import '../../warnings/presentation/warning_list_screen.dart';
 import '../application/shell_layout.dart';
 import 'overview_screen.dart';
 import 'emergency_screen.dart';
+import 'home_screen_widget_sync.dart';
 
 /// Top-level navigation once a profile exists.
 ///
@@ -128,6 +129,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             // Above the rail as well as the tabs: a warning concerns the
             // whole app, so it gets the whole width.
             WarningBanner(profile: widget.profile),
+            // Draws nothing; keeps the home screen widget in step (#105).
+            HomeScreenWidgetSync(profile: widget.profile),
             Expanded(
               child: navigation == ShellNavigation.bar
                   ? content

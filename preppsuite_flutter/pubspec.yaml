@@ -198,6 +198,7 @@ dependencies:
   # verified migration path to file_picker 9+.
   wakelock_plus: ^1.5.2
   url_launcher: ^6.3.2
+  home_widget: ^0.10.0
 
 dev_dependencies:
   # Only so the geolocation test can stand in for the platform and

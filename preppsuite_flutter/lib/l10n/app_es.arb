@@ -1192,6 +1192,7 @@
   "statusSituationQuiet": "Ningún aviso oficial",
   "statusSituationQuietHint": "Las autoridades publican avisos, no confirmaciones de que todo va bien. Que no haya ninguno en vigor no significa que no pase nada.",
   "statusSituationActive": "{count, plural, =1{Un aviso} other{{count} avisos}} para tu zona",
+  "homeWidgetUpdated": "A las: {time}",
   "searchTitle": "Buscar",
   "searchHint": "Pantalla, provisión, punto de lista …",
   "searchStartHint": "Escribe para buscar en toda la app: pantallas, provisiones, puntos de listas y el inventario del hogar.",

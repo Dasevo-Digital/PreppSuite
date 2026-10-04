@@ -1387,6 +1387,7 @@
   "statusSituationQuiet": "Keine amtliche Warnung",
   "statusSituationQuietHint": "Behörden veröffentlichen Warnungen, keine Entwarnungen. Dass keine vorliegt, heißt nicht, dass nichts ist.",
   "statusSituationActive": "{count, plural, =1{Eine Warnung} other{{count} Warnungen}} für euren Bereich",
+  "homeWidgetUpdated": "Stand: {time}",
   "searchTitle": "Suchen",
   "searchHint": "Bildschirm, Vorrat, Checklistenpunkt …",
   "searchStartHint": "Tippe, um die ganze App zu durchsuchen: Bildschirme, Vorräte, Checklistenpunkte und den Hausrat.",

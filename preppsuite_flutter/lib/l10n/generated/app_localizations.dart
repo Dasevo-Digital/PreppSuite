@@ -7252,6 +7252,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{One warning} other{{count} warnings}} for your area'**
   String statusSituationActive(int count);
 
+  /// No description provided for @homeWidgetUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'As of {time}'**
+  String homeWidgetUpdated(String time);
+
   /// No description provided for @searchTitle.
   ///
   /// In en, this message translates to:
