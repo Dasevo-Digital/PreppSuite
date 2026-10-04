@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 /// One purchase, for the budget overview.
+@TableIndex(name: 'budget_entries_household', columns: {#householdId})
 class BudgetEntries extends Table {
   TextColumn get clientId => text()();
   TextColumn get householdId => text()();

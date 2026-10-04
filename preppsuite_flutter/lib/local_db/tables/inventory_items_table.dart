@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 /// generated once, on the device that created the row, and is what a
 /// shared folder matches rows by. [dirty] marks local edits that have not
 /// been published to that folder yet.
+@TableIndex(name: 'inventory_items_household', columns: {#householdId})
 class InventoryItems extends Table {
   TextColumn get clientId => text()();
   TextColumn get householdId => text()();

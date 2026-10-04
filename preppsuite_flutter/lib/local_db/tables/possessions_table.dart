@@ -13,6 +13,7 @@ import 'package:drift/drift.dart';
 /// The idea is FEMA's ("document and insure your property now"); the
 /// fields are what a claim actually needs: what it is, where it stood,
 /// what it cost, and a picture.
+@TableIndex(name: 'possessions_household', columns: {#householdId})
 class Possessions extends Table {
   TextColumn get clientId => text()();
   TextColumn get householdId => text()();

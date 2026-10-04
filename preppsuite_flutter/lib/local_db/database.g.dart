@@ -7381,6 +7381,38 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PossessionsTable possessions = $PossessionsTable(this);
   late final $WarningsTable warnings = $WarningsTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
+  late final Index inventoryItemsHousehold = Index(
+    'inventory_items_household',
+    'CREATE INDEX inventory_items_household ON inventory_items (household_id)',
+  );
+  late final Index checklistTemplatesHousehold = Index(
+    'checklist_templates_household',
+    'CREATE INDEX checklist_templates_household ON checklist_templates (household_id)',
+  );
+  late final Index checklistItemsHousehold = Index(
+    'checklist_items_household',
+    'CREATE INDEX checklist_items_household ON checklist_items (household_id)',
+  );
+  late final Index checklistItemsTemplate = Index(
+    'checklist_items_template',
+    'CREATE INDEX checklist_items_template ON checklist_items (template_client_id)',
+  );
+  late final Index budgetEntriesHousehold = Index(
+    'budget_entries_household',
+    'CREATE INDEX budget_entries_household ON budget_entries (household_id)',
+  );
+  late final Index householdMembersHousehold = Index(
+    'household_members_household',
+    'CREATE INDEX household_members_household ON household_members (household_id)',
+  );
+  late final Index householdPlansHousehold = Index(
+    'household_plans_household',
+    'CREATE INDEX household_plans_household ON household_plans (household_id)',
+  );
+  late final Index possessionsHousehold = Index(
+    'possessions_household',
+    'CREATE INDEX possessions_household ON possessions (household_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7395,5 +7427,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     possessions,
     warnings,
     syncState,
+    inventoryItemsHousehold,
+    checklistTemplatesHousehold,
+    checklistItemsHousehold,
+    checklistItemsTemplate,
+    budgetEntriesHousehold,
+    householdMembersHousehold,
+    householdPlansHousehold,
+    possessionsHousehold,
   ];
 }

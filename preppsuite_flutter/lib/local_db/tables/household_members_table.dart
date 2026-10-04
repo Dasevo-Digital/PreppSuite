@@ -13,6 +13,7 @@ import 'package:drift/drift.dart';
 /// `folder_crypto.dart`. Every field below is optional: a card with a
 /// name and an allergy is worth having, and a form that demanded a blood
 /// type would get no card at all.
+@TableIndex(name: 'household_members_household', columns: {#householdId})
 class HouseholdMembers extends Table {
   TextColumn get clientId => text()();
   TextColumn get householdId => text()();

@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 /// A checklist. [isBuiltIn] marks the templates the app seeds itself;
 /// those carry fixed [clientId]s so two devices seed the same rows rather
 /// than two copies of each.
+@TableIndex(name: 'checklist_templates_household', columns: {#householdId})
 class ChecklistTemplates extends Table {
   TextColumn get clientId => text()();
   TextColumn get householdId => text().nullable()();

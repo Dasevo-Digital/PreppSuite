@@ -4,6 +4,8 @@ import 'package:drift/drift.dart';
 /// [ChecklistTemplates.clientId], which is stable across devices — so an
 /// item and its template survive a trip through a shared folder together,
 /// in either order.
+@TableIndex(name: 'checklist_items_household', columns: {#householdId})
+@TableIndex(name: 'checklist_items_template', columns: {#templateClientId})
 class ChecklistItems extends Table {
   TextColumn get clientId => text()();
   TextColumn get householdId => text().nullable()();

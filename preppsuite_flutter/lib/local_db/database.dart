@@ -30,7 +30,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 21;
+  static const currentSchemaVersion = 22;
 
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
@@ -495,8 +495,43 @@ class AppDatabase extends _$AppDatabase {
           await _addColumnOnce(m, inventoryItems, inventoryItems.packageSize);
         }
       }
+      if (from < 22) {
+        // Indexes on the partition key (#99). Every screen and every sync
+        // selects by `household_id`, and none of it had an index -- a full
+        // scan per query, harmless at a few hundred rows and the first
+        // thing to show once a household keeps years of history.
+        //
+        // Last on purpose, and by name with IF NOT EXISTS rather than
+        // through `m.createIndex`: the rebuilds above recreate tables and
+        // take their indexes with them, a table created in a branch above
+        // may or may not have got them, and a replayed upgrade (see
+        // [_addColumnOnce]) must step over what is already there. The
+        // names match the `@TableIndex` annotations, which is what gives
+        // a fresh install the same ones.
+        for (final (name, table, column) in _indexes) {
+          if (await _hasTable(table)) {
+            await customStatement(
+              'CREATE INDEX IF NOT EXISTS $name ON $table ($column)',
+            );
+          }
+        }
+      }
     },
   );
+
+  /// The indexes schema 22 added, as `(name, table, column)`. Kept in step
+  /// with the `@TableIndex` annotations on the tables by
+  /// `migration_to_22_test`, which compares this list with a fresh install.
+  static const _indexes = [
+    ('budget_entries_household', 'budget_entries', 'household_id'),
+    ('checklist_items_household', 'checklist_items', 'household_id'),
+    ('checklist_items_template', 'checklist_items', 'template_client_id'),
+    ('checklist_templates_household', 'checklist_templates', 'household_id'),
+    ('household_members_household', 'household_members', 'household_id'),
+    ('household_plans_household', 'household_plans', 'household_id'),
+    ('inventory_items_household', 'inventory_items', 'household_id'),
+    ('possessions_household', 'possessions', 'household_id'),
+  ];
 
   /// Permanently removes data owned by one local household. Used only by
   /// the explicit factory-reset action after its confirmation dialog.

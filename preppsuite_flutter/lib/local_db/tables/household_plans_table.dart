@@ -16,6 +16,7 @@ import 'package:drift/drift.dart';
 ///
 /// The consequence is that joining a folder has to re-key this row — see
 /// `adoptHouseholdId`.
+@TableIndex(name: 'household_plans_household', columns: {#householdId})
 class HouseholdPlans extends Table {
   /// The household id, not a generated id. See the class comment.
   TextColumn get clientId => text()();
