@@ -159,7 +159,7 @@ class _BaseMapLayerState extends ConsumerState<BaseMapLayer> {
     return TileLayer(
       key: ValueKey(_cacheGeneration),
       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      userAgentPackageName: 'de.status403.preppsuite',
+      userAgentPackageName: 'de.dasevo.preppsuite',
       // OpenStreetMap serves one set of tiles and they are light. The
       // offline map is turned at the style, which keeps a park green;
       // there is no style here to turn, only finished pictures, so this

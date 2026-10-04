@@ -32,7 +32,7 @@ readonly BUILD_APP="$REPO_ROOT/preppsuite_flutter/build/macos/Build/Products/Rel
 
 readonly PROD_APP="/Applications/PreppSuite.app"
 readonly TEST_APP="/Applications/PreppSuite Test.app"
-readonly TEST_ID="de.status403.preppsuite.test"
+readonly TEST_ID="de.dasevo.preppsuite.test"
 readonly TEST_NAME="PreppSuite Test"
 
 die() { echo "FEHLER: $*" >&2; exit 1; }
@@ -77,7 +77,9 @@ echo "Quelle: $source (Fassung $version)"
 # Overridable so the waiting itself can be tested without waiting.
 QUIT_GRACE="${QUIT_GRACE:-30}"
 
-for id in de.status403.preppsuite "$TEST_ID"; do
+# The former identifiers too: the first install under the new ones
+# replaces apps that still carry the old.
+for id in de.dasevo.preppsuite "$TEST_ID" de.status403.preppsuite de.status403.preppsuite.test; do
   osascript -e "quit app id \"$id\"" >/dev/null 2>&1 || true
 done
 

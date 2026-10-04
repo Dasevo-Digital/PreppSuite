@@ -49,5 +49,16 @@
 	<true/>
 	<key>com.apple.security.print</key>
 	<true/>
+	<!-- Only for carrying the household over from the former identifier
+	     (de.status403.preppsuite, until 2.x): the first start under the
+	     new one moves the folder and reads the preferences from the old
+	     container. Remove once every installation has been started under
+	     the new identifier — and before any store build, which would be
+	     rejected for it. See lib/core/former_identity.dart. -->
+	<key>com.apple.security.temporary-exception.files.home-relative-path.read-write</key>
+	<array>
+		<string>/Library/Containers/de.status403.preppsuite/</string>
+		<string>/Library/Containers/de.status403.preppsuite.test/</string>
+	</array>
 </dict>
 </plist>

@@ -19,7 +19,7 @@ void main() {
                 packageInfo: Future.value(
                   PackageInfo(
                     appName: 'PreppSuite',
-                    packageName: 'de.status403.preppsuite',
+                    packageName: 'de.dasevo.preppsuite',
                     version: '1.2.3',
                     buildNumber: '18',
                     buildSignature: '',

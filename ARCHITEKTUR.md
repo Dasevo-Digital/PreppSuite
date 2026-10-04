@@ -680,6 +680,15 @@ folder. Either that is turned off on the host (one way only: turning it
 back on needs a reinstall of Windows) or the binaries are signed. Until
 then the Windows launch check cannot run on this hardware.
 
+**`CompanyName` and `ProductName` are `de.dasevo` and `preppsuite` since
+the switch to `de.dasevo.preppsuite`** (they were `PreppSuite Contributors`
+and `PreppSuite` before). `lib/core/former_identity.dart` carries the
+household over from `%APPDATA%\PreppSuite Contributors\PreppSuite` on the
+first start, by renaming the folder; the secure storage file moves with it,
+and its Credential Manager entry is named after `BINARY_NAME`, which did not
+change. What follows is the reasoning from before the switch, kept because
+the risk it names is the same one the takeover answers.
+
 **`CompanyName` stays `com.example` until a Windows build can be
 launched, and that is a decision, not an oversight.** On Windows
 `path_provider` builds its directory out of the executable's version
@@ -980,6 +989,24 @@ tree; the test suite deliberately targets that layer rather than the UI.
   panel is the one part that cannot be shared: picking and writing the
   bookmark must happen in a single native call, because the permission
   hangs on the `NSURL` the panel returns and not on its path.
+- **The identifier changed from `de.status403.preppsuite` to
+  `de.dasevo.preppsuite`** (and `.test`), for a store listing. On the
+  desktops the first start under the new one carries the household over
+  (`lib/core/former_identity.dart`): renamed where possible, copied
+  through a sibling folder where not, never deleted. On macOS that needs a
+  read-write temporary exception for the two former containers in both
+  entitlements files — the same kind #80 removed, and it has to go the
+  same way before any store build. The preferences live in the old
+  container's `NSUserDefaults` plist and are read by
+  `MainFlutterWindow.swift` before the engine starts. Security-scoped
+  bookmarks belong to the identifier that made them, so a chosen data
+  folder, the shared folder and the download folder have to be picked once
+  more; the overview already says so for the data folder (`missingChoice`).
+  On Linux the database key is in the keyring under a name built from
+  `APPLICATION_ID`; `linux/runner/former_identity.cc` copies the entry
+  before the app starts, or the database would end in recovery. Android
+  and iOS cannot be helped: a new identifier is a new app with its own
+  sandbox, and the household moves through a backup.
 - **Apple's automatic container migration only runs when the system
   creates the container.** A container left over from an earlier
   sandboxed launch makes it skip silently, and the app then starts on an

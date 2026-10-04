@@ -84,8 +84,11 @@ class NotificationService {
           appName: 'PreppSuite',
           // Company.Product form, and stable: Windows ties delivered
           // notifications to it, so changing it orphans the ones already
-          // scheduled.
-          appUserModelId: 'Status403.PreppSuite',
+          // scheduled. Changed once, with the identifier (it was
+          // `Status403.PreppSuite`); the reminders are scheduled again
+          // from the inventory, so what is orphaned is only what was
+          // already pending at the update.
+          appUserModelId: 'Dasevo.PreppSuite',
           guid: '9E1A6D86-E8D0-4CEB-897C-8D7E50D5BEE7',
         ),
       ),

@@ -7,7 +7,12 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "PreppSuite")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "de.status403.preppsuite")
+set(APPLICATION_ID "de.dasevo.preppsuite")
+# The identifier until 2.x. It names the data folder
+# (~/.local/share/<id>, carried over by lib/core/former_identity.dart) and
+# the keyring entry flutter_secure_storage keeps the database key in
+# (carried over by runner/former_identity.cc, before the app starts).
+set(FORMER_APPLICATION_ID "de.status403.preppsuite")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

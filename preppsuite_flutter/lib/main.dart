@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/closes_databases_on_exit.dart';
+import 'core/former_identity.dart';
 import 'core/local_database_encryption.dart';
 import 'core/photo_vault.dart';
 import 'core/portable_data.dart';
@@ -27,6 +28,12 @@ void main(List<String> args) async {
   if (runWebViewTitleBarWidget(args)) return;
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  // First of all: the folder the household was in under the former
+  // identifier (de.status403.preppsuite) holds the pointer to a chosen
+  // folder as well as the databases. It cannot throw and it cannot stop
+  // startup.
+  await takeOverFormerIdentity();
 
   // Before anything reads a setting or opens a database: this is what
   // decides whether they come from the platform's own place or from a

@@ -1,4 +1,4 @@
-package de.status403.preppsuite
+package de.dasevo.preppsuite
 
 import android.content.Intent
 import android.net.Uri

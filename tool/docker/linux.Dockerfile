@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates curl git unzip xz-utils zip \
       clang cmake ninja-build pkg-config \
       libgtk-3-dev liblzma-dev libstdc++-12-dev libglu1-mesa \
-      libwebkit2gtk-4.1-dev libsoup-3.0-dev \
+      libwebkit2gtk-4.1-dev libsoup-3.0-dev libsecret-1-dev \
       zlib1g-dev uuid-dev \
     && rm -rf /var/lib/apt/lists/*
 
