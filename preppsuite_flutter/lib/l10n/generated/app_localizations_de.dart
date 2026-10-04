@@ -4860,6 +4860,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nearbyUseMyLocation => 'Meinen Standort verwenden';
 
   @override
+  String get nearbyFromOwnPlace => 'Oder von einem eigenen Ort aus suchen:';
+
+  @override
   String get nearbyNoCentre => 'Noch kein Punkt gewählt';
 
   @override

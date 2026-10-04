@@ -8066,6 +8066,12 @@ abstract class AppLocalizations {
   /// **'Use my location'**
   String get nearbyUseMyLocation;
 
+  /// No description provided for @nearbyFromOwnPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Or search from one of your own places:'**
+  String get nearbyFromOwnPlace;
+
   /// No description provided for @nearbyNoCentre.
   ///
   /// In en, this message translates to:

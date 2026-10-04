@@ -10,6 +10,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../shelters/application/shelter_l10n.dart';
 import '../application/offline_map_providers.dart';
 import '../application/offline_poi_search.dart';
+import '../application/personal_place.dart';
 import '../application/pmtiles_archive.dart';
 import '../application/poi_labels.dart';
 import 'map_download_screen.dart';
@@ -33,6 +34,7 @@ class NearbyScreen extends ConsumerStatefulWidget {
     this.centreLabel,
     this.kinds,
     this.geolocation,
+    this.ownPlaces,
   });
 
   /// Where to search around. Usually the map's centre, handed over when
@@ -51,6 +53,10 @@ class NearbyScreen extends ConsumerStatefulWidget {
   /// Only ever passed by tests, which have no device to ask.
   @visibleForTesting
   final GeolocationService? geolocation;
+
+  /// Only ever passed by tests; the app reads the household's own store.
+  @visibleForTesting
+  final PersonalPlaceStore? ownPlaces;
 
   @override
   ConsumerState<NearbyScreen> createState() => _NearbyScreenState();
@@ -95,6 +101,33 @@ class _NearbyScreenState extends ConsumerState<NearbyScreen> {
   PoiSearchProgress? _progress;
   PoiSearchProblem? _problem;
   var _locating = false;
+
+  /// The household's own places, offered as starting points (#59). They
+  /// are on this device already, so they answer when the receiver does
+  /// not: indoors, on a desktop, or on a device that has never had a fix
+  /// and so has no last known position to fall back to either.
+  var _ownPlaces = const <PersonalPlace>[];
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadOwnPlaces());
+  }
+
+  Future<void> _loadOwnPlaces() async {
+    final places = await (widget.ownPlaces ?? const PersonalPlaceStore())
+        .load();
+    if (mounted) setState(() => _ownPlaces = places);
+  }
+
+  Future<void> _searchAround(PersonalPlace place) async {
+    setState(() {
+      _centre = LatLng(place.latitude, place.longitude);
+      _centreLabel = place.label;
+      _centreAge = null;
+    });
+    await _run();
+  }
 
   @override
   void dispose() {
@@ -222,6 +255,25 @@ class _NearbyScreenState extends ConsumerState<NearbyScreen> {
               body: l10n.nearbyNoCentreWhy,
               action: l10n.nearbyUseMyLocation,
               onAction: _locating ? null : _useMyLocation,
+              extra: [
+                if (_ownPlaces.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Text(l10n.nearbyFromOwnPlace),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final place in _ownPlaces)
+                        ActionChip(
+                          avatar: const Icon(Icons.place_outlined, size: 18),
+                          label: Text(place.label),
+                          onPressed: () => _searchAround(place),
+                        ),
+                    ],
+                  ),
+                ],
+              ],
             )
           : _results(l10n),
     );
@@ -432,12 +484,16 @@ class _Explanation extends StatelessWidget {
     required this.body,
     required this.action,
     required this.onAction,
+    this.extra = const [],
   });
 
   final String title;
   final String body;
   final String action;
   final VoidCallback? onAction;
+
+  /// Further ways out, under the main one.
+  final List<Widget> extra;
 
   @override
   Widget build(BuildContext context) => ListView(
@@ -448,6 +504,7 @@ class _Explanation extends StatelessWidget {
       Text(body),
       const SizedBox(height: 16),
       FilledButton(onPressed: onAction, child: Text(action)),
+      ...extra,
     ],
   );
 }

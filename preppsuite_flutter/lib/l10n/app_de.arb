@@ -1766,6 +1766,7 @@
   "nearbyMapCentre": "Kartenmitte",
   "nearbyMyPosition": "deinen Standort",
   "nearbyUseMyLocation": "Meinen Standort verwenden",
+  "nearbyFromOwnPlace": "Oder von einem eigenen Ort aus suchen:",
   "nearbyNoCentre": "Noch kein Punkt gewählt",
   "nearbyNoCentreWhy": "Diese Suche braucht einen Ausgangspunkt. Nimm deinen Standort – oder öffne die Karte, schiebe sie auf die Gegend und starte die Suche von dort.",
   "nearbyOpenMap": "Karte öffnen",

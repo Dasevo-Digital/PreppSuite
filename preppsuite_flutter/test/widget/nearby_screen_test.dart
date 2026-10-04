@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:preppsuite_flutter/core/geolocation_service.dart';
 import 'package:preppsuite_flutter/features/maps/application/offline_map_providers.dart';
 import 'package:preppsuite_flutter/features/maps/application/readable_position.dart';
+import 'package:preppsuite_flutter/features/maps/application/personal_place.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart';
 import 'package:preppsuite_flutter/features/maps/presentation/map_screen.dart';
 import 'package:preppsuite_flutter/features/maps/presentation/nearby_screen.dart';
@@ -47,6 +48,16 @@ class _StaleGeolocation extends GeolocationService {
   void close() {}
 }
 
+/// The household's own places, without the encrypted store behind them.
+class _OwnPlaces extends PersonalPlaceStore {
+  _OwnPlaces(this.places);
+
+  final List<PersonalPlace> places;
+
+  @override
+  Future<List<PersonalPlace>> load() async => places;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -73,6 +84,7 @@ void main() {
     NavigatorObserver? observer,
     bool withArchive = true,
     GeolocationService? geolocation,
+    PersonalPlaceStore? ownPlaces,
   }) async {
     PmTilesArchive? archive;
     await tester.runAsync(() async {
@@ -112,6 +124,7 @@ void main() {
             centre: at,
             centreLabel: at == null ? null : 'Kartenmitte',
             geolocation: geolocation,
+            ownPlaces: ownPlaces ?? _OwnPlaces(const []),
           ),
         ),
       ),
@@ -263,6 +276,41 @@ void main() {
     );
 
     expect(find.text('Noch kein Punkt gewählt'), findsOneWidget);
+  });
+
+  testWidgets('without a fix, one of the household places is a start', (
+    tester,
+  ) async {
+    // #59: indoors, on a desktop, or on a device that never had a fix,
+    // there is no position at all -- not even a last known one. The
+    // places the household saved are on the device regardless.
+    await show(
+      tester,
+      points: [
+        (subclass: 'pharmacy', name: 'Apotheke am Markt', x: 2048, y: 2048),
+      ],
+      at: null,
+      ownPlaces: _OwnPlaces([
+        PersonalPlace(
+          id: 'home',
+          label: 'Zuhause',
+          latitude: centre.latitude,
+          longitude: centre.longitude,
+        ),
+      ]),
+    );
+
+    expect(find.text('Oder von einem eigenen Ort aus suchen:'), findsOneWidget);
+    await tester.tap(find.widgetWithText(ActionChip, 'Zuhause'));
+    for (var turn = 0; turn < 12; turn++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+
+    expect(find.textContaining('Apotheke am Markt'), findsOneWidget);
+    expect(find.textContaining('Zuhause'), findsWidgets);
   });
 
   testWidgets('is accessible', (tester) async {
