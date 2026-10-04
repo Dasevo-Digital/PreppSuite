@@ -1856,6 +1856,34 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Datei konnte nicht geschrieben werden.';
 
   @override
+  String get calendarExportButton => 'Ablaufdaten als Kalender';
+
+  @override
+  String get calendarExportDialogTitle =>
+      'Ablaufdaten als Kalenderdatei sichern';
+
+  @override
+  String get calendarExportEmpty =>
+      'Kein Artikel hat ein künftiges Ablaufdatum, und die Akku-Erinnerung ist aus.';
+
+  @override
+  String calendarExportSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Kalenderdatei mit $count Ablaufdaten gesichert',
+      one: 'Kalenderdatei mit einem Ablaufdatum gesichert',
+      zero: 'Kalenderdatei mit der Akku-Erinnerung gesichert',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String calendarExpiryTitle(String name) {
+    return 'MHD: $name';
+  }
+
+  @override
   String get profileSetupTitle => 'Haushalt einrichten';
 
   @override

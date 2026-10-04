@@ -1842,6 +1842,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get csvExportErrorMessage => 'The file could not be written.';
 
   @override
+  String get calendarExportButton => 'Expiry dates as calendar';
+
+  @override
+  String get calendarExportDialogTitle =>
+      'Save expiry dates as a calendar file';
+
+  @override
+  String get calendarExportEmpty =>
+      'No item has an upcoming expiry date, and the battery reminder is off.';
+
+  @override
+  String calendarExportSuccess(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Calendar file saved with $count expiry dates',
+      one: 'Calendar file saved with one expiry date',
+      zero: 'Calendar file saved with the battery reminder',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String calendarExpiryTitle(String name) {
+    return 'Best before: $name';
+  }
+
+  @override
   String get profileSetupTitle => 'Set up your household';
 
   @override

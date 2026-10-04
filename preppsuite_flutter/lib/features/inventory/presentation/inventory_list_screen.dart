@@ -13,6 +13,9 @@ import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../../household/application/household_providers.dart';
 import '../application/inventory_category_l10n.dart';
+import '../application/charge_reminder_provider.dart';
+import '../application/expiry_reminder_provider.dart';
+import '../application/inventory_calendar_export.dart';
 import '../application/inventory_csv_export.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_providers.dart';
@@ -42,6 +45,7 @@ enum _InventoryMenuAction {
   storageTips,
   waterTreatment,
   exportCsv,
+  exportCalendar,
   importCsv,
 }
 
@@ -145,6 +149,13 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
                 child: ListTile(
                   leading: const Icon(Icons.download),
                   title: Text(l10n.csvExportButton),
+                ),
+              ),
+              PopupMenuItem(
+                value: _InventoryMenuAction.exportCalendar,
+                child: ListTile(
+                  leading: const Icon(Icons.event_outlined),
+                  title: Text(l10n.calendarExportButton),
                 ),
               ),
               PopupMenuItem(
@@ -315,6 +326,8 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
         );
       case _InventoryMenuAction.exportCsv:
         await _exportCsv(context, ref, householdId, l10n);
+      case _InventoryMenuAction.exportCalendar:
+        await _exportCalendar(context, ref, householdId, l10n);
       case _InventoryMenuAction.importCsv:
         final imported = await Navigator.of(context).push<int>(
           MaterialPageRoute(
@@ -378,6 +391,65 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
 
   /// Writes the whole inventory out as CSV, in the format the importer
   /// reads back — see `inventory_csv_export.dart`.
+  /// Writes the expiry dates and the battery check as an `.ics` file for
+  /// a household calendar -- see `inventory_calendar_export.dart` (#102).
+  Future<void> _exportCalendar(
+    BuildContext context,
+    WidgetRef ref,
+    String householdId,
+    AppLocalizations l10n,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final items =
+        ref.read(inventoryItemsProvider(householdId)).value ?? const [];
+    final calendar = buildInventoryCalendar(
+      items: items,
+      householdLeadDays: ref.read(expiryLeadDaysProvider),
+      charge: ref.read(chargeCheckProvider),
+      expiryTitle: (item) => l10n.calendarExpiryTitle(item.name),
+      chargeTitle: l10n.chargeReminderTitle,
+      chargeDescription: l10n.chargeReminderBody,
+    );
+    if (calendar == null) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.calendarExportEmpty)),
+      );
+      return;
+    }
+
+    final bytes = utf8.encode(calendar);
+    try {
+      final path = await FilePicker.platform.saveFile(
+        dialogTitle: l10n.calendarExportDialogTitle,
+        fileName: 'preppsuite-ablaufdaten.ics',
+        type: FileType.custom,
+        allowedExtensions: const ['ics'],
+        bytes: bytes,
+      );
+      if (path == null) return;
+      // As for the CSV: desktop pickers only name the file.
+      final file = File(path);
+      if (!file.existsSync() || file.lengthSync() == 0) {
+        await file.writeAsBytes(bytes);
+      }
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            l10n.calendarExportSuccess(calendarItemCount(items)),
+          ),
+        ),
+      );
+    } catch (error) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            '${l10n.csvExportErrorMessage} ${describeError(l10n, error)}',
+          ),
+        ),
+      );
+    }
+  }
+
   Future<void> _exportCsv(
     BuildContext context,
     WidgetRef ref,

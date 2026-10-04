@@ -3176,6 +3176,36 @@ abstract class AppLocalizations {
   /// **'The file could not be written.'**
   String get csvExportErrorMessage;
 
+  /// No description provided for @calendarExportButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry dates as calendar'**
+  String get calendarExportButton;
+
+  /// No description provided for @calendarExportDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save expiry dates as a calendar file'**
+  String get calendarExportDialogTitle;
+
+  /// No description provided for @calendarExportEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No item has an upcoming expiry date, and the battery reminder is off.'**
+  String get calendarExportEmpty;
+
+  /// No description provided for @calendarExportSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Calendar file saved with the battery reminder} =1{Calendar file saved with one expiry date} other{Calendar file saved with {count} expiry dates}}'**
+  String calendarExportSuccess(int count);
+
+  /// No description provided for @calendarExpiryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Best before: {name}'**
+  String calendarExpiryTitle(String name);
+
   /// No description provided for @profileSetupTitle.
   ///
   /// In en, this message translates to:

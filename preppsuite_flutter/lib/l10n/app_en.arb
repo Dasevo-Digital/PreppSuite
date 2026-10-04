@@ -974,6 +974,25 @@
   },
   "csvExportEmptyMessage": "There are no items to export yet.",
   "csvExportErrorMessage": "The file could not be written.",
+  "calendarExportButton": "Expiry dates as calendar",
+  "calendarExportDialogTitle": "Save expiry dates as a calendar file",
+  "calendarExportEmpty": "No item has an upcoming expiry date, and the battery reminder is off.",
+  "calendarExportSuccess": "{count, plural, =0{Calendar file saved with the battery reminder} =1{Calendar file saved with one expiry date} other{Calendar file saved with {count} expiry dates}}",
+  "@calendarExportSuccess": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarExpiryTitle": "Best before: {name}",
+  "@calendarExpiryTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "profileSetupTitle": "Set up your household",
   "profileSetupIntro": "PreppSuite runs entirely on this device. There is no account and no server — just these details, so warnings and supply targets match your situation.",
   "profileSetupSubmit": "Get started",
