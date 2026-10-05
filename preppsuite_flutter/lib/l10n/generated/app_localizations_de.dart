@@ -3749,7 +3749,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get backupHint =>
-      'Vorräte, Checklisten, Notfallplan und Notfallkarten. Die Datei enthält persönliche Daten und sollte geschützt aufbewahrt werden.';
+      'Vorräte, Checklisten, Notfallplan, Notfallkarten, Fotos, eigene Dokumente, Offline-Karte und Wissensarchive. Die Datei enthält persönliche Daten und sollte geschützt aufbewahrt werden.';
 
   @override
   String get backupCreated => 'Datensicherung gespeichert.';
@@ -7969,4 +7969,79 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get emergencyComicHint =>
       'Notfall-Comic für Kinder: was tun bei Stromausfall, Sirene, Sturm, Feuer und wenn von Krieg die Rede ist.';
+
+  @override
+  String get backupContentsTitle => 'Was in die Sicherung kommt';
+
+  @override
+  String get backupRestoreContentsTitle => 'Was wiederhergestellt wird';
+
+  @override
+  String get backupContentsHousehold =>
+      'Haushalt, Einstellungen und Notfallplan';
+
+  @override
+  String get backupContentsAlways => 'immer dabei';
+
+  @override
+  String backupContentsPhotos(int count) {
+    return 'Fotos ($count)';
+  }
+
+  @override
+  String backupContentsDocuments(int count) {
+    return 'Eigene Dokumente ($count)';
+  }
+
+  @override
+  String get backupContentsMap => 'Offline-Karte';
+
+  @override
+  String get backupContentsArchives => 'Wissensarchive';
+
+  @override
+  String get backupContentsPresent => 'schon auf diesem Gerät';
+
+  @override
+  String backupContentsTotal(String size) {
+    return 'Zusammen etwa $size';
+  }
+
+  @override
+  String get backupContentsSizeUnknown => 'Größe unbekannt';
+
+  @override
+  String get backupContentsLargeHint =>
+      'Eine große Sicherung lässt sich nicht per Messenger oder Mail verschicken. Karte und Wissensarchive lassen sich auch später neu herunterladen.';
+
+  @override
+  String get backupContentsContinue => 'Weiter';
+
+  @override
+  String get backupProgressWriting => 'Sicherung wird geschrieben …';
+
+  @override
+  String get backupProgressRestoring => 'Dateien werden wiederhergestellt …';
+
+  @override
+  String get backupProgressPreparing => 'Wird vorbereitet …';
+
+  @override
+  String get backupCancelled =>
+      'Abgebrochen. Eine unvollständige Datei wurde nicht behalten.';
+
+  @override
+  String backupFilesUnreadable(String files) {
+    return 'Nicht in der Sicherung, weil nicht lesbar: $files';
+  }
+
+  @override
+  String backupFilesRestored(int count) {
+    return '$count Dateien wiederhergestellt.';
+  }
+
+  @override
+  String backupFilesFailed(String files) {
+    return 'Nicht wiederhergestellt: $files';
+  }
 }

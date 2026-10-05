@@ -3749,7 +3749,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get backupHint =>
-      'Provisiones, listas, plan de emergencia y tarjetas de emergencia. El archivo contiene datos personales y debe guardarse de forma segura.';
+      'Provisiones, listas, plan de emergencia, tarjetas de emergencia, fotos, documentos propios, mapa sin conexión y archivos de conocimiento. El archivo contiene datos personales y debe guardarse de forma segura.';
 
   @override
   String get backupCreated => 'Copia de seguridad guardada.';
@@ -7998,4 +7998,78 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get emergencyComicHint =>
       'Un cómic de emergencia para niños: qué hacer en un corte de luz, cuando suena la sirena, en una tormenta, en un incendio y cuando se habla de guerra.';
+
+  @override
+  String get backupContentsTitle => 'Qué entra en la copia de seguridad';
+
+  @override
+  String get backupRestoreContentsTitle => 'Qué se restaura';
+
+  @override
+  String get backupContentsHousehold => 'Hogar, ajustes y plan de emergencia';
+
+  @override
+  String get backupContentsAlways => 'siempre incluido';
+
+  @override
+  String backupContentsPhotos(int count) {
+    return 'Fotos ($count)';
+  }
+
+  @override
+  String backupContentsDocuments(int count) {
+    return 'Documentos propios ($count)';
+  }
+
+  @override
+  String get backupContentsMap => 'Mapa sin conexión';
+
+  @override
+  String get backupContentsArchives => 'Archivos de conocimiento';
+
+  @override
+  String get backupContentsPresent => 'ya está en este dispositivo';
+
+  @override
+  String backupContentsTotal(String size) {
+    return 'Unos $size en total';
+  }
+
+  @override
+  String get backupContentsSizeUnknown => 'tamaño desconocido';
+
+  @override
+  String get backupContentsLargeHint =>
+      'Una copia grande no se puede enviar por mensajería ni por correo. El mapa y los archivos de conocimiento también se pueden volver a descargar más tarde.';
+
+  @override
+  String get backupContentsContinue => 'Continuar';
+
+  @override
+  String get backupProgressWriting => 'Escribiendo la copia de seguridad …';
+
+  @override
+  String get backupProgressRestoring => 'Restaurando archivos …';
+
+  @override
+  String get backupProgressPreparing => 'Preparando …';
+
+  @override
+  String get backupCancelled =>
+      'Cancelado. No se ha conservado ningún archivo incompleto.';
+
+  @override
+  String backupFilesUnreadable(String files) {
+    return 'No está en la copia porque no se pudo leer: $files';
+  }
+
+  @override
+  String backupFilesRestored(int count) {
+    return '$count archivos restaurados.';
+  }
+
+  @override
+  String backupFilesFailed(String files) {
+    return 'No restaurado: $files';
+  }
 }

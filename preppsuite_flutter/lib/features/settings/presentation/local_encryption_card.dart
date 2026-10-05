@@ -1,7 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,8 +6,10 @@ import '../../../core/error_text.dart';
 import '../../../core/local_database_encryption.dart';
 import '../../../core/portable_data.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../application/backup_container.dart';
 import '../application/backup_service.dart';
 import '../application/local_encryption_readiness_store.dart';
+import 'backup_flow.dart';
 import 'passphrase_dialog.dart';
 
 /// What the card needs to know, read in one go so the two halves cannot
@@ -188,29 +186,13 @@ class _LocalEncryptionCardState extends ConsumerState<LocalEncryptionCard> {
 
   Future<void> _testBackup() async {
     final messenger = ScaffoldMessenger.of(context);
+    PickedBackup? picked;
     try {
-      final picked = await FilePicker.platform.pickFiles(
-        dialogTitle: l10n.settingsLocalEncryptionTestBackup,
-        type: FileType.custom,
-        allowedExtensions: const ['json'],
-        withData: true,
-      );
-      if (picked == null || !mounted) return;
-      final passphrase = await showDialog<String>(
-        context: context,
-        builder: (_) => PassphraseDialog(l10n: l10n, confirm: false),
-      );
-      if (passphrase == null) return;
-
-      final file = picked.files.single;
-      final raw = file.bytes != null
-          ? utf8.decode(file.bytes!)
-          : await File(file.path!).readAsString();
-      final check = await BackupService(
-        ref.read(appDatabaseProvider),
-      ).verify(raw, widget.householdId, passphrase);
-
-      if (check == null) {
+      try {
+        picked = await pickBackup(
+          dialogTitle: l10n.settingsLocalEncryptionTestBackup,
+        );
+      } on BackupFormatException {
         messenger.showSnackBar(
           SnackBar(
             content: Text(l10n.settingsLocalEncryptionBackupUnreadable),
@@ -218,6 +200,29 @@ class _LocalEncryptionCardState extends ConsumerState<LocalEncryptionCard> {
         );
         return;
       }
+      if (picked == null || !mounted) return;
+      final passphrase = await showDialog<String>(
+        context: context,
+        builder: (_) => PassphraseDialog(l10n: l10n, confirm: false),
+      );
+      if (passphrase == null) return;
+
+      final service = BackupService(ref.read(appDatabaseProvider));
+      final opened = await service.open(
+        picked.file,
+        passphrase,
+        householdId: widget.householdId,
+      );
+
+      if (opened == null) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(l10n.settingsLocalEncryptionBackupUnreadable),
+          ),
+        );
+        return;
+      }
+      final check = service.verifyOpened(opened);
       await const LocalEncryptionReadinessStore().recordVerified();
       ref.invalidate(localEncryptionStatusProvider);
       messenger.showSnackBar(
@@ -231,6 +236,8 @@ class _LocalEncryptionCardState extends ConsumerState<LocalEncryptionCard> {
       messenger.showSnackBar(
         SnackBar(content: Text(describeError(l10n, error))),
       );
+    } finally {
+      await picked?.source.close();
     }
   }
 

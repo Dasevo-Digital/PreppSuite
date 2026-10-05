@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+
+import '../../maps/application/pmtiles_archive.dart' show ByteRangeSource;
 
 import '../../../local_db/database.dart';
 import '../../preparedness/application/preparedness_hub_store.dart';
@@ -11,6 +14,8 @@ import '../../sharing/application/snapshot_exchange.dart';
 import '../../warnings/application/warning_region_store.dart';
 import '../../../model/household_profile.dart';
 import '../../../model/household_profile_store.dart';
+import 'backup_container.dart';
+import 'backup_files.dart';
 
 /// An encrypted copy of one household, as a single file.
 ///
@@ -33,21 +38,95 @@ class BackupService {
   final PreparednessHubStore hub;
 
   Future<String> exportHousehold(String householdId, String passphrase) async {
-    final snapshot = (await readHouseholdSnapshot(
-      database,
-      deviceId: 'backup',
-      householdId: householdId,
-    )).encode();
+    final (key, parameters) = await _newKey(passphrase);
+    return jsonEncode(await _envelope(householdId, key, parameters));
+  }
+
+  /// Writes a format 3 backup into [out]: the household, and the [files]
+  /// beside it (#114).
+  ///
+  /// [onFile] is told which file is being written, [onBytes] how much of
+  /// it went in. Answers the labels of files that could not be opened;
+  /// they are listed in the backup and carry no bytes, and a restore says
+  /// so instead of failing.
+  Future<List<String>> writeBackup({
+    required RandomAccessFile out,
+    required String householdId,
+    required String passphrase,
+    required List<BackupCandidate> files,
+    BackupCancellation? cancellation,
+    void Function(BackupFileEntry entry)? onFile,
+    void Function(int bytes)? onBytes,
+  }) async {
+    final (key, parameters) = await _newKey(passphrase);
+    final manifest = [
+      for (var i = 0; i < files.length; i++) files[i].entry.withIndex(i),
+    ];
+    final envelope = await _envelope(householdId, key, parameters)
+      ..['preppsuiteBackup'] = backupContainerVersion
+      // Encrypted like every other section: which papers a household
+      // keeps, and which archives, is nobody else's business.
+      ..['files'] = await encryptForFolder(
+        jsonEncode([for (final entry in manifest) entry.toJson()]),
+        key,
+      );
+
+    final writer = BackupWriter(out, key);
+    await writer.writeHeader(envelope);
+    final unreadable = <String>[];
+    for (var i = 0; i < files.length; i++) {
+      cancellation?.check();
+      final entry = manifest[i];
+      onFile?.call(entry);
+      final ByteRangeSource source;
+      try {
+        source = await files[i].open();
+      } on Object {
+        // A document on a disk that is not plugged in, an archive whose
+        // permission did not survive. The household is worth saving
+        // without it.
+        unreadable.add(entry.label);
+        continue;
+      }
+      try {
+        await writer.writeEntry(
+          i,
+          source,
+          encrypted: entry.kind.encrypted,
+          cancellation: cancellation,
+          onBytes: onBytes,
+        );
+      } finally {
+        await source.close();
+      }
+    }
+    await writer.finish();
+    return unreadable;
+  }
+
+  Future<(FolderKey, VaultParameters)> _newKey(String passphrase) async {
     final random = Random.secure();
     final parameters = VaultParameters(
       salt: Uint8List.fromList(
         List.generate(saltLength, (_) => random.nextInt(256)),
       ),
     );
-    final key = await deriveFolderKey(passphrase, parameters);
+    return (await deriveFolderKey(passphrase, parameters), parameters);
+  }
+
+  Future<Map<String, Object?>> _envelope(
+    String householdId,
+    FolderKey key,
+    VaultParameters parameters,
+  ) async {
+    final snapshot = (await readHouseholdSnapshot(
+      database,
+      deviceId: 'backup',
+      householdId: householdId,
+    )).encode();
     final plan = jsonEncode((await hub.load()).toJson());
     final carried = jsonEncode((await readCarriedHousehold()).toJson());
-    return jsonEncode({
+    return {
       'preppsuiteBackup': 2,
       'key': parameters.toJson(),
       'payload': await encryptForFolder(snapshot, key),
@@ -63,7 +142,49 @@ class BackupService {
       // values are encrypted on the device, a backup is also the only
       // way they survive a lost keychain.
       'household': await encryptForFolder(carried, key),
-    });
+    };
+  }
+
+  /// Opens a backup file of any format and checks the passphrase, without
+  /// changing anything.
+  ///
+  /// Null for every way it can fail to be this household's backup, as
+  /// [verify] explains. [householdId] null accepts any household; only a
+  /// device that has none may ask for that.
+  Future<OpenedBackup?> open(
+    BackupFile file,
+    String passphrase, {
+    String? householdId,
+  }) async {
+    final opened = await _open(file.envelope, householdId, passphrase);
+    if (opened == null) return null;
+    final (snapshot, key, envelope) = opened;
+    return OpenedBackup(
+      file: file,
+      snapshot: snapshot,
+      key: key,
+      files: await _manifest(envelope['files'], key),
+    );
+  }
+
+  /// The file list of a format 3 backup; empty for the older ones.
+  ///
+  /// A damaged list costs the files and not the household, the same rule
+  /// as the plan and the settings.
+  static Future<List<BackupFileEntry>> _manifest(
+    Object? section,
+    FolderKey key,
+  ) async {
+    if (section is! String) return const [];
+    final clear = await decryptFromFolder(section, key);
+    if (clear == null) return const [];
+    try {
+      final decoded = jsonDecode(clear);
+      if (decoded is! List) return const [];
+      return [for (final raw in decoded) ?BackupFileEntry.fromJson(raw)];
+    } on FormatException {
+      return const [];
+    }
   }
 
   /// Opens a backup without changing anything, and says what is in it.
@@ -82,10 +203,15 @@ class BackupService {
     String householdId,
     String passphrase,
   ) async {
-    final opened = await _open(raw, householdId, passphrase);
-    if (opened == null) return null;
-    return BackupCheck(rows: opened.$1.rowCount);
+    final file = BackupFile.fromString(raw);
+    if (file == null) return null;
+    final opened = await open(file, passphrase, householdId: householdId);
+    return opened == null ? null : verifyOpened(opened);
   }
+
+  /// What [verify] answers, for a backup that is already open.
+  BackupCheck verifyOpened(OpenedBackup opened) =>
+      BackupCheck(rows: opened.snapshot.rowCount, files: opened.files.length);
 
   /// Restores a backup onto a device that has no household yet, taking
   /// the household id from the file.
@@ -102,9 +228,19 @@ class BackupService {
     String raw,
     String passphrase,
   ) async {
-    final opened = await _open(raw, null, passphrase);
-    if (opened == null) return null;
-    final (snapshot, key, envelope) = opened;
+    final file = BackupFile.fromString(raw);
+    if (file == null) return null;
+    final opened = await open(file, passphrase);
+    return opened == null ? null : restoreOpenedAsNewHousehold(opened);
+  }
+
+  /// [restoreAsNewHousehold], for a backup that is already open.
+  Future<RestoredHousehold> restoreOpenedAsNewHousehold(
+    OpenedBackup opened,
+  ) async {
+    final snapshot = opened.snapshot;
+    final key = opened.key;
+    final envelope = opened.file.envelope;
     final householdId = snapshot.householdId;
 
     await _restorePlan(envelope['device'], key);
@@ -138,9 +274,23 @@ class BackupService {
     String passphrase, {
     Future<void> Function(HouseholdProfile profile)? saveProfile,
   }) async {
-    final opened = await _open(raw, householdId, passphrase);
+    final file = BackupFile.fromString(raw);
+    if (file == null) return null;
+    final opened = await open(file, passphrase, householdId: householdId);
     if (opened == null) return null;
-    final (snapshot, key, envelope) = opened;
+    return restoreOpened(opened, saveProfile: saveProfile);
+  }
+
+  /// [restore], for a backup that is already open -- and was opened for
+  /// this household, which [open] checked.
+  Future<int> restoreOpened(
+    OpenedBackup opened, {
+    Future<void> Function(HouseholdProfile profile)? saveProfile,
+  }) async {
+    final snapshot = opened.snapshot;
+    final key = opened.key;
+    final envelope = opened.file.envelope;
+    final householdId = snapshot.householdId;
     await _restorePlan(envelope['device'], key);
     final profile = await _restoreCarried(
       envelope['household'],
@@ -165,19 +315,13 @@ class BackupService {
   /// [restoreAsNewHousehold] does that, and only on a device that has
   /// none.
   Future<(DeviceSnapshot, FolderKey, Map<String, Object?>)?> _open(
-    String raw,
+    Map<String, Object?> envelope,
     String? householdId,
     String passphrase,
   ) async {
-    final Object? envelope;
-    try {
-      envelope = jsonDecode(raw);
-    } on FormatException {
-      return null;
-    }
-    if (envelope is! Map<String, Object?> ||
-        (envelope['preppsuiteBackup'] != 1 &&
-            envelope['preppsuiteBackup'] != 2) ||
+    if (!const {1, 2, backupContainerVersion}.contains(
+          envelope['preppsuiteBackup'],
+        ) ||
         envelope['key'] is! Map<String, Object?> ||
         envelope['payload'] is! String) {
       return null;
@@ -254,11 +398,83 @@ class BackupService {
 
 /// What a backup was found to contain, for a check that changes nothing.
 class BackupCheck {
-  const BackupCheck({required this.rows});
+  const BackupCheck({required this.rows, this.files = 0});
 
   /// Rows the file would restore. Shown to the person so that a backup of
   /// an empty household cannot pass as a safety net for a full one.
   final int rows;
+
+  /// Files listed beside the rows. Zero for a backup before format 3.
+  final int files;
+}
+
+/// A backup file, read as far as its envelope.
+///
+/// Formats 1 and 2 are a JSON document and are read whole; format 3 is a
+/// container whose header is that same document, and whose files are
+/// read later, one at a time, by [reader].
+class BackupFile {
+  const BackupFile._(this.envelope, this.reader);
+
+  final Map<String, Object?> envelope;
+
+  /// The container, for format 3. Null for the JSON formats.
+  final BackupReader? reader;
+
+  static BackupFile? fromString(String raw) {
+    try {
+      final decoded = jsonDecode(raw);
+      return decoded is Map<String, Object?>
+          ? BackupFile._(decoded, null)
+          : null;
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// Null when [source] holds neither a container nor a JSON backup.
+  ///
+  /// A JSON backup is read only up to [maxJsonBytes]: it is rows and
+  /// settings, and a file larger than that is not one.
+  static Future<BackupFile?> read(
+    ByteRangeSource source, {
+    int maxJsonBytes = 256 * 1024 * 1024,
+  }) async {
+    final reader = await BackupReader.open(source);
+    if (reader != null) return BackupFile._(reader.envelope, reader);
+
+    final bytes = BytesBuilder(copy: false);
+    var offset = 0;
+    while (offset <= maxJsonBytes) {
+      final piece = await source.read(offset, backupChunkSize);
+      if (piece.isEmpty) break;
+      bytes.add(piece);
+      offset += piece.length;
+    }
+    if (offset > maxJsonBytes) return null;
+    try {
+      return fromString(utf8.decode(bytes.takeBytes()));
+    } on FormatException {
+      return null;
+    }
+  }
+}
+
+/// A backup whose passphrase was right, ready to be restored.
+class OpenedBackup {
+  const OpenedBackup({
+    required this.file,
+    required this.snapshot,
+    required this.key,
+    required this.files,
+  });
+
+  final BackupFile file;
+  final DeviceSnapshot snapshot;
+  final FolderKey key;
+
+  /// The files beside the rows. Empty before format 3.
+  final List<BackupFileEntry> files;
 }
 
 /// What came out of a backup restored onto an empty device.

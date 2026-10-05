@@ -260,6 +260,23 @@ Future<int> applyHouseholdPhotos(
   return taken;
 }
 
+/// Every picture file this device holds for [householdId], with the row
+/// it belongs to. Files that are not there are left out.
+///
+/// For the backup, which takes the pictures one at a time instead of in
+/// a budgeted batch the way a handover does.
+Future<List<({PhotoOwner owner, String clientId, File file})>>
+householdPhotoFiles(AppDatabase db, {required String householdId}) async {
+  final found = await _photoPaths(db, householdId: householdId);
+  found.sort((a, b) => a.path.compareTo(b.path));
+  return [
+    for (final row in found)
+      if (File(InventoryPhotoService.resolvePhotoPath(row.path)) case final file
+          when file.existsSync())
+        (owner: row.owner, clientId: row.clientId, file: file),
+  ];
+}
+
 typedef _PhotoRow = ({PhotoOwner owner, String clientId, String path});
 
 Future<List<_PhotoRow>> _photoPaths(

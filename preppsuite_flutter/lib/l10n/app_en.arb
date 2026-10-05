@@ -2139,7 +2139,7 @@
   },
   "backupCreate": "Create data backup",
   "backupRestore": "Restore data backup",
-  "backupHint": "Stock, checklists, emergency plan and emergency cards. The file contains personal data and should be stored securely.",
+  "backupHint": "Stock, checklists, emergency plan, emergency cards, photos, own documents, offline map and knowledge archives. The file contains personal data and should be stored securely.",
   "backupCreated": "Data backup saved.",
   "backupRestored": "Backup restored: {count} newer records applied.",
   "@backupRestored": {
@@ -4481,5 +4481,67 @@
   "@knowledgeDocumentTooLargeForReader": {"placeholders": {"size": {"type": "String"}, "limit": {"type": "String"}}},
   "knowledgeDocumentTooLargeInside": "This document holds more than the built-in reader can handle on this device. Another app can still read it.",
   "knowledgeDocumentTruncated": "From here on the document is too long for the built-in reader. Another app shows the rest.",
-  "emergencyComicHint": "An emergency comic for children: what to do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war."
+  "emergencyComicHint": "An emergency comic for children: what to do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war.",
+  "backupContentsTitle": "What goes into the backup",
+  "backupRestoreContentsTitle": "What is restored",
+  "backupContentsHousehold": "Household, settings and emergency plan",
+  "backupContentsAlways": "always included",
+  "backupContentsPhotos": "Photos ({count})",
+  "@backupContentsPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupContentsDocuments": "Own documents ({count})",
+  "@backupContentsDocuments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupContentsMap": "Offline map",
+  "backupContentsArchives": "Knowledge archives",
+  "backupContentsPresent": "already on this device",
+  "backupContentsTotal": "About {size} in total",
+  "@backupContentsTotal": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "backupContentsSizeUnknown": "size unknown",
+  "backupContentsLargeHint": "A large backup cannot be sent by messenger or email. The map and the knowledge archives can also be downloaded again later.",
+  "backupContentsContinue": "Continue",
+  "backupProgressWriting": "Writing the backup …",
+  "backupProgressRestoring": "Restoring files …",
+  "backupProgressPreparing": "Preparing …",
+  "backupCancelled": "Cancelled. No incomplete file was kept.",
+  "backupFilesUnreadable": "Not in the backup because it could not be read: {files}",
+  "@backupFilesUnreadable": {
+    "placeholders": {
+      "files": {
+        "type": "String"
+      }
+    }
+  },
+  "backupFilesRestored": "{count} files restored.",
+  "@backupFilesRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupFilesFailed": "Not restored: {files}",
+  "@backupFilesFailed": {
+    "placeholders": {
+      "files": {
+        "type": "String"
+      }
+    }
+  }
 }

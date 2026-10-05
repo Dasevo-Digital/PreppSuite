@@ -302,7 +302,10 @@ sich an den Teilen-Dialog des Systems übergeben, und dort ist OneDrive
 sehr wohl vertreten, ebenso jeder Messenger und jedes Mailprogramm. Was
 dabei das Gerät verlässt, ist derselbe mit der Passphrase verschlüsselte
 Umschlag; ohne sie ist die Datei Rauschen. Das ist kein Abgleich, sondern
-ein Transport von Hand — aber einer, der überall ankommt.
+ein Transport von Hand — aber einer, der überall ankommt. Seit Format 3
+trägt die Sicherung auch Fotos, eigene Dokumente, Karte und Wissensarchive
+(siehe `ARCHITEKTUR.md`); mit Archiven ist sie für Messenger und Mail zu
+groß, und Karte und Archive lassen sich vor dem Schreiben abwählen.
 
 **iOS und iPadOS** geben gar keinen Pfad heraus, der weiterarbeitet. Ein
 im Dokumentenwähler gewählter Ordner kommt als *security-scoped* URL

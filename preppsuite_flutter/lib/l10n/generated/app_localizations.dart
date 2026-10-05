@@ -6283,7 +6283,7 @@ abstract class AppLocalizations {
   /// No description provided for @backupHint.
   ///
   /// In en, this message translates to:
-  /// **'Stock, checklists, emergency plan and emergency cards. The file contains personal data and should be stored securely.'**
+  /// **'Stock, checklists, emergency plan, emergency cards, photos, own documents, offline map and knowledge archives. The file contains personal data and should be stored securely.'**
   String get backupHint;
 
   /// No description provided for @backupCreated.
@@ -13176,6 +13176,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An emergency comic for children: what to do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war.'**
   String get emergencyComicHint;
+
+  /// No description provided for @backupContentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What goes into the backup'**
+  String get backupContentsTitle;
+
+  /// No description provided for @backupRestoreContentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is restored'**
+  String get backupRestoreContentsTitle;
+
+  /// No description provided for @backupContentsHousehold.
+  ///
+  /// In en, this message translates to:
+  /// **'Household, settings and emergency plan'**
+  String get backupContentsHousehold;
+
+  /// No description provided for @backupContentsAlways.
+  ///
+  /// In en, this message translates to:
+  /// **'always included'**
+  String get backupContentsAlways;
+
+  /// No description provided for @backupContentsPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos ({count})'**
+  String backupContentsPhotos(int count);
+
+  /// No description provided for @backupContentsDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Own documents ({count})'**
+  String backupContentsDocuments(int count);
+
+  /// No description provided for @backupContentsMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline map'**
+  String get backupContentsMap;
+
+  /// No description provided for @backupContentsArchives.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge archives'**
+  String get backupContentsArchives;
+
+  /// No description provided for @backupContentsPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'already on this device'**
+  String get backupContentsPresent;
+
+  /// No description provided for @backupContentsTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'About {size} in total'**
+  String backupContentsTotal(String size);
+
+  /// No description provided for @backupContentsSizeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'size unknown'**
+  String get backupContentsSizeUnknown;
+
+  /// No description provided for @backupContentsLargeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A large backup cannot be sent by messenger or email. The map and the knowledge archives can also be downloaded again later.'**
+  String get backupContentsLargeHint;
+
+  /// No description provided for @backupContentsContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get backupContentsContinue;
+
+  /// No description provided for @backupProgressWriting.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing the backup …'**
+  String get backupProgressWriting;
+
+  /// No description provided for @backupProgressRestoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring files …'**
+  String get backupProgressRestoring;
+
+  /// No description provided for @backupProgressPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing …'**
+  String get backupProgressPreparing;
+
+  /// No description provided for @backupCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled. No incomplete file was kept.'**
+  String get backupCancelled;
+
+  /// No description provided for @backupFilesUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in the backup because it could not be read: {files}'**
+  String backupFilesUnreadable(String files);
+
+  /// No description provided for @backupFilesRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} files restored.'**
+  String backupFilesRestored(int count);
+
+  /// No description provided for @backupFilesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not restored: {files}'**
+  String backupFilesFailed(String files);
 }
 
 class _AppLocalizationsDelegate

@@ -1,12 +1,10 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_database_providers.dart';
+import '../../../core/error_text.dart';
 import '../../settings/application/backup_service.dart';
+import '../../settings/presentation/backup_flow.dart';
 import '../../settings/presentation/passphrase_dialog.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -122,34 +120,25 @@ class _SetupChoiceScreenState extends ConsumerState<SetupChoiceScreen> {
     final l10n = AppLocalizations.of(context)!;
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _busy = true);
+    PickedBackup? picked;
     try {
-      final picked = await FilePicker.platform.pickFiles(
-        dialogTitle: l10n.setupChoiceRestoreTitle,
-        type: FileType.custom,
-        allowedExtensions: const ['json'],
-        withData: true,
-      );
+      picked = await pickBackup(dialogTitle: l10n.setupChoiceRestoreTitle);
       if (picked == null || !mounted) return;
       final passphrase = await showDialog<String>(
         context: context,
         builder: (_) => PassphraseDialog(l10n: l10n, confirm: false),
       );
-      if (passphrase == null) return;
+      if (passphrase == null || !mounted) return;
 
-      final file = picked.files.single;
-      final raw = file.bytes != null
-          ? utf8.decode(file.bytes!)
-          : await File(file.path!).readAsString();
-      final restored = await BackupService(
-        ref.read(appDatabaseProvider),
-      ).restoreAsNewHousehold(raw, passphrase);
-
-      if (restored == null) {
+      final service = BackupService(ref.read(appDatabaseProvider));
+      final opened = await service.open(picked.file, passphrase);
+      if (opened == null) {
         messenger.showSnackBar(
           SnackBar(content: Text(l10n.setupRestoreFailed)),
         );
         return;
       }
+      final restored = await service.restoreOpenedAsNewHousehold(opened);
 
       // A backup from before the profile travelled with it leaves the
       // household nameless. It is still the right household, and naming
@@ -165,10 +154,29 @@ class _SetupChoiceScreenState extends ConsumerState<SetupChoiceScreen> {
                 ),
           );
       if (!mounted) return;
-      _leaveSetup(confirmation: l10n.setupRestoreDone(restored.rows));
+
+      // The files after the rows: a picture belongs to a row, and on a
+      // fresh device the rows have only just arrived.
+      String? files;
+      try {
+        files = describeFilesRestored(
+          l10n,
+          await restoreBackupFilesWithProgress(context, ref, opened: opened),
+        );
+      } on Object catch (error) {
+        // The household is back. Files that did not follow are worth a
+        // sentence, not the whole restore.
+        files = isBackupCancelled(error)
+            ? l10n.backupCancelled
+            : '${l10n.backupFailed} ${describeError(l10n, error)}';
+      }
+      if (!mounted) return;
+      final done = l10n.setupRestoreDone(restored.rows);
+      _leaveSetup(confirmation: files == null ? done : '$done $files');
     } on Object {
       messenger.showSnackBar(SnackBar(content: Text(l10n.setupRestoreFailed)));
     } finally {
+      await picked?.source.close();
       if (mounted) setState(() => _busy = false);
     }
   }

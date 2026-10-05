@@ -2139,6 +2139,64 @@ als fremde abweisen. Auf einem Gerät ohne Zeilen gibt es nichts zu
 verlieren, also wird die Kennung aus der Datei übernommen.
 
 
+### Sicherungsformat 3: der Haushalt und seine Dateien
+
+Bis Format 2 trug die Sicherung Zeilen und Einstellungen. Was ein Haushalt
+daneben hat, blieb auf dem Gerät: die Fotos von Vorrat und Hausrat, die
+eigenen Dokumente, die Offline-Karte, die Wissensarchive. Seit #114 kommt
+das alles mit. Eine Sicherung mit Wikipedia ist aber 50 GB groß, und eine
+JSON-Datei, die im Speicher gebaut und dem Dateiwähler am Stück übergeben
+wird, kann das nicht sein.
+
+Format 3 ist deshalb ein Container (`backup_container.dart`), der Stück für
+Stück geschrieben und gelesen wird. Sein Kopf ist **derselbe Umschlag wie
+Format 2**, plus einem verschlüsselten Abschnitt `files` mit der Dateiliste.
+Der Haushalt wird also mit demselben Code geöffnet und zurückgespielt wie
+vorher. Format 1 und 2 bleiben lesbar. Ältere App-Fassungen können Format 3
+nicht lesen.
+
+- **Privat wird verschlüsselt, öffentlich nicht.** Fotos und eigene Dokumente
+  liegen in Stücken von 1 MiB unter AES-GCM. Jedes Stück ist über AAD an
+  seinen Eintrag und seinen Platz gebunden. Archive und Karte liegen im
+  Klartext, denn es sind dieselben Bytes, die jeder herunterladen kann. AES-GCM
+  in reinem Dart würde für eine Enzyklopädie den größten Teil eines Tages
+  brauchen. Die Unversehrtheit sichert stattdessen ein **verschlüsselter Anhang
+  je Eintrag** mit Index, Länge und SHA-256. Welche Archive ein Haushalt hat,
+  steht nur in der verschlüsselten Liste.
+- **Gelesen wird über `ByteRangeSource`.** Ein Eintrag, der nicht
+  wiederhergestellt werden soll, wird übersprungen, nicht gelesen. Pfad,
+  macOS-Bookmark und Android-`content://` gehen alle durch `openMapArchive`.
+- **Geschrieben wird direkt dorthin, wo die Datei hin soll**, auf dem Rechner
+  in den Pfad aus dem Speichern-Dialog. Unter iOS und Android will der Dialog
+  die Bytes im Speicher. Dort entsteht die Datei deshalb im temporären Ordner.
+  Bis 100 MB geht sie dann durch den Dialog, darüber an den Teilen-Dialog
+  („In Dateien sichern“).
+- **Auswahl.** Vor dem Schreiben sind alle Teile angehakt. Fotos und Dokumente
+  sind je eine Gruppe, Karte und jedes Archiv einzeln abwählbar. Beim
+  Wiederherstellen ist nicht angehakt, was das Gerät schon lesbar hat
+  (`presentBackupFiles`, nach Name *und* Öffnen-Probe). Ein Eintrag gleichen
+  Namens, der sich nicht mehr öffnen lässt, macht dem wiederhergestellten
+  Platz.
+- **Wohin.** Dokumente, Karte und Archive gehen in den Download-Ordner,
+  Dokumente in den Unterordner `PreppSuite-Dokumente`. Erst als `.part`, nach
+  bestandener Prüfung umbenannt, dann über `rememberStoragePath` und die
+  Controller in Gebrauch genommen, genau wie ein Download. Eine Datei
+  gleichen Namens und gleicher Größe, die schon dort liegt, wird genommen,
+  nicht überschrieben. Fotos gehen durch `applyHouseholdPhotos`, also
+  **nach** den Zeilen, zu denen sie gehören.
+- **Nicht dabei** sind die Suchindizes. Sie sind aus den Dateien abgeleitet
+  und mit dem Schlüssel dieses Geräts versiegelt. Eigene Dokumente, die
+  indiziert waren, werden beim Wiederherstellen neu indiziert.
+- Eine Datei, die sich beim Schreiben nicht öffnen lässt (Platte nicht
+  angesteckt), steht in der Liste ohne Bytes. Die Sicherung wird trotzdem
+  fertig, und beide Seiten sagen, was fehlt.
+
+Tests: `test/features/settings/backup_container_test.dart` (Format,
+Manipulation, Überspringen, Format 2) und
+`integration_test/native_backup_test.dart` (echter Fotospeicher und
+Download-Ordner auf dem Gerät).
+
+
 ### Ein unlesbarer Schlüsselspeicher heißt nicht „nichts eingerichtet"
 
 Als der macOS-Start daran scheiterte, dass die App keinen Schlüsselbund
