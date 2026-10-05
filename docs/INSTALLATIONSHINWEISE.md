@@ -1,4 +1,4 @@
-# Installationshinweise zu PrepSuite 2.4.2
+# Installationshinweise zu PrepSuite 2.4.3
 
 Die Release-Pakete für macOS und Windows sind derzeit nicht mit einem
 kommerziellen Entwicklerzertifikat signiert und nicht notarisiert. Die
