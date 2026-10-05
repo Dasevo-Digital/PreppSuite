@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:preppsuite_flutter/core/app_database_providers.dart';
 import 'package:preppsuite_flutter/core/closes_databases_on_exit.dart';
+import 'package:preppsuite_flutter/core/open_databases.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
 /// A quit was the one moment this app never cleaned up after itself.
@@ -75,6 +76,28 @@ void main() {
 
     expect(response, AppExitResponse.exit);
     expect(built, 0);
+  });
+
+  testWidgets('closes a database no provider holds', (tester) async {
+    // The search over personal documents opens its index per query, and
+    // the quit cannot reach it through a provider. It reports itself
+    // instead (#113).
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    OpenDatabases.track(database);
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    await tester.pumpWidget(underTest(container));
+    await database.customSelect('SELECT 1').get();
+
+    final response = await tester.binding.handleRequestAppExit();
+
+    expect(response, AppExitResponse.exit);
+    await expectLater(
+      database.customSelect('SELECT 1').get(),
+      throwsA(isA<StateError>()),
+    );
+    expect(OpenDatabases.count, 0);
   });
 
   testWidgets('a close that hangs does not hold the quit', (tester) async {

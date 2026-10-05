@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 import '../core/local_database_encryption.dart';
+import '../core/open_databases.dart';
 
 import 'tables/budget_entries_table.dart';
 import 'tables/checklist_items_table.dart';
@@ -32,8 +33,16 @@ class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
   static const currentSchemaVersion = 22;
 
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(_openConnection()) {
+    OpenDatabases.track(this);
+  }
   AppDatabase.forTesting(super.executor);
+
+  @override
+  Future<void> close() {
+    OpenDatabases.untrack(this);
+    return super.close();
+  }
 
   @override
   int get schemaVersion => currentSchemaVersion;

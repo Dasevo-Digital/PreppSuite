@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/local_database_encryption.dart';
+import '../../../core/open_databases.dart';
 import '../../../core/platform_storage.dart';
 import 'knowledge_index_database.dart' show fts5QueryFor;
 import 'personal_document_store.dart';
@@ -25,9 +26,17 @@ class PersonalDocumentIndex extends _$PersonalDocumentIndex {
   PersonalDocumentIndex()
     : super(
         LocalDatabaseEncryption.instance.open('preppsuite_personal_documents'),
-      );
+      ) {
+    OpenDatabases.track(this);
+  }
 
   PersonalDocumentIndex.forTesting(super.executor);
+
+  @override
+  Future<void> close() {
+    OpenDatabases.untrack(this);
+    return super.close();
+  }
 
   @override
   int get schemaVersion => currentSchemaVersion;

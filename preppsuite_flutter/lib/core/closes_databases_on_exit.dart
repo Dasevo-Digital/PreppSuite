@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/knowledge/application/knowledge_providers.dart';
 import 'app_database_providers.dart';
+import 'open_databases.dart';
 
 /// Closes the local databases while the app is still alive.
 ///
@@ -82,6 +83,9 @@ class _ClosesDatabasesOnExitState extends ConsumerState<ClosesDatabasesOnExit> {
     if (container.exists(knowledgeIndexDatabaseProvider)) {
       await container.read(knowledgeIndexDatabaseProvider)?.close();
     }
+    // And whatever no provider holds: a search over personal documents
+    // left on screen, an indexer half way through (#113).
+    await OpenDatabases.closeAll();
   }
 
   @override

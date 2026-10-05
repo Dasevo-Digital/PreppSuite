@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import '../../../core/app_database_directory.dart';
 import '../../../core/local_database_encryption.dart';
+import '../../../core/open_databases.dart';
 import 'german_stemmer.dart';
 import 'zim_store.dart' show legacyArchiveId;
 
@@ -25,9 +26,17 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   static const _compactFormat = 'fts5-terms-v2';
 
   KnowledgeIndexDatabase(String archiveId)
-    : super(LocalDatabaseEncryption.instance.open(fileNameFor(archiveId)));
+    : super(LocalDatabaseEncryption.instance.open(fileNameFor(archiveId))) {
+    OpenDatabases.track(this);
+  }
 
   KnowledgeIndexDatabase.forTesting(super.executor);
+
+  @override
+  Future<void> close() {
+    OpenDatabases.untrack(this);
+    return super.close();
+  }
 
   /// One file per archive, so switching between them keeps both indexes.
   ///
