@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_theme.dart';
@@ -36,6 +34,7 @@ import '../application/inventory_filter.dart';
 import 'inventory_filter_sheet.dart';
 import 'package:intl/intl.dart';
 import '../../../core/error_text.dart';
+import '../../../core/save_file.dart';
 import 'stored_photo_image.dart';
 
 enum _InventoryMenuAction {
@@ -417,21 +416,14 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
       return;
     }
 
-    final bytes = utf8.encode(calendar);
     try {
-      final path = await FilePicker.platform.saveFile(
+      final saved = await saveFileWithPicker(
         dialogTitle: l10n.calendarExportDialogTitle,
         fileName: 'preppsuite-ablaufdaten.ics',
-        type: FileType.custom,
-        allowedExtensions: const ['ics'],
-        bytes: bytes,
+        extension: 'ics',
+        bytes: utf8.encode(calendar),
       );
-      if (path == null) return;
-      // As for the CSV: desktop pickers only name the file.
-      final file = File(path);
-      if (!file.existsSync() || file.lengthSync() == 0) {
-        await file.writeAsBytes(bytes);
-      }
+      if (!saved) return;
       messenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -472,22 +464,13 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
     final bytes = utf8.encode(buildInventoryCsv(items));
 
     try {
-      final path = await FilePicker.platform.saveFile(
+      final saved = await saveFileWithPicker(
         dialogTitle: l10n.csvExportDialogTitle,
         fileName: 'preppsuite-vorraete.csv',
-        type: FileType.custom,
-        allowedExtensions: const ['csv'],
+        extension: 'csv',
         bytes: bytes,
       );
-      if (path == null) return;
-
-      // On desktop the picker returns the path without writing anything,
-      // so the file still has to be created here; on mobile it has already
-      // been written and this would duplicate it.
-      final file = File(path);
-      if (!file.existsSync() || file.lengthSync() == 0) {
-        await file.writeAsBytes(bytes);
-      }
+      if (!saved) return;
 
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.csvExportSuccessMessage(items.length))),

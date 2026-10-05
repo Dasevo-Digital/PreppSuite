@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../../core/app_database_providers.dart';
 import '../../../core/error_text.dart';
+import '../../../core/save_file.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/backup_service.dart';
 import 'passphrase_dialog.dart';
@@ -54,19 +55,13 @@ class BackupCard extends ConsumerWidget {
       final raw = await BackupService(
         ref.read(appDatabaseProvider),
       ).exportHousehold(householdId, passphrase);
-      final bytes = utf8.encode(raw);
-      final path = await FilePicker.platform.saveFile(
+      final saved = await saveFileWithPicker(
         dialogTitle: l10n.backupCreate,
         fileName: 'preppsuite-backup.json',
-        type: FileType.custom,
-        allowedExtensions: const ['json'],
-        bytes: bytes,
+        extension: 'json',
+        bytes: utf8.encode(raw),
       );
-      if (path == null) return;
-      final file = File(path);
-      if (!file.existsSync() || file.lengthSync() == 0) {
-        await file.writeAsBytes(bytes, flush: true);
-      }
+      if (!saved) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.backupCreated)));
     } catch (error) {
       // The reason, not just the fact. This is somebody's whole household
