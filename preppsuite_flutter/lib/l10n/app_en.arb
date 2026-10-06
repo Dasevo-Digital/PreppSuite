@@ -4683,5 +4683,80 @@
     }
   },
   "checkInNoSmsApp": "No text message app can be opened here. Copy the text or send it with another app.",
-  "checkInPrivacy": "The message only goes through the text or messaging app you choose. PreppSuite sends nothing itself."
+  "checkInPrivacy": "The message only goes through the text or messaging app you choose. PreppSuite sends nothing itself.",
+  "aedTitle": "Defibrillators nearby",
+  "aedEntryHint": "Where the nearest defibrillator is – search once with a connection, then also offline.",
+  "aedCall112First": "In a cardiac arrest, call 112 first and start chest compressions. Whoever is free fetches the defibrillator.",
+  "aedUseLocation": "Search here",
+  "aedSearchAddress": "Enter an address",
+  "aedNone": "No defibrillator is recorded in OpenStreetMap within {radius} km.",
+  "@aedNone": {
+    "placeholders": {
+      "radius": {
+        "type": "int"
+      }
+    }
+  },
+  "aedFound": "{count} within {radius} km, {place}, as of {date}",
+  "@aedFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "radius": {
+        "type": "int"
+      },
+      "place": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "aedDistance": "{distance} {direction}",
+  "@aedDistance": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
+  "aedUnnamed": "Defibrillator",
+  "aedLevel": "Floor: {level}",
+  "@aedLevel": {
+    "placeholders": {
+      "level": {
+        "type": "String"
+      }
+    }
+  },
+  "aedOpeningHours": "Accessible: {hours}",
+  "@aedOpeningHours": {
+    "placeholders": {
+      "hours": {
+        "type": "String"
+      }
+    }
+  },
+  "aedIndoor": "indoors",
+  "aedOutdoor": "outdoors",
+  "aedRestricted": "not open to the public",
+  "aedOpenMap": "Open on the map",
+  "aedFailed": "OpenStreetMap did not answer.",
+  "aedOffline": "No connection. Showing the last search.",
+  "aedIncomplete": "Volunteers record the locations in OpenStreetMap. The list is not complete, and opening hours can change.",
+  "aedSource": "Data: © OpenStreetMap contributors, ODbL",
+  "aedHere": "here",
+  "compassN": "north",
+  "compassNE": "north-east",
+  "compassE": "east",
+  "compassSE": "south-east",
+  "compassS": "south",
+  "compassSW": "south-west",
+  "compassW": "west",
+  "compassNW": "north-west"
 }

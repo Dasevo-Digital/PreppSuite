@@ -8227,4 +8227,101 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get checkInPrivacy =>
       'The message only goes through the text or messaging app you choose. PreppSuite sends nothing itself.';
+
+  @override
+  String get aedTitle => 'Defibrillators nearby';
+
+  @override
+  String get aedEntryHint =>
+      'Where the nearest defibrillator is – search once with a connection, then also offline.';
+
+  @override
+  String get aedCall112First =>
+      'In a cardiac arrest, call 112 first and start chest compressions. Whoever is free fetches the defibrillator.';
+
+  @override
+  String get aedUseLocation => 'Search here';
+
+  @override
+  String get aedSearchAddress => 'Enter an address';
+
+  @override
+  String aedNone(int radius) {
+    return 'No defibrillator is recorded in OpenStreetMap within $radius km.';
+  }
+
+  @override
+  String aedFound(int count, int radius, String place, String date) {
+    return '$count within $radius km, $place, as of $date';
+  }
+
+  @override
+  String aedDistance(String distance, String direction) {
+    return '$distance $direction';
+  }
+
+  @override
+  String get aedUnnamed => 'Defibrillator';
+
+  @override
+  String aedLevel(String level) {
+    return 'Floor: $level';
+  }
+
+  @override
+  String aedOpeningHours(String hours) {
+    return 'Accessible: $hours';
+  }
+
+  @override
+  String get aedIndoor => 'indoors';
+
+  @override
+  String get aedOutdoor => 'outdoors';
+
+  @override
+  String get aedRestricted => 'not open to the public';
+
+  @override
+  String get aedOpenMap => 'Open on the map';
+
+  @override
+  String get aedFailed => 'OpenStreetMap did not answer.';
+
+  @override
+  String get aedOffline => 'No connection. Showing the last search.';
+
+  @override
+  String get aedIncomplete =>
+      'Volunteers record the locations in OpenStreetMap. The list is not complete, and opening hours can change.';
+
+  @override
+  String get aedSource => 'Data: © OpenStreetMap contributors, ODbL';
+
+  @override
+  String get aedHere => 'here';
+
+  @override
+  String get compassN => 'north';
+
+  @override
+  String get compassNE => 'north-east';
+
+  @override
+  String get compassE => 'east';
+
+  @override
+  String get compassSE => 'south-east';
+
+  @override
+  String get compassS => 'south';
+
+  @override
+  String get compassSW => 'south-west';
+
+  @override
+  String get compassW => 'west';
+
+  @override
+  String get compassNW => 'north-west';
 }

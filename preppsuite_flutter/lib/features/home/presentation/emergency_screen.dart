@@ -22,6 +22,7 @@ import 'emergency_information_screen.dart';
 import 'preparedness_tools_screen.dart';
 import 'readiness_screen.dart';
 import 'check_in_screen.dart';
+import '../../first_aid/presentation/defibrillator_screen.dart';
 
 /// The information that must remain quick to reach when time, power or a
 /// data connection is scarce. All values are derived from existing records.
@@ -114,7 +115,20 @@ class EmergencyScreen extends ConsumerWidget {
               ),
             ),
           ),
-          // Second, and with a name of its own rather than three screens
+          // Right under first aid, because it belongs to the same minute
+          // (#117).
+          ListTile(
+            leading: const Icon(Icons.monitor_heart_outlined),
+            title: Text(l10n.aedTitle),
+            subtitle: Text(l10n.aedEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const DefibrillatorScreen(),
+              ),
+            ),
+          ),
+          // Then, and with a name of its own rather than three screens
           // down in the crisis organisation, where it was the nineteenth
           // section of twenty: a child, or a parent reading with one, has
           // to be able to find it.

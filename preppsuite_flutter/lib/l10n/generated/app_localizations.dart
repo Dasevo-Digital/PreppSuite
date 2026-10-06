@@ -13680,6 +13680,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The message only goes through the text or messaging app you choose. PreppSuite sends nothing itself.'**
   String get checkInPrivacy;
+
+  /// No description provided for @aedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Defibrillators nearby'**
+  String get aedTitle;
+
+  /// No description provided for @aedEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the nearest defibrillator is – search once with a connection, then also offline.'**
+  String get aedEntryHint;
+
+  /// No description provided for @aedCall112First.
+  ///
+  /// In en, this message translates to:
+  /// **'In a cardiac arrest, call 112 first and start chest compressions. Whoever is free fetches the defibrillator.'**
+  String get aedCall112First;
+
+  /// No description provided for @aedUseLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Search here'**
+  String get aedUseLocation;
+
+  /// No description provided for @aedSearchAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an address'**
+  String get aedSearchAddress;
+
+  /// No description provided for @aedNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No defibrillator is recorded in OpenStreetMap within {radius} km.'**
+  String aedNone(int radius);
+
+  /// No description provided for @aedFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} within {radius} km, {place}, as of {date}'**
+  String aedFound(int count, int radius, String place, String date);
+
+  /// No description provided for @aedDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance} {direction}'**
+  String aedDistance(String distance, String direction);
+
+  /// No description provided for @aedUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Defibrillator'**
+  String get aedUnnamed;
+
+  /// No description provided for @aedLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Floor: {level}'**
+  String aedLevel(String level);
+
+  /// No description provided for @aedOpeningHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Accessible: {hours}'**
+  String aedOpeningHours(String hours);
+
+  /// No description provided for @aedIndoor.
+  ///
+  /// In en, this message translates to:
+  /// **'indoors'**
+  String get aedIndoor;
+
+  /// No description provided for @aedOutdoor.
+  ///
+  /// In en, this message translates to:
+  /// **'outdoors'**
+  String get aedOutdoor;
+
+  /// No description provided for @aedRestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'not open to the public'**
+  String get aedRestricted;
+
+  /// No description provided for @aedOpenMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Open on the map'**
+  String get aedOpenMap;
+
+  /// No description provided for @aedFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenStreetMap did not answer.'**
+  String get aedFailed;
+
+  /// No description provided for @aedOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Showing the last search.'**
+  String get aedOffline;
+
+  /// No description provided for @aedIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteers record the locations in OpenStreetMap. The list is not complete, and opening hours can change.'**
+  String get aedIncomplete;
+
+  /// No description provided for @aedSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Data: © OpenStreetMap contributors, ODbL'**
+  String get aedSource;
+
+  /// No description provided for @aedHere.
+  ///
+  /// In en, this message translates to:
+  /// **'here'**
+  String get aedHere;
+
+  /// No description provided for @compassN.
+  ///
+  /// In en, this message translates to:
+  /// **'north'**
+  String get compassN;
+
+  /// No description provided for @compassNE.
+  ///
+  /// In en, this message translates to:
+  /// **'north-east'**
+  String get compassNE;
+
+  /// No description provided for @compassE.
+  ///
+  /// In en, this message translates to:
+  /// **'east'**
+  String get compassE;
+
+  /// No description provided for @compassSE.
+  ///
+  /// In en, this message translates to:
+  /// **'south-east'**
+  String get compassSE;
+
+  /// No description provided for @compassS.
+  ///
+  /// In en, this message translates to:
+  /// **'south'**
+  String get compassS;
+
+  /// No description provided for @compassSW.
+  ///
+  /// In en, this message translates to:
+  /// **'south-west'**
+  String get compassSW;
+
+  /// No description provided for @compassW.
+  ///
+  /// In en, this message translates to:
+  /// **'west'**
+  String get compassW;
+
+  /// No description provided for @compassNW.
+  ///
+  /// In en, this message translates to:
+  /// **'north-west'**
+  String get compassNW;
 }
 
 class _AppLocalizationsDelegate

@@ -1142,6 +1142,20 @@ tree; the test suite deliberately targets that layer rather than the UI.
   the warning region. The map leaves out sewers and infiltration; the
   screen says so. The answer is kept in `PrivatePreferences`: it is the
   household's address.
+- **Overpass wants a name.** Since autumn 2026 `overpass-api.de` answers
+  a request with Dart's default user agent (`Dart/3.x (dart:io)`) with
+  406; the same query as `PreppSuite/1.0` answers 200 (measured
+  2026-10-06). `askOverpass` sends it for every feature, and the tests
+  check that it does. The mirror at `overpass.kumi.systems` did not
+  answer at all that day, so the header is not optional.
+- **Defibrillators come from OpenStreetMap, not from the map archive**
+  (#117). OpenMapTiles has no `emergency=*` layer, so they are asked for
+  through Overpass within 2 km of a place and kept encrypted. Germany has
+  no national register; a few districts publish their own. The screen puts
+  "112 and compressions first" above the list, shows
+  `defibrillator:location` (in the app's language where a mapper wrote
+  one), level, opening hours and `access`, and says the list is not
+  complete.
 - **Only the woodland index ships.** The grassland index (GLFI) sits
   beside it in the same directory and is not used: the DWD publishes the
   five-step wording for the WBI and not, where this was written, for the

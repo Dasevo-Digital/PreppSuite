@@ -8270,4 +8270,101 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get checkInPrivacy =>
       'Die Nachricht geht nur über die SMS- oder Messenger-App, die du wählst. PreppSuite schickt nichts selbst.';
+
+  @override
+  String get aedTitle => 'Defibrillatoren in der Nähe';
+
+  @override
+  String get aedEntryHint =>
+      'Wo der nächste Defibrillator hängt – einmal mit Netz suchen, danach auch offline.';
+
+  @override
+  String get aedCall112First =>
+      'Bei einem Herzstillstand zuerst 112 rufen und mit der Herzdruckmassage beginnen. Den Defibrillator holt, wer gerade frei ist.';
+
+  @override
+  String get aedUseLocation => 'Hier suchen';
+
+  @override
+  String get aedSearchAddress => 'Adresse eingeben';
+
+  @override
+  String aedNone(int radius) {
+    return 'Im Umkreis von $radius km ist in OpenStreetMap kein Defibrillator eingetragen.';
+  }
+
+  @override
+  String aedFound(int count, int radius, String place, String date) {
+    return '$count im Umkreis von $radius km, $place, Stand $date';
+  }
+
+  @override
+  String aedDistance(String distance, String direction) {
+    return '$distance $direction';
+  }
+
+  @override
+  String get aedUnnamed => 'Defibrillator';
+
+  @override
+  String aedLevel(String level) {
+    return 'Etage: $level';
+  }
+
+  @override
+  String aedOpeningHours(String hours) {
+    return 'Zugänglich: $hours';
+  }
+
+  @override
+  String get aedIndoor => 'im Gebäude';
+
+  @override
+  String get aedOutdoor => 'im Freien';
+
+  @override
+  String get aedRestricted => 'nicht öffentlich zugänglich';
+
+  @override
+  String get aedOpenMap => 'Auf der Karte öffnen';
+
+  @override
+  String get aedFailed => 'OpenStreetMap hat nicht geantwortet.';
+
+  @override
+  String get aedOffline => 'Keine Verbindung. Gezeigt wird die letzte Suche.';
+
+  @override
+  String get aedIncomplete =>
+      'Die Standorte tragen Freiwillige in OpenStreetMap ein. Die Liste ist nicht vollständig, und Öffnungszeiten können sich ändern.';
+
+  @override
+  String get aedSource => 'Daten: © OpenStreetMap-Mitwirkende, ODbL';
+
+  @override
+  String get aedHere => 'hier';
+
+  @override
+  String get compassN => 'nördlich';
+
+  @override
+  String get compassNE => 'nordöstlich';
+
+  @override
+  String get compassE => 'östlich';
+
+  @override
+  String get compassSE => 'südöstlich';
+
+  @override
+  String get compassS => 'südlich';
+
+  @override
+  String get compassSW => 'südwestlich';
+
+  @override
+  String get compassW => 'westlich';
+
+  @override
+  String get compassNW => 'nordwestlich';
 }

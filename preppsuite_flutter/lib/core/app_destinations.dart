@@ -57,6 +57,7 @@ import '../features/warnings/presentation/air_quality_screen.dart';
 import '../features/warnings/presentation/fire_danger_screen.dart';
 import '../features/warnings/presentation/heavy_rain_screen.dart';
 import '../features/home/presentation/check_in_screen.dart';
+import '../features/first_aid/presentation/defibrillator_screen.dart';
 import '../features/warnings/presentation/pegel_screen.dart';
 import '../features/warnings/presentation/hazard_release_screen.dart';
 import '../features/warnings/presentation/iodine_tablets_screen.dart';
@@ -390,6 +391,14 @@ List<AppDestination> appDestinations() => [
     area: ShellDestination.warnings,
     open: (_) => const FireDangerScreen(),
     aliases: ['waldbrand', 'wbi', 'duerre', 'wildfire'],
+  ),
+  AppDestination(
+    id: 'defibrillators',
+    title: (l) => l.aedTitle,
+    icon: Icons.monitor_heart_outlined,
+    area: ShellDestination.emergency,
+    open: (_) => const DefibrillatorScreen(),
+    aliases: ['aed', 'defi', 'defibrillator', 'herzstillstand'],
   ),
   AppDestination(
     id: 'check-in',
