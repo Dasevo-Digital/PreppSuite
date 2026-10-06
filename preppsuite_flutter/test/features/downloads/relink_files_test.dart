@@ -53,6 +53,27 @@ void main() {
     expect(library.selectedId, 'wiki');
   });
 
+  test('a downloaded map is found by the name in its old path', () async {
+    final map = put('map-1234.pmtiles', 10);
+    put('other.pmtiles', 11);
+    await const OfflineMapStore().save(
+      location: '/old/container/Documents/map-1234.pmtiles',
+      label: 'Niedersachsen',
+    );
+    expect(await relinker().run(), 1);
+    expect((await const OfflineMapStore().archive())!.location, map.path);
+  });
+
+  test('a picked map is found as the one map file there is', () async {
+    final map = put('karte.pmtiles', 10);
+    await const OfflineMapStore().save(
+      location: 'bookmark://gone',
+      label: 'Niedersachsen',
+    );
+    expect(await relinker(broken: {'bookmark://gone'}).run(), 1);
+    expect((await const OfflineMapStore().archive())!.location, map.path);
+  });
+
   test('an archive named by its title is found by its size', () async {
     final gutenberg = put('gutenberg_de_all.zim', 33);
     put('other.zim', 34);

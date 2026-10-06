@@ -62,7 +62,14 @@ class FileRelinker {
 
     final map = await const OfflineMapStore().archive();
     if (map != null && !await _opens(map.location)) {
-      final match = _byName(await candidates(), map.label);
+      final all = await candidates();
+      // A map downloaded in the app is labelled with the place it covers,
+      // "Niedersachsen", and only its old path knows the file's name.
+      // Failing both, the one map file there is, if there is just one.
+      final match =
+          _byName(all, map.label) ??
+          _byName(all, _fileNameIn(map.location)) ??
+          _onlyOne(all, '.pmtiles');
       if (match != null) {
         await const OfflineMapStore().save(
           location: await _remember(match.path, map.label),
@@ -83,6 +90,7 @@ class FileRelinker {
       final all = await candidates();
       final match =
           _byName(all, archive.label) ??
+          _byName(all, _fileNameIn(archive.location)) ??
           _bySize(all, archive.sizeBytes, extension: '.zim');
       if (match == null) {
         archives.add(archive);
@@ -110,7 +118,10 @@ class FileRelinker {
     const documents = PersonalDocumentStore();
     for (final document in await documents.load()) {
       if (await _opens(document.location)) continue;
-      final match = _byName(await candidates(), document.label);
+      final all = await candidates();
+      final match =
+          _byName(all, document.label) ??
+          _byName(all, _fileNameIn(document.location));
       if (match == null) continue;
       await documents.relocate(
         document.id,
@@ -153,11 +164,27 @@ class FileRelinker {
     return found;
   }
 
-  static _Candidate? _byName(List<_Candidate> candidates, String label) {
+  static _Candidate? _byName(List<_Candidate> candidates, String? label) {
+    if (label == null || label.isEmpty) return null;
     for (final candidate in candidates) {
       if (p.basename(candidate.path) == label) return candidate;
     }
     return null;
+  }
+
+  /// The file name a stored path ends in. A handle -- a bookmark, an
+  /// Android document -- has none to give.
+  static String? _fileNameIn(String location) =>
+      isNativeStorageHandle(location) ? null : p.basename(location);
+
+  /// The single file with [extension], or null when there are none or
+  /// several.
+  static _Candidate? _onlyOne(List<_Candidate> candidates, String extension) {
+    final matches = [
+      for (final candidate in candidates)
+        if (candidate.path.toLowerCase().endsWith(extension)) candidate,
+    ];
+    return matches.length == 1 ? matches.single : null;
   }
 
   /// An archive whose label is its title rather than its file name -- the
