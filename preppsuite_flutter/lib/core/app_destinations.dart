@@ -55,6 +55,7 @@ import '../features/transfer/presentation/qr_receive_screen.dart';
 import '../features/transfer/presentation/qr_send_screen.dart';
 import '../features/warnings/presentation/air_quality_screen.dart';
 import '../features/warnings/presentation/fire_danger_screen.dart';
+import '../features/warnings/presentation/heavy_rain_screen.dart';
 import '../features/warnings/presentation/pegel_screen.dart';
 import '../features/warnings/presentation/hazard_release_screen.dart';
 import '../features/warnings/presentation/iodine_tablets_screen.dart';
@@ -388,6 +389,14 @@ List<AppDestination> appDestinations() => [
     area: ShellDestination.warnings,
     open: (_) => const FireDangerScreen(),
     aliases: ['waldbrand', 'wbi', 'duerre', 'wildfire'],
+  ),
+  AppDestination(
+    id: 'heavy-rain',
+    title: (l) => l.heavyRainTitle,
+    icon: Icons.thunderstorm_outlined,
+    area: ShellDestination.warnings,
+    open: (_) => const HeavyRainScreen(),
+    aliases: ['starkregen', 'sturzflut', 'ueberflutung', 'keller', 'flood'],
   ),
   AppDestination(
     id: 'hazard-release',

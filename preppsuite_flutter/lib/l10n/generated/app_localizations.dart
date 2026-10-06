@@ -13296,6 +13296,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not restored: {files}'**
   String backupFilesFailed(String files);
+
+  /// No description provided for @heavyRainTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Heavy rain hazard'**
+  String get heavyRainTitle;
+
+  /// No description provided for @heavyRainEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How deep water stands at your address after a cloudburst – map by the BKG.'**
+  String get heavyRainEntryHint;
+
+  /// No description provided for @heavyRainIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The heavy rain hazard map of the German Federal Agency for Cartography and Geodesy (BKG) shows where water collects after a cloudburst and how fast it flows. Checked once with a connection, the result stays on the device.'**
+  String get heavyRainIntro;
+
+  /// No description provided for @heavyRainUseLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Use my location'**
+  String get heavyRainUseLocation;
+
+  /// No description provided for @heavyRainSearchAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an address'**
+  String get heavyRainSearchAddress;
+
+  /// No description provided for @heavyRainAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Street, number, town'**
+  String get heavyRainAddressHint;
+
+  /// No description provided for @heavyRainCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get heavyRainCheck;
+
+  /// No description provided for @heavyRainNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This address was not found.'**
+  String get heavyRainNotFound;
+
+  /// No description provided for @heavyRainFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The BKG map service did not answer.'**
+  String get heavyRainFailed;
+
+  /// No description provided for @heavyRainScenarioExceptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Exceptional heavy rain'**
+  String get heavyRainScenarioExceptional;
+
+  /// No description provided for @heavyRainScenarioExceptionalBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistically once in 100 years.'**
+  String get heavyRainScenarioExceptionalBody;
+
+  /// No description provided for @heavyRainScenarioExtreme.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme heavy rain'**
+  String get heavyRainScenarioExtreme;
+
+  /// No description provided for @heavyRainScenarioExtremeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'100 mm of rain in one hour, 90 mm in North Rhine-Westphalia.'**
+  String get heavyRainScenarioExtremeBody;
+
+  /// No description provided for @heavyRainDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Water depth within {radius} m: {range}'**
+  String heavyRainDepth(int radius, String range);
+
+  /// No description provided for @heavyRainFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Flow velocity: {range}'**
+  String heavyRainFlow(String range);
+
+  /// No description provided for @heavyRainDepthClass0.
+  ///
+  /// In en, this message translates to:
+  /// **'under 10 cm'**
+  String get heavyRainDepthClass0;
+
+  /// No description provided for @heavyRainDepthClass1.
+  ///
+  /// In en, this message translates to:
+  /// **'10 to 30 cm'**
+  String get heavyRainDepthClass1;
+
+  /// No description provided for @heavyRainDepthClass2.
+  ///
+  /// In en, this message translates to:
+  /// **'30 to 50 cm'**
+  String get heavyRainDepthClass2;
+
+  /// No description provided for @heavyRainDepthClass3.
+  ///
+  /// In en, this message translates to:
+  /// **'50 to 100 cm'**
+  String get heavyRainDepthClass3;
+
+  /// No description provided for @heavyRainDepthClass4.
+  ///
+  /// In en, this message translates to:
+  /// **'100 to 200 cm'**
+  String get heavyRainDepthClass4;
+
+  /// No description provided for @heavyRainDepthClass5.
+  ///
+  /// In en, this message translates to:
+  /// **'200 to 400 cm'**
+  String get heavyRainDepthClass5;
+
+  /// No description provided for @heavyRainDepthClass6.
+  ///
+  /// In en, this message translates to:
+  /// **'400 cm or more'**
+  String get heavyRainDepthClass6;
+
+  /// No description provided for @heavyRainVelocityClass0.
+  ///
+  /// In en, this message translates to:
+  /// **'under 0.2 m/s'**
+  String get heavyRainVelocityClass0;
+
+  /// No description provided for @heavyRainVelocityClass1.
+  ///
+  /// In en, this message translates to:
+  /// **'0.2 to 0.5 m/s'**
+  String get heavyRainVelocityClass1;
+
+  /// No description provided for @heavyRainVelocityClass2.
+  ///
+  /// In en, this message translates to:
+  /// **'0.5 to 1.0 m/s'**
+  String get heavyRainVelocityClass2;
+
+  /// No description provided for @heavyRainVelocityClass3.
+  ///
+  /// In en, this message translates to:
+  /// **'1.0 to 2.0 m/s'**
+  String get heavyRainVelocityClass3;
+
+  /// No description provided for @heavyRainVelocityClass4.
+  ///
+  /// In en, this message translates to:
+  /// **'2.0 m/s or more'**
+  String get heavyRainVelocityClass4;
+
+  /// No description provided for @heavyRainNoValue.
+  ///
+  /// In en, this message translates to:
+  /// **'The map holds no value for this spot.'**
+  String get heavyRainNoValue;
+
+  /// No description provided for @heavyRainUncovered.
+  ///
+  /// In en, this message translates to:
+  /// **'The nationwide map holds no data for {state}. The state keeps maps of its own.'**
+  String heavyRainUncovered(String state);
+
+  /// No description provided for @heavyRainLimits.
+  ///
+  /// In en, this message translates to:
+  /// **'A hazard indication map: the simulation leaves out sewers and infiltration, so all rain runs off on the surface. Under buildings it usually holds no value, which is why the deepest water within 25 m of the point is shown.'**
+  String get heavyRainLimits;
+
+  /// No description provided for @heavyRainCheckedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{place}, checked on {date}'**
+  String heavyRainCheckedAt(String place, String date);
+
+  /// No description provided for @heavyRainHerePlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Chosen place'**
+  String get heavyRainHerePlace;
+
+  /// No description provided for @heavyRainCellar.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplies stored in the cellar: {count}'**
+  String heavyRainCellar(int count);
+
+  /// No description provided for @heavyRainOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection to the map service. Showing the last check.'**
+  String get heavyRainOffline;
+
+  /// No description provided for @heavyRainChangePlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Check another place'**
+  String get heavyRainChangePlace;
+
+  /// No description provided for @heavyRainRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get heavyRainRefresh;
+
+  /// No description provided for @heavyRainSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: Hinweiskarte Starkregengefahren, © BKG {year}, dl-de/by-2-0'**
+  String heavyRainSource(String year);
+
+  /// No description provided for @heavyRainPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'For the check, the coordinates go to the BKG map service, and a position rounded to about a kilometre goes to OpenStreetMap to find the state.'**
+  String get heavyRainPrivacy;
 }
 
 class _AppLocalizationsDelegate

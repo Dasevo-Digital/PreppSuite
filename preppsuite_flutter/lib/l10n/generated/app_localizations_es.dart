@@ -8072,4 +8072,139 @@ class AppLocalizationsEs extends AppLocalizations {
   String backupFilesFailed(String files) {
     return 'No restaurado: $files';
   }
+
+  @override
+  String get heavyRainTitle => 'Peligro por lluvias torrenciales';
+
+  @override
+  String get heavyRainEntryHint =>
+      'Qué profundidad alcanza el agua en tu dirección tras un aguacero – mapa del BKG.';
+
+  @override
+  String get heavyRainIntro =>
+      'El mapa de peligro por lluvias torrenciales de la Agencia Federal Alemana de Cartografía y Geodesia (BKG) muestra dónde se acumula el agua tras un aguacero y a qué velocidad fluye. Consultado una vez con conexión, el resultado se queda en el dispositivo.';
+
+  @override
+  String get heavyRainUseLocation => 'Usar mi ubicación';
+
+  @override
+  String get heavyRainSearchAddress => 'Introducir una dirección';
+
+  @override
+  String get heavyRainAddressHint => 'Calle, número, localidad';
+
+  @override
+  String get heavyRainCheck => 'Consultar';
+
+  @override
+  String get heavyRainNotFound => 'No se ha encontrado esta dirección.';
+
+  @override
+  String get heavyRainFailed =>
+      'El servicio de mapas del BKG no ha respondido.';
+
+  @override
+  String get heavyRainScenarioExceptional => 'Lluvia torrencial excepcional';
+
+  @override
+  String get heavyRainScenarioExceptionalBody =>
+      'Estadísticamente una vez cada 100 años.';
+
+  @override
+  String get heavyRainScenarioExtreme => 'Lluvia torrencial extrema';
+
+  @override
+  String get heavyRainScenarioExtremeBody =>
+      '100 mm de lluvia en una hora, 90 mm en Renania del Norte-Westfalia.';
+
+  @override
+  String heavyRainDepth(int radius, String range) {
+    return 'Profundidad del agua en un radio de $radius m: $range';
+  }
+
+  @override
+  String heavyRainFlow(String range) {
+    return 'Velocidad del flujo: $range';
+  }
+
+  @override
+  String get heavyRainDepthClass0 => 'menos de 10 cm';
+
+  @override
+  String get heavyRainDepthClass1 => 'de 10 a 30 cm';
+
+  @override
+  String get heavyRainDepthClass2 => 'de 30 a 50 cm';
+
+  @override
+  String get heavyRainDepthClass3 => 'de 50 a 100 cm';
+
+  @override
+  String get heavyRainDepthClass4 => 'de 100 a 200 cm';
+
+  @override
+  String get heavyRainDepthClass5 => 'de 200 a 400 cm';
+
+  @override
+  String get heavyRainDepthClass6 => '400 cm o más';
+
+  @override
+  String get heavyRainVelocityClass0 => 'menos de 0,2 m/s';
+
+  @override
+  String get heavyRainVelocityClass1 => 'de 0,2 a 0,5 m/s';
+
+  @override
+  String get heavyRainVelocityClass2 => 'de 0,5 a 1,0 m/s';
+
+  @override
+  String get heavyRainVelocityClass3 => 'de 1,0 a 2,0 m/s';
+
+  @override
+  String get heavyRainVelocityClass4 => '2,0 m/s o más';
+
+  @override
+  String get heavyRainNoValue =>
+      'El mapa no contiene ningún valor para este lugar.';
+
+  @override
+  String heavyRainUncovered(String state) {
+    return 'El mapa nacional no contiene datos para $state. El estado federado tiene mapas propios.';
+  }
+
+  @override
+  String get heavyRainLimits =>
+      'Un mapa indicativo: la simulación no tiene en cuenta el alcantarillado ni la infiltración, toda la lluvia fluye por la superficie. Bajo los edificios no suele haber valor, por eso se muestra el agua más profunda en 25 m alrededor del punto.';
+
+  @override
+  String heavyRainCheckedAt(String place, String date) {
+    return '$place, consultado el $date';
+  }
+
+  @override
+  String get heavyRainHerePlace => 'Lugar elegido';
+
+  @override
+  String heavyRainCellar(int count) {
+    return 'Provisiones guardadas en el sótano: $count';
+  }
+
+  @override
+  String get heavyRainOffline =>
+      'Sin conexión con el servicio de mapas. Se muestra la última consulta.';
+
+  @override
+  String get heavyRainChangePlace => 'Consultar otro lugar';
+
+  @override
+  String get heavyRainRefresh => 'Volver a consultar';
+
+  @override
+  String heavyRainSource(String year) {
+    return 'Fuente: Hinweiskarte Starkregengefahren, © BKG $year, dl-de/by-2-0';
+  }
+
+  @override
+  String get heavyRainPrivacy =>
+      'Para la consulta, las coordenadas se envían al servicio de mapas del BKG y una posición redondeada a un kilómetro a OpenStreetMap para saber el estado federado.';
 }

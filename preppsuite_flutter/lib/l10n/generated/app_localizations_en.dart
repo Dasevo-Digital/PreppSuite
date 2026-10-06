@@ -8004,4 +8004,137 @@ class AppLocalizationsEn extends AppLocalizations {
   String backupFilesFailed(String files) {
     return 'Not restored: $files';
   }
+
+  @override
+  String get heavyRainTitle => 'Heavy rain hazard';
+
+  @override
+  String get heavyRainEntryHint =>
+      'How deep water stands at your address after a cloudburst – map by the BKG.';
+
+  @override
+  String get heavyRainIntro =>
+      'The heavy rain hazard map of the German Federal Agency for Cartography and Geodesy (BKG) shows where water collects after a cloudburst and how fast it flows. Checked once with a connection, the result stays on the device.';
+
+  @override
+  String get heavyRainUseLocation => 'Use my location';
+
+  @override
+  String get heavyRainSearchAddress => 'Enter an address';
+
+  @override
+  String get heavyRainAddressHint => 'Street, number, town';
+
+  @override
+  String get heavyRainCheck => 'Check';
+
+  @override
+  String get heavyRainNotFound => 'This address was not found.';
+
+  @override
+  String get heavyRainFailed => 'The BKG map service did not answer.';
+
+  @override
+  String get heavyRainScenarioExceptional => 'Exceptional heavy rain';
+
+  @override
+  String get heavyRainScenarioExceptionalBody =>
+      'Statistically once in 100 years.';
+
+  @override
+  String get heavyRainScenarioExtreme => 'Extreme heavy rain';
+
+  @override
+  String get heavyRainScenarioExtremeBody =>
+      '100 mm of rain in one hour, 90 mm in North Rhine-Westphalia.';
+
+  @override
+  String heavyRainDepth(int radius, String range) {
+    return 'Water depth within $radius m: $range';
+  }
+
+  @override
+  String heavyRainFlow(String range) {
+    return 'Flow velocity: $range';
+  }
+
+  @override
+  String get heavyRainDepthClass0 => 'under 10 cm';
+
+  @override
+  String get heavyRainDepthClass1 => '10 to 30 cm';
+
+  @override
+  String get heavyRainDepthClass2 => '30 to 50 cm';
+
+  @override
+  String get heavyRainDepthClass3 => '50 to 100 cm';
+
+  @override
+  String get heavyRainDepthClass4 => '100 to 200 cm';
+
+  @override
+  String get heavyRainDepthClass5 => '200 to 400 cm';
+
+  @override
+  String get heavyRainDepthClass6 => '400 cm or more';
+
+  @override
+  String get heavyRainVelocityClass0 => 'under 0.2 m/s';
+
+  @override
+  String get heavyRainVelocityClass1 => '0.2 to 0.5 m/s';
+
+  @override
+  String get heavyRainVelocityClass2 => '0.5 to 1.0 m/s';
+
+  @override
+  String get heavyRainVelocityClass3 => '1.0 to 2.0 m/s';
+
+  @override
+  String get heavyRainVelocityClass4 => '2.0 m/s or more';
+
+  @override
+  String get heavyRainNoValue => 'The map holds no value for this spot.';
+
+  @override
+  String heavyRainUncovered(String state) {
+    return 'The nationwide map holds no data for $state. The state keeps maps of its own.';
+  }
+
+  @override
+  String get heavyRainLimits =>
+      'A hazard indication map: the simulation leaves out sewers and infiltration, so all rain runs off on the surface. Under buildings it usually holds no value, which is why the deepest water within 25 m of the point is shown.';
+
+  @override
+  String heavyRainCheckedAt(String place, String date) {
+    return '$place, checked on $date';
+  }
+
+  @override
+  String get heavyRainHerePlace => 'Chosen place';
+
+  @override
+  String heavyRainCellar(int count) {
+    return 'Supplies stored in the cellar: $count';
+  }
+
+  @override
+  String get heavyRainOffline =>
+      'No connection to the map service. Showing the last check.';
+
+  @override
+  String get heavyRainChangePlace => 'Check another place';
+
+  @override
+  String get heavyRainRefresh => 'Check again';
+
+  @override
+  String heavyRainSource(String year) {
+    return 'Source: Hinweiskarte Starkregengefahren, © BKG $year, dl-de/by-2-0';
+  }
+
+  @override
+  String get heavyRainPrivacy =>
+      'For the check, the coordinates go to the BKG map service, and a position rounded to about a kilometre goes to OpenStreetMap to find the state.';
 }

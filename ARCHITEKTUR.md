@@ -1126,6 +1126,22 @@ tree; the test suite deliberately targets that layer rather than the UI.
   in every file name, so a bump there breaks every request at once while
   the code stays perfectly valid. It is a constant in
   `fire_danger_client.dart` and the live test is what notices.
+- **Heavy rain is the BKG's map, read around the house, not at it**
+  (#115). `sgx.geodatenzentrum.de/wms_starkregen`, the *Hinweiskarte
+  Starkregengefahren*, dl-de/by-2-0, no key. One `GetFeatureInfo` per
+  point asks the four group layers (depth and flow, both scenarios) at
+  once and answers per state layer in plain text. Depth is in
+  centimetres and flow in m/s; the classes are the service's own legend,
+  colours included. Three things that cost a measurement to learn: the
+  cell under a building answers `-9999`, so the screen samples seventeen
+  points out to 25 m and reports the deepest water; a neighbouring
+  state's layer answers `0` well past its border, so values are maxed
+  across states and never read from one; and Baden-Württemberg and
+  Bayern have no layer at all, so a point there is "not covered", never
+  "dry" — the state comes from the same two-decimal Nominatim lookup as
+  the warning region. The map leaves out sewers and infiltration; the
+  screen says so. The answer is kept in `PrivatePreferences`: it is the
+  household's address.
 - **Only the woodland index ships.** The grassland index (GLFI) sits
   beside it in the same directory and is not used: the DWD publishes the
   five-step wording for the WBI and not, where this was written, for the

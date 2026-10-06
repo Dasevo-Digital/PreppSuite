@@ -65,7 +65,13 @@ class GeolocationService {
   /// was denied or the position couldn't be read at all.
   Future<GermanState?> determineBundesland() async {
     final position = await _getPosition();
-    final stateName = await _reverseGeocodeState(position);
+    return stateAt(position.latitude, position.longitude);
+  }
+
+  /// The [GermanState] a coordinate lies in, by the same coarse lookup as
+  /// [determineBundesland]: only two decimals of it leave the device.
+  Future<GermanState?> stateAt(double latitude, double longitude) async {
+    final stateName = await _reverseGeocodeState(latitude, longitude);
     if (stateName == null) return null;
     return germanStateByName(stateName);
   }
@@ -201,7 +207,10 @@ class GeolocationService {
     }
   }
 
-  Future<String?> _reverseGeocodeState(Position position) async {
+  Future<String?> _reverseGeocodeState(
+    double latitude,
+    double longitude,
+  ) async {
     // Only the state is wanted, so only that much of the position goes
     // out: two decimals, about a kilometre. No `zoom` to go with it —
     // at the state level Berlin, Hamburg and Bremen are answered as
@@ -212,8 +221,8 @@ class GeolocationService {
     // fills in can be corrected by hand.
     final uri = Uri.https('nominatim.openstreetmap.org', '/reverse', {
       'format': 'jsonv2',
-      'lat': position.latitude.toStringAsFixed(2),
-      'lon': position.longitude.toStringAsFixed(2),
+      'lat': latitude.toStringAsFixed(2),
+      'lon': longitude.toStringAsFixed(2),
       'accept-language': 'de',
     });
 

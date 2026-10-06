@@ -16,6 +16,7 @@ import '../../maps/presentation/nearby_screen.dart';
 import '../../warnings/presentation/air_quality_screen.dart';
 import '../../warnings/presentation/road_closure_screen.dart';
 import '../../warnings/presentation/fire_danger_screen.dart';
+import '../../warnings/presentation/heavy_rain_screen.dart';
 import '../../warnings/presentation/pegel_screen.dart';
 import '../../warnings/presentation/radiation_screen.dart';
 import 'radio_emergency_screen.dart';
@@ -382,6 +383,18 @@ class _EmergencyInformationScreenState
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => const FireDangerScreen(),
+                  ),
+                ),
+              ),
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                leading: const Icon(Icons.thunderstorm_outlined),
+                title: Text(l10n.heavyRainTitle),
+                subtitle: Text(l10n.heavyRainEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const HeavyRainScreen(),
                   ),
                 ),
               ),

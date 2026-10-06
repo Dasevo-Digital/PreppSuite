@@ -8044,4 +8044,139 @@ class AppLocalizationsDe extends AppLocalizations {
   String backupFilesFailed(String files) {
     return 'Nicht wiederhergestellt: $files';
   }
+
+  @override
+  String get heavyRainTitle => 'Starkregen-Gefahr';
+
+  @override
+  String get heavyRainEntryHint =>
+      'Wie tief Wasser nach einem Wolkenbruch an der eigenen Adresse steht – Karte des BKG.';
+
+  @override
+  String get heavyRainIntro =>
+      'Die Hinweiskarte Starkregengefahren des Bundesamts für Kartographie und Geodäsie zeigt, wo sich nach einem Wolkenbruch Wasser sammelt und wie schnell es fließt. Einmal mit Netz abgefragt, bleibt das Ergebnis auf dem Gerät.';
+
+  @override
+  String get heavyRainUseLocation => 'Meinen Standort verwenden';
+
+  @override
+  String get heavyRainSearchAddress => 'Adresse eingeben';
+
+  @override
+  String get heavyRainAddressHint => 'Straße, Hausnummer, Ort';
+
+  @override
+  String get heavyRainCheck => 'Abfragen';
+
+  @override
+  String get heavyRainNotFound => 'Diese Adresse wurde nicht gefunden.';
+
+  @override
+  String get heavyRainFailed =>
+      'Der Kartendienst des BKG hat nicht geantwortet.';
+
+  @override
+  String get heavyRainScenarioExceptional => 'Außergewöhnlicher Starkregen';
+
+  @override
+  String get heavyRainScenarioExceptionalBody =>
+      'Statistisch einmal in 100 Jahren.';
+
+  @override
+  String get heavyRainScenarioExtreme => 'Extremer Starkregen';
+
+  @override
+  String get heavyRainScenarioExtremeBody =>
+      '100 mm Regen in einer Stunde, in Nordrhein-Westfalen 90 mm.';
+
+  @override
+  String heavyRainDepth(int radius, String range) {
+    return 'Wassertiefe im Umkreis von $radius m: $range';
+  }
+
+  @override
+  String heavyRainFlow(String range) {
+    return 'Fließgeschwindigkeit: $range';
+  }
+
+  @override
+  String get heavyRainDepthClass0 => 'unter 10 cm';
+
+  @override
+  String get heavyRainDepthClass1 => '10 bis 30 cm';
+
+  @override
+  String get heavyRainDepthClass2 => '30 bis 50 cm';
+
+  @override
+  String get heavyRainDepthClass3 => '50 bis 100 cm';
+
+  @override
+  String get heavyRainDepthClass4 => '100 bis 200 cm';
+
+  @override
+  String get heavyRainDepthClass5 => '200 bis 400 cm';
+
+  @override
+  String get heavyRainDepthClass6 => '400 cm und mehr';
+
+  @override
+  String get heavyRainVelocityClass0 => 'unter 0,2 m/s';
+
+  @override
+  String get heavyRainVelocityClass1 => '0,2 bis 0,5 m/s';
+
+  @override
+  String get heavyRainVelocityClass2 => '0,5 bis 1,0 m/s';
+
+  @override
+  String get heavyRainVelocityClass3 => '1,0 bis 2,0 m/s';
+
+  @override
+  String get heavyRainVelocityClass4 => '2,0 m/s und mehr';
+
+  @override
+  String get heavyRainNoValue =>
+      'Für diese Stelle enthält die Karte keinen Wert.';
+
+  @override
+  String heavyRainUncovered(String state) {
+    return 'Für $state enthält die bundesweite Hinweiskarte keine Daten. Das Land führt eigene Karten.';
+  }
+
+  @override
+  String get heavyRainLimits =>
+      'Eine Hinweiskarte: Die Berechnung lässt Kanalisation und Versickerung weg, aller Regen fließt an der Oberfläche ab. Unter Gebäuden enthält sie meist keinen Wert, deshalb zählt das tiefste Wasser bis 25 m um den Punkt.';
+
+  @override
+  String heavyRainCheckedAt(String place, String date) {
+    return '$place, abgefragt am $date';
+  }
+
+  @override
+  String get heavyRainHerePlace => 'Gewählter Ort';
+
+  @override
+  String heavyRainCellar(int count) {
+    return 'Vorräte mit Lagerort Keller: $count';
+  }
+
+  @override
+  String get heavyRainOffline =>
+      'Keine Verbindung zum Kartendienst. Gezeigt wird die letzte Abfrage.';
+
+  @override
+  String get heavyRainChangePlace => 'Anderen Ort abfragen';
+
+  @override
+  String get heavyRainRefresh => 'Erneut abfragen';
+
+  @override
+  String heavyRainSource(String year) {
+    return 'Quelle: Hinweiskarte Starkregengefahren, © BKG $year, dl-de/by-2-0';
+  }
+
+  @override
+  String get heavyRainPrivacy =>
+      'Für die Abfrage gehen die Koordinaten an den Kartendienst des BKG, für das Bundesland eine auf etwa einen Kilometer gerundete Position an OpenStreetMap.';
 }
