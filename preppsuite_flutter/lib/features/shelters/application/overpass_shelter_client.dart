@@ -148,39 +148,8 @@ class OverpassShelterClient {
     ].whereType<OverpassShelterFeature>().toList();
   }
 
-  /// Sends [query], once per attempt, until one instance answers.
-  ///
-  /// Only a busy instance is worth asking again: 429 is the rate limit
-  /// and 504 is the query timing out on their side, and both are about
-  /// the moment rather than the request. Anything else is a bad request
-  /// or a broken instance, where a second identical try is just another
-  /// request against a server run for other people.
-  Future<http.Response> _ask(String query) async {
-    OverpassException? last;
-
-    for (final endpoint in endpoints) {
-      for (var attempt = 0; attempt < 2; attempt++) {
-        if (attempt > 0) await Future<void>.delayed(_retryDelay);
-
-        final http.Response response;
-        try {
-          response = await _httpClient
-              .post(Uri.parse(endpoint), body: {'data': query})
-              .timeout(const Duration(seconds: 30));
-        } on Object {
-          // A dead instance is worth moving on from, not retrying.
-          break;
-        }
-
-        if (response.statusCode == 200) return response;
-
-        last = OverpassException(response.statusCode);
-        if (!last.isBusy) break;
-      }
-    }
-
-    throw last ?? const OverpassException(0);
-  }
+  Future<http.Response> _ask(String query) =>
+      askOverpass(_httpClient, query, retryDelay: _retryDelay);
 
   OverpassShelterFeature? _parseElement(Map<String, dynamic> entry) {
     final id = entry['id'] as int?;
@@ -205,6 +174,55 @@ class OverpassShelterClient {
 
     return OverpassShelterFeature(id: id, lat: lat, lon: lon, tags: tags);
   }
+}
+
+/// Sends [query] to the public Overpass instances, once per attempt,
+/// until one answers. Shared by every feature that asks OpenStreetMap,
+/// so the rate limit is respected in one place.
+///
+/// Only a busy instance is worth asking again: 429 is the rate limit
+/// and 504 is the query timing out on their side, and both are about
+/// the moment rather than the request. Anything else is a bad request
+/// or a broken instance, where a second identical try is just another
+/// request against a server run for other people.
+Future<http.Response> askOverpass(
+  http.Client httpClient,
+  String query, {
+  Duration retryDelay = OverpassShelterClient.defaultRetryDelay,
+}) async {
+  OverpassException? last;
+
+  for (final endpoint in OverpassShelterClient.endpoints) {
+    for (var attempt = 0; attempt < 2; attempt++) {
+      if (attempt > 0) await Future<void>.delayed(retryDelay);
+
+      final http.Response response;
+      try {
+        response = await httpClient
+            .post(
+              Uri.parse(endpoint),
+              // Without a name of its own a request goes out as
+              // "Dart/3.x (dart:io)", and overpass-api.de answers that with
+              // 406 since autumn 2026 -- measured on 2026-10-06, the same
+              // query with this header answered 200. Nominatim has asked for
+              // the same thing all along.
+              headers: {'User-Agent': 'PreppSuite/1.0'},
+              body: {'data': query},
+            )
+            .timeout(const Duration(seconds: 30));
+      } on Object {
+        // A dead instance is worth moving on from, not retrying.
+        break;
+      }
+
+      if (response.statusCode == 200) return response;
+
+      last = OverpassException(response.statusCode);
+      if (!last.isBusy) break;
+    }
+  }
+
+  throw last ?? const OverpassException(0);
 }
 
 class _CachedShelters {
