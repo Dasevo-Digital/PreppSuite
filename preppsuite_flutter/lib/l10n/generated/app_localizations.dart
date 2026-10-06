@@ -13524,6 +13524,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'For the check, the coordinates go to the BKG map service, and a position rounded to about a kilometre goes to OpenStreetMap to find the state.'**
   String get heavyRainPrivacy;
+
+  /// No description provided for @checkInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a sign of life'**
+  String get checkInTitle;
+
+  /// No description provided for @checkInEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Say by text message that you are all right – a text often still gets through when mobile data is overloaded.'**
+  String get checkInEntryHint;
+
+  /// No description provided for @checkInStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What should arrive?'**
+  String get checkInStatusLabel;
+
+  /// No description provided for @checkInSafe.
+  ///
+  /// In en, this message translates to:
+  /// **'I am all right.'**
+  String get checkInSafe;
+
+  /// No description provided for @checkInNeedHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'I need help.'**
+  String get checkInNeedHelp;
+
+  /// No description provided for @checkInOnMyWay.
+  ///
+  /// In en, this message translates to:
+  /// **'I am on my way to the meeting point.'**
+  String get checkInOnMyWay;
+
+  /// No description provided for @checkInOnMyWayTo.
+  ///
+  /// In en, this message translates to:
+  /// **'I am on my way to the meeting point: {place}.'**
+  String checkInOnMyWayTo(String place);
+
+  /// No description provided for @checkInTime.
+  ///
+  /// In en, this message translates to:
+  /// **'As of {time}'**
+  String checkInTime(String time);
+
+  /// No description provided for @checkInAttachLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach my location'**
+  String get checkInAttachLocation;
+
+  /// No description provided for @checkInLocating.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding my location …'**
+  String get checkInLocating;
+
+  /// No description provided for @checkInNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional note (optional)'**
+  String get checkInNote;
+
+  /// No description provided for @checkInPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'This message will be sent'**
+  String get checkInPreview;
+
+  /// No description provided for @checkInRecipients.
+  ///
+  /// In en, this message translates to:
+  /// **'Recipients'**
+  String get checkInRecipients;
+
+  /// No description provided for @checkInNoRecipients.
+  ///
+  /// In en, this message translates to:
+  /// **'No recipients yet. Ideally someone outside your own region – local networks are the first to be overloaded in an emergency.'**
+  String get checkInNoRecipients;
+
+  /// No description provided for @checkInSendTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Text {name}'**
+  String checkInSendTo(String name);
+
+  /// No description provided for @checkInShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Send with another app'**
+  String get checkInShare;
+
+  /// No description provided for @checkInCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy text'**
+  String get checkInCopy;
+
+  /// No description provided for @checkInCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Text copied.'**
+  String get checkInCopied;
+
+  /// No description provided for @checkInAddContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Add recipient'**
+  String get checkInAddContact;
+
+  /// No description provided for @checkInContactName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get checkInContactName;
+
+  /// No description provided for @checkInContactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get checkInContactPhone;
+
+  /// No description provided for @checkInContactInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name and a valid phone number.'**
+  String get checkInContactInvalid;
+
+  /// No description provided for @checkInRemoveContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove recipient'**
+  String get checkInRemoveContact;
+
+  /// No description provided for @checkInSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Use suggestion: {name}'**
+  String checkInSuggestion(String name);
+
+  /// No description provided for @checkInNoSmsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'No text message app can be opened here. Copy the text or send it with another app.'**
+  String get checkInNoSmsApp;
+
+  /// No description provided for @checkInPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'The message only goes through the text or messaging app you choose. PreppSuite sends nothing itself.'**
+  String get checkInPrivacy;
 }
 
 class _AppLocalizationsDelegate

@@ -21,6 +21,7 @@ import '../application/shell_layout.dart';
 import 'emergency_information_screen.dart';
 import 'preparedness_tools_screen.dart';
 import 'readiness_screen.dart';
+import 'check_in_screen.dart';
 
 /// The information that must remain quick to reach when time, power or a
 /// data connection is scarce. All values are derived from existing records.
@@ -124,6 +125,19 @@ class EmergencyScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const KidsComicScreen()),
+            ),
+          ),
+          // Third: after the casualty and the child comes the family
+          // that is waiting to hear (#116).
+          ListTile(
+            leading: const Icon(Icons.sms_outlined),
+            title: Text(l10n.checkInTitle),
+            subtitle: Text(l10n.checkInEntryHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => CheckInScreen(householdId: profile.id),
+              ),
             ),
           ),
           ListTile(

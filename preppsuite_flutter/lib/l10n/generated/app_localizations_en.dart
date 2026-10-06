@@ -8137,4 +8137,94 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get heavyRainPrivacy =>
       'For the check, the coordinates go to the BKG map service, and a position rounded to about a kilometre goes to OpenStreetMap to find the state.';
+
+  @override
+  String get checkInTitle => 'Send a sign of life';
+
+  @override
+  String get checkInEntryHint =>
+      'Say by text message that you are all right – a text often still gets through when mobile data is overloaded.';
+
+  @override
+  String get checkInStatusLabel => 'What should arrive?';
+
+  @override
+  String get checkInSafe => 'I am all right.';
+
+  @override
+  String get checkInNeedHelp => 'I need help.';
+
+  @override
+  String get checkInOnMyWay => 'I am on my way to the meeting point.';
+
+  @override
+  String checkInOnMyWayTo(String place) {
+    return 'I am on my way to the meeting point: $place.';
+  }
+
+  @override
+  String checkInTime(String time) {
+    return 'As of $time';
+  }
+
+  @override
+  String get checkInAttachLocation => 'Attach my location';
+
+  @override
+  String get checkInLocating => 'Finding my location …';
+
+  @override
+  String get checkInNote => 'Additional note (optional)';
+
+  @override
+  String get checkInPreview => 'This message will be sent';
+
+  @override
+  String get checkInRecipients => 'Recipients';
+
+  @override
+  String get checkInNoRecipients =>
+      'No recipients yet. Ideally someone outside your own region – local networks are the first to be overloaded in an emergency.';
+
+  @override
+  String checkInSendTo(String name) {
+    return 'Text $name';
+  }
+
+  @override
+  String get checkInShare => 'Send with another app';
+
+  @override
+  String get checkInCopy => 'Copy text';
+
+  @override
+  String get checkInCopied => 'Text copied.';
+
+  @override
+  String get checkInAddContact => 'Add recipient';
+
+  @override
+  String get checkInContactName => 'Name';
+
+  @override
+  String get checkInContactPhone => 'Phone number';
+
+  @override
+  String get checkInContactInvalid => 'Enter a name and a valid phone number.';
+
+  @override
+  String get checkInRemoveContact => 'Remove recipient';
+
+  @override
+  String checkInSuggestion(String name) {
+    return 'Use suggestion: $name';
+  }
+
+  @override
+  String get checkInNoSmsApp =>
+      'No text message app can be opened here. Copy the text or send it with another app.';
+
+  @override
+  String get checkInPrivacy =>
+      'The message only goes through the text or messaging app you choose. PreppSuite sends nothing itself.';
 }

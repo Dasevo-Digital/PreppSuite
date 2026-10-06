@@ -8207,4 +8207,95 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get heavyRainPrivacy =>
       'Para la consulta, las coordenadas se envían al servicio de mapas del BKG y una posición redondeada a un kilómetro a OpenStreetMap para saber el estado federado.';
+
+  @override
+  String get checkInTitle => 'Enviar señal de vida';
+
+  @override
+  String get checkInEntryHint =>
+      'Decir por SMS que estás bien: un SMS suele llegar aunque los datos móviles estén saturados.';
+
+  @override
+  String get checkInStatusLabel => '¿Qué debe llegar?';
+
+  @override
+  String get checkInSafe => 'Estoy bien.';
+
+  @override
+  String get checkInNeedHelp => 'Necesito ayuda.';
+
+  @override
+  String get checkInOnMyWay => 'Voy de camino al punto de encuentro.';
+
+  @override
+  String checkInOnMyWayTo(String place) {
+    return 'Voy de camino al punto de encuentro: $place.';
+  }
+
+  @override
+  String checkInTime(String time) {
+    return 'Hora: $time';
+  }
+
+  @override
+  String get checkInAttachLocation => 'Adjuntar mi ubicación';
+
+  @override
+  String get checkInLocating => 'Buscando mi ubicación …';
+
+  @override
+  String get checkInNote => 'Nota adicional (opcional)';
+
+  @override
+  String get checkInPreview => 'Se enviará este mensaje';
+
+  @override
+  String get checkInRecipients => 'Destinatarios';
+
+  @override
+  String get checkInNoRecipients =>
+      'Aún no hay destinatarios. Mejor alguien fuera de tu región: las redes locales son las primeras en saturarse en una emergencia.';
+
+  @override
+  String checkInSendTo(String name) {
+    return 'SMS a $name';
+  }
+
+  @override
+  String get checkInShare => 'Enviar con otra aplicación';
+
+  @override
+  String get checkInCopy => 'Copiar texto';
+
+  @override
+  String get checkInCopied => 'Texto copiado.';
+
+  @override
+  String get checkInAddContact => 'Añadir destinatario';
+
+  @override
+  String get checkInContactName => 'Nombre';
+
+  @override
+  String get checkInContactPhone => 'Número de teléfono';
+
+  @override
+  String get checkInContactInvalid =>
+      'Introduce un nombre y un número de teléfono válido.';
+
+  @override
+  String get checkInRemoveContact => 'Eliminar destinatario';
+
+  @override
+  String checkInSuggestion(String name) {
+    return 'Usar sugerencia: $name';
+  }
+
+  @override
+  String get checkInNoSmsApp =>
+      'Aquí no se puede abrir ninguna aplicación de SMS. Copia el texto o envíalo con otra aplicación.';
+
+  @override
+  String get checkInPrivacy =>
+      'El mensaje solo se envía con la aplicación de SMS o mensajería que elijas. PreppSuite no envía nada por sí misma.';
 }

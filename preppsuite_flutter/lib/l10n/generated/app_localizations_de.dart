@@ -8179,4 +8179,95 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get heavyRainPrivacy =>
       'Für die Abfrage gehen die Koordinaten an den Kartendienst des BKG, für das Bundesland eine auf etwa einen Kilometer gerundete Position an OpenStreetMap.';
+
+  @override
+  String get checkInTitle => 'Lebenszeichen senden';
+
+  @override
+  String get checkInEntryHint =>
+      'Per SMS sagen, dass es dir gut geht – eine SMS kommt oft noch durch, wenn das mobile Internet überlastet ist.';
+
+  @override
+  String get checkInStatusLabel => 'Was soll ankommen?';
+
+  @override
+  String get checkInSafe => 'Mir geht es gut.';
+
+  @override
+  String get checkInNeedHelp => 'Ich brauche Hilfe.';
+
+  @override
+  String get checkInOnMyWay => 'Ich bin auf dem Weg zum Treffpunkt.';
+
+  @override
+  String checkInOnMyWayTo(String place) {
+    return 'Ich bin auf dem Weg zum Treffpunkt: $place.';
+  }
+
+  @override
+  String checkInTime(String time) {
+    return 'Stand: $time';
+  }
+
+  @override
+  String get checkInAttachLocation => 'Standort anhängen';
+
+  @override
+  String get checkInLocating => 'Standort wird bestimmt …';
+
+  @override
+  String get checkInNote => 'Zusatz (optional)';
+
+  @override
+  String get checkInPreview => 'Diese Nachricht wird gesendet';
+
+  @override
+  String get checkInRecipients => 'Empfänger';
+
+  @override
+  String get checkInNoRecipients =>
+      'Noch keine Empfänger. Am besten jemand außerhalb der eigenen Region – Ortsnetze sind im Ernstfall zuerst überlastet.';
+
+  @override
+  String checkInSendTo(String name) {
+    return 'SMS an $name';
+  }
+
+  @override
+  String get checkInShare => 'Mit anderer App senden';
+
+  @override
+  String get checkInCopy => 'Text kopieren';
+
+  @override
+  String get checkInCopied => 'Text kopiert.';
+
+  @override
+  String get checkInAddContact => 'Empfänger hinzufügen';
+
+  @override
+  String get checkInContactName => 'Name';
+
+  @override
+  String get checkInContactPhone => 'Telefonnummer';
+
+  @override
+  String get checkInContactInvalid =>
+      'Name und eine gültige Telefonnummer eingeben.';
+
+  @override
+  String get checkInRemoveContact => 'Empfänger entfernen';
+
+  @override
+  String checkInSuggestion(String name) {
+    return 'Vorschlag übernehmen: $name';
+  }
+
+  @override
+  String get checkInNoSmsApp =>
+      'Hier lässt sich keine SMS öffnen. Den Text kopieren oder mit einer anderen App senden.';
+
+  @override
+  String get checkInPrivacy =>
+      'Die Nachricht geht nur über die SMS- oder Messenger-App, die du wählst. PreppSuite schickt nichts selbst.';
 }

@@ -2213,6 +2213,29 @@ Manipulation, Überspringen, Format 2) und
 Download-Ordner auf dem Gerät).
 
 
+### Lebenszeichen per SMS, ohne Server
+
+Nach einem Ereignis ist das mobile Internet zuerst überlastet. Eine SMS
+kommt oft noch durch: Sie ist klein und wird gespeichert und weitergereicht.
+`CheckInScreen` (#116) baut deshalb die Nachricht (Zustand, Uhrzeit, auf
+Wunsch Koordinaten mit Genauigkeit und ein OpenStreetMap-Link, ein Zusatz)
+und übergibt sie über einen `sms:`-Link der SMS-App des Telefons, je Empfänger
+einzeln. Gesendet wird erst, wenn die Person dort auf Senden drückt.
+
+- iOS liest den Text hinter `&body=`, alle anderen hinter `?body=`.
+  Leerzeichen gehen als `%20`, ein `+` käme als Pluszeichen an
+  (`smsUri`).
+- Mehrere Empfänger in einem Link sind nicht verlässlich (Trennzeichen je
+  Hersteller verschieden), deshalb ein Knopf je Kontakt. Familiengruppen in
+  Messengern erreicht „Mit anderer App senden“.
+- Unter Windows und Linux gibt es keinen Standard-Handler für `sms:`. Dort
+  bleiben Teilen und Kopieren.
+- Die Empfänger liegen verschlüsselt (`checkInContacts.v1`) und reisen als
+  mitgeführte Einstellung. Vorgeschlagen werden der Kontakt außerhalb der
+  Region aus dem Notfallplan und Nummern aus dem Notfallkontakt der
+  Notfallkarten.
+
+
 ### Ein unlesbarer Schlüsselspeicher heißt nicht „nichts eingerichtet"
 
 Als der macOS-Start daran scheiterte, dass die App keinen Schlüsselbund

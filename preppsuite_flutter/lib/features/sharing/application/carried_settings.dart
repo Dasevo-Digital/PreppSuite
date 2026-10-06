@@ -72,7 +72,12 @@ const _setupOnly = CarriedWhen.setupOnly;
 /// what travels is the value and not this device's envelope — the far
 /// side has a different key and could make nothing of it. The journey
 /// itself is already encrypted, whichever road it takes.
-const _privateSettings = {'preparednessHubV1', 'personalMapPlaces.v1'};
+const _privateSettings = {
+  'preparednessHubV1',
+  'personalMapPlaces.v1',
+  'checkInContacts.v1',
+  'heavyRainHazard.v1',
+};
 
 /// Every setting that travels with a household, and what it holds.
 /// Deliberately absent: `warningCountryCode`, `warningRegionKey` and
@@ -121,6 +126,14 @@ const carriedSettings = <String, CarriedSetting>{
   // are coordinates, not paths, so nothing here points at a file on the
   // other machine.
   'personalMapPlaces.v1': (kind: CarriedKind.text, when: _always),
+
+  // Who is told that the household is alive. Typed in once, and the
+  // thing nobody wants to be typing on a second phone after the event.
+  'checkInContacts.v1': (kind: CarriedKind.text, when: _always),
+
+  // The heavy rain hazard at the household's address. The household is
+  // in one place, and the answer was asked for with a network.
+  'heavyRainHazard.v1': (kind: CarriedKind.text, when: _always),
 
   // How far ahead the household wants to be warned.
   'expiryLeadDays': (kind: CarriedKind.integer, when: _always),

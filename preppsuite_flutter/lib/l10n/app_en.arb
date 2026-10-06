@@ -4629,5 +4629,59 @@
       }
     }
   },
-  "heavyRainPrivacy": "For the check, the coordinates go to the BKG map service, and a position rounded to about a kilometre goes to OpenStreetMap to find the state."
+  "heavyRainPrivacy": "For the check, the coordinates go to the BKG map service, and a position rounded to about a kilometre goes to OpenStreetMap to find the state.",
+  "checkInTitle": "Send a sign of life",
+  "checkInEntryHint": "Say by text message that you are all right – a text often still gets through when mobile data is overloaded.",
+  "checkInStatusLabel": "What should arrive?",
+  "checkInSafe": "I am all right.",
+  "checkInNeedHelp": "I need help.",
+  "checkInOnMyWay": "I am on my way to the meeting point.",
+  "checkInOnMyWayTo": "I am on my way to the meeting point: {place}.",
+  "@checkInOnMyWayTo": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "checkInTime": "As of {time}",
+  "@checkInTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "checkInAttachLocation": "Attach my location",
+  "checkInLocating": "Finding my location …",
+  "checkInNote": "Additional note (optional)",
+  "checkInPreview": "This message will be sent",
+  "checkInRecipients": "Recipients",
+  "checkInNoRecipients": "No recipients yet. Ideally someone outside your own region – local networks are the first to be overloaded in an emergency.",
+  "checkInSendTo": "Text {name}",
+  "@checkInSendTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "checkInShare": "Send with another app",
+  "checkInCopy": "Copy text",
+  "checkInCopied": "Text copied.",
+  "checkInAddContact": "Add recipient",
+  "checkInContactName": "Name",
+  "checkInContactPhone": "Phone number",
+  "checkInContactInvalid": "Enter a name and a valid phone number.",
+  "checkInRemoveContact": "Remove recipient",
+  "checkInSuggestion": "Use suggestion: {name}",
+  "@checkInSuggestion": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "checkInNoSmsApp": "No text message app can be opened here. Copy the text or send it with another app.",
+  "checkInPrivacy": "The message only goes through the text or messaging app you choose. PreppSuite sends nothing itself."
 }
