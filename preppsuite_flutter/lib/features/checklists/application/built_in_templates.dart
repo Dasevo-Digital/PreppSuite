@@ -1094,4 +1094,99 @@ const builtInTemplates = [
       ),
     ],
   ),
+  // Nach der Broschüre "Krisen- und Katastrophenvorsorge für
+  // pflegebedürftige Menschen und ihre An- und Zugehörigen" des
+  // AOK-Bundesverbands, Stand Dezember 2024 (#118). Die Punkte stehen dort
+  // so oder fast so; die App fügt nichts hinzu. Eine eigene Vorlage und
+  // keine Zeilen in einer bestehenden, damit sie auch Haushalte erreicht,
+  // die längst angelegt sind (siehe oben).
+  BuiltInTemplate(
+    '00000000-0000-4000-8000-000000000025',
+    'Pflege zu Hause: Vorsorge für Angehörige (AOK)',
+    ChecklistCategory.wellbeing,
+    [
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002501',
+        'Unterstützungsnetz absprechen: wer was und wie lange '
+            'übernimmt, wer koordiniert, wer die Schlüssel hat – auch die '
+            'direkte Nachbarschaft fragen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002502',
+        'Versorgung ohne Pflegedienst planen; den Pflegedienst fragen, '
+            'was er im Notfall leisten kann',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002503',
+        'Alle Helfenden in die nötigen Pflegeaufgaben einweisen, etwa '
+            'über einen Pflegekurs',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002504',
+        'Hausarzt und Pflegedienst wissen, ob Beatmungs- oder '
+            'Sauerstoffgeräte gebraucht werden',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002505',
+        'Mit der Arztpraxis einen Plan für Stromausfall machen; darin: '
+            'wie lange gekühlte Medikamente bei falscher Temperatur '
+            'verwendbar bleiben',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002506',
+        'Thermometer in Kühl- und Gefrierschrank',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002507',
+        'Bei Sauerstoff oder Beatmung: erforderliche Materialien und '
+            'zusätzliche Akkus bereithalten',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002508',
+        'Bei elektrischer Wechseldruckmatratze: eine normale '
+            'Schaumstoffmatratze vorrätig',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002509',
+        'Bei passierter Kost: passierte Kost in Gläsern und einen '
+            'Vorrat an Trinknahrung, weil der Mixer ohne Strom ausfällt',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002510',
+        'Pflegematerial für mehrere Tage: Einmalhandschuhe, '
+            'Händedesinfektionsmittel, Inkontinenzmaterial, '
+            'Injektionsnadeln, Insulinpen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002511',
+        'Medikamente für mehrere Tage im Haus',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002512',
+        'Müllbeutel und einen Mülleimer mit Deckel für Abfälle und '
+            'Ausscheidungen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002513',
+        'Thermoskannen oder -flaschen für heißes Wasser und Getränke',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002514',
+        'Hausnotruf, Telefon und Türklingel fallen ohne Strom aus: '
+            'Klopf- oder Lichtzeichen mit Nachbarn vereinbaren und eine '
+            'Telefonliste auf Papier neben das Telefon legen',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002515',
+        'Klären, wie die pflegebedürftige Person rechtzeitig evakuiert '
+            'werden kann und wer sie außerhalb der Gefahrenzone aufnimmt',
+      ),
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000002516',
+        'Notfalltasche: Telefonliste, Medikamente, Ausweis, Bargeld, '
+            'Gesundheitskarte, Impfpass, Schlüssel, geladenes Telefon, '
+            'Hygieneartikel und Pflegemittel für ein paar Tage, Kleidung',
+      ),
+    ],
+  ),
 ];
