@@ -228,6 +228,29 @@ class PersonalDocumentStore {
     return updated;
   }
 
+  /// Points document [id] at [location], keeping everything else about
+  /// it -- its index, its reading position. For a file that is still
+  /// there but could no longer be reached by the old handle.
+  Future<void> relocate(String id, String location) async {
+    final updated = [
+      for (final item in await load())
+        if (item.id == id)
+          PersonalDocument(
+            id: item.id,
+            location: location,
+            label: item.label,
+            addedAt: item.addedAt,
+            indexStatus: item.indexStatus,
+            indexedCharacters: item.indexedCharacters,
+            readerOffset: item.readerOffset,
+            sourceFingerprint: item.sourceFingerprint,
+          )
+        else
+          item,
+    ];
+    await _save(updated);
+  }
+
   Future<void> updateReaderOffset(String id, double offset) async {
     final updated = [
       for (final item in await load())

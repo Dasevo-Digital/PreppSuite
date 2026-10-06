@@ -10,6 +10,7 @@ import 'core/former_identity.dart';
 import 'core/local_database_encryption.dart';
 import 'core/photo_vault.dart';
 import 'core/portable_data.dart';
+import 'features/downloads/application/relink_files.dart';
 import 'features/inventory/application/inventory_photo_service.dart';
 import 'features/inventory/application/open_food_facts_service.dart';
 
@@ -50,6 +51,13 @@ void main(List<String> args) async {
   // right now leaves the app in recovery, where `LocalDataGate` explains
   // it -- a crash before `runApp` would leave nothing at all.
   await LocalDatabaseEncryption.instance.initializeOrMarkUnavailable();
+
+  // After the key, because the document list is encrypted; before the
+  // providers, because they read what this may rewrite. An update can
+  // cut the app off from the map and the archives while the files sit
+  // exactly where they were -- see `relink_files.dart`. Bounded, and it
+  // cannot stop startup.
+  await relinkMovedFiles();
 
   // Seals the pictures an older version left in the clear, in the
   // background. A picture that is opened first is sealed by that read;

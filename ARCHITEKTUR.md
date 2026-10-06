@@ -2227,6 +2227,33 @@ Manipulation, Überspringen, Format 2) und
 Download-Ordner auf dem Gerät).
 
 
+### Nach einem Update findet die App ihre Dateien selbst wieder
+
+Nach Updates fehlten auf iPhone und Mac Offline-Karte und Wissensarchive,
+obwohl die Dateien unverändert dalagen (#120). Kaputt ist jeweils nur der
+Weg, auf dem die App sie sich gemerkt hat:
+
+- **iOS** legt den App-Ordner unter einem Pfad mit Container-Kennung ab, und
+  die kann sich mit einem Update ändern. Ein Download, gemerkt mit vollem
+  Pfad, zeigt danach in einen Ordner, den es nicht mehr gibt.
+- **macOS** merkt sich gewählte Dateien als Lesezeichen mit Freigabe. Die
+  Sandbox bindet sie an die Signatur, und die ändert sich bei einem ad hoc
+  signierten Build mit jeder Fassung. Eine Freigabe der Vorgängerversion
+  geht dann womöglich nicht mehr auf, mit Sicherheit nicht über einen
+  Kennungswechsel hinweg (2.4.1).
+
+`relinkMovedFiles` läuft deshalb beim Start nach dem Schlüssel und vor den
+Providern, höchstens zehn Sekunden. Es probiert Karte, Archive und eigene
+Dokumente. Was nicht aufgeht, sucht es in den Ordnern, die die App ohne
+Rückfrage erreicht (Download-Ordner, Datenordner, je zwei Ebenen tief): nach
+dem Namen, ein Archiv auch nach seiner genauen Größe, denn ein Archiv mit
+Titel als Bezeichnung („Projekt Gutenberg-Bibliothek“) hat keinen
+Dateinamen im Eintrag. Zwei Dateien gleicher Größe werden nicht geraten. Das
+Archiv behält seine Kennung und damit seinen Suchindex. Was nicht gefunden
+wird, bleibt unverändert: Eine nicht angesteckte Platte ist kein Grund,
+etwas zu vergessen.
+
+
 ### Lebenszeichen per SMS, ohne Server
 
 Nach einem Ereignis ist das mobile Internet zuerst überlastet. Eine SMS
