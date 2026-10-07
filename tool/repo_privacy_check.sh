@@ -4,9 +4,11 @@
 # address; third-party licence texts are explicitly excluded below.
 set -euo pipefail
 
-readonly PROJECT_EMAIL='noreply'@'preppsuite.invalid'
-readonly IDENTITY="PreppSuite Contributors <$PROJECT_EMAIL>"
-# Every commit in the reachable history must use the neutral project identity.
+# Every commit in the reachable history carries the maintainer's GitHub login
+# and its noreply address, so GitHub attributes it to that account without a
+# real name or mailbox.
+readonly AUTHOR_EMAIL='335995236+superkuh86'@'users.noreply.github.com'
+readonly IDENTITY="superkuh86 <$AUTHOR_EMAIL>"
 readonly EXCLUDED=(
   ':(exclude)preppsuite_flutter/assets/fonts/OFL.txt'
   ':(exclude)preppsuite_flutter/ios/**/Package.resolved'
@@ -38,8 +40,8 @@ if matches=$(git grep -n -I -E '[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}' -- . "${E
   fi
 fi
 
-# The history was rewritten on 2026-10-02 to the neutral identity throughout,
-# so the whole reachable history is checked.
+# The history was rewritten on 2026-10-07 to this identity throughout, so the
+# whole reachable history is checked.
 if identities=$(git log HEAD --format='%aN <%aE>%n%cN <%cE>' | sort -u | grep -vFx "$IDENTITY" || true); then
   if [[ -n "$identities" ]]; then
     report "Personal author or committer identity in reachable Git history:"
