@@ -174,8 +174,12 @@ Future<void> rememberPortableFolder({
   String? handle,
 }) async {
   final pointer = await _pointerFile();
+  // The path goes on a second line beside a handle (#112). The handle is
+  // what opens the folder; the path is what can be shown when the handle
+  // no longer does -- "bookmark://19E10C5E-…" told nobody which folder
+  // was missing.
   await pointer.writeAsString(
-    handle == null || handle.isEmpty ? location : handle,
+    handle == null || handle.isEmpty ? location : '$handle\n$location',
   );
 }
 
@@ -205,12 +209,21 @@ Future<({Directory? directory, String? stored})> _chosenDirectory([
   }
 
   final String stored;
+  String? shown;
   try {
-    stored = (await pointer.readAsString()).trim();
+    // One line, or a handle and the path it stood for. Written before
+    // #112 there is only the first.
+    final lines = (await pointer.readAsString())
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+    if (lines.isEmpty) return nothingChosen;
+    stored = lines.first;
+    shown = lines.length > 1 ? lines[1] : null;
   } on Object {
     return nothingChosen;
   }
-  if (stored.isEmpty) return nothingChosen;
 
   // A handle has to be resolved, and resolving it is also what opens the
   // security scope that lets `dart:io` touch anything inside.
@@ -218,9 +231,10 @@ Future<({Directory? directory, String? stored})> _chosenDirectory([
       ? await resolveStoragePath(stored)
       : stored;
 
-  // A handle nobody can resolve has no path worth showing, so the handle
-  // itself stands in -- it is at least evidence that a choice was made.
-  if (path == null) return (directory: null, stored: stored);
+  // A handle nobody can resolve: the path it was made for, where it was
+  // written down, and otherwise the handle itself -- at least evidence
+  // that a choice was made.
+  if (path == null) return (directory: null, stored: shown ?? stored);
 
   final directory = Directory(path);
   if (await _usable(directory)) return (directory: directory, stored: null);

@@ -171,6 +171,36 @@ void main() {
       expect(location.missingChoice, gone);
     });
 
+    test(
+      'a handle that no longer opens names the folder, not itself',
+      () async {
+        // #112: the notice said "bookmark://19E10C5E-…", which told nobody
+        // which folder to look for. The path is written beside the handle.
+        final location = await resolvePortableLocation(
+          environment: const {},
+          executablePath: unpacked(depth: 0, withDataFolder: false),
+          searchBesideProgram: true,
+          pointerDirectory: pointingAt(
+            'bookmark://19E10C5E-839A-4CDE-BE6E-4384223FF3D1\n'
+            '/Volumes/Daten/Daten/PreppSuite',
+          ),
+        );
+
+        expect(location.missingChoice, '/Volumes/Daten/Daten/PreppSuite');
+      },
+    );
+
+    test('a handle written before #112 still stands in for itself', () async {
+      final location = await resolvePortableLocation(
+        environment: const {},
+        executablePath: unpacked(depth: 0, withDataFolder: false),
+        searchBesideProgram: true,
+        pointerDirectory: pointingAt('bookmark://ALT'),
+      );
+
+      expect(location.missingChoice, 'bookmark://ALT');
+    });
+
     test('is still reported when some other folder is found instead', () async {
       // Worse than finding nothing: the app would come up on a different
       // household and look perfectly fine doing it.
