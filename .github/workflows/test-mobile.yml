@@ -42,8 +42,14 @@ jobs:
           target: google_apis
           arch: x86_64
           disable-animations: true
+          # The default 2 GB was not enough once the device tests grew past
+          # six files; the emulator started dropping off adb (#121).
+          ram-size: 4096M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           working-directory: preppsuite_flutter
-          script: flutter test --no-pub integration_test/ -d emulator-5554
+          # One file at a time, with a wait for the device and one retry
+          # each: see the script for why.
+          script: bash ../tool/run_android_integration.sh
 
   ios:
     # workmanager_apple needs the iOS 26 SDK (Xcode 26).
