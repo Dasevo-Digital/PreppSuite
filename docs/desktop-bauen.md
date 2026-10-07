@@ -194,6 +194,29 @@ Die entstandene `zim_xapian.dll` gehört vor dem Bau nach
 `preppsuite_flutter/native/zim_xapian/build/`; CMake legt sie dann neben
 die `.exe`.
 
+## Ein Release in einem Lauf
+
+`tool/release.sh <version>` baut alle sechs Pakete eines Releases und prüft
+sie (#125). Vorher wird die Version in `pubspec.yaml` angehoben, committet,
+als `v<version>` getaggt und gepusht; das Skript baut, was der Tag sagt, und
+bricht ab, wenn das Arbeitsverzeichnis davon abweicht.
+
+Reihenfolge, damit die langsamen Maschinen nicht warten: Der Linux-Build
+(`tool/linux_release.sh`) startet zuerst und läuft im Hintergrund, während
+der Mac das macOS- und die Android-Pakete baut und den Gerätetest im
+iPhone-Simulator laufen lässt. Danach holt das Skript das Linux-Paket und
+die quergebaute `zim_xapian.dll` und baut Windows (`tool/windows_build.ps1`).
+Zum Schluss prüft es PDFium in allen sechs Paketen gegen die Attestation und
+schreibt `SHA256SUMS.txt`.
+
+Die Maschinen und das Ziel zum Hochladen stehen nicht im Skript, sondern in
+der Umgebung: `RELEASE_LINUX_HOST`, `RELEASE_WINDOWS_HOST` (ssh-Namen),
+`RELEASE_DIR` (Upload-Ordner), und für `--publish` `RELEASE_API` und
+`RELEASE_TOKEN`. Den Release-Text schreibt man von Hand als
+`RELEASE-TEXT-v<version>.md` in den Upload-Ordner; `--publish` legt damit
+das Release an und lädt jede Datei hoch, mit Prüfsummenvergleich nach dem
+Hochladen.
+
 ## Woher PDFium kommt
 
 PDFium ist die einzige fremde Binärdatei, die in ein PreppSuite-Paket
