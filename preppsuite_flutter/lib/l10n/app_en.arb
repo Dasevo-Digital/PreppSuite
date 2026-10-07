@@ -4758,5 +4758,40 @@
   "compassS": "south",
   "compassSW": "south-west",
   "compassW": "west",
-  "compassNW": "north-west"
+  "compassNW": "north-west",
+  "backupReminderTitle": "Time for a backup",
+  "backupReminderBody": "The last backup on this device is from {date}. Photos, your own documents and archives only survive a lost device in a backup.",
+  "@backupReminderBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupReminderBodyNever": "No backup has been made on this device yet. Photos, your own documents and archives only survive a lost device in a backup.",
+  "backupLastNever": "No backup made on this device yet.",
+  "backupLastAt": "Last backup: {date} ({age})",
+  "@backupLastAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "age": {
+        "type": "String"
+      }
+    }
+  },
+  "backupReminderLabel": "Remind me of the next backup",
+  "readinessBackupMade": "Backup up to date",
+  "readinessBackupMadeNever": "No backup made on this device yet",
+  "readinessBackupMadeAge": "Last backed up: {age}",
+  "@readinessBackupMadeAge": {
+    "placeholders": {
+      "age": {
+        "type": "String"
+      }
+    }
+  },
+  "backupAgeToday": "today",
+  "backupAgeYesterday": "yesterday"
 }

@@ -2288,5 +2288,16 @@
   "compassS": "al sur",
   "compassSW": "al suroeste",
   "compassW": "al oeste",
-  "compassNW": "al noroeste"
+  "compassNW": "al noroeste",
+  "backupReminderTitle": "Es hora de hacer una copia de seguridad",
+  "backupReminderBody": "La última copia de seguridad en este dispositivo es del {date}. Las fotos, los documentos propios y los archivos solo sobreviven a la pérdida del dispositivo en una copia.",
+  "backupReminderBodyNever": "Aún no se ha hecho ninguna copia de seguridad en este dispositivo. Las fotos, los documentos propios y los archivos solo sobreviven a la pérdida del dispositivo en una copia.",
+  "backupLastNever": "Aún no hay ninguna copia de seguridad en este dispositivo.",
+  "backupLastAt": "Última copia de seguridad: {date} ({age})",
+  "backupReminderLabel": "Recordar la próxima copia",
+  "readinessBackupMade": "Copia de seguridad al día",
+  "readinessBackupMadeNever": "Aún no hay ninguna copia en este dispositivo",
+  "readinessBackupMadeAge": "Última copia: {age}",
+  "backupAgeToday": "hoy",
+  "backupAgeYesterday": "ayer"
 }

@@ -13848,6 +13848,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'north-west'**
   String get compassNW;
+
+  /// No description provided for @backupReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for a backup'**
+  String get backupReminderTitle;
+
+  /// No description provided for @backupReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The last backup on this device is from {date}. Photos, your own documents and archives only survive a lost device in a backup.'**
+  String backupReminderBody(String date);
+
+  /// No description provided for @backupReminderBodyNever.
+  ///
+  /// In en, this message translates to:
+  /// **'No backup has been made on this device yet. Photos, your own documents and archives only survive a lost device in a backup.'**
+  String get backupReminderBodyNever;
+
+  /// No description provided for @backupLastNever.
+  ///
+  /// In en, this message translates to:
+  /// **'No backup made on this device yet.'**
+  String get backupLastNever;
+
+  /// No description provided for @backupLastAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backup: {date} ({age})'**
+  String backupLastAt(String date, String age);
+
+  /// No description provided for @backupReminderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me of the next backup'**
+  String get backupReminderLabel;
+
+  /// No description provided for @readinessBackupMade.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup up to date'**
+  String get readinessBackupMade;
+
+  /// No description provided for @readinessBackupMadeNever.
+  ///
+  /// In en, this message translates to:
+  /// **'No backup made on this device yet'**
+  String get readinessBackupMadeNever;
+
+  /// No description provided for @readinessBackupMadeAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Last backed up: {age}'**
+  String readinessBackupMadeAge(String age);
+
+  /// No description provided for @backupAgeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today'**
+  String get backupAgeToday;
+
+  /// No description provided for @backupAgeYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'yesterday'**
+  String get backupAgeYesterday;
 }
 
 class _AppLocalizationsDelegate

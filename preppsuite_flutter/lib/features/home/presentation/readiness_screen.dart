@@ -15,6 +15,8 @@ import '../../maps/application/offline_map_providers.dart';
 import '../../maps/application/personal_place.dart';
 import '../../maps/application/pmtiles_archive.dart';
 import '../../warnings/application/warning_poll_status_store.dart';
+import '../../settings/application/backup_reminder.dart';
+import '../../settings/presentation/backup_card.dart' show backupAge;
 
 final _warningPollStatusProvider = FutureProvider(
   (ref) => const WarningPollStatusStore().load(),
@@ -57,6 +59,7 @@ class ReadinessScreen extends ConsumerWidget {
     final warningStatus = ref.watch(_warningPollStatusProvider).value;
     final backupVerifiedAt = ref.watch(_backupVerificationProvider).value;
     final backupReady = LocalEncryptionReadinessStore.isFresh(backupVerifiedAt);
+    final backup = ref.watch(backupStatusProvider);
     final equipment = ref.watch(chargeCheckProvider);
     final equipmentReady =
         !equipment.isOff && equipment.lastChecked != null && !equipment.isDue();
@@ -79,6 +82,7 @@ class ReadinessScreen extends ConsumerWidget {
       (l10n.readinessMap, mapReady),
       (l10n.readinessKnowledge, knowledgeReady),
       (l10n.readinessEquipment, equipmentReady),
+      (l10n.readinessBackupMade, backup.isCurrent()),
       (l10n.readinessBackup, backupReady),
     ];
     final readyCount = checks.where((check) => check.$2).length;
@@ -167,6 +171,16 @@ class ReadinessScreen extends ConsumerWidget {
                   value: knowledgeReady
                       ? l10n.readinessArchivesReady(knowledge!.library.length)
                       : l10n.readinessPackageMissing,
+                ),
+                const Divider(height: 1),
+                _StatusRow(
+                  icon: Icons.save_alt,
+                  title: l10n.readinessBackupMade,
+                  value: backup.lastBackup == null
+                      ? l10n.readinessBackupMadeNever
+                      : l10n.readinessBackupMadeAge(
+                          backupAge(l10n, backup.daysSince() ?? 0),
+                        ),
                 ),
                 const Divider(height: 1),
                 _StatusRow(

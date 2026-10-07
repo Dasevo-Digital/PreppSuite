@@ -8395,4 +8395,46 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get compassNW => 'al noroeste';
+
+  @override
+  String get backupReminderTitle => 'Es hora de hacer una copia de seguridad';
+
+  @override
+  String backupReminderBody(String date) {
+    return 'La última copia de seguridad en este dispositivo es del $date. Las fotos, los documentos propios y los archivos solo sobreviven a la pérdida del dispositivo en una copia.';
+  }
+
+  @override
+  String get backupReminderBodyNever =>
+      'Aún no se ha hecho ninguna copia de seguridad en este dispositivo. Las fotos, los documentos propios y los archivos solo sobreviven a la pérdida del dispositivo en una copia.';
+
+  @override
+  String get backupLastNever =>
+      'Aún no hay ninguna copia de seguridad en este dispositivo.';
+
+  @override
+  String backupLastAt(String date, String age) {
+    return 'Última copia de seguridad: $date ($age)';
+  }
+
+  @override
+  String get backupReminderLabel => 'Recordar la próxima copia';
+
+  @override
+  String get readinessBackupMade => 'Copia de seguridad al día';
+
+  @override
+  String get readinessBackupMadeNever =>
+      'Aún no hay ninguna copia en este dispositivo';
+
+  @override
+  String readinessBackupMadeAge(String age) {
+    return 'Última copia: $age';
+  }
+
+  @override
+  String get backupAgeToday => 'hoy';
+
+  @override
+  String get backupAgeYesterday => 'ayer';
 }

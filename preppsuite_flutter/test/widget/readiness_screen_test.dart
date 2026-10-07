@@ -115,7 +115,7 @@ void main() {
   testWidgets('an empty household is ready for nothing', (tester) async {
     await show(tester);
 
-    expect(find.textContaining('0 von 8'), findsOneWidget);
+    expect(find.textContaining('0 von 9'), findsOneWidget);
   });
 
   testWidgets('a ticked task counts, even with an empty pantry', (
@@ -123,7 +123,7 @@ void main() {
   ) async {
     await show(tester, checklist: [task(clientId: 'a', isChecked: true)]);
 
-    expect(find.textContaining('1 von 8'), findsOneWidget);
+    expect(find.textContaining('1 von 9'), findsOneWidget);
   });
 
   testWidgets('stock that covers a linked task counts it as done', (
@@ -144,7 +144,7 @@ void main() {
       ],
     );
 
-    expect(find.textContaining('2 von 8'), findsOneWidget);
+    expect(find.textContaining('2 von 9'), findsOneWidget);
   });
 
   testWidgets('stock below the target does not count the task', (
@@ -164,7 +164,7 @@ void main() {
       ],
     );
 
-    expect(find.textContaining('1 von 8'), findsOneWidget);
+    expect(find.textContaining('1 von 9'), findsOneWidget);
   });
 
   testWidgets('a task linked to nothing on the shelf does not count', (
@@ -176,7 +176,7 @@ void main() {
       checklist: [task(clientId: 'a', linkedInventoryItemId: 'batteries')],
     );
 
-    expect(find.textContaining('1 von 8'), findsOneWidget);
+    expect(find.textContaining('1 von 9'), findsOneWidget);
   });
 
   testWidgets('the screen meets the accessibility guidelines', (tester) async {

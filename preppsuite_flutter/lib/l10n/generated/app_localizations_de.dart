@@ -8367,4 +8367,46 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get compassNW => 'nordwestlich';
+
+  @override
+  String get backupReminderTitle => 'Zeit für eine Datensicherung';
+
+  @override
+  String backupReminderBody(String date) {
+    return 'Die letzte Datensicherung auf diesem Gerät ist vom $date. Fotos, eigene Dokumente und Archive überstehen ein verlorenes Gerät nur in einer Sicherung.';
+  }
+
+  @override
+  String get backupReminderBodyNever =>
+      'Auf diesem Gerät wurde noch keine Datensicherung erstellt. Fotos, eigene Dokumente und Archive überstehen ein verlorenes Gerät nur in einer Sicherung.';
+
+  @override
+  String get backupLastNever =>
+      'Auf diesem Gerät noch keine Datensicherung erstellt.';
+
+  @override
+  String backupLastAt(String date, String age) {
+    return 'Letzte Datensicherung: $date ($age)';
+  }
+
+  @override
+  String get backupReminderLabel => 'An die nächste Sicherung erinnern';
+
+  @override
+  String get readinessBackupMade => 'Datensicherung aktuell';
+
+  @override
+  String get readinessBackupMadeNever =>
+      'Auf diesem Gerät noch keine Datensicherung erstellt';
+
+  @override
+  String readinessBackupMadeAge(String age) {
+    return 'Zuletzt gesichert: $age';
+  }
+
+  @override
+  String get backupAgeToday => 'heute';
+
+  @override
+  String get backupAgeYesterday => 'gestern';
 }

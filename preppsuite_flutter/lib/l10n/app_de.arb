@@ -3510,5 +3510,16 @@
   "compassS": "südlich",
   "compassSW": "südwestlich",
   "compassW": "westlich",
-  "compassNW": "nordwestlich"
+  "compassNW": "nordwestlich",
+  "backupReminderTitle": "Zeit für eine Datensicherung",
+  "backupReminderBody": "Die letzte Datensicherung auf diesem Gerät ist vom {date}. Fotos, eigene Dokumente und Archive überstehen ein verlorenes Gerät nur in einer Sicherung.",
+  "backupReminderBodyNever": "Auf diesem Gerät wurde noch keine Datensicherung erstellt. Fotos, eigene Dokumente und Archive überstehen ein verlorenes Gerät nur in einer Sicherung.",
+  "backupLastNever": "Auf diesem Gerät noch keine Datensicherung erstellt.",
+  "backupLastAt": "Letzte Datensicherung: {date} ({age})",
+  "backupReminderLabel": "An die nächste Sicherung erinnern",
+  "readinessBackupMade": "Datensicherung aktuell",
+  "readinessBackupMadeNever": "Auf diesem Gerät noch keine Datensicherung erstellt",
+  "readinessBackupMadeAge": "Zuletzt gesichert: {age}",
+  "backupAgeToday": "heute",
+  "backupAgeYesterday": "gestern"
 }

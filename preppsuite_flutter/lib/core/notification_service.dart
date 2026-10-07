@@ -158,6 +158,7 @@ class NotificationService {
   static const _expiryPayloadPrefix = 'expiry:';
   static const _chargeReminderId = 90407;
   static const _warningDayId = 90408;
+  static const _backupReminderId = 90409;
 
   /// Replaces all pending expiry reminders with [reminders].
   ///
@@ -259,6 +260,41 @@ class NotificationService {
     if (!supportsScheduledNotifications) return;
     await _ensureInitialized();
     await _plugin.cancel(id: _chargeReminderId);
+  }
+
+  /// Schedules the reminder to write a backup again (#122). One fixed id,
+  /// so a new backup or a new interval replaces the pending one.
+  Future<void> scheduleBackupReminder({
+    required DateTime fireAt,
+    required String title,
+    required String body,
+  }) async {
+    if (!supportsScheduledNotifications) return;
+    await _ensureInitialized();
+    await _plugin.zonedSchedule(
+      id: _backupReminderId,
+      title: title,
+      body: body,
+      payload: 'backup-reminder',
+      scheduledDate: tz.TZDateTime.from(fireAt.toUtc(), tz.UTC),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      notificationDetails: const NotificationDetails(
+        macOS: DarwinNotificationDetails(),
+        iOS: DarwinNotificationDetails(),
+        android: AndroidNotificationDetails(
+          'backup-reminder',
+          'Datensicherung',
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+      ),
+    );
+  }
+
+  Future<void> cancelBackupReminder() async {
+    if (!supportsScheduledNotifications) return;
+    await _ensureInitialized();
+    await _plugin.cancel(id: _backupReminderId);
   }
 
   /// Schedules the reminder for the nationwide warning day.

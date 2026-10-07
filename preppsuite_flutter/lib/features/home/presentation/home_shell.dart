@@ -26,6 +26,7 @@ import '../application/shell_layout.dart';
 import 'overview_screen.dart';
 import 'emergency_screen.dart';
 import 'home_screen_widget_sync.dart';
+import '../../settings/presentation/backup_reminder_scheduler.dart';
 
 /// Top-level navigation once a profile exists.
 ///
@@ -125,6 +126,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             // inventory for as long as any tab is open.
             ExpiryReminderScheduler(householdId: householdId),
             ChargeReminderScheduler(),
+            const BackupReminderScheduler(),
             const WarningDayScheduler(),
             // Above the rail as well as the tabs: a warning concerns the
             // whole app, so it gets the whole width.

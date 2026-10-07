@@ -8324,4 +8324,44 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get compassNW => 'north-west';
+
+  @override
+  String get backupReminderTitle => 'Time for a backup';
+
+  @override
+  String backupReminderBody(String date) {
+    return 'The last backup on this device is from $date. Photos, your own documents and archives only survive a lost device in a backup.';
+  }
+
+  @override
+  String get backupReminderBodyNever =>
+      'No backup has been made on this device yet. Photos, your own documents and archives only survive a lost device in a backup.';
+
+  @override
+  String get backupLastNever => 'No backup made on this device yet.';
+
+  @override
+  String backupLastAt(String date, String age) {
+    return 'Last backup: $date ($age)';
+  }
+
+  @override
+  String get backupReminderLabel => 'Remind me of the next backup';
+
+  @override
+  String get readinessBackupMade => 'Backup up to date';
+
+  @override
+  String get readinessBackupMadeNever => 'No backup made on this device yet';
+
+  @override
+  String readinessBackupMadeAge(String age) {
+    return 'Last backed up: $age';
+  }
+
+  @override
+  String get backupAgeToday => 'today';
+
+  @override
+  String get backupAgeYesterday => 'yesterday';
 }

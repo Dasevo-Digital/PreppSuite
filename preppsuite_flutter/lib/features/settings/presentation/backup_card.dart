@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/app_database_providers.dart';
 import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/backup_container.dart';
+import '../application/backup_reminder.dart';
 import '../application/backup_service.dart';
 import 'backup_flow.dart';
 import 'passphrase_dialog.dart';
@@ -22,6 +24,7 @@ class BackupCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => Card(
     child: Column(
       children: [
+        _BackupStatusTile(l10n: l10n),
         ListTile(
           leading: const Icon(Icons.save_alt),
           title: Text(l10n.backupCreate),
@@ -62,6 +65,7 @@ class BackupCard extends ConsumerWidget {
         subject: l10n.backupShareSubject,
       );
       if (!saved) return;
+      await ref.read(backupStatusProvider.notifier).markBackedUp();
       messenger.showSnackBar(
         SnackBar(content: Text(_created(written.unreadable))),
       );
@@ -100,6 +104,9 @@ class BackupCard extends ConsumerWidget {
       if (written == null) return;
       file = written.file;
       await shareBackup(file, subject: l10n.backupShareSubject);
+      // Handed over is as far as this app can see. Whether the other app
+      // kept it is beyond it, and asking would be asking every time.
+      await ref.read(backupStatusProvider.notifier).markBackedUp();
       if (written.unreadable.isNotEmpty) {
         messenger.showSnackBar(
           SnackBar(content: Text(_created(written.unreadable))),
@@ -192,3 +199,79 @@ class BackupCard extends ConsumerWidget {
     );
   }
 }
+
+/// When this device last made a backup, and how often to be reminded
+/// (#122). The date is the point: a backup is only as good as it is
+/// recent, and nothing on the card used to say how recent it was.
+class _BackupStatusTile extends ConsumerWidget {
+  const _BackupStatusTile({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(backupStatusProvider);
+    final days = ref.watch(backupReminderDaysProvider);
+    final theme = Theme.of(context);
+    final last = status.lastBackup?.toLocal();
+    final current = status.isCurrent();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                current ? Icons.check_circle_outline : Icons.history,
+                color: current
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.error,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  last == null
+                      ? l10n.backupLastNever
+                      : l10n.backupLastAt(
+                          DateFormat.yMMMd(l10n.localeName).format(last),
+                          backupAge(l10n, status.daysSince() ?? 0),
+                        ),
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(l10n.backupReminderLabel, style: theme.textTheme.bodySmall),
+          const SizedBox(height: 4),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final interval in selectableBackupReminderDays)
+                ChoiceChip(
+                  label: Text(
+                    interval == 0
+                        ? l10n.settingsChargeReminderOff
+                        : l10n.chargeReminderInterval(interval),
+                  ),
+                  selected: days == interval,
+                  onSelected: (_) => ref
+                      .read(backupReminderDaysProvider.notifier)
+                      .setDays(interval),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "heute", "gestern", "vor 47 Tagen" -- the readiness overview's words.
+String backupAge(AppLocalizations l10n, int days) => switch (days) {
+  <= 0 => l10n.backupAgeToday,
+  1 => l10n.backupAgeYesterday,
+  _ => l10n.readinessDaysAgo(days),
+};
