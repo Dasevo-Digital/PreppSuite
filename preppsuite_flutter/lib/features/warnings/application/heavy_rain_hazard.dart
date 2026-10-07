@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 
 import '../../../core/private_preferences.dart';
+import 'river_flood.dart';
 
 /// Where water runs and stands after a cloudburst, at one address (#115).
 ///
@@ -104,6 +105,7 @@ class HeavyRainHazard {
     this.placeName,
     this.stateName,
     this.results = const {},
+    this.river,
   });
 
   final double latitude;
@@ -118,8 +120,14 @@ class HeavyRainHazard {
   final bool covered;
   final Map<HeavyRainScenario, HeavyRainScenarioResult> results;
 
-  /// Whether either scenario puts water of a coloured class within reach.
-  bool get anyWater => results.values.any((r) => (r.depthClass ?? 0) > 0);
+  /// The river flood map of the Land, where this app has one (#124). Null
+  /// for an answer kept from before it was asked.
+  final RiverFloodResult? river;
+
+  /// Whether any scenario, rain or river, puts water within reach.
+  bool get anyWater =>
+      results.values.any((r) => (r.depthClass ?? 0) > 0) ||
+      (river?.anyWater ?? false);
 
   Map<String, Object?> toJson() => {
     'latitude': latitude,
@@ -131,6 +139,7 @@ class HeavyRainHazard {
     'results': {
       for (final entry in results.entries) entry.key.name: entry.value.toJson(),
     },
+    'river': river?.toJson(),
   };
 
   static HeavyRainHazard? fromJson(Object? json) {
@@ -149,6 +158,7 @@ class HeavyRainHazard {
       stateName: json['stateName'] as String?,
       checkedAt: checkedAt,
       covered: json['covered'] != false,
+      river: RiverFloodResult.fromJson(json['river']),
       results: {
         if (results is Map)
           for (final scenario in HeavyRainScenario.values)

@@ -8006,11 +8006,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get heavyRainTitle => 'Heavy rain hazard';
+  String get heavyRainTitle => 'Heavy rain and floods';
 
   @override
   String get heavyRainEntryHint =>
-      'How deep water stands at your address after a cloudburst – map by the BKG.';
+      'How deep water stands at your address after a cloudburst or in a flood.';
 
   @override
   String get heavyRainIntro =>
@@ -8370,4 +8370,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapHideAeds => 'Hide defibrillators';
+
+  @override
+  String get riverFloodTitle => 'River floods';
+
+  @override
+  String get riverFloodFrequent => 'Frequent flood (HQhäufig)';
+
+  @override
+  String get riverFloodHundred => 'Hundred-year flood (HQ100)';
+
+  @override
+  String get riverFloodExtreme => 'Extreme flood (HQextrem)';
+
+  @override
+  String get riverFloodClass1 => 'up to 0.5 m of water';
+
+  @override
+  String get riverFloodClass2 => '0.5 to 1 m of water';
+
+  @override
+  String get riverFloodClass3 => '1 to 2 m of water';
+
+  @override
+  String get riverFloodClass4 => '2 to 4 m of water';
+
+  @override
+  String get riverFloodClass5 => 'more than 4 m of water';
+
+  @override
+  String get riverFloodDry => 'not flooded according to the map';
+
+  @override
+  String riverFloodUncovered(String state) {
+    return 'The flood hazard map of $state is not included yet.';
+  }
+
+  @override
+  String get riverFloodLimits =>
+      'Flood hazard maps under the EU Floods Directive, water depth within 25 m. Areas behind dikes are only roughly estimated there.';
+
+  @override
+  String get riverFloodSource =>
+      'Source: NLWKN, flood hazard maps (Floods Directive, 2nd cycle)';
+
+  @override
+  String get riverFloodFailed => 'The state\'s map service did not answer.';
 }

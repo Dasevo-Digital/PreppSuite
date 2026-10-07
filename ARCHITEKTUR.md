@@ -1142,6 +1142,21 @@ tree; the test suite deliberately targets that layer rather than the UI.
   the warning region. The map leaves out sewers and infiltration; the
   screen says so. The answer is kept in `PrivatePreferences`: it is the
   household's address.
+- **River floods come from each Land, Niedersachsen first** (#124). The
+  EU Floods Directive maps three floods per Land with the same five LAWA
+  depth classes, but every Land runs its own service. Niedersachsen is
+  the NLWKN's ArcGIS service on `umweltkarten-niedersachsen.de`
+  (`HWSchutz_wms/MapServer`, raster layers 20–22), asked with `identify`
+  per sample point. The service gives pixel values and not which class
+  they are; read off the rendered map against the legend swatches on
+  2026-10-07 (the layer draws at about 70 % opacity, which has to be
+  taken out first): 1–5 in HQhäufig and HQ100, 11–15 in HQextrem, the five
+  classes in order, `NoData` where the flood does not reach. The extreme
+  layer's five "protected" classes behind defences turned up in no sample,
+  so unknown values are dropped, not guessed. Other Länder show a sentence
+  saying they are not in yet. The source line names the NLWKN but not the
+  contact address in the service's copyright text -- an e-mail address
+  has no place in this repository.
 - **Overpass wants a name.** Since autumn 2026 `overpass-api.de` answers
   a request with Dart's default user agent (`Dart/3.x (dart:io)`) with
   406; the same query as `PreppSuite/1.0` answers 200 (measured

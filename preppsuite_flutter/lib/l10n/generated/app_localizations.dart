@@ -13300,13 +13300,13 @@ abstract class AppLocalizations {
   /// No description provided for @heavyRainTitle.
   ///
   /// In en, this message translates to:
-  /// **'Heavy rain hazard'**
+  /// **'Heavy rain and floods'**
   String get heavyRainTitle;
 
   /// No description provided for @heavyRainEntryHint.
   ///
   /// In en, this message translates to:
-  /// **'How deep water stands at your address after a cloudburst – map by the BKG.'**
+  /// **'How deep water stands at your address after a cloudburst or in a flood.'**
   String get heavyRainEntryHint;
 
   /// No description provided for @heavyRainIntro.
@@ -13926,6 +13926,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide defibrillators'**
   String get mapHideAeds;
+
+  /// No description provided for @riverFloodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'River floods'**
+  String get riverFloodTitle;
+
+  /// No description provided for @riverFloodFrequent.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequent flood (HQhäufig)'**
+  String get riverFloodFrequent;
+
+  /// No description provided for @riverFloodHundred.
+  ///
+  /// In en, this message translates to:
+  /// **'Hundred-year flood (HQ100)'**
+  String get riverFloodHundred;
+
+  /// No description provided for @riverFloodExtreme.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme flood (HQextrem)'**
+  String get riverFloodExtreme;
+
+  /// No description provided for @riverFloodClass1.
+  ///
+  /// In en, this message translates to:
+  /// **'up to 0.5 m of water'**
+  String get riverFloodClass1;
+
+  /// No description provided for @riverFloodClass2.
+  ///
+  /// In en, this message translates to:
+  /// **'0.5 to 1 m of water'**
+  String get riverFloodClass2;
+
+  /// No description provided for @riverFloodClass3.
+  ///
+  /// In en, this message translates to:
+  /// **'1 to 2 m of water'**
+  String get riverFloodClass3;
+
+  /// No description provided for @riverFloodClass4.
+  ///
+  /// In en, this message translates to:
+  /// **'2 to 4 m of water'**
+  String get riverFloodClass4;
+
+  /// No description provided for @riverFloodClass5.
+  ///
+  /// In en, this message translates to:
+  /// **'more than 4 m of water'**
+  String get riverFloodClass5;
+
+  /// No description provided for @riverFloodDry.
+  ///
+  /// In en, this message translates to:
+  /// **'not flooded according to the map'**
+  String get riverFloodDry;
+
+  /// No description provided for @riverFloodUncovered.
+  ///
+  /// In en, this message translates to:
+  /// **'The flood hazard map of {state} is not included yet.'**
+  String riverFloodUncovered(String state);
+
+  /// No description provided for @riverFloodLimits.
+  ///
+  /// In en, this message translates to:
+  /// **'Flood hazard maps under the EU Floods Directive, water depth within 25 m. Areas behind dikes are only roughly estimated there.'**
+  String get riverFloodLimits;
+
+  /// No description provided for @riverFloodSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: NLWKN, flood hazard maps (Floods Directive, 2nd cycle)'**
+  String get riverFloodSource;
+
+  /// No description provided for @riverFloodFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The state\'s map service did not answer.'**
+  String get riverFloodFailed;
 }
 
 class _AppLocalizationsDelegate

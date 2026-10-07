@@ -8046,11 +8046,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get heavyRainTitle => 'Starkregen-Gefahr';
+  String get heavyRainTitle => 'Starkregen und Hochwasser';
 
   @override
   String get heavyRainEntryHint =>
-      'Wie tief Wasser nach einem Wolkenbruch an der eigenen Adresse steht – Karte des BKG.';
+      'Wie tief Wasser nach einem Wolkenbruch oder bei Hochwasser an der eigenen Adresse steht.';
 
   @override
   String get heavyRainIntro =>
@@ -8415,4 +8415,51 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mapHideAeds => 'Defibrillatoren ausblenden';
+
+  @override
+  String get riverFloodTitle => 'Hochwasser an Flüssen';
+
+  @override
+  String get riverFloodFrequent => 'Häufiges Hochwasser (HQhäufig)';
+
+  @override
+  String get riverFloodHundred => 'Hundertjährliches Hochwasser (HQ100)';
+
+  @override
+  String get riverFloodExtreme => 'Extremes Hochwasser (HQextrem)';
+
+  @override
+  String get riverFloodClass1 => 'bis 0,5 m Wasser';
+
+  @override
+  String get riverFloodClass2 => '0,5 bis 1 m Wasser';
+
+  @override
+  String get riverFloodClass3 => '1 bis 2 m Wasser';
+
+  @override
+  String get riverFloodClass4 => '2 bis 4 m Wasser';
+
+  @override
+  String get riverFloodClass5 => 'mehr als 4 m Wasser';
+
+  @override
+  String get riverFloodDry => 'laut Karte nicht überflutet';
+
+  @override
+  String riverFloodUncovered(String state) {
+    return 'Für $state ist die Hochwassergefahrenkarte des Landes noch nicht eingebunden.';
+  }
+
+  @override
+  String get riverFloodLimits =>
+      'Hochwassergefahrenkarten nach der EU-Hochwasserrichtlinie, Wassertiefe im Umkreis von 25 m. Bereiche hinter Deichen sind dort nur grob ermittelt.';
+
+  @override
+  String get riverFloodSource =>
+      'Quelle: NLWKN, Hochwassergefahrenkarten (HWRM-RL, 2. Zyklus)';
+
+  @override
+  String get riverFloodFailed =>
+      'Der Kartendienst des Landes hat nicht geantwortet.';
 }

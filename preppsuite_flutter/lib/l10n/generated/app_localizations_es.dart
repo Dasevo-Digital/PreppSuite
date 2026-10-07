@@ -8074,11 +8074,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get heavyRainTitle => 'Peligro por lluvias torrenciales';
+  String get heavyRainTitle => 'Lluvias torrenciales y crecidas';
 
   @override
   String get heavyRainEntryHint =>
-      'Qué profundidad alcanza el agua en tu dirección tras un aguacero – mapa del BKG.';
+      'Qué profundidad alcanza el agua en tu dirección tras un aguacero o en una crecida.';
 
   @override
   String get heavyRainIntro =>
@@ -8443,4 +8443,51 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get mapHideAeds => 'Ocultar desfibriladores';
+
+  @override
+  String get riverFloodTitle => 'Crecidas de ríos';
+
+  @override
+  String get riverFloodFrequent => 'Crecida frecuente (HQhäufig)';
+
+  @override
+  String get riverFloodHundred => 'Crecida centenaria (HQ100)';
+
+  @override
+  String get riverFloodExtreme => 'Crecida extrema (HQextrem)';
+
+  @override
+  String get riverFloodClass1 => 'hasta 0,5 m de agua';
+
+  @override
+  String get riverFloodClass2 => 'de 0,5 a 1 m de agua';
+
+  @override
+  String get riverFloodClass3 => 'de 1 a 2 m de agua';
+
+  @override
+  String get riverFloodClass4 => 'de 2 a 4 m de agua';
+
+  @override
+  String get riverFloodClass5 => 'más de 4 m de agua';
+
+  @override
+  String get riverFloodDry => 'sin inundación según el mapa';
+
+  @override
+  String riverFloodUncovered(String state) {
+    return 'El mapa de peligro de inundación de $state aún no está incluido.';
+  }
+
+  @override
+  String get riverFloodLimits =>
+      'Mapas de peligro de inundación según la Directiva europea, profundidad del agua en un radio de 25 m. Las zonas tras los diques solo se estiman de forma aproximada.';
+
+  @override
+  String get riverFloodSource =>
+      'Fuente: NLWKN, mapas de peligro de inundación (Directiva de inundaciones, 2.º ciclo)';
+
+  @override
+  String get riverFloodFailed =>
+      'El servicio de mapas del estado federado no ha respondido.';
 }

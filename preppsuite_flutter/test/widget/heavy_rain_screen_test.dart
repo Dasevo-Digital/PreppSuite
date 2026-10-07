@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/warnings/application/heavy_rain_hazard.dart';
+import 'package:preppsuite_flutter/features/warnings/application/river_flood.dart';
 import 'package:preppsuite_flutter/features/warnings/presentation/heavy_rain_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,6 +67,35 @@ void main() {
     );
     expect(find.text('Fließgeschwindigkeit: 0,2 bis 0,5 m/s'), findsOneWidget);
     expect(find.textContaining('Kanalisation und Versickerung'), findsOne);
+  });
+
+  testWidgets('the river map shows its three floods', (tester) async {
+    await show(
+      tester,
+      HeavyRainHazard(
+        latitude: 52.378,
+        longitude: 9.7,
+        placeName: 'Hannover',
+        stateName: 'Niedersachsen',
+        checkedAt: DateTime(2026, 10, 7),
+        covered: true,
+        river: const RiverFloodResult(
+          covered: true,
+          classes: {
+            RiverFloodScenario.frequent: 0,
+            RiverFloodScenario.hundred: 4,
+            RiverFloodScenario.extreme: 5,
+          },
+        ),
+      ),
+    );
+    expect(find.text('Hochwasser an Flüssen'), findsOneWidget);
+    expect(
+      find.textContaining('HQhäufig): laut Karte nicht überflutet'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('(HQ100): 2 bis 4 m Wasser'), findsOneWidget);
+    expect(find.textContaining('NLWKN'), findsOneWidget);
   });
 
   testWidgets('a state without data is not called dry', (tester) async {

@@ -9,6 +9,7 @@ import '../../household/application/german_states.dart';
 import '../../household/application/household_providers.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../application/heavy_rain_hazard.dart';
+import '../application/river_flood.dart';
 
 /// Water after a cloudburst, at one address (#115).
 ///
@@ -21,12 +22,14 @@ class HeavyRainScreen extends ConsumerStatefulWidget {
   const HeavyRainScreen({
     super.key,
     this.client,
+    this.riverClient,
     this.geolocation,
     this.store = const HeavyRainStore(),
   });
 
   /// Injectable for tests.
   final HeavyRainClient? client;
+  final RiverFloodClient? riverClient;
   final GeolocationService? geolocation;
   final HeavyRainStore store;
 
@@ -36,6 +39,7 @@ class HeavyRainScreen extends ConsumerStatefulWidget {
 
 class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
   late final HeavyRainClient _client = widget.client ?? HeavyRainClient();
+  late final RiverFloodClient _river = widget.riverClient ?? RiverFloodClient();
   late final GeolocationService _geolocation =
       widget.geolocation ?? GeolocationService();
 
@@ -161,6 +165,16 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
       }
     }
 
+    // The river map is a second source, not a condition: one that does
+    // not answer costs its own card, not the heavy rain one (#124).
+    RiverFloodResult? river;
+    try {
+      river = await _river.check(latitude, longitude, stateCode: stateCode);
+    } on Object {
+      river = null;
+      _say(l10n.riverFloodFailed);
+    }
+
     final hazard = HeavyRainHazard(
       latitude: latitude,
       longitude: longitude,
@@ -169,6 +183,7 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
       checkedAt: DateTime.now(),
       covered: covered,
       results: results,
+      river: river,
     );
     await widget.store.save(hazard);
     if (!mounted) return;
@@ -286,6 +301,14 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
             scenario: scenario,
             result: hazard.results[scenario] ?? const HeavyRainScenarioResult(),
           ),
+      if (hazard.river case final river?) ...[
+        const SizedBox(height: 4),
+        _RiverCard(
+          l10n: l10n,
+          river: river,
+          stateName: hazard.stateName,
+        ),
+      ],
       if (hazard.anyWater && cellar > 0) ...[
         const SizedBox(height: 8),
         Card(
@@ -446,4 +469,92 @@ Color depthClassColour(int depthClass) => switch (depthClass) {
   4 => const Color(0xFF3D66FF),
   5 => const Color(0xFF0033CC),
   _ => const Color(0xFF08306B),
+};
+
+/// The Land's river flood map for the place (#124): three floods, each in
+/// the LAWA's five depth classes, or a sentence saying the Land is not
+/// in yet.
+class _RiverCard extends StatelessWidget {
+  const _RiverCard({
+    required this.l10n,
+    required this.river,
+    required this.stateName,
+  });
+
+  final AppLocalizations l10n;
+  final RiverFloodResult river;
+  final String? stateName;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.riverFloodTitle, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            if (!river.covered)
+              Text(l10n.riverFloodUncovered(stateName ?? ''))
+            else ...[
+              for (final scenario in RiverFloodScenario.values)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 16,
+                        height: 16,
+                        margin: const EdgeInsets.only(top: 2),
+                        decoration: BoxDecoration(
+                          color: riverClassColour(river.classes[scenario] ?? 0),
+                          border: Border.all(color: theme.colorScheme.outline),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${switch (scenario) {
+                            RiverFloodScenario.frequent => l10n.riverFloodFrequent,
+                            RiverFloodScenario.hundred => l10n.riverFloodHundred,
+                            RiverFloodScenario.extreme => l10n.riverFloodExtreme,
+                          }}: ${riverClassLabel(l10n, river.classes[scenario] ?? 0)}',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 4),
+              Text(l10n.riverFloodLimits, style: theme.textTheme.bodySmall),
+              const SizedBox(height: 4),
+              Text(l10n.riverFloodSource, style: theme.textTheme.bodySmall),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String riverClassLabel(AppLocalizations l10n, int depthClass) =>
+    switch (depthClass) {
+      1 => l10n.riverFloodClass1,
+      2 => l10n.riverFloodClass2,
+      3 => l10n.riverFloodClass3,
+      4 => l10n.riverFloodClass4,
+      5 => l10n.riverFloodClass5,
+      _ => l10n.riverFloodDry,
+    };
+
+/// The NLWKN legend's blues, read off its own legend swatches.
+Color riverClassColour(int depthClass) => switch (depthClass) {
+  1 => const Color(0xFFCCECFF),
+  2 => const Color(0xFF98CCFF),
+  3 => const Color(0xFF6798FF),
+  4 => const Color(0xFF3D67FF),
+  5 => const Color(0xFF0033CC),
+  _ => Colors.transparent,
 };

@@ -4544,8 +4544,8 @@
       }
     }
   },
-  "heavyRainTitle": "Heavy rain hazard",
-  "heavyRainEntryHint": "How deep water stands at your address after a cloudburst – map by the BKG.",
+  "heavyRainTitle": "Heavy rain and floods",
+  "heavyRainEntryHint": "How deep water stands at your address after a cloudburst or in a flood.",
   "heavyRainIntro": "The heavy rain hazard map of the German Federal Agency for Cartography and Geodesy (BKG) shows where water collects after a cloudburst and how fast it flows. Checked once with a connection, the result stays on the device.",
   "heavyRainUseLocation": "Use my location",
   "heavyRainSearchAddress": "Enter an address",
@@ -4795,5 +4795,26 @@
   "backupAgeToday": "today",
   "backupAgeYesterday": "yesterday",
   "mapShowAeds": "Show defibrillators",
-  "mapHideAeds": "Hide defibrillators"
+  "mapHideAeds": "Hide defibrillators",
+  "riverFloodTitle": "River floods",
+  "riverFloodFrequent": "Frequent flood (HQhäufig)",
+  "riverFloodHundred": "Hundred-year flood (HQ100)",
+  "riverFloodExtreme": "Extreme flood (HQextrem)",
+  "riverFloodClass1": "up to 0.5 m of water",
+  "riverFloodClass2": "0.5 to 1 m of water",
+  "riverFloodClass3": "1 to 2 m of water",
+  "riverFloodClass4": "2 to 4 m of water",
+  "riverFloodClass5": "more than 4 m of water",
+  "riverFloodDry": "not flooded according to the map",
+  "riverFloodUncovered": "The flood hazard map of {state} is not included yet.",
+  "@riverFloodUncovered": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "riverFloodLimits": "Flood hazard maps under the EU Floods Directive, water depth within 25 m. Areas behind dikes are only roughly estimated there.",
+  "riverFloodSource": "Source: NLWKN, flood hazard maps (Floods Directive, 2nd cycle)",
+  "riverFloodFailed": "The state's map service did not answer."
 }
