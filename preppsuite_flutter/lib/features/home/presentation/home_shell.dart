@@ -27,6 +27,7 @@ import 'overview_screen.dart';
 import 'emergency_screen.dart';
 import 'home_screen_widget_sync.dart';
 import '../../settings/presentation/backup_reminder_scheduler.dart';
+import 'app_shortcuts.dart';
 
 /// Top-level navigation once a profile exists.
 ///
@@ -127,6 +128,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             ExpiryReminderScheduler(householdId: householdId),
             ChargeReminderScheduler(),
             const BackupReminderScheduler(),
+            // Draws nothing; the long-press menu on the app icon (#123).
+            AppShortcuts(householdId: householdId),
             const WarningDayScheduler(),
             // Above the rail as well as the tabs: a warning concerns the
             // whole app, so it gets the whole width.
