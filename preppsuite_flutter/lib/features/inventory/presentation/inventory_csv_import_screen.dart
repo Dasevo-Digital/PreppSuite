@@ -44,21 +44,21 @@ class _InventoryCsvImportScreenState
       _missingColumns = false;
     });
 
-    final picked = await FilePicker.platform.pickFiles(
+    final file = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: ['csv'],
-      withData: true,
     );
-    final file = picked?.files.firstOrNull;
-    if (file?.bytes == null || !mounted) return;
+    if (file == null || !mounted) return;
+    final bytes = await file.readAsBytes();
+    if (!mounted) return;
 
     setState(() {
-      _fileName = file!.name;
+      _fileName = file.name;
       _isParsing = true;
     });
 
     try {
-      final content = decodeCsvBytes(file!.bytes!);
+      final content = decodeCsvBytes(bytes);
       final result = parseInventoryCsv(content);
       if (!mounted) return;
       setState(() {

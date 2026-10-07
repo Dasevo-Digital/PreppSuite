@@ -102,7 +102,7 @@ class DownloadFolderCard extends ConsumerWidget {
       path = chosen;
       handle = picked?['uri'];
     } else {
-      final chosen = await FilePicker.platform.getDirectoryPath(
+      final chosen = await FilePicker.getDirectoryPath(
         dialogTitle: l10n.downloadFolderTitle,
       );
       if (chosen == null) return;

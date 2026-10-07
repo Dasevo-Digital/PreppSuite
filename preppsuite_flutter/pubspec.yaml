@@ -35,7 +35,7 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  package_info_plus: ^9.0.1
+  package_info_plus: ^10.2.2
   intl: any
   flutter_riverpod: ^3.4.2
   drift: ^2.35.0
@@ -84,7 +84,7 @@ dependencies:
   # here and on the two build machines at once.
   pdfrx: 2.4.8
   printing: ^5.14.3
-  shared_preferences: ^2.5.5
+  shared_preferences: ^2.5.6
   flutter_secure_storage: ^10.3.4
   # Reads the first aid steps out loud, for the one situation where both
   # hands are busy. No Linux implementation exists -- see
@@ -96,31 +96,25 @@ dependencies:
   # platform's place. See lib/core/portable_preferences.dart.
   shared_preferences_platform_interface: ^2.4.1
   csv: ^8.0.0
-  # Pinned below 9.x: file_picker 12.0.0 (via file_picker_darwin 1.0.0)
-  # calls macOS-native methods by FileType name (e.g. "custom"), but the
-  # native macOS handler only implements the older "pickFiles"-style API —
-  # every pick fails with MissingPluginException on this platform. 8.x's
-  # macOS implementation uses "pickFiles" and works correctly.
-  #
-  # This pin is also what holds back most of the platform plugins (#78):
-  # file_picker 8 needs win32 5, and share_plus 13, package_info_plus 10,
-  # geolocator 14.1 and wakelock_plus 1.8 all need win32 6. Moving it means
-  # checking a real file pick on macOS first -- nothing automated can.
-  file_picker: ^8.3.7
+  # 13 since #93. 12.0 broke every pick on macOS (MissingPluginException,
+  # fixed in file_picker_darwin 1.0.1). Since 12 the save dialog writes the
+  # bytes itself on every platform and answers a Uri; a backup too large
+  # to hand over is saved as an empty file and streamed into it.
+  file_picker: ^13.1.0
   # Only so a backup can be handed to the system's share sheet. The file
   # picker cannot reach OneDrive or Google Drive on Android -- neither
   # registers a document tree -- but both are ordinary share targets, so
   # this is what makes a cloud a usable transport for the one file the
   # household may not lose.
-  share_plus: ^12.0.0
-  image_picker: ^1.2.3
+  share_plus: ^13.3.1
+  image_picker: ^1.2.4
   # Cropping and rotating a product photo (see `photo_edit.dart`).
   # `printing` pulls it in too, but a transitive dependency cannot be
   # imported.
   image: ^4.10.1
   path: ^1.9.1
   flutter_local_notifications: ^22.3.1
-  geolocator: ^14.0.2
+  geolocator: ^14.1.1
   http: ^1.6.0
   # Parses MeteoAlarm's Atom+CAP feed, which the app now fetches itself
   # instead of going through a server.
@@ -193,10 +187,8 @@ dependencies:
   # display sleeps after half a minute -- in the middle of a
   # resuscitation, taking the count and the beat with it, because a
   # backgrounded app's timers are throttled by every platform here.
-  # 1.6+ requires win32 6.x, which conflicts with the intentionally pinned
-  # file_picker 8.x. Keep the compatible release until the macOS picker has a
-  # verified migration path to file_picker 9+.
-  wakelock_plus: ^1.5.2
+  # 1.8.0 and not 1.8.1: 1.8.1 needs dbus 0.8, geolocator_linux still 0.7.
+  wakelock_plus: ^1.8.0
   url_launcher: ^6.3.2
   home_widget: ^0.10.0
   # Long-press actions on the app icon (#123): 112, a sign of life, first

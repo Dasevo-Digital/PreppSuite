@@ -57,7 +57,7 @@ class _PortableDataCardState extends State<PortableDataCard> {
       path = chosen;
       handle = picked?['uri'];
     } else {
-      final chosen = await FilePicker.platform.getDirectoryPath(
+      final chosen = await FilePicker.getDirectoryPath(
         dialogTitle: l10n.portableTitle,
       );
       if (chosen == null) return;

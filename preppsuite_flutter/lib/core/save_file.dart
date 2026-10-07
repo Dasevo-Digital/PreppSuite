@@ -14,8 +14,9 @@ import 'package:flutter/foundation.dart';
 ///   names it, but the app may not open it, and the old follow-up check
 ///   (`existsSync`, then writing if empty) threw "the file could not be
 ///   reached" for a file that had in fact just been saved.
-/// * On macOS, Windows and Linux the picker only names a path, and the app
-///   writes the file itself.
+/// * On macOS, Windows and Linux the picker used to only name a path; since
+///   file_picker 12 it writes there too, and the app checks the file is
+///   not empty.
 ///
 /// Returns whether a file was saved; false when the person cancelled.
 /// Errors from writing on the desktop are thrown, so the caller can say
@@ -60,10 +61,17 @@ Future<String?> _pick({
   required String fileName,
   required List<String> allowedExtensions,
   required Uint8List bytes,
-}) => FilePicker.platform.saveFile(
-  dialogTitle: dialogTitle,
-  fileName: fileName,
-  type: FileType.custom,
-  allowedExtensions: allowedExtensions,
-  bytes: bytes,
-);
+}) async {
+  // Since file_picker 12 the dialog writes the bytes on every platform and
+  // answers a `Uri`. The desktop check above stays as a net: it costs one
+  // stat of a file that is there.
+  final uri = await FilePicker.saveFile(
+    dialogTitle: dialogTitle,
+    fileName: fileName,
+    type: FileType.custom,
+    allowedExtensions: allowedExtensions,
+    bytes: bytes,
+  );
+  if (uri == null) return null;
+  return uri.scheme == 'file' ? uri.toFilePath() : uri.toString();
+}

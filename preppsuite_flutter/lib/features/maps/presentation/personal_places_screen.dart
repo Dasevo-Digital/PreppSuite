@@ -220,16 +220,15 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
   /// importing twice is what people do when they are not sure it worked.
   Future<void> _import() async {
     final l10n = AppLocalizations.of(context)!;
-    final picked = await FilePicker.platform.pickFiles(
+    final file = await FilePicker.pickFile(
       type: FileType.custom,
       // Lower case only: the picker matches these literally, and a file
       // off a camera or a receiver is as likely to shout as not.
       allowedExtensions: const ['gpx', 'kml', 'xml'],
-      withData: true,
     );
-    final file = picked?.files.firstOrNull;
-    final bytes = file?.bytes;
-    if (bytes == null || !mounted) return;
+    if (file == null || !mounted) return;
+    final bytes = await file.readAsBytes();
+    if (!mounted) return;
 
     final String raw;
     try {

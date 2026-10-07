@@ -445,11 +445,16 @@ Future<File?> backupTarget({required String dialogTitle}) async {
       '${(await getTemporaryDirectory()).path}${Platform.pathSeparator}$name',
     );
   }
-  final path = await FilePicker.platform.saveFile(
+  // The dialog writes what it is handed, and a backup with archives in it
+  // cannot be handed over whole. So it writes nothing, and the backup is
+  // streamed into the file it named -- the sandbox lets this process write
+  // where the person chose, for as long as it runs.
+  final uri = await FilePicker.saveFile(
     dialogTitle: dialogTitle,
     fileName: name,
+    bytes: Uint8List(0),
   );
-  return path == null ? null : File(path);
+  return uri == null ? null : File(uri.toFilePath());
 }
 
 /// A temporary file for a backup that is handed to the share sheet.

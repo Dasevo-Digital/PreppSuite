@@ -204,14 +204,14 @@ class _FirstAidVideosScreenState extends ConsumerState<FirstAidVideosScreen> {
   }
 
   Future<void> _import() async {
-    final picked = await FilePicker.platform.pickFiles(
+    final picked = await FilePicker.pickFile(
       dialogTitle: AppLocalizations.of(context)!.firstAidVideoPackImport,
       // Not a custom-extension filter, for the same reason the map
       // archive picker does not use one: several desktop platforms
       // refuse extensions they do not know.
       type: FileType.any,
     );
-    final path = picked?.files.single.path;
+    final path = picked?.path;
     if (path == null || !mounted) return;
 
     setState(() {

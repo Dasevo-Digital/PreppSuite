@@ -30,7 +30,7 @@ Future<SharedFolderLocation?> pickSharedFolder({String? dialogTitle}) async {
     );
   }
 
-  final path = await FilePicker.platform.getDirectoryPath(
+  final path = await FilePicker.getDirectoryPath(
     dialogTitle: dialogTitle,
   );
   if (path == null) return null;

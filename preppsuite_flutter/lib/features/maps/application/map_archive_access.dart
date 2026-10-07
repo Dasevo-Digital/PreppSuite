@@ -32,16 +32,16 @@ Future<PickedStorage?> pickMapArchive({String? dialogTitle}) async {
     );
   }
 
-  final result = await FilePicker.platform.pickFiles(
+  final result = await FilePicker.pickFile(
     dialogTitle: dialogTitle,
     // Not a custom-extension filter: several desktop platforms refuse
     // extensions they do not recognize, and `.pmtiles` is one of them.
     type: FileType.any,
   );
-  final path = result?.files.single.path;
+  final path = result?.path;
   if (path == null) return null;
 
-  return PickedStorage(value: path, label: result!.files.single.name);
+  return PickedStorage(value: path, label: result!.name);
 }
 
 /// Random access to the archive at [location], whatever kind it is.
