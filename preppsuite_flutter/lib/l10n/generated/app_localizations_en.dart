@@ -8364,4 +8364,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get backupAgeYesterday => 'yesterday';
+
+  @override
+  String get mapShowAeds => 'Show defibrillators';
+
+  @override
+  String get mapHideAeds => 'Hide defibrillators';
 }

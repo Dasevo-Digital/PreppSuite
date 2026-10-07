@@ -2299,5 +2299,7 @@
   "readinessBackupMadeNever": "Aún no hay ninguna copia en este dispositivo",
   "readinessBackupMadeAge": "Última copia: {age}",
   "backupAgeToday": "hoy",
-  "backupAgeYesterday": "ayer"
+  "backupAgeYesterday": "ayer",
+  "mapShowAeds": "Mostrar desfibriladores",
+  "mapHideAeds": "Ocultar desfibriladores"
 }

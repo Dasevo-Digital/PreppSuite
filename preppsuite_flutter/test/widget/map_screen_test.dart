@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/first_aid/application/defibrillators.dart';
 import 'package:preppsuite_flutter/features/maps/application/map_source_preference.dart';
 import 'package:preppsuite_flutter/features/maps/application/offline_map_providers.dart';
 import 'package:preppsuite_flutter/features/maps/presentation/map_screen.dart';
@@ -68,6 +69,40 @@ void main() {
     // Beside it and not the same thing: one centres the map, the other
     // hands you the coordinates to read out.
     expect(find.byTooltip('Standort weitergeben'), findsOneWidget);
+  });
+
+  testWidgets('saved defibrillators are on the map and can be hidden', (
+    tester,
+  ) async {
+    // #117: the archive has no layer for them; the last search does.
+    await tester.runAsync(
+      () => const DefibrillatorStore().save(
+        DefibrillatorSearch(
+          latitude: 52.2689,
+          longitude: 10.5268,
+          checkedAt: DateTime(2026, 10, 7),
+          found: const [
+            Defibrillator(
+              id: 1,
+              latitude: 52.2733,
+              longitude: 10.5254,
+              tags: {'defibrillator:location': 'Neben Raum 143'},
+            ),
+          ],
+        ),
+      ),
+    );
+    await show(tester);
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pump();
+
+    expect(find.byTooltip('Defibrillatoren ausblenden'), findsOneWidget);
+    expect(find.bySemanticsLabel('Neben Raum 143'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Defibrillatoren ausblenden'));
+    await tester.pump();
+    expect(find.byTooltip('Defibrillatoren einblenden'), findsOneWidget);
+    expect(find.bySemanticsLabel('Neben Raum 143'), findsNothing);
   });
 
   testWidgets('the map meets the accessibility guidelines', (

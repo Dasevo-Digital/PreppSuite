@@ -3521,5 +3521,7 @@
   "readinessBackupMadeNever": "Auf diesem Gerät noch keine Datensicherung erstellt",
   "readinessBackupMadeAge": "Zuletzt gesichert: {age}",
   "backupAgeToday": "heute",
-  "backupAgeYesterday": "gestern"
+  "backupAgeYesterday": "gestern",
+  "mapShowAeds": "Defibrillatoren einblenden",
+  "mapHideAeds": "Defibrillatoren ausblenden"
 }

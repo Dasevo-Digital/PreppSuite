@@ -16,6 +16,7 @@ import 'personal_places_screen.dart';
 import 'swipe_zoom.dart';
 import '../application/readable_position.dart';
 import 'my_position_screen.dart';
+import '../../first_aid/application/defibrillators.dart';
 
 /// Roughly the centre of Germany, so the map opens on something before a
 /// position or a search has resolved.
@@ -56,12 +57,38 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   int _lookupGeneration = 0;
   List<PersonalPlace> _personalPlaces = const [];
 
+  /// The defibrillators the last search found (#117), drawn on the map
+  /// because the downloaded archive has no layer for them.
+  List<Defibrillator> _defibrillators = const [];
+  var _showDefibrillators = true;
+
   @override
   void initState() {
     super.initState();
     _searchPosition = widget.focus;
     _searchLabel = widget.focusLabel;
     _loadPersonalPlaces();
+    _loadDefibrillators();
+  }
+
+  Future<void> _loadDefibrillators() async {
+    final search = await const DefibrillatorStore().load();
+    if (mounted && search != null) {
+      setState(() => _defibrillators = search.found);
+    }
+  }
+
+  void _describe(Defibrillator aed, AppLocalizations l10n) {
+    final details = [
+      aed.name ?? l10n.aedUnnamed,
+      ?aed.locationIn(l10n.localeName.split('_').first),
+      if (aed.level case final level?) l10n.aedLevel(level),
+      if (aed.openingHours case final hours?) l10n.aedOpeningHours(hours),
+      if (aed.restricted) l10n.aedRestricted,
+    ];
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(details.join('\n'))));
   }
 
   @override
@@ -158,6 +185,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               ),
             ),
           ),
+          if (_defibrillators.isNotEmpty)
+            IconButton(
+              isSelected: _showDefibrillators,
+              icon: const Icon(Icons.monitor_heart_outlined),
+              selectedIcon: const Icon(Icons.monitor_heart),
+              tooltip: _showDefibrillators
+                  ? l10n.mapHideAeds
+                  : l10n.mapShowAeds,
+              onPressed: () => setState(
+                () => _showDefibrillators = !_showDefibrillators,
+              ),
+            ),
           IconButton(
             icon: const Icon(Icons.bookmark_outline),
             tooltip: l10n.mapPlacesTitle,
@@ -325,6 +364,39 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                                         ),
                                       ),
                                     ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  if (_showDefibrillators && _defibrillators.isNotEmpty)
+                    MarkerLayer(
+                      markers: [
+                        for (final aed in _defibrillators)
+                          Marker(
+                            point: LatLng(aed.latitude, aed.longitude),
+                            width: 32,
+                            height: 32,
+                            child: Semantics(
+                              button: true,
+                              label:
+                                  aed.locationIn(
+                                    l10n.localeName.split('_').first,
+                                  ) ??
+                                  l10n.aedUnnamed,
+                              child: GestureDetector(
+                                onTap: () => _describe(aed, l10n),
+                                child: const DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFFC62828),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.favorite,
+                                    size: 18,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),

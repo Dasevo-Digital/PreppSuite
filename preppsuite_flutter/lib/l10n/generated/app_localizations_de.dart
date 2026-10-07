@@ -8409,4 +8409,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get backupAgeYesterday => 'gestern';
+
+  @override
+  String get mapShowAeds => 'Defibrillatoren einblenden';
+
+  @override
+  String get mapHideAeds => 'Defibrillatoren ausblenden';
 }

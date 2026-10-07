@@ -4793,5 +4793,7 @@
     }
   },
   "backupAgeToday": "today",
-  "backupAgeYesterday": "yesterday"
+  "backupAgeYesterday": "yesterday",
+  "mapShowAeds": "Show defibrillators",
+  "mapHideAeds": "Hide defibrillators"
 }

@@ -13914,6 +13914,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'yesterday'**
   String get backupAgeYesterday;
+
+  /// No description provided for @mapShowAeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Show defibrillators'**
+  String get mapShowAeds;
+
+  /// No description provided for @mapHideAeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide defibrillators'**
+  String get mapHideAeds;
 }
 
 class _AppLocalizationsDelegate
