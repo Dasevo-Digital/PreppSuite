@@ -22,12 +22,19 @@ class PmTilesArchive {
   final PmTilesHeader header;
   final _Directory _rootDirectory;
 
-  /// Leaf directories already read, keyed by their offset.
+  /// Leaf directories read or being read, keyed by their offset, the
+  /// most recently used last.
   ///
   /// An archive of any size is two levels deep, and panning revisits the
   /// same leaves constantly — without this every tile would cost a second
   /// read and a second gunzip.
-  final _leafCache = <int, _Directory>{};
+  ///
+  /// The reads themselves are kept, not only their results (#13). The
+  /// renderer asks for a screenful of tiles at once, and on a part of the
+  /// map not seen yet they all need the same leaf: with only finished
+  /// leaves cached, every one of them missed and read and unpacked that
+  /// leaf itself, one after another through the file's single queue.
+  final _leafCache = <int, Future<_Directory>>{};
 
   /// How many leaves to keep. Each is tens of kilobytes at most, and a
   /// screenful of tiles rarely spans more than a handful.
@@ -116,23 +123,32 @@ class PmTilesArchive {
 
   Future<void> close() => _source.close();
 
-  Future<_Directory> _leaf(_Entry entry) async {
+  Future<_Directory> _leaf(_Entry entry) {
     final offset = header.leafDirectoryOffset + entry.offset;
-    final cached = _leafCache[offset];
-    if (cached != null) return cached;
-
-    final leaf = _Directory.parse(
-      _decompress(
-        await _readBounded(_source, offset, entry.length),
-        header.internalCompression,
-      ),
-    );
+    final cached = _leafCache.remove(offset);
+    if (cached != null) return _leafCache[offset] = cached;
 
     if (_leafCache.length >= _leafCacheLimit) {
       _leafCache.remove(_leafCache.keys.first);
     }
-    return _leafCache[offset] = leaf;
+    final reading = _readLeaf(offset, entry.length);
+    // A read that failed is not a leaf: the next tile asks again.
+    reading.then<void>(
+      (_) {},
+      onError: (Object _) {
+        if (identical(_leafCache[offset], reading)) _leafCache.remove(offset);
+      },
+    );
+    return _leafCache[offset] = reading;
   }
+
+  Future<_Directory> _readLeaf(int offset, int length) async =>
+      _Directory.parse(
+        _decompress(
+          await _readBounded(_source, offset, length),
+          header.internalCompression,
+        ),
+      );
 
   /// The most one read or one decompression may come to.
   ///
