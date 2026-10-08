@@ -59,7 +59,7 @@ jobs:
 
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
-          flutter-version: '3.44.8'
+          flutter-version: '3.47.6'
 
       # Beyond the usual Flutter toolchain: webkit2gtk and libsoup are what
       # desktop_webview_window draws articles with, and their absence is a
@@ -109,7 +109,7 @@ jobs:
 
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
-          flutter-version: '3.44.8'
+          flutter-version: '3.47.6'
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:

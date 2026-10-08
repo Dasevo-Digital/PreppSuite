@@ -56,7 +56,7 @@ Mac at all.
 
 **The shipped x64 packages for both come from two machines on the LAN**,
 `TestKubuntu` and `TestWindows` in `~/.ssh/config`, each with Flutter
-3.44.8 installed. `.github/workflows/build-desktop.yml` describes the same
+3.47.6 installed. `.github/workflows/build-desktop.yml` describes the same
 builds and is useful as a list of what they need, but it is **not** a build
 path here: the repository lives on Gitea and has no Actions runner
 registered — zero runs, checked. Anything saying the workflow is the only

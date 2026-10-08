@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       zlib1g-dev uuid-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone --depth 1 --branch 3.44.8 https://github.com/flutter/flutter.git /opt/flutter
+RUN git clone --depth 1 --branch 3.47.6 https://github.com/flutter/flutter.git /opt/flutter
 ENV PATH="/opt/flutter/bin:${PATH}"
 
 RUN git config --global --add safe.directory /opt/flutter \

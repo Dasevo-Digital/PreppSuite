@@ -43,7 +43,7 @@ dependencies:
   # raw SqliteException. Drift wraps most database errors, but not the
   # ones thrown while the database is being opened -- which is exactly
   # when a failure is least explainable to the person looking at it.
-  sqlite3: ^3.5.2
+  sqlite3: ^3.7.0
   path_provider: ^2.1.6
   uuid: ^4.6.0
   mobile_scanner: ^7.4.2
@@ -59,11 +59,11 @@ dependencies:
   # documents. Unlike a platform PDF viewer, it works on mobile and desktop
   # without sending a document to a service.
   #
-  # 6.0.0 since 2.3.9 (#78), from 3.8.0: the parts used here -- opening a
-  # document and reading its text -- did not change, and the personal
-  # document tests run against generated PDFs on every check.
-  pdf_document: 6.0.0
-  pdf_graphics: 6.0.0
+  # 7.0.0 with pdfrx 2.6 (#95); 6.0.0 since 2.3.9 (#78). The parts used
+  # here -- opening a document and reading its text -- did not change, and
+  # the personal document tests run against generated PDFs on every check.
+  pdf_document: 7.0.0
+  pdf_graphics: 7.0.0
   # Local renderer for PDFs from the personal knowledge library.  It uses
   # PDFium on every supported native platform, so a document never has to
   # leave the device merely to be read.
@@ -78,11 +78,10 @@ dependencies:
   # stops riding along in the macOS, Linux, Windows and Android packages,
   # where nothing can execute it.
   #
-  # Nothing above 2.4.8 fits yet: 2.5.0 wants Flutter 3.47 and 2.6.x wants
-  # Dart 3.13. sqlite3 3.7 is held back by the same SDK (it needs a newer
-  # `meta` than flutter_test pins), so both move with a Flutter upgrade --
-  # here and on the two build machines at once.
-  pdfrx: 2.4.8
+  # 2.6.5 since Flutter 3.47 / Dart 3.13 (#95), which it needs; sqlite3 3.7
+  # moved with it. The PDFium inside is still chromium/7811, so
+  # tool/pdfium_provenance.txt did not change.
+  pdfrx: 2.6.5
   printing: ^5.14.3
   shared_preferences: ^2.5.6
   flutter_secure_storage: ^10.3.4
@@ -118,7 +117,7 @@ dependencies:
   http: ^1.6.0
   # Parses MeteoAlarm's Atom+CAP feed, which the app now fetches itself
   # instead of going through a server.
-  xml: ^7.0.1
+  xml: ^7.1.0
   # The Dart team's own HTML parser. Direct, because the built-in article
   # reader turns a ZIM article into widgets without a browser engine —
   # parsing is the part worth taking from somewhere that maintains it,
