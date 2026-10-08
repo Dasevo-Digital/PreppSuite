@@ -8526,4 +8526,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapHideEmergencyPoints => 'Hide emergency wells and sirens';
+
+  @override
+  String get measureConvertTitle => 'Add the package size';
+
+  @override
+  String get measureConvertIntro =>
+      'These foods are counted in packages. With what one package holds they count in the supply calculator, and they can still be used up a package at a time.';
+
+  @override
+  String get measureConvertAction => 'Enter size';
+
+  @override
+  String measureConvertPrompt(String package) {
+    return 'How much does one “$package” hold?';
+  }
+
+  @override
+  String get measureConvertHint => 'On the label, for example 400';
+
+  @override
+  String get measureConvertInvalid => 'Please enter an amount above 0.';
+
+  @override
+  String measureConvertDone(String name) {
+    return '“$name” now counts in the supply calculator.';
+  }
+
+  @override
+  String get measureConvertNoneLeft => 'Every food has a measure now.';
 }

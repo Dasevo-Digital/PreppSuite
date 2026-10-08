@@ -8601,4 +8601,34 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get mapHideEmergencyPoints => 'Ocultar pozos de emergencia y sirenas';
+
+  @override
+  String get measureConvertTitle => 'Indicar el contenido';
+
+  @override
+  String get measureConvertIntro =>
+      'Estos alimentos se cuentan en envases. Con el contenido de un envase cuentan en la calculadora de provisiones, y se pueden seguir consumiendo envase a envase.';
+
+  @override
+  String get measureConvertAction => 'Indicar';
+
+  @override
+  String measureConvertPrompt(String package) {
+    return '¿Cuánto contiene un envase «$package»?';
+  }
+
+  @override
+  String get measureConvertHint => 'En la etiqueta, por ejemplo 400';
+
+  @override
+  String get measureConvertInvalid => 'Introduce una cantidad mayor que 0.';
+
+  @override
+  String measureConvertDone(String name) {
+    return '«$name» ya cuenta en la calculadora de provisiones.';
+  }
+
+  @override
+  String get measureConvertNoneLeft =>
+      'Todos los alimentos tienen ya una medida.';
 }

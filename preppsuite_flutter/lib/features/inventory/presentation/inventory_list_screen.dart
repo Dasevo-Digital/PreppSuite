@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_theme.dart';
-import 'unit_info_dialog.dart';
+import 'measure_conversion_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -689,7 +689,7 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
             if (foodWithoutMeasure(items) case final uncounted
                 when uncounted.isNotEmpty) ...[
               const SizedBox(height: 4),
-              _UnmeasuredNotice(count: uncounted.length, l10n: l10n),
+              _UnmeasuredNotice(householdId: widget.householdId, l10n: l10n),
             ],
           ],
         ),
@@ -889,9 +889,9 @@ class _SupplyRing extends StatelessWidget {
 /// time the inventory is opened until somebody changes a unit, and a
 /// paragraph in that position is a paragraph people learn to skip.
 class _UnmeasuredNotice extends StatelessWidget {
-  const _UnmeasuredNotice({required this.count, required this.l10n});
+  const _UnmeasuredNotice({required this.householdId, required this.l10n});
 
-  final int count;
+  final String householdId;
   final AppLocalizations l10n;
 
   @override
@@ -900,7 +900,7 @@ class _UnmeasuredNotice extends StatelessWidget {
 
     return InkWell(
       borderRadius: BorderRadius.circular(AppRadius.small),
-      onTap: () => showUnitInfo(context, uncounted: count),
+      onTap: () => showMeasureConversion(context, householdId),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
         child: Row(
@@ -921,7 +921,7 @@ class _UnmeasuredNotice extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              l10n.unitInfoAction,
+              l10n.measureConvertTitle,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.primary,
               ),

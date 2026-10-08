@@ -4938,5 +4938,27 @@
   "emergencyHelpPointUnnamed": "Help point",
   "emergencyPointsIncomplete": "Volunteers enter the locations in OpenStreetMap. Sirens and help points in particular are still missing in many places.",
   "mapShowEmergencyPoints": "Show emergency wells and sirens",
-  "mapHideEmergencyPoints": "Hide emergency wells and sirens"
+  "mapHideEmergencyPoints": "Hide emergency wells and sirens",
+  "measureConvertTitle": "Add the package size",
+  "measureConvertIntro": "These foods are counted in packages. With what one package holds they count in the supply calculator, and they can still be used up a package at a time.",
+  "measureConvertAction": "Enter size",
+  "measureConvertPrompt": "How much does one “{package}” hold?",
+  "@measureConvertPrompt": {
+    "placeholders": {
+      "package": {
+        "type": "String"
+      }
+    }
+  },
+  "measureConvertHint": "On the label, for example 400",
+  "measureConvertInvalid": "Please enter an amount above 0.",
+  "measureConvertDone": "“{name}” now counts in the supply calculator.",
+  "@measureConvertDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "measureConvertNoneLeft": "Every food has a measure now."
 }

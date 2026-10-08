@@ -8572,4 +8572,33 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get mapHideEmergencyPoints => 'Notbrunnen und Sirenen ausblenden';
+
+  @override
+  String get measureConvertTitle => 'Füllmenge nachtragen';
+
+  @override
+  String get measureConvertIntro =>
+      'Diese Lebensmittel sind in Packungen gezählt. Mit der Füllmenge einer Packung zählen sie im Vorrats-Rechner mit, und beim Verbrauchen lässt sich weiter packungsweise abbuchen.';
+
+  @override
+  String get measureConvertAction => 'Füllmenge angeben';
+
+  @override
+  String measureConvertPrompt(String package) {
+    return 'Wie viel enthält eine Packung „$package“?';
+  }
+
+  @override
+  String get measureConvertHint => 'Steht auf dem Etikett, etwa 400';
+
+  @override
+  String get measureConvertInvalid => 'Bitte eine Menge über 0 eingeben.';
+
+  @override
+  String measureConvertDone(String name) {
+    return '„$name“ zählt jetzt im Vorrats-Rechner mit.';
+  }
+
+  @override
+  String get measureConvertNoneLeft => 'Alle Lebensmittel haben jetzt ein Maß.';
 }

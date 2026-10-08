@@ -14172,6 +14172,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide emergency wells and sirens'**
   String get mapHideEmergencyPoints;
+
+  /// No description provided for @measureConvertTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the package size'**
+  String get measureConvertTitle;
+
+  /// No description provided for @measureConvertIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'These foods are counted in packages. With what one package holds they count in the supply calculator, and they can still be used up a package at a time.'**
+  String get measureConvertIntro;
+
+  /// No description provided for @measureConvertAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter size'**
+  String get measureConvertAction;
+
+  /// No description provided for @measureConvertPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'How much does one “{package}” hold?'**
+  String measureConvertPrompt(String package);
+
+  /// No description provided for @measureConvertHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On the label, for example 400'**
+  String get measureConvertHint;
+
+  /// No description provided for @measureConvertInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an amount above 0.'**
+  String get measureConvertInvalid;
+
+  /// No description provided for @measureConvertDone.
+  ///
+  /// In en, this message translates to:
+  /// **'“{name}” now counts in the supply calculator.'**
+  String measureConvertDone(String name);
+
+  /// No description provided for @measureConvertNoneLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Every food has a measure now.'**
+  String get measureConvertNoneLeft;
 }
 
 class _AppLocalizationsDelegate

@@ -195,6 +195,41 @@ class InventoryController {
     );
   }
 
+  /// Turns food counted in packages -- "6 Dosen" -- into a measure, once
+  /// the household has said what one holds (#109).
+  ///
+  /// Such a row counts no calories: a label is per 100 g and a tin has no
+  /// weight until somebody reads it. Since 2.3.8 the form only takes
+  /// measures for food, but rows from before stay as they were typed, and
+  /// the supply calculator could only say they were missing. This keeps
+  /// the package as the way to say an amount at the shelf -- the old unit
+  /// becomes its name -- so taking one tin still takes one tin, and the
+  /// calories drop with it.
+  Future<void> countInMeasure(
+    InventoryItem existing, {
+    required double perPackage,
+    required String measure,
+  }) async {
+    final package = ItemPackage.from(existing.unit, perPackage);
+    if (package == null) return;
+    final minimum = existing.minQuantity;
+    await _db.upsertInventoryItem(
+      existing
+          .toCompanion(false)
+          .copyWith(
+            quantity: Value(package.toUnits(existing.quantity)),
+            unit: Value(measure),
+            minQuantity: Value(
+              minimum == null ? null : package.toUnits(minimum),
+            ),
+            packageName: Value(package.name),
+            packageSize: Value(package.size),
+            updatedAt: Value(DateTime.now().toUtc()),
+            dirty: const Value(true),
+          ),
+    );
+  }
+
   /// Undo restores the latest stored fields, not an old form snapshot.
   Future<void> restoreItem(String clientId) async {
     final row =

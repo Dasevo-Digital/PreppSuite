@@ -2342,5 +2342,13 @@
   "emergencyHelpPointUnnamed": "Punto de ayuda",
   "emergencyPointsIncomplete": "Las ubicaciones las introducen voluntarios en OpenStreetMap. Sobre todo las sirenas y los puntos de ayuda aún faltan en muchos lugares.",
   "mapShowEmergencyPoints": "Mostrar pozos de emergencia y sirenas",
-  "mapHideEmergencyPoints": "Ocultar pozos de emergencia y sirenas"
+  "mapHideEmergencyPoints": "Ocultar pozos de emergencia y sirenas",
+  "measureConvertTitle": "Indicar el contenido",
+  "measureConvertIntro": "Estos alimentos se cuentan en envases. Con el contenido de un envase cuentan en la calculadora de provisiones, y se pueden seguir consumiendo envase a envase.",
+  "measureConvertAction": "Indicar",
+  "measureConvertPrompt": "¿Cuánto contiene un envase «{package}»?",
+  "measureConvertHint": "En la etiqueta, por ejemplo 400",
+  "measureConvertInvalid": "Introduce una cantidad mayor que 0.",
+  "measureConvertDone": "«{name}» ya cuenta en la calculadora de provisiones.",
+  "measureConvertNoneLeft": "Todos los alimentos tienen ya una medida."
 }

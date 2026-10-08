@@ -88,9 +88,51 @@ void main() {
       // somebody opened to do something else.
       expect(find.text(l10n.foodWithoutMeasureBody(2)), findsNothing);
 
+      await tester.tap(find.text(l10n.measureConvertTitle));
+      await tester.pumpAndSettle();
+      // The tap now offers the fix first, with the reason one tap on.
+      expect(find.text(l10n.measureConvertAction), findsNWidgets(2));
       await tester.tap(find.text(l10n.unitInfoAction));
       await tester.pumpAndSettle();
       expect(find.text(l10n.foodWithoutMeasureBody(2)), findsOneWidget);
+    });
+
+    testWidgets('one number per item makes it count (#109)', (tester) async {
+      await pump(
+        tester,
+        const InventoryListScreen(householdId: householdId),
+        stock: [item(clientId: 'ravioli', unit: 'Dose')],
+      );
+      await tester.tap(find.text(l10n.measureConvertTitle));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(l10n.measureConvertAction));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.measureConvertPrompt('Dose')), findsOneWidget);
+
+      // Nothing, then something.
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.measureConvertInvalid), findsOneWidget);
+      // The list behind the sheet has a search field of its own.
+      await tester.enterText(
+        find.descendant(
+          of: find.byType(AlertDialog),
+          matching: find.byType(TextField),
+        ),
+        '400',
+      );
+      await tester.tap(find.text('OK'));
+      await tester.pump();
+      // The write runs on the real clock; the test's own does not move it.
+      final stored = await tester.runAsync(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        return (await db.watchInventoryItems(householdId).first).single;
+      });
+      await tester.pumpAndSettle();
+      expect(stored!.quantity, 2400);
+      expect(stored.unit, 'g');
+      expect(stored.packageName, 'Dose');
+      expect(find.text(l10n.measureConvertDone('ravioli')), findsOneWidget);
     });
 
     testWidgets('and a pantry that all counts says nothing', (tester) async {
@@ -130,6 +172,8 @@ void main() {
         stock: [item(clientId: 'ravioli', unit: 'Dose')],
       );
 
+      await tester.tap(find.text(l10n.measureConvertTitle));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(l10n.unitInfoAction));
       await tester.pumpAndSettle();
 
@@ -145,6 +189,8 @@ void main() {
         const InventoryListScreen(householdId: householdId),
         stock: [item(clientId: 'ravioli', unit: 'Dose')],
       );
+      await tester.tap(find.text(l10n.measureConvertTitle));
+      await tester.pumpAndSettle();
       await tester.tap(find.text(l10n.unitInfoAction));
       await tester.pumpAndSettle();
 

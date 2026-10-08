@@ -3564,5 +3564,13 @@
   "emergencyHelpPointUnnamed": "Notfallinfopunkt",
   "emergencyPointsIncomplete": "Die Standorte tragen Freiwillige in OpenStreetMap ein. Gerade Sirenen und Infopunkte sind vielerorts noch nicht erfasst.",
   "mapShowEmergencyPoints": "Notbrunnen und Sirenen einblenden",
-  "mapHideEmergencyPoints": "Notbrunnen und Sirenen ausblenden"
+  "mapHideEmergencyPoints": "Notbrunnen und Sirenen ausblenden",
+  "measureConvertTitle": "Füllmenge nachtragen",
+  "measureConvertIntro": "Diese Lebensmittel sind in Packungen gezählt. Mit der Füllmenge einer Packung zählen sie im Vorrats-Rechner mit, und beim Verbrauchen lässt sich weiter packungsweise abbuchen.",
+  "measureConvertAction": "Füllmenge angeben",
+  "measureConvertPrompt": "Wie viel enthält eine Packung „{package}“?",
+  "measureConvertHint": "Steht auf dem Etikett, etwa 400",
+  "measureConvertInvalid": "Bitte eine Menge über 0 eingeben.",
+  "measureConvertDone": "„{name}“ zählt jetzt im Vorrats-Rechner mit.",
+  "measureConvertNoneLeft": "Alle Lebensmittel haben jetzt ein Maß."
 }

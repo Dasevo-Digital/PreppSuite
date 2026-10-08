@@ -72,6 +72,51 @@ void main() {
     },
   );
 
+  group('countInMeasure (#109)', () {
+    test('six tins become grams, the tin stays the package', () async {
+      await addItem(quantity: 6, minQuantity: 2);
+      await db.customStatement(
+        "UPDATE inventory_items SET unit = 'Dose', calories = 120",
+      );
+
+      await controller.countInMeasure(
+        await storedItem(),
+        perPackage: 400,
+        measure: 'g',
+      );
+
+      final item = await storedItem();
+      expect(item.quantity, 2400);
+      expect(item.unit, 'g');
+      expect(item.minQuantity, 800);
+      expect(item.packageName, 'Dose');
+      expect(item.packageSize, 400);
+      expect(item.dirty, isTrue);
+      // What the change is for: the calculator counts it now, 2400 g at
+      // 120 kcal per 100 g.
+      expect(
+        calculateSupply(items: [item], days: 1).caloriesCurrent,
+        2880,
+      );
+      expect(foodWithoutMeasure([item]), isEmpty);
+
+      // And one tin is still one tin at the shelf.
+      await controller.consumeQuantity(item, ItemPackage.of(item)!.size);
+      expect((await storedItem()).quantity, 2000);
+    });
+
+    test('a size of nothing changes nothing', () async {
+      await addItem(quantity: 6);
+      await controller.countInMeasure(
+        await storedItem(),
+        perPackage: 0,
+        measure: 'g',
+      );
+      expect((await storedItem()).unit, 'Stk');
+      expect((await storedItem()).quantity, 6);
+    });
+  });
+
   group('consumeQuantity', () {
     test('subtracts the amount and marks the row dirty for sync', () async {
       await addItem(quantity: 5);
