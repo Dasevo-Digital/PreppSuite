@@ -247,6 +247,156 @@ void main() {
     expect(existing.lastModifiedSync(), modified);
   });
 
+  // What restoring must never do is write over a file that is already
+  // there and is not the one in the backup (#132).
+  test(
+    'a different file of the same name is kept, the restore goes beside it',
+    () async {
+      final opened = (await open(await write()))!;
+      final folder = Directory('${temp.path}/ziel')..createSync();
+      final mine = Uint8List.fromList(utf8.encode('meine eigene Datei'));
+      final existing = File('${folder.path}/wikipedia_de_test.zim')
+        ..writeAsBytesSync(mine);
+
+      final into = targetsInto(folder);
+      final result = await restoreBackupFiles(
+        reader: opened.file.reader!,
+        key: opened.key,
+        manifest: opened.files,
+        selected: {2},
+        targets: into.targets,
+      );
+      expect(result.restored, 1);
+      expect(existing.readAsBytesSync(), mine);
+      expect(into.archives.single, '${folder.path}/wikipedia_de_test (2).zim');
+      expect(File(into.archives.single).readAsBytesSync(), archiveBytes);
+    },
+  );
+
+  test('a cancelled restore leaves no half file behind', () async {
+    final opened = (await open(await write()))!;
+    final folder = Directory('${temp.path}/ziel');
+    final cancellation = BackupCancellation();
+    final into = targetsInto(folder);
+    await expectLater(
+      restoreBackupFiles(
+        reader: opened.file.reader!,
+        key: opened.key,
+        manifest: opened.files,
+        selected: {2},
+        targets: into.targets,
+        cancellation: cancellation,
+        // After the first chunk of the archive, which has three.
+        onBytes: (entry, bytes) => cancellation.cancel(),
+      ),
+      throwsA(isA<BackupCancelled>()),
+    );
+    expect(into.archives, isEmpty);
+    expect(
+      folder.listSync().map((e) => e.path.split('/').last),
+      isNot(contains(endsWith('.part'))),
+    );
+    expect(File('${folder.path}/wikipedia_de_test.zim').existsSync(), isFalse);
+  });
+
+  test(
+    'a file the app cannot take into use is named, the rest come back',
+    () async {
+      final opened = (await open(await write()))!;
+      final into = targetsInto(Directory('${temp.path}/ziel'));
+      final refusing = BackupFileTargets(
+        folder: into.targets.folder,
+        addPhotos: into.targets.addPhotos,
+        addDocument: into.targets.addDocument,
+        useMap: into.targets.useMap,
+        addArchive: (location, label, entry) async =>
+            throw const FormatException('not a ZIM file'),
+      );
+      final result = await restoreBackupFiles(
+        reader: opened.file.reader!,
+        key: opened.key,
+        manifest: opened.files,
+        selected: {0, 1, 2},
+        targets: refusing,
+      );
+      expect(result.restored, 2);
+      expect(result.failed, ['wikipedia_de_test.zim']);
+      expect(into.photos, hasLength(1));
+      expect(into.documents, hasLength(1));
+    },
+  );
+
+  test(
+    'documents go into their own folder, the map is taken into use',
+    () async {
+      final mapBytes = Uint8List.fromList(utf8.encode('PMTiles' * 300));
+      final files = [
+        ...candidates(),
+        BackupCandidate(
+          entry: BackupFileEntry(
+            index: 3,
+            kind: BackupFileKind.map,
+            label: 'Niedersachsen.pmtiles',
+            size: mapBytes.length,
+          ),
+          open: () async => MemoryByteRangeSource(mapBytes),
+        ),
+      ];
+      final opened = (await open(await write(files: files)))!;
+      final folder = Directory('${temp.path}/ziel');
+      final maps = <(String, String)>[];
+      final into = targetsInto(folder);
+      final result = await restoreBackupFiles(
+        reader: opened.file.reader!,
+        key: opened.key,
+        manifest: opened.files,
+        selected: {1, 3},
+        targets: BackupFileTargets(
+          folder: into.targets.folder,
+          addPhotos: into.targets.addPhotos,
+          addDocument: into.targets.addDocument,
+          useMap: (location, label) async => maps.add((location, label)),
+          addArchive: into.targets.addArchive,
+        ),
+      );
+      expect(result.restored, 2);
+      expect(
+        into.documents.single,
+        '${folder.path}/$restoredDocumentsFolder/police.pdf',
+      );
+      expect(maps.single.$2, 'Niedersachsen.pmtiles');
+      expect(File(maps.single.$1).readAsBytesSync(), mapBytes);
+    },
+  );
+
+  test(
+    'a picture whose row it belongs to is unknown is not guessed at',
+    () async {
+      final files = candidates()
+        ..[0] = BackupCandidate(
+          entry: BackupFileEntry(
+            index: 0,
+            kind: BackupFileKind.photo,
+            label: 'b3f0.jpg',
+            size: photoBytes.length,
+            meta: const {'owner': 'inventory'},
+          ),
+          open: () async => MemoryByteRangeSource(photoBytes),
+        );
+      final opened = (await open(await write(files: files)))!;
+      final into = targetsInto(Directory('${temp.path}/ziel'));
+      final result = await restoreBackupFiles(
+        reader: opened.file.reader!,
+        key: opened.key,
+        manifest: opened.files,
+        selected: {0},
+        targets: into.targets,
+      );
+      expect(into.photos, isEmpty);
+      expect(result.failed, ['b3f0.jpg']);
+    },
+  );
+
   test('a file that could not be read is listed as missing', () async {
     final files = candidates()
       ..[1] = BackupCandidate(
