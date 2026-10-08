@@ -8490,4 +8490,115 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get riverFloodFailed =>
       'El servicio de mapas del estado federado no ha respondido.';
+
+  @override
+  String get emergencyPointsTitle =>
+      'Pozos de emergencia, puntos de ayuda y sirenas';
+
+  @override
+  String get emergencyPointsEntryHint =>
+      'Dónde hay agua e información durante un apagón, y si hay una sirena al alcance del oído.';
+
+  @override
+  String get emergencyPointsIntro =>
+      'En un apagón prolongado, el agua corriente, el teléfono e internet fallan uno tras otro. Dónde están el pozo de emergencia y el punto de ayuda más cercanos aún se puede consultar ahora: la búsqueda se guarda y después está disponible sin conexión.';
+
+  @override
+  String emergencyPointsPlace(String place, String date) {
+    return '$place, a $date';
+  }
+
+  @override
+  String get sirenTitle => '¿Sirena al alcance del oído?';
+
+  @override
+  String sirenLikely(String distance, String direction) {
+    return 'La sirena más cercana está a $distance $direction. Es muy probable que se oiga allí.';
+  }
+
+  @override
+  String sirenMaybe(String distance, String direction) {
+    return 'La sirena más cercana está a $distance $direction. Eso queda entre su alcance en ciudad y en campo abierto: quizá se oiga, aunque difícilmente con viento y ventanas cerradas. Aquí son importantes la app de alertas y la radio.';
+  }
+
+  @override
+  String sirenUnlikely(String distance, String direction) {
+    return 'La sirena registrada más cercana está a $distance $direction. Es lejos para una sirena. Aquí conviene confiar en la app de alertas y la radio.';
+  }
+
+  @override
+  String sirenNone(int radius) {
+    return 'En OpenStreetMap no hay ninguna sirena registrada en un radio de $radius km. Eso no significa que no la haya: en el día nacional de alerta de Alemania, el segundo jueves de septiembre a las 11, se puede comprobar uno mismo, y el ayuntamiento lo sabe.';
+  }
+
+  @override
+  String sirenRangeMapped(String range) {
+    return 'Alcance según el registro: $range';
+  }
+
+  @override
+  String get sirenRule =>
+      'Valor orientativo para la sirena de motor E57, con la que también se miden las sirenas electrónicas nuevas: unos 400 m en ciudad, 600 m en las afueras y 850 m en campo abierto. El viento, los edificios y las ventanas cerradas lo reducen mucho.';
+
+  @override
+  String get sirenUnnamed => 'Sirena';
+
+  @override
+  String get emergencyWellsTitle => 'Pozos de agua potable de emergencia';
+
+  @override
+  String emergencyWellsFound(int count, int radius) {
+    return 'Los $count más cercanos en un radio de $radius km';
+  }
+
+  @override
+  String emergencyWellsNone(int radius) {
+    return 'No hay ningún pozo de emergencia registrado en un radio de $radius km.';
+  }
+
+  @override
+  String get emergencyWellsWater =>
+      'Los pozos de emergencia extraen agua subterránea que no siempre tiene calidad de agua potable. En caso de emergencia, las autoridades indican si hay que hervirla. Conviene tener bidones o cubos en casa para transportarla.';
+
+  @override
+  String get emergencyWellUnnamed => 'Pozo de emergencia';
+
+  @override
+  String emergencyWellNumber(String ref) {
+    return 'N.º $ref';
+  }
+
+  @override
+  String get emergencyWellOutOfOrder =>
+      'Bomba averiada o cerrada en la última comprobación';
+
+  @override
+  String get emergencyHelpPointsTitle => 'Puntos de ayuda en catástrofes';
+
+  @override
+  String get emergencyHelpPointsHint =>
+      'Un edificio con electricidad de emergencia que abre durante un apagón prolongado: allí hay información, y desde allí se puede hacer una llamada de emergencia cuando ya no funciona ningún teléfono.';
+
+  @override
+  String emergencyHelpPointsFound(int count, int radius) {
+    return '$count en un radio de $radius km';
+  }
+
+  @override
+  String emergencyHelpPointsNone(int radius) {
+    return 'No hay ningún punto de ayuda registrado en un radio de $radius km. Muchos municipios los tienen sin que figuren en OpenStreetMap: el ayuntamiento sabe dónde está el más cercano.';
+  }
+
+  @override
+  String get emergencyHelpPointUnnamed => 'Punto de ayuda';
+
+  @override
+  String get emergencyPointsIncomplete =>
+      'Las ubicaciones las introducen voluntarios en OpenStreetMap. Sobre todo las sirenas y los puntos de ayuda aún faltan en muchos lugares.';
+
+  @override
+  String get mapShowEmergencyPoints => 'Mostrar pozos de emergencia y sirenas';
+
+  @override
+  String get mapHideEmergencyPoints => 'Ocultar pozos de emergencia y sirenas';
 }

@@ -8416,4 +8416,114 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get riverFloodFailed => 'The state\'s map service did not answer.';
+
+  @override
+  String get emergencyPointsTitle => 'Emergency wells, help points and sirens';
+
+  @override
+  String get emergencyPointsEntryHint =>
+      'Where there is water and information in a blackout, and whether a siren is within earshot.';
+
+  @override
+  String get emergencyPointsIntro =>
+      'In a long blackout, mains water, phone and internet fail one after another. Where the nearest emergency well and help point are can still be looked up now – the search is kept and is there offline afterwards.';
+
+  @override
+  String emergencyPointsPlace(String place, String date) {
+    return '$place, as of $date';
+  }
+
+  @override
+  String get sirenTitle => 'Siren within earshot?';
+
+  @override
+  String sirenLikely(String distance, String direction) {
+    return 'The nearest siren is $distance $direction. It is very likely to be heard there.';
+  }
+
+  @override
+  String sirenMaybe(String distance, String direction) {
+    return 'The nearest siren is $distance $direction. That lies between its reach in town and over open land: it may be heard, though hardly with wind and closed windows. The warning app and the radio matter here.';
+  }
+
+  @override
+  String sirenUnlikely(String distance, String direction) {
+    return 'The nearest mapped siren is $distance $direction. That is far for a siren. Here, rely on the warning app and the radio.';
+  }
+
+  @override
+  String sirenNone(int radius) {
+    return 'No siren is mapped in OpenStreetMap within $radius km. That does not mean there is none: on Germany\'s nationwide warning day, the second Thursday in September at 11 am, you can hear for yourself, and the municipality knows.';
+  }
+
+  @override
+  String sirenRangeMapped(String range) {
+    return 'Range as mapped: $range';
+  }
+
+  @override
+  String get sirenRule =>
+      'Rule of thumb for the E57 motor siren, which new electronic sirens are still measured against: about 400 m in town, 600 m in the suburbs and 850 m over open land. Wind, buildings and closed windows shorten that a great deal.';
+
+  @override
+  String get sirenUnnamed => 'Siren';
+
+  @override
+  String get emergencyWellsTitle => 'Emergency drinking-water wells';
+
+  @override
+  String emergencyWellsFound(int count, int radius) {
+    return 'The nearest $count within $radius km';
+  }
+
+  @override
+  String emergencyWellsNone(int radius) {
+    return 'No emergency well is mapped within $radius km.';
+  }
+
+  @override
+  String get emergencyWellsWater =>
+      'Emergency wells draw groundwater that is not always of drinking-water quality. In an emergency the authorities say whether it has to be boiled. Keep canisters or buckets at home for carrying it.';
+
+  @override
+  String get emergencyWellUnnamed => 'Emergency well';
+
+  @override
+  String emergencyWellNumber(String ref) {
+    return 'No. $ref';
+  }
+
+  @override
+  String get emergencyWellOutOfOrder =>
+      'Pump broken or locked when last checked';
+
+  @override
+  String get emergencyHelpPointsTitle => 'Disaster help points';
+
+  @override
+  String get emergencyHelpPointsHint =>
+      'A building with emergency power that opens in a long blackout: there is information there, and an emergency call still goes out from it when no phone works.';
+
+  @override
+  String emergencyHelpPointsFound(int count, int radius) {
+    return '$count within $radius km';
+  }
+
+  @override
+  String emergencyHelpPointsNone(int radius) {
+    return 'No help point is mapped within $radius km. Many municipalities have them without their being in OpenStreetMap – the municipality knows where the nearest one is.';
+  }
+
+  @override
+  String get emergencyHelpPointUnnamed => 'Help point';
+
+  @override
+  String get emergencyPointsIncomplete =>
+      'Volunteers enter the locations in OpenStreetMap. Sirens and help points in particular are still missing in many places.';
+
+  @override
+  String get mapShowEmergencyPoints => 'Show emergency wells and sirens';
+
+  @override
+  String get mapHideEmergencyPoints => 'Hide emergency wells and sirens';
 }

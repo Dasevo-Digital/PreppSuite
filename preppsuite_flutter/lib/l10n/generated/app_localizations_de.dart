@@ -8462,4 +8462,114 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get riverFloodFailed =>
       'Der Kartendienst des Landes hat nicht geantwortet.';
+
+  @override
+  String get emergencyPointsTitle => 'Notbrunnen, Infopunkte und Sirenen';
+
+  @override
+  String get emergencyPointsEntryHint =>
+      'Wo es im Stromausfall Wasser und Auskunft gibt, und ob eine Sirene in Hörweite steht.';
+
+  @override
+  String get emergencyPointsIntro =>
+      'Im längeren Stromausfall fallen Wasserleitung, Telefon und Internet nach und nach aus. Wo dann der nächste Notbrunnen und der nächste Notfallinfopunkt sind, lässt sich jetzt noch nachsehen – die Suche wird gespeichert und ist danach auch offline da.';
+
+  @override
+  String emergencyPointsPlace(String place, String date) {
+    return '$place, Stand $date';
+  }
+
+  @override
+  String get sirenTitle => 'Sirene in Hörweite?';
+
+  @override
+  String sirenLikely(String distance, String direction) {
+    return 'Die nächste Sirene steht $distance $direction. Sie ist dort sehr wahrscheinlich zu hören.';
+  }
+
+  @override
+  String sirenMaybe(String distance, String direction) {
+    return 'Die nächste Sirene steht $distance $direction. Das liegt zwischen der Reichweite in der Stadt und über freies Land: Vielleicht ist sie zu hören, bei Wind und geschlossenen Fenstern eher nicht. Warn-App und Radio sind hier wichtig.';
+  }
+
+  @override
+  String sirenUnlikely(String distance, String direction) {
+    return 'Die nächste eingetragene Sirene steht $distance $direction. Das ist für eine Sirene weit. Hier sollte man sich auf Warn-App und Radio verlassen.';
+  }
+
+  @override
+  String sirenNone(int radius) {
+    return 'Im Umkreis von $radius km ist in OpenStreetMap keine Sirene eingetragen. Das heißt nicht, dass es keine gibt: Am bundesweiten Warntag, dem zweiten Donnerstag im September um 11 Uhr, hört man es selbst, und die Gemeinde weiß es.';
+  }
+
+  @override
+  String sirenRangeMapped(String range) {
+    return 'Reichweite laut Eintrag: $range';
+  }
+
+  @override
+  String get sirenRule =>
+      'Richtwert für die Motorsirene E57, an der auch neue elektronische Sirenen gemessen werden: etwa 400 m in der Stadt, 600 m am Stadtrand und 850 m über freies Land. Wind, Bebauung und geschlossene Fenster verkürzen das deutlich.';
+
+  @override
+  String get sirenUnnamed => 'Sirene';
+
+  @override
+  String get emergencyWellsTitle => 'Trinkwasser-Notbrunnen';
+
+  @override
+  String emergencyWellsFound(int count, int radius) {
+    return 'Die $count nächsten im Umkreis von $radius km';
+  }
+
+  @override
+  String emergencyWellsNone(int radius) {
+    return 'Im Umkreis von $radius km ist kein Notbrunnen eingetragen.';
+  }
+
+  @override
+  String get emergencyWellsWater =>
+      'Notbrunnen fördern Grundwasser, das nicht in jedem Fall Trinkwasserqualität hat. Im Ernstfall sagen die Behörden, ob es abgekocht werden muss. Für den Weg dorthin gehören Kanister oder Eimer ins Haus.';
+
+  @override
+  String get emergencyWellUnnamed => 'Notbrunnen';
+
+  @override
+  String emergencyWellNumber(String ref) {
+    return 'Nr. $ref';
+  }
+
+  @override
+  String get emergencyWellOutOfOrder =>
+      'Pumpe beim letzten Besuch defekt oder verschlossen';
+
+  @override
+  String get emergencyHelpPointsTitle => 'Notfallinfopunkte und Leuchttürme';
+
+  @override
+  String get emergencyHelpPointsHint =>
+      'Ein Gebäude mit Notstrom, das bei langem Stromausfall aufmacht: Dort gibt es Auskunft, und von dort geht ein Notruf raus, wenn kein Telefon mehr geht.';
+
+  @override
+  String emergencyHelpPointsFound(int count, int radius) {
+    return '$count im Umkreis von $radius km';
+  }
+
+  @override
+  String emergencyHelpPointsNone(int radius) {
+    return 'Im Umkreis von $radius km ist kein Notfallinfopunkt eingetragen. Viele Gemeinden haben welche, ohne dass sie in OpenStreetMap stehen – die Gemeinde weiß, wo der nächste ist.';
+  }
+
+  @override
+  String get emergencyHelpPointUnnamed => 'Notfallinfopunkt';
+
+  @override
+  String get emergencyPointsIncomplete =>
+      'Die Standorte tragen Freiwillige in OpenStreetMap ein. Gerade Sirenen und Infopunkte sind vielerorts noch nicht erfasst.';
+
+  @override
+  String get mapShowEmergencyPoints => 'Notbrunnen und Sirenen einblenden';
+
+  @override
+  String get mapHideEmergencyPoints => 'Notbrunnen und Sirenen ausblenden';
 }

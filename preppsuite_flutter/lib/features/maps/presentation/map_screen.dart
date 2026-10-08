@@ -16,6 +16,7 @@ import 'personal_places_screen.dart';
 import 'swipe_zoom.dart';
 import '../application/readable_position.dart';
 import 'my_position_screen.dart';
+import '../../emergency_points/application/emergency_points.dart';
 import '../../first_aid/application/defibrillators.dart';
 
 /// Roughly the centre of Germany, so the map opens on something before a
@@ -62,6 +63,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   List<Defibrillator> _defibrillators = const [];
   var _showDefibrillators = true;
 
+  /// Emergency wells, help points and sirens from the last search (#127),
+  /// for the same reason.
+  List<EmergencyPoint> _emergencyPoints = const [];
+  var _showEmergencyPoints = true;
+
   @override
   void initState() {
     super.initState();
@@ -69,6 +75,31 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     _searchLabel = widget.focusLabel;
     _loadPersonalPlaces();
     _loadDefibrillators();
+    _loadEmergencyPoints();
+  }
+
+  Future<void> _loadEmergencyPoints() async {
+    final search = await const EmergencyPointStore().load();
+    if (mounted && search != null) {
+      setState(() => _emergencyPoints = search.found);
+    }
+  }
+
+  void _describePoint(EmergencyPoint point, AppLocalizations l10n) {
+    final details = [
+      point.name ??
+          switch (point.kind) {
+            EmergencyPointKind.well => l10n.emergencyWellUnnamed,
+            EmergencyPointKind.helpPoint => l10n.emergencyHelpPointUnnamed,
+            EmergencyPointKind.siren => l10n.sirenUnnamed,
+          },
+      ?point.address,
+      if (point.openingHours case final hours?) l10n.aedOpeningHours(hours),
+      if (point.outOfOrder) l10n.emergencyWellOutOfOrder,
+    ];
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(details.join('\n'))));
   }
 
   Future<void> _loadDefibrillators() async {
@@ -195,6 +226,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   : l10n.mapShowAeds,
               onPressed: () => setState(
                 () => _showDefibrillators = !_showDefibrillators,
+              ),
+            ),
+          if (_emergencyPoints.isNotEmpty)
+            IconButton(
+              isSelected: _showEmergencyPoints,
+              icon: const Icon(Icons.water_drop_outlined),
+              selectedIcon: const Icon(Icons.water_drop),
+              tooltip: _showEmergencyPoints
+                  ? l10n.mapHideEmergencyPoints
+                  : l10n.mapShowEmergencyPoints,
+              onPressed: () => setState(
+                () => _showEmergencyPoints = !_showEmergencyPoints,
               ),
             ),
           IconButton(
@@ -364,6 +407,51 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                                         ),
                                       ),
                                     ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  if (_showEmergencyPoints && _emergencyPoints.isNotEmpty)
+                    MarkerLayer(
+                      markers: [
+                        for (final point in _emergencyPoints)
+                          Marker(
+                            point: LatLng(point.latitude, point.longitude),
+                            width: 30,
+                            height: 30,
+                            child: Semantics(
+                              button: true,
+                              label: point.name ?? point.address,
+                              child: GestureDetector(
+                                onTap: () => _describePoint(point, l10n),
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: switch (point.kind) {
+                                      EmergencyPointKind.well => const Color(
+                                        0xFF1565C0,
+                                      ),
+                                      EmergencyPointKind.helpPoint =>
+                                        const Color(0xFFEF6C00),
+                                      EmergencyPointKind.siren => const Color(
+                                        0xFF6A1B9A,
+                                      ),
+                                    },
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    switch (point.kind) {
+                                      EmergencyPointKind.well =>
+                                        Icons.water_drop,
+                                      EmergencyPointKind.helpPoint =>
+                                        Icons.info,
+                                      EmergencyPointKind.siren =>
+                                        Icons.campaign,
+                                    },
+                                    size: 17,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),

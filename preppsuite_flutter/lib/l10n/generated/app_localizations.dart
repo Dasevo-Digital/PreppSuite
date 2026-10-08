@@ -14010,6 +14010,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The state\'s map service did not answer.'**
   String get riverFloodFailed;
+
+  /// No description provided for @emergencyPointsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency wells, help points and sirens'**
+  String get emergencyPointsTitle;
+
+  /// No description provided for @emergencyPointsEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where there is water and information in a blackout, and whether a siren is within earshot.'**
+  String get emergencyPointsEntryHint;
+
+  /// No description provided for @emergencyPointsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'In a long blackout, mains water, phone and internet fail one after another. Where the nearest emergency well and help point are can still be looked up now – the search is kept and is there offline afterwards.'**
+  String get emergencyPointsIntro;
+
+  /// No description provided for @emergencyPointsPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'{place}, as of {date}'**
+  String emergencyPointsPlace(String place, String date);
+
+  /// No description provided for @sirenTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Siren within earshot?'**
+  String get sirenTitle;
+
+  /// No description provided for @sirenLikely.
+  ///
+  /// In en, this message translates to:
+  /// **'The nearest siren is {distance} {direction}. It is very likely to be heard there.'**
+  String sirenLikely(String distance, String direction);
+
+  /// No description provided for @sirenMaybe.
+  ///
+  /// In en, this message translates to:
+  /// **'The nearest siren is {distance} {direction}. That lies between its reach in town and over open land: it may be heard, though hardly with wind and closed windows. The warning app and the radio matter here.'**
+  String sirenMaybe(String distance, String direction);
+
+  /// No description provided for @sirenUnlikely.
+  ///
+  /// In en, this message translates to:
+  /// **'The nearest mapped siren is {distance} {direction}. That is far for a siren. Here, rely on the warning app and the radio.'**
+  String sirenUnlikely(String distance, String direction);
+
+  /// No description provided for @sirenNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No siren is mapped in OpenStreetMap within {radius} km. That does not mean there is none: on Germany\'s nationwide warning day, the second Thursday in September at 11 am, you can hear for yourself, and the municipality knows.'**
+  String sirenNone(int radius);
+
+  /// No description provided for @sirenRangeMapped.
+  ///
+  /// In en, this message translates to:
+  /// **'Range as mapped: {range}'**
+  String sirenRangeMapped(String range);
+
+  /// No description provided for @sirenRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule of thumb for the E57 motor siren, which new electronic sirens are still measured against: about 400 m in town, 600 m in the suburbs and 850 m over open land. Wind, buildings and closed windows shorten that a great deal.'**
+  String get sirenRule;
+
+  /// No description provided for @sirenUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Siren'**
+  String get sirenUnnamed;
+
+  /// No description provided for @emergencyWellsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency drinking-water wells'**
+  String get emergencyWellsTitle;
+
+  /// No description provided for @emergencyWellsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'The nearest {count} within {radius} km'**
+  String emergencyWellsFound(int count, int radius);
+
+  /// No description provided for @emergencyWellsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No emergency well is mapped within {radius} km.'**
+  String emergencyWellsNone(int radius);
+
+  /// No description provided for @emergencyWellsWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency wells draw groundwater that is not always of drinking-water quality. In an emergency the authorities say whether it has to be boiled. Keep canisters or buckets at home for carrying it.'**
+  String get emergencyWellsWater;
+
+  /// No description provided for @emergencyWellUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency well'**
+  String get emergencyWellUnnamed;
+
+  /// No description provided for @emergencyWellNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'No. {ref}'**
+  String emergencyWellNumber(String ref);
+
+  /// No description provided for @emergencyWellOutOfOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Pump broken or locked when last checked'**
+  String get emergencyWellOutOfOrder;
+
+  /// No description provided for @emergencyHelpPointsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Disaster help points'**
+  String get emergencyHelpPointsTitle;
+
+  /// No description provided for @emergencyHelpPointsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'A building with emergency power that opens in a long blackout: there is information there, and an emergency call still goes out from it when no phone works.'**
+  String get emergencyHelpPointsHint;
+
+  /// No description provided for @emergencyHelpPointsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} within {radius} km'**
+  String emergencyHelpPointsFound(int count, int radius);
+
+  /// No description provided for @emergencyHelpPointsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No help point is mapped within {radius} km. Many municipalities have them without their being in OpenStreetMap – the municipality knows where the nearest one is.'**
+  String emergencyHelpPointsNone(int radius);
+
+  /// No description provided for @emergencyHelpPointUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Help point'**
+  String get emergencyHelpPointUnnamed;
+
+  /// No description provided for @emergencyPointsIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Volunteers enter the locations in OpenStreetMap. Sirens and help points in particular are still missing in many places.'**
+  String get emergencyPointsIncomplete;
+
+  /// No description provided for @mapShowEmergencyPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Show emergency wells and sirens'**
+  String get mapShowEmergencyPoints;
+
+  /// No description provided for @mapHideEmergencyPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide emergency wells and sirens'**
+  String get mapHideEmergencyPoints;
 }
 
 class _AppLocalizationsDelegate

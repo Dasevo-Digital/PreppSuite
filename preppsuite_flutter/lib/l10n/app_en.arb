@@ -4816,5 +4816,127 @@
   },
   "riverFloodLimits": "Flood hazard maps under the EU Floods Directive, water depth within 25 m. Areas behind dikes are only roughly estimated there.",
   "riverFloodSource": "Source: NLWKN, flood hazard maps (Floods Directive, 2nd cycle)",
-  "riverFloodFailed": "The state's map service did not answer."
+  "riverFloodFailed": "The state's map service did not answer.",
+  "emergencyPointsTitle": "Emergency wells, help points and sirens",
+  "emergencyPointsEntryHint": "Where there is water and information in a blackout, and whether a siren is within earshot.",
+  "emergencyPointsIntro": "In a long blackout, mains water, phone and internet fail one after another. Where the nearest emergency well and help point are can still be looked up now – the search is kept and is there offline afterwards.",
+  "emergencyPointsPlace": "{place}, as of {date}",
+  "@emergencyPointsPlace": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sirenTitle": "Siren within earshot?",
+  "sirenLikely": "The nearest siren is {distance} {direction}. It is very likely to be heard there.",
+  "@sirenLikely": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
+  "sirenMaybe": "The nearest siren is {distance} {direction}. That lies between its reach in town and over open land: it may be heard, though hardly with wind and closed windows. The warning app and the radio matter here.",
+  "@sirenMaybe": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
+  "sirenUnlikely": "The nearest mapped siren is {distance} {direction}. That is far for a siren. Here, rely on the warning app and the radio.",
+  "@sirenUnlikely": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      }
+    }
+  },
+  "sirenNone": "No siren is mapped in OpenStreetMap within {radius} km. That does not mean there is none: on Germany's nationwide warning day, the second Thursday in September at 11 am, you can hear for yourself, and the municipality knows.",
+  "@sirenNone": {
+    "placeholders": {
+      "radius": {
+        "type": "int"
+      }
+    }
+  },
+  "sirenRangeMapped": "Range as mapped: {range}",
+  "@sirenRangeMapped": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "sirenRule": "Rule of thumb for the E57 motor siren, which new electronic sirens are still measured against: about 400 m in town, 600 m in the suburbs and 850 m over open land. Wind, buildings and closed windows shorten that a great deal.",
+  "sirenUnnamed": "Siren",
+  "emergencyWellsTitle": "Emergency drinking-water wells",
+  "emergencyWellsFound": "The nearest {count} within {radius} km",
+  "@emergencyWellsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "radius": {
+        "type": "int"
+      }
+    }
+  },
+  "emergencyWellsNone": "No emergency well is mapped within {radius} km.",
+  "@emergencyWellsNone": {
+    "placeholders": {
+      "radius": {
+        "type": "int"
+      }
+    }
+  },
+  "emergencyWellsWater": "Emergency wells draw groundwater that is not always of drinking-water quality. In an emergency the authorities say whether it has to be boiled. Keep canisters or buckets at home for carrying it.",
+  "emergencyWellUnnamed": "Emergency well",
+  "emergencyWellNumber": "No. {ref}",
+  "@emergencyWellNumber": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "emergencyWellOutOfOrder": "Pump broken or locked when last checked",
+  "emergencyHelpPointsTitle": "Disaster help points",
+  "emergencyHelpPointsHint": "A building with emergency power that opens in a long blackout: there is information there, and an emergency call still goes out from it when no phone works.",
+  "emergencyHelpPointsFound": "{count} within {radius} km",
+  "@emergencyHelpPointsFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "radius": {
+        "type": "int"
+      }
+    }
+  },
+  "emergencyHelpPointsNone": "No help point is mapped within {radius} km. Many municipalities have them without their being in OpenStreetMap – the municipality knows where the nearest one is.",
+  "@emergencyHelpPointsNone": {
+    "placeholders": {
+      "radius": {
+        "type": "int"
+      }
+    }
+  },
+  "emergencyHelpPointUnnamed": "Help point",
+  "emergencyPointsIncomplete": "Volunteers enter the locations in OpenStreetMap. Sirens and help points in particular are still missing in many places.",
+  "mapShowEmergencyPoints": "Show emergency wells and sirens",
+  "mapHideEmergencyPoints": "Hide emergency wells and sirens"
 }

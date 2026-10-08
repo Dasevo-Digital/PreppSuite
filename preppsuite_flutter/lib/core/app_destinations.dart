@@ -58,6 +58,7 @@ import '../features/warnings/presentation/fire_danger_screen.dart';
 import '../features/warnings/presentation/heavy_rain_screen.dart';
 import '../features/home/presentation/check_in_screen.dart';
 import '../features/first_aid/presentation/defibrillator_screen.dart';
+import '../features/emergency_points/presentation/emergency_points_screen.dart';
 import '../features/warnings/presentation/pegel_screen.dart';
 import '../features/warnings/presentation/hazard_release_screen.dart';
 import '../features/warnings/presentation/iodine_tablets_screen.dart';
@@ -399,6 +400,24 @@ List<AppDestination> appDestinations() => [
     area: ShellDestination.emergency,
     open: (_) => const DefibrillatorScreen(),
     aliases: ['aed', 'defi', 'defibrillator', 'herzstillstand'],
+  ),
+  AppDestination(
+    id: 'emergency-points',
+    title: (l) => l.emergencyPointsTitle,
+    icon: Icons.water_drop_outlined,
+    area: ShellDestination.emergency,
+    open: (_) => const EmergencyPointsScreen(),
+    aliases: [
+      'notbrunnen',
+      'brunnen',
+      'wasser',
+      'sirene',
+      'leuchtturm',
+      'notfallinfopunkt',
+      'notfalltreffpunkt',
+      'well',
+      'siren',
+    ],
   ),
   AppDestination(
     id: 'check-in',
