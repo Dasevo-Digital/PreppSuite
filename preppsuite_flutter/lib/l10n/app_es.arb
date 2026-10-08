@@ -2313,7 +2313,7 @@
   "riverFloodClass5": "más de 4 m de agua",
   "riverFloodDry": "sin inundación según el mapa",
   "riverFloodUncovered": "El mapa de peligro de inundación de {state} aún no está incluido.",
-  "riverFloodLimits": "Mapas de peligro de inundación según la Directiva europea, profundidad del agua en un radio de 25 m. Las zonas tras los diques solo se estiman de forma aproximada.",
+  "riverFloodLimits": "Mapas de peligro de inundación según la Directiva europea, profundidad del agua en un radio de 25 m. Las zonas tras diques y defensas no se incluyen o solo de forma aproximada.",
   "riverFloodSource": "Fuente: NLWKN, mapas de peligro de inundación (Directiva de inundaciones, 2.º ciclo)",
   "riverFloodFailed": "El servicio de mapas del estado federado no ha respondido.",
   "emergencyPointsTitle": "Pozos de emergencia, puntos de ayuda y sirenas",
@@ -2350,5 +2350,7 @@
   "measureConvertHint": "En la etiqueta, por ejemplo 400",
   "measureConvertInvalid": "Introduce una cantidad mayor que 0.",
   "measureConvertDone": "«{name}» ya cuenta en la calculadora de provisiones.",
-  "measureConvertNoneLeft": "Todos los alimentos tienen ya una medida."
+  "measureConvertNoneLeft": "Todos los alimentos tienen ya una medida.",
+  "riverFloodSourceBY": "Fuente de datos: Agencia de Medio Ambiente de Baviera, www.lfu.bayern.de",
+  "riverFloodSourceNW": "Fuente: Land NRW (2026), Licencia de datos de Alemania – atribución – versión 2.0 (www.govdata.de/dl-de/by-2-0)"
 }

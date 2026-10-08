@@ -8481,7 +8481,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get riverFloodLimits =>
-      'Mapas de peligro de inundación según la Directiva europea, profundidad del agua en un radio de 25 m. Las zonas tras los diques solo se estiman de forma aproximada.';
+      'Mapas de peligro de inundación según la Directiva europea, profundidad del agua en un radio de 25 m. Las zonas tras diques y defensas no se incluyen o solo de forma aproximada.';
 
   @override
   String get riverFloodSource =>
@@ -8631,4 +8631,12 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get measureConvertNoneLeft =>
       'Todos los alimentos tienen ya una medida.';
+
+  @override
+  String get riverFloodSourceBY =>
+      'Fuente de datos: Agencia de Medio Ambiente de Baviera, www.lfu.bayern.de';
+
+  @override
+  String get riverFloodSourceNW =>
+      'Fuente: Land NRW (2026), Licencia de datos de Alemania – atribución – versión 2.0 (www.govdata.de/dl-de/by-2-0)';
 }

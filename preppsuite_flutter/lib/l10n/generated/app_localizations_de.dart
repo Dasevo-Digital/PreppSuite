@@ -8453,7 +8453,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get riverFloodLimits =>
-      'Hochwassergefahrenkarten nach der EU-Hochwasserrichtlinie, Wassertiefe im Umkreis von 25 m. Bereiche hinter Deichen sind dort nur grob ermittelt.';
+      'Hochwassergefahrenkarten nach der EU-Hochwasserrichtlinie, Wassertiefe im Umkreis von 25 m. Bereiche hinter Deichen und Schutzanlagen sind nicht oder nur grob erfasst.';
 
   @override
   String get riverFloodSource =>
@@ -8601,4 +8601,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get measureConvertNoneLeft => 'Alle Lebensmittel haben jetzt ein Maß.';
+
+  @override
+  String get riverFloodSourceBY =>
+      'Datenquelle: Bayerisches Landesamt für Umwelt, www.lfu.bayern.de';
+
+  @override
+  String get riverFloodSourceNW =>
+      'Quelle: Land NRW (2026), Datenlizenz Deutschland – Namensnennung – Version 2.0 (www.govdata.de/dl-de/by-2-0)';
 }

@@ -3535,7 +3535,7 @@
   "riverFloodClass5": "mehr als 4 m Wasser",
   "riverFloodDry": "laut Karte nicht überflutet",
   "riverFloodUncovered": "Für {state} ist die Hochwassergefahrenkarte des Landes noch nicht eingebunden.",
-  "riverFloodLimits": "Hochwassergefahrenkarten nach der EU-Hochwasserrichtlinie, Wassertiefe im Umkreis von 25 m. Bereiche hinter Deichen sind dort nur grob ermittelt.",
+  "riverFloodLimits": "Hochwassergefahrenkarten nach der EU-Hochwasserrichtlinie, Wassertiefe im Umkreis von 25 m. Bereiche hinter Deichen und Schutzanlagen sind nicht oder nur grob erfasst.",
   "riverFloodSource": "Quelle: NLWKN, Hochwassergefahrenkarten (HWRM-RL, 2. Zyklus)",
   "riverFloodFailed": "Der Kartendienst des Landes hat nicht geantwortet.",
   "emergencyPointsTitle": "Notbrunnen, Infopunkte und Sirenen",
@@ -3572,5 +3572,7 @@
   "measureConvertHint": "Steht auf dem Etikett, etwa 400",
   "measureConvertInvalid": "Bitte eine Menge über 0 eingeben.",
   "measureConvertDone": "„{name}“ zählt jetzt im Vorrats-Rechner mit.",
-  "measureConvertNoneLeft": "Alle Lebensmittel haben jetzt ein Maß."
+  "measureConvertNoneLeft": "Alle Lebensmittel haben jetzt ein Maß.",
+  "riverFloodSourceBY": "Datenquelle: Bayerisches Landesamt für Umwelt, www.lfu.bayern.de",
+  "riverFloodSourceNW": "Quelle: Land NRW (2026), Datenlizenz Deutschland – Namensnennung – Version 2.0 (www.govdata.de/dl-de/by-2-0)"
 }

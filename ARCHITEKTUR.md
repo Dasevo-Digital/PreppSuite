@@ -1149,7 +1149,7 @@ tree; the test suite deliberately targets that layer rather than the UI.
   the warning region. The map leaves out sewers and infiltration; the
   screen says so. The answer is kept in `PrivatePreferences`: it is the
   household's address.
-- **River floods come from each Land, Niedersachsen first** (#124). The
+- **River floods come from each Land: Niedersachsen, Bayern, NRW** (#124). The
   EU Floods Directive maps three floods per Land with the same five LAWA
   depth classes, but every Land runs its own service. Niedersachsen is
   the NLWKN's ArcGIS service on `umweltkarten-niedersachsen.de`
@@ -1160,10 +1160,33 @@ tree; the test suite deliberately targets that layer rather than the UI.
   taken out first): 1–5 in HQhäufig and HQ100, 11–15 in HQextrem, the five
   classes in order, `NoData` where the flood does not reach. The extreme
   layer's five "protected" classes behind defences turned up in no sample,
-  so unknown values are dropped, not guessed. Other Länder show a sentence
-  saying they are not in yet. The source line names the NLWKN but not the
-  contact address in the service's copyright text -- an e-mail address
-  has no place in this repository.
+  so unknown values are dropped, not guessed. The source line names the
+  NLWKN but not the contact address in the service's copyright text -- an
+  e-mail address has no place in this repository.
+
+  **Bayern** (#130) is the LfU's WMS `gdi/wms/wasser/wassertiefen`
+  (`wt_hqhaeufig`, `wt_hq100`, `wt_hqextrem`), asked with GetFeatureInfo
+  as GeoJSON. Its polygons name the class in words — "größer 0 - 0,5 m"
+  up to "größer 4,0 m", read at Passau on 2026-10-08 — and several can
+  overlap at one point, which the deepest-class rule already handles;
+  "nicht ermittelt" is dropped. **Nordrhein-Westfalen** (#129) is the
+  LANUV's WMS `umwelt/wasser/HW_Gefahrenkarte`, layers
+  `Tiefen_Ueberflutungsgebiet_hw|mw|nw` (high, medium, low probability),
+  which answer with the computed depth in metres as the pixel value and
+  `NoData` where dry. NRW's own class number beside it is not the LAWA
+  scheme (7.1 m came back as class 4), so the metres are classed here.
+  The separate layers for land behind defences are left out in both, as
+  the protected classes are in Niedersachsen. NRW's licence is the Data
+  Licence Germany 2.0 and asks for "Land NRW (year)" as the source, which
+  is the source line. WMS 1.3.0 in EPSG:4326 takes latitude first in the
+  bounding box; the tests pin that.
+
+  **Baden-Württemberg** (#131) has no public service with the depths:
+  none of the LUBW's 129 public map services carries them (searched
+  2026-10-08), its metadata places the HWGK services on the state
+  intranet, and what is public is a query page for people. Reading that
+  page would be scraping a form, so BW, like every other Land not named
+  here, shows a sentence saying it is not in yet.
 - **Overpass wants a name.** Since autumn 2026 `overpass-api.de` answers
   a request with Dart's default user agent (`Dart/3.x (dart:io)`) with
   406; the same query as `PreppSuite/1.0` answers 200 (measured

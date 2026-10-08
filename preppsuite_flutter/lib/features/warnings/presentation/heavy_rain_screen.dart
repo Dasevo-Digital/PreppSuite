@@ -530,7 +530,11 @@ class _RiverCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(l10n.riverFloodLimits, style: theme.textTheme.bodySmall),
               const SizedBox(height: 4),
-              Text(l10n.riverFloodSource, style: theme.textTheme.bodySmall),
+              Text(switch (river.stateCode) {
+                'BY' => l10n.riverFloodSourceBY,
+                'NW' => l10n.riverFloodSourceNW,
+                _ => l10n.riverFloodSource,
+              }, style: theme.textTheme.bodySmall),
             ],
           ],
         ),

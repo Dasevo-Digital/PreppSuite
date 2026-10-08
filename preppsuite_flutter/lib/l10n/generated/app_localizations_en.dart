@@ -8408,7 +8408,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get riverFloodLimits =>
-      'Flood hazard maps under the EU Floods Directive, water depth within 25 m. Areas behind dikes are only roughly estimated there.';
+      'Flood hazard maps under the EU Floods Directive, water depth within 25 m. Areas behind dikes and flood defences are not covered or only roughly estimated.';
 
   @override
   String get riverFloodSource =>
@@ -8555,4 +8555,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get measureConvertNoneLeft => 'Every food has a measure now.';
+
+  @override
+  String get riverFloodSourceBY =>
+      'Data source: Bavarian Environment Agency, www.lfu.bayern.de';
+
+  @override
+  String get riverFloodSourceNW =>
+      'Source: Land NRW (2026), Data licence Germany – attribution – version 2.0 (www.govdata.de/dl-de/by-2-0)';
 }

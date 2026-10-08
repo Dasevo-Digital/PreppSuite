@@ -4814,7 +4814,7 @@
       }
     }
   },
-  "riverFloodLimits": "Flood hazard maps under the EU Floods Directive, water depth within 25 m. Areas behind dikes are only roughly estimated there.",
+  "riverFloodLimits": "Flood hazard maps under the EU Floods Directive, water depth within 25 m. Areas behind dikes and flood defences are not covered or only roughly estimated.",
   "riverFloodSource": "Source: NLWKN, flood hazard maps (Floods Directive, 2nd cycle)",
   "riverFloodFailed": "The state's map service did not answer.",
   "emergencyPointsTitle": "Emergency wells, help points and sirens",
@@ -4960,5 +4960,7 @@
       }
     }
   },
-  "measureConvertNoneLeft": "Every food has a measure now."
+  "measureConvertNoneLeft": "Every food has a measure now.",
+  "riverFloodSourceBY": "Data source: Bavarian Environment Agency, www.lfu.bayern.de",
+  "riverFloodSourceNW": "Source: Land NRW (2026), Data licence Germany – attribution – version 2.0 (www.govdata.de/dl-de/by-2-0)"
 }
