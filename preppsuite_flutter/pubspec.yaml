@@ -38,7 +38,7 @@ dependencies:
   package_info_plus: ^10.2.2
   intl: any
   flutter_riverpod: ^3.4.2
-  drift: ^2.35.0
+  drift: ^2.35.2
   # Named directly only so that core/error_text.dart can recognise a
   # raw SqliteException. Drift wraps most database errors, but not the
   # ones thrown while the database is being opened -- which is exactly
@@ -53,7 +53,7 @@ dependencies:
   # in three years; the painter is sixty lines and the module data is
   # all that is really needed.
   qr: ^3.0.2
-  openfoodfacts: ^3.30.2
+  openfoodfacts: ^3.31.0
   pdf: ^3.13.1
   # Pure-Dart PDF parser used for the offline full-text index of personal
   # documents. Unlike a platform PDF viewer, it works on mobile and desktop

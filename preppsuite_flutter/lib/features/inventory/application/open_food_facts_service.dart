@@ -14,9 +14,25 @@ import 'package_nutrition.dart';
 /// The column holds per 100 now, which is what the label already says, so
 /// there is nothing left to convert. The arithmetic happens once, in
 /// `supply_calculator.dart`, where the quantity is actually known.
-PackageNutrition packageNutritionOf(Nutriments? nutriments) {
-  double? per100(Nutrient nutrient) =>
-      nutriments?.getValue(nutrient, PerSize.oneHundredGrams);
+///
+/// Since API 3.5 a product carries its nutrition as sets, one per source
+/// and basis: what the packaging says, what someone entered as prepared,
+/// what Open Food Facts estimated from the ingredients. Only a set as sold
+/// and per 100 g or 100 ml is the label's own figure; the packaging is
+/// preferred, and an estimate is never taken -- it would put a guessed
+/// calorie count into the supply calculator as if somebody had read it.
+PackageNutrition packageNutritionOf(Map<String, dynamic>? nutrition) {
+  final set = _labelSet(nutrition?['input_sets']);
+  double? per100(Nutrient nutrient) {
+    final value = set?.nutritionValues?[nutrient];
+    final number = value?.value;
+    if (number == null) return null;
+    return switch (value!.unit) {
+      Unit.MILLI_G => number / 1000,
+      Unit.MICRO_G => number / 1000000,
+      _ => number.toDouble(),
+    };
+  }
 
   return PackageNutrition(
     kcal: per100(Nutrient.energyKCal),
@@ -25,6 +41,23 @@ PackageNutrition packageNutritionOf(Nutriments? nutriments) {
     fatGrams: per100(Nutrient.fat),
     fiberGrams: per100(Nutrient.fiber),
   );
+}
+
+NutritionSet? _labelSet(Object? json) {
+  if (json is! List) return null;
+  final sets =
+      [
+        for (final item in json)
+          if (item is Map) NutritionSet.fromJson(item),
+      ].nonNulls.where(
+        (set) =>
+            set.key.source != 'estimate' &&
+            set.key.preparation == 'as_sold' &&
+            (set.key.perSize == PerSize.oneHundredGrams ||
+                set.key.perSize == PerSize.oneHundredMilliliters),
+      );
+  return sets.where((set) => set.key.source == 'packaging').firstOrNull ??
+      sets.firstOrNull;
 }
 
 /// A minimal, prefill-only view of an Open Food Facts product — just enough
@@ -85,12 +118,12 @@ class OpenFoodFactsService {
       final result = await OpenFoodAPIClient.getProductV3(
         ProductQueryConfiguration(
           barcode,
-          version: ProductQueryVersion.v3,
+          version: ProductQueryVersion.latestVersion,
           fields: [
             ProductField.NAME,
             ProductField.BRANDS,
             ProductField.QUANTITY,
-            ProductField.NUTRIMENTS,
+            ProductField.NUTRITION,
           ],
         ),
       );
@@ -104,7 +137,7 @@ class OpenFoodFactsService {
         name: name,
         brand: product.brands,
         quantity: product.quantity,
-        nutrition: packageNutritionOf(product.nutriments),
+        nutrition: packageNutritionOf(product.nutrition),
       );
     } catch (_) {
       // Network error, timeout, malformed response, etc. — the user can

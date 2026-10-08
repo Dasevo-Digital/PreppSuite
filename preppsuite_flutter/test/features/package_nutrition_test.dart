@@ -1,19 +1,30 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:preppsuite_flutter/features/inventory/application/open_food_facts_service.dart';
 
 void main() {
-  Nutriments nutriments(Map<Nutrient, double> values) {
-    var result = Nutriments.empty();
-    for (final entry in values.entries) {
-      result = result.setValue(
-        entry.key,
-        PerSize.oneHundredGrams,
-        entry.value,
-      );
-    }
-    return result;
-  }
+  // The shape API 3.5 answers with: one set per source and basis.
+  Map<String, dynamic> labelSet(
+    Map<String, num> values, {
+    String source = 'packaging',
+    String preparation = 'as_sold',
+    String per = '100g',
+    String unit = 'g',
+  }) => {
+    'source': source,
+    'preparation': preparation,
+    'per': per,
+    'nutrients': {
+      for (final entry in values.entries)
+        entry.key: {
+          'value': entry.value,
+          'unit': entry.key == 'energy-kcal' ? 'kcal' : unit,
+        },
+    },
+  };
+
+  Map<String, dynamic> nutriments(Map<String, num> values) => {
+    'input_sets': [labelSet(values)],
+  };
 
   group('reading a scanned label', () {
     test('each nutrient lands in its own field, unchanged', () {
@@ -27,11 +38,11 @@ void main() {
       // column holds per 100 now, which is what the label already says.
       final nutrition = packageNutritionOf(
         nutriments({
-          Nutrient.energyKCal: 250,
-          Nutrient.proteins: 10,
-          Nutrient.carbohydrates: 30,
-          Nutrient.fat: 5,
-          Nutrient.fiber: 2,
+          'energy-kcal': 250,
+          'proteins': 10,
+          'carbohydrates': 30,
+          'fat': 5,
+          'fiber': 2,
         }),
       );
 
@@ -47,7 +58,7 @@ void main() {
       // and the rest of the fields have to stay null rather than zero, or
       // a shelf of unknowns would add up to a confident total.
       final nutrition = packageNutritionOf(
-        nutriments({Nutrient.energyKCal: 350}),
+        nutriments({'energy-kcal': 350}),
       );
 
       expect(nutrition.kcal, 350);
@@ -65,13 +76,62 @@ void main() {
       // more, so a box that states one badly keeps its figures.
       final nutrition = packageNutritionOf(
         nutriments({
-          Nutrient.energyKCal: 250,
-          Nutrient.proteins: 10,
+          'energy-kcal': 250,
+          'proteins': 10,
         }),
       );
 
       expect(nutrition.kcal, 250);
       expect(nutrition.proteinGrams, closeTo(10, 0.001));
+    });
+
+    test('the packaging wins over an estimate, which is never taken', () {
+      // Open Food Facts estimates figures from the ingredients. Taken as
+      // the label, a guess would feed the supply calculator as if somebody
+      // had read it off the box.
+      final both = packageNutritionOf({
+        'input_sets': [
+          labelSet({'energy-kcal': 999}, source: 'estimate'),
+          labelSet({'energy-kcal': 539}),
+        ],
+      });
+      expect(both.kcal, 539);
+
+      final onlyEstimate = packageNutritionOf({
+        'input_sets': [
+          labelSet({'energy-kcal': 999}, source: 'estimate'),
+        ],
+      });
+      expect(onlyEstimate.isEmpty, isTrue);
+    });
+
+    test('a drink per 100 ml counts, a serving or a prepared dish not', () {
+      expect(
+        packageNutritionOf({
+          'input_sets': [
+            labelSet({'energy-kcal': 42}, per: '100ml'),
+          ],
+        }).kcal,
+        42,
+      );
+      expect(
+        packageNutritionOf({
+          'input_sets': [
+            labelSet({'energy-kcal': 120}, per: 'serving'),
+            labelSet({'energy-kcal': 80}, preparation: 'prepared'),
+          ],
+        }).isEmpty,
+        isTrue,
+      );
+    });
+
+    test('a figure given in milligrams arrives in grams', () {
+      final nutrition = packageNutritionOf({
+        'input_sets': [
+          labelSet({'fiber': 2500}, unit: 'mg'),
+        ],
+      });
+      expect(nutrition.fiberGrams, closeTo(2.5, 0.0001));
     });
 
     test('a product with no nutrition data at all is empty', () {
