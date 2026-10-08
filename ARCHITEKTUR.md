@@ -33,6 +33,13 @@ tool/pre_release_check.sh                                   # no device needed
 tool/release_device_check.py ~/Desktop/PreppSuite-Release-v<version>-Upload
 ```
 
+`tool/release.sh <version>` runs the second one as part of building all
+packages, and `tool/release.sh <version> --publish-only` publishes the
+folder once the release text is written -- see
+[`docs/desktop-bauen.md`](docs/desktop-bauen.md#ein-release-in-einem-lauf).
+The hand-run steps below are what the script does, and what to fall back
+on when one machine is not available.
+
 The device check runs the integration tests on an **iPhone simulator,
 never this Mac** — `flutter test -d macos` would start the app under its
 production identifier beside the household's real data. It writes
@@ -95,7 +102,7 @@ builds is also the machine that uses the app, and a build leaves copies
 behind:
 
 ```bash
-tool/macos_install.sh ~/Desktop/PreppSuite-Release-v<version>-Upload/PreppSuite-<version>-macos-universal.zip
+tool/macos_install.sh ~/Desktop/PreppSuite-Release-v<version>-Upload/PreppSuite-<version>-macos-local-ad-hoc.zip
 ```
 
 It installs the released bundle as both `/Applications/PreppSuite.app`

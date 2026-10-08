@@ -3,12 +3,16 @@
 #
 #   tool/release.sh 2.4.6             build, test and checksum
 #   tool/release.sh 2.4.6 --publish   … and create the release and upload
+#   tool/release.sh 2.4.6 --publish-only   publish a folder built before
 #
 # Before it: the version is raised in pubspec.yaml, committed, tagged
 # v<version> and pushed -- this script builds what the tag says and refuses
 # a working tree that differs from it. The release text is written by hand
 # into RELEASE-TEXT-v<version>.md in the upload folder; --publish takes it
-# from there.
+# from there. The text names the device check's result, which only exists
+# once the build has run -- so the usual order is a build without
+# --publish, then the text, then --publish-only, which builds nothing and
+# publishes what the folder holds after checking it against SHA256SUMS.txt.
 #
 # The machines and the upload target come from the environment, never from
 # this file:
@@ -29,9 +33,15 @@ readonly APP_DIR="$ROOT/preppsuite_flutter"
 
 version="${1:-}"
 publish=false
-[ "${2:-}" = "--publish" ] && publish=true
+publish_only=false
+case "${2:-}" in
+  "") ;;
+  --publish) publish=true ;;
+  --publish-only) publish=true publish_only=true ;;
+  *) echo "Usage: $0 <version> [--publish|--publish-only]" >&2; exit 2 ;;
+esac
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
-  echo "Usage: $0 <version> [--publish]" >&2
+  echo "Usage: $0 <version> [--publish|--publish-only]" >&2
   exit 2
 }
 
@@ -43,6 +53,54 @@ log="$(mktemp -d)"
 
 step() { printf '\n== %s ==\n' "$*"; }
 fail() { echo "FEHLER: $*" >&2; echo "Protokolle: $log" >&2; exit 1; }
+
+# --- Publish ----------------------------------------------------------------
+publish_release() {
+  step "Veröffentlichen"
+  [ -f "$out/RELEASE-TEXT-v$version.md" ] || fail "RELEASE-TEXT-v$version.md fehlt"
+  [ -n "${RELEASE_API:-}" ] && [ -n "${RELEASE_TOKEN:-}" ] ||
+    fail "RELEASE_API und RELEASE_TOKEN setzen"
+  OUT="$out" VERSION="$version" python3 - <<'PY'
+import glob, hashlib, json, os, urllib.parse, urllib.request
+
+api, token = os.environ["RELEASE_API"], os.environ["RELEASE_TOKEN"]
+out, version = os.environ["OUT"], os.environ["VERSION"]
+
+def call(method, url, data=None, kind="application/json", raw=False):
+    request = urllib.request.Request(url, data=data, method=method, headers={
+        "Authorization": "token " + token, "Content-Type": kind,
+        "Accept": "application/json"})
+    with urllib.request.urlopen(request, timeout=900) as response:
+        body = response.read()
+        return body if raw else json.loads(body or b"null")
+
+text = open(f"{out}/RELEASE-TEXT-v{version}.md", encoding="utf-8").read()
+release = call("POST", api + "/releases", json.dumps({
+    "tag_name": f"v{version}", "name": f"PreppSuite {version}", "body": text,
+    "draft": False, "prerelease": False}).encode())
+print(release["html_url"])
+files = sorted(glob.glob(f"{out}/PreppSuite-{version}-*"))
+files += [f"{out}/GERAETETEST-v{version}.txt", f"{out}/SHA256SUMS.txt"]
+for path in files:
+    data = open(path, "rb").read()
+    name = os.path.basename(path)
+    asset = call("POST", f"{api}/releases/{release['id']}/assets?name="
+                 + urllib.parse.quote(name), data, "application/octet-stream")
+    back = call("GET", asset["browser_download_url"], raw=True)
+    same = hashlib.sha256(back).digest() == hashlib.sha256(data).digest()
+    print(" ", name, "ok" if same else "ABWEICHUNG")
+    if not same:
+        raise SystemExit(1)
+PY
+  step "Veröffentlicht"
+}
+
+if $publish_only; then
+  [ -f "$out/SHA256SUMS.txt" ] || fail "$out/SHA256SUMS.txt fehlt – erst bauen"
+  (cd "$out" && shasum -a 256 -c SHA256SUMS.txt) || fail "Prüfsummen stimmen nicht"
+  publish_release
+  exit 0
+fi
 
 # --- What is being built -------------------------------------------------
 cd "$ROOT"
@@ -152,41 +210,4 @@ if ! $publish; then
   exit 0
 fi
 
-# --- Publish --------------------------------------------------------------
-step "Veröffentlichen"
-[ -f "$out/RELEASE-TEXT-v$version.md" ] || fail "RELEASE-TEXT-v$version.md fehlt"
-[ -n "${RELEASE_API:-}" ] && [ -n "${RELEASE_TOKEN:-}" ] ||
-  fail "RELEASE_API und RELEASE_TOKEN setzen"
-OUT="$out" VERSION="$version" python3 - <<'PY'
-import glob, hashlib, json, os, urllib.parse, urllib.request
-
-api, token = os.environ["RELEASE_API"], os.environ["RELEASE_TOKEN"]
-out, version = os.environ["OUT"], os.environ["VERSION"]
-
-def call(method, url, data=None, kind="application/json", raw=False):
-    request = urllib.request.Request(url, data=data, method=method, headers={
-        "Authorization": "token " + token, "Content-Type": kind,
-        "Accept": "application/json"})
-    with urllib.request.urlopen(request, timeout=900) as response:
-        body = response.read()
-        return body if raw else json.loads(body or b"null")
-
-text = open(f"{out}/RELEASE-TEXT-v{version}.md", encoding="utf-8").read()
-release = call("POST", api + "/releases", json.dumps({
-    "tag_name": f"v{version}", "name": f"PreppSuite {version}", "body": text,
-    "draft": False, "prerelease": False}).encode())
-print(release["html_url"])
-files = sorted(glob.glob(f"{out}/PreppSuite-{version}-*"))
-files += [f"{out}/GERAETETEST-v{version}.txt", f"{out}/SHA256SUMS.txt"]
-for path in files:
-    data = open(path, "rb").read()
-    name = os.path.basename(path)
-    asset = call("POST", f"{api}/releases/{release['id']}/assets?name="
-                 + urllib.parse.quote(name), data, "application/octet-stream")
-    back = call("GET", asset["browser_download_url"], raw=True)
-    same = hashlib.sha256(back).digest() == hashlib.sha256(data).digest()
-    print(" ", name, "ok" if same else "ABWEICHUNG")
-    if not same:
-        raise SystemExit(1)
-PY
-step "Veröffentlicht"
+publish_release

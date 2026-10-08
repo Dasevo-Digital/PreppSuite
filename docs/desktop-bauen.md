@@ -217,6 +217,12 @@ der Umgebung: `RELEASE_LINUX_HOST`, `RELEASE_WINDOWS_HOST` (ssh-Namen),
 das Release an und lädt jede Datei hoch, mit Prüfsummenvergleich nach dem
 Hochladen.
 
+Weil der Release-Text das Ergebnis des Gerätetests nennt, das erst nach dem
+Bauen feststeht, ist der übliche Ablauf dreiteilig: `tool/release.sh
+<version>` baut, dann wird der Text geschrieben, dann veröffentlicht
+`tool/release.sh <version> --publish-only` den Ordner, ohne noch einmal zu
+bauen. Vorher prüft es die Dateien gegen `SHA256SUMS.txt`.
+
 ## Woher PDFium kommt
 
 PDFium ist die einzige fremde Binärdatei, die in ein PreppSuite-Paket
