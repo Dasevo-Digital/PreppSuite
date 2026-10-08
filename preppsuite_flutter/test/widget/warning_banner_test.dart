@@ -39,6 +39,7 @@ void main() {
     required String headline,
     String? regionKey,
     String severity = 'minor',
+    DateTime? effective,
   }) {
     return db.Warning(
       source: 'bbk',
@@ -48,7 +49,7 @@ void main() {
       severity: severity,
       eventType: 'Test',
       headline: headline,
-      effective: DateTime.utc(2026),
+      effective: effective ?? DateTime.utc(2026),
       sent: DateTime.utc(2026),
       updatedAt: DateTime.utc(2026),
       notified: false,
@@ -107,12 +108,65 @@ void main() {
     expect(find.textContaining('Stromausfall Braunschweig'), findsOneWidget);
   });
 
-  testWidgets('the household\'s own state counts too', (tester) async {
+  testWidgets('the own Land counts when it is severe', (tester) async {
+    // A warning known only by its Land may be for all of it or for a
+    // district at the other end (#11). Severe is worth the banner either
+    // way; a minor one waits in the list.
     await pump(tester, [
-      warning(id: 'ni', headline: 'Sturm in Niedersachsen', regionKey: 'NI'),
+      warning(
+        id: 'ni',
+        headline: 'Sturm in Niedersachsen',
+        regionKey: 'NI',
+        severity: 'severe',
+      ),
+      warning(id: 'ni-minor', headline: 'Glätte', regionKey: 'NI'),
     ]);
 
     expect(find.textContaining('Sturm in Niedersachsen'), findsOneWidget);
+    expect(find.textContaining('weitere'), findsNothing);
+  });
+
+  testWidgets('another district of the Land only when extreme (#11)', (
+    tester,
+  ) async {
+    // Emsland is in the same Land as Braunschweig and two hundred
+    // kilometres away.
+    await pump(tester, [
+      warning(
+        id: 'el',
+        headline: 'Sturm im Emsland',
+        regionKey: '03454',
+        severity: 'severe',
+      ),
+    ]);
+    expect(find.byType(InkWell), findsNothing);
+  });
+
+  testWidgets('and an extreme one there still is shown', (tester) async {
+    await pump(tester, [
+      warning(
+        id: 'el',
+        headline: 'Chemieunfall im Emsland',
+        regionKey: '03454',
+        severity: 'extreme',
+      ),
+    ]);
+    expect(find.textContaining('Chemieunfall im Emsland'), findsOneWidget);
+  });
+
+  testWidgets('a warning that has not begun waits in the list (#11)', (
+    tester,
+  ) async {
+    await pump(tester, [
+      warning(
+        id: 'morgen',
+        headline: 'Sturm ab morgen',
+        regionKey: '03101',
+        severity: 'severe',
+        effective: DateTime.now().add(const Duration(hours: 20)),
+      ),
+    ]);
+    expect(find.byType(InkWell), findsNothing);
   });
 
   testWidgets('a warning that could not be placed still reaches everyone', (

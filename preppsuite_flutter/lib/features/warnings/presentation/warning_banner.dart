@@ -40,36 +40,16 @@ class WarningBanner extends ConsumerWidget {
         //
         // The screen behind it still lists them — that is where the ones
         // concerning somewhere else belong.
-        final warnings = [
-          for (final warning in all)
-            if (isWarningRelevant(
-              warning: warning,
-              filter: profile.warningFilter,
-            ))
-              warning,
-        ];
-        if (warnings.isEmpty) return const SizedBox.shrink();
-
-        // Severity is still the primary sort key — an extreme nationwide
-        // warning must never be buried behind a minor local one — but
-        // among warnings of the same severity, the more regionally
-        // relevant one surfaces first.
-        final sorted = [...warnings]
-          ..sort((a, b) {
-            final severityCompare =
-                warningSeverityRank(
-                  warningSeverityFromName(b.severity),
-                ).compareTo(
-                  warningSeverityRank(warningSeverityFromName(a.severity)),
-                );
-            if (severityCompare != 0) return severityCompare;
-            return warningRelevanceRank(
-              warning: b,
-              filter: profile.warningFilter,
-            ).compareTo(
-              warningRelevanceRank(warning: a, filter: profile.warningFilter),
-            );
-          });
+        //
+        // And of those, what is happening here and now (#11): another
+        // district of the same Land only when extreme, nothing that has
+        // not begun yet. See [bannerWarnings].
+        final sorted = bannerWarnings(
+          warnings: all,
+          filter: profile.warningFilter,
+          now: DateTime.now(),
+        );
+        if (sorted.isEmpty) return const SizedBox.shrink();
         final mostSevere = sorted.first;
         final severity = warningSeverityFromName(mostSevere.severity);
 

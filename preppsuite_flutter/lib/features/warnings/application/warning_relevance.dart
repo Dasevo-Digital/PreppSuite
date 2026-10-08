@@ -1,4 +1,5 @@
 import '../../../local_db/database.dart';
+import '../../../model/categories.dart';
 import '../../household/application/german_states.dart';
 import 'warning_region_filter.dart';
 
@@ -107,4 +108,63 @@ bool isWarningRelevant({
   if (!filter.hasAnyRegion) return true;
 
   return warningRelevanceRank(warning: warning, filter: filter) > 0;
+}
+
+/// What the app-wide banner shows, in the order it shows it (#11).
+///
+/// Narrower than [isWarningRelevant], which decides what the list and the
+/// notifications carry. The banner sits across every tab and is read
+/// without being looked for, so it holds what is happening *here*, *now*:
+///
+/// * **Here.** For a household that has named its district, a warning for
+///   another district of the same Land is relevant enough for the list --
+///   it may be where somebody works -- but the banner of a household in
+///   Braunschweig is the wrong place for a storm in Emsland. It stays on
+///   the banner only when extreme. A warning known only by its Land may
+///   be for the whole Land or for any district in it, and stays when
+///   severe or extreme; one for this district reaches it as such, because
+///   the district's own dashboard narrows it (see `warning_ingest.dart`).
+///   Followed districts and Länder, and warnings nobody could place, keep
+///   their place.
+/// * **Now.** A weather warning issued today for tomorrow afternoon is not
+///   in force yet. It is in the list, and the banner leaves it there until
+///   it begins.
+///
+/// Sorted by severity first -- an extreme warning for the Land outranks a
+/// minor one next door -- and among the same severity by nearness.
+List<Warning> bannerWarnings({
+  required List<Warning> warnings,
+  required WarningRegionFilter filter,
+  required DateTime now,
+}) {
+  final shown = [
+    for (final warning in warnings)
+      if (isWarningRelevant(warning: warning, filter: filter) &&
+          !warning.effective.isAfter(now) &&
+          _hereEnough(warning, filter))
+        warning,
+  ];
+  int severity(Warning warning) =>
+      WarningSeverity.fromName(warning.severity).index;
+  return shown..sort((a, b) {
+    final bySeverity = severity(b).compareTo(severity(a));
+    if (bySeverity != 0) return bySeverity;
+    return warningRelevanceRank(
+      warning: b,
+      filter: filter,
+    ).compareTo(warningRelevanceRank(warning: a, filter: filter));
+  });
+}
+
+bool _hereEnough(Warning warning, WarningRegionFilter filter) {
+  if (filter.ownKreisSchluessel == null) return true;
+  if (warningRelevance(warning: warning, filter: filter) !=
+      WarningRelevance.ownState) {
+    return true;
+  }
+  final severity = WarningSeverity.fromName(warning.severity);
+  final onlyTheLand = germanStateByBbkCode(warning.regionKey ?? '') != null;
+  return onlyTheLand
+      ? severity.index >= WarningSeverity.severe.index
+      : severity == WarningSeverity.extreme;
 }

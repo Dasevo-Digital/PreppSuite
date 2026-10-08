@@ -183,7 +183,14 @@ class WarningIngest {
       // everyone". Narrowing only, never a change to a key we already
       // have, and it is not newsworthy: nobody is notified twice because
       // the app got better at geography.
-      if (existing.regionKey != null || regionKey == null) return null;
+      //
+      // The same holds for a Land narrowed to one of its districts (#11).
+      // The nationwide feed knows most warnings only by the Land in their
+      // id; the household's own district dashboard, polled after it, says
+      // the same warning is for this district. Without this the district
+      // never arrived, and a warning here could not be told from one at
+      // the other end of the Land.
+      if (!_narrows(existing.regionKey, regionKey)) return null;
     }
 
     final escalated =
@@ -322,4 +329,17 @@ String? bbkRegionFromId(String id) {
     if (germanStateByBbkCode(code) != null) return code;
   }
   return null;
+}
+
+/// Whether [next] says more precisely where a warning applies than
+/// [stored]: a key where there was none, or a district of the Land that
+/// was stored.
+bool _narrows(String? stored, String? next) {
+  if (next == null) return false;
+  if (stored == null) return true;
+  final land = germanStateByBbkCode(stored);
+  return land != null &&
+      next.length >= 5 &&
+      next.startsWith(land.arsPrefix) &&
+      germanStateByBbkCode(next) == null;
 }

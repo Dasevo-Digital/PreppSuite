@@ -235,6 +235,47 @@ Kreis Kassel;06633;HE
       expect(await storedRegionKey(), '03101');
     });
 
+    test(
+      'the district dashboard narrows a Land the feed stored (#11)',
+      () async {
+        // The order the poll runs in: the nationwide feed first, which knows
+        // this warning only as "NI" from its id; then the household's own
+        // district, which says it is for this district. The second used to
+        // be dropped as "unchanged", and a warning here looked like one at
+        // the other end of the Land.
+        final warning = raw(id: 'mow.DE-NI-BS-W001-20261008-001');
+        await ingest.ingestBbk([warning], countryCode: 'DE');
+        expect(await storedRegionKey(), 'NI');
+
+        final notifiable = await ingest.ingestBbk(
+          [warning],
+          countryCode: 'DE',
+          regionKeyOverride: '03101',
+        );
+        expect(await storedRegionKey(), '03101');
+        // Nobody is told twice because the place got sharper.
+        expect(notifiable, isEmpty);
+
+        // And the next nationwide round does not widen it again.
+        await ingest.ingestBbk([warning], countryCode: 'DE');
+        expect(await storedRegionKey(), '03101');
+      },
+    );
+
+    test(
+      'a district of another Land does not replace the stored one',
+      () async {
+        final warning = raw(id: 'mow.DE-NI-BS-W001-20261008-001');
+        await ingest.ingestBbk([warning], countryCode: 'DE');
+        await ingest.ingestBbk(
+          [warning],
+          countryCode: 'DE',
+          regionKeyOverride: '05554',
+        );
+        expect(await storedRegionKey(), 'NI');
+      },
+    );
+
     group('and whose area description cannot be placed either', () {
       // The real case, live on 2026-09-14: a severe drinking-water alert
       // for Lauterbach in Hesse reached a household in Braunschweig.
