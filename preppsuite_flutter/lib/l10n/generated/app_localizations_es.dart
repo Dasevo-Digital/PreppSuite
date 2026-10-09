@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -4120,8 +4121,7 @@ class AppLocalizationsEs extends AppLocalizations {
       locale: localeName,
       other:
           '$count documentos han cambiado desde que se indexaron. La búsqueda todavía encuentra su contenido antiguo.',
-      one:
-          'Un documento ha cambiado desde que se indexó. La búsqueda todavía encuentra su contenido antiguo.',
+      one: 'Un documento ha cambiado desde que se indexó. La búsqueda todavía encuentra su contenido antiguo.',
     );
     return '$_temp0';
   }
@@ -7325,10 +7325,8 @@ class AppLocalizationsEs extends AppLocalizations {
       locale: localeName,
       other:
           'Las $count entradas propias pasan al otro hogar, y los datos de ese hogar vienen aquí. No se pierde nada.',
-      one:
-          'La única entrada propia pasa al otro hogar, y los datos de ese hogar vienen aquí. No se pierde nada.',
-      zero:
-          'Este dispositivo no tiene nada que aportar y simplemente se une al otro hogar.',
+      one: 'La única entrada propia pasa al otro hogar, y los datos de ese hogar vienen aquí. No se pierde nada.',
+      zero: 'Este dispositivo no tiene nada que aportar y simplemente se une al otro hogar.',
     );
     return '$_temp0';
   }

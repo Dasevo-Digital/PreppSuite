@@ -38,10 +38,9 @@ enum FolderEncryptionError {
 
 class FolderEncryption {
   const FolderEncryption({
-    required SyncFolder folder,
-    FolderKeyStore keyStore = const FolderKeyStore(),
-  }) : _folder = folder,
-       _keyStore = keyStore;
+    required this._folder,
+    this._keyStore = const FolderKeyStore(),
+  });
 
   final SyncFolder _folder;
   final FolderKeyStore _keyStore;

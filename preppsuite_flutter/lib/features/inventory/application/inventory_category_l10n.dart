@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../../core/private_preferences.dart';
+
 import 'package:uuid/uuid.dart';
 
 import 'resilience_plan.dart';

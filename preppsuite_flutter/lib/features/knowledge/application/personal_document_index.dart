@@ -156,10 +156,9 @@ class PersonalDocumentIndexResult {
 /// the reader uses too, so the two can never disagree about what a
 /// document says or how large it may be.
 class PersonalDocumentIndexer {
-  PersonalDocumentIndexer({PersonalDocumentIndex? index, int? maxBytes})
+  PersonalDocumentIndexer({PersonalDocumentIndex? index, this._maxBytes})
     : _index = index ?? PersonalDocumentIndex(),
-      _ownsIndex = index == null,
-      _maxBytes = maxBytes;
+      _ownsIndex = index == null;
 
   final PersonalDocumentIndex _index;
   final bool _ownsIndex;

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+
 import '../../../core/http_client.dart';
 
 /// Where vector tiles can be fetched from.

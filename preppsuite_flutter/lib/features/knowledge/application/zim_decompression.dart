@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart'
     show XZDecoder, InputMemoryStream, OutputMemoryStream;
+
 import 'archive_memory_limits.dart';
 
 import 'zim_archive.dart' show ZimException;
@@ -13,8 +14,10 @@ import 'zstd_stream.dart';
 /// Injectable so the reader can be tested without a Flutter plugin
 /// binding: zstd is a platform plugin, and a unit test has no engine to
 /// answer it.
-typedef ClusterDecompressor =
-    Future<Uint8List> Function(int compressionType, Uint8List body);
+typedef ClusterDecompressor = Future<Uint8List> Function(
+  int compressionType,
+  Uint8List body,
+);
 
 /// Compression types a cluster's first byte can name.
 ///

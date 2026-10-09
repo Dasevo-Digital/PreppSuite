@@ -16,6 +16,7 @@ import 'features/inventory/application/open_food_facts_service.dart';
 import 'core/error_log.dart';
 import 'core/error_display.dart';
 import 'core/app_database_directory.dart';
+
 import 'package:flutter/foundation.dart';
 
 /// PreppSuite runs entirely on the device.

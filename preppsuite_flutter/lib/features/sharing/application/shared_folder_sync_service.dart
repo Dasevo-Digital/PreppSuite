@@ -78,15 +78,14 @@ class SharedFolderSyncResult {
 class SharedFolderSyncService {
   SharedFolderSyncService({
     required AppDatabase database,
-    required SyncFolder folder,
+    required this._folder,
     required this.deviceId,
     required this.identity,
     this.key,
     this.republish = false,
     this.requireEncryption = false,
     this.onEncryptedFolder,
-  }) : _db = database,
-       _folder = folder;
+  }) : _db = database;
 
   final AppDatabase _db;
   final SyncFolder _folder;

@@ -1,8 +1,9 @@
 import 'geo_bounds.dart';
 import 'shelter_classification.dart';
 
-typedef ShelterSource =
-    Future<List<ClassifiedShelter>> Function(GeoBoundingBox bounds);
+typedef ShelterSource = Future<List<ClassifiedShelter>> Function(
+  GeoBoundingBox bounds,
+);
 
 class ShelterSearchResult {
   const ShelterSearchResult(

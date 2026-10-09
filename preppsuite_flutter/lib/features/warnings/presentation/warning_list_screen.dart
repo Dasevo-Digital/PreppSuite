@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/content_swap.dart';
+
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../model/categories.dart';
 import '../../../model/household_profile.dart';
 

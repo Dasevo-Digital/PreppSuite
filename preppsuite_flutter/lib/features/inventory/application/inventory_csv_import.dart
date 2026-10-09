@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:csv/csv.dart';
+
 import '../../../model/categories.dart';
 
 /// A single successfully-parsed CSV row, ready to hand to

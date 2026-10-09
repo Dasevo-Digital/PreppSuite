@@ -3,6 +3,7 @@ import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../l10n/generated/app_localizations.dart';
 import '../../search/presentation/app_search_screen.dart';
 import '../../../core/feature_activity.dart';

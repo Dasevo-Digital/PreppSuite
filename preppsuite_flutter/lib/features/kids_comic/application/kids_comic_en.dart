@@ -321,8 +321,7 @@ const kidsComicEn = KidsComic(
         ),
         ComicPanel(
           image: 'sturm-3',
-          description:
-              'Mila and Nuss upstairs with a backpack, there is water downstairs',
+          description: 'Mila and Nuss upstairs with a backpack, there is water downstairs',
           lines: [
             ComicLine(
               _mila,
