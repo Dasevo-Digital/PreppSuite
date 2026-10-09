@@ -79,9 +79,9 @@ void main() {
   /// sentence without its number.
   group('the three ARB files agree', () {
     Map<String, String> strings(String code) {
-      final decoded =
-          jsonDecode(File('lib/l10n/app_$code.arb').readAsStringSync())
-              as Map<String, dynamic>;
+      final decoded = jsonDecode(
+        File('lib/l10n/app_$code.arb').readAsStringSync(),
+      ) as Map<String, dynamic>;
       return {
         for (final MapEntry(:key, :value) in decoded.entries)
           if (!key.startsWith('@')) key: value as String,

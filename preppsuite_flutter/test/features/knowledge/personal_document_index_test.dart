@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -49,56 +50,59 @@ void main() {
     },
   );
 
-  test('indexes Markdown, EPUB chapters and embedded PDF text offline', () async {
-    final markdown = File('${workspace.path}/hinweise.md')
-      ..writeAsStringSync('Kerzen immer außerhalb der Reichweite lagern.');
-    final epub = File('${workspace.path}/notizen.epub');
-    final archive = Archive()
-      ..addFile(
-        ArchiveFile.string(
-          'OPS/chapter.xhtml',
-          '<html><body><h1>Funk</h1><p>PMR446 ist für kurze Wege gedacht.</p></body></html>',
+  test(
+    'indexes Markdown, EPUB chapters and embedded PDF text offline',
+    () async {
+      final markdown = File('${workspace.path}/hinweise.md')
+        ..writeAsStringSync('Kerzen immer außerhalb der Reichweite lagern.');
+      final epub = File('${workspace.path}/notizen.epub');
+      final archive = Archive()
+        ..addFile(
+          ArchiveFile.string(
+            'OPS/chapter.xhtml',
+            '<html><body><h1>Funk</h1><p>PMR446 ist für kurze Wege gedacht.</p></body></html>',
+          ),
+        );
+      epub.writeAsBytesSync(ZipEncoder().encodeBytes(archive));
+      final pdf = File('${workspace.path}/handbuch.pdf');
+      final report = pw.Document()
+        ..addPage(
+          pw.Page(build: (_) => pw.Text('Trinkwasser kühl und dunkel lagern.')),
+        );
+      await pdf.writeAsBytes(await report.save());
+
+      final indexer = PersonalDocumentIndexer(index: index);
+      for (final document in [
+        PersonalDocument(
+          id: 'markdown',
+          location: markdown.path,
+          label: 'hinweise.md',
+          addedAt: DateTime.now(),
         ),
-      );
-    epub.writeAsBytesSync(ZipEncoder().encodeBytes(archive));
-    final pdf = File('${workspace.path}/handbuch.pdf');
-    final report = pw.Document()
-      ..addPage(
-        pw.Page(build: (_) => pw.Text('Trinkwasser kühl und dunkel lagern.')),
-      );
-    await pdf.writeAsBytes(await report.save());
+        PersonalDocument(
+          id: 'epub',
+          location: epub.path,
+          label: 'notizen.epub',
+          addedAt: DateTime.now(),
+        ),
+        PersonalDocument(
+          id: 'pdf',
+          location: pdf.path,
+          label: 'handbuch.pdf',
+          addedAt: DateTime.now(),
+        ),
+      ]) {
+        expect(
+          (await indexer.index(document)).status,
+          PersonalDocumentIndexStatus.ready,
+        );
+      }
 
-    final indexer = PersonalDocumentIndexer(index: index);
-    for (final document in [
-      PersonalDocument(
-        id: 'markdown',
-        location: markdown.path,
-        label: 'hinweise.md',
-        addedAt: DateTime.now(),
-      ),
-      PersonalDocument(
-        id: 'epub',
-        location: epub.path,
-        label: 'notizen.epub',
-        addedAt: DateTime.now(),
-      ),
-      PersonalDocument(
-        id: 'pdf',
-        location: pdf.path,
-        label: 'handbuch.pdf',
-        addedAt: DateTime.now(),
-      ),
-    ]) {
-      expect(
-        (await indexer.index(document)).status,
-        PersonalDocumentIndexStatus.ready,
-      );
-    }
-
-    expect((await index.search('Kerzen')).single.id, 'markdown');
-    expect((await index.search('PMR446')).single.id, 'epub');
-    expect((await index.search('Trinkwasser')).single.id, 'pdf');
-  });
+      expect((await index.search('Kerzen')).single.id, 'markdown');
+      expect((await index.search('PMR446')).single.id, 'epub');
+      expect((await index.search('Trinkwasser')).single.id, 'pdf');
+    },
+  );
 
   test(
     'the local reader obtains Markdown and EPUB content without an app',

@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:preppsuite_flutter/features/maps/application/offline_poi_search.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart';
 import 'package:preppsuite_flutter/features/shelters/application/shelter_bearing.dart';
+
 import 'offline_poi_tile.dart';
 import 'pmtiles_fixture.dart';
 
