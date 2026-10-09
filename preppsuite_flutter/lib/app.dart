@@ -6,6 +6,7 @@ import 'core/app_lock_gate.dart';
 import 'core/crisis_mode_provider.dart';
 import 'core/local_data_gate.dart';
 import 'core/locale_provider.dart';
+import 'core/selectable_everywhere.dart';
 import 'core/theme_provider.dart';
 import 'features/household/presentation/household_gate.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -24,17 +25,6 @@ class PreppSuiteApp extends ConsumerWidget {
       theme: appLightTheme,
       darkTheme: appDarkTheme,
       themeMode: ref.watch(themeModeProvider),
-      builder: (context, child) {
-        final media = MediaQuery.of(context);
-        if (!crisisMode) return child!;
-        return MediaQuery(
-          data: media.copyWith(
-            textScaler: crisisTextScaler(media.textScaler),
-            disableAnimations: true,
-          ),
-          child: child!,
-        );
-      },
       // Nothing in this app was selectable. A Flutter `Text` is not, on
       // its own, and there are 667 of them against no `SelectableText` and
       // no `SelectionArea` at all — so right-click-copy worked inside
@@ -46,16 +36,33 @@ class PreppSuiteApp extends ConsumerWidget {
       // needed, the Kreisschlüssel, a shelter's name and distance, the
       // wording of an official warning.
       //
-      // Wrapped around the whole app rather than per screen, having
+      // Made selectable everywhere rather than screen by screen, having
       // measured that it takes nothing away: a map still pans, a list
-      // still scrolls and a slider still drags inside one, because those
-      // recognizers win the gesture arena. See selection_test.dart, which
-      // keeps that true.
+      // still scrolls and a slider still drags inside an area, because
+      // those recognizers win the gesture arena. See selection_test.dart,
+      // which keeps that true. Every screen gets its area from the page
+      // transition in app_theme.dart, dialogs and sheets from this one
+      // around the navigator (#39); selectable_everywhere.dart says why
+      // it takes both.
+      builder: (context, child) {
+        final media = MediaQuery.of(context);
+        return SelectableEverywhere(
+          child: !crisisMode
+              ? child!
+              : MediaQuery(
+                  data: media.copyWith(
+                    textScaler: crisisTextScaler(media.textScaler),
+                    disableAnimations: true,
+                  ),
+                  child: child!,
+                ),
+        );
+      },
       // Outside the app lock: a device that cannot open its databases
       // cannot check the lock either, and the passphrase prompt would
       // be asking for something that leads nowhere.
       home: const LocalDataGate(
-        child: AppLockGate(child: SelectionArea(child: HouseholdGate())),
+        child: AppLockGate(child: HouseholdGate()),
       ),
     );
   }

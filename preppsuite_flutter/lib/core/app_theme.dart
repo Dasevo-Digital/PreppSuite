@@ -19,6 +19,8 @@ import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'selectable_everywhere.dart';
+
 /// Forest green -- chosen for the prepper and civil-protection subject
 /// rather than a generic Material default.
 const appSeedColor = Color(0xFF2E7D32);
@@ -246,15 +248,28 @@ ThemeData _theme(Brightness brightness) {
 
     // The swipe-from-the-edge gesture and the sliding transition, on both
     // Apple platforms. Flutter does this for iOS on its own; macOS gets
-    // the zoom transition by default, which is an Android idiom.
+    // the zoom transition by default, which is an Android idiom. Each one
+    // also makes the screen inside it selectable (#39).
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
-        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-        TargetPlatform.android: ZoomPageTransitionsBuilder(),
-        TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
-        TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
-        TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
+        TargetPlatform.iOS: SelectablePageTransitions(
+          CupertinoPageTransitionsBuilder(),
+        ),
+        TargetPlatform.macOS: SelectablePageTransitions(
+          CupertinoPageTransitionsBuilder(),
+        ),
+        TargetPlatform.android: SelectablePageTransitions(
+          ZoomPageTransitionsBuilder(),
+        ),
+        TargetPlatform.linux: SelectablePageTransitions(
+          FadeUpwardsPageTransitionsBuilder(),
+        ),
+        TargetPlatform.windows: SelectablePageTransitions(
+          FadeUpwardsPageTransitionsBuilder(),
+        ),
+        TargetPlatform.fuchsia: SelectablePageTransitions(
+          ZoomPageTransitionsBuilder(),
+        ),
       },
     ),
   );

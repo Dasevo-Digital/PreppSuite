@@ -1,7 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:preppsuite_flutter/core/app_theme.dart';
+import 'package:preppsuite_flutter/core/selectable_everywhere.dart';
 
 /// Making every label selectable, and the reason it can be done at all.
 ///
@@ -115,5 +119,139 @@ void main() {
       SelectionContainer.maybeOf(tester.element(find.text('Notvorrat'))),
       isNull,
     );
+  });
+
+  group('everywhere in the app (#39)', () {
+    // The area used to sit around the start screen only, so every screen
+    // opened above it and every dialog could not be copied from. These
+    // build the app's own arrangement -- the theme's page transitions
+    // and the area around the navigator -- and copy the way a person
+    // does, through the clipboard.
+    late List<String> copied;
+
+    setUp(() => copied = []);
+    final macOS = TargetPlatformVariant.only(TargetPlatform.macOS);
+
+    Future<void> pumpApp(WidgetTester tester) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied.add((call.arguments as Map)['text'] as String);
+          }
+          return null;
+        },
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: appLightTheme,
+          builder: (context, child) => SelectableEverywhere(child: child!),
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Column(
+                children: [
+                  const Text('Startseite'),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (context) => Scaffold(
+                          body: Column(
+                            children: [
+                              const Text('Noch 12 Liter'),
+                              TextButton(
+                                onPressed: () => showDialog<void>(
+                                  context: context,
+                                  builder: (_) => const AlertDialog(
+                                    content: Text('Schlüssel 03241 Region'),
+                                  ),
+                                ),
+                                child: const Text('Dialog'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    child: const Text('Weiter'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Weiter'));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> rightClickCopy(WidgetTester tester, String text) async {
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text(text)),
+        kind: PointerDeviceKind.mouse,
+        buttons: kSecondaryMouseButton,
+      );
+      await gesture.up();
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Copy'));
+      await tester.pumpAndSettle();
+    }
+
+    Future<void> selectAllAndCopy(WidgetTester tester, String text) async {
+      await tester.tapAt(
+        tester.getCenter(find.text(text)),
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.meta);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.meta);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('a screen opened above the first one can be copied from', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      await rightClickCopy(tester, 'Noch 12 Liter');
+
+      // A right-click takes the word under the pointer, as in a browser.
+      expect(copied, ['12']);
+    }, variant: macOS);
+
+    testWidgets('and "select all" there leaves the screens beneath it out', (
+      tester,
+    ) async {
+      // The navigator keeps the start screen built under this one. One
+      // area around all of them copied its text along.
+      await pumpApp(tester);
+      await selectAllAndCopy(tester, 'Noch 12 Liter');
+
+      expect(copied.single, contains('Noch 12 Liter'));
+      expect(copied.single, isNot(contains('Startseite')));
+    }, variant: macOS);
+
+    testWidgets('a dialog can be copied from, and only the dialog', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      await tester.tap(find.text('Dialog'));
+      await tester.pumpAndSettle();
+
+      await rightClickCopy(tester, 'Schlüssel 03241 Region');
+      expect(copied, ['03241']);
+
+      copied.clear();
+      await selectAllAndCopy(tester, 'Schlüssel 03241 Region');
+      expect(copied, ['Schlüssel 03241 Region']);
+    }, variant: macOS);
+
+    test('every platform\'s page transition brings its area along', () {
+      for (final theme in [appLightTheme, appDarkTheme]) {
+        final builders = theme.pageTransitionsTheme.builders;
+        expect(builders.keys, containsAll(TargetPlatform.values));
+        expect(builders.values, everyElement(isA<SelectablePageTransitions>()));
+      }
+    });
   });
 }

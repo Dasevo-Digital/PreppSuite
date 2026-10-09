@@ -2450,6 +2450,33 @@ deutsche Stimme vorliegt, ist hier nicht festzustellen. Der Code ist so
 gebaut, dass die Antwort „nein" nichts kostet.
 
 
+### Markierbar ist jeder Bildschirm für sich
+
+Ein Flutter-`Text` lässt sich nur markieren und kopieren, wenn eine
+`SelectionArea` über ihm liegt. Lange lag die einzige um die Startansicht,
+also im Navigator. Jeder weitere Bildschirm und jeder Dialog ist dort aber
+eine eigene Route neben ihr, nicht unter ihr. Rechtsklick → Kopieren ging
+deshalb auf der ersten Seite und sonst nirgends (#39).
+
+Eine einzige Fläche um den Navigator erreicht alle Routen und wurde
+gemessen und verworfen: „Alles auswählen“ nimmt dann auch jeden Bildschirm
+mit, den der Navigator unter dem sichtbaren aufbewahrt, und das Kopieren
+bringt dessen Text mit. Deshalb gibt es zwei Stellen
+(`core/selectable_everywhere.dart`):
+
+- **Jeder Bildschirm** bekommt eine eigene Fläche über den Seitenübergang
+  (`SelectablePageTransitions` im `pageTransitionsTheme` von
+  `app_theme.dart`). Ein neuer Übergang für eine Plattform muss dort
+  hinein, sonst ist der Bildschirm nicht mehr markierbar. Ein Test prüft
+  das für jede Plattform.
+- **Dialoge und Sheets** sind keine Seiten. Für sie liegt eine Fläche im
+  `builder` von `MaterialApp`, um den Navigator, mit einem eigenen
+  `Overlay` für Markierungsgriffe und Kopiermenü. Text auf einer Seite
+  gehört zur näheren Fläche der Seite und erreicht diese nie.
+
+Karte, Listen und Schieberegler bleiben bedienbar, weil ihre Gesten das
+Gestenrennen gewinnen. `test/widget/selection_test.dart` misst beides.
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,
