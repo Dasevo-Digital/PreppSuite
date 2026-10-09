@@ -130,4 +130,12 @@ void main() {
     ]);
     db = AppDatabase.forTesting(NativeDatabase.memory());
   });
+
+  test('a deleted household takes its copies with it', () async {
+    final snapshots = DatabaseSnapshots(live);
+    await snapshots.takeIfDue(db.snapshotTo, now: day);
+    await snapshots.clear();
+    expect(snapshots.folder.existsSync(), isFalse);
+    expect(await snapshots.list(), isEmpty);
+  });
 }

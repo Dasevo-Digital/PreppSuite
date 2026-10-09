@@ -13,6 +13,8 @@ import '../../inventory/application/inventory_photo_service.dart';
 import '../../maps/application/map_source_preference.dart';
 import '../../sharing/application/folder_key_store.dart';
 import '../../sharing/application/shared_folder_store.dart';
+import '../../../core/database_snapshots.dart';
+import '../../../core/local_database_encryption.dart';
 
 class ResetCard extends ConsumerWidget {
   const ResetCard({super.key, required this.profile, required this.l10n});
@@ -104,6 +106,14 @@ class ResetCard extends ConsumerWidget {
     // this household's.
     await deleteHouseholdPhotos(db, householdId: profile.id);
     await db.deleteHouseholdData(profile.id);
+    // The daily copies hold the same household (#140).
+    try {
+      await DatabaseSnapshots(
+        LocalDatabaseEncryption.instance.databaseFile(localDatabaseFilePrefix),
+      ).clear();
+    } on Object {
+      // Not initialised in a test, or already gone.
+    }
     await const SharedFolderStore().clearLocation();
     await const FolderKeyStore().clear(profile.id);
     final prefs = await SharedPreferences.getInstance();

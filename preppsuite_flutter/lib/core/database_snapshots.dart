@@ -116,6 +116,12 @@ class DatabaseSnapshots {
     return copy;
   }
 
+  /// Removes every copy. For a household that is deleted: its copies hold
+  /// the same emergency cards and must not outlive it.
+  Future<void> clear() async {
+    if (await folder.exists()) await folder.delete(recursive: true);
+  }
+
   /// Puts [snapshot] in place of the database, which must be closed.
   ///
   /// The damaged file is not deleted: it is renamed beside itself with
