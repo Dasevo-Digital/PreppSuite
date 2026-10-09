@@ -10,6 +10,8 @@ import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_freshness.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_poll_status_store.dart';
 
 /// The two lamps at the top of the overview.
 void main() {
@@ -68,6 +70,7 @@ void main() {
     WidgetTester tester, {
     required List<InventoryItem> items,
     List<Warning> warnings = const [],
+    WarningPollStatus? polled,
   }) async {
     went = [];
     await tester.binding.setSurfaceSize(const Size(900, 700));
@@ -79,6 +82,16 @@ void main() {
             householdId,
           ).overrideWith((ref) => Stream.value(items)),
           activeWarningsProvider.overrideWith((ref) => Stream.value(warnings)),
+          // Heard from the feeds a minute ago unless a test says otherwise.
+          warningPollStatusProvider.overrideWith(
+            (ref) async =>
+                polled ??
+                WarningPollStatus(
+                  lastComplete: DateTime.now().subtract(
+                    const Duration(minutes: 1),
+                  ),
+                ),
+          ),
         ],
         child: MaterialApp(
           locale: const Locale('de'),
@@ -184,6 +197,26 @@ void main() {
 
       expect(find.text(l10n.statusSituationQuiet), findsOneWidget);
       expect(find.text(l10n.statusSituationQuietHint), findsOneWidget);
+    });
+
+    testWidgets('quiet but unheard for hours is not called quiet (#138)', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        items: stocked,
+        polled: WarningPollStatus(
+          lastComplete: DateTime.now().subtract(const Duration(hours: 5)),
+        ),
+      );
+      expect(find.text(l10n.statusSituationStale), findsOneWidget);
+      expect(find.text(l10n.statusSituationQuiet), findsNothing);
+      expect(find.textContaining('Es können Warnungen fehlen'), findsOneWidget);
+    });
+
+    testWidgets('and a device that never polled says that', (tester) async {
+      await pump(tester, items: stocked, polled: const WarningPollStatus());
+      expect(find.text(l10n.statusSituationNever), findsOneWidget);
     });
 
     testWidgets('a warning in force shows the issuer own wording', (

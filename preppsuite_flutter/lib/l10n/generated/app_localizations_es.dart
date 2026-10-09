@@ -8671,4 +8671,42 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get householdLoadRetry => 'Reintentar';
+
+  @override
+  String warningsTimeToday(String time) {
+    return 'hoy $time';
+  }
+
+  @override
+  String warningsUpdatedAt(String time) {
+    return 'Actualizado: $time';
+  }
+
+  @override
+  String get warningsStaleTitle => 'Avisos no actualizados';
+
+  @override
+  String warningsStaleBody(String time) {
+    return 'La última actualización completa fue $time. Desde entonces puede haberse emitido un aviso que aquí falta. Atiende a la radio, las sirenas y los avisos por megafonía.';
+  }
+
+  @override
+  String get warningsNeverBody =>
+      'Aún no se han descargado avisos en este dispositivo; para ello la app necesita una vez conexión a internet. Hasta entonces, atiende a la radio, las sirenas y los avisos por megafonía.';
+
+  @override
+  String get warningsEmptyStale =>
+      'No hay avisos guardados. Sin una actualización reciente no se puede saber si los hay ahora.';
+
+  @override
+  String get statusSituationStale => 'Desactualizado';
+
+  @override
+  String statusSituationStaleHint(String time) {
+    return 'Última actualización: $time. Pueden faltar avisos.';
+  }
+
+  @override
+  String get statusSituationNever =>
+      'Aún no se han descargado avisos. La app necesita internet una vez para ello.';
 }

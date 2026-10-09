@@ -8643,4 +8643,42 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get householdLoadRetry => 'Erneut versuchen';
+
+  @override
+  String warningsTimeToday(String time) {
+    return 'heute $time';
+  }
+
+  @override
+  String warningsUpdatedAt(String time) {
+    return 'Stand: $time';
+  }
+
+  @override
+  String get warningsStaleTitle => 'Warnungen nicht aktuell';
+
+  @override
+  String warningsStaleBody(String time) {
+    return 'Der letzte vollständige Abruf war $time. Seitdem kann eine Warnung dazugekommen sein, die hier fehlt. Auf Radio, Sirenen und Durchsagen achten.';
+  }
+
+  @override
+  String get warningsNeverBody =>
+      'Auf diesem Gerät wurden noch keine Warnungen abgerufen; dafür braucht die App einmal eine Internetverbindung. Bis dahin auf Radio, Sirenen und Durchsagen achten.';
+
+  @override
+  String get warningsEmptyStale =>
+      'Keine Warnungen gespeichert. Ob es gerade welche gibt, lässt sich ohne aktuellen Abruf nicht sagen.';
+
+  @override
+  String get statusSituationStale => 'Stand veraltet';
+
+  @override
+  String statusSituationStaleHint(String time) {
+    return 'Letzter Abruf: $time. Es können Warnungen fehlen.';
+  }
+
+  @override
+  String get statusSituationNever =>
+      'Noch keine Warnungen abgerufen. Dafür braucht die App einmal Internet.';
 }

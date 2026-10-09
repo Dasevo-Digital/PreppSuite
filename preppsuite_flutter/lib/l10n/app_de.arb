@@ -3584,5 +3584,14 @@
   "emergencyAccessCall110": "110 anrufen – Polizei",
   "emergencyAccessNote": "Diese Hilfe ist Teil der App und braucht keine gespeicherten Daten. Sie funktioniert auch, wenn die App gesperrt ist oder der Haushalt gerade nicht geladen werden kann.",
   "householdLoadFailedTitle": "Der Haushalt lässt sich gerade nicht laden",
-  "householdLoadRetry": "Erneut versuchen"
+  "householdLoadRetry": "Erneut versuchen",
+  "warningsTimeToday": "heute {time}",
+  "warningsUpdatedAt": "Stand: {time}",
+  "warningsStaleTitle": "Warnungen nicht aktuell",
+  "warningsStaleBody": "Der letzte vollständige Abruf war {time}. Seitdem kann eine Warnung dazugekommen sein, die hier fehlt. Auf Radio, Sirenen und Durchsagen achten.",
+  "warningsNeverBody": "Auf diesem Gerät wurden noch keine Warnungen abgerufen; dafür braucht die App einmal eine Internetverbindung. Bis dahin auf Radio, Sirenen und Durchsagen achten.",
+  "warningsEmptyStale": "Keine Warnungen gespeichert. Ob es gerade welche gibt, lässt sich ohne aktuellen Abruf nicht sagen.",
+  "statusSituationStale": "Stand veraltet",
+  "statusSituationStaleHint": "Letzter Abruf: {time}. Es können Warnungen fehlen.",
+  "statusSituationNever": "Noch keine Warnungen abgerufen. Dafür braucht die App einmal Internet."
 }

@@ -14292,6 +14292,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get householdLoadRetry;
+
+  /// No description provided for @warningsTimeToday.
+  ///
+  /// In en, this message translates to:
+  /// **'today {time}'**
+  String warningsTimeToday(String time);
+
+  /// No description provided for @warningsUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'As of {time}'**
+  String warningsUpdatedAt(String time);
+
+  /// No description provided for @warningsStaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Warnings not up to date'**
+  String get warningsStaleTitle;
+
+  /// No description provided for @warningsStaleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The last complete update was {time}. A warning may have been issued since that is missing here. Listen to the radio, sirens and announcements.'**
+  String warningsStaleBody(String time);
+
+  /// No description provided for @warningsNeverBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No warnings have been fetched on this device yet; the app needs an internet connection once for that. Until then, listen to the radio, sirens and announcements.'**
+  String get warningsNeverBody;
+
+  /// No description provided for @warningsEmptyStale.
+  ///
+  /// In en, this message translates to:
+  /// **'No warnings stored. Whether there are any right now cannot be said without a current update.'**
+  String get warningsEmptyStale;
+
+  /// No description provided for @statusSituationStale.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of date'**
+  String get statusSituationStale;
+
+  /// No description provided for @statusSituationStaleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Last update: {time}. Warnings may be missing.'**
+  String statusSituationStaleHint(String time);
+
+  /// No description provided for @statusSituationNever.
+  ///
+  /// In en, this message translates to:
+  /// **'No warnings fetched yet. The app needs the internet once for that.'**
+  String get statusSituationNever;
 }
 
 class _AppLocalizationsDelegate

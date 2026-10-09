@@ -11,6 +11,7 @@ import '../../warnings/application/warning_relevance.dart';
 import '../../warnings/application/warning_severity_l10n.dart';
 import '../application/shell_layout.dart';
 import '../application/status_lights.dart';
+import '../../warnings/application/warning_freshness.dart';
 
 /// The first thing on the first screen: two lamps, side by side.
 ///
@@ -68,6 +69,19 @@ class StatusLightsRow extends ConsumerWidget {
     };
 
     final severity = situation.highest;
+    // Quiet is only quiet when the feeds were heard from lately (#138).
+    final status = ref.watch(warningPollStatusProvider).value;
+    final fresh = status == null
+        ? null
+        : warningFreshness(
+            status,
+            countryCode: profile.countryCode,
+            now: DateTime.now(),
+          );
+    final unheard =
+        severity == null &&
+        fresh != null &&
+        fresh.freshness != WarningFreshness.current;
     final situationColour = severity == null
         ? theme.colorScheme.outline
         : warningSeverityColors(context, severity).background;
@@ -108,14 +122,23 @@ class StatusLightsRow extends ConsumerWidget {
           Expanded(
             child: _Lamp(
               title: l10n.statusSituationTitle,
-              headline: severity == null
+              headline: unheard
+                  ? l10n.statusSituationStale
+                  : severity == null
                   ? l10n.statusSituationQuiet
                   : localizeWarningSeverity(l10n, severity),
               // There is no green on this lamp. An authority publishes
               // warnings, not all-clears, and dressing the absence of one
               // up as "all well" would be the app saying something nobody
               // said to it.
-              detail: severity == null
+              detail: unheard
+                  ? switch (fresh.at) {
+                      final at? => l10n.statusSituationStaleHint(
+                        formatWarningTime(l10n, at, DateTime.now()),
+                      ),
+                      null => l10n.statusSituationNever,
+                    }
+                  : severity == null
                   ? l10n.statusSituationQuietHint
                   : l10n.statusSituationActive(situation.count),
               colour: situationColour,

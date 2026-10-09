@@ -4972,5 +4972,42 @@
   "emergencyAccessCall110": "Call 110 – police",
   "emergencyAccessNote": "This help is part of the app and needs no stored data. It works even when the app is locked or the household cannot be loaded right now.",
   "householdLoadFailedTitle": "The household cannot be loaded right now",
-  "householdLoadRetry": "Try again"
+  "householdLoadRetry": "Try again",
+  "warningsTimeToday": "today {time}",
+  "@warningsTimeToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "warningsUpdatedAt": "As of {time}",
+  "@warningsUpdatedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "warningsStaleTitle": "Warnings not up to date",
+  "warningsStaleBody": "The last complete update was {time}. A warning may have been issued since that is missing here. Listen to the radio, sirens and announcements.",
+  "@warningsStaleBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "warningsNeverBody": "No warnings have been fetched on this device yet; the app needs an internet connection once for that. Until then, listen to the radio, sirens and announcements.",
+  "warningsEmptyStale": "No warnings stored. Whether there are any right now cannot be said without a current update.",
+  "statusSituationStale": "Out of date",
+  "statusSituationStaleHint": "Last update: {time}. Warnings may be missing.",
+  "@statusSituationStaleHint": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "statusSituationNever": "No warnings fetched yet. The app needs the internet once for that."
 }

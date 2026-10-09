@@ -2362,5 +2362,14 @@
   "emergencyAccessCall110": "Llamar al 110 – policía",
   "emergencyAccessNote": "Esta ayuda forma parte de la app y no necesita datos guardados. Funciona aunque la app esté bloqueada o el hogar no se pueda cargar ahora.",
   "householdLoadFailedTitle": "El hogar no se puede cargar ahora",
-  "householdLoadRetry": "Reintentar"
+  "householdLoadRetry": "Reintentar",
+  "warningsTimeToday": "hoy {time}",
+  "warningsUpdatedAt": "Actualizado: {time}",
+  "warningsStaleTitle": "Avisos no actualizados",
+  "warningsStaleBody": "La última actualización completa fue {time}. Desde entonces puede haberse emitido un aviso que aquí falta. Atiende a la radio, las sirenas y los avisos por megafonía.",
+  "warningsNeverBody": "Aún no se han descargado avisos en este dispositivo; para ello la app necesita una vez conexión a internet. Hasta entonces, atiende a la radio, las sirenas y los avisos por megafonía.",
+  "warningsEmptyStale": "No hay avisos guardados. Sin una actualización reciente no se puede saber si los hay ahora.",
+  "statusSituationStale": "Desactualizado",
+  "statusSituationStaleHint": "Última actualización: {time}. Pueden faltar avisos.",
+  "statusSituationNever": "Aún no se han descargado avisos. La app necesita internet una vez para ello."
 }

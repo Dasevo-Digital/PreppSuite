@@ -9,6 +9,7 @@ import 'warning_poll_service.dart';
 import 'warning_region_filter.dart';
 import 'warning_region_store.dart';
 import 'warning_relevance.dart';
+import 'warning_freshness.dart';
 
 final warningPollServiceProvider = Provider<WarningPollService>((ref) {
   return WarningPollService(database: ref.watch(appDatabaseProvider));
@@ -64,6 +65,10 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
       state = const AsyncData(null);
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
+    } finally {
+      // Every attempt, answered or not, moves how old the warnings are
+      // (#138).
+      if (ref.mounted) ref.invalidate(warningPollStatusProvider);
     }
   }
 

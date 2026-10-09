@@ -26,6 +26,8 @@ import '../application/warning_order.dart';
 import '../application/warning_severity_l10n.dart';
 import '../../../core/error_text.dart';
 import '../../maps/presentation/base_map_layer.dart';
+import '../application/warning_freshness.dart';
+import 'warning_freshness_notice.dart';
 
 class WarningListScreen extends ConsumerStatefulWidget {
   const WarningListScreen({super.key, required this.profile, this.now});
@@ -129,8 +131,29 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
     /// Not vertically centred any more: centring means filling the
     /// viewport, which pushed the card below the fold — and a hint nobody
     /// scrolls to is a hint nobody reads.
+    // How old all of this is (#138). Read from the poll's own
+    // bookkeeping; while that is still loading nothing is claimed.
+    final clock = widget.now ?? DateTime.now();
+    final status = ref.watch(warningPollStatusProvider).value;
+    final fresh = status == null
+        ? null
+        : warningFreshness(
+            status,
+            countryCode: profile.countryCode,
+            now: clock,
+          );
+    final notice = fresh == null
+        ? null
+        : WarningFreshnessNotice(
+            freshness: fresh.freshness,
+            at: fresh.at,
+            now: clock,
+          );
+    final current =
+        fresh == null || fresh.freshness == WarningFreshness.current;
+
     Widget messageWithHint(Widget message) =>
-        ListView(children: [?warningDay, message, ?hint]);
+        ListView(children: [?notice, ?warningDay, message, ?hint]);
 
     return ContentSwap(
       child: warningsAsync.when(
@@ -142,8 +165,9 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
             return messageWithHint(
               Padding(
                 padding: const EdgeInsets.all(32),
+                // "No warnings" is only said when it is known (#138).
                 child: Text(
-                  l10n.warningsEmpty,
+                  current ? l10n.warningsEmpty : l10n.warningsEmptyStale,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
@@ -201,6 +225,7 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
           // and the notice goes first: it explains what the list may be
           // about to contain, while the count is about the filter.
           final leading = <Widget>[
+            ?notice,
             ?warningDay,
             // WarningFilter has isEmpty and no isNotEmpty.
             if (!_filter.isEmpty)

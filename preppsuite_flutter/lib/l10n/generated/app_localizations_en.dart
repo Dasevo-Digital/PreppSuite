@@ -8596,4 +8596,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get householdLoadRetry => 'Try again';
+
+  @override
+  String warningsTimeToday(String time) {
+    return 'today $time';
+  }
+
+  @override
+  String warningsUpdatedAt(String time) {
+    return 'As of $time';
+  }
+
+  @override
+  String get warningsStaleTitle => 'Warnings not up to date';
+
+  @override
+  String warningsStaleBody(String time) {
+    return 'The last complete update was $time. A warning may have been issued since that is missing here. Listen to the radio, sirens and announcements.';
+  }
+
+  @override
+  String get warningsNeverBody =>
+      'No warnings have been fetched on this device yet; the app needs an internet connection once for that. Until then, listen to the radio, sirens and announcements.';
+
+  @override
+  String get warningsEmptyStale =>
+      'No warnings stored. Whether there are any right now cannot be said without a current update.';
+
+  @override
+  String get statusSituationStale => 'Out of date';
+
+  @override
+  String statusSituationStaleHint(String time) {
+    return 'Last update: $time. Warnings may be missing.';
+  }
+
+  @override
+  String get statusSituationNever =>
+      'No warnings fetched yet. The app needs the internet once for that.';
 }
