@@ -3608,5 +3608,10 @@
   "errorLogClear": "Löschen",
   "riverFloodClassUnknown": "überflutet, Tiefe nicht angegeben",
   "riverFloodNoMap": "keine Karte für dieses Szenario",
-  "riverFloodSourceNational": "Quelle: Hochwassergefahrenkarten der Länder, bundesweit zusammengeführt von der Bundesanstalt für Gewässerkunde (geoportal.bafg.de)"
+  "riverFloodSourceNational": "Quelle: Hochwassergefahrenkarten der Länder, bundesweit zusammengeführt von der Bundesanstalt für Gewässerkunde (geoportal.bafg.de)",
+  "appLockBiometricTitle": "Mit Gesicht oder Fingerabdruck entsperren",
+  "appLockBiometricHint": "Statt die Passphrase zu tippen. Sie bleibt und öffnet die App, wenn der Sensor nicht erkennt.",
+  "appLockBiometricReason": "PreppSuite entsperren",
+  "appLockBiometricButton": "Mit Gesicht oder Fingerabdruck",
+  "appLockBiometricNotConfirmed": "Gesicht oder Fingerabdruck wurde nicht bestätigt. Die Einstellung bleibt aus."
 }

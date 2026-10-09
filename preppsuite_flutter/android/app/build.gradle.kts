@@ -127,6 +127,10 @@ dependencies {
     // the Storage Access Framework — see MainActivity. DocumentFile is the
     // readable way to walk a content:// tree.
     implementation("androidx.documentfile:documentfile:1.0.1")
+    // The biometric prompt behind the app lock (#143) needs an AppCompat
+    // launch theme, or it crashes on Android 8 and older. Named here rather
+    // than left to whichever plugin happens to pull it in.
+    implementation("androidx.appcompat:appcompat:1.7.0")
 }
 
 // Flutter 3.44 currently writes the dev-only integration_test plugin into

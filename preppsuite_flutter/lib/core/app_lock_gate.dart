@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'app_lock.dart';
 import 'app_lock_provider.dart';
+import 'biometric_unlock.dart';
 import 'emergency_access.dart';
 
 /// Locks the whole UI after the app leaves the foreground.
@@ -23,6 +24,10 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   bool _checking = false;
   bool _wrongPassphrase = false;
 
+  /// Whether face or fingerprint has been asked for since the app was last
+  /// locked: once by itself, then only on the button (#143).
+  bool _prompted = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,7 +46,25 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   }
 
   void _lock() {
-    if (_unlocked && mounted) setState(() => _unlocked = false);
+    if (_unlocked && mounted) {
+      setState(() {
+        _unlocked = false;
+        _prompted = false;
+      });
+    }
+  }
+
+  Future<void> _unlockWithBiometrics() async {
+    _prompted = true;
+    final l10n = AppLocalizations.of(context)!;
+    final recognised = await ref
+        .read(biometricAuthProvider)
+        .authenticate(l10n.appLockBiometricReason);
+    if (!mounted || !recognised) return;
+    setState(() {
+      _unlocked = true;
+      _controller.clear();
+    });
   }
 
   Future<void> _unlock() async {
@@ -74,6 +97,13 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
       data: (isEnabled) {
         if (!isEnabled || _unlocked) return widget.child;
         final l10n = AppLocalizations.of(context)!;
+        final biometric = ref.watch(appLockBiometricProvider).value ?? false;
+        if (biometric && !_prompted) {
+          _prompted = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _unlockWithBiometrics();
+          });
+        }
         return Scaffold(
           body: Center(
             child: ConstrainedBox(
@@ -118,6 +148,14 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
                             )
                           : Text(l10n.appLockUnlockButton),
                     ),
+                    if (biometric) ...[
+                      const SizedBox(height: 8),
+                      OutlinedButton.icon(
+                        onPressed: _unlockWithBiometrics,
+                        icon: const Icon(Icons.fingerprint),
+                        label: Text(l10n.appLockBiometricButton),
+                      ),
+                    ],
                     // As on a locked phone: the emergency help needs no
                     // passphrase and shows nothing private (#137).
                     const SizedBox(height: 24),

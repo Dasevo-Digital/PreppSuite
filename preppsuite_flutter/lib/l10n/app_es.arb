@@ -2386,5 +2386,10 @@
   "errorLogClear": "Borrar",
   "riverFloodClassUnknown": "inundado, profundidad no indicada",
   "riverFloodNoMap": "no hay mapa para este escenario",
-  "riverFloodSourceNational": "Fuente: mapas de peligro de inundación de los estados federados, reunidos a nivel nacional por el Instituto Federal de Hidrología (geoportal.bafg.de)"
+  "riverFloodSourceNational": "Fuente: mapas de peligro de inundación de los estados federados, reunidos a nivel nacional por el Instituto Federal de Hidrología (geoportal.bafg.de)",
+  "appLockBiometricTitle": "Desbloquear con la cara o la huella",
+  "appLockBiometricHint": "En lugar de escribir la frase de contraseña. Esta se mantiene y abre la app si el sensor no te reconoce.",
+  "appLockBiometricReason": "Desbloquear PreppSuite",
+  "appLockBiometricButton": "Con la cara o la huella",
+  "appLockBiometricNotConfirmed": "No se confirmó la cara o la huella. El ajuste sigue desactivado."
 }

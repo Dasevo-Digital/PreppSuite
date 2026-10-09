@@ -4,7 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.ParcelFileDescriptor
 import androidx.documentfile.provider.DocumentFile
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -24,8 +24,11 @@ import java.util.concurrent.Executors
  * The permission is taken as *persistable* in both cases, which is the
  * part that makes this worth doing: it survives a restart, so the folder
  * and the map are picked once rather than every launch.
+ *
+ * A FragmentActivity because the biometric prompt of the app lock is a
+ * fragment (#143); everything above works the same on it.
  */
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
     private companion object {
         const val CHANNEL = "preppsuite/storage"
         const val PICK_FOLDER_REQUEST = 8451

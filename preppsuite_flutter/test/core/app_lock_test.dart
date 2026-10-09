@@ -54,6 +54,24 @@ void main() {
     expect(await lock.verify('ein-langer-test-schluessel'), isFalse);
   });
 
+  test(
+    'face or fingerprint is off until chosen, and goes with the lock',
+    () async {
+      // #143: turning the lock off must not leave a setting behind that a
+      // later lock would inherit without being asked.
+      final storage = _MemoryStorage();
+      final lock = store(storage);
+      await lock.enable('ein-langer-test-schluessel');
+      expect(await lock.biometricEnabled(), isFalse);
+      await lock.setBiometric(true);
+      expect(await lock.biometricEnabled(), isTrue);
+      await lock.disable();
+      expect(await lock.biometricEnabled(), isFalse);
+      await lock.enable('ein-langer-test-schluessel');
+      expect(await lock.biometricEnabled(), isFalse);
+    },
+  );
+
   test('rejects an incomplete secure-store verifier', () async {
     final storage = _MemoryStorage();
     await store(storage).enable('ein-langer-test-schluessel');

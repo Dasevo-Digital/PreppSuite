@@ -5045,5 +5045,10 @@
   "errorLogClear": "Delete",
   "riverFloodClassUnknown": "flooded, depth not given",
   "riverFloodNoMap": "no map for this scenario",
-  "riverFloodSourceNational": "Source: the Länder's flood hazard maps, brought together nationwide by the Federal Institute of Hydrology (geoportal.bafg.de)"
+  "riverFloodSourceNational": "Source: the Länder's flood hazard maps, brought together nationwide by the Federal Institute of Hydrology (geoportal.bafg.de)",
+  "appLockBiometricTitle": "Unlock with face or fingerprint",
+  "appLockBiometricHint": "Instead of typing the passphrase. It stays, and opens the app when the sensor does not recognise you.",
+  "appLockBiometricReason": "Unlock PreppSuite",
+  "appLockBiometricButton": "With face or fingerprint",
+  "appLockBiometricNotConfirmed": "Face or fingerprint was not confirmed. The setting stays off."
 }

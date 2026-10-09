@@ -14436,6 +14436,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Source: the Länder\'s flood hazard maps, brought together nationwide by the Federal Institute of Hydrology (geoportal.bafg.de)'**
   String get riverFloodSourceNational;
+
+  /// No description provided for @appLockBiometricTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with face or fingerprint'**
+  String get appLockBiometricTitle;
+
+  /// No description provided for @appLockBiometricHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Instead of typing the passphrase. It stays, and opens the app when the sensor does not recognise you.'**
+  String get appLockBiometricHint;
+
+  /// No description provided for @appLockBiometricReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock PreppSuite'**
+  String get appLockBiometricReason;
+
+  /// No description provided for @appLockBiometricButton.
+  ///
+  /// In en, this message translates to:
+  /// **'With face or fingerprint'**
+  String get appLockBiometricButton;
+
+  /// No description provided for @appLockBiometricNotConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Face or fingerprint was not confirmed. The setting stays off.'**
+  String get appLockBiometricNotConfirmed;
 }
 
 class _AppLocalizationsDelegate

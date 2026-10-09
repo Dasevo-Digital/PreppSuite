@@ -8738,4 +8738,22 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get riverFloodSourceNational =>
       'Quelle: Hochwassergefahrenkarten der Länder, bundesweit zusammengeführt von der Bundesanstalt für Gewässerkunde (geoportal.bafg.de)';
+
+  @override
+  String get appLockBiometricTitle =>
+      'Mit Gesicht oder Fingerabdruck entsperren';
+
+  @override
+  String get appLockBiometricHint =>
+      'Statt die Passphrase zu tippen. Sie bleibt und öffnet die App, wenn der Sensor nicht erkennt.';
+
+  @override
+  String get appLockBiometricReason => 'PreppSuite entsperren';
+
+  @override
+  String get appLockBiometricButton => 'Mit Gesicht oder Fingerabdruck';
+
+  @override
+  String get appLockBiometricNotConfirmed =>
+      'Gesicht oder Fingerabdruck wurde nicht bestätigt. Die Einstellung bleibt aus.';
 }

@@ -66,6 +66,7 @@ class AppLockStore {
   static const _enabledKey = 'appLock.enabled.v1';
   static const _saltKey = 'appLock.salt.v1';
   static const _checkKey = 'appLock.check.v1';
+  static const _biometricKey = 'appLock.biometric.v1';
   static const _marker = 'preppsuite-app-lock-v1';
 
   /// Says *that* a lock is set, never anything about it.
@@ -183,7 +184,27 @@ class AppLockStore {
     }
   }
 
+  /// Whether the household chose to open the lock with face or
+  /// fingerprint as well (#143). Off on every installation until turned
+  /// on, and off again with the lock.
+  Future<bool> biometricEnabled() async {
+    try {
+      return await _storage.read(_biometricKey) == 'true';
+    } on Object {
+      return false;
+    }
+  }
+
+  Future<void> setBiometric(bool enabled) async {
+    if (enabled) {
+      await _storage.write(_biometricKey, 'true');
+    } else {
+      await _storage.delete(_biometricKey);
+    }
+  }
+
   Future<void> disable() async {
+    await _storage.delete(_biometricKey);
     await _storage.delete(_enabledKey);
     await _storage.delete(_saltKey);
     await _storage.delete(_checkKey);

@@ -8691,4 +8691,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get riverFloodSourceNational =>
       'Source: the Länder\'s flood hazard maps, brought together nationwide by the Federal Institute of Hydrology (geoportal.bafg.de)';
+
+  @override
+  String get appLockBiometricTitle => 'Unlock with face or fingerprint';
+
+  @override
+  String get appLockBiometricHint =>
+      'Instead of typing the passphrase. It stays, and opens the app when the sensor does not recognise you.';
+
+  @override
+  String get appLockBiometricReason => 'Unlock PreppSuite';
+
+  @override
+  String get appLockBiometricButton => 'With face or fingerprint';
+
+  @override
+  String get appLockBiometricNotConfirmed =>
+      'Face or fingerprint was not confirmed. The setting stays off.';
 }

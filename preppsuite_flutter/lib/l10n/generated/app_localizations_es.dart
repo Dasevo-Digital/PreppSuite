@@ -8766,4 +8766,21 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get riverFloodSourceNational =>
       'Fuente: mapas de peligro de inundación de los estados federados, reunidos a nivel nacional por el Instituto Federal de Hidrología (geoportal.bafg.de)';
+
+  @override
+  String get appLockBiometricTitle => 'Desbloquear con la cara o la huella';
+
+  @override
+  String get appLockBiometricHint =>
+      'En lugar de escribir la frase de contraseña. Esta se mantiene y abre la app si el sensor no te reconoce.';
+
+  @override
+  String get appLockBiometricReason => 'Desbloquear PreppSuite';
+
+  @override
+  String get appLockBiometricButton => 'Con la cara o la huella';
+
+  @override
+  String get appLockBiometricNotConfirmed =>
+      'No se confirmó la cara o la huella. El ajuste sigue desactivado.';
 }

@@ -191,6 +191,7 @@ dependencies:
   # backgrounded app's timers are throttled by every platform here.
   # 1.8.0 and not 1.8.1: 1.8.1 needs dbus 0.8, geolocator_linux still 0.7.
   wakelock_plus: ^1.8.0
+  local_auth: ^3.0.2
   url_launcher: ^6.3.2
   home_widget: ^0.10.0
   # Long-press actions on the app icon (#123): 112, a sign of life, first
