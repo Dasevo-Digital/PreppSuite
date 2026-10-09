@@ -115,6 +115,7 @@ class OpenFoodFactsService {
   /// fails.
   Future<OpenFoodFactsProduct?> lookup(String barcode) async {
     try {
+      // The package brings its own client and no limit on waiting (#139).
       final result = await OpenFoodAPIClient.getProductV3(
         ProductQueryConfiguration(
           barcode,
@@ -126,7 +127,7 @@ class OpenFoodFactsService {
             ProductField.NUTRITION,
           ],
         ),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final product = result.product;
       final name = product?.productName;

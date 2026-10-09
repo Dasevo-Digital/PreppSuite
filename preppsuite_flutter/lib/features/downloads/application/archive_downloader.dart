@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import '../../../core/platform_storage.dart';
+import '../../../core/http_client.dart';
 
 /// How far a download has got.
 class DownloadProgress {
@@ -65,7 +66,7 @@ class ArchiveDownloader {
     http.Client? httpClient,
     Duration? reportEvery,
     List<Duration>? retryDelays,
-  }) : _httpClient = httpClient ?? http.Client(),
+  }) : _httpClient = httpClient ?? TimeoutClient(),
        _reportEvery = reportEvery ?? const Duration(milliseconds: 250),
        _retryDelays = retryDelays ?? defaultRetryDelays;
 

@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/article_document.dart';
 import '../application/article_viewer.dart';
+import '../../../core/http_client.dart';
 
 /// Reads an article without a browser engine.
 ///
@@ -46,7 +47,7 @@ class ArticleReaderScreen extends StatefulWidget {
 }
 
 class _ArticleReaderScreenState extends State<ArticleReaderScreen> {
-  late final http.Client _client = widget.client ?? http.Client();
+  late final http.Client _client = widget.client ?? TimeoutClient();
   final _scroll = ScrollController();
 
   ArticleDocument? _document;

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import '../../../core/http_client.dart';
 
 /// What kind of thing is standing on the road.
 enum RoadEventKind {
@@ -69,7 +70,7 @@ class RoadEvent {
 /// What this asks for is what would make somebody turn round.
 class RoadClosureClient {
   RoadClosureClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

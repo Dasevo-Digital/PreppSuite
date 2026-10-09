@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../../../core/private_preferences.dart';
 import '../../first_aid/application/defibrillators.dart' show distanceMetres;
 import '../../shelters/application/overpass_shelter_client.dart';
+import '../../../core/http_client.dart';
 
 /// Emergency wells, disaster help points and sirens near a place, from
 /// OpenStreetMap (#127, #128).
@@ -176,7 +177,7 @@ SirenReach sirenReach(double? nearestMetres, {int? rangeMetres}) {
 class EmergencyPointClient {
   EmergencyPointClient({http.Client? httpClient, Duration? retryDelay})
     : _ownsClient = httpClient == null,
-      _httpClient = httpClient ?? http.Client(),
+      _httpClient = httpClient ?? TimeoutClient(),
       _retryDelay = retryDelay ?? OverpassShelterClient.defaultRetryDelay;
 
   final http.Client _httpClient;

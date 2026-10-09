@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/private_preferences.dart';
 import '../../shelters/application/overpass_shelter_client.dart';
+import '../../../core/http_client.dart';
 
 /// Defibrillators near a place, from OpenStreetMap (#117).
 ///
@@ -117,7 +118,7 @@ int compassOctant(double lat1, double lon1, double lat2, double lon2) {
 class DefibrillatorClient {
   DefibrillatorClient({http.Client? httpClient, Duration? retryDelay})
     : _ownsClient = httpClient == null,
-      _httpClient = httpClient ?? http.Client(),
+      _httpClient = httpClient ?? TimeoutClient(),
       _retryDelay = retryDelay ?? OverpassShelterClient.defaultRetryDelay;
 
   final http.Client _httpClient;

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
+import '../../../core/http_client.dart';
 
 /// One archive offered by the Kiwix library.
 class KiwixEntry {
@@ -89,7 +90,7 @@ class KiwixPage {
 /// the file is on the device nothing here is ever consulted again.
 class KiwixCatalogue {
   KiwixCatalogue({http.Client? httpClient, Uri? host})
-    : _httpClient = httpClient ?? http.Client(),
+    : _httpClient = httpClient ?? TimeoutClient(),
       host = host ?? Uri.parse('https://library.kiwix.org');
 
   final http.Client _httpClient;

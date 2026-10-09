@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 import '../features/household/application/german_states.dart';
+import 'http_client.dart';
 
 /// Why the device's location could not be had.
 enum LocationRefusal {
@@ -51,7 +52,7 @@ class LocationUnavailableException implements Exception {
 class GeolocationService {
   GeolocationService({http.Client? httpClient})
     : _ownsClient = httpClient == null,
-      _httpClient = httpClient ?? http.Client();
+      _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
   final bool _ownsClient;

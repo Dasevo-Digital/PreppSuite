@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'pegel_level.dart';
+import '../../../core/http_client.dart';
 
 /// One gauge on a federal waterway.
 class PegelStation {
@@ -74,7 +75,7 @@ class PegelStation {
 /// through the BBK feed this app already reads.
 class PegelClient {
   PegelClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

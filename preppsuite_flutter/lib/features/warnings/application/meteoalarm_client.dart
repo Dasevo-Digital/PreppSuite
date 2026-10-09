@@ -2,6 +2,7 @@ import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
 import 'warning_http.dart';
+import '../../../core/http_client.dart';
 
 /// A single `<entry>` from a MeteoAlarm legacy Atom+CAP feed. Fields
 /// confirmed against the live feed on 2026-08-14; see
@@ -35,7 +36,7 @@ class MeteoAlarmRawWarning {
 /// countries (e.g. includes Switzerland, Norway, UK).
 class MeteoAlarmClient {
   MeteoAlarmClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

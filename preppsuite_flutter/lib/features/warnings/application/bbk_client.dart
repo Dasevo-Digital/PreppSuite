@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'warning_http.dart';
+import '../../../core/http_client.dart';
 
 /// A single raw entry from a BBK (warnung.bund.de) `mapData.json` feed —
 /// intentionally untyped beyond this shape; `WarningIngest` maps it onto
@@ -80,7 +81,7 @@ class BbkFetchResult {
 /// `mapData.json` array shape, so one parser covers them.
 class BbkClient {
   BbkClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

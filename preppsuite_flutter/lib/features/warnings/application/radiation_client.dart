@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'radiation_level.dart';
+import '../../../core/http_client.dart';
 
 /// One probe of the federal gamma dose-rate network.
 class RadiationStation {
@@ -68,7 +69,7 @@ class RadiationStation {
 /// beats one that shows an error.
 class RadiationClient {
   RadiationClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

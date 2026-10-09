@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'geo_bounds.dart';
+import '../../../core/http_client.dart';
 
 /// A bunker/shelter-tagged OpenStreetMap element (node or way — ways are
 /// requested with `out center`, so both shapes end up with a single
@@ -37,7 +38,7 @@ class OverpassShelterClient {
     Duration? retryDelay,
     Duration? cacheLifetime,
   }) : _ownsClient = httpClient == null,
-       _httpClient = httpClient ?? http.Client(),
+       _httpClient = httpClient ?? TimeoutClient(),
        _retryDelay = retryDelay ?? defaultRetryDelay,
        _cacheLifetime = cacheLifetime ?? defaultCacheLifetime;
 

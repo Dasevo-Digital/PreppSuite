@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'air_quality_level.dart';
+import '../../../core/http_client.dart';
 
 /// One measuring station of the federal air quality network.
 class AirQualityStation {
@@ -75,7 +76,7 @@ class AirQualityStation {
 /// the wrong federal state.
 class AirQualityClient {
   AirQualityClient({http.Client? httpClient, Duration? retryDelay})
-    : _httpClient = httpClient ?? http.Client(),
+    : _httpClient = httpClient ?? TimeoutClient(),
       _retryDelay = retryDelay ?? const Duration(seconds: 2);
 
   final http.Client _httpClient;

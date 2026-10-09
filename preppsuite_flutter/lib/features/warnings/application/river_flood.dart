@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'heavy_rain_hazard.dart' show samplePoints;
+import '../../../core/http_client.dart';
 
 /// River floods at one address, from the Land's own hazard maps (#124).
 ///
@@ -73,7 +74,7 @@ class RiverFloodResult {
 /// Asks the Land's flood hazard map about one point.
 class RiverFloodClient {
   RiverFloodClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

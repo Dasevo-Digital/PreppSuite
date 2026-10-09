@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/private_preferences.dart';
 import 'river_flood.dart';
+import '../../../core/http_client.dart';
 
 /// Where water runs and stands after a cloudburst, at one address (#115).
 ///
@@ -174,7 +175,7 @@ class HeavyRainHazard {
 /// Asks the BKG's map service about one point.
 class HeavyRainClient {
   HeavyRainClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

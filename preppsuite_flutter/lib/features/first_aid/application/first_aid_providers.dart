@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../downloads/application/archive_downloader.dart';
 import '../../downloads/application/download_folder.dart';
 import 'first_aid_video_pack.dart';
+import '../../../core/http_client.dart';
 
 /// Where the video pack folder is on this device.
 final firstAidLibraryProvider = FutureProvider<FirstAidVideoLibrary>((
@@ -152,7 +153,7 @@ class FirstAidDownloadController extends Notifier<FirstAidDownloadState> {
   }) async {
     final http.Response response;
     final own = client == null;
-    final httpClient = client ?? http.Client();
+    final httpClient = client ?? TimeoutClient();
     try {
       response = await httpClient.get(url);
     } on Object {

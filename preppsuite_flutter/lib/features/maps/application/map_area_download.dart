@@ -8,6 +8,7 @@ import 'map_download_plan.dart';
 import 'pmtiles_archive.dart' show tileIdFor;
 import 'pmtiles_writer.dart';
 import 'tile_source.dart';
+import '../../../core/http_client.dart';
 
 /// A rectangle of the world at a range of zoom levels.
 class MapArea {
@@ -182,7 +183,7 @@ class MapDownloadException implements Exception {
 /// the area someone cares about.
 class MapAreaDownloader {
   MapAreaDownloader({http.Client? httpClient, this.concurrency = 4})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

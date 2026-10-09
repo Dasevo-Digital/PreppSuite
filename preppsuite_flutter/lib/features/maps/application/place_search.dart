@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'map_area_download.dart';
+import '../../../core/http_client.dart';
 
 /// A place someone can download the map of.
 class PlaceResult {
@@ -75,7 +76,7 @@ class PlaceSearchException implements Exception {
 /// a second, which a search box driven by a person stays well inside.
 class PlaceSearchClient {
   PlaceSearchClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

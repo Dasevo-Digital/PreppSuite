@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../../../core/bounded_gzip.dart';
 
 import 'fire_danger_level.dart';
+import '../../../core/http_client.dart';
 
 /// One of the DWD's fire-danger stations.
 class FireDangerStation {
@@ -70,7 +71,7 @@ class FireDangerStation {
 /// the reason the station is chosen once and kept.
 class FireDangerClient {
   FireDangerClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

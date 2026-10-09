@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import '../../../core/http_client.dart';
 
 /// Where vector tiles can be fetched from.
 ///
@@ -60,7 +61,7 @@ class TileSourceException implements Exception {
 /// Reads a provider's TileJSON.
 class TileSourceClient {
   TileSourceClient({http.Client? httpClient})
-    : _httpClient = httpClient ?? http.Client();
+    : _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
 

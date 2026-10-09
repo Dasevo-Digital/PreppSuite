@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'geo_bounds.dart';
+import '../../../core/http_client.dart';
 
 /// A bunker from the WWBOTA ("World Wide Bunkers on the Air") reference
 /// database — an amateur-radio activation-award catalogue (like POTA/SOTA),
@@ -33,7 +34,7 @@ class WwbotaBunker {
 class WwbotaClient {
   WwbotaClient({http.Client? httpClient})
     : _ownsClient = httpClient == null,
-      _httpClient = httpClient ?? http.Client();
+      _httpClient = httpClient ?? TimeoutClient();
 
   final http.Client _httpClient;
   final bool _ownsClient;
