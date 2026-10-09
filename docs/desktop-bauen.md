@@ -206,8 +206,13 @@ Reihenfolge, damit die langsamen Maschinen nicht warten: Der Linux-Build
 der Mac das macOS- und die Android-Pakete baut und den Gerätetest im
 iPhone-Simulator laufen lässt. Danach holt das Skript das Linux-Paket und
 die quergebaute `zim_xapian.dll` und baut Windows (`tool/windows_build.ps1`).
-Zum Schluss prüft es PDFium in allen sechs Paketen gegen die Attestation und
-schreibt `SHA256SUMS.txt`.
+Linux und Windows lassen nach ihrem Build den Starttest
+(`integration_test/app_start_test.dart`) laufen, der SQLite mit
+Verschlüsselung, PDFium, Zstandard und Xapian wirklich lädt und die
+Notfallhilfe zeichnet; ohne „STARTTEST: BESTANDEN“ von beiden bricht das
+Skript ab. Unter Linux braucht das eine angemeldete Desktop-Sitzung des
+Build-Benutzers. Zum Schluss prüft es PDFium in allen sechs Paketen gegen die
+Attestation und schreibt `SHA256SUMS.txt`.
 
 Die Maschinen und das Ziel zum Hochladen stehen nicht im Skript, sondern in
 der Umgebung: `RELEASE_LINUX_HOST`, `RELEASE_WINDOWS_HOST` (ssh-Namen),

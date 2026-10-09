@@ -25,6 +25,12 @@ $release = 'build\windows\x64\runner\Release'
 Write-Output "== Dateien: $((Get-ChildItem $release -Recurse -File).Count) =="
 if (-not (Test-Path (Join-Path $release 'zim_xapian.dll'))) { throw 'zim_xapian.dll nicht im Paket' }
 
+# The start test (#142): the package's native libraries, loaded for real
+# in a running app. Works over ssh without a signed-in desktop.
+flutter test integration_test/app_start_test.dart -d windows
+if ($LASTEXITCODE -ne 0) { throw 'Starttest fehlgeschlagen' }
+Write-Output '== STARTTEST: BESTANDEN =='
+
 $zip = Join-Path $Work "PreppSuite-$Version-windows-x64-unsigned-test.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Compress-Archive -Path (Join-Path $release '*') -DestinationPath $zip -Force

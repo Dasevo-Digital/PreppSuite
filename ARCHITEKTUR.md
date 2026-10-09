@@ -45,8 +45,21 @@ never this Mac** — `flutter test -d macos` would start the app under its
 production identifier beside the household's real data. It writes
 `GERAETETEST-v<version>.txt` into the release folder, which is uploaded
 and listed in `SHA256SUMS.txt`, and keeps the full log beside it locally,
-because that log carries this machine's paths. It runs the four files
-one at a time.
+because that log carries this machine's paths. It runs every file in
+`integration_test/` one at a time.
+
+**The start test runs on every platform a release goes to** (#142).
+`integration_test/app_start_test.dart` loads the native foundation for
+real -- SQLite with its cipher and the daily copy, PDFium drawing a page,
+Zstandard, the Xapian shim where the desktop packages ship it -- and
+draws the emergency help. The iPhone device check and the Android CI pick
+it up with the other files; `tool/linux_release.sh` and
+`tool/windows_build.ps1` run it after their build, and `tool/release.sh`
+refuses to go on without `STARTTEST: BESTANDEN` from both. On TestKubuntu
+it uses the build user's own Wayland session (`/run/user/<uid>/wayland-0`),
+so that user has to be signed in to the desktop -- no virtual display is
+installed. On TestWindows it runs over ssh without a desktop. Measured
+2026-10-09: five of five on the simulator, Linux and Windows.
 
 **`zstandard_ios` and `zstandard_macos` are patched copies in
 `third_party/`** (#100). Version 1.5.0 of both deleted its synced zstd

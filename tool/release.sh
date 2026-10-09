@@ -24,7 +24,9 @@
 #
 # What it does, in the order that keeps the slow machines busy: the Linux
 # build starts first and runs while the Mac builds macOS and Android and
-# runs the device check in the iPhone simulator. The Windows build needs
+# runs the device check in the iPhone simulator. Linux and Windows each
+# run the start test (integration_test/app_start_test.dart) after their
+# build, and a release whose start test did not pass is not published. The Windows build needs
 # the Xapian DLL the Linux machine cross-compiles, so it comes last.
 set -euo pipefail
 
@@ -164,6 +166,8 @@ for _ in $(seq 1 360); do
 done
 ssh "$linux" "grep -q ALLES-FERTIG ~/$remote_linux/build.log" ||
   fail "Linux-Build nicht fertig, siehe ~/$remote_linux/build.log"
+ssh "$linux" "grep -q 'STARTTEST: BESTANDEN' ~/$remote_linux/build.log" ||
+  fail "Starttest unter Linux nicht bestanden, siehe ~/$remote_linux/build.log"
 ssh "$linux" "grep -q 'lib/libzim_xapian.so' ~/$remote_linux/inhalt.txt && \
   grep -q 'lib/libpdfium.so' ~/$remote_linux/inhalt.txt" ||
   fail "Linux-Paket ohne Xapian oder PDFium"
@@ -188,6 +192,8 @@ ssh "$windows" "powershell -NoProfile -ExecutionPolicy Bypass -File \
   -BuildNumber $build" > "$log/windows.log" 2>&1 ||
   fail "Windows-Build, siehe $log/windows.log"
 grep -q "== FERTIG ==" "$log/windows.log" || fail "Windows-Build unvollständig"
+grep -q "STARTTEST: BESTANDEN" "$log/windows.log" ||
+  fail "Starttest unter Windows nicht bestanden, siehe $log/windows.log"
 scp -q "$windows:$win/PreppSuite-$version-windows-x64-unsigned-test.zip" "$out/"
 
 # --- Checks on the finished packages --------------------------------------
