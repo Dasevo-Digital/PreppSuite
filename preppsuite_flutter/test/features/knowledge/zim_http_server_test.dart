@@ -36,6 +36,18 @@ void main() {
             content: [98, 111, 100, 121], // "body"
             mimeType: 1,
           ),
+          ZimFixtureEntry(
+            namespace: 'C',
+            url: 'Anleitung/iPhone+16+Akku+tauschen/177286',
+            title: 'iPhone 16 Akku tauschen',
+            content: utf8.encode('<h1>Akku</h1>'),
+          ),
+          ZimFixtureEntry(
+            namespace: 'C',
+            url: 'Was tun? Notfall #1',
+            title: 'Was tun?',
+            content: utf8.encode('<h1>Notfall</h1>'),
+          ),
           const ZimFixtureEntry(
             namespace: 'C',
             url: 'Wasservorrat',
@@ -175,6 +187,22 @@ void main() {
       expect(await utf8.decodeStream(response), '<h1>Trinkwasser</h1>');
     },
   );
+
+  test('an address from uriFor reaches the entry, whatever its name', () async {
+    // #18: an archive names its entries as it likes. iFixit's guides carry
+    // a "+" for each space; a "?" or a "#" pasted into an address would
+    // have ended the path early.
+    for (final url in [
+      'Anleitung/iPhone+16+Akku+tauschen/177286',
+      'Was tun? Notfall #1',
+    ]) {
+      final entry = (await archive.findByUrl('C', url))!;
+      final request = await client.getUrl(server.uriFor(entry));
+      final response = await request.close();
+      expect(response.statusCode, HttpStatus.ok, reason: entry.url);
+      await response.drain<void>();
+    }
+  });
 
   test('the server is reachable only over loopback', () async {
     expect(server.uriFor(await archive.entryAt(0)).host, '127.0.0.1');

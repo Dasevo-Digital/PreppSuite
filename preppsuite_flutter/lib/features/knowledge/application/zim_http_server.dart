@@ -27,8 +27,19 @@ class ZimHttpServer {
 
   int get port => _server.port;
 
-  Uri uriFor(ZimEntry entry) =>
-      Uri.parse('http://127.0.0.1:$port/${entry.namespace}/${entry.url}');
+  /// The address of [entry] on this server.
+  ///
+  /// Built from segments rather than pasted into a string: an entry's URL
+  /// is the archive's own text and may hold a space, a `?` or a `#`, which
+  /// pasted in would end the path early or turn into a query. Each segment
+  /// is encoded here and decoded again by [_respond], so the archive gets
+  /// back exactly the URL it named.
+  Uri uriFor(ZimEntry entry) => Uri(
+    scheme: 'http',
+    host: '127.0.0.1',
+    port: port,
+    pathSegments: [entry.namespace, ...entry.url.split('/')],
+  );
 
   static Future<ZimHttpServer> start(ZimArchive archive) async {
     // Port zero: the system picks a free one. A fixed port would collide

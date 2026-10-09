@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -121,6 +123,17 @@ class _ArticleScreenState extends State<ArticleScreen> {
         ),
       )
       ..loadRequest(widget.uri);
+    // White underneath, as in any browser (#18). The engine otherwise
+    // paints the system's own background below the page, which in dark
+    // mode is black -- and a page that sets no background of its own, as
+    // the iFixit archive's pages after the start page do, then drew its
+    // dark grey text on black: the whole page read as empty. A page with a
+    // background of its own paints over this as before.
+    unawaited(
+      _controller.setBackgroundColor(const Color(0xFFFFFFFF)).catchError((_) {
+        // An engine that does not take a background colour keeps its own.
+      }),
+    );
   }
 
   Future<void> _restoreBookmark() async {
