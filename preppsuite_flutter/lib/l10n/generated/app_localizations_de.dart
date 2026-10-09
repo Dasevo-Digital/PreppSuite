@@ -8700,4 +8700,34 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get snapshotRestoreFailed => 'Das Zurückholen hat nicht geklappt.';
+
+  @override
+  String get errorWidgetText =>
+      'Dieser Teil der App konnte nicht angezeigt werden. Was passiert ist, steht im Fehlerprotokoll unter Einstellungen → Über.';
+
+  @override
+  String get errorLogTitle => 'Fehlerprotokoll';
+
+  @override
+  String get errorLogEmpty => 'Keine Fehler aufgezeichnet.';
+
+  @override
+  String errorLogCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge',
+      one: 'Ein Eintrag',
+    );
+    return '$_temp0. Das Protokoll bleibt auf diesem Gerät; es verlässt es nur, wenn du es selbst teilst.';
+  }
+
+  @override
+  String get errorLogShow => 'Anzeigen';
+
+  @override
+  String get errorLogShare => 'Teilen';
+
+  @override
+  String get errorLogClear => 'Löschen';
 }

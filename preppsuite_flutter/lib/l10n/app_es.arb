@@ -2376,5 +2376,12 @@
   "snapshotRestoreTitle": "¿Recuperar la copia automática?",
   "snapshotRestoreBody": "El hogar vuelve al estado del {date}. Lo que se haya introducido después faltará. La base de datos dañada no se borra, se guarda al lado.",
   "snapshotRestoreConfirm": "Recuperar",
-  "snapshotRestoreFailed": "La recuperación no ha funcionado."
+  "snapshotRestoreFailed": "La recuperación no ha funcionado.",
+  "errorWidgetText": "Esta parte de la app no se pudo mostrar. Lo ocurrido está en el registro de errores, en Ajustes → Acerca de.",
+  "errorLogTitle": "Registro de errores",
+  "errorLogEmpty": "No hay errores registrados.",
+  "errorLogCount": "{count, plural, =1{Una entrada} other{{count} entradas}}. El registro se queda en este dispositivo; solo sale de él si lo compartes tú.",
+  "errorLogShow": "Mostrar",
+  "errorLogShare": "Compartir",
+  "errorLogClear": "Borrar"
 }

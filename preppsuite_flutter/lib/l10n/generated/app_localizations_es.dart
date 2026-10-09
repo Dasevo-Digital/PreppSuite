@@ -8728,4 +8728,34 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get snapshotRestoreFailed => 'La recuperación no ha funcionado.';
+
+  @override
+  String get errorWidgetText =>
+      'Esta parte de la app no se pudo mostrar. Lo ocurrido está en el registro de errores, en Ajustes → Acerca de.';
+
+  @override
+  String get errorLogTitle => 'Registro de errores';
+
+  @override
+  String get errorLogEmpty => 'No hay errores registrados.';
+
+  @override
+  String errorLogCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entradas',
+      one: 'Una entrada',
+    );
+    return '$_temp0. El registro se queda en este dispositivo; solo sale de él si lo compartes tú.';
+  }
+
+  @override
+  String get errorLogShow => 'Mostrar';
+
+  @override
+  String get errorLogShare => 'Compartir';
+
+  @override
+  String get errorLogClear => 'Borrar';
 }

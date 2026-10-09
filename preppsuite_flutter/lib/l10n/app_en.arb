@@ -5028,5 +5028,19 @@
     }
   },
   "snapshotRestoreConfirm": "Restore",
-  "snapshotRestoreFailed": "The restore did not work."
+  "snapshotRestoreFailed": "The restore did not work.",
+  "errorWidgetText": "This part of the app could not be shown. What happened is in the error log under Settings → About.",
+  "errorLogTitle": "Error log",
+  "errorLogEmpty": "No errors recorded.",
+  "errorLogCount": "{count, plural, =1{One entry} other{{count} entries}}. The log stays on this device; it only leaves it if you share it yourself.",
+  "@errorLogCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "errorLogShow": "Show",
+  "errorLogShare": "Share",
+  "errorLogClear": "Delete"
 }

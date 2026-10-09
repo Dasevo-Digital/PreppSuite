@@ -24,6 +24,7 @@ import 'reset_card.dart';
 import 'version_info_card.dart';
 import 'warning_readiness_card.dart';
 import 'followed_places_screen.dart';
+import 'error_log_card.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key, required this.profile});
@@ -154,6 +155,7 @@ class SettingsScreen extends ConsumerWidget {
               (l10n) => l10n.settingsCategoryAbout,
               (l10n) => const [
                 VersionInfoCard(),
+                ErrorLogCard(),
               ],
             ),
           ),

@@ -13,6 +13,10 @@ import 'core/portable_data.dart';
 import 'features/downloads/application/relink_files.dart';
 import 'features/inventory/application/inventory_photo_service.dart';
 import 'features/inventory/application/open_food_facts_service.dart';
+import 'core/error_log.dart';
+import 'core/error_display.dart';
+import 'core/app_database_directory.dart';
+import 'package:flutter/foundation.dart';
 
 /// PreppSuite runs entirely on the device.
 ///
@@ -30,6 +34,27 @@ void main(List<String> args) async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Every error that reaches the top, from a build or from a future
+  // nobody awaited, goes into the log on this device (#141). Flutter's own
+  // handling stays as it was beside it.
+  final presentError = FlutterError.onError;
+  FlutterError.onError = (details) {
+    ErrorLog.instance.record(
+      details.exception,
+      details.stack,
+      context: details.library,
+    );
+    presentError?.call(details);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    ErrorLog.instance.record(error, stack, context: 'async');
+    return true;
+  };
+  // A sentence instead of a grey patch where a part of a screen fails.
+  // Debug builds keep Flutter's red one, which says more to whoever is
+  // fixing it.
+  if (kReleaseMode) ErrorWidget.builder = friendlyErrorWidget;
+
   // First of all: the folder the household was in under the former
   // identifier (de.status403.preppsuite) holds the pointer to a chosen
   // folder as well as the databases. It cannot throw and it cannot stop
@@ -42,6 +67,14 @@ void main(List<String> args) async {
   // and it cannot stop startup — the worst it does is decide that this
   // is an ordinary installation.
   await startPortableData();
+
+  // The log lives with the app's own files, on the stick if it is
+  // carried on one.
+  try {
+    ErrorLog.instance.attach(await appSupportDirectory());
+  } on Object {
+    // Kept in memory until the next start.
+  }
 
   // Establish the data-key state before any provider can open Drift. New
   // households start encrypted; existing ones remain recoverably readable

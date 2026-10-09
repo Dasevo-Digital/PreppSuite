@@ -3598,5 +3598,12 @@
   "snapshotRestoreTitle": "Automatische Sicherung zurückholen?",
   "snapshotRestoreBody": "Der Haushalt wird auf den Stand vom {date} zurückgesetzt. Was danach eingetragen wurde, fehlt. Die beschädigte Datenbank wird nicht gelöscht, sondern daneben aufbewahrt.",
   "snapshotRestoreConfirm": "Zurückholen",
-  "snapshotRestoreFailed": "Das Zurückholen hat nicht geklappt."
+  "snapshotRestoreFailed": "Das Zurückholen hat nicht geklappt.",
+  "errorWidgetText": "Dieser Teil der App konnte nicht angezeigt werden. Was passiert ist, steht im Fehlerprotokoll unter Einstellungen → Über.",
+  "errorLogTitle": "Fehlerprotokoll",
+  "errorLogEmpty": "Keine Fehler aufgezeichnet.",
+  "errorLogCount": "{count, plural, =1{Ein Eintrag} other{{count} Einträge}}. Das Protokoll bleibt auf diesem Gerät; es verlässt es nur, wenn du es selbst teilst.",
+  "errorLogShow": "Anzeigen",
+  "errorLogShare": "Teilen",
+  "errorLogClear": "Löschen"
 }

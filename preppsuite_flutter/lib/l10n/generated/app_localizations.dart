@@ -14376,6 +14376,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The restore did not work.'**
   String get snapshotRestoreFailed;
+
+  /// No description provided for @errorWidgetText.
+  ///
+  /// In en, this message translates to:
+  /// **'This part of the app could not be shown. What happened is in the error log under Settings → About.'**
+  String get errorWidgetText;
+
+  /// No description provided for @errorLogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error log'**
+  String get errorLogTitle;
+
+  /// No description provided for @errorLogEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No errors recorded.'**
+  String get errorLogEmpty;
+
+  /// No description provided for @errorLogCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One entry} other{{count} entries}}. The log stays on this device; it only leaves it if you share it yourself.'**
+  String errorLogCount(int count);
+
+  /// No description provided for @errorLogShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get errorLogShow;
+
+  /// No description provided for @errorLogShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get errorLogShare;
+
+  /// No description provided for @errorLogClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get errorLogClear;
 }
 
 class _AppLocalizationsDelegate

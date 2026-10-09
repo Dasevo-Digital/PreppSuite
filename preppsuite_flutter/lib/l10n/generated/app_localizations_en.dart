@@ -8653,4 +8653,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get snapshotRestoreFailed => 'The restore did not work.';
+
+  @override
+  String get errorWidgetText =>
+      'This part of the app could not be shown. What happened is in the error log under Settings → About.';
+
+  @override
+  String get errorLogTitle => 'Error log';
+
+  @override
+  String get errorLogEmpty => 'No errors recorded.';
+
+  @override
+  String errorLogCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries',
+      one: 'One entry',
+    );
+    return '$_temp0. The log stays on this device; it only leaves it if you share it yourself.';
+  }
+
+  @override
+  String get errorLogShow => 'Show';
+
+  @override
+  String get errorLogShare => 'Share';
+
+  @override
+  String get errorLogClear => 'Delete';
 }
