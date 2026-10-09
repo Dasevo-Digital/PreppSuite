@@ -14232,6 +14232,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Source: Land NRW (2026), Data licence Germany – attribution – version 2.0 (www.govdata.de/dl-de/by-2-0)'**
   String get riverFloodSourceNW;
+
+  /// No description provided for @callUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This device cannot make calls'**
+  String get callUnavailableTitle;
+
+  /// No description provided for @callUnavailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Please dial the number on a phone, mobile or landline:'**
+  String get callUnavailableBody;
+
+  /// No description provided for @callUnavailableCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy number'**
+  String get callUnavailableCopy;
 }
 
 class _AppLocalizationsDelegate

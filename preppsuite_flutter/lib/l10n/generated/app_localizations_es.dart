@@ -8639,4 +8639,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get riverFloodSourceNW =>
       'Fuente: Land NRW (2026), Licencia de datos de Alemania – atribución – versión 2.0 (www.govdata.de/dl-de/by-2-0)';
+
+  @override
+  String get callUnavailableTitle => 'Este dispositivo no puede llamar';
+
+  @override
+  String get callUnavailableBody =>
+      'Marca el número en un teléfono, móvil o fijo:';
+
+  @override
+  String get callUnavailableCopy => 'Copiar número';
 }

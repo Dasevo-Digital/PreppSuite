@@ -2352,5 +2352,8 @@
   "measureConvertDone": "«{name}» ya cuenta en la calculadora de provisiones.",
   "measureConvertNoneLeft": "Todos los alimentos tienen ya una medida.",
   "riverFloodSourceBY": "Fuente de datos: Agencia de Medio Ambiente de Baviera, www.lfu.bayern.de",
-  "riverFloodSourceNW": "Fuente: Land NRW (2026), Licencia de datos de Alemania – atribución – versión 2.0 (www.govdata.de/dl-de/by-2-0)"
+  "riverFloodSourceNW": "Fuente: Land NRW (2026), Licencia de datos de Alemania – atribución – versión 2.0 (www.govdata.de/dl-de/by-2-0)",
+  "callUnavailableTitle": "Este dispositivo no puede llamar",
+  "callUnavailableBody": "Marca el número en un teléfono, móvil o fijo:",
+  "callUnavailableCopy": "Copiar número"
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
@@ -24,6 +23,7 @@ import 'readiness_screen.dart';
 import 'check_in_screen.dart';
 import '../../first_aid/presentation/defibrillator_screen.dart';
 import '../../emergency_points/presentation/emergency_points_screen.dart';
+import '../../../core/phone_call.dart';
 
 /// The information that must remain quick to reach when time, power or a
 /// data connection is scarce. All values are derived from existing records.
@@ -362,7 +362,7 @@ class _CallButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FilledButton.icon(
-    onPressed: () => launchUrl(Uri(scheme: 'tel', path: number)),
+    onPressed: () => callNumber(context, number),
     icon: const Icon(Icons.call),
     label: Text(label),
   );

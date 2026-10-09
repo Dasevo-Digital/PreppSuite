@@ -3574,5 +3574,8 @@
   "measureConvertDone": "„{name}“ zählt jetzt im Vorrats-Rechner mit.",
   "measureConvertNoneLeft": "Alle Lebensmittel haben jetzt ein Maß.",
   "riverFloodSourceBY": "Datenquelle: Bayerisches Landesamt für Umwelt, www.lfu.bayern.de",
-  "riverFloodSourceNW": "Quelle: Land NRW (2026), Datenlizenz Deutschland – Namensnennung – Version 2.0 (www.govdata.de/dl-de/by-2-0)"
+  "riverFloodSourceNW": "Quelle: Land NRW (2026), Datenlizenz Deutschland – Namensnennung – Version 2.0 (www.govdata.de/dl-de/by-2-0)",
+  "callUnavailableTitle": "Dieses Gerät kann nicht anrufen",
+  "callUnavailableBody": "Bitte die Nummer auf einem Telefon wählen, Handy oder Festnetz:",
+  "callUnavailableCopy": "Nummer kopieren"
 }

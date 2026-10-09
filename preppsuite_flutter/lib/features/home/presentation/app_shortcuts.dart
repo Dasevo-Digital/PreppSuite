@@ -3,12 +3,12 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:quick_actions/quick_actions.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../first_aid/presentation/first_aid_screen.dart';
 import '../../household/presentation/emergency_cards_screen.dart';
 import 'check_in_screen.dart';
+import '../../../core/phone_call.dart';
 
 /// The actions a long press on the app icon offers (#123). Draws nothing.
 ///
@@ -91,7 +91,8 @@ class _AppShortcutsState extends State<AppShortcuts> {
     final navigator = Navigator.of(context);
     switch (type) {
       case AppShortcuts.call112:
-        (widget.launch ?? launchUrl)(Uri(scheme: 'tel', path: '112'));
+        // An iPad has the menu and no dialler (#135).
+        callNumber(context, '112', launch: widget.launch);
       case AppShortcuts.checkIn:
         navigator.push(
           MaterialPageRoute<void>(

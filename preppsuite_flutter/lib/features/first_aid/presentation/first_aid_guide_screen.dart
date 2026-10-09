@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/adaptive_columns.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -13,6 +12,7 @@ import 'first_aid_drawings.dart';
 import 'first_aid_screen.dart' show EmergencyCallBar;
 import 'first_aid_video_screen.dart';
 import 'first_aid_videos_screen.dart';
+import '../../../core/phone_call.dart';
 
 /// One instruction, top to bottom.
 ///
@@ -288,12 +288,7 @@ class _FactRow extends StatelessWidget {
 
     if (!dialable) return row;
     return InkWell(
-      onTap: () => launchUrl(
-        Uri(
-          scheme: 'tel',
-          path: fact.value.replaceAll(RegExp(r'[^0-9+]'), ''),
-        ),
-      ),
+      onTap: () => callNumber(context, fact.value),
       child: row,
     );
   }

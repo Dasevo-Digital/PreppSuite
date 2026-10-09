@@ -8563,4 +8563,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get riverFloodSourceNW =>
       'Source: Land NRW (2026), Data licence Germany – attribution – version 2.0 (www.govdata.de/dl-de/by-2-0)';
+
+  @override
+  String get callUnavailableTitle => 'This device cannot make calls';
+
+  @override
+  String get callUnavailableBody =>
+      'Please dial the number on a phone, mobile or landline:';
+
+  @override
+  String get callUnavailableCopy => 'Copy number';
 }

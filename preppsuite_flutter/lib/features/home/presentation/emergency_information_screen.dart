@@ -20,6 +20,7 @@ import '../../warnings/presentation/heavy_rain_screen.dart';
 import '../../warnings/presentation/pegel_screen.dart';
 import '../../warnings/presentation/radiation_screen.dart';
 import 'radio_emergency_screen.dart';
+import '../../../core/phone_call.dart';
 
 const _contactsKey = 'nearbyEmergencyContacts';
 
@@ -531,8 +532,7 @@ class _EmergencyInformationScreenState
     );
   }
 
-  Future<void> _call(String number) =>
-      launchUrl(Uri(scheme: 'tel', path: number.replaceAll(' ', '')));
+  Future<void> _call(String number) => callNumber(context, number);
 
   Future<void> _map(_NearbyContact contact) {
     final query = contact.coordinates.isNotEmpty

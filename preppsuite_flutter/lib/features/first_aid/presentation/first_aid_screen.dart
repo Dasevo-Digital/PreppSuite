@@ -7,6 +7,7 @@ import '../application/first_aid_guides.dart';
 import 'first_aid_guide_screen.dart';
 import 'first_aid_videos_screen.dart';
 import 'knowledge_check_screen.dart';
+import '../../../core/phone_call.dart';
 
 /// The list of instructions.
 ///
@@ -194,7 +195,7 @@ class EmergencyCallBar extends StatelessWidget {
     return Material(
       color: scheme.errorContainer,
       child: InkWell(
-        onTap: () => launchUrl(Uri(scheme: 'tel', path: '112')),
+        onTap: () => callNumber(context, '112'),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(

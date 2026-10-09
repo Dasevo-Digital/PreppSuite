@@ -1,11 +1,11 @@
 import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../preparedness/presentation/preparedness_hub_screen.dart';
 import '../application/drill_progress_store.dart';
+import '../../../core/phone_call.dart';
 
 /// A deliberately small, offline exercise and incident guide. It does not
 /// create a cloud account or transmit a "safe" status; contacts remain under
@@ -91,7 +91,7 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
                   Text(l10n.drillsImmediateDanger),
                   const SizedBox(height: 12),
                   FilledButton.icon(
-                    onPressed: () => launchUrl(Uri(scheme: 'tel', path: '112')),
+                    onPressed: () => callNumber(context, '112'),
                     icon: const Icon(Icons.call),
                     label: Text(l10n.drillsCallEmergency),
                   ),

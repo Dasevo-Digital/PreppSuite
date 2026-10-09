@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/feel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
@@ -13,6 +12,7 @@ import '../application/household_member_controller.dart';
 import 'emergency_card_form_screen.dart';
 import 'lock_screen_card_dialog.dart';
 import '../../../core/error_text.dart';
+import '../../../core/phone_call.dart';
 
 /// The household's people, and what an ambulance would want to know.
 class EmergencyCardsScreen extends ConsumerWidget {
@@ -353,11 +353,9 @@ class _CallableValue extends StatelessWidget {
           iconSize: 20,
           icon: const Icon(Icons.call_outlined),
           tooltip: phone,
-          // Silent where there is no dialler: a desktop without one is
-          // not a fault to report, and the number is right there to read.
-          onPressed: () => launchUrl(
-            Uri(scheme: 'tel', path: phone.replaceAll(' ', '')),
-          ).catchError((_) => false),
+          // Where there is no dialler the number comes up large, to be
+          // dialled on a phone (#135) -- the same as every call button.
+          onPressed: () => callNumber(context, phone),
         ),
       ],
     );

@@ -8609,4 +8609,14 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get riverFloodSourceNW =>
       'Quelle: Land NRW (2026), Datenlizenz Deutschland – Namensnennung – Version 2.0 (www.govdata.de/dl-de/by-2-0)';
+
+  @override
+  String get callUnavailableTitle => 'Dieses Gerät kann nicht anrufen';
+
+  @override
+  String get callUnavailableBody =>
+      'Bitte die Nummer auf einem Telefon wählen, Handy oder Festnetz:';
+
+  @override
+  String get callUnavailableCopy => 'Nummer kopieren';
 }
