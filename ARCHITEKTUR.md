@@ -1,7 +1,8 @@
 # PreppSuite
 
-Self-hosted-free household preparedness app (inventory, checklists, budget,
-official warnings, shelter map). **Everything runs on the device.** There is
+Self-hosted-free household preparedness app (inventory, checklists,
+official warnings, shelter map). The budget screen left the navigation in
+1.1.0; its table stays, synced and backed up, so nothing entered is lost. **Everything runs on the device.** There is
 no server, no account and no network dependency beyond the public feeds the
 app fetches itself. Several devices share a household through a folder they
 can all see — see [`docs/gemeinsamer-ordner.md`](docs/gemeinsamer-ordner.md).

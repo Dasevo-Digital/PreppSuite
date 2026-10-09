@@ -153,9 +153,11 @@ prüfen. Die akuten Schritte stehen jetzt in „Hochwasser: wenn es soweit
 ist" und „Sturm und Unwetter: wenn es soweit ist". Eigene Listen wählen
 selbst, wohin sie gehören.
 
-**Budget.** Was die Vorsorge gekostet hat, nach Kategorie. Dazu ein
-PDF-Bericht der fehlenden Ausrüstung – der Bestände also, die unter ihrem
-Mindestbestand liegen.
+**Fehlende Ausrüstung.** Aus den Checklisten heraus ein PDF-Bericht der
+Bestände, die unter ihrem Mindestbestand liegen. Ein Budget für die
+Ausgaben gibt es seit 1.1.0 nicht mehr: Im Ernstfall zählt, was da ist,
+nicht was es gekostet hat. Früher eingetragene Posten bleiben gespeichert
+und reisen mit Sicherung und gemeinsamem Ordner.
 
 **Mila und Nuss.** Ein Notfall-Comic für Kinder in sechs Kapiteln:
 Vorräte, Stromausfall, Sirene, Sturm und Hochwasser, Feuer und – bewusst
@@ -339,7 +341,7 @@ Sprache gefiltert und von dort geladen. Gesucht wird nach Titeln oder im
 Text der Artikel; gelesen wird mit Bildern und Formatierung. Einzelheiten
 in [`docs/wissen-offline.md`](docs/wissen-offline.md).
 
-**Teilen.** Mehrere Geräte teilen sich Bestände, Listen und Budget über
+**Teilen.** Mehrere Geräte teilen sich Bestände und Listen über
 einen Ordner, den sie alle sehen – Nextcloud, Syncthing, iCloud Drive,
 Dropbox. PreppSuite legt dort nur Dateien ab; wer sie transportiert,
 entscheidest du. Kein Konto, kein Einladungscode, kein Dienst dazwischen.
