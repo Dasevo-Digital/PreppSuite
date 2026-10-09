@@ -8681,4 +8681,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLogClear => 'Delete';
+
+  @override
+  String get riverFloodClassUnknown => 'flooded, depth not given';
+
+  @override
+  String get riverFloodNoMap => 'no map for this scenario';
+
+  @override
+  String get riverFloodSourceNational =>
+      'Source: the Länder\'s flood hazard maps, brought together nationwide by the Federal Institute of Hydrology (geoportal.bafg.de)';
 }

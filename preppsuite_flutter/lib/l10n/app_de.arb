@@ -3605,5 +3605,8 @@
   "errorLogCount": "{count, plural, =1{Ein Eintrag} other{{count} Einträge}}. Das Protokoll bleibt auf diesem Gerät; es verlässt es nur, wenn du es selbst teilst.",
   "errorLogShow": "Anzeigen",
   "errorLogShare": "Teilen",
-  "errorLogClear": "Löschen"
+  "errorLogClear": "Löschen",
+  "riverFloodClassUnknown": "überflutet, Tiefe nicht angegeben",
+  "riverFloodNoMap": "keine Karte für dieses Szenario",
+  "riverFloodSourceNational": "Quelle: Hochwassergefahrenkarten der Länder, bundesweit zusammengeführt von der Bundesanstalt für Gewässerkunde (geoportal.bafg.de)"
 }

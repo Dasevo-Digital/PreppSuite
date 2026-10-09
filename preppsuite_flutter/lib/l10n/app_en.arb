@@ -5042,5 +5042,8 @@
   },
   "errorLogShow": "Show",
   "errorLogShare": "Share",
-  "errorLogClear": "Delete"
+  "errorLogClear": "Delete",
+  "riverFloodClassUnknown": "flooded, depth not given",
+  "riverFloodNoMap": "no map for this scenario",
+  "riverFloodSourceNational": "Source: the Länder's flood hazard maps, brought together nationwide by the Federal Institute of Hydrology (geoportal.bafg.de)"
 }

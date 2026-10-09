@@ -8728,4 +8728,14 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get errorLogClear => 'Löschen';
+
+  @override
+  String get riverFloodClassUnknown => 'überflutet, Tiefe nicht angegeben';
+
+  @override
+  String get riverFloodNoMap => 'keine Karte für dieses Szenario';
+
+  @override
+  String get riverFloodSourceNational =>
+      'Quelle: Hochwassergefahrenkarten der Länder, bundesweit zusammengeführt von der Bundesanstalt für Gewässerkunde (geoportal.bafg.de)';
 }

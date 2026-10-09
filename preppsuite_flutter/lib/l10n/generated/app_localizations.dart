@@ -14418,6 +14418,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete'**
   String get errorLogClear;
+
+  /// No description provided for @riverFloodClassUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'flooded, depth not given'**
+  String get riverFloodClassUnknown;
+
+  /// No description provided for @riverFloodNoMap.
+  ///
+  /// In en, this message translates to:
+  /// **'no map for this scenario'**
+  String get riverFloodNoMap;
+
+  /// No description provided for @riverFloodSourceNational.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: the Länder\'s flood hazard maps, brought together nationwide by the Federal Institute of Hydrology (geoportal.bafg.de)'**
+  String get riverFloodSourceNational;
 }
 
 class _AppLocalizationsDelegate

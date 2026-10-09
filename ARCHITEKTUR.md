@@ -1163,7 +1163,7 @@ tree; the test suite deliberately targets that layer rather than the UI.
   the warning region. The map leaves out sewers and infiltration; the
   screen says so. The answer is kept in `PrivatePreferences`: it is the
   household's address.
-- **River floods come from each Land: Niedersachsen, Bayern, NRW** (#124). The
+- **River floods for all sixteen Länder** (#124, #148). The
   EU Floods Directive maps three floods per Land with the same five LAWA
   depth classes, but every Land runs its own service. Niedersachsen is
   the NLWKN's ArcGIS service on `umweltkarten-niedersachsen.de`
@@ -1195,12 +1195,42 @@ tree; the test suite deliberately targets that layer rather than the UI.
   is the source line. WMS 1.3.0 in EPSG:4326 takes latitude first in the
   bounding box; the tests pin that.
 
-  **Baden-Württemberg** (#131) has no public service with the depths:
-  none of the LUBW's 129 public map services carries them (searched
-  2026-10-08), its metadata places the HWGK services on the state
-  intranet, and what is public is a query page for people. Reading that
-  page would be scraping a form, so BW, like every other Land not named
-  here, shows a sentence saying it is not in yet.
+  **Every other Land comes from the BfG's national map** (#148), which
+  also closes **Baden-Württemberg** (#131): the LUBW's own depths are on
+  the state intranet, but the Länder report their maps to the BfG, and
+  `geoportal.bafg.de/arcgis3/rest/services/nHWGK_HWRK_2027` serves them
+  as one ArcGIS map service per scenario for rivers -- `RWHi`, `RWMe`,
+  `RWLo` -- with a polygon layer per Land. Read on 2026-10-09:
+
+  - The legend is the same everywhere: 11–15 the LAWA classes, 31–35 the
+    same "nachrichtlich" (taken over from another authority, counted),
+    16/17 Saxony's own 0.5–2 m and >2 m (put at the deeper class), 18
+    flooded without a depth (`floodDepthUnknown`, shown as such), 21–25
+    behind defences (left out). The value field is not: `T_class`,
+    `gridcode`, `SIGD_CD`, `WT_KL`, `rastervalue`, `LEGENDE` -- each
+    layer's renderer names it, so it is read from there.
+  - Layers are named after the Land (`DEHE`), except one per service
+    called "Wassertiefen" that holds a different Land each time (Saxony
+    in `RWHi` and `RWMe`, Baden-Württemberg in `RWLo`). The household's
+    own layer is the named one, or else an unnamed one whose extent holds
+    the point.
+  - Only the own layer says whether a scenario is mapped. The extents are
+    overlapping rectangles: Rhineland-Palatinate's covers Saarbrücken, and
+    asking it called the Saarland's unmapped frequent flood "dry". Other
+    Länder's layers are still asked, for border rivers, but can only add
+    water. A scenario with no own layer is missing from the result, and
+    the screen says "no map", never "dry". The Saarland has no frequent
+    flood in the service.
+  - One envelope query of ±25 m per layer and scenario instead of 17
+    sample points; the layer list is read once per client.
+
+  **A Land's own service that does not answer falls back to the national
+  map.** The NLWKN's service was unreachable for an afternoon on
+  2026-10-09; the fallback answered the Leine in Hannover with the same
+  classes the NLWKN gives there (4/4/4). The result carries `national`,
+  and the source line names the BfG and the Länder. The BfG states no
+  licence on the service; the source line credits both.
+
 - **Overpass wants a name.** Since autumn 2026 `overpass-api.de` answers
   a request with Dart's default user agent (`Dart/3.x (dart:io)`) with
   406; the same query as `PreppSuite/1.0` answers 200 (measured

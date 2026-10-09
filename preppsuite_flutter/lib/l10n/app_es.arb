@@ -2383,5 +2383,8 @@
   "errorLogCount": "{count, plural, =1{Una entrada} other{{count} entradas}}. El registro se queda en este dispositivo; solo sale de él si lo compartes tú.",
   "errorLogShow": "Mostrar",
   "errorLogShare": "Compartir",
-  "errorLogClear": "Borrar"
+  "errorLogClear": "Borrar",
+  "riverFloodClassUnknown": "inundado, profundidad no indicada",
+  "riverFloodNoMap": "no hay mapa para este escenario",
+  "riverFloodSourceNational": "Fuente: mapas de peligro de inundación de los estados federados, reunidos a nivel nacional por el Instituto Federal de Hidrología (geoportal.bafg.de)"
 }

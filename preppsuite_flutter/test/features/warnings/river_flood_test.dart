@@ -6,7 +6,8 @@ import 'package:http/testing.dart';
 import 'package:preppsuite_flutter/features/warnings/application/river_flood.dart';
 
 /// River floods from the Land's own map: Niedersachsen (#124), Bayern
-/// (#130) and Nordrhein-Westfalen (#129).
+/// (#130) and Nordrhein-Westfalen (#129); every other Land from the
+/// national map of the BfG (#148, #131).
 void main() {
   String answer(Map<int, String> values) => jsonEncode({
     'results': [
@@ -56,12 +57,11 @@ void main() {
     });
   });
 
-  test('a Land without a source is not covered and not asked', () async {
+  test('a place outside Germany is not covered and not asked', () async {
     final client = RiverFloodClient(
       httpClient: MockClient((_) async => fail('must not be asked')),
     );
-    // Baden-Württemberg has no public service with the depths (#131).
-    final result = await client.check(48.78, 9.18, stateCode: 'BW');
+    final result = await client.check(47.37, 8.54, stateCode: null);
     expect(result.covered, isFalse);
     expect(result.anyWater, isFalse);
   });
@@ -252,5 +252,291 @@ void main() {
       expect(result.stateCode, 'NW');
       expect(result.classes[RiverFloodScenario.hundred], 3);
     });
+  });
+
+  group('the national map', () {
+    // Two layers as the service lists them: one named after its Land,
+    // one called "Wassertiefen" that holds another (Saxony, here).
+    final (hx, hy) = webMercator(50.1065, 8.6820); // Frankfurt am Main
+    final (sx, sy) = webMercator(51.0560, 13.7390); // Dresden
+    String layers({bool withHesse = true}) => jsonEncode({
+      'layers': [
+        if (withHesse)
+          {
+            'id': 37,
+            'name': 'DEHE',
+            'extent': {
+              'xmin': hx - 1000,
+              'ymin': hy - 1000,
+              'xmax': hx + 1000,
+              'ymax': hy + 1000,
+            },
+            'drawingInfo': {
+              'renderer': {'field1': 'gridcode'},
+            },
+          },
+        {
+          'id': 0,
+          'name': 'Wassertiefen',
+          'extent': {
+            'xmin': sx - 1000,
+            'ymin': sy - 1000,
+            'xmax': sx + 1000,
+            'ymax': sy + 1000,
+          },
+          'drawingInfo': {
+            'renderer': {'field1': 'LEGENDE'},
+          },
+        },
+      ],
+    });
+    String codes(String field, List<Object> values) => jsonEncode({
+      'features': [
+        for (final value in values)
+          {
+            'attributes': {field: value, 'OBJECTID': 1},
+          },
+      ],
+    });
+
+    test('the legend becomes the app\'s classes', () {
+      expect(nationalFloodClass(11), 1);
+      expect(nationalFloodClass(15), 5);
+      // Taken over from another authority, water all the same.
+      expect(nationalFloodClass(33), 3);
+      // Saxony's own: 0.5 to 2 m and over 2 m, at the deeper class.
+      expect(nationalFloodClass(16), 3);
+      expect(nationalFloodClass(17), 4);
+      expect(nationalFloodClass(18), floodDepthUnknown);
+      // Behind flood defences, and anything unknown: left out.
+      expect(nationalFloodClass(23), isNull);
+      expect(nationalFloodClass(99), isNull);
+      // A known depth outranks "depth not given", which outranks dry.
+      expect(floodClassRank(1), greaterThan(floodClassRank(floodDepthUnknown)));
+      expect(floodClassRank(floodDepthUnknown), greaterThan(floodClassRank(0)));
+    });
+
+    test('codes are read whatever the Land called the field', () {
+      expect(parseNationalCodes(codes('T_Class', [14]), 'T_class'), [14]);
+      expect(parseNationalCodes(codes('SIGD_CD', ['11', '13']), 'SIGD_CD'), [
+        11,
+        13,
+      ]);
+      expect(parseNationalCodes('kein json', 'gridcode'), isEmpty);
+    });
+
+    test('layers are read with field and extent', () {
+      final parsed = parseNationalLayers(layers());
+      expect(parsed.map((l) => l.name), ['DEHE', 'Wassertiefen']);
+      expect(parsed.first.field, 'gridcode');
+      expect(parsed.first.contains(hx, hy), isTrue);
+      expect(parsed.last.contains(hx, hy), isFalse);
+    });
+
+    test('Web Mercator as the service measures it', () {
+      final (x, y) = webMercator(0, 0);
+      expect(x, closeTo(0, 1e-6));
+      expect(y, closeTo(0, 1e-6));
+      // Cologne: inside the NRW layer's extent the service reports
+      // (x 638574 to 1055039).
+      final (cx, cy) = webMercator(50.94796, 6.96516);
+      expect(cx, closeTo(775358.06, 0.01));
+      expect(cy, closeTo(6612093.61, 0.01));
+    });
+
+    test('Hesse is asked in its own layer, by where it lies', () async {
+      final asked = <String>[];
+      final client = RiverFloodClient(
+        httpClient: MockClient((request) async {
+          final path = request.url.path;
+          asked.add(path);
+          if (path.endsWith('/layers')) return http.Response(layers(), 200);
+          expect(
+            request.url.queryParameters['geometryType'],
+            'esriGeometryEnvelope',
+          );
+          return http.Response(codes('gridcode', [12, 23]), 200);
+        }),
+      );
+      final result = await client.check(50.1065, 8.6820, stateCode: 'HE');
+      expect(result.covered, isTrue);
+      expect(result.stateCode, 'HE');
+      expect(RiverFloodClient.isNational('HE'), isTrue);
+      expect(RiverFloodClient.isNational('NI'), isFalse);
+      // 12 is 0.5 to 1 m; 23 is behind a dike and does not count.
+      expect(result.classes.values.toSet(), {2});
+      expect(asked.where((p) => p.endsWith('/37/query')), hasLength(3));
+      expect(asked.where((p) => p.endsWith('/0/query')), isEmpty);
+    });
+
+    test('a scenario without a layer here is left out, not dry', () async {
+      final client = RiverFloodClient(
+        httpClient: MockClient((request) async {
+          final path = request.url.path;
+          if (path.endsWith('/layers')) {
+            // The frequent flood has no Hesse layer, like the Saarland.
+            return http.Response(
+              layers(withHesse: !path.contains('/RWHi/')),
+              200,
+            );
+          }
+          return http.Response(codes('gridcode', <Object>[]), 200);
+        }),
+      );
+      final result = await client.check(50.1065, 8.6820, stateCode: 'HE');
+      expect(result.classes.containsKey(RiverFloodScenario.frequent), isFalse);
+      expect(result.classes[RiverFloodScenario.hundred], 0);
+      expect(result.anyWater, isFalse);
+    });
+
+    test('layers here that all stay silent are an error', () async {
+      final client = RiverFloodClient(
+        httpClient: MockClient((request) async {
+          if (request.url.path.endsWith('/layers')) {
+            return http.Response(layers(), 200);
+          }
+          return http.Response('', 503);
+        }),
+      );
+      expect(
+        client.check(50.1065, 8.6820, stateCode: 'HE'),
+        throwsA(isA<http.ClientException>()),
+      );
+    });
+
+    test(
+      'a neighbour\'s rectangle over the point does not make it dry',
+      () async {
+        // Saarbrücken lies inside Rhineland-Palatinate's extent, and the
+        // frequent flood has no Saarland layer: that is "no map", not dry.
+        final (px, py) = webMercator(49.2330, 6.9930);
+        String saar({required bool withSaarland}) => jsonEncode({
+          'layers': [
+            {
+              'id': 50,
+              'name': 'DERP',
+              'extent': {
+                'xmin': px - 50000,
+                'ymin': py - 50000,
+                'xmax': px + 50000,
+                'ymax': py + 50000,
+              },
+              'drawingInfo': {
+                'renderer': {'field1': 'gridcode'},
+              },
+            },
+            if (withSaarland)
+              {
+                'id': 18,
+                'name': 'DESL',
+                'extent': {
+                  'xmin': px - 1000,
+                  'ymin': py - 1000,
+                  'xmax': px + 1000,
+                  'ymax': py + 1000,
+                },
+                'drawingInfo': {
+                  'renderer': {'field1': 'T_klasse'},
+                },
+              },
+          ],
+        });
+        final client = RiverFloodClient(
+          httpClient: MockClient((request) async {
+            final path = request.url.path;
+            if (path.endsWith('/layers')) {
+              return http.Response(
+                saar(withSaarland: !path.contains('/RWHi/')),
+                200,
+              );
+            }
+            if (path.endsWith('/18/query')) {
+              return http.Response(codes('T_klasse', [15]), 200);
+            }
+            return http.Response(codes('gridcode', <Object>[]), 200);
+          }),
+        );
+        final result = await client.check(49.2330, 6.9930, stateCode: 'SL');
+        expect(
+          result.classes.containsKey(RiverFloodScenario.frequent),
+          isFalse,
+        );
+        expect(result.classes[RiverFloodScenario.hundred], 5);
+      },
+    );
+
+    test('a river on the border still shows the neighbour\'s water', () {
+      final (px, py) = webMercator(50.0, 8.0);
+      final layers = parseNationalLayers(
+        jsonEncode({
+          'layers': [
+            for (final (id, name) in [(1, 'DEHE'), (2, 'Wassertiefen')])
+              {
+                'id': id,
+                'name': name,
+                'extent': {
+                  'xmin': px - 10,
+                  'ymin': py - 10,
+                  'xmax': px + 10,
+                  'ymax': py + 10,
+                },
+                'drawingInfo': {
+                  'renderer': {'field1': 'gridcode'},
+                },
+              },
+          ],
+        }),
+      );
+      // Hesse has its own layer, so the unnamed one is not Hesse's.
+      expect(ownNationalLayers(layers, 'HE', px, py).map((l) => l.id), [1]);
+      // A Land without a named layer takes the unnamed one at the point.
+      expect(ownNationalLayers(layers, 'SN', px, py).map((l) => l.id), [2]);
+      expect(ownNationalLayers(layers, 'SN', px + 100, py), isEmpty);
+    });
+
+    test(
+      'a Land service that is down falls back to the national map',
+      () async {
+        // The NLWKN's service did not answer for an afternoon on 2026-10-09.
+        final (nx, ny) = webMercator(52.378, 9.700);
+        final client = RiverFloodClient(
+          httpClient: MockClient((request) async {
+            if (request.url.host == 'www.umweltkarten-niedersachsen.de') {
+              return http.Response('', 503);
+            }
+            if (request.url.path.endsWith('/layers')) {
+              return http.Response(
+                jsonEncode({
+                  'layers': [
+                    {
+                      'id': 43,
+                      'name': 'DENI',
+                      'extent': {
+                        'xmin': nx - 1000,
+                        'ymin': ny - 1000,
+                        'xmax': nx + 1000,
+                        'ymax': ny + 1000,
+                      },
+                      'drawingInfo': {
+                        'renderer': {'field1': 'gridcode'},
+                      },
+                    },
+                  ],
+                }),
+                200,
+              );
+            }
+            return http.Response(codes('gridcode', [14]), 200);
+          }),
+        );
+        final result = await client.check(52.378, 9.700, stateCode: 'NI');
+        expect(result.national, isTrue);
+        expect(result.classes[RiverFloodScenario.hundred], 4);
+        final kept = RiverFloodResult.fromJson(
+          jsonDecode(jsonEncode(result.toJson())),
+        )!;
+        expect(kept.national, isTrue);
+      },
+    );
   });
 }

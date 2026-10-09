@@ -8756,4 +8756,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errorLogClear => 'Borrar';
+
+  @override
+  String get riverFloodClassUnknown => 'inundado, profundidad no indicada';
+
+  @override
+  String get riverFloodNoMap => 'no hay mapa para este escenario';
+
+  @override
+  String get riverFloodSourceNational =>
+      'Fuente: mapas de peligro de inundación de los estados federados, reunidos a nivel nacional por el Instituto Federal de Hidrología (geoportal.bafg.de)';
 }

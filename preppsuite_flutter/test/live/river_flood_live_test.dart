@@ -1,3 +1,6 @@
+@Timeout(Duration(minutes: 3))
+library;
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -44,4 +47,47 @@ void main() {
     // 4.9 m when this was written.
     expect(result.classes[RiverFloodScenario.hundred], greaterThanOrEqualTo(4));
   }, skip: reason);
+
+  group('the national map (#148)', () {
+    Future<RiverFloodResult> at(double lat, double lon, String state) async {
+      final result = await RiverFloodClient().check(lat, lon, stateCode: state);
+      stdout.writeln('$state $lat,$lon: ${result.toJson()}');
+      return result;
+    }
+
+    test(
+      'the Elbe in Dresden (Saxony, a layer called "Wassertiefen")',
+      () async {
+        final result = await at(51.0560, 13.7390, 'SN');
+        // Over 4 m in the river at HQ100 when this was written.
+        expect(
+          result.classes[RiverFloodScenario.hundred],
+          greaterThanOrEqualTo(4),
+        );
+      },
+      skip: reason,
+    );
+
+    test('the Neckar in Heidelberg (Baden-Württemberg, #131)', () async {
+      final result = await at(49.4125, 8.6990, 'BW');
+      expect(
+        result.classes[RiverFloodScenario.hundred],
+        greaterThanOrEqualTo(3),
+      );
+      // The extreme flood sits in the layer called "Wassertiefen" there.
+      expect(result.classes[RiverFloodScenario.extreme], isNotNull);
+    }, skip: reason);
+
+    test('the Main in Frankfurt (Hesse)', () async {
+      final result = await at(50.1065, 8.6820, 'HE');
+      expect(result.covered, isTrue);
+      expect(result.classes.keys, hasLength(3));
+    }, skip: reason);
+
+    test('the Saarland has no map for the frequent flood', () async {
+      final result = await at(49.2330, 6.9930, 'SL');
+      expect(result.classes.containsKey(RiverFloodScenario.frequent), isFalse);
+      expect(result.classes.containsKey(RiverFloodScenario.hundred), isTrue);
+    }, skip: reason);
+  });
 }

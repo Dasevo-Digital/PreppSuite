@@ -98,6 +98,44 @@ void main() {
     expect(find.textContaining('NLWKN'), findsOneWidget);
   });
 
+  testWidgets('the national map: a missing flood is "no map", not dry', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      HeavyRainHazard(
+        latitude: 49.233,
+        longitude: 6.993,
+        placeName: 'Saarbrücken',
+        stateName: 'Saarland',
+        checkedAt: DateTime(2026, 10, 9),
+        covered: true,
+        river: const RiverFloodResult(
+          covered: true,
+          stateCode: 'SL',
+          national: true,
+          classes: {
+            RiverFloodScenario.hundred: floodDepthUnknown,
+            RiverFloodScenario.extreme: 5,
+          },
+        ),
+      ),
+    );
+    expect(
+      find.textContaining('HQhäufig): keine Karte für dieses Szenario'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('nicht überflutet'), findsNothing);
+    expect(
+      find.textContaining('(HQ100): überflutet, Tiefe nicht angegeben'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Bundesanstalt für Gewässerkunde'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('a state without data is not called dry', (tester) async {
     await show(
       tester,

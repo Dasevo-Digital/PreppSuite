@@ -511,6 +511,7 @@ class _RiverCard extends StatelessWidget {
                         margin: const EdgeInsets.only(top: 2),
                         decoration: BoxDecoration(
                           color: riverClassColour(river.classes[scenario] ?? 0),
+                          // A scenario without a map shows no colour.
                           border: Border.all(color: theme.colorScheme.outline),
                         ),
                       ),
@@ -521,7 +522,11 @@ class _RiverCard extends StatelessWidget {
                             RiverFloodScenario.frequent => l10n.riverFloodFrequent,
                             RiverFloodScenario.hundred => l10n.riverFloodHundred,
                             RiverFloodScenario.extreme => l10n.riverFloodExtreme,
-                          }}: ${riverClassLabel(l10n, river.classes[scenario] ?? 0)}',
+                          }}: ${switch (river.classes[scenario]) {
+                            // Not dry: nobody has mapped it here (#148).
+                            null => l10n.riverFloodNoMap,
+                            final depth => riverClassLabel(l10n, depth),
+                          }}',
                         ),
                       ),
                     ],
@@ -531,6 +536,9 @@ class _RiverCard extends StatelessWidget {
               Text(l10n.riverFloodLimits, style: theme.textTheme.bodySmall),
               const SizedBox(height: 4),
               Text(switch (river.stateCode) {
+                // Checked first: a Land's own service that did not answer
+                // was replaced by the national map.
+                _ when river.national => l10n.riverFloodSourceNational,
                 'BY' => l10n.riverFloodSourceBY,
                 'NW' => l10n.riverFloodSourceNW,
                 _ => l10n.riverFloodSource,
@@ -550,6 +558,7 @@ String riverClassLabel(AppLocalizations l10n, int depthClass) =>
       3 => l10n.riverFloodClass3,
       4 => l10n.riverFloodClass4,
       5 => l10n.riverFloodClass5,
+      floodDepthUnknown => l10n.riverFloodClassUnknown,
       _ => l10n.riverFloodDry,
     };
 
@@ -560,5 +569,7 @@ Color riverClassColour(int depthClass) => switch (depthClass) {
   3 => const Color(0xFF6798FF),
   4 => const Color(0xFF3D67FF),
   5 => const Color(0xFF0033CC),
+  // Water, depth not given: the lightest blue, hatched would be better.
+  floodDepthUnknown => const Color(0xFFB3D9F2),
   _ => Colors.transparent,
 };
