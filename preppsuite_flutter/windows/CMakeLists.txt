@@ -57,6 +57,15 @@ add_subdirectory("runner")
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+# local_auth_windows (2.0.2, the newest) is built with /await, the
+# experimental coroutines. Visual Studio 2026 (MSVC 14.51) rejects them
+# with a hard error unless told otherwise, and the Windows build stopped
+# there. The plugin works the same; this keeps it compiling until it
+# moves to C++20 coroutines.
+if(TARGET local_auth_windows_plugin)
+  target_compile_definitions(local_auth_windows_plugin PRIVATE
+    _SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+endif()
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can
