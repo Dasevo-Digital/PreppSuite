@@ -9,6 +9,7 @@ import '../../sharing/application/sharing_providers.dart';
 import '../application/household_providers.dart';
 import 'setup_choice_screen.dart';
 import '../../../core/error_text.dart';
+import '../../../core/emergency_access.dart';
 
 /// Shows first-run setup until a profile exists, then the app.
 ///
@@ -80,11 +81,41 @@ class _HouseholdGateState extends ConsumerState<HouseholdGate> {
     final profile = ref.watch(householdProfileProvider);
 
     return profile.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () => const LoadingWithEmergencyAccess(),
+      // A database that does not open used to leave only this sentence,
+      // and with it no way to 112 or to first aid -- neither of which
+      // needs the database (#136).
       error: (error, stackTrace) => Scaffold(
-        body: Center(child: Text(describeError(l10n, error))),
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Icon(Icons.error_outline, size: 48),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.householdLoadFailedTitle,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(describeError(l10n, error), textAlign: TextAlign.center),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () => ref.invalidate(householdProfileProvider),
+                    child: Text(l10n.householdLoadRetry),
+                  ),
+                  const SizedBox(height: 24),
+                  const EmergencyAccessButton(),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
       data: (profile) {
         if (profile == null) return const SetupChoiceScreen();

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import 'local_database_encryption.dart';
+import 'emergency_access.dart';
 
 /// Stands in front of the app when the local databases cannot be opened.
 ///
@@ -108,6 +109,10 @@ class _LocalDataGateState extends State<LocalDataGate> {
                     child: Text(l10n.localDataRecoveryStartOver),
                   ),
                 ],
+                // Whatever the key is doing, 112 is not waiting for it
+                // (#136).
+                const SizedBox(height: 24),
+                const EmergencyAccessButton(),
               ],
             ),
           ),

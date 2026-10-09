@@ -8619,4 +8619,28 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get callUnavailableCopy => 'Nummer kopieren';
+
+  @override
+  String get emergencyAccessTitle => 'Notfall';
+
+  @override
+  String get emergencyAccessButton => 'Notfall: 112 und Erste Hilfe';
+
+  @override
+  String get emergencyAccessCall112 =>
+      '112 anrufen – Feuerwehr und Rettungsdienst';
+
+  @override
+  String get emergencyAccessCall110 => '110 anrufen – Polizei';
+
+  @override
+  String get emergencyAccessNote =>
+      'Diese Hilfe ist Teil der App und braucht keine gespeicherten Daten. Sie funktioniert auch, wenn die App gesperrt ist oder der Haushalt gerade nicht geladen werden kann.';
+
+  @override
+  String get householdLoadFailedTitle =>
+      'Der Haushalt lässt sich gerade nicht laden';
+
+  @override
+  String get householdLoadRetry => 'Erneut versuchen';
 }

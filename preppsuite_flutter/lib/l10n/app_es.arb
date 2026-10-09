@@ -2355,5 +2355,12 @@
   "riverFloodSourceNW": "Fuente: Land NRW (2026), Licencia de datos de Alemania – atribución – versión 2.0 (www.govdata.de/dl-de/by-2-0)",
   "callUnavailableTitle": "Este dispositivo no puede llamar",
   "callUnavailableBody": "Marca el número en un teléfono, móvil o fijo:",
-  "callUnavailableCopy": "Copiar número"
+  "callUnavailableCopy": "Copiar número",
+  "emergencyAccessTitle": "Emergencia",
+  "emergencyAccessButton": "Emergencia: 112 y primeros auxilios",
+  "emergencyAccessCall112": "Llamar al 112 – bomberos y ambulancia",
+  "emergencyAccessCall110": "Llamar al 110 – policía",
+  "emergencyAccessNote": "Esta ayuda forma parte de la app y no necesita datos guardados. Funciona aunque la app esté bloqueada o el hogar no se pueda cargar ahora.",
+  "householdLoadFailedTitle": "El hogar no se puede cargar ahora",
+  "householdLoadRetry": "Reintentar"
 }

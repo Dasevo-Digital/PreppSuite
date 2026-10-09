@@ -8573,4 +8573,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get callUnavailableCopy => 'Copy number';
+
+  @override
+  String get emergencyAccessTitle => 'Emergency';
+
+  @override
+  String get emergencyAccessButton => 'Emergency: 112 and first aid';
+
+  @override
+  String get emergencyAccessCall112 => 'Call 112 – fire and ambulance';
+
+  @override
+  String get emergencyAccessCall110 => 'Call 110 – police';
+
+  @override
+  String get emergencyAccessNote =>
+      'This help is part of the app and needs no stored data. It works even when the app is locked or the household cannot be loaded right now.';
+
+  @override
+  String get householdLoadFailedTitle =>
+      'The household cannot be loaded right now';
+
+  @override
+  String get householdLoadRetry => 'Try again';
 }

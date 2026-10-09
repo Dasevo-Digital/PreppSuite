@@ -14250,6 +14250,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copy number'**
   String get callUnavailableCopy;
+
+  /// No description provided for @emergencyAccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get emergencyAccessTitle;
+
+  /// No description provided for @emergencyAccessButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency: 112 and first aid'**
+  String get emergencyAccessButton;
+
+  /// No description provided for @emergencyAccessCall112.
+  ///
+  /// In en, this message translates to:
+  /// **'Call 112 – fire and ambulance'**
+  String get emergencyAccessCall112;
+
+  /// No description provided for @emergencyAccessCall110.
+  ///
+  /// In en, this message translates to:
+  /// **'Call 110 – police'**
+  String get emergencyAccessCall110;
+
+  /// No description provided for @emergencyAccessNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This help is part of the app and needs no stored data. It works even when the app is locked or the household cannot be loaded right now.'**
+  String get emergencyAccessNote;
+
+  /// No description provided for @householdLoadFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The household cannot be loaded right now'**
+  String get householdLoadFailedTitle;
+
+  /// No description provided for @householdLoadRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get householdLoadRetry;
 }
 
 class _AppLocalizationsDelegate

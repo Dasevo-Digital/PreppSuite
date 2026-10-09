@@ -8649,4 +8649,26 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get callUnavailableCopy => 'Copiar número';
+
+  @override
+  String get emergencyAccessTitle => 'Emergencia';
+
+  @override
+  String get emergencyAccessButton => 'Emergencia: 112 y primeros auxilios';
+
+  @override
+  String get emergencyAccessCall112 => 'Llamar al 112 – bomberos y ambulancia';
+
+  @override
+  String get emergencyAccessCall110 => 'Llamar al 110 – policía';
+
+  @override
+  String get emergencyAccessNote =>
+      'Esta ayuda forma parte de la app y no necesita datos guardados. Funciona aunque la app esté bloqueada o el hogar no se pueda cargar ahora.';
+
+  @override
+  String get householdLoadFailedTitle => 'El hogar no se puede cargar ahora';
+
+  @override
+  String get householdLoadRetry => 'Reintentar';
 }

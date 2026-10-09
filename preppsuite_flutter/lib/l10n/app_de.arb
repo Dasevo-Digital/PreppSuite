@@ -3577,5 +3577,12 @@
   "riverFloodSourceNW": "Quelle: Land NRW (2026), Datenlizenz Deutschland – Namensnennung – Version 2.0 (www.govdata.de/dl-de/by-2-0)",
   "callUnavailableTitle": "Dieses Gerät kann nicht anrufen",
   "callUnavailableBody": "Bitte die Nummer auf einem Telefon wählen, Handy oder Festnetz:",
-  "callUnavailableCopy": "Nummer kopieren"
+  "callUnavailableCopy": "Nummer kopieren",
+  "emergencyAccessTitle": "Notfall",
+  "emergencyAccessButton": "Notfall: 112 und Erste Hilfe",
+  "emergencyAccessCall112": "112 anrufen – Feuerwehr und Rettungsdienst",
+  "emergencyAccessCall110": "110 anrufen – Polizei",
+  "emergencyAccessNote": "Diese Hilfe ist Teil der App und braucht keine gespeicherten Daten. Sie funktioniert auch, wenn die App gesperrt ist oder der Haushalt gerade nicht geladen werden kann.",
+  "householdLoadFailedTitle": "Der Haushalt lässt sich gerade nicht laden",
+  "householdLoadRetry": "Erneut versuchen"
 }

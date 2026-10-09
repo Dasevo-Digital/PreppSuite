@@ -4965,5 +4965,12 @@
   "riverFloodSourceNW": "Source: Land NRW (2026), Data licence Germany – attribution – version 2.0 (www.govdata.de/dl-de/by-2-0)",
   "callUnavailableTitle": "This device cannot make calls",
   "callUnavailableBody": "Please dial the number on a phone, mobile or landline:",
-  "callUnavailableCopy": "Copy number"
+  "callUnavailableCopy": "Copy number",
+  "emergencyAccessTitle": "Emergency",
+  "emergencyAccessButton": "Emergency: 112 and first aid",
+  "emergencyAccessCall112": "Call 112 – fire and ambulance",
+  "emergencyAccessCall110": "Call 110 – police",
+  "emergencyAccessNote": "This help is part of the app and needs no stored data. It works even when the app is locked or the household cannot be loaded right now.",
+  "householdLoadFailedTitle": "The household cannot be loaded right now",
+  "householdLoadRetry": "Try again"
 }

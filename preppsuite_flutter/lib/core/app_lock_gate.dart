@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'app_lock.dart';
 import 'app_lock_provider.dart';
+import 'emergency_access.dart';
 
 /// Locks the whole UI after the app leaves the foreground.
 class AppLockGate extends ConsumerStatefulWidget {
@@ -63,8 +64,7 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   Widget build(BuildContext context) {
     final enabled = ref.watch(appLockProvider);
     return enabled.when(
-      loading: () =>
-          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () => const LoadingWithEmergencyAccess(),
       // A lock whose state cannot be read must never reveal the protected
       // surface. Secure storage can temporarily be unavailable after an OS
       // update or a restored device; offer recovery, but fail closed.
@@ -118,6 +118,10 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
                             )
                           : Text(l10n.appLockUnlockButton),
                     ),
+                    // As on a locked phone: the emergency help needs no
+                    // passphrase and shows nothing private (#137).
+                    const SizedBox(height: 24),
+                    const EmergencyAccessButton(),
                   ],
                 ),
               ),
@@ -164,6 +168,8 @@ class _LockStatusUnavailable extends StatelessWidget {
                   onPressed: onRetry,
                   child: Text(l10n.appLockRetry),
                 ),
+                const SizedBox(height: 24),
+                const EmergencyAccessButton(),
               ],
             ),
           ),
