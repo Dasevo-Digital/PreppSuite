@@ -1,4 +1,4 @@
-# Installationshinweise zu PrepSuite 2.4.8
+# Installationshinweise zu PreppSuite 2.4.8
 
 Die Release-Pakete für macOS und Windows sind derzeit nicht mit einem
 kommerziellen Entwicklerzertifikat signiert und nicht notarisiert. Die
@@ -6,7 +6,7 @@ Schutzmechanismen der Betriebssysteme können deshalb beim ersten Start eine
 Warnung anzeigen. Das ist bei diesem Release erwartetes Verhalten, kein
 automatischer Hinweis auf Schadsoftware.
 
-Installiere ein Paket nur, wenn es direkt aus dem offiziellen PrepSuite-Release
+Installiere ein Paket nur, wenn es direkt aus dem offiziellen PreppSuite-Release
 bezogen wurde, und vergleiche vorher seine SHA-256-Prüfsumme mit
 `SHA256SUMS.txt` im selben Release.
 
