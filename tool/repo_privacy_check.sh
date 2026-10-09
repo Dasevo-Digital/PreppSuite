@@ -49,6 +49,56 @@ if identities=$(git log HEAD --format='%aN <%aE>%n%cN <%cE>' | sort -u | grep -v
   fi
 fi
 
+# Commit and tag messages are published to GitHub along with the code, and
+# the checks above never read them: an address once sat in a message while
+# this script reported success (#73). The same rules apply to them, plus
+# the trailers and tool names that writing aids add to a message. One
+# historical commit names an instruction file by its former name; it is
+# published, and rewriting public history is not an option, so it alone is
+# let through.
+if ! python3 - "$AUTHOR_EMAIL" <<'PY'
+import re
+import subprocess
+import sys
+
+noreply = sys.argv[1]
+known = {"409ec6d91adb8a3fcea46f435985e65974f03f20"}
+email = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+names = re.compile("ma" "rco|guen" "ther|leonardo" "gamar", re.I)
+tools = re.compile(
+    r"co-authored-by|generated with|\b(?:cla" r"ude|anthr" r"opic|chat" r"gpt|open" r"ai|copi" r"lot)\b",
+    re.I,
+)
+
+
+def messages():
+    log = subprocess.run(
+        ["git", "log", "HEAD", "--format=%H%x00%B%x1e"],
+        capture_output=True, text=True, check=True).stdout
+    tags = subprocess.run(
+        ["git", "for-each-ref", "refs/tags",
+         "--format=%(objectname)%00%(contents)%1e"],
+        capture_output=True, text=True, check=True).stdout
+    for record in (log + tags).split("\x1e"):
+        if "\x00" in record:
+            sha, text = record.strip("\n").split("\x00", 1)
+            yield sha, text
+
+
+bad = []
+for sha, text in messages():
+    for line in text.splitlines():
+        found = [a for a in email.findall(line) if a.lower() != noreply.lower()]
+        if found or names.search(line) or (tools.search(line) and sha not in known):
+            bad.append(f"{sha[:10]}: {line.strip()}")
+for entry in bad:
+    print(entry, file=sys.stderr)
+sys.exit(1 if bad else 0)
+PY
+then
+  report "Personal identifier or tool reference in a commit or tag message (above)."
+fi
+
 if (( fail )); then
   exit 1
 fi
