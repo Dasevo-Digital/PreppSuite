@@ -54,7 +54,11 @@ jobs:
   ios:
     # workmanager_apple needs the iOS 26 SDK (Xcode 26).
     runs-on: macos-26
-    timeout-minutes: 40
+    # Each test file is built and installed on its own, and the macOS
+    # runners differ a lot in speed: the same seven files took 18 minutes
+    # on one run and 38 on another. At 40 the job was cut off twice in the
+    # middle of the tests, which says nothing about the app (#147).
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
