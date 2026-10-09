@@ -47,7 +47,7 @@ void main() {
       tester,
       catalogue: KiwixCatalogue(
         httpClient: FixtureHttpClient({
-          'https://library.kiwix.org/catalog/v2/entries'
+          'https://opds.library.kiwix.org/catalog/v2/entries'
                   '?lang=deu&start=0&count=25':
               entriesXml,
         }),
@@ -88,7 +88,7 @@ void main() {
       tester,
       catalogue: KiwixCatalogue(
         httpClient: FixtureHttpClient({
-          'https://library.kiwix.org/catalog/v2/entries'
+          'https://opds.library.kiwix.org/catalog/v2/entries'
                   '?lang=deu&start=0&count=25':
               entriesXml,
         }),
@@ -105,7 +105,7 @@ void main() {
       tester,
       catalogue: KiwixCatalogue(
         httpClient: FixtureHttpClient({
-          'https://library.kiwix.org/catalog/v2/entries'
+          'https://opds.library.kiwix.org/catalog/v2/entries'
                   '?lang=deu&start=0&count=25':
               entriesXml,
         }),
@@ -123,10 +123,10 @@ void main() {
         tester,
         catalogue: KiwixCatalogue(
           httpClient: FixtureHttpClient({
-            'https://library.kiwix.org/catalog/v2/entries'
+            'https://opds.library.kiwix.org/catalog/v2/entries'
                     '?lang=deu&start=0&count=25':
                 entriesXml,
-            'https://library.kiwix.org/catalog/v2/languages': languagesXml,
+            'https://opds.library.kiwix.org/catalog/v2/languages': languagesXml,
           }),
         ),
       );
@@ -191,13 +191,13 @@ void main() {
         tester,
         catalogue: KiwixCatalogue(
           httpClient: FixtureHttpClient({
-            'https://library.kiwix.org/catalog/v2/entries'
+            'https://opds.library.kiwix.org/catalog/v2/entries'
                     '?lang=deu&start=0&count=25':
                 entriesXml,
-            'https://library.kiwix.org/catalog/v2/entries'
+            'https://opds.library.kiwix.org/catalog/v2/entries'
                     '?lang=eng&start=0&count=25':
                 entriesXml,
-            'https://library.kiwix.org/catalog/v2/languages': languagesXml,
+            'https://opds.library.kiwix.org/catalog/v2/languages': languagesXml,
           }),
         ),
       );

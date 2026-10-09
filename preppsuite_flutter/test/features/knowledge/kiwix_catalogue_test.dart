@@ -18,7 +18,7 @@ void main() {
       final requested = <String>[];
       final catalogue = KiwixCatalogue(
         httpClient: FixtureHttpClient({
-          'https://library.kiwix.org/catalog/v2/entries'
+          'https://opds.library.kiwix.org/catalog/v2/entries'
                   '?lang=deu&q=wikipedia&start=0&count=3':
               entriesXml,
         }, onRequest: requested.add),
@@ -49,7 +49,7 @@ void main() {
     test('points at the archive, not at its Metalink', () async {
       final catalogue = KiwixCatalogue(
         httpClient: FixtureHttpClient({
-          'https://library.kiwix.org/catalog/v2/entries?start=0&count=3':
+          'https://opds.library.kiwix.org/catalog/v2/entries?start=0&count=3':
               entriesXml,
         }),
       );
@@ -71,7 +71,7 @@ void main() {
     test('takes the entry name, not the author name', () async {
       final catalogue = KiwixCatalogue(
         httpClient: FixtureHttpClient({
-          'https://library.kiwix.org/catalog/v2/entries?start=0&count=3':
+          'https://opds.library.kiwix.org/catalog/v2/entries?start=0&count=3':
               entriesXml,
         }),
       );
@@ -95,7 +95,7 @@ void main() {
     test('reads the code, the native name and the stock', () async {
       final catalogue = KiwixCatalogue(
         httpClient: FixtureHttpClient({
-          'https://library.kiwix.org/catalog/v2/languages': languagesXml,
+          'https://opds.library.kiwix.org/catalog/v2/languages': languagesXml,
         }),
       );
 
@@ -120,7 +120,7 @@ void main() {
       // the whole library.
       final catalogue = KiwixCatalogue(
         httpClient: FixtureHttpClient({
-          'https://library.kiwix.org/catalog/v2/languages': languagesXml,
+          'https://opds.library.kiwix.org/catalog/v2/languages': languagesXml,
         }),
       );
 

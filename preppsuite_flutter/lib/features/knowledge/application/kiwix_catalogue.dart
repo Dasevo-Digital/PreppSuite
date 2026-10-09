@@ -92,7 +92,10 @@ class KiwixPage {
 class KiwixCatalogue {
   KiwixCatalogue({http.Client? httpClient, Uri? host})
     : _httpClient = httpClient ?? TimeoutClient(),
-      host = host ?? Uri.parse('https://library.kiwix.org');
+      // The catalogue moved to its own host in 2026; library.kiwix.org
+      // answers every request with a redirect there (seen 2026-10-09).
+      // Asked directly, so the day the redirect goes the catalogue stays.
+      host = host ?? Uri.parse('https://opds.library.kiwix.org');
 
   final http.Client _httpClient;
 
