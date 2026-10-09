@@ -8709,4 +8709,23 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get statusSituationNever =>
       'Aún no se han descargado avisos. La app necesita internet una vez para ello.';
+
+  @override
+  String snapshotRestoreAction(String date) {
+    return 'Recuperar la copia automática del $date';
+  }
+
+  @override
+  String get snapshotRestoreTitle => '¿Recuperar la copia automática?';
+
+  @override
+  String snapshotRestoreBody(String date) {
+    return 'El hogar vuelve al estado del $date. Lo que se haya introducido después faltará. La base de datos dañada no se borra, se guarda al lado.';
+  }
+
+  @override
+  String get snapshotRestoreConfirm => 'Recuperar';
+
+  @override
+  String get snapshotRestoreFailed => 'La recuperación no ha funcionado.';
 }

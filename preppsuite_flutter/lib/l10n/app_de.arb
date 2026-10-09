@@ -3593,5 +3593,10 @@
   "warningsEmptyStale": "Keine Warnungen gespeichert. Ob es gerade welche gibt, lässt sich ohne aktuellen Abruf nicht sagen.",
   "statusSituationStale": "Stand veraltet",
   "statusSituationStaleHint": "Letzter Abruf: {time}. Es können Warnungen fehlen.",
-  "statusSituationNever": "Noch keine Warnungen abgerufen. Dafür braucht die App einmal Internet."
+  "statusSituationNever": "Noch keine Warnungen abgerufen. Dafür braucht die App einmal Internet.",
+  "snapshotRestoreAction": "Automatische Sicherung vom {date} zurückholen",
+  "snapshotRestoreTitle": "Automatische Sicherung zurückholen?",
+  "snapshotRestoreBody": "Der Haushalt wird auf den Stand vom {date} zurückgesetzt. Was danach eingetragen wurde, fehlt. Die beschädigte Datenbank wird nicht gelöscht, sondern daneben aufbewahrt.",
+  "snapshotRestoreConfirm": "Zurückholen",
+  "snapshotRestoreFailed": "Das Zurückholen hat nicht geklappt."
 }

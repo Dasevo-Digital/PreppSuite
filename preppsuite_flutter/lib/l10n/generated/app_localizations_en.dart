@@ -8634,4 +8634,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get statusSituationNever =>
       'No warnings fetched yet. The app needs the internet once for that.';
+
+  @override
+  String snapshotRestoreAction(String date) {
+    return 'Restore the automatic copy from $date';
+  }
+
+  @override
+  String get snapshotRestoreTitle => 'Restore the automatic copy?';
+
+  @override
+  String snapshotRestoreBody(String date) {
+    return 'The household goes back to how it was on $date. Anything entered after that is missing. The damaged database is not deleted but kept beside it.';
+  }
+
+  @override
+  String get snapshotRestoreConfirm => 'Restore';
+
+  @override
+  String get snapshotRestoreFailed => 'The restore did not work.';
 }

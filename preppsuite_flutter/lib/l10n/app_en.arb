@@ -5009,5 +5009,24 @@
       }
     }
   },
-  "statusSituationNever": "No warnings fetched yet. The app needs the internet once for that."
+  "statusSituationNever": "No warnings fetched yet. The app needs the internet once for that.",
+  "snapshotRestoreAction": "Restore the automatic copy from {date}",
+  "@snapshotRestoreAction": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "snapshotRestoreTitle": "Restore the automatic copy?",
+  "snapshotRestoreBody": "The household goes back to how it was on {date}. Anything entered after that is missing. The damaged database is not deleted but kept beside it.",
+  "@snapshotRestoreBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "snapshotRestoreConfirm": "Restore",
+  "snapshotRestoreFailed": "The restore did not work."
 }

@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:sqlite3/sqlite3.dart' show sqlite3;
+import 'package:sqlite3/sqlite3.dart' show OpenMode, sqlite3;
 
 import 'app_database_directory.dart';
 import 'portable_data.dart';
@@ -350,6 +350,42 @@ class LocalDatabaseEncryption {
     _mode = null;
     _key = null;
     await initializeOrMarkUnavailable(directory: directory);
+  }
+
+  /// The file [name].sqlite lives in, once [initialize] has run.
+  File databaseFile(String name) {
+    final directory = _directory;
+    if (directory == null) {
+      throw StateError('Local database encryption has not been initialized.');
+    }
+    return File(
+      '${directory.path}${Platform.pathSeparator}$name$_databaseExtension',
+    );
+  }
+
+  /// Whether [file] opens under this installation's key and passes
+  /// SQLite's quick check (#140).
+  ///
+  /// Asked of an automatic snapshot before it is put back: one written
+  /// before the household was encrypted, or damaged itself, must not take
+  /// the place of the file it was meant to rescue. Read-only, so asking
+  /// changes nothing.
+  bool opensCleanly(File file) {
+    final key = _key;
+    try {
+      final database = sqlite3.open(file.path, mode: OpenMode.readOnly);
+      try {
+        if (_mode == LocalDatabaseEncryptionMode.encrypted && key != null) {
+          _configureCipherForFile(database, file.path, key);
+        }
+        final result = database.select('PRAGMA quick_check');
+        return result.isNotEmpty && result.first.values.first == 'ok';
+      } finally {
+        database.close();
+      }
+    } on Object {
+      return false;
+    }
   }
 
   /// Opens [name].sqlite after [initialize] has established its mode.

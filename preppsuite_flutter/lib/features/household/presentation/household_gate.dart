@@ -10,6 +10,7 @@ import '../application/household_providers.dart';
 import 'setup_choice_screen.dart';
 import '../../../core/error_text.dart';
 import '../../../core/emergency_access.dart';
+import 'snapshot_restore_offer.dart';
 
 /// Shows first-run setup until a profile exists, then the app.
 ///
@@ -109,6 +110,8 @@ class _HouseholdGateState extends ConsumerState<HouseholdGate> {
                     onPressed: () => ref.invalidate(householdProfileProvider),
                     child: Text(l10n.householdLoadRetry),
                   ),
+                  // The day's automatic copy, if one opens cleanly (#140).
+                  const SnapshotRestoreOffer(),
                   const SizedBox(height: 24),
                   const EmergencyAccessButton(),
                 ],

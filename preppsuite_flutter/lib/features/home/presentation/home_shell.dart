@@ -28,6 +28,7 @@ import 'emergency_screen.dart';
 import 'home_screen_widget_sync.dart';
 import '../../settings/presentation/backup_reminder_scheduler.dart';
 import 'app_shortcuts.dart';
+import '../../settings/presentation/database_snapshot_scheduler.dart';
 
 /// Top-level navigation once a profile exists.
 ///
@@ -128,6 +129,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             ExpiryReminderScheduler(householdId: householdId),
             ChargeReminderScheduler(),
             const BackupReminderScheduler(),
+            // A copy of the database a day, for the day it breaks (#140).
+            const DatabaseSnapshotScheduler(),
             // Draws nothing; the long-press menu on the app icon (#123).
             AppShortcuts(householdId: householdId),
             const WarningDayScheduler(),

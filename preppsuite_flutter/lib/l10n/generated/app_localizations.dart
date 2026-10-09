@@ -14346,6 +14346,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No warnings fetched yet. The app needs the internet once for that.'**
   String get statusSituationNever;
+
+  /// No description provided for @snapshotRestoreAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the automatic copy from {date}'**
+  String snapshotRestoreAction(String date);
+
+  /// No description provided for @snapshotRestoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the automatic copy?'**
+  String get snapshotRestoreTitle;
+
+  /// No description provided for @snapshotRestoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The household goes back to how it was on {date}. Anything entered after that is missing. The damaged database is not deleted but kept beside it.'**
+  String snapshotRestoreBody(String date);
+
+  /// No description provided for @snapshotRestoreConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get snapshotRestoreConfirm;
+
+  /// No description provided for @snapshotRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The restore did not work.'**
+  String get snapshotRestoreFailed;
 }
 
 class _AppLocalizationsDelegate

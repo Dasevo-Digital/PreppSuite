@@ -38,6 +38,13 @@ class AppDatabase extends _$AppDatabase {
   }
   AppDatabase.forTesting(super.executor);
 
+  /// Writes a consistent copy of this database to [path], under the same
+  /// key (#140). SQLite's own `VACUUM INTO`: a copy of the file bytes
+  /// taken while a write is half done would be a damaged database, and
+  /// this cannot be. [path] must not exist yet.
+  Future<void> snapshotTo(String path) =>
+      customStatement('VACUUM INTO ?', [path]);
+
   @override
   Future<void> close() {
     OpenDatabases.untrack(this);

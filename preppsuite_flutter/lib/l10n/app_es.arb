@@ -2371,5 +2371,10 @@
   "warningsEmptyStale": "No hay avisos guardados. Sin una actualización reciente no se puede saber si los hay ahora.",
   "statusSituationStale": "Desactualizado",
   "statusSituationStaleHint": "Última actualización: {time}. Pueden faltar avisos.",
-  "statusSituationNever": "Aún no se han descargado avisos. La app necesita internet una vez para ello."
+  "statusSituationNever": "Aún no se han descargado avisos. La app necesita internet una vez para ello.",
+  "snapshotRestoreAction": "Recuperar la copia automática del {date}",
+  "snapshotRestoreTitle": "¿Recuperar la copia automática?",
+  "snapshotRestoreBody": "El hogar vuelve al estado del {date}. Lo que se haya introducido después faltará. La base de datos dañada no se borra, se guarda al lado.",
+  "snapshotRestoreConfirm": "Recuperar",
+  "snapshotRestoreFailed": "La recuperación no ha funcionado."
 }

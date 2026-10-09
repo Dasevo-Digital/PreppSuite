@@ -8681,4 +8681,23 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get statusSituationNever =>
       'Noch keine Warnungen abgerufen. Dafür braucht die App einmal Internet.';
+
+  @override
+  String snapshotRestoreAction(String date) {
+    return 'Automatische Sicherung vom $date zurückholen';
+  }
+
+  @override
+  String get snapshotRestoreTitle => 'Automatische Sicherung zurückholen?';
+
+  @override
+  String snapshotRestoreBody(String date) {
+    return 'Der Haushalt wird auf den Stand vom $date zurückgesetzt. Was danach eingetragen wurde, fehlt. Die beschädigte Datenbank wird nicht gelöscht, sondern daneben aufbewahrt.';
+  }
+
+  @override
+  String get snapshotRestoreConfirm => 'Zurückholen';
+
+  @override
+  String get snapshotRestoreFailed => 'Das Zurückholen hat nicht geklappt.';
 }
