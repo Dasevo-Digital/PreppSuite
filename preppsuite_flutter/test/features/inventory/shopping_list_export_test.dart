@@ -57,6 +57,7 @@ void main() {
 
     expect(file['format'], 'preppsuite-einkaufsliste');
     expect(file['version'], 1);
+    expect(file['origin'], 'minimums');
     expect(file['created'], '2026-10-10T09:30:00.000Z');
     expect(file['language'], 'de');
     expect(file['items'], isEmpty);

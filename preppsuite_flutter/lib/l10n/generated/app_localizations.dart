@@ -14568,6 +14568,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Time for a new prescription'**
   String get medicationRefillDue;
+
+  /// No description provided for @scenarioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Without power, water and heating'**
+  String get scenarioTitle;
+
+  /// No description provided for @scenarioOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Work through a scenario'**
+  String get scenarioOpen;
+
+  /// No description provided for @scenarioIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'What is missing to get through the chosen time on your own stores. Stock, medicines and energy come from what you entered, the need per person from the supply calculator.'**
+  String get scenarioIntro;
+
+  /// No description provided for @scenarioHorizonHours.
+  ///
+  /// In en, this message translates to:
+  /// **'72 hours'**
+  String get scenarioHorizonHours;
+
+  /// No description provided for @scenarioHorizonDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String scenarioHorizonDays(int days);
+
+  /// No description provided for @scenarioWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get scenarioWater;
+
+  /// No description provided for @scenarioFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get scenarioFood;
+
+  /// No description provided for @scenarioMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicines'**
+  String get scenarioMedicine;
+
+  /// No description provided for @scenarioEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Light, cooking, heat'**
+  String get scenarioEnergy;
+
+  /// No description provided for @scenarioNeedHave.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed {needed}, in stock {have}'**
+  String scenarioNeedHave(String needed, String have);
+
+  /// No description provided for @scenarioMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} missing'**
+  String scenarioMissing(String amount);
+
+  /// No description provided for @scenarioCovered.
+  ///
+  /// In en, this message translates to:
+  /// **'Covered'**
+  String get scenarioCovered;
+
+  /// No description provided for @scenarioNoMedicines.
+  ///
+  /// In en, this message translates to:
+  /// **'No medicine with a daily dose in the stores.'**
+  String get scenarioNoMedicines;
+
+  /// No description provided for @scenarioWithoutDose.
+  ///
+  /// In en, this message translates to:
+  /// **'No daily dose, so not worked out: {names}'**
+  String scenarioWithoutDose(String names);
+
+  /// No description provided for @scenarioNoEnergyPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'No consumption entered. What your lamp, stove and heater use goes under Energy.'**
+  String get scenarioNoEnergyPlan;
+
+  /// No description provided for @scenarioEnergyUses.
+  ///
+  /// In en, this message translates to:
+  /// **'for {uses}'**
+  String scenarioEnergyUses(String uses);
+
+  /// No description provided for @scenarioEnergyUnused.
+  ///
+  /// In en, this message translates to:
+  /// **'Stored, but nothing entered that uses it: {kinds}'**
+  String scenarioEnergyUnused(String kinds);
+
+  /// No description provided for @scenarioWaterLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Drinking water'**
+  String get scenarioWaterLine;
+
+  /// No description provided for @scenarioSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Need per person as in the supply calculator: by the BBK and the BLE where they publish figures, marked there where they do not. Medicines by your daily dose, energy by the consumption you entered for your appliances.'**
+  String get scenarioSource;
 }
 
 class _AppLocalizationsDelegate

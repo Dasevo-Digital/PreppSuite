@@ -8819,4 +8819,76 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get medicationRefillDue => 'Zeit für ein neues Rezept';
+
+  @override
+  String get scenarioTitle => 'Ohne Strom, Wasser und Heizung';
+
+  @override
+  String get scenarioOpen => 'Szenario durchrechnen';
+
+  @override
+  String get scenarioIntro =>
+      'Was fehlt, um die gewählte Zeit aus dem eigenen Vorrat zu überstehen. Bestand, Medikamente und Energie kommen aus deinen Einträgen, der Bedarf je Person aus dem Vorratsrechner.';
+
+  @override
+  String get scenarioHorizonHours => '72 Stunden';
+
+  @override
+  String scenarioHorizonDays(int days) {
+    return '$days Tage';
+  }
+
+  @override
+  String get scenarioWater => 'Wasser';
+
+  @override
+  String get scenarioFood => 'Essen';
+
+  @override
+  String get scenarioMedicine => 'Medikamente';
+
+  @override
+  String get scenarioEnergy => 'Licht, Kochen, Wärme';
+
+  @override
+  String scenarioNeedHave(String needed, String have) {
+    return 'Bedarf $needed, vorhanden $have';
+  }
+
+  @override
+  String scenarioMissing(String amount) {
+    return 'Es fehlen $amount';
+  }
+
+  @override
+  String get scenarioCovered => 'Gedeckt';
+
+  @override
+  String get scenarioNoMedicines => 'Kein Medikament mit Tagesdosis im Vorrat.';
+
+  @override
+  String scenarioWithoutDose(String names) {
+    return 'Ohne Tagesdosis, daher nicht zu rechnen: $names';
+  }
+
+  @override
+  String get scenarioNoEnergyPlan =>
+      'Kein Verbrauch eingetragen. Was Lampe, Kocher und Ofen verbrauchen, trägst du unter Energie ein.';
+
+  @override
+  String scenarioEnergyUses(String uses) {
+    return 'für $uses';
+  }
+
+  @override
+  String scenarioEnergyUnused(String kinds) {
+    return 'Vorhanden, aber ohne eingetragenen Verbrauch: $kinds';
+  }
+
+  @override
+  String get scenarioWaterLine => 'Trinkwasser';
+
+  @override
+  String get scenarioSource =>
+      'Bedarf je Person wie im Vorratsrechner: nach BBK und BLE, wo sie Werte veröffentlichen, sonst dort gekennzeichnet. Medikamente nach deiner Tagesdosis, Energie nach dem Verbrauch, den du für deine Geräte eingetragen hast.';
 }

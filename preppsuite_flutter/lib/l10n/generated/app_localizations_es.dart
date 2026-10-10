@@ -8848,4 +8848,77 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get medicationRefillDue => 'Es hora de una nueva receta';
+
+  @override
+  String get scenarioTitle => 'Sin electricidad, agua ni calefacción';
+
+  @override
+  String get scenarioOpen => 'Calcular un escenario';
+
+  @override
+  String get scenarioIntro =>
+      'Lo que falta para pasar el tiempo elegido con tu propia reserva. Existencias, medicamentos y energía salen de lo que anotaste; la necesidad por persona, de la calculadora de reservas.';
+
+  @override
+  String get scenarioHorizonHours => '72 horas';
+
+  @override
+  String scenarioHorizonDays(int days) {
+    return '$days días';
+  }
+
+  @override
+  String get scenarioWater => 'Agua';
+
+  @override
+  String get scenarioFood => 'Comida';
+
+  @override
+  String get scenarioMedicine => 'Medicamentos';
+
+  @override
+  String get scenarioEnergy => 'Luz, cocina, calor';
+
+  @override
+  String scenarioNeedHave(String needed, String have) {
+    return 'Necesario $needed, disponible $have';
+  }
+
+  @override
+  String scenarioMissing(String amount) {
+    return 'Faltan $amount';
+  }
+
+  @override
+  String get scenarioCovered => 'Cubierto';
+
+  @override
+  String get scenarioNoMedicines =>
+      'Ningún medicamento con dosis diaria en la reserva.';
+
+  @override
+  String scenarioWithoutDose(String names) {
+    return 'Sin dosis diaria, por eso sin calcular: $names';
+  }
+
+  @override
+  String get scenarioNoEnergyPlan =>
+      'No hay consumo anotado. Lo que gastan la lámpara, el hornillo y la estufa se anota en Energía.';
+
+  @override
+  String scenarioEnergyUses(String uses) {
+    return 'para $uses';
+  }
+
+  @override
+  String scenarioEnergyUnused(String kinds) {
+    return 'Disponible, pero sin consumo anotado: $kinds';
+  }
+
+  @override
+  String get scenarioWaterLine => 'Agua potable';
+
+  @override
+  String get scenarioSource =>
+      'Necesidad por persona como en la calculadora de reservas: según la BBK y la BLE donde publican cifras, y señalado allí donde no. Medicamentos según tu dosis diaria, energía según el consumo que anotaste para tus aparatos.';
 }

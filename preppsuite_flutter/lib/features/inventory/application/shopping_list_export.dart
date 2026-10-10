@@ -5,6 +5,10 @@
 /// own and sort into aisles -- something it can only guess back out of
 /// prose. This is that file; `docs/einkaufsliste-format.md` describes it
 /// for whoever reads it.
+///
+/// Two lists write it: the items under their minimum (`origin`
+/// `minimums`), and what a stretch without power and water is short of
+/// (`scenario`, #149; see `scenario_export.dart`).
 library;
 
 import 'dart:convert';
@@ -27,13 +31,70 @@ String shoppingListFileName(DateTime now) {
       '${now.year}-${two(now.month)}-${two(now.day)}.json';
 }
 
-/// Writes [list] as JSON.
+/// One line to buy, whatever list it came from.
+class ShoppingFileLine {
+  const ShoppingFileLine({
+    required this.name,
+    required this.amount,
+    required this.unit,
+    required this.supplyCategory,
+    this.minimum,
+  });
+
+  final String name;
+
+  /// How much is missing, in [unit].
+  final double amount;
+  final String unit;
+
+  /// An `InventoryItemCategory` name.
+  final String supplyCategory;
+
+  /// The minimum the amount was worked out against, where there is one.
+  final double? minimum;
+}
+
+/// Writes [lines] as JSON.
 ///
 /// Each line carries its amount twice: as `amount` and `unit` for a
 /// program that computes, and as `quantity`, already formatted with
 /// [formatAmount] in the language the app is showing, for a program that
 /// only displays it -- a shopping app's quantity field is usually free
 /// text, and "1,5 kg" is what belongs there in German.
+///
+/// [extra] goes in beside the lines: what is true of the whole list
+/// rather than of one line.
+String buildShoppingFile({
+  required String origin,
+  required List<ShoppingFileLine> lines,
+  required DateTime now,
+  required String language,
+  required String Function(double amount) formatAmount,
+  Map<String, Object?> extra = const {},
+}) {
+  final document = <String, Object?>{
+    'format': shoppingListFileFormat,
+    'version': shoppingListFileVersion,
+    'origin': origin,
+    'created': now.toUtc().toIso8601String(),
+    'language': language,
+    'items': [
+      for (final line in lines)
+        {
+          'name': line.name,
+          'quantity': _quantity(formatAmount(line.amount), line.unit),
+          'amount': plainNumber(line.amount),
+          'unit': line.unit,
+          if (line.minimum != null) 'minimum': plainNumber(line.minimum!),
+          'supplyCategory': line.supplyCategory,
+        },
+    ],
+    ...extra,
+  };
+  return '${const JsonEncoder.withIndent('  ').convert(document)}\n';
+}
+
+/// Writes [list] -- the items under their minimum.
 ///
 /// The household target goes along under `target`, apart from the lines.
 /// "12 l of water still missing" is true of the household, not of any one
@@ -44,33 +105,30 @@ String buildShoppingListFile(
   required DateTime now,
   required String language,
   required String Function(double amount) formatAmount,
-}) {
-  final document = <String, Object?>{
-    'format': shoppingListFileFormat,
-    'version': shoppingListFileVersion,
-    'created': now.toUtc().toIso8601String(),
-    'language': language,
-    'items': [
-      for (final entry in list.entries)
-        {
-          'name': entry.item.name,
-          'quantity': _quantity(formatAmount(entry.shortfall), entry.item.unit),
-          'amount': _plain(entry.shortfall),
-          'unit': entry.item.unit,
-          if (entry.item.minQuantity != null)
-            'minimum': _plain(entry.item.minQuantity!),
-          'supplyCategory': entry.item.category,
-        },
-    ],
+}) => buildShoppingFile(
+  origin: 'minimums',
+  lines: [
+    for (final entry in list.entries)
+      ShoppingFileLine(
+        name: entry.item.name,
+        amount: entry.shortfall,
+        unit: entry.item.unit,
+        minimum: entry.item.minQuantity,
+        supplyCategory: entry.item.category,
+      ),
+  ],
+  now: now,
+  language: language,
+  formatAmount: formatAmount,
+  extra: {
     'target': {
       'days': list.days,
       'met': list.targetMet,
-      'waterLiters': _plain(list.waterShortfallLiters),
+      'waterLiters': plainNumber(list.waterShortfallLiters),
       'kcal': list.calorieShortfall,
     },
-  };
-  return '${const JsonEncoder.withIndent('  ').convert(document)}\n';
-}
+  },
+);
 
 String _quantity(String amount, String unit) =>
     unit.trim().isEmpty ? amount : '$amount ${unit.trim()}';
@@ -78,7 +136,7 @@ String _quantity(String amount, String unit) =>
 /// A whole number as an integer, so a reader sees `6` and not `6.0`;
 /// anything else to two places, which is finer than any unit a household
 /// buys in and keeps float noise like 0.30000000000000004 out of the file.
-num _plain(double value) {
+num plainNumber(double value) {
   final rounded = (value * 100).roundToDouble() / 100;
   return rounded == rounded.roundToDouble() ? rounded.round() : rounded;
 }

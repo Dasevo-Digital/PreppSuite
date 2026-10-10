@@ -25,6 +25,7 @@ import '../application/current_situation.dart';
 import '../application/emergency_folder_report.dart';
 import '../application/preparedness_hub_store.dart';
 import 'resilience_plan_panel.dart';
+import 'scenario_screen.dart';
 
 /// Private, offline planning tools. The screen intentionally has no map or
 /// cloud action: routes and sensitive document locations stay on this device.
@@ -542,10 +543,28 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
               },
             ),
           ),
-        OutlinedButton.icon(
-          onPressed: () => _editAutonomy(reaches),
-          icon: const Icon(Icons.edit_outlined),
-          label: Text(_l10n.hubAutonomyAddByHand),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              onPressed: () => _editAutonomy(reaches),
+              icon: const Icon(Icons.edit_outlined),
+              label: Text(_l10n.hubAutonomyAddByHand),
+            ),
+            // The same records, asked the other way round: not how long
+            // they last, but what is missing for a given stretch (#149).
+            OutlinedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      ScenarioScreen(householdId: widget.householdId),
+                ),
+              ),
+              icon: const Icon(Icons.calculate_outlined),
+              label: Text(_l10n.scenarioOpen),
+            ),
+          ],
         ),
       ],
     );

@@ -1,12 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
@@ -16,8 +11,8 @@ import '../application/shopping_list.dart';
 import '../application/shopping_list_export.dart';
 import '../application/supply_calculator.dart';
 import 'inventory_item_form_screen.dart';
+import 'shopping_file_share.dart';
 import '../../../core/error_text.dart';
-import '../../../core/save_file.dart';
 
 /// What to buy.
 ///
@@ -119,56 +114,18 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
 
   /// The lines as a file, for a shopping app to put on a list of its own
   /// (#155) -- see `shopping_list_export.dart` for what is in it.
-  ///
-  /// On a phone through the share sheet, which offers "Save to Files" and
-  /// any app that takes the file. On a computer there is no such sheet on
-  /// every system, so the save dialog asks where it goes.
-  Future<void> _export(ShoppingList list, AppLocalizations l10n) async {
-    final messenger = ScaffoldMessenger.of(context);
+  Future<void> _export(ShoppingList list, AppLocalizations l10n) {
     final now = DateTime.now();
-    final name = shoppingListFileName(now);
-    final content = buildShoppingListFile(
-      list,
+    return shareShoppingFile(
+      context,
       now: now,
-      language: Localizations.localeOf(context).languageCode,
-      formatAmount: _number,
+      content: buildShoppingListFile(
+        list,
+        now: now,
+        language: Localizations.localeOf(context).languageCode,
+        formatAmount: _number,
+      ),
     );
-    try {
-      if (Platform.isIOS || Platform.isAndroid) {
-        final file = File(
-          '${(await getTemporaryDirectory()).path}'
-          '${Platform.pathSeparator}$name',
-        );
-        await file.writeAsString(content, flush: true);
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(file.path, mimeType: 'application/json')],
-            subject: l10n.shoppingListTitle,
-          ),
-        );
-        return;
-      }
-      final saved = await saveFileWithPicker(
-        dialogTitle: l10n.shoppingListExportDialogTitle,
-        fileName: name,
-        extension: 'json',
-        bytes: utf8.encode(content),
-      );
-      if (!saved) return;
-      messenger
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(l10n.shoppingListExported)));
-    } on Object catch (error) {
-      messenger
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              '${l10n.csvExportErrorMessage} ${describeError(l10n, error)}',
-            ),
-          ),
-        );
-    }
   }
 
   /// A list you take to a shop has to leave the app. Plain text goes into

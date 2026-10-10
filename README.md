@@ -156,7 +156,10 @@ selbst, wohin sie gehören.
 **Fehlende Ausrüstung.** Aus den Checklisten heraus ein PDF-Bericht der
 Bestände, die unter ihrem Mindestbestand liegen. Die Einkaufsliste lässt
 sich kopieren oder als JSON-Datei an eine Einkaufs-App weitergeben
-([Format](docs/einkaufsliste-format.md)). Ein Budget für die
+([Format](docs/einkaufsliste-format.md)). Im Krisen-Hub rechnet ein
+Szenario durch, was für 72 Stunden oder 10 Tage ohne Strom, Wasser und
+Heizung fehlt: Wasser, Kalorien, Medikamente und Energie, aus den eigenen
+Einträgen, und gibt die Lücken ebenso als Datei weiter. Ein Budget für die
 Ausgaben gibt es seit 1.1.0 nicht mehr: Im Ernstfall zählt, was da ist,
 nicht was es gekostet hat. Früher eingetragene Posten bleiben gespeichert
 und reisen mit Sicherung und gemeinsamem Ordner.

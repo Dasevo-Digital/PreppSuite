@@ -5108,5 +5108,69 @@
       }
     }
   },
-  "medicationRefillDue": "Time for a new prescription"
+  "medicationRefillDue": "Time for a new prescription",
+  "scenarioTitle": "Without power, water and heating",
+  "scenarioOpen": "Work through a scenario",
+  "scenarioIntro": "What is missing to get through the chosen time on your own stores. Stock, medicines and energy come from what you entered, the need per person from the supply calculator.",
+  "scenarioHorizonHours": "72 hours",
+  "scenarioHorizonDays": "{days} days",
+  "@scenarioHorizonDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "scenarioWater": "Water",
+  "scenarioFood": "Food",
+  "scenarioMedicine": "Medicines",
+  "scenarioEnergy": "Light, cooking, heat",
+  "scenarioNeedHave": "Needed {needed}, in stock {have}",
+  "@scenarioNeedHave": {
+    "placeholders": {
+      "needed": {
+        "type": "String"
+      },
+      "have": {
+        "type": "String"
+      }
+    }
+  },
+  "scenarioMissing": "{amount} missing",
+  "@scenarioMissing": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "scenarioCovered": "Covered",
+  "scenarioNoMedicines": "No medicine with a daily dose in the stores.",
+  "scenarioWithoutDose": "No daily dose, so not worked out: {names}",
+  "@scenarioWithoutDose": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "scenarioNoEnergyPlan": "No consumption entered. What your lamp, stove and heater use goes under Energy.",
+  "scenarioEnergyUses": "for {uses}",
+  "@scenarioEnergyUses": {
+    "placeholders": {
+      "uses": {
+        "type": "String"
+      }
+    }
+  },
+  "scenarioEnergyUnused": "Stored, but nothing entered that uses it: {kinds}",
+  "@scenarioEnergyUnused": {
+    "placeholders": {
+      "kinds": {
+        "type": "String"
+      }
+    }
+  },
+  "scenarioWaterLine": "Drinking water",
+  "scenarioSource": "Need per person as in the supply calculator: by the BBK and the BLE where they publish figures, marked there where they do not. Medicines by your daily dose, energy by the consumption you entered for your appliances."
 }

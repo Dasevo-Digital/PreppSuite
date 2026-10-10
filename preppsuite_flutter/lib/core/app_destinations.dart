@@ -49,6 +49,7 @@ import '../features/maps/presentation/my_position_screen.dart';
 import '../features/maps/presentation/nearby_screen.dart';
 import '../features/possessions/presentation/possessions_screen.dart';
 import '../features/preparedness/presentation/preparedness_hub_screen.dart';
+import '../features/preparedness/presentation/scenario_screen.dart';
 import '../features/settings/presentation/followed_places_screen.dart';
 import '../features/transfer/presentation/local_devices_screen.dart';
 import '../features/transfer/presentation/qr_receive_screen.dart';
@@ -580,6 +581,21 @@ List<AppDestination> appDestinations() => [
     icon: Icons.hub_outlined,
     area: ShellDestination.household,
     open: (p) => PreparednessHubScreen(householdId: p.id),
+  ),
+  AppDestination(
+    id: 'scenario',
+    title: (l) => l.scenarioTitle,
+    icon: Icons.calculate_outlined,
+    area: ShellDestination.household,
+    open: (p) => ScenarioScreen(householdId: p.id),
+    aliases: [
+      'szenario',
+      '72 stunden',
+      'stromausfall',
+      'blackout',
+      'lucke',
+      'scenario',
+    ],
   ),
   AppDestination(
     id: 'kids-comic',

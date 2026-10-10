@@ -8772,4 +8772,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get medicationRefillDue => 'Time for a new prescription';
+
+  @override
+  String get scenarioTitle => 'Without power, water and heating';
+
+  @override
+  String get scenarioOpen => 'Work through a scenario';
+
+  @override
+  String get scenarioIntro =>
+      'What is missing to get through the chosen time on your own stores. Stock, medicines and energy come from what you entered, the need per person from the supply calculator.';
+
+  @override
+  String get scenarioHorizonHours => '72 hours';
+
+  @override
+  String scenarioHorizonDays(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get scenarioWater => 'Water';
+
+  @override
+  String get scenarioFood => 'Food';
+
+  @override
+  String get scenarioMedicine => 'Medicines';
+
+  @override
+  String get scenarioEnergy => 'Light, cooking, heat';
+
+  @override
+  String scenarioNeedHave(String needed, String have) {
+    return 'Needed $needed, in stock $have';
+  }
+
+  @override
+  String scenarioMissing(String amount) {
+    return '$amount missing';
+  }
+
+  @override
+  String get scenarioCovered => 'Covered';
+
+  @override
+  String get scenarioNoMedicines =>
+      'No medicine with a daily dose in the stores.';
+
+  @override
+  String scenarioWithoutDose(String names) {
+    return 'No daily dose, so not worked out: $names';
+  }
+
+  @override
+  String get scenarioNoEnergyPlan =>
+      'No consumption entered. What your lamp, stove and heater use goes under Energy.';
+
+  @override
+  String scenarioEnergyUses(String uses) {
+    return 'for $uses';
+  }
+
+  @override
+  String scenarioEnergyUnused(String kinds) {
+    return 'Stored, but nothing entered that uses it: $kinds';
+  }
+
+  @override
+  String get scenarioWaterLine => 'Drinking water';
+
+  @override
+  String get scenarioSource =>
+      'Need per person as in the supply calculator: by the BBK and the BLE where they publish figures, marked there where they do not. Medicines by your daily dose, energy by the consumption you entered for your appliances.';
 }
