@@ -9023,4 +9023,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String knowledgeCostsMemory(String cluster, String cache) {
     return 'Geöffnet ist immer nur ein Archiv. Es entpackt höchstens $cluster auf einmal und hält bis zu $cache im Zwischenspeicher; die übrigen kosten nur Platz.';
   }
+
+  @override
+  String firstAidVideoPackPublisher(String who) {
+    return 'Zusammengestellt von: $who';
+  }
+
+  @override
+  String get firstAidVideoPackNotStated => 'nicht angegeben';
+
+  @override
+  String firstAidVideoPackReviewed(String who) {
+    return 'Fachlich geprüft, laut Paket: $who';
+  }
+
+  @override
+  String get firstAidVideoPackNotReviewed =>
+      'Fachliche Prüfung: nicht angegeben. Die App prüft die Filme eines Pakets nicht; die Anleitungen in Text und Zeichnung gelten.';
 }

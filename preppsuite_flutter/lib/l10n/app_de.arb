@@ -3682,5 +3682,9 @@
   "knowledgeCostsArchives": "{count, plural, =1{1 Archiv, {size} auf dem Datenträger.} other{{count} Archive, zusammen {size} auf dem Datenträger.}}",
   "knowledgeCostsUnknown": "{count, plural, =1{Bei einem ist die Größe noch unbekannt, bis es einmal geöffnet war.} other{Bei {count} ist die Größe noch unbekannt, bis sie einmal geöffnet waren.}}",
   "knowledgeCostsIndexes": "Eigene Suchindizes: {size}.",
-  "knowledgeCostsMemory": "Geöffnet ist immer nur ein Archiv. Es entpackt höchstens {cluster} auf einmal und hält bis zu {cache} im Zwischenspeicher; die übrigen kosten nur Platz."
+  "knowledgeCostsMemory": "Geöffnet ist immer nur ein Archiv. Es entpackt höchstens {cluster} auf einmal und hält bis zu {cache} im Zwischenspeicher; die übrigen kosten nur Platz.",
+  "firstAidVideoPackPublisher": "Zusammengestellt von: {who}",
+  "firstAidVideoPackNotStated": "nicht angegeben",
+  "firstAidVideoPackReviewed": "Fachlich geprüft, laut Paket: {who}",
+  "firstAidVideoPackNotReviewed": "Fachliche Prüfung: nicht angegeben. Die App prüft die Filme eines Pakets nicht; die Anleitungen in Text und Zeichnung gelten."
 }

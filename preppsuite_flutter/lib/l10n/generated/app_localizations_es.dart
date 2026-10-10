@@ -9052,4 +9052,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String knowledgeCostsMemory(String cluster, String cache) {
     return 'Solo hay un archivo abierto a la vez. Descomprime como máximo $cluster de golpe y guarda hasta $cache en caché; los demás solo ocupan espacio.';
   }
+
+  @override
+  String firstAidVideoPackPublisher(String who) {
+    return 'Reunido por: $who';
+  }
+
+  @override
+  String get firstAidVideoPackNotStated => 'sin indicar';
+
+  @override
+  String firstAidVideoPackReviewed(String who) {
+    return 'Revisado, según el paquete: $who';
+  }
+
+  @override
+  String get firstAidVideoPackNotReviewed =>
+      'Revisión: sin indicar. La app no revisa los vídeos de un paquete; valen las guías en texto y dibujos.';
 }

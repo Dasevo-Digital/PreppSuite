@@ -8974,4 +8974,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String knowledgeCostsMemory(String cluster, String cache) {
     return 'Only one archive is ever open. It unpacks at most $cluster at a time and keeps up to $cache in its cache; the others cost only disk space.';
   }
+
+  @override
+  String firstAidVideoPackPublisher(String who) {
+    return 'Put together by: $who';
+  }
+
+  @override
+  String get firstAidVideoPackNotStated => 'not stated';
+
+  @override
+  String firstAidVideoPackReviewed(String who) {
+    return 'Checked, as the pack states: $who';
+  }
+
+  @override
+  String get firstAidVideoPackNotReviewed =>
+      'Checked by: not stated. The app does not check the films in a pack; the written and drawn guides are what counts.';
 }

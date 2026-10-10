@@ -2460,5 +2460,9 @@
   "knowledgeCostsArchives": "{count, plural, =1{1 archivo, {size} en el disco.} other{{count} archivos, {size} en el disco en total.}}",
   "knowledgeCostsUnknown": "{count, plural, =1{De uno aún no se conoce el tamaño hasta que se haya abierto una vez.} other{De {count} aún no se conoce el tamaño hasta que se hayan abierto una vez.}}",
   "knowledgeCostsIndexes": "Índices de búsqueda propios: {size}.",
-  "knowledgeCostsMemory": "Solo hay un archivo abierto a la vez. Descomprime como máximo {cluster} de golpe y guarda hasta {cache} en caché; los demás solo ocupan espacio."
+  "knowledgeCostsMemory": "Solo hay un archivo abierto a la vez. Descomprime como máximo {cluster} de golpe y guarda hasta {cache} en caché; los demás solo ocupan espacio.",
+  "firstAidVideoPackPublisher": "Reunido por: {who}",
+  "firstAidVideoPackNotStated": "sin indicar",
+  "firstAidVideoPackReviewed": "Revisado, según el paquete: {who}",
+  "firstAidVideoPackNotReviewed": "Revisión: sin indicar. La app no revisa los vídeos de un paquete; valen las guías en texto y dibujos."
 }

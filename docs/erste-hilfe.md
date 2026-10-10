@@ -334,6 +334,9 @@ sie nennt.
   "name": "Erste Hilfe – Videopaket",
   "language": "de",
   "baseUrl": "https://example.org/eh/",
+  "publisher": "Ortsverein Musterstadt",
+  "reviewedBy": "Notfallsanitäterin, Oktober 2026",
+  "about": "Eigene Aufnahmen vom Übungsabend, CC BY 4.0.",
   "videos": [
     {
       "id": "hdm",
@@ -359,13 +362,22 @@ sie nennt.
 | `url` | Absolut oder relativ zu `baseUrl`. Fehlt sie, ist das Paket nur als Datei zu bekommen. |
 | `bytes`, `sha256` | Werden nach dem Laden geprüft. Passt etwas nicht, wird die Datei gelöscht statt behalten. |
 | `credit`, `licence` | Stehen unter dem Video. Die meisten freien Lizenzen verlangen das, und der Zuschauer beurteilt danach, was er da sieht. |
+| `publisher` | Wer das Paket zusammengestellt hat. Optional; fehlt es, steht dort „nicht angegeben“. |
+| `reviewedBy` | Wer die Filme gegen die aktuelle Erste-Hilfe-Lehre geprüft hat, und wann – so, wie das Paket es angibt. Optional. Fehlt es, sagt die App ausdrücklich, dass keine Prüfung angegeben ist: Sie selbst prüft die Filme eines Pakets nicht (#58). |
+| `about` | Ein kurzer Absatz, woher die Filme stammen. Optional. |
+
+Die drei Angaben zum Paket stehen vor dem Herunterladen und beim
+installierten Paket. Ältere Versionen der App übergehen sie.
 
 ### Ein Paket bauen
 
 ```bash
 tool/erste_hilfe_paket.sh --ids          # welche Anleitungen es gibt
-tool/erste_hilfe_paket.sh <ordner> [basis-url] [paketname]
+tool/erste_hilfe_paket.sh <ordner> [basis-url] [paketname] [zusammengestellt-von] [geprueft-von]
 ```
+
+`geprueft-von` bleibt leer, wenn niemand die Filme wirklich geprüft hat.
+Eine `herkunft.txt` im Ordner wird zu `about`.
 
 Der Ordner enthält die Videodateien und eine `videos.tsv` mit einer Zeile
 je Clip:

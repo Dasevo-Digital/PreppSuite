@@ -262,6 +262,10 @@ class _Installed extends ConsumerWidget {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: PackProvenance(pack: pack),
+          ),
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.delete_outline),
@@ -327,6 +331,8 @@ class _Offer extends ConsumerWidget {
                 formatByteSize(pack.totalBytes),
               ),
             ),
+            const SizedBox(height: 8),
+            PackProvenance(pack: pack),
             const SizedBox(height: 8),
             for (final video in pack.videos)
               ListTile(
@@ -416,6 +422,49 @@ class _Progress extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Where a pack comes from and whether anybody checked it (#58).
+///
+/// Before the download as well as after: who made a set of first aid films
+/// is part of deciding whether to watch them. A pack that does not say who
+/// checked it is shown as exactly that, never as nothing.
+class PackProvenance extends StatelessWidget {
+  const PackProvenance({super.key, required this.pack});
+
+  final FirstAidVideoPack pack;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final small = theme.textTheme.bodySmall;
+    final reviewed = pack.reviewedBy;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.firstAidVideoPackPublisher(
+            pack.publisher ?? l10n.firstAidVideoPackNotStated,
+          ),
+          style: small,
+        ),
+        Text(
+          reviewed == null
+              ? l10n.firstAidVideoPackNotReviewed
+              : l10n.firstAidVideoPackReviewed(reviewed),
+          style: reviewed == null
+              ? small?.copyWith(color: theme.colorScheme.error)
+              : small,
+        ),
+        if (pack.about case final about?) ...[
+          const SizedBox(height: 4),
+          Text(about, style: small),
+        ],
+      ],
     );
   }
 }

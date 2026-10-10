@@ -16,7 +16,11 @@
 #   hdm.mp4	cpr-adult	Herzdruckmassage	Jane Doe	CC BY-SA 4.0	95
 #
 # `anleitung` is the id of the guide the clip belongs to. The ids are the
-# `id:` values in first_aid_guides_de.dart; --ids prints them.
+# `## ` headings in preppsuite_flutter/content/first_aid/de.md; --ids
+# prints them.
+#
+# Optionally, beside it, herkunft.txt: a short paragraph on where the
+# films come from. It is shown with the pack, before and after download.
 #
 # Lines beginning with # and blank lines are skipped, so the file can be
 # commented.
@@ -29,8 +33,14 @@
 #   <ordner>/ErsteHilfe-Videopaket.zip       description and videos together
 #
 # Usage:
-#   tool/erste_hilfe_paket.sh <ordner> [basis-url] [paketname]
+#   tool/erste_hilfe_paket.sh <ordner> [basis-url] [paketname] \
+#       [zusammengestellt-von] [geprueft-von]
 #   tool/erste_hilfe_paket.sh --ids
+#
+# `zusammengestellt-von` names who put the pack together, `geprueft-von`
+# who checked the films against current first aid teaching, and when.
+# Both are shown with the pack. Leave the second empty unless somebody
+# really did: the app then says "not stated", which is the truth.
 #
 # With a basis-url the description carries a `baseUrl`, and every clip
 # gets a relative address under it -- that is what makes the pack
@@ -43,18 +53,21 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-guides="$here/preppsuite_flutter/lib/features/first_aid/application/first_aid_guides_de.dart"
+guides="$here/preppsuite_flutter/content/first_aid/de.md"
 
 if [[ "${1:-}" == "--ids" ]]; then
-  # The single source of truth is the Dart file; printing from it means
-  # this can never list an id the app does not have.
-  grep -o "id: '[a-z-]*'" "$guides" | sed "s/id: '//;s/'//"
+  # The guides' text is the single source of truth, and the app is
+  # generated from it; printing from it means this can never list an id
+  # the app does not have.
+  grep '^## ' "$guides" | sed 's/^## //'
   exit 0
 fi
 
 folder="${1:-}"
 base_url="${2:-}"
 pack_name="${3:-Erste Hilfe – Videopaket}"
+publisher="${4:-}"
+reviewed_by="${5:-}"
 
 if [[ -z "$folder" || ! -d "$folder" ]]; then
   echo "Usage: tool/erste_hilfe_paket.sh <ordner> [basis-url] [paketname]" >&2
@@ -69,7 +82,7 @@ if [[ ! -f "$list" ]]; then
   exit 2
 fi
 
-known_ids="$(grep -o "id: '[a-z-]*'" "$guides" | sed "s/id: '//;s/'//")"
+known_ids="$(grep '^## ' "$guides" | sed 's/^## //')"
 
 manifest="$folder/paket.json"
 tmp="$(mktemp)"
@@ -80,6 +93,15 @@ trap 'rm -f "$tmp"' EXIT
   echo '  "format": 1,'
   printf '  "name": %s,\n' "$(printf '%s' "$pack_name" | sed 's/\\/\\\\/g; s/"/\\"/g; s/^/"/; s/$/"/')"
   echo '  "language": "de",'
+  if [[ -n "$publisher" ]]; then
+    printf '  "publisher": %s,\n' "$(printf '%s' "$publisher" | sed 's/\\/\\\\/g; s/"/\\"/g; s/^/"/; s/$/"/')"
+  fi
+  if [[ -n "$reviewed_by" ]]; then
+    printf '  "reviewedBy": %s,\n' "$(printf '%s' "$reviewed_by" | sed 's/\\/\\\\/g; s/"/\\"/g; s/^/"/; s/$/"/')"
+  fi
+  if [[ -f "$folder/herkunft.txt" ]]; then
+    printf '  "about": %s,\n' "$(tr '\n' ' ' < "$folder/herkunft.txt" | sed 's/ *$//; s/\\/\\\\/g; s/"/\\"/g; s/^/"/; s/$/"/')"
+  fi
   if [[ -n "$base_url" ]]; then
     printf '  "baseUrl": "%s",\n' "$base_url"
   fi

@@ -14880,6 +14880,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only one archive is ever open. It unpacks at most {cluster} at a time and keeps up to {cache} in its cache; the others cost only disk space.'**
   String knowledgeCostsMemory(String cluster, String cache);
+
+  /// No description provided for @firstAidVideoPackPublisher.
+  ///
+  /// In en, this message translates to:
+  /// **'Put together by: {who}'**
+  String firstAidVideoPackPublisher(String who);
+
+  /// No description provided for @firstAidVideoPackNotStated.
+  ///
+  /// In en, this message translates to:
+  /// **'not stated'**
+  String get firstAidVideoPackNotStated;
+
+  /// No description provided for @firstAidVideoPackReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked, as the pack states: {who}'**
+  String firstAidVideoPackReviewed(String who);
+
+  /// No description provided for @firstAidVideoPackNotReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked by: not stated. The app does not check the films in a pack; the written and drawn guides are what counts.'**
+  String get firstAidVideoPackNotReviewed;
 }
 
 class _AppLocalizationsDelegate

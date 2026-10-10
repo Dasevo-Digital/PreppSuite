@@ -55,6 +55,31 @@ void main() {
       expect(pack.totalBytes, 1234);
     });
 
+    test('who made it and who checked it come along (#58)', () {
+      final decoded = jsonDecode(manifest()) as Map<String, Object?>;
+      final pack = FirstAidVideoPack.parse(
+        jsonEncode({
+          ...decoded,
+          'publisher': 'Ortsverein Musterstadt',
+          'reviewedBy': 'Notfallsanitäterin, Oktober 2026',
+          'about': 'Eigene Aufnahmen, CC BY 4.0.',
+        }),
+      );
+
+      expect(pack.publisher, 'Ortsverein Musterstadt');
+      expect(pack.reviewedBy, 'Notfallsanitäterin, Oktober 2026');
+      expect(pack.about, 'Eigene Aufnahmen, CC BY 4.0.');
+      final again = FirstAidVideoPack.parse(pack.toJsonString());
+      expect(again.reviewedBy, pack.reviewedBy);
+    });
+
+    test('a pack that does not say stays without, not invented', () {
+      final pack = FirstAidVideoPack.parse(manifest());
+
+      expect(pack.publisher, isNull);
+      expect(pack.reviewedBy, isNull);
+    });
+
     test('a login page is refused with a sentence, not a stack trace', () {
       expect(
         () => FirstAidVideoPack.parse('<html><body>Sign in</body></html>'),

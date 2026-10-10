@@ -5253,5 +5253,23 @@
         "type": "String"
       }
     }
-  }
+  },
+  "firstAidVideoPackPublisher": "Put together by: {who}",
+  "@firstAidVideoPackPublisher": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "firstAidVideoPackNotStated": "not stated",
+  "firstAidVideoPackReviewed": "Checked, as the pack states: {who}",
+  "@firstAidVideoPackReviewed": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "firstAidVideoPackNotReviewed": "Checked by: not stated. The app does not check the films in a pack; the written and drawn guides are what counts."
 }

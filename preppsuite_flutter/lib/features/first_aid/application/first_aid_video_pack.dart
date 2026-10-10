@@ -131,9 +131,26 @@ class FirstAidVideoPack {
     required this.language,
     required this.videos,
     this.baseUrl,
+    this.publisher,
+    this.reviewedBy,
+    this.about,
   });
 
   final String name;
+
+  /// Who put the pack together (#58). Anybody can build one -- the app
+  /// ships none and points at none -- so who did is the first thing a
+  /// household needs to judge it by.
+  final String? publisher;
+
+  /// Who checked the films against current first aid teaching, and when,
+  /// as the pack says. Null is said out loud on screen as "not stated":
+  /// the app checks nothing inside a pack, and silence would read as a
+  /// seal it never gave.
+  final String? reviewedBy;
+
+  /// A short paragraph on where the films come from.
+  final String? about;
 
   /// A language tag: `de`, `en`.
   final String language;
@@ -209,11 +226,21 @@ class FirstAidVideoPack {
     }
 
     final base = decoded['baseUrl'];
+    // Optional, and new in the same format: a pack without them is read
+    // as before, and an older app reading a pack with them skips them.
+    final manifest = decoded;
+    String? text(String key) => switch (manifest[key]) {
+      final String value when value.trim().isNotEmpty => value.trim(),
+      _ => null,
+    };
     return FirstAidVideoPack(
       name: decoded['name'] as String? ?? 'Videos',
       language: decoded['language'] as String? ?? 'de',
       videos: videos,
       baseUrl: base is String && base.isNotEmpty ? Uri.parse(base) : from,
+      publisher: text('publisher'),
+      reviewedBy: text('reviewedBy'),
+      about: text('about'),
     );
   }
 
@@ -222,6 +249,9 @@ class FirstAidVideoPack {
     'name': name,
     'language': language,
     if (baseUrl != null) 'baseUrl': baseUrl.toString(),
+    if (publisher != null) 'publisher': publisher,
+    if (reviewedBy != null) 'reviewedBy': reviewedBy,
+    if (about != null) 'about': about,
     'videos': [for (final video in videos) video.toJson()],
   });
 }
