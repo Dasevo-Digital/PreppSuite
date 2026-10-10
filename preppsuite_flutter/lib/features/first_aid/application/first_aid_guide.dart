@@ -9,11 +9,17 @@
 /// Not the ARB files, because medical text has to be reviewable as prose.
 /// Forty-six guides are some six hundred strings; scattered through
 /// eleven hundred lines of interface wording, nobody could ever read them
-/// end to end and check them against the guideline they came from. They live in
-/// `first_aid_guides_de.dart` and `first_aid_guides_en.dart` instead, one
-/// file per language, each readable in one sitting.
-/// `first_aid_guides_test.dart` holds the two files to the same ids and
-/// the same step counts, which is the part a compiler cannot check.
+/// end to end and check them against the guideline they came from.
+///
+/// Not Dart either, any more (#146). The text lives in
+/// `content/first_aid/<language>.md`, one file per language, each
+/// readable in one sitting by somebody who checks or translates it
+/// without reading code. `tool/first_aid/generate.dart` turns it into
+/// `first_aid_guides_de.dart` and `first_aid_guides_en.dart`, which the
+/// app compiles in: nothing is parsed at run time, so first aid opens
+/// whatever else fails. `first_aid_content_test.dart` holds the generated
+/// code to the Markdown and every language to the same ids and step
+/// counts, which is the part a compiler cannot check.
 library;
 
 /// Where a guide sits in the list.

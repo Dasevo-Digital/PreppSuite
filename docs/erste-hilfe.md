@@ -115,13 +115,18 @@ könnte sie niemand am Stück gegen die Leitlinie lesen.
 
 Sie liegen in
 
-- `lib/features/first_aid/application/first_aid_guides_de.dart`
-- `lib/features/first_aid/application/first_aid_guides_en.dart`
+- `preppsuite_flutter/content/first_aid/de.md`
+- `preppsuite_flutter/content/first_aid/en.md`
 
-je eine Datei pro Sprache, jede an einem Stück lesbar.
-`test/features/first_aid/first_aid_guides_test.dart` hält beide auf
+je eine Datei pro Sprache, jede an einem Stück lesbar, ohne Programmcode
+(#146). Der Aufbau steht in `content/first_aid/README.md`. Daraus erzeugt
+`tool/first_aid/generate.dart` die Dart-Dateien, die in die App
+einkompiliert werden; zur Laufzeit wird nichts eingelesen, damit Erste
+Hilfe auch dann aufgeht, wenn sonst nichts geht.
+`test/features/first_aid/first_aid_content_test.dart` hält den erzeugten
+Code am Markdown fest, `first_aid_guides_test.dart` beide Sprachen auf
 dieselben Kennungen, dieselbe Reihenfolge und dieselbe Zahl an Schritten,
-Warnungen und Kennzahlen fest. Eine Übersetzung, die stillschweigend einen
+Warnungen und Kennzahlen. Eine Übersetzung, die stillschweigend einen
 Schritt verliert, verliert einen Schritt einer Wiederbelebung.
 
 Die Kennung einer Anleitung (`cpr-adult`, `recovery-position`, …) ist über

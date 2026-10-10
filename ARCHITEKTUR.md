@@ -564,11 +564,16 @@ Spanish there means a third file per content set and its review, not a
 switch.
 
 **The first aid guides are the one deliberate exception to that,** and
-they are content rather than interface: `first_aid_guides_de.dart` and
-`first_aid_guides_en.dart`, one file per language. Medical text has to be
+they are content rather than interface: `content/first_aid/de.md` and
+`en.md`, one file per language. Medical text has to be
 reviewable as prose against the guideline it came from, and two hundred
 strings scattered through fourteen hundred lines of interface wording
-cannot be read end to end by anybody. `first_aid_guides_test.dart` holds
+cannot be read end to end by anybody. Since #146 the Markdown is the
+source and `tool/first_aid/generate.dart` writes `first_aid_guides_de.dart`
+and `first_aid_guides_en.dart` from it; the app compiles those in and
+parses nothing at run time, because first aid is the screen that has to
+open when nothing else does. `first_aid_content_test.dart` fails while
+the two disagree. `first_aid_guides_test.dart` holds
 the two files to the same ids, the same order and the same number of
 steps, cautions and figures — a translation that quietly drops a step
 drops a step of a resuscitation. Buttons and headings on those screens go
