@@ -8901,4 +8901,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardVet => 'Vet';
+
+  @override
+  String get checklistFoodGroupsHint =>
+      'The amounts here are per person. The supply groups show how much of them your household already has in its stores.';
 }

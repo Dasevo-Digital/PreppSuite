@@ -8977,4 +8977,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cardVet => 'Veterinario';
+
+  @override
+  String get checklistFoodGroupsHint =>
+      'Las cantidades de aquí son por persona. Cuánto de ello tiene ya tu hogar en la reserva lo muestran los grupos de reserva.';
 }

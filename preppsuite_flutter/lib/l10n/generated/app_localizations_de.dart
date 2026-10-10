@@ -8947,4 +8947,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get cardVet => 'Tierärztin oder Tierarzt';
+
+  @override
+  String get checklistFoodGroupsHint =>
+      'Die Mengen hier gelten pro Person. Was davon für deinen Haushalt schon im Vorrat ist, zeigen die Vorratsgruppen.';
 }

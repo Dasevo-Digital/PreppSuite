@@ -14790,6 +14790,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vet'**
   String get cardVet;
+
+  /// No description provided for @checklistFoodGroupsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The amounts here are per person. The supply groups show how much of them your household already has in its stores.'**
+  String get checklistFoodGroupsHint;
 }
 
 class _AppLocalizationsDelegate

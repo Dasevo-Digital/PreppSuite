@@ -3667,5 +3667,6 @@
   "cardShelters": "Wer das Tier im Notfall aufnimmt",
   "cardShelterHint": "z. B. Nachbarin, Tierpension, Tierheim",
   "cardAnimalHint": "Den Impfpass legst du als PDF unter Wissen → Eigene Dokumente ab, etwa mit der Scan-Funktion des Telefons. Futter und Medikamente ordnest du im Vorrat diesem Tier zu. Für das Trinkwasser zählt weiter die Zahl der Tiere im Haushaltsprofil.",
-  "cardVet": "Tierärztin oder Tierarzt"
+  "cardVet": "Tierärztin oder Tierarzt",
+  "checklistFoodGroupsHint": "Die Mengen hier gelten pro Person. Was davon für deinen Haushalt schon im Vorrat ist, zeigen die Vorratsgruppen."
 }

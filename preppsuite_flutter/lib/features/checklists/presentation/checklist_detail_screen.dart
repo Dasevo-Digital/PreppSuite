@@ -11,6 +11,8 @@ import '../application/checklist_controller.dart';
 import '../application/checklist_providers.dart';
 import '../application/checklist_satisfaction.dart';
 import '../../inventory/application/inventory_providers.dart';
+import '../../inventory/presentation/supply_groups_screen.dart';
+import '../../../model/categories.dart';
 import '../../../core/error_text.dart';
 
 class ChecklistDetailScreen extends ConsumerStatefulWidget {
@@ -46,6 +48,12 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
     _newItemController.clear();
   }
 
+  /// A list about food: the BLE's groups per person, which the
+  /// supply-groups screen sets against the household's own stores (#31).
+  bool get _food =>
+      ChecklistCategory.values.asNameMap()[widget.template.category] ==
+      ChecklistCategory.food;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -70,8 +78,16 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
                 error: (error, stackTrace) =>
                     Center(child: Text(describeError(l10n, error))),
                 data: (items) => ListView.builder(
-                  itemCount: items.length,
+                  itemCount: items.length + (_food ? 1 : 0),
                   itemBuilder: (context, index) {
+                    if (_food) {
+                      if (index == 0) {
+                        return _SupplyGroupsLink(
+                          householdId: widget.householdId,
+                        );
+                      }
+                      index -= 1;
+                    }
                     final item = items[index];
                     final linked = inventoryById[item.linkedInventoryItemId];
                     final complete = isChecklistItemSatisfied(
@@ -222,3 +238,35 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
 enum _ItemAction { link, delete }
 
 const _unlinkStock = '__unlink__';
+
+/// Where a food list's amounts meet the stores (#31).
+///
+/// The list says "3,5 kg Getreide pro Person für 10 Tage" and can only be
+/// ticked. The supply-groups screen holds the same BLE groups against what
+/// the household has tagged, scaled to its own people and days -- the
+/// answer the tick box cannot give. A link rather than a copy: two places
+/// working the groups out would be two answers.
+class _SupplyGroupsLink extends StatelessWidget {
+  const _SupplyGroupsLink({required this.householdId});
+
+  final String householdId;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Card(
+      margin: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+      child: ListTile(
+        leading: const Icon(Icons.donut_small_outlined),
+        title: Text(l10n.supplyGroupsTitle),
+        subtitle: Text(l10n.checklistFoodGroupsHint),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => SupplyGroupsScreen(householdId: householdId),
+          ),
+        ),
+      ),
+    );
+  }
+}

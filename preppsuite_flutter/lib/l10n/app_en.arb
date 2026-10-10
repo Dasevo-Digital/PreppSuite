@@ -5190,5 +5190,6 @@
   "cardShelters": "Who takes the animal in an emergency",
   "cardShelterHint": "e.g. neighbour, boarding kennel, shelter",
   "cardAnimalHint": "Keep the vaccination record as a PDF under Knowledge → Personal documents, for example with your phone’s scan function. Food and medicines are assigned to this animal in the stores. For drinking water, the number of animals in the household profile still counts.",
-  "cardVet": "Vet"
+  "cardVet": "Vet",
+  "checklistFoodGroupsHint": "The amounts here are per person. The supply groups show how much of them your household already has in its stores."
 }

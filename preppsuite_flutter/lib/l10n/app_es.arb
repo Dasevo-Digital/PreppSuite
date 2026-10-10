@@ -2445,5 +2445,6 @@
   "cardShelters": "Quién acoge al animal en una emergencia",
   "cardShelterHint": "p. ej. vecina, residencia canina, protectora",
   "cardAnimalHint": "Guarda la cartilla de vacunación como PDF en Saber → Documentos personales, por ejemplo con la función de escaneo del teléfono. La comida y los medicamentos se asignan a este animal en la reserva. Para el agua sigue contando el número de animales del perfil del hogar.",
-  "cardVet": "Veterinario"
+  "cardVet": "Veterinario",
+  "checklistFoodGroupsHint": "Las cantidades de aquí son por persona. Cuánto de ello tiene ya tu hogar en la reserva lo muestran los grupos de reserva."
 }
