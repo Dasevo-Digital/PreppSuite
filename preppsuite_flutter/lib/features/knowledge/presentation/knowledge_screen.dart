@@ -9,7 +9,9 @@ import '../../../core/content_swap.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../application/article_viewer.dart';
 import '../application/article_viewer_choice.dart';
+import '../application/archive_memory_limits.dart';
 import '../application/knowledge_providers.dart';
+import '../application/library_costs.dart';
 import '../application/knowledge_bookmark_store.dart';
 import '../application/personal_document_index.dart';
 import '../application/personal_document_store.dart';
@@ -156,6 +158,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
               // meant the progress vanished.
               const DownloadBanner(),
               _ArchiveSwitcher(state: state, l10n: l10n),
+              const _LibraryCostsNote(),
               Expanded(
                 child: _EmptyState(
                   state: state,
@@ -264,6 +267,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
               nested: true,
               onSelect: (id) => _select(l10n, state, id),
             ),
+            const _LibraryCostsNote(),
             if (state.isReady)
               _BrowseArchive(
                 nested: true,
@@ -1234,6 +1238,54 @@ class _Centered extends StatelessWidget {
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+      ),
+    );
+  }
+}
+
+/// What the whole library costs the device (#26): the archives on disk,
+/// the indexes the app built over them, and what an open one holds in
+/// memory -- only ever one, which is why the library may grow.
+class _LibraryCostsNote extends ConsumerWidget {
+  const _LibraryCostsNote();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final costs = ref.watch(libraryCostsProvider).value;
+    if (costs == null || costs.archives == 0) return const SizedBox.shrink();
+    final style = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.knowledgeCostsArchives(
+              costs.archives,
+              _formatBytes(costs.archiveBytes),
+            ),
+            style: style,
+          ),
+          if (costs.unknownSizes > 0)
+            Text(l10n.knowledgeCostsUnknown(costs.unknownSizes), style: style),
+          if (costs.indexBytes > 0)
+            Text(
+              l10n.knowledgeCostsIndexes(_formatBytes(costs.indexBytes)),
+              style: style,
+            ),
+          Text(
+            l10n.knowledgeCostsMemory(
+              _formatBytes(maxClusterBytes),
+              _formatBytes(clusterCacheBytes),
+            ),
+            style: style,
+          ),
+        ],
       ),
     );
   }

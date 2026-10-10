@@ -8989,4 +8989,38 @@ class AppLocalizationsDe extends AppLocalizations {
   String kiwixInEnglish(String name) {
     return '$name (englisch)';
   }
+
+  @override
+  String knowledgeCostsArchives(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Archive, zusammen $size auf dem Datenträger.',
+      one: '1 Archiv, $size auf dem Datenträger.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String knowledgeCostsUnknown(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Bei $count ist die Größe noch unbekannt, bis sie einmal geöffnet waren.',
+      one:
+          'Bei einem ist die Größe noch unbekannt, bis es einmal geöffnet war.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String knowledgeCostsIndexes(String size) {
+    return 'Eigene Suchindizes: $size.';
+  }
+
+  @override
+  String knowledgeCostsMemory(String cluster, String cache) {
+    return 'Geöffnet ist immer nur ein Archiv. Es entpackt höchstens $cluster auf einmal und hält bis zu $cache im Zwischenspeicher; die übrigen kosten nur Platz.';
+  }
 }

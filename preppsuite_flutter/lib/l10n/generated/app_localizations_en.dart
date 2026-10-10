@@ -8942,4 +8942,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String kiwixInEnglish(String name) {
     return '$name';
   }
+
+  @override
+  String knowledgeCostsArchives(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count archives, $size on disk together.',
+      one: '1 archive, $size on disk.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String knowledgeCostsUnknown(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count have no known size until they have been opened once.',
+      one: 'One has no known size until it has been opened once.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String knowledgeCostsIndexes(String size) {
+    return 'Search indexes built by the app: $size.';
+  }
+
+  @override
+  String knowledgeCostsMemory(String cluster, String cache) {
+    return 'Only one archive is ever open. It unpacks at most $cluster at a time and keeps up to $cache in its cache; the others cost only disk space.';
+  }
 }

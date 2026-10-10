@@ -131,7 +131,11 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
   ///
   /// This is deliberately file based rather than an SQLite page estimate, so
   /// the size shown in the app matches storage the operating system reports.
-  Future<int> storageBytes(String archiveId) async {
+  Future<int> storageBytes(String archiveId) => storageBytesFor(archiveId);
+
+  /// [storageBytes] without opening the index -- for adding up every
+  /// archive's at once (#26).
+  static Future<int> storageBytesFor(String archiveId) async {
     final base = await _databasePath(archiveId);
     var bytes = 0;
     for (final path in [base, '$base-wal', '$base-shm']) {

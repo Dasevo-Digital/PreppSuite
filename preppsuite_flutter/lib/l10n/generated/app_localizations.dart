@@ -14856,6 +14856,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name}'**
   String kiwixInEnglish(String name);
+
+  /// No description provided for @knowledgeCostsArchives.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 archive, {size} on disk.} other{{count} archives, {size} on disk together.}}'**
+  String knowledgeCostsArchives(int count, String size);
+
+  /// No description provided for @knowledgeCostsUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{One has no known size until it has been opened once.} other{{count} have no known size until they have been opened once.}}'**
+  String knowledgeCostsUnknown(int count);
+
+  /// No description provided for @knowledgeCostsIndexes.
+  ///
+  /// In en, this message translates to:
+  /// **'Search indexes built by the app: {size}.'**
+  String knowledgeCostsIndexes(String size);
+
+  /// No description provided for @knowledgeCostsMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Only one archive is ever open. It unpacks at most {cluster} at a time and keeps up to {cache} in its cache; the others cost only disk space.'**
+  String knowledgeCostsMemory(String cluster, String cache);
 }
 
 class _AppLocalizationsDelegate

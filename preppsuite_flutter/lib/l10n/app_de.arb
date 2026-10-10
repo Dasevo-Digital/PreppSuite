@@ -3678,5 +3678,9 @@
   "kiwixAlreadyHereBody": "„{title}“ liegt in genau dieser Fassung schon auf dem Gerät. Noch einmal herunterladen, etwa weil die Datei beschädigt ist?",
   "kiwixDownloadAgain": "Noch einmal herunterladen",
   "kiwixCrisisShortcuts": "Für den Ernstfall",
-  "kiwixInEnglish": "{name} (englisch)"
+  "kiwixInEnglish": "{name} (englisch)",
+  "knowledgeCostsArchives": "{count, plural, =1{1 Archiv, {size} auf dem Datenträger.} other{{count} Archive, zusammen {size} auf dem Datenträger.}}",
+  "knowledgeCostsUnknown": "{count, plural, =1{Bei einem ist die Größe noch unbekannt, bis es einmal geöffnet war.} other{Bei {count} ist die Größe noch unbekannt, bis sie einmal geöffnet waren.}}",
+  "knowledgeCostsIndexes": "Eigene Suchindizes: {size}.",
+  "knowledgeCostsMemory": "Geöffnet ist immer nur ein Archiv. Es entpackt höchstens {cluster} auf einmal und hält bis zu {cache} im Zwischenspeicher; die übrigen kosten nur Platz."
 }

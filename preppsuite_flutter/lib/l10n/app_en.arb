@@ -5215,5 +5215,43 @@
         "type": "String"
       }
     }
+  },
+  "knowledgeCostsArchives": "{count, plural, =1{1 archive, {size} on disk.} other{{count} archives, {size} on disk together.}}",
+  "@knowledgeCostsArchives": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "knowledgeCostsUnknown": "{count, plural, =1{One has no known size until it has been opened once.} other{{count} have no known size until they have been opened once.}}",
+  "@knowledgeCostsUnknown": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeCostsIndexes": "Search indexes built by the app: {size}.",
+  "@knowledgeCostsIndexes": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "knowledgeCostsMemory": "Only one archive is ever open. It unpacks at most {cluster} at a time and keeps up to {cache} in its cache; the others cost only disk space.",
+  "@knowledgeCostsMemory": {
+    "placeholders": {
+      "cluster": {
+        "type": "String"
+      },
+      "cache": {
+        "type": "String"
+      }
+    }
   }
 }

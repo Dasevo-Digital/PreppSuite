@@ -2456,5 +2456,9 @@
   "kiwixAlreadyHereBody": "«{title}» ya está en el dispositivo en esta misma versión. ¿Descargarlo de nuevo, por ejemplo porque el archivo está dañado?",
   "kiwixDownloadAgain": "Descargar de nuevo",
   "kiwixCrisisShortcuts": "Para una emergencia",
-  "kiwixInEnglish": "{name} (en inglés)"
+  "kiwixInEnglish": "{name} (en inglés)",
+  "knowledgeCostsArchives": "{count, plural, =1{1 archivo, {size} en el disco.} other{{count} archivos, {size} en el disco en total.}}",
+  "knowledgeCostsUnknown": "{count, plural, =1{De uno aún no se conoce el tamaño hasta que se haya abierto una vez.} other{De {count} aún no se conoce el tamaño hasta que se hayan abierto una vez.}}",
+  "knowledgeCostsIndexes": "Índices de búsqueda propios: {size}.",
+  "knowledgeCostsMemory": "Solo hay un archivo abierto a la vez. Descomprime como máximo {cluster} de golpe y guarda hasta {cache} en caché; los demás solo ocupan espacio."
 }
