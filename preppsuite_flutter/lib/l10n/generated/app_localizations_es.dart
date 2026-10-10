@@ -9091,7 +9091,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get knowledgeRecognizeBody =>
-      'La app lee cada página de este escaneo como imagen y reconoce el texto, en este dispositivo; nada sale de él. Lleva tiempo: en un teléfono de gama media se midió alrededor de un segundo por página, en un ordenador mucho menos. El texto reconocido puede tener huecos que la app no detecta. Suele bastar para buscar, no como transcripción.';
+      'La app lee cada página de este escaneo como imagen y reconoce el texto, en este dispositivo; nada sale de él. Lleva tiempo, mucho más en un teléfono que en un ordenador, y muchos minutos en un documento largo. El texto reconocido puede tener huecos que la app no detecta. Suele bastar para buscar, no como transcripción.';
 
   @override
   String get knowledgeRecognizeStarting => 'Empezando el reconocimiento …';

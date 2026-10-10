@@ -2515,14 +2515,23 @@ BGRA-Pixel über den Kanal `de.dasevo.preppsuite/text_recognition`:
 `TextRecognitionBridge.swift` (Vision, macOS und iOS, dieselbe Datei),
 `windows/runner/text_recognition.cpp` (`Windows.Media.Ocr`, in einem
 eigenen Thread, die Antwort über eine Fenster-Nachricht, weil ein Kanal
-nur auf dem Fenster-Thread antworten darf) und unter Linux die
+nur auf dem Fenster-Thread antworten darf), `TextRecognition.kt`
+(Tesseract4Android mit `tessdata_fast` für Deutsch und Englisch aus den
+Assets, ebenfalls in einem eigenen Thread) und unter Linux die
 Kommandozeile von Tesseract, falls installiert. Erkannter Text wird als
 solcher markiert (`PersonalDocument.recognized`), weil eine Erkennung
 Lücken haben kann, ohne sie zu melden.
 
-**Kein Erkenner, der Daten an Dritte schickt.** Android hat deshalb noch
-keinen: ML Kit sendet nach seinen Bedingungen Nutzungsdaten an Google.
-Ein neuer Erkenner muss auf dem Gerät laufen und nichts senden.
+**Kein Erkenner, der Daten an Dritte schickt.** Android liest deshalb mit
+Tesseract und nicht mit ML Kit, obwohl ML Kit in der Messung etwas besser
+las: ML Kit sendet nach seinen Bedingungen Nutzungsdaten an Google. Ein
+neuer Erkenner muss auf dem Gerät laufen und nichts senden. Die
+Sprachdaten liegen als Assets im APK (`android/app/src/main/assets/tessdata`,
+Herkunft und Prüfsummen in `third_party/tessdata_fast`) und werden beim
+ersten Erkennen in `filesDir` kopiert, über eine `.part`-Datei, damit ein
+abgebrochenes Kopieren nicht als fertige Datei liegen bleibt. Die
+ProGuard-Regeln halten die JNI-Klassen von Tesseract und Leptonica, die
+R8 sonst entfernt, weil nur nativer Code sie aufruft.
 
 ### Markierbar ist jeder Bildschirm für sich
 

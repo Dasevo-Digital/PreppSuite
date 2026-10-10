@@ -179,17 +179,35 @@ Erkennung sich von einer vollständigen nicht unterscheiden lässt.
 
 ## Umsetzung (#66)
 
-Gebaut für macOS und iOS (Vision), Windows (`Windows.Media.Ocr`) und
-Linux (Tesseract über die Kommandozeile, falls installiert). Die Seiten
+Gebaut für macOS und iOS (Vision), Windows (`Windows.Media.Ocr`),
+Android (Tesseract in der App) und Linux (Tesseract über die
+Kommandozeile, falls installiert). Die Seiten
 zeichnet PDFium, das die App ohnehin mitbringt, mit 150 dpi und höchstens
 4000 Pixeln an der langen Seite, eine Seite nach der anderen; die Engines
 bekommen dieselben BGRA-Pixel. `integration_test/native_text_recognition_test.dart`
 legt einen bekannten Satz als Bild in ein PDF ohne Textebene und liest ihn
-zurück; bestanden im iPhone-Simulator, unter Windows und unter Linux.
+zurück; bestanden im iPhone-Simulator, unter Windows und unter Linux,
+für Android läuft er im Emulator der CI.
 
-**Android: zurückgestellt.** Laut den
+**Android: Tesseract statt ML Kit.** Laut den
 [ML-Kit-Bedingungen](https://developers.google.com/ml-kit/terms) bleiben
 die Bilder zwar auf dem Gerät, ML Kit schickt aber Kennzahlen zu Leistung
 und Nutzung an Google und fragt von Zeit zu Zeit nach Updates; eine
 Abschaltung nennen die Bedingungen nicht. Das war in der Messung nicht
-bedacht.
+bedacht. Android liest deshalb mit Tesseract 5.5.1 (Tesseract4Android
+4.9.0) und den Daten aus `tessdata_fast` 4.1.0 für Deutsch und Englisch.
+
+Was es kostet, gemessen am Release-Paket für arm64-v8a: 7,0 MB
+Bibliotheken (`libtesseract.so` 4,2 MB, `libleptonica.so` 2,9 MB),
+dazu die Sprachdaten, im Paket komprimiert 2,8 MB, entpackt 5,6 MB. Das
+Paket wächst damit um rund 10 MB, ähnlich viel wie ML Kit gekostet hätte.
+Die Sprachdaten legt die App beim ersten Erkennen einmal in ihren eigenen
+Speicher, weil Tesseract eine Datei lesen will und keinen Asset-Strom.
+
+**Nicht gemessen** ist, wie schnell und wie gut Tesseract auf einem
+Telefon liest. Der Test im Emulator zeigt nur, dass es liest. Die
+schnellen Daten lesen nach Angabe des Tesseract-Projekts etwas schlechter
+als die großen (`tessdata_best`, für Deutsch und Englisch zusammen rund
+24 MB). Wie viel das bei echten Scans ausmacht, ist die nächste Messung,
+am Telefon und mit derselben BBK-Broschüre wie oben; die Sonde unter
+`tool/ocr_probe/android/` fragt bisher nur ML Kit.

@@ -227,10 +227,10 @@ Systems gelesen, Seite für Seite, auf dem Gerät.
 | macOS, iOS | Apple Vision, im System | iPhone-Simulator geprüft |
 | Windows | `Windows.Media.Ocr`, im System, für installierte Sprachpakete | geprüft |
 | Linux | Tesseract, falls installiert (`tesseract-ocr`, `tesseract-ocr-deu`) | geprüft |
-| Android | noch keine | siehe unten |
+| Android | Tesseract 5, in der App, mit deutschen und englischen Daten | im Emulator geprüft |
 
-Vorher sagt ein Dialog, was das heißt: Es dauert (gemessen rund eine
-Sekunde je Seite auf einem Mittelklasse-Telefon), es bleibt auf dem Gerät,
+Vorher sagt ein Dialog, was das heißt: Es dauert, am Telefon deutlich
+länger als an einem Rechner, es bleibt auf dem Gerät,
 und **erkannter Text kann Lücken haben, ohne dass etwas sie meldet** – die
 Messung fand eine Seite, auf der Vision ganze Absätze ausließ und dabei
 volle Zuversicht meldete. Ein so gelesenes Dokument steht in der Liste mit
@@ -238,12 +238,13 @@ volle Zuversicht meldete. Ein so gelesenes Dokument steht in der Liste mit
 Bildschirm an, weil Android die Arbeit sonst mit dem dunklen Bildschirm
 anhält.
 
-Android hat noch keine Texterkennung. Gemessen war ML Kit mit
-mitgeliefertem Modell, und das liest gut – aber nach Googles eigenen
-Bedingungen sendet ML Kit Leistungs- und Nutzungsdaten an Google, ohne
-Möglichkeit, das abzuschalten. Die Bilder blieben auf dem Gerät, die App
-würde aber Daten an Google schicken, und das tut sie sonst nirgends. Wie
-es dort weitergeht, ist offen.
+Unter Android liest Tesseract, das die App mitbringt: die Bibliothek
+(Tesseract4Android) und die schnellen Sprachdaten für Deutsch und Englisch
+aus `tessdata_fast`. Das macht das Paket rund 10 MB größer; beim ersten
+Erkennen legt die App die 5,6 MB Sprachdaten einmal in ihren eigenen
+Speicher. Gemessen war vorher ML Kit, und das liest gut – aber nach Googles
+eigenen Bedingungen sendet ML Kit Leistungs- und Nutzungsdaten an Google,
+ohne Möglichkeit, das abzuschalten. Tesseract sendet nichts.
 
 Die Messung dazu steht in `texterkennung-messung.md`.
 

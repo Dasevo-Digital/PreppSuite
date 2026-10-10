@@ -6,8 +6,9 @@
 /// was that each system has a good engine of its own, or none:
 ///
 /// * **macOS and iOS**: Apple's Vision, part of the system.
-/// * **Android**: ML Kit with its model bundled, so that it needs neither
-///   a network nor Google's services.
+/// * **Android**: Tesseract, shipped in the APK with German and English
+///   data. ML Kit was measured first and reads a little better, but sends
+///   usage figures to Google by its own terms; Tesseract talks to nobody.
 /// * **Windows**: `Windows.Media.Ocr`, part of the system -- for the
 ///   languages whose language pack is installed.
 /// * **Linux**: Tesseract, which no Linux system has by default and which
@@ -62,8 +63,8 @@ abstract interface class TextRecognizer {
   Future<String> recognize(PageImage page);
 }
 
-/// The system's own engine, through the app's platform channel: Vision on
-/// Apple systems, ML Kit on Android, `Windows.Media.Ocr` on Windows.
+/// The engine behind the app's platform channel: Vision on Apple systems,
+/// Tesseract inside the Android app, `Windows.Media.Ocr` on Windows.
 class PlatformTextRecognizer implements TextRecognizer {
   const PlatformTextRecognizer();
 

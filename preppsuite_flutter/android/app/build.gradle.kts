@@ -89,6 +89,9 @@ android {
 
     buildTypes {
         release {
+            // Tesseract's Java side is reached from its native code by name,
+            // and an AAR without rules of its own would be shrunk away.
+            proguardFiles("proguard-rules.pro")
             signingConfig = if (hasReleaseKeystore) {
                 signingConfigs.getByName("release")
             } else {
@@ -131,6 +134,11 @@ dependencies {
     // launch theme, or it crashes on Android 8 and older. Named here rather
     // than left to whichever plugin happens to pull it in.
     implementation("androidx.appcompat:appcompat:1.7.0")
+    // Reads scanned pages on the device (#66): Tesseract 5.5.1 with
+    // Leptonica. Not ML Kit, which sends usage figures to Google. Its
+    // language data is in src/main/assets/tessdata, see
+    // third_party/tessdata_fast.
+    implementation("cz.adaptech.tesseract4android:tesseract4android:4.9.0")
 }
 
 // Flutter 3.44 currently writes the dev-only integration_test plugin into

@@ -14944,7 +14944,7 @@ abstract class AppLocalizations {
   /// No description provided for @knowledgeRecognizeBody.
   ///
   /// In en, this message translates to:
-  /// **'The app reads each page of this scan as an image and recognises the text on it, on this device; nothing leaves it. It takes a while: about a second per page was measured on a mid-range phone, much less on a computer. Recognised text can have gaps the app does not notice. It is usually enough for searching, not for a transcript.'**
+  /// **'The app reads each page of this scan as an image and recognises the text on it, on this device; nothing leaves it. It takes a while, much longer on a phone than on a computer, and many minutes for a long document. Recognised text can have gaps the app does not notice. It is usually enough for searching, not for a transcript.'**
   String get knowledgeRecognizeBody;
 
   /// No description provided for @knowledgeRecognizeStarting.

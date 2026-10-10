@@ -54,11 +54,22 @@ class MainActivity : FlutterFragmentActivity() {
      */
     private val fileReads = Executors.newSingleThreadExecutor()
 
+    /** Reads scanned pages (#66); see TextRecognition. */
+    private var textRecognition: TextRecognition? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result -> handle(call, result) }
+        textRecognition =
+            TextRecognition(applicationContext, flutterEngine.dartExecutor.binaryMessenger)
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        textRecognition?.dispose()
+        textRecognition = null
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 
     private fun handle(call: MethodCall, result: MethodChannel.Result) {

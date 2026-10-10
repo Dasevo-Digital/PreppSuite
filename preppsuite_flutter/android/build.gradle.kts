@@ -2,6 +2,13 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Tesseract for reading scanned pages (#66) is published on JitPack
+        // alone. JitPack builds whatever a GitHub repository holds, so it
+        // may answer for that one group and nothing else.
+        exclusiveContent {
+            forRepository { maven("https://jitpack.io") }
+            filter { includeGroup("cz.adaptech.tesseract4android") }
+        }
     }
 }
 

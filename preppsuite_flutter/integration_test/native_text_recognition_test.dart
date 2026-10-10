@@ -13,7 +13,7 @@ import 'package:preppsuite_flutter/features/knowledge/application/text_recogniti
 /// The text recognition of each system, actually asked (#66).
 ///
 /// The unit tests stand a fake engine in for the real one, which proves
-/// everything around it and nothing about whether Vision, ML Kit or
+/// everything around it and nothing about whether Vision, Tesseract or
 /// Windows answer at all -- or answer with the text. Here a known sentence
 /// is drawn as a picture, put into a PDF with no text layer, the way a
 /// scanner makes one, and read back.
@@ -51,23 +51,19 @@ void main() {
     return img.encodePng(image);
   }
 
-  // Android has no engine yet: ML Kit, the one that was measured, sends
-  // usage figures to Google, which this app does not do (#66).
-  final skip = Platform.isAndroid;
-
-  testWidgets('the engine is there', skip: skip, (tester) async {
+  testWidgets('the engine is there', (tester) async {
     final support = await tester.runAsync(() => recognizer().support());
 
     expect(
       support,
       TextRecognitionSupport.available,
       reason:
-          'Vision, ML Kit and Windows.Media.Ocr ship with the app or the '
-          'system; Tesseract has to be installed on the Linux machine',
+          'Vision and Windows.Media.Ocr come with the system, Tesseract '
+          'with the Android app; on Linux it has to be installed',
     );
   });
 
-  testWidgets('a scanned page is read back', skip: skip, (tester) async {
+  testWidgets('a scanned page is read back', (tester) async {
     final text = await tester.runAsync(() async {
       final picture = drawn();
       final pdf = pw.Document()

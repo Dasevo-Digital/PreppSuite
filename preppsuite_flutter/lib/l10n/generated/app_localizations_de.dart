@@ -9062,7 +9062,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get knowledgeRecognizeBody =>
-      'Die App liest jede Seite dieses Scans als Bild und erkennt den Text darin, auf diesem Gerät; nichts verlässt es. Das dauert: Auf einem Mittelklasse-Telefon wurde rund eine Sekunde je Seite gemessen, an einem Rechner deutlich weniger. Erkannter Text kann Lücken haben, ohne dass die App sie bemerkt. Zum Suchen genügt er meist, als Abschrift taugt er nicht.';
+      'Die App liest jede Seite dieses Scans als Bild und erkennt den Text darin, auf diesem Gerät; nichts verlässt es. Das dauert, am Telefon deutlich länger als an einem Rechner, bei einem langen Dokument viele Minuten. Erkannter Text kann Lücken haben, ohne dass die App sie bemerkt. Zum Suchen genügt er meist, als Abschrift taugt er nicht.';
 
   @override
   String get knowledgeRecognizeStarting => 'Texterkennung beginnt …';

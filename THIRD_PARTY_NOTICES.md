@@ -14,6 +14,12 @@ ihre jeweils eigenen Bedingungen.
 - Angepasste Kopien von `zstandard_ios` und `zstandard_macos` — BSD;
   vollständiger Text: `third_party/zstandard_ios/LICENSE` und
   `third_party/zstandard_macos/LICENSE`
+- Tesseract4Android mit Tesseract 5.5.1, Leptonica 1.85.0, libjpeg und
+  libpng (nur Android) — Apache-2.0 bzw. die Lizenzen der enthaltenen
+  Bibliotheken; Quelle `github.com/adaptech-cz/Tesseract4Android`
+- Tesseract-Sprachdaten `tessdata_fast` Deutsch und Englisch (nur
+  Android) — Apache-2.0; vollständiger Text:
+  `third_party/tessdata_fast/LICENSE`
 - Weitere Flutter- und Dart-Abhängigkeiten — jeweilige Paketlizenz; Anzeige
   über Flutters Lizenzübersicht im erzeugten Programm
 
