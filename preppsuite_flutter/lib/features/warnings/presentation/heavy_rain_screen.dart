@@ -10,6 +10,7 @@ import '../../household/application/household_providers.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../application/heavy_rain_hazard.dart';
 import '../application/river_flood.dart';
+import '../../../core/adaptive_columns.dart';
 
 /// Water after a cloudburst, at one address (#115).
 ///
@@ -218,12 +219,19 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
       ),
       body: _restoring
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
+          // In columns on a wide window (#47): the two rain scenarios and
+          // the river side by side, which is the comparison they invite.
+          : AdaptiveColumns(
               padding: const EdgeInsets.all(16),
-              children: [
+              columnWidth: 480,
+              spacing: 12,
+              blocks: [
                 if (_busy) const LinearProgressIndicator(),
                 if (hazard == null)
-                  ..._empty(l10n)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _empty(l10n),
+                  )
                 else
                   ..._result(l10n, hazard),
               ],
@@ -277,16 +285,22 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
             '${hazard.longitude.toStringAsFixed(4)})';
     final cellar = _cellarCount();
 
+    // Blocks, each kept together in a column: where and when, each
+    // scenario, the river, the cellar, and what the check cannot say.
     return [
-      Text(
-        l10n.heavyRainCheckedAt(place, date),
-        style: theme.textTheme.titleMedium,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.heavyRainCheckedAt(place, date),
+            style: theme.textTheme.titleMedium,
+          ),
+          if (_offline) ...[
+            const SizedBox(height: 8),
+            Text(l10n.heavyRainOffline, style: theme.textTheme.bodySmall),
+          ],
+        ],
       ),
-      if (_offline) ...[
-        const SizedBox(height: 8),
-        Text(l10n.heavyRainOffline, style: theme.textTheme.bodySmall),
-      ],
-      const SizedBox(height: 12),
       if (!hazard.covered)
         Card(
           child: Padding(
@@ -301,33 +315,29 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
             scenario: scenario,
             result: hazard.results[scenario] ?? const HeavyRainScenarioResult(),
           ),
-      if (hazard.river case final river?) ...[
-        const SizedBox(height: 4),
-        _RiverCard(
-          l10n: l10n,
-          river: river,
-          stateName: hazard.stateName,
-        ),
-      ],
-      if (hazard.anyWater && cellar > 0) ...[
-        const SizedBox(height: 8),
+      if (hazard.river case final river?)
+        _RiverCard(l10n: l10n, river: river, stateName: hazard.stateName),
+      if (hazard.anyWater && cellar > 0)
         Card(
           child: ListTile(
             leading: const Icon(Icons.inventory_2_outlined),
             title: Text(l10n.heavyRainCellar(cellar)),
           ),
         ),
-      ],
-      const SizedBox(height: 12),
-      Text(l10n.heavyRainLimits, style: theme.textTheme.bodySmall),
-      const SizedBox(height: 16),
-      ..._choices(l10n),
-      const SizedBox(height: 16),
-      Text(l10n.heavyRainPrivacy, style: theme.textTheme.bodySmall),
-      const SizedBox(height: 8),
-      Text(
-        l10n.heavyRainSource('${hazard.checkedAt.year}'),
-        style: theme.textTheme.bodySmall,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.heavyRainLimits, style: theme.textTheme.bodySmall),
+          const SizedBox(height: 16),
+          ..._choices(l10n),
+          const SizedBox(height: 16),
+          Text(l10n.heavyRainPrivacy, style: theme.textTheme.bodySmall),
+          const SizedBox(height: 8),
+          Text(
+            l10n.heavyRainSource('${hazard.checkedAt.year}'),
+            style: theme.textTheme.bodySmall,
+          ),
+        ],
       ),
     ];
   }

@@ -126,4 +126,17 @@ void main() {
     expect(find.text(l10n.scenarioNoEnergyPlan), findsOneWidget);
     expect(find.byTooltip(l10n.shoppingListExport), findsNothing);
   });
+
+  testWidgets('a wide window puts the resources side by side (#47)', (
+    tester,
+  ) async {
+    await pump(tester, [water(5)]);
+    await tester.binding.setSurfaceSize(const Size(1600, 1200));
+    await tester.pumpAndSettle();
+
+    final water_ = tester.getTopLeft(find.text(l10n.scenarioWater));
+    final food = tester.getTopLeft(find.text(l10n.scenarioFood));
+    expect(water_.dx, isNot(food.dx));
+    expect(tester.takeException(), isNull);
+  });
 }

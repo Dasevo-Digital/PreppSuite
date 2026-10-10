@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/adaptive_columns.dart';
 import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../../sharing/presentation/folder_encryption_section.dart';
@@ -38,13 +39,25 @@ class EmergencyCardsScreen extends ConsumerWidget {
         child: membersAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text(describeError(l10n, error))),
-          data: (members) => ListView(
+          // A card per person, side by side on a wide window (#47): the
+          // household at a glance rather than one tall column with the
+          // rest of the screen empty beside it.
+          data: (members) => AdaptiveColumns(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-            children: [
-              Text(l10n.emergencyCardsIntro, style: theme.textTheme.bodyMedium),
-              const SizedBox(height: 12),
-              const _HealthDataNotice(),
-              const SizedBox(height: 12),
+            columnWidth: 480,
+            spacing: 12,
+            blocks: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.emergencyCardsIntro,
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 12),
+                  const _HealthDataNotice(),
+                ],
+              ),
               if (members.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
@@ -154,7 +167,7 @@ class _MemberCard extends ConsumerWidget {
         ref.watch(inventoryItemsProvider(householdId)).value ?? const [];
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -25,6 +25,7 @@ import 'version_info_card.dart';
 import 'warning_readiness_card.dart';
 import 'followed_places_screen.dart';
 import 'error_log_card.dart';
+import '../../../core/adaptive_columns.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key, required this.profile});
@@ -37,9 +38,12 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.navSettings)),
-      body: ListView(
+      // In columns on a wide window (#47), like the pages behind them.
+      body: AdaptiveColumns(
         padding: const EdgeInsets.all(16),
-        children: [
+        columnWidth: 420,
+        spacing: 12,
+        blocks: [
           _CategoryTile(
             icon: Icons.notifications_active_outlined,
             title: l10n.settingsCategoryWarnings,
@@ -193,7 +197,7 @@ class _CategoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.only(bottom: 12),
+    margin: EdgeInsets.zero,
     child: ListTile(
       leading: Icon(icon),
       title: Text(title),
@@ -223,11 +227,12 @@ class _SettingsCategoryScreen extends StatelessWidget {
     final items = children(l10n);
     return Scaffold(
       appBar: AppBar(title: Text(title(l10n))),
-      body: ListView.separated(
+      // Each card is a block: on a wide window they share the width
+      // instead of one stretched column with nothing beside it (#47).
+      body: AdaptiveColumns(
         padding: const EdgeInsets.all(16),
-        itemCount: items.length,
-        itemBuilder: (context, index) => items[index],
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        spacing: 12,
+        blocks: items,
       ),
     );
   }

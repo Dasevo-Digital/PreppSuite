@@ -18,6 +18,7 @@ import '../../warnings/application/warning_poll_status_store.dart';
 import '../../settings/application/backup_reminder.dart';
 import '../../settings/presentation/backup_card.dart' show backupAge;
 import '../../household/application/card_species.dart';
+import '../../../core/adaptive_columns.dart';
 
 final _warningPollStatusProvider = FutureProvider(
   (ref) => const WarningPollStatusStore().load(),
@@ -92,9 +93,13 @@ class ReadinessScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.readinessTitle)),
-      body: ListView(
+      // In columns on a wide window (#47): the summary, the checks and the
+      // two status cards side by side rather than one long column.
+      body: AdaptiveColumns(
         padding: const EdgeInsets.all(16),
-        children: [
+        columnWidth: 480,
+        spacing: 16,
+        blocks: [
           Card(
             color: Theme.of(context).colorScheme.primaryContainer,
             child: Padding(
@@ -114,7 +119,6 @@ class ReadinessScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
           Card(
             child: Column(
               children: [
@@ -133,93 +137,109 @@ class ReadinessScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.readinessOfflinePackages,
-            style: Theme.of(context).textTheme.titleLarge,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.readinessOfflinePackages,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Card(
+                child: Column(
+                  children: [
+                    _StatusRow(
+                      icon: Icons.map_outlined,
+                      title: l10n.readinessMap,
+                      value: mapReady
+                          ? places.isEmpty
+                                ? l10n.readinessMapReadyNoPlaces(
+                                    map!.label ?? '',
+                                  )
+                                : l10n.readinessMapCoverage(
+                                    coveredPlaces,
+                                    places.length,
+                                    map!.label ?? '',
+                                  )
+                          : l10n.readinessPackageMissing,
+                    ),
+                    const Divider(height: 1),
+                    _StatusRow(
+                      icon: Icons.battery_charging_full_outlined,
+                      title: l10n.readinessEquipment,
+                      value: switch (equipment) {
+                        _ when equipment.isOff => l10n.readinessEquipmentOff,
+                        _ when equipment.lastChecked == null =>
+                          l10n.readinessEquipmentNotChecked,
+                        _ when equipment.isDue() => l10n.readinessEquipmentDue,
+                        _ => l10n.readinessEquipmentChecked,
+                      },
+                    ),
+                    const Divider(height: 1),
+                    _StatusRow(
+                      icon: Icons.menu_book_outlined,
+                      title: l10n.readinessKnowledge,
+                      value: knowledgeReady
+                          ? l10n.readinessArchivesReady(
+                              knowledge!.library.length,
+                            )
+                          : l10n.readinessPackageMissing,
+                    ),
+                    const Divider(height: 1),
+                    _StatusRow(
+                      icon: Icons.save_alt,
+                      title: l10n.readinessBackupMade,
+                      value: backup.lastBackup == null
+                          ? l10n.readinessBackupMadeNever
+                          : l10n.readinessBackupMadeAge(
+                              backupAge(l10n, backup.daysSince() ?? 0),
+                            ),
+                    ),
+                    const Divider(height: 1),
+                    _StatusRow(
+                      icon: Icons.fact_check_outlined,
+                      title: l10n.readinessBackup,
+                      value: backupVerifiedAt == null
+                          ? l10n.readinessBackupNeverVerified
+                          : backupReady
+                          ? l10n.readinessBackupVerified(
+                              _age(
+                                l10n,
+                                DateTime.now().toUtc().difference(
+                                  backupVerifiedAt,
+                                ),
+                              ),
+                            )
+                          : l10n.readinessBackupStale(
+                              _age(
+                                l10n,
+                                DateTime.now().toUtc().difference(
+                                  backupVerifiedAt,
+                                ),
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Card(
-            child: Column(
-              children: [
-                _StatusRow(
-                  icon: Icons.map_outlined,
-                  title: l10n.readinessMap,
-                  value: mapReady
-                      ? places.isEmpty
-                            ? l10n.readinessMapReadyNoPlaces(map!.label ?? '')
-                            : l10n.readinessMapCoverage(
-                                coveredPlaces,
-                                places.length,
-                                map!.label ?? '',
-                              )
-                      : l10n.readinessPackageMissing,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.readinessWarningData,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Card(
+                child: _StatusRow(
+                  icon: Icons.warning_amber_outlined,
+                  title: l10n.readinessWarningData,
+                  value: _warningStatusText(l10n, warningStatus),
                 ),
-                const Divider(height: 1),
-                _StatusRow(
-                  icon: Icons.battery_charging_full_outlined,
-                  title: l10n.readinessEquipment,
-                  value: switch (equipment) {
-                    _ when equipment.isOff => l10n.readinessEquipmentOff,
-                    _ when equipment.lastChecked == null =>
-                      l10n.readinessEquipmentNotChecked,
-                    _ when equipment.isDue() => l10n.readinessEquipmentDue,
-                    _ => l10n.readinessEquipmentChecked,
-                  },
-                ),
-                const Divider(height: 1),
-                _StatusRow(
-                  icon: Icons.menu_book_outlined,
-                  title: l10n.readinessKnowledge,
-                  value: knowledgeReady
-                      ? l10n.readinessArchivesReady(knowledge!.library.length)
-                      : l10n.readinessPackageMissing,
-                ),
-                const Divider(height: 1),
-                _StatusRow(
-                  icon: Icons.save_alt,
-                  title: l10n.readinessBackupMade,
-                  value: backup.lastBackup == null
-                      ? l10n.readinessBackupMadeNever
-                      : l10n.readinessBackupMadeAge(
-                          backupAge(l10n, backup.daysSince() ?? 0),
-                        ),
-                ),
-                const Divider(height: 1),
-                _StatusRow(
-                  icon: Icons.fact_check_outlined,
-                  title: l10n.readinessBackup,
-                  value: backupVerifiedAt == null
-                      ? l10n.readinessBackupNeverVerified
-                      : backupReady
-                      ? l10n.readinessBackupVerified(
-                          _age(
-                            l10n,
-                            DateTime.now().toUtc().difference(backupVerifiedAt),
-                          ),
-                        )
-                      : l10n.readinessBackupStale(
-                          _age(
-                            l10n,
-                            DateTime.now().toUtc().difference(backupVerifiedAt),
-                          ),
-                        ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            l10n.readinessWarningData,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Card(
-            child: _StatusRow(
-              icon: Icons.warning_amber_outlined,
-              title: l10n.readinessWarningData,
-              value: _warningStatusText(l10n, warningStatus),
-            ),
+              ),
+            ],
           ),
         ],
       ),

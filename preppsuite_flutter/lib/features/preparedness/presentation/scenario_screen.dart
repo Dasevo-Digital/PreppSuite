@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/adaptive_columns.dart';
 import '../../../core/content_swap.dart';
 import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -142,27 +143,35 @@ class _Body extends StatelessWidget {
     String amount(double value, String unit) =>
         '${_format(l10n, value)} $unit'.trim();
 
-    return ListView(
+    // In columns on a wide window (#47): the four resources side by side
+    // read as the one comparison they are.
+    return AdaptiveColumns(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-      children: [
-        Text(l10n.scenarioIntro),
-        const SizedBox(height: 12),
-        SegmentedButton<int>(
-          segments: [
-            for (final horizon in scenarioHorizons)
-              ButtonSegment(
-                value: horizon,
-                label: Text(
-                  horizon == 3
-                      ? l10n.scenarioHorizonHours
-                      : l10n.scenarioHorizonDays(horizon),
-                ),
-              ),
+      columnWidth: 420,
+      spacing: 12,
+      blocks: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.scenarioIntro),
+            const SizedBox(height: 12),
+            SegmentedButton<int>(
+              segments: [
+                for (final horizon in scenarioHorizons)
+                  ButtonSegment(
+                    value: horizon,
+                    label: Text(
+                      horizon == 3
+                          ? l10n.scenarioHorizonHours
+                          : l10n.scenarioHorizonDays(horizon),
+                    ),
+                  ),
+              ],
+              selected: {days},
+              onSelectionChanged: (selection) => onDays(selection.single),
+            ),
           ],
-          selected: {days},
-          onSelectionChanged: (selection) => onDays(selection.single),
         ),
-        const SizedBox(height: 16),
         _Section(
           icon: Icons.water_drop_outlined,
           title: l10n.scenarioWater,
@@ -255,7 +264,6 @@ class _Body extends StatelessWidget {
               ),
           ],
         ),
-        const SizedBox(height: 8),
         Text(
           l10n.scenarioSource,
           style: theme.textTheme.bodySmall?.copyWith(
@@ -281,7 +289,7 @@ class _Section extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
         child: Column(
