@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 import '../../../local_db/database.dart';
 import 'card_people.dart';
+import 'card_species.dart';
 
 class EmergencyPlanReportStrings {
   const EmergencyPlanReportStrings({
@@ -57,6 +58,12 @@ class EmergencyCardFieldStrings {
     required this.contacts,
     required this.notes,
     required this.careNeeds,
+    required this.kind,
+    required this.speciesName,
+    required this.chipNumber,
+    required this.vet,
+    required this.vets,
+    required this.shelters,
   });
 
   final String birthYear;
@@ -76,6 +83,15 @@ class EmergencyCardFieldStrings {
 
   final String notes;
   final String careNeeds;
+
+  /// An animal's card (#151): what kind of animal, under [kind], and its
+  /// own words for the vet and for who takes it in.
+  final String kind;
+  final String Function(CardSpecies species) speciesName;
+  final String chipNumber;
+  final String vet;
+  final String vets;
+  final String shelters;
 }
 
 /// A compact paper copy of the household's agreement.
@@ -236,6 +252,11 @@ List<({String label, String value})> emergencyCardRows(
     ));
   }
 
+  final animal = member.isAnimal;
+  if (member.cardSpecies case final species?) {
+    add(fields.kind, fields.speciesName(species));
+  }
+  add(fields.chipNumber, member.chipNumber);
   if (member.birthYear != null) {
     add(fields.birthYear, '${member.birthYear}');
   }
@@ -244,8 +265,16 @@ List<({String label, String value})> emergencyCardRows(
   add(fields.medication, member.medication);
   add(fields.conditions, member.conditions);
   add(fields.insurance, member.insurance);
-  addPeople(fields.doctor, fields.doctors, member.doctor);
-  addPeople(fields.contact, fields.contacts, member.emergencyContact);
+  addPeople(
+    animal ? fields.vet : fields.doctor,
+    animal ? fields.vets : fields.doctors,
+    member.doctor,
+  );
+  addPeople(
+    animal ? fields.shelters : fields.contact,
+    animal ? fields.shelters : fields.contacts,
+    member.emergencyContact,
+  );
   add(fields.careNeeds, member.careNeeds);
   add(fields.notes, member.notes);
   return rows;

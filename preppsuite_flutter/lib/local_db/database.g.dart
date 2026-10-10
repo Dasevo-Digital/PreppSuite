@@ -3855,6 +3855,28 @@ class $HouseholdMembersTable extends HouseholdMembers
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _speciesMeta = const VerificationMeta(
+    'species',
+  );
+  @override
+  late final GeneratedColumn<String> species = GeneratedColumn<String>(
+    'species',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _chipNumberMeta = const VerificationMeta(
+    'chipNumber',
+  );
+  @override
+  late final GeneratedColumn<String> chipNumber = GeneratedColumn<String>(
+    'chip_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _sortOrderMeta = const VerificationMeta(
     'sortOrder',
   );
@@ -3917,6 +3939,8 @@ class $HouseholdMembersTable extends HouseholdMembers
     emergencyContact,
     careNeeds,
     notes,
+    species,
+    chipNumber,
     sortOrder,
     updatedAt,
     deletedAt,
@@ -4024,6 +4048,18 @@ class $HouseholdMembersTable extends HouseholdMembers
         notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
+    if (data.containsKey('species')) {
+      context.handle(
+        _speciesMeta,
+        species.isAcceptableOrUnknown(data['species']!, _speciesMeta),
+      );
+    }
+    if (data.containsKey('chip_number')) {
+      context.handle(
+        _chipNumberMeta,
+        chipNumber.isAcceptableOrUnknown(data['chip_number']!, _chipNumberMeta),
+      );
+    }
     if (data.containsKey('sort_order')) {
       context.handle(
         _sortOrderMeta,
@@ -4111,6 +4147,14 @@ class $HouseholdMembersTable extends HouseholdMembers
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
       ),
+      species: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}species'],
+      ),
+      chipNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chip_number'],
+      ),
       sortOrder: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
@@ -4163,6 +4207,21 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
   final String? careNeeds;
   final String? notes;
 
+  /// Null for a person; for an animal, what kind -- a `CardSpecies` name
+  /// (`dog`, `cat`, `other`) (#151).
+  ///
+  /// An animal gets a card of its own rather than a list somewhere else:
+  /// what it needs in an emergency is what a person's card already holds
+  /// -- a vet, medicines, who looks after it, what it must not eat -- and
+  /// its food and medicines in the stores can then name it the way a
+  /// person's do. Not who the household feeds: the head counts stay in
+  /// the profile, which is what the supply calculator reads.
+  final String? species;
+
+  /// An animal's transponder or tattoo number, which is what a shelter
+  /// or a vet asks for first (#151). Null on a person's card.
+  final String? chipNumber;
+
   /// Keeps the cards in the order the household put them in rather than
   /// alphabetically, which would put a child before a parent for no
   /// reason anyone chose.
@@ -4184,6 +4243,8 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
     this.emergencyContact,
     this.careNeeds,
     this.notes,
+    this.species,
+    this.chipNumber,
     required this.sortOrder,
     required this.updatedAt,
     this.deletedAt,
@@ -4224,6 +4285,12 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || species != null) {
+      map['species'] = Variable<String>(species);
+    }
+    if (!nullToAbsent || chipNumber != null) {
+      map['chip_number'] = Variable<String>(chipNumber);
     }
     map['sort_order'] = Variable<int>(sortOrder);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -4269,6 +4336,12 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
+      species: species == null && nullToAbsent
+          ? const Value.absent()
+          : Value(species),
+      chipNumber: chipNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(chipNumber),
       sortOrder: Value(sortOrder),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -4297,6 +4370,8 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
       emergencyContact: serializer.fromJson<String?>(json['emergencyContact']),
       careNeeds: serializer.fromJson<String?>(json['careNeeds']),
       notes: serializer.fromJson<String?>(json['notes']),
+      species: serializer.fromJson<String?>(json['species']),
+      chipNumber: serializer.fromJson<String?>(json['chipNumber']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -4320,6 +4395,8 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
       'emergencyContact': serializer.toJson<String?>(emergencyContact),
       'careNeeds': serializer.toJson<String?>(careNeeds),
       'notes': serializer.toJson<String?>(notes),
+      'species': serializer.toJson<String?>(species),
+      'chipNumber': serializer.toJson<String?>(chipNumber),
       'sortOrder': serializer.toJson<int>(sortOrder),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -4341,6 +4418,8 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
     Value<String?> emergencyContact = const Value.absent(),
     Value<String?> careNeeds = const Value.absent(),
     Value<String?> notes = const Value.absent(),
+    Value<String?> species = const Value.absent(),
+    Value<String?> chipNumber = const Value.absent(),
     int? sortOrder,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -4361,6 +4440,8 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
         : this.emergencyContact,
     careNeeds: careNeeds.present ? careNeeds.value : this.careNeeds,
     notes: notes.present ? notes.value : this.notes,
+    species: species.present ? species.value : this.species,
+    chipNumber: chipNumber.present ? chipNumber.value : this.chipNumber,
     sortOrder: sortOrder ?? this.sortOrder,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -4389,6 +4470,10 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
           : this.emergencyContact,
       careNeeds: data.careNeeds.present ? data.careNeeds.value : this.careNeeds,
       notes: data.notes.present ? data.notes.value : this.notes,
+      species: data.species.present ? data.species.value : this.species,
+      chipNumber: data.chipNumber.present
+          ? data.chipNumber.value
+          : this.chipNumber,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -4412,6 +4497,8 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
           ..write('emergencyContact: $emergencyContact, ')
           ..write('careNeeds: $careNeeds, ')
           ..write('notes: $notes, ')
+          ..write('species: $species, ')
+          ..write('chipNumber: $chipNumber, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -4435,6 +4522,8 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
     emergencyContact,
     careNeeds,
     notes,
+    species,
+    chipNumber,
     sortOrder,
     updatedAt,
     deletedAt,
@@ -4457,6 +4546,8 @@ class HouseholdMember extends DataClass implements Insertable<HouseholdMember> {
           other.emergencyContact == this.emergencyContact &&
           other.careNeeds == this.careNeeds &&
           other.notes == this.notes &&
+          other.species == this.species &&
+          other.chipNumber == this.chipNumber &&
           other.sortOrder == this.sortOrder &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -4477,6 +4568,8 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
   final Value<String?> emergencyContact;
   final Value<String?> careNeeds;
   final Value<String?> notes;
+  final Value<String?> species;
+  final Value<String?> chipNumber;
   final Value<int> sortOrder;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -4496,6 +4589,8 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
     this.emergencyContact = const Value.absent(),
     this.careNeeds = const Value.absent(),
     this.notes = const Value.absent(),
+    this.species = const Value.absent(),
+    this.chipNumber = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -4516,6 +4611,8 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
     this.emergencyContact = const Value.absent(),
     this.careNeeds = const Value.absent(),
     this.notes = const Value.absent(),
+    this.species = const Value.absent(),
+    this.chipNumber = const Value.absent(),
     this.sortOrder = const Value.absent(),
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -4539,6 +4636,8 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
     Expression<String>? emergencyContact,
     Expression<String>? careNeeds,
     Expression<String>? notes,
+    Expression<String>? species,
+    Expression<String>? chipNumber,
     Expression<int>? sortOrder,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -4559,6 +4658,8 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
       if (emergencyContact != null) 'emergency_contact': emergencyContact,
       if (careNeeds != null) 'care_needs': careNeeds,
       if (notes != null) 'notes': notes,
+      if (species != null) 'species': species,
+      if (chipNumber != null) 'chip_number': chipNumber,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -4581,6 +4682,8 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
     Value<String?>? emergencyContact,
     Value<String?>? careNeeds,
     Value<String?>? notes,
+    Value<String?>? species,
+    Value<String?>? chipNumber,
     Value<int>? sortOrder,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -4601,6 +4704,8 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
       emergencyContact: emergencyContact ?? this.emergencyContact,
       careNeeds: careNeeds ?? this.careNeeds,
       notes: notes ?? this.notes,
+      species: species ?? this.species,
+      chipNumber: chipNumber ?? this.chipNumber,
       sortOrder: sortOrder ?? this.sortOrder,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -4651,6 +4756,12 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (species.present) {
+      map['species'] = Variable<String>(species.value);
+    }
+    if (chipNumber.present) {
+      map['chip_number'] = Variable<String>(chipNumber.value);
+    }
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
@@ -4685,6 +4796,8 @@ class HouseholdMembersCompanion extends UpdateCompanion<HouseholdMember> {
           ..write('emergencyContact: $emergencyContact, ')
           ..write('careNeeds: $careNeeds, ')
           ..write('notes: $notes, ')
+          ..write('species: $species, ')
+          ..write('chipNumber: $chipNumber, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')

@@ -8845,4 +8845,60 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get scenarioSource =>
       'Need per person as in the supply calculator: by the BBK and the BLE where they publish figures, marked there where they do not. Medicines by your daily dose, energy by the consumption you entered for your appliances.';
+
+  @override
+  String get cardSpeciesDog => 'Dog';
+
+  @override
+  String get cardSpeciesCat => 'Cat';
+
+  @override
+  String get cardSpeciesOther => 'Other animal';
+
+  @override
+  String get categoryPetFood => 'Pet food';
+
+  @override
+  String get dailyFoodLabel => 'Food a day';
+
+  @override
+  String get dailyFoodHelper =>
+      'In the same unit as the stock: for a stock in kilograms and 200 g a day, this says “0.2”. Leave it empty if it is not fed daily.';
+
+  @override
+  String get inventoryAnimalLabel => 'For which animal';
+
+  @override
+  String get cardSpeciesLabel => 'Card for';
+
+  @override
+  String get cardSpeciesPerson => 'A person';
+
+  @override
+  String get cardChipNumber => 'Chip or tattoo number';
+
+  @override
+  String get cardChipNumberHint => 'It is in the pet passport';
+
+  @override
+  String get cardVets => 'Vets';
+
+  @override
+  String get cardVetHint => 'e.g. regular vet, animal clinic';
+
+  @override
+  String get cardVetAdd => 'Add a vet';
+
+  @override
+  String get cardShelters => 'Who takes the animal in an emergency';
+
+  @override
+  String get cardShelterHint => 'e.g. neighbour, boarding kennel, shelter';
+
+  @override
+  String get cardAnimalHint =>
+      'Keep the vaccination record as a PDF under Knowledge → Personal documents, for example with your phone’s scan function. Food and medicines are assigned to this animal in the stores. For drinking water, the number of animals in the household profile still counts.';
+
+  @override
+  String get cardVet => 'Vet';
 }

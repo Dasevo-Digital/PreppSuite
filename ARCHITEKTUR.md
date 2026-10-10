@@ -402,7 +402,19 @@ anything it cannot use, which costs one row instead of the whole sync.
 **Who the household feeds lives in `HouseholdProfile`, nowhere else.**
 The inventory screen used to keep a second, device-local person count
 beside the household's own, and the two silently disagreed. The supply
-calculator reads the profile.
+calculator reads the profile. Since schema 24 a card can be an animal's (#151), and
+that does not change this: the cards say who someone is, the profile
+says how many are fed. Pet food is its own inventory category,
+`petFood`, precisely so that it never reaches the human calorie total.
+
+**A new inventory category must not reach an older app by name.** Apps
+before 2.5.0 read a category they do not know with `byName`, which
+throws, in the overview, the supply calculator and the inventory list.
+So the snapshot writes `petFood` as `other`, with `exactCategory` beside
+it, and a newer app reads the exact one back (`device_snapshot.dart`).
+Since 2.5.0 an unknown name reads as `other` instead of throwing, so the
+next category only needs the snapshot mapping as long as 2.4.x devices
+are still about.
 
 **The stockpiling tables are a citation, not the app's advice.**
 `storage_plan.dart` reproduces the BLE's two *Vorratstabellen* — mixed
@@ -462,7 +474,9 @@ that as null would strip the size somebody typed on a newer device. A
 newer device that clears a package writes the key with null, which does
 clear it. `device_snapshot_test` holds both halves. Schema 23's three columns on a
 medicine (`memberId`, `refillLeadDays`, `stockCountedAt`) follow the same
-rule, so an older device's edit cannot switch a prescription reminder off.
+rule, so an older device's edit cannot switch a prescription reminder off;
+so do schema 24's `species` and `chipNumber` on a card, so that it cannot
+turn a dog's card into a person's.
 
 **Where a public authority publishes the interpretation, the app uses
 theirs.** Three live feeds now show a bare number, and a bare number is
@@ -2479,7 +2493,9 @@ als das sechzigste Glas Marmelade. Die Vorlaufzeiten 7, 14, 21 und 28 Tage
 sind die Wahl des Haushalts, wie lange ein neues Rezept bei ihm dauert,
 keine Aussage über das Medikament.
 
-`memberId` ordnet ein Medikament einer Notfallkarte zu, ohne Fremdschlüssel.
+`memberId` ordnet ein Medikament einer Notfallkarte zu, ohne Fremdschlüssel
+– seit Schema 24 auch einem Tier, und ebenso Tierfutter, dessen
+Tagesbedarf in `dailyDose` steht und ab heute zählt wie ein Vorrat (#151).
 Eine Karte kann auf einem Gerät gelöscht werden, während die Zeile auf
 einem anderen bearbeitet wird; eine verwaiste Kennung liest sich als „für
 den ganzen Haushalt“. Die Karte zeigt den Vorrat neben der getippten

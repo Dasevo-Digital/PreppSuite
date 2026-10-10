@@ -16,7 +16,14 @@ enum InventoryItemCategory {
   documents,
   energy,
   hygiene,
-  other;
+  other,
+
+  /// Food for the household's animals (#151). Its own kind rather than
+  /// `food`, which the supply calculator counts as human calories: a
+  /// sack of dry food is not ten days of dinners for anyone at the table.
+  /// Last, so the names before it keep their meaning; an older app reads
+  /// the name it does not know as [other].
+  petFood;
 
   /// Drift stores these as their plain name.
   static InventoryItemCategory fromName(String name) =>

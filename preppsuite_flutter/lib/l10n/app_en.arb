@@ -5172,5 +5172,23 @@
     }
   },
   "scenarioWaterLine": "Drinking water",
-  "scenarioSource": "Need per person as in the supply calculator: by the BBK and the BLE where they publish figures, marked there where they do not. Medicines by your daily dose, energy by the consumption you entered for your appliances."
+  "scenarioSource": "Need per person as in the supply calculator: by the BBK and the BLE where they publish figures, marked there where they do not. Medicines by your daily dose, energy by the consumption you entered for your appliances.",
+  "cardSpeciesDog": "Dog",
+  "cardSpeciesCat": "Cat",
+  "cardSpeciesOther": "Other animal",
+  "categoryPetFood": "Pet food",
+  "dailyFoodLabel": "Food a day",
+  "dailyFoodHelper": "In the same unit as the stock: for a stock in kilograms and 200 g a day, this says “0.2”. Leave it empty if it is not fed daily.",
+  "inventoryAnimalLabel": "For which animal",
+  "cardSpeciesLabel": "Card for",
+  "cardSpeciesPerson": "A person",
+  "cardChipNumber": "Chip or tattoo number",
+  "cardChipNumberHint": "It is in the pet passport",
+  "cardVets": "Vets",
+  "cardVetHint": "e.g. regular vet, animal clinic",
+  "cardVetAdd": "Add a vet",
+  "cardShelters": "Who takes the animal in an emergency",
+  "cardShelterHint": "e.g. neighbour, boarding kennel, shelter",
+  "cardAnimalHint": "Keep the vaccination record as a PDF under Knowledge → Personal documents, for example with your phone’s scan function. Food and medicines are assigned to this animal in the stores. For drinking water, the number of animals in the household profile still counts.",
+  "cardVet": "Vet"
 }

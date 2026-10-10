@@ -8,6 +8,7 @@ import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/card_people.dart';
+import '../application/card_species.dart';
 import '../application/household_member_controller.dart';
 
 /// One person's emergency card.
@@ -47,6 +48,9 @@ class _EmergencyCardFormScreenState
   String? _nameError;
   String? _yearError;
 
+  /// Null for a person; the kind of animal otherwise (#151).
+  CardSpecies? _species;
+
   /// The two fields that can refuse a save sit at the top of a long form,
   /// and the save button at the bottom. A refusal printed under a field
   /// that has scrolled away is a tap on save that does nothing anybody
@@ -60,7 +64,9 @@ class _EmergencyCardFormScreenState
   void initState() {
     super.initState();
     final existing = widget.existing;
+    _species = existing?.cardSpecies;
     _fields['name'] = TextEditingController(text: existing?.name ?? '');
+    _fields['chip'] = TextEditingController(text: existing?.chipNumber ?? '');
     _fields['year'] = TextEditingController(
       text: existing?.birthYear?.toString() ?? '',
     );
@@ -110,6 +116,8 @@ class _EmergencyCardFormScreenState
     ];
   }
 
+  bool get _animal => _species != null;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -126,13 +134,48 @@ class _EmergencyCardFormScreenState
         controller: _scroll,
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
         children: [
+          // An animal's card is the same card with other words on it
+          // (#151): a vet instead of a doctor, who takes it in instead of
+          // who to ring, and the chip number a shelter asks for first.
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: DropdownButtonFormField<CardSpecies?>(
+              isExpanded: true,
+              initialValue: _species,
+              decoration: InputDecoration(
+                labelText: l10n.cardSpeciesLabel,
+                prefixIcon: Icon(
+                  _species == null ? Icons.person_outline : Icons.pets_outlined,
+                ),
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: null,
+                  child: Text(l10n.cardSpeciesPerson),
+                ),
+                for (final species in CardSpecies.values)
+                  DropdownMenuItem(
+                    value: species,
+                    child: Text(localizeCardSpecies(l10n, species)),
+                  ),
+              ],
+              onChanged: (value) => setState(() => _species = value),
+            ),
+          ),
           _Field(
             key: _nameKey,
             controller: _fields['name']!,
             label: l10n.emergencyCardName,
-            icon: Icons.person_outline,
+            icon: _animal ? Icons.pets_outlined : Icons.person_outline,
             error: _nameError,
           ),
+          if (_animal)
+            _Field(
+              controller: _fields['chip']!,
+              label: l10n.cardChipNumber,
+              hint: l10n.cardChipNumberHint,
+              icon: Icons.qr_code_2_outlined,
+            ),
           _Field(
             key: _yearKey,
             controller: _fields['year']!,
@@ -142,11 +185,12 @@ class _EmergencyCardFormScreenState
             keyboardType: TextInputType.number,
             error: _yearError,
           ),
-          _Field(
-            controller: _fields['blood']!,
-            label: l10n.emergencyCardBloodType,
-            icon: Icons.bloodtype_outlined,
-          ),
+          if (!_animal)
+            _Field(
+              controller: _fields['blood']!,
+              label: l10n.emergencyCardBloodType,
+              icon: Icons.bloodtype_outlined,
+            ),
           _Field(
             controller: _fields['allergies']!,
             label: l10n.emergencyCardAllergies,
@@ -172,79 +216,93 @@ class _EmergencyCardFormScreenState
             icon: Icons.badge_outlined,
           ),
           _PeopleSection(
-            title: l10n.emergencyCardDoctors,
+            title: _animal ? l10n.cardVets : l10n.emergencyCardDoctors,
             icon: Icons.local_hospital_outlined,
             nameLabel: l10n.emergencyCardName,
             roleLabel: l10n.emergencyCardSpecialty,
-            roleHint: l10n.emergencyCardSpecialtyHint,
+            roleHint: _animal
+                ? l10n.cardVetHint
+                : l10n.emergencyCardSpecialtyHint,
             phoneLabel: l10n.emergencyCardPhone,
-            addLabel: l10n.emergencyCardDoctorAdd,
+            addLabel: _animal ? l10n.cardVetAdd : l10n.emergencyCardDoctorAdd,
             removeLabel: l10n.emergencyCardPersonRemove,
             rows: _doctors,
             onChanged: () => setState(() {}),
           ),
           _PeopleSection(
-            title: l10n.emergencyCardContacts,
+            title: _animal ? l10n.cardShelters : l10n.emergencyCardContacts,
             icon: Icons.phone_outlined,
             nameLabel: l10n.emergencyCardName,
             roleLabel: l10n.emergencyCardRelation,
-            roleHint: l10n.emergencyCardRelationHint,
+            roleHint: _animal
+                ? l10n.cardShelterHint
+                : l10n.emergencyCardRelationHint,
             phoneLabel: l10n.emergencyCardPhone,
             addLabel: l10n.emergencyCardContactAdd,
             removeLabel: l10n.emergencyCardPersonRemove,
             rows: _contacts,
             onChanged: () => setState(() {}),
           ),
-          Card(
-            color: Theme.of(context).colorScheme.secondaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.accessible_forward_outlined,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.emergencyCardCareTitle,
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSecondaryContainer,
-                              ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          l10n.emergencyCardCareHint,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSecondaryContainer,
-                              ),
-                        ),
-                      ],
+          if (_animal)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                l10n.cardAnimalHint,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            )
+          else ...[
+            Card(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.accessible_forward_outlined,
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.emergencyCardCareTitle,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSecondaryContainer,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n.emergencyCardCareHint,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSecondaryContainer,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          _Field(
-            controller: _fields['careNeeds']!,
-            label: l10n.emergencyCardCareTitle,
-            hint: l10n.emergencyCardCareHint,
-            icon: Icons.accessible_forward_outlined,
-            maxLines: 3,
-          ),
+            const SizedBox(height: 12),
+            _Field(
+              controller: _fields['careNeeds']!,
+              label: l10n.emergencyCardCareTitle,
+              hint: l10n.emergencyCardCareHint,
+              icon: Icons.accessible_forward_outlined,
+              maxLines: 3,
+            ),
+          ],
           const SizedBox(height: 12),
           _Field(
             controller: _fields['notes']!,
@@ -300,8 +358,10 @@ class _EmergencyCardFormScreenState
               emergencyContact: encodeCardPeople(
                 _contacts.map((r) => r.person),
               ),
-              careNeeds: _fields['careNeeds']!.text,
+              careNeeds: _animal ? null : _fields['careNeeds']!.text,
               notes: _fields['notes']!.text,
+              species: _species,
+              chipNumber: _fields['chip']!.text,
             ),
             existing: widget.existing,
             sortOrder: widget.sortOrder,

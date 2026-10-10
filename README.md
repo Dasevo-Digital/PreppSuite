@@ -443,6 +443,15 @@ Penicillinallergie", ist es wert. Das sind Gesundheitsdaten, und der
 Bildschirm sagt vor dem ersten Buchstaben, ob der gemeinsame Ordner, über
 den sie wandern, verschlüsselt ist.
 
+**Haustiere.** Ein Tier bekommt eine eigene Notfallkarte: Hund, Katze oder
+anderes Tier, mit Chip- oder Tätowierungsnummer, Tierärztin oder Tierarzt
+und wer es im Notfall aufnimmt. Tierfutter ist eine eigene
+Vorratskategorie, die nicht in die Kalorien des Haushalts zählt; mit Futter
+am Tag und dem Tier, für das es ist, steht es mit seiner Reichweite auf
+dessen Karte, ebenso seine Medikamente. Den Impfpass legt man als PDF unter
+den eigenen Dokumenten ab. Das Trinkwasser rechnet weiter mit der Zahl der
+Tiere im Haushaltsprofil.
+
 **Übersicht mit zwei Ampeln.** Oben auf dem ersten Bildschirm: *Vorrat* gegen
 die Werte des BBK – zehn Tage, 2 l und 2200 kcal je Person und Tag –, und
 *Lage* mit der höchsten amtlichen Warnstufe, die gerade für eure Bereiche

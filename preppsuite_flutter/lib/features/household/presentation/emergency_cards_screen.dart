@@ -13,6 +13,7 @@ import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/application/medication_range.dart';
 import '../../../model/categories.dart';
 import '../application/card_people.dart';
+import '../application/card_species.dart';
 import '../application/household_member_controller.dart';
 import 'emergency_card_form_screen.dart';
 import 'lock_screen_card_dialog.dart';
@@ -161,12 +162,19 @@ class _MemberCard extends ConsumerWidget {
             leading: CircleAvatar(
               backgroundColor: theme.colorScheme.primaryContainer,
               foregroundColor: theme.colorScheme.onPrimaryContainer,
-              child: Text(_initial(member.name)),
+              child: member.isAnimal
+                  ? const Icon(Icons.pets_outlined)
+                  : Text(_initial(member.name)),
             ),
             title: Text(member.name),
-            subtitle: member.birthYear == null
-                ? null
-                : Text('${member.birthYear}'),
+            subtitle: switch ([
+              if (member.cardSpecies case final species?)
+                localizeCardSpecies(l10n, species),
+              if (member.birthYear case final year?) '$year',
+            ]) {
+              final parts when parts.isNotEmpty => Text(parts.join(' · ')),
+              _ => null,
+            },
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -182,14 +190,17 @@ class _MemberCard extends ConsumerWidget {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.wallpaper_outlined),
-                  tooltip: l10n.lockScreenCardAction,
-                  onPressed: () => showDialog<void>(
-                    context: context,
-                    builder: (_) => LockScreenCardDialog(card: member),
+                // A lock screen says who the phone's owner is; an animal
+                // is nobody's phone.
+                if (!member.isAnimal)
+                  IconButton(
+                    icon: const Icon(Icons.wallpaper_outlined),
+                    tooltip: l10n.lockScreenCardAction,
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      builder: (_) => LockScreenCardDialog(card: member),
+                    ),
                   ),
-                ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
                   // Names the person: in a household of five, five
@@ -233,9 +244,10 @@ class _MemberCard extends ConsumerWidget {
     );
   }
 
-  /// The medicines in the stores that are this person's (#150), each with
-  /// how long it lasts where a daily dose says so, and the stock where it
-  /// does not. Null when there are none.
+  /// The medicines in the stores that are this person's (#150) -- or an
+  /// animal's medicines and food (#151) -- each with how long it lasts
+  /// where a daily amount says so, and the stock where it does not. Null
+  /// when there are none.
   ///
   /// Beside the typed "Dauermedikation", not instead of it: the card says
   /// what is taken, this says whether there is enough of it in the house.
@@ -244,8 +256,10 @@ class _MemberCard extends ConsumerWidget {
       for (final item in items)
         if (item.memberId == member.clientId &&
             item.deletedAt == null &&
-            InventoryItemCategory.fromName(item.category) ==
-                InventoryItemCategory.medical)
+            const {
+              InventoryItemCategory.medical,
+              InventoryItemCategory.petFood,
+            }.contains(InventoryItemCategory.fromName(item.category)))
           item,
     ];
     if (mine.isEmpty) return null;
@@ -261,6 +275,13 @@ class _MemberCard extends ConsumerWidget {
       for (final item in mine)
         if (ranges[item.clientId] case final range?)
           l10n.emergencyCardStoredReach(item.name, days(range.wholeDays))
+        // Food is counted from today, like a reserve: a sack lasts as many
+        // days as the daily amount fits into it.
+        else if (item.dailyDose case final perDay? when perDay > 0)
+          l10n.emergencyCardStoredReach(
+            item.name,
+            days((item.quantity / perDay).floor()),
+          )
         else
           '${item.name}: ${_amount(item.quantity)} ${item.unit}'.trim(),
     ].join('\n');
@@ -273,6 +294,8 @@ class _MemberCard extends ConsumerWidget {
   /// Only the fields that were filled in. An empty row would read as
   /// "no allergies" when it means "nobody said".
   List<_CardLine> _lines(String? stored) => [
+    if (member.chipNumber != null)
+      (label: l10n.cardChipNumber, value: member.chipNumber!, phone: null),
     if (member.bloodType != null)
       (
         label: l10n.emergencyCardBloodType,
@@ -305,8 +328,14 @@ class _MemberCard extends ConsumerWidget {
         value: member.insurance!,
         phone: null,
       ),
-    ..._people(l10n.emergencyCardDoctor, member.doctor),
-    ..._people(l10n.emergencyCardContact, member.emergencyContact),
+    ..._people(
+      member.isAnimal ? l10n.cardVet : l10n.emergencyCardDoctor,
+      member.doctor,
+    ),
+    ..._people(
+      member.isAnimal ? l10n.cardShelters : l10n.emergencyCardContact,
+      member.emergencyContact,
+    ),
     if (member.careNeeds != null)
       (
         label: l10n.emergencyCardCareTitle,

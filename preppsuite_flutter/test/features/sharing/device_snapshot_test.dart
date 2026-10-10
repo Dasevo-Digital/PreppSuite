@@ -273,4 +273,80 @@ void main() {
       expect(DeviceSnapshot.decode('{"version": 1, "deviceId"'), isNull);
     });
   });
+
+  group('an animal\'s card (#151)', () {
+    HouseholdMember bello({String? species = 'dog'}) => HouseholdMember(
+      clientId: 'bello',
+      householdId: 'household-1',
+      name: 'Bello',
+      species: species,
+      chipNumber: '276098100000001',
+      sortOrder: 0,
+      updatedAt: DateTime.utc(2026, 10, 10),
+      dirty: true,
+    );
+
+    test('travels between devices', () {
+      final companion = decodeHouseholdMember(encodeHouseholdMember(bello()))!;
+
+      expect(companion.species.value, 'dog');
+      expect(companion.chipNumber.value, '276098100000001');
+    });
+
+    test('an older device does not turn it into a person', () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      await db.upsertHouseholdMember(bello().toCompanion(false));
+
+      final fromOlder = Map.of(encodeHouseholdMember(bello()))
+        ..remove('species')
+        ..remove('chipNumber')
+        ..['notes'] = 'Frisst kein Huhn'
+        ..['updatedAt'] = '2026-10-11T00:00:00.000Z';
+      final companion = decodeHouseholdMember(fromOlder)!;
+      expect(companion.species.present, isFalse);
+      await db.into(db.householdMembers).insertOnConflictUpdate(companion);
+
+      final stored =
+          (await db.watchHouseholdMembers('household-1').first).single;
+      expect(stored.notes, 'Frisst kein Huhn');
+      expect(stored.species, 'dog');
+      expect(stored.chipNumber, '276098100000001');
+    });
+  });
+
+  group('pet food and an older app (#151)', () {
+    InventoryItem food({String category = 'petFood'}) => InventoryItem(
+      clientId: 'food',
+      householdId: 'household-1',
+      name: 'Trockenfutter',
+      category: category,
+      quantity: 3,
+      unit: 'kg',
+      storageLocation: 'Keller',
+      updatedAt: DateTime.utc(2026, 10, 10),
+      dirty: true,
+    );
+
+    test('is written as a category an older app knows', () {
+      // An app before 2.5.0 throws on a category name it does not know.
+      final json = encodeInventoryItem(food());
+
+      expect(json['category'], 'other');
+      expect(json['exactCategory'], 'petFood');
+    });
+
+    test('and read back exactly by a newer one', () {
+      final companion = decodeInventoryItem(encodeInventoryItem(food()))!;
+
+      expect(companion.category.value, 'petFood');
+    });
+
+    test('a category an older app knows is written as it is', () {
+      final json = encodeInventoryItem(food(category: 'food'));
+
+      expect(json['category'], 'food');
+      expect(json.containsKey('exactCategory'), isFalse);
+    });
+  });
 }

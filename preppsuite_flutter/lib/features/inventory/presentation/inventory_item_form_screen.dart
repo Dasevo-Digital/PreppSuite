@@ -23,6 +23,7 @@ import '../application/expiry_reminder_provider.dart';
 import '../application/supply_group_l10n.dart';
 import '../application/supply_groups.dart';
 import '../application/inventory_controller.dart';
+import '../../household/application/card_species.dart';
 import '../../household/application/household_member_controller.dart';
 import '../application/inventory_photo_service.dart';
 import '../application/open_food_facts_service.dart';
@@ -144,6 +145,13 @@ class _InventoryItemFormScreenState
     _photoPath,
   ]);
   bool get _hasChanges => _signature != _initialSignature;
+
+  bool get _petFood => _category == InventoryItemCategory.petFood;
+
+  /// What is taken from every day, and so has a daily amount and someone
+  /// it is for: a medicine, and an animal's food (#151).
+  bool get _takenDaily =>
+      _petFood || _category == InventoryItemCategory.medical;
   void _onFieldChanged() {
     if (mounted) setState(() {});
   }
@@ -586,20 +594,22 @@ class _InventoryItemFormScreenState
           ? null
           : double.parse(minQuantityText);
       final nutrition = _readNutrition();
-      // Only for a medicine. A dose left behind on an item whose category
-      // was changed afterwards would put a tin of beans into the
-      // medication reach with a straight face.
+      // Only for a medicine or an animal's food (#151). A dose left behind
+      // on an item whose category was changed afterwards would put a tin
+      // of beans into the medication reach with a straight face.
+      final medical = _category == InventoryItemCategory.medical;
+      final takenDaily = _takenDaily;
       final doseText = _dailyDoseController.text.trim();
-      final dailyDose =
-          _category == InventoryItemCategory.medical && doseText.isNotEmpty
+      final dailyDose = takenDaily && doseText.isNotEmpty
           ? double.parse(doseText)
           : null;
-      // Whose it is and the reminder belong to a medicine as well, and the
-      // reminder only to one with a dose: without one there is no end to
+      // Whose it is goes with the same two. The reminder is a medicine's
+      // alone, and only one with a dose: without one there is no end to
       // count towards.
-      final medical = _category == InventoryItemCategory.medical;
-      final memberId = medical ? _memberId : null;
-      final refillLeadDays = dailyDose != null ? _refillLeadDays : null;
+      final memberId = takenDaily ? _memberId : null;
+      final refillLeadDays = medical && dailyDose != null
+          ? _refillLeadDays
+          : null;
       final notes = _notesController.text.trim();
       final package = ItemPackage.from(
         _packageNameController.text,
@@ -1016,13 +1026,17 @@ class _InventoryItemFormScreenState
                         ),
                         validator: _numberValidator(l10n, required: false),
                       ),
-                      if (_category == InventoryItemCategory.medical) ...[
+                      if (_takenDaily) ...[
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _dailyDoseController,
                           decoration: InputDecoration(
-                            labelText: l10n.dailyDoseLabel,
-                            helperText: l10n.dailyDoseHelper,
+                            labelText: _petFood
+                                ? l10n.dailyFoodLabel
+                                : l10n.dailyDoseLabel,
+                            helperText: _petFood
+                                ? l10n.dailyFoodHelper
+                                : l10n.dailyDoseHelper,
                             helperMaxLines: 3,
                           ),
                           keyboardType: const TextInputType.numberWithOptions(
@@ -1030,7 +1044,8 @@ class _InventoryItemFormScreenState
                           ),
                           validator: _numberValidator(l10n, required: false),
                         ),
-                        if (_dailyDoseController.text.trim().isNotEmpty) ...[
+                        if (!_petFood &&
+                            _dailyDoseController.text.trim().isNotEmpty) ...[
                           const SizedBox(height: 16),
                           DropdownButtonFormField<int?>(
                             isExpanded: true,
@@ -1058,6 +1073,7 @@ class _InventoryItemFormScreenState
                         _MemberField(
                           householdId: widget.householdId,
                           memberId: _memberId,
+                          animalsOnly: _petFood,
                           onChanged: (value) =>
                               setState(() => _memberId = value),
                         ),
@@ -1231,18 +1247,25 @@ class _MemberField extends ConsumerWidget {
     required this.householdId,
     required this.memberId,
     required this.onChanged,
+    this.animalsOnly = false,
   });
 
   final String householdId;
   final String? memberId;
   final ValueChanged<String?> onChanged;
 
+  /// For an animal's food: a person is not a choice (#151).
+  final bool animalsOnly;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final members =
-        ref.watch(householdMemberChoicesProvider(householdId)).value ??
-        const [];
+    final members = [
+      for (final member
+          in ref.watch(householdMemberChoicesProvider(householdId)).value ??
+              const <HouseholdMember>[])
+        if (!animalsOnly || member.isAnimal) member,
+    ];
     if (members.isEmpty) return const SizedBox.shrink();
     final known = members.any((member) => member.clientId == memberId);
 
@@ -1252,7 +1275,9 @@ class _MemberField extends ConsumerWidget {
         isExpanded: true,
         initialValue: known ? memberId : null,
         decoration: InputDecoration(
-          labelText: l10n.inventoryMemberLabel,
+          labelText: animalsOnly
+              ? l10n.inventoryAnimalLabel
+              : l10n.inventoryMemberLabel,
           helperText: l10n.inventoryMemberHelper,
           helperMaxLines: 2,
         ),

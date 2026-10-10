@@ -426,6 +426,14 @@ const builtInTemplates = [
         '00000000-0000-4000-8000-000000001008',
         'Kotbeutel, Katzenstreu, Einstreu',
       ),
+      // Where the animal goes if the household has to leave and cannot
+      // take it along. The animal's card is where the answer is written
+      // down (#151).
+      BuiltInItem(
+        '00000000-0000-4000-8000-000000001009',
+        'Notunterbringung absprechen (Nachbarn, Tierpension, Tierheim) und '
+            'auf der Notfallkarte des Tieres eintragen',
+      ),
     ],
   ),
   // Die folgenden Listen bilden die Zweige nach, die der BBK-Ratgeber

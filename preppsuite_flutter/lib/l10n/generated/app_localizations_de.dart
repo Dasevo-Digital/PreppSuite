@@ -8891,4 +8891,60 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get scenarioSource =>
       'Bedarf je Person wie im Vorratsrechner: nach BBK und BLE, wo sie Werte veröffentlichen, sonst dort gekennzeichnet. Medikamente nach deiner Tagesdosis, Energie nach dem Verbrauch, den du für deine Geräte eingetragen hast.';
+
+  @override
+  String get cardSpeciesDog => 'Hund';
+
+  @override
+  String get cardSpeciesCat => 'Katze';
+
+  @override
+  String get cardSpeciesOther => 'Anderes Tier';
+
+  @override
+  String get categoryPetFood => 'Tierfutter';
+
+  @override
+  String get dailyFoodLabel => 'Futter am Tag';
+
+  @override
+  String get dailyFoodHelper =>
+      'In derselben Einheit wie der Bestand: bei einem Vorrat in Kilogramm und 200 g am Tag steht hier „0,2“. Leer lassen, wenn es nicht täglich gefüttert wird.';
+
+  @override
+  String get inventoryAnimalLabel => 'Für welches Tier';
+
+  @override
+  String get cardSpeciesLabel => 'Karte für';
+
+  @override
+  String get cardSpeciesPerson => 'Eine Person';
+
+  @override
+  String get cardChipNumber => 'Chip- oder Tätowierungsnummer';
+
+  @override
+  String get cardChipNumberHint => 'Steht im Heimtierausweis';
+
+  @override
+  String get cardVets => 'Tierärztinnen und Tierärzte';
+
+  @override
+  String get cardVetHint => 'z. B. Haustierarzt, Tierklinik';
+
+  @override
+  String get cardVetAdd => 'Tierärztin oder Tierarzt hinzufügen';
+
+  @override
+  String get cardShelters => 'Wer das Tier im Notfall aufnimmt';
+
+  @override
+  String get cardShelterHint => 'z. B. Nachbarin, Tierpension, Tierheim';
+
+  @override
+  String get cardAnimalHint =>
+      'Den Impfpass legst du als PDF unter Wissen → Eigene Dokumente ab, etwa mit der Scan-Funktion des Telefons. Futter und Medikamente ordnest du im Vorrat diesem Tier zu. Für das Trinkwasser zählt weiter die Zahl der Tiere im Haushaltsprofil.';
+
+  @override
+  String get cardVet => 'Tierärztin oder Tierarzt';
 }

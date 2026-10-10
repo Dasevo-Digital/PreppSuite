@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/app_database_providers.dart';
 import '../../../local_db/database.dart';
+import 'card_species.dart';
 
 final householdMembersProvider = StreamProvider.autoDispose
     .family<List<HouseholdMember>, String>((ref, householdId) {
@@ -36,6 +37,8 @@ class HouseholdMemberDraft {
     this.emergencyContact,
     this.careNeeds,
     this.notes,
+    this.species,
+    this.chipNumber,
   });
 
   final String name;
@@ -49,6 +52,12 @@ class HouseholdMemberDraft {
   final String? emergencyContact;
   final String? careNeeds;
   final String? notes;
+
+  /// Null for a person (#151).
+  final CardSpecies? species;
+
+  /// Kept only on an animal's card.
+  final String? chipNumber;
 }
 
 class HouseholdMemberController {
@@ -85,6 +94,10 @@ class HouseholdMemberController {
         emergencyContact: Value(_trimmed(draft.emergencyContact)),
         careNeeds: Value(_trimmed(draft.careNeeds)),
         notes: Value(_trimmed(draft.notes)),
+        species: Value(draft.species?.name),
+        chipNumber: Value(
+          draft.species == null ? null : _trimmed(draft.chipNumber),
+        ),
         sortOrder: Value(sortOrder ?? existing?.sortOrder ?? 0),
         updatedAt: DateTime.now().toUtc(),
         // An edit must be able to undo a delete, and a rewritten row that

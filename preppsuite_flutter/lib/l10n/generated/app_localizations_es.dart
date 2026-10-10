@@ -8921,4 +8921,60 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get scenarioSource =>
       'Necesidad por persona como en la calculadora de reservas: según la BBK y la BLE donde publican cifras, y señalado allí donde no. Medicamentos según tu dosis diaria, energía según el consumo que anotaste para tus aparatos.';
+
+  @override
+  String get cardSpeciesDog => 'Perro';
+
+  @override
+  String get cardSpeciesCat => 'Gato';
+
+  @override
+  String get cardSpeciesOther => 'Otro animal';
+
+  @override
+  String get categoryPetFood => 'Comida para animales';
+
+  @override
+  String get dailyFoodLabel => 'Comida al día';
+
+  @override
+  String get dailyFoodHelper =>
+      'En la misma unidad que las existencias: con una reserva en kilos y 200 g al día, aquí va «0,2». Déjalo vacío si no se da a diario.';
+
+  @override
+  String get inventoryAnimalLabel => 'Para qué animal';
+
+  @override
+  String get cardSpeciesLabel => 'Tarjeta para';
+
+  @override
+  String get cardSpeciesPerson => 'Una persona';
+
+  @override
+  String get cardChipNumber => 'Número de chip o tatuaje';
+
+  @override
+  String get cardChipNumberHint => 'Figura en el pasaporte de la mascota';
+
+  @override
+  String get cardVets => 'Veterinarios';
+
+  @override
+  String get cardVetHint => 'p. ej. veterinario habitual, clínica';
+
+  @override
+  String get cardVetAdd => 'Añadir veterinario';
+
+  @override
+  String get cardShelters => 'Quién acoge al animal en una emergencia';
+
+  @override
+  String get cardShelterHint => 'p. ej. vecina, residencia canina, protectora';
+
+  @override
+  String get cardAnimalHint =>
+      'Guarda la cartilla de vacunación como PDF en Saber → Documentos personales, por ejemplo con la función de escaneo del teléfono. La comida y los medicamentos se asignan a este animal en la reserva. Para el agua sigue contando el número de animales del perfil del hogar.';
+
+  @override
+  String get cardVet => 'Veterinario';
 }

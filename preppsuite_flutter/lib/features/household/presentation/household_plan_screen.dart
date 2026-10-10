@@ -11,6 +11,7 @@ import '../application/household_member_controller.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
+import '../application/card_species.dart';
 import '../application/emergency_plan_report.dart';
 import '../application/household_providers.dart';
 import '../application/household_plan_controller.dart';
@@ -302,6 +303,12 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
             contact: l10n.emergencyCardContact,
             contacts: l10n.emergencyCardContacts,
             careNeeds: l10n.emergencyCardCareTitle,
+            kind: l10n.cardSpeciesLabel,
+            speciesName: (species) => localizeCardSpecies(l10n, species),
+            chipNumber: l10n.cardChipNumber,
+            vet: l10n.cardVet,
+            vets: l10n.cardVets,
+            shelters: l10n.cardShelters,
             notes: l10n.emergencyCardNotes,
           ),
         ),

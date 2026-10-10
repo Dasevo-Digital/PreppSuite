@@ -14,6 +14,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../household/application/household_member_controller.dart';
 import '../../household/application/household_plan_controller.dart';
 import '../application/check_in.dart';
+import '../../household/application/card_species.dart';
 
 /// "I am all right", to the people who are waiting to hear it (#116).
 ///
@@ -168,7 +169,10 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
         const [];
     final text = _message(l10n, plan?.meetingPointNear);
     final suggestions = _suggestions(plan?.contactName, plan?.contactPhone, [
-      for (final member in members) ?member.emergencyContact,
+      // An animal's card names who takes it in (#151), not somebody who
+      // is waiting to hear that the household is safe.
+      for (final member in members)
+        if (!member.isAnimal) ?member.emergencyContact,
     ]);
 
     return Scaffold(

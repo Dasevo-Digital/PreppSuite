@@ -45,6 +45,21 @@ class HouseholdMembers extends Table {
 
   TextColumn get notes => text().nullable()();
 
+  /// Null for a person; for an animal, what kind -- a `CardSpecies` name
+  /// (`dog`, `cat`, `other`) (#151).
+  ///
+  /// An animal gets a card of its own rather than a list somewhere else:
+  /// what it needs in an emergency is what a person's card already holds
+  /// -- a vet, medicines, who looks after it, what it must not eat -- and
+  /// its food and medicines in the stores can then name it the way a
+  /// person's do. Not who the household feeds: the head counts stay in
+  /// the profile, which is what the supply calculator reads.
+  TextColumn get species => text().nullable()();
+
+  /// An animal's transponder or tattoo number, which is what a shelter
+  /// or a vet asks for first (#151). Null on a person's card.
+  TextColumn get chipNumber => text().nullable()();
+
   /// Keeps the cards in the order the household put them in rather than
   /// alphabetically, which would put a child before a parent for no
   /// reason anyone chose.

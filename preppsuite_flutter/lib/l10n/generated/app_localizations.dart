@@ -14682,6 +14682,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Need per person as in the supply calculator: by the BBK and the BLE where they publish figures, marked there where they do not. Medicines by your daily dose, energy by the consumption you entered for your appliances.'**
   String get scenarioSource;
+
+  /// No description provided for @cardSpeciesDog.
+  ///
+  /// In en, this message translates to:
+  /// **'Dog'**
+  String get cardSpeciesDog;
+
+  /// No description provided for @cardSpeciesCat.
+  ///
+  /// In en, this message translates to:
+  /// **'Cat'**
+  String get cardSpeciesCat;
+
+  /// No description provided for @cardSpeciesOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other animal'**
+  String get cardSpeciesOther;
+
+  /// No description provided for @categoryPetFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Pet food'**
+  String get categoryPetFood;
+
+  /// No description provided for @dailyFoodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Food a day'**
+  String get dailyFoodLabel;
+
+  /// No description provided for @dailyFoodHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'In the same unit as the stock: for a stock in kilograms and 200 g a day, this says “0.2”. Leave it empty if it is not fed daily.'**
+  String get dailyFoodHelper;
+
+  /// No description provided for @inventoryAnimalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'For which animal'**
+  String get inventoryAnimalLabel;
+
+  /// No description provided for @cardSpeciesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Card for'**
+  String get cardSpeciesLabel;
+
+  /// No description provided for @cardSpeciesPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'A person'**
+  String get cardSpeciesPerson;
+
+  /// No description provided for @cardChipNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Chip or tattoo number'**
+  String get cardChipNumber;
+
+  /// No description provided for @cardChipNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'It is in the pet passport'**
+  String get cardChipNumberHint;
+
+  /// No description provided for @cardVets.
+  ///
+  /// In en, this message translates to:
+  /// **'Vets'**
+  String get cardVets;
+
+  /// No description provided for @cardVetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. regular vet, animal clinic'**
+  String get cardVetHint;
+
+  /// No description provided for @cardVetAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a vet'**
+  String get cardVetAdd;
+
+  /// No description provided for @cardShelters.
+  ///
+  /// In en, this message translates to:
+  /// **'Who takes the animal in an emergency'**
+  String get cardShelters;
+
+  /// No description provided for @cardShelterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. neighbour, boarding kennel, shelter'**
+  String get cardShelterHint;
+
+  /// No description provided for @cardAnimalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the vaccination record as a PDF under Knowledge → Personal documents, for example with your phone’s scan function. Food and medicines are assigned to this animal in the stores. For drinking water, the number of animals in the household profile still counts.'**
+  String get cardAnimalHint;
+
+  /// No description provided for @cardVet.
+  ///
+  /// In en, this message translates to:
+  /// **'Vet'**
+  String get cardVet;
 }
 
 class _AppLocalizationsDelegate

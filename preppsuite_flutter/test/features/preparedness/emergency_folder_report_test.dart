@@ -9,6 +9,8 @@ import 'package:preppsuite_flutter/local_db/database.dart';
 
 import '../../pdf_text.dart';
 
+import 'package:preppsuite_flutter/features/household/application/card_species.dart';
+
 /// The folder is the copy that works when the device is gone, which is
 /// the assumption the whole app rests on. It is also a loose sheet of
 /// paper, so what reaches it is read back out of the finished document
@@ -38,6 +40,12 @@ void main() {
       contact: 'Notfallkontakt',
       contacts: 'Notfallkontakte',
       careNeeds: 'Unterstützungsbedarf',
+      kind: 'Karte für',
+      speciesName: _speciesName,
+      chipNumber: 'Chipnummer',
+      vet: 'Tierarzt',
+      vets: 'Tierärzte',
+      shelters: 'Wer es aufnimmt',
       notes: 'Notizen',
     ),
     evacuation: 'Evakuierungs-Karten',
@@ -190,3 +198,5 @@ void main() {
     );
   });
 }
+
+String _speciesName(CardSpecies species) => species.name;

@@ -24,6 +24,7 @@ import 'check_in_screen.dart';
 import '../../first_aid/presentation/defibrillator_screen.dart';
 import '../../emergency_points/presentation/emergency_points_screen.dart';
 import '../../../core/phone_call.dart';
+import '../../household/application/card_species.dart';
 
 /// The information that must remain quick to reach when time, power or a
 /// data connection is scarce. All values are derived from existing records.
@@ -78,7 +79,13 @@ class EmergencyScreen extends ConsumerWidget {
         ShellDestination.checklists,
       ),
       (l10n.readinessPlan, plan != null, ShellDestination.household),
-      (l10n.readinessCards, members.isNotEmpty, ShellDestination.household),
+      // A card for a paramedic is a person's; an animal's alone does
+      // not answer this (#151).
+      (
+        l10n.readinessCards,
+        members.any((member) => !member.isAnimal),
+        ShellDestination.household,
+      ),
       (l10n.readinessMap, mapReady, ShellDestination.map),
       (l10n.readinessKnowledge, knowledgeReady, ShellDestination.knowledge),
     ];

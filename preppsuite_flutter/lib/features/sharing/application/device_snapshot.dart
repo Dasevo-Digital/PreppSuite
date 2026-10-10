@@ -161,11 +161,26 @@ class DeviceSnapshot {
 // older app versions — have to keep reading. These name their fields
 // explicitly and skip anything they don't recognize.
 
+/// A category an older app knows, written as `category`, with the exact
+/// one beside it as `exactCategory` where they differ (#151).
+///
+/// Apps before 2.5.0 read a category they do not know with `byName`, which
+/// throws -- in the overview, the supply calculator and the inventory list
+/// alike. A pet food row arriving as `petFood` would have broken every
+/// one of those screens on a device that had not been updated yet. Written
+/// as `other`, it shows there as "Sonstiges" and nothing breaks; a newer
+/// app reads the exact category back. An older device that edits the row
+/// writes `other` without the exact one, and the row stays "Sonstiges"
+/// from then on -- a label lost, never a screen.
+const _olderAppCategory = {'petFood': 'other'};
+
 Map<String, Object?> encodeInventoryItem(InventoryItem row) => {
   'clientId': row.clientId,
   'householdId': row.householdId,
   'name': row.name,
-  'category': row.category,
+  'category': _olderAppCategory[row.category] ?? row.category,
+  if (_olderAppCategory.containsKey(row.category))
+    'exactCategory': row.category,
   'barcode': row.barcode,
   'offProductId': row.offProductId,
   'quantity': row.quantity,
@@ -201,7 +216,7 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
   final clientId = _string(json['clientId']);
   final householdId = _string(json['householdId']);
   final name = _string(json['name']);
-  final category = _string(json['category']);
+  final category = _string(json['exactCategory']) ?? _string(json['category']);
   final quantity = _double(json['quantity']);
   final updatedAt = asUtcDate(json['updatedAt']);
   if (clientId == null ||
@@ -365,6 +380,8 @@ Map<String, Object?> encodeHouseholdMember(HouseholdMember row) => {
   'emergencyContact': row.emergencyContact,
   'careNeeds': row.careNeeds,
   'notes': row.notes,
+  'species': row.species,
+  'chipNumber': row.chipNumber,
   'sortOrder': row.sortOrder,
   'updatedAt': _date(row.updatedAt),
   'deletedAt': _date(row.deletedAt),
@@ -398,6 +415,15 @@ HouseholdMembersCompanion? decodeHouseholdMember(Map<String, Object?> json) {
     emergencyContact: Value(_string(json['emergencyContact'])),
     careNeeds: Value(_string(json['careNeeds'])),
     notes: Value(_string(json['notes'])),
+    // Schema 24 (#151). Absent from what an older device writes, also for
+    // a card it edited: read as null, that edit would turn a dog's card
+    // into a person's.
+    species: json.containsKey('species')
+        ? Value(_text(json['species']))
+        : const Value.absent(),
+    chipNumber: json.containsKey('chipNumber')
+        ? Value(_text(json['chipNumber']))
+        : const Value.absent(),
     sortOrder: Value(_int(json['sortOrder']) ?? 0),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),

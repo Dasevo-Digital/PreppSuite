@@ -9,6 +9,8 @@ import 'package:preppsuite_flutter/local_db/database.dart';
 
 import '../../pdf_text.dart';
 
+import 'package:preppsuite_flutter/features/household/application/card_species.dart';
+
 /// The paper copy of the household's agreement.
 ///
 /// Read back out of the finished PDF rather than trusted: what this puts on
@@ -39,6 +41,12 @@ void main() {
       contact: 'Notfallkontakt',
       contacts: 'Notfallkontakte',
       careNeeds: 'Unterstützungsbedarf',
+      kind: 'Karte für',
+      speciesName: _speciesName,
+      chipNumber: 'Chipnummer',
+      vet: 'Tierarzt',
+      vets: 'Tierärzte',
+      shelters: 'Wer es aufnimmt',
       notes: 'Notizen',
     ),
   );
@@ -218,4 +226,30 @@ void main() {
     expect(text, contains('Anna Muster'));
     expect(text, contains('Bert Muster'));
   });
+
+  test('an animal\'s card says what it is, its chip and its vet', () {
+    // Built from the rows rather than the PDF: the PDF font folds
+    // umlauts, and the rows are what both reports print.
+    final rows = emergencyCardRows(
+      HouseholdMember(
+        clientId: 'bello',
+        householdId: 'household-1',
+        name: 'Bello',
+        species: 'dog',
+        chipNumber: '276098100000001',
+        doctor: 'Praxis Feld|Tierarzt|0511 123',
+        sortOrder: 0,
+        updatedAt: DateTime.utc(2026),
+        dirty: false,
+      ),
+      strings.fields,
+    );
+    final labels = [for (final row in rows) row.label];
+
+    expect(labels, containsAllInOrder(['Karte für', 'Chipnummer', 'Tierarzt']));
+    expect(rows.first.value, 'dog');
+    expect(labels, isNot(contains('Arzt')));
+  });
 }
+
+String _speciesName(CardSpecies species) => species.name;

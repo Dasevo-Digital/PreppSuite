@@ -165,6 +165,9 @@ const Map<String, InventoryItemCategory> categoryAliases = {
   'other': InventoryItemCategory.other,
   'sonstiges': InventoryItemCategory.other,
   'sonstige': InventoryItemCategory.other,
+  'petfood': InventoryItemCategory.petFood,
+  'tierfutter': InventoryItemCategory.petFood,
+  'futter': InventoryItemCategory.petFood,
 };
 
 /// Decodes file bytes picked by `file_picker`. CSV exports from German

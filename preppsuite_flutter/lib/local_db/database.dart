@@ -32,7 +32,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 23;
+  static const currentSchemaVersion = 24;
 
   AppDatabase() : super(_openConnection()) {
     OpenDatabases.track(this);
@@ -561,6 +561,21 @@ class AppDatabase extends _$AppDatabase {
             m,
             inventoryItems,
             inventoryItems.stockCountedAt,
+          );
+        }
+      }
+      if (from < 24) {
+        // A card may now be an animal's, with its chip number (#151). Null
+        // everywhere after the upgrade, and null is a person -- which is
+        // what every card written so far is.
+        if (!await _hasTable('household_members')) {
+          await m.createTable(householdMembers);
+        } else {
+          await _addColumnOnce(m, householdMembers, householdMembers.species);
+          await _addColumnOnce(
+            m,
+            householdMembers,
+            householdMembers.chipNumber,
           );
         }
       }

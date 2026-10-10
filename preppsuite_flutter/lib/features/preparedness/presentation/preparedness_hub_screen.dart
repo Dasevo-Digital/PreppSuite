@@ -12,6 +12,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../energy/application/energy_store.dart';
 import '../../energy/application/outage_store.dart';
 import '../../warnings/application/warning_providers.dart';
+import '../../household/application/card_species.dart';
 import '../../household/application/emergency_plan_report.dart';
 import '../../household/application/household_member_controller.dart';
 import '../../household/application/household_plan_controller.dart';
@@ -1035,6 +1036,12 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
             contacts: l10n.emergencyCardContacts,
             notes: l10n.emergencyCardNotes,
             careNeeds: l10n.emergencyCardCareTitle,
+            kind: l10n.cardSpeciesLabel,
+            speciesName: (species) => localizeCardSpecies(l10n, species),
+            chipNumber: l10n.cardChipNumber,
+            vet: l10n.cardVet,
+            vets: l10n.cardVets,
+            shelters: l10n.cardShelters,
           ),
           evacuation: l10n.hubEvacuationTitle,
           evacuationRoute: l10n.hubFolderReportRoute,

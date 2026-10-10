@@ -17,6 +17,7 @@ import '../../maps/application/pmtiles_archive.dart';
 import '../../warnings/application/warning_poll_status_store.dart';
 import '../../settings/application/backup_reminder.dart';
 import '../../settings/presentation/backup_card.dart' show backupAge;
+import '../../household/application/card_species.dart';
 
 final _warningPollStatusProvider = FutureProvider(
   (ref) => const WarningPollStatusStore().load(),
@@ -78,7 +79,9 @@ class ReadinessScreen extends ConsumerWidget {
         checklist.any((item) => isChecklistItemSatisfied(item, inventoryById)),
       ),
       (l10n.readinessPlan, plan != null),
-      (l10n.readinessCards, members.isNotEmpty),
+      // A card for a paramedic is a person's; an animal's alone does
+      // not answer this (#151).
+      (l10n.readinessCards, members.any((member) => !member.isAnimal)),
       (l10n.readinessMap, mapReady),
       (l10n.readinessKnowledge, knowledgeReady),
       (l10n.readinessEquipment, equipmentReady),
