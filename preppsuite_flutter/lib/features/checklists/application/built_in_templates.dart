@@ -21,9 +21,13 @@ import '../../../model/categories.dart';
 /// nine more lines under "Erste Hilfe".
 ///
 /// The content follows the BBK's "Ratgeber für Notfallvorsorge und
-/// richtiges Handeln in Notsituationen" and its checklists. German only,
-/// like the rest of this file — it is seeded content, not app copy, and
-/// once a row is in the database no locale switch can reach it anyway.
+/// richtiges Handeln in Notsituationen" and its checklists. Seeded in
+/// German, like the rest of this file — it is seeded content, not app
+/// copy. English and Spanish readers see it translated on the screen
+/// (`built_in_templates_en.dart`, `built_in_templates_es.dart`, #108)
+/// while a row still says exactly what is written here; see
+/// `built_in_template_l10n.dart`. Changing a text below therefore also
+/// means changing both translations, and a test holds them together.
 ///
 /// One template, "Wenn der Strom ausfällt", comes from FEMA's Ready.gov
 /// instead. It is the one subject where the BBK's own material says what

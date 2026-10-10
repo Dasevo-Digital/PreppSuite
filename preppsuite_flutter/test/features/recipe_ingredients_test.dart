@@ -229,4 +229,47 @@ void main() {
       isFalse,
     );
   });
+
+  group('Spanish (#108)', () {
+    List<String> found(String ingredient, List<InventoryItem> items) =>
+        foundFor(ingredient, items, language: 'es');
+
+    test('a plural on the shelf answers a singular in the recipe', () {
+      // Spanish plurals take "-s" or "-es", and a tin is labelled either
+      // way: "Melocotones en almíbar" is the melocotón the dish asks for.
+      expect(found('melocotón', [item('Melocotones en almíbar')]), [
+        'Melocotones en almíbar',
+      ]);
+      expect(found('pimientos', [item('Pimiento asado 300 g')]), [
+        'Pimiento asado 300 g',
+      ]);
+      expect(found('ajo', [item('Ajos')]), ['Ajos']);
+    });
+
+    test('accents and ñ do not split a word in two', () {
+      expect(found('atún', [item('Atun claro')]), ['Atun claro']);
+      expect(found('maíz', [item('Maiz dulce')]), ['Maiz dulce']);
+    });
+
+    test('a word is a word, not a piece of a longer one', () {
+      // English rules, not German ones: Spanish does not build compounds
+      // with the head at the end, so "pan" is not in "panceta".
+      expect(found('pan', [item('Panceta curada')]), isEmpty);
+      expect(found('pan', [item('Pan de molde')]), ['Pan de molde']);
+    });
+
+    test('every ingredient of the Spanish list is found by its own word', () {
+      // A cupboard holding exactly what each recipe names, one row per
+      // word, answers all of it: no ingredient is written so that the
+      // matching cannot reach it.
+      for (final recipe in prepperRecipesEs) {
+        final matches = matchIngredients(
+          ingredients: recipe.ingredients,
+          items: [for (final word in recipe.ingredients) item(word)],
+          language: 'es',
+        );
+        expect(namesEverything(matches), isTrue, reason: recipe.id);
+      }
+    });
+  });
 }

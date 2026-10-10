@@ -8,8 +8,9 @@
 /// the same shelf, and a household that stocks baked beans does not cook
 /// from a list built around Dosentomaten. So each language carries the
 /// dishes its own store cupboard actually holds. Neither list is short of
-/// anything, so there is nothing to fall back to and the two are free to
-/// differ in length.
+/// anything, so there is nothing to fall back to and the lists are free to
+/// differ in length. Spanish has its own since #108: lentejas de bote,
+/// garbanzos and pan duro rather than either of the other two.
 ///
 /// **The preservation methods are translations of each other**, because
 /// drying is drying. There a gap is a real gap, so [mergeByLanguage] still
@@ -117,15 +118,20 @@ List<String> _wordsOf(String text) => [
 /// [word] and the shorter forms inflection leaves behind.
 ///
 /// Not a stemmer: four endings, cut only when enough word is left to
-/// still mean something. A real stemmer lives in
+/// still mean something. Spanish has its own two, because its plural is
+/// "-s" or "-es": "melocotones" has to come back to "melocotón", and the
+/// German "-n" and "-e" would only cut Spanish words where they are not
+/// inflected at all. A real stemmer lives in
 /// `features/knowledge/german_stemmer.dart` and is far too eager for this
 /// — it is built to make a search box generous, and a generous match here
 /// is a tick beside food that is not in the house.
-Set<String> _stems(String word) => {
+Set<String> _stems(String word, {bool spanish = false}) => {
   word,
-  for (final ending in const ['en', 'n', 'e', 's'])
-    if (word.endsWith(ending) && word.length - ending.length >= 4)
-      word.substring(0, word.length - ending.length),
+  for (final ending
+      in spanish ? const ['es', 's'] : const ['en', 'n', 'e', 's'])
+    if (word.endsWith(ending) && word.length - ending.length >= 3)
+      if (spanish || word.length - ending.length >= 4)
+        word.substring(0, word.length - ending.length),
 };
 
 /// Compounds that are not what they end in.
@@ -159,10 +165,12 @@ const _ingredientGroups = <String, SupplyGroup>{
 };
 
 /// Whether the shelf word [shelf] names the ingredient word [ingredient].
-bool _wordNames(String ingredient, String shelf, bool german) {
+bool _wordNames(String ingredient, String shelf, String language) {
   if (_notACompoundOf[shelf]?.contains(ingredient) ?? false) return false;
-  final wanted = _stems(ingredient);
-  for (final form in _stems(shelf)) {
+  final german = language == 'de';
+  final spanish = language == 'es';
+  final wanted = _stems(ingredient, spanish: spanish);
+  for (final form in _stems(shelf, spanish: spanish)) {
     for (final want in wanted) {
       if (form == want) return true;
       if (german && form.endsWith(want)) return true;
@@ -176,9 +184,10 @@ List<RecipeIngredientMatch> matchIngredients({
   required List<InventoryItem> items,
   required String language,
 }) {
-  // The recipe lists never fall back into the other language, so the
-  // language of the screen is the language of the ingredient words.
-  final german = language == 'de';
+  // The recipe lists never fall back into another language, so the
+  // language of the screen is the language of the ingredient words --
+  // and anything without a list of its own is reading the English one.
+  final words = _recipeLanguage(language);
   final pantry = [
     for (final item in items)
       if (item.deletedAt == null &&
@@ -195,7 +204,7 @@ List<RecipeIngredientMatch> matchIngredients({
     for (final ingredient in ingredients)
       RecipeIngredientMatch(ingredient, [
         for (final row in pantry)
-          if (_rowNames(ingredient, row.words, row.group, german)) row.name,
+          if (_rowNames(ingredient, row.words, row.group, words)) row.name,
       ]),
   ];
 }
@@ -206,14 +215,14 @@ bool _rowNames(
   String ingredient,
   List<String> shelfWords,
   SupplyGroup? shelfGroup,
-  bool german,
+  String language,
 ) {
   final group = _ingredientGroups[_foldPantry(ingredient)];
   if (group != null && shelfGroup == group) return true;
   final wanted = _wordsOf(ingredient);
   if (wanted.isEmpty) return false;
   return wanted.every(
-    (word) => shelfWords.any((shelf) => _wordNames(word, shelf, german)),
+    (word) => shelfWords.any((shelf) => _wordNames(word, shelf, language)),
   );
 }
 
@@ -249,14 +258,24 @@ class LocalisedRecipe<T> {
   bool get isFallback => fallbackLanguage != null;
 }
 
+/// The language whose recipe list [languageCode] reads: its own where
+/// there is one, English otherwise, which is what the rest of the app
+/// does.
+String _recipeLanguage(String languageCode) => switch (languageCode) {
+  'de' || 'es' => languageCode,
+  _ => 'en',
+};
+
 /// The recipes for [languageCode].
 ///
-/// Each list is whole, so nothing is appended from the other language and
-/// no entry is ever marked. Anything that is not German is served English,
-/// which is what the rest of the app does.
+/// Each list is whole, so nothing is appended from another language and
+/// no entry is ever marked.
 List<LocalisedRecipe<PrepperRecipe>> recipesFor(String languageCode) => [
-  for (final recipe
-      in languageCode == 'de' ? prepperRecipesDe : prepperRecipesEn)
+  for (final recipe in switch (_recipeLanguage(languageCode)) {
+    'de' => prepperRecipesDe,
+    'es' => prepperRecipesEs,
+    _ => prepperRecipesEn,
+  })
     LocalisedRecipe(recipe),
 ];
 
@@ -266,10 +285,11 @@ List<LocalisedRecipe<PreservationMethod>> preservationMethodsFor(
   languageCode,
   de: preservationMethodsDe,
   en: preservationMethodsEn,
+  es: preservationMethodsEs,
   idOf: (item) => item.id,
 );
 
-/// Picks the list for [languageCode] and appends what only the other one
+/// Picks the list for [languageCode] and appends what only another one
 /// has, marked.
 ///
 /// The preservation methods use this and the recipes deliberately do not:
@@ -281,24 +301,33 @@ List<LocalisedRecipe<PreservationMethod>> preservationMethodsFor(
 /// not — better than leaving a real gap in the app so a test has something
 /// to find.
 ///
-/// Anything that is not German is served English, which is what the rest
-/// of the app does.
+/// Anything without a list of its own is served English, which is what
+/// the rest of the app does. Spanish looks to English first and German
+/// second for what it lacks: English is the language the rest of the app
+/// falls back to, and German is the original every list is translated
+/// from, so nothing that exists anywhere is left out.
 List<LocalisedRecipe<T>> mergeByLanguage<T>(
   String languageCode, {
   required List<T> de,
   required List<T> en,
+  List<T>? es,
   required String Function(T) idOf,
 }) {
-  final german = languageCode == 'de';
-  final wanted = german ? de : en;
-  final other = german ? en : de;
-  final otherLanguage = german ? 'en' : 'de';
-  final have = {for (final item in wanted) idOf(item)};
+  final lists = {'de': de, 'en': en, 'es': ?es};
+  final language = lists.containsKey(languageCode) ? languageCode : 'en';
+  final fallbacks = switch (language) {
+    'de' => const ['en'],
+    'en' => const ['de'],
+    _ => const ['en', 'de'],
+  };
+  final have = <String>{};
   return [
-    for (final item in wanted) LocalisedRecipe(item),
-    for (final item in other)
-      if (!have.contains(idOf(item)))
-        LocalisedRecipe(item, fallbackLanguage: otherLanguage),
+    for (final item in lists[language]!)
+      if (have.add(idOf(item))) LocalisedRecipe(item),
+    for (final other in fallbacks)
+      for (final item in lists[other]!)
+        if (have.add(idOf(item)))
+          LocalisedRecipe(item, fallbackLanguage: other),
   ];
 }
 
@@ -459,6 +488,105 @@ const prepperRecipesEn = [
   ),
 ];
 
+/// The same question asked of a Spanish store cupboard: lentejas and
+/// garbanzos come cooked in a jar, tomate frito in a tin, and yesterday's
+/// bread is an ingredient rather than waste.
+///
+/// Like the others, without amounts -- see [PrepperRecipe.ingredients].
+/// The ingredient words are singular or plural as a shelf label would
+/// say them; the matching brings "-s" and "-es" back together.
+const prepperRecipesEs = [
+  PrepperRecipe(
+    id: 'ensalada-garbanzos-atun',
+    title: 'Ensalada de garbanzos con atún',
+    hint: 'Sin cocinar',
+    steps:
+        'Escurrir y enjuagar los garbanzos cocidos de bote. Mezclar con '
+        'atún, pimientos asados de lata, aceite, vinagre y sal.',
+    ingredients: ['garbanzos', 'atún', 'pimientos', 'aceite'],
+  ),
+  PrepperRecipe(
+    id: 'lentejas-estofadas',
+    title: 'Lentejas estofadas',
+    hint: 'Una olla',
+    steps:
+        'Las lentejas de bote ya están cocidas: calentarlas con su caldo, '
+        'tomate triturado y una cucharadita de pimentón unos diez minutos. '
+        'Con chorizo en rodajas si lo hay.',
+    ingredients: ['lentejas', 'tomate', 'pimentón'],
+  ),
+  PrepperRecipe(
+    id: 'sopa-de-ajo',
+    title: 'Sopa de ajo',
+    hint: 'Una olla, aprovecha el pan duro',
+    steps:
+        'Dorar ajo en láminas en aceite, añadir el pan duro en trozos y el '
+        'pimentón, y cubrir con caldo caliente. Dejar que el pan se empape '
+        'unos minutos.',
+    ingredients: ['pan', 'ajo', 'caldo', 'aceite'],
+  ),
+  PrepperRecipe(
+    id: 'arroz-atun-tomate',
+    title: 'Arroz con atún y tomate',
+    hint: 'Una olla',
+    steps:
+        'Cocer el arroz en agua medida hasta que la absorba. Mezclar con '
+        'tomate frito de lata y atún escurrido.',
+    ingredients: ['arroz', 'tomate', 'atún'],
+  ),
+  PrepperRecipe(
+    id: 'migas',
+    title: 'Migas',
+    hint: 'Una sartén, aprovecha el pan duro',
+    steps:
+        'Humedecer el pan duro en dados con un poco de agua. Freír ajo en '
+        'aceite, añadir el pan y remover hasta que se dore. Con chorizo o '
+        'pimientos de lata.',
+    ingredients: ['pan', 'ajo', 'aceite'],
+  ),
+  PrepperRecipe(
+    id: 'alubias-con-chorizo',
+    title: 'Alubias con chorizo',
+    hint: 'Una olla',
+    steps:
+        'Calentar alubias cocidas de bote con su caldo. Añadir chorizo en '
+        'rodajas, pimentón y un poco de tomate triturado, y dejar que dé '
+        'unos hervores.',
+    ingredients: ['alubias', 'chorizo', 'pimentón'],
+  ),
+  // Like the German list, chosen by the BLE's supply groups and not by
+  // taste: the dishes above clear grain, pulses and protein and leave
+  // fruit and milk almost untouched.
+  PrepperRecipe(
+    id: 'arroz-con-leche',
+    title: 'Arroz con leche',
+    hint: 'Un cazo, cocción larga',
+    steps:
+        'Cocer el arroz a fuego lento en leche UHT con canela y piel de '
+        'limón si la hay, removiendo, unos cuarenta minutos; azúcar al '
+        'final. Cuesta combustible, así que mejor para varias raciones.',
+    ingredients: ['arroz', 'leche', 'canela'],
+  ),
+  PrepperRecipe(
+    id: 'melocoton-frutos-secos',
+    title: 'Melocotón en almíbar con frutos secos',
+    hint: 'Sin cocinar',
+    steps:
+        'Servir el melocotón en almíbar de lata con nueces, almendras o '
+        'pasas por encima. El almíbar se puede beber o usar para endulzar.',
+    ingredients: ['melocotón', 'frutos secos'],
+  ),
+  PrepperRecipe(
+    id: 'pisto-con-pan',
+    title: 'Pisto con pan',
+    hint: 'Frío o templado',
+    steps:
+        'Pisto de lata, frío o calentado, sobre pan o picos. Con sardinas '
+        'en aceite o atún al lado.',
+    ingredients: ['pisto', 'pan'],
+  ),
+];
+
 const preservationMethodsDe = [
   PreservationMethod(
     id: 'chill-freeze',
@@ -531,5 +659,44 @@ const preservationMethodsEn = [
     body:
         'Follow the recipe and concentration; inspect appearance, smell '
         'and seal before eating.',
+  ),
+];
+
+const preservationMethodsEs = [
+  PreservationMethod(
+    id: 'chill-freeze',
+    title: 'Refrigerar y congelar',
+    body:
+        'Repartir en raciones, etiquetar y mantener la cadena de frío. No '
+        'volver a congelar alimentos descongelados sin cocinarlos antes.',
+  ),
+  PreservationMethod(
+    id: 'canning',
+    title: 'Esterilizar en conserva',
+    body:
+        'Usar solo recetas adecuadas y comprobadas, con el tiempo y la '
+        'temperatura indicados; los alimentos poco ácidos requieren un '
+        'cuidado especial.',
+  ),
+  PreservationMethod(
+    id: 'fermenting',
+    title: 'Fermentar',
+    body:
+        'Mantener los alimentos completamente cubiertos por la salmuera y '
+        'usar recipientes limpios.',
+  ),
+  PreservationMethod(
+    id: 'drying',
+    title: 'Secar',
+    body:
+        'Cortar en láminas finas, secar del todo y guardar después en un '
+        'lugar hermético, fresco y oscuro.',
+  ),
+  PreservationMethod(
+    id: 'pickling',
+    title: 'Encurtir, salar y confitar en azúcar',
+    body:
+        'Respetar la concentración y la receta; antes de comer, revisar el '
+        'aspecto, el olor y el cierre.',
   ),
 ];

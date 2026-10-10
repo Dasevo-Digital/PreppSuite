@@ -6,6 +6,7 @@ import '../../../model/categories.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../local_db/database.dart';
+import 'built_in_template_l10n.dart';
 import 'checklist_providers.dart';
 
 /// Local writes for checklist templates and items. See
@@ -39,13 +40,20 @@ class ChecklistController {
   /// Ready-Kit-inspired "duplicate template" action, and the only way to
   /// customize a built-in's title/category since the shared original stays
   /// read-only.
-  Future<void> duplicateTemplate(ChecklistTemplate source) async {
+  /// A copy of [source] the household owns, in the words it was reading:
+  /// a built-in list shown in Spanish is copied in Spanish (#108), because
+  /// the copy is the household's own list from here on, and its own lists
+  /// are never translated.
+  Future<void> duplicateTemplate(
+    ChecklistTemplate source, {
+    String languageCode = 'de',
+  }) async {
     final newTemplateClientId = const Uuid().v4();
     await _db.upsertChecklistTemplate(
       ChecklistTemplatesCompanion.insert(
         clientId: newTemplateClientId,
         householdId: Value(householdId),
-        title: source.title,
+        title: source.titleIn(languageCode),
         category: source.category,
         kind: Value(source.kind),
         updatedAt: DateTime.now().toUtc(),
@@ -60,7 +68,7 @@ class ChecklistController {
           clientId: const Uuid().v4(),
           householdId: Value(householdId),
           templateClientId: newTemplateClientId,
-          title: item.title,
+          title: item.titleIn(languageCode),
           targetQuantity: Value(item.targetQuantity),
           sortOrder: Value(item.sortOrder),
           updatedAt: DateTime.now().toUtc(),

@@ -5,6 +5,7 @@ import '../../../core/app_destinations.dart';
 import '../../../core/content_swap.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
+import '../../checklists/application/built_in_template_l10n.dart';
 import '../../checklists/application/checklist_providers.dart';
 import '../../checklists/presentation/checklist_detail_screen.dart';
 import '../../home/application/shell_layout.dart';
@@ -59,6 +60,7 @@ class _AppSearchScreenState extends ConsumerState<AppSearchScreen> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final householdId = widget.profile.id;
+    final language = Localizations.localeOf(context).languageCode;
 
     final destinations = appDestinations();
     final inventory =
@@ -108,12 +110,20 @@ class _AppSearchScreenState extends ConsumerState<AppSearchScreen> {
       );
     }
 
+    // A built-in list is found by the words on the screen, and by the
+    // German it is stored in as well: a household reads one phone in
+    // Spanish and another in German, and says the list's name aloud.
+    List<String> storedAs(String shown, String stored) =>
+        shown == stored ? const [] : [stored];
+
     for (final template in templates) {
+      final title = template.titleIn(language);
       offer(
         SearchCandidate(
           key: 'list:${template.clientId}',
-          label: template.title,
+          label: title,
           context: l10n.checklistsTitle,
+          aliases: storedAs(title, template.title),
         ),
         _Target(
           icon: Icons.checklist_outlined,
@@ -131,13 +141,15 @@ class _AppSearchScreenState extends ConsumerState<AppSearchScreen> {
     for (final item in checklistItems) {
       final template = templatesById[item.templateClientId];
       if (template == null) continue;
+      final title = item.titleIn(language);
       offer(
         SearchCandidate(
           key: 'entry:${item.clientId}',
-          label: item.title,
+          label: title,
           // The list it belongs to, which is both where it is and the
           // only way to tell two identical entries apart.
-          context: template.title,
+          context: template.titleIn(language),
+          aliases: storedAs(title, item.title),
         ),
         _Target(
           icon: Icons.check_box_outlined,

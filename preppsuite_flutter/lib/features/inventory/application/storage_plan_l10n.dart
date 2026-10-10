@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import 'storage_plan.dart';
+import 'storage_plan_es.dart';
 
 /// Names inside the BLE tables are data, not app copy.
 ///
@@ -13,22 +14,37 @@ import 'storage_plan.dart';
 /// makes a transcription impossible to check against the original. The
 /// screen's own words — headings, buttons, explanations — go through
 /// `AppLocalizations` as usual.
-bool _isGerman(AppLocalizations l10n) => l10n.localeName.startsWith('de');
+///
+/// Spanish (#108) comes from `storage_plan_es.dart`, keyed by the German
+/// text; a test holds it against every row, so the English fallback
+/// below is a guard and not a path anything takes.
+String _pick(AppLocalizations l10n, String german, String english) {
+  final language = l10n.localeName;
+  if (language.startsWith('de')) return german;
+  if (language.startsWith('es')) return storagePlanSpanish[german] ?? english;
+  return english;
+}
+
+String? _pickOptional(
+  AppLocalizations l10n,
+  String? german,
+  String? english,
+) => german == null ? english : _pick(l10n, german, english ?? german);
 
 String storageGroupName(AppLocalizations l10n, StorageGroup group) =>
-    _isGerman(l10n) ? group.name : group.nameEn;
+    _pick(l10n, group.name, group.nameEn);
 
 String storageGroupFootnote(AppLocalizations l10n, StorageGroup group) =>
-    (_isGerman(l10n) ? group.footnote : group.footnoteEn) ?? '';
+    _pickOptional(l10n, group.footnote, group.footnoteEn) ?? '';
 
 String storageFoodName(AppLocalizations l10n, StorageFood food) =>
-    _isGerman(l10n) ? food.name : food.nameEn;
+    _pick(l10n, food.name, food.nameEn);
 
 String? storageFoodNote(AppLocalizations l10n, StorageFood food) =>
-    _isGerman(l10n) ? food.note : food.noteEn;
+    _pickOptional(l10n, food.note, food.noteEn);
 
 String storageVariantName(AppLocalizations l10n, StorageVariant variant) =>
-    _isGerman(l10n) ? variant.name : variant.nameEn;
+    _pick(l10n, variant.name, variant.nameEn);
 
 String localizeDiet(AppLocalizations l10n, StorageDiet diet) => switch (diet) {
   StorageDiet.mixed => l10n.storageDietMixed,

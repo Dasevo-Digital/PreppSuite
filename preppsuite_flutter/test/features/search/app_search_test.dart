@@ -37,6 +37,13 @@ void main() {
       // entirely, and it would otherwise never match.
       expect(foldForSearch('ä'), foldForSearch('ä'));
     });
+
+    test('Spanish letters fold too (#108)', () {
+      expect(foldForSearch('Maíz'), 'maiz');
+      expect(foldForSearch('Piña'), 'pina');
+      // A tilde typed as a combining mark, as a Mac can produce it.
+      expect(foldForSearch('Pin\u0303a'), 'pina');
+    });
   });
 
   group('the order answers come in', () {

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
+import '../application/built_in_template_l10n.dart';
 import '../application/checklist_controller.dart';
 import '../application/checklist_providers.dart';
 import '../application/checklist_satisfaction.dart';
@@ -66,9 +67,10 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
     final inventory =
         ref.watch(inventoryItemsProvider(widget.householdId)).value ?? const [];
     final inventoryById = {for (final item in inventory) item.clientId: item};
+    final language = Localizations.localeOf(context).languageCode;
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.template.title)),
+      appBar: AppBar(title: Text(widget.template.titleIn(language))),
       body: Column(
         children: [
           Expanded(
@@ -106,7 +108,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
                               controller.toggleItem(item);
                             },
                       title: Text(
-                        item.title,
+                        item.titleIn(language),
                         style: complete
                             ? const TextStyle(
                                 decoration: TextDecoration.lineThrough,
@@ -152,7 +154,9 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
                           ),
                           PopupMenuItem(
                             value: _ItemAction.delete,
-                            child: Text(l10n.deleteItemAction(item.title)),
+                            child: Text(
+                              l10n.deleteItemAction(item.titleIn(language)),
+                            ),
                           ),
                         ],
                       ),

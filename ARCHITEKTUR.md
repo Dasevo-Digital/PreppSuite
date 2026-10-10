@@ -553,15 +553,33 @@ helper. gen-l10n falls back to the English template for a missing key
 without a word, so `app_localizations_test` holds all three files to the
 same keys, placeholders and plural cases.
 
-**Spanish is the interface, not yet the content** (#104). The texts kept
-in Dart as German/English pairs — first aid guides, the comic, the
-built-in checklists, the BLE tables, recipes and the knowledge check —
-choose German or else English, so a Spanish household reads them in
-English. That is deliberate for now: the first aid guides are medical
-text that has to be checked against the guideline it came from, and an
-unchecked translation of a resuscitation sequence is not shipped. Adding
-Spanish there means a third file per content set and its review, not a
-switch.
+**Spanish content: everything but the medical part** (#104, #108). The
+comic, the BLE tables, the recipes and the built-in checklists have a
+Spanish version, each in the shape its content needs: the comic a third
+file held panel by panel against the German one, the BLE tables a map
+keyed by the German text beside the transcription, the recipes a list
+of dishes from a Spanish store cupboard (not a translation, like the
+English list), and the checklists a map by clientId. The first aid
+guides and the knowledge check are not translated: they are medical
+text that has to be checked against the guideline it came from by
+somebody qualified to, and an unchecked translation of a resuscitation
+sequence is not shipped. A Spanish reader gets the first aid guides in
+German and the knowledge check in English until then.
+
+**The built-in checklists are translated on the screen, never in the
+database.** They are seeded in German, and a seeded row is the
+household's: ticked, deleted, merged with another device's copy.
+`built_in_template_l10n.dart` shows a row in English or Spanish only
+while its text is still exactly what `built_in_templates.dart` ships,
+and as it stands otherwise -- so an edited row, an older wording, and a
+list of the household's own stay as they are, and two devices in two
+languages never rewrite each other's rows. A copy made with
+"Duplizieren" is the household's own list and is written in the
+language it was copied in. Changing a shipped German text means
+changing both translations; `built_in_checklist_l10n_test` holds them to
+the same ids and to the same numbers in the same order, because an
+emergency number lost in translation is invisible to whoever reads the
+translation.
 
 **The first aid guides are the one deliberate exception to that,** and
 they are content rather than interface: `content/first_aid/de.md` and

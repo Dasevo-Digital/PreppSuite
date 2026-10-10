@@ -63,6 +63,10 @@ class SearchMatch {
 /// Also strips the combining marks a Mac produces for "ä" typed as
 /// option-u then a, which is a different string from the single
 /// character and would otherwise never match it.
+///
+/// Spanish letters fold the same way since #108: "maíz" is typed "maiz"
+/// in a hurry, and "piña" "pina". Without them both broke into two words
+/// wherever a word was split on letters outside a to z.
 String foldForSearch(String text) {
   final buffer = StringBuffer();
   for (final rune in text.toLowerCase().runes) {
@@ -71,10 +75,13 @@ String foldForSearch(String text) {
       0x00f6 || 0x00f2 || 0x00f3 || 0x00f4 => 'o',
       0x00fc || 0x00f9 || 0x00fa || 0x00fb => 'u',
       0x00e8 || 0x00e9 || 0x00ea || 0x00eb => 'e',
+      0x00ec || 0x00ed || 0x00ee || 0x00ef => 'i',
+      0x00f1 => 'n',
+      0x00e7 => 'c',
       0x00df => 'ss',
-      // Combining diaeresis, grave, acute, circumflex: dropped, which
-      // leaves the plain letter that carried them.
-      0x0300 || 0x0301 || 0x0302 || 0x0308 => '',
+      // Combining grave, acute, circumflex, tilde, diaeresis and cedilla:
+      // dropped, which leaves the plain letter that carried them.
+      0x0300 || 0x0301 || 0x0302 || 0x0303 || 0x0308 || 0x0327 => '',
       _ => String.fromCharCode(rune),
     });
   }

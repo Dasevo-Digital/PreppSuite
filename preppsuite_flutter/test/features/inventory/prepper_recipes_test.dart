@@ -1,54 +1,71 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/inventory/application/prepper_recipes.dart';
 
-/// The recipes are prose in two lists, and a compiler cannot check prose.
+/// The recipes are prose in three lists, and a compiler cannot check prose.
 ///
 /// What it can be held to is the rule the two halves of this file follow
-/// differently: the **recipes** are two independent lists, each whole, so
+/// differently: the **recipes** are independent lists, each whole, so
 /// nobody is ever shown a dish in a language they did not ask for; the
 /// **preservation methods** are translations of one another, so a gap
 /// there is a real gap and has to be *shown* rather than quietly dropped.
 /// The second is the part that matters — a cook seeing four methods where
 /// there are five has no way to notice.
 void main() {
-  test('every id is unique, in both languages', () {
-    for (final list in [prepperRecipesDe, prepperRecipesEn]) {
+  test('every id is unique, in every language', () {
+    for (final list in [prepperRecipesDe, prepperRecipesEn, prepperRecipesEs]) {
       final ids = list.map((r) => r.id).toList();
       expect(ids.toSet().length, ids.length);
     }
-    for (final list in [preservationMethodsDe, preservationMethodsEn]) {
+    for (final list in [
+      preservationMethodsDe,
+      preservationMethodsEn,
+      preservationMethodsEs,
+    ]) {
       final ids = list.map((m) => m.id).toList();
       expect(ids.toSet().length, ids.length);
     }
   });
 
-  test('the two recipe lists are independent, not a translated pair', () {
+  test('the recipe lists are independent, not translations', () {
     // Deliberate: an English store cupboard holds baked beans and corned
-    // beef, a German one holds Dosentomaten and H-Milch. Sharing an id
-    // would mean somebody went back to treating one list as the other's
-    // translation, and the fallback would start firing on every dish.
+    // beef, a German one holds Dosentomaten and H-Milch, a Spanish one
+    // lentejas de bote and pan duro. Sharing an id would mean somebody
+    // went back to treating one list as another's translation, and the
+    // fallback would start firing on every dish.
     final german = prepperRecipesDe.map((r) => r.id).toSet();
     final english = prepperRecipesEn.map((r) => r.id).toSet();
+    final spanish = prepperRecipesEs.map((r) => r.id).toSet();
 
     expect(german.intersection(english), isEmpty);
+    expect(german.intersection(spanish), isEmpty);
+    expect(english.intersection(spanish), isEmpty);
     expect(german, isNotEmpty);
     expect(english, isNotEmpty);
+    expect(spanish, isNotEmpty);
   });
 
-  test('the preservation methods stay a translated pair, in order', () {
-    expect(
-      preservationMethodsEn.map((m) => m.id).toList(),
-      preservationMethodsDe.map((m) => m.id).toList(),
-    );
+  test('the preservation methods stay translations, in order', () {
+    final german = preservationMethodsDe.map((m) => m.id).toList();
+    expect(preservationMethodsEn.map((m) => m.id).toList(), german);
+    expect(preservationMethodsEs.map((m) => m.id).toList(), german);
   });
 
   test('nothing is empty', () {
-    for (final recipe in [...prepperRecipesDe, ...prepperRecipesEn]) {
+    for (final recipe in [
+      ...prepperRecipesDe,
+      ...prepperRecipesEn,
+      ...prepperRecipesEs,
+    ]) {
       expect(recipe.title.trim(), isNotEmpty, reason: recipe.id);
       expect(recipe.hint.trim(), isNotEmpty, reason: recipe.id);
       expect(recipe.steps.trim(), isNotEmpty, reason: recipe.id);
+      expect(recipe.ingredients, isNotEmpty, reason: recipe.id);
     }
-    for (final method in [...preservationMethodsDe, ...preservationMethodsEn]) {
+    for (final method in [
+      ...preservationMethodsDe,
+      ...preservationMethodsEn,
+      ...preservationMethodsEs,
+    ]) {
       expect(method.title.trim(), isNotEmpty, reason: method.id);
       expect(method.body.trim(), isNotEmpty, reason: method.id);
     }
@@ -67,6 +84,13 @@ void main() {
 
       expect(chosen.map((e) => e.value.id), prepperRecipesEn.map((r) => r.id));
       expect(chosen.first.value.title, 'Beans on toast');
+      expect(chosen.every((e) => !e.isFallback), isTrue);
+    });
+
+    test('Spanish gets the Spanish list, whole and unmarked', () {
+      final chosen = recipesFor('es');
+
+      expect(chosen.map((e) => e.value.id), prepperRecipesEs.map((r) => r.id));
       expect(chosen.every((e) => !e.isFallback), isTrue);
     });
 
@@ -92,10 +116,14 @@ void main() {
         preservationMethodsFor('nl').first.value.title,
         'Chilling and freezing',
       );
+      expect(
+        preservationMethodsFor('es').first.value.title,
+        'Refrigerar y congelar',
+      );
     });
 
     test('nothing in either language is ever labelled today', () {
-      for (final language in ['de', 'en', 'nl']) {
+      for (final language in ['de', 'en', 'es', 'nl']) {
         expect(
           [
             ...recipesFor(language),
@@ -152,6 +180,29 @@ void main() {
 
       expect(chosen.last.value.title, 'Smoking');
       expect(chosen.last.fallbackLanguage, 'en');
+    });
+
+    test('Spanish looks to English first, then to German', () {
+      final chosen = mergeByLanguage(
+        'es',
+        de: [...preservationMethodsDe, onlyGerman],
+        en: [
+          ...preservationMethodsEn,
+          const PreservationMethod(
+            id: 'salting-fish',
+            title: 'Salting fish',
+            body: 'Dry salt, cool, turned daily.',
+          ),
+        ],
+        es: preservationMethodsEs,
+        idOf: (item) => item.id,
+      );
+
+      expect(chosen.first.value.title, 'Refrigerar y congelar');
+      expect(chosen, hasLength(preservationMethodsEs.length + 2));
+      expect(chosen[chosen.length - 2].fallbackLanguage, 'en');
+      expect(chosen.last.value.title, 'Räuchern');
+      expect(chosen.last.fallbackLanguage, 'de');
     });
 
     test('nothing is dropped in either direction', () {

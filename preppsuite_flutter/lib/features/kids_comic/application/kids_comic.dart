@@ -20,6 +20,7 @@ library;
 
 import 'kids_comic_de.dart';
 import 'kids_comic_en.dart';
+import 'kids_comic_es.dart';
 
 /// Who is talking in a speech bubble.
 enum ComicSpeaker { mila, nuss, papa, neighbour }
@@ -123,6 +124,12 @@ const kidsComicCover = 'titel';
 String kidsComicAsset(String image) => 'assets/comic/$image.png';
 
 /// The comic in the language being read, German being the fallback — the
-/// same rule as the first aid guides, for the same reason.
-KidsComic kidsComic(String localeName) =>
-    localeName.toLowerCase().startsWith('en') ? kidsComicEn : kidsComicDe;
+/// same rule as the first aid guides, for the same reason. Spanish has
+/// its own since #108: the comic gives no medical advice, so it needs no
+/// professional review before it ships, unlike the first aid guides.
+KidsComic kidsComic(String localeName) {
+  final language = localeName.toLowerCase();
+  if (language.startsWith('en')) return kidsComicEn;
+  if (language.startsWith('es')) return kidsComicEs;
+  return kidsComicDe;
+}

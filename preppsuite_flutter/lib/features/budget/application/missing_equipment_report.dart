@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../local_db/database.dart';
+import '../../checklists/application/built_in_template_l10n.dart';
 
 /// Localized strings for the report, gathered from `AppLocalizations` by
 /// the caller — keeps this generator free of a `BuildContext` dependency.
@@ -46,13 +47,15 @@ class MissingEquipmentReport {
     required String householdId,
     required String householdName,
     required MissingEquipmentReportStrings strings,
+    String languageCode = 'de',
   }) async {
     final uncheckedItems = await db.uncheckedChecklistItems(householdId);
     final templates = await db.allChecklistTemplates(householdId);
     final lowStockItems = await db.lowStockInventoryItems(householdId);
 
     final templateTitleByClientId = {
-      for (final template in templates) template.clientId: template.title,
+      for (final template in templates)
+        template.clientId: template.titleIn(languageCode),
     };
     final itemsByTemplateTitle = <String, List<ChecklistItem>>{};
     for (final item in uncheckedItems) {
@@ -107,7 +110,7 @@ class MissingEquipmentReport {
               ),
               pw.Bullet(
                 text: itemsByTemplateTitle[templateTitle]!
-                    .map((item) => item.title)
+                    .map((item) => item.titleIn(languageCode))
                     .join(', '),
               ),
               pw.SizedBox(height: 8),

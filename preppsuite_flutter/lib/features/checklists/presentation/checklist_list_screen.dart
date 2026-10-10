@@ -13,6 +13,7 @@ import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../../budget/application/missing_equipment_report.dart';
 import '../../household/application/household_providers.dart';
+import '../application/built_in_template_l10n.dart';
 import '../application/checklist_category_l10n.dart';
 import '../application/checklist_kind_l10n.dart';
 import '../application/checklist_controller.dart';
@@ -127,6 +128,7 @@ class ChecklistListScreen extends ConsumerWidget {
   ) async {
     final l10n = AppLocalizations.of(context)!;
     final locale = Localizations.localeOf(context).toString();
+    final language = Localizations.localeOf(context).languageCode;
     final householdName = ref.read(householdProfileProvider).value?.name ?? '';
     final db = ref.read(appDatabaseProvider);
 
@@ -151,6 +153,7 @@ class ChecklistListScreen extends ConsumerWidget {
         householdId: householdId,
         householdName: householdName,
         strings: strings,
+        languageCode: language,
       ),
     );
   }
@@ -367,13 +370,14 @@ class _TemplateTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Watches nothing. It is handed its figures and reads the controller
     // only when one of its menu items is chosen.
+    final language = Localizations.localeOf(context).languageCode;
     return ListTile(
       leading: Icon(
         checklistCategoryIcon(ChecklistCategory.fromName(template.category)),
       ),
       title: Row(
         children: [
-          Expanded(child: Text(template.title)),
+          Expanded(child: Text(template.titleIn(language))),
           if (template.isBuiltIn)
             Padding(
               padding: const EdgeInsets.only(left: 8),
@@ -394,7 +398,7 @@ class _TemplateTile extends ConsumerWidget {
           );
           switch (action) {
             case _TemplateAction.duplicate:
-              controller.duplicateTemplate(template);
+              controller.duplicateTemplate(template, languageCode: language);
             case _TemplateAction.delete:
               // No dialog and no undo behind this one: it happens on a
               // menu tap and the list is simply gone.
