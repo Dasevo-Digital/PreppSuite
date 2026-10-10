@@ -1169,7 +1169,7 @@
   "knowledgeApolloMedicalTitle": "Medicina y primeros auxilios",
   "knowledgeApolloMedicalBody": "Usa WikiMed para consultar directamente nociones médicas básicas y primeros auxilios. No sustituye a la atención de emergencia ni a la atención médica profesional.",
   "knowledgeApolloSurvivalTitle": "Supervivencia, bushcraft y autosuficiencia",
-  "knowledgeApolloSurvivalBody": "Wikibooks e iFixit tratan el agua, el refugio, el fuego, la orientación, la alimentación, la higiene y las reparaciones como fundamentos comprensibles.",
+  "knowledgeApolloSurvivalBody": "Potabilizar agua, refugio, saneamiento y salud tras una catástrofe, tecnología apropiada y reparaciones: las colecciones de agua y de ayuda tras catástrofes y Appropedia (en inglés), además de iFixit.",
   "knowledgeApolloRepairTitle": "Oficio, energía y reparación",
   "knowledgeApolloRepairBody": "Herramientas, reparaciones, tecnología sencilla y oficios prácticos: conocimiento que mantiene los equipos y las provisiones útiles durante más tiempo.",
   "knowledgeApolloFoundationsTitle": "Fundamentos y educación",
@@ -2446,5 +2446,15 @@
   "cardShelterHint": "p. ej. vecina, residencia canina, protectora",
   "cardAnimalHint": "Guarda la cartilla de vacunación como PDF en Saber → Documentos personales, por ejemplo con la función de escaneo del teléfono. La comida y los medicamentos se asignan a este animal en la reserva. Para el agua sigue contando el número de animales del perfil del hogar.",
   "cardVet": "Veterinario",
-  "checklistFoodGroupsHint": "Las cantidades de aquí son por persona. Cuánto de ello tiene ya tu hogar en la reserva lo muestran los grupos de reserva."
+  "checklistFoodGroupsHint": "Las cantidades de aquí son por persona. Cuánto de ello tiene ya tu hogar en la reserva lo muestran los grupos de reserva.",
+  "knowledgeSuggestionWater": "Recoger y potabilizar agua. En inglés.",
+  "knowledgeSuggestionPostDisaster": "Refugio, saneamiento, salud y comida tras una catástrofe. En inglés.",
+  "knowledgeSuggestionAppropedia": "Tecnología apropiada para agua, saneamiento, energía y construir con lo que hay. En inglés.",
+  "kiwixOnDevice": "Esta versión ya está en el dispositivo.",
+  "kiwixOtherBuildOnDevice": "Hay otra versión en el dispositivo. Volver a descargar vale la pena si esta es más nueva.",
+  "kiwixAlreadyHereTitle": "Ya está en el dispositivo",
+  "kiwixAlreadyHereBody": "«{title}» ya está en el dispositivo en esta misma versión. ¿Descargarlo de nuevo, por ejemplo porque el archivo está dañado?",
+  "kiwixDownloadAgain": "Descargar de nuevo",
+  "kiwixCrisisShortcuts": "Para una emergencia",
+  "kiwixInEnglish": "{name} (en inglés)"
 }

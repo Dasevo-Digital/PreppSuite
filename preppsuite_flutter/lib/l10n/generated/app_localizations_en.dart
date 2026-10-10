@@ -4228,7 +4228,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeApolloSurvivalBody =>
-      'Wikibooks and iFixit cover water, shelter, fire, navigation, food, hygiene and repairs as understandable foundations.';
+      'Treating water, shelter, sanitation and health after a disaster, appropriate technology and repairs: the water and post-disaster collections and Appropedia, with iFixit.';
 
   @override
   String get knowledgeApolloRepairTitle => 'Craft, energy & repair';
@@ -8905,4 +8905,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get checklistFoodGroupsHint =>
       'The amounts here are per person. The supply groups show how much of them your household already has in its stores.';
+
+  @override
+  String get knowledgeSuggestionWater => 'Collecting and purifying water.';
+
+  @override
+  String get knowledgeSuggestionPostDisaster =>
+      'Shelter, sanitation, health and food after a disaster.';
+
+  @override
+  String get knowledgeSuggestionAppropedia =>
+      'Appropriate technology for water, sanitation, energy and building with what is at hand.';
+
+  @override
+  String get kiwixOnDevice => 'This build is already on the device.';
+
+  @override
+  String get kiwixOtherBuildOnDevice =>
+      'Another build is on the device. Downloading again is worth it if this one is newer.';
+
+  @override
+  String get kiwixAlreadyHereTitle => 'Already on the device';
+
+  @override
+  String kiwixAlreadyHereBody(String title) {
+    return '“$title” is already on the device in exactly this build. Download it again, for example because the file is damaged?';
+  }
+
+  @override
+  String get kiwixDownloadAgain => 'Download again';
+
+  @override
+  String get kiwixCrisisShortcuts => 'For an emergency';
+
+  @override
+  String kiwixInEnglish(String name) {
+    return '$name';
+  }
 }

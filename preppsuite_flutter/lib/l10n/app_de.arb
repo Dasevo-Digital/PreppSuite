@@ -1364,7 +1364,7 @@
   "knowledgeApolloMedicalTitle": "Medizin & Erste Hilfe",
   "knowledgeApolloMedicalBody": "Mit WikiMed medizinische Grundlagen und Erste Hilfe gezielt nachschlagen. Es ersetzt keine Notruf- oder ärztliche Hilfe.",
   "knowledgeApolloSurvivalTitle": "Überleben, Bushcraft & Selbstversorgung",
-  "knowledgeApolloSurvivalBody": "Wikibooks und iFixit für Wasser, Unterkunft, Feuer, Orientierung, Nahrung, Hygiene und Reparaturen als nachvollziehbare Grundlagen.",
+  "knowledgeApolloSurvivalBody": "Wasser aufbereiten, Unterkunft, Hygiene und Gesundheit nach einer Katastrophe, einfache Technik und Reparaturen: die Sammlungen zu Wasser und Katastrophenhilfe und Appropedia (auf Englisch), dazu iFixit.",
   "knowledgeApolloRepairTitle": "Handwerk, Energie & Reparatur",
   "knowledgeApolloRepairBody": "Werkzeuge, Reparaturen, einfache Technik und Alltagshandwerk: Wissen, das Geräte und Versorgung länger nutzbar hält.",
   "knowledgeApolloFoundationsTitle": "Grundlagen & Bildung",
@@ -3668,5 +3668,15 @@
   "cardShelterHint": "z. B. Nachbarin, Tierpension, Tierheim",
   "cardAnimalHint": "Den Impfpass legst du als PDF unter Wissen → Eigene Dokumente ab, etwa mit der Scan-Funktion des Telefons. Futter und Medikamente ordnest du im Vorrat diesem Tier zu. Für das Trinkwasser zählt weiter die Zahl der Tiere im Haushaltsprofil.",
   "cardVet": "Tierärztin oder Tierarzt",
-  "checklistFoodGroupsHint": "Die Mengen hier gelten pro Person. Was davon für deinen Haushalt schon im Vorrat ist, zeigen die Vorratsgruppen."
+  "checklistFoodGroupsHint": "Die Mengen hier gelten pro Person. Was davon für deinen Haushalt schon im Vorrat ist, zeigen die Vorratsgruppen.",
+  "knowledgeSuggestionWater": "Wasser sammeln und aufbereiten. Auf Englisch.",
+  "knowledgeSuggestionPostDisaster": "Unterkunft, Hygiene, Gesundheit und Nahrung nach einer Katastrophe. Auf Englisch.",
+  "knowledgeSuggestionAppropedia": "Einfache Technik für Wasser, Sanitär, Energie und Bauen mit dem, was da ist. Auf Englisch.",
+  "kiwixOnDevice": "Diese Fassung ist schon auf dem Gerät.",
+  "kiwixOtherBuildOnDevice": "Eine andere Fassung ist auf dem Gerät. Neu laden lohnt sich, wenn diese neuer ist.",
+  "kiwixAlreadyHereTitle": "Schon auf dem Gerät",
+  "kiwixAlreadyHereBody": "„{title}“ liegt in genau dieser Fassung schon auf dem Gerät. Noch einmal herunterladen, etwa weil die Datei beschädigt ist?",
+  "kiwixDownloadAgain": "Noch einmal herunterladen",
+  "kiwixCrisisShortcuts": "Für den Ernstfall",
+  "kiwixInEnglish": "{name} (englisch)"
 }

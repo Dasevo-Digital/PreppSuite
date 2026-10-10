@@ -38,6 +38,7 @@ class StoredArchive {
     this.title,
     this.description,
     this.cover,
+    this.fileName,
   });
 
   /// Stable for the life of the entry. Names this archive's index file, so
@@ -69,6 +70,15 @@ class StoredArchive {
   /// archive is opened, alongside the size and the entry count.
   final Uint8List? cover;
 
+  /// The file name the archive arrived under from the Kiwix library --
+  /// `wikipedia_de_all_maxi_2026-10.zim` -- or null for one added by hand
+  /// or before this was kept (#37).
+  ///
+  /// Kept rather than read off [location], because on a sandboxed Mac the
+  /// location is a security bookmark that names no file at all. It is what
+  /// tells the library which build of an archive is already here.
+  final String? fileName;
+
   StoredArchive copyWith({
     int? sizeBytes,
     int? entryCount,
@@ -84,6 +94,7 @@ class StoredArchive {
     title: title ?? this.title,
     description: description ?? this.description,
     cover: cover ?? this.cover,
+    fileName: fileName,
   );
 
   Map<String, Object?> toJson() => {
@@ -98,6 +109,7 @@ class StoredArchive {
     'title': title,
     'description': description,
     if (cover != null) 'cover': base64Encode(cover!),
+    if (fileName != null) 'fileName': fileName,
   };
 
   static StoredArchive? fromJson(Object? json) {
@@ -134,6 +146,7 @@ class StoredArchive {
       title: text(json['title']),
       description: text(json['description']),
       cover: cover,
+      fileName: text(json['fileName']),
     );
   }
 }

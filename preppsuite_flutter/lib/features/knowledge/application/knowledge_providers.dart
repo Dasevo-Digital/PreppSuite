@@ -128,13 +128,22 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
   Future<KnowledgeProblem?> useArchive({
     required String location,
     required String label,
+
+    /// The file name it came down under from the Kiwix library, when it
+    /// did; see [StoredArchive.fileName].
+    String? fileName,
   }) async {
     final current = state.value ?? const KnowledgeState();
 
     final existing = _entryAt(current.library, location);
     final entry =
         existing ??
-        StoredArchive(id: ZimStore.newId(), location: location, label: label);
+        StoredArchive(
+          id: ZimStore.newId(),
+          location: location,
+          label: label,
+          fileName: fileName,
+        );
 
     final library = existing == null
         ? [...current.library, entry]

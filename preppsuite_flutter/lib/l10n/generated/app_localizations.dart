@@ -7117,7 +7117,7 @@ abstract class AppLocalizations {
   /// No description provided for @knowledgeApolloSurvivalBody.
   ///
   /// In en, this message translates to:
-  /// **'Wikibooks and iFixit cover water, shelter, fire, navigation, food, hygiene and repairs as understandable foundations.'**
+  /// **'Treating water, shelter, sanitation and health after a disaster, appropriate technology and repairs: the water and post-disaster collections and Appropedia, with iFixit.'**
   String get knowledgeApolloSurvivalBody;
 
   /// No description provided for @knowledgeApolloRepairTitle.
@@ -14796,6 +14796,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The amounts here are per person. The supply groups show how much of them your household already has in its stores.'**
   String get checklistFoodGroupsHint;
+
+  /// No description provided for @knowledgeSuggestionWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Collecting and purifying water.'**
+  String get knowledgeSuggestionWater;
+
+  /// No description provided for @knowledgeSuggestionPostDisaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Shelter, sanitation, health and food after a disaster.'**
+  String get knowledgeSuggestionPostDisaster;
+
+  /// No description provided for @knowledgeSuggestionAppropedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Appropriate technology for water, sanitation, energy and building with what is at hand.'**
+  String get knowledgeSuggestionAppropedia;
+
+  /// No description provided for @kiwixOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'This build is already on the device.'**
+  String get kiwixOnDevice;
+
+  /// No description provided for @kiwixOtherBuildOnDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Another build is on the device. Downloading again is worth it if this one is newer.'**
+  String get kiwixOtherBuildOnDevice;
+
+  /// No description provided for @kiwixAlreadyHereTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Already on the device'**
+  String get kiwixAlreadyHereTitle;
+
+  /// No description provided for @kiwixAlreadyHereBody.
+  ///
+  /// In en, this message translates to:
+  /// **'“{title}” is already on the device in exactly this build. Download it again, for example because the file is damaged?'**
+  String kiwixAlreadyHereBody(String title);
+
+  /// No description provided for @kiwixDownloadAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Download again'**
+  String get kiwixDownloadAgain;
+
+  /// No description provided for @kiwixCrisisShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'For an emergency'**
+  String get kiwixCrisisShortcuts;
+
+  /// No description provided for @kiwixInEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}'**
+  String kiwixInEnglish(String name);
 }
 
 class _AppLocalizationsDelegate

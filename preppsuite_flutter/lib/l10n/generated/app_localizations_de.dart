@@ -4257,7 +4257,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get knowledgeApolloSurvivalBody =>
-      'Wikibooks und iFixit für Wasser, Unterkunft, Feuer, Orientierung, Nahrung, Hygiene und Reparaturen als nachvollziehbare Grundlagen.';
+      'Wasser aufbereiten, Unterkunft, Hygiene und Gesundheit nach einer Katastrophe, einfache Technik und Reparaturen: die Sammlungen zu Wasser und Katastrophenhilfe und Appropedia (auf Englisch), dazu iFixit.';
 
   @override
   String get knowledgeApolloRepairTitle => 'Handwerk, Energie & Reparatur';
@@ -8951,4 +8951,42 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get checklistFoodGroupsHint =>
       'Die Mengen hier gelten pro Person. Was davon für deinen Haushalt schon im Vorrat ist, zeigen die Vorratsgruppen.';
+
+  @override
+  String get knowledgeSuggestionWater =>
+      'Wasser sammeln und aufbereiten. Auf Englisch.';
+
+  @override
+  String get knowledgeSuggestionPostDisaster =>
+      'Unterkunft, Hygiene, Gesundheit und Nahrung nach einer Katastrophe. Auf Englisch.';
+
+  @override
+  String get knowledgeSuggestionAppropedia =>
+      'Einfache Technik für Wasser, Sanitär, Energie und Bauen mit dem, was da ist. Auf Englisch.';
+
+  @override
+  String get kiwixOnDevice => 'Diese Fassung ist schon auf dem Gerät.';
+
+  @override
+  String get kiwixOtherBuildOnDevice =>
+      'Eine andere Fassung ist auf dem Gerät. Neu laden lohnt sich, wenn diese neuer ist.';
+
+  @override
+  String get kiwixAlreadyHereTitle => 'Schon auf dem Gerät';
+
+  @override
+  String kiwixAlreadyHereBody(String title) {
+    return '„$title“ liegt in genau dieser Fassung schon auf dem Gerät. Noch einmal herunterladen, etwa weil die Datei beschädigt ist?';
+  }
+
+  @override
+  String get kiwixDownloadAgain => 'Noch einmal herunterladen';
+
+  @override
+  String get kiwixCrisisShortcuts => 'Für den Ernstfall';
+
+  @override
+  String kiwixInEnglish(String name) {
+    return '$name (englisch)';
+  }
 }

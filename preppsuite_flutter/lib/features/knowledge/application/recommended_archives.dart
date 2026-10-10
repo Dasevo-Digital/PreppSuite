@@ -11,12 +11,47 @@ import '../../../l10n/generated/app_localizations.dart';
 /// rebuilds them every few months, so a hard-coded link would be a dead
 /// link within the year; a query keeps finding the current build.
 ///
-/// Schooling is the reason half of this list exists. If public life stops
+/// What helps in a crisis comes first (#38): medicine, repair, and the
+/// three English collections made for exactly this -- water treatment,
+/// what to do after a disaster, appropriate technology. Wikipedia answers
+/// most questions and is the largest download, and it was the first thing
+/// anybody reached for; it is further down on purpose, so that the
+/// smaller archive that answers the urgent question is found first.
+///
+/// Schooling is the reason much of the rest exists. If public life stops
 /// for a season, the thing a household misses first after food and heat is
 /// somewhere for the children to keep learning — and Khan Academy, the
 /// obvious answer, has no German archive at all. What German does have is
 /// Wikibooks, Klexikon, PhET and Wikiversity, so those come first.
 enum RecommendedArchive {
+  /// A focused, German medical encyclopedia. It is deliberately offered
+  /// instead of making a person hunt through the general encyclopedia.
+  medicine(name: 'WikiMed', query: 'wikimed', language: 'deu'),
+
+  /// Repair instructions for household appliances and electronics, with
+  /// pictures, in German.
+  ifixit(name: 'iFixit', query: 'ifixit', language: 'deu'),
+
+  /// Water collection and purification, from the openZIM "zimgit"
+  /// collections. English only, and there is no German equivalent.
+  waterTreatment(
+    name: 'Water Treatment Library',
+    query: 'water treatment',
+    language: 'eng',
+  ),
+
+  /// Shelter, sanitation, health and food after a disaster -- the
+  /// companion collection to the one above. English only.
+  postDisaster(
+    name: 'Post Disaster Resource Library',
+    query: 'post disaster',
+    language: 'eng',
+  ),
+
+  /// Appropriate technology: water, sanitation, energy and building with
+  /// what is at hand. English only.
+  appropedia(name: 'Appropedia', query: 'appropedia', language: 'eng'),
+
   /// German school lessons: Wikibooks carries "Mathe für Nicht-Freaks",
   /// which is a full secondary and undergraduate maths course.
   wikibooks(name: 'Wikibooks', query: 'wikibooks', language: 'deu'),
@@ -34,14 +69,6 @@ enum RecommendedArchive {
 
   /// The one that answers most questions, and the largest download.
   wikipedia(name: 'Wikipedia', query: 'wikipedia', language: 'deu'),
-
-  /// A focused, German medical encyclopedia. It is deliberately offered
-  /// instead of making a person hunt through the general encyclopedia.
-  medicine(name: 'WikiMed', query: 'wikimed', language: 'deu'),
-
-  /// Repair instructions for household appliances and electronics, with
-  /// pictures, in German.
-  ifixit(name: 'iFixit', query: 'ifixit', language: 'deu'),
 
   /// Only in English, Spanish and French — but it is the school
   /// curriculum end to end, so it is here for anyone who reads English.
@@ -87,6 +114,9 @@ String recommendedArchiveDescription(
     RecommendedArchive.wikipedia => l10n.knowledgeSuggestionWikipedia,
     RecommendedArchive.medicine => l10n.knowledgeSuggestionMedicine,
     RecommendedArchive.ifixit => l10n.knowledgeSuggestionIfixit,
+    RecommendedArchive.waterTreatment => l10n.knowledgeSuggestionWater,
+    RecommendedArchive.postDisaster => l10n.knowledgeSuggestionPostDisaster,
+    RecommendedArchive.appropedia => l10n.knowledgeSuggestionAppropedia,
     RecommendedArchive.khanAcademy => l10n.knowledgeSuggestionKhan,
   };
 }

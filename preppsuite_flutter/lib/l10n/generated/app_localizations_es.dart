@@ -4262,7 +4262,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get knowledgeApolloSurvivalBody =>
-      'Wikibooks e iFixit tratan el agua, el refugio, el fuego, la orientación, la alimentación, la higiene y las reparaciones como fundamentos comprensibles.';
+      'Potabilizar agua, refugio, saneamiento y salud tras una catástrofe, tecnología apropiada y reparaciones: las colecciones de agua y de ayuda tras catástrofes y Appropedia (en inglés), además de iFixit.';
 
   @override
   String get knowledgeApolloRepairTitle => 'Oficio, energía y reparación';
@@ -8981,4 +8981,42 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get checklistFoodGroupsHint =>
       'Las cantidades de aquí son por persona. Cuánto de ello tiene ya tu hogar en la reserva lo muestran los grupos de reserva.';
+
+  @override
+  String get knowledgeSuggestionWater =>
+      'Recoger y potabilizar agua. En inglés.';
+
+  @override
+  String get knowledgeSuggestionPostDisaster =>
+      'Refugio, saneamiento, salud y comida tras una catástrofe. En inglés.';
+
+  @override
+  String get knowledgeSuggestionAppropedia =>
+      'Tecnología apropiada para agua, saneamiento, energía y construir con lo que hay. En inglés.';
+
+  @override
+  String get kiwixOnDevice => 'Esta versión ya está en el dispositivo.';
+
+  @override
+  String get kiwixOtherBuildOnDevice =>
+      'Hay otra versión en el dispositivo. Volver a descargar vale la pena si esta es más nueva.';
+
+  @override
+  String get kiwixAlreadyHereTitle => 'Ya está en el dispositivo';
+
+  @override
+  String kiwixAlreadyHereBody(String title) {
+    return '«$title» ya está en el dispositivo en esta misma versión. ¿Descargarlo de nuevo, por ejemplo porque el archivo está dañado?';
+  }
+
+  @override
+  String get kiwixDownloadAgain => 'Descargar de nuevo';
+
+  @override
+  String get kiwixCrisisShortcuts => 'Para una emergencia';
+
+  @override
+  String kiwixInEnglish(String name) {
+    return '$name (en inglés)';
+  }
 }

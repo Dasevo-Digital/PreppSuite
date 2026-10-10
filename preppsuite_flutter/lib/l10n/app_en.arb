@@ -2377,7 +2377,7 @@
   "knowledgeApolloMedicalTitle": "Medicine & first aid",
   "knowledgeApolloMedicalBody": "Use WikiMed to look up medical basics and first aid directly. It does not replace emergency or professional medical care.",
   "knowledgeApolloSurvivalTitle": "Survival, bushcraft & self-reliance",
-  "knowledgeApolloSurvivalBody": "Wikibooks and iFixit cover water, shelter, fire, navigation, food, hygiene and repairs as understandable foundations.",
+  "knowledgeApolloSurvivalBody": "Treating water, shelter, sanitation and health after a disaster, appropriate technology and repairs: the water and post-disaster collections and Appropedia, with iFixit.",
   "knowledgeApolloRepairTitle": "Craft, energy & repair",
   "knowledgeApolloRepairBody": "Tools, repairs, simple technology and practical craft: knowledge that keeps equipment and supplies usable longer.",
   "knowledgeApolloFoundationsTitle": "Fundamentals & education",
@@ -5191,5 +5191,29 @@
   "cardShelterHint": "e.g. neighbour, boarding kennel, shelter",
   "cardAnimalHint": "Keep the vaccination record as a PDF under Knowledge → Personal documents, for example with your phone’s scan function. Food and medicines are assigned to this animal in the stores. For drinking water, the number of animals in the household profile still counts.",
   "cardVet": "Vet",
-  "checklistFoodGroupsHint": "The amounts here are per person. The supply groups show how much of them your household already has in its stores."
+  "checklistFoodGroupsHint": "The amounts here are per person. The supply groups show how much of them your household already has in its stores.",
+  "knowledgeSuggestionWater": "Collecting and purifying water.",
+  "knowledgeSuggestionPostDisaster": "Shelter, sanitation, health and food after a disaster.",
+  "knowledgeSuggestionAppropedia": "Appropriate technology for water, sanitation, energy and building with what is at hand.",
+  "kiwixOnDevice": "This build is already on the device.",
+  "kiwixOtherBuildOnDevice": "Another build is on the device. Downloading again is worth it if this one is newer.",
+  "kiwixAlreadyHereTitle": "Already on the device",
+  "kiwixAlreadyHereBody": "“{title}” is already on the device in exactly this build. Download it again, for example because the file is damaged?",
+  "@kiwixAlreadyHereBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "kiwixDownloadAgain": "Download again",
+  "kiwixCrisisShortcuts": "For an emergency",
+  "kiwixInEnglish": "{name}",
+  "@kiwixInEnglish": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

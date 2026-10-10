@@ -67,8 +67,8 @@ class AdaptiveColumns extends StatelessWidget {
   static const _stretch = 1.25;
 
   /// How many columns [width] has room for, given a column of
-  /// [columnWidth] and [spacing] between them.
-  @visibleForTesting
+  /// [columnWidth] and [spacing] between them. Also what a grid of cards
+  /// that is not a page of blocks asks, such as the Kiwix library.
   static int columnsFor(
     double width, {
     double columnWidth = 560,

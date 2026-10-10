@@ -11,8 +11,11 @@ import '../../downloads/application/byte_size.dart';
 import '../../downloads/application/download_folder.dart';
 import '../../downloads/application/download_providers.dart';
 import '../../downloads/presentation/download_banner.dart';
+import '../../../core/adaptive_columns.dart';
+import '../application/catalogue_presence.dart';
 import '../application/kiwix_catalogue.dart';
 import '../application/knowledge_providers.dart';
+import '../application/recommended_archives.dart';
 
 /// Overridden in tests so the screen can be shown against a captured
 /// catalogue instead of the live library.
@@ -127,6 +130,31 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
       return;
     }
 
+    // The same file a second time is almost always a slip -- a tap on an
+    // archive somebody wanted to look at. Asked rather than refused: a
+    // damaged copy is a real reason to fetch it again (#37).
+    final library = ref.read(knowledgeProvider).value?.library ?? const [];
+    if (presenceOf(entry, library) == CataloguePresence.sameBuild) {
+      final again = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.kiwixAlreadyHereTitle),
+          content: Text(l10n.kiwixAlreadyHereBody(entry.title)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.cancelButton),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.kiwixDownloadAgain),
+            ),
+          ],
+        ),
+      );
+      if (again != true || !mounted) return;
+    }
+
     final folder = await const DownloadFolder().current();
     if (!mounted) return;
 
@@ -188,6 +216,7 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
                 .useArchive(
                   location: remembered?.value ?? path,
                   label: remembered?.label ?? label,
+                  fileName: entry.fileName,
                 );
 
             if (problem != null) {
@@ -219,105 +248,154 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
       body: Column(
         children: [
           const DownloadBanner(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.kiwixIntro, style: theme.textTheme.bodySmall),
-                const SizedBox(height: 12),
-                _LanguagePicker(
-                  value: _language,
-                  l10n: l10n,
-                  onChanged: (code) {
-                    setState(() => _language = code);
-                    _reload();
-                  },
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _queryController,
-                  textInputAction: TextInputAction.search,
-                  decoration: InputDecoration(
-                    labelText: l10n.kiwixSearchHint,
-                    prefixIcon: const Icon(Icons.search),
-                    border: const OutlineInputBorder(),
-                  ),
-                  onSubmitted: (value) {
-                    _query = value;
-                    _reload();
-                  },
-                ),
-              ],
-            ),
-          ),
-          Expanded(child: _results(l10n, theme)),
+          // The search scrolls away with the results rather than sitting
+          // above them: with the shortcuts under it, at twice the font
+          // size it took the whole screen and left no room for a list.
+          Expanded(child: _results(l10n, theme, _header(l10n, theme))),
         ],
       ),
     );
   }
 
-  Widget _results(AppLocalizations l10n, ThemeData theme) {
-    if (_error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Text(
-            // A failed catalogue is actionable on its own (retry once a
-            // connection exists), while the raw exception can expose server
-            // addresses or local paths. Keep the familiar context but never
-            // render implementation text.
-            l10n.kiwixLoadError(describeError(l10n, _error!)),
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall,
-          ),
+  Widget _header(AppLocalizations l10n, ThemeData theme) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.kiwixIntro, style: theme.textTheme.bodySmall),
+        const SizedBox(height: 12),
+        _LanguagePicker(
+          value: _language,
+          l10n: l10n,
+          onChanged: (code) {
+            setState(() => _language = code);
+            _reload();
+          },
         ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _queryController,
+          textInputAction: TextInputAction.search,
+          decoration: InputDecoration(
+            labelText: l10n.kiwixSearchHint,
+            prefixIcon: const Icon(Icons.search),
+            border: const OutlineInputBorder(),
+          ),
+          onSubmitted: (value) {
+            _query = value;
+            _reload();
+          },
+        ),
+        const SizedBox(height: 12),
+        _CrisisShortcuts(
+          l10n: l10n,
+          onChoose: (archive) {
+            setState(() {
+              _language = archive.language;
+              _query = archive.query;
+              _queryController.text = archive.query;
+            });
+            _reload();
+          },
+        ),
+      ],
+    ),
+  );
+
+  Widget _results(AppLocalizations l10n, ThemeData theme, Widget header) {
+    if (_error != null) {
+      return ListView(
+        children: [
+          header,
+          Padding(
+            padding: const EdgeInsets.all(32),
+            child: Text(
+              // A failed catalogue is actionable on its own (retry once a
+              // connection exists), while the raw exception can expose server
+              // addresses or local paths. Keep the familiar context but never
+              // render implementation text.
+              l10n.kiwixLoadError(describeError(l10n, _error!)),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+        ],
       );
     }
 
     if (_entries.isEmpty) {
-      if (_loading) return const Center(child: CircularProgressIndicator());
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Text(l10n.kiwixNoResults, textAlign: TextAlign.center),
-        ),
+      return ListView(
+        children: [
+          header,
+          Padding(
+            padding: const EdgeInsets.all(32),
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : Text(l10n.kiwixNoResults, textAlign: TextAlign.center),
+          ),
+        ],
       );
     }
 
-    return ListView.separated(
-      itemCount: _entries.length + 1,
-      separatorBuilder: (context, index) => const Divider(height: 1),
-      itemBuilder: (context, index) {
-        if (index == _entries.length) return _footer(l10n);
-        final entry = _entries[index];
-        return ListTile(
-          title: Text(entry.title),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (entry.summary.isNotEmpty)
-                Text(
-                  entry.summary,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+    final library = ref.watch(knowledgeProvider).value?.library ?? const [];
+    final catalogue = ref.read(kiwixCatalogueProvider);
+
+    // Tiles rather than rows (#17): each archive with its own cover, the
+    // way the library of archives already on the device shows them. As
+    // many columns as the window has room for; one on a phone, which is
+    // the list it always was, only with the picture.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = AdaptiveColumns.columnsFor(
+          constraints.maxWidth - 24,
+          columnWidth: 360,
+          spacing: 12,
+          maxColumns: 4,
+        );
+        final rows = (_entries.length / columns).ceil();
+        return ListView.builder(
+          itemCount: rows + 2,
+          itemBuilder: (context, index) {
+            if (index == 0) return header;
+            final row = index - 1;
+            if (row == rows) return _footer(l10n);
+            final cards = [
+              for (
+                var index = row * columns;
+                index < (row + 1) * columns && index < _entries.length;
+                index++
+              )
+                _EntryCard(
+                  entry: _entries[index],
+                  cover: catalogue.illustration(_entries[index]),
+                  presence: presenceOf(_entries[index], library),
+                  details: _details(_entries[index], l10n),
+                  onDownload: () => _download(_entries[index], l10n),
                 ),
-              const SizedBox(height: 4),
-              Text(
-                _details(entry, l10n),
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.primary,
+            ];
+            if (columns == 1) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: cards.single,
+              );
+            }
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var c = 0; c < columns; c++) ...[
+                      if (c > 0) const SizedBox(width: 12),
+                      Expanded(
+                        child: c < cards.length ? cards[c] : const SizedBox(),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ],
-          ),
-          isThreeLine: entry.summary.isNotEmpty,
-          trailing: IconButton(
-            icon: const Icon(Icons.download_outlined),
-            tooltip: l10n.downloadStartAction,
-            onPressed: () => _download(entry, l10n),
-          ),
-          onTap: () => _download(entry, l10n),
+            );
+          },
         );
       },
     );
@@ -526,6 +604,182 @@ class _LanguageDialogState extends State<_LanguageDialog> {
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(widget.l10n.cancelButton),
+        ),
+      ],
+    );
+  }
+}
+
+/// One archive of the library: its cover, what it is, what it costs, and
+/// whether it is already here.
+class _EntryCard extends StatelessWidget {
+  const _EntryCard({
+    required this.entry,
+    required this.cover,
+    required this.presence,
+    required this.details,
+    required this.onDownload,
+  });
+
+  final KiwixEntry entry;
+  final Uri? cover;
+  final CataloguePresence presence;
+  final String details;
+  final VoidCallback onDownload;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final placeholder = Icon(
+      Icons.menu_book_outlined,
+      size: 32,
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onDownload,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox.square(
+                    dimension: 48,
+                    child: cover == null
+                        ? placeholder
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.network(
+                              cover.toString(),
+                              width: 48,
+                              height: 48,
+                              fit: BoxFit.contain,
+                              // A cover that does not arrive is cosmetic;
+                              // the archive is no less there without it.
+                              errorBuilder: (_, _, _) => placeholder,
+                              semanticLabel: '',
+                            ),
+                          ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(entry.title, style: theme.textTheme.titleMedium),
+                        const SizedBox(height: 2),
+                        Text(
+                          details,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      presence == CataloguePresence.sameBuild
+                          ? Icons.download_done_outlined
+                          : Icons.download_outlined,
+                    ),
+                    tooltip: presence == CataloguePresence.sameBuild
+                        ? l10n.kiwixDownloadAgain
+                        : l10n.downloadStartAction,
+                    onPressed: onDownload,
+                  ),
+                ],
+              ),
+              if (entry.summary.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  entry.summary,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              if (presence != CataloguePresence.absent) ...[
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(
+                      presence == CataloguePresence.sameBuild
+                          ? Icons.check_circle_outline
+                          : Icons.update,
+                      size: 18,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        presence == CataloguePresence.sameBuild
+                            ? l10n.kiwixOnDevice
+                            : l10n.kiwixOtherBuildOnDevice,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// What helps in a crisis, one tap away (#38).
+///
+/// The library opens on whatever the catalogue ranks first, which is
+/// Wikipedia. These search for the smaller archives that answer the
+/// urgent questions -- each in its own language, because three of them
+/// only exist in English.
+class _CrisisShortcuts extends StatelessWidget {
+  const _CrisisShortcuts({required this.l10n, required this.onChoose});
+
+  final AppLocalizations l10n;
+  final ValueChanged<RecommendedArchive> onChoose;
+
+  static const _archives = [
+    RecommendedArchive.medicine,
+    RecommendedArchive.ifixit,
+    RecommendedArchive.waterTreatment,
+    RecommendedArchive.postDisaster,
+    RecommendedArchive.appropedia,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.kiwixCrisisShortcuts,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            for (final archive in _archives)
+              ActionChip(
+                label: Text(
+                  archive.language == 'eng'
+                      ? l10n.kiwixInEnglish(archive.name)
+                      : archive.name,
+                ),
+                onPressed: () => onChoose(archive),
+              ),
+          ],
         ),
       ],
     );

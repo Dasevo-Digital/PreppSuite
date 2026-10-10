@@ -87,7 +87,9 @@ class ApolloLibraryScreen extends ConsumerWidget {
             title: l10n.knowledgeApolloSurvivalTitle,
             body: l10n.knowledgeApolloSurvivalBody,
             archives: const [
-              RecommendedArchive.wikibooks,
+              RecommendedArchive.waterTreatment,
+              RecommendedArchive.postDisaster,
+              RecommendedArchive.appropedia,
               RecommendedArchive.ifixit,
             ],
             installedLabels: installedLabels,
@@ -98,6 +100,7 @@ class ApolloLibraryScreen extends ConsumerWidget {
             body: l10n.knowledgeApolloRepairBody,
             archives: const [
               RecommendedArchive.ifixit,
+              RecommendedArchive.appropedia,
               RecommendedArchive.wikibooks,
             ],
             installedLabels: installedLabels,

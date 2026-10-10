@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/kiwix_catalogue.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/knowledge_providers.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/zim_store.dart';
 import 'package:preppsuite_flutter/features/knowledge/presentation/kiwix_library_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/fixture_http_client.dart';
 
@@ -22,12 +25,22 @@ void main() {
     'test/fixtures/kiwix_languages.xml',
   ).readAsStringSync();
 
-  Future<void> show(WidgetTester tester, {KiwixCatalogue? catalogue}) async {
+  // The screen reads the library on the device to mark what is already
+  // there; an empty one, here.
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  Future<void> show(
+    WidgetTester tester, {
+    KiwixCatalogue? catalogue,
+    List<StoredArchive>? library,
+  }) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           if (catalogue != null)
             kiwixCatalogueProvider.overrideWithValue(catalogue),
+          if (library != null)
+            knowledgeProvider.overrideWith(() => _FixedLibrary(library)),
         ],
         child: const MaterialApp(
           locale: Locale('de'),
@@ -210,4 +223,90 @@ void main() {
       expect(find.textContaining('English (1298)'), findsOneWidget);
     });
   });
+
+  group('what is already here (#37)', () {
+    KiwixCatalogue catalogue() => KiwixCatalogue(
+      httpClient: FixtureHttpClient({
+        'https://opds.library.kiwix.org/catalog/v2/entries'
+                '?lang=deu&start=0&count=25':
+            entriesXml,
+      }),
+    );
+
+    testWidgets('the build on the device is marked, its siblings are not', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        catalogue: catalogue(),
+        library: const [
+          StoredArchive(
+            id: 'a',
+            location: 'bookmark://BFDD0E14',
+            label: 'Wikipedia',
+            fileName: 'wikipedia_de_all_maxi_2026-01.zim',
+          ),
+        ],
+      );
+
+      expect(
+        find.text('Diese Fassung ist schon auf dem Gerät.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a second download of the same file is asked about', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        catalogue: catalogue(),
+        library: const [
+          StoredArchive(
+            id: 'a',
+            location: '/Wissen/wikipedia_de_all_maxi_2026-01.zim',
+            label: 'Wikipedia',
+          ),
+        ],
+      );
+
+      await tester.tap(find.byTooltip('Noch einmal herunterladen'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Schon auf dem Gerät'), findsOneWidget);
+    });
+  });
+
+  testWidgets('the emergency shortcuts search in their own language (#38)', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      catalogue: KiwixCatalogue(
+        httpClient: FixtureHttpClient({
+          'https://opds.library.kiwix.org/catalog/v2/entries'
+                  '?lang=deu&start=0&count=25':
+              entriesXml,
+          'https://opds.library.kiwix.org/catalog/v2/entries'
+                  '?lang=eng&q=water+treatment&start=0&count=25':
+              entriesXml,
+        }),
+      ),
+    );
+
+    expect(find.text('Für den Ernstfall'), findsOneWidget);
+    await tester.tap(find.text('Water Treatment Library (englisch)'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(TextField, 'water treatment'), findsOneWidget);
+  });
+}
+
+class _FixedLibrary extends KnowledgeController {
+  _FixedLibrary(this.library);
+
+  final List<StoredArchive> library;
+
+  @override
+  Future<KnowledgeState> build() async => KnowledgeState(library: library);
 }
