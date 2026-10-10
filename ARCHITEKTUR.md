@@ -2506,6 +2506,24 @@ einem anderen bearbeitet wird; eine verwaiste Kennung liest sich als „für
 den ganzen Haushalt“. Die Karte zeigt den Vorrat neben der getippten
 „Dauermedikation“, nicht an ihrer Stelle.
 
+### Texterkennung: die Systeme lesen, die App zeichnet
+
+Ein gescanntes PDF wird seit #66 auf Wunsch Seite für Seite gelesen. Die
+Seiten zeichnet PDFium (pdfrx) in Dart, mit 150 dpi und höchstens 4000
+Pixeln an der langen Seite, und jede Plattform bekommt dieselben
+BGRA-Pixel über den Kanal `de.dasevo.preppsuite/text_recognition`:
+`TextRecognitionBridge.swift` (Vision, macOS und iOS, dieselbe Datei),
+`windows/runner/text_recognition.cpp` (`Windows.Media.Ocr`, in einem
+eigenen Thread, die Antwort über eine Fenster-Nachricht, weil ein Kanal
+nur auf dem Fenster-Thread antworten darf) und unter Linux die
+Kommandozeile von Tesseract, falls installiert. Erkannter Text wird als
+solcher markiert (`PersonalDocument.recognized`), weil eine Erkennung
+Lücken haben kann, ohne sie zu melden.
+
+**Kein Erkenner, der Daten an Dritte schickt.** Android hat deshalb noch
+keinen: ML Kit sendet nach seinen Bedingungen Nutzungsdaten an Google.
+Ein neuer Erkenner muss auf dem Gerät laufen und nichts senden.
+
 ### Markierbar ist jeder Bildschirm für sich
 
 Ein Flutter-`Text` lässt sich nur markieren und kopieren, wenn eine

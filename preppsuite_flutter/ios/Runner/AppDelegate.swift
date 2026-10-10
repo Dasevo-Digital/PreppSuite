@@ -14,6 +14,9 @@ import UIKit
   /// descriptors and the security scopes they hang on.
   private var storage: StorageBridge?
 
+  /// Held for the same reason: reading scanned pages (#66).
+  private var textRecognition: TextRecognitionBridge?
+
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
@@ -22,6 +25,9 @@ import UIKit
     // presenter for itself when it is actually opened.
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "PreppSuiteStorage") {
       storage = StorageBridge.register(with: registrar.messenger())
+    }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "PreppSuiteTextRecognition") {
+      textRecognition = TextRecognitionBridge.register(with: registrar.messenger())
     }
   }
 }

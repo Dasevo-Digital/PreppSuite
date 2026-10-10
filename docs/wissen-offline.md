@@ -216,11 +216,36 @@ Zeichen Text je Dokument, am Telefon und Tablet bis 128 MB und 4
 Millionen (#64). Die Datei wird im Ganzen gelesen; die Grenze ist also
 auch der Speicher, den das Lesen höchstens braucht.
 
-**Gescannte PDFs bleiben außen vor.** Ein PDF ohne Textebene ist für den
-Index ein leeres Dokument; die App meldet das als „Kein auslesbarer Text
-(möglicherweise ein Scan)" statt so zu tun, als wäre nichts gewesen. Eine
-Texterkennung bringt sie nicht mit. Was eine kosten würde und wie viel
-sie läse, ist gemessen und steht in `texterkennung-messung.md`.
+**Gescannte PDFs.** Ein PDF ohne Textebene ist für den Index ein leeres
+Dokument; die App meldet das als „Kein auslesbarer Text (möglicherweise
+ein Scan)". Seit #66 bietet sie dann **„Text erkennen“** an: Jede Seite
+wird von PDFium mit 150 dpi gezeichnet und von der Texterkennung des
+Systems gelesen, Seite für Seite, auf dem Gerät.
+
+| | womit | Stand |
+|---|---|---|
+| macOS, iOS | Apple Vision, im System | iPhone-Simulator geprüft |
+| Windows | `Windows.Media.Ocr`, im System, für installierte Sprachpakete | geprüft |
+| Linux | Tesseract, falls installiert (`tesseract-ocr`, `tesseract-ocr-deu`) | geprüft |
+| Android | noch keine | siehe unten |
+
+Vorher sagt ein Dialog, was das heißt: Es dauert (gemessen rund eine
+Sekunde je Seite auf einem Mittelklasse-Telefon), es bleibt auf dem Gerät,
+und **erkannter Text kann Lücken haben, ohne dass etwas sie meldet** – die
+Messung fand eine Seite, auf der Vision ganze Absätze ausließ und dabei
+volle Zuversicht meldete. Ein so gelesenes Dokument steht in der Liste mit
+„Text per Texterkennung, kann Lücken haben“. Während des Lesens bleibt der
+Bildschirm an, weil Android die Arbeit sonst mit dem dunklen Bildschirm
+anhält.
+
+Android hat noch keine Texterkennung. Gemessen war ML Kit mit
+mitgeliefertem Modell, und das liest gut – aber nach Googles eigenen
+Bedingungen sendet ML Kit Leistungs- und Nutzungsdaten an Google, ohne
+Möglichkeit, das abzuschalten. Die Bilder blieben auf dem Gerät, die App
+würde aber Daten an Google schicken, und das tut sie sonst nirgends. Wie
+es dort weitergeht, ist offen.
+
+Die Messung dazu steht in `texterkennung-messung.md`.
 
 ## Grenzen
 

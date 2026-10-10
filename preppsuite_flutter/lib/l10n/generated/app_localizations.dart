@@ -14928,6 +14928,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Do not suggest again'**
   String get knowledgeDownloadsDismiss;
+
+  /// No description provided for @knowledgeRecognizeAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Recognise text'**
+  String get knowledgeRecognizeAction;
+
+  /// No description provided for @knowledgeRecognizeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition'**
+  String get knowledgeRecognizeTitle;
+
+  /// No description provided for @knowledgeRecognizeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The app reads each page of this scan as an image and recognises the text on it, on this device; nothing leaves it. It takes a while: about a second per page was measured on a mid-range phone, much less on a computer. Recognised text can have gaps the app does not notice. It is usually enough for searching, not for a transcript.'**
+  String get knowledgeRecognizeBody;
+
+  /// No description provided for @knowledgeRecognizeStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting text recognition …'**
+  String get knowledgeRecognizeStarting;
+
+  /// No description provided for @knowledgeRecognizeProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition: {done} of {total} pages'**
+  String knowledgeRecognizeProgress(int done, int total);
+
+  /// No description provided for @knowledgeRecognizeCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop text recognition'**
+  String get knowledgeRecognizeCancel;
+
+  /// No description provided for @knowledgeRecognizedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'text recognised from the pages, may have gaps'**
+  String get knowledgeRecognizedNote;
+
+  /// No description provided for @knowledgeRecognizeDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} characters recognised and searchable.'**
+  String knowledgeRecognizeDone(int count);
+
+  /// No description provided for @knowledgeRecognizeNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'No text was recognised on the pages.'**
+  String get knowledgeRecognizeNothing;
+
+  /// No description provided for @knowledgeRecognizeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition failed.'**
+  String get knowledgeRecognizeFailed;
+
+  /// No description provided for @knowledgeRecognizeNeedsLanguagePack.
+  ///
+  /// In en, this message translates to:
+  /// **'Windows recognises text only in languages whose language pack is installed, and there is none for German or English. One can be added under Settings → Time & language → Language & region.'**
+  String get knowledgeRecognizeNeedsLanguagePack;
+
+  /// No description provided for @knowledgeRecognizeNeedsTesseract.
+  ///
+  /// In en, this message translates to:
+  /// **'On Linux the app reads scanned pages with Tesseract, which does not come with it. On Debian and Ubuntu: sudo apt install tesseract-ocr tesseract-ocr-deu'**
+  String get knowledgeRecognizeNeedsTesseract;
+
+  /// No description provided for @knowledgeRecognizeUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no text recognition on this device.'**
+  String get knowledgeRecognizeUnsupported;
 }
 
 class _AppLocalizationsDelegate

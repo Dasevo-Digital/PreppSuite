@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/personal_document_store.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/text_recognition.dart';
 import 'package:preppsuite_flutter/features/knowledge/presentation/personal_documents_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -198,4 +199,85 @@ void main() {
       expect(find.text('Im Download-Ordner'), findsNothing);
     });
   });
+
+  group('a scan without text (#66)', () {
+    Future<void> showScan(
+      WidgetTester tester, {
+      required String label,
+      required TextRecognitionSupport support,
+    }) async {
+      await tester.runAsync(() async {
+        const store = PersonalDocumentStore();
+        final added = await store.add(location: '/Scans/$label', label: label);
+        await store.updateIndex(added.single.id, status: 'noText');
+      });
+      await tester.binding.setSurfaceSize(const Size(600, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: PersonalDocumentsScreen(
+            downloadsDirectory: () async => null,
+            textRecognizer: _Recognizer(support),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('offers to recognise the text of a PDF', (tester) async {
+      await showScan(
+        tester,
+        label: 'Broschuere.pdf',
+        support: TextRecognitionSupport.available,
+      );
+
+      expect(find.byTooltip('Text erkennen'), findsOneWidget);
+      await tester.tap(find.byTooltip('Text erkennen'));
+      await tester.pumpAndSettle();
+
+      // What it costs and what it cannot promise, before it starts.
+      expect(find.textContaining('kann Lücken haben'), findsOneWidget);
+      expect(find.textContaining('nichts verlässt es'), findsOneWidget);
+    });
+
+    testWidgets('says what is missing where nothing can read it', (
+      tester,
+    ) async {
+      await showScan(
+        tester,
+        label: 'Broschuere.pdf',
+        support: TextRecognitionSupport.needsTesseract,
+      );
+
+      await tester.tap(find.byTooltip('Text erkennen'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('tesseract-ocr-deu'), findsOneWidget);
+    });
+
+    testWidgets('an EPUB without text is not offered it', (tester) async {
+      await showScan(
+        tester,
+        label: 'Buch.epub',
+        support: TextRecognitionSupport.available,
+      );
+
+      expect(find.byTooltip('Text erkennen'), findsNothing);
+    });
+  });
+}
+
+class _Recognizer implements TextRecognizer {
+  const _Recognizer(this.answer);
+
+  final TextRecognitionSupport answer;
+
+  @override
+  Future<TextRecognitionSupport> support() async => answer;
+
+  @override
+  Future<String> recognize(PageImage page) async => '';
 }

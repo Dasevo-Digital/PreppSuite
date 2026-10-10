@@ -9053,4 +9053,54 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get knowledgeDownloadsDismiss => 'Nicht mehr vorschlagen';
+
+  @override
+  String get knowledgeRecognizeAction => 'Text erkennen';
+
+  @override
+  String get knowledgeRecognizeTitle => 'Texterkennung';
+
+  @override
+  String get knowledgeRecognizeBody =>
+      'Die App liest jede Seite dieses Scans als Bild und erkennt den Text darin, auf diesem Gerät; nichts verlässt es. Das dauert: Auf einem Mittelklasse-Telefon wurde rund eine Sekunde je Seite gemessen, an einem Rechner deutlich weniger. Erkannter Text kann Lücken haben, ohne dass die App sie bemerkt. Zum Suchen genügt er meist, als Abschrift taugt er nicht.';
+
+  @override
+  String get knowledgeRecognizeStarting => 'Texterkennung beginnt …';
+
+  @override
+  String knowledgeRecognizeProgress(int done, int total) {
+    return 'Texterkennung: $done von $total Seiten';
+  }
+
+  @override
+  String get knowledgeRecognizeCancel => 'Texterkennung abbrechen';
+
+  @override
+  String get knowledgeRecognizedNote =>
+      'Text per Texterkennung, kann Lücken haben';
+
+  @override
+  String knowledgeRecognizeDone(int count) {
+    return '$count Zeichen erkannt und durchsuchbar.';
+  }
+
+  @override
+  String get knowledgeRecognizeNothing =>
+      'Auf den Seiten wurde kein Text erkannt.';
+
+  @override
+  String get knowledgeRecognizeFailed =>
+      'Die Texterkennung ist fehlgeschlagen.';
+
+  @override
+  String get knowledgeRecognizeNeedsLanguagePack =>
+      'Windows erkennt Text nur in Sprachen, deren Sprachpaket installiert ist, und für Deutsch und Englisch ist keines da. Es lässt sich unter Einstellungen → Zeit und Sprache → Sprache und Region hinzufügen.';
+
+  @override
+  String get knowledgeRecognizeNeedsTesseract =>
+      'Unter Linux liest die App gescannte Seiten mit Tesseract, das ihr nicht beiliegt. Unter Debian und Ubuntu installieren: sudo apt install tesseract-ocr tesseract-ocr-deu';
+
+  @override
+  String get knowledgeRecognizeUnsupported =>
+      'Auf diesem Gerät gibt es keine Texterkennung.';
 }

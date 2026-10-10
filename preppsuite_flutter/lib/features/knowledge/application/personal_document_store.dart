@@ -18,6 +18,7 @@ class PersonalDocument {
     this.indexedCharacters = 0,
     this.readerOffset = 0,
     this.sourceFingerprint,
+    this.recognized = false,
   });
 
   final String id;
@@ -39,6 +40,11 @@ class PersonalDocument {
   /// never indexed, or indexed before fingerprints were kept.
   final String? sourceFingerprint;
 
+  /// Whether the indexed text came from reading the pages as images
+  /// (#66) rather than from the file's own text. Said beside the
+  /// document, because a recognition can leave gaps nothing reports.
+  final bool recognized;
+
   bool get isSearchable => indexStatus == 'ready';
 
   String get extension {
@@ -58,6 +64,7 @@ class PersonalDocument {
     'indexedCharacters': indexedCharacters,
     'readerOffset': readerOffset,
     'sourceFingerprint': ?sourceFingerprint,
+    if (recognized) 'recognized': true,
   };
 
   static PersonalDocument? fromJson(Object? value) {
@@ -89,6 +96,7 @@ class PersonalDocument {
       sourceFingerprint: value['sourceFingerprint'] is String
           ? value['sourceFingerprint'] as String
           : null,
+      recognized: value['recognized'] == true,
     );
   }
 
@@ -98,6 +106,7 @@ class PersonalDocument {
     double? readerOffset,
     String? sourceFingerprint,
     bool clearFingerprint = false,
+    bool? recognized,
   }) => PersonalDocument(
     id: id,
     location: location,
@@ -109,6 +118,7 @@ class PersonalDocument {
     sourceFingerprint: clearFingerprint
         ? null
         : sourceFingerprint ?? this.sourceFingerprint,
+    recognized: recognized ?? this.recognized,
   );
 }
 
@@ -200,6 +210,10 @@ class PersonalDocumentStore {
     required String status,
     int characters = 0,
     String? fingerprint,
+
+    /// Whether the text was recognised from page images (#66). Every
+    /// other index run is the file's own text, so it clears the mark.
+    bool recognized = false,
   }) async {
     final updated = [
       for (final item in await load())
@@ -208,6 +222,7 @@ class PersonalDocumentStore {
             indexStatus: status,
             indexedCharacters: characters,
             sourceFingerprint: fingerprint,
+            recognized: recognized,
           )
         else
           item,

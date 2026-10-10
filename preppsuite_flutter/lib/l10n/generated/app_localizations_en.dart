@@ -9004,4 +9004,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeDownloadsDismiss => 'Do not suggest again';
+
+  @override
+  String get knowledgeRecognizeAction => 'Recognise text';
+
+  @override
+  String get knowledgeRecognizeTitle => 'Text recognition';
+
+  @override
+  String get knowledgeRecognizeBody =>
+      'The app reads each page of this scan as an image and recognises the text on it, on this device; nothing leaves it. It takes a while: about a second per page was measured on a mid-range phone, much less on a computer. Recognised text can have gaps the app does not notice. It is usually enough for searching, not for a transcript.';
+
+  @override
+  String get knowledgeRecognizeStarting => 'Starting text recognition …';
+
+  @override
+  String knowledgeRecognizeProgress(int done, int total) {
+    return 'Text recognition: $done of $total pages';
+  }
+
+  @override
+  String get knowledgeRecognizeCancel => 'Stop text recognition';
+
+  @override
+  String get knowledgeRecognizedNote =>
+      'text recognised from the pages, may have gaps';
+
+  @override
+  String knowledgeRecognizeDone(int count) {
+    return '$count characters recognised and searchable.';
+  }
+
+  @override
+  String get knowledgeRecognizeNothing =>
+      'No text was recognised on the pages.';
+
+  @override
+  String get knowledgeRecognizeFailed => 'Text recognition failed.';
+
+  @override
+  String get knowledgeRecognizeNeedsLanguagePack =>
+      'Windows recognises text only in languages whose language pack is installed, and there is none for German or English. One can be added under Settings → Time & language → Language & region.';
+
+  @override
+  String get knowledgeRecognizeNeedsTesseract =>
+      'On Linux the app reads scanned pages with Tesseract, which does not come with it. On Debian and Ubuntu: sudo apt install tesseract-ocr tesseract-ocr-deu';
+
+  @override
+  String get knowledgeRecognizeUnsupported =>
+      'There is no text recognition on this device.';
 }

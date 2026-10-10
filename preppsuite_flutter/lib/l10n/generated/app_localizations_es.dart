@@ -9082,4 +9082,54 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get knowledgeDownloadsDismiss => 'No volver a sugerir';
+
+  @override
+  String get knowledgeRecognizeAction => 'Reconocer texto';
+
+  @override
+  String get knowledgeRecognizeTitle => 'Reconocimiento de texto';
+
+  @override
+  String get knowledgeRecognizeBody =>
+      'La app lee cada página de este escaneo como imagen y reconoce el texto, en este dispositivo; nada sale de él. Lleva tiempo: en un teléfono de gama media se midió alrededor de un segundo por página, en un ordenador mucho menos. El texto reconocido puede tener huecos que la app no detecta. Suele bastar para buscar, no como transcripción.';
+
+  @override
+  String get knowledgeRecognizeStarting => 'Empezando el reconocimiento …';
+
+  @override
+  String knowledgeRecognizeProgress(int done, int total) {
+    return 'Reconocimiento: $done de $total páginas';
+  }
+
+  @override
+  String get knowledgeRecognizeCancel => 'Detener el reconocimiento';
+
+  @override
+  String get knowledgeRecognizedNote =>
+      'texto reconocido de las páginas, puede tener huecos';
+
+  @override
+  String knowledgeRecognizeDone(int count) {
+    return '$count caracteres reconocidos y buscables.';
+  }
+
+  @override
+  String get knowledgeRecognizeNothing =>
+      'No se reconoció texto en las páginas.';
+
+  @override
+  String get knowledgeRecognizeFailed =>
+      'El reconocimiento de texto ha fallado.';
+
+  @override
+  String get knowledgeRecognizeNeedsLanguagePack =>
+      'Windows solo reconoce texto en los idiomas cuyo paquete está instalado, y no hay ninguno para alemán ni inglés. Se puede añadir en Configuración → Hora e idioma → Idioma y región.';
+
+  @override
+  String get knowledgeRecognizeNeedsTesseract =>
+      'En Linux la app lee las páginas escaneadas con Tesseract, que no viene incluido. En Debian y Ubuntu: sudo apt install tesseract-ocr tesseract-ocr-deu';
+
+  @override
+  String get knowledgeRecognizeUnsupported =>
+      'Este dispositivo no tiene reconocimiento de texto.';
 }

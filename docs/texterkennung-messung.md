@@ -176,3 +176,20 @@ Was zu klären bleibt, ist nicht mehr das Ob, sondern das Wie: ein
 Vordergrunddienst für lange Dokumente unter Android, +11 MB Paketgröße
 dort, und eine ehrliche Antwort darauf, dass eine unvollständige
 Erkennung sich von einer vollständigen nicht unterscheiden lässt.
+
+## Umsetzung (#66)
+
+Gebaut für macOS und iOS (Vision), Windows (`Windows.Media.Ocr`) und
+Linux (Tesseract über die Kommandozeile, falls installiert). Die Seiten
+zeichnet PDFium, das die App ohnehin mitbringt, mit 150 dpi und höchstens
+4000 Pixeln an der langen Seite, eine Seite nach der anderen; die Engines
+bekommen dieselben BGRA-Pixel. `integration_test/native_text_recognition_test.dart`
+legt einen bekannten Satz als Bild in ein PDF ohne Textebene und liest ihn
+zurück; bestanden im iPhone-Simulator, unter Windows und unter Linux.
+
+**Android: zurückgestellt.** Laut den
+[ML-Kit-Bedingungen](https://developers.google.com/ml-kit/terms) bleiben
+die Bilder zwar auf dem Gerät, ML Kit schickt aber Kennzahlen zu Leistung
+und Nutzung an Google und fragt von Zeit zu Zeit nach Updates; eine
+Abschaltung nennen die Bedingungen nicht. Das war in der Messung nicht
+bedacht.

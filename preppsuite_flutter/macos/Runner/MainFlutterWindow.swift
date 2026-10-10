@@ -13,6 +13,9 @@ class MainFlutterWindow: NSWindow {
   /// own reference for the same reason.
   private var storage: StorageBridge?
 
+  /// Held for the same reason: reading scanned pages (#66).
+  private var textRecognition: TextRecognitionBridge?
+
   override func awakeFromNib() {
     // Before the engine exists, so no setting is read from the empty
     // defaults first.
@@ -26,6 +29,9 @@ class MainFlutterWindow: NSWindow {
     RegisterGeneratedPlugins(registry: flutterViewController)
     storage = StorageBridge.register(
       with: flutterViewController.registrar(forPlugin: "StorageBridge")
+    )
+    textRecognition = TextRecognitionBridge.register(
+      with: flutterViewController.registrar(forPlugin: "TextRecognitionBridge").messenger
     )
 
     super.awakeFromNib()

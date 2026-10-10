@@ -201,6 +201,30 @@ class PersonalDocumentIndexer {
     }
   }
 
+  /// Puts text recognised from page images (#66) into the index, as
+  /// [index] does with a file's own text.
+  Future<PersonalDocumentIndexResult> indexRecognized(
+    PersonalDocument document,
+    PersonalDocumentText recognized,
+  ) async {
+    try {
+      final text = recognized.searchText;
+      if (text.isEmpty) {
+        await _index.remove(document.id);
+        return const PersonalDocumentIndexResult(
+          PersonalDocumentIndexStatus.noText,
+        );
+      }
+      await _index.replace(id: document.id, label: document.label, text: text);
+      return PersonalDocumentIndexResult(
+        PersonalDocumentIndexStatus.ready,
+        characters: text.length,
+      );
+    } finally {
+      if (_ownsIndex) await _index.close();
+    }
+  }
+
   Future<void> remove(String id) async {
     try {
       await _index.remove(id);

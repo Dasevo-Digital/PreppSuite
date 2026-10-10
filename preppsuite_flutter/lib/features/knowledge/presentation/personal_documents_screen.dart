@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../core/feel.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -9,6 +10,8 @@ import '../../downloads/application/byte_size.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
 import '../../../core/platform_storage.dart';
 import '../application/document_folder_import.dart';
+import '../application/document_text_recognition.dart';
+import '../application/text_recognition.dart';
 import '../application/download_suggestions.dart';
 import '../application/personal_document_index.dart';
 import '../application/document_fingerprint.dart';
@@ -16,11 +19,23 @@ import '../application/personal_document_store.dart';
 import 'personal_document_reader_screen.dart';
 
 class PersonalDocumentsScreen extends StatefulWidget {
-  const PersonalDocumentsScreen({super.key, this.downloadsDirectory});
+  const PersonalDocumentsScreen({
+    super.key,
+    this.downloadsDirectory,
+    this.textRecognizer,
+    this.pageSource,
+  });
 
   /// Where to look for documents to suggest (#33); the system's Downloads
   /// folder unless a test says otherwise.
   final Future<Directory?> Function()? downloadsDirectory;
+
+  /// What reads a scanned page (#66); the system's engine unless a test
+  /// hands in another.
+  final TextRecognizer? textRecognizer;
+
+  /// What draws a document's pages for that; PDFium unless a test says.
+  final Future<PageSource> Function(PersonalDocument document)? pageSource;
 
   @override
   State<PersonalDocumentsScreen> createState() =>
@@ -35,6 +50,123 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
   /// built from (#77). Found after the list is shown, not before it: a
   /// library of large files should not wait on its own check to appear.
   Set<String> _changed = const {};
+
+  /// The scanned document being read, and how far it has got (#66).
+  ({String id, int done, int total})? _recognizing;
+  var _recognitionCancelled = false;
+
+  TextRecognizer get _recognizer =>
+      widget.textRecognizer ??
+      (Platform.isLinux
+          ? const TesseractRecognizer()
+          : const PlatformTextRecognizer());
+
+  /// Reads a scanned PDF by recognising its pages, after saying what that
+  /// means: it takes a while, it stays on the device, and what it reads
+  /// can have gaps nothing reports (`docs/texterkennung-messung.md`).
+  Future<void> _recognize(PersonalDocument document) async {
+    final l10n = AppLocalizations.of(context)!;
+    final support = await _recognizer.support();
+    if (!mounted) return;
+    if (support != TextRecognitionSupport.available) {
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.knowledgeRecognizeTitle),
+          content: Text(switch (support) {
+            TextRecognitionSupport.needsLanguagePack =>
+              l10n.knowledgeRecognizeNeedsLanguagePack,
+            TextRecognitionSupport.needsTesseract =>
+              l10n.knowledgeRecognizeNeedsTesseract,
+            _ => l10n.knowledgeRecognizeUnsupported,
+          }),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(MaterialLocalizations.of(context).okButtonLabel),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.knowledgeRecognizeTitle),
+        content: Text(l10n.knowledgeRecognizeBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.knowledgeRecognizeAction),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    _recognitionCancelled = false;
+    setState(() => _recognizing = (id: document.id, done: 0, total: 0));
+    // A page takes about a second on a phone, and Android stops the work
+    // when the screen goes dark -- the measurement's run stood still at
+    // page seventeen. So the screen stays on while this runs.
+    await WakelockPlus.enable().catchError((Object _) {});
+    PageSource? source;
+    try {
+      final fingerprint = await documentFingerprint(document.location);
+      source = await (widget.pageSource ?? PdfPageSource.open)(document);
+      final text = await recognizeDocument(
+        source: source,
+        recognizer: _recognizer,
+        onProgress: (done, total) {
+          if (mounted) {
+            setState(
+              () => _recognizing = (id: document.id, done: done, total: total),
+            );
+          }
+        },
+        isCancelled: () => _recognitionCancelled || !mounted,
+      );
+      final result = await PersonalDocumentIndexer().indexRecognized(
+        document,
+        text,
+      );
+      final updated = await _store.updateIndex(
+        document.id,
+        status: result.status.name,
+        characters: result.characters,
+        fingerprint: fingerprint,
+        recognized: result.status == PersonalDocumentIndexStatus.ready,
+      );
+      if (!mounted) return;
+      setState(() => _documents = Future.value(updated));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            result.status == PersonalDocumentIndexStatus.ready
+                ? l10n.knowledgeRecognizeDone(result.characters)
+                : l10n.knowledgeRecognizeNothing,
+          ),
+        ),
+      );
+    } on PersonalDocumentCancelled {
+      // Stopped on purpose; the document stays as it was.
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.knowledgeRecognizeFailed)),
+        );
+      }
+    } finally {
+      await source?.close();
+      await WakelockPlus.disable().catchError((Object _) {});
+      if (mounted) setState(() => _recognizing = null);
+    }
+  }
 
   /// Documents in the Downloads folder the library does not have (#33).
   late Future<List<DownloadSuggestion>> _suggestions = _loadSuggestions();
@@ -471,15 +603,54 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
                     child: ListTile(
                       leading: Icon(_icon(document.extension)),
                       title: Text(document.label),
-                      subtitle: Text(
-                        '${document.extension.toUpperCase()} · '
-                        '${_changed.contains(document.id) ? l10n.knowledgeDocumentChanged : _indexStatus(l10n, document.indexStatus)}'
-                        '${document.readerOffset > 0 ? ' · ${l10n.knowledgeDocumentContinue}' : ''}',
-                      ),
+                      subtitle: switch (_recognizing) {
+                        (id: final id, done: final done, total: final total)
+                            when id == document.id =>
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                total == 0
+                                    ? l10n.knowledgeRecognizeStarting
+                                    : l10n.knowledgeRecognizeProgress(
+                                        done,
+                                        total,
+                                      ),
+                              ),
+                              const SizedBox(height: 4),
+                              LinearProgressIndicator(
+                                value: total == 0 ? null : done / total,
+                              ),
+                            ],
+                          ),
+                        _ => Text(
+                          '${document.extension.toUpperCase()} · '
+                          '${_changed.contains(document.id) ? l10n.knowledgeDocumentChanged : _indexStatus(l10n, document.indexStatus)}'
+                          '${document.recognized ? ' · ${l10n.knowledgeRecognizedNote}' : ''}'
+                          '${document.readerOffset > 0 ? ' · ${l10n.knowledgeDocumentContinue}' : ''}',
+                        ),
+                      },
                       onTap: () => _open(document),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // A scan has no text for the index to find; the
+                          // pages can be read as images instead (#66).
+                          if (_recognizing?.id == document.id)
+                            IconButton(
+                              tooltip: l10n.knowledgeRecognizeCancel,
+                              icon: const Icon(Icons.stop_circle_outlined),
+                              onPressed: () => _recognitionCancelled = true,
+                            )
+                          else if (document.indexStatus == 'noText' &&
+                              document.extension == 'pdf')
+                            IconButton(
+                              tooltip: l10n.knowledgeRecognizeAction,
+                              icon: const Icon(Icons.document_scanner_outlined),
+                              onPressed: _recognizing == null
+                                  ? () => _recognize(document)
+                                  : null,
+                            ),
                           IconButton(
                             tooltip: l10n.knowledgeDocumentReindex,
                             icon: const Icon(Icons.manage_search_outlined),

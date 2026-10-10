@@ -6,6 +6,7 @@
 
 #include <memory>
 
+#include "text_recognition.h"
 #include "win32_window.h"
 
 // A window that does nothing but host a Flutter view.
@@ -28,6 +29,9 @@ class FlutterWindow : public Win32Window {
 
   // The Flutter instance hosted by this window.
   std::unique_ptr<flutter::FlutterViewController> flutter_controller_;
+
+  // Reads scanned pages (#66); answers through this window's messages.
+  std::unique_ptr<TextRecognition> text_recognition_;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

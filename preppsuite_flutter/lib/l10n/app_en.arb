@@ -5275,5 +5275,35 @@
   "knowledgeDownloadsTitle": "In your Downloads folder",
   "knowledgeDownloadsHint": "Documents not in the library yet, newest first. The app reads only the file names for this; nothing is added until you tap it.",
   "knowledgeDownloadsTake": "Add",
-  "knowledgeDownloadsDismiss": "Do not suggest again"
+  "knowledgeDownloadsDismiss": "Do not suggest again",
+  "knowledgeRecognizeAction": "Recognise text",
+  "knowledgeRecognizeTitle": "Text recognition",
+  "knowledgeRecognizeBody": "The app reads each page of this scan as an image and recognises the text on it, on this device; nothing leaves it. It takes a while: about a second per page was measured on a mid-range phone, much less on a computer. Recognised text can have gaps the app does not notice. It is usually enough for searching, not for a transcript.",
+  "knowledgeRecognizeStarting": "Starting text recognition …",
+  "knowledgeRecognizeProgress": "Text recognition: {done} of {total} pages",
+  "@knowledgeRecognizeProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeRecognizeCancel": "Stop text recognition",
+  "knowledgeRecognizedNote": "text recognised from the pages, may have gaps",
+  "knowledgeRecognizeDone": "{count} characters recognised and searchable.",
+  "@knowledgeRecognizeDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "knowledgeRecognizeNothing": "No text was recognised on the pages.",
+  "knowledgeRecognizeFailed": "Text recognition failed.",
+  "knowledgeRecognizeNeedsLanguagePack": "Windows recognises text only in languages whose language pack is installed, and there is none for German or English. One can be added under Settings → Time & language → Language & region.",
+  "knowledgeRecognizeNeedsTesseract": "On Linux the app reads scanned pages with Tesseract, which does not come with it. On Debian and Ubuntu: sudo apt install tesseract-ocr tesseract-ocr-deu",
+  "knowledgeRecognizeUnsupported": "There is no text recognition on this device."
 }
