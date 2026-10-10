@@ -48,6 +48,7 @@ import '../features/maps/presentation/map_download_screen.dart';
 import '../features/maps/presentation/my_position_screen.dart';
 import '../features/maps/presentation/nearby_screen.dart';
 import '../features/possessions/presentation/possessions_screen.dart';
+import '../features/neighbourhood/presentation/neighbourhood_screen.dart';
 import '../features/preparedness/presentation/preparedness_hub_screen.dart';
 import '../features/preparedness/presentation/scenario_screen.dart';
 import '../features/settings/presentation/followed_places_screen.dart';
@@ -566,6 +567,22 @@ List<AppDestination> appDestinations() => [
     area: ShellDestination.household,
     open: (p) => PossessionsScreen(householdId: p.id),
     aliases: ['hausrat', 'versicherung', 'inventar', 'wert'],
+  ),
+  AppDestination(
+    id: 'neighbourhood',
+    title: (l) => l.neighbourhoodTitle,
+    icon: Icons.diversity_3_outlined,
+    area: ShellDestination.household,
+    open: (p) => NeighbourhoodScreen(householdId: p.id),
+    aliases: [
+      'nachbarn',
+      'angebot',
+      'teilen',
+      'helfen',
+      'tauschen',
+      'neighbours',
+      'vecinos',
+    ],
   ),
   AppDestination(
     id: 'readiness',

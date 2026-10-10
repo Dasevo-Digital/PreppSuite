@@ -5305,5 +5305,66 @@
   "knowledgeRecognizeFailed": "Text recognition failed.",
   "knowledgeRecognizeNeedsLanguagePack": "Windows recognises text only in languages whose language pack is installed, and there is none for German or English. One can be added under Settings → Time & language → Language & region.",
   "knowledgeRecognizeNeedsTesseract": "On Linux the app reads scanned pages with Tesseract, which does not come with it. On Debian and Ubuntu: sudo apt install tesseract-ocr tesseract-ocr-deu",
-  "knowledgeRecognizeUnsupported": "There is no text recognition on this device."
+  "knowledgeRecognizeUnsupported": "There is no text recognition on this device.",
+  "neighbourhoodTitle": "Neighbourhood",
+  "neighbourhoodEntryHint": "Offer surplus or help, by QR code",
+  "neighbourhoodCount": "{count, plural, =1{1 offer} other{{count} offers}}",
+  "@neighbourhoodCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "neighbourhoodIntro": "Offer what you have spare or what you can do, and see what neighbours offer. An offer becomes a QR code holding exactly the text you write: no server, no location, nothing from your stores. Anyone who scans it can read it without PreppSuite.",
+  "neighbourhoodOwnSection": "Our offers",
+  "neighbourhoodOwnEmpty": "No offer yet. What you have spare only helps others if they know about it.",
+  "neighbourhoodReceivedSection": "From neighbours",
+  "neighbourhoodReceivedEmpty": "Nothing scanned yet. An offer from next door comes here when you scan its QR code or paste its text.",
+  "neighbourhoodCreate": "Create an offer",
+  "neighbourhoodScan": "Scan an offer",
+  "neighbourhoodPaste": "Paste text",
+  "neighbourhoodShowCode": "Show as QR code",
+  "neighbourhoodEdit": "Edit",
+  "neighbourhoodDelete": "Delete",
+  "neighbourhoodOfferedOn": "offered on {date}",
+  "@neighbourhoodOfferedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "neighbourhoodKindWater": "Water",
+  "neighbourhoodKindFood": "Food",
+  "neighbourhoodKindEnergy": "Power and heat",
+  "neighbourhoodKindTools": "Tools and equipment",
+  "neighbourhoodKindCare": "First aid and care",
+  "neighbourhoodKindHelp": "Help and skills",
+  "neighbourhoodKindOther": "Other",
+  "neighbourhoodContactLabel": "Contact",
+  "neighbourhoodFormNew": "New offer",
+  "neighbourhoodFormEdit": "Edit offer",
+  "neighbourhoodKindField": "Kind",
+  "neighbourhoodBodyField": "What you offer",
+  "neighbourhoodBodyHint": "e.g. 20 l of drinking water to spare",
+  "neighbourhoodBodyRequired": "Say what you are offering.",
+  "neighbourhoodContactField": "How to reach you (optional)",
+  "neighbourhoodContactHint": "e.g. first name, house number or doorbell – only what you want to share",
+  "neighbourhoodFormNote": "The QR code holds exactly these details and today’s date, nothing else. Anyone who sees or films it has them.",
+  "neighbourhoodCodeTitle": "Offer as QR code",
+  "neighbourhoodCodeHint": "Show the code to your neighbours. Any camera app shows its text; PreppSuite adds it to its own list.",
+  "neighbourhoodCodeSemantics": "QR code holding the offer",
+  "neighbourhoodShareText": "Share as text",
+  "neighbourhoodScanHint": "Point the camera at the offer’s QR code.",
+  "neighbourhoodScanAlternative": "Without a camera: copy the offer’s text and add it with “Paste text”.",
+  "neighbourhoodPasteTitle": "Paste an offer as text",
+  "neighbourhoodPasteHint": "The whole text, down to the last line “PreppSuite-Angebot/1 …”",
+  "neighbourhoodPasteConfirm": "Add",
+  "neighbourhoodReceiveTitle": "Add this offer?",
+  "neighbourhoodReceiveConfirm": "Add to the list",
+  "neighbourhoodReceived": "Offer added to the list.",
+  "neighbourhoodAlreadyKnown": "This offer is already in the list.",
+  "neighbourhoodNotAnOffer": "That is not a PreppSuite offer.",
+  "neighbourhoodTooNew": "This offer comes from a newer PreppSuite. Please update the app."
 }

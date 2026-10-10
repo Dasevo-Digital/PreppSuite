@@ -9,6 +9,8 @@ import 'household_plan_screen.dart';
 import '../application/household_member_controller.dart';
 import '../../possessions/application/possession_controller.dart';
 import '../../possessions/presentation/possessions_screen.dart';
+import '../../neighbourhood/application/neighbour_offer_controller.dart';
+import '../../neighbourhood/presentation/neighbourhood_screen.dart';
 import '../../settings/presentation/followed_places_screen.dart';
 import 'emergency_cards_screen.dart';
 import 'count_tile.dart';
@@ -125,6 +127,32 @@ class HouseholdOverviewScreen extends ConsumerWidget {
                     MaterialPageRoute(
                       builder: (_) =>
                           PossessionsScreen(householdId: profile.id),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Consumer(
+              builder: (context, ref, _) {
+                final rows =
+                    ref.watch(neighbourOffersProvider(profile.id)).value ??
+                    const [];
+                return ListTile(
+                  leading: const Icon(Icons.diversity_3_outlined),
+                  title: Text(l10n.neighbourhoodTitle),
+                  subtitle: Text(
+                    rows.isEmpty
+                        ? l10n.neighbourhoodEntryHint
+                        : l10n.neighbourhoodCount(rows.length),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          NeighbourhoodScreen(householdId: profile.id),
                     ),
                   ),
                 );

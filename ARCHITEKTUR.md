@@ -2551,6 +2551,47 @@ abgebrochenes Kopieren nicht als fertige Datei liegen bleibt. Die
 ProGuard-Regeln halten die JNI-Klassen von Tesseract und Leptonica, die
 R8 sonst entfernt, weil nur nativer Code sie aufruft.
 
+### Angebote an die Nachbarschaft: ein QR-Code aus Klartext
+
+Seit #152 kann der Haushalt Nachbarn etwas anbieten und deren Angebote
+sammeln (`features/neighbourhood`, Tabelle `neighbour_offers`, Schema 25).
+Es gibt keinen Server dazwischen: Ein Angebot verlässt das Telefon als
+QR-Code auf dem Bildschirm und kommt über eine Kamera oder als
+eingefügter Text an.
+
+**Der Code ist das Angebot, lesbar ohne die App.** Die meisten Nachbarn
+haben kein PreppSuite, und jede Kamera-App zeigt den Text eines
+QR-Codes. Deshalb ist der Inhalt kein Datenpaket, sondern zwei Zeilen in
+der Sprache des Anbieters und eine Zeile für die App
+(`neighbour_offer_code.dart`):
+
+```text
+Wasser: 20 l Trinkwasser, abzugeben
+Kontakt: Haus 4, 2. Stock
+PreppSuite-Angebot/1 water 2026-10-10
+```
+
+Beim Lesen fällt alles bis zum ersten „: “ weg, also die Beschriftung in
+einer Sprache, die der Leser vielleicht nicht spricht. Die letzte Zeile
+trägt Formatversion, Art als festes Wort und den Tag des Angebots; eine
+höhere Version wird abgelehnt und als „neuere PreppSuite“ benannt, eine
+unbekannte Art liest sich als „Sonstiges“.
+
+**Nur, was getippt wurde.** Kein Haushaltsname, keine Adresse, kein
+Standort, nichts aus dem Vorrat: Das Formular füllt nichts vor und sagt
+unter den Feldern, was der Code enthält. Wer den Bildschirm filmt, hat
+genau das. Empfangene Angebote werden vor dem Übernehmen gezeigt, das
+gleiche Angebot zweimal ist ein Angebot (gleiche Art, gleicher Text,
+gleicher Kontakt, gleicher Tag).
+
+**Beide Richtungen in einer Tabelle**, unterschieden durch `received`,
+und wie jede andere Tabelle mit den Geräten des Haushalts abgeglichen:
+Das Telefon, das ein Angebot gescannt hat, ist nicht unbedingt das, das
+jemand in der Hand hat, wenn es gebraucht wird. Der Tag des Angebots
+wird als Mitternacht UTC gespeichert und so gelesen, weil die Datenbank
+Zeiten in Ortszeit zurückgibt und westlich von Greenwich Mitternacht UTC
+der Vorabend ist.
+
 ### Markierbar ist jeder Bildschirm für sich
 
 Ein Flutter-`Text` lässt sich nur markieren und kopieren, wenn eine

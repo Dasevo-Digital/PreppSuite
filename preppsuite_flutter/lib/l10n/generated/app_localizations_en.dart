@@ -9053,4 +9053,165 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get knowledgeRecognizeUnsupported =>
       'There is no text recognition on this device.';
+
+  @override
+  String get neighbourhoodTitle => 'Neighbourhood';
+
+  @override
+  String get neighbourhoodEntryHint => 'Offer surplus or help, by QR code';
+
+  @override
+  String neighbourhoodCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count offers',
+      one: '1 offer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get neighbourhoodIntro =>
+      'Offer what you have spare or what you can do, and see what neighbours offer. An offer becomes a QR code holding exactly the text you write: no server, no location, nothing from your stores. Anyone who scans it can read it without PreppSuite.';
+
+  @override
+  String get neighbourhoodOwnSection => 'Our offers';
+
+  @override
+  String get neighbourhoodOwnEmpty =>
+      'No offer yet. What you have spare only helps others if they know about it.';
+
+  @override
+  String get neighbourhoodReceivedSection => 'From neighbours';
+
+  @override
+  String get neighbourhoodReceivedEmpty =>
+      'Nothing scanned yet. An offer from next door comes here when you scan its QR code or paste its text.';
+
+  @override
+  String get neighbourhoodCreate => 'Create an offer';
+
+  @override
+  String get neighbourhoodScan => 'Scan an offer';
+
+  @override
+  String get neighbourhoodPaste => 'Paste text';
+
+  @override
+  String get neighbourhoodShowCode => 'Show as QR code';
+
+  @override
+  String get neighbourhoodEdit => 'Edit';
+
+  @override
+  String get neighbourhoodDelete => 'Delete';
+
+  @override
+  String neighbourhoodOfferedOn(String date) {
+    return 'offered on $date';
+  }
+
+  @override
+  String get neighbourhoodKindWater => 'Water';
+
+  @override
+  String get neighbourhoodKindFood => 'Food';
+
+  @override
+  String get neighbourhoodKindEnergy => 'Power and heat';
+
+  @override
+  String get neighbourhoodKindTools => 'Tools and equipment';
+
+  @override
+  String get neighbourhoodKindCare => 'First aid and care';
+
+  @override
+  String get neighbourhoodKindHelp => 'Help and skills';
+
+  @override
+  String get neighbourhoodKindOther => 'Other';
+
+  @override
+  String get neighbourhoodContactLabel => 'Contact';
+
+  @override
+  String get neighbourhoodFormNew => 'New offer';
+
+  @override
+  String get neighbourhoodFormEdit => 'Edit offer';
+
+  @override
+  String get neighbourhoodKindField => 'Kind';
+
+  @override
+  String get neighbourhoodBodyField => 'What you offer';
+
+  @override
+  String get neighbourhoodBodyHint => 'e.g. 20 l of drinking water to spare';
+
+  @override
+  String get neighbourhoodBodyRequired => 'Say what you are offering.';
+
+  @override
+  String get neighbourhoodContactField => 'How to reach you (optional)';
+
+  @override
+  String get neighbourhoodContactHint =>
+      'e.g. first name, house number or doorbell – only what you want to share';
+
+  @override
+  String get neighbourhoodFormNote =>
+      'The QR code holds exactly these details and today’s date, nothing else. Anyone who sees or films it has them.';
+
+  @override
+  String get neighbourhoodCodeTitle => 'Offer as QR code';
+
+  @override
+  String get neighbourhoodCodeHint =>
+      'Show the code to your neighbours. Any camera app shows its text; PreppSuite adds it to its own list.';
+
+  @override
+  String get neighbourhoodCodeSemantics => 'QR code holding the offer';
+
+  @override
+  String get neighbourhoodShareText => 'Share as text';
+
+  @override
+  String get neighbourhoodScanHint =>
+      'Point the camera at the offer’s QR code.';
+
+  @override
+  String get neighbourhoodScanAlternative =>
+      'Without a camera: copy the offer’s text and add it with “Paste text”.';
+
+  @override
+  String get neighbourhoodPasteTitle => 'Paste an offer as text';
+
+  @override
+  String get neighbourhoodPasteHint =>
+      'The whole text, down to the last line “PreppSuite-Angebot/1 …”';
+
+  @override
+  String get neighbourhoodPasteConfirm => 'Add';
+
+  @override
+  String get neighbourhoodReceiveTitle => 'Add this offer?';
+
+  @override
+  String get neighbourhoodReceiveConfirm => 'Add to the list';
+
+  @override
+  String get neighbourhoodReceived => 'Offer added to the list.';
+
+  @override
+  String get neighbourhoodAlreadyKnown => 'This offer is already in the list.';
+
+  @override
+  String get neighbourhoodNotAnOffer => 'That is not a PreppSuite offer.';
+
+  @override
+  String get neighbourhoodTooNew =>
+      'This offer comes from a newer PreppSuite. Please update the app.';
 }

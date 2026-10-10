@@ -366,6 +366,7 @@ class SharedFolderSyncService {
       plans: versions(snapshot.householdPlans),
       members: versions(snapshot.householdMembers),
       owned: versions(snapshot.possessions),
+      offers: versions(snapshot.neighbourOffers),
     );
     await _db.setLastPulledAt(repairEntity, DateTime.now().toUtc());
     return true;
@@ -378,6 +379,7 @@ class SharedFolderSyncService {
         (await _db.dirtyBudgetEntries(householdId)).isNotEmpty ||
         (await _db.dirtyHouseholdPlans(householdId)).isNotEmpty ||
         (await _db.dirtyHouseholdMembers(householdId)).isNotEmpty ||
-        (await _db.dirtyPossessions(householdId)).isNotEmpty;
+        (await _db.dirtyPossessions(householdId)).isNotEmpty ||
+        (await _db.dirtyNeighbourOffers(householdId)).isNotEmpty;
   }
 }

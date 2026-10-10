@@ -11,6 +11,7 @@ import 'tables/checklist_templates_table.dart';
 import 'tables/household_members_table.dart';
 import 'tables/household_plans_table.dart';
 import 'tables/inventory_items_table.dart';
+import 'tables/neighbour_offers_table.dart';
 import 'tables/possessions_table.dart';
 import 'tables/sync_state_table.dart';
 import 'tables/warnings_table.dart';
@@ -26,13 +27,14 @@ part 'database.g.dart';
     HouseholdMembers,
     HouseholdPlans,
     Possessions,
+    NeighbourOffers,
     Warnings,
     SyncState,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 24;
+  static const currentSchemaVersion = 25;
 
   AppDatabase() : super(_openConnection()) {
     OpenDatabases.track(this);
@@ -579,6 +581,20 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       }
+      if (from < 25) {
+        // Offers to and from the neighbours (#152). A new table, so
+        // nothing to convert -- looked for all the same, because a
+        // replayed upgrade (see [_addColumnOnce]) finds it already there.
+        // Its index by name, like the schema-22 ones: `createTable` does
+        // not make the `@TableIndex` a fresh install gets.
+        if (!await _hasTable('neighbour_offers')) {
+          await m.createTable(neighbourOffers);
+        }
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS neighbour_offers_household '
+          'ON neighbour_offers (household_id)',
+        );
+      }
     },
   );
 
@@ -619,6 +635,9 @@ class AppDatabase extends _$AppDatabase {
     )..where((t) => t.householdId.equals(householdId))).go();
     await (delete(
       possessions,
+    )..where((t) => t.householdId.equals(householdId))).go();
+    await (delete(
+      neighbourOffers,
     )..where((t) => t.householdId.equals(householdId))).go();
   });
 
@@ -697,6 +716,45 @@ class AppDatabase extends _$AppDatabase {
   Future<List<Possession>> possessionsForSync(String householdId) {
     return (select(
       possessions,
+    )..where((t) => t.householdId.equals(householdId))).get();
+  }
+
+  // --- Neighbour offers --------------------------------------------------
+
+  /// The household's own offers and the ones it has scanned, newest
+  /// first within each.
+  Stream<List<NeighbourOffer>> watchNeighbourOffers(String householdId) {
+    return (select(neighbourOffers)
+          ..where(
+            (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
+          )
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.received),
+            (t) => OrderingTerm.desc(t.offeredOn),
+            (t) => OrderingTerm.asc(t.body),
+          ]))
+        .watch();
+  }
+
+  Future<void> upsertNeighbourOffer(NeighbourOffersCompanion offer) {
+    return _writeLocal(
+      neighbourOffers,
+      offer.clientId.value,
+      offer.updatedAt.value,
+      (timestamp) => offer.copyWith(updatedAt: Value(timestamp)),
+    );
+  }
+
+  Future<List<NeighbourOffer>> dirtyNeighbourOffers(String householdId) {
+    return (select(neighbourOffers)..where(
+          (t) => t.householdId.equals(householdId) & t.dirty.equals(true),
+        ))
+        .get();
+  }
+
+  Future<List<NeighbourOffer>> neighbourOffersForSync(String householdId) {
+    return (select(
+      neighbourOffers,
     )..where((t) => t.householdId.equals(householdId))).get();
   }
 
@@ -1212,6 +1270,7 @@ class AppDatabase extends _$AppDatabase {
     List<PublishedRow> plans = const [],
     List<PublishedRow> members = const [],
     List<PublishedRow> owned = const [],
+    List<PublishedRow> offers = const [],
   }) {
     return transaction(() async {
       for (final (table, rows)
@@ -1223,6 +1282,7 @@ class AppDatabase extends _$AppDatabase {
             (householdPlans, plans),
             (householdMembers, members),
             (possessions, owned),
+            (neighbourOffers, offers),
           ]) {
         for (final row in rows) {
           await customUpdate(
@@ -1331,6 +1391,15 @@ class AppDatabase extends _$AppDatabase {
         ),
       );
 
+      await (update(
+        neighbourOffers,
+      )..where((t) => t.householdId.equals(from))).write(
+        NeighbourOffersCompanion(
+          householdId: Value(to),
+          dirty: const Value(true),
+        ),
+      );
+
       // The plan cannot be re-stamped like the rest. Its `clientId` *is*
       // the household id — that is what makes two devices edit one record
       // instead of one each — so a plan left under the old key would stop
@@ -1370,6 +1439,7 @@ class AppDatabase extends _$AppDatabase {
     List<IncomingRow<HouseholdPlansCompanion>> plans = const [],
     List<IncomingRow<HouseholdMembersCompanion>> members = const [],
     List<IncomingRow<PossessionsCompanion>> owned = const [],
+    List<IncomingRow<NeighbourOffersCompanion>> offers = const [],
   }) {
     return transaction(() async {
       var changed = 0;
@@ -1412,6 +1482,12 @@ class AppDatabase extends _$AppDatabase {
       changed += await _mergeInto(
         possessions,
         owned,
+        (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
+        (row) => row.toCompanion(false),
+      );
+      changed += await _mergeInto(
+        neighbourOffers,
+        offers,
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
         (row) => row.toCompanion(false),
       );

@@ -82,6 +82,9 @@ void main() {
       'EmergencyCardFormScreen',
       'InventoryItemFormScreen',
       'PossessionFormScreen',
+      'NeighbourOfferFormScreen',
+      // One of the household's offers, shown as its QR code.
+      'NeighbourOfferCodeScreen',
       // Need a document, an archive or a file.
       'ArticleReaderScreen',
       'ArticleScreen',
@@ -96,6 +99,7 @@ void main() {
       'PersonalPlacesScreen',
       // Needs a camera.
       'BarcodeScannerScreen',
+      'NeighbourOfferScanScreen',
       // Setup, before there is a household to search in.
       'ProfileSetupScreen',
       'SetupChoiceScreen',

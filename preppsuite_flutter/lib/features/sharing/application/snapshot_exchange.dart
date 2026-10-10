@@ -61,6 +61,10 @@ Future<DeviceSnapshot> readHouseholdSnapshot(
       for (final row in await db.possessionsForSync(householdId))
         encodePossession(row),
     ],
+    neighbourOffers: [
+      for (final row in await db.neighbourOffersForSync(householdId))
+        encodeNeighbourOffer(row),
+    ],
   );
 }
 
@@ -100,6 +104,10 @@ Future<int> applyHouseholdSnapshot(AppDatabase db, DeviceSnapshot snapshot) {
     owned: [
       for (final json in snapshot.possessions)
         ?incomingRow(json, decodePossession(json)),
+    ],
+    offers: [
+      for (final json in snapshot.neighbourOffers)
+        ?incomingRow(json, decodeNeighbourOffer(json)),
     ],
   );
 }

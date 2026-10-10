@@ -29,6 +29,7 @@ class DeviceSnapshot {
     this.householdPlans = const [],
     this.householdMembers = const [],
     this.possessions = const [],
+    this.neighbourOffers = const [],
     this.settings = const {},
   });
 
@@ -49,7 +50,8 @@ class DeviceSnapshot {
       budgetEntries.length +
       householdPlans.length +
       householdMembers.length +
-      possessions.length;
+      possessions.length +
+      neighbourOffers.length;
 
   final String deviceId;
   final String householdId;
@@ -75,6 +77,10 @@ class DeviceSnapshot {
   /// a file written by an older version simply has no such key, and
   /// [_rows] answers an empty list for it.
   final List<Map<String, Object?>> possessions;
+
+  /// What the household offers its neighbours and what it has scanned
+  /// from them (#152). Added after the fact, like [possessions].
+  final List<Map<String, Object?>> neighbourOffers;
 
   /// The household's settings, each with the moment this device last saw
   /// it change — which river gauge it reads, what the energy plan is,
@@ -112,6 +118,7 @@ class DeviceSnapshot {
     'householdPlans': householdPlans,
     'householdMembers': householdMembers,
     'possessions': possessions,
+    'neighbourOffers': neighbourOffers,
     if (settings.isNotEmpty) 'settings': encodeStampedSettings(settings),
   };
 
@@ -139,6 +146,7 @@ class DeviceSnapshot {
         householdPlans: _rows(json['householdPlans']),
         householdMembers: _rows(json['householdMembers']),
         possessions: _rows(json['possessions']),
+        neighbourOffers: _rows(json['neighbourOffers']),
         settings: decodeStampedSettings(json['settings']),
       );
     } on FormatException {
@@ -561,6 +569,46 @@ BudgetEntriesCompanion? decodeBudgetEntry(Map<String, Object?> json) {
     category: category,
     purchaseDate: Value(asUtcDate(json['purchaseDate'])),
     linkedInventoryItemId: Value(_string(json['linkedInventoryItemId'])),
+    updatedAt: updatedAt,
+    deletedAt: Value(asUtcDate(json['deletedAt'])),
+    dirty: const Value(false),
+  );
+}
+
+Map<String, Object?> encodeNeighbourOffer(NeighbourOffer row) => {
+  'clientId': row.clientId,
+  'householdId': row.householdId,
+  'received': row.received,
+  'kind': row.kind,
+  'body': row.body,
+  'contact': row.contact,
+  'offeredOn': _date(row.offeredOn),
+  'updatedAt': _date(row.updatedAt),
+  'deletedAt': _date(row.deletedAt),
+};
+
+NeighbourOffersCompanion? decodeNeighbourOffer(Map<String, Object?> json) {
+  final clientId = _string(json['clientId']);
+  final householdId = _string(json['householdId']);
+  final body = _string(json['body']);
+  final updatedAt = asUtcDate(json['updatedAt']);
+  if (clientId == null ||
+      householdId == null ||
+      body == null ||
+      updatedAt == null) {
+    return null;
+  }
+
+  return NeighbourOffersCompanion.insert(
+    clientId: clientId,
+    householdId: householdId,
+    received: Value(json['received'] == true),
+    // Unknown to this version, or missing: read as "other" by the screen,
+    // and kept as written so a newer device gets its own kind back.
+    kind: _string(json['kind']) ?? 'other',
+    body: body,
+    contact: Value(_string(json['contact'])),
+    offeredOn: asUtcDate(json['offeredOn']) ?? updatedAt,
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),
     dirty: const Value(false),

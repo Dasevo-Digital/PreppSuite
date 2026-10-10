@@ -6449,6 +6449,637 @@ class PossessionsCompanion extends UpdateCompanion<Possession> {
   }
 }
 
+class $NeighbourOffersTable extends NeighbourOffers
+    with TableInfo<$NeighbourOffersTable, NeighbourOffer> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $NeighbourOffersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _clientIdMeta = const VerificationMeta(
+    'clientId',
+  );
+  @override
+  late final GeneratedColumn<String> clientId = GeneratedColumn<String>(
+    'client_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _householdIdMeta = const VerificationMeta(
+    'householdId',
+  );
+  @override
+  late final GeneratedColumn<String> householdId = GeneratedColumn<String>(
+    'household_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _receivedMeta = const VerificationMeta(
+    'received',
+  );
+  @override
+  late final GeneratedColumn<bool> received = GeneratedColumn<bool>(
+    'received',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("received" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'body',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contactMeta = const VerificationMeta(
+    'contact',
+  );
+  @override
+  late final GeneratedColumn<String> contact = GeneratedColumn<String>(
+    'contact',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _offeredOnMeta = const VerificationMeta(
+    'offeredOn',
+  );
+  @override
+  late final GeneratedColumn<DateTime> offeredOn = GeneratedColumn<DateTime>(
+    'offered_on',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dirtyMeta = const VerificationMeta('dirty');
+  @override
+  late final GeneratedColumn<bool> dirty = GeneratedColumn<bool>(
+    'dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    clientId,
+    householdId,
+    received,
+    kind,
+    body,
+    contact,
+    offeredOn,
+    updatedAt,
+    deletedAt,
+    dirty,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'neighbour_offers';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<NeighbourOffer> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('client_id')) {
+      context.handle(
+        _clientIdMeta,
+        clientId.isAcceptableOrUnknown(data['client_id']!, _clientIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_clientIdMeta);
+    }
+    if (data.containsKey('household_id')) {
+      context.handle(
+        _householdIdMeta,
+        householdId.isAcceptableOrUnknown(
+          data['household_id']!,
+          _householdIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_householdIdMeta);
+    }
+    if (data.containsKey('received')) {
+      context.handle(
+        _receivedMeta,
+        received.isAcceptableOrUnknown(data['received']!, _receivedMeta),
+      );
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('body')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['body']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('contact')) {
+      context.handle(
+        _contactMeta,
+        contact.isAcceptableOrUnknown(data['contact']!, _contactMeta),
+      );
+    }
+    if (data.containsKey('offered_on')) {
+      context.handle(
+        _offeredOnMeta,
+        offeredOn.isAcceptableOrUnknown(data['offered_on']!, _offeredOnMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_offeredOnMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('dirty')) {
+      context.handle(
+        _dirtyMeta,
+        dirty.isAcceptableOrUnknown(data['dirty']!, _dirtyMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {clientId};
+  @override
+  NeighbourOffer map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return NeighbourOffer(
+      clientId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}client_id'],
+      )!,
+      householdId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}household_id'],
+      )!,
+      received: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}received'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body'],
+      )!,
+      contact: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contact'],
+      ),
+      offeredOn: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}offered_on'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      dirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}dirty'],
+      )!,
+    );
+  }
+
+  @override
+  $NeighbourOffersTable createAlias(String alias) {
+    return $NeighbourOffersTable(attachedDatabase, alias);
+  }
+}
+
+class NeighbourOffer extends DataClass implements Insertable<NeighbourOffer> {
+  final String clientId;
+  final String householdId;
+
+  /// False for the household's own offers, true for scanned ones.
+  final bool received;
+
+  /// `NeighbourOfferKind.name`. Text rather than an index, so a kind
+  /// added later reads as "other" on an older app instead of as the
+  /// wrong one.
+  final String kind;
+
+  /// The offer itself, as its author wrote it: "20 l Trinkwasser".
+  final String body;
+
+  /// How to reach whoever made it, as they chose to put it -- "Haus 4,
+  /// 2. Stock", a first name, a phone number. Never filled in by the app.
+  final String? contact;
+
+  /// The day the offer was made, by its author. Carried in the code, so a
+  /// scanned offer says how old it is: water offered in March is not
+  /// necessarily still there in October.
+  final DateTime offeredOn;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final bool dirty;
+  const NeighbourOffer({
+    required this.clientId,
+    required this.householdId,
+    required this.received,
+    required this.kind,
+    required this.body,
+    this.contact,
+    required this.offeredOn,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.dirty,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['client_id'] = Variable<String>(clientId);
+    map['household_id'] = Variable<String>(householdId);
+    map['received'] = Variable<bool>(received);
+    map['kind'] = Variable<String>(kind);
+    map['body'] = Variable<String>(body);
+    if (!nullToAbsent || contact != null) {
+      map['contact'] = Variable<String>(contact);
+    }
+    map['offered_on'] = Variable<DateTime>(offeredOn);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['dirty'] = Variable<bool>(dirty);
+    return map;
+  }
+
+  NeighbourOffersCompanion toCompanion(bool nullToAbsent) {
+    return NeighbourOffersCompanion(
+      clientId: Value(clientId),
+      householdId: Value(householdId),
+      received: Value(received),
+      kind: Value(kind),
+      body: Value(body),
+      contact: contact == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contact),
+      offeredOn: Value(offeredOn),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      dirty: Value(dirty),
+    );
+  }
+
+  factory NeighbourOffer.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return NeighbourOffer(
+      clientId: serializer.fromJson<String>(json['clientId']),
+      householdId: serializer.fromJson<String>(json['householdId']),
+      received: serializer.fromJson<bool>(json['received']),
+      kind: serializer.fromJson<String>(json['kind']),
+      body: serializer.fromJson<String>(json['body']),
+      contact: serializer.fromJson<String?>(json['contact']),
+      offeredOn: serializer.fromJson<DateTime>(json['offeredOn']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      dirty: serializer.fromJson<bool>(json['dirty']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'clientId': serializer.toJson<String>(clientId),
+      'householdId': serializer.toJson<String>(householdId),
+      'received': serializer.toJson<bool>(received),
+      'kind': serializer.toJson<String>(kind),
+      'body': serializer.toJson<String>(body),
+      'contact': serializer.toJson<String?>(contact),
+      'offeredOn': serializer.toJson<DateTime>(offeredOn),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'dirty': serializer.toJson<bool>(dirty),
+    };
+  }
+
+  NeighbourOffer copyWith({
+    String? clientId,
+    String? householdId,
+    bool? received,
+    String? kind,
+    String? body,
+    Value<String?> contact = const Value.absent(),
+    DateTime? offeredOn,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    bool? dirty,
+  }) => NeighbourOffer(
+    clientId: clientId ?? this.clientId,
+    householdId: householdId ?? this.householdId,
+    received: received ?? this.received,
+    kind: kind ?? this.kind,
+    body: body ?? this.body,
+    contact: contact.present ? contact.value : this.contact,
+    offeredOn: offeredOn ?? this.offeredOn,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    dirty: dirty ?? this.dirty,
+  );
+  NeighbourOffer copyWithCompanion(NeighbourOffersCompanion data) {
+    return NeighbourOffer(
+      clientId: data.clientId.present ? data.clientId.value : this.clientId,
+      householdId: data.householdId.present
+          ? data.householdId.value
+          : this.householdId,
+      received: data.received.present ? data.received.value : this.received,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      body: data.body.present ? data.body.value : this.body,
+      contact: data.contact.present ? data.contact.value : this.contact,
+      offeredOn: data.offeredOn.present ? data.offeredOn.value : this.offeredOn,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      dirty: data.dirty.present ? data.dirty.value : this.dirty,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NeighbourOffer(')
+          ..write('clientId: $clientId, ')
+          ..write('householdId: $householdId, ')
+          ..write('received: $received, ')
+          ..write('kind: $kind, ')
+          ..write('body: $body, ')
+          ..write('contact: $contact, ')
+          ..write('offeredOn: $offeredOn, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    clientId,
+    householdId,
+    received,
+    kind,
+    body,
+    contact,
+    offeredOn,
+    updatedAt,
+    deletedAt,
+    dirty,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is NeighbourOffer &&
+          other.clientId == this.clientId &&
+          other.householdId == this.householdId &&
+          other.received == this.received &&
+          other.kind == this.kind &&
+          other.body == this.body &&
+          other.contact == this.contact &&
+          other.offeredOn == this.offeredOn &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.dirty == this.dirty);
+}
+
+class NeighbourOffersCompanion extends UpdateCompanion<NeighbourOffer> {
+  final Value<String> clientId;
+  final Value<String> householdId;
+  final Value<bool> received;
+  final Value<String> kind;
+  final Value<String> body;
+  final Value<String?> contact;
+  final Value<DateTime> offeredOn;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool> dirty;
+  final Value<int> rowid;
+  const NeighbourOffersCompanion({
+    this.clientId = const Value.absent(),
+    this.householdId = const Value.absent(),
+    this.received = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.body = const Value.absent(),
+    this.contact = const Value.absent(),
+    this.offeredOn = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  NeighbourOffersCompanion.insert({
+    required String clientId,
+    required String householdId,
+    this.received = const Value.absent(),
+    required String kind,
+    required String body,
+    this.contact = const Value.absent(),
+    required DateTime offeredOn,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.dirty = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : clientId = Value(clientId),
+       householdId = Value(householdId),
+       kind = Value(kind),
+       body = Value(body),
+       offeredOn = Value(offeredOn),
+       updatedAt = Value(updatedAt);
+  static Insertable<NeighbourOffer> custom({
+    Expression<String>? clientId,
+    Expression<String>? householdId,
+    Expression<bool>? received,
+    Expression<String>? kind,
+    Expression<String>? body,
+    Expression<String>? contact,
+    Expression<DateTime>? offeredOn,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? dirty,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (clientId != null) 'client_id': clientId,
+      if (householdId != null) 'household_id': householdId,
+      if (received != null) 'received': received,
+      if (kind != null) 'kind': kind,
+      if (body != null) 'body': body,
+      if (contact != null) 'contact': contact,
+      if (offeredOn != null) 'offered_on': offeredOn,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (dirty != null) 'dirty': dirty,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  NeighbourOffersCompanion copyWith({
+    Value<String>? clientId,
+    Value<String>? householdId,
+    Value<bool>? received,
+    Value<String>? kind,
+    Value<String>? body,
+    Value<String?>? contact,
+    Value<DateTime>? offeredOn,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool>? dirty,
+    Value<int>? rowid,
+  }) {
+    return NeighbourOffersCompanion(
+      clientId: clientId ?? this.clientId,
+      householdId: householdId ?? this.householdId,
+      received: received ?? this.received,
+      kind: kind ?? this.kind,
+      body: body ?? this.body,
+      contact: contact ?? this.contact,
+      offeredOn: offeredOn ?? this.offeredOn,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      dirty: dirty ?? this.dirty,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (clientId.present) {
+      map['client_id'] = Variable<String>(clientId.value);
+    }
+    if (householdId.present) {
+      map['household_id'] = Variable<String>(householdId.value);
+    }
+    if (received.present) {
+      map['received'] = Variable<bool>(received.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (body.present) {
+      map['body'] = Variable<String>(body.value);
+    }
+    if (contact.present) {
+      map['contact'] = Variable<String>(contact.value);
+    }
+    if (offeredOn.present) {
+      map['offered_on'] = Variable<DateTime>(offeredOn.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (dirty.present) {
+      map['dirty'] = Variable<bool>(dirty.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('NeighbourOffersCompanion(')
+          ..write('clientId: $clientId, ')
+          ..write('householdId: $householdId, ')
+          ..write('received: $received, ')
+          ..write('kind: $kind, ')
+          ..write('body: $body, ')
+          ..write('contact: $contact, ')
+          ..write('offeredOn: $offeredOn, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('dirty: $dirty, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -7683,6 +8314,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $HouseholdPlansTable householdPlans = $HouseholdPlansTable(this);
   late final $PossessionsTable possessions = $PossessionsTable(this);
+  late final $NeighbourOffersTable neighbourOffers = $NeighbourOffersTable(
+    this,
+  );
   late final $WarningsTable warnings = $WarningsTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
   late final Index inventoryItemsHousehold = Index(
@@ -7717,6 +8351,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'possessions_household',
     'CREATE INDEX possessions_household ON possessions (household_id)',
   );
+  late final Index neighbourOffersHousehold = Index(
+    'neighbour_offers_household',
+    'CREATE INDEX neighbour_offers_household ON neighbour_offers (household_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7729,6 +8367,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     householdMembers,
     householdPlans,
     possessions,
+    neighbourOffers,
     warnings,
     syncState,
     inventoryItemsHousehold,
@@ -7739,5 +8378,6 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     householdMembersHousehold,
     householdPlansHousehold,
     possessionsHousehold,
+    neighbourOffersHousehold,
   ];
 }

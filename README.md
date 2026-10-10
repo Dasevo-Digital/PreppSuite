@@ -424,6 +424,13 @@ Summen je Währung. Nicht der Vorrat, sondern was eine Versicherung nach
 einem Brand wissen will. Die PDF-Ausgabe ist dafür gedacht, außerhalb der
 Wohnung aufbewahrt zu werden.
 
+**Nachbarschaft.** Überschuss oder Hilfe anbieten – „20 l Trinkwasser“,
+„kann Erste Hilfe“ – als QR-Code mit genau dem Text, den man schreibt,
+und optional einer Kontaktangabe. Kein Server, kein Standort, nichts aus
+dem Vorrat. Jede Kamera-App liest den Code als Text; PreppSuite übernimmt
+ihn per Kamera oder eingefügtem Text in eine Liste der Angebote aus der
+Nachbarschaft, die mit den anderen Geräten des Haushalts abgeglichen wird.
+
 Was die US-Behörden darüber hinaus aufführen und warum das meiste davon
 schon abgedeckt war, steht in
 [`docs/us-behoerden-abgleich.md`](docs/us-behoerden-abgleich.md).

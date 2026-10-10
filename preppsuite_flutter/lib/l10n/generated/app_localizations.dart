@@ -15006,6 +15006,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There is no text recognition on this device.'**
   String get knowledgeRecognizeUnsupported;
+
+  /// No description provided for @neighbourhoodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Neighbourhood'**
+  String get neighbourhoodTitle;
+
+  /// No description provided for @neighbourhoodEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer surplus or help, by QR code'**
+  String get neighbourhoodEntryHint;
+
+  /// No description provided for @neighbourhoodCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 offer} other{{count} offers}}'**
+  String neighbourhoodCount(int count);
+
+  /// No description provided for @neighbourhoodIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer what you have spare or what you can do, and see what neighbours offer. An offer becomes a QR code holding exactly the text you write: no server, no location, nothing from your stores. Anyone who scans it can read it without PreppSuite.'**
+  String get neighbourhoodIntro;
+
+  /// No description provided for @neighbourhoodOwnSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Our offers'**
+  String get neighbourhoodOwnSection;
+
+  /// No description provided for @neighbourhoodOwnEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No offer yet. What you have spare only helps others if they know about it.'**
+  String get neighbourhoodOwnEmpty;
+
+  /// No description provided for @neighbourhoodReceivedSection.
+  ///
+  /// In en, this message translates to:
+  /// **'From neighbours'**
+  String get neighbourhoodReceivedSection;
+
+  /// No description provided for @neighbourhoodReceivedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing scanned yet. An offer from next door comes here when you scan its QR code or paste its text.'**
+  String get neighbourhoodReceivedEmpty;
+
+  /// No description provided for @neighbourhoodCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an offer'**
+  String get neighbourhoodCreate;
+
+  /// No description provided for @neighbourhoodScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan an offer'**
+  String get neighbourhoodScan;
+
+  /// No description provided for @neighbourhoodPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste text'**
+  String get neighbourhoodPaste;
+
+  /// No description provided for @neighbourhoodShowCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Show as QR code'**
+  String get neighbourhoodShowCode;
+
+  /// No description provided for @neighbourhoodEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get neighbourhoodEdit;
+
+  /// No description provided for @neighbourhoodDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get neighbourhoodDelete;
+
+  /// No description provided for @neighbourhoodOfferedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'offered on {date}'**
+  String neighbourhoodOfferedOn(String date);
+
+  /// No description provided for @neighbourhoodKindWater.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get neighbourhoodKindWater;
+
+  /// No description provided for @neighbourhoodKindFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get neighbourhoodKindFood;
+
+  /// No description provided for @neighbourhoodKindEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Power and heat'**
+  String get neighbourhoodKindEnergy;
+
+  /// No description provided for @neighbourhoodKindTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools and equipment'**
+  String get neighbourhoodKindTools;
+
+  /// No description provided for @neighbourhoodKindCare.
+  ///
+  /// In en, this message translates to:
+  /// **'First aid and care'**
+  String get neighbourhoodKindCare;
+
+  /// No description provided for @neighbourhoodKindHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Help and skills'**
+  String get neighbourhoodKindHelp;
+
+  /// No description provided for @neighbourhoodKindOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get neighbourhoodKindOther;
+
+  /// No description provided for @neighbourhoodContactLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get neighbourhoodContactLabel;
+
+  /// No description provided for @neighbourhoodFormNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New offer'**
+  String get neighbourhoodFormNew;
+
+  /// No description provided for @neighbourhoodFormEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit offer'**
+  String get neighbourhoodFormEdit;
+
+  /// No description provided for @neighbourhoodKindField.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind'**
+  String get neighbourhoodKindField;
+
+  /// No description provided for @neighbourhoodBodyField.
+  ///
+  /// In en, this message translates to:
+  /// **'What you offer'**
+  String get neighbourhoodBodyField;
+
+  /// No description provided for @neighbourhoodBodyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. 20 l of drinking water to spare'**
+  String get neighbourhoodBodyHint;
+
+  /// No description provided for @neighbourhoodBodyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Say what you are offering.'**
+  String get neighbourhoodBodyRequired;
+
+  /// No description provided for @neighbourhoodContactField.
+  ///
+  /// In en, this message translates to:
+  /// **'How to reach you (optional)'**
+  String get neighbourhoodContactField;
+
+  /// No description provided for @neighbourhoodContactHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. first name, house number or doorbell – only what you want to share'**
+  String get neighbourhoodContactHint;
+
+  /// No description provided for @neighbourhoodFormNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The QR code holds exactly these details and today’s date, nothing else. Anyone who sees or films it has them.'**
+  String get neighbourhoodFormNote;
+
+  /// No description provided for @neighbourhoodCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer as QR code'**
+  String get neighbourhoodCodeTitle;
+
+  /// No description provided for @neighbourhoodCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the code to your neighbours. Any camera app shows its text; PreppSuite adds it to its own list.'**
+  String get neighbourhoodCodeHint;
+
+  /// No description provided for @neighbourhoodCodeSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'QR code holding the offer'**
+  String get neighbourhoodCodeSemantics;
+
+  /// No description provided for @neighbourhoodShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Share as text'**
+  String get neighbourhoodShareText;
+
+  /// No description provided for @neighbourhoodScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Point the camera at the offer’s QR code.'**
+  String get neighbourhoodScanHint;
+
+  /// No description provided for @neighbourhoodScanAlternative.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a camera: copy the offer’s text and add it with “Paste text”.'**
+  String get neighbourhoodScanAlternative;
+
+  /// No description provided for @neighbourhoodPasteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste an offer as text'**
+  String get neighbourhoodPasteTitle;
+
+  /// No description provided for @neighbourhoodPasteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The whole text, down to the last line “PreppSuite-Angebot/1 …”'**
+  String get neighbourhoodPasteHint;
+
+  /// No description provided for @neighbourhoodPasteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get neighbourhoodPasteConfirm;
+
+  /// No description provided for @neighbourhoodReceiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add this offer?'**
+  String get neighbourhoodReceiveTitle;
+
+  /// No description provided for @neighbourhoodReceiveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to the list'**
+  String get neighbourhoodReceiveConfirm;
+
+  /// No description provided for @neighbourhoodReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer added to the list.'**
+  String get neighbourhoodReceived;
+
+  /// No description provided for @neighbourhoodAlreadyKnown.
+  ///
+  /// In en, this message translates to:
+  /// **'This offer is already in the list.'**
+  String get neighbourhoodAlreadyKnown;
+
+  /// No description provided for @neighbourhoodNotAnOffer.
+  ///
+  /// In en, this message translates to:
+  /// **'That is not a PreppSuite offer.'**
+  String get neighbourhoodNotAnOffer;
+
+  /// No description provided for @neighbourhoodTooNew.
+  ///
+  /// In en, this message translates to:
+  /// **'This offer comes from a newer PreppSuite. Please update the app.'**
+  String get neighbourhoodTooNew;
 }
 
 class _AppLocalizationsDelegate
