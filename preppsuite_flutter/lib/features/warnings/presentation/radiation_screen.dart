@@ -7,6 +7,7 @@ import 'iodine_tablets_screen.dart';
 import '../application/radiation_client.dart';
 import '../application/radiation_level.dart';
 import '../application/radiation_store.dart';
+import '../../../core/adaptive_columns.dart';
 
 /// The gamma dose rate at one probe, with what it means.
 ///
@@ -135,70 +136,86 @@ class _RadiationScreenState extends State<RadiationScreen> {
     final station = _station!;
     final reading = _reading;
 
-    return ListView(
+    // In columns on a wide window (#47): the reading beside where to go
+    // with it, rather than one column with the window empty beside it.
+    return AdaptiveColumns(
       padding: const EdgeInsets.all(16),
-      children: [
-        Text(station.name, style: theme.textTheme.headlineSmall),
-        Text(
-          [
-            if (station.postalCode case final code? when code.isNotEmpty)
-              l10n.radiationPostalCode(code),
-            if (station.heightAboveSea case final metres?)
-              l10n.radiationHeight('$metres'),
-          ].join(' · '),
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 16),
-        if (_loading && reading == null)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(),
-            ),
-          )
-        else if (reading == null)
-          Text(l10n.radiationLoadFailed)
-        else
-          ..._readingCards(l10n, reading),
-        const SizedBox(height: 16),
-        OutlinedButton(onPressed: _choose, child: Text(l10n.radiationChange)),
-        const SizedBox(height: 16),
-        // Below the measurement and above the disclaimer, because this
-        // screen deliberately never says what to do -- and somebody who
-        // just read "ueber dem, was Wetter erklaert" is owed somewhere to
-        // go with that.
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.masks_outlined),
-            title: Text(l10n.hazardReleaseTitle),
-            subtitle: Text(l10n.hazardReleaseEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const HazardReleaseScreen(),
+      columnWidth: 480,
+      spacing: 16,
+      blocks: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(station.name, style: theme.textTheme.headlineSmall),
+            Text(
+              [
+                if (station.postalCode case final code? when code.isNotEmpty)
+                  l10n.radiationPostalCode(code),
+                if (station.heightAboveSea case final metres?)
+                  l10n.radiationHeight('$metres'),
+              ].join(' · '),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-          ),
+            const SizedBox(height: 16),
+            if (_loading && reading == null)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (reading == null)
+              Text(l10n.radiationLoadFailed)
+            else
+              ..._readingCards(l10n, reading),
+          ],
         ),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.medication_outlined),
-            title: Text(l10n.iodineTitle),
-            subtitle: Text(l10n.iodineEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const IodineTabletsScreen(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            OutlinedButton(
+              onPressed: _choose,
+              child: Text(l10n.radiationChange),
+            ),
+            const SizedBox(height: 16),
+            // Below the measurement and above the disclaimer, because this
+            // screen deliberately never says what to do -- and somebody who
+            // just read "ueber dem, was Wetter erklaert" is owed somewhere to
+            // go with that.
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.masks_outlined),
+                title: Text(l10n.hazardReleaseTitle),
+                subtitle: Text(l10n.hazardReleaseEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const HazardReleaseScreen(),
+                  ),
+                ),
               ),
             ),
-          ),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.medication_outlined),
+                title: Text(l10n.iodineTitle),
+                subtitle: Text(l10n.iodineEntryHint),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const IodineTabletsScreen(),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(l10n.radiationNoWarning, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 8),
+            Text(l10n.radiationSource, style: theme.textTheme.bodySmall),
+          ],
         ),
-        const SizedBox(height: 16),
-        Text(l10n.radiationNoWarning, style: theme.textTheme.bodySmall),
-        const SizedBox(height: 8),
-        Text(l10n.radiationSource, style: theme.textTheme.bodySmall),
       ],
     );
   }

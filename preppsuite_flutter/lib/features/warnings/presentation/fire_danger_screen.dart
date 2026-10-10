@@ -5,6 +5,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/fire_danger_client.dart';
 import '../application/fire_danger_level.dart';
 import '../application/fire_danger_store.dart';
+import '../../../core/adaptive_columns.dart';
 
 /// The forest fire danger index at one DWD station, today and ahead.
 ///
@@ -132,35 +133,51 @@ class _FireDangerScreenState extends State<FireDangerScreen> {
     final station = _station!;
     final forecast = _forecast;
 
-    return ListView(
+    // In columns on a wide window (#47): the reading beside what to do
+    // next and where it comes from.
+    return AdaptiveColumns(
       padding: const EdgeInsets.all(16),
-      children: [
-        Text(station.name, style: theme.textTheme.headlineSmall),
-        if (station.state case final state?)
-          Text(
-            l10n.fireDangerState(state),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+      columnWidth: 480,
+      spacing: 16,
+      blocks: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(station.name, style: theme.textTheme.headlineSmall),
+            if (station.state case final state?)
+              Text(
+                l10n.fireDangerState(state),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            const SizedBox(height: 16),
+            if (_loading && forecast == null)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (forecast == null)
+              Text(l10n.fireDangerLoadFailed)
+            else
+              ..._forecastCards(l10n, forecast),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            OutlinedButton(
+              onPressed: _choose,
+              child: Text(l10n.fireDangerChange),
             ),
-          ),
-        const SizedBox(height: 16),
-        if (_loading && forecast == null)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(),
-            ),
-          )
-        else if (forecast == null)
-          Text(l10n.fireDangerLoadFailed)
-        else
-          ..._forecastCards(l10n, forecast),
-        const SizedBox(height: 16),
-        OutlinedButton(onPressed: _choose, child: Text(l10n.fireDangerChange)),
-        const SizedBox(height: 16),
-        Text(l10n.fireDangerNoWarning, style: theme.textTheme.bodySmall),
-        const SizedBox(height: 8),
-        Text(l10n.fireDangerSource, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 16),
+            Text(l10n.fireDangerNoWarning, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 8),
+            Text(l10n.fireDangerSource, style: theme.textTheme.bodySmall),
+          ],
+        ),
       ],
     );
   }

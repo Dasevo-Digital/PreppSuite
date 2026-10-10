@@ -5,6 +5,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/pegel_client.dart';
 import '../application/pegel_level.dart';
 import '../application/pegel_store.dart';
+import '../../../core/adaptive_columns.dart';
 
 /// The water level at one gauge, with what it means.
 ///
@@ -131,39 +132,52 @@ class _PegelScreenState extends State<PegelScreen> {
     final station = _station!;
     final reading = _reading;
 
-    return ListView(
+    // In columns on a wide window (#47): the reading beside what to do
+    // next and where it comes from.
+    return AdaptiveColumns(
       padding: const EdgeInsets.all(16),
-      children: [
-        Text(station.name, style: theme.textTheme.headlineSmall),
-        Text(
-          station.water,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        if (station.kilometre != null)
-          Text(
-            l10n.pegelKilometre('${station.kilometre}'),
-            style: theme.textTheme.bodySmall,
-          ),
-        const SizedBox(height: 16),
-        if (_loading && reading == null)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(),
+      columnWidth: 480,
+      spacing: 16,
+      blocks: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(station.name, style: theme.textTheme.headlineSmall),
+            Text(
+              station.water,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
-          )
-        else if (reading == null)
-          Text(l10n.pegelLoadFailed)
-        else
-          ..._readingCards(l10n, reading),
-        const SizedBox(height: 16),
-        OutlinedButton(onPressed: _choose, child: Text(l10n.pegelChange)),
-        const SizedBox(height: 16),
-        Text(l10n.pegelNoMeldestufe, style: theme.textTheme.bodySmall),
-        const SizedBox(height: 8),
-        Text(l10n.pegelSource, style: theme.textTheme.bodySmall),
+            if (station.kilometre != null)
+              Text(
+                l10n.pegelKilometre('${station.kilometre}'),
+                style: theme.textTheme.bodySmall,
+              ),
+            const SizedBox(height: 16),
+            if (_loading && reading == null)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (reading == null)
+              Text(l10n.pegelLoadFailed)
+            else
+              ..._readingCards(l10n, reading),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            OutlinedButton(onPressed: _choose, child: Text(l10n.pegelChange)),
+            const SizedBox(height: 16),
+            Text(l10n.pegelNoMeldestufe, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 8),
+            Text(l10n.pegelSource, style: theme.textTheme.bodySmall),
+          ],
+        ),
       ],
     );
   }

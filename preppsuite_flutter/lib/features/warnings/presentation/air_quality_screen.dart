@@ -5,6 +5,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/air_quality_client.dart';
 import '../application/air_quality_level.dart';
 import '../application/air_quality_store.dart';
+import '../../../core/adaptive_columns.dart';
 
 /// The air quality index at one station, in the Umweltbundesamt's words.
 ///
@@ -149,40 +150,56 @@ class _AirQualityScreenState extends State<AirQualityScreen> {
     final station = _station!;
     final reading = _reading;
 
-    return ListView(
+    // In columns on a wide window (#47): the reading beside what to do
+    // next and where it comes from.
+    return AdaptiveColumns(
       padding: const EdgeInsets.all(16),
-      children: [
-        Text(station.name, style: theme.textTheme.headlineSmall),
-        Text(
-          [
-            ?station.city,
-            ?station.state,
-            ?station.setting,
-          ].join(' · '),
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 16),
-        if (_loading && reading == null)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: CircularProgressIndicator(),
+      columnWidth: 480,
+      spacing: 16,
+      blocks: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(station.name, style: theme.textTheme.headlineSmall),
+            Text(
+              [
+                ?station.city,
+                ?station.state,
+                ?station.setting,
+              ].join(' · '),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
-          )
-        else if (reading == null)
-          Text(l10n.airQualityLoadFailed)
-        else
-          ..._readingCards(l10n, reading),
-        const SizedBox(height: 16),
-        OutlinedButton(onPressed: _choose, child: Text(l10n.airQualityChange)),
-        const SizedBox(height: 16),
-        Text(l10n.airQualityNoWarning, style: theme.textTheme.bodySmall),
-        const SizedBox(height: 8),
-        Text(l10n.airQualityAdvice, style: theme.textTheme.bodySmall),
-        const SizedBox(height: 8),
-        Text(l10n.airQualitySource, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 16),
+            if (_loading && reading == null)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32),
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (reading == null)
+              Text(l10n.airQualityLoadFailed)
+            else
+              ..._readingCards(l10n, reading),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            OutlinedButton(
+              onPressed: _choose,
+              child: Text(l10n.airQualityChange),
+            ),
+            const SizedBox(height: 16),
+            Text(l10n.airQualityNoWarning, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 8),
+            Text(l10n.airQualityAdvice, style: theme.textTheme.bodySmall),
+            const SizedBox(height: 8),
+            Text(l10n.airQualitySource, style: theme.textTheme.bodySmall),
+          ],
+        ),
       ],
     );
   }
