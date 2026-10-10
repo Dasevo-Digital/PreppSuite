@@ -62,11 +62,12 @@ dependencies:
   # documents. Unlike a platform PDF viewer, it works on mobile and desktop
   # without sending a document to a service.
   #
-  # 7.0.0 with pdfrx 2.6 (#95); 6.0.0 since 2.3.9 (#78). The parts used
-  # here -- opening a document and reading its text -- did not change, and
-  # the personal document tests run against generated PDFs on every check.
-  pdf_document: 7.0.0
-  pdf_graphics: 7.0.0
+  # 8.1.0 (#145); 7.0.0 with pdfrx 2.6 (#95); 6.0.0 since 2.3.9 (#78). The
+  # parts used here -- opening a document and reading its text -- did not
+  # change in any of them, and the personal document tests run against
+  # generated PDFs on every check.
+  pdf_document: 8.1.0
+  pdf_graphics: 8.1.0
   # Local renderer for PDFs from the personal knowledge library.  It uses
   # PDFium on every supported native platform, so a document never has to
   # leave the device merely to be read.
