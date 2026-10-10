@@ -5271,5 +5271,9 @@
       }
     }
   },
-  "firstAidVideoPackNotReviewed": "Checked by: not stated. The app does not check the films in a pack; the written and drawn guides are what counts."
+  "firstAidVideoPackNotReviewed": "Checked by: not stated. The app does not check the films in a pack; the written and drawn guides are what counts.",
+  "knowledgeDownloadsTitle": "In your Downloads folder",
+  "knowledgeDownloadsHint": "Documents not in the library yet, newest first. The app reads only the file names for this; nothing is added until you tap it.",
+  "knowledgeDownloadsTake": "Add",
+  "knowledgeDownloadsDismiss": "Do not suggest again"
 }

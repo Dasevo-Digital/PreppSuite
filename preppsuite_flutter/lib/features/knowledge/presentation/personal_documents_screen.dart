@@ -1,17 +1,26 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/feel.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
 import '../../maps/application/map_archive_access.dart' show pickMapArchive;
+import '../../../core/platform_storage.dart';
 import '../application/document_folder_import.dart';
+import '../application/download_suggestions.dart';
 import '../application/personal_document_index.dart';
 import '../application/document_fingerprint.dart';
 import '../application/personal_document_store.dart';
 import 'personal_document_reader_screen.dart';
 
 class PersonalDocumentsScreen extends StatefulWidget {
-  const PersonalDocumentsScreen({super.key});
+  const PersonalDocumentsScreen({super.key, this.downloadsDirectory});
+
+  /// Where to look for documents to suggest (#33); the system's Downloads
+  /// folder unless a test says otherwise.
+  final Future<Directory?> Function()? downloadsDirectory;
 
   @override
   State<PersonalDocumentsScreen> createState() =>
@@ -27,10 +36,59 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
   /// library of large files should not wait on its own check to appear.
   Set<String> _changed = const {};
 
+  /// Documents in the Downloads folder the library does not have (#33).
+  late Future<List<DownloadSuggestion>> _suggestions = _loadSuggestions();
+
   @override
   void initState() {
     super.initState();
     _checkForChanges();
+  }
+
+  Future<List<DownloadSuggestion>> _loadSuggestions() async {
+    if (!canImportDocumentFolder && widget.downloadsDirectory == null) {
+      return const [];
+    }
+    try {
+      return await downloadSuggestions(
+        downloads: await (widget.downloadsDirectory ?? systemDownloadsFolder)(),
+        known: await _documents,
+        dismissed: await const DismissedDownloads().load(),
+      );
+    } on Object {
+      // A suggestion that cannot be made is no suggestion, not an error.
+      return const [];
+    }
+  }
+
+  /// Takes a suggested file into the library and builds its index: the
+  /// one tap the suggestion promises.
+  Future<void> _takeSuggestion(DownloadSuggestion suggestion) async {
+    final remembered = await rememberStoragePath(
+      suggestion.path,
+      label: suggestion.name,
+    );
+    final location = remembered?.value ?? suggestion.path;
+    final updated = await _store.add(
+      location: location,
+      label: suggestion.name,
+    );
+    final document = updated.firstWhere((item) => item.location == location);
+    if (!mounted) return;
+    setState(() {
+      _documents = Future.value(updated);
+      _suggestions = _loadSuggestions();
+    });
+    await _index(document);
+  }
+
+  Future<void> _dismissSuggestion(DownloadSuggestion suggestion) async {
+    await const DismissedDownloads().add(suggestion.path);
+    if (mounted) {
+      setState(() {
+        _suggestions = _loadSuggestions();
+      });
+    }
   }
 
   Future<void> _checkForChanges() async {
@@ -351,6 +409,22 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
                   ),
                 ),
               ),
+              FutureBuilder<List<DownloadSuggestion>>(
+                future: _suggestions,
+                builder: (context, snapshot) {
+                  final suggestions = snapshot.data ?? const [];
+                  if (suggestions.isEmpty) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: _DownloadSuggestions(
+                      suggestions: suggestions,
+                      icon: _icon,
+                      onTake: _takeSuggestion,
+                      onDismiss: _dismissSuggestion,
+                    ),
+                  );
+                },
+              ),
               if (_changed.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Card(
@@ -445,4 +519,74 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
     'epub' => Icons.book_outlined,
     _ => Icons.description_outlined,
   };
+}
+
+/// What lies in the Downloads folder and is not in the library yet (#33).
+class _DownloadSuggestions extends StatelessWidget {
+  const _DownloadSuggestions({
+    required this.suggestions,
+    required this.icon,
+    required this.onTake,
+    required this.onDismiss,
+  });
+
+  final List<DownloadSuggestion> suggestions;
+  final IconData Function(String extension) icon;
+  final ValueChanged<DownloadSuggestion> onTake;
+  final ValueChanged<DownloadSuggestion> onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final date = DateFormat.yMMMd(l10n.localeName);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Text(
+                l10n.knowledgeDownloadsTitle,
+                style: theme.textTheme.titleMedium,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+              child: Text(
+                l10n.knowledgeDownloadsHint,
+                style: theme.textTheme.bodySmall,
+              ),
+            ),
+            for (final suggestion in suggestions)
+              ListTile(
+                leading: Icon(icon(suggestion.name.split('.').last)),
+                title: Text(suggestion.name),
+                subtitle: Text(
+                  '${formatByteSize(suggestion.bytes)} · '
+                  '${date.format(suggestion.modified)}',
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton(
+                      onPressed: () => onTake(suggestion),
+                      child: Text(l10n.knowledgeDownloadsTake),
+                    ),
+                    IconButton(
+                      tooltip: l10n.knowledgeDownloadsDismiss,
+                      icon: const Icon(Icons.close),
+                      onPressed: () => onDismiss(suggestion),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }

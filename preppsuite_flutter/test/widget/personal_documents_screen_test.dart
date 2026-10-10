@@ -137,4 +137,65 @@ void main() {
     expect(find.textContaining('Ein Dokument hat sich'), findsOneWidget);
     expect(find.text('Index aktualisieren'), findsOneWidget);
   });
+
+  group('documents in the Downloads folder (#33)', () {
+    late Directory downloads;
+
+    setUp(() async {
+      downloads = await Directory.systemTemp.createTemp('downloads');
+      await File('${downloads.path}/Broschuere.pdf').writeAsString('x');
+    });
+    tearDown(() => downloads.delete(recursive: true));
+
+    /// Lets the real file reads behind the suggestions finish: each step
+    /// of them waits on the one before, and a fake clock moves none.
+    Future<void> settle(WidgetTester tester) async {
+      for (var round = 0; round < 10; round++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump();
+      }
+    }
+
+    Future<void> showWith(WidgetTester tester) async {
+      await tester.binding.setSurfaceSize(const Size(500, 1600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      // The folder is read for real, so the screen is built where real
+      // file reads can finish.
+      await tester.runAsync(() async {
+        await tester.pumpWidget(
+          MaterialApp(
+            locale: const Locale('de'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: PersonalDocumentsScreen(
+              downloadsDirectory: () async => downloads,
+            ),
+          ),
+        );
+      });
+      await settle(tester);
+    }
+
+    testWidgets('are offered, with what the app reads to offer them', (
+      tester,
+    ) async {
+      await showWith(tester);
+
+      expect(find.text('Im Download-Ordner'), findsOneWidget);
+      expect(find.text('Broschuere.pdf'), findsOneWidget);
+      expect(find.textContaining('nur die Dateinamen'), findsOneWidget);
+    });
+
+    testWidgets('and one turned down does not come back', (tester) async {
+      await showWith(tester);
+
+      await tester.tap(find.byTooltip('Nicht mehr vorschlagen'));
+      await settle(tester);
+
+      expect(find.text('Broschuere.pdf'), findsNothing);
+      expect(find.text('Im Download-Ordner'), findsNothing);
+    });
+  });
 }

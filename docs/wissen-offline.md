@@ -202,6 +202,20 @@ erreicht, und für ein einzelnes Kind darin gibt es bisher keine Form, die
 sich speichern ließe. Statt eines Knopfes, der dort nicht funktionieren
 kann, steht auf diesen Geräten ein Satz, der das sagt.
 
+**Aus dem Download-Ordner.** Am Computer schlägt die Bibliothek vor, was
+direkt im Download-Ordner liegt und lesbar ist, aber noch nicht in der
+Bibliothek steht: die zwölf neuesten Dateien, zuerst die jüngste (#33).
+Dafür liest sie nur die Dateinamen. „Aufnehmen“ nimmt eine Datei auf und
+baut gleich ihren Index, „Nicht mehr vorschlagen“ blendet sie dauerhaft
+aus. Am Telefon gibt es das nicht: Android und iOS lassen eine App ihren
+Download-Ordner nur über den Dateidialog sehen, und der öffnet sich
+ohnehin dort.
+
+**Wie groß.** Am Computer bis 512 MB je Datei und bis 16 Millionen
+Zeichen Text je Dokument, am Telefon und Tablet bis 128 MB und 4
+Millionen (#64). Die Datei wird im Ganzen gelesen; die Grenze ist also
+auch der Speicher, den das Lesen höchstens braucht.
+
 **Gescannte PDFs bleiben außen vor.** Ein PDF ohne Textebene ist für den
 Index ein leeres Dokument; die App meldet das als „Kein auslesbarer Text
 (möglicherweise ein Scan)" statt so zu tun, als wäre nichts gewesen. Eine

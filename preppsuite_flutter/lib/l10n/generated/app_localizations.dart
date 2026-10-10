@@ -14904,6 +14904,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Checked by: not stated. The app does not check the films in a pack; the written and drawn guides are what counts.'**
   String get firstAidVideoPackNotReviewed;
+
+  /// No description provided for @knowledgeDownloadsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'In your Downloads folder'**
+  String get knowledgeDownloadsTitle;
+
+  /// No description provided for @knowledgeDownloadsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents not in the library yet, newest first. The app reads only the file names for this; nothing is added until you tap it.'**
+  String get knowledgeDownloadsHint;
+
+  /// No description provided for @knowledgeDownloadsTake.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get knowledgeDownloadsTake;
+
+  /// No description provided for @knowledgeDownloadsDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not suggest again'**
+  String get knowledgeDownloadsDismiss;
 }
 
 class _AppLocalizationsDelegate

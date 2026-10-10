@@ -9040,4 +9040,17 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get firstAidVideoPackNotReviewed =>
       'Fachliche Prüfung: nicht angegeben. Die App prüft die Filme eines Pakets nicht; die Anleitungen in Text und Zeichnung gelten.';
+
+  @override
+  String get knowledgeDownloadsTitle => 'Im Download-Ordner';
+
+  @override
+  String get knowledgeDownloadsHint =>
+      'Dokumente, die noch nicht in der Bibliothek sind, die neuesten zuerst. Die App liest dafür nur die Dateinamen; aufgenommen wird nur, was du antippst.';
+
+  @override
+  String get knowledgeDownloadsTake => 'Aufnehmen';
+
+  @override
+  String get knowledgeDownloadsDismiss => 'Nicht mehr vorschlagen';
 }

@@ -3686,5 +3686,9 @@
   "firstAidVideoPackPublisher": "Zusammengestellt von: {who}",
   "firstAidVideoPackNotStated": "nicht angegeben",
   "firstAidVideoPackReviewed": "Fachlich geprüft, laut Paket: {who}",
-  "firstAidVideoPackNotReviewed": "Fachliche Prüfung: nicht angegeben. Die App prüft die Filme eines Pakets nicht; die Anleitungen in Text und Zeichnung gelten."
+  "firstAidVideoPackNotReviewed": "Fachliche Prüfung: nicht angegeben. Die App prüft die Filme eines Pakets nicht; die Anleitungen in Text und Zeichnung gelten.",
+  "knowledgeDownloadsTitle": "Im Download-Ordner",
+  "knowledgeDownloadsHint": "Dokumente, die noch nicht in der Bibliothek sind, die neuesten zuerst. Die App liest dafür nur die Dateinamen; aufgenommen wird nur, was du antippst.",
+  "knowledgeDownloadsTake": "Aufnehmen",
+  "knowledgeDownloadsDismiss": "Nicht mehr vorschlagen"
 }

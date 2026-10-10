@@ -8991,4 +8991,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get firstAidVideoPackNotReviewed =>
       'Checked by: not stated. The app does not check the films in a pack; the written and drawn guides are what counts.';
+
+  @override
+  String get knowledgeDownloadsTitle => 'In your Downloads folder';
+
+  @override
+  String get knowledgeDownloadsHint =>
+      'Documents not in the library yet, newest first. The app reads only the file names for this; nothing is added until you tap it.';
+
+  @override
+  String get knowledgeDownloadsTake => 'Add';
+
+  @override
+  String get knowledgeDownloadsDismiss => 'Do not suggest again';
 }

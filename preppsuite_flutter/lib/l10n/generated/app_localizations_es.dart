@@ -9069,4 +9069,17 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get firstAidVideoPackNotReviewed =>
       'Revisión: sin indicar. La app no revisa los vídeos de un paquete; valen las guías en texto y dibujos.';
+
+  @override
+  String get knowledgeDownloadsTitle => 'En la carpeta de descargas';
+
+  @override
+  String get knowledgeDownloadsHint =>
+      'Documentos que aún no están en la biblioteca, los más recientes primero. La app solo lee los nombres de archivo; no se añade nada hasta que lo tocas.';
+
+  @override
+  String get knowledgeDownloadsTake => 'Añadir';
+
+  @override
+  String get knowledgeDownloadsDismiss => 'No volver a sugerir';
 }
