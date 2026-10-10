@@ -183,6 +183,9 @@ Map<String, Object?> encodeInventoryItem(InventoryItem row) => {
   'foodGroup': row.foodGroup,
   'packageName': row.packageName,
   'packageSize': row.packageSize,
+  'memberId': row.memberId,
+  'refillLeadDays': row.refillLeadDays,
+  'stockCountedAt': _date(row.stockCountedAt),
   'notes': row.notes,
   'updatedAt': _date(row.updatedAt),
   'deletedAt': _date(row.deletedAt),
@@ -246,6 +249,18 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
         : const Value.absent(),
     packageSize: json.containsKey('packageSize')
         ? Value(_double(json['packageSize']))
+        : const Value.absent(),
+    // The same rule for schema 23 (#150): an older device writes none of
+    // these, and its edit must not switch off a reminder or forget whose
+    // medicine it is.
+    memberId: json.containsKey('memberId')
+        ? Value(_text(json['memberId']))
+        : const Value.absent(),
+    refillLeadDays: json.containsKey('refillLeadDays')
+        ? Value(_int(json['refillLeadDays']))
+        : const Value.absent(),
+    stockCountedAt: json.containsKey('stockCountedAt')
+        ? Value(asUtcDate(json['stockCountedAt']))
         : const Value.absent(),
     notes: Value(_string(json['notes'])),
     updatedAt: updatedAt,

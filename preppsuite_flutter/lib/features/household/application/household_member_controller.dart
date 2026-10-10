@@ -13,6 +13,15 @@ final householdMembersProvider = StreamProvider.autoDispose
       return ref.watch(appDatabaseProvider).watchHouseholdMembers(householdId);
     });
 
+/// The cards read once rather than watched: what a form offers as a
+/// choice of person (#150). A list that cannot change while the form is
+/// open costs nothing, and it leaves no live query behind when the form
+/// closes.
+final householdMemberChoicesProvider = FutureProvider.autoDispose
+    .family<List<HouseholdMember>, String>((ref, householdId) {
+      return ref.watch(appDatabaseProvider).householdMembersOnce(householdId);
+    });
+
 /// What a card holds. Only [name] is required — see [HouseholdMembers].
 class HouseholdMemberDraft {
   const HouseholdMemberDraft({

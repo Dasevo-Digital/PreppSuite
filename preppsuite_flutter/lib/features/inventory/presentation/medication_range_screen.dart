@@ -109,11 +109,26 @@ class MedicationRangeScreen extends ConsumerWidget {
                           child: ListTile(
                             title: Text(range.item.name),
                             subtitle: Text(
-                              l10n.medicationStock(
-                                number(range.item.quantity),
-                                range.item.unit,
-                                number(range.dailyDose),
-                              ),
+                              [
+                                l10n.medicationStock(
+                                  number(range.item.quantity),
+                                  range.item.unit,
+                                  number(range.dailyDose),
+                                ),
+                                // A pack in daily use counts from a date,
+                                // and says which, so a stale count can be
+                                // seen for what it is (#150).
+                                if (range.inDailyUse)
+                                  l10n.medicationInUse(
+                                    date.format(range.countedOn),
+                                  ),
+                                if (range.refillOn case final day?)
+                                  day.isAfter(range.today)
+                                      ? l10n.medicationRefillOn(
+                                          date.format(day),
+                                        )
+                                      : l10n.medicationRefillDue,
+                              ].join('\n'),
                             ),
                             trailing: Text(
                               days(range.wholeDays),

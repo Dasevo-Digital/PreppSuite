@@ -23,6 +23,7 @@ import '../application/expiry_reminder_provider.dart';
 import '../application/supply_group_l10n.dart';
 import '../application/supply_groups.dart';
 import '../application/inventory_controller.dart';
+import '../../household/application/household_member_controller.dart';
 import '../application/inventory_photo_service.dart';
 import '../application/open_food_facts_service.dart';
 import '../application/item_package.dart';
@@ -98,6 +99,13 @@ class _InventoryItemFormScreenState
 
   /// Which BLE supply group this row counts towards, or null.
   SupplyGroup? _foodGroup;
+
+  /// Whose medicine this is, as a household member's `clientId` (#150).
+  String? _memberId;
+
+  /// Days before the end to remind of a new prescription, or null for a
+  /// reserve that nobody takes from (#150).
+  int? _refillLeadDays;
   String? _barcode;
   String? _offProductId;
   String? _photoPath;
@@ -129,6 +137,8 @@ class _InventoryItemFormScreenState
     _expirationDate?.toIso8601String(),
     _expiryLeadDays,
     _foodGroup?.name,
+    _memberId,
+    _refillLeadDays,
     _barcode,
     _offProductId,
     _photoPath,
@@ -237,6 +247,8 @@ class _InventoryItemFormScreenState
     _expirationDate = existing?.expirationDate;
     _expiryLeadDays = existing?.expiryLeadDays;
     _foodGroup = supplyGroupFromName(existing?.foodGroup);
+    _memberId = existing?.memberId;
+    _refillLeadDays = existing?.refillLeadDays;
     _barcode = existing?.barcode;
     _offProductId = existing?.offProductId;
     _photoPath = existing?.photoPath;
@@ -582,6 +594,12 @@ class _InventoryItemFormScreenState
           _category == InventoryItemCategory.medical && doseText.isNotEmpty
           ? double.parse(doseText)
           : null;
+      // Whose it is and the reminder belong to a medicine as well, and the
+      // reminder only to one with a dose: without one there is no end to
+      // count towards.
+      final medical = _category == InventoryItemCategory.medical;
+      final memberId = medical ? _memberId : null;
+      final refillLeadDays = dailyDose != null ? _refillLeadDays : null;
       final notes = _notesController.text.trim();
       final package = ItemPackage.from(
         _packageNameController.text,
@@ -607,6 +625,8 @@ class _InventoryItemFormScreenState
           offProductId: _offProductId,
           photoPath: _photoPath,
           nutrition: nutrition,
+          memberId: memberId,
+          refillLeadDays: refillLeadDays,
         );
       } else {
         await controller.addItem(
@@ -626,6 +646,8 @@ class _InventoryItemFormScreenState
           offProductId: _offProductId,
           photoPath: _photoPath,
           nutrition: nutrition,
+          memberId: memberId,
+          refillLeadDays: refillLeadDays,
         );
       }
 
@@ -1008,6 +1030,37 @@ class _InventoryItemFormScreenState
                           ),
                           validator: _numberValidator(l10n, required: false),
                         ),
+                        if (_dailyDoseController.text.trim().isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          DropdownButtonFormField<int?>(
+                            isExpanded: true,
+                            initialValue: _refillLeadDays,
+                            decoration: InputDecoration(
+                              labelText: l10n.refillLeadLabel,
+                              helperText: l10n.refillLeadHelper,
+                              helperMaxLines: 4,
+                            ),
+                            items: [
+                              DropdownMenuItem(
+                                value: null,
+                                child: Text(l10n.refillLeadNone),
+                              ),
+                              for (final days in refillLeadChoices)
+                                DropdownMenuItem(
+                                  value: days,
+                                  child: Text(l10n.refillLeadDays(days)),
+                                ),
+                            ],
+                            onChanged: (value) =>
+                                setState(() => _refillLeadDays = value),
+                          ),
+                        ],
+                        _MemberField(
+                          householdId: widget.householdId,
+                          memberId: _memberId,
+                          onChanged: (value) =>
+                              setState(() => _memberId = value),
+                        ),
                       ],
                       if (_category == InventoryItemCategory.food) ...[
                         const SizedBox(height: 24),
@@ -1162,6 +1215,58 @@ class _InventoryItemFormScreenState
 
 /// One of the four macronutrient fields, all of which are grams for the
 /// whole item and all of which may be left blank.
+/// The lead times offered for a prescription reminder (#150): the
+/// household's choice of how long a new prescription takes it, not a
+/// figure about the medicine.
+const refillLeadChoices = [7, 14, 21, 28];
+
+/// Whose medicine this is (#150), from the household's emergency cards.
+///
+/// Absent while the household has no cards: there is nobody to choose,
+/// and an empty list with a heading would only ask a question it cannot
+/// answer. A card deleted elsewhere leaves an id nobody here has, which
+/// reads as the household's own -- what it then is.
+class _MemberField extends ConsumerWidget {
+  const _MemberField({
+    required this.householdId,
+    required this.memberId,
+    required this.onChanged,
+  });
+
+  final String householdId;
+  final String? memberId;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final members =
+        ref.watch(householdMemberChoicesProvider(householdId)).value ??
+        const [];
+    if (members.isEmpty) return const SizedBox.shrink();
+    final known = members.any((member) => member.clientId == memberId);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: DropdownButtonFormField<String?>(
+        isExpanded: true,
+        initialValue: known ? memberId : null,
+        decoration: InputDecoration(
+          labelText: l10n.inventoryMemberLabel,
+          helperText: l10n.inventoryMemberHelper,
+          helperMaxLines: 2,
+        ),
+        items: [
+          DropdownMenuItem(value: null, child: Text(l10n.inventoryMemberNone)),
+          for (final member in members)
+            DropdownMenuItem(value: member.clientId, child: Text(member.name)),
+        ],
+        onChanged: onChanged,
+      ),
+    );
+  }
+}
+
 class _GramsField extends StatelessWidget {
   const _GramsField({
     required this.controller,

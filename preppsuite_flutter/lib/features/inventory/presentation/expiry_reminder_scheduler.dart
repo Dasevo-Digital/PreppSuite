@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
@@ -9,9 +10,11 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/expiry_reminder_planner.dart';
 import '../application/expiry_reminder_provider.dart';
 import '../application/inventory_providers.dart';
+import '../application/refill_reminder_planner.dart';
 
-/// Invisible widget that keeps the scheduled expiry reminders in step with
-/// the inventory and the user's settings.
+/// Invisible widget that keeps the scheduled expiry reminders -- and the
+/// prescription reminders beside them (#150) -- in step with the
+/// inventory and the user's settings.
 ///
 /// It is a widget rather than a provider because the notification text is
 /// localized, and [AppLocalizations] hangs off a [BuildContext]. Sitting in
@@ -68,13 +71,33 @@ class _ExpiryReminderSchedulerState
     // and scheduling an empty list is itself a full cancel.
     if (!enabled) {
       await NotificationService.instance.cancelExpiryReminders();
+      await NotificationService.instance.cancelRefillReminders();
       return;
     }
 
+    final now = DateTime.now();
+    // Planned first, and taken out of the expiry reminders' share of the
+    // 64 notifications iOS keeps: a household with a few medicines in
+    // daily use has a few of these, and each one matters more than the
+    // sixtieth jar of jam.
+    final refills = planRefillReminders(
+      items: items,
+      now: now,
+    ).take(maxScheduledExpiryReminders).toList();
+    await NotificationService.instance.scheduleRefillReminders(
+      refills,
+      title: l10n.refillReminderTitle,
+      body: (reminder) => l10n.refillReminderBody(
+        reminder.itemName,
+        DateFormat.yMMMd(l10n.localeName).format(reminder.runsOutOn),
+      ),
+    );
+
     final reminders = planExpiryReminders(
       items: items,
-      now: DateTime.now(),
+      now: now,
       leadDays: leadDays,
+      limit: maxScheduledExpiryReminders - refills.length,
     );
 
     await NotificationService.instance.scheduleExpiryReminders(

@@ -460,7 +460,9 @@ missing.** The package is the first column decoded that way, with
 package keys, including for a row it edited and wrote back, and reading
 that as null would strip the size somebody typed on a newer device. A
 newer device that clears a package writes the key with null, which does
-clear it. `device_snapshot_test` holds both halves.
+clear it. `device_snapshot_test` holds both halves. Schema 23's three columns on a
+medicine (`memberId`, `refillLeadDays`, `stockCountedAt`) follow the same
+rule, so an older device's edit cannot switch a prescription reminder off.
 
 **Where a public authority publishes the interpretation, the app uses
 theirs.** Three live feeds now show a bare number, and a bare number is
@@ -2449,6 +2451,39 @@ die App unsichtbar, und jedes Gerät meldet, es könne nicht sprechen.
 deutsche Stimme vorliegt, ist hier nicht festzustellen. Der Code ist so
 gebaut, dass die Antwort „nein" nichts kostet.
 
+
+### Ein Medikament ist Vorrat oder in Gebrauch, und das ändert die Rechnung
+
+Die Reichweite eines Medikaments war immer „Bestand durch Tagesdosis, ab
+heute“. Für einen Notvorrat stimmt das: Aus ihm wird nichts genommen, er
+reicht so viele Tage, wie Tabletten da sind, ab dem Tag, an dem er
+gebraucht wird. Für eine Packung in täglichem Gebrauch stimmt es nicht.
+Sie wird jeden Tag leerer, ob jemand abbucht oder nicht. Wer nicht
+abbucht, sah jeden Tag dieselbe Reichweite, und eine Erinnerung an ein
+neues Rezept, die von heute aus rechnet, rutschte bei jedem Öffnen der App
+einen Tag weiter nach hinten und kam nie (#150).
+
+Deshalb unterscheidet `medication_range.dart` die beiden, und der Haushalt
+sagt, welcher Fall vorliegt, indem er die Rezept-Erinnerung einschaltet
+(`refillLeadDays`). Nur dann zählt die Rechnung ab `stockCountedAt`, also
+ab dem Tag, an dem die Menge zuletzt eingetragen, auf eine neue Zahl
+geändert oder abgebucht wurde. Das ist bewusst nicht `updatedAt`: Ein
+umbenanntes Medikament ist nicht neu gezählt, und von der Umbenennung aus
+gerechnet sähe eine angebrochene Packung wieder voll aus. Zeilen von vor
+Schema 23 haben keine Zählung und rechnen ab `updatedAt`.
+
+Die Erinnerungen plant `refill_reminder_planner.dart`, rein und ohne Uhr
+wie die Ablauf-Erinnerungen, und sie gehen vom selben Kontingent ab: iOS
+hält höchstens 64 ausstehende Benachrichtigungen, und ein Rezept zählt mehr
+als das sechzigste Glas Marmelade. Die Vorlaufzeiten 7, 14, 21 und 28 Tage
+sind die Wahl des Haushalts, wie lange ein neues Rezept bei ihm dauert,
+keine Aussage über das Medikament.
+
+`memberId` ordnet ein Medikament einer Notfallkarte zu, ohne Fremdschlüssel.
+Eine Karte kann auf einem Gerät gelöscht werden, während die Zeile auf
+einem anderen bearbeitet wird; eine verwaiste Kennung liest sich als „für
+den ganzen Haushalt“. Die Karte zeigt den Vorrat neben der getippten
+„Dauermedikation“, nicht an ihrer Stelle.
 
 ### Markierbar ist jeder Bildschirm für sich
 

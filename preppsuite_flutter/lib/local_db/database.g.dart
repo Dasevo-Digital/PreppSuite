@@ -238,6 +238,40 @@ class $InventoryItemsTable extends InventoryItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _memberIdMeta = const VerificationMeta(
+    'memberId',
+  );
+  @override
+  late final GeneratedColumn<String> memberId = GeneratedColumn<String>(
+    'member_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _refillLeadDaysMeta = const VerificationMeta(
+    'refillLeadDays',
+  );
+  @override
+  late final GeneratedColumn<int> refillLeadDays = GeneratedColumn<int>(
+    'refill_lead_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stockCountedAtMeta = const VerificationMeta(
+    'stockCountedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> stockCountedAt =
+      GeneratedColumn<DateTime>(
+        'stock_counted_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -316,6 +350,9 @@ class $InventoryItemsTable extends InventoryItems
     packageName,
     packageSize,
     expiryLeadDays,
+    memberId,
+    refillLeadDays,
+    stockCountedAt,
     notes,
     photoPath,
     updatedAt,
@@ -504,6 +541,30 @@ class $InventoryItemsTable extends InventoryItems
         ),
       );
     }
+    if (data.containsKey('member_id')) {
+      context.handle(
+        _memberIdMeta,
+        memberId.isAcceptableOrUnknown(data['member_id']!, _memberIdMeta),
+      );
+    }
+    if (data.containsKey('refill_lead_days')) {
+      context.handle(
+        _refillLeadDaysMeta,
+        refillLeadDays.isAcceptableOrUnknown(
+          data['refill_lead_days']!,
+          _refillLeadDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('stock_counted_at')) {
+      context.handle(
+        _stockCountedAtMeta,
+        stockCountedAt.isAcceptableOrUnknown(
+          data['stock_counted_at']!,
+          _stockCountedAtMeta,
+        ),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -628,6 +689,18 @@ class $InventoryItemsTable extends InventoryItems
       expiryLeadDays: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}expiry_lead_days'],
+      ),
+      memberId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}member_id'],
+      ),
+      refillLeadDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}refill_lead_days'],
+      ),
+      stockCountedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}stock_counted_at'],
       ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -773,6 +846,38 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   /// round numbers the settings offer, and `decodeItemLeadDays` throws
   /// nothing away except what cannot be a day.
   final String? expiryLeadDays;
+
+  /// Whose medicine this is: the `clientId` of a household member, the
+  /// person an emergency card describes — or null, which is every
+  /// non-medicine and a medicine the whole household shares.
+  ///
+  /// Not a foreign key. A card can be deleted on one device while this
+  /// row is edited on another, and the shared folder has to merge both;
+  /// a dangling id reads as "nobody in particular", which is what it
+  /// then is (#150).
+  final String? memberId;
+
+  /// Days before this medicine runs out to remind the household of a new
+  /// prescription — or null for no reminder, which is also what marks a
+  /// stock that is not being taken from (#150).
+  ///
+  /// The two go together on purpose. A reserve kept for a crisis lasts
+  /// "as many days as there are tablets" from whenever the crisis
+  /// begins, so its reach is counted from today. A pack in daily use
+  /// shrinks every day whether anybody books it or not, so its end is a
+  /// date, counted from [stockCountedAt]; that date is what a reminder
+  /// can be set against. Asking for the reminder is the household saying
+  /// which of the two this is.
+  final int? refillLeadDays;
+
+  /// When [quantity] was last written by the household: entered, edited
+  /// to a new figure or booked down -- or null on a row from before
+  /// schema 23, which then counts from [updatedAt].
+  ///
+  /// Not [updatedAt] itself, which moves when anything on the row
+  /// changes. Renaming a medicine does not recount it, and a pack in
+  /// daily use counted from the rename would read as full again (#150).
+  final DateTime? stockCountedAt;
   final String? notes;
 
   /// Path to a locally-stored photo of the item (see
@@ -806,6 +911,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     this.packageName,
     this.packageSize,
     this.expiryLeadDays,
+    this.memberId,
+    this.refillLeadDays,
+    this.stockCountedAt,
     this.notes,
     this.photoPath,
     required this.updatedAt,
@@ -863,6 +971,15 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     }
     if (!nullToAbsent || expiryLeadDays != null) {
       map['expiry_lead_days'] = Variable<String>(expiryLeadDays);
+    }
+    if (!nullToAbsent || memberId != null) {
+      map['member_id'] = Variable<String>(memberId);
+    }
+    if (!nullToAbsent || refillLeadDays != null) {
+      map['refill_lead_days'] = Variable<int>(refillLeadDays);
+    }
+    if (!nullToAbsent || stockCountedAt != null) {
+      map['stock_counted_at'] = Variable<DateTime>(stockCountedAt);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -929,6 +1046,15 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       expiryLeadDays: expiryLeadDays == null && nullToAbsent
           ? const Value.absent()
           : Value(expiryLeadDays),
+      memberId: memberId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(memberId),
+      refillLeadDays: refillLeadDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(refillLeadDays),
+      stockCountedAt: stockCountedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stockCountedAt),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -972,6 +1098,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       packageName: serializer.fromJson<String?>(json['packageName']),
       packageSize: serializer.fromJson<double?>(json['packageSize']),
       expiryLeadDays: serializer.fromJson<String?>(json['expiryLeadDays']),
+      memberId: serializer.fromJson<String?>(json['memberId']),
+      refillLeadDays: serializer.fromJson<int?>(json['refillLeadDays']),
+      stockCountedAt: serializer.fromJson<DateTime?>(json['stockCountedAt']),
       notes: serializer.fromJson<String?>(json['notes']),
       photoPath: serializer.fromJson<String?>(json['photoPath']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -1004,6 +1133,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'packageName': serializer.toJson<String?>(packageName),
       'packageSize': serializer.toJson<double?>(packageSize),
       'expiryLeadDays': serializer.toJson<String?>(expiryLeadDays),
+      'memberId': serializer.toJson<String?>(memberId),
+      'refillLeadDays': serializer.toJson<int?>(refillLeadDays),
+      'stockCountedAt': serializer.toJson<DateTime?>(stockCountedAt),
       'notes': serializer.toJson<String?>(notes),
       'photoPath': serializer.toJson<String?>(photoPath),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -1034,6 +1166,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     Value<String?> packageName = const Value.absent(),
     Value<double?> packageSize = const Value.absent(),
     Value<String?> expiryLeadDays = const Value.absent(),
+    Value<String?> memberId = const Value.absent(),
+    Value<int?> refillLeadDays = const Value.absent(),
+    Value<DateTime?> stockCountedAt = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<String?> photoPath = const Value.absent(),
     DateTime? updatedAt,
@@ -1067,6 +1202,13 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     expiryLeadDays: expiryLeadDays.present
         ? expiryLeadDays.value
         : this.expiryLeadDays,
+    memberId: memberId.present ? memberId.value : this.memberId,
+    refillLeadDays: refillLeadDays.present
+        ? refillLeadDays.value
+        : this.refillLeadDays,
+    stockCountedAt: stockCountedAt.present
+        ? stockCountedAt.value
+        : this.stockCountedAt,
     notes: notes.present ? notes.value : this.notes,
     photoPath: photoPath.present ? photoPath.value : this.photoPath,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -1118,6 +1260,13 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       expiryLeadDays: data.expiryLeadDays.present
           ? data.expiryLeadDays.value
           : this.expiryLeadDays,
+      memberId: data.memberId.present ? data.memberId.value : this.memberId,
+      refillLeadDays: data.refillLeadDays.present
+          ? data.refillLeadDays.value
+          : this.refillLeadDays,
+      stockCountedAt: data.stockCountedAt.present
+          ? data.stockCountedAt.value
+          : this.stockCountedAt,
       notes: data.notes.present ? data.notes.value : this.notes,
       photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1150,6 +1299,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ..write('packageName: $packageName, ')
           ..write('packageSize: $packageSize, ')
           ..write('expiryLeadDays: $expiryLeadDays, ')
+          ..write('memberId: $memberId, ')
+          ..write('refillLeadDays: $refillLeadDays, ')
+          ..write('stockCountedAt: $stockCountedAt, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1182,6 +1334,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     packageName,
     packageSize,
     expiryLeadDays,
+    memberId,
+    refillLeadDays,
+    stockCountedAt,
     notes,
     photoPath,
     updatedAt,
@@ -1213,6 +1368,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           other.packageName == this.packageName &&
           other.packageSize == this.packageSize &&
           other.expiryLeadDays == this.expiryLeadDays &&
+          other.memberId == this.memberId &&
+          other.refillLeadDays == this.refillLeadDays &&
+          other.stockCountedAt == this.stockCountedAt &&
           other.notes == this.notes &&
           other.photoPath == this.photoPath &&
           other.updatedAt == this.updatedAt &&
@@ -1242,6 +1400,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<String?> packageName;
   final Value<double?> packageSize;
   final Value<String?> expiryLeadDays;
+  final Value<String?> memberId;
+  final Value<int?> refillLeadDays;
+  final Value<DateTime?> stockCountedAt;
   final Value<String?> notes;
   final Value<String?> photoPath;
   final Value<DateTime> updatedAt;
@@ -1270,6 +1431,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.packageName = const Value.absent(),
     this.packageSize = const Value.absent(),
     this.expiryLeadDays = const Value.absent(),
+    this.memberId = const Value.absent(),
+    this.refillLeadDays = const Value.absent(),
+    this.stockCountedAt = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1299,6 +1463,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.packageName = const Value.absent(),
     this.packageSize = const Value.absent(),
     this.expiryLeadDays = const Value.absent(),
+    this.memberId = const Value.absent(),
+    this.refillLeadDays = const Value.absent(),
+    this.stockCountedAt = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
     required DateTime updatedAt,
@@ -1335,6 +1502,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<String>? packageName,
     Expression<double>? packageSize,
     Expression<String>? expiryLeadDays,
+    Expression<String>? memberId,
+    Expression<int>? refillLeadDays,
+    Expression<DateTime>? stockCountedAt,
     Expression<String>? notes,
     Expression<String>? photoPath,
     Expression<DateTime>? updatedAt,
@@ -1364,6 +1534,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       if (packageName != null) 'package_name': packageName,
       if (packageSize != null) 'package_size': packageSize,
       if (expiryLeadDays != null) 'expiry_lead_days': expiryLeadDays,
+      if (memberId != null) 'member_id': memberId,
+      if (refillLeadDays != null) 'refill_lead_days': refillLeadDays,
+      if (stockCountedAt != null) 'stock_counted_at': stockCountedAt,
       if (notes != null) 'notes': notes,
       if (photoPath != null) 'photo_path': photoPath,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1395,6 +1568,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Value<String?>? packageName,
     Value<double?>? packageSize,
     Value<String?>? expiryLeadDays,
+    Value<String?>? memberId,
+    Value<int?>? refillLeadDays,
+    Value<DateTime?>? stockCountedAt,
     Value<String?>? notes,
     Value<String?>? photoPath,
     Value<DateTime>? updatedAt,
@@ -1424,6 +1600,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       packageName: packageName ?? this.packageName,
       packageSize: packageSize ?? this.packageSize,
       expiryLeadDays: expiryLeadDays ?? this.expiryLeadDays,
+      memberId: memberId ?? this.memberId,
+      refillLeadDays: refillLeadDays ?? this.refillLeadDays,
+      stockCountedAt: stockCountedAt ?? this.stockCountedAt,
       notes: notes ?? this.notes,
       photoPath: photoPath ?? this.photoPath,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1499,6 +1678,15 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     if (expiryLeadDays.present) {
       map['expiry_lead_days'] = Variable<String>(expiryLeadDays.value);
     }
+    if (memberId.present) {
+      map['member_id'] = Variable<String>(memberId.value);
+    }
+    if (refillLeadDays.present) {
+      map['refill_lead_days'] = Variable<int>(refillLeadDays.value);
+    }
+    if (stockCountedAt.present) {
+      map['stock_counted_at'] = Variable<DateTime>(stockCountedAt.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -1544,6 +1732,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
           ..write('packageName: $packageName, ')
           ..write('packageSize: $packageSize, ')
           ..write('expiryLeadDays: $expiryLeadDays, ')
+          ..write('memberId: $memberId, ')
+          ..write('refillLeadDays: $refillLeadDays, ')
+          ..write('stockCountedAt: $stockCountedAt, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
           ..write('updatedAt: $updatedAt, ')

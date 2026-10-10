@@ -123,6 +123,38 @@ class InventoryItems extends Table {
   /// nothing away except what cannot be a day.
   TextColumn get expiryLeadDays => text().nullable()();
 
+  /// Whose medicine this is: the `clientId` of a household member, the
+  /// person an emergency card describes — or null, which is every
+  /// non-medicine and a medicine the whole household shares.
+  ///
+  /// Not a foreign key. A card can be deleted on one device while this
+  /// row is edited on another, and the shared folder has to merge both;
+  /// a dangling id reads as "nobody in particular", which is what it
+  /// then is (#150).
+  TextColumn get memberId => text().nullable()();
+
+  /// Days before this medicine runs out to remind the household of a new
+  /// prescription — or null for no reminder, which is also what marks a
+  /// stock that is not being taken from (#150).
+  ///
+  /// The two go together on purpose. A reserve kept for a crisis lasts
+  /// "as many days as there are tablets" from whenever the crisis
+  /// begins, so its reach is counted from today. A pack in daily use
+  /// shrinks every day whether anybody books it or not, so its end is a
+  /// date, counted from [stockCountedAt]; that date is what a reminder
+  /// can be set against. Asking for the reminder is the household saying
+  /// which of the two this is.
+  IntColumn get refillLeadDays => integer().nullable()();
+
+  /// When [quantity] was last written by the household: entered, edited
+  /// to a new figure or booked down -- or null on a row from before
+  /// schema 23, which then counts from [updatedAt].
+  ///
+  /// Not [updatedAt] itself, which moves when anything on the row
+  /// changes. Renaming a medicine does not recount it, and a pack in
+  /// daily use counted from the rename would read as full again (#150).
+  DateTimeColumn get stockCountedAt => dateTime().nullable()();
+
   TextColumn get notes => text().nullable()();
 
   /// Path to a locally-stored photo of the item (see

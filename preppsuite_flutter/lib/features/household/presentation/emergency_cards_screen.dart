@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import '../../../core/feel.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../../sharing/presentation/folder_encryption_section.dart';
+import '../../inventory/application/inventory_providers.dart';
+import '../../inventory/application/medication_range.dart';
+import '../../../model/categories.dart';
 import '../application/card_people.dart';
 import '../application/household_member_controller.dart';
 import 'emergency_card_form_screen.dart';
@@ -145,6 +149,8 @@ class _MemberCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final items =
+        ref.watch(inventoryItemsProvider(householdId)).value ?? const [];
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -195,7 +201,7 @@ class _MemberCard extends ConsumerWidget {
               ],
             ),
           ),
-          for (final line in _lines())
+          for (final line in _lines(_stored(items)))
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
@@ -227,9 +233,46 @@ class _MemberCard extends ConsumerWidget {
     );
   }
 
+  /// The medicines in the stores that are this person's (#150), each with
+  /// how long it lasts where a daily dose says so, and the stock where it
+  /// does not. Null when there are none.
+  ///
+  /// Beside the typed "Dauermedikation", not instead of it: the card says
+  /// what is taken, this says whether there is enough of it in the house.
+  String? _stored(List<InventoryItem> items) {
+    final mine = [
+      for (final item in items)
+        if (item.memberId == member.clientId &&
+            item.deletedAt == null &&
+            InventoryItemCategory.fromName(item.category) ==
+                InventoryItemCategory.medical)
+          item,
+    ];
+    if (mine.isEmpty) return null;
+    final ranges = {
+      for (final range in medicationRanges(mine)) range.item.clientId: range,
+    };
+    String days(int count) => switch (count) {
+      0 => l10n.medicationZeroDays,
+      1 => l10n.medicationOneDay,
+      _ => l10n.medicationDays(count),
+    };
+    return [
+      for (final item in mine)
+        if (ranges[item.clientId] case final range?)
+          l10n.emergencyCardStoredReach(item.name, days(range.wholeDays))
+        else
+          '${item.name}: ${_amount(item.quantity)} ${item.unit}'.trim(),
+    ].join('\n');
+  }
+
+  String _amount(double value) => NumberFormat.decimalPattern(
+    l10n.localeName,
+  ).format(double.parse(value.toStringAsFixed(2)));
+
   /// Only the fields that were filled in. An empty row would read as
   /// "no allergies" when it means "nobody said".
-  List<_CardLine> _lines() => [
+  List<_CardLine> _lines(String? stored) => [
     if (member.bloodType != null)
       (
         label: l10n.emergencyCardBloodType,
@@ -248,6 +291,8 @@ class _MemberCard extends ConsumerWidget {
         value: member.medication!,
         phone: null,
       ),
+    if (stored != null)
+      (label: l10n.emergencyCardStored, value: stored, phone: null),
     if (member.conditions != null)
       (
         label: l10n.emergencyCardConditions,

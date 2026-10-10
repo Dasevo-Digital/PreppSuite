@@ -6,6 +6,7 @@ import '../model/categories.dart' show WarningSeverity;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../features/inventory/application/expiry_reminder_planner.dart';
+import '../features/inventory/application/refill_reminder_planner.dart';
 import 'notification_capabilities.dart';
 
 /// How insistently a warning may interrupt on iOS (#101).
@@ -158,6 +159,7 @@ class NotificationService {
   /// [scheduleExpiryReminders] can clear exactly its own pending ones and
   /// leave anything else (warnings) alone.
   static const _expiryPayloadPrefix = 'expiry:';
+  static const _refillPayloadPrefix = 'refill:';
   static const _chargeReminderId = 90407;
   static const _warningDayId = 90408;
   static const _backupReminderId = 90409;
@@ -224,6 +226,54 @@ class NotificationService {
     final pending = await _plugin.pendingNotificationRequests();
     for (final request in pending) {
       if (request.payload?.startsWith(_expiryPayloadPrefix) ?? false) {
+        await _plugin.cancel(id: request.id);
+      }
+    }
+  }
+
+  /// Replaces all pending prescription reminders with [reminders] (#150).
+  /// Wholesale, like [scheduleExpiryReminders], and for the same reason.
+  Future<void> scheduleRefillReminders(
+    List<RefillReminder> reminders, {
+    required String title,
+    required String Function(RefillReminder) body,
+  }) async {
+    if (!supportsScheduledNotifications) return;
+
+    await _ensureInitialized();
+    await cancelRefillReminders();
+
+    for (final reminder in reminders) {
+      await _plugin.zonedSchedule(
+        id: reminder.id,
+        title: title,
+        body: body(reminder),
+        payload: '$_refillPayloadPrefix${reminder.itemClientId}',
+        // Local wall-clock time to UTC; see [scheduleExpiryReminders].
+        scheduledDate: tz.TZDateTime.from(reminder.fireAt.toUtc(), tz.UTC),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        notificationDetails: const NotificationDetails(
+          macOS: DarwinNotificationDetails(),
+          iOS: DarwinNotificationDetails(),
+          android: AndroidNotificationDetails(
+            'refill',
+            'Rezepte',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Cancels every pending prescription reminder, by payload.
+  Future<void> cancelRefillReminders() async {
+    if (!supportsScheduledNotifications) return;
+
+    await _ensureInitialized();
+    final pending = await _plugin.pendingNotificationRequests();
+    for (final request in pending) {
+      if (request.payload?.startsWith(_refillPayloadPrefix) ?? false) {
         await _plugin.cancel(id: request.id);
       }
     }

@@ -13,6 +13,9 @@ void main() {
     double? dailyDose,
     String unit = 'Tablette',
     InventoryItemCategory category = InventoryItemCategory.medical,
+    int? refillLeadDays,
+    DateTime? stockCountedAt,
+    DateTime? updatedAt,
   }) => InventoryItem(
     clientId: name,
     householdId: 'household-1',
@@ -22,7 +25,9 @@ void main() {
     unit: unit,
     storageLocation: 'Hausapotheke',
     dailyDose: dailyDose,
-    updatedAt: DateTime.utc(2026, 9, 14),
+    refillLeadDays: refillLeadDays,
+    stockCountedAt: stockCountedAt,
+    updatedAt: updatedAt ?? DateTime.utc(2026, 9, 14),
     dirty: false,
   );
 
@@ -137,6 +142,102 @@ void main() {
         range.runsOutOn(DateTime(2026, 9, 14, 0, 1)),
         range.runsOutOn(DateTime(2026, 9, 14, 23, 59)),
       );
+    });
+  });
+
+  group('a pack in daily use (#150)', () {
+    // Counted on 1 October at noon: 60 tablets at two a day is 30 days.
+    final counted = DateTime(2026, 10, 1, 12);
+    final tenDaysOn = DateTime(2026, 10, 11, 8);
+
+    test('is counted down from the day it was counted', () {
+      final range = medicationRanges([
+        item(
+          name: 'Ramipril',
+          quantity: 60,
+          dailyDose: 2,
+          refillLeadDays: 14,
+          stockCountedAt: counted,
+        ),
+      ], now: tenDaysOn).single;
+
+      expect(range.inDailyUse, isTrue);
+      expect(range.wholeDays, 20);
+      expect(range.days, 20);
+      expect(range.runsOutOn(tenDaysOn), DateTime(2026, 10, 31));
+      expect(range.refillOn, DateTime(2026, 10, 17));
+    });
+
+    test('ends on the same date whichever day it is asked on', () {
+      // The point of counting from a date: opening the app every day
+      // without booking anything must not push the end, and with it the
+      // reminder, a day further out each time.
+      List<DateTime> ends() => [
+        for (final day in [1, 5, 20])
+          medicationRanges(
+            [
+              item(
+                name: 'Ramipril',
+                quantity: 60,
+                dailyDose: 2,
+                refillLeadDays: 14,
+                stockCountedAt: counted,
+              ),
+            ],
+            now: DateTime(2026, 10, day, 9),
+          ).single.runsOutOn(DateTime(2026, 10, day, 9)),
+      ];
+
+      expect(ends().toSet(), {DateTime(2026, 10, 31)});
+    });
+
+    test('a reserve beside it is still counted from today', () {
+      final range = medicationRanges([
+        item(
+          name: 'Notvorrat Ramipril',
+          quantity: 60,
+          dailyDose: 2,
+          stockCountedAt: counted,
+        ),
+      ], now: tenDaysOn).single;
+
+      expect(range.inDailyUse, isFalse);
+      expect(range.wholeDays, 30);
+      expect(range.refillOn, isNull);
+      expect(range.runsOutOn(tenDaysOn), DateTime(2026, 11, 10));
+    });
+
+    test('counts from its last change where no count was recorded', () {
+      final range = medicationRanges([
+        item(
+          name: 'Ramipril',
+          quantity: 30,
+          dailyDose: 1,
+          refillLeadDays: 7,
+          updatedAt: DateTime.utc(2026, 10, 1, 10),
+        ),
+      ], now: tenDaysOn).single;
+
+      expect(range.wholeDays, 20);
+    });
+
+    test('stays in at zero once the arithmetic says it is empty', () {
+      // Either it has run out or its count is stale; both want a look,
+      // and leaving it out would read as "nothing to worry about".
+      final ranges = medicationRanges([
+        item(
+          name: 'Ramipril',
+          quantity: 10,
+          dailyDose: 1,
+          refillLeadDays: 7,
+          stockCountedAt: counted,
+        ),
+        item(name: 'Ibuprofen', quantity: 20, dailyDose: 1),
+      ], now: tenDaysOn);
+
+      expect(ranges.first.item.name, 'Ramipril');
+      expect(ranges.first.wholeDays, 0);
+      expect(firstToRunOut(ranges)!.item.name, 'Ramipril');
     });
   });
 }

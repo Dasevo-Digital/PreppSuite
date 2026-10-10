@@ -8718,4 +8718,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shoppingListExported => 'Shopping list saved as a file.';
+
+  @override
+  String get refillReminderTitle => 'Get a new prescription';
+
+  @override
+  String refillReminderBody(String name, String date) {
+    return 'By your last count, $name lasts until $date.';
+  }
+
+  @override
+  String get inventoryMemberLabel => 'For whom';
+
+  @override
+  String get inventoryMemberHelper =>
+      'It then shows on that person’s emergency card, with how long it lasts.';
+
+  @override
+  String get inventoryMemberNone => 'For the whole household';
+
+  @override
+  String get refillLeadLabel => 'Reminder for a new prescription';
+
+  @override
+  String get refillLeadHelper =>
+      'For a pack that is taken from every day. The app then counts from the day you last entered or booked the stock, and reminds you before it runs out.';
+
+  @override
+  String get refillLeadNone => 'None: a reserve nobody takes from';
+
+  @override
+  String refillLeadDays(int days) {
+    return '$days days before it runs out';
+  }
+
+  @override
+  String get emergencyCardStored => 'In the stores';
+
+  @override
+  String emergencyCardStoredReach(String name, String days) {
+    return '$name: $days';
+  }
+
+  @override
+  String medicationInUse(String date) {
+    return 'In daily use, counted on $date';
+  }
+
+  @override
+  String medicationRefillOn(String date) {
+    return 'Reminder for a new prescription on $date';
+  }
+
+  @override
+  String get medicationRefillDue => 'Time for a new prescription';
 }

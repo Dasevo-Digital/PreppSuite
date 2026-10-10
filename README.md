@@ -407,7 +407,13 @@ keine. Die Uhr läuft über einen Neustart hinweg weiter.
 **Medikamente.** Dieselbe Reichweitenrechnung wie bei Vorräten und
 Brennstoff: Bestand geteilt durch Tagesverbrauch, mit dem, was zuerst
 leer ist, ganz oben. Die Dosis kommt von der Packung; Medikamente ohne
-Tagesverbrauch werden genannt statt stillschweigend übergangen.
+Tagesverbrauch werden genannt statt stillschweigend übergangen. Ein
+Medikament lässt sich einer Person zuordnen und steht dann mit seiner
+Reichweite auf ihrer Notfallkarte. Für eine Packung, aus der täglich
+genommen wird, erinnert die App auf Wunsch 7 bis 28 Tage vor dem Ende an
+ein neues Rezept; sie zählt dann ab dem Tag, an dem der Bestand zuletzt
+eingetragen oder abgebucht wurde. Ein Notvorrat, aus dem nichts genommen
+wird, zählt weiter ab heute.
 
 **Hausratverzeichnis.** Was der Haushalt besitzt – Gegenstand, Raum,
 Seriennummer, Kaufdatum, Preis, Foto –, gruppiert nach Raum und mit

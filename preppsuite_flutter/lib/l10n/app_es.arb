@@ -2394,5 +2394,19 @@
   "appLockBiometricNotConfirmed": "No se confirmó la cara o la huella. El ajuste sigue desactivado.",
   "shoppingListExport": "Exportar como archivo",
   "shoppingListExportDialogTitle": "Guardar la lista de la compra como archivo",
-  "shoppingListExported": "Lista de la compra guardada como archivo."
+  "shoppingListExported": "Lista de la compra guardada como archivo.",
+  "refillReminderTitle": "Conseguir una nueva receta",
+  "refillReminderBody": "Según tu último recuento, {name} dura hasta el {date}.",
+  "inventoryMemberLabel": "Para quién",
+  "inventoryMemberHelper": "Aparece entonces en la tarjeta de emergencia de esa persona, con cuánto dura.",
+  "inventoryMemberNone": "Para todo el hogar",
+  "refillLeadLabel": "Recordatorio de una nueva receta",
+  "refillLeadHelper": "Para un envase del que se toma cada día. La app cuenta entonces desde el día en que anotaste o descontaste las existencias por última vez y te avisa antes de que se acaben.",
+  "refillLeadNone": "Ninguno: una reserva de la que no se toma",
+  "refillLeadDays": "{days} días antes de que se acabe",
+  "emergencyCardStored": "En la reserva",
+  "emergencyCardStoredReach": "{name}: {days}",
+  "medicationInUse": "En uso diario, contado el {date}",
+  "medicationRefillOn": "Recordatorio de nueva receta el {date}",
+  "medicationRefillDue": "Es hora de una nueva receta"
 }

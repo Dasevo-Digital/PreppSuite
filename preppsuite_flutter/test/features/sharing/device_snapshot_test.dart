@@ -119,6 +119,72 @@ void main() {
       });
     });
 
+    group('whose medicine, its reminder and its count (#150)', () {
+      final counted = DateTime.utc(2026, 10, 1);
+
+      InventoryItem pills({
+        String? memberId = 'member-1',
+        int? refillLeadDays = 14,
+        DateTime? stockCountedAt,
+      }) => InventoryItem(
+        clientId: 'pills',
+        householdId: 'household-1',
+        name: 'Ramipril 5 mg',
+        category: 'medical',
+        quantity: 60,
+        unit: 'Tabletten',
+        storageLocation: 'Bad',
+        dailyDose: 1,
+        memberId: memberId,
+        refillLeadDays: refillLeadDays,
+        stockCountedAt: stockCountedAt ?? counted,
+        updatedAt: DateTime.utc(2026, 10, 2),
+        dirty: true,
+      );
+
+      test('travel between devices', () {
+        final companion = decodeInventoryItem(encodeInventoryItem(pills()))!;
+
+        expect(companion.memberId.value, 'member-1');
+        expect(companion.refillLeadDays.value, 14);
+        expect(companion.stockCountedAt.value, counted);
+      });
+
+      test('a reminder switched off is written as off', () {
+        final json = encodeInventoryItem(pills(refillLeadDays: null));
+        final companion = decodeInventoryItem(json)!;
+
+        expect(json.containsKey('refillLeadDays'), isTrue);
+        expect(companion.refillLeadDays, const Value<int?>(null));
+      });
+
+      // An app before schema 23 writes none of the three, also for a row
+      // it edited and wrote back. Read as null, that edit would switch a
+      // reminder off and forget whose medicine it is.
+      test('an older device leaves them alone', () async {
+        final db = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(db.close);
+        await db.upsertInventoryItem(pills().toCompanion(false));
+
+        final fromOlder = Map.of(encodeInventoryItem(pills()))
+          ..remove('memberId')
+          ..remove('refillLeadDays')
+          ..remove('stockCountedAt')
+          ..['notes'] = 'Morgens'
+          ..['updatedAt'] = '2026-10-05T00:00:00.000Z';
+        final companion = decodeInventoryItem(fromOlder)!;
+        expect(companion.refillLeadDays.present, isFalse);
+        await db.into(db.inventoryItems).insertOnConflictUpdate(companion);
+
+        final stored =
+            (await db.watchInventoryItems('household-1').first).single;
+        expect(stored.notes, 'Morgens');
+        expect(stored.memberId, 'member-1');
+        expect(stored.refillLeadDays, 14);
+        expect(stored.stockCountedAt?.toUtc(), counted);
+      });
+    });
+
     test('a row that arrived from elsewhere is not marked for publishing', () {
       // Otherwise every device would republish everything it received on
       // the next run, forever, and the folder would never go quiet.

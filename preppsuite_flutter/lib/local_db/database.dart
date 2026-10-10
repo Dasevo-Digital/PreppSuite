@@ -32,7 +32,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 22;
+  static const currentSchemaVersion = 23;
 
   AppDatabase() : super(_openConnection()) {
     OpenDatabases.track(this);
@@ -231,6 +231,9 @@ class AppDatabase extends _$AppDatabase {
               inventoryItems.foodGroup,
               inventoryItems.packageName,
               inventoryItems.packageSize,
+              inventoryItems.memberId,
+              inventoryItems.refillLeadDays,
+              inventoryItems.stockCountedAt,
             ],
           ),
         );
@@ -373,6 +376,9 @@ class AppDatabase extends _$AppDatabase {
                 inventoryItems.foodGroup,
                 inventoryItems.packageName,
                 inventoryItems.packageSize,
+                inventoryItems.memberId,
+                inventoryItems.refillLeadDays,
+                inventoryItems.stockCountedAt,
               ],
             ),
           );
@@ -533,6 +539,31 @@ class AppDatabase extends _$AppDatabase {
           }
         }
       }
+      if (from < 23) {
+        // A medicine may now name whose it is, ask for a reminder before
+        // it runs out, and remember when it was last counted (#150). Null
+        // everywhere after the upgrade, and each null is a real answer:
+        // nobody in particular, no reminder, count from `updated_at`.
+        //
+        // After the indexes above rather than before them: adding a
+        // column leaves a table's indexes where they are, so nothing
+        // here undoes that branch.
+        if (!await _hasTable('inventory_items')) {
+          await m.createTable(inventoryItems);
+        } else {
+          await _addColumnOnce(m, inventoryItems, inventoryItems.memberId);
+          await _addColumnOnce(
+            m,
+            inventoryItems,
+            inventoryItems.refillLeadDays,
+          );
+          await _addColumnOnce(
+            m,
+            inventoryItems,
+            inventoryItems.stockCountedAt,
+          );
+        }
+      }
     },
   );
 
@@ -579,17 +610,20 @@ class AppDatabase extends _$AppDatabase {
   // --- Household members ------------------------------------------------
 
   /// The household's people, in the order they were put in.
-  Stream<List<HouseholdMember>> watchHouseholdMembers(String householdId) {
-    return (select(householdMembers)
-          ..where(
-            (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
-          )
-          ..orderBy([
-            (t) => OrderingTerm.asc(t.sortOrder),
-            (t) => OrderingTerm.asc(t.name),
-          ]))
-        .watch();
-  }
+  Stream<List<HouseholdMember>> watchHouseholdMembers(String householdId) =>
+      _householdMembersQuery(householdId).watch();
+
+  /// The same cards once, for a form that only offers them as choices.
+  Future<List<HouseholdMember>> householdMembersOnce(String householdId) =>
+      _householdMembersQuery(householdId).get();
+
+  SimpleSelectStatement<$HouseholdMembersTable, HouseholdMember>
+  _householdMembersQuery(String householdId) => select(householdMembers)
+    ..where((t) => t.householdId.equals(householdId) & t.deletedAt.isNull())
+    ..orderBy([
+      (t) => OrderingTerm.asc(t.sortOrder),
+      (t) => OrderingTerm.asc(t.name),
+    ]);
 
   Future<void> upsertHouseholdMember(HouseholdMembersCompanion member) {
     return _writeLocal(

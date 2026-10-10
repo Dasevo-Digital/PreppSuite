@@ -3616,5 +3616,19 @@
   "appLockBiometricNotConfirmed": "Gesicht oder Fingerabdruck wurde nicht bestätigt. Die Einstellung bleibt aus.",
   "shoppingListExport": "Als Datei exportieren",
   "shoppingListExportDialogTitle": "Einkaufsliste als Datei sichern",
-  "shoppingListExported": "Einkaufsliste als Datei gesichert."
+  "shoppingListExported": "Einkaufsliste als Datei gesichert.",
+  "refillReminderTitle": "Neues Rezept besorgen",
+  "refillReminderBody": "{name} reicht nach deiner letzten Zählung bis {date}.",
+  "inventoryMemberLabel": "Für wen",
+  "inventoryMemberHelper": "Steht dann auf der Notfallkarte dieser Person, mit seiner Reichweite.",
+  "inventoryMemberNone": "Für den ganzen Haushalt",
+  "refillLeadLabel": "Erinnerung an ein neues Rezept",
+  "refillLeadHelper": "Für eine Packung, aus der täglich genommen wird. Die App zählt dann ab dem Tag, an dem du den Bestand zuletzt eingetragen oder abgebucht hast, und erinnert vor dem Ende.",
+  "refillLeadNone": "Keine: ein Vorrat, aus dem nicht genommen wird",
+  "refillLeadDays": "{days} Tage vor dem Ende",
+  "emergencyCardStored": "Im Vorrat",
+  "emergencyCardStoredReach": "{name}: {days}",
+  "medicationInUse": "In täglichem Gebrauch, gezählt am {date}",
+  "medicationRefillOn": "Erinnerung an ein neues Rezept am {date}",
+  "medicationRefillDue": "Zeit für ein neues Rezept"
 }

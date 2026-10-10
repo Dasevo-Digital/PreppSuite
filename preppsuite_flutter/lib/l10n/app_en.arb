@@ -5053,5 +5053,60 @@
   "appLockBiometricNotConfirmed": "Face or fingerprint was not confirmed. The setting stays off.",
   "shoppingListExport": "Export as a file",
   "shoppingListExportDialogTitle": "Save the shopping list as a file",
-  "shoppingListExported": "Shopping list saved as a file."
+  "shoppingListExported": "Shopping list saved as a file.",
+  "refillReminderTitle": "Get a new prescription",
+  "refillReminderBody": "By your last count, {name} lasts until {date}.",
+  "@refillReminderBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inventoryMemberLabel": "For whom",
+  "inventoryMemberHelper": "It then shows on that person’s emergency card, with how long it lasts.",
+  "inventoryMemberNone": "For the whole household",
+  "refillLeadLabel": "Reminder for a new prescription",
+  "refillLeadHelper": "For a pack that is taken from every day. The app then counts from the day you last entered or booked the stock, and reminds you before it runs out.",
+  "refillLeadNone": "None: a reserve nobody takes from",
+  "refillLeadDays": "{days} days before it runs out",
+  "@refillLeadDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "emergencyCardStored": "In the stores",
+  "emergencyCardStoredReach": "{name}: {days}",
+  "@emergencyCardStoredReach": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "days": {
+        "type": "String"
+      }
+    }
+  },
+  "medicationInUse": "In daily use, counted on {date}",
+  "@medicationInUse": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "medicationRefillOn": "Reminder for a new prescription on {date}",
+  "@medicationRefillOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "medicationRefillDue": "Time for a new prescription"
 }

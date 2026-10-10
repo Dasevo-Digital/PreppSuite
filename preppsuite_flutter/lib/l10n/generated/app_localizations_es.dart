@@ -8794,4 +8794,58 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get shoppingListExported =>
       'Lista de la compra guardada como archivo.';
+
+  @override
+  String get refillReminderTitle => 'Conseguir una nueva receta';
+
+  @override
+  String refillReminderBody(String name, String date) {
+    return 'Según tu último recuento, $name dura hasta el $date.';
+  }
+
+  @override
+  String get inventoryMemberLabel => 'Para quién';
+
+  @override
+  String get inventoryMemberHelper =>
+      'Aparece entonces en la tarjeta de emergencia de esa persona, con cuánto dura.';
+
+  @override
+  String get inventoryMemberNone => 'Para todo el hogar';
+
+  @override
+  String get refillLeadLabel => 'Recordatorio de una nueva receta';
+
+  @override
+  String get refillLeadHelper =>
+      'Para un envase del que se toma cada día. La app cuenta entonces desde el día en que anotaste o descontaste las existencias por última vez y te avisa antes de que se acaben.';
+
+  @override
+  String get refillLeadNone => 'Ninguno: una reserva de la que no se toma';
+
+  @override
+  String refillLeadDays(int days) {
+    return '$days días antes de que se acabe';
+  }
+
+  @override
+  String get emergencyCardStored => 'En la reserva';
+
+  @override
+  String emergencyCardStoredReach(String name, String days) {
+    return '$name: $days';
+  }
+
+  @override
+  String medicationInUse(String date) {
+    return 'En uso diario, contado el $date';
+  }
+
+  @override
+  String medicationRefillOn(String date) {
+    return 'Recordatorio de nueva receta el $date';
+  }
+
+  @override
+  String get medicationRefillDue => 'Es hora de una nueva receta';
 }

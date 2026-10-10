@@ -46,7 +46,15 @@ class InventoryController {
     /// The package the item comes in, or null; see `item_package.dart`.
     ItemPackage? package,
     PackageNutrition nutrition = const PackageNutrition(),
+
+    /// Whose medicine this is, as a household member's `clientId`.
+    String? memberId,
+
+    /// Days before a medicine in daily use runs out to remind of a new
+    /// prescription, or null for none; see the column.
+    int? refillLeadDays,
   }) async {
+    final now = DateTime.now().toUtc();
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
         clientId: const Uuid().v4(),
@@ -63,6 +71,9 @@ class InventoryController {
         foodGroup: Value(foodGroup),
         packageName: Value(package?.name),
         packageSize: Value(package?.size),
+        memberId: Value(memberId),
+        refillLeadDays: Value(refillLeadDays),
+        stockCountedAt: Value(now),
         notes: Value(notes),
         barcode: Value(barcode),
         offProductId: Value(offProductId),
@@ -72,7 +83,7 @@ class InventoryController {
         carbohydrateGrams: Value(nutrition.carbohydrateGrams),
         fatGrams: Value(nutrition.fatGrams),
         fiberGrams: Value(nutrition.fiberGrams),
-        updatedAt: DateTime.now().toUtc(),
+        updatedAt: now,
         dirty: const Value(true),
       ),
     );
@@ -102,7 +113,19 @@ class InventoryController {
     /// The package the item comes in, or null; see `item_package.dart`.
     ItemPackage? package,
     PackageNutrition nutrition = const PackageNutrition(),
+
+    /// Whose medicine this is, as a household member's `clientId`.
+    String? memberId,
+
+    /// Days before a medicine in daily use runs out to remind of a new
+    /// prescription, or null for none; see the column.
+    int? refillLeadDays,
   }) async {
+    final now = DateTime.now().toUtc();
+    // A new figure is a new count. Anything else on the row -- a name, a
+    // shelf, a note -- leaves the count where it was: a pack in daily use
+    // counted from a rename would read as full again (#150).
+    final recounted = quantity != existing.quantity;
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
         clientId: existing.clientId,
@@ -121,6 +144,9 @@ class InventoryController {
         foodGroup: Value(foodGroup),
         packageName: Value(package?.name),
         packageSize: Value(package?.size),
+        memberId: Value(memberId),
+        refillLeadDays: Value(refillLeadDays),
+        stockCountedAt: recounted ? Value(now) : const Value.absent(),
         notes: Value(notes),
         photoPath: Value(photoPath),
         calories: Value(nutrition.kcal),
@@ -128,7 +154,7 @@ class InventoryController {
         carbohydrateGrams: Value(nutrition.carbohydrateGrams),
         fatGrams: Value(nutrition.fatGrams),
         fiberGrams: Value(nutrition.fiberGrams),
-        updatedAt: DateTime.now().toUtc(),
+        updatedAt: now,
         dirty: const Value(true),
       ),
     );
@@ -151,6 +177,7 @@ class InventoryController {
           expirationDate: Value(row.expirationDate),
           minQuantity: Value(row.minQuantity),
           notes: Value(row.notes),
+          stockCountedAt: Value(DateTime.now().toUtc()),
           updatedAt: DateTime.now().toUtc(),
           dirty: const Value(true),
         ),
@@ -191,6 +218,8 @@ class InventoryController {
         carbohydrateGrams: Value(existing.carbohydrateGrams),
         fatGrams: Value(existing.fatGrams),
         fiberGrams: Value(existing.fiberGrams),
+        // Booking down is counting: what is left is now known (#150).
+        stockCountedAt: Value(DateTime.now().toUtc()),
         updatedAt: DateTime.now().toUtc(),
         dirty: const Value(true),
       ),

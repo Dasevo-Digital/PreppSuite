@@ -353,4 +353,101 @@ void main() {
       );
     });
   });
+
+  /// A pack in daily use is counted down from the day it was last counted
+  /// (#150), so what counts as a count decides when it runs out.
+  group('the count of a medicine', () {
+    Future<void> addPills() => controller.addItem(
+      name: 'Ramipril',
+      category: InventoryItemCategory.medical,
+      quantity: 60,
+      unit: 'Tabletten',
+      storageLocation: 'Bad',
+      dailyDose: 2,
+      memberId: 'member-1',
+      refillLeadDays: 14,
+    );
+
+    test('is taken when the medicine is entered', () async {
+      final before = DateTime.now().toUtc();
+      await addPills();
+
+      final item = await storedItem();
+      expect(item.memberId, 'member-1');
+      expect(item.refillLeadDays, 14);
+      expect(
+        item.stockCountedAt!.isBefore(
+          before.subtract(const Duration(seconds: 1)),
+        ),
+        isFalse,
+      );
+    });
+
+    test('stays where it was when only the name changes', () async {
+      await addPills();
+      final item = await storedItem();
+      final counted = DateTime.utc(2026, 9, 1);
+      await db.upsertInventoryItem(
+        item.toCompanion(false).copyWith(stockCountedAt: Value(counted)),
+      );
+
+      await controller.updateItem(
+        await storedItem(),
+        name: 'Ramipril 5 mg',
+        category: InventoryItemCategory.medical,
+        quantity: 60,
+        unit: 'Tabletten',
+        storageLocation: 'Bad',
+        dailyDose: 2,
+        memberId: 'member-1',
+        refillLeadDays: 14,
+      );
+
+      final renamed = await storedItem();
+      expect(renamed.name, 'Ramipril 5 mg');
+      expect(renamed.stockCountedAt?.toUtc(), counted);
+    });
+
+    test('moves when a new figure is typed in', () async {
+      await addPills();
+      final item = await storedItem();
+      final counted = DateTime.utc(2026, 9, 1);
+      await db.upsertInventoryItem(
+        item.toCompanion(false).copyWith(stockCountedAt: Value(counted)),
+      );
+
+      await controller.updateItem(
+        await storedItem(),
+        name: 'Ramipril',
+        category: InventoryItemCategory.medical,
+        quantity: 100,
+        unit: 'Tabletten',
+        storageLocation: 'Bad',
+        dailyDose: 2,
+        refillLeadDays: 14,
+      );
+
+      final recounted = await storedItem();
+      expect(recounted.stockCountedAt!.toUtc().isAfter(counted), isTrue);
+      expect(recounted.memberId, isNull);
+    });
+
+    test('moves when some is booked down', () async {
+      await addPills();
+      final item = await storedItem();
+      final counted = DateTime.utc(2026, 9, 1);
+      await db.upsertInventoryItem(
+        item.toCompanion(false).copyWith(stockCountedAt: Value(counted)),
+      );
+
+      await controller.consumeQuantity(await storedItem(), 2);
+
+      final booked = await storedItem();
+      expect(booked.quantity, 58);
+      expect(booked.stockCountedAt!.toUtc().isAfter(counted), isTrue);
+      // Booking down is not editing: whose it is and the reminder stay.
+      expect(booked.memberId, 'member-1');
+      expect(booked.refillLeadDays, 14);
+    });
+  });
 }

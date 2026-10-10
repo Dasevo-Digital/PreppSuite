@@ -14484,6 +14484,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shopping list saved as a file.'**
   String get shoppingListExported;
+
+  /// No description provided for @refillReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a new prescription'**
+  String get refillReminderTitle;
+
+  /// No description provided for @refillReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'By your last count, {name} lasts until {date}.'**
+  String refillReminderBody(String name, String date);
+
+  /// No description provided for @inventoryMemberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'For whom'**
+  String get inventoryMemberLabel;
+
+  /// No description provided for @inventoryMemberHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'It then shows on that person’s emergency card, with how long it lasts.'**
+  String get inventoryMemberHelper;
+
+  /// No description provided for @inventoryMemberNone.
+  ///
+  /// In en, this message translates to:
+  /// **'For the whole household'**
+  String get inventoryMemberNone;
+
+  /// No description provided for @refillLeadLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder for a new prescription'**
+  String get refillLeadLabel;
+
+  /// No description provided for @refillLeadHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'For a pack that is taken from every day. The app then counts from the day you last entered or booked the stock, and reminds you before it runs out.'**
+  String get refillLeadHelper;
+
+  /// No description provided for @refillLeadNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None: a reserve nobody takes from'**
+  String get refillLeadNone;
+
+  /// No description provided for @refillLeadDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days before it runs out'**
+  String refillLeadDays(int days);
+
+  /// No description provided for @emergencyCardStored.
+  ///
+  /// In en, this message translates to:
+  /// **'In the stores'**
+  String get emergencyCardStored;
+
+  /// No description provided for @emergencyCardStoredReach.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {days}'**
+  String emergencyCardStoredReach(String name, String days);
+
+  /// No description provided for @medicationInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'In daily use, counted on {date}'**
+  String medicationInUse(String date);
+
+  /// No description provided for @medicationRefillOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder for a new prescription on {date}'**
+  String medicationRefillOn(String date);
+
+  /// No description provided for @medicationRefillDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for a new prescription'**
+  String get medicationRefillDue;
 }
 
 class _AppLocalizationsDelegate
