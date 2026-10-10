@@ -1,16 +1,23 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
 import '../../household/application/household_providers.dart';
 import '../application/inventory_providers.dart';
 import '../application/shopping_list.dart';
+import '../application/shopping_list_export.dart';
 import '../application/supply_calculator.dart';
 import 'inventory_item_form_screen.dart';
 import '../../../core/error_text.dart';
+import '../../../core/save_file.dart';
 
 /// What to buy.
 ///
@@ -40,24 +47,40 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
     final l10n = AppLocalizations.of(context)!;
     final itemsAsync = ref.watch(inventoryItemsProvider(widget.householdId));
     final profile = ref.watch(householdProfileProvider).value;
+    final household = SupplyHousehold(
+      adults: profile?.personCount ?? 1,
+      children: profile?.children ?? 0,
+      dogs: profile?.dogs ?? 0,
+      cats: profile?.cats ?? 0,
+    );
+    final items = itemsAsync.value;
+    final shoppingList = items == null
+        ? null
+        : buildShoppingList(
+            items: items,
+            days: widget.days,
+            household: household,
+          );
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.shoppingListTitle)),
+      appBar: AppBar(
+        title: Text(l10n.shoppingListTitle),
+        actions: [
+          if (shoppingList != null && shoppingList.entries.isNotEmpty)
+            IconButton(
+              tooltip: l10n.shoppingListExport,
+              icon: const Icon(Icons.file_upload_outlined),
+              onPressed: () => _export(shoppingList, l10n),
+            ),
+        ],
+      ),
       body: ContentSwap(
         child: itemsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text(describeError(l10n, error))),
-          data: (items) {
-            final list = buildShoppingList(
-              items: items,
-              days: widget.days,
-              household: SupplyHousehold(
-                adults: profile?.personCount ?? 1,
-                children: profile?.children ?? 0,
-                dogs: profile?.dogs ?? 0,
-                cats: profile?.cats ?? 0,
-              ),
-            );
+          data: (_) {
+            // Worked out above, from the same items.
+            final list = shoppingList!;
 
             // Built by index rather than as a list of children. The items
             // section used to be a `Column` inside this `ListView`, and a
@@ -84,28 +107,68 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
           },
         ),
       ),
-      floatingActionButton: itemsAsync.maybeWhen(
-        data: (items) {
-          final list = buildShoppingList(
-            items: items,
-            days: widget.days,
-            household: SupplyHousehold(
-              adults: profile?.personCount ?? 1,
-              children: profile?.children ?? 0,
-              dogs: profile?.dogs ?? 0,
-              cats: profile?.cats ?? 0,
+      floatingActionButton: shoppingList == null || shoppingList.isEmpty
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: () => _copy(shoppingList, l10n),
+              icon: const Icon(Icons.copy_all_outlined),
+              label: Text(l10n.shoppingListCopy),
             ),
-          );
-          if (list.isEmpty) return null;
-          return FloatingActionButton.extended(
-            onPressed: () => _copy(list, l10n),
-            icon: const Icon(Icons.copy_all_outlined),
-            label: Text(l10n.shoppingListCopy),
-          );
-        },
-        orElse: () => null,
-      ),
     );
+  }
+
+  /// The lines as a file, for a shopping app to put on a list of its own
+  /// (#155) -- see `shopping_list_export.dart` for what is in it.
+  ///
+  /// On a phone through the share sheet, which offers "Save to Files" and
+  /// any app that takes the file. On a computer there is no such sheet on
+  /// every system, so the save dialog asks where it goes.
+  Future<void> _export(ShoppingList list, AppLocalizations l10n) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final now = DateTime.now();
+    final name = shoppingListFileName(now);
+    final content = buildShoppingListFile(
+      list,
+      now: now,
+      language: Localizations.localeOf(context).languageCode,
+      formatAmount: _number,
+    );
+    try {
+      if (Platform.isIOS || Platform.isAndroid) {
+        final file = File(
+          '${(await getTemporaryDirectory()).path}'
+          '${Platform.pathSeparator}$name',
+        );
+        await file.writeAsString(content, flush: true);
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(file.path, mimeType: 'application/json')],
+            subject: l10n.shoppingListTitle,
+          ),
+        );
+        return;
+      }
+      final saved = await saveFileWithPicker(
+        dialogTitle: l10n.shoppingListExportDialogTitle,
+        fileName: name,
+        extension: 'json',
+        bytes: utf8.encode(content),
+      );
+      if (!saved) return;
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l10n.shoppingListExported)));
+    } on Object catch (error) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              '${l10n.csvExportErrorMessage} ${describeError(l10n, error)}',
+            ),
+          ),
+        );
+    }
   }
 
   /// A list you take to a shop has to leave the app. Plain text goes into

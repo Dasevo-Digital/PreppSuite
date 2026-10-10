@@ -14466,6 +14466,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Face or fingerprint was not confirmed. The setting stays off.'**
   String get appLockBiometricNotConfirmed;
+
+  /// No description provided for @shoppingListExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as a file'**
+  String get shoppingListExport;
+
+  /// No description provided for @shoppingListExportDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save the shopping list as a file'**
+  String get shoppingListExportDialogTitle;
+
+  /// No description provided for @shoppingListExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping list saved as a file.'**
+  String get shoppingListExported;
 }
 
 class _AppLocalizationsDelegate

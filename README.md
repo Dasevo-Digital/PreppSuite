@@ -154,7 +154,9 @@ ist" und „Sturm und Unwetter: wenn es soweit ist". Eigene Listen wählen
 selbst, wohin sie gehören.
 
 **Fehlende Ausrüstung.** Aus den Checklisten heraus ein PDF-Bericht der
-Bestände, die unter ihrem Mindestbestand liegen. Ein Budget für die
+Bestände, die unter ihrem Mindestbestand liegen. Die Einkaufsliste lässt
+sich kopieren oder als JSON-Datei an eine Einkaufs-App weitergeben
+([Format](docs/einkaufsliste-format.md)). Ein Budget für die
 Ausgaben gibt es seit 1.1.0 nicht mehr: Im Ernstfall zählt, was da ist,
 nicht was es gekostet hat. Früher eingetragene Posten bleiben gespeichert
 und reisen mit Sicherung und gemeinsamem Ordner.

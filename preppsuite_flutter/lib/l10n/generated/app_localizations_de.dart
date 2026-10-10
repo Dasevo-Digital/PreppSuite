@@ -8756,4 +8756,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get appLockBiometricNotConfirmed =>
       'Gesicht oder Fingerabdruck wurde nicht bestätigt. Die Einstellung bleibt aus.';
+
+  @override
+  String get shoppingListExport => 'Als Datei exportieren';
+
+  @override
+  String get shoppingListExportDialogTitle => 'Einkaufsliste als Datei sichern';
+
+  @override
+  String get shoppingListExported => 'Einkaufsliste als Datei gesichert.';
 }

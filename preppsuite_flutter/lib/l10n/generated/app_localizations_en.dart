@@ -8708,4 +8708,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appLockBiometricNotConfirmed =>
       'Face or fingerprint was not confirmed. The setting stays off.';
+
+  @override
+  String get shoppingListExport => 'Export as a file';
+
+  @override
+  String get shoppingListExportDialogTitle =>
+      'Save the shopping list as a file';
+
+  @override
+  String get shoppingListExported => 'Shopping list saved as a file.';
 }

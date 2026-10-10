@@ -2391,5 +2391,8 @@
   "appLockBiometricHint": "En lugar de escribir la frase de contraseña. Esta se mantiene y abre la app si el sensor no te reconoce.",
   "appLockBiometricReason": "Desbloquear PreppSuite",
   "appLockBiometricButton": "Con la cara o la huella",
-  "appLockBiometricNotConfirmed": "No se confirmó la cara o la huella. El ajuste sigue desactivado."
+  "appLockBiometricNotConfirmed": "No se confirmó la cara o la huella. El ajuste sigue desactivado.",
+  "shoppingListExport": "Exportar como archivo",
+  "shoppingListExportDialogTitle": "Guardar la lista de la compra como archivo",
+  "shoppingListExported": "Lista de la compra guardada como archivo."
 }

@@ -5050,5 +5050,8 @@
   "appLockBiometricHint": "Instead of typing the passphrase. It stays, and opens the app when the sensor does not recognise you.",
   "appLockBiometricReason": "Unlock PreppSuite",
   "appLockBiometricButton": "With face or fingerprint",
-  "appLockBiometricNotConfirmed": "Face or fingerprint was not confirmed. The setting stays off."
+  "appLockBiometricNotConfirmed": "Face or fingerprint was not confirmed. The setting stays off.",
+  "shoppingListExport": "Export as a file",
+  "shoppingListExportDialogTitle": "Save the shopping list as a file",
+  "shoppingListExported": "Shopping list saved as a file."
 }

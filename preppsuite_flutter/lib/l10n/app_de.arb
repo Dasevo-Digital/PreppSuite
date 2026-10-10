@@ -3613,5 +3613,8 @@
   "appLockBiometricHint": "Statt die Passphrase zu tippen. Sie bleibt und öffnet die App, wenn der Sensor nicht erkennt.",
   "appLockBiometricReason": "PreppSuite entsperren",
   "appLockBiometricButton": "Mit Gesicht oder Fingerabdruck",
-  "appLockBiometricNotConfirmed": "Gesicht oder Fingerabdruck wurde nicht bestätigt. Die Einstellung bleibt aus."
+  "appLockBiometricNotConfirmed": "Gesicht oder Fingerabdruck wurde nicht bestätigt. Die Einstellung bleibt aus.",
+  "shoppingListExport": "Als Datei exportieren",
+  "shoppingListExportDialogTitle": "Einkaufsliste als Datei sichern",
+  "shoppingListExported": "Einkaufsliste als Datei gesichert."
 }

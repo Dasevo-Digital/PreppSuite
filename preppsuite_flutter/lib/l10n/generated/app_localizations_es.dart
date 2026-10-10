@@ -8783,4 +8783,15 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get appLockBiometricNotConfirmed =>
       'No se confirmó la cara o la huella. El ajuste sigue desactivado.';
+
+  @override
+  String get shoppingListExport => 'Exportar como archivo';
+
+  @override
+  String get shoppingListExportDialogTitle =>
+      'Guardar la lista de la compra como archivo';
+
+  @override
+  String get shoppingListExported =>
+      'Lista de la compra guardada como archivo.';
 }
