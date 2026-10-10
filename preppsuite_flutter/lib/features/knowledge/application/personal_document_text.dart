@@ -22,20 +22,29 @@ import 'personal_document_store.dart';
 /// Lower on a phone or a tablet. The file is read whole, because neither
 /// the ZIP decoder nor the PDF parser works from a stream, so the limit is
 /// also the peak allocation, before the text that comes out of it. A
-/// desktop can afford 256 MB of that; a phone that the system ends for
+/// desktop can afford 512 MB of that; a phone that the system ends for
 /// using too much memory loses whatever else was open.
 ///
 /// Decimal megabytes, so the message that names the limit says "128 MB"
 /// rather than a binary figure nobody recognises.
+///
+/// 512 MB on a computer since #64, where 256 MB turned away large
+/// handbooks a desktop has the memory for. A phone keeps 128 MB.
 int personalDocumentByteLimit([TargetPlatform? platform]) =>
     switch (platform ?? defaultTargetPlatform) {
       TargetPlatform.android || TargetPlatform.iOS => 128 * 1000 * 1000,
-      _ => 256 * 1000 * 1000,
+      _ => 512 * 1000 * 1000,
     };
 
 /// How much extracted text is kept per document, for the reader and the
-/// index alike. Roughly two thousand printed pages.
-const personalDocumentMaxCharacters = 4 * 1024 * 1024;
+/// index alike: roughly two thousand printed pages on a phone, eight
+/// thousand on a computer (#64). The text is held whole while it is
+/// indexed, which is the same reason the byte limit is lower on a phone.
+int personalDocumentCharacterLimit([TargetPlatform? platform]) =>
+    switch (platform ?? defaultTargetPlatform) {
+      TargetPlatform.android || TargetPlatform.iOS => 4 * 1024 * 1024,
+      _ => 16 * 1024 * 1024,
+    };
 
 /// The document, or a part of it, is more than this device reads.
 class PersonalDocumentTooLarge implements Exception {
@@ -95,7 +104,7 @@ class PersonalDocumentText {
   /// prevent.
   final List<String> paragraphs;
 
-  /// The document had more than [personalDocumentMaxCharacters].
+  /// The document had more than [personalDocumentCharacterLimit].
   final bool truncated;
 
   /// The whole text as one line, for the search index.
@@ -116,17 +125,20 @@ class PersonalDocumentText {
 /// parser can be interrupted from outside, so ending the isolate is the
 /// only way to stop a parse that has started.
 class PersonalDocumentTextJob {
-  PersonalDocumentTextJob._(this.document, this.maxBytes);
+  PersonalDocumentTextJob._(this.document, this.maxBytes, this.maxCharacters);
 
-  /// Starts reading [document]. [maxBytes] defaults to this device's
-  /// [personalDocumentByteLimit].
+  /// Starts reading [document]. [maxBytes] and [maxCharacters] default to
+  /// this device's [personalDocumentByteLimit] and
+  /// [personalDocumentCharacterLimit].
   factory PersonalDocumentTextJob.start(
     PersonalDocument document, {
     int? maxBytes,
+    int? maxCharacters,
   }) {
     final job = PersonalDocumentTextJob._(
       document,
       maxBytes ?? personalDocumentByteLimit(),
+      maxCharacters ?? personalDocumentCharacterLimit(),
     );
     unawaited(job._run());
     return job;
@@ -134,6 +146,7 @@ class PersonalDocumentTextJob {
 
   final PersonalDocument document;
   final int maxBytes;
+  final int maxCharacters;
 
   final _progress = StreamController<PersonalDocumentProgress>.broadcast();
   final _result = Completer<PersonalDocumentText>();
@@ -189,6 +202,7 @@ class PersonalDocumentTextJob {
           path: path,
           bytes: bytes,
           maxBytes: maxBytes,
+          maxCharacters: maxCharacters,
         ),
         errorsAreFatal: true,
         onError: port.sendPort,
@@ -299,8 +313,13 @@ PersonalDocumentText extractPersonalDocumentText(
   String extension,
   Uint8List bytes, {
   int maxBytes = 256 * 1000 * 1000,
+  int? maxCharacters,
   void Function(PersonalDocumentProgress progress)? onProgress,
-}) => _Extractor(maxBytes, onProgress).extract(extension, bytes);
+}) => _Extractor(
+  maxBytes,
+  maxCharacters ?? personalDocumentCharacterLimit(),
+  onProgress,
+).extract(extension, bytes);
 
 class _Request {
   const _Request({
@@ -309,6 +328,7 @@ class _Request {
     required this.path,
     required this.bytes,
     required this.maxBytes,
+    required this.maxCharacters,
   });
 
   final SendPort reply;
@@ -316,6 +336,7 @@ class _Request {
   final String? path;
   final TransferableTypedData? bytes;
   final int maxBytes;
+  final int maxCharacters;
 }
 
 class _TooLarge {
@@ -335,6 +356,7 @@ Future<void> _extractInIsolate(_Request request) async {
     }
     final text = _Extractor(
       request.maxBytes,
+      request.maxCharacters,
       reply.send,
     ).extract(request.extension, bytes);
     // The last word, handed over rather than copied.
@@ -370,9 +392,10 @@ Future<Uint8List> _readFile(String path, int maxBytes, SendPort reply) async {
 }
 
 class _Extractor {
-  _Extractor(this.maxBytes, this.onProgress);
+  _Extractor(this.maxBytes, this.maxCharacters, this.onProgress);
 
   final int maxBytes;
+  final int maxCharacters;
   final void Function(PersonalDocumentProgress progress)? onProgress;
 
   static const _maxEpubEntries = 4096;
@@ -460,10 +483,10 @@ class _Extractor {
         block,
       ).replaceAll(_whitespace, ' ').trim();
       if (paragraph.isEmpty) continue;
-      final room = personalDocumentMaxCharacters - _characters;
+      final room = maxCharacters - _characters;
       if (paragraph.length >= room) {
         if (room > 0) _paragraphs.add(paragraph.substring(0, room));
-        _characters = personalDocumentMaxCharacters;
+        _characters = maxCharacters;
         _truncated = true;
         return;
       }

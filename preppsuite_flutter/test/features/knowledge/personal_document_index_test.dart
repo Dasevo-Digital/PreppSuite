@@ -230,7 +230,7 @@ void main() {
       Uint8List.fromList(
         utf8.encode(
           List.filled(
-            personalDocumentMaxCharacters ~/ 1000 + 10,
+            personalDocumentCharacterLimit() ~/ 1000 + 10,
             'y' * 999,
           ).join('\n\n'),
         ),
@@ -240,7 +240,7 @@ void main() {
     expect(text.truncated, isTrue);
     expect(
       text.paragraphs.fold<int>(0, (sum, p) => sum + p.length),
-      lessThanOrEqualTo(personalDocumentMaxCharacters),
+      lessThanOrEqualTo(personalDocumentCharacterLimit()),
     );
   });
 
@@ -319,7 +319,10 @@ void main() {
       TargetPlatform.windows,
       TargetPlatform.linux,
     ]) {
-      expect(personalDocumentByteLimit(platform), 256000000);
+      expect(personalDocumentByteLimit(platform), 512000000);
+      expect(personalDocumentCharacterLimit(platform), 16 * 1024 * 1024);
     }
+    expect(personalDocumentCharacterLimit(TargetPlatform.android), 4194304);
+    expect(personalDocumentCharacterLimit(TargetPlatform.iOS), 4194304);
   });
 }

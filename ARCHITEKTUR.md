@@ -2565,9 +2565,11 @@ parallel one.
   parser can be stopped from outside. A file on disk is read inside that
   isolate; only an Android content URI is read on the main isolate, in
   chunks, because the platform channel lives there. One limit for both,
-  `personalDocumentByteLimit()`: 128 MB on Android and iOS, 256 MB
-  elsewhere, decimal so the message can name it. The file is read whole,
-  so the limit is the peak allocation. The reader lays the text out one
+  `personalDocumentByteLimit()`: 128 MB on Android and iOS, 512 MB
+  elsewhere since #64, decimal so the message can name it. The file is
+  read whole, so the limit is the peak allocation. The text kept per
+  document follows the same split, `personalDocumentCharacterLimit()`:
+  4 Mi characters on a phone, 16 Mi on a computer. The reader lays the text out one
   paragraph at a time in a lazy list; it used to extract on the interface's
   thread and set up to four million characters as a single `Text`.
 - PMTiles reads and gzip output are limited to 32 MiB each
