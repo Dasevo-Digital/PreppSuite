@@ -2543,7 +2543,16 @@ Lücken haben kann, ohne sie zu melden.
 **Kein Erkenner, der Daten an Dritte schickt.** Android liest deshalb mit
 Tesseract und nicht mit ML Kit, obwohl ML Kit in der Messung etwas besser
 las: ML Kit sendet nach seinen Bedingungen Nutzungsdaten an Google. Ein
-neuer Erkenner muss auf dem Gerät laufen und nichts senden. Die
+neuer Erkenner muss auf dem Gerät laufen und nichts senden. Dasselbe gilt
+seit #158 für Strichcodes und QR-Codes: `mobile_scanner` las unter Android
+mit ML Kit, die Kopie in `third_party/mobile_scanner` liest mit zxing-cpp
+(Einzelheiten in `third_party/LIESMICH.md`). Wer eine Bibliothek
+hinzufügt, prüft mit `./gradlew :app:dependencies --configuration
+releaseRuntimeClasspath`, dass weder `com.google.mlkit` noch
+`com.google.android.datatransport` im Baum steht. Den Standort fragt die
+App unter Android beim Android-eigenen Standortdienst
+(`forceLocationManager`), nicht bei Googles Fused Location in den Play
+Services. Die
 Sprachdaten liegen als Assets im APK (`android/app/src/main/assets/tessdata`,
 Herkunft und Prüfsummen in `third_party/tessdata_fast`) und werden beim
 ersten Erkennen in `filesDir` kopiert, über eine `.part`-Datei, damit ein

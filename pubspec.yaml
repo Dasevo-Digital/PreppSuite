@@ -33,6 +33,13 @@ dependency_overrides:
   # inkrementelle Build findet sie nicht und scheitert -- genau jeder
   # zweite. Die Kopien unter third_party/ lassen die Quellen liegen; sonst
   # unveraendert. Siehe third_party/LIESMICH.md.
+  # mobile_scanner 7.4.2 liest Strichcodes unter Android mit ML Kit, und
+  # ML Kit meldet bei jeder Nutzung Geraet, App, eine Installationskennung
+  # und Nutzungsereignisse an Google -- abschalten laesst sich das nicht.
+  # Die Kopie liest unter Android mit zxing-cpp; iOS und macOS (Apple
+  # Vision) sind unveraendert. Siehe third_party/LIESMICH.md.
+  mobile_scanner:
+    path: third_party/mobile_scanner
   zstandard_ios:
     path: third_party/zstandard_ios
   zstandard_macos:

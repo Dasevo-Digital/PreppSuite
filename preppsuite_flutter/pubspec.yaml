@@ -49,6 +49,9 @@ dependencies:
   sqlite3: ^3.7.0
   path_provider: ^2.1.6
   uuid: ^4.6.0
+  # Under Android read with zxing-cpp rather than ML Kit, which reports
+  # usage to Google: the workspace overrides this with the copy in
+  # third_party/mobile_scanner (#158).
   mobile_scanner: ^7.4.2
   # QR codes are generated from this pure-Dart encoder and painted by
   # the app itself (features/transfer/presentation/qr_code_view.dart).

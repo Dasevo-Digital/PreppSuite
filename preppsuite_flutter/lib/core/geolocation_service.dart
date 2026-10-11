@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../features/maps/application/readable_position.dart';
@@ -180,10 +181,7 @@ class GeolocationService {
 
       try {
         return await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.low,
-            timeLimit: Duration(seconds: 15),
-          ),
+          locationSettings: _settings(),
         );
       } on Object {
         // A fresh fix is a receiver waking up, and indoors or on a
@@ -195,7 +193,9 @@ class GeolocationService {
         //
         // Only reached once the permission questions above are settled,
         // so this never papers over a refusal: those throw before here.
-        final last = await Geolocator.getLastKnownPosition();
+        final last = await Geolocator.getLastKnownPosition(
+          forceAndroidLocationManager: true,
+        );
         if (last != null) return last;
         rethrow;
       }
@@ -207,6 +207,26 @@ class GeolocationService {
         error.toString(),
       );
     }
+  }
+
+  /// Coarse and quick: a region and a nearby shelter need no more.
+  ///
+  /// On Android through the system's own location manager rather than
+  /// Google Play services' fused provider (#158). The fused provider is
+  /// Google's, in a Google process; the location manager is the
+  /// platform's. Whether the device itself asks Google for a network
+  /// position is a system setting of its owner's, not this app's.
+  static LocationSettings _settings() {
+    const accuracy = LocationAccuracy.low;
+    const timeLimit = Duration(seconds: 15);
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return AndroidSettings(
+        accuracy: accuracy,
+        timeLimit: timeLimit,
+        forceLocationManager: true,
+      );
+    }
+    return const LocationSettings(accuracy: accuracy, timeLimit: timeLimit);
   }
 
   Future<String?> _reverseGeocodeState(

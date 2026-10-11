@@ -14,6 +14,10 @@ ihre jeweils eigenen Bedingungen.
 - Angepasste Kopien von `zstandard_ios` und `zstandard_macos` — BSD;
   vollständiger Text: `third_party/zstandard_ios/LICENSE` und
   `third_party/zstandard_macos/LICENSE`
+- Angepasste Kopie von `mobile_scanner` 7.4.2 — BSD-3-Clause;
+  vollständiger Text: `third_party/mobile_scanner/LICENSE`
+- zxing-cpp für Android 2.3.0 (nur Android, Strichcodes und QR-Codes) —
+  Apache-2.0; Quelle `github.com/zxing-cpp/zxing-cpp`
 - Tesseract4Android mit Tesseract 5.5.1, Leptonica 1.85.0, libjpeg und
   libpng (nur Android) — Apache-2.0 bzw. die Lizenzen der enthaltenen
   Bibliotheken; Quelle `github.com/adaptech-cz/Tesseract4Android`

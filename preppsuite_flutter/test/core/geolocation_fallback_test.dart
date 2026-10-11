@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:geolocator/geolocator.dart' show AndroidSettings;
 import 'package:geolocator_platform_interface/geolocator_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:preppsuite_flutter/core/geolocation_service.dart';
@@ -33,6 +34,8 @@ class _FakeGeolocator extends GeolocatorPlatform
   final Position? last;
 
   var askedForLast = 0;
+  LocationSettings? askedWith;
+  bool? lastForcedManager;
 
   @override
   Future<bool> isLocationServiceEnabled() async => serviceEnabled;
@@ -45,6 +48,7 @@ class _FakeGeolocator extends GeolocatorPlatform
 
   @override
   Future<Position> getCurrentPosition({LocationSettings? locationSettings}) {
+    askedWith = locationSettings;
     final position = current;
     if (position == null) {
       return Future.error(
@@ -57,6 +61,7 @@ class _FakeGeolocator extends GeolocatorPlatform
   @override
   Future<Position?> getLastKnownPosition({bool forceLocationManager = false}) {
     askedForLast++;
+    lastForcedManager = forceLocationManager;
     return Future.value(last);
   }
 }
@@ -204,5 +209,33 @@ void main() {
     expect(state, isNotNull);
     expect(asked!.queryParameters['lat'], '52.27');
     expect(asked!.queryParameters['lon'], '10.53');
+  });
+
+  group('on Android (#158)', () {
+    // Through the system's own location manager, not Google Play
+    // services' fused provider, which is Google's code in a Google
+    // process. flutter_test reports Android as the platform.
+    test('a fresh fix asks the location manager', () async {
+      final platform = _FakeGeolocator(current: at(52.0, 10.0, now));
+      GeolocatorPlatform.instance = platform;
+
+      await GeolocationService().getCurrentFix();
+
+      final settings = platform.askedWith;
+      expect(settings, isA<AndroidSettings>());
+      expect((settings! as AndroidSettings).forceLocationManager, isTrue);
+    });
+
+    test('and so does the last known one', () async {
+      final platform = _FakeGeolocator(
+        current: null,
+        last: at(52.0, 10.0, now),
+      );
+      GeolocatorPlatform.instance = platform;
+
+      await GeolocationService().getCurrentFix();
+
+      expect(platform.lastForcedManager, isTrue);
+    });
   });
 }
