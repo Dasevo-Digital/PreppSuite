@@ -44,21 +44,21 @@ const knowledgeQuestionsEn = <KnowledgeQuestion>[
     guideId: 'hypothermia',
     question: 'A chilled person: rub the arms and legs warm?',
     answers: [
-      'No, warm the trunk, neck and head only',
+      'No, wrap them up and let them warm slowly',
       'Yes, rubbing hard gets the circulation going',
       'Only the hands',
     ],
     correct: 0,
     because:
-        'Do not rub arms and legs and do not warm them actively. That '
-        'drives cold blood to the heart.',
+        'No hot water bottle, no fan heater, no hot bath, and do not rub '
+        'arms and legs. That drives cold blood to the heart.',
   ),
   KnowledgeQuestion(
     id: 'burns-ice',
     guideId: 'burns',
     question: 'What do you cool a small burn with?',
     answers: [
-      'Hand-warm water, 10 to 20 minutes',
+      'Cool water, not ice-cold',
       'Ice cubes from the freezer',
       'Nothing, air is enough',
     ],
@@ -273,14 +273,14 @@ const knowledgeQuestionsEn = <KnowledgeQuestion>[
         'Somebody has been pulled from the water and is not breathing. '
         'Compressions only, or breaths as well?',
     answers: [
-      'Breaths as well, 30 to 2',
+      'Breaths as well: 5 breaths first, then 30 to 2',
       'Compressions only, as for a cardiac arrest',
       'Press the water out first',
     ],
     correct: 0,
     because:
-        'With drowning the rescue breaths belong to it — unlike a cardiac '
-        'arrest. Start with the compressions all the same.',
+        'In drowning it is oxygen that runs out first. So here — unlike an '
+        "adult's cardiac arrest — you start with the breaths.",
   ),
   KnowledgeQuestion(
     id: 'hypo-diet-drink',
@@ -301,12 +301,14 @@ const knowledgeQuestionsEn = <KnowledgeQuestion>[
     guideId: 'frostbite',
     question: 'Hold frostbitten fingers up to a fan heater?',
     answers: [
-      'No, water at body temperature',
+      'No, warm them with body heat',
       'Yes, warm is warm',
       'Yes, but only briefly',
     ],
     correct: 0,
-    because: 'Not near direct heat such as a fan heater or a stove.',
+    because:
+        'Not near direct heat such as a fan heater, a stove or a hot water '
+        'bottle.',
   ),
   KnowledgeQuestion(
     id: 'nosebleed-head',
@@ -345,7 +347,7 @@ const knowledgeQuestionsEn = <KnowledgeQuestion>[
       'Oil only, never heat',
     ],
     correct: 0,
-    because: 'No chemicals and no heat to stun or kill it.',
+    because: 'No chemicals, no oil, no glue and no heat to stun or kill it.',
   ),
   KnowledgeQuestion(
     id: 'amputation-ice',
@@ -372,5 +374,19 @@ const knowledgeQuestionsEn = <KnowledgeQuestion>[
     ],
     correct: 0,
     because: 'Do not rinse with fresh water — seawater.',
+  ),
+  KnowledgeQuestion(
+    id: 'croup-air',
+    guideId: 'croup',
+    question: 'A croup attack in the night. What helps the child?',
+    answers: [
+      'Cool, fresh air at an open window',
+      'Hot steam from the shower',
+      'Lying down and going back to sleep',
+    ],
+    correct: 0,
+    because:
+        'No hot steam — no bowl of hot water, no hot shower. There is no '
+        'evidence it helps, and it can scald.',
   ),
 ];

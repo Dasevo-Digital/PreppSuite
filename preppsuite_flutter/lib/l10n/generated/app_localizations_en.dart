@@ -4365,7 +4365,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsVersionInfoFirstAidValue =>
-      'ERC 2025 source status (GRC edition)';
+      'ERC 2025 sources, checked against German Red Cross 10/2026';
 
   @override
   String get settingsVersionInfoApp => 'PreppSuite app';
@@ -5967,7 +5967,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstAidContentVersionBody =>
-      'Content follows the 2025 Guidelines of the European Resuscitation Council. The pages under \"Mental distress\" follow the IFRC International first aid, resuscitation and education guidelines 2025. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.';
+      'Content follows the 2025 Guidelines of the European Resuscitation Council and was checked guide by guide against the German Red Cross\'s first aid pages in October 2026. Some guides follow the IFRC, the paediatricians, the German Life Saving Association or a German clinical guideline; each one names its source. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.';
 
   @override
   String get firstAidEntryHint =>

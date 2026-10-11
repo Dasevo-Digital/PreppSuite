@@ -597,6 +597,23 @@ steps, cautions and figures — a translation that quietly drops a step
 drops a step of a resuscitation. Buttons and headings on those screens go
 through the ARB files like everything else.
 
+**Which source wins where they disagree** (review of 11 October 2026,
+every instruction against the DRK's first aid pages and ERC 2025). The
+ERC 2025 guidelines over the DRK pages where those still show the 2021
+teaching (child resuscitation: two thumbs on an infant, 30:2 without a
+children's course; drowning: five breaths first), German specialist
+sources over the IFRC where they are more specific or more recent
+(croup: cool air, not warm steam; burns in children: the AWMF S2k
+guideline; jellyfish: the DLRG), and the DRK over the IFRC where the
+IFRC's advice needs equipment or training a household lacks
+(hypothermia: no hot water bottle; frostbite: body heat, water only when
+help is hours away). A medicine with a dose appears only where a
+guideline itself recommends it to laypeople, with the amount named as
+the guideline's — aspirin for chest pain after asking the dispatcher
+(ERC 2025), a painkiller for frostbite (IFRC). Each such choice is a
+comment at the guide in `de.md`, and the knowledge check's explanations
+are the guides' own words, so changing one means changing the other.
+
 **The children's comic is the second exception, for the same reason.**
 "Mila und Nuss" is a story, and a story has to read end to end: its words
 live in `kids_comic_de.dart` and `kids_comic_en.dart`, and

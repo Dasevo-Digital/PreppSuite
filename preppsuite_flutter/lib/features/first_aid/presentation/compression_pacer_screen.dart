@@ -25,7 +25,9 @@ import '../application/compression_pacer.dart';
 class CompressionPacerScreen extends StatefulWidget {
   const CompressionPacerScreen({super.key, this.compressionsPerCycle = 30});
 
-  /// 30 for an adult, 15 for a child — set by whichever guide opened this.
+  /// 30, or 15 for a helper trained in resuscitating children, who picks
+  /// it on the screen. The 2025 guidelines give 30:2 to everybody else,
+  /// children included.
   final int compressionsPerCycle;
 
   @override

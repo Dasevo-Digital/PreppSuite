@@ -4400,7 +4400,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsVersionInfoFirstAidValue =>
-      'Estado de fuentes ERC 2025 (edición GRC)';
+      'Fuentes ERC 2025, comparadas con la Cruz Roja Alemana 10/2026';
 
   @override
   String get settingsVersionInfoApp => 'App PreppSuite';
@@ -6011,7 +6011,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get firstAidContentVersionBody =>
-      'El contenido sigue las Guías 2025 del Consejo Europeo de Resucitación (ERC). Las páginas de «Malestar psíquico» siguen las IFRC International first aid, resuscitation and education guidelines 2025. Lo que enseña un curso de primeros auxilios lo acuerdan conjuntamente las organizaciones de ayuda; en un curso, vale lo que se diga allí.';
+      'El contenido sigue las Guías 2025 del Consejo Europeo de Resucitación (ERC) y se comparó guía por guía con las páginas de primeros auxilios de la Cruz Roja Alemana en octubre de 2026. Algunas guías siguen a la IFRC, a los pediatras, a la DLRG o a una guía clínica alemana; cada una indica su fuente. Lo que enseña un curso de primeros auxilios lo acuerdan conjuntamente las organizaciones de ayuda; en un curso, vale lo que se diga allí.';
 
   @override
   String get firstAidEntryHint =>

@@ -26,7 +26,16 @@ widersprechen dem in keiner Zahl.
 
 Was hier bewusst fehlt: alles, was ohne Ausbildung nicht sicher
 anzuwenden ist, und jede Dosierung eines Medikaments, das nicht dem
-Verletzten selbst verordnet wurde.
+Verletzten selbst verordnet wurde. Ausgenommen ist nur, was eine
+Leitlinie Laien selbst mit Menge empfiehlt – Acetylsalicylsäure beim
+Herzinfarkt (ERC 2025) und ein Schmerzmittel bei Erfrierungen (IFRC) –,
+und dann steht dabei, dass die Menge die der Leitlinie ist.
+
+Am 11.10.2026 ist jede Anweisung gegen die Erste-Hilfe-Seiten des DRK,
+die ERC-Leitlinien 2025 (Laienfassung und deutsche Kurzfassung) und,
+wo es um Kinder geht, gegen die Kinderärzte (BVKJ, BIÖG, IQWiG) und die
+AWMF-Leitlinien geprüft worden. Wo die Quellen auseinandergehen, steht
+in einem Kommentar an der Anleitung, wem sie folgt und warum.
 
 Format: README.md in this folder.
 -->
@@ -116,6 +125,15 @@ Format: README.md in this folder.
 - Tiefe: 5–6 cm
 - Verhältnis: 30 Kompressionen : 2 Beatmungen
 
+<!--
+Kinder: ERC 2025 (Paediatric Life Support, deutsche Kurzfassung). Neu
+gegenüber 2021 und gegenüber der DRK-Seite, die noch den Stand von 2021
+zeigt: beim Säugling die Zwei-Daumen-Technik für alle Helfer, 15:2 nur
+für Helfer mit Kinder-Reanimationskurs, alle anderen 30:2, und mit
+Telefon sofort die Leitstelle. Allein ohne Telefon bleibt es bei einer
+Minute Wiederbelebung, bevor Hilfe geholt wird.
+-->
+
 ## cpr-child
 - group: lifeThreatening
 - title: Wiederbelebung – Kind und Säugling
@@ -126,22 +144,25 @@ Format: README.md in this folder.
 
 ### steps
 1. 112 anrufen, sobald das Kind nicht reagiert und nicht normal atmet.
-   Telefon auf Lautsprecher und liegen lassen — so bleibst du beim Kind und hast die Hände frei. Bis 2021 galt hier noch: erst eine Minute wiederbeleben, dann anrufen. Seit den Leitlinien 2025 ist die Reihenfolge dieselbe wie beim Erwachsenen.
+   Telefon auf Lautsprecher und neben dich legen — so bleibst du beim Kind, hast die Hände frei, und die Leitstelle leitet dich an. Bist du allein und hast kein Telefon: erst eine Minute wiederbeleben, dann Hilfe holen.
 2. Mit 5 Beatmungen beginnen, nicht mit dem Drücken.
-   Bei Kindern steht das Herz fast immer wegen Sauerstoffmangel still, nicht umgekehrt. Beim Säugling Mund und Nase zugleich umschließen.
-3. 15-mal drücken, dann 2-mal beatmen.
-   Kind: ein oder zwei Handballen. Säugling: zwei Finger oder beide Daumen bei umfassten Händen.
+   Bei Kindern steht das Herz fast immer wegen Sauerstoffmangel still, nicht umgekehrt. Beim Säugling Mund und Nase zugleich umschließen und den Kopf gerade halten, nicht überstrecken.
+3. 30-mal drücken, dann 2-mal beatmen.
+   Kind: ein oder beide Handballen auf die untere Hälfte des Brustbeins. Säugling: mit beiden Daumen, die Hände umfassen dabei den Brustkorb.
 4. Ein Drittel des Brustkorbdurchmessers tief drücken.
-   Etwa 5 cm beim Kind, etwa 4 cm beim Säugling. Takt wie beim Erwachsenen: 100 bis 120 in der Minute.
-5. Weiter 15:2, bis Hilfe da ist.
+   Etwa 5 cm beim Kind, etwa 4 cm beim Säugling, nie tiefer als 6 cm. Takt wie beim Erwachsenen: 100 bis 120 in der Minute.
+5. Weiter 30:2, bis Hilfe da ist.
 
 ### cautions
-- Traust du dir das Verhältnis 15:2 nicht zu, nimm 30:2 wie beim Erwachsenen. Das ist ausdrücklich erlaubt und weit besser als zu zögern.
+- Hast du einen Kurs in Wiederbelebung von Kindern gemacht, nimm 15:2 statt 30:2. Ohne einen solchen Kurs gilt 30:2 wie beim Erwachsenen.
 - Zu vorsichtig zu drücken ist der häufigste Fehler. Ein Kind, dessen Herz steht, kann durch zu zaghaftes Drücken nicht gerettet werden.
+- Im Kurs mit zwei Fingern am Säugling gelernt? Auch das ist weit besser als zu zögern. Die Leitlinien 2025 empfehlen die beiden Daumen, weil sie kräftiger und gleichmäßiger drücken.
 
 ### facts
 - Erst: 5 Beatmungen
-- Dann: 15 Kompressionen : 2 Beatmungen
+- Dann: 30 Kompressionen : 2 Beatmungen
+- Mit Kinder-Kurs: 15 : 2
+- Säugling: beide Daumen, Brustkorb umfassen
 - Tiefe Kind: etwa 5 cm
 - Tiefe Säugling: etwa 4 cm
 - Takt: 100–120 pro Minute
@@ -165,7 +186,7 @@ Format: README.md in this folder.
 
 ### cautions
 - Ein AED schockt nie jemanden, der keinen Schock braucht. Er analysiert selbst und gibt nur dann frei.
-- Kinder unter acht Jahren: Kinderelektroden verwenden, wenn vorhanden. Sind keine da, nimm die für Erwachsene – das ist besser als kein Schock.
+- Kinder unter 25 kg, etwa unter acht Jahren: Kindermodus oder Kinderelektroden, wenn vorhanden. Sonst die für Erwachsene – das ist besser als kein Schock. Bei kleinen Kindern eine Elektrode vorn mitten auf die Brust, etwas links, die andere hinten zwischen die Schulterblätter.
 - Elektroden nicht auf einen Herzschrittmacher kleben; ein paar Zentimeter daneben genügen. Medikamentenpflaster vorher abziehen.
 
 ## recovery-position
@@ -222,9 +243,10 @@ der IFRC statt nach dem ERC. Jede nennt ihr Kapitel auf dem
 Bildschirm; die Impressumsseite der Leitlinien erlaubt die
 nicht-kommerzielle Wiedergabe unter Nennung der Quelle.
 
-Eine Ausnahme von der Regel, dass hier keine Medikamentendosis steht:
-die Leitlinie stellt bei Erfrierungen ein Schmerzmittel zur Erwaegung,
-mit Mengen, und die stehen dort. Der Schritt sagt selbst, dass die
+Eine der zwei Ausnahmen von der Regel, dass hier keine
+Medikamentendosis steht (die andere ist die Acetylsalicylsäure beim
+Herzinfarkt nach ERC 2025): die Leitlinie stellt bei Erfrierungen ein
+Schmerzmittel zur Erwaegung, mit Mengen, und die stehen dort. Der Schritt sagt selbst, dass die
 Mengen die der Leitlinie sind. Die Regel gilt unveraendert fuer alles,
 was sich die App selbst ausdenken muesste -- und die Leitlinie denkt
 sich hier nichts aus.
@@ -234,7 +256,7 @@ sich hier nichts aus.
 - group: lifeThreatening
 - title: Ertrinken
 - when: Jemand ist im Wasser in Not oder wurde gerade herausgeholt.
-- source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Drowning"
+- source: Reanimationsleitlinien 2025 des European Resuscitation Council (ERC); International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Drowning"
 
 ### steps
 1. Nicht ins Wasser gehen.
@@ -243,8 +265,8 @@ sich hier nichts aus.
    Stange, Ast, Ruder, Seil, Rettungsring.
 3. Notruf 112.
 4. An Land laut ansprechen und die Atmung prüfen.
-5. Atmet nicht normal: sofort wiederbeleben, 30 Drücken und 2 Beatmungen.
-   Beim Ertrinken gehören die Beatmungen dazu – anders als beim Herzstillstand. Angefangen wird trotzdem mit dem Drücken.
+5. Atmet nicht normal: zuerst 5 Beatmungen, dann wiederbeleben, 30 Drücken und 2 Beatmungen.
+   Beim Ertrinken fehlt zuerst der Sauerstoff. Deshalb beginnt man hier – anders als beim Herzstillstand eines Erwachsenen – mit dem Beatmen.
 6. Defibrillator: die Klebestellen vorher abtrocknen.
 7. Atmet normal: stabile Seitenlage, den Kopf so, dass Flüssigkeit aus dem Mund ablaufen kann.
 8. Erbrochenes oder Fremdkörper nur herausholen, wenn sie die Atmung wirklich blockieren.
@@ -255,7 +277,8 @@ sich hier nichts aus.
 - Keinen Druck auf den Brustkorb, der das Atmen erschwert.
 
 ### facts
-- Verhältnis: 30 Drücken, 2 Beatmen
+- Erst: 5 Beatmungen
+- Dann: 30 Drücken, 2 Beatmen
 
 ## severe-bleeding
 - group: injury
@@ -348,19 +371,19 @@ sich hier nichts aus.
 - group: injury
 - title: Verbrennung und Verbrühung
 - when: Hitze, Feuer, heiße Flüssigkeit, Strom oder Chemie haben die Haut verletzt.
-- source: Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)
+- source: Erste-Hilfe-Leitlinien des European Resuscitation Council (ERC) und des DRK; für Kinder die AWMF-S2k-Leitlinie „Thermische Verletzungen im Kindesalter" (2024)
 
 ### steps
 1. Die Ursache beenden.
    Flammen ersticken, Strom abschalten, durchnässte heiße Kleidung entfernen, solange sie nicht festklebt.
-2. Kleine Flächen 10 bis 20 Minuten kühlen.
-   Fließendes lauwarmes Wasser, etwa 20 °C. Nur Hände, Füße, Gesicht oder einzelne Stellen.
+2. Kleine Flächen sofort kühlen, mindestens 20 Minuten.
+   Fließendes, kühles Wasser – kühl, aber nicht eiskalt. Bei Kindern nur kleine Stellen an Armen und Beinen, höchstens 10 Minuten, mit handwarmem Wasser.
 3. Ringe, Uhren und Armbänder sofort abnehmen.
    Bevor es anschwillt. Danach geht es nicht mehr.
 4. Locker und keimarm abdecken.
-   Brandwundenauflage oder ein sauberes Tuch. Nichts, was fasert.
+   Brandwundenauflage, Frischhaltefolie locker aufgelegt (nicht herumgewickelt) oder ein sauberes Tuch. Nichts, was fasert.
 5. Große Flächen nicht kühlen, sondern zudecken und warm halten.
-   Mehr als eine Handfläche des Verletzten. Kühlen führt dann zu Unterkühlung, die gefährlicher ist als die Verbrennung.
+   Kühlen führt dann zu Unterkühlung, die gefährlicher ist als die Verbrennung. Bei Säuglingen gar nicht kühlen, bei Kindern auch nicht an Rumpf und Kopf.
 6. 112 bei großer Fläche, bei Gesicht, Händen, Genitalien oder Gelenken, bei Kindern, bei Strom und bei Chemie.
 
 ### cautions
@@ -368,6 +391,10 @@ sich hier nichts aus.
 - Blasen nicht öffnen.
 - Keine Salbe, kein Öl, kein Mehl, kein Puder, kein Hausmittel.
 - Festgeklebte Kleidung nicht abziehen. Herumschneiden statt abreißen.
+
+### facts
+- Kühlen, Erwachsene: mindestens 20 Minuten, kühles Wasser
+- Kühlen, Kinder: höchstens 10 Minuten, handwarm, nur Arme und Beine
 
 ## fracture
 - group: injury
@@ -464,6 +491,7 @@ sich hier nichts aus.
 1. Hinsetzen und den Kopf leicht nach vorn neigen.
    Nach vorn, nicht in den Nacken.
 2. Die Nasenflügel zusammendrücken, 10 bis 15 Minuten am Stück.
+   Ein kühles Tuch im Nacken darf dazu, ersetzt das Drücken aber nicht.
 3. Hört es nach 15 Minuten nicht auf, oder wird der Person schwindlig vom Blutverlust: ärztliche Hilfe.
 4. Nach einem Stoß und mit Anzeichen einer Hirnverletzung, verformter Nase, Gesichtsbruch – oder wenn die Person Blutverdünner nimmt: sofort Notruf 112.
 
@@ -499,34 +527,34 @@ sich hier nichts aus.
 ### steps
 1. So schnell wie möglich entfernen.
    Mit einer Zeckenkarte oder -zange nach deren Anleitung. Sonst mit einer Pinzette so dicht wie möglich an der Haut fassen und gleichmäßig und fest herausziehen.
-2. Die Stelle mit Wasser und Seife waschen.
+2. Die Stelle desinfizieren oder mit Wasser und Seife waschen.
 3. Datum und Ort des Stichs aufschreiben und die Stelle im Auge behalten.
 4. Zum Arzt bei Fieber, unerklärlicher Müdigkeit, Gelenkschmerzen oder wenn ein Ausschlag auftritt.
    Der Ausschlag bei Borreliose ist ein Fleck mit einem Ring darum. Er tritt aber nicht immer auf.
 
 ### cautions
 - Den Körper der Zecke nicht quetschen. Das drückt die Erreger in die Haut.
-- Keine Chemie und keine Hitze, um die Zecke zu betäuben oder zu töten.
+- Keine Chemie, kein Öl, kein Klebstoff und keine Hitze, um die Zecke zu betäuben oder zu töten.
 - Ein Zeckenstich wird anders behandelt als ein Schlangenbiss.
 
 ## insect-bite
 - group: injury
 - title: Insektenstich
 - when: Biene, Wespe, Hornisse, Mücke.
-- source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Insect bites or stings"
+- source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Insect bites or stings"; DRK
 
 ### steps
 1. Beruhigen und vom Kratzen abhalten.
 2. Steckt der Stachel noch: so schnell wie möglich heraus.
-   Mit etwas Flachem abschaben – Bankkarte, stumpfe Messerseite.
+   Mit etwas Flachem abschaben – Bankkarte, Fingernagel – oder mit einer Pinzette dicht an der Haut fassen. Schnell zählt mehr als die Methode.
 3. Die Stelle gründlich mit Wasser reinigen.
 4. Kühlen, gegen Schwellung, Juckreiz und Schmerz.
    Sitzt der Stich an der Hand: Ringe abnehmen.
 5. Sofort Notruf 112 bei einem Stich im Mund oder Rachen, oder bei Anzeichen einer allergischen Reaktion.
-   Im Mund kann die Schwellung die Atemwege verschließen. Bis Hilfe da ist, einen Eiswürfel lutschen lassen.
+   Im Mund kann die Schwellung die Atemwege verschließen. Bis Hilfe da ist, Eiswürfel lutschen lassen und den Hals von außen kühlen.
 
 ### cautions
-- Den Stachel nicht mit Pinzette oder Fingern fassen. Das drückt den Giftbeutel aus.
+- Nicht auf den Giftbeutel am Stachel drücken. Das presst das restliche Gift in die Haut.
 - Nicht kratzen.
 - Bei Atemnot, Schwellung im Gesicht oder Kreislaufproblemen ist es ein allergischer Schock – siehe die eigene Anleitung dazu.
 
@@ -553,18 +581,21 @@ sich hier nichts aus.
 - group: injury
 - title: Quallenkontakt
 - when: Brennende Striemen nach dem Baden in der See.
-- source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Aquatic animal injuries"
+- source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Aquatic animal injuries"; Deutsche Lebens-Rettungs-Gesellschaft (DLRG)
 
 ### steps
-1. Die Nesselzellen von der Haut entfernen und sich dabei selbst schützen.
+1. Aus dem Wasser, und die Stelle nicht reiben.
 2. Die Stelle mit Meerwasser abspülen.
-3. Wärme auf die Stelle, 20 bis 30 Minuten.
-   Warmes Wasser oder ein Wärmekissen, höchstens 45 °C. Heiß genug gegen den Schmerz, nicht so heiß, dass es verbrennt.
-4. Zum Arzt bei Tetanusgefahr oder wenn der Schmerz bleibt.
+3. Anhaftende Nesselfäden binden und abschaben, ohne sie mit bloßen Händen zu berühren.
+   Rasierschaum oder feuchten Sand auftragen, kurz antrocknen lassen und mit einer Karte oder einem Messerrücken abschaben.
+4. Gegen den Schmerz: Wärme auf die Stelle, 20 bis 30 Minuten.
+   Warmes Wasser oder ein Wärmekissen, höchstens 45 °C – heiß genug gegen den Schmerz, nicht so heiß, dass es verbrennt. Ist Kühlen angenehmer, darf auch vorsichtig gekühlt werden.
+5. Zum Arzt bei starken Schmerzen, großer Fläche, Tetanusgefahr oder wenn der Schmerz bleibt.
 
 ### cautions
-- Nicht mit Süßwasser abspülen – Meerwasser.
-- Bei einer schweren allergischen Reaktion sofort Notruf 112.
+- Nicht mit Süßwasser abspülen – Meerwasser. Süßwasser lässt die Nesselzellen platzen.
+- Kein Alkohol und kein Urin. Beides macht es schlimmer.
+- Bei Atemnot, Kreislaufproblemen oder einem Tentakel im Auge sofort Notruf 112.
 
 ### facts
 - Wärme: höchstens 45 °C, 20 bis 30 Minuten
@@ -594,11 +625,12 @@ sich hier nichts aus.
 ### steps
 1. Die Blutung im Mund mit einer Kompresse aus Gaze oder sauberer Watte stillen.
 2. Den Zahn suchen und nur an der Krone anfassen, nicht an der Wurzel.
-3. Feucht aufbewahren.
-   Salzlösung, eine Trinklösung oder Frischhaltefolie – bei Folie genug Speichel dazu, damit der Zahn nicht austrocknet. Sonst H-Milch oder der eigene Speichel.
+3. Feucht aufbewahren, am besten in einer Zahnrettungsbox.
+   Gibt es keine: kalte H-Milch, Kochsalzlösung oder fest in Frischhaltefolie, mit etwas Speichel, damit der Zahn nicht austrocknet.
 4. So schnell wie möglich zum Zahnarzt oder in die Notaufnahme, den Zahn mitnehmen.
 
 ### cautions
+- Den Zahn nicht abspülen, nicht säubern und nie trocken liegen lassen. Leitungswasser schadet den Zellen an der Wurzel.
 - Den Zahn nicht im Mund transportieren, außer die Person ist erwachsen, ganz wach und kann es sicher. Der freie Atemweg geht vor allem anderen.
 - Ein ausgeschlagener Zahn kann auf eine weitere Verletzung hindeuten – etwa am Kopf. Die geht vor.
 
@@ -666,12 +698,14 @@ sich hier nichts aus.
    Angst treibt den Puls und damit den Sauerstoffbedarf des Herzens.
 5. Jede Anstrengung vermeiden.
    Nicht laufen lassen, nicht Treppen steigen lassen.
-6. Bewusstlos und keine normale Atmung: sofort Wiederbelebung.
+6. Die Leitstelle fragen, ob du Acetylsalicylsäure geben sollst.
+   Die Leitlinien 2025 empfehlen Erwachsenen ohne bekannte Allergie eine Tablette Acetylsalicylsäure, 150 bis 500 mg, etwa Aspirin, zum Zerkauen. Die Menge ist die der Leitlinie, nicht die dieser App.
+7. Bewusstlos und keine normale Atmung: sofort Wiederbelebung.
 
 ### cautions
 - Bei Frauen, älteren Menschen und Diabetikern fehlt der typische Brustschmerz oft. Dann stehen Atemnot, Übelkeit, Oberbauchschmerz oder plötzliche Erschöpfung im Vordergrund.
 - Nicht selbst ins Krankenhaus fahren. Im Rettungswagen beginnt die Behandlung, im eigenen Auto nicht.
-- Kein Medikament geben, das nicht dieser Person verordnet wurde.
+- Sonst kein Medikament geben, das nicht dieser Person verordnet wurde. Hat sie ein eigenes Nitrospray, beim Anwenden helfen.
 
 ## seizure
 - group: illness
@@ -715,7 +749,7 @@ sich hier nichts aus.
    Durch die Kleidung hindurch möglich. Die Anleitung steht auf dem Gerät und ist in Sekunden gelesen.
 4. Flach hinlegen, Beine hoch.
    Bei Atemnot dagegen aufrecht sitzen lassen. Nicht plötzlich aufstehen lassen.
-5. Keine Besserung nach 5 bis 15 Minuten: zweite Dosis, wenn eine zweite da ist.
+5. Keine Besserung nach 5 Minuten: zweite Dosis, wenn eine zweite da ist.
 6. Bewusstlos und keine normale Atmung: Wiederbelebung.
 
 ### cautions
@@ -762,22 +796,36 @@ sich hier nichts aus.
 - Zucker: 15 bis 20 g
 - Nachlegen nach: 15 Minuten
 
+<!--
+Pseudokrupp folgt nicht der IFRC-Leitlinie, die noch feuchte, warme Luft
+nennt, sondern den deutschen Kinderärzten (BVKJ,
+kinderaerzte-im-netz.de), dem BIÖG (kindergesundheit-info.de) und dem
+IQWiG (gesundheitsinformation.de): beruhigen, aufrecht halten, kühle
+frische Luft. Warmer Dampf kommt dort nicht mehr vor; dass feuchte Luft
+überhaupt hilft, ist nicht belegt, und heißes Wasser kann verbrühen.
+-->
+
 ## croup
 - group: illness
 - title: Pseudokrupp
 - when: Ein Kind wacht nachts mit bellendem Husten und pfeifendem Einatmen auf.
-- source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Croup"
+- source: Berufsverband der Kinder- und Jugendärzte (kinderaerzte-im-netz.de), Bundesinstitut für Öffentliche Gesundheit (kindergesundheit-info.de), IQWiG (gesundheitsinformation.de)
 
 ### steps
-1. Ruhig bleiben und das Kind beruhigen, meist im Sitzen.
-   Das ist kein Nebensatz: bleibst du ruhig, wird es ruhiger, und die Atemnot lässt nach.
-2. Fieber messen und, wenn vorhanden, behandeln.
-3. Feuchte, warme Luft einatmen lassen.
-   Neben der laufenden Dusche sitzen oder über eine Schüssel mit heißem Wasser beugen – nicht so heiß, dass es verbrüht.
-4. Atmung und Reaktion genau beobachten. Bei schwerem oder anhaltendem Anfall: Notruf 112.
+1. Ruhig bleiben und das Kind beruhigen.
+   Das ist kein Nebensatz: Angst und Schreien lassen die Schleimhaut weiter anschwellen. Bleibst du ruhig, wird es ruhiger, und die Atemnot lässt nach.
+2. Das Kind hochnehmen oder aufrecht hinsetzen.
+   Im Liegen schwillt die Engstelle stärker an.
+3. Kühle, frische Luft atmen lassen.
+   Am offenen Fenster, vor dem offenen Kühlschrank oder draußen in der Nachtluft – im Winter warm angezogen. Kühle Luft lässt die Schleimhaut abschwellen.
+4. Hat die Kinderärztin ein Notfallmedikament verordnet, meist ein Kortisonzäpfchen: nach ihrer Anweisung geben.
+   Ist das Kind ruhiger, etwas Kühles in kleinen Schlucken trinken lassen, Wasser oder Tee.
+5. Atmung und Reaktion genau beobachten. Bei schwerem oder anhaltendem Anfall: Notruf 112.
+   Auch wenn es besser wird: beim ersten Anfall immer zur Kinderärztin.
 
 ### cautions
-- Sofort 112 bei schwerer Atemnot: aufrecht und vorgebeugt, Mund offen, Hals- und Schultermuskeln arbeiten mit, Nasenflügel beben, über dem Brustbein zieht es ein.
+- Kein heißer Dampf – keine Schüssel mit heißem Wasser, keine heiße Dusche. Dass es hilft, ist nicht belegt, und es kann verbrühen.
+- Sofort 112 bei schwerer Atemnot: aufrecht und vorgebeugt, Mund offen, Hals- und Schultermuskeln arbeiten mit, Nasenflügel beben, über dem Brustbein zieht es ein, Lippen oder Nägel werden bläulich, das Kind wird matt.
 - Aus leicht kann in wenigen Stunden schwer werden. Und es gibt eine ähnlich aussehende Entzündung des Kehldeckels, die sofort in ärztliche Hände gehört. Im Zweifel anrufen.
 
 ## faint
@@ -802,19 +850,20 @@ sich hier nichts aus.
 - group: illness
 - title: Fieber
 - when: Erhöhte Temperatur, Frösteln, Schwäche.
-- source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Fever"
+- source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Fever"; S3-Leitlinie „Fiebermanagement bei Kindern und Jugendlichen" (DGKJ, 2025)
 
 ### steps
 1. Ruhen lassen und leicht anziehen.
 2. Zu trinken geben – Schwitzen kostet Flüssigkeit.
 3. Oft braucht es kein Medikament.
-   Geht es der Person schlecht, kann Paracetamol in der empfohlenen Dosis das Fieber senken. Auch Abwaschen mit lauwarmem Wasser hilft, solange es nicht unangenehm ist.
+   Gesenkt wird nach dem Befinden, nicht nach der Zahl auf dem Thermometer. Geht es der Person schlecht, helfen Paracetamol oder Ibuprofen nach Packungsbeilage. Auch Abwaschen mit lauwarmem Wasser hilft, solange es nicht unangenehm ist.
 4. Den Zustand beobachten und auf neue Zeichen achten.
 
 ### cautions
 - Nicht mit Kleidung und Decken einpacken.
 - Nicht mit kaltem Wasser abwaschen. Das ist unangenehm und hält die Wärme im Körper.
-- Paracetamol ist das Mittel der Wahl. Ibuprofen kann den Magen reizen und die Nieren schädigen. Zwei Fiebermittel nebeneinander nur mit genauem Plan, sonst wird doppelt dosiert.
+- Paracetamol und Ibuprofen wirken vergleichbar. Ibuprofen erst ab drei Monaten. Zwei Fiebermittel im Wechsel nur nach ärztlicher Rücksprache, sonst wird doppelt dosiert.
+- Wadenwickel nur, wenn Hände und Füße warm sind, und körperwarm, nicht kalt.
 
 ## childbirth
 - group: illness
@@ -846,20 +895,20 @@ sich hier nichts aus.
 - group: environment
 - title: Unterkühlung
 - when: Zittern, kalte blasse Haut, Verlangsamung, Verwirrung – nach Kälte, Nässe oder Wind. Hört das Zittern auf, wird es gefährlich.
-- source: Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)
+- source: Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC); DRK
 
 ### steps
 1. Aus der Kälte holen, vor Wind und Nässe schützen.
 2. Nasse Kleidung entfernen, notfalls aufschneiden.
-3. In Decken einpacken, auch unter der Person.
-   Kopf mit einpacken. Der Boden zieht die meiste Wärme.
-4. Wach und schluckfähig: warme, gezuckerte Getränke.
-5. Wärme auf Rumpf, Hals und Kopf, nicht auf Arme und Beine.
-   Wärmflasche oder Wärmepad, immer mit einem Tuch dazwischen.
-6. 112 bei Verwirrung, aufhörendem Zittern oder Schläfrigkeit.
+3. In Decken einpacken, auch unter der Person, und langsam von selbst warm werden lassen.
+   Kopf mit einpacken, eine Rettungsdecke darüber. Der Boden zieht die meiste Wärme.
+4. Wach, zitternd und schluckfähig: warme, gut gezuckerte Getränke.
+5. Zittert die Person nicht mehr, ist sie schläfrig oder verwirrt: 112, nicht mehr aufwärmen.
+   Nur noch zudecken, so wenig wie möglich bewegen und Atmung beobachten.
+6. Auch sonst 112, wenn es nicht rasch besser wird.
 
 ### cautions
-- Arme und Beine nicht reiben und nicht aktiv erwärmen. Das treibt kaltes Blut zum Herzen.
+- Keine Wärmflasche, kein Heizlüfter, kein heißes Bad, und Arme und Beine nicht reiben. Das treibt kaltes Blut zum Herzen.
 - So wenig wie möglich bewegen. Ein stark unterkühltes Herz kann durch Erschütterung stehenbleiben.
 - Kein Alkohol. Er fühlt sich warm an und kühlt aus.
 - Bei schwerer Unterkühlung Atmung und Puls bis zu einer Minute prüfen – beides kann kaum wahrnehmbar sein. Niemand ist tot, bevor er nicht warm und tot ist.
@@ -868,17 +917,20 @@ sich hier nichts aus.
 - group: environment
 - title: Hitzeerschöpfung und Hitzschlag
 - when: Nach Hitze oder Anstrengung: Schwäche, Kopfschmerz, Übelkeit. Kommt heiße trockene Haut, Verwirrung oder Bewusstlosigkeit dazu, ist es ein Hitzschlag und lebensbedrohlich.
-- source: Bundeszentrale für gesundheitliche Aufklärung und Erste-Hilfe-Leitlinien 2025 des ERC
+- source: Erste-Hilfe-Leitlinien 2025 des ERC; DRK; Bundeszentrale für gesundheitliche Aufklärung
 
 ### steps
 1. In den Schatten oder in einen kühlen Raum bringen.
-2. Hinlegen, Beine hoch, Kleidung öffnen.
-3. Bei Bewusstsein: in kleinen Schlucken Wasser trinken lassen.
-4. Kühlen: feuchte Tücher, Luft zufächeln, kaltes Wasser auf Nacken, Achseln und Leisten.
-5. 112 bei Verwirrung, heißer trockener Haut, Erbrechen oder Bewusstlosigkeit.
-   Das ist ein Hitzschlag. Weiterkühlen, bis der Rettungsdienst da ist.
+2. Mit leicht erhöhtem Oberkörper lagern, Kleidung öffnen.
+   Ist die Person benommen oder wird ihr schwarz vor Augen: flach hinlegen, Beine hoch.
+3. Ganz wach: in kleinen Schlucken Wasser trinken lassen.
+4. Kühlen: nasse Tücher, Luft zufächeln, kühles Wasser auf Nacken, Achseln und Leisten.
+5. 112 bei Verwirrung, heißer trockener Haut, Erbrechen oder Bewusstlosigkeit – das ist ein Hitzschlag. Dann so kräftig wie möglich kühlen.
+   Am besten bis zum Hals in kaltes Wasser, etwa in der Badewanne, sonst kalte Dusche oder nasse Tücher am ganzen Körper. Erst kühlen, dann transportieren: weiterkühlen, bis der Rettungsdienst übernimmt.
 
 ### cautions
+- Im Wasser den Kopf über Wasser halten und die Person keinen Moment allein lassen.
+- Kein Eis direkt auf die Haut.
 - Nichts zu trinken geben, wenn die Person verwirrt oder nicht ganz wach ist.
 - Kein Alkohol und nichts Koffeinhaltiges.
 - Ein Hitzschlag ist kein stärkerer Sonnenbrand. Ohne Behandlung endet er tödlich.
@@ -887,7 +939,7 @@ sich hier nichts aus.
 - group: environment
 - title: Vergiftung
 - when: Etwas wurde geschluckt, eingeatmet, verschüttet oder in die Augen bekommen, das dort nicht hingehört.
-- source: Giftinformationszentren der Länder, Bundesinstitut für Risikobewertung
+- source: Giftinformationszentren der Länder, Bundesinstitut für Risikobewertung; DRK
 
 ### steps
 1. Eigene Sicherheit: bei Gas und Rauch nicht hineingehen.
@@ -896,8 +948,10 @@ sich hier nichts aus.
    Was, wie viel, wann, wie alt und wie schwer ist die Person, welche Beschwerden.
 4. Die Verpackung, den Rest und gegebenenfalls Erbrochenes aufheben.
 5. Haut oder Augen betroffen: 10 bis 15 Minuten mit fließendem Wasser spülen.
-   Beim Auge vom inneren zum äußeren Winkel, damit nichts ins gesunde Auge läuft.
-6. Bewusstlos und normale Atmung: stabile Seitenlage.
+   Beim Auge vom inneren zum äußeren Winkel, damit nichts ins gesunde Auge läuft. Benetzte Kleidung ausziehen, dabei Handschuhe tragen.
+6. Ätzendes geschluckt, etwa Reiniger, Säure oder Lauge: ist die Person ganz wach, Wasser oder Tee in kleinen Schlucken trinken lassen.
+   Das verdünnt. Mehr nicht, und nur, solange sie gut schlucken kann.
+7. Bewusstlos und normale Atmung: stabile Seitenlage.
 
 ### cautions
 - Kein Erbrechen auslösen. Bei Säuren, Laugen und Schäumern richtet der Weg zurück mehr Schaden an als der Weg hinunter.
@@ -932,26 +986,28 @@ Kummer, beide kostenfrei und rund um die Uhr.
 - group: environment
 - title: Erfrierungen
 - when: Weiße, harte, gefühllose Stellen an Fingern, Zehen, Nase oder Ohren.
-- source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Frostbite"
+- source: DRK; International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Frostbite"
 
 ### steps
 1. Zuerst vor Unterkühlung schützen.
-   An einen wärmeren Ort bringen, nasse Kleidung ausziehen, trocken und warm halten.
-2. Schmuck vorsichtig abnehmen, solange das ohne Verletzung geht.
-3. Die Stelle behutsam in körperwarmem Wasser aufwärmen.
-   Meist etwa 30 Minuten, bis sie wieder durchwärmt ist.
-4. Mit steriler Gaze verbinden. Sind mehrere Finger oder Zehen betroffen, Gaze dazwischenlegen.
-5. Die Leitlinie stellt zusätzlich ein Schmerzmittel zur Erwägung.
+   An einen wärmeren Ort bringen, nasse Kleidung ausziehen, trocken und warm halten. Eine Unterkühlung geht vor.
+2. Ärztliche Hilfe holen; bei großen Flächen oder zusätzlicher Unterkühlung 112.
+3. Schmuck vorsichtig abnehmen und enge Kleidung und Schuhe öffnen, solange das ohne Verletzung geht.
+4. Locker mit steriler Gaze abdecken. Sind mehrere Finger oder Zehen betroffen, Gaze dazwischenlegen.
+5. Mit Körperwärme wärmen, etwa die Hände in der eigenen Achselhöhle – nicht bei hart gefrorenen Stellen.
+6. Nur wenn ärztliche Hilfe für Stunden nicht erreichbar ist und ein erneutes Durchfrieren ausgeschlossen: in körperwarmem Wasser auftauen.
+   Meist etwa 30 Minuten, bis die Stelle wieder durchwärmt ist.
+7. Die IFRC-Leitlinie stellt dann zusätzlich ein Schmerzmittel zur Erwägung.
    Hochdosiertes Ibuprofen, 400 bis 800 mg, oder – wenn das nicht da ist – niedrig dosierte Acetylsalicylsäure, 75 bis 81 mg. Das kann die Heilung verbessern. Die Mengen sind die der Leitlinie, nicht die dieser App.
 
 ### cautions
 - Nicht reiben und nicht grob anfassen – das schädigt die Haut.
-- Nicht an direkte Hitze wie Heizlüfter oder Herd.
+- Nicht an direkte Hitze wie Heizlüfter, Herd oder Wärmflasche.
 - Blasen nicht öffnen.
-- Nur aufwärmen, wenn ein erneutes Durchfrieren ausgeschlossen ist. Ärztliche Hilfe ist bei Erfrierungen immer nötig.
+- Erfrierungen gehören immer in ärztliche Behandlung.
 
 ### facts
-- Aufwärmen: körperwarmes Wasser, ~30 Minuten
+- Auftauen ohne ärztliche Hilfe: körperwarmes Wasser, ~30 Minuten
 
 ## dehydration
 - group: environment
@@ -963,7 +1019,7 @@ Kummer, beide kostenfrei und rund um die Uhr.
 1. Beruhigen und reichlich zu trinken geben.
 2. Leichter Fall: Wasser genügt.
 3. Schwerer Fall: eine Trinklösung.
-   Ist keine da: Apfelsaft, Kokoswasser oder Wasser.
+   Ist keine da: Apfelsaft, halb mit Wasser verdünnt, Kokoswasser oder Wasser.
 4. Trinklösung selbst ansetzen: auf einen Liter Trinkwasser einen halben Teelöffel Salz und sechs Teelöffel Zucker.
 5. Notruf 112, wenn die Person verwirrt wird oder nicht mehr ansprechbar ist.
 

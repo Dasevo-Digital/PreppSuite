@@ -91,12 +91,11 @@ class FirstAidGuideScreen extends ConsumerWidget {
                         child: FilledButton.icon(
                           onPressed: () => Navigator.of(context).push(
                             MaterialPageRoute<void>(
-                              builder: (_) => CompressionPacerScreen(
-                                // The child guide counts to fifteen.
-                                compressionsPerCycle: guide.id == 'cpr-child'
-                                    ? 15
-                                    : 30,
-                              ),
+                              // 30:2 for every guide, the child's included:
+                              // since the 2025 guidelines 15:2 is for
+                              // helpers trained in resuscitating children,
+                              // who switch to it on the pacer itself.
+                              builder: (_) => const CompressionPacerScreen(),
                             ),
                           ),
                           icon: const Icon(Icons.graphic_eq),

@@ -10,6 +10,11 @@ The telephone numbers are the German ones, because the app is used in
 Germany whatever language it is read in. 112 is the emergency number
 across the European Union either way.
 
+Reviewed against the German Red Cross's first aid pages, the ERC 2025
+guidelines and, for children, the German paediatric sources on
+11 October 2026; where the sources differ, a comment at the guide in
+`de.md` says which one it follows and why.
+
 Format: README.md in this folder.
 -->
 
@@ -108,22 +113,25 @@ Format: README.md in this folder.
 
 ### steps
 1. Call 112 as soon as the child does not react and is not breathing normally.
-   Speaker on, phone down — you stay with the child and keep your hands free. Until 2021 the rule here was one minute of resuscitation first; since the 2025 guidelines the order is the same as for an adult.
+   Speaker on, phone down beside you — you stay with the child, keep your hands free, and the dispatcher talks you through it. Alone and without a phone: one minute of resuscitation first, then go for help.
 2. Start with 5 rescue breaths, not with compressions.
-   In children the heart nearly always stops for want of oxygen, not the other way round. On an infant, seal your mouth over mouth and nose together.
-3. Push 15 times, then give 2 breaths.
-   Child: one or two heels of the hand. Infant: two fingers, or both thumbs with your hands encircling the chest.
+   In children the heart nearly always stops for want of oxygen, not the other way round. On an infant, seal your mouth over mouth and nose together and keep the head level, not tipped back.
+3. Push 30 times, then give 2 breaths.
+   Child: one or both heels of the hand on the lower half of the breastbone. Infant: with both thumbs, your hands encircling the chest.
 4. Push a third of the depth of the chest.
-   About 5 cm in a child, about 4 cm in an infant. Same rate as an adult: 100 to 120 a minute.
-5. Carry on 15:2 until help arrives.
+   About 5 cm in a child, about 4 cm in an infant, never more than 6 cm. Same rate as an adult: 100 to 120 a minute.
+5. Carry on 30:2 until help arrives.
 
 ### cautions
-- If 15:2 is more than you trust yourself with, use 30:2 as for an adult. That is expressly allowed and far better than hesitating.
+- If you have done a course in resuscitating children, use 15:2 instead of 30:2. Without such a course, 30:2 as for an adult.
 - Pushing too gently is the commonest mistake. A child whose heart has stopped cannot be saved by timid compressions.
+- Learnt it with two fingers on an infant? That is still far better than hesitating. The 2025 guidelines recommend both thumbs because they push harder and more evenly.
 
 ### facts
 - First: 5 rescue breaths
-- Then: 15 compressions : 2 breaths
+- Then: 30 compressions : 2 breaths
+- With a children's course: 15 : 2
+- Infant: both thumbs, hands round the chest
 - Depth, child: about 5 cm
 - Depth, infant: about 4 cm
 - Rate: 100–120 per minute
@@ -147,7 +155,7 @@ Format: README.md in this folder.
 
 ### cautions
 - An AED never shocks somebody who does not need it. It analyses by itself and only then releases the button.
-- Children under eight: use paediatric pads if there are any. If there are none, use the adult pads — better than no shock.
+- Children under 25 kg, roughly under eight: paediatric mode or paediatric pads if there are any. Otherwise the adult pads — better than no shock. On a small child, one pad on the front in the middle of the chest, slightly left, the other on the back between the shoulder blades.
 - Do not put a pad over a pacemaker; a few centimetres to the side is enough. Peel off any medication patches first.
 
 ## recovery-position
@@ -201,7 +209,7 @@ Format: README.md in this folder.
 - group: lifeThreatening
 - title: Drowning
 - when: Somebody is in trouble in the water, or has just been got out.
-- source: International first aid, resuscitation and education guidelines 2025 (IFRC), "Drowning"
+- source: European Resuscitation Council (ERC) Guidelines 2025; International first aid, resuscitation and education guidelines 2025 (IFRC), "Drowning"
 
 ### steps
 1. Do not go into the water.
@@ -210,8 +218,8 @@ Format: README.md in this folder.
    A pole, a branch, an oar, a rope, a ring buoy.
 3. Call 112.
 4. On land, speak to them loudly and check the breathing.
-5. Not breathing normally: resuscitate at once, 30 compressions and 2 rescue breaths.
-   With drowning the rescue breaths belong to it — unlike a cardiac arrest. Start with the compressions all the same.
+5. Not breathing normally: 5 rescue breaths first, then resuscitate, 30 compressions and 2 rescue breaths.
+   In drowning it is oxygen that runs out first. So here — unlike an adult's cardiac arrest — you start with the breaths.
 6. Defibrillator: dry the skin before the pads go on.
 7. Breathing normally: recovery position, head placed so that fluid can drain from the mouth.
 8. Take vomit or debris out only where it is genuinely blocking the breathing.
@@ -222,7 +230,8 @@ Format: README.md in this folder.
 - No pressure on the chest that makes breathing harder.
 
 ### facts
-- Ratio: 30 compressions, 2 breaths
+- First: 5 rescue breaths
+- Then: 30 compressions, 2 breaths
 
 ## severe-bleeding
 - group: injury
@@ -315,19 +324,19 @@ Format: README.md in this folder.
 - group: injury
 - title: Burns and scalds
 - when: Heat, fire, hot liquid, electricity or chemicals have injured the skin.
-- source: European Resuscitation Council (ERC) First Aid Guidelines 2025
+- source: First aid guidelines of the European Resuscitation Council (ERC) and the German Red Cross; for children the German AWMF S2k guideline on thermal injuries in childhood (2024)
 
 ### steps
 1. Stop the cause.
    Smother flames, switch off the power, take off hot soaked clothing as long as it is not stuck.
-2. Cool small areas for 10 to 20 minutes.
-   Running lukewarm water, around 20 °C. Hands, feet, face or single patches only.
+2. Cool small areas straight away, for at least 20 minutes.
+   Running cool water — cool, not ice-cold. On children only small patches on arms and legs, 10 minutes at most, with hand-warm water.
 3. Take off rings, watches and bracelets straight away.
    Before it swells. Afterwards it is too late.
 4. Cover loosely with something clean.
-   A burn dressing or a clean cloth. Nothing that sheds fibres.
+   A burn dressing, clingfilm laid on loosely (not wrapped round) or a clean cloth. Nothing that sheds fibres.
 5. Do not cool large areas — cover them and keep the person warm.
-   More than the casualty’s own palm. Cooling then causes hypothermia, which is more dangerous than the burn.
+   Cooling then causes hypothermia, which is more dangerous than the burn. Do not cool infants at all, nor a child's trunk or head.
 6. Call 112 for large areas, for face, hands, genitals or joints, for children, and for electrical and chemical burns.
 
 ### cautions
@@ -335,6 +344,10 @@ Format: README.md in this folder.
 - Do not open blisters.
 - No ointment, no oil, no flour, no powder, no home remedy.
 - Do not pull off clothing that has stuck. Cut around it rather than tearing it away.
+
+### facts
+- Cooling, adults: at least 20 minutes, cool water
+- Cooling, children: 10 minutes at most, hand-warm, arms and legs only
 
 ## fracture
 - group: injury
@@ -431,6 +444,7 @@ Format: README.md in this folder.
 1. Sit down and tip the head slightly forward.
    Forward, not back.
 2. Pinch the nostrils together, 10 to 15 minutes without letting go.
+   A cool cloth on the back of the neck is fine as well, but it does not replace the pinching.
 3. If it has not stopped after 15 minutes, or they go lightheaded from the blood loss: medical help.
 4. After a blow, with signs of a brain injury, a misshapen nose, a facial fracture — or if they take anticoagulants: call 112 at once.
 
@@ -466,34 +480,34 @@ Format: README.md in this folder.
 ### steps
 1. Get it out as quickly as you can.
    With a tick card or tool, following its instructions. Otherwise grip it with tweezers as close to the skin as possible and pull it out steadily and firmly.
-2. Wash the site with soap and water.
+2. Disinfect the site or wash it with soap and water.
 3. Write down the date and where it happened, and keep an eye on the spot.
 4. See a doctor for fever, unexplained tiredness, joint pain, or if a rash appears.
    The Lyme rash is a patch with a ring around it. It does not always appear.
 
 ### cautions
 - Do not squeeze the tick's body. That pushes the organisms into the skin.
-- No chemicals and no heat to stun or kill it.
+- No chemicals, no oil, no glue and no heat to stun or kill it.
 - A tick bite is treated differently from a snakebite.
 
 ## insect-bite
 - group: injury
 - title: Insect sting
 - when: Bee, wasp, hornet, mosquito.
-- source: International first aid, resuscitation and education guidelines 2025 (IFRC), "Insect bites or stings"
+- source: International first aid, resuscitation and education guidelines 2025 (IFRC), "Insect bites or stings"; German Red Cross
 
 ### steps
 1. Reassure them and keep them from scratching.
 2. If the stinger is still in: out as fast as possible.
-   Scrape it off with something flat — a bank card, the blunt side of a knife.
+   Scrape it off with something flat — a bank card, a fingernail — or grip it with tweezers close to the skin. Speed matters more than the method.
 3. Clean the site thoroughly with water.
 4. Cool it, against swelling, itching and pain.
    If it is on the hand: take the rings off.
 5. Call 112 at once for a sting in the mouth or throat, or at any sign of an allergic reaction.
-   In the mouth the swelling can close the airway. While you wait, let them suck an ice cube.
+   In the mouth the swelling can close the airway. While you wait, let them suck ice cubes and cool the neck from outside.
 
 ### cautions
-- Do not take the stinger with tweezers or fingers. That squeezes the venom sac.
+- Do not press on the venom sac on the stinger. That squeezes the rest of the venom into the skin.
 - No scratching.
 - Breathlessness, a swelling face or circulatory trouble make it anaphylaxis — see its own guide.
 
@@ -520,18 +534,21 @@ Format: README.md in this folder.
 - group: injury
 - title: Jellyfish sting
 - when: Burning weals after swimming in the sea.
-- source: International first aid, resuscitation and education guidelines 2025 (IFRC), "Aquatic animal injuries"
+- source: International first aid, resuscitation and education guidelines 2025 (IFRC), "Aquatic animal injuries"; German Life Saving Association (DLRG)
 
 ### steps
-1. Take the stinging cells off the skin, protecting yourself as you do.
+1. Out of the water, and do not rub the area.
 2. Rinse the area with seawater.
-3. Heat on the area, 20 to 30 minutes.
-   Warm water or a heat pack, 45 °C at most. Hot enough against the pain, not so hot that it burns.
-4. See a doctor where there is a tetanus risk or the pain stays.
+3. Bind and scrape off any tentacles still sticking, without touching them with bare hands.
+   Put on shaving foam or wet sand, let it dry a little and scrape it off with a card or the back of a knife.
+4. Against the pain: heat on the area, 20 to 30 minutes.
+   Warm water or a heat pack, 45 °C at most — hot enough against the pain, not so hot that it burns. If cooling feels better, gentle cooling is fine too.
+5. See a doctor for severe pain, a large area, a tetanus risk, or pain that stays.
 
 ### cautions
-- Do not rinse with fresh water — seawater.
-- For a severe allergic reaction, call 112 at once.
+- Do not rinse with fresh water — seawater. Fresh water makes the stinging cells burst.
+- No alcohol and no urine. Both make it worse.
+- For breathing difficulty, circulatory trouble or a tentacle in the eye, call 112 at once.
 
 ### facts
 - Heat: 45 °C at most, 20 to 30 minutes
@@ -561,11 +578,12 @@ Format: README.md in this folder.
 ### steps
 1. Stop the bleeding in the mouth with a compress of gauze or clean cotton.
 2. Find the tooth and pick it up by the crown only, not the root.
-3. Keep it moist.
-   Saline, a rehydration solution or clingfilm — with clingfilm, add enough of their saliva so the tooth does not dry out. Otherwise milk or their own saliva.
+3. Keep it moist, best in a tooth rescue box.
+   If there is none: cold long-life milk, saline, or wrapped tight in clingfilm with a little saliva so the tooth does not dry out.
 4. To a dentist or emergency department as fast as possible, taking the tooth.
 
 ### cautions
+- Do not rinse the tooth, do not clean it and never let it dry. Tap water harms the cells on the root.
 - Do not carry the tooth in the mouth unless the person is an adult, fully awake and can do it safely. A clear airway comes before everything.
 - A knocked-out tooth can point to another injury — to the head, for instance. That comes first.
 
@@ -633,12 +651,14 @@ Format: README.md in this folder.
    Fear drives the pulse, and with it the heart’s demand for oxygen.
 5. Avoid every exertion.
    Do not let them walk, do not let them climb stairs.
-6. Unconscious and not breathing normally: start resuscitation.
+6. Ask the dispatcher whether to give acetylsalicylic acid.
+   The 2025 guidelines recommend that an adult with no known allergy chews one tablet of acetylsalicylic acid, 150 to 500 mg, aspirin for instance. The amount is the guidelines', not this app's.
+7. Unconscious and not breathing normally: start resuscitation.
 
 ### cautions
 - In women, older people and diabetics the typical chest pain is often missing. Breathlessness, nausea, upper abdominal pain or sudden exhaustion come to the fore instead.
 - Do not drive to hospital yourselves. Treatment starts in the ambulance; it does not start in your car.
-- Give no medication that was not prescribed for this person.
+- Otherwise give no medication that was not prescribed for this person. If they have their own nitro spray, help them use it.
 
 ## seizure
 - group: illness
@@ -682,7 +702,7 @@ Format: README.md in this folder.
    Through clothing is fine. The instructions are on the device and take seconds to read.
 4. Lay them flat, legs up.
    If they are struggling to breathe, let them sit upright instead. Do not let them stand up suddenly.
-5. No better after 5 to 15 minutes: a second dose, if there is a second one.
+5. No better after 5 minutes: a second dose, if there is a second one.
 6. Unconscious and not breathing normally: resuscitation.
 
 ### cautions
@@ -733,18 +753,23 @@ Format: README.md in this folder.
 - group: illness
 - title: Croup
 - when: A child wakes in the night with a barking cough and a whistling breath in.
-- source: International first aid, resuscitation and education guidelines 2025 (IFRC), "Croup"
+- source: German paediatricians' association (kinderaerzte-im-netz.de), German Federal Institute for Public Health (kindergesundheit-info.de), IQWiG (gesundheitsinformation.de)
 
 ### steps
-1. Stay calm and settle the child, usually sitting up.
-   That is not a throwaway line: if you stay calm they become calmer, and the breathing eases.
-2. Take their temperature and treat a fever if there is one.
-3. Let them breathe warm, humid air.
-   Sitting by a running shower, or leaning over a bowl of hot water — not hot enough to scald.
-4. Watch breathing and response closely. For a severe or persisting episode: call 112.
+1. Stay calm and settle the child.
+   That is not a throwaway line: fear and crying make the lining swell further. If you stay calm they become calmer, and the breathing eases.
+2. Pick the child up or sit them upright.
+   Lying down, the narrowing swells more.
+3. Let them breathe cool, fresh air.
+   At an open window, in front of the open fridge or outside in the night air — dressed warmly in winter. Cool air makes the lining go down.
+4. If the paediatrician has prescribed an emergency medicine, usually a cortisone suppository: give it as instructed.
+   Once the child is calmer, let them sip something cool, water or tea.
+5. Watch breathing and response closely. For a severe or persisting episode: call 112.
+   Even if it eases: after a first episode always see the paediatrician.
 
 ### cautions
-- Call 112 at once for severe breathing difficulty: sitting up and leaning forward, mouth open, neck and shoulder muscles working, nostrils flaring, a hollow forming at the base of the neck.
+- No hot steam — no bowl of hot water, no hot shower. There is no evidence it helps, and it can scald.
+- Call 112 at once for severe breathing difficulty: sitting up and leaning forward, mouth open, neck and shoulder muscles working, nostrils flaring, a hollow forming at the base of the neck, lips or nails turning bluish, the child going limp.
 - Mild can become severe within a few hours. And there is a croup-like inflammation of the epiglottis that needs urgent medical care. In any doubt, call.
 
 ## faint
@@ -769,19 +794,20 @@ Format: README.md in this folder.
 - group: illness
 - title: Fever
 - when: A raised temperature, shivering, weakness.
-- source: International first aid, resuscitation and education guidelines 2025 (IFRC), "Fever"
+- source: International first aid, resuscitation and education guidelines 2025 (IFRC), "Fever"; German S3 guideline on managing fever in children and adolescents (DGKJ, 2025)
 
 ### steps
 1. Let them rest and dress lightly.
 2. Give them something to drink — sweating costs fluid.
 3. Often no medicine is needed.
-   If they feel unwell, paracetamol at the recommended dose can bring the fever down. Sponging with lukewarm water helps too, as long as it does not upset them.
+   Treat how they feel, not the number on the thermometer. If they feel unwell, paracetamol or ibuprofen as the leaflet says. Sponging with lukewarm water helps too, as long as it does not upset them.
 4. Watch how they are and look out for new signs.
 
 ### cautions
 - Do not pack them in clothes and blankets.
 - Do not sponge with cold water. It is unpleasant and keeps the heat in the body.
-- Paracetamol is the one to reach for. Ibuprofen can irritate the stomach and damage the kidneys. Two antipyretics alongside each other only with a careful plan, or the dose is doubled.
+- Paracetamol and ibuprofen work about equally well. Ibuprofen only from three months of age. Alternating two fever medicines only after asking a doctor, or the dose gets doubled.
+- Cool calf wraps only when hands and feet are warm, and at body temperature, not cold.
 
 ## childbirth
 - group: illness
@@ -813,20 +839,20 @@ Format: README.md in this folder.
 - group: environment
 - title: Hypothermia
 - when: Shivering, cold pale skin, slowing down, confusion — after cold, wet or wind. When the shivering stops, it is getting dangerous.
-- source: European Resuscitation Council (ERC) First Aid Guidelines 2025
+- source: European Resuscitation Council (ERC) First Aid Guidelines 2025; German Red Cross
 
 ### steps
 1. Get them out of the cold, out of wind and wet.
 2. Take off wet clothing, cutting it off if need be.
-3. Wrap them in blankets, underneath as well.
-   Cover the head too. The ground takes the most heat.
-4. Awake and able to swallow: warm, sweet drinks.
-5. Warmth on trunk, neck and head, not on arms and legs.
-   A hot water bottle or a heat pad, always with a cloth in between.
-6. Call 112 for confusion, for shivering that has stopped, or for drowsiness.
+3. Wrap them in blankets, underneath as well, and let them warm up slowly by themselves.
+   Cover the head too, with a foil blanket over the top. The ground takes the most heat.
+4. Awake, shivering and able to swallow: warm, well-sweetened drinks.
+5. No longer shivering, drowsy or confused: call 112 and stop rewarming.
+   Just keep them covered, move them as little as possible and watch the breathing.
+6. Call 112 in any case if it does not improve quickly.
 
 ### cautions
-- Do not rub arms and legs and do not warm them actively. That drives cold blood to the heart.
+- No hot water bottle, no fan heater, no hot bath, and do not rub arms and legs. That drives cold blood to the heart.
 - Move them as little as possible. A deeply cold heart can stop from being jolted.
 - No alcohol. It feels warm and cools them down.
 - In severe hypothermia check breathing and pulse for up to a minute — both may be barely detectable. Nobody is dead until they are warm and dead.
@@ -835,17 +861,20 @@ Format: README.md in this folder.
 - group: environment
 - title: Heat exhaustion and heatstroke
 - when: After heat or exertion: weakness, headache, nausea. If hot dry skin, confusion or unconsciousness join it, it is heatstroke and life-threatening.
-- source: German Federal Centre for Health Education (BZgA) and ERC First Aid Guidelines 2025
+- source: ERC First Aid Guidelines 2025; German Red Cross; German Federal Centre for Health Education (BZgA)
 
 ### steps
 1. Get them into shade or a cool room.
-2. Lay them down, legs up, loosen clothing.
-3. Conscious: let them sip water.
-4. Cool them: damp cloths, fan air over them, cold water on neck, armpits and groin.
-5. Call 112 for confusion, hot dry skin, vomiting or unconsciousness.
-   That is heatstroke. Keep cooling until the ambulance arrives.
+2. Rest them with the upper body slightly raised, loosen clothing.
+   If they are dazed or their vision goes dark: lay them flat, legs up.
+3. Fully awake: let them sip water.
+4. Cool them: wet cloths, fan air over them, cool water on neck, armpits and groin.
+5. Call 112 for confusion, hot dry skin, vomiting or unconsciousness — that is heatstroke. Then cool as hard as you can.
+   Best up to the neck in cold water, in a bath for instance; otherwise a cold shower or wet cloths all over. Cool first, then transport: keep cooling until the ambulance takes over.
 
 ### cautions
+- In the water keep the head above the surface and never leave them for a moment.
+- No ice straight onto the skin.
 - Give nothing to drink if they are confused or not fully awake.
 - No alcohol and nothing with caffeine.
 - Heatstroke is not a bad case of sunburn. Untreated it kills.
@@ -854,7 +883,7 @@ Format: README.md in this folder.
 - group: environment
 - title: Poisoning
 - when: Something has been swallowed, breathed in, spilled or got into the eyes that does not belong there.
-- source: German poison information centres, Federal Institute for Risk Assessment (BfR)
+- source: German poison information centres, Federal Institute for Risk Assessment (BfR); German Red Cross
 
 ### steps
 1. Your own safety: do not walk into gas or smoke.
@@ -863,8 +892,10 @@ Format: README.md in this folder.
    What, how much, when, how old and how heavy the person is, what symptoms.
 4. Keep the packaging, what is left, and any vomit.
 5. Skin or eyes affected: rinse for 10 to 15 minutes under running water.
-   For an eye, from the inner corner outwards so nothing runs into the good eye.
-6. Unconscious and breathing normally: recovery position.
+   For an eye, from the inner corner outwards so nothing runs into the good eye. Take off soaked clothing, wearing gloves.
+6. Swallowed something corrosive, a cleaner, an acid or an alkali: if they are fully awake, let them sip water or tea.
+   That dilutes it. No more than that, and only while they can swallow well.
+7. Unconscious and breathing normally: recovery position.
 
 ### cautions
 - Do not make them vomit. With acids, alkalis and foaming agents the way back up does more harm than the way down.
@@ -895,26 +926,28 @@ here.
 - group: environment
 - title: Frostbite
 - when: White, hard, numb patches on fingers, toes, nose or ears.
-- source: International first aid, resuscitation and education guidelines 2025 (IFRC), "Frostbite"
+- source: German Red Cross; International first aid, resuscitation and education guidelines 2025 (IFRC), "Frostbite"
 
 ### steps
 1. Protect them from hypothermia first.
-   Move them somewhere warmer, take off wet clothing, keep them dry and warm.
-2. Take off jewellery carefully, while that is possible without damaging the skin.
-3. Warm the area gently in water at body temperature.
+   Move them somewhere warmer, take off wet clothing, keep them dry and warm. Hypothermia comes first.
+2. Get medical help; for large areas or hypothermia as well, call 112.
+3. Take off jewellery carefully and loosen tight clothing and shoes, while that is possible without injury.
+4. Cover loosely with sterile gauze. Where several digits are affected, put gauze between them.
+5. Warm with body heat, the hands in their own armpits for instance — not where it is frozen hard.
+6. Only where medical help is hours away and refreezing is ruled out: thaw it in water at body temperature.
    Usually about 30 minutes, until it is warmed through.
-4. Dress it with sterile gauze. Where several digits are affected, put gauze between them.
-5. The guidelines additionally put a painkiller up for consideration.
+7. The IFRC guidelines then additionally put a painkiller up for consideration.
    A high dose of ibuprofen, 400 to 800 mg, or — where that is not available — a low dose of acetylsalicylic acid, 75 to 81 mg. It may improve healing. The amounts are the guidelines', not this app's.
 
 ### cautions
 - Do not rub and do not handle roughly — that damages the skin.
-- Not near direct heat such as a fan heater or a stove.
+- Not near direct heat such as a fan heater, a stove or a hot water bottle.
 - Do not break blisters.
-- Rewarm only where refreezing is ruled out. Frostbite always needs medical care.
+- Frostbite always needs medical care.
 
 ### facts
-- Rewarming: body-temperature water, ~30 minutes
+- Thawing without medical help: body-temperature water, ~30 minutes
 
 ## dehydration
 - group: environment
@@ -926,7 +959,7 @@ here.
 1. Reassure them and give them plenty to drink.
 2. Mild case: water is enough.
 3. More severe: an oral rehydration solution.
-   If there is none: apple juice, coconut water or water.
+   If there is none: apple juice diluted half and half with water, coconut water, or water.
 4. To make it yourself: half a teaspoon of salt and six teaspoons of sugar in one litre of drinking water.
 5. Call 112 if they become confused or stop responding.
 

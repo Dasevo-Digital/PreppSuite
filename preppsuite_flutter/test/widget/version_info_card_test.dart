@@ -59,7 +59,7 @@ void main() {
     // sie wird gemessen, und gemessen wird in derselben Schrift, in der
     // danach gezeichnet wird.
     const longName = 'Erste-Hilfe-Inhalte';
-    const longValue = 'Quellenstand ERC 2025 (GRC-Fassung)';
+    const longValue = 'Quellenstand ERC 2025, mit DRK abgeglichen 10/2026';
     const shortName = 'Offline-Kartenformat';
     const shortValue = 'PMTiles v3';
 

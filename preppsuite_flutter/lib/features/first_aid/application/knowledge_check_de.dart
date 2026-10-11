@@ -46,21 +46,21 @@ const knowledgeQuestionsDe = <KnowledgeQuestion>[
     guideId: 'hypothermia',
     question: 'Unterkühlte Person: Arme und Beine warm reiben?',
     answers: [
-      'Nein, wärmen nur Rumpf, Hals und Kopf',
+      'Nein, einpacken und langsam warm werden lassen',
       'Ja, kräftig reiben bringt den Kreislauf in Gang',
       'Nur die Hände',
     ],
     correct: 0,
     because:
-        'Arme und Beine nicht reiben und nicht aktiv erwärmen. Das '
-        'treibt kaltes Blut zum Herzen.',
+        'Keine Wärmflasche, kein Heizlüfter, kein heißes Bad, und Arme und '
+        'Beine nicht reiben. Das treibt kaltes Blut zum Herzen.',
   ),
   KnowledgeQuestion(
     id: 'burns-ice',
     guideId: 'burns',
     question: 'Womit kühlst du eine kleine Verbrennung?',
     answers: [
-      'Handwarmem Wasser, 10 bis 20 Minuten',
+      'Kühlem Wasser, nicht eiskalt',
       'Eiswürfeln aus dem Gefrierfach',
       'Gar nicht, Luft reicht',
     ],
@@ -278,14 +278,15 @@ const knowledgeQuestionsDe = <KnowledgeQuestion>[
         'Jemand wurde aus dem Wasser geholt und atmet nicht. Nur drücken '
         'oder auch beatmen?',
     answers: [
-      'Auch beatmen, 30 zu 2',
+      'Auch beatmen: erst 5 Beatmungen, dann 30 zu 2',
       'Nur drücken, wie beim Herzstillstand',
       'Erst das Wasser herausdrücken',
     ],
     correct: 0,
     because:
-        'Beim Ertrinken gehören die Beatmungen dazu – anders als beim '
-        'Herzstillstand. Angefangen wird trotzdem mit dem Drücken.',
+        'Beim Ertrinken fehlt zuerst der Sauerstoff. Deshalb beginnt man '
+        'hier – anders als beim Herzstillstand eines Erwachsenen – mit dem '
+        'Beatmen.',
   ),
   KnowledgeQuestion(
     id: 'hypo-diet-drink',
@@ -304,12 +305,12 @@ const knowledgeQuestionsDe = <KnowledgeQuestion>[
     guideId: 'frostbite',
     question: 'Erfrorene Finger an den Heizlüfter halten?',
     answers: [
-      'Nein, körperwarmes Wasser',
+      'Nein, mit Körperwärme wärmen',
       'Ja, Hauptsache schnell warm',
       'Ja, aber nur kurz',
     ],
     correct: 0,
-    because: 'Nicht an direkte Hitze wie Heizlüfter oder Herd.',
+    because: 'Nicht an direkte Hitze wie Heizlüfter, Herd oder Wärmflasche.',
   ),
   KnowledgeQuestion(
     id: 'nosebleed-head',
@@ -350,8 +351,8 @@ const knowledgeQuestionsDe = <KnowledgeQuestion>[
     ],
     correct: 0,
     because:
-        'Keine Chemie und keine Hitze, um die Zecke zu betäuben oder zu '
-        'töten.',
+        'Keine Chemie, kein Öl, kein Klebstoff und keine Hitze, um die '
+        'Zecke zu betäuben oder zu töten.',
   ),
   KnowledgeQuestion(
     id: 'amputation-ice',
@@ -379,5 +380,19 @@ const knowledgeQuestionsDe = <KnowledgeQuestion>[
     ],
     correct: 0,
     because: 'Nicht mit Süßwasser abspülen – Meerwasser.',
+  ),
+  KnowledgeQuestion(
+    id: 'croup-air',
+    guideId: 'croup',
+    question: 'Pseudokrupp-Anfall in der Nacht. Was hilft dem Kind?',
+    answers: [
+      'Kühle, frische Luft am offenen Fenster',
+      'Heißer Dampf aus der Dusche',
+      'Hinlegen und schlafen lassen',
+    ],
+    correct: 0,
+    because:
+        'Kein heißer Dampf – keine Schüssel mit heißem Wasser, keine heiße '
+        'Dusche. Dass es hilft, ist nicht belegt, und es kann verbrühen.',
   ),
 ];

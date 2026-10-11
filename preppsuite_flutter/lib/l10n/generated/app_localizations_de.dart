@@ -4394,7 +4394,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsVersionInfoFirstAidValue =>
-      'Quellenstand ERC 2025 (GRC-Fassung)';
+      'Quellenstand ERC 2025, mit DRK abgeglichen 10/2026';
 
   @override
   String get settingsVersionInfoApp => 'PreppSuite-App';
@@ -6002,7 +6002,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get firstAidContentVersionBody =>
-      'Inhalt nach den Leitlinien 2025 des European Resuscitation Council, deutsche Fassung des German Resuscitation Council. Die Seiten unter „Seelische Not\" folgen den International first aid, resuscitation and education guidelines 2025 der IFRC. Was in einem Erste-Hilfe-Kurs gelehrt wird, stimmen die Hilfsorganisationen gemeinsam ab; im Kurs gilt, was dort gesagt wird.';
+      'Inhalt nach den Leitlinien 2025 des European Resuscitation Council, deutsche Fassung des German Resuscitation Council, im Oktober 2026 Anleitung für Anleitung mit den Erste-Hilfe-Seiten des DRK abgeglichen. Einzelne Anleitungen folgen der IFRC, den Kinderärzten, der DLRG oder einer AWMF-Leitlinie; jede nennt ihre Quelle. Was in einem Erste-Hilfe-Kurs gelehrt wird, stimmen die Hilfsorganisationen gemeinsam ab; im Kurs gilt, was dort gesagt wird.';
 
   @override
   String get firstAidEntryHint =>

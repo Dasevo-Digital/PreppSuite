@@ -7321,7 +7321,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsVersionInfoFirstAidValue.
   ///
   /// In en, this message translates to:
-  /// **'ERC 2025 source status (GRC edition)'**
+  /// **'ERC 2025 sources, checked against German Red Cross 10/2026'**
   String get settingsVersionInfoFirstAidValue;
 
   /// No description provided for @settingsVersionInfoApp.
@@ -9979,7 +9979,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstAidContentVersionBody.
   ///
   /// In en, this message translates to:
-  /// **'Content follows the 2025 Guidelines of the European Resuscitation Council. The pages under \"Mental distress\" follow the IFRC International first aid, resuscitation and education guidelines 2025. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.'**
+  /// **'Content follows the 2025 Guidelines of the European Resuscitation Council and was checked guide by guide against the German Red Cross\'s first aid pages in October 2026. Some guides follow the IFRC, the paediatricians, the German Life Saving Association or a German clinical guideline; each one names its source. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.'**
   String get firstAidContentVersionBody;
 
   /// No description provided for @firstAidEntryHint.
