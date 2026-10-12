@@ -479,6 +479,7 @@ sich hier nichts aus.
 - group: injury
 - title: Wunden und Schürfwunden
 - when: Die kleine Verletzung, die es am häufigsten gibt.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Cuts and grazes"
 
 ### steps
@@ -642,6 +643,7 @@ sich hier nichts aus.
 - group: injury
 - title: Ausgeschlagener Zahn
 - when: Ein bleibender Zahn ist ganz herausgeschlagen.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Dental avulsion"
 
 ### steps
@@ -1145,6 +1147,7 @@ Kummer, beide kostenfrei und rund um die Uhr.
 - group: mentalDistress
 - title: Angst und Panikattacke
 - when: Herzrasen, Atemnot, Enge in der Brust, Todesangst – und nach Minuten geht es von selbst zurück.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Anxiety and panic"
 
 ### steps

@@ -616,6 +616,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
     facts: [
       FirstAidFact('Tetanus nach schmutziger Wunde', 'alle 5 Jahre'),
     ],
+    chart: 'assets/first_aid/de/cuts-and-grazes.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Cuts and grazes"',
   ),
   FirstAidGuide(
@@ -832,6 +833,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Den Zahn nicht im Mund transportieren, außer die Person ist erwachsen, ganz wach und kann es sicher. Der freie Atemweg geht vor allem anderen.',
       'Ein ausgeschlagener Zahn kann auf eine weitere Verletzung hindeuten – etwa am Kopf. Die geht vor.',
     ],
+    chart: 'assets/first_aid/de/dental-avulsion.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Dental avulsion"',
   ),
   FirstAidGuide(
@@ -1508,6 +1510,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Atmen', 'ein auf 1, aus auf 3'),
       FirstAidFact('Telefonseelsorge, europaweit', '116 123'),
     ],
+    chart: 'assets/first_aid/de/anxiety-panic.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Anxiety and panic"',
   ),
   FirstAidGuide(

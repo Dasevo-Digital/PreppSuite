@@ -645,12 +645,14 @@ text is what was checked against the guidelines. Before a chart goes in,
 every instruction drawn into it is read against its guide, and one that
 gives a different time, position or prohibition stays out until it is
 redrawn, and so does one whose wording is garbled or misspelt into
-another meaning. A chart that is right but for a few words gets them
-corrected in `tool/first_aid/chart_patches.py`, keyed to the SHA-256 of
-the exact picture it was measured on, so a redrawn picture is checked
-afresh rather than patched blind. Since 2026-10-12, 42 of the 46 guides
-have a chart; the corrections and the charts held back are listed in
-`docs/erste-hilfe.md`. Leaving something out is allowed: the steps are
+another meaning. A chart that is right but for a few words or one
+picture gets them corrected in `tool/first_aid/chart_patches.py`: the
+words set anew, a wrong picture crossed out with the charts' own
+prohibition sign or covered by a plain drawing that says the right
+thing. Each correction is keyed to the SHA-256 of the exact picture it
+was measured on, so a redrawn picture is checked afresh rather than
+patched blind. Since 2026-10-12, 45 of the 46 guides have a chart; the
+corrections are listed in `docs/erste-hilfe.md`. Leaving something out is allowed: the steps are
 right underneath.
 
 **First aid works on a fresh install with no network, no download and no

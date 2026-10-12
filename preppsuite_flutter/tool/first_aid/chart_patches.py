@@ -20,12 +20,18 @@ Two ways of changing text, in this order of preference:
   PT Sans Narrow). This runs on the Mac that builds the releases and
   nowhere else.
 
+Where a picture says something wrong, it is not redrawn in its own
+style here. It is crossed out with the charts' own prohibition sign, or
+covered by a plain shape in the charts' colours -- a box, a curve -- that
+says the right thing.
+
 Ink is found by how much darker a pixel is than the plane fitted through
 the light pixels around it, so a soft shading behind the text survives.
 """
 
 from dataclasses import dataclass
 import hashlib
+import math
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
@@ -599,6 +605,332 @@ def _fever(image):
         ((918, 0, 927, 0), 1077), 1, ((937, 0, 1010, 0), 1077)])
 
 
+def _drawn(image, box, paint, scale=4):
+    """Lays shapes over [box] of [image], drawn at [scale] times the size
+    and scaled down so that their edges are as soft as the chart's own.
+
+    [paint](draw, scale, at) draws them; [at] turns chart coordinates
+    into the drawing's.
+    """
+    x0, y0, x1, y1 = box
+    layer = Image.new("RGBA", ((x1 - x0) * scale, (y1 - y0) * scale), (0, 0, 0, 0))
+
+    def at(*xy):
+        return [(v - (x0 if i % 2 == 0 else y0)) * scale for i, v in enumerate(xy)]
+
+    paint(ImageDraw.Draw(layer), scale, at)
+    layer = layer.resize((x1 - x0, y1 - y0), Image.LANCZOS)
+    image.paste(layer, (x0, y0), layer)
+
+
+def _centred(image, centre, baseline, text, size, colour, face):
+    set_line(image, round(centre - text_width(text, size, face) / 2), baseline,
+             text, size, colour, face=face)
+
+
+def _forbidden(image, centre, radius, width, colour=(226, 24, 30)):
+    """The charts' prohibition sign, a red ring and bar, laid over a
+    picture to say "not like this". Edged in white, so that it stands
+    out on a painted picture as it does on the plain ground of a "Nicht
+    tun" cell."""
+    edge = 3
+    box = (centre[0] - radius - edge - 4, centre[1] - radius - edge - 4,
+           centre[0] + radius + edge + 4, centre[1] + radius + edge + 4)
+    a = radius * math.cos(math.radians(45))
+    bar = (centre[0] - a, centre[1] - a, centre[0] + a, centre[1] + a)
+
+    def paint(d, s, at):
+        cx, cy = at(*centre)
+        for r, w, fill in ((radius + edge, width + 2 * edge, (255, 255, 255, 230)),
+                           (radius, width, colour + (255,))):
+            d.ellipse((cx - r * s, cy - r * s, cx + r * s, cy + r * s),
+                      outline=fill, width=w * s)
+            d.line(at(*bar), fill=fill, width=w * s)
+
+    _drawn(image, box, paint)
+
+
+def _fill_smooth(pixels, unknown, known, steps=3000):
+    """Fills the [unknown] pixels from the [known] ones around them, each
+    one the mean of its neighbours, so that the fill runs into its
+    surroundings without a seam. Pixels that are neither -- a figure in
+    front of the wall being filled -- take no part. Starts from the
+    pixels as given, which should already be close."""
+    out = pixels.astype(float).copy()
+    take = unknown | known
+    h, w = unknown.shape
+    for _ in range(steps):
+        total = np.zeros_like(out)
+        count = np.zeros((h, w, 1))
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            src = (slice(max(dy, 0), h + min(dy, 0)), slice(max(dx, 0), w + min(dx, 0)))
+            dst = (slice(max(-dy, 0), h + min(-dy, 0)), slice(max(-dx, 0), w + min(-dx, 0)))
+            total[dst] += out[src] * take[src][..., None]
+            count[dst] += take[src][..., None]
+        out[unknown] = (total / np.maximum(count, 1))[unknown]
+    return out
+
+
+def _dental_avulsion(image):
+    # Step 2 was "Wenn verschmutzt: kurz und sanft abspülen", its picture
+    # a tooth under the tap. The guide: never rinse it, never clean it,
+    # tap water harms the cells on the root. The heading and the points
+    # now say that, and the picture carries the charts' own "Nicht tun"
+    # sign. Avenir Next Condensed, Bold for the heading and Medium for the
+    # points, measured on the chart's own lines.
+    text, heading, green = (2, 5, 28), (0, 6, 61), (3, 82, 50)
+    # Step 1 ended "Nicht reinigen, wenn er sauber ist" -- and if not?
+    erase(image, (44, 346, 328, 377))
+    erase(image, (40, 377, 92, 399))
+    set_line(image, 49, 365, "Nicht spülen, nicht reinigen.", 25.9, text,
+             face=CONDENSED_MEDIUM)
+    erase(image, (616, 166, 944, 233))
+    erase(image, (616, 233, 920, 245))  # the p's tail, short of the tap
+    set_line(image, 621, 196, "Nicht abspülen,", 32.6, heading, face=CONDENSED_BOLD)
+    set_line(image, 621, 232, "nie trocken lagern.", 32.6, heading,
+             face=CONDENSED_BOLD)
+    # "Nicht schrubben, nicht / mit Bürste reinigen." stays, a line higher
+    # and on the others' left edge; its bullet is set anew with theirs.
+    k = ink(image, (556, 380, 800, 442))
+    erase(image, (526, 258, 836, 378))
+    erase(image, (526, 380, 800, 442))
+    erase(image, (526, 444, 836, 504))
+    erase(image, (836, 472, 854, 503))
+    paste_ink(image, (552, 351), k.alpha, k.colour)
+    for baseline, line in ((281, "Auch einen schmutzigen"),
+                           (309, "Zahn nicht abspülen, auch"),
+                           (337, "nicht kurz, nicht säubern."),
+                           (437, "Leitungswasser schadet"),
+                           (465, "den Zellen an der Wurzel."),
+                           (501, "Nie trocken liegen lassen.")):
+        # Clear of the sign, whose white edge begins at 823.
+        assert 562 + text_width(line, 25.9, CONDENSED_MEDIUM) <= 815, line
+        set_line(image, 562, baseline, line, 25.9, text, face=CONDENSED_MEDIUM)
+    for baseline in (281, 373, 437, 501):
+        dot(image, (536, baseline - 8), 5, green)
+    _forbidden(image, (918, 418), 92, 15)
+    # "die besten Chancen den Zahn zu retten" wants its comma.
+    _rebuilt(image, (24, 98, 895, 142), [(24, 639), 7, (639, 895)], light=True)
+    set_line(image, 640, 129, ",", 36.7, (254, 253, 252), face=CONDENSED_DEMI)
+
+
+def _anxiety_panic(image):
+    # Two steps taught what the guide leaves out on purpose. Step 2
+    # breathed 4-2-6; the guide breathes along, in on one, out on three.
+    # Step 4 was the 5-4-3-2-1 method, for which the 2025 guidelines give
+    # no recommendation; the guide says instead that the attack is a
+    # reaction to strain, passes by itself and peaks after ten to fifteen
+    # minutes. That is drawn as a curve where the five senses were.
+    text, heading = (7, 19, 63), (0, 10, 78)
+    blue, cream, cream_edge = (31, 90, 133), (253, 239, 224), (238, 214, 190)
+    red = (214, 34, 40)
+
+    # Step 2: the first bullet's dot stays and is copied for the third.
+    bullet = ink(image, (576, 240, 594, 262))
+    erase(image, (596, 236, 836, 263))
+    erase(image, (596, 263, 818, 402))  # short of the breath arrows
+    for baseline, line in ((257, "Voratmen, mitatmen lassen."),
+                           (284, "Auf eins durch die Nase"),
+                           (312, "ein, auf drei durch den"),
+                           (340, "Mund aus."),
+                           (368, "In den Bauch atmen"),
+                           (395, "lassen.")):
+        set_line(image, 602, baseline, line, 22.9, text, face=CONDENSED_MEDIUM)
+    paste_ink(image, (576, 351), bullet.alpha, bullet.colour)
+    # The "4 - 2 - 6" box, drawn again over itself: the blue label, two
+    # cells instead of three.
+    erase(image, (816, 437, 1000, 447), ring=3)
+
+    def breathing(d, s, at):
+        d.rounded_rectangle(at(778, 443, 1015, 518), radius=11 * s,
+                            fill=cream + (255,), outline=cream_edge + (255,), width=s)
+        d.line(at(896.5, 462, 896.5, 510), fill=(225, 200, 178, 255), width=s)
+        d.rounded_rectangle(at(820, 391, 995, 442), radius=10 * s, fill=(255, 255, 255, 255))
+        d.rounded_rectangle(at(822, 393, 993, 440), radius=9 * s, fill=blue + (255,))
+        for x in (837, 956):
+            d.line(at(x, 442, x, 456), fill=text + (255,), width=round(1.6 * s))
+            d.polygon(at(x - 4, 452, x + 4, 452, x, 458), fill=text + (255,))
+
+    _drawn(image, (770, 385, 1020, 522), breathing)
+    _centred(image, 907.5, 428, "Mitatmen", 30, (255, 255, 255), CONDENSED_DEMI)
+    for centre, count, verb in ((837, "1", "einatmen"), (956, "3", "ausatmen")):
+        auf = text_width("auf ", 19, CONDENSED_MEDIUM)
+        left = round(centre - (auf + text_width(count, 27, CONDENSED_BOLD)) / 2)
+        set_line(image, left, 484, "auf", 19, text, face=CONDENSED_MEDIUM)
+        set_line(image, round(left + auf), 484, count, 27, text, face=CONDENSED_BOLD)
+        _centred(image, centre, 507, verb, 20.5, text, CONDENSED_MEDIUM)
+
+    # Step 4.
+    erase(image, (584, 534, 1006, 633))
+    set_line(image, 590, 569, "Sagen, dass es vorbeigeht.", 35.4, heading,
+             face=CONDENSED_DEMI)
+    set_line(image, 591, 597, "Eine Reaktion auf Anspannung,", 25.9, text,
+             face=CONDENSED_MEDIUM)
+    set_line(image, 591, 624, "sie lässt von selbst nach.", 25.9, text,
+             face=CONDENSED_MEDIUM)
+    erase(image, (566, 633, 1009, 866))
+    left, right, axis, top = 604, 978, 826, 678
+
+    def x_of(minutes):
+        return left + (right - left - 14) * minutes / 32
+
+    def strength(minutes):
+        # Rises, peaks at 12.5 minutes, ebbs; the shape, not a measurement.
+        u = minutes / 12.5
+        return 0.10 + 0.90 * u ** 3 * math.exp(3 * (1 - u))
+
+    curve = [(x_of(m / 4), axis - strength(m / 4) * (axis - top)) for m in range(129)]
+    peak = (x_of(12.5), axis - (axis - top))
+
+    def graph(d, s, at):
+        d.rounded_rectangle(at(572, 638, 1005, 862), radius=12 * s,
+                            fill=(255, 255, 255, 255), outline=(206, 226, 236, 255), width=s)
+        d.rectangle(at(x_of(10), top - 6, x_of(15), axis), fill=(253, 228, 226, 255))
+        line = [v for p in curve for v in at(*p)]
+        d.polygon(line + at(x_of(32), axis, x_of(0), axis), fill=(246, 196, 192, 150))
+        d.line(line, fill=red + (255,), width=round(4.5 * s), joint="curve")
+        d.line(at(left, axis, right, axis), fill=text + (255,), width=2 * s)
+        d.polygon(at(right + 9, axis, right - 1, axis - 6, right - 1, axis + 6),
+                  fill=text + (255,))
+        cx, cy = at(*peak)
+        d.ellipse((cx - 6 * s, cy - 6 * s, cx + 6 * s, cy + 6 * s),
+                  fill=(255, 255, 255, 255), outline=red + (255,), width=3 * s)
+        for minutes in (10, 15):
+            d.line(at(x_of(minutes), axis, x_of(minutes), axis + 6),
+                   fill=text + (255,), width=2 * s)
+
+    _drawn(image, (566, 633, 1010, 868), graph)
+    _centred(image, peak[0], top - 14, "Höhepunkt", 21, red, CONDENSED_DEMI)
+    _centred(image, peak[0], axis + 26, "10 bis 15 Min.", 19, text, CONDENSED_MEDIUM)
+    set_line(image, left - 2, axis + 26, "0", 19, text, face=CONDENSED_MEDIUM)
+    set_line(image, right - 50, axis + 26, "Zeit", 19, text, face=CONDENSED_MEDIUM)
+    set_line(image, 588, 668, "Angst", 19, text, face=CONDENSED_MEDIUM)
+    set_line(image, 860, 712, "lässt von", 20, text, face=CONDENSED_DEMI)
+    set_line(image, 860, 734, "selbst nach", 20, text, face=CONDENSED_DEMI)
+
+
+def _plaster(image, centre, length, width, angle):
+    """A sticking plaster as on the chart's header: white rim, a white pad
+    across the middle, a cross of dots on each end."""
+    u = (math.cos(math.radians(angle)), -math.sin(math.radians(angle)))
+    n = (-u[1], u[0])
+    half, r = (length - width) / 2, width / 2
+    cx, cy = centre
+    ends = [(cx - half * u[0], cy - half * u[1]), (cx + half * u[0], cy + half * u[1])]
+    box = (round(cx - length / 2 - 8), round(cy - length / 2 - 8),
+           round(cx + length / 2 + 8), round(cy + length / 2 + 8))
+    white = (255, 255, 255, 255)
+
+    def paint(d, s, at):
+        for radius, fill in ((r, white), (r - 4.2, (215, 15, 22, 255))):
+            d.line(at(*ends[0], *ends[1]), fill=fill, width=round(2 * radius * s))
+            for end in ends:
+                x, y = at(*end)
+                d.ellipse((x - radius * s, y - radius * s, x + radius * s, y + radius * s),
+                          fill=fill)
+        pad = length * 0.17
+        corners = [(cx + a * pad * u[0] + b * r * n[0], cy + a * pad * u[1] + b * r * n[1])
+                   for a, b in ((-1, -1), (1, -1), (1, 1), (-1, 1))]
+        d.polygon([v for p in corners for v in at(*p)], fill=white)
+        step, spot = width * 0.2, width * 0.065 * s
+        for sign in (-1, 1):
+            along = sign * (pad + (half + r * 0.45 - pad) / 2 + 2)
+            for dx, dy in ((0, 0), (step, 0), (-step, 0), (0, step), (0, -step)):
+                x, y = at(cx + along * u[0] + dx, cy + along * u[1] + dy)
+                d.ellipse((x - spot, y - spot, x + spot, y + spot), fill=white)
+
+    _drawn(image, box, paint)
+
+
+def _right_margin(image, sections):
+    """Puts back a right margin the picture was cropped without: each of
+    [sections] (top, bottom, right edge, corner radius) ends in rounded
+    corners, and beyond them is the page, taken row by row from the left
+    margin."""
+    a = np.asarray(image).astype(float)
+    page = np.median(a[:, 2:10], axis=1)
+    s = 4
+    for top, bottom, right, radius in sections:
+        x0, y0, x1, y1 = 940, max(top - 3, 0), image.width, bottom + 3
+        mask = Image.new("L", ((x1 - x0) * s, (y1 - y0) * s), 0)
+        ImageDraw.Draw(mask).rounded_rectangle(
+            ((900 - x0) * s, (top - y0) * s, (right - x0) * s, (bottom - y0) * s),
+            radius=radius * s, fill=255)
+        inside = np.asarray(mask.resize((x1 - x0, y1 - y0), Image.LANCZOS))
+        inside = inside.astype(float)[..., None] / 255
+        a[y0:y1, x0:x1] = a[y0:y1, x0:x1] * inside + page[y0:y1, None, :] * (1 - inside)
+    image.paste(Image.fromarray(a.clip(0, 255).astype(np.uint8)))
+
+
+def _cuts_and_grazes(image):
+    # The picture was cropped on the right: no margin, the plaster in the
+    # header cut through, and step 4, the card beside step 5 and the last
+    # "Nicht tun" cell ending mid-word. Each part is mended where it
+    # stands, then the margin goes back on.
+    def deep_red(p):
+        return (p[..., 0] > 180) & (p[..., 1] < 40) & (p[..., 2] < 45)
+
+    # Header: the plaster painted out (round the title's last N), drawn
+    # whole and a little smaller.
+    _paint_over(image, (934, 15, 1024, 87), deep_red)
+    _paint_over(image, (918, 87, 1024, 147), deep_red)
+    _plaster(image, (958, 100), 90, 44, 55)
+
+    # Step 4, set anew in Arial Narrow, to the guide's "Haut ringsum
+    # trocknen und die Wunde abdecken".
+    erase(image, (785, 558, 1010, 733))
+    for baseline, line in ((579, "Haut um die Wunde"), (606, "trocknen."),
+                           (637, "Sterile, nicht haftende"),
+                           (663, "Kompresse auflegen."),
+                           (694, "Mit Pflaster oder"), (720, "Verband fixieren.")):
+        assert 787 + text_width(line, 25.9) <= 995, line
+        set_line(image, 787, baseline, line, 25.9, (3, 10, 39))
+
+    # Step 5 said "in der Regel alle 10 Jahre auffrischen". The guide:
+    # every five years after a dirty wound, otherwise every ten.
+    erase(image, (155, 1016, 540, 1068))  # "Bei tiefen" begins at 1069
+    set_line(image, 157, 1037, "Tetanusschutz prüfen (alle 10 Jahre,", 26, (9, 24, 56))
+    set_line(image, 157, 1062, "nach schmutziger Wunde alle 5).", 26, (9, 24, 56))
+    # The card beside the picture ("Tetanussc… prüfen (i. d. R. a… 10
+    # Jahr…") goes; it said the same as the line now does. Behind it is
+    # the wall, filled from what shows of it above the boy and below the
+    # card. Only the card is painted over: everything right of the boy,
+    # and its pale ground beside him.
+    a = np.asarray(image).astype(float)
+    x0, x1, y0, y1 = 890, 1006, 860, 1124
+    pixels = a[y0:y1, x0:x1]
+    lum = pixels.mean(axis=2)
+    sat = pixels.max(axis=2) - pixels.min(axis=2)
+    ys, xs = np.mgrid[y0:y1, x0:x1]
+    card = (xs >= 942) & (ys < 1074)
+    r, b = pixels[..., 0], pixels[..., 2]
+    # The boy: hair and skin warmer and darker than the wall, his shirt
+    # saturated, its outline dark (the card's dark letters lie higher).
+    boy = ((r - b > 45) & (lum < 200)) | (sat > 90) | ((lum < 160) & (ys > 990))
+    pale = (lum > 222) & (b >= r - 4)
+    paint = card & ((xs >= 957) | ~boy | pale)
+    wall = ~card & (lum > 200) & (sat < 45)
+    start = pixels.copy()
+    start[paint] = _plane(pixels, wall)[paint]
+    filled = _fill_smooth(start, paint, wall)
+    filled[paint] += np.random.default_rng(1).normal(0, 1.0, (paint.sum(), 3))
+    a[y0:y1, x0:x1] = filled
+    image.paste(Image.fromarray(a.clip(0, 255).astype(np.uint8)))
+
+    # The last "Nicht tun" cell moves left, clear of the new edge, and its
+    # middle line -- "aggressive Desinfektionsmit…" -- reads "aggressive
+    # Mittel", in the face nearest the cell's own.
+    image.paste(image.crop((800, 1176, 1024, 1372)), (788, 1176))
+    erase(image, (775, 1316, 1012, 1337))
+    erase(image, (775, 1336, 809, 1346))
+    _centred(image, 898, 1333, "aggressive Mittel", 23.1, (7, 12, 32), CONDENSED_MEDIUM)
+
+    # The margin, as wide as on the left, with the left's rounded corners.
+    _right_margin(image, [(2, 148, 1007, 13), (156, 501, 1005, 12),
+                          (507, 853, 1005, 12), (859, 1126, 1005, 12),
+                          (1129, 1369, 1006, 12)])
+
+
 PATCHES = {
     "2f3080016a087fb64c673fdb02ea867d3009b269ee17a935a18ae2c7423a316c": (
         "Beine hochlagern statt nicht hochlagern", _anaphylaxis),
@@ -636,6 +968,13 @@ PATCHES = {
         "TelefonSeelsorge und telefonseelsorge.de", _suicidal_ideation),
     "20440a995670918c35dd4f8a49b1d2e3df753767aedafe249d8bd37a4da38ed4": (
         "Anzeichen statt Krankzeichen", _fever),
+    "c6ebd22e70937a494019d6763ab4aa644315f1f6585dc1e9cefc47fe959133bc": (
+        "rechter Rand ergänzt, abgeschnittene Zeilen neu; Tetanus wie im Text",
+        _cuts_and_grazes),
+    "6f5609fb48a544d191889fdf7653c92d085b1ac56079781736fdc5c72249c42b": (
+        "Zahn nicht abspülen statt kurz abspülen", _dental_avulsion),
+    "ed579bdf60fb514265d3ddd452bede97fb73b2a58b7cdff8a0080467935ab1ba": (
+        "Mitatmen 1/3 statt 4-2-6; Verlauf statt 5-4-3-2-1", _anxiety_panic),
 }
 
 

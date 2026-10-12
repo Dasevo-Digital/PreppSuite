@@ -256,7 +256,7 @@ Bildschirmdichte.
 
 ## Die Bildtafeln
 
-42 der 46 deutschen Anleitungen haben zusätzlich eine Bildtafel: ein Bild,
+45 der 46 deutschen Anleitungen haben zusätzlich eine Bildtafel: ein Bild,
 in das die Schritte mit Zeichnungen eingetragen sind. Sie steht klein
 über den Schritten und ersetzt dort die Strichzeichnung; die Lupe öffnet
 sie als Vollbild, in das sich hineinzoomen lässt. Die Tafeln tragen
@@ -333,24 +333,41 @@ korrigiert:
   www.telefonseelsorge.de.
 - **Fieber:** „Anzeichen" statt „Krankzeichen".
 
-Drei bleiben draußen, bis sie neu gezeichnet sind:
+Die übrigen drei blieben zunächst draußen und kamen am selben Tag
+korrigiert hinein. Hier reichte es nicht, Wörter zu tauschen: ein Bild
+war falsch oder fehlte. Es wird nicht im Stil der Tafel neu gemalt,
+sondern mit dem Verbotszeichen der Tafeln durchgestrichen oder von einer
+schlichten Zeichnung in ihren Farben ersetzt.
 
-- **Wunden und Schürfwunden:** Die Tafel ist am rechten Rand
-  abgeschnitten; mehrere Zeilen enden mitten im Wort.
-- **Ausgeschlagener Zahn:** Schritt 2 spült den Zahn ab, das Bild unter
-  dem Wasserhahn. Die Anleitung sagt: nicht abspülen, Leitungswasser
-  schadet den Zellen an der Wurzel.
-- **Angst und Panikattacke:** Die Tafel lehrt die 5-4-3-2-1-Methode und
-  ein Atmen nach 4-2-6. Für die „fünf Dinge, die du siehst" sprechen die
-  IFRC-Leitlinien 2025 ausdrücklich keine Empfehlung aus; die Anleitung
-  lässt sie deshalb bewusst weg und atmet vor und mit, ein auf 1, aus
-  auf 3.
+- **Wunden und Schürfwunden:** Die Tafel war am rechten Rand
+  abgeschnitten: kein Rand, das Pflaster im Kopf angeschnitten, und in
+  Schritt 4, im Kasten neben Schritt 5 und im letzten „Nicht tun"-Feld
+  endeten Zeilen mitten im Wort. Der Rand ist ergänzt, das Pflaster neu
+  gezeichnet, die Zeilen neu gesetzt. Der Kasten neben Schritt 5 ist
+  weg; dahinter ist die Wand ergänzt. Der Tetanus-Punkt sagte „in der
+  Regel alle 10 Jahre", jetzt wie im Text „alle 10 Jahre, nach
+  schmutziger Wunde alle 5".
+- **Ausgeschlagener Zahn:** Schritt 2 ließ den Zahn „kurz und sanft
+  abspülen", das Bild unter dem Wasserhahn. Die Anleitung sagt: nicht
+  abspülen, Leitungswasser schadet den Zellen an der Wurzel. Schritt 2
+  heißt jetzt „Nicht abspülen, nie trocken lagern", das Bild trägt das
+  Verbotszeichen. Schritt 1 sagte „Nicht reinigen, wenn er sauber ist";
+  jetzt „Nicht spülen, nicht reinigen". Dazu das Komma in „die besten
+  Chancen, den Zahn zu retten".
+- **Angst und Panikattacke:** Die Tafel lehrte ein Atmen nach 4-2-6 und
+  die 5-4-3-2-1-Methode. Für die „fünf Dinge, die du siehst" sprechen
+  die IFRC-Leitlinien 2025 ausdrücklich keine Empfehlung aus; die
+  Anleitung lässt sie deshalb bewusst weg. Schritt 2 atmet jetzt wie der
+  Text vor und mit, ein auf 1, aus auf 3, im neu gezeichneten Kasten.
+  Schritt 4 sagt, dass es eine Reaktion auf Anspannung ist und von
+  selbst nachlässt; eine Kurve zeigt den Höhepunkt nach 10 bis 15
+  Minuten.
 
 Die stabile Seitenlage hat noch keine Tafel und zeigt die
 Strichzeichnung.
 
 Eine Tafel ist ein WebP in voller Größe (`assets/first_aid/de/`,
-zusammen 10 MB), angelegt mit `tool/first_aid/infographic.py`.
+zusammen 11 MB), angelegt mit `tool/first_aid/infographic.py`.
 
 ## Videos
 
