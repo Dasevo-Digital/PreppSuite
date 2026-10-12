@@ -289,6 +289,21 @@ wo neuer Text nötig ist, wird er in Arial Narrow gesetzt. Am 12.10.2026:
 - **Austrocknung:** „Keines Kind" wurde zu „Kleines Kind".
 - **Knochenbruch:** Die abgebrochene, unleserliche Zeile nach
   „Oberschenkelbruch" ist entfernt.
+- **Vergiftung:** „du" statt „Sie", wie auf allen anderen Tafeln; die
+  Nummer 030 19240 als „(Berlin)" statt „(Deutschland)" – es ist eines
+  von acht Giftinformationszentren, die App listet alle.
+- **Hitze:** Unter den Anzeichen der Hitzeerschöpfung stand „heiße,
+  trockene Haut"; das ist der Hitzschlag, den der Kasten daneben nennt.
+  Jetzt „blasse, feuchte Haut" (DRK).
+- **Quallen:** „kratzen" statt „krazten"; der erste Punkt zieht keine
+  Tentakel mehr mit der Pinzette ab, sondern bindet die Nesselfäden mit
+  Rasierschaum oder feuchtem Sand und schabt sie mit einer Karte ab, wie
+  der Text nach der DLRG.
+
+Eine Rechtschreibprüfung über den per Texterkennung gelesenen Text
+aller Tafeln fand danach noch vier Tippfehler, ebenfalls korrigiert:
+„unterstützen" (Psychische Erste Hilfe), „Bewusstsein" und „Rucksack"
+(Ohnmacht), „dabei sein" (Geburt).
 
 Eine Tafel ist ein WebP in voller Größe (`assets/first_aid/de/`,
 zusammen 7,6 MB), angelegt mit `tool/first_aid/infographic.py`.
