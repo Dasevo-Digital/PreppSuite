@@ -12,9 +12,11 @@ and the same code passed on the next push.
 
 A passing file prints its next line at most two minutes after its build
 on those runners (1.9 was the longest, measured over four runs in October
-2026). So eight minutes of silence after the build is a stuck simulator,
+2026). So five minutes of silence after the build is a stuck simulator,
 not a slow test: the run is stopped, the simulator is shut down and booted
-again, and the file runs once more. A file that fails, or hangs twice,
+again, and the file runs once more. The first run with this hung twice and
+passed, in 58 minutes; at eight minutes a hang cost eleven, which left too
+little of the job's 75. A file that fails, or hangs twice,
 fails the job; that is a finding, not the runner. A failure is not
 retried -- only the hang has been seen to be the runner's.
 """
@@ -32,7 +34,7 @@ import time
 APP = Path(__file__).resolve().parents[1] / "preppsuite_flutter"
 ON_CI = os.environ.get("GITHUB_ACTIONS") == "true"
 
-SILENCE_AFTER_BUILD = 8 * 60
+SILENCE_AFTER_BUILD = 5 * 60
 # Covers the build too. The first file builds from scratch, which took up
 # to ten minutes on a slow runner; a later file takes two or three.
 ATTEMPT_LIMIT = 30 * 60
