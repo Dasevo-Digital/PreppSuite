@@ -59,6 +59,8 @@ void main() {
     expect(find.text('Pseudokrupp'), findsOneWidget);
   });
 
+  // Every German guide has a chart; a guide without one in the language
+  // being read is any guide in English.
   testWidgets('in English the drawing stays, and there is no chart', (
     tester,
   ) async {
@@ -68,11 +70,13 @@ void main() {
     expect(find.byType(FirstAidDrawingView), findsOneWidget);
   });
 
-  testWidgets('a guide without a chart keeps its drawing', (tester) async {
+  testWidgets('the drawn recovery position chart takes the drawing\'s place', (
+    tester,
+  ) async {
     await show(tester, 'recovery-position');
 
-    expect(find.byType(FirstAidChartThumbnail), findsNothing);
-    expect(find.byType(FirstAidDrawingView), findsOneWidget);
+    expect(find.byType(FirstAidChartThumbnail), findsOneWidget);
+    expect(find.byType(FirstAidDrawingView), findsNothing);
   });
 
   testWidgets('a guide with a chart meets the accessibility guidelines', (

@@ -651,9 +651,12 @@ words set anew, a wrong picture crossed out with the charts' own
 prohibition sign or covered by a plain drawing that says the right
 thing. Each correction is keyed to the SHA-256 of the exact picture it
 was measured on, so a redrawn picture is checked afresh rather than
-patched blind. Since 2026-10-12, 45 of the 46 guides have a chart; the
-corrections are listed in `docs/erste-hilfe.md`. Leaving something out is allowed: the steps are
-right underneath.
+patched blind. Since 2026-10-12, all 46 guides have a chart; the
+corrections are listed in `docs/erste-hilfe.md`. The recovery
+position's, for which none was supplied, is drawn here by
+`tool/first_aid/recovery_position_chart.py` after the others' model, and
+holds to the same rule: the guide's steps, nothing beyond them. Leaving
+something out is allowed: the steps are right underneath.
 
 **First aid works on a fresh install with no network, no download and no
 setting.** That is the whole reason it is its own feature rather than a

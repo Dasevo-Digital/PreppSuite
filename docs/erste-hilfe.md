@@ -256,7 +256,7 @@ Bildschirmdichte.
 
 ## Die Bildtafeln
 
-45 der 46 deutschen Anleitungen haben zusätzlich eine Bildtafel: ein Bild,
+Alle 46 deutschen Anleitungen haben zusätzlich eine Bildtafel: ein Bild,
 in das die Schritte mit Zeichnungen eingetragen sind. Sie steht klein
 über den Schritten und ersetzt dort die Strichzeichnung; die Lupe öffnet
 sie als Vollbild, in das sich hineinzoomen lässt. Die Tafeln tragen
@@ -363,8 +363,18 @@ schlichten Zeichnung in ihren Farben ersetzt.
   selbst nachlässt; eine Kurve zeigt den Höhepunkt nach 10 bis 15
   Minuten.
 
-Die stabile Seitenlage hat noch keine Tafel und zeigt die
-Strichzeichnung.
+Für die stabile Seitenlage kam keine Tafel. Sie ist hier gezeichnet
+(`tool/first_aid/recovery_position_chart.py`), nach dem Vorbild der
+anderen: roter Kopf, ein nummeriertes Feld je Schritt, ein Kasten
+„Wichtig" für die Hinweise, das Merke-Band. Die sieben Schritte sind die
+der Anleitung, in ihren Worten, und die Bilder zeigen nichts, was dort
+nicht steht. Gezeichnet sind flache Figuren von oben gesehen: in dieser
+Ansicht liegen Arme und Beine in der Ebene des Bodens, und „im rechten
+Winkel" lässt sich als rechter Winkel zeigen. Der Helfer kniet am
+unteren Rand, von ihm sind nur die roten Ärmel zu sehen. Das Merke-Band
+und die Symbole Hören, Sehen, Fühlen stammen aus zwei anderen Tafeln,
+das Bild im Kopf ist die Strichzeichnung der App. Die Figuren sind
+schlichter gezeichnet als die Bilder der übrigen Tafeln.
 
 Eine Tafel ist ein WebP in voller Größe (`assets/first_aid/de/`,
 zusammen 11 MB), angelegt mit `tool/first_aid/infographic.py`.

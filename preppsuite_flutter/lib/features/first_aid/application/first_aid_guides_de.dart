@@ -239,6 +239,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Bei Verdacht auf eine Wirbelsäulenverletzung nur dann drehen, wenn die Atemwege anders nicht frei zu halten sind. Freie Atemwege haben Vorrang.',
     ],
     drawing: FirstAidDrawing.recoveryPosition,
+    chart: 'assets/first_aid/de/recovery-position.webp',
     source: 'Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
   FirstAidGuide(

@@ -199,6 +199,7 @@ Minute Wiederbelebung, bevor Hilfe geholt wird.
 - title: Stabile Seitenlage
 - when: Die Person ist bewusstlos und atmet normal.
 - drawing: recoveryPosition
+- chart: true
 - source: Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council
 
 ### steps
