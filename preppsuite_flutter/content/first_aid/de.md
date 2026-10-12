@@ -215,6 +215,7 @@ Minute Wiederbelebung, bevor Hilfe geholt wird.
 - title: Ersticken
 - when: Jemand greift sich an den Hals, kann nicht sprechen, nicht husten, nicht atmen.
 - drawing: choking
+- chart: true
 - source: Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council
 
 ### steps
@@ -286,6 +287,7 @@ sich hier nichts aus.
 - when: Blut fließt kräftig, spritzt oder durchtränkt die Kleidung.
 - callFirst: true
 - drawing: bleeding
+- chart: true
 - source: Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)
 
 ### steps
@@ -310,6 +312,7 @@ sich hier nichts aus.
 - title: Schock
 - when: Blass, kalte feuchte Haut, schneller flacher Puls, unruhig oder auffallend teilnahmslos – nach Blutverlust, Verbrennung oder starken Schmerzen.
 - callFirst: true
+- chart: true
 - source: Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)
 
 ### steps
@@ -330,6 +333,7 @@ sich hier nichts aus.
 - group: injury
 - title: Abgetrenntes Körperteil
 - when: Ein Finger, eine Hand, ein Fuß ist ganz oder teilweise ab.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Amputation"
 
 ### steps
@@ -350,6 +354,7 @@ sich hier nichts aus.
 - group: injury
 - title: Verletzung an Brust oder Bauch
 - when: Stich, Schuss, Pfählung oder stumpfe Gewalt gegen Rumpf.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Chest and abdomen injuries"
 
 ### steps
@@ -400,6 +405,7 @@ sich hier nichts aus.
 - group: injury
 - title: Knochenbruch, Verstauchung, Zerrung
 - when: Nach Sturz oder Stoß: Schmerz, Schwellung, ein Glied in falscher Stellung.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Fractures, sprains and strains"
 
 ### steps
@@ -423,6 +429,7 @@ sich hier nichts aus.
 - group: injury
 - title: Verdacht auf Wirbelsäulenverletzung
 - when: Sturz aus Höhe, Kopfsprung, Verkehrsunfall – und Schmerz im Nacken oder Rücken.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Spinal injury"
 
 ### steps
@@ -446,6 +453,7 @@ sich hier nichts aus.
 - group: injury
 - title: Kopfverletzung und Gehirnerschütterung
 - when: Schlag oder Sturz auf den Kopf.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Head injury and concussion"
 
 ### steps
@@ -485,6 +493,7 @@ sich hier nichts aus.
 - group: injury
 - title: Nasenbluten
 - when: Blut aus der Nase, von selbst oder nach einem Stoß.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Nosebleeds"
 
 ### steps
@@ -506,6 +515,7 @@ sich hier nichts aus.
 - group: injury
 - title: Tierbiss
 - when: Gebissen von Hund, Katze oder einem wilden Tier.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Mammal bites"
 
 ### steps
@@ -522,6 +532,7 @@ sich hier nichts aus.
 - group: injury
 - title: Zeckenstich
 - when: Eine Zecke sitzt in der Haut.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Insect bites or stings"
 
 ### steps
@@ -562,6 +573,7 @@ sich hier nichts aus.
 - group: injury
 - title: Schlangenbiss
 - when: In Deutschland die Kreuzotter – oder eine gehaltene Schlange.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Snakebites"
 
 ### steps
@@ -581,6 +593,7 @@ sich hier nichts aus.
 - group: injury
 - title: Quallenkontakt
 - when: Brennende Striemen nach dem Baden in der See.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Aquatic animal injuries"; Deutsche Lebens-Rettungs-Gesellschaft (DLRG)
 
 ### steps
@@ -657,6 +670,7 @@ sich hier nichts aus.
 - when: Plötzlich: hängender Mundwinkel, kraftloser Arm, verwaschene Sprache, Sehstörung oder stärkster Kopfschmerz aus dem Nichts.
 - callFirst: true
 - drawing: face
+- chart: true
 - source: Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)
 
 ### steps
@@ -688,6 +702,7 @@ sich hier nichts aus.
 - title: Herzinfarkt
 - when: Druck, Enge oder Schmerz in der Brust, länger als ein paar Minuten – oft mit Atemnot, Übelkeit, kaltem Schweiß und Angst.
 - callFirst: true
+- chart: true
 - source: Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)
 
 ### steps
@@ -711,6 +726,7 @@ sich hier nichts aus.
 - group: illness
 - title: Krampfanfall
 - when: Jemand stürzt, wird steif und zuckt, oft mit verdrehten Augen und Speichel am Mund.
+- chart: true
 - source: Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)
 
 ### steps
@@ -760,6 +776,7 @@ sich hier nichts aus.
 - group: illness
 - title: Asthmaanfall
 - when: Pfeifende, schwere Atmung und Enge in der Brust.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Asthma attack"
 
 ### steps
@@ -779,6 +796,7 @@ sich hier nichts aus.
 - group: illness
 - title: Unterzuckerung
 - when: Bekannter Diabetes, dazu Zittern, Schwitzen, Verwirrtheit oder plötzliche Gereiztheit.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Diabetic emergency (hypoglycemia)"
 
 ### steps
@@ -809,6 +827,7 @@ frische Luft. Warmer Dampf kommt dort nicht mehr vor; dass feuchte Luft
 - group: illness
 - title: Pseudokrupp
 - when: Ein Kind wacht nachts mit bellendem Husten und pfeifendem Einatmen auf.
+- chart: true
 - source: Berufsverband der Kinder- und Jugendärzte (kinderaerzte-im-netz.de), Bundesinstitut für Öffentliche Gesundheit (kindergesundheit-info.de), IQWiG (gesundheitsinformation.de)
 
 ### steps
@@ -832,6 +851,7 @@ frische Luft. Warmer Dampf kommt dort nicht mehr vor; dass feuchte Luft
 - group: illness
 - title: Drohende Ohnmacht
 - when: Schwarz vor Augen, blass, schwindlig – noch bei Bewusstsein.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Feeling faint"
 
 ### steps
@@ -869,6 +889,7 @@ frische Luft. Warmer Dampf kommt dort nicht mehr vor; dass feuchte Luft
 - group: illness
 - title: Geburt ohne Hilfe
 - when: Die Wehen kommen, und Rettungsdienst oder Hebamme sind nicht da oder kommen nicht durch.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Emergency childbirth"
 
 ### steps
@@ -1036,6 +1057,7 @@ Kummer, beide kostenfrei und rund um die Uhr.
 - group: mentalDistress
 - title: Psychische Erste Hilfe
 - when: Jemand ist nach einem Unglück verstört, erstarrt oder außer sich. Diese Seite gilt für alle folgenden.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Psychological first aid" (Look – Listen – Link nach der WHO)
 
 ### steps

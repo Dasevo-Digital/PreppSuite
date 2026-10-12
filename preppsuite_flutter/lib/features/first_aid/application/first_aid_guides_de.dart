@@ -269,6 +269,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Säugling', '5 Rückenschläge, 5 Brustkompressionen'),
     ],
     drawing: FirstAidDrawing.choking,
+    chart: 'assets/first_aid/de/choking.webp',
     source: 'Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
   FirstAidGuide(
@@ -342,6 +343,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Einen tief steckenden Fremdkörper nicht herausziehen. Er verschließt die Wunde, die er gemacht hat. Ringsherum abpolstern.',
     ],
     drawing: FirstAidDrawing.bleeding,
+    chart: 'assets/first_aid/de/severe-bleeding.webp',
     source:
         'Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)',
   ),
@@ -372,6 +374,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Nichts zu essen und nichts zu trinken geben, auch wenn ausdrücklich darum gebeten wird. Eine Operation könnte bevorstehen.',
       'Wird die Person bewusstlos und atmet normal: stabile Seitenlage. Atmet sie nicht normal: Wiederbelebung.',
     ],
+    chart: 'assets/first_aid/de/shock.webp',
     source:
         'Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)',
   ),
@@ -404,6 +407,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Das Körperteil nicht direkt ins Wasser und nicht direkt auf Eis. Das schädigt das Gewebe und kann das Wiederannähen unmöglich machen.',
       'Das ist eine große offene Wunde. Auf den eigenen Schutz achten.',
     ],
+    chart: 'assets/first_aid/de/amputation.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Amputation"',
   ),
   FirstAidGuide(
@@ -434,6 +438,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Eine offene Brustwunde nicht luftdicht verschließen. Sonst sammelt sich Luft im Brustkorb.',
       'Beim Druck auf eine Brustwunde die Wunde nicht ganz zudrücken.',
     ],
+    chart: 'assets/first_aid/de/chest-abdomen-injury.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Chest and abdomen injuries"',
   ),
   FirstAidGuide(
@@ -514,6 +519,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
     facts: [
       FirstAidFact('Kühlen', 'höchstens 20 Minuten'),
     ],
+    chart: 'assets/first_aid/de/fracture.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Fractures, sprains and strains"',
   ),
   FirstAidGuide(
@@ -546,6 +552,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
     facts: [
       FirstAidFact('Wenn bewegt werden muss', 'mindestens zwei Helfer'),
     ],
+    chart: 'assets/first_aid/de/spinal-injury.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Spinal injury"',
   ),
   FirstAidGuide(
@@ -571,6 +578,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Eine Gehirnerschütterung kann sich über Stunden oder Tage erst entwickeln.',
       'Erst zurück an Arbeit, Steuer, Maschine oder Sport, wenn die Beschwerden weg sind.',
     ],
+    chart: 'assets/first_aid/de/head-injury.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Head injury and concussion"',
   ),
   FirstAidGuide(
@@ -631,6 +639,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
     facts: [
       FirstAidFact('Drücken', '10 bis 15 Minuten am Stück'),
     ],
+    chart: 'assets/first_aid/de/nosebleed.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Nosebleeds"',
   ),
   FirstAidGuide(
@@ -652,6 +661,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Tierbisse können Krankheiten übertragen. Auch eine kleine Bisswunde ist keine gewöhnliche kleine Wunde.',
       'Auf Zeichen einer Entzündung achten: wird es warm oder schmerzt es stärker, zum Arzt.',
     ],
+    chart: 'assets/first_aid/de/animal-bite.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Mammal bites"',
   ),
   FirstAidGuide(
@@ -680,6 +690,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Keine Chemie, kein Öl, kein Klebstoff und keine Hitze, um die Zecke zu betäuben oder zu töten.',
       'Ein Zeckenstich wird anders behandelt als ein Schlangenbiss.',
     ],
+    chart: 'assets/first_aid/de/tick.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Insect bites or stings"',
   ),
   FirstAidGuide(
@@ -732,6 +743,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Nichts davon hilft, und alles davon kann schaden: abbinden, Gift aussaugen, kühlen, die Stelle reiben, die Wunde aufschneiden.',
       'Schlangen werden gehandelt und reisen. Es kann eine Art sein, die hier nicht vorkommt.',
     ],
+    chart: 'assets/first_aid/de/snakebite.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Snakebites"',
   ),
   FirstAidGuide(
@@ -762,6 +774,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
     facts: [
       FirstAidFact('Wärme', 'höchstens 45 °C, 20 bis 30 Minuten'),
     ],
+    chart: 'assets/first_aid/de/jellyfish.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Aquatic animal injuries"; Deutsche Lebens-Rettungs-Gesellschaft (DLRG)',
   ),
   FirstAidGuide(
@@ -872,6 +885,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('T – Time', 'Sofort 112, Uhrzeit merken'),
     ],
     drawing: FirstAidDrawing.face,
+    chart: 'assets/first_aid/de/stroke.webp',
     source:
         'Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)',
   ),
@@ -907,6 +921,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Nicht selbst ins Krankenhaus fahren. Im Rettungswagen beginnt die Behandlung, im eigenen Auto nicht.',
       'Sonst kein Medikament geben, das nicht dieser Person verordnet wurde. Hat sie ein eigenes Nitrospray, beim Anwenden helfen.',
     ],
+    chart: 'assets/first_aid/de/heart-attack.webp',
     source:
         'Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)',
   ),
@@ -946,6 +961,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       ),
       FirstAidFact('Ebenso bei', 'Verletzung, Schwangerschaft, Wasser'),
     ],
+    chart: 'assets/first_aid/de/seizure.webp',
     source:
         'Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)',
   ),
@@ -1007,6 +1023,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Nur das Spray, das dieser Person selbst verordnet ist.',
       'Wird die Atmung langsamer und leiser oder die Person müde, ist das keine Besserung.',
     ],
+    chart: 'assets/first_aid/de/asthma.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Asthma attack"',
   ),
   FirstAidGuide(
@@ -1035,6 +1052,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Zucker', '15 bis 20 g'),
       FirstAidFact('Nachlegen nach', '15 Minuten'),
     ],
+    chart: 'assets/first_aid/de/hypoglycaemia.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Diabetic emergency (hypoglycemia)"',
   ),
   FirstAidGuide(
@@ -1069,6 +1087,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Sofort 112 bei schwerer Atemnot: aufrecht und vorgebeugt, Mund offen, Hals- und Schultermuskeln arbeiten mit, Nasenflügel beben, über dem Brustbein zieht es ein, Lippen oder Nägel werden bläulich, das Kind wird matt.',
       'Aus leicht kann in wenigen Stunden schwer werden. Und es gibt eine ähnlich aussehende Entzündung des Kehldeckels, die sofort in ärztliche Hände gehört. Im Zweifel anrufen.',
     ],
+    chart: 'assets/first_aid/de/croup.webp',
     source: 'Berufsverband der Kinder- und Jugendärzte (kinderaerzte-im-netz.de), Bundesinstitut für Öffentliche Gesundheit (kindergesundheit-info.de), IQWiG (gesundheitsinformation.de)',
   ),
   FirstAidGuide(
@@ -1090,6 +1109,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Ist jemand gestürzt, an Kopf und Knochen denken.',
       'Wer ohnmächtig wird, kommt sehr schnell wieder zu sich. Bleibt er ohne Reaktion, ist es keine Ohnmacht: Atmung prüfen.',
     ],
+    chart: 'assets/first_aid/de/faint.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Feeling faint"',
   ),
   FirstAidGuide(
@@ -1155,6 +1175,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Von hier an sind es zwei Patienten: die Mutter und das Kind.',
       'Nichts erzwingen und nicht ziehen. Was hier steht, ist Begleiten, nicht Entbinden.',
     ],
+    chart: 'assets/first_aid/de/childbirth.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Emergency childbirth"',
   ),
   FirstAidGuide(
@@ -1373,6 +1394,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Telefonseelsorge, europaweit', '116 123'),
       FirstAidFact('Ärztlicher Bereitschaftsdienst', '116 117'),
     ],
+    chart: 'assets/first_aid/de/psychological-first-aid.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Psychological first aid" (Look – Listen – Link nach der WHO)',
   ),
   FirstAidGuide(

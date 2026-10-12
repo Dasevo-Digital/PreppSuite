@@ -637,6 +637,17 @@ parents. The BBK declined the use of its "Max und Flocke" comics
 on 2026-10-01, so nothing of theirs may go into the repository or a
 package, and a link or embed was ruled out as well.
 
+**A first aid chart repeats its guide and never says anything else.** A
+chart is one picture with the steps drawn in (`assets/first_aid/de/`,
+`tool/first_aid/infographic.py`); it carries words, so it belongs to one
+language, and where there is one it takes the line drawing's place. The
+text is what was checked against the guidelines. Before a chart goes in,
+every instruction drawn into it is read against its guide, and one that
+gives a different time, position or prohibition stays out until it is
+redrawn -- ten of thirty-two did on 2026-10-12, listed in
+`docs/erste-hilfe.md`. Leaving something out is allowed: the steps are
+right underneath.
+
 **First aid works on a fresh install with no network, no download and no
 setting.** That is the whole reason it is its own feature rather than a
 corner of `features/knowledge/`, which is an encyclopedia behind a

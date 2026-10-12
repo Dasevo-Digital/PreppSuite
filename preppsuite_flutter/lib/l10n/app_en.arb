@@ -3458,6 +3458,7 @@
     }
   },
   "firstAidOpenPacer": "Start the pacer",
+  "firstAidChartOpen": "Enlarge the chart",
   "firstAidVideos": "Videos",
   "firstAidVideosNone": "No video is installed for this guide.",
   "firstAidVideoManage": "Manage the video pack",

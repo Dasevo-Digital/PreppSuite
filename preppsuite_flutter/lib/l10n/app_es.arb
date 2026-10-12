@@ -1665,6 +1665,7 @@
   "firstAidCautions": "No hacer",
   "firstAidSource": "Fuente: {source}",
   "firstAidOpenPacer": "Iniciar el marcapasos",
+  "firstAidChartOpen": "Ampliar la lámina",
   "firstAidVideos": "Vídeos",
   "firstAidVideosNone": "No hay ningún vídeo instalado para esta guía.",
   "firstAidVideoManage": "Gestionar el paquete de vídeos",

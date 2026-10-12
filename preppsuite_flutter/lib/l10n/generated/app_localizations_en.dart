@@ -6028,6 +6028,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get firstAidOpenPacer => 'Start the pacer';
 
   @override
+  String get firstAidChartOpen => 'Enlarge the chart';
+
+  @override
   String get firstAidVideos => 'Videos';
 
   @override

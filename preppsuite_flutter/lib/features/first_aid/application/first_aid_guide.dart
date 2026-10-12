@@ -108,6 +108,7 @@ class FirstAidGuide {
     this.cautions = const [],
     this.facts = const [],
     this.drawing,
+    this.chart,
     this.hasPacer = false,
   });
 
@@ -140,6 +141,15 @@ class FirstAidGuide {
 
   final FirstAidDrawing? drawing;
 
+  /// A picture chart of the whole guide, as an asset path, or null.
+  ///
+  /// One picture with the steps drawn in, in the guide's language, which is
+  /// why only the language it was drawn for carries it; where there is one,
+  /// it takes the drawing's place. It repeats the steps and never replaces
+  /// them: what was checked against the guidelines is the text, and a chart
+  /// that says anything else stays out. See `tool/first_aid/infographic.py`.
+  final String? chart;
+
   /// Whether this guide offers the compression pacer.
   final bool hasPacer;
 
@@ -150,3 +160,7 @@ class FirstAidGuide {
   /// says whose. See `outage_food_safety.dart`.
   final String source;
 }
+
+/// Where the chart of guide [id] in [language] lives.
+String firstAidChartAsset(String language, String id) =>
+    'assets/first_aid/$language/$id.webp';

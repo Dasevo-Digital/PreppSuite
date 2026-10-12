@@ -6072,6 +6072,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get firstAidOpenPacer => 'Iniciar el marcapasos';
 
   @override
+  String get firstAidChartOpen => 'Ampliar la lámina';
+
+  @override
   String get firstAidVideos => 'Vídeos';
 
   @override

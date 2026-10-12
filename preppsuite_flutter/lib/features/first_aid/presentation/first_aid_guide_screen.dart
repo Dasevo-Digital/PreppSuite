@@ -8,6 +8,7 @@ import '../application/step_speech.dart';
 import '../application/first_aid_providers.dart';
 import '../application/first_aid_video_pack.dart';
 import 'compression_pacer_screen.dart';
+import 'first_aid_chart.dart';
 import 'first_aid_drawings.dart';
 import 'first_aid_screen.dart' show EmergencyCallBar;
 import 'first_aid_video_screen.dart';
@@ -60,7 +61,12 @@ class FirstAidGuideScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                       _CallFirstBanner(l10n: l10n),
                     ],
-                    if (guide.drawing case final drawing?) ...[
+                    // The chart, where this language has one, takes the
+                    // drawing's place: it shows the same and more.
+                    if (guide.chart != null) ...[
+                      const SizedBox(height: 16),
+                      FirstAidChartThumbnail(guide: guide),
+                    ] else if (guide.drawing case final drawing?) ...[
                       const SizedBox(height: 16),
                       FirstAidDrawingView(drawing: drawing),
                     ],

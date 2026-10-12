@@ -17,6 +17,11 @@ import '../application/first_aid_guide.dart';
 ///
 /// And it costs nothing: a few hundred bytes of code each against tens of
 /// kilobytes per raster image, times every screen density.
+///
+/// Where a guide has a picture chart in the language being read, the chart
+/// is shown instead (`first_aid_chart.dart`): a full page of steps drawn
+/// out, which a line drawing cannot be. The drawings stay for every guide
+/// and every language without one.
 class FirstAidDrawingView extends StatelessWidget {
   const FirstAidDrawingView({
     super.key,

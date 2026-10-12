@@ -250,6 +250,9 @@ flutter:
     # The pictures of the children's comic, cut from its PDF edition by
     # tool/comic/cut_panels.py.
     - assets/comic/
+    # Picture charts beside the German first aid guides, put there by
+    # tool/first_aid/infographic.py.
+    - assets/first_aid/de/
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a

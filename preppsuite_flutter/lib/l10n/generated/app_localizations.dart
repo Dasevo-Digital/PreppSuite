@@ -10090,6 +10090,12 @@ abstract class AppLocalizations {
   /// **'Start the pacer'**
   String get firstAidOpenPacer;
 
+  /// No description provided for @firstAidChartOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Enlarge the chart'**
+  String get firstAidChartOpen;
+
   /// No description provided for @firstAidVideos.
   ///
   /// In en, this message translates to:

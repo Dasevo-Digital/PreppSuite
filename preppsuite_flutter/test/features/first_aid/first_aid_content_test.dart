@@ -19,9 +19,10 @@ void main() {
     ('en', firstAidGuidesEn),
   ]) {
     test('$language: the app compiles in exactly the Markdown', () {
-      final parsed = parseFirstAidMarkdown(
+      final parsedGuides = parseFirstAidMarkdown(
         File('content/first_aid/$language.md').readAsStringSync(),
-      ).map((p) => p.guide).toList();
+      );
+      final parsed = parsedGuides.map((p) => p.guide).toList();
 
       expect(
         parsed.map((g) => g.id),
@@ -37,6 +38,13 @@ void main() {
         expect(got.when, want.when, reason: where);
         expect(got.callFirst, want.callFirst, reason: where);
         expect(got.drawing, want.drawing, reason: where);
+        expect(
+          want.chart,
+          parsedGuides[i].hasChart
+              ? firstAidChartAsset(language, want.id)
+              : isNull,
+          reason: where,
+        );
         expect(got.hasPacer, want.hasPacer, reason: where);
         expect(got.source, want.source, reason: where);
         expect(got.cautions, want.cautions, reason: where);

@@ -6063,6 +6063,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get firstAidOpenPacer => 'Taktgeber starten';
 
   @override
+  String get firstAidChartOpen => 'Bildtafel vergrößern';
+
+  @override
   String get firstAidVideos => 'Videos';
 
   @override

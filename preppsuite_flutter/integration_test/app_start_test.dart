@@ -12,6 +12,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdfrx/pdfrx.dart';
 import 'package:preppsuite_flutter/core/emergency_access.dart';
 import 'package:preppsuite_flutter/core/local_database_encryption.dart';
+import 'package:preppsuite_flutter/features/first_aid/application/first_aid_guides_de.dart';
 import 'package:preppsuite_flutter/features/kids_comic/application/kids_comic.dart';
 import 'package:preppsuite_flutter/features/kids_comic/application/kids_comic_de.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/xapian_index.dart';
@@ -139,17 +140,20 @@ void main() {
     expect(find.textContaining('Bewusstlose Person'), findsWidgets);
   });
 
-  testWidgets('the comic’s pictures decode', (tester) async {
+  testWidgets('the comic’s pictures and the first aid charts decode', (
+    tester,
+  ) async {
     // They are WebP. An engine that cannot read it would show grey boxes
     // where the pictures belong, and no test on this Mac would notice.
     final images = [
-      kidsComicCover,
+      kidsComicAsset(kidsComicCover),
       for (final chapter in kidsComicDe.chapters)
-        for (final panel in chapter.panels) panel.image,
+        for (final panel in chapter.panels) panel.asset,
+      for (final guide in firstAidGuidesDe) ?guide.chart,
     ];
     await tester.runAsync(() async {
       for (final image in images) {
-        final data = await rootBundle.load(kidsComicAsset(image));
+        final data = await rootBundle.load(image);
         final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
         final frame = await codec.getNextFrame();
         expect(frame.image.width, greaterThan(900), reason: image);

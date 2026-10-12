@@ -30,13 +30,19 @@ class FirstAidMarkdownError implements Exception {
   String toString() => 'line $line: $message';
 }
 
-/// A parsed guide, and whether its facts are the poison centres -- which
-/// the generator writes as a reference rather than as copies.
+/// A parsed guide, whether its facts are the poison centres -- which the
+/// generator writes as a reference rather than as copies -- and whether it
+/// has a chart, whose path depends on the language the generator knows.
 class ParsedGuide {
-  const ParsedGuide(this.guide, {this.factsArePoisonCentres = false});
+  const ParsedGuide(
+    this.guide, {
+    this.factsArePoisonCentres = false,
+    this.hasChart = false,
+  });
 
   final FirstAidGuide guide;
   final bool factsArePoisonCentres;
+  final bool hasChart;
 }
 
 List<ParsedGuide> parseFirstAidMarkdown(String text) {
@@ -196,6 +202,7 @@ List<ParsedGuide> parseFirstAidMarkdown(String text) {
           source: need('source'),
         ),
         factsArePoisonCentres: poison,
+        hasChart: flag('chart'),
       ),
     );
   }
@@ -215,6 +222,7 @@ const _keys = {
   'when',
   'callFirst',
   'drawing',
+  'chart',
   'pacer',
   'source',
 };
@@ -279,6 +287,9 @@ String generateFirstAidDart({
     }
     if (guide.drawing != null) {
       out.writeln('drawing: FirstAidDrawing.${guide.drawing!.name},');
+    }
+    if (parsed.hasChart) {
+      out.writeln('chart: ${quote(firstAidChartAsset(language, guide.id))},');
     }
     if (guide.hasPacer) out.writeln('hasPacer: true,');
     out

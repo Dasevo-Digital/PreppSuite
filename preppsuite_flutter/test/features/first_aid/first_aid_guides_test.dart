@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/first_aid/application/first_aid_guides.dart';
 import 'package:preppsuite_flutter/features/first_aid/application/first_aid_guides_de.dart';
@@ -50,6 +52,37 @@ void main() {
       expect(en.callFirst, de.callFirst, reason: de.id);
       expect(en.hasPacer, de.hasPacer, reason: de.id);
       expect(en.drawing, de.drawing, reason: de.id);
+    }
+  });
+
+  test('every chart a guide names is carried, and nothing else is', () {
+    // `flutter test` runs from the package root, where the assets live.
+    for (final (language, guides) in [
+      ('de', firstAidGuidesDe),
+      ('en', firstAidGuidesEn),
+    ]) {
+      final folder = Directory('assets/first_aid/$language');
+      final carried = {
+        if (folder.existsSync())
+          for (final file in folder.listSync()) file.path,
+      };
+      final named = {for (final guide in guides) ?guide.chart};
+      expect(carried, named, reason: language);
+    }
+  });
+
+  test('a chart is a WebP the size it was drawn at', () {
+    // Full size is what the zoom is for; a chart scaled down to save
+    // space is one whose small print cannot be read any more.
+    for (final guide in firstAidGuidesDe) {
+      final chart = guide.chart;
+      if (chart == null) continue;
+      final bytes = File(chart).readAsBytesSync();
+      expect(String.fromCharCodes(bytes.sublist(8, 12)), 'WEBP', reason: chart);
+      final width = (bytes[26] | bytes[27] << 8) & 0x3fff;
+      final height = (bytes[28] | bytes[29] << 8) & 0x3fff;
+      expect(width, greaterThanOrEqualTo(1000), reason: chart);
+      expect(height, greaterThanOrEqualTo(1000), reason: chart);
     }
   });
 
