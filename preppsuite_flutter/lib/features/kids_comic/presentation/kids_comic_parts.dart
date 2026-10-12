@@ -45,7 +45,7 @@ class ComicPanelView extends StatelessWidget {
           ComicPicture(
             asset: panel.asset,
             description: panel.description,
-            aspectRatio: panel.wide ? 600 / 180 : 300 / 180,
+            aspectRatio: kidsComicPanelAspectRatio,
           ),
           Container(height: 2.5, color: ink),
           Padding(
@@ -55,9 +55,7 @@ class ComicPanelView extends StatelessWidget {
               children: [
                 for (final (i, line) in panel.lines.indexed) ...[
                   if (i > 0) const SizedBox(height: 10),
-                  line.isCaption
-                      ? _Caption(line: line)
-                      : _Bubble(line: line, name: speakers[line.speaker]!),
+                  _Bubble(line: line, name: speakers[line.speaker]!),
                 ],
               ],
             ),
@@ -99,12 +97,11 @@ class ComicPicture extends StatelessWidget {
 
 /// Each speaker's colour on the name tag, so a child who cannot read yet
 /// still sees who is talking. The same colours as the drawings: Mila's
-/// shirt, Nuss's fur, Papa's jumper, the neighbour's cardigan.
+/// dungarees, Nuss's fur, Papa's jumper.
 const _tagColours = {
   ComicSpeaker.mila: (Color(0xFFF2C21B), Color(0xFF1D2433)),
   ComicSpeaker.nuss: (Color(0xFFB85A1E), Color(0xFFFFFFFF)),
   ComicSpeaker.papa: (Color(0xFF3F7A59), Color(0xFFFFFFFF)),
-  ComicSpeaker.neighbour: (Color(0xFF7D4FA6), Color(0xFFFFFFFF)),
 };
 
 class _Bubble extends StatelessWidget {
@@ -155,32 +152,34 @@ class _Bubble extends StatelessWidget {
   }
 }
 
-class _Caption extends StatelessWidget {
-  const _Caption({required this.line});
+/// The box under a chapter's last panel.
+class ComicNote extends StatelessWidget {
+  const ComicNote({super.key, required this.text});
 
-  final ComicLine line;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final lead = line.lead;
+    final colour = theme.colorScheme.onTertiaryContainer;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      color: theme.colorScheme.tertiaryContainer,
-      child: Text.rich(
-        TextSpan(
-          children: [
-            if (lead != null)
-              TextSpan(
-                text: line.text.isEmpty ? lead : '$lead ',
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-            TextSpan(text: line.text),
-          ],
-        ),
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.onTertiaryContainer,
-        ),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.info_outline, color: colour),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: theme.textTheme.bodyLarge?.copyWith(color: colour),
+            ),
+          ),
+        ],
       ),
     );
   }

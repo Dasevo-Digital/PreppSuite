@@ -3,15 +3,15 @@
 /// Content, like the first aid guides, and kept the same way for the same
 /// reason: a story has to be readable end to end, in one file per
 /// language, and not scattered through the interface wording of the ARB
-/// files. `kids_comic_de.dart` and `kids_comic_en.dart` hold the text;
-/// `kids_comic_test.dart` holds the two to the same chapters, the same
-/// pictures and the same speakers in the same order, which is the part a
-/// compiler cannot check.
+/// files. `kids_comic_de.dart`, `kids_comic_en.dart` and
+/// `kids_comic_es.dart` hold the text; `kids_comic_test.dart` holds the
+/// translations to the same chapters, the same pictures and the same
+/// speakers in the same order, which is the part a compiler cannot check.
 ///
-/// The pictures are drawn once in `tool/comic/mila_und_nuss.html` and
-/// rendered into `assets/comic/` by `tool/comic/render_panels.py`. They
-/// carry no words of their own, so both languages share them; the words
-/// are set by Flutter and follow the text size.
+/// The pictures are cut from the comic's PDF edition into `assets/comic/`
+/// by `tool/comic/cut_panels.py`. They carry no words of their own, only
+/// each panel's number, so every language shares them; the words are set
+/// by Flutter and follow the text size.
 ///
 /// What the comic says follows the BBK's advice on emergency preparedness.
 /// Mila, Nuss and the story are this app's own: the BBK declined the use
@@ -23,20 +23,14 @@ import 'kids_comic_en.dart';
 import 'kids_comic_es.dart';
 
 /// Who is talking in a speech bubble.
-enum ComicSpeaker { mila, nuss, papa, neighbour }
+enum ComicSpeaker { mila, nuss, papa }
 
-/// One bubble, or one narration box when [speaker] is null.
+/// One speech bubble.
 class ComicLine {
-  const ComicLine(ComicSpeaker this.speaker, this.text) : lead = null;
+  const ComicLine(this.speaker, this.text);
 
-  /// A narration box. [lead] is set in bold in front of [text].
-  const ComicLine.caption(this.text, {this.lead}) : speaker = null;
-
-  final ComicSpeaker? speaker;
-  final String? lead;
+  final ComicSpeaker speaker;
   final String text;
-
-  bool get isCaption => speaker == null;
 }
 
 class ComicPanel {
@@ -44,7 +38,6 @@ class ComicPanel {
     required this.image,
     required this.description,
     required this.lines,
-    this.wide = false,
   });
 
   /// The picture's id, which is also its file name under `assets/comic/`.
@@ -55,9 +48,6 @@ class ComicPanel {
 
   final List<ComicLine> lines;
 
-  /// Twice as wide as an ordinary panel: 600 by 180 rather than 300 by 180.
-  final bool wide;
-
   String get asset => kidsComicAsset(image);
 }
 
@@ -67,6 +57,7 @@ class ComicChapter {
     required this.title,
     required this.lede,
     required this.panels,
+    required this.note,
     required this.rulesTitle,
     required this.rules,
   });
@@ -79,7 +70,11 @@ class ComicChapter {
 
   final List<ComicPanel> panels;
 
-  /// The chapter's line on the summary sheet, and its four rules.
+  /// The box under the last panel: the one fact a grown-up reading along
+  /// should not leave out.
+  final String note;
+
+  /// The chapter's line on the summary sheet, and its rules.
   final String rulesTitle;
   final List<String> rules;
 }
@@ -93,6 +88,7 @@ class KidsComic {
     required this.speakers,
     required this.chapters,
     required this.numbers,
+    required this.numbersNote,
     required this.parentsIntro,
     required this.parentsTips,
     required this.source,
@@ -111,6 +107,9 @@ class KidsComic {
   /// The emergency numbers and what each is for, in the order shown.
   final List<({String number, String label})> numbers;
 
+  /// What a child does before any of it.
+  final String numbersNote;
+
   final String parentsIntro;
   final List<String> parentsTips;
 
@@ -121,7 +120,12 @@ class KidsComic {
 /// The picture on the cover, which belongs to no chapter.
 const kidsComicCover = 'titel';
 
-String kidsComicAsset(String image) => 'assets/comic/$image.png';
+/// The shapes of the pictures as they are cut, so the space is taken
+/// before a picture has loaded and nothing of it is cropped.
+const kidsComicCoverAspectRatio = 1400 / 713;
+const kidsComicPanelAspectRatio = 976 / 553;
+
+String kidsComicAsset(String image) => 'assets/comic/$image.webp';
 
 /// The comic in the language being read, German being the fallback — the
 /// same rule as the first aid guides, for the same reason. Spanish has

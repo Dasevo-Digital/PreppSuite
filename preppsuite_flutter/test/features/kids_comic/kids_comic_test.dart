@@ -12,7 +12,8 @@ import 'package:preppsuite_flutter/features/kids_comic/application/kids_comic_es
 /// What it is held to here: every language tells the same story, panel by
 /// panel and speaker by speaker — a translation that drops "never go back
 /// into the house" drops the one line that matters most — and every
-/// picture the text names is a file the app actually carries.
+/// picture the text names is a file the app actually carries, in the shape
+/// the screen keeps for it.
 void main() {
   List<ComicPanel> panels(KidsComic comic) => [
     for (final chapter in comic.chapters) ...chapter.panels,
@@ -30,10 +31,10 @@ void main() {
         );
       });
 
-      test('the same pictures, the same width', () {
+      test('the same pictures', () {
         expect(
-          panels(comic).map((p) => (p.image, p.wide)).toList(),
-          panels(kidsComicDe).map((p) => (p.image, p.wide)).toList(),
+          panels(comic).map((p) => p.image).toList(),
+          panels(kidsComicDe).map((p) => p.image).toList(),
         );
       });
 
@@ -75,15 +76,15 @@ void main() {
 
   test('no line is empty, and every picture is described', () {
     for (final comic in [kidsComicDe, ...translations.values]) {
+      expect(comic.numbersNote.trim(), isNotEmpty);
+      for (final chapter in comic.chapters) {
+        expect(chapter.note.trim(), isNotEmpty, reason: chapter.id);
+      }
       for (final panel in panels(comic)) {
         expect(panel.description.trim(), isNotEmpty, reason: panel.image);
         expect(panel.lines, isNotEmpty, reason: panel.image);
         for (final line in panel.lines) {
-          expect(
-            (line.lead ?? '') + line.text,
-            isNot(isEmpty),
-            reason: panel.image,
-          );
+          expect(line.text.trim(), isNotEmpty, reason: panel.image);
         }
       }
     }
@@ -93,21 +94,43 @@ void main() {
     // `flutter test` runs from the package root, where the assets live.
     final carried = {
       for (final file in Directory('assets/comic').listSync())
-        if (file.path.endsWith('.png'))
-          file.uri.pathSegments.last.replaceAll('.png', ''),
+        file.uri.pathSegments.last,
     };
     final named = {
       kidsComicCover,
       for (final panel in panels(kidsComicDe)) panel.image,
     };
     expect(named.length, panels(kidsComicDe).length + 1, reason: 'unique ids');
-    expect(carried, named);
+    expect(carried, {for (final image in named) '$image.webp'});
   });
 
-  test('every picture is drawn in the source the assets come from', () {
-    final source = File('../tool/comic/mila_und_nuss.html').readAsStringSync();
+  test('every picture has the shape the screen keeps for it', () {
+    // The space is taken before a picture loads, and the picture covers
+    // it: a picture of another shape would lose its edges, and with them
+    // the panel's number.
+    void expectShape(String image, double aspectRatio) {
+      final (width, height) = _webpSize(
+        File(kidsComicAsset(image)).readAsBytesSync(),
+      );
+      expect(width / height, closeTo(aspectRatio, 0.01), reason: image);
+    }
+
+    expectShape(kidsComicCover, kidsComicCoverAspectRatio);
     for (final panel in panels(kidsComicDe)) {
-      expect(source, contains('data-panel="${panel.image}"'));
+      expectShape(panel.image, kidsComicPanelAspectRatio);
+    }
+  });
+
+  test('the pictures are the ones the cutting script makes', () {
+    // tool/comic/cut_panels.py cuts four panels from each chapter's page
+    // and names them after the chapter, in this order.
+    final script = File('../tool/comic/cut_panels.py').readAsStringSync();
+    final ids = kidsComicDe.chapters.map((c) => '"${c.id}"').join(', ');
+    expect(script, contains('CHAPTERS = ($ids)'));
+    for (final chapter in kidsComicDe.chapters) {
+      expect(chapter.panels.map((p) => p.image).toList(), [
+        for (var i = 1; i <= 4; i++) '${chapter.id}-$i',
+      ]);
     }
   });
 
@@ -118,4 +141,15 @@ void main() {
     expect(kidsComic('es').title, kidsComicEs.title);
     expect(kidsComic('es_MX').title, kidsComicEs.title);
   });
+}
+
+/// Width and height from a lossy WebP's frame header, which is what
+/// `tool/comic/cut_panels.py` writes.
+(int, int) _webpSize(List<int> bytes) {
+  String tag(int at) => String.fromCharCodes(bytes.sublist(at, at + 4));
+  if (tag(0) != 'RIFF' || tag(8) != 'WEBP' || tag(12) != 'VP8 ') {
+    throw const FormatException('not a lossy WebP');
+  }
+  int read14(int at) => (bytes[at] | bytes[at + 1] << 8) & 0x3fff;
+  return (read14(26), read14(28));
 }

@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -11,6 +12,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdfrx/pdfrx.dart';
 import 'package:preppsuite_flutter/core/emergency_access.dart';
 import 'package:preppsuite_flutter/core/local_database_encryption.dart';
+import 'package:preppsuite_flutter/features/kids_comic/application/kids_comic.dart';
+import 'package:preppsuite_flutter/features/kids_comic/application/kids_comic_de.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/xapian_index.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/zstd_stream.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
@@ -134,5 +137,25 @@ void main() {
     await tester.tap(find.text('Erste Hilfe'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Bewusstlose Person'), findsWidgets);
+  });
+
+  testWidgets('the comic’s pictures decode', (tester) async {
+    // They are WebP. An engine that cannot read it would show grey boxes
+    // where the pictures belong, and no test on this Mac would notice.
+    final images = [
+      kidsComicCover,
+      for (final chapter in kidsComicDe.chapters)
+        for (final panel in chapter.panels) panel.image,
+    ];
+    await tester.runAsync(() async {
+      for (final image in images) {
+        final data = await rootBundle.load(kidsComicAsset(image));
+        final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+        final frame = await codec.getNextFrame();
+        expect(frame.image.width, greaterThan(900), reason: image);
+        frame.image.dispose();
+        codec.dispose();
+      }
+    });
   });
 }

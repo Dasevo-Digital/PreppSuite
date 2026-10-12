@@ -4,7 +4,8 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/kids_comic.dart';
 import 'kids_comic_parts.dart';
 
-/// Every chapter's rules on one sheet, and the two numbers.
+/// Every chapter's rules on one sheet, each beside its first picture, and
+/// the two numbers.
 class KidsComicRulesScreen extends StatelessWidget {
   const KidsComicRulesScreen({super.key});
 
@@ -57,35 +58,65 @@ class KidsComicRulesScreen extends StatelessWidget {
                 ),
             ],
           ),
+          const SizedBox(height: 8),
+          Text(
+            comic.numbersNote,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: 16),
           for (final chapter in comic.chapters)
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      chapter.rulesTitle,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 6),
-                    for (final rule in chapter.rules)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.check_circle_outline,
-                              size: 20,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(child: Text(rule)),
-                          ],
+                    // The chapter's first picture, to find it again by;
+                    // its words are the chapter's, so it says nothing.
+                    SizedBox(
+                      width: 104,
+                      child: ExcludeSemantics(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: ComicPicture(
+                            asset: chapter.panels.first.asset,
+                            description: chapter.panels.first.description,
+                            aspectRatio: kidsComicPanelAspectRatio,
+                          ),
                         ),
                       ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            chapter.rulesTitle,
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 2),
+                          for (final rule in chapter.rules)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.check_circle_outline,
+                                    size: 20,
+                                    color: theme.colorScheme.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(child: Text(rule)),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

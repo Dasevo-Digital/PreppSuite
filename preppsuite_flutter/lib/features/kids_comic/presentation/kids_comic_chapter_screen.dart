@@ -30,18 +30,11 @@ class KidsComicChapterScreen extends StatelessWidget {
           // blocks into columns, which would have the story run down the
           // left half first.
           final twoUp = constraints.maxWidth >= 860;
-          final rows = <List<ComicPanel>>[];
-          for (final panel in chapter.panels) {
-            if (!twoUp || panel.wide) {
-              rows.add([panel]);
-            } else if (rows.isNotEmpty &&
-                rows.last.length == 1 &&
-                !rows.last.single.wide) {
-              rows.last.add(panel);
-            } else {
-              rows.add([panel]);
-            }
-          }
+          final perRow = twoUp ? 2 : 1;
+          final rows = [
+            for (var i = 0; i < chapter.panels.length; i += perRow)
+              chapter.panels.skip(i).take(perRow).toList(),
+          ];
 
           return Center(
             child: ConstrainedBox(
@@ -90,6 +83,8 @@ class KidsComicChapterScreen extends StatelessWidget {
                               ),
                             ),
                     ),
+                  ComicNote(text: chapter.note),
+                  const SizedBox(height: 16),
                   Align(
                     alignment: Alignment.centerRight,
                     child: FilledButton.icon(

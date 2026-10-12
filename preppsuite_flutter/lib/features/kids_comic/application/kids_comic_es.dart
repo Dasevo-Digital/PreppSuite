@@ -3,572 +3,411 @@ import 'kids_comic.dart';
 const _mila = ComicSpeaker.mila;
 const _nuss = ComicSpeaker.nuss;
 const _papa = ComicSpeaker.papa;
-const _vecina = ComicSpeaker.neighbour;
 
 const kidsComicEs = KidsComic(
   title: 'Mila y Nuss',
-  subtitle: 'Un cómic de emergencias para niños',
+  subtitle: 'Nuestro cómic de emergencias',
   intro:
-      'Nuss es una ardilla que cada otoño guarda provisiones. Mila aprende '
-      'de él y de su papá qué hacer cuando de repente algo es distinto de '
-      'lo normal: cuando se va la luz, suena la sirena, llega una tormenta, '
-      'hay un incendio o los mayores hablan de guerra.',
+      'Seis historias para aprender y estar preparados: prepararse, mantener '
+      'la calma, entender las alertas, ayudarse. Con la ardilla Nuss y con '
+      'su papá, Mila aprende qué hacer cuando se va la luz, suena la sirena, '
+      'llega una tormenta, hay un incendio o los mayores hablan de guerra.',
   coverDescription:
-      'Mila y la ardilla Nuss bajo un árbol con un montón de nueces',
+      'Mila y la ardilla Nuss recogen nueces en el jardín, al lado de una '
+      'caja abierta con provisiones',
   speakers: {
     ComicSpeaker.mila: 'Mila',
     ComicSpeaker.nuss: 'Nuss',
     ComicSpeaker.papa: 'Papá',
-    ComicSpeaker.neighbour: 'Sra. Yilmaz',
   },
   numbers: [
-    (number: '112', label: 'Bomberos y ambulancia'),
-    (number: '110', label: 'Policía'),
+    (number: '112', label: 'Bomberos y emergencias médicas'),
+    (number: '110', label: 'Policía (Alemania)'),
   ],
+  numbersNote: 'Niños: pedid ayuda a un adulto.',
   chapters: [
     ComicChapter(
       id: 'vorrat',
-      title: 'Nuss guarda provisiones',
-      lede:
-          'Quien está preparado tiene menos miedo. Por eso todo empieza '
-          'aquí, en un día cualquiera.',
-      rulesTitle: 'Provisiones',
-      rules: [
-        'Agua y comida para unos días',
-        'Una mochila de emergencia para cada uno',
-        'Los números de teléfono en papel',
-        'Acordar un punto de encuentro',
-      ],
+      title: 'Nuss prepara las provisiones',
+      lede: '¿Y si un día falla algo importante?',
       panels: [
         ComicPanel(
           image: 'vorrat-1',
           description:
-              'Nuss está sentado bajo un árbol junto a un montón de nueces, '
-              'Mila lo mira',
+              'Mila y Nuss recogen nueces en una cesta en el jardín, al lado '
+              'una caja abierta con latas, tarros y botellas de agua',
           lines: [
             ComicLine(
               _nuss,
-              'Recojo nueces para el invierno. Así tengo bastantes, aunque '
-              'fuera esté todo nevado.',
-            ),
-            ComicLine(
-              _mila,
-              '¡Qué listo! ¿Las personas también necesitamos provisiones así?',
+              'Yo guardo nueces. ¿Qué guardamos nosotros para una emergencia?',
             ),
           ],
         ),
         ComicPanel(
           image: 'vorrat-2',
           description:
-              'Papá le enseña a Mila una estantería con botellas de agua y '
-              'latas',
+              'Papá y Mila llenan una estantería con botellas de agua, latas '
+              'y tarros, Nuss mira',
           lines: [
             ComicLine(
               _papa,
-              'Sí. Tenemos agua y comida para unos días. Si alguna vez las '
-              'tiendas están cerradas, nos apañamos igual.',
-            ),
-            ComicLine.caption(
-              'Unos 2 litros por persona y día, para beber y cocinar.',
-              lead: '¿Cuánta agua?',
+              'Agua y alimentos duraderos: primero para 3 días, mejor para 10.',
             ),
           ],
         ),
         ComicPanel(
           image: 'vorrat-3',
           description:
-              'Mila prepara una mochila con linterna, cantimplora y conejo '
-              'de peluche',
+              'Mila mete su osito en una mochila roja, en la mesa hay un '
+              'botiquín, una linterna y una lista de cosas',
           lines: [
             ComicLine(
               _mila,
-              'En mi mochila de emergencia van: la linterna, la cantimplora, '
-              'una chaqueta de abrigo y mi conejo de peluche Momo.',
-            ),
-            ComicLine(
-              _nuss,
-              'Y una nota con los teléfonos de mamá y papá. Si el móvil se '
-              'queda sin batería, el papel ayuda.',
+              '¡En la mochila necesitamos linterna, radio, medicinas y mi '
+              'osito!',
             ),
           ],
         ),
         ComicPanel(
           image: 'vorrat-4',
           description:
-              'Un cartel verde de punto de encuentro delante de la casa, '
-              'Papá y Mila al lado',
+              'En el parque, Papá le enseña a Mila una señal verde de punto '
+              'de encuentro, Nuss va sentado en su hombro',
           lines: [
             ComicLine(
               _papa,
-              'Si alguna vez nos perdemos, nos encontramos aquí, junto al '
-              'cartel delante de casa.',
-            ),
-            ComicLine(
-              _mila,
-              '¡Y mi dirección me la sé de memoria: Lindenweg 4!',
-            ),
-            ComicLine.caption(
-              '112 para bomberos y ambulancia, 110 para la policía. Los dos '
-              'números son gratis.',
-              lead: 'Emergencias:',
+              'También sabemos dónde reunirnos y a qué números llamar.',
             ),
           ],
         ),
       ],
+      note:
+          'Calcula unos 2 litros de agua por persona y día para beber y '
+          'cocinar. Incluye a las mascotas.',
+      rulesTitle: 'Provisiones',
+      rules: ['3 días es un buen comienzo', 'Mejor prepararse para 10'],
     ),
     ComicChapter(
       id: 'strom',
-      title: 'De repente todo está oscuro',
-      lede:
-          'Un apagón llega sin avisar. La luz, la tele y la calefacción se '
-          'apagan, y el móvil ya no carga.',
-      rulesTitle: 'Apagón',
-      rules: [
-        'Mantener la calma',
-        'Linterna en vez de vela',
-        'Dejar la nevera cerrada',
-        'Escuchar la radio, preguntar a los vecinos',
-      ],
+      title: 'De pronto, se va la luz',
+      lede: 'No hay electricidad, ¿qué hacemos?',
       panels: [
         ComicPanel(
           image: 'strom-1',
           description:
-              'Una habitación oscura de noche, Mila asustada, Papá a su lado',
+              'Salón a oscuras por la tarde, Papá pulsa el interruptor, Mila '
+              'y Nuss miran la lámpara',
           lines: [
-            ComicLine(_mila, '¡Papá! ¡Se ha ido la luz, y la tele también!'),
-            ComicLine(
-              _papa,
-              'Es un apagón. Lo primero, mantenemos la calma. Estoy aquí.',
-            ),
+            ComicLine(_mila, '¡Se ha apagado la luz! ¿Ha pasado algo malo?'),
           ],
         ),
         ComicPanel(
           image: 'strom-2',
           description:
-              'Nuss alumbra con una linterna, al lado una vela tachada',
+              'Mila alumbra con una linterna, al lado una señal de velas '
+              'tachadas, Nuss está junto a un farol',
           lines: [
             ComicLine(
-              _nuss,
-              '¡Linterna en vez de vela! Una vela se puede caer, y entonces '
-              'hay fuego.',
+              _papa,
+              'Mantenemos la calma. Una linterna es más segura que una vela.',
             ),
           ],
         ),
         ComicPanel(
           image: 'strom-3',
-          description: 'Papá mantiene cerrada la nevera, Mila mira',
+          description:
+              'Papá cierra la nevera y señala la escalera, en el ascensor hay '
+              'una señal de prohibido',
           lines: [
             ComicLine(
-              _papa,
-              'La nevera la dejamos cerrada. Así dentro se mantiene fría '
-              'más tiempo.',
-            ),
-            ComicLine(_mila, '¿Y el ascensor de casa?'),
-            ComicLine(
-              _papa,
-              'Sin corriente no funciona. Vamos por la escalera.',
+              _nuss,
+              '¡Dejad cerrada la nevera! Y no uséis el ascensor.',
             ),
           ],
         ),
         ComicPanel(
           image: 'strom-4',
           description:
-              'Papá le da a la manivela de una radio, Mila y Nuss escuchan',
-          lines: [
-            ComicLine(
-              _papa,
-              'Esta radio funciona con pilas o con la manivela. En la radio '
-              'dicen qué pasa y cuánto va a durar.',
-            ),
-            ComicLine.caption(
-              'Abrigarse, acurrucarse juntos y hacer sombras chinescas con '
-              'la linterna. Así el tiempo pasa más rápido.',
-            ),
-          ],
-        ),
-        ComicPanel(
-          image: 'strom-5',
-          wide: true,
-          description:
-              'Mila y Papá llaman a la puerta de la vecina, que abre con '
-              'una sonrisa',
+              'Mila, Papá y Nuss escuchan una radio de manivela, la abuela '
+              'sonríe en la puerta',
           lines: [
             ComicLine(
               _mila,
-              'La señora Yilmaz, la de al lado, vive sola. ¿Le preguntamos '
-              'si necesita algo?',
-            ),
-            ComicLine(
-              _vecina,
-              '¡Qué amables sois! Me vendría bien una manta.',
-            ),
-            ComicLine(
-              _papa,
-              'Buena idea, Mila. Cuando los vecinos se ayudan, es más fácil '
-              'para todos.',
+              'Oigamos la radio de manivela y veamos si la abuela necesita '
+              'ayuda.',
             ),
           ],
         ),
       ],
+      note:
+          'Ten a mano linternas, pilas de repuesto, batería externa y radio a '
+          'pilas o de manivela.',
+      rulesTitle: 'Luz',
+      rules: ['Linterna y radio', 'Mantener cerrada la nevera'],
     ),
     ComicChapter(
       id: 'sirene',
       title: 'Suena la sirena',
-      lede:
-          'Las sirenas avisan a todo el mundo a la vez. Lo importante es '
-          'cómo suenan.',
-      rulesTitle: 'Sirena',
-      rules: [
-        'Sube y baja: aviso, a casa',
-        'Ventanas y puertas cerradas',
-        'Radio o app de avisos encendida',
-        'Tono largo: fin del aviso',
-      ],
+      lede: 'Ese sonido fuerte significa: ¡atención!',
       panels: [
         ComicPanel(
           image: 'sirene-1',
           description:
-              'Una sirena en un poste con ondas de sonido rojas, Mila '
-              'asustada',
+              'Mila, Papá y Nuss miran una sirena que suena en un mástil '
+              'sobre los tejados',
           lines: [
-            ComicLine.caption(
-              'Es un aviso.',
-              lead: 'Un sonido que sube y baja durante un minuto:',
-            ),
-            ComicLine(_mila, '¿Qué significa eso?'),
             ComicLine(
               _nuss,
-              '¡Atención! Ha pasado algo. Ahora escuchamos con cuidado.',
+              '¿Oyes el sonido que sube y baja? ¡Puede ser una alerta!',
             ),
           ],
         ),
         ComicPanel(
           image: 'sirene-2',
-          description: 'Mila camina con Nuss hacia una casa',
+          description:
+              'Papá lleva a Mila de la mano por la puerta de casa, Nuss los '
+              'acompaña',
           lines: [
             ComicLine(
-              _nuss,
-              'Entra en la casa más cercana. Si estás fuera, quédate con tu '
-              'profesora o con un adulto que conozcas.',
+              _papa,
+              'Buscamos un lugar seguro y entramos juntos en casa.',
             ),
           ],
         ),
         ComicPanel(
           image: 'sirene-3',
           description:
-              'Dentro: Papá cierra la ventana, la radio está sobre la mesa',
+              'En la mesa de la cocina Papá enciende la radio y sostiene un '
+              'móvil con una señal de aviso, Mila y Nuss escuchan',
           lines: [
             ComicLine(
-              _papa,
-              'Ventanas y puertas cerradas, radio encendida. En la radio y '
-              'en la app de avisos dicen qué tenemos que hacer ahora.',
+              _mila,
+              '¿Qué ha pasado? Escuchemos la radio y consultemos alertas '
+              'oficiales.',
             ),
-            ComicLine(_mila, 'Me quedo contigo.'),
           ],
         ),
         ComicPanel(
           image: 'sirene-4',
           description:
-              'La sirena con un tono verde y tranquilo, Mila respira aliviada',
+              'Papá les explica el aviso a Mila y a Nuss, en la ventana una '
+              'marca verde',
           lines: [
-            ComicLine.caption(
-              'Fin del aviso. El peligro ha pasado.',
-              lead: 'Un tono largo, sin subir ni bajar:',
-            ),
-            ComicLine(_mila, '¡Uf!'),
             ComicLine(
-              _nuss,
-              'Una vez al año, el día de prueba de avisos en septiembre, '
-              'todas las sirenas se prueban a la vez. Así no tienes que '
-              'asustarte.',
+              _papa,
+              'El aviso nos dice cómo protegernos de ese peligro concreto.',
             ),
           ],
         ),
       ],
+      note:
+          'En Alemania: sirena que sube y baja 1 minuto = alerta; tono '
+          'constante 1 minuto = fin de alerta. Atiende los avisos locales.',
+      rulesTitle: 'Sirenas',
+      rules: ['Oír la alerta', 'Consultar avisos oficiales', 'Actuar'],
     ),
     ComicChapter(
       id: 'sturm',
-      title: 'Tormenta e inundación',
-      lede:
-          'Las tormentas eléctricas, el viento fuerte y la lluvia intensa '
-          'son lo más frecuente aquí. Contra todo ello casi siempre sirve '
-          'lo mismo: meterse en casa.',
-      rulesTitle: 'Tormenta e inundación',
-      rules: [
-        'Con tormenta, a casa y lejos de los árboles',
-        'Dentro, lejos de la ventana',
-        'Nunca cruzar el agua andando',
-        'Con inundación, hacia arriba, no al sótano',
-      ],
+      title: 'Tormentas, inundaciones y calor',
+      lede: 'A veces el tiempo puede ser peligroso.',
       panels: [
         ComicPanel(
           image: 'sturm-1',
           description:
-              'Una nube de tormenta con un rayo sobre un árbol, Mila se '
-              'aleja corriendo del árbol',
+              'Mila, Nuss y Papá están dentro en el sofá, fuera hay una '
+              'tormenta con lluvia',
           lines: [
             ComicLine(
-              _nuss,
-              'Con tormenta, rápido a casa. ¡No te pongas debajo de un '
-              'árbol!',
-            ),
-            ComicLine(_mila, '¿Y dentro?'),
-            ComicLine(
-              _nuss,
-              'Lejos de la ventana. Fuera, el viento puede hacer volar ramas '
-              'y tejas.',
+              _mila,
+              'Si hay tormenta, nos quedamos dentro, lejos de las ventanas.',
             ),
           ],
         ),
         ComicPanel(
           image: 'sturm-2',
           description:
-              'Papá y Mila se quedan en la acera seca; delante de ellos la '
+              'Papá y Mila, con Nuss en brazos, suben la escalera, fuera la '
               'calle está inundada',
           lines: [
-            ComicLine.caption(
-              'El agua suele ser más fuerte y más profunda de lo que parece.',
-              lead: 'Inundación:',
-            ),
             ComicLine(
               _papa,
-              'Nunca cruzamos andando el agua de la calle. ¡Y con '
-              'inundación tampoco bajamos al sótano!',
+              'Si hay inundación, subimos de planta. ¡Nunca al sótano!',
             ),
           ],
         ),
         ComicPanel(
           image: 'sturm-3',
           description:
-              'Mila y Nuss arriba en la casa con la mochila, abajo hay agua',
+              'Papá prepara la mochila, una radio, agua y una linterna, fuera '
+              'hay casas en el agua',
           lines: [
             ComicLine(
-              _mila,
-              'Subimos y esperamos hasta que los bomberos digan que vuelve a '
-              'ser seguro.',
-            ),
-            ComicLine(
               _nuss,
-              'La mochila de emergencia y la radio nos las llevamos.',
+              'La mochila y la radio están listas. Seguimos las alertas.',
             ),
           ],
         ),
         ComicPanel(
           image: 'sturm-4',
           description:
-              'Un día caluroso de verano, Mila bebe a la sombra de un árbol',
+              'Papá, Mila con sombrero de sol y Nuss beben agua a la sombra '
+              'de un árbol',
           lines: [
-            ComicLine.caption(
-              'también es un peligro.',
-              lead: 'El calor fuerte',
-            ),
             ComicLine(
-              _nuss,
-              'Beber mucho, quedarse a la sombra y a mediodía mejor jugar '
-              'dentro.',
+              _mila,
+              'Cuando hace mucho calor: ¡sombra, descansos y agua!',
             ),
           ],
         ),
       ],
+      note:
+          'No camines ni conduzcas por zonas inundadas. Si hay tormenta '
+          'eléctrica, no te refugies bajo los árboles.',
+      rulesTitle: 'Temporal',
+      rules: ['Refugiarse dentro', 'Si hay inundación, evitar el sótano'],
     ),
     ComicChapter(
       id: 'feuer',
-      title: 'Pita y huele a humo',
-      lede:
-          'El fuego en casa es el peligro que los niños tienen más '
-          'probabilidades de vivir ellos mismos. Aquí cuenta cada segundo.',
-      rulesTitle: 'Fuego',
-      rules: [
-        'Salir y gritar fuerte «¡Fuego!»',
-        'Agacharse o gatear',
-        'Nunca esconderse, nunca volver',
-        '112: ¿Dónde? ¿Qué? Luego esperar',
-      ],
+      title: 'Suena la alarma y hay humo',
+      lede: 'El detector de humo avisa del fuego.',
       panels: [
         ComicPanel(
           image: 'feuer-1',
           description:
-              'Un detector de humo pitando en el techo, debajo humo, Mila '
-              'asustada',
-          lines: [
-            ComicLine(_mila, '¡El detector de humo está pitando!'),
-            ComicLine(
-              _nuss,
-              '¡Sal de casa ahora mismo! Y grita fuerte «¡Fuego!» para que '
-              'todos lo oigan.',
-            ),
-          ],
+              'En el pasillo pita un detector de humo en el techo, entra '
+              'humo, Mila señala hacia arriba',
+          lines: [ComicLine(_mila, '¡Suena el detector de humo! ¡Fuego!')],
         ),
         ComicPanel(
           image: 'feuer-2',
           description:
-              'Mila gatea a cuatro patas por debajo del humo hacia la '
-              'puerta',
+              'Papá, Mila y Nuss gatean por debajo del humo hacia la puerta '
+              'abierta',
           lines: [
-            ComicLine.caption(
-              'Abajo, cerca del suelo, hay menos humo. Por eso: agacharse o '
-              'gatear.',
-            ),
             ComicLine(
-              _nuss,
-              '¡No te escondas nunca, ni debajo de la cama ni en el armario! '
-              'Los bomberos tienen que poder encontrarte.',
+              _papa,
+              'Vamos rápido a una salida segura. Si hay humo, agáchate.',
             ),
-            ComicLine(_mila, 'Y cierro la puerta al salir.'),
           ],
         ),
         ComicPanel(
           image: 'feuer-3',
           description:
-              'Fuera, en el punto de encuentro: Papá llama al 112 con el '
-              'móvil, Mila se agarra a él',
+              'Fuera, Papá cierra la puerta de casa, Mila lleva a Nuss en '
+              'brazos',
           lines: [
-            ComicLine(_mila, '¡Momo sigue dentro!'),
             ComicLine(
-              _papa,
-              'Nunca volvemos a entrar en casa. Eso lo hacen los bomberos. '
-              'Las cosas se pueden reemplazar, a ti no.',
+              _mila,
+              'Cerramos la puerta al salir, ¡y no volvemos a entrar!',
             ),
           ],
         ),
         ComicPanel(
           image: 'feuer-4',
-          description: 'Un móvil grande con el número 112, Nuss lo señala',
+          description:
+              'Papá habla por teléfono, Mila lleva a Nuss en brazos, detrás '
+              'llegan los bomberos',
           lines: [
-            ComicLine(_mila, '¿Y si estoy sola?'),
-            ComicLine(
-              _nuss,
-              'Entonces llamas tú misma al 112. Es gratis y funciona también '
-              'sin saldo.',
-            ),
-            ComicLine.caption(
-              '¿Dónde es? ¿Qué ha pasado? Luego esperas. La central hace '
-              'preguntas y es la primera en colgar.',
-              lead: 'Por teléfono dices:',
-            ),
+            ComicLine(_papa, 'Ya fuera, llamo al 112 y digo si falta alguien.'),
           ],
         ),
       ],
+      note:
+          'No entres en rutas de salida llenas de humo. Si no puedes salir, '
+          'cierra la puerta y pide ayuda desde una ventana.',
+      rulesTitle: 'Fuego',
+      rules: ['Salir, cerrar la puerta, llamar al 112', 'No regresar'],
     ),
     ComicChapter(
       id: 'krieg',
       title: 'Cuando los mayores hablan de guerra',
-      lede:
-          'A veces los niños oyen noticias que les dan miedo. Hablar de '
-          'ello ayuda más que callar.',
-      rulesTitle: 'Cuando tengo miedo',
-      rules: [
-        'Hablar de ello',
-        'Preguntar a los adultos, no creer a internet',
-        'Si hay aviso: habitación sin ventanas, quedarse juntos',
-        'No tocar cosas raras',
-      ],
+      lede: 'Está bien hacer preguntas difíciles.',
       panels: [
         ComicPanel(
           image: 'krieg-1',
           description:
-              'Mila está junto a la radio con cara triste, Papá está con ella',
+              'Mila está triste en el sofá y abraza su peluche, Nuss está a '
+              'su lado, en la mesa hay una radio',
           lines: [
             ComicLine(
               _mila,
-              'En la radio hablan de guerra. ¿Va a venir aquí también?',
-            ),
-            ComicLine(
-              _papa,
-              'Qué bien que lo preguntes. Aquí ahora mismo estamos seguros. '
-              'Y muchísimas personas trabajan cada día para que siga así.',
+              'En la radio hablan de una guerra. Me da miedo.',
             ),
           ],
         ),
         ComicPanel(
           image: 'krieg-2',
           description:
-              'Mila pinta un dibujo con un corazón, Nuss está sentado con ella',
+              'Papá se sienta con Mila en el sofá y le habla con cariño, Nuss '
+              'escucha',
           lines: [
             ComicLine(
-              _nuss,
-              'Tener miedo está bien. Cuéntaselo a alguien: a papá, a tu '
-              'profesora o a la abuela.',
-            ),
-            ComicLine(
-              _mila,
-              'A mí también me ayuda pintar. Y abrazar a Momo.',
+              _papa,
+              'Lo entiendo. Puedes preguntarme lo que quieras; te escucharé.',
             ),
           ],
         ),
         ComicPanel(
           image: 'krieg-3',
-          description:
-              'La familia en una habitación sin ventanas con mochila, radio '
-              'y conejo de peluche',
+          description: 'Mila dibuja un corazón, Nuss se acurruca a su lado',
           lines: [
-            ComicLine.caption('', lead: 'Si alguna vez hay un aviso:'),
             ComicLine(
-              _papa,
-              'Entonces vamos a una habitación sin ventanas, por ejemplo al '
-              'pasillo o al sótano. Nos llevamos la mochila de emergencia, '
-              'la radio y la linterna.',
+              _nuss,
+              'Hablar, dibujar y abrazarnos puede hacernos sentir mejor.',
             ),
-            ComicLine(_mila, 'Y nos quedamos juntos.'),
           ],
         ),
         ComicPanel(
           image: 'krieg-4',
           description:
-              'Un móvil con un signo de interrogación; al lado, en la '
-              'hierba, un objeto extraño que nadie toca',
+              'Papá, Mila y Nuss están sentados con calma junto a una '
+              'mochila, una radio, una linterna y un botiquín',
           lines: [
             ComicLine(
-              _nuss,
-              'No todo lo que pone en internet es verdad. Mejor pregunta a '
-              'los adultos o escucha las noticias en la radio.',
-            ),
-            ComicLine(
-              _mila,
-              'Y si fuera encuentro algo raro, no lo toco y se lo digo a un '
-              'adulto.',
-            ),
-          ],
-        ),
-        ComicPanel(
-          image: 'krieg-5',
-          wide: true,
-          description: 'Mila, Papá y Nuss, contentos, bajo el gran árbol',
-          lines: [
-            ComicLine(
-              _mila,
-              'Ahora sé lo que puedo hacer. Así me siento mucho mejor.',
-            ),
-            ComicLine(
-              _nuss,
-              '¿Ves? Quien está preparado tiene menos miedo.',
+              _papa,
+              'Comprobamos las noticias y pensamos con calma qué hacer.',
             ),
           ],
         ),
       ],
+      note:
+          'Responde con sinceridad y según la edad, escucha sus emociones y '
+          'haz pausas de las noticias.',
+      rulesTitle: 'Emociones',
+      rules: ['Preguntar', 'Compartir miedos', 'Buscar fuentes fiables'],
     ),
   ],
   parentsIntro:
       'El cómic está pensado para leerlo juntos a partir de unos cinco '
       'años. Basta con un capítulo por noche. El último capítulo es '
-      'tranquilo a propósito. Léalo cuando su hijo o hija pregunte por las '
-      'noticias, no como primer capítulo.',
+      'tranquilo a propósito: léelo cuando tu hijo o hija pregunte por las '
+      'noticias, no como primer capítulo. Lo que aconsejan los capítulos, '
+      'para personas adultas:',
   parentsTips: [
-    'Responder a las preguntas con sinceridad y brevedad. Los niños no '
-        'necesitan detalles, pero notan cuando se les oculta algo.',
-    'Preparar juntos la mochila de emergencia. Quien puede hacer algo por '
-        'sí mismo se siente menos indefenso.',
-    'Practicar juntos el punto de encuentro, la dirección y los números '
-        '112 y 110, mejor fuera, delante de la puerta.',
-    'Aprovechar el día de prueba de avisos de septiembre para hablar de '
-        'las señales de las sirenas.',
-    'Probar juntos el detector de humo, para que el pitido sea conocido y '
-        'no asuste.',
+    'Provisiones de emergencia: si es posible, prepara provisiones para 10 '
+        'días; 3 días es un buen inicio. Calcula unos 2 litros de agua por '
+        'persona y día.',
+    'Cortes de electricidad: prepara iluminación, radio y provisiones. Un '
+        'apagón puede afectar al frío, la calefacción, los ascensores y las '
+        'comunicaciones.',
+    'Alertas públicas: en Alemania, 1 minuto de sirena ascendente y '
+        'descendente = alerta; 1 minuto de tono constante = fin. Comprueba '
+        'el aviso concreto.',
+    'Riesgos naturales: con tormenta, busca refugio en un edificio. Con '
+        'inundación, sube a plantas superiores; evita sótanos, pasos '
+        'subterráneos y garajes.',
+    'Incendios: usa solo salidas seguras, evita el humo, cierra las puertas '
+        'al salir y llama al 112 desde fuera. Nunca vuelvas a entrar.',
+    'Hablar con los niños: escucha sus preocupaciones, explica con '
+        'sinceridad según su edad, limita las noticias angustiosas y no '
+        'prometas seguridad absoluta.',
   ],
   source:
-      'Las normas de comportamiento siguen las recomendaciones de la '
-      'Oficina Federal de Protección Civil y Asistencia en Catástrofes de '
-      'Alemania (BBK) sobre la preparación ante emergencias. Mila, Nuss y '
-      'su historia son personajes propios de esta app y no una publicación '
-      'de la BBK.',
+      'Adaptación editorial de octubre de 2026, basada en las '
+      'recomendaciones públicas de la Oficina Federal alemana de Protección '
+      'Civil (BBK): preparación ante crisis y catástrofes, sirenas y alertas '
+      'en Alemania, buscar refugio, inundaciones, prevención de incendios y '
+      'afrontar miedos y preocupaciones. Sin aprobación oficial ni '
+      'certificación médica. Mila, Nuss y su historia son personajes propios '
+      'de esta app y no una publicación del BBK.',
 );

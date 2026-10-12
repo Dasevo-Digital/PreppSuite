@@ -165,12 +165,13 @@ nicht was es gekostet hat. Früher eingetragene Posten bleiben gespeichert
 und reisen mit Sicherung und gemeinsamem Ordner.
 
 **Mila und Nuss.** Ein Notfall-Comic für Kinder in sechs Kapiteln:
-Vorräte, Stromausfall, Sirene, Sturm und Hochwasser, Feuer und – bewusst
-ruhig erzählt – was man tut, wenn die Großen von Krieg reden. Dazu ein
-Merkzettel mit allen Regeln und Hinweise für Eltern. Mila ist ein Mädchen,
-Nuss ein Eichhörnchen, das Vorräte anlegt. Die Regeln folgen den
-Empfehlungen des BBK; Figuren und Zeichnungen sind eigene. Der Comic ist in
-der App enthalten, auf Deutsch und Englisch, und braucht kein Internet; zu
+Vorräte, Stromausfall, Sirene, Sturm, Hochwasser und Hitze, Feuer und –
+bewusst ruhig erzählt – was man tut, wenn die Großen von Krieg reden. Jedes
+Kapitel hat vier Bilder und einen Merksatz; dazu ein Merkzettel mit allen
+Regeln und Hinweise für Eltern. Mila ist ein Mädchen, Nuss ein
+Eichhörnchen, das Vorräte anlegt. Die Regeln sind mit den Empfehlungen des
+BBK abgeglichen; Figuren und Bilder sind eigene. Der Comic ist in der App
+enthalten, auf Deutsch, Englisch und Spanisch, und braucht kein Internet; zu
 finden im Reiter „Notfall“ direkt unter „Erste Hilfe“ und über die Suche.
 
 **Erste Hilfe.** Sechsundvierzig Anleitungen in Dringlichkeitsreihenfolge.

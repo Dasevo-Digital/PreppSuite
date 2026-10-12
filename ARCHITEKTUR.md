@@ -616,18 +616,26 @@ are the guides' own words, so changing one means changing the other.
 
 **The children's comic is the second exception, for the same reason.**
 "Mila und Nuss" is a story, and a story has to read end to end: its words
-live in `kids_comic_de.dart` and `kids_comic_en.dart`, and
-`kids_comic_test.dart` holds the two to the same chapters, pictures and
-speakers in the same order. Its drawings are made once, as SVG, in
-`tool/comic/mila_und_nuss.html` — which is also the web edition — and
-rendered to `assets/comic/` by `tool/comic/render_panels.py` (macOS, Quick
-Look and `sips`, nothing to install). Pictures carry no words, so both
-languages share them; change a drawing in the HTML and run the script, never
-edit a PNG. The test checks that every picture the text names is carried and
-drawn. What the comic advises follows the BBK; the characters are this
-app's own. The BBK declined the use of its "Max und Flocke" comics on
-2026-10-01, so nothing of theirs may go into the repository or a package,
-and a link or embed was ruled out as well.
+live in `kids_comic_de.dart`, `kids_comic_en.dart` and
+`kids_comic_es.dart`, and `kids_comic_test.dart` holds them to the same
+chapters, pictures and speakers in the same order. The comic exists as
+three PDF editions, German, English and Spanish, kept outside the
+repository; each language's words are its edition's, and the pictures are
+the same pixels in all three. `tool/comic/cut_panels.py` takes each page
+out as the JPEG it is stored as and cuts the cover and the four panels of
+each chapter into `assets/comic/` as WebP, from inside the frames, leaving
+the words drawn on the page behind. The pictures carry no words, only each
+panel's number, so every language shares them; a new edition is cut
+again, never a WebP edited by hand. The test checks that every picture the
+text names is carried, in the shape the screen keeps for it, and the start
+test decodes each one on every platform a release goes to. What the comic
+advises was checked against the BBK's public advice in October 2026; the
+characters are this app's own. The editions head some of their boxes "BBK
+tip" or "Consejo del BBK"; the app leaves that off, because a paraphrase
+is not the BBK's sentence, and names the source once, under the notes for
+parents. The BBK declined the use of its "Max und Flocke" comics
+on 2026-10-01, so nothing of theirs may go into the repository or a
+package, and a link or embed was ruled out as well.
 
 **First aid works on a fresh install with no network, no download and no
 setting.** That is the whole reason it is its own feature rather than a

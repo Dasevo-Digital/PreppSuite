@@ -48,7 +48,8 @@ void main() {
     await show(tester, const KidsComicChapterScreen(index: 4));
 
     expect(find.text('Es piept und riecht nach Rauch'), findsOneWidget);
-    expect(find.textContaining('Wir gehen niemals zurück'), findsOneWidget);
+    expect(find.textContaining('nicht wieder hineingehen'), findsOneWidget);
+    expect(find.text(kidsComicDe.chapters[4].note), findsOneWidget);
     expect(
       find.text('Weiter: ${kidsComicDe.chapters[5].title}'),
       findsOneWidget,
@@ -65,6 +66,7 @@ void main() {
 
     expect(find.text('Notrufnummern'), findsOneWidget);
     expect(find.text('112'), findsOneWidget);
+    expect(find.text('Kinder: immer Erwachsene dazuholen.'), findsOneWidget);
   });
 
   testWidgets('on a wide window two panels share a row', (tester) async {

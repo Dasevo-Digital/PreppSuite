@@ -28,7 +28,7 @@ class KidsComicScreen extends StatelessWidget {
           ComicPicture(
             asset: kidsComicAsset(kidsComicCover),
             description: comic.coverDescription,
-            aspectRatio: 300 / 220,
+            aspectRatio: kidsComicCoverAspectRatio,
           ),
           const SizedBox(height: 16),
           Text(comic.subtitle, style: theme.textTheme.titleMedium),
