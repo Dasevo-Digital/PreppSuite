@@ -724,7 +724,10 @@ Die mobile CI (`.github/workflows/test-mobile.yml`) führt die nativen
 Speicher- und Webview-Tests auf einem Android-Emulator und einem iOS-Simulator
 aus. Lokal startet `python3 tool/run_ios_integration.py` einen verfügbaren
 iPhone-Simulator und beendet ihn danach wieder, sofern das Skript ihn
-selbst gestartet hat. Echte Hintergrundzustellung und der interaktive
+selbst gestartet hat. Es führt jede Testdatei einzeln aus; bleibt der
+Simulator nach dem Bauen acht Minuten stumm, startet es ihn neu (wieder
+nur, wenn es ihn selbst gestartet hat) und wiederholt die Datei einmal.
+Echte Hintergrundzustellung und der interaktive
 Ordner-Picker benötigen weiterhin Tests auf physischen Geräten.
 
 Vor jedem Release läuft dasselbe als Release-Schranke mit Nachweis:
