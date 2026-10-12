@@ -35,6 +35,9 @@ from PIL import Image, ImageDraw, ImageFont
 NARROW = ("/System/Library/Fonts/Supplemental/Arial Narrow.ttf", 0)
 NARROW_BOLD = ("/System/Library/Fonts/Supplemental/Arial Narrow Bold.ttf", 0)
 CONDENSED_MEDIUM = ("/System/Library/Fonts/Avenir Next Condensed.ttc", 5)
+CONDENSED_DEMI = ("/System/Library/Fonts/Avenir Next Condensed.ttc", 2)
+CONDENSED_BOLD = ("/System/Library/Fonts/Avenir Next Condensed.ttc", 0)
+HELVETICA = ("/System/Library/Fonts/HelveticaNeue.ttc", 0)
 
 
 def _plane(pixels, mask):
@@ -145,20 +148,26 @@ def _font(face, size):
     return ImageFont.truetype(path, size, index=index)
 
 
-def set_line(image, left, baseline, text, size, colour, *, face=NARROW):
+def set_line(image, left, baseline, text, size, colour, *, face=NARROW,
+             stretch=1.0):
     """Sets one line of new text, its baseline at [baseline].
 
     Drawn at four times the size and scaled down, which smooths the edges
-    the way the charts' own text is smoothed.
+    the way the charts' own text is smoothed. [stretch] narrows it, for a
+    chart whose own face is more condensed than any face on the Mac.
     """
     scale = 4
     font = _font(face, size * scale)
-    layer = Image.new("L", (image.width * scale, image.height * scale), 0)
-    ImageDraw.Draw(layer).text((left * scale, baseline * scale), text,
+    l, t, r, b = font.getbbox(text, anchor="ls")
+    layer = Image.new("L", (r - l + 8 * scale, b - t + 8 * scale), 0)
+    ImageDraw.Draw(layer).text((4 * scale - l, 4 * scale - t), text,
                                font=font, fill=255, anchor="ls")
-    layer = layer.resize(image.size, Image.LANCZOS)
-    paste_ink(image, (0, 0), np.asarray(layer).astype(float) / 255,
-              np.asarray(colour, float))
+    width = round(layer.width / scale * stretch)
+    alpha = np.asarray(layer.resize((width, layer.height // scale),
+                                    Image.LANCZOS)).astype(float) / 255
+    x = left + round((l / scale - 4) * stretch)
+    y = baseline + round(t / scale) - 4
+    paste_ink(image, (x, y), alpha, np.asarray(colour, float))
 
 
 def dot(image, centre, radius, colour):
@@ -170,8 +179,8 @@ def dot(image, centre, radius, colour):
               np.asarray(layer).astype(float) / 255, np.asarray(colour, float))
 
 
-def text_width(text, size, face=NARROW):
-    return _font(face, size * 4).getlength(text) / 4
+def text_width(text, size, face=NARROW, stretch=1.0):
+    return _font(face, size * 4).getlength(text) / 4 * stretch
 
 
 def _closed_up(image, line, cut_from, cut_to, light=False):
@@ -344,6 +353,252 @@ def _psychological_first_aid(image):
              light=True)
 
 
+def _disc(image, source, centre, radius):
+    """Copies the round area at [centre] from [source] onto [image]."""
+    size = radius * 2
+    x, y = centre[0] - radius, centre[1] - radius
+    large = Image.new("L", (size * 4, size * 4), 0)
+    ImageDraw.Draw(large).ellipse((0, 0, size * 4 - 1, size * 4 - 1), fill=255)
+    mask = large.resize((size, size), Image.LANCZOS)
+    image.paste(source.crop((x, y, x + size, y + size)), (x, y), mask)
+
+
+def _unresponsive(image):
+    # The chart checked the breathing (panel 2) before the call
+    # (panel 3, "Wenn keine normale Atmung: Notruf 112"). Since the 2025
+    # guidelines the call comes first, as soon as there is no response,
+    # and the guide says so. The two panels change places, each fitted to
+    # the other's width (298 and 305 pixels), and the numbers stay where
+    # they were.
+    source = image.copy()
+    top, bottom = 157, 648
+    breathing = source.crop((403, top, 701, bottom))
+    call = source.crop((707, top, 1012, bottom))
+    image.paste(call.resize((298, bottom - top), Image.LANCZOS), (403, top))
+    image.paste(breathing.resize((305, bottom - top), Image.LANCZOS), (707, top))
+    _disc(image, source, (442, 192), 38)
+    _disc(image, source, (751, 191), 38)
+    # The call's heading loses "Wenn keine normale Atmung:" and keeps
+    # "Notruf 112.", on one line where "Atmung prüfen." stood: panel 1
+    # ends on "Reagiert die Person nicht?", and this is the answer.
+    scale = 298 / 305
+    left = 403 + round((894 - 707) * scale)
+    right = 403 + round((1001 - 707) * scale) + 1
+    k = ink(image, (left - 1, 197, right + 1, 231))
+    # A two-line heading is set narrower and darker than a heading of one
+    # line: back to the 22 pixels of "Atmung prüfen." with the top of the
+    # capitals at 174, a fifth wider, and in its navy.
+    rows = np.nonzero((k.alpha > 0.4).any(axis=1))[0]
+    grow = 22 / (rows.max() - rows.min() + 1)
+    height, width = k.alpha.shape
+    alpha = np.asarray(
+        Image.fromarray((k.alpha * 255).astype(np.uint8)).resize(
+            (round(width * grow * 1.2), round(height * grow)), Image.LANCZOS),
+    ).astype(float) / 255
+    erase(image, (485, 162, 700, 232))
+    paste_ink(image, (491, 174 - round(rows.min() * grow)), alpha,
+              np.array([1.0, 17.0, 82.0]))
+    # "regelmläßig" -> "regelmäßig".
+    _closed_up(image, (130, 798, 430, 828), 271, 275)
+
+
+def _paint_over(image, box, keep, ring=4):
+    """Paints [box] with a plane fitted to the ring pixels [keep] accepts.
+
+    For a mark on a coloured ground, where the ring around it also holds
+    other colours: [keep] picks the ground's own pixels by colour.
+    """
+    x0, y0, x1, y1 = box
+    ox0, oy0, ox1, oy1 = x0 - ring, y0 - ring, x1 + ring, y1 + ring
+    pixels = np.asarray(image.crop((ox0, oy0, ox1, oy1))).astype(float)
+    inner = np.zeros(pixels.shape[:2], bool)
+    inner[ring:-ring, ring:-ring] = True
+    fitted = _plane(pixels, ~inner & keep(pixels))
+    pixels[inner] = fitted[inner]
+    image.paste(Image.fromarray(pixels[ring:-ring, ring:-ring]
+                                .clip(0, 255).astype(np.uint8)), (x0, y0))
+
+
+def _respaced(image, region, cells, separator, keep=()):
+    """Spreads [cells] of [region] evenly across it, separators between.
+
+    [cells] are (left, right) column ranges of the region; [separator] is
+    the column of one of its faint dividing lines, copied to the new
+    places. Everything is on one ground, fitted as a plane, and each cell's
+    contents are carried over as they are. [keep] are boxes that belong to
+    something else reaching into the region; they stay where they are.
+    """
+    x0, y0, x1, y1 = region
+    pixels = np.asarray(image.crop(region)).astype(float)
+    kept = np.zeros(pixels.shape[:2], bool)
+    for kx0, ky0, kx1, ky1 in keep:
+        kept[ky0 - y0:ky1 - y0, kx0 - x0:kx1 - x0] = True
+    lum = pixels.mean(axis=2)
+    ground = _plane(pixels, (np.abs(lum - np.median(lum)) < 6) & ~kept)
+    difference = np.abs(pixels - ground).max(axis=2)
+    difference[kept] = 0
+    out = ground.copy()
+    line = pixels[:, separator - x0] - ground[:, separator - x0]
+    slot = (x1 - x0) / len(cells)
+    for i, (left, right) in enumerate(cells):
+        block = slice(left - x0, right - x0)
+        used = np.nonzero((difference[:, block] > 30).any(axis=0))[0]
+        start, end = used.min(), used.max() + 1
+        width = end - start
+        target = round(i * slot + (slot - width) / 2)
+        a = np.clip(difference[:, block][:, start:end] / 30, 0, 1)[..., None]
+        src = pixels[:, block][:, start:end]
+        dst = out[:, target:target + width]
+        out[:, target:target + width] = dst * (1 - a) + src * a
+        if i:
+            column = round(i * slot)
+            out[:, column] = ground[:, column] + line
+    out[kept] = pixels[kept]
+    image.paste(Image.fromarray(out.clip(0, 255).astype(np.uint8)), (x0, y0))
+
+
+def _emergency_call(image):
+    # The last "Nicht tun" was "Den Notruf nicht von Kindern ohne Aufsicht
+    # absetzen lassen". A child alone with someone who has collapsed has
+    # to call 112, and is taught to. The cell goes, and the other three
+    # share the row.
+    # The "Nicht tun!" banner reaches into the first cell: its lower edge
+    # down to 1128, its round badge down to 1135.
+    _respaced(image, (20, 1128, 1008, 1350),
+              [(20, 272), (275, 500), (503, 743)], 273,
+              keep=[(20, 1128, 350, 1129), (20, 1128, 120, 1137)])
+    # "①1122" on the ambulance's bonnet, where the chart is about 112.
+    _paint_over(image, (898, 944, 972, 961),
+                lambda p: (p[..., 0] > 180) & (p[..., 1] < 110))
+
+
+def _composed(image, line, baseline, parts, colour=None):
+    """Sets [line] anew from letters taken anywhere on the chart.
+
+    [parts] are (box, baseline) pairs -- the letters inside [box], whose
+    own baseline is [baseline] -- or a number of empty columns. Each is
+    moved so that its baseline sits on the line's [baseline], and the
+    line is set from its left edge. The letters keep their ink; the line
+    takes the colour of its own old letters unless [colour] is given.
+    """
+    x0, y0, x1, y1 = line
+    above, below = baseline - y0, y1 - baseline
+    if colour is None:
+        colour = ink(image, line).colour
+    pieces = []
+    for part in parts:
+        if isinstance(part, int):
+            pieces.append(np.zeros((above + below, part)))
+            continue
+        (bx0, by0, bx1, by1), base = part
+        k = ink(image, (bx0, base - above, bx1, base + below))
+        pieces.append(k.alpha)
+    alpha = np.hstack(pieces)
+    erase(image, line)
+    paste_ink(image, (x0, y0), alpha[:, :x1 - x0 + 40], colour)
+
+
+def _drowning(image):
+    # Three typos, from the chart's own letters: "möglichet" takes the s
+    # of "Gewässer" from the line below, "übernimnt" its own m, and
+    # "fortestzen" swaps e and s.
+    _composed(image, (690, 229, 905, 254), 243, [
+        ((690, 0, 820, 0), 243), ((856, 0, 865, 0), 268),
+        ((830, 0, 905, 0), 243)])
+    _rebuilt(image, (100, 907, 565, 935),
+             [(100, 537), (522, 537), 1, (547, 565)])
+    _rebuilt(image, (680, 959, 976, 990),
+             [(680, 913), (921, 930), (913, 921), (930, 976)])
+    # In the "Nicht tun" row two cells came out garbled: "nicht auf der"
+    # (cell 3) and "aus den" / "Lungen verlieren." (cell 5). Cell 3 now
+    # reads "Nasse Kleidung nicht anlassen.", cell 5 "Keine Zeit mit
+    # Ausschütteln von Wasser aus den Lungen verlieren." as before. The
+    # new lines are set in the face that measured nearest; cell 5's own
+    # lines are squeezed to about four fifths, and so are the new ones,
+    # to 0.74 so that "verlieren." stays clear of the panel's edge.
+    erase(image, (556, 1299, 637, 1346))
+    set_line(image, 557, 1316, "nicht", 19.5, (26, 40, 76),
+             face=CONDENSED_MEDIUM)
+    set_line(image, 557, 1340, "anlassen.", 19.5, (26, 40, 76),
+             face=CONDENSED_MEDIUM)
+    erase(image, (908, 1298, 1010, 1346))
+    for text, baseline in (("Wasser aus den", 1314),
+                           ("Lungen verlieren.", 1336)):
+        assert text_width(text, 19.5, CONDENSED_DEMI, 0.74) <= 1010 - 913, text
+        set_line(image, 913, baseline, text, 19.5, (30, 44, 84),
+                 face=CONDENSED_DEMI, stretch=0.74)
+
+
+def _aed(image):
+    # "Pads genau nach Abbildung auf das Gerät kleben." The pads go on
+    # the chest: "auf die Brust kleben.", with "die" from "seitlich
+    # unter die linke Achsel." below and "Brust" from step 3.
+    _composed(image, (640, 578, 830, 600), 596, [
+        ((640, 0, 673, 0), 596), 4, ((752, 0, 778, 0), 671), 5,
+        ((136, 0, 182, 0), 620), 5, ((756, 0, 813, 0), 596)])
+    # "AED nicht bei Nässe verwenden (trocknen)." reads as: in the rain,
+    # leave the defibrillator. It works wet; the chest is dried first, as
+    # the guide says. Avenir Next Condensed Medium, at the cell's cap
+    # height of 14 pixels: it covers as much of a line as the cells beside
+    # it do.
+    erase(image, (418, 1258, 560, 1327))
+    for text, baseline in (("Pads nicht auf", 1275),
+                           ("nasse Haut kleben", 1297),
+                           ("(vorher trocknen).", 1319)):
+        # Clear of the next cell's sign, which begins at 575.
+        assert text_width(text, 19.7, CONDENSED_MEDIUM) <= 568 - 426, text
+        set_line(image, 426, baseline, text, 19.7, (24, 37, 76),
+                 face=CONDENSED_MEDIUM)
+
+
+def _insect_bite(image):
+    # A strip of another chart, and the line between the two, run down
+    # the left edge above the "Merke" box. The page's own white goes over
+    # it.
+    _paint_over(image, (0, 0, 46, 1366),
+                lambda p: p.min(axis=2) > 246, ring=2)
+
+
+def _flash_eye(image):
+    # "Hellenes Licht" -> "Helles Licht": n and e out.
+    _closed_up(image, (112, 250, 392, 283), 192, 214)
+    # "Noch am gleichen Tag Augenarzt aufsuchen." The guide sends to the
+    # doctor when it is not better after 24 hours, or worse. The first
+    # line of the heading says so; the second stays.
+    erase(image, (620, 672, 1008, 711))
+    set_line(image, 627, 700, "Nach 24 h nicht besser?", 33.5, (1, 17, 82),
+             face=CONDENSED_DEMI)
+    # "Merke" said: see an eye doctor soon after UV damage. Now: what the
+    # steps say, and the same 24 hours.
+    erase(image, (215, 1400, 1000, 1478))
+    set_line(image, 226, 1427, "Augen schonen, nicht reiben, nicht selbst betäuben.",
+             29.8, (31, 41, 61), face=HELVETICA)
+    set_line(image, 226, 1463, "Nach 24 Stunden nicht besser: zum Augenarzt.",
+             29.8, (31, 41, 61), face=HELVETICA)
+
+
+def _suicidal_ideation(image):
+    # 116 123 is the TelefonSeelsorge's, and so the box calls it; it said
+    # "Krisendienst". And "www.116123.de" is no help service at all: the
+    # domain was for sale in October 2026. The TelefonSeelsorge is at
+    # telefonseelsorge.de.
+    erase(image, (725, 653, 995, 688))
+    set_line(image, 729, 680, "TelefonSeelsorge", 27.9, (10, 28, 70),
+             face=CONDENSED_BOLD)
+    erase(image, (725, 836, 1000, 870))
+    set_line(image, 729, 858, "www.telefonseelsorge.de", 23.5, (10, 28, 70),
+             face=NARROW)
+
+
+def _fever(image):
+    # "oder weitere schwere Krankzeichen" -> "Anzeichen": the A of
+    # "Atemprobleme" three lines up, the n and "zeichen" its own.
+    # The line starts after its red bullet, which keeps its colour.
+    _composed(image, (716, 1060, 1010, 1086), 1077, [
+        ((716, 0, 892, 0), 1077), ((774, 0, 786, 0), 1013), 1,
+        ((918, 0, 927, 0), 1077), 1, ((937, 0, 1010, 0), 1077)])
+
+
 PATCHES = {
     "2f3080016a087fb64c673fdb02ea867d3009b269ee17a935a18ae2c7423a316c": (
         "Beine hochlagern statt nicht hochlagern", _anaphylaxis),
@@ -365,6 +620,22 @@ PATCHES = {
         "dabei sein statt dabeisein", _childbirth),
     "4ab3a6bd08a3029f487025cebb9638b6d42a3c82e7ddf958526031d3bab8ffbb": (
         "unterstützen statt unterstützzen", _psychological_first_aid),
+    "252a18bec34f4672acd0c74f66db702f414d65f54add5f558527e07c1efca192": (
+        "Kinder dürfen 112 rufen; Krankenwagen ohne 1122", _emergency_call),
+    "e7f4dfcf707f1bbc9aafc01a4b8f3a2fe0a24f8592f0ab461fa6aad8fd4333af": (
+        "erst 112, dann Atmung prüfen; regelmäßig", _unresponsive),
+    "1bb7a0b3e529075c0d36487376ed9e1e2d690f1895b1b0275d4f04ceb6652d83": (
+        "Pads auf die Brust; Pads nicht auf nasse Haut", _aed),
+    "e6fa75adb5cf2eb6c3126d88d7220e0651a6132a04109d7fb6815722cc3b7178": (
+        "drei Tippfehler, zwei unleserliche Felder", _drowning),
+    "bb7df0ddf5e29ded2765dec7accb34cc133460a6a42f752c6f52950a90298a89": (
+        "Fremdstreifen am linken Rand entfernt", _insect_bite),
+    "d447d61dcd8d595f04d88c3fcb7d59d591bbf7f4e5807159d9c98018eb752453": (
+        "Helles; Augenarzt nach 24 Stunden", _flash_eye),
+    "ae4f3a622760d718c13a14677acd2dd8841947c918a642a16472b453eed30b28": (
+        "TelefonSeelsorge und telefonseelsorge.de", _suicidal_ideation),
+    "20440a995670918c35dd4f8a49b1d2e3df753767aedafe249d8bd37a4da38ed4": (
+        "Anzeichen statt Krankzeichen", _fever),
 }
 
 

@@ -256,7 +256,7 @@ Bildschirmdichte.
 
 ## Die Bildtafeln
 
-31 der deutschen Anleitungen haben zusätzlich eine Bildtafel: ein Bild,
+42 der 46 deutschen Anleitungen haben zusätzlich eine Bildtafel: ein Bild,
 in das die Schritte mit Zeichnungen eingetragen sind. Sie steht klein
 über den Schritten und ersetzt dort die Strichzeichnung; die Lupe öffnet
 sie als Vollbild, in das sich hineinzoomen lässt. Die Tafeln tragen
@@ -305,8 +305,52 @@ aller Tafeln fand danach noch vier Tippfehler, ebenfalls korrigiert:
 „unterstützen" (Psychische Erste Hilfe), „Bewusstsein" und „Rucksack"
 (Ohnmacht), „dabei sein" (Geburt).
 
+Von 14 weiteren Tafeln am selben Tag kamen elf hinein, sieben davon
+korrigiert:
+
+- **Notruf absetzen:** „Den Notruf nicht von Kindern ohne Aufsicht
+  absetzen lassen" ist gestrichen – ein Kind allein mit einem
+  Bewusstlosen soll 112 rufen und lernt das. Die übrigen drei Felder
+  rücken auseinander. Auf dem Krankenwagen stand „1122".
+- **Bewusstlose Person prüfen:** Die Tafel prüfte die Atmung, bevor sie
+  112 rief („Wenn keine normale Atmung: Notruf 112"). Seit den Leitlinien
+  2025 kommt der Notruf zuerst, sobald die Person nicht reagiert. Die
+  Felder 2 und 3 haben die Plätze getauscht. Dazu „regelmäßig".
+- **Defibrillator:** „Pads genau nach Abbildung auf das Gerät kleben"
+  heißt jetzt „auf die Brust kleben". „AED nicht bei Nässe verwenden"
+  las sich wie: im Regen das Gerät liegen lassen; jetzt „Pads nicht auf
+  nasse Haut kleben (vorher trocknen)".
+- **Ertrinken:** drei Tippfehler, und zwei Felder der „Nicht tun"-Zeile
+  waren unleserlich; sie sind neu gesetzt.
+- **Insektenstich:** Am linken Rand lief ein Streifen einer anderen
+  Tafel mit.
+- **Verblitzte Augen:** Die Tafel schickte noch am selben Tag zum
+  Augenarzt, die Anleitung nach 24 Stunden ohne Besserung. Überschrift
+  und Merksatz sagen das jetzt. Dazu „Helles Licht".
+- **Suizidgedanken:** 116 123 ist die TelefonSeelsorge, nicht „ein
+  Krisendienst". Und als Webseite stand www.116123.de da – die Domain
+  gehört keiner Hilfsstelle und stand im Oktober 2026 zum Verkauf. Jetzt
+  www.telefonseelsorge.de.
+- **Fieber:** „Anzeichen" statt „Krankzeichen".
+
+Drei bleiben draußen, bis sie neu gezeichnet sind:
+
+- **Wunden und Schürfwunden:** Die Tafel ist am rechten Rand
+  abgeschnitten; mehrere Zeilen enden mitten im Wort.
+- **Ausgeschlagener Zahn:** Schritt 2 spült den Zahn ab, das Bild unter
+  dem Wasserhahn. Die Anleitung sagt: nicht abspülen, Leitungswasser
+  schadet den Zellen an der Wurzel.
+- **Angst und Panikattacke:** Die Tafel lehrt die 5-4-3-2-1-Methode und
+  ein Atmen nach 4-2-6. Für die „fünf Dinge, die du siehst" sprechen die
+  IFRC-Leitlinien 2025 ausdrücklich keine Empfehlung aus; die Anleitung
+  lässt sie deshalb bewusst weg und atmet vor und mit, ein auf 1, aus
+  auf 3.
+
+Die stabile Seitenlage hat noch keine Tafel und zeigt die
+Strichzeichnung.
+
 Eine Tafel ist ein WebP in voller Größe (`assets/first_aid/de/`,
-zusammen 7,6 MB), angelegt mit `tool/first_aid/infographic.py`.
+zusammen 10 MB), angelegt mit `tool/first_aid/infographic.py`.
 
 ## Videos
 

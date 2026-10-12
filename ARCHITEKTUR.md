@@ -648,8 +648,9 @@ redrawn, and so does one whose wording is garbled or misspelt into
 another meaning. A chart that is right but for a few words gets them
 corrected in `tool/first_aid/chart_patches.py`, keyed to the SHA-256 of
 the exact picture it was measured on, so a redrawn picture is checked
-afresh rather than patched blind. Since 2026-10-12, 31 guides have a
-chart; the corrections are listed in `docs/erste-hilfe.md`. Leaving something out is allowed: the steps are
+afresh rather than patched blind. Since 2026-10-12, 42 of the 46 guides
+have a chart; the corrections and the charts held back are listed in
+`docs/erste-hilfe.md`. Leaving something out is allowed: the steps are
 right underneath.
 
 **First aid works on a fresh install with no network, no download and no

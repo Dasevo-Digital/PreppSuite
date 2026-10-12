@@ -44,6 +44,7 @@ Format: README.md in this folder.
 - group: basics
 - title: Notruf absetzen
 - when: Immer zuerst, sobald jemand ernsthaft in Gefahr ist.
+- chart: true
 - source: Bundesamt für Bevölkerungsschutz und Katastrophenhilfe
 
 ### steps
@@ -71,6 +72,7 @@ Format: README.md in this folder.
 - group: basics
 - title: Bewusstlose Person prüfen
 - when: Jemand liegt da und reagiert nicht. Das ist der Anfang von allem, was danach kommt.
+- chart: true
 - source: Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council
 
 ### steps
@@ -173,6 +175,7 @@ Minute Wiederbelebung, bevor Hilfe geholt wird.
 - group: lifeThreatening
 - title: Defibrillator (AED)
 - when: Ein Gerät ist erreichbar, während wiederbelebt wird.
+- chart: true
 - source: Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council
 
 ### steps
@@ -259,6 +262,7 @@ sich hier nichts aus.
 - group: lifeThreatening
 - title: Ertrinken
 - when: Jemand ist im Wasser in Not oder wurde gerade herausgeholt.
+- chart: true
 - source: Reanimationsleitlinien 2025 des European Resuscitation Council (ERC); International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Drowning"
 
 ### steps
@@ -555,6 +559,7 @@ sich hier nichts aus.
 - group: injury
 - title: Insektenstich
 - when: Biene, Wespe, Hornisse, Mücke.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Insect bites or stings"; DRK
 
 ### steps
@@ -620,6 +625,7 @@ sich hier nichts aus.
 - group: injury
 - title: Blasen an den Füßen
 - when: Nach langem Gehen – und damit die Verletzung, die eine Flucht zu Fuß beendet.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Friction blisters"
 
 ### steps
@@ -654,6 +660,7 @@ sich hier nichts aus.
 - group: injury
 - title: Verblitzte Augen
 - when: Stunden nach Schweißen, Höhensonne, Schnee oder See: Schmerz, als läge Sand im Auge.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Flash eye"
 
 ### steps
@@ -874,6 +881,7 @@ frische Luft. Warmer Dampf kommt dort nicht mehr vor; dass feuchte Luft
 - group: illness
 - title: Fieber
 - when: Erhöhte Temperatur, Frösteln, Schwäche.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Fever"; S3-Leitlinie „Fiebermanagement bei Kindern und Jugendlichen" (DGKJ, 2025)
 
 ### steps
@@ -1100,6 +1108,7 @@ Kummer, beide kostenfrei und rund um die Uhr.
 - group: mentalDistress
 - title: Suizidgedanken
 - when: Jemand sagt oder zeigt, dass er nicht mehr leben will.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Suicidal ideation"; Rufnummern der TelefonSeelsorge Deutschland und der Nummer gegen Kummer
 
 ### steps
@@ -1167,6 +1176,7 @@ Kummer, beide kostenfrei und rund um die Uhr.
 - group: mentalDistress
 - title: Nach einem schweren Erlebnis
 - when: Kurz nach Unglück, Unfall oder Gewalt – bei Betroffenen und bei Helfern.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Traumatic event"
 
 ### steps
@@ -1192,6 +1202,7 @@ Kummer, beide kostenfrei und rund um die Uhr.
 - group: mentalDistress
 - title: Akute Trauer
 - when: Jemand hat gerade erfahren, dass ein Mensch gestorben ist.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Acute grief"
 
 ### steps

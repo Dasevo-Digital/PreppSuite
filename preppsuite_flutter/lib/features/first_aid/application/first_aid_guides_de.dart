@@ -41,6 +41,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Ärztlicher Bereitschaftsdienst', '116 117'),
       FirstAidFact('Europaweit', '112'),
     ],
+    chart: 'assets/first_aid/de/emergency-call.webp',
     source: 'Bundesamt für Bevölkerungsschutz und Katastrophenhilfe',
   ),
   FirstAidGuide(
@@ -77,6 +78,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Einzelne schnappende Atemzüge sind keine normale Atmung. Diese Schnappatmung ist in den ersten Minuten nach einem Herzstillstand häufig und wird regelmäßig für Atmung gehalten – im Zweifel gilt sie als Atemstillstand.',
       'Im Zweifel drücken. Herzdruckmassage bei jemandem, dessen Herz noch schlägt, richtet weit weniger Schaden an als unterlassene Wiederbelebung bei jemandem, dessen Herz steht.',
     ],
+    chart: 'assets/first_aid/de/unresponsive.webp',
     source: 'Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
   FirstAidGuide(
@@ -202,6 +204,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Kinder unter 25 kg, etwa unter acht Jahren: Kindermodus oder Kinderelektroden, wenn vorhanden. Sonst die für Erwachsene – das ist besser als kein Schock. Bei kleinen Kindern eine Elektrode vorn mitten auf die Brust, etwas links, die andere hinten zwischen die Schulterblätter.',
       'Elektroden nicht auf einen Herzschrittmacher kleben; ein paar Zentimeter daneben genügen. Medikamentenpflaster vorher abziehen.',
     ],
+    chart: 'assets/first_aid/de/aed.webp',
     source: 'Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
   FirstAidGuide(
@@ -311,6 +314,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Erst', '5 Beatmungen'),
       FirstAidFact('Dann', '30 Drücken, 2 Beatmen'),
     ],
+    chart: 'assets/first_aid/de/drowning.webp',
     source: 'Reanimationsleitlinien 2025 des European Resuscitation Council (ERC); International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Drowning"',
   ),
   FirstAidGuide(
@@ -722,6 +726,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Nicht kratzen.',
       'Bei Atemnot, Schwellung im Gesicht oder Kreislaufproblemen ist es ein allergischer Schock – siehe die eigene Anleitung dazu.',
     ],
+    chart: 'assets/first_aid/de/insect-bite.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Insect bites or stings"; DRK',
   ),
   FirstAidGuide(
@@ -799,6 +804,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Zum Arzt, wenn daraus eine offene Wunde wird oder sie sich entzündet – warm, zunehmend schmerzhaft, Fieber.',
       'Bei Diabetes oder geschwächter Abwehr früher zum Arzt: solche Wunden entzünden sich leichter und heilen schlechter.',
     ],
+    chart: 'assets/first_aid/de/blisters.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Friction blisters"',
   ),
   FirstAidGuide(
@@ -848,6 +854,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Nicht reiben.',
       'Das kommt nicht nur im Schnee vor – auch am Wasser, am Strand und beim Schweißen.',
     ],
+    chart: 'assets/first_aid/de/flash-eye.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Flash eye"',
   ),
   FirstAidGuide(
@@ -1136,6 +1143,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Paracetamol und Ibuprofen wirken vergleichbar. Ibuprofen erst ab drei Monaten. Zwei Fiebermittel im Wechsel nur nach ärztlicher Rücksprache, sonst wird doppelt dosiert.',
       'Wadenwickel nur, wenn Hände und Füße warm sind, und körperwarm, nicht kalt.',
     ],
+    chart: 'assets/first_aid/de/fever.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Fever"; S3-Leitlinie „Fiebermanagement bei Kindern und Jugendlichen" (DGKJ, 2025)',
   ),
   FirstAidGuide(
@@ -1455,6 +1463,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Kinder- und Jugendtelefon', '116 111'),
       FirstAidFact('Notruf bei unmittelbarer Gefahr', '112'),
     ],
+    chart: 'assets/first_aid/de/suicidal-ideation.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Suicidal ideation"; Rufnummern der TelefonSeelsorge Deutschland und der Nummer gegen Kummer',
   ),
   FirstAidGuide(
@@ -1531,6 +1540,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Ärztlicher Bereitschaftsdienst', '116 117'),
       FirstAidFact('Telefonseelsorge, europaweit', '116 123'),
     ],
+    chart: 'assets/first_aid/de/traumatic-event.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Traumatic event"',
   ),
   FirstAidGuide(
@@ -1569,6 +1579,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Telefonseelsorge, rund um die Uhr', '0800 111 0 111'),
       FirstAidFact('Telefonseelsorge, europaweit', '116 123'),
     ],
+    chart: 'assets/first_aid/de/acute-grief.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Acute grief"',
   ),
 ];
