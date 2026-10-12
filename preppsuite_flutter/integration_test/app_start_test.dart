@@ -154,11 +154,29 @@ void main() {
     await tester.runAsync(() async {
       for (final image in images) {
         final data = await rootBundle.load(image);
-        final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-        final frame = await codec.getNextFrame();
-        expect(frame.image.width, greaterThan(900), reason: image);
-        frame.image.dispose();
-        codec.dispose();
+        // The engine's own image decoder reads the format and its size.
+        // An engine without WebP fails here, on every machine.
+        final buffer = await ui.ImmutableBuffer.fromUint8List(
+          data.buffer.asUint8List(),
+        );
+        final descriptor = await ui.ImageDescriptor.encoded(buffer);
+        expect(descriptor.width, greaterThan(900), reason: image);
+        // The whole picture as well, where there is a GPU to put it on.
+        // The Windows build machine runs this over ssh with no desktop,
+        // and there a decoded frame has nowhere to go: "No Impeller
+        // context is available". That says nothing about the format.
+        final codec = await descriptor.instantiateCodec();
+        try {
+          final frame = await codec.getNextFrame();
+          expect(frame.image.width, descriptor.width, reason: image);
+          frame.image.dispose();
+        } on Exception catch (error) {
+          if (!'$error'.contains('No Impeller context')) rethrow;
+        } finally {
+          codec.dispose();
+          descriptor.dispose();
+          buffer.dispose();
+        }
       }
     });
   });
