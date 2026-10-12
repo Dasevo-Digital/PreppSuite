@@ -126,6 +126,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Verhältnis', '30 Kompressionen : 2 Beatmungen'),
     ],
     drawing: FirstAidDrawing.compressionPoint,
+    chart: 'assets/first_aid/de/cpr-adult.webp',
     hasPacer: true,
     source: 'Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
@@ -168,6 +169,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Tiefe Säugling', 'etwa 4 cm'),
       FirstAidFact('Takt', '100–120 pro Minute'),
     ],
+    chart: 'assets/first_aid/de/cpr-child.webp',
     hasPacer: true,
     source: 'Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council',
   ),
@@ -1205,6 +1207,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Kein Alkohol. Er fühlt sich warm an und kühlt aus.',
       'Bei schwerer Unterkühlung Atmung und Puls bis zu einer Minute prüfen – beides kann kaum wahrnehmbar sein. Niemand ist tot, bevor er nicht warm und tot ist.',
     ],
+    chart: 'assets/first_aid/de/hypothermia.webp',
     source: 'Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC); DRK',
   ),
   FirstAidGuide(
@@ -1234,6 +1237,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Kein Alkohol und nichts Koffeinhaltiges.',
       'Ein Hitzschlag ist kein stärkerer Sonnenbrand. Ohne Behandlung endet er tödlich.',
     ],
+    chart: 'assets/first_aid/de/heat.webp',
     source: 'Erste-Hilfe-Leitlinien 2025 des ERC; DRK; Bundeszentrale für gesundheitliche Aufklärung',
   ),
   FirstAidGuide(
@@ -1270,6 +1274,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Die Nummern sind ein gespeicherter Stand. Prüfe sie, solange du Netz hast, und trage die für dich zuständige in die Notfallkontakte ein.',
     ],
     facts: poisonCentres,
+    chart: 'assets/first_aid/de/poisoning.webp',
     source: 'Giftinformationszentren der Länder, Bundesinstitut für Risikobewertung; DRK',
   ),
   FirstAidGuide(
@@ -1316,6 +1321,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
         'körperwarmes Wasser, ~30 Minuten',
       ),
     ],
+    chart: 'assets/first_aid/de/frostbite.webp',
     source: 'DRK; International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Frostbite"',
   ),
   FirstAidGuide(

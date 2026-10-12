@@ -256,7 +256,7 @@ Bildschirmdichte.
 
 ## Die Bildtafeln
 
-22 der deutschen Anleitungen haben zusätzlich eine Bildtafel: ein Bild,
+28 der deutschen Anleitungen haben zusätzlich eine Bildtafel: ein Bild,
 in das die Schritte mit Zeichnungen eingetragen sind. Sie steht klein
 über den Schritten und ersetzt dort die Strichzeichnung; die Lupe öffnet
 sie als Vollbild, in das sich hineinzoomen lässt. Die Tafeln tragen
@@ -267,20 +267,32 @@ zeigt. Auf Englisch bleibt es bei den Strichzeichnungen.
 Geprüft wird die Tafel gegen den Text, nicht umgekehrt. Der Text ist
 gegen die Leitlinien geprüft; eine Tafel, die etwas anderes anweist –
 eine andere Zeit, eine andere Lagerung, ein Verbot, wo der Text etwas
-erlaubt –, kommt nicht hinein, bis sie neu gezeichnet ist. Was die Tafel
-weglässt, steht direkt darunter. Am 12.10.2026 wurden zehn Tafeln
-zurückgehalten: Unterkühlung (Wärmflasche), Wiederbelebung Erwachsene
-(Oberkörper freimachen, „unteres Drittel"), Wiederbelebung Kinder (zwei
-Finger, ohne die fünf ersten Beatmungen), Hitze (Lagerung, kein
-Eintauchen beim Hitzschlag), Allergischer Schock (zweite Dosis nach 5 bis
-15 statt nach 5 Minuten), Verbrennung (10 bis 20 statt mindestens 20
-Minuten, lauwarm, ohne die Regeln für Kinder), Austrocknung (Kokoswasser
-erlaubt und verboten zugleich), Vergiftung (nichts trinken, wo der Text
-bei Ätzendem Wasser in Schlucken nennt) und beide Fassungen der
-Erfrierung (warmes Wasser ohne Einschränkung).
+erlaubt –, kommt nicht hinein, bis sie neu gezeichnet ist. Ebenso eine
+mit einem Schreibfehler, der den Sinn ändert, oder mit unleserlichem
+Text. Was die Tafel weglässt, steht direkt darunter.
+
+Am 12.10.2026 kamen zuerst 22 von 32 Tafeln hinein. Von 14 Neufassungen
+am selben Tag kamen zehn dazu oder ersetzten eine frühere: Unterkühlung,
+Wiederbelebung Erwachsene, Wiederbelebung Kinder und Säuglinge, Hitze,
+Vergiftung, Erfrierungen, Herzinfarkt, Tierbiss, Quallen, Wirbelsäule.
+Vier bleiben draußen:
+
+- **Allergischer Schock:** „Beine nicht hochlagern". Der Text sagt
+  „flach hinlegen, Beine hoch"; die Leitlinie des Resuscitation Council
+  UK sagt „flach hinlegen, mit oder ohne hochgelagerte Beine".
+- **Verbrennung:** Kinder und Säuglinge werden wie Erwachsene mindestens
+  20 Minuten kühl gekühlt. Der Text folgt der AWMF-S2k-Leitlinie
+  „Thermische Verletzungen im Kindesalter" (2024): bei Kindern nur
+  kleine Stellen an Armen und Beinen, höchstens 10 Minuten, handwarm;
+  Säuglinge, Rumpf und Kopf gar nicht. Die Neufassung weicht davon mit
+  Absicht ab und beruft sich auf den NHS. Welcher Quelle die App folgt,
+  ist eine fachliche Entscheidung, die noch aussteht.
+- **Austrocknung:** „Keines Kind" statt „Kleines Kind".
+- **Knochenbruch:** Der letzte Punkt unter „Notruf 112 nur bei" bricht
+  in unleserliche Zeichen ab. Bis dahin bleibt die erste Fassung.
 
 Eine Tafel ist ein WebP in voller Größe (`assets/first_aid/de/`,
-zusammen 4,3 MB), angelegt mit `tool/first_aid/infographic.py`.
+zusammen 6,6 MB), angelegt mit `tool/first_aid/infographic.py`.
 
 ## Videos
 

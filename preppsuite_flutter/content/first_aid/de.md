@@ -97,6 +97,7 @@ Format: README.md in this folder.
 - callFirst: true
 - drawing: compressionPoint
 - pacer: true
+- chart: true
 - source: Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council
 
 ### steps
@@ -140,6 +141,7 @@ Minute Wiederbelebung, bevor Hilfe geholt wird.
 - when: Ein Kind unter der Pubertät oder ein Säugling reagiert nicht und atmet nicht normal.
 - callFirst: true
 - pacer: true
+- chart: true
 - source: Reanimationsleitlinien 2025 des European Resuscitation Council (ERC), deutsche Fassung des German Resuscitation Council
 
 ### steps
@@ -916,6 +918,7 @@ frische Luft. Warmer Dampf kommt dort nicht mehr vor; dass feuchte Luft
 - group: environment
 - title: Unterkühlung
 - when: Zittern, kalte blasse Haut, Verlangsamung, Verwirrung – nach Kälte, Nässe oder Wind. Hört das Zittern auf, wird es gefährlich.
+- chart: true
 - source: Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC); DRK
 
 ### steps
@@ -938,6 +941,7 @@ frische Luft. Warmer Dampf kommt dort nicht mehr vor; dass feuchte Luft
 - group: environment
 - title: Hitzeerschöpfung und Hitzschlag
 - when: Nach Hitze oder Anstrengung: Schwäche, Kopfschmerz, Übelkeit. Kommt heiße trockene Haut, Verwirrung oder Bewusstlosigkeit dazu, ist es ein Hitzschlag und lebensbedrohlich.
+- chart: true
 - source: Erste-Hilfe-Leitlinien 2025 des ERC; DRK; Bundeszentrale für gesundheitliche Aufklärung
 
 ### steps
@@ -960,6 +964,7 @@ frische Luft. Warmer Dampf kommt dort nicht mehr vor; dass feuchte Luft
 - group: environment
 - title: Vergiftung
 - when: Etwas wurde geschluckt, eingeatmet, verschüttet oder in die Augen bekommen, das dort nicht hingehört.
+- chart: true
 - source: Giftinformationszentren der Länder, Bundesinstitut für Risikobewertung; DRK
 
 ### steps
@@ -1007,6 +1012,7 @@ Kummer, beide kostenfrei und rund um die Uhr.
 - group: environment
 - title: Erfrierungen
 - when: Weiße, harte, gefühllose Stellen an Fingern, Zehen, Nase oder Ohren.
+- chart: true
 - source: DRK; International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Frostbite"
 
 ### steps

@@ -644,8 +644,9 @@ language, and where there is one it takes the line drawing's place. The
 text is what was checked against the guidelines. Before a chart goes in,
 every instruction drawn into it is read against its guide, and one that
 gives a different time, position or prohibition stays out until it is
-redrawn -- ten of thirty-two did on 2026-10-12, listed in
-`docs/erste-hilfe.md`. Leaving something out is allowed: the steps are
+redrawn, and so does one whose wording is garbled or misspelt into
+another meaning. On 2026-10-12, 28 guides had a chart and four supplied
+charts were held back, listed in `docs/erste-hilfe.md`. Leaving something out is allowed: the steps are
 right underneath.
 
 **First aid works on a fresh install with no network, no download and no
