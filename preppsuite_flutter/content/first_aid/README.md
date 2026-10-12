@@ -65,7 +65,7 @@ dem Bildschirm, nach Dringlichkeit.
 | `callFirst` | `true`, wenn 112 vor den Schritten kommt. Sonst weglassen. |
 | `drawing` | Eine der Zeichnungen der App: `compressionPoint`, `recoveryPosition`, `choking`, `bleeding`, `face`. Sonst weglassen. |
 | `pacer` | `true`, wenn die Anleitung den Takt für die Herzdruckmassage anbietet. Sonst weglassen. |
-| `chart` | `true`, wenn es zu der Anleitung in dieser Sprache eine Bildtafel gibt: `assets/first_aid/<sprache>/<kennung>.webp`, angelegt mit `tool/first_aid/infographic.py`. Sie ersetzt auf dem Bildschirm die Zeichnung. Eine Bildtafel kommt nur hinein, wenn nichts darin der Anleitung widerspricht. Sonst weglassen. |
+| `chart` | `true`, wenn es zu der Anleitung in dieser Sprache eine Bildtafel gibt: `assets/first_aid/<sprache>/<kennung>.webp`, angelegt mit `tool/first_aid/infographic.py`; kleine Textfehler einer Tafel korrigiert `tool/first_aid/chart_patches.py`. Sie ersetzt auf dem Bildschirm die Zeichnung. Eine Bildtafel kommt nur hinein, wenn nichts darin der Anleitung widerspricht. Sonst weglassen. |
 | `source` | Quelle, wird auf dem Bildschirm genannt. Pflicht. |
 
 - **`### steps`**: nummerierte Schritte, lückenlos ab 1. Eine eingerückte

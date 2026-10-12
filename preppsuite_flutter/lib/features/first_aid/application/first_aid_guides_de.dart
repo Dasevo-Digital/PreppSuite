@@ -489,6 +489,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
         'höchstens 10 Minuten, handwarm, nur Arme und Beine',
       ),
     ],
+    chart: 'assets/first_aid/de/burns.webp',
     source: 'Erste-Hilfe-Leitlinien des European Resuscitation Council (ERC) und des DRK; für Kinder die AWMF-S2k-Leitlinie „Thermische Verletzungen im Kindesalter" (2024)',
   ),
   FirstAidGuide(
@@ -996,6 +997,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       'Auch wenn es rasch besser wird: immer in die Klinik. Die Beschwerden kommen in einem Teil der Fälle nach Stunden zurück.',
       'Ein Autoinjektor darf nur bei der Person angewendet werden, für die er verordnet ist – oder auf Anweisung der Leitstelle.',
     ],
+    chart: 'assets/first_aid/de/anaphylaxis.webp',
     source:
         'Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)',
   ),
@@ -1352,6 +1354,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
       FirstAidFact('Trinklösung je Liter', 'halber TL Salz, 6 TL Zucker'),
       FirstAidFact('Kinder von 2 bis 5 Jahren', '10 ml je kg'),
     ],
+    chart: 'assets/first_aid/de/dehydration.webp',
     source: 'International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Dehydration"',
   ),
   FirstAidGuide(

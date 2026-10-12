@@ -7,8 +7,8 @@ Run from preppsuite_flutter/, like the generator beside it.
 
 A chart is one picture with the guide's steps drawn in, made outside this
 repository. It carries words, so it belongs to one language (German unless
-named), and is written to
-`assets/first_aid/<language>/<guide-id>.webp` at its own size, as WebP. The guide then needs `- image: true` in
+named), and is written to `assets/first_aid/<language>/<guide-id>.webp` at
+its own size, as WebP. The guide then needs `- chart: true` in
 `content/first_aid/<language>.md`, and `dart run tool/first_aid/generate.dart`.
 
 A chart is a second telling of the guide, and the guide is what was checked
@@ -16,9 +16,10 @@ against the guidelines. So before one goes in, every instruction drawn into
 it is read against the guide's text: a chart that says anything the text
 does not -- a different time, a different position, a "never" the text
 allows -- stays out until it is redrawn. Leaving something out is allowed;
-the steps are right underneath.
+the steps are right underneath. A chart that is right but for a few words
+can have them corrected in `chart_patches.py`, tied to that exact picture.
 
-Needs Pillow (`python3 -m pip install --user pillow`).
+Needs Pillow and NumPy (`python3 -m pip install --user pillow numpy`).
 """
 
 from pathlib import Path
@@ -26,6 +27,8 @@ import re
 import sys
 
 from PIL import Image
+
+import chart_patches
 
 APP = Path(__file__).resolve().parents[2]
 QUALITY = 82
@@ -42,7 +45,11 @@ def main():
     target = APP / "assets" / "first_aid" / language / f"{guide}.webp"
     target.parent.mkdir(parents=True, exist_ok=True)
     with Image.open(source) as picture:
-        picture.convert("RGB").save(target, "WEBP", quality=QUALITY, method=6)
+        picture = picture.convert("RGB")
+    corrected = chart_patches.apply(source, picture)
+    if corrected:
+        print(f"korrigiert: {corrected}")
+    picture.save(target, "WEBP", quality=QUALITY, method=6)
     with Image.open(target) as written:
         print(f"{target.relative_to(APP)}  {written.width}x{written.height}  "
               f"{target.stat().st_size // 1024} KB")

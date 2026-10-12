@@ -378,6 +378,7 @@ sich hier nichts aus.
 - group: injury
 - title: Verbrennung und Verbrühung
 - when: Hitze, Feuer, heiße Flüssigkeit, Strom oder Chemie haben die Haut verletzt.
+- chart: true
 - source: Erste-Hilfe-Leitlinien des European Resuscitation Council (ERC) und des DRK; für Kinder die AWMF-S2k-Leitlinie „Thermische Verletzungen im Kindesalter" (2024)
 
 ### steps
@@ -757,6 +758,7 @@ sich hier nichts aus.
 - title: Allergischer Schock
 - when: Nach Stich, Nuss, Medikament oder Lebensmittel: Quaddeln, schwellendes Gesicht, pfeifende Atmung, Engegefühl im Hals, Kreislaufzusammenbruch.
 - callFirst: true
+- chart: true
 - source: Erste-Hilfe-Leitlinien 2025 des European Resuscitation Council (ERC)
 
 ### steps
@@ -1040,6 +1042,7 @@ Kummer, beide kostenfrei und rund um die Uhr.
 - group: environment
 - title: Austrocknung
 - when: Nach Durchfall, Erbrechen, Fieber oder Hitze: Durst, wenig und dunkler Urin, Schwäche.
+- chart: true
 - source: International first aid, resuscitation and education guidelines 2025 der IFRC, Kapitel „Dehydration"
 
 ### steps

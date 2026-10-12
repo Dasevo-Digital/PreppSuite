@@ -256,7 +256,7 @@ Bildschirmdichte.
 
 ## Die Bildtafeln
 
-28 der deutschen Anleitungen haben zusätzlich eine Bildtafel: ein Bild,
+31 der deutschen Anleitungen haben zusätzlich eine Bildtafel: ein Bild,
 in das die Schritte mit Zeichnungen eingetragen sind. Sie steht klein
 über den Schritten und ersetzt dort die Strichzeichnung; die Lupe öffnet
 sie als Vollbild, in das sich hineinzoomen lässt. Die Tafeln tragen
@@ -271,28 +271,27 @@ erlaubt –, kommt nicht hinein, bis sie neu gezeichnet ist. Ebenso eine
 mit einem Schreibfehler, der den Sinn ändert, oder mit unleserlichem
 Text. Was die Tafel weglässt, steht direkt darunter.
 
-Am 12.10.2026 kamen zuerst 22 von 32 Tafeln hinein. Von 14 Neufassungen
-am selben Tag kamen zehn dazu oder ersetzten eine frühere: Unterkühlung,
-Wiederbelebung Erwachsene, Wiederbelebung Kinder und Säuglinge, Hitze,
-Vergiftung, Erfrierungen, Herzinfarkt, Tierbiss, Quallen, Wirbelsäule.
-Vier bleiben draußen:
+Stimmt eine Tafel bis auf wenige Worte, werden die Worte korrigiert
+statt die Tafel zurückgehalten: in `tool/first_aid/chart_patches.py`,
+gebunden an die SHA-256 genau des Bildes, an dem sie vermessen wurden.
+Wo es geht, werden dabei die eigenen Buchstaben der Tafel versetzt; nur
+wo neuer Text nötig ist, wird er in Arial Narrow gesetzt. Am 12.10.2026:
 
-- **Allergischer Schock:** „Beine nicht hochlagern". Der Text sagt
-  „flach hinlegen, Beine hoch"; die Leitlinie des Resuscitation Council
-  UK sagt „flach hinlegen, mit oder ohne hochgelagerte Beine".
-- **Verbrennung:** Kinder und Säuglinge werden wie Erwachsene mindestens
-  20 Minuten kühl gekühlt. Der Text folgt der AWMF-S2k-Leitlinie
-  „Thermische Verletzungen im Kindesalter" (2024): bei Kindern nur
-  kleine Stellen an Armen und Beinen, höchstens 10 Minuten, handwarm;
-  Säuglinge, Rumpf und Kopf gar nicht. Die Neufassung weicht davon mit
-  Absicht ab und beruft sich auf den NHS. Welcher Quelle die App folgt,
-  ist eine fachliche Entscheidung, die noch aussteht.
-- **Austrocknung:** „Keines Kind" statt „Kleines Kind".
-- **Knochenbruch:** Der letzte Punkt unter „Notruf 112 nur bei" bricht
-  in unleserliche Zeichen ab. Bis dahin bleibt die erste Fassung.
+- **Allergischer Schock:** „Beine nicht hochlagern" wurde zu „Beine
+  hochlagern", wie im Text und erlaubt nach dem Resuscitation Council UK.
+- **Verbrennung:** Der Kasten unter Schritt 2 kühlte Kinder und
+  Säuglinge wie Erwachsene. Er folgt jetzt der AWMF-S2k-Leitlinie
+  „Thermische Verletzungen im Kindesalter" (2024) wie der Text: Kinder
+  nur kleine Stellen an Armen und Beinen, höchstens 10 Minuten,
+  handwarm; Säuglinge gar nicht, bei Kindern nicht Rumpf und Kopf; bei
+  Kindern immer 112. Die Neufassung wollte hier dem NHS folgen; entschieden
+  ist für die AWMF.
+- **Austrocknung:** „Keines Kind" wurde zu „Kleines Kind".
+- **Knochenbruch:** Die abgebrochene, unleserliche Zeile nach
+  „Oberschenkelbruch" ist entfernt.
 
 Eine Tafel ist ein WebP in voller Größe (`assets/first_aid/de/`,
-zusammen 6,6 MB), angelegt mit `tool/first_aid/infographic.py`.
+zusammen 7,6 MB), angelegt mit `tool/first_aid/infographic.py`.
 
 ## Videos
 
