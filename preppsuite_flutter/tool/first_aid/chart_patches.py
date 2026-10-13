@@ -931,6 +931,13 @@ def _cuts_and_grazes(image):
                           (1129, 1369, 1006, 12)])
 
 
+
+def _cpr_adult(image):
+    # The redrawn chart (its pictures corrected, the hands now across the
+    # lower half of the breastbone) came with a new slip of its own:
+    # "umschileßen" -> "umschließen", i and l change places.
+    _rebuilt(image, (38, 940, 160, 968), [(38, 98), (102, 106), (98, 102), (106, 160)])
+
 PATCHES = {
     "2f3080016a087fb64c673fdb02ea867d3009b269ee17a935a18ae2c7423a316c": (
         "Beine hochlagern statt nicht hochlagern", _anaphylaxis),
@@ -968,6 +975,8 @@ PATCHES = {
         "TelefonSeelsorge und telefonseelsorge.de", _suicidal_ideation),
     "20440a995670918c35dd4f8a49b1d2e3df753767aedafe249d8bd37a4da38ed4": (
         "Anzeichen statt Krankzeichen", _fever),
+    "e577b63a37bd051c8b852e3be5c16dd9a8c571394ddcab92b87ba8d6521e1843": (
+        "umschließen statt umschileßen", _cpr_adult),
     "c6ebd22e70937a494019d6763ab4aa644315f1f6585dc1e9cefc47fe959133bc": (
         "rechter Rand ergänzt, abgeschnittene Zeilen neu; Tetanus wie im Text",
         _cuts_and_grazes),

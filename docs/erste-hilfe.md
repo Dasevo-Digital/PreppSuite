@@ -376,6 +376,42 @@ und die Symbole Hören, Sehen, Fühlen stammen aus zwei anderen Tafeln,
 das Bild im Kopf ist die Strichzeichnung der App. Die Figuren sind
 schlichter gezeichnet als die Bilder der übrigen Tafeln.
 
+### Die Bilder geprüft (13.10.2026)
+
+Bis hierher waren die Tafeln auf ihre Texte geprüft. Am 13.10.2026 kam
+die Prüfung der Bilder selbst dazu: Handhaltung, Kopfhaltung, was eine
+Person tut. Gefunden wurde, was der Text nie verraten hätte: Atemkontrolle
+mit dem Mund am Kinn statt dem Ohr über Mund und Nase, eine „stabile
+Seitenlage“, die eine Schlafhaltung war, die Hände bei der Herzdruckmassage
+längs und zu hoch, beim Nasenbluten ein Finger am Nasenrücken, ein Säugling
+beim Ersticken flach auf dem Schoß. Dazu Bilder, die ihrem eigenen Text
+widersprachen: die Beine flach unter „Beine hochlagern“, Eiswürfel in der
+Wanne neben „kein Eis auf die Haut“, die Pinzette unter „mit einer Karte
+abschaben“, ein Ring, der vom Unterarm gezogen wird.
+
+21 Tafeln wurden daraufhin mit korrigierten Bildern neu gezeichnet, im
+Stil der übrigen. 19 davon stimmen und ersetzen die bisherigen:
+Bewusstlose Person, Ersticken, HLW Erwachsene, Nasenbluten, Vergiftung,
+Schock, Allergischer Schock, Asthma, Tierbiss, Pseudokrupp, Verblitzte
+Augen, Quallen, Abgetrenntes Körperteil, Brust/Bauch, Hitze, Wirbelsäule,
+Krampfanfall, Schlangenbiss, Ertrinken. Bei „HLW Erwachsene“ ist ein
+neuer Tippfehler korrigiert („umschließen“). Beim Ersticken zeigt die
+Brustkompression am Säugling jetzt den Zwei-Daumen-Griff: die
+Kinder-Leitlinie des ERC 2025 empfiehlt ihn ausdrücklich statt der
+früheren zwei Finger, für Wiederbelebung und Ersticken gleich.
+
+Zwei neu gezeichnete Tafeln stimmen noch nicht und sind nicht übernommen;
+es bleibt bei den bisherigen, bis sie richtig sind:
+
+- **HLW Kinder und Säuglinge:** Die Atemkontrolle zeigt das Gesicht an
+  der Wange des Kindes, der Blick geht nicht zur Brust. Beim Kind liegen
+  die Lippen bei der Beatmung an der Nase statt um den Mund. Die Hände
+  beim Kind und die Daumen beim Säugling liegen zu hoch, nah am Hals; beim
+  Säugling im 30:2-Bild eher auf dem Bauch. Dazu „wiederbelerben“.
+- **Kopfverletzung:** Bei „Reaktion und Atmung beobachten“ liegt der
+  Helfer Nase an Nase mit dem Verletzten, statt das Ohr über Mund und Nase
+  zu halten und zur Brust zu sehen.
+
 Eine Tafel ist ein WebP in voller Größe (`assets/first_aid/de/`,
 zusammen 11 MB), angelegt mit `tool/first_aid/infographic.py`.
 
