@@ -533,10 +533,11 @@ Fragezeichen in der Übersicht und ein Eintrag in den Einstellungen wieder
 hinein.
 
 Oberfläche auf Deutsch, Englisch und Spanisch, helles und dunkles
-Erscheinungsbild. Auf Spanisch sind vorerst nur die Bedienoberfläche und
-ihre Erklärtexte übersetzt; Erste Hilfe, Comic, Checklisten, Rezepte und
-die Vorratstabellen erscheinen dort auf Englisch, bis eine geprüfte
-spanische Fassung vorliegt.
+Erscheinungsbild. Auf Spanisch gibt es außer der Bedienoberfläche auch
+den Comic, die mitgelieferten Checklisten, die Vorratstabellen der BLE und
+eine eigene Rezeptliste. Die Erste-Hilfe-Anleitungen samt Bildtafeln
+erscheinen dort auf Deutsch und das Quiz auf Englisch, bis eine fachlich
+geprüfte spanische Fassung vorliegt.
 Auf einem breiten Fenster legen sich die Bildschirme in Spalten lesbarer
 Breite nebeneinander, statt eine einzelne Spalte über die ganze Breite zu
 ziehen; auf dem Telefon bleibt alles wie es war.
