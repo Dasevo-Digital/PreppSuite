@@ -16,6 +16,7 @@ import '../../inventory/presentation/expiry_reminders_card.dart';
 import '../../inventory/presentation/charge_reminder_card.dart';
 import '../../maps/presentation/offline_map_card.dart';
 import '../../sharing/presentation/shared_folder_card.dart';
+import '../../tour/application/app_tour.dart';
 import '../../transfer/presentation/transfer_card.dart';
 import 'app_lock_card.dart';
 import 'backup_card.dart';
@@ -162,6 +163,16 @@ class SettingsScreen extends ConsumerWidget {
                 ErrorLogCard(),
               ],
             ),
+          ),
+          // The second way back into the tour besides the overview's
+          // question mark, for whoever looks for help where the other
+          // settings are (#173). Starts it at once: there is nothing to
+          // choose on a page in between.
+          _CategoryTile(
+            icon: Icons.tour_outlined,
+            title: l10n.tourOpen,
+            subtitle: l10n.tourOpenHint(TourStop.values.length),
+            onTap: () => ref.read(appTourProvider.notifier).start(),
           ),
         ],
       ),

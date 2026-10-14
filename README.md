@@ -520,6 +520,18 @@ Einrichten steht „Aus einer Sicherung wiederherstellen", und der Haushalt
 kommt mit seiner bisherigen Kennung zurück statt als fremder abgewiesen zu
 werden.
 
+**Rundgang.** Die Übersicht bietet einen kurzen Rundgang an: acht
+Stationen von Notfall und Warnungen bis zu den Einstellungen, auf
+Deutsch, Englisch und Spanisch. Das Angebot kommt einmal nach der
+Einrichtung eines neuen Haushalts und einmal nach dem Update für jeden,
+der die App schon benutzt. Jede Station öffnet den echten Bereich und
+erklärt in einem Band am unteren Rand, was dort zu finden ist und mit
+welchem Knopf man was einrichtet; der Bereich bleibt dabei bedienbar. Das
+Angebot ist eine Karte, kein Fenster, und bleibt im Krisenmodus und bei
+einer schweren Warnung für den Haushalt weg. Später führen das
+Fragezeichen in der Übersicht und ein Eintrag in den Einstellungen wieder
+hinein.
+
 Oberfläche auf Deutsch, Englisch und Spanisch, helles und dunkles
 Erscheinungsbild. Auf Spanisch sind vorerst nur die Bedienoberfläche und
 ihre Erklärtexte übersetzt; Erste Hilfe, Comic, Checklisten, Rezepte und

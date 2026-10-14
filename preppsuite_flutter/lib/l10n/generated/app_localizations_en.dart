@@ -9217,4 +9217,83 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get neighbourhoodTooNew =>
       'This offer comes from a newer PreppSuite. Please update the app.';
+
+  @override
+  String get tourOfferTitle => 'A short tour of the app';
+
+  @override
+  String tourOfferBody(int count) {
+    return '$count stops, about two minutes: where to find help in an emergency and what you can set up beforehand. You can stop at any time and start the tour again later with the question mark at the top or in the settings.';
+  }
+
+  @override
+  String get tourOfferStart => 'Start the tour';
+
+  @override
+  String get tourOfferDismiss => 'No, thanks';
+
+  @override
+  String get tourOpen => 'Tour of the app';
+
+  @override
+  String tourOpenHint(int count) {
+    return 'The main areas in $count steps';
+  }
+
+  @override
+  String tourProgress(int step, int count) {
+    return 'Tour, step $step of $count';
+  }
+
+  @override
+  String get tourBack => 'Back';
+
+  @override
+  String get tourNext => 'Next';
+
+  @override
+  String get tourDone => 'Done';
+
+  @override
+  String get tourEnd => 'End the tour';
+
+  @override
+  String tourEmergencyBody(String firstAid) {
+    return 'The emergency numbers are at the top. “$firstAid” shows step by step what to do, with pictures and a pacer for chest compressions. It works straight away, without internet and without setting anything up. Further down you can see what is still missing for an emergency.';
+  }
+
+  @override
+  String tourWarningsBody(String map, String household) {
+    return 'Official warnings for your household\'s places, fetched every 15 minutes. The most important current warning appears at the top of every screen, and “$map” at the top right shows where warnings apply. Which places they cover is set under “$household”.';
+  }
+
+  @override
+  String tourInventoryBody(String add) {
+    return '“$add” records what you keep in store. The app works out how many days your household\'s water and food will last and shows what expires soon.';
+  }
+
+  @override
+  String tourChecklistsBody(String create) {
+    return 'Ready-made lists for being prepared, from the emergency bag to important documents. An item you link to your inventory ticks itself off once there is enough. “$create” adds lists of your own.';
+  }
+
+  @override
+  String tourMapBody(String download, String shelters) {
+    return '“$download” at the top right puts a map of your area on the device, so it keeps working when the network fails. “$shelters” lists shelters and possible places of protection, each marked with whether it is officially confirmed.';
+  }
+
+  @override
+  String tourKnowledgeBody(String documents) {
+    return 'Look things up without a network: download an archive such as Wikipedia onto the device. “$documents” at the top keeps files of your own, manuals as PDFs for example. Both can be searched.';
+  }
+
+  @override
+  String tourHouseholdBody(String plan, String cards, String places) {
+    return 'What applies to your household in an emergency: the “$plan” with a meeting point and contacts, the “$cards” with what the ambulance service needs to know about each of you, and under “$places” the places you are warned about.';
+  }
+
+  @override
+  String tourSettingsBody(String data, String appearance, String overview) {
+    return 'Under “$data” you share the household with other devices and make an encrypted backup; under “$appearance” you choose the language and crisis mode. You will find the tour here again, and behind the question mark on the “$overview”.';
+  }
 }

@@ -5367,5 +5367,122 @@
   "neighbourhoodReceived": "Offer added to the list.",
   "neighbourhoodAlreadyKnown": "This offer is already in the list.",
   "neighbourhoodNotAnOffer": "That is not a PreppSuite offer.",
-  "neighbourhoodTooNew": "This offer comes from a newer PreppSuite. Please update the app."
+  "neighbourhoodTooNew": "This offer comes from a newer PreppSuite. Please update the app.",
+  "tourOfferTitle": "A short tour of the app",
+  "tourOfferBody": "{count} stops, about two minutes: where to find help in an emergency and what you can set up beforehand. You can stop at any time and start the tour again later with the question mark at the top or in the settings.",
+  "@tourOfferBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tourOfferStart": "Start the tour",
+  "tourOfferDismiss": "No, thanks",
+  "tourOpen": "Tour of the app",
+  "tourOpenHint": "The main areas in {count} steps",
+  "@tourOpenHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tourProgress": "Tour, step {step} of {count}",
+  "@tourProgress": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tourBack": "Back",
+  "tourNext": "Next",
+  "tourDone": "Done",
+  "tourEnd": "End the tour",
+  "tourEmergencyBody": "The emergency numbers are at the top. “{firstAid}” shows step by step what to do, with pictures and a pacer for chest compressions. It works straight away, without internet and without setting anything up. Further down you can see what is still missing for an emergency.",
+  "@tourEmergencyBody": {
+    "placeholders": {
+      "firstAid": {
+        "type": "String"
+      }
+    }
+  },
+  "tourWarningsBody": "Official warnings for your household's places, fetched every 15 minutes. The most important current warning appears at the top of every screen, and “{map}” at the top right shows where warnings apply. Which places they cover is set under “{household}”.",
+  "@tourWarningsBody": {
+    "placeholders": {
+      "map": {
+        "type": "String"
+      },
+      "household": {
+        "type": "String"
+      }
+    }
+  },
+  "tourInventoryBody": "“{add}” records what you keep in store. The app works out how many days your household's water and food will last and shows what expires soon.",
+  "@tourInventoryBody": {
+    "placeholders": {
+      "add": {
+        "type": "String"
+      }
+    }
+  },
+  "tourChecklistsBody": "Ready-made lists for being prepared, from the emergency bag to important documents. An item you link to your inventory ticks itself off once there is enough. “{create}” adds lists of your own.",
+  "@tourChecklistsBody": {
+    "placeholders": {
+      "create": {
+        "type": "String"
+      }
+    }
+  },
+  "tourMapBody": "“{download}” at the top right puts a map of your area on the device, so it keeps working when the network fails. “{shelters}” lists shelters and possible places of protection, each marked with whether it is officially confirmed.",
+  "@tourMapBody": {
+    "placeholders": {
+      "download": {
+        "type": "String"
+      },
+      "shelters": {
+        "type": "String"
+      }
+    }
+  },
+  "tourKnowledgeBody": "Look things up without a network: download an archive such as Wikipedia onto the device. “{documents}” at the top keeps files of your own, manuals as PDFs for example. Both can be searched.",
+  "@tourKnowledgeBody": {
+    "placeholders": {
+      "documents": {
+        "type": "String"
+      }
+    }
+  },
+  "tourHouseholdBody": "What applies to your household in an emergency: the “{plan}” with a meeting point and contacts, the “{cards}” with what the ambulance service needs to know about each of you, and under “{places}” the places you are warned about.",
+  "@tourHouseholdBody": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "cards": {
+        "type": "String"
+      },
+      "places": {
+        "type": "String"
+      }
+    }
+  },
+  "tourSettingsBody": "Under “{data}” you share the household with other devices and make an encrypted backup; under “{appearance}” you choose the language and crisis mode. You will find the tour here again, and behind the question mark on the “{overview}”.",
+  "@tourSettingsBody": {
+    "placeholders": {
+      "data": {
+        "type": "String"
+      },
+      "appearance": {
+        "type": "String"
+      },
+      "overview": {
+        "type": "String"
+      }
+    }
+  }
 }

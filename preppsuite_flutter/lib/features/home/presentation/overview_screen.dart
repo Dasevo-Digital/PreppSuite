@@ -20,6 +20,7 @@ import '../../checklists/application/checklist_providers.dart';
 import '../../checklists/application/checklist_satisfaction.dart';
 import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
+import '../../tour/presentation/tour_offer_card.dart';
 import '../application/home_overview.dart';
 import '../application/shell_layout.dart';
 import 'operational_briefing_card.dart';
@@ -74,6 +75,7 @@ class OverviewScreen extends ConsumerWidget {
             tooltip: l10n.searchTitle,
             onPressed: () => openAppSearch(context, profile, onNavigate),
           ),
+          const TourButton(),
         ],
       ),
       body: LayoutBuilder(
@@ -91,6 +93,12 @@ class OverviewScreen extends ConsumerWidget {
               if (portableLocation.missingChoice case final chosen?) ...[
                 MissingDataFolderNotice(path: chosen),
                 const SizedBox(height: 16),
+              ],
+              // Above the first-item card: on a new household it says
+              // where things are before that card says what to do first.
+              if (TourOfferCard.showsFor(ref, profile)) ...[
+                TourOfferCard(profile: profile),
+                const SizedBox(height: 12),
               ],
               if (inventory.hasValue && items.isEmpty) ...[
                 Card(

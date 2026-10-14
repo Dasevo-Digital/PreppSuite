@@ -19,6 +19,8 @@ import '../../knowledge/presentation/knowledge_screen.dart';
 import '../../maps/presentation/map_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
 import '../../shelters/presentation/shelter_map_screen.dart';
+import '../../tour/application/app_tour.dart';
+import '../../tour/presentation/tour_banner.dart';
 import '../../warnings/application/warning_providers.dart';
 import '../../warnings/application/warning_relevance.dart';
 import '../../warnings/presentation/warning_banner.dart';
@@ -66,6 +68,13 @@ class _HomeShellState extends ConsumerState<HomeShell> {
 
     final navigation = shellNavigationFor(MediaQuery.sizeOf(context).width);
     final slots = shellSlotsFor(navigation: navigation, selected: _selected);
+
+    // The tour moves the shell, never the other way round: tapping
+    // another destination mid-tour leaves the band where it was, and
+    // "next" goes on from there (#173).
+    ref.listen(appTourProvider, (previous, stop) {
+      if (stop != null && stop != previous) _select(stop.destination);
+    });
 
     return CallbackShortcuts(
       // The search is one screen deep from the overview and nowhere at
@@ -150,6 +159,12 @@ class _HomeShellState extends ConsumerState<HomeShell> {
                         Expanded(child: content),
                       ],
                     ),
+            ),
+            // Below the content and above the bar, across the whole
+            // width like the warning banner at the top. Zero-sized while
+            // no tour runs.
+            TourBanner(
+              onFinished: () => _select(ShellDestination.overview),
             ),
           ],
         ),

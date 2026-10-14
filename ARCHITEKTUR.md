@@ -2674,6 +2674,48 @@ bringt dessen Text mit. Deshalb gibt es zwei Stellen
 Karte, Listen und Schieberegler bleiben bedienbar, weil ihre Gesten das
 Gestenrennen gewinnen. `test/widget/selection_test.dart` misst beides.
 
+### Der Rundgang zeigt die echten Bildschirme
+
+Der Rundgang (#173, `features/tour/`) hat acht Stationen, und jede ist
+ein Ziel der Navigation, kein Bild davon. `HomeShell` hört auf
+`appTourProvider` und wechselt den Bereich; am Fuß des Shells steht ein
+Band mit Titel, „3/8“, dem Text, Zurück, Weiter und einem Kreuz. Drei
+Entscheidungen tragen das:
+
+- **Kein Overlay-Paket, keine Kreise um Knöpfe.** Solche Hervorhebungen
+  brechen bei doppelter Schrift, im Querformat, mit der Seitenleiste auf
+  dem Desktop und vor einem Screenreader, und sie kosten eine
+  Abhängigkeit. Das Band steht *in* der Spalte des Shells, nicht darüber:
+  Der Bildschirm wird niedriger, statt dass seine letzte Zeile und sein
+  schwebender Knopf verdeckt werden, und er bleibt bedienbar. Wer an
+  einer Station etwas einrichten will, tut es dort und tippt danach auf
+  „Weiter“. Deshalb hat das Band keine eigenen Einrichtungsknöpfe, die
+  neben den echten auseinanderlaufen könnten. Sein Text hat eine
+  Obergrenze von einem Sechstel der Höhe und scrollt darunter, mit
+  sichtbarer Leiste; die Knöpfe bleiben darunter in Reichweite.
+- **Die Texte nennen Knöpfe mit deren eigenem Label.** Jeder Knopf, auf
+  den ein Text zeigt, kommt als Platzhalter aus dem Getter, der ihn auf
+  dem Bildschirm beschriftet (`app_tour_l10n.dart`). `tourStopAnchors`
+  führt dieselben Labels, und `test/widget/app_tour_test.dart` geht den
+  Rundgang in allen drei Sprachen durch und sucht jedes auf dem
+  Bildschirm seiner Station, notfalls nach unten gescrollt. Ein Knopf,
+  der umzieht oder umbenannt wird, lässt den Test scheitern, statt einen
+  Text zu hinterlassen, der ins Leere zeigt.
+- **Angeboten, nie aufgedrängt.** Die Übersicht zeigt eine Karte, bis das
+  Angebot angenommen oder abgelehnt ist (`appTourOfferAnswered`). Das
+  gilt für einen neuen Haushalt nach der Einrichtung wie für jeden schon
+  vorhandenen nach dem Update. Die Antwort gehört diesem Gerät: Sie reist
+  nicht mit den Einstellungen des Haushalts und steht in keiner
+  Sicherung, denn vor einem zweiten Telefon sitzt ein zweiter Mensch. Im
+  Krisenmodus und bei einer schweren Warnung für den Haushalt bleibt die
+  Karte weg und kommt danach wieder. Später führen das Fragezeichen in
+  der Übersicht und ein Eintrag in den Einstellungen hinein.
+
+Die Reihenfolge ist zum Lernen sortiert, nicht wie die Leiste zum
+Benutzen: Warnungen kommen gleich nach dem Notfall, weil wer nur zwei
+Stationen sieht, diese zwei sehen soll. Wo der Rundgang gerade steht,
+liegt nur im Speicher; ein Neustart beginnt ohne ihn.
+
 ## Conventions
 
 Comments explain *why*, not *what* — the existing ones are the model to match,

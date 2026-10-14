@@ -15294,6 +15294,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This offer comes from a newer PreppSuite. Please update the app.'**
   String get neighbourhoodTooNew;
+
+  /// No description provided for @tourOfferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A short tour of the app'**
+  String get tourOfferTitle;
+
+  /// No description provided for @tourOfferBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} stops, about two minutes: where to find help in an emergency and what you can set up beforehand. You can stop at any time and start the tour again later with the question mark at the top or in the settings.'**
+  String tourOfferBody(int count);
+
+  /// No description provided for @tourOfferStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the tour'**
+  String get tourOfferStart;
+
+  /// No description provided for @tourOfferDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'No, thanks'**
+  String get tourOfferDismiss;
+
+  /// No description provided for @tourOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour of the app'**
+  String get tourOpen;
+
+  /// No description provided for @tourOpenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The main areas in {count} steps'**
+  String tourOpenHint(int count);
+
+  /// No description provided for @tourProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Tour, step {step} of {count}'**
+  String tourProgress(int step, int count);
+
+  /// No description provided for @tourBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get tourBack;
+
+  /// No description provided for @tourNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get tourNext;
+
+  /// No description provided for @tourDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get tourDone;
+
+  /// No description provided for @tourEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'End the tour'**
+  String get tourEnd;
+
+  /// No description provided for @tourEmergencyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The emergency numbers are at the top. “{firstAid}” shows step by step what to do, with pictures and a pacer for chest compressions. It works straight away, without internet and without setting anything up. Further down you can see what is still missing for an emergency.'**
+  String tourEmergencyBody(String firstAid);
+
+  /// No description provided for @tourWarningsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Official warnings for your household\'s places, fetched every 15 minutes. The most important current warning appears at the top of every screen, and “{map}” at the top right shows where warnings apply. Which places they cover is set under “{household}”.'**
+  String tourWarningsBody(String map, String household);
+
+  /// No description provided for @tourInventoryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'“{add}” records what you keep in store. The app works out how many days your household\'s water and food will last and shows what expires soon.'**
+  String tourInventoryBody(String add);
+
+  /// No description provided for @tourChecklistsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready-made lists for being prepared, from the emergency bag to important documents. An item you link to your inventory ticks itself off once there is enough. “{create}” adds lists of your own.'**
+  String tourChecklistsBody(String create);
+
+  /// No description provided for @tourMapBody.
+  ///
+  /// In en, this message translates to:
+  /// **'“{download}” at the top right puts a map of your area on the device, so it keeps working when the network fails. “{shelters}” lists shelters and possible places of protection, each marked with whether it is officially confirmed.'**
+  String tourMapBody(String download, String shelters);
+
+  /// No description provided for @tourKnowledgeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Look things up without a network: download an archive such as Wikipedia onto the device. “{documents}” at the top keeps files of your own, manuals as PDFs for example. Both can be searched.'**
+  String tourKnowledgeBody(String documents);
+
+  /// No description provided for @tourHouseholdBody.
+  ///
+  /// In en, this message translates to:
+  /// **'What applies to your household in an emergency: the “{plan}” with a meeting point and contacts, the “{cards}” with what the ambulance service needs to know about each of you, and under “{places}” the places you are warned about.'**
+  String tourHouseholdBody(String plan, String cards, String places);
+
+  /// No description provided for @tourSettingsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Under “{data}” you share the household with other devices and make an encrypted backup; under “{appearance}” you choose the language and crisis mode. You will find the tour here again, and behind the question mark on the “{overview}”.'**
+  String tourSettingsBody(String data, String appearance, String overview);
 }
 
 class _AppLocalizationsDelegate

@@ -3751,5 +3751,122 @@
   "neighbourhoodReceived": "Angebot in der Liste.",
   "neighbourhoodAlreadyKnown": "Dieses Angebot steht schon in der Liste.",
   "neighbourhoodNotAnOffer": "Das ist kein PreppSuite-Angebot.",
-  "neighbourhoodTooNew": "Dieses Angebot stammt aus einer neueren PreppSuite. Bitte die App aktualisieren."
+  "neighbourhoodTooNew": "Dieses Angebot stammt aus einer neueren PreppSuite. Bitte die App aktualisieren.",
+  "tourOfferTitle": "Ein kurzer Rundgang durch die App",
+  "tourOfferBody": "{count} Stationen, etwa zwei Minuten: wo du im Notfall Hilfe findest und was du vorher einrichten kannst. Du kannst jederzeit aufhören und den Rundgang später über das Fragezeichen oben oder in den Einstellungen wieder starten.",
+  "@tourOfferBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tourOfferStart": "Rundgang starten",
+  "tourOfferDismiss": "Nein, danke",
+  "tourOpen": "Rundgang durch die App",
+  "tourOpenHint": "Die wichtigsten Bereiche in {count} Schritten",
+  "@tourOpenHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tourProgress": "Rundgang, Schritt {step} von {count}",
+  "@tourProgress": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tourBack": "Zurück",
+  "tourNext": "Weiter",
+  "tourDone": "Fertig",
+  "tourEnd": "Rundgang beenden",
+  "tourEmergencyBody": "Oben stehen die Notrufnummern. „{firstAid}“ zeigt Schritt für Schritt, was zu tun ist, mit Bildern und einem Taktgeber für die Herzdruckmassage. Das funktioniert sofort, ohne Internet und ohne Einrichtung. Weiter unten steht, was für den Ernstfall noch fehlt.",
+  "@tourEmergencyBody": {
+    "placeholders": {
+      "firstAid": {
+        "type": "String"
+      }
+    }
+  },
+  "tourWarningsBody": "Amtliche Warnungen für die Orte deines Haushalts, alle 15 Minuten neu abgerufen. Die wichtigste aktuelle Warnung steht oben über jedem Bereich, und „{map}“ oben rechts zeigt, wo gewarnt wird. Für welche Orte, legst du unter „{household}“ fest.",
+  "@tourWarningsBody": {
+    "placeholders": {
+      "map": {
+        "type": "String"
+      },
+      "household": {
+        "type": "String"
+      }
+    }
+  },
+  "tourInventoryBody": "Mit „{add}“ trägst du ein, was du lagerst. Die App rechnet aus, wie viele Tage Wasser und Essen für deinen Haushalt reichen, und zeigt, was bald abläuft.",
+  "@tourInventoryBody": {
+    "placeholders": {
+      "add": {
+        "type": "String"
+      }
+    }
+  },
+  "tourChecklistsBody": "Fertige Listen für die Vorsorge, vom Notgepäck bis zu den wichtigen Dokumenten. Ein Punkt, den du mit dem Vorrat verknüpfst, hakt sich selbst ab, sobald genug da ist. Mit „{create}“ legst du eigene Listen an.",
+  "@tourChecklistsBody": {
+    "placeholders": {
+      "create": {
+        "type": "String"
+      }
+    }
+  },
+  "tourMapBody": "Mit „{download}“ oben rechts holst du die Karte deiner Gegend auf das Gerät. Dann funktioniert sie auch, wenn das Netz ausfällt. Unter „{shelters}“ stehen Schutzräume und mögliche Schutzorte, jeweils mit dem Hinweis, ob sie offiziell bestätigt sind.",
+  "@tourMapBody": {
+    "placeholders": {
+      "download": {
+        "type": "String"
+      },
+      "shelters": {
+        "type": "String"
+      }
+    }
+  },
+  "tourKnowledgeBody": "Nachschlagen ohne Netz: Lade ein Archiv wie die Wikipedia auf das Gerät. Unter „{documents}“ oben legst du eigene Dateien ab, etwa Anleitungen als PDF. Beides lässt sich durchsuchen.",
+  "@tourKnowledgeBody": {
+    "placeholders": {
+      "documents": {
+        "type": "String"
+      }
+    }
+  },
+  "tourHouseholdBody": "Was im Ernstfall für deinen Haushalt gilt: der „{plan}“ mit Treffpunkt und Kontakten, die „{cards}“ mit dem, was der Rettungsdienst über jeden von euch wissen will, und unter „{places}“ die Orte, für die du gewarnt wirst.",
+  "@tourHouseholdBody": {
+    "placeholders": {
+      "plan": {
+        "type": "String"
+      },
+      "cards": {
+        "type": "String"
+      },
+      "places": {
+        "type": "String"
+      }
+    }
+  },
+  "tourSettingsBody": "Unter „{data}“ teilst du den Haushalt mit weiteren Geräten und legst eine verschlüsselte Sicherung an, unter „{appearance}“ wählst du Sprache und Krisenmodus. Den Rundgang findest du hier und über das Fragezeichen in der „{overview}“ wieder.",
+  "@tourSettingsBody": {
+    "placeholders": {
+      "data": {
+        "type": "String"
+      },
+      "appearance": {
+        "type": "String"
+      },
+      "overview": {
+        "type": "String"
+      }
+    }
+  }
 }

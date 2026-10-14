@@ -9269,4 +9269,83 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get neighbourhoodTooNew =>
       'Dieses Angebot stammt aus einer neueren PreppSuite. Bitte die App aktualisieren.';
+
+  @override
+  String get tourOfferTitle => 'Ein kurzer Rundgang durch die App';
+
+  @override
+  String tourOfferBody(int count) {
+    return '$count Stationen, etwa zwei Minuten: wo du im Notfall Hilfe findest und was du vorher einrichten kannst. Du kannst jederzeit aufhören und den Rundgang später über das Fragezeichen oben oder in den Einstellungen wieder starten.';
+  }
+
+  @override
+  String get tourOfferStart => 'Rundgang starten';
+
+  @override
+  String get tourOfferDismiss => 'Nein, danke';
+
+  @override
+  String get tourOpen => 'Rundgang durch die App';
+
+  @override
+  String tourOpenHint(int count) {
+    return 'Die wichtigsten Bereiche in $count Schritten';
+  }
+
+  @override
+  String tourProgress(int step, int count) {
+    return 'Rundgang, Schritt $step von $count';
+  }
+
+  @override
+  String get tourBack => 'Zurück';
+
+  @override
+  String get tourNext => 'Weiter';
+
+  @override
+  String get tourDone => 'Fertig';
+
+  @override
+  String get tourEnd => 'Rundgang beenden';
+
+  @override
+  String tourEmergencyBody(String firstAid) {
+    return 'Oben stehen die Notrufnummern. „$firstAid“ zeigt Schritt für Schritt, was zu tun ist, mit Bildern und einem Taktgeber für die Herzdruckmassage. Das funktioniert sofort, ohne Internet und ohne Einrichtung. Weiter unten steht, was für den Ernstfall noch fehlt.';
+  }
+
+  @override
+  String tourWarningsBody(String map, String household) {
+    return 'Amtliche Warnungen für die Orte deines Haushalts, alle 15 Minuten neu abgerufen. Die wichtigste aktuelle Warnung steht oben über jedem Bereich, und „$map“ oben rechts zeigt, wo gewarnt wird. Für welche Orte, legst du unter „$household“ fest.';
+  }
+
+  @override
+  String tourInventoryBody(String add) {
+    return 'Mit „$add“ trägst du ein, was du lagerst. Die App rechnet aus, wie viele Tage Wasser und Essen für deinen Haushalt reichen, und zeigt, was bald abläuft.';
+  }
+
+  @override
+  String tourChecklistsBody(String create) {
+    return 'Fertige Listen für die Vorsorge, vom Notgepäck bis zu den wichtigen Dokumenten. Ein Punkt, den du mit dem Vorrat verknüpfst, hakt sich selbst ab, sobald genug da ist. Mit „$create“ legst du eigene Listen an.';
+  }
+
+  @override
+  String tourMapBody(String download, String shelters) {
+    return 'Mit „$download“ oben rechts holst du die Karte deiner Gegend auf das Gerät. Dann funktioniert sie auch, wenn das Netz ausfällt. Unter „$shelters“ stehen Schutzräume und mögliche Schutzorte, jeweils mit dem Hinweis, ob sie offiziell bestätigt sind.';
+  }
+
+  @override
+  String tourKnowledgeBody(String documents) {
+    return 'Nachschlagen ohne Netz: Lade ein Archiv wie die Wikipedia auf das Gerät. Unter „$documents“ oben legst du eigene Dateien ab, etwa Anleitungen als PDF. Beides lässt sich durchsuchen.';
+  }
+
+  @override
+  String tourHouseholdBody(String plan, String cards, String places) {
+    return 'Was im Ernstfall für deinen Haushalt gilt: der „$plan“ mit Treffpunkt und Kontakten, die „$cards“ mit dem, was der Rettungsdienst über jeden von euch wissen will, und unter „$places“ die Orte, für die du gewarnt wirst.';
+  }
+
+  @override
+  String tourSettingsBody(String data, String appearance, String overview) {
+    return 'Unter „$data“ teilst du den Haushalt mit weiteren Geräten und legst eine verschlüsselte Sicherung an, unter „$appearance“ wählst du Sprache und Krisenmodus. Den Rundgang findest du hier und über das Fragezeichen in der „$overview“ wieder.';
+  }
 }
