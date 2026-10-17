@@ -9664,4 +9664,17 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get phrasebookTranslatorHint =>
       'Satz nicht dabei? Der Übersetzer übersetzt freien Text.';
+
+  @override
+  String get emergencyCommunicateHeading => 'Verständigen ohne Netz';
+
+  @override
+  String get emergencyOrientationHeading => 'Orientierung ohne Netz';
+
+  @override
+  String get measurementsTitle => 'Messwerte und Gefahrenkarten';
+
+  @override
+  String get measurementsHint =>
+      'Pegel, Strahlung, Luftqualität, Waldbrand, Starkregen und Autobahn-Sperrungen';
 }

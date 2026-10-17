@@ -261,7 +261,8 @@ vorzuschlagen.
 der WWBOTA-Datenbank, nach Entfernung und nach Belastbarkeit der Angabe
 filterbar.
 
-**Notfall-Informationen.** Messwerte, die alt nichts mehr wert sind, und
+**Messwerte und Gefahrenkarten** (im Tab „Warnungen“, oben rechts und am
+Ende der Liste). Messwerte, die alt nichts mehr wert sind, und
 jeder mit der Deutung der Stelle, die ihn veröffentlicht — nie mit einer
 selbst erfundenen Skala:
 
@@ -275,6 +276,12 @@ selbst erfundenen Skala:
   und sechs Tage voraus.
 - **Autobahnsperrungen** von der Autobahn GmbH, für die Strecken, die
   zählen. Baustellen ohne Sperrung bleiben draußen.
+
+**Im Notfall-Tab** stehen unter „Verständigen ohne Netz“ Notsignal,
+Morsecode, Sprachführer, Übersetzer und Notfunk, unter „Orientierung ohne
+Netz“ der eigene Standort, „In der Nähe“ und „Tageslicht und Mond“.
+„Notruf, Kontakte & Funk“ enthält Nummern, Giftnotruf, Sirenensignale,
+Radiofrequenzen und die eigenen Kontakte.
 
 **In der Nähe.** Apotheke, Arzt, Trinkwasser, Supermarkt, Tankstelle,
 Feuerwehr, Baumarkt — gesucht in der **heruntergeladenen Karte**, ohne

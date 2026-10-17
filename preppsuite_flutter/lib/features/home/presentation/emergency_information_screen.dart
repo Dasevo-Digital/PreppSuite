@@ -9,21 +9,8 @@ import 'package:uuid/uuid.dart';
 import '../../../core/adaptive_columns.dart';
 import '../../first_aid/application/poison_centres.dart';
 import '../../maps/presentation/my_position_screen.dart';
-import 'distress_signal_screen.dart';
 import '../../../l10n/generated/app_localizations.dart';
-import '../../daylight/presentation/daylight_screen.dart';
-import '../../maps/presentation/nearby_screen.dart';
-import '../../warnings/presentation/air_quality_screen.dart';
-import '../../warnings/presentation/road_closure_screen.dart';
-import '../../warnings/presentation/fire_danger_screen.dart';
-import '../../warnings/presentation/heavy_rain_screen.dart';
-import '../../warnings/presentation/pegel_screen.dart';
-import '../../warnings/presentation/radiation_screen.dart';
-import 'radio_emergency_screen.dart';
 import '../../../core/phone_call.dart';
-import '../../morse/presentation/morse_screen.dart';
-import '../../phrasebook/presentation/phrasebook_screen.dart';
-import '../../translator/presentation/translator_screen.dart';
 
 const _contactsKey = 'nearbyEmergencyContacts';
 
@@ -195,7 +182,10 @@ class _EmergencyInformationScreenState
         blocks: [
           // First, because it is the question every one of these calls
           // begins with and the only one this app can answer for the
-          // caller: where are you.
+          // caller: where are you. The rest of what used to follow -- the
+          // signals, Morse, the phrasebook and the translator, the live
+          // readings -- moved to where it is looked for (#187): the
+          // emergency tab's "Verständigen ohne Netz" and the warnings.
           Card(
             child: ListTile(
               leading: const Icon(Icons.share_location_outlined),
@@ -205,64 +195,6 @@ class _EmergencyInformationScreenState
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const MyPositionScreen(),
-                ),
-              ),
-            ),
-          ),
-          // Beside it, because they answer the same question by two
-          // different roads: the coordinates are for somebody on the
-          // telephone, the rhythm for somebody who can only see you.
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.highlight_outlined),
-              title: Text(l10n.distressTitle),
-              subtitle: Text(l10n.distressAlpineHint),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const DistressSignalScreen(),
-                ),
-              ),
-            ),
-          ),
-          // Under the distress signal, which sends one rhythm everybody
-          // knows; this sends whatever somebody types, and reads a reply.
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.linear_scale),
-              title: Text(l10n.morseTitle),
-              subtitle: Text(l10n.morseEntryHint),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const MorseScreen()),
-              ),
-            ),
-          ),
-          // The third way of being understood without a network: when the
-          // other person is right there, but speaks another language.
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.translate),
-              title: Text(l10n.phrasebookTitle),
-              subtitle: Text(l10n.phrasebookEntryHint),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const PhrasebookScreen(),
-                ),
-              ),
-            ),
-          ),
-          // Beside the phrasebook, for what its sentences do not cover.
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.g_translate),
-              title: Text(l10n.translatorTitle),
-              subtitle: Text(l10n.translatorEntryHint),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const TranslatorScreen(),
                 ),
               ),
             ),
@@ -368,136 +300,6 @@ class _EmergencyInformationScreenState
                       ),
                     ),
                   ],
-                ),
-              ),
-            ],
-          ),
-          _Block(
-            children: [
-              // Live data on an otherwise offline reference screen, and it
-              // earns the place: the screen is where somebody looks in an
-              // emergency, and a river's level is the one figure here that is
-              // worthless when out of date. It keeps the last reading and says
-              // so rather than pretending.
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: const Icon(Icons.water_outlined),
-                title: Text(l10n.pegelTitle),
-                subtitle: Text(l10n.pegelEntryHint),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const PegelScreen()),
-                ),
-              ),
-              // Beside the gauge for the same reason: a figure that is
-              // worthless out of date, on the screen somebody opens when
-              // something has happened. It keeps the last reading and says
-              // so rather than pretending.
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: const Icon(Icons.radar_outlined),
-                title: Text(l10n.radiationTitle),
-                subtitle: Text(l10n.radiationEntryHint),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const RadiationScreen(),
-                  ),
-                ),
-              ),
-              // The third measurement of the same kind: a number that is
-              // worthless out of date, and one whose meaning comes from the
-              // authority that publishes it rather than from this app.
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: const Icon(Icons.air_outlined),
-                title: Text(l10n.airQualityTitle),
-                subtitle: Text(l10n.airQualityEntryHint),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const AirQualityScreen(),
-                  ),
-                ),
-              ),
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: const Icon(Icons.local_fire_department_outlined),
-                title: Text(l10n.fireDangerTitle),
-                subtitle: Text(l10n.fireDangerEntryHint),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const FireDangerScreen(),
-                  ),
-                ),
-              ),
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: const Icon(Icons.thunderstorm_outlined),
-                title: Text(l10n.heavyRainTitle),
-                subtitle: Text(l10n.heavyRainEntryHint),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const HeavyRainScreen(),
-                  ),
-                ),
-              ),
-              // Not a measurement like the three above: this is about
-              // leaving. "Which way is open" is the question a household has
-              // when it can no longer stay.
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: const Icon(Icons.alt_route_outlined),
-                title: Text(l10n.roadClosureTitle),
-                subtitle: Text(l10n.roadClosureEntryHint),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const RoadClosureScreen(),
-                  ),
-                ),
-              ),
-              // The one entry on this screen that needs nothing at all. Every
-              // other live figure here dies with the network; this reads the
-              // map that is already on the device.
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: const Icon(Icons.travel_explore_outlined),
-                title: Text(l10n.nearbyTitle),
-                subtitle: Text(l10n.nearbyEntryHint),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => const NearbyScreen()),
-                ),
-              ),
-              // Beside it for the same reason: the answer is already in the
-              // device. This one is arithmetic rather than a stored map, so
-              // it is as right on the tenth day without a network as on the
-              // first.
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: const Icon(Icons.wb_twilight_outlined),
-                title: Text(l10n.daylightTitle),
-                subtitle: Text(l10n.daylightEntryHint),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const DaylightScreen(),
-                  ),
-                ),
-              ),
-              ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                leading: const Icon(Icons.settings_input_antenna_outlined),
-                title: Text(l10n.radioEmergencyTitle),
-                subtitle: Text(l10n.radioEmergencyEntryHint),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const RadioEmergencyScreen(),
-                  ),
                 ),
               ),
             ],

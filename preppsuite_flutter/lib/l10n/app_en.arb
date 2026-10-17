@@ -5683,5 +5683,9 @@
     }
   },
   "translatorRemove": "Remove language pack",
-  "phrasebookTranslatorHint": "Sentence not here? The translator translates free text."
+  "phrasebookTranslatorHint": "Sentence not here? The translator translates free text.",
+  "emergencyCommunicateHeading": "Communicating without a network",
+  "emergencyOrientationHeading": "Finding your way without a network",
+  "measurementsTitle": "Readings and hazard maps",
+  "measurementsHint": "River levels, radiation, air quality, forest fire, heavy rain and motorway closures"
 }

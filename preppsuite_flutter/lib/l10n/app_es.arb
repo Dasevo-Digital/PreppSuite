@@ -2637,5 +2637,9 @@
   "translatorDownloadFailed": "La descarga falló: {error}",
   "translatorInstalled": "En este dispositivo ({size})",
   "translatorRemove": "Eliminar paquete de idioma",
-  "phrasebookTranslatorHint": "¿No está la frase? El traductor traduce texto libre."
+  "phrasebookTranslatorHint": "¿No está la frase? El traductor traduce texto libre.",
+  "emergencyCommunicateHeading": "Comunicarse sin red",
+  "emergencyOrientationHeading": "Orientarse sin red",
+  "measurementsTitle": "Mediciones y mapas de peligro",
+  "measurementsHint": "Niveles de ríos, radiación, calidad del aire, incendios forestales, lluvias intensas y cortes de autopista"
 }

@@ -62,6 +62,7 @@ import '../features/home/presentation/check_in_screen.dart';
 import '../features/first_aid/presentation/defibrillator_screen.dart';
 import '../features/emergency_points/presentation/emergency_points_screen.dart';
 import '../features/warnings/presentation/pegel_screen.dart';
+import '../features/warnings/presentation/measurements_screen.dart';
 import '../features/warnings/presentation/hazard_release_screen.dart';
 import '../features/warnings/presentation/iodine_tablets_screen.dart';
 import '../features/warnings/presentation/radiation_screen.dart';
@@ -423,6 +424,20 @@ List<AppDestination> appDestinations() => [
     area: ShellDestination.warnings,
     open: (p) => WarningSituationMapScreen(profile: p),
     aliases: ['lage', 'lagekarte'],
+  ),
+  AppDestination(
+    id: 'measurements',
+    title: (l) => l.measurementsTitle,
+    icon: Icons.sensors_outlined,
+    area: ShellDestination.warnings,
+    open: (_) => const MeasurementsScreen(),
+    aliases: [
+      'messwerte',
+      'messwert',
+      'gefahrenkarte',
+      'readings',
+      'mediciones',
+    ],
   ),
   AppDestination(
     id: 'pegel',

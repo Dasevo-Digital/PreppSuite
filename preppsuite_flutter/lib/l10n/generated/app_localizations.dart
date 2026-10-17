@@ -15942,6 +15942,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sentence not here? The translator translates free text.'**
   String get phrasebookTranslatorHint;
+
+  /// No description provided for @emergencyCommunicateHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Communicating without a network'**
+  String get emergencyCommunicateHeading;
+
+  /// No description provided for @emergencyOrientationHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding your way without a network'**
+  String get emergencyOrientationHeading;
+
+  /// No description provided for @measurementsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Readings and hazard maps'**
+  String get measurementsTitle;
+
+  /// No description provided for @measurementsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'River levels, radiation, air quality, forest fire, heavy rain and motorway closures'**
+  String get measurementsHint;
 }
 
 class _AppLocalizationsDelegate

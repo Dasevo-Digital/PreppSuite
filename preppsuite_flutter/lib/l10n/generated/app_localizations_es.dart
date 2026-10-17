@@ -9693,4 +9693,17 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get phrasebookTranslatorHint =>
       '¿No está la frase? El traductor traduce texto libre.';
+
+  @override
+  String get emergencyCommunicateHeading => 'Comunicarse sin red';
+
+  @override
+  String get emergencyOrientationHeading => 'Orientarse sin red';
+
+  @override
+  String get measurementsTitle => 'Mediciones y mapas de peligro';
+
+  @override
+  String get measurementsHint =>
+      'Niveles de ríos, radiación, calidad del aire, incendios forestales, lluvias intensas y cortes de autopista';
 }

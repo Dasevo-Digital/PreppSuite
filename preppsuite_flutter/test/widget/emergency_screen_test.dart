@@ -110,4 +110,28 @@ void main() {
 
     expect(find.text('Mila and Nuss'), findsOneWidget);
   });
+
+  testWidgets('Morse and the other ways of being understood are on the tab', (
+    tester,
+  ) async {
+    // They were three screens down under "Notruf, Kontakte & Funk", and
+    // somebody looking for the Morse translator did not find it (#187).
+    await show(tester, const Locale('de'));
+
+    expect(find.text('Verständigen ohne Netz'), findsOneWidget);
+    for (final title in [
+      'Notsignal',
+      'Morsecode',
+      'Sprachführer',
+      'Übersetzer',
+      'Funk-Notfallfrequenzen',
+    ]) {
+      expect(find.text(title), findsOneWidget, reason: title);
+    }
+    expect(find.text('Orientierung ohne Netz'), findsOneWidget);
+
+    await tester.tap(find.text('Morsecode'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BackButton), findsOneWidget);
+  });
 }

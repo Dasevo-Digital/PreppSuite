@@ -212,4 +212,18 @@ void main() {
 
     expect(find.text('Heute ist bundesweiter Warntag'), findsNothing);
   });
+
+  testWidgets('the readings are reached from the warnings (#187)', (
+    tester,
+  ) async {
+    await pumpScreen(tester, [storm]);
+
+    expect(find.text('Messwerte und Gefahrenkarten'), findsOneWidget);
+    await tester.tap(find.byTooltip('Messwerte und Gefahrenkarten'));
+    await tester.pumpAndSettle();
+
+    for (final title in ['Pegelstände', 'Gammastrahlung']) {
+      expect(find.textContaining(title), findsWidgets, reason: title);
+    }
+  });
 }

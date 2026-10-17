@@ -21,6 +21,7 @@ import '../application/warning_filter.dart';
 import '../application/warning_polygon_codec.dart';
 import '../application/warning_relevance.dart';
 import '../application/warning_region_filter.dart';
+import 'measurements_screen.dart';
 import 'warning_situation_map_screen.dart';
 import 'warning_day_notice.dart';
 import '../application/warning_providers.dart';
@@ -139,6 +140,17 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
               ),
             ),
           ),
+          // The readings belong beside the warnings (#187); the card at
+          // the end of the list says the same in words.
+          IconButton(
+            tooltip: l10n.measurementsTitle,
+            icon: const Icon(Icons.sensors_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const MeasurementsScreen(),
+              ),
+            ),
+          ),
         ],
       ),
       body: Column(
@@ -205,8 +217,15 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
     final current =
         fresh == null || fresh.freshness == WarningFreshness.current;
 
-    Widget messageWithHint(Widget message) =>
-        ListView(children: [?notice, ?warningDay, message, ?hint]);
+    Widget messageWithHint(Widget message) => ListView(
+      children: [
+        ?notice,
+        ?warningDay,
+        message,
+        ?hint,
+        const MeasurementsCard(),
+      ],
+    );
 
     return ContentSwap(
       child: warningsAsync.when(
@@ -305,6 +324,7 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
                   regions: profile.warningFilter,
                 ),
               ?hint,
+              const MeasurementsCard(),
             ],
           );
         },

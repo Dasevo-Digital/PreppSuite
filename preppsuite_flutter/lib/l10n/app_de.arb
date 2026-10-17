@@ -4067,5 +4067,9 @@
     }
   },
   "translatorRemove": "Sprachpaket entfernen",
-  "phrasebookTranslatorHint": "Satz nicht dabei? Der Übersetzer übersetzt freien Text."
+  "phrasebookTranslatorHint": "Satz nicht dabei? Der Übersetzer übersetzt freien Text.",
+  "emergencyCommunicateHeading": "Verständigen ohne Netz",
+  "emergencyOrientationHeading": "Orientierung ohne Netz",
+  "measurementsTitle": "Messwerte und Gefahrenkarten",
+  "measurementsHint": "Pegel, Strahlung, Luftqualität, Waldbrand, Starkregen und Autobahn-Sperrungen"
 }

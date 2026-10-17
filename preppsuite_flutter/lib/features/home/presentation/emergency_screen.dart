@@ -12,6 +12,14 @@ import '../../household/application/household_plan_controller.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../kids_comic/application/kids_comic.dart';
 import '../../kids_comic/presentation/kids_comic_screen.dart';
+import '../../daylight/presentation/daylight_screen.dart';
+import '../../maps/presentation/my_position_screen.dart';
+import '../../maps/presentation/nearby_screen.dart';
+import '../../morse/presentation/morse_screen.dart';
+import '../../phrasebook/presentation/phrasebook_screen.dart';
+import '../../translator/presentation/translator_screen.dart';
+import 'distress_signal_screen.dart';
+import 'radio_emergency_screen.dart';
 import '../../knowledge/application/knowledge_providers.dart';
 import '../../maps/application/offline_map_providers.dart';
 import '../../warnings/application/warning_providers.dart';
@@ -206,6 +214,71 @@ class EmergencyScreen extends ConsumerWidget {
               MaterialPageRoute<void>(builder: (_) => const OutageScreen()),
             ),
           ),
+          // Every way of being understood when the network is gone, side
+          // by side and named as what they are for (#187). They used to be
+          // entries three to six of "Notruf, Kontakte & Funk", a title
+          // that promises none of them -- and somebody looking for the
+          // Morse translator did not find it.
+          _Section(
+            title: l10n.emergencyCommunicateHeading,
+            entries: [
+              _Entry(
+                icon: Icons.highlight_outlined,
+                title: l10n.distressTitle,
+                subtitle: l10n.distressAlpineHint,
+                open: () => const DistressSignalScreen(),
+              ),
+              _Entry(
+                icon: Icons.linear_scale,
+                title: l10n.morseTitle,
+                subtitle: l10n.morseEntryHint,
+                open: () => const MorseScreen(),
+              ),
+              _Entry(
+                icon: Icons.translate,
+                title: l10n.phrasebookTitle,
+                subtitle: l10n.phrasebookEntryHint,
+                open: () => const PhrasebookScreen(),
+              ),
+              _Entry(
+                icon: Icons.g_translate,
+                title: l10n.translatorTitle,
+                subtitle: l10n.translatorEntryHint,
+                open: () => const TranslatorScreen(),
+              ),
+              _Entry(
+                icon: Icons.settings_input_antenna_outlined,
+                title: l10n.radioEmergencyTitle,
+                subtitle: l10n.radioEmergencyEntryHint,
+                open: () => const RadioEmergencyScreen(),
+              ),
+            ],
+          ),
+          // What the device can still answer by itself: where you are,
+          // what is near, and how long the light lasts.
+          _Section(
+            title: l10n.emergencyOrientationHeading,
+            entries: [
+              _Entry(
+                icon: Icons.share_location_outlined,
+                title: l10n.myPositionTitle,
+                subtitle: l10n.myPositionDmsHint,
+                open: () => const MyPositionScreen(),
+              ),
+              _Entry(
+                icon: Icons.travel_explore_outlined,
+                title: l10n.nearbyTitle,
+                subtitle: l10n.nearbyEntryHint,
+                open: () => const NearbyScreen(),
+              ),
+              _Entry(
+                icon: Icons.wb_twilight_outlined,
+                title: l10n.daylightTitle,
+                subtitle: l10n.daylightEntryHint,
+                open: () => const DaylightScreen(),
+              ),
+            ],
+          ),
           const SizedBox(height: 20),
           Text(
             l10n.emergencyCurrentWarnings,
@@ -384,5 +457,54 @@ class _PlanRow extends StatelessWidget {
   Widget build(BuildContext context) => ListTile(
     leading: Icon(icon),
     title: Text(value),
+  );
+}
+
+/// One entry of a [_Section].
+class _Entry {
+  const _Entry({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.open,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Widget Function() open;
+}
+
+/// A heading and the screens under it, in one card.
+class _Section extends StatelessWidget {
+  const _Section({required this.title, required this.entries});
+
+  final String title;
+  final List<_Entry> entries;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      const SizedBox(height: 20),
+      Text(title, style: Theme.of(context).textTheme.titleLarge),
+      const SizedBox(height: 8),
+      Card(
+        child: Column(
+          children: [
+            for (final entry in entries)
+              ListTile(
+                leading: Icon(entry.icon),
+                title: Text(entry.title),
+                subtitle: Text(entry.subtitle),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => entry.open()),
+                ),
+              ),
+          ],
+        ),
+      ),
+    ],
   );
 }

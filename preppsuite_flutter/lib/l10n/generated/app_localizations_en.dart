@@ -9612,4 +9612,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get phrasebookTranslatorHint =>
       'Sentence not here? The translator translates free text.';
+
+  @override
+  String get emergencyCommunicateHeading => 'Communicating without a network';
+
+  @override
+  String get emergencyOrientationHeading =>
+      'Finding your way without a network';
+
+  @override
+  String get measurementsTitle => 'Readings and hazard maps';
+
+  @override
+  String get measurementsHint =>
+      'River levels, radiation, air quality, forest fire, heavy rain and motorway closures';
 }
