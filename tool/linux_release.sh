@@ -39,6 +39,21 @@ tar tzf "$work/PreppSuite-$version-linux-x64.tar.gz" > "$work/inhalt.txt"
 # not run, which the caller treats as a failure.
 cd "$work/src/preppsuite_flutter"
 runtime="/run/user/$(id -u)"
+# The app reads the desktop keyring before its first frame (it takes over
+# the former identity's entry), and a locked keyring answers with an
+# unlock dialog on that desktop -- the test then hangs without a word.
+# Said in the log, and waited for, so the caller can tell somebody.
+keyring_locked() {
+  busctl --user call org.freedesktop.secrets \
+    /org/freedesktop/secrets/aliases/default \
+    org.freedesktop.DBus.Properties Get ss \
+    org.freedesktop.Secret.Collection Locked 2>/dev/null | grep -q true
+}
+if keyring_locked; then
+  echo "SCHLUESSELBUND-GESPERRT: auf dem Desktop entsperren, der Starttest wartet"
+  while keyring_locked; do sleep 30; done
+  echo "Schlüsselbund entsperrt"
+fi
 if [ -S "$runtime/wayland-0" ]; then
   if XDG_RUNTIME_DIR="$runtime" WAYLAND_DISPLAY=wayland-0 \
     flutter test integration_test/app_start_test.dart -d linux \

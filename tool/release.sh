@@ -4,6 +4,11 @@
 #   tool/release.sh 2.4.6             build, test and checksum
 #   tool/release.sh 2.4.6 --publish   … and create the release and upload
 #   tool/release.sh 2.4.6 --publish-only   publish a folder built before
+#   tool/release.sh 2.4.6 --resume    pick up a run that stopped while
+#                                     waiting for Linux: the Mac, Android
+#                                     and device-check results in the
+#                                     upload folder are kept, the Linux
+#                                     machine's run is waited for again
 #
 # Before it: the version is raised in pubspec.yaml, committed, tagged
 # v<version> and pushed -- this script builds what the tag says and refuses
@@ -37,14 +42,17 @@ readonly APP_DIR="$ROOT/preppsuite_flutter"
 version="${1:-}"
 publish=false
 publish_only=false
+resume=false
+usage="Usage: $0 <version> [--publish|--publish-only|--resume]"
 case "${2:-}" in
   "") ;;
   --publish) publish=true ;;
   --publish-only) publish=true publish_only=true ;;
-  *) echo "Usage: $0 <version> [--publish|--publish-only]" >&2; exit 2 ;;
+  --resume) resume=true ;;
+  *) echo "$usage" >&2; exit 2 ;;
 esac
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
-  echo "Usage: $0 <version> [--publish|--publish-only]" >&2
+  echo "$usage" >&2
   exit 2
 }
 
@@ -108,11 +116,15 @@ fi
 # --- What is being built -------------------------------------------------
 cd "$ROOT"
 git rev-parse -q --verify "refs/tags/$tag" >/dev/null || fail "Tag $tag fehlt"
-[ "$(git rev-parse HEAD)" = "$(git rev-list -n 1 "$tag")" ] ||
-  fail "HEAD ist nicht $tag – erst auschecken"
-[ -z "$(git status --porcelain -- preppsuite_flutter)" ] ||
-  fail "Arbeitsverzeichnis nicht sauber"
-line="$(sed -n 's/^version:[[:space:]]*//p' "$APP_DIR/pubspec.yaml" | head -1)"
+# A resumed run builds nothing more on this Mac; what it still sends out
+# is the tag's own archive, whatever is checked out now.
+if ! $resume; then
+  [ "$(git rev-parse HEAD)" = "$(git rev-list -n 1 "$tag")" ] ||
+    fail "HEAD ist nicht $tag – erst auschecken"
+  [ -z "$(git status --porcelain -- preppsuite_flutter)" ] ||
+    fail "Arbeitsverzeichnis nicht sauber"
+fi
+line="$(git show "$tag:preppsuite_flutter/pubspec.yaml" | sed -n 's/^version:[[:space:]]*//p' | head -1)"
 [ "${line%%+*}" = "$version" ] || fail "pubspec.yaml sagt $line, nicht $version"
 build="${line#*+}"
 [[ "$build" =~ ^[0-9]+$ ]] || fail "ungültige Build-Nummer in pubspec.yaml"
@@ -121,9 +133,21 @@ mkdir -p "$out"
 archive="$log/src-$version.tar.gz"
 git archive --format=tar.gz --prefix=src/ -o "$archive" "$tag"
 
+remote_linux="preppsuite-release/$version"
+if $resume; then
+  for kept in "PreppSuite-$version-macos-local-ad-hoc.zip" \
+    "PreppSuite-$version-Android-arm64-v8a.apk" \
+    "PreppSuite-$version-Android-armeabi-v7a.apk" "GERAETETEST-v$version.txt"; do
+    [ -f "$out/$kept" ] || fail "$kept fehlt – ohne --resume neu bauen"
+  done
+  grep -q "BESTANDEN" "$out/GERAETETEST-v$version.txt" ||
+    fail "Gerätetest im Upload-Ordner nicht bestanden"
+  ssh "$linux" "test -f ~/$remote_linux/build.log" ||
+    fail "kein Linux-Lauf für $version auf $linux – ohne --resume neu bauen"
+  step "Fortsetzen: Mac, Android und Gerätetest liegen schon vor"
+else
 # --- Linux, in the background -------------------------------------------
 step "Linux auf $linux starten"
-remote_linux="preppsuite-release/$version"
 ssh "$linux" "rm -rf ~/$remote_linux && mkdir -p ~/$remote_linux"
 scp -q "$archive" "$linux:$remote_linux/src.tar.gz"
 scp -q "$ROOT/tool/linux_release.sh" "$linux:$remote_linux/linux_release.sh"
@@ -174,13 +198,22 @@ grep -E "Ergebnis|Stand|Tests:" "$log/device.log" || true
 grep -q "BESTANDEN" "$log/device.log" || fail "Gerätetest nicht bestanden"
 # Bundles under build/ show up in Spotlight and can open the real data.
 find "$APP_DIR/build" \( -name '*.app' -o -name '*.appex' \) -prune -exec rm -rf {} +
+fi
 
 # --- Linux result ---------------------------------------------------------
 step "Auf Linux warten"
 # Two hours: since the translator (#184) the Linux machine also compiles
 # Mozilla's engine twice, for Linux and for Windows.
+keyring_told=false
 for _ in $(seq 1 720); do
   ssh "$linux" "grep -q ALLES-FERTIG ~/$remote_linux/build.log" && break
+  # The start test reads the desktop keyring, which waits for somebody to
+  # unlock it; linux_release.sh says so in its log rather than hanging.
+  if ! $keyring_told &&
+    ssh "$linux" "grep -q SCHLUESSELBUND-GESPERRT ~/$remote_linux/build.log"; then
+    echo "Linux wartet: Schlüsselbund auf $linux am Desktop entsperren."
+    keyring_told=true
+  fi
   sleep 10
 done
 ssh "$linux" "grep -q ALLES-FERTIG ~/$remote_linux/build.log" ||
