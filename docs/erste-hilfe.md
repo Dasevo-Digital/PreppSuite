@@ -412,6 +412,22 @@ es bleibt bei den bisherigen, bis sie richtig sind:
   Helfer Nase an Nase mit dem Verletzten, statt das Ohr über Mund und Nase
   zu halten und zur Brust zu sehen.
 
+**Zwischenlösung seit 17.10.2026.** Auch die zweite Neuzeichnung beider
+Tafeln im Stil der übrigen hatte diese Fehler noch (Atemkontrolle und
+Beatmung mit den Lippen an der Nase, beim Kind die Hände nah am Hals, beim
+Säugling im Ablauf zwei Handballen statt zwei Daumen; bei der
+Kopfverletzung wieder Nase an Nase; dazu „2 ×“ statt 5 erster
+Beatmungen, der Notruf erst nach einer Minute, 5–6 cm, „Headache“ und
+„nicht fest drücken“ bei Blutungen). Bis sie richtig gezeichnet sind,
+stehen an ihrer Stelle **schematische Tafeln**: flache Figuren statt
+Illustrationen, aber jedes Feld gegen die Anleitung gelesen und ohne
+Abweichung – 5 erste Atemspenden, Notruf früh über Lautsprecher, 30:2 und
+mit Kinderkurs 15:2, etwa 5 und 4 cm, Handballen auf der unteren
+Brustbeinhälfte, Zwei-Daumen-Griff; bei der Kopfverletzung Hände seitlich
+am Kopf, Ohr mit Abstand über Mund und Nase, Blick zur Brust. Sie sind
+von 3600 auf 1400 Pixel Breite verkleinert, damit sie im Speicher nicht
+das Fünffache der übrigen kosten.
+
 Eine Tafel ist ein WebP in voller Größe (`assets/first_aid/de/`,
 zusammen 11 MB), angelegt mit `tool/first_aid/infographic.py`.
 
