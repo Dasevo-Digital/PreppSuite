@@ -366,7 +366,9 @@ which never had it, and the upgrade dies. Naming it in `newColumns`
 makes the rebuild create it empty instead; its own branch then has to
 read `from == 8` rather than `from < 9`, because anything older already
 got it from the rebuild. `migration_to_8_test` and `migration_to_9_test`
-cover the two halves.
+cover the two halves. **The schema-15 branch rebuilds the table too**
+(`calories` became a real) and has the same list; a new column goes into
+both, which schema 26 found again (`migration_to_15_test`).
 
 **Every road a household travels goes through `snapshot_exchange.dart`.**
 The shared folder, the QR chain, the local handover *and the encrypted
@@ -480,7 +482,9 @@ clear it. `device_snapshot_test` holds both halves. Schema 23's three columns on
 medicine (`memberId`, `refillLeadDays`, `stockCountedAt`) follow the same
 rule, so an older device's edit cannot switch a prescription reminder off;
 so do schema 24's `species` and `chipNumber` on a card, so that it cannot
-turn a dog's card into a person's.
+turn a dog's card into a person's, and schema 26's `chargeEveryDays` and
+`chargeCheckedAt` on a device, so that it cannot switch its battery check
+off (#179).
 
 **Where a public authority publishes the interpretation, the app uses
 theirs.** Three live feeds now show a bare number, and a bare number is

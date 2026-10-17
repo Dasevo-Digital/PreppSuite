@@ -105,6 +105,8 @@ class _InventoryFilterSheetState extends State<InventoryFilterSheet> {
                       InventoryStatusFilter.expiring =>
                         l10n.inventoryExpiringSoon,
                       InventoryStatusFilter.lowStock => l10n.lowStockBadge,
+                      InventoryStatusFilter.chargeDue =>
+                        l10n.deviceChargeDueBadge,
                     }),
                   ),
               ],

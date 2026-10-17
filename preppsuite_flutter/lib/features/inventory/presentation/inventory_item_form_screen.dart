@@ -32,6 +32,8 @@ import '../application/package_nutrition.dart';
 import 'barcode_scanner_screen.dart';
 import 'photo_editor_screen.dart';
 import '../application/food_amount.dart';
+import '../application/charge_reminder_provider.dart';
+import '../application/device_charge.dart';
 import 'stored_photo_image.dart';
 
 /// A form filled in from somewhere other than an existing row — the
@@ -107,6 +109,11 @@ class _InventoryItemFormScreenState
   /// Days before the end to remind of a new prescription, or null for a
   /// reserve that nobody takes from (#150).
   int? _refillLeadDays;
+
+  /// Every how many days this device's battery is checked, or null for
+  /// none; and when it last was (#179).
+  int? _chargeEveryDays;
+  DateTime? _chargeCheckedAt;
   String? _barcode;
   String? _offProductId;
   String? _photoPath;
@@ -140,6 +147,8 @@ class _InventoryItemFormScreenState
     _foodGroup?.name,
     _memberId,
     _refillLeadDays,
+    _chargeEveryDays,
+    _chargeCheckedAt?.toIso8601String(),
     _barcode,
     _offProductId,
     _photoPath,
@@ -152,6 +161,14 @@ class _InventoryItemFormScreenState
   /// it is for: a medicine, and an animal's food (#151).
   bool get _takenDaily =>
       _petFood || _category == InventoryItemCategory.medical;
+
+  /// What may have a battery to look after: anything that is not eaten
+  /// or drunk (#179).
+  bool get _mayHaveBattery => !const {
+    InventoryItemCategory.food,
+    InventoryItemCategory.water,
+    InventoryItemCategory.petFood,
+  }.contains(_category);
   void _onFieldChanged() {
     if (mounted) setState(() {});
   }
@@ -257,6 +274,8 @@ class _InventoryItemFormScreenState
     _foodGroup = supplyGroupFromName(existing?.foodGroup);
     _memberId = existing?.memberId;
     _refillLeadDays = existing?.refillLeadDays;
+    _chargeEveryDays = existing?.chargeEveryDays;
+    _chargeCheckedAt = existing?.chargeCheckedAt?.toLocal();
     _barcode = existing?.barcode;
     _offProductId = existing?.offProductId;
     _photoPath = existing?.photoPath;
@@ -309,6 +328,19 @@ class _InventoryItemFormScreenState
       lastDate: DateTime(2100),
     );
     if (picked != null) setState(() => _expirationDate = picked);
+  }
+
+  Future<void> _pickChargeCheckedAt() async {
+    final today = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _chargeCheckedAt ?? today,
+      firstDate: DateTime(2000),
+      // A check is something that happened. Tomorrow's would put the next
+      // one off by a day nobody has earned.
+      lastDate: today,
+    );
+    if (picked != null) setState(() => _chargeCheckedAt = picked);
   }
 
   Future<void> _scanBarcode() async {
@@ -610,6 +642,10 @@ class _InventoryItemFormScreenState
       final refillLeadDays = medical && dailyDose != null
           ? _refillLeadDays
           : null;
+      // Only where there can be a battery. A check left behind on a row
+      // whose category became food would remind somebody to charge rice.
+      final chargeEveryDays = _mayHaveBattery ? _chargeEveryDays : null;
+      final chargeCheckedAt = chargeEveryDays == null ? null : _chargeCheckedAt;
       final notes = _notesController.text.trim();
       final package = ItemPackage.from(
         _packageNameController.text,
@@ -637,6 +673,8 @@ class _InventoryItemFormScreenState
           nutrition: nutrition,
           memberId: memberId,
           refillLeadDays: refillLeadDays,
+          chargeEveryDays: chargeEveryDays,
+          chargeCheckedAt: chargeCheckedAt,
         );
       } else {
         await controller.addItem(
@@ -658,6 +696,8 @@ class _InventoryItemFormScreenState
           nutrition: nutrition,
           memberId: memberId,
           refillLeadDays: refillLeadDays,
+          chargeEveryDays: chargeEveryDays,
+          chargeCheckedAt: chargeCheckedAt,
         );
       }
 
@@ -1078,6 +1118,23 @@ class _InventoryItemFormScreenState
                               setState(() => _memberId = value),
                         ),
                       ],
+                      if (_mayHaveBattery) ...[
+                        const SizedBox(height: 16),
+                        _ChargeSection(
+                          everyDays: _chargeEveryDays,
+                          checkedAt: _chargeCheckedAt,
+                          onEveryDays: (days) => setState(() {
+                            _chargeEveryDays = days;
+                            // Switched on while holding the device: it
+                            // counts from today unless somebody says
+                            // otherwise.
+                            if (days != null) {
+                              _chargeCheckedAt ??= DateTime.now();
+                            }
+                          }),
+                          onPickCheckedAt: _pickChargeCheckedAt,
+                        ),
+                      ],
                       if (_category == InventoryItemCategory.food) ...[
                         const SizedBox(height: 24),
                         Text(
@@ -1235,6 +1292,88 @@ class _InventoryItemFormScreenState
 /// household's choice of how long a new prescription takes it, not a
 /// figure about the medicine.
 const refillLeadChoices = [7, 14, 21, 28];
+
+/// A device's battery check in the form (#179): on or off, how often, and
+/// when it was last done -- with when the next is due spelled out, so the
+/// arithmetic is checked by whoever typed the figures.
+class _ChargeSection extends StatelessWidget {
+  const _ChargeSection({
+    required this.everyDays,
+    required this.checkedAt,
+    required this.onEveryDays,
+    required this.onPickCheckedAt,
+  });
+
+  final int? everyDays;
+  final DateTime? checkedAt;
+  final ValueChanged<int?> onEveryDays;
+  final VoidCallback onPickCheckedAt;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final every = everyDays;
+    final checked = checkedAt;
+    final days = every == null
+        ? null
+        : ChargeCheck(lastChecked: checked, everyDays: every).daysUntilDue();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          secondary: const Icon(Icons.battery_charging_full),
+          title: Text(l10n.deviceChargeLabel),
+          subtitle: Text(l10n.deviceChargeHint),
+          value: every != null,
+          onChanged: (on) => onEveryDays(on ? defaultDeviceChargeDays : null),
+        ),
+        if (every != null) ...[
+          DropdownButtonFormField<int>(
+            isExpanded: true,
+            initialValue: every,
+            decoration: InputDecoration(labelText: l10n.deviceChargeEvery),
+            items: [
+              for (final interval in {...deviceChargeIntervals, every})
+                DropdownMenuItem(
+                  value: interval,
+                  child: Text(l10n.chargeReminderInterval(interval)),
+                ),
+            ],
+            onChanged: (value) {
+              if (value != null) onEveryDays(value);
+            },
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.deviceChargeLastChecked),
+            subtitle: Text(
+              checked == null
+                  ? l10n.overviewChargeNeverChecked
+                  : MaterialLocalizations.of(context).formatMediumDate(checked),
+            ),
+            trailing: const Icon(Icons.edit_calendar_outlined),
+            onTap: onPickCheckedAt,
+          ),
+          if (days != null)
+            Text(
+              switch (days) {
+                0 => l10n.overviewChargeDueToday,
+                final int left when left < 0 => l10n.overviewChargeOverdue(
+                  -left,
+                ),
+                final int left => l10n.overviewChargeNext(left),
+              },
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: days <= 0 ? theme.colorScheme.error : null,
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+}
 
 /// Whose medicine this is (#150), from the household's emergency cards.
 ///

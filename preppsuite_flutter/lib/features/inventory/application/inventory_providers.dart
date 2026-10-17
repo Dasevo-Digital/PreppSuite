@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_database_providers.dart';
 import '../../../local_db/database.dart';
+import 'device_charge.dart';
 
 export '../../../core/app_database_providers.dart';
 
@@ -27,6 +28,9 @@ final inventoryAttentionCountProvider = Provider.autoDispose
             item.minQuantity != null && item.quantity < item.minQuantity!;
         final isExpired =
             item.expirationDate != null && item.expirationDate!.isBefore(now);
-        return isLowStock || isExpired;
+        // A device whose battery check has come round wants looking at
+        // as much as an empty shelf does (#179).
+        final chargeDue = deviceChargeCheck(item)?.isDue(now: now) ?? false;
+        return isLowStock || isExpired || chargeDue;
       }).length;
     });

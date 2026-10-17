@@ -39,6 +39,7 @@ import 'package:intl/intl.dart';
 import '../../../core/error_text.dart';
 import '../../../core/save_file.dart';
 import 'stored_photo_image.dart';
+import '../application/device_charge.dart';
 
 enum _InventoryMenuAction {
   consumeByScan,
@@ -411,6 +412,7 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
       expiryTitle: (item) => l10n.calendarExpiryTitle(item.name),
       chargeTitle: l10n.chargeReminderTitle,
       chargeDescription: l10n.chargeReminderBody,
+      deviceChargeTitle: (item) => l10n.deviceChargeReminderBody(item.name),
     );
     if (calendar == null) {
       messenger.showSnackBar(
@@ -507,6 +509,11 @@ class _InventoryTile extends ConsumerWidget {
         false;
 
     final photoPath = item.photoPath;
+    // Read from the row itself: a watch here would be one per row (see
+    // "Was eine Liste je Zeile kostet").
+    final charge = deviceChargeCheck(item);
+    final chargeDays = charge?.daysUntilDue(now: now);
+    final chargeDue = charge?.isDue(now: now) ?? false;
 
     return ListTile(
       leading: photoPath != null
@@ -531,13 +538,41 @@ class _InventoryTile extends ConsumerWidget {
               item.storageLocation,
             ].join(' · '),
           ),
-          if (isExpired || isLowStock)
+          if (charge != null && !chargeDue)
+            Text(
+              l10n.deviceChargeStatus(
+                chargeDays == null
+                    ? l10n.overviewChargeNeverChecked
+                    : l10n.overviewChargeNext(chargeDays),
+              ),
+            ),
+          if (isExpired || isLowStock || chargeDue)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Wrap(
                 spacing: 6,
                 runSpacing: 4,
                 children: [
+                  if (chargeDue) ...[
+                    Chip(
+                      avatar: const Icon(Icons.battery_alert_outlined),
+                      label: Text(l10n.deviceChargeDueBadge),
+                      visualDensity: VisualDensity.compact,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.errorContainer,
+                    ),
+                    // Done at the shelf, without opening the form: the
+                    // check is charging it, not editing it.
+                    ActionChip(
+                      avatar: const Icon(Icons.check),
+                      label: Text(l10n.overviewChargeDone),
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => ref
+                          .read(inventoryControllerProvider(item.householdId))
+                          .markCharged(item),
+                    ),
+                  ],
                   if (isExpired)
                     Chip(
                       label: Text(l10n.expiredBadge),

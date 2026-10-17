@@ -34,7 +34,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 25;
+  static const currentSchemaVersion = 26;
 
   AppDatabase() : super(_openConnection()) {
     OpenDatabases.track(this);
@@ -236,6 +236,8 @@ class AppDatabase extends _$AppDatabase {
               inventoryItems.memberId,
               inventoryItems.refillLeadDays,
               inventoryItems.stockCountedAt,
+              inventoryItems.chargeEveryDays,
+              inventoryItems.chargeCheckedAt,
             ],
           ),
         );
@@ -381,6 +383,8 @@ class AppDatabase extends _$AppDatabase {
                 inventoryItems.memberId,
                 inventoryItems.refillLeadDays,
                 inventoryItems.stockCountedAt,
+                inventoryItems.chargeEveryDays,
+                inventoryItems.chargeCheckedAt,
               ],
             ),
           );
@@ -594,6 +598,25 @@ class AppDatabase extends _$AppDatabase {
           'CREATE INDEX IF NOT EXISTS neighbour_offers_household '
           'ON neighbour_offers (household_id)',
         );
+      }
+      if (from < 26) {
+        // A battery to look after, per device (#179). Null everywhere
+        // after the upgrade, and null is "no battery here", which is what
+        // every row so far has been treated as.
+        if (!await _hasTable('inventory_items')) {
+          await m.createTable(inventoryItems);
+        } else {
+          await _addColumnOnce(
+            m,
+            inventoryItems,
+            inventoryItems.chargeEveryDays,
+          );
+          await _addColumnOnce(
+            m,
+            inventoryItems,
+            inventoryItems.chargeCheckedAt,
+          );
+        }
       }
     },
   );

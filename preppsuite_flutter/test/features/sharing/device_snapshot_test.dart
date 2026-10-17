@@ -185,6 +185,64 @@ void main() {
       });
     });
 
+    group('a device\'s battery check (#179)', () {
+      final checked = DateTime.utc(2026, 10, 17);
+
+      InventoryItem powerBank({int? every = 30}) => InventoryItem(
+        clientId: 'bank',
+        householdId: 'household-1',
+        name: 'Powerbank',
+        category: 'energy',
+        quantity: 1,
+        unit: 'Stück',
+        storageLocation: 'Flur',
+        chargeEveryDays: every,
+        chargeCheckedAt: checked,
+        updatedAt: DateTime.utc(2026, 10, 17, 12),
+        dirty: true,
+      );
+
+      test('travels between devices', () {
+        final companion = decodeInventoryItem(
+          encodeInventoryItem(powerBank()),
+        )!;
+        expect(companion.chargeEveryDays.value, 30);
+        expect(companion.chargeCheckedAt.value, checked);
+      });
+
+      test('a check switched off is written as off', () {
+        final json = encodeInventoryItem(powerBank(every: null));
+        expect(json.containsKey('chargeEveryDays'), isTrue);
+        expect(
+          decodeInventoryItem(json)!.chargeEveryDays,
+          const Value<int?>(null),
+        );
+      });
+
+      // An app before schema 26 writes neither, also for a row it edited
+      // and wrote back. Read as null, that edit would switch the check off.
+      test('an older device leaves it alone', () async {
+        final db = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(db.close);
+        await db.upsertInventoryItem(powerBank().toCompanion(false));
+
+        final fromOlder = Map.of(encodeInventoryItem(powerBank()))
+          ..remove('chargeEveryDays')
+          ..remove('chargeCheckedAt')
+          ..['storageLocation'] = 'Keller'
+          ..['updatedAt'] = '2026-10-18T00:00:00.000Z';
+        final companion = decodeInventoryItem(fromOlder)!;
+        expect(companion.chargeEveryDays.present, isFalse);
+        await db.into(db.inventoryItems).insertOnConflictUpdate(companion);
+
+        final stored =
+            (await db.watchInventoryItems('household-1').first).single;
+        expect(stored.storageLocation, 'Keller');
+        expect(stored.chargeEveryDays, 30);
+        expect(stored.chargeCheckedAt?.toUtc(), checked);
+      });
+    });
+
     test('a row that arrived from elsewhere is not marked for publishing', () {
       // Otherwise every device would republish everything it received on
       // the next run, forever, and the folder would never go quiet.

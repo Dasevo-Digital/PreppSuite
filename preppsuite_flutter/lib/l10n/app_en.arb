@@ -5558,5 +5558,49 @@
   "morseProsignEndOfWork": "End of work",
   "morseSource": "Source: Recommendation ITU-R M.1677-1, “International Morse code” (2009).",
   "morseDotSpoken": "short",
-  "morseDashSpoken": "long"
+  "morseDashSpoken": "long",
+  "deviceChargeLabel": "Check the battery regularly",
+  "deviceChargeHint": "Charge and test it. The overview and the list show when it is due again.",
+  "deviceChargeEvery": "Check",
+  "deviceChargeLastChecked": "Last charged and tested",
+  "deviceChargeDueBadge": "Battery due",
+  "deviceChargeStatus": "Battery · {detail}",
+  "@deviceChargeStatus": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceChargeOverviewDue": "{count, plural, =1{Battery due: {name}} other{Battery due on {count} devices}}",
+  "@deviceChargeOverviewDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceChargeOverviewNext": "Battery {name} · {detail}",
+  "@deviceChargeOverviewNext": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceChargeReminderTitle": "Check the battery",
+  "deviceChargeReminderBody": "{name}: charge and test it.",
+  "@deviceChargeReminderBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

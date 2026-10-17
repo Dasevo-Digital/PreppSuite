@@ -1,4 +1,4 @@
-/// The stock's expiry dates and the battery check, as a calendar file.
+/// The stock's expiry dates and the battery checks, as a calendar file.
 ///
 /// The reminders the app schedules itself live on this one device and in
 /// nobody else's day. A household calendar is where the other people in
@@ -17,6 +17,7 @@ import 'dart:convert';
 
 import '../../../local_db/database.dart';
 import 'charge_reminder_provider.dart';
+import 'device_charge.dart';
 import 'expiry_reminder_planner.dart';
 
 /// Builds the calendar, or null when there is nothing to put in it.
@@ -33,6 +34,9 @@ String? buildInventoryCalendar({
   required String Function(InventoryItem item) expiryTitle,
   required String chargeTitle,
   required String chargeDescription,
+
+  /// What a device's own battery check is called in the calendar (#179).
+  required String Function(InventoryItem item) deviceChargeTitle,
   DateTime? now,
 }) {
   final clock = now ?? DateTime.now();
@@ -73,6 +77,26 @@ String? buildInventoryCalendar({
       'RRULE:FREQ=DAILY;INTERVAL=${charge.everyDays}',
       'SUMMARY:${_text(chargeTitle)}',
       'DESCRIPTION:${_text(chargeDescription)}',
+      'TRANSP:TRANSPARENT',
+      ..._alarm(0),
+      'END:VEVENT',
+    ]);
+  }
+
+  // Each device with a check of its own, repeating at its interval from
+  // the day it is next due -- the same shape as the household's above.
+  for (final device in deviceCharges(items, now: clock)) {
+    final due = device.check.dueAt?.toLocal();
+    if (due == null) continue;
+    final day = DateTime(due.year, due.month, due.day);
+    events.add([
+      'BEGIN:VEVENT',
+      'UID:${device.item.clientId}-charge@preppsuite',
+      'DTSTAMP:$stamp',
+      'DTSTART;VALUE=DATE:${_date(day)}',
+      'DTEND;VALUE=DATE:${_date(day.add(const Duration(days: 1)))}',
+      'RRULE:FREQ=DAILY;INTERVAL=${device.check.everyDays}',
+      'SUMMARY:${_text(deviceChargeTitle(device.item))}',
       'TRANSP:TRANSPARENT',
       ..._alarm(0),
       'END:VEVENT',

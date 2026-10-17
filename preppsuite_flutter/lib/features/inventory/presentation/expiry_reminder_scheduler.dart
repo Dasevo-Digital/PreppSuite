@@ -10,6 +10,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/expiry_reminder_planner.dart';
 import '../application/expiry_reminder_provider.dart';
 import '../application/inventory_providers.dart';
+import '../application/device_charge.dart';
 import '../application/refill_reminder_planner.dart';
 
 /// Invisible widget that keeps the scheduled expiry reminders -- and the
@@ -72,6 +73,7 @@ class _ExpiryReminderSchedulerState
     if (!enabled) {
       await NotificationService.instance.cancelExpiryReminders();
       await NotificationService.instance.cancelRefillReminders();
+      await NotificationService.instance.cancelDeviceChargeReminders();
       return;
     }
 
@@ -93,11 +95,24 @@ class _ExpiryReminderSchedulerState
       ),
     );
 
+    // Then the devices whose battery is due (#179), from the same share
+    // and for the same reason: a radio that will not switch on in the
+    // dark is worth more than the sixtieth jar of jam.
+    final charges = planDeviceChargeReminders(
+      items: items,
+      now: now,
+    ).take(maxScheduledExpiryReminders - refills.length).toList();
+    await NotificationService.instance.scheduleDeviceChargeReminders(
+      charges,
+      title: l10n.deviceChargeReminderTitle,
+      body: (reminder) => l10n.deviceChargeReminderBody(reminder.itemName),
+    );
+
     final reminders = planExpiryReminders(
       items: items,
       now: now,
       leadDays: leadDays,
-      limit: maxScheduledExpiryReminders - refills.length,
+      limit: maxScheduledExpiryReminders - refills.length - charges.length,
     );
 
     await NotificationService.instance.scheduleExpiryReminders(

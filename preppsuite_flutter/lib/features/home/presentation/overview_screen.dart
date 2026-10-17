@@ -24,6 +24,8 @@ import '../../tour/presentation/tour_offer_card.dart';
 import '../application/home_overview.dart';
 import '../application/shell_layout.dart';
 import 'operational_briefing_card.dart';
+import '../../inventory/application/device_charge.dart';
+import '../../inventory/application/inventory_controller.dart';
 
 /// The first thing the app shows: what state this household is in.
 ///
@@ -51,6 +53,7 @@ class OverviewScreen extends ConsumerWidget {
     final cards = <Widget>[
       _AttentionCard(
         overview: overview,
+        items: items,
         onOpen: () => onNavigate(ShellDestination.inventory),
       ),
       _WarningCard(
@@ -468,9 +471,14 @@ class _Meter extends StatelessWidget {
 
 /// What is expired, running low or about to run out.
 class _AttentionCard extends ConsumerWidget {
-  const _AttentionCard({required this.overview, required this.onOpen});
+  const _AttentionCard({
+    required this.overview,
+    required this.items,
+    required this.onOpen,
+  });
 
   final InventoryOverview overview;
+  final List<InventoryItem> items;
   final VoidCallback onOpen;
 
   @override
@@ -483,14 +491,28 @@ class _AttentionCard extends ConsumerWidget {
     // power banks that arrived and was dismissed. Two answers means one of
     // them stops being read.
     final check = ref.watch(chargeCheckProvider);
-    final wanted = overview.needsAttention > 0 || check.isDue();
+    // And the devices that carry a check of their own (#179), beside the
+    // household's one for everything else.
+    final devices = deviceCharges(items);
+    final devicesDue = devices.where((d) => d.isDue()).length;
+    final wanted =
+        overview.needsAttention > 0 || check.isDue() || devicesDue > 0;
+    final footer = [
+      if (!check.isOff) _ChargeRow(check: check),
+      if (devices.isNotEmpty) _DeviceChargeRow(devices: devices),
+    ];
 
     return _OverviewCard(
       icon: wanted ? Icons.error_outline : Icons.check_circle_outline,
       title: l10n.overviewAttentionTitle,
       tone: wanted ? theme.colorScheme.error : null,
       onOpen: onOpen,
-      footer: check.isOff ? null : _ChargeRow(check: check),
+      footer: footer.isEmpty
+          ? null
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: footer,
+            ),
       child: overview.isEmpty
           ? Text(l10n.overviewNothingStored, style: theme.textTheme.bodyMedium)
           : Wrap(
@@ -563,6 +585,60 @@ class _ChargeRow extends ConsumerWidget {
           onPressed: () => ref.read(chargeCheckProvider.notifier).markChecked(),
           child: Text(l10n.overviewChargeDone),
         ),
+      ],
+    );
+  }
+}
+
+/// The devices with a battery check of their own, said in one line: the
+/// one that is due or the number that are, or else the next one coming.
+class _DeviceChargeRow extends ConsumerWidget {
+  const _DeviceChargeRow({required this.devices});
+
+  /// Most urgent first; see [deviceCharges].
+  final List<DeviceCharge> devices;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final due = [
+      for (final device in devices)
+        if (device.isDue()) device,
+    ];
+    final first = devices.first;
+    final days = first.daysUntilDue();
+    final text = due.isNotEmpty
+        ? l10n.deviceChargeOverviewDue(due.length, due.first.item.name)
+        : l10n.deviceChargeOverviewNext(
+            first.item.name,
+            days == null
+                ? l10n.overviewChargeNeverChecked
+                : l10n.overviewChargeNext(days),
+          );
+
+    return Row(
+      children: [
+        Icon(
+          due.isNotEmpty
+              ? Icons.battery_alert_outlined
+              : Icons.battery_charging_full,
+          size: 18,
+          color: due.isNotEmpty
+              ? theme.colorScheme.error
+              : theme.colorScheme.primary,
+        ),
+        const SizedBox(width: 8),
+        Expanded(child: Text(text, style: theme.textTheme.bodySmall)),
+        // One device can be confirmed from here; several are a job for
+        // the list, which the card opens.
+        if (due.length == 1)
+          TextButton(
+            onPressed: () => ref
+                .read(inventoryControllerProvider(due.single.item.householdId))
+                .markCharged(due.single.item),
+            child: Text(l10n.overviewChargeDone),
+          ),
       ],
     );
   }

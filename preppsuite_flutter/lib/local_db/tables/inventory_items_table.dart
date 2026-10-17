@@ -155,6 +155,24 @@ class InventoryItems extends Table {
   /// daily use counted from the rename would read as full again (#150).
   DateTimeColumn get stockCountedAt => dateTime().nullable()();
 
+  /// Every how many days this device's battery is to be charged and
+  /// tested -- or null, which is every row that has no battery to look
+  /// after and is what every row starts as (#179).
+  ///
+  /// Per row, beside the household's one reminder for "the equipment".
+  /// A power bank, a hand-crank radio and a head torch drain at different
+  /// speeds, and one interval for all of them is either too often for the
+  /// radio or too seldom for the power bank.
+  IntColumn get chargeEveryDays => integer().nullable()();
+
+  /// When somebody last confirmed that this battery was charged and
+  /// working, or null while nobody has. The next check is due
+  /// [chargeEveryDays] after it, in calendar days.
+  ///
+  /// Not [updatedAt], for the same reason [stockCountedAt] is not:
+  /// renaming a torch does not charge it.
+  DateTimeColumn get chargeCheckedAt => dateTime().nullable()();
+
   TextColumn get notes => text().nullable()();
 
   /// Path to a locally-stored photo of the item (see

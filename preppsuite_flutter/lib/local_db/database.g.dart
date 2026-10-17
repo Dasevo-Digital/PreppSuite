@@ -272,6 +272,29 @@ class $InventoryItemsTable extends InventoryItems
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _chargeEveryDaysMeta = const VerificationMeta(
+    'chargeEveryDays',
+  );
+  @override
+  late final GeneratedColumn<int> chargeEveryDays = GeneratedColumn<int>(
+    'charge_every_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _chargeCheckedAtMeta = const VerificationMeta(
+    'chargeCheckedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> chargeCheckedAt =
+      GeneratedColumn<DateTime>(
+        'charge_checked_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _notesMeta = const VerificationMeta('notes');
   @override
   late final GeneratedColumn<String> notes = GeneratedColumn<String>(
@@ -353,6 +376,8 @@ class $InventoryItemsTable extends InventoryItems
     memberId,
     refillLeadDays,
     stockCountedAt,
+    chargeEveryDays,
+    chargeCheckedAt,
     notes,
     photoPath,
     updatedAt,
@@ -565,6 +590,24 @@ class $InventoryItemsTable extends InventoryItems
         ),
       );
     }
+    if (data.containsKey('charge_every_days')) {
+      context.handle(
+        _chargeEveryDaysMeta,
+        chargeEveryDays.isAcceptableOrUnknown(
+          data['charge_every_days']!,
+          _chargeEveryDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('charge_checked_at')) {
+      context.handle(
+        _chargeCheckedAtMeta,
+        chargeCheckedAt.isAcceptableOrUnknown(
+          data['charge_checked_at']!,
+          _chargeCheckedAtMeta,
+        ),
+      );
+    }
     if (data.containsKey('notes')) {
       context.handle(
         _notesMeta,
@@ -701,6 +744,14 @@ class $InventoryItemsTable extends InventoryItems
       stockCountedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}stock_counted_at'],
+      ),
+      chargeEveryDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}charge_every_days'],
+      ),
+      chargeCheckedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}charge_checked_at'],
       ),
       notes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -878,6 +929,24 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   /// changes. Renaming a medicine does not recount it, and a pack in
   /// daily use counted from the rename would read as full again (#150).
   final DateTime? stockCountedAt;
+
+  /// Every how many days this device's battery is to be charged and
+  /// tested -- or null, which is every row that has no battery to look
+  /// after and is what every row starts as (#179).
+  ///
+  /// Per row, beside the household's one reminder for "the equipment".
+  /// A power bank, a hand-crank radio and a head torch drain at different
+  /// speeds, and one interval for all of them is either too often for the
+  /// radio or too seldom for the power bank.
+  final int? chargeEveryDays;
+
+  /// When somebody last confirmed that this battery was charged and
+  /// working, or null while nobody has. The next check is due
+  /// [chargeEveryDays] after it, in calendar days.
+  ///
+  /// Not [updatedAt], for the same reason [stockCountedAt] is not:
+  /// renaming a torch does not charge it.
+  final DateTime? chargeCheckedAt;
   final String? notes;
 
   /// Path to a locally-stored photo of the item (see
@@ -914,6 +983,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     this.memberId,
     this.refillLeadDays,
     this.stockCountedAt,
+    this.chargeEveryDays,
+    this.chargeCheckedAt,
     this.notes,
     this.photoPath,
     required this.updatedAt,
@@ -980,6 +1051,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     }
     if (!nullToAbsent || stockCountedAt != null) {
       map['stock_counted_at'] = Variable<DateTime>(stockCountedAt);
+    }
+    if (!nullToAbsent || chargeEveryDays != null) {
+      map['charge_every_days'] = Variable<int>(chargeEveryDays);
+    }
+    if (!nullToAbsent || chargeCheckedAt != null) {
+      map['charge_checked_at'] = Variable<DateTime>(chargeCheckedAt);
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -1055,6 +1132,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       stockCountedAt: stockCountedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(stockCountedAt),
+      chargeEveryDays: chargeEveryDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(chargeEveryDays),
+      chargeCheckedAt: chargeCheckedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(chargeCheckedAt),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
           : Value(notes),
@@ -1101,6 +1184,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       memberId: serializer.fromJson<String?>(json['memberId']),
       refillLeadDays: serializer.fromJson<int?>(json['refillLeadDays']),
       stockCountedAt: serializer.fromJson<DateTime?>(json['stockCountedAt']),
+      chargeEveryDays: serializer.fromJson<int?>(json['chargeEveryDays']),
+      chargeCheckedAt: serializer.fromJson<DateTime?>(json['chargeCheckedAt']),
       notes: serializer.fromJson<String?>(json['notes']),
       photoPath: serializer.fromJson<String?>(json['photoPath']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -1136,6 +1221,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'memberId': serializer.toJson<String?>(memberId),
       'refillLeadDays': serializer.toJson<int?>(refillLeadDays),
       'stockCountedAt': serializer.toJson<DateTime?>(stockCountedAt),
+      'chargeEveryDays': serializer.toJson<int?>(chargeEveryDays),
+      'chargeCheckedAt': serializer.toJson<DateTime?>(chargeCheckedAt),
       'notes': serializer.toJson<String?>(notes),
       'photoPath': serializer.toJson<String?>(photoPath),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -1169,6 +1256,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     Value<String?> memberId = const Value.absent(),
     Value<int?> refillLeadDays = const Value.absent(),
     Value<DateTime?> stockCountedAt = const Value.absent(),
+    Value<int?> chargeEveryDays = const Value.absent(),
+    Value<DateTime?> chargeCheckedAt = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<String?> photoPath = const Value.absent(),
     DateTime? updatedAt,
@@ -1209,6 +1298,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     stockCountedAt: stockCountedAt.present
         ? stockCountedAt.value
         : this.stockCountedAt,
+    chargeEveryDays: chargeEveryDays.present
+        ? chargeEveryDays.value
+        : this.chargeEveryDays,
+    chargeCheckedAt: chargeCheckedAt.present
+        ? chargeCheckedAt.value
+        : this.chargeCheckedAt,
     notes: notes.present ? notes.value : this.notes,
     photoPath: photoPath.present ? photoPath.value : this.photoPath,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -1267,6 +1362,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       stockCountedAt: data.stockCountedAt.present
           ? data.stockCountedAt.value
           : this.stockCountedAt,
+      chargeEveryDays: data.chargeEveryDays.present
+          ? data.chargeEveryDays.value
+          : this.chargeEveryDays,
+      chargeCheckedAt: data.chargeCheckedAt.present
+          ? data.chargeCheckedAt.value
+          : this.chargeCheckedAt,
       notes: data.notes.present ? data.notes.value : this.notes,
       photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -1302,6 +1403,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ..write('memberId: $memberId, ')
           ..write('refillLeadDays: $refillLeadDays, ')
           ..write('stockCountedAt: $stockCountedAt, ')
+          ..write('chargeEveryDays: $chargeEveryDays, ')
+          ..write('chargeCheckedAt: $chargeCheckedAt, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1337,6 +1440,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     memberId,
     refillLeadDays,
     stockCountedAt,
+    chargeEveryDays,
+    chargeCheckedAt,
     notes,
     photoPath,
     updatedAt,
@@ -1371,6 +1476,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           other.memberId == this.memberId &&
           other.refillLeadDays == this.refillLeadDays &&
           other.stockCountedAt == this.stockCountedAt &&
+          other.chargeEveryDays == this.chargeEveryDays &&
+          other.chargeCheckedAt == this.chargeCheckedAt &&
           other.notes == this.notes &&
           other.photoPath == this.photoPath &&
           other.updatedAt == this.updatedAt &&
@@ -1403,6 +1510,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<String?> memberId;
   final Value<int?> refillLeadDays;
   final Value<DateTime?> stockCountedAt;
+  final Value<int?> chargeEveryDays;
+  final Value<DateTime?> chargeCheckedAt;
   final Value<String?> notes;
   final Value<String?> photoPath;
   final Value<DateTime> updatedAt;
@@ -1434,6 +1543,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.memberId = const Value.absent(),
     this.refillLeadDays = const Value.absent(),
     this.stockCountedAt = const Value.absent(),
+    this.chargeEveryDays = const Value.absent(),
+    this.chargeCheckedAt = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1466,6 +1577,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.memberId = const Value.absent(),
     this.refillLeadDays = const Value.absent(),
     this.stockCountedAt = const Value.absent(),
+    this.chargeEveryDays = const Value.absent(),
+    this.chargeCheckedAt = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
     required DateTime updatedAt,
@@ -1505,6 +1618,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<String>? memberId,
     Expression<int>? refillLeadDays,
     Expression<DateTime>? stockCountedAt,
+    Expression<int>? chargeEveryDays,
+    Expression<DateTime>? chargeCheckedAt,
     Expression<String>? notes,
     Expression<String>? photoPath,
     Expression<DateTime>? updatedAt,
@@ -1537,6 +1652,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       if (memberId != null) 'member_id': memberId,
       if (refillLeadDays != null) 'refill_lead_days': refillLeadDays,
       if (stockCountedAt != null) 'stock_counted_at': stockCountedAt,
+      if (chargeEveryDays != null) 'charge_every_days': chargeEveryDays,
+      if (chargeCheckedAt != null) 'charge_checked_at': chargeCheckedAt,
       if (notes != null) 'notes': notes,
       if (photoPath != null) 'photo_path': photoPath,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1571,6 +1688,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Value<String?>? memberId,
     Value<int?>? refillLeadDays,
     Value<DateTime?>? stockCountedAt,
+    Value<int?>? chargeEveryDays,
+    Value<DateTime?>? chargeCheckedAt,
     Value<String?>? notes,
     Value<String?>? photoPath,
     Value<DateTime>? updatedAt,
@@ -1603,6 +1722,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       memberId: memberId ?? this.memberId,
       refillLeadDays: refillLeadDays ?? this.refillLeadDays,
       stockCountedAt: stockCountedAt ?? this.stockCountedAt,
+      chargeEveryDays: chargeEveryDays ?? this.chargeEveryDays,
+      chargeCheckedAt: chargeCheckedAt ?? this.chargeCheckedAt,
       notes: notes ?? this.notes,
       photoPath: photoPath ?? this.photoPath,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1687,6 +1808,12 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     if (stockCountedAt.present) {
       map['stock_counted_at'] = Variable<DateTime>(stockCountedAt.value);
     }
+    if (chargeEveryDays.present) {
+      map['charge_every_days'] = Variable<int>(chargeEveryDays.value);
+    }
+    if (chargeCheckedAt.present) {
+      map['charge_checked_at'] = Variable<DateTime>(chargeCheckedAt.value);
+    }
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
@@ -1735,6 +1862,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
           ..write('memberId: $memberId, ')
           ..write('refillLeadDays: $refillLeadDays, ')
           ..write('stockCountedAt: $stockCountedAt, ')
+          ..write('chargeEveryDays: $chargeEveryDays, ')
+          ..write('chargeCheckedAt: $chargeCheckedAt, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
           ..write('updatedAt: $updatedAt, ')

@@ -3942,5 +3942,49 @@
   "morseProsignEndOfWork": "Verkehrsende",
   "morseSource": "Quelle: Empfehlung ITU-R M.1677-1 „Internationaler Morsecode“ (2009).",
   "morseDotSpoken": "kurz",
-  "morseDashSpoken": "lang"
+  "morseDashSpoken": "lang",
+  "deviceChargeLabel": "Akku regelmäßig prüfen",
+  "deviceChargeHint": "Aufladen und testen. Die Übersicht und die Liste zeigen, wann es wieder so weit ist.",
+  "deviceChargeEvery": "Prüfen",
+  "deviceChargeLastChecked": "Zuletzt geladen und geprüft",
+  "deviceChargeDueBadge": "Akku fällig",
+  "deviceChargeStatus": "Akku · {detail}",
+  "@deviceChargeStatus": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceChargeOverviewDue": "{count, plural, =1{Akku fällig: {name}} other{Akku fällig bei {count} Geräten}}",
+  "@deviceChargeOverviewDue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceChargeOverviewNext": "Akku {name} · {detail}",
+  "@deviceChargeOverviewNext": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceChargeReminderTitle": "Akku prüfen",
+  "deviceChargeReminderBody": "{name}: aufladen und testen.",
+  "@deviceChargeReminderBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

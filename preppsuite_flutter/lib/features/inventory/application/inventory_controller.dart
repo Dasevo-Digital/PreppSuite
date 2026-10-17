@@ -53,6 +53,13 @@ class InventoryController {
     /// Days before a medicine in daily use runs out to remind of a new
     /// prescription, or null for none; see the column.
     int? refillLeadDays,
+
+    /// Every how many days this device's battery is checked, or null for
+    /// a row without one (#179).
+    int? chargeEveryDays,
+
+    /// When it was last checked.
+    DateTime? chargeCheckedAt,
   }) async {
     final now = DateTime.now().toUtc();
     await _db.upsertInventoryItem(
@@ -74,6 +81,8 @@ class InventoryController {
         memberId: Value(memberId),
         refillLeadDays: Value(refillLeadDays),
         stockCountedAt: Value(now),
+        chargeEveryDays: Value(chargeEveryDays),
+        chargeCheckedAt: Value(chargeCheckedAt?.toUtc()),
         notes: Value(notes),
         barcode: Value(barcode),
         offProductId: Value(offProductId),
@@ -120,6 +129,13 @@ class InventoryController {
     /// Days before a medicine in daily use runs out to remind of a new
     /// prescription, or null for none; see the column.
     int? refillLeadDays,
+
+    /// Every how many days this device's battery is checked, or null for
+    /// a row without one (#179).
+    int? chargeEveryDays,
+
+    /// When it was last checked.
+    DateTime? chargeCheckedAt,
   }) async {
     final now = DateTime.now().toUtc();
     // A new figure is a new count. Anything else on the row -- a name, a
@@ -147,6 +163,8 @@ class InventoryController {
         memberId: Value(memberId),
         refillLeadDays: Value(refillLeadDays),
         stockCountedAt: recounted ? Value(now) : const Value.absent(),
+        chargeEveryDays: Value(chargeEveryDays),
+        chargeCheckedAt: Value(chargeCheckedAt?.toUtc()),
         notes: Value(notes),
         photoPath: Value(photoPath),
         calories: Value(nutrition.kcal),
@@ -256,6 +274,25 @@ class InventoryController {
             packageName: Value(package.name),
             packageSize: Value(package.size),
             updatedAt: Value(DateTime.now().toUtc()),
+            dirty: const Value(true),
+          ),
+    );
+  }
+
+  /// Records that [existing]'s battery was just charged and tested
+  /// (#179), which is what moves its next check along.
+  ///
+  /// The whole row otherwise as stored, so a check confirmed from the
+  /// list cannot undo an edit made on another device a moment earlier --
+  /// it is a write like any other, dirty and with a new version.
+  Future<void> markCharged(InventoryItem existing, {DateTime? at}) async {
+    final now = DateTime.now().toUtc();
+    await _db.upsertInventoryItem(
+      existing
+          .toCompanion(false)
+          .copyWith(
+            chargeCheckedAt: Value((at ?? now).toUtc()),
+            updatedAt: Value(now),
             dirty: const Value(true),
           ),
     );

@@ -15666,6 +15666,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'long'**
   String get morseDashSpoken;
+
+  /// No description provided for @deviceChargeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the battery regularly'**
+  String get deviceChargeLabel;
+
+  /// No description provided for @deviceChargeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge and test it. The overview and the list show when it is due again.'**
+  String get deviceChargeHint;
+
+  /// No description provided for @deviceChargeEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get deviceChargeEvery;
+
+  /// No description provided for @deviceChargeLastChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Last charged and tested'**
+  String get deviceChargeLastChecked;
+
+  /// No description provided for @deviceChargeDueBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery due'**
+  String get deviceChargeDueBadge;
+
+  /// No description provided for @deviceChargeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery · {detail}'**
+  String deviceChargeStatus(String detail);
+
+  /// No description provided for @deviceChargeOverviewDue.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Battery due: {name}} other{Battery due on {count} devices}}'**
+  String deviceChargeOverviewDue(int count, String name);
+
+  /// No description provided for @deviceChargeOverviewNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery {name} · {detail}'**
+  String deviceChargeOverviewNext(String name, String detail);
+
+  /// No description provided for @deviceChargeReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the battery'**
+  String get deviceChargeReminderTitle;
+
+  /// No description provided for @deviceChargeReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: charge and test it.'**
+  String deviceChargeReminderBody(String name);
 }
 
 class _AppLocalizationsDelegate

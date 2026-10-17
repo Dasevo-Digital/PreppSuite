@@ -38,6 +38,7 @@ void main() {
         expiryTitle: (item) => 'MHD: ${item.name}',
         chargeTitle: 'Akkus prüfen',
         chargeDescription: 'Powerbanks aufladen',
+        deviceChargeTitle: (item) => 'Akku: ${item.name}',
         now: now,
       );
 
@@ -138,5 +139,27 @@ void main() {
 
     expect(ics.endsWith('\r\n'), isTrue);
     expect(ics.replaceAll('\r\n', ''), isNot(contains('\n')));
+  });
+
+  test('a device with its own battery check repeats at its interval', () {
+    final radio = InventoryItem(
+      clientId: 'radio',
+      householdId: 'h',
+      name: 'Kurbelradio',
+      category: 'energy',
+      quantity: 1,
+      unit: 'Stück',
+      storageLocation: 'Flur',
+      chargeEveryDays: 60,
+      chargeCheckedAt: DateTime(2026, 9, 1, 12),
+      updatedAt: DateTime.utc(2026),
+      dirty: false,
+    );
+    final ics = lines(build([radio])!);
+
+    expect(ics, contains('UID:radio-charge@preppsuite'));
+    expect(ics, contains('DTSTART;VALUE=DATE:20261031'));
+    expect(ics, contains('RRULE:FREQ=DAILY;INTERVAL=60'));
+    expect(ics, contains('SUMMARY:Akku: Kurbelradio'));
   });
 }

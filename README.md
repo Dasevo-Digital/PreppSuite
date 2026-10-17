@@ -39,6 +39,14 @@ Gläsern ab. Die App rechnet das in Gramm um, und die Kalorien im
 Vorrats-Rechner sinken entsprechend. Die Liste zeigt dann neben der
 Menge, wie viele Gläser das sind.
 
+Geräte mit Akku – Powerbank, Kurbelradio, Stirnlampe, Funkgerät –
+bekommen auf Wunsch eine eigene Prüffrist: alle so und so viele Tage
+aufladen und testen. Die Liste zeigt bei jedem, wann die nächste Prüfung
+fällig ist, und ein fälliges Gerät wird mit „Geprüft“ direkt dort
+abgehakt; die Übersicht nennt das dringendste, der Filter „Akku fällig“
+zeigt alle. Wo die Plattform es kann, erinnert die App am Morgen des
+Tages, und der Kalender-Export enthält die Prüfungen mit.
+
 
 **Einbruch.** Was die Polizei sagt — und in der Reihenfolge, in der sie es
 sagt. Oben die Regel, mit der alles andere anfängt: sich und andere nicht

@@ -209,6 +209,8 @@ Map<String, Object?> encodeInventoryItem(InventoryItem row) => {
   'memberId': row.memberId,
   'refillLeadDays': row.refillLeadDays,
   'stockCountedAt': _date(row.stockCountedAt),
+  'chargeEveryDays': row.chargeEveryDays,
+  'chargeCheckedAt': _date(row.chargeCheckedAt),
   'notes': row.notes,
   'updatedAt': _date(row.updatedAt),
   'deletedAt': _date(row.deletedAt),
@@ -284,6 +286,14 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
         : const Value.absent(),
     stockCountedAt: json.containsKey('stockCountedAt')
         ? Value(asUtcDate(json['stockCountedAt']))
+        : const Value.absent(),
+    // And for schema 26 (#179): an older device's edit must not switch a
+    // device's battery check off or forget when it was last done.
+    chargeEveryDays: json.containsKey('chargeEveryDays')
+        ? Value(_int(json['chargeEveryDays']))
+        : const Value.absent(),
+    chargeCheckedAt: json.containsKey('chargeCheckedAt')
+        ? Value(asUtcDate(json['chargeCheckedAt']))
         : const Value.absent(),
     notes: Value(_string(json['notes'])),
     updatedAt: updatedAt,

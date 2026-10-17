@@ -9491,4 +9491,49 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get morseDashSpoken => 'lang';
+
+  @override
+  String get deviceChargeLabel => 'Akku regelmäßig prüfen';
+
+  @override
+  String get deviceChargeHint =>
+      'Aufladen und testen. Die Übersicht und die Liste zeigen, wann es wieder so weit ist.';
+
+  @override
+  String get deviceChargeEvery => 'Prüfen';
+
+  @override
+  String get deviceChargeLastChecked => 'Zuletzt geladen und geprüft';
+
+  @override
+  String get deviceChargeDueBadge => 'Akku fällig';
+
+  @override
+  String deviceChargeStatus(String detail) {
+    return 'Akku · $detail';
+  }
+
+  @override
+  String deviceChargeOverviewDue(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Akku fällig bei $count Geräten',
+      one: 'Akku fällig: $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deviceChargeOverviewNext(String name, String detail) {
+    return 'Akku $name · $detail';
+  }
+
+  @override
+  String get deviceChargeReminderTitle => 'Akku prüfen';
+
+  @override
+  String deviceChargeReminderBody(String name) {
+    return '$name: aufladen und testen.';
+  }
 }

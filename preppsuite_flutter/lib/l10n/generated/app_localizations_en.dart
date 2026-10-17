@@ -9439,4 +9439,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get morseDashSpoken => 'long';
+
+  @override
+  String get deviceChargeLabel => 'Check the battery regularly';
+
+  @override
+  String get deviceChargeHint =>
+      'Charge and test it. The overview and the list show when it is due again.';
+
+  @override
+  String get deviceChargeEvery => 'Check';
+
+  @override
+  String get deviceChargeLastChecked => 'Last charged and tested';
+
+  @override
+  String get deviceChargeDueBadge => 'Battery due';
+
+  @override
+  String deviceChargeStatus(String detail) {
+    return 'Battery · $detail';
+  }
+
+  @override
+  String deviceChargeOverviewDue(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Battery due on $count devices',
+      one: 'Battery due: $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deviceChargeOverviewNext(String name, String detail) {
+    return 'Battery $name · $detail';
+  }
+
+  @override
+  String get deviceChargeReminderTitle => 'Check the battery';
+
+  @override
+  String deviceChargeReminderBody(String name) {
+    return '$name: charge and test it.';
+  }
 }

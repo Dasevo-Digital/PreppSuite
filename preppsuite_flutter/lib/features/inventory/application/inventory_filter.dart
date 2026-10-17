@@ -1,6 +1,8 @@
 import '../../../local_db/database.dart';
+import 'device_charge.dart';
 
-enum InventoryStatusFilter { all, expired, expiring, lowStock }
+/// [chargeDue] is a device whose battery check has come round (#179).
+enum InventoryStatusFilter { all, expired, expiring, lowStock, chargeDue }
 
 enum InventorySort { name, expiry, attention }
 
@@ -37,13 +39,17 @@ List<InventoryItem> filterInventory(
       !expired(item) && (item.expirationDate?.isBefore(end) ?? false);
   bool low(InventoryItem item) =>
       item.minQuantity != null && item.quantity < item.minQuantity!;
+  bool chargeDue(InventoryItem item) =>
+      deviceChargeCheck(item)?.isDue(now: clock) ?? false;
   int priority(InventoryItem item) => expired(item)
       ? 0
       : low(item)
       ? 1
-      : expiring(item)
+      : chargeDue(item)
       ? 2
-      : 3;
+      : expiring(item)
+      ? 3
+      : 4;
   final terms = query
       .toLowerCase()
       .trim()
@@ -65,6 +71,7 @@ List<InventoryItem> filterInventory(
       InventoryStatusFilter.expired => expired(item),
       InventoryStatusFilter.expiring => expiring(item),
       InventoryStatusFilter.lowStock => low(item),
+      InventoryStatusFilter.chargeDue => chargeDue(item),
     };
   }).toList();
   result.sort((a, b) {

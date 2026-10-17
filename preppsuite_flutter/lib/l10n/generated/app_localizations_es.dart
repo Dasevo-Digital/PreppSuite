@@ -9520,4 +9520,49 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get morseDashSpoken => 'largo';
+
+  @override
+  String get deviceChargeLabel => 'Revisar la batería con regularidad';
+
+  @override
+  String get deviceChargeHint =>
+      'Cargarla y probarla. El resumen y la lista muestran cuándo toca de nuevo.';
+
+  @override
+  String get deviceChargeEvery => 'Revisar';
+
+  @override
+  String get deviceChargeLastChecked => 'Última carga y prueba';
+
+  @override
+  String get deviceChargeDueBadge => 'Batería pendiente';
+
+  @override
+  String deviceChargeStatus(String detail) {
+    return 'Batería · $detail';
+  }
+
+  @override
+  String deviceChargeOverviewDue(int count, String name) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Batería pendiente en $count aparatos',
+      one: 'Batería pendiente: $name',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deviceChargeOverviewNext(String name, String detail) {
+    return 'Batería $name · $detail';
+  }
+
+  @override
+  String get deviceChargeReminderTitle => 'Revisar la batería';
+
+  @override
+  String deviceChargeReminderBody(String name) {
+    return '$name: cargar y probar.';
+  }
 }

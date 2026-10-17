@@ -2591,5 +2591,15 @@
   "morseProsignEndOfWork": "Fin del trabajo",
   "morseSource": "Fuente: Recomendación UIT-R M.1677-1, «Código Morse internacional» (2009).",
   "morseDotSpoken": "corto",
-  "morseDashSpoken": "largo"
+  "morseDashSpoken": "largo",
+  "deviceChargeLabel": "Revisar la batería con regularidad",
+  "deviceChargeHint": "Cargarla y probarla. El resumen y la lista muestran cuándo toca de nuevo.",
+  "deviceChargeEvery": "Revisar",
+  "deviceChargeLastChecked": "Última carga y prueba",
+  "deviceChargeDueBadge": "Batería pendiente",
+  "deviceChargeStatus": "Batería · {detail}",
+  "deviceChargeOverviewDue": "{count, plural, =1{Batería pendiente: {name}} other{Batería pendiente en {count} aparatos}}",
+  "deviceChargeOverviewNext": "Batería {name} · {detail}",
+  "deviceChargeReminderTitle": "Revisar la batería",
+  "deviceChargeReminderBody": "{name}: cargar y probar."
 }

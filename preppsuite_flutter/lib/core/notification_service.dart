@@ -6,6 +6,7 @@ import '../model/categories.dart' show WarningSeverity;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../features/inventory/application/expiry_reminder_planner.dart';
+import '../features/inventory/application/device_charge.dart';
 import '../features/inventory/application/refill_reminder_planner.dart';
 import 'notification_capabilities.dart';
 
@@ -160,6 +161,7 @@ class NotificationService {
   /// leave anything else (warnings) alone.
   static const _expiryPayloadPrefix = 'expiry:';
   static const _refillPayloadPrefix = 'refill:';
+  static const _deviceChargePayloadPrefix = 'charge-item:';
   static const _chargeReminderId = 90407;
   static const _warningDayId = 90408;
   static const _backupReminderId = 90409;
@@ -274,6 +276,54 @@ class NotificationService {
     final pending = await _plugin.pendingNotificationRequests();
     for (final request in pending) {
       if (request.payload?.startsWith(_refillPayloadPrefix) ?? false) {
+        await _plugin.cancel(id: request.id);
+      }
+    }
+  }
+
+  /// Replaces all pending battery checks for single devices (#179).
+  /// Wholesale, like [scheduleExpiryReminders], and for the same reason.
+  Future<void> scheduleDeviceChargeReminders(
+    List<DeviceChargeReminder> reminders, {
+    required String title,
+    required String Function(DeviceChargeReminder) body,
+  }) async {
+    if (!supportsScheduledNotifications) return;
+
+    await _ensureInitialized();
+    await cancelDeviceChargeReminders();
+
+    for (final reminder in reminders) {
+      await _plugin.zonedSchedule(
+        id: reminder.id,
+        title: title,
+        body: body(reminder),
+        payload: '$_deviceChargePayloadPrefix${reminder.itemClientId}',
+        // Local wall-clock time to UTC; see [scheduleExpiryReminders].
+        scheduledDate: tz.TZDateTime.from(reminder.fireAt.toUtc(), tz.UTC),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        notificationDetails: const NotificationDetails(
+          macOS: DarwinNotificationDetails(),
+          iOS: DarwinNotificationDetails(),
+          android: AndroidNotificationDetails(
+            'charge',
+            'Akkus',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+        ),
+      );
+    }
+  }
+
+  /// Cancels every pending battery check for a single device, by payload.
+  Future<void> cancelDeviceChargeReminders() async {
+    if (!supportsScheduledNotifications) return;
+
+    await _ensureInitialized();
+    final pending = await _plugin.pendingNotificationRequests();
+    for (final request in pending) {
+      if (request.payload?.startsWith(_deviceChargePayloadPrefix) ?? false) {
         await _plugin.cancel(id: request.id);
       }
     }
