@@ -2601,5 +2601,18 @@
   "deviceChargeOverviewDue": "{count, plural, =1{Batería pendiente: {name}} other{Batería pendiente en {count} aparatos}}",
   "deviceChargeOverviewNext": "Batería {name} · {detail}",
   "deviceChargeReminderTitle": "Revisar la batería",
-  "deviceChargeReminderBody": "{name}: cargar y probar."
+  "deviceChargeReminderBody": "{name}: cargar y probar.",
+  "phrasebookTitle": "Guía de conversación",
+  "phrasebookEntryHint": "Frases cortas para una emergencia en diez idiomas, sin conexión, para mostrar.",
+  "phrasebookTarget": "Traducir al",
+  "phrasebookSearch": "Buscar una frase",
+  "phrasebookUnreviewed": "Estas traducciones no las ha revisado un hablante nativo. Elige frases cortas y, en caso de duda, señala y ayúdate con gestos.",
+  "phrasebookShow": "Mostrar en grande",
+  "phrasebookNoMatch": "No se ha encontrado ninguna frase.",
+  "phrasebookGroupBasics": "Entenderse",
+  "phrasebookGroupEmergency": "Emergencia",
+  "phrasebookGroupHealth": "Salud",
+  "phrasebookGroupShelter": "Alojamiento y suministros",
+  "phrasebookGroupPeople": "Personas",
+  "phrasebookGroupAnswers": "Respuestas para señalar"
 }

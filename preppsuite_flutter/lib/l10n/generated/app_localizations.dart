@@ -15726,6 +15726,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name}: charge and test it.'**
   String deviceChargeReminderBody(String name);
+
+  /// No description provided for @phrasebookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Phrasebook'**
+  String get phrasebookTitle;
+
+  /// No description provided for @phrasebookEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Short sentences for an emergency in ten languages, offline, to show.'**
+  String get phrasebookEntryHint;
+
+  /// No description provided for @phrasebookTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate into'**
+  String get phrasebookTarget;
+
+  /// No description provided for @phrasebookSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a sentence'**
+  String get phrasebookSearch;
+
+  /// No description provided for @phrasebookUnreviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'These translations have not been checked by native speakers. Pick short sentences and, when in doubt, point and use gestures as well.'**
+  String get phrasebookUnreviewed;
+
+  /// No description provided for @phrasebookShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show large'**
+  String get phrasebookShow;
+
+  /// No description provided for @phrasebookNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No sentence found.'**
+  String get phrasebookNoMatch;
+
+  /// No description provided for @phrasebookGroupBasics.
+  ///
+  /// In en, this message translates to:
+  /// **'Making yourself understood'**
+  String get phrasebookGroupBasics;
+
+  /// No description provided for @phrasebookGroupEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency'**
+  String get phrasebookGroupEmergency;
+
+  /// No description provided for @phrasebookGroupHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get phrasebookGroupHealth;
+
+  /// No description provided for @phrasebookGroupShelter.
+  ///
+  /// In en, this message translates to:
+  /// **'Shelter and supplies'**
+  String get phrasebookGroupShelter;
+
+  /// No description provided for @phrasebookGroupPeople.
+  ///
+  /// In en, this message translates to:
+  /// **'People'**
+  String get phrasebookGroupPeople;
+
+  /// No description provided for @phrasebookGroupAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers to point at'**
+  String get phrasebookGroupAnswers;
 }
 
 class _AppLocalizationsDelegate

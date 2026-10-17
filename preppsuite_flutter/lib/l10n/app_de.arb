@@ -3986,5 +3986,18 @@
         "type": "String"
       }
     }
-  }
+  },
+  "phrasebookTitle": "Sprachführer",
+  "phrasebookEntryHint": "Kurze Sätze für den Notfall in zehn Sprachen, ohne Netz, zum Zeigen.",
+  "phrasebookTarget": "Übersetzen in",
+  "phrasebookSearch": "Satz suchen",
+  "phrasebookUnreviewed": "Diese Übersetzungen sind nicht von Muttersprachlern geprüft. Kurze Sätze wählen und im Zweifel zeigen und mit Gesten nachhelfen.",
+  "phrasebookShow": "Groß zeigen",
+  "phrasebookNoMatch": "Kein Satz gefunden.",
+  "phrasebookGroupBasics": "Verständigung",
+  "phrasebookGroupEmergency": "Notfall",
+  "phrasebookGroupHealth": "Gesundheit",
+  "phrasebookGroupShelter": "Unterkunft und Versorgung",
+  "phrasebookGroupPeople": "Personen",
+  "phrasebookGroupAnswers": "Antworten zum Zeigen"
 }

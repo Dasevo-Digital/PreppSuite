@@ -5602,5 +5602,18 @@
         "type": "String"
       }
     }
-  }
+  },
+  "phrasebookTitle": "Phrasebook",
+  "phrasebookEntryHint": "Short sentences for an emergency in ten languages, offline, to show.",
+  "phrasebookTarget": "Translate into",
+  "phrasebookSearch": "Find a sentence",
+  "phrasebookUnreviewed": "These translations have not been checked by native speakers. Pick short sentences and, when in doubt, point and use gestures as well.",
+  "phrasebookShow": "Show large",
+  "phrasebookNoMatch": "No sentence found.",
+  "phrasebookGroupBasics": "Making yourself understood",
+  "phrasebookGroupEmergency": "Emergency",
+  "phrasebookGroupHealth": "Health",
+  "phrasebookGroupShelter": "Shelter and supplies",
+  "phrasebookGroupPeople": "People",
+  "phrasebookGroupAnswers": "Answers to point at"
 }

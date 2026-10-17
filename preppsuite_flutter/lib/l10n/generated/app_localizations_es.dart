@@ -9565,4 +9565,45 @@ class AppLocalizationsEs extends AppLocalizations {
   String deviceChargeReminderBody(String name) {
     return '$name: cargar y probar.';
   }
+
+  @override
+  String get phrasebookTitle => 'Guía de conversación';
+
+  @override
+  String get phrasebookEntryHint =>
+      'Frases cortas para una emergencia en diez idiomas, sin conexión, para mostrar.';
+
+  @override
+  String get phrasebookTarget => 'Traducir al';
+
+  @override
+  String get phrasebookSearch => 'Buscar una frase';
+
+  @override
+  String get phrasebookUnreviewed =>
+      'Estas traducciones no las ha revisado un hablante nativo. Elige frases cortas y, en caso de duda, señala y ayúdate con gestos.';
+
+  @override
+  String get phrasebookShow => 'Mostrar en grande';
+
+  @override
+  String get phrasebookNoMatch => 'No se ha encontrado ninguna frase.';
+
+  @override
+  String get phrasebookGroupBasics => 'Entenderse';
+
+  @override
+  String get phrasebookGroupEmergency => 'Emergencia';
+
+  @override
+  String get phrasebookGroupHealth => 'Salud';
+
+  @override
+  String get phrasebookGroupShelter => 'Alojamiento y suministros';
+
+  @override
+  String get phrasebookGroupPeople => 'Personas';
+
+  @override
+  String get phrasebookGroupAnswers => 'Respuestas para señalar';
 }

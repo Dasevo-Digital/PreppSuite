@@ -9484,4 +9484,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String deviceChargeReminderBody(String name) {
     return '$name: charge and test it.';
   }
+
+  @override
+  String get phrasebookTitle => 'Phrasebook';
+
+  @override
+  String get phrasebookEntryHint =>
+      'Short sentences for an emergency in ten languages, offline, to show.';
+
+  @override
+  String get phrasebookTarget => 'Translate into';
+
+  @override
+  String get phrasebookSearch => 'Find a sentence';
+
+  @override
+  String get phrasebookUnreviewed =>
+      'These translations have not been checked by native speakers. Pick short sentences and, when in doubt, point and use gestures as well.';
+
+  @override
+  String get phrasebookShow => 'Show large';
+
+  @override
+  String get phrasebookNoMatch => 'No sentence found.';
+
+  @override
+  String get phrasebookGroupBasics => 'Making yourself understood';
+
+  @override
+  String get phrasebookGroupEmergency => 'Emergency';
+
+  @override
+  String get phrasebookGroupHealth => 'Health';
+
+  @override
+  String get phrasebookGroupShelter => 'Shelter and supplies';
+
+  @override
+  String get phrasebookGroupPeople => 'People';
+
+  @override
+  String get phrasebookGroupAnswers => 'Answers to point at';
 }

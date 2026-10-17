@@ -9536,4 +9536,45 @@ class AppLocalizationsDe extends AppLocalizations {
   String deviceChargeReminderBody(String name) {
     return '$name: aufladen und testen.';
   }
+
+  @override
+  String get phrasebookTitle => 'Sprachführer';
+
+  @override
+  String get phrasebookEntryHint =>
+      'Kurze Sätze für den Notfall in zehn Sprachen, ohne Netz, zum Zeigen.';
+
+  @override
+  String get phrasebookTarget => 'Übersetzen in';
+
+  @override
+  String get phrasebookSearch => 'Satz suchen';
+
+  @override
+  String get phrasebookUnreviewed =>
+      'Diese Übersetzungen sind nicht von Muttersprachlern geprüft. Kurze Sätze wählen und im Zweifel zeigen und mit Gesten nachhelfen.';
+
+  @override
+  String get phrasebookShow => 'Groß zeigen';
+
+  @override
+  String get phrasebookNoMatch => 'Kein Satz gefunden.';
+
+  @override
+  String get phrasebookGroupBasics => 'Verständigung';
+
+  @override
+  String get phrasebookGroupEmergency => 'Notfall';
+
+  @override
+  String get phrasebookGroupHealth => 'Gesundheit';
+
+  @override
+  String get phrasebookGroupShelter => 'Unterkunft und Versorgung';
+
+  @override
+  String get phrasebookGroupPeople => 'Personen';
+
+  @override
+  String get phrasebookGroupAnswers => 'Antworten zum Zeigen';
 }

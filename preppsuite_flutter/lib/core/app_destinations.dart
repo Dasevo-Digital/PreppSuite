@@ -70,6 +70,7 @@ import '../features/warnings/presentation/warning_situation_map_screen.dart';
 import '../features/kids_comic/application/kids_comic.dart';
 import '../features/kids_comic/presentation/kids_comic_screen.dart';
 import '../features/morse/presentation/morse_screen.dart';
+import '../features/phrasebook/presentation/phrasebook_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../model/household_profile.dart';
 
@@ -279,6 +280,23 @@ List<AppDestination> appDestinations() => [
     area: ShellDestination.emergency,
     open: (_) => const MorseScreen(),
     aliases: ['morse', 'morsen', 'morsezeichen', 'funk', 'lichtsignal', 'code'],
+  ),
+  AppDestination(
+    id: 'phrasebook',
+    title: (l) => l.phrasebookTitle,
+    icon: Icons.translate,
+    area: ShellDestination.emergency,
+    open: (_) => const PhrasebookScreen(),
+    aliases: [
+      'sprachfuhrer',
+      'ubersetzen',
+      'ubersetzer',
+      'dolmetscher',
+      'sprache',
+      'translate',
+      'phrasebook',
+      'idioma',
+    ],
   ),
   AppDestination(
     id: 'outage',

@@ -22,6 +22,7 @@ import '../../warnings/presentation/radiation_screen.dart';
 import 'radio_emergency_screen.dart';
 import '../../../core/phone_call.dart';
 import '../../morse/presentation/morse_screen.dart';
+import '../../phrasebook/presentation/phrasebook_screen.dart';
 
 const _contactsKey = 'nearbyEmergencyContacts';
 
@@ -233,6 +234,21 @@ class _EmergencyInformationScreenState
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const MorseScreen()),
+              ),
+            ),
+          ),
+          // The third way of being understood without a network: when the
+          // other person is right there, but speaks another language.
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.translate),
+              title: Text(l10n.phrasebookTitle),
+              subtitle: Text(l10n.phrasebookEntryHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const PhrasebookScreen(),
+                ),
               ),
             ),
           ),

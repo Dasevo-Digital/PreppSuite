@@ -346,6 +346,15 @@ Tempi und mit dem gerade gesendeten Zeichen darauf. Dazu die Tafel aller
 Zeichen nach der Empfehlung ITU-R M.1677-1; Ä, Ö, Ü, ß, CH und Ñ stehen
 gesondert, weil sie nicht zum internationalen Standard gehören.
 
+**Sprachführer.** 43 kurze Sätze für den Notfall – Hilfe rufen, sagen, wo
+es wehtut, nach Wasser, Unterkunft oder einem Kind fragen, dazu Antworten
+zum Zeigen – auf Deutsch, Englisch, Spanisch, Französisch, Polnisch,
+Türkisch, Russisch, Ukrainisch, Arabisch und Persisch. Ohne Netz und ohne
+Download; ein Satz lässt sich groß anzeigen und dem Gegenüber hinhalten,
+Arabisch und Persisch von rechts nach links. **Die Übersetzungen sind
+nicht von Muttersprachlern geprüft**, und das steht auch so auf dem
+Bildschirm.
+
 **Karte offline.** Im dunklen Erscheinungsbild ist auch die Karte dunkel –
 der Stil wird umgedreht statt das fertige Bild, sodass ein Park grün bleibt.
 Die Karte lässt sich in der App herunterladen: Ort
