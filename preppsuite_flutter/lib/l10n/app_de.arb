@@ -4086,5 +4086,19 @@
   },
   "morseKey": "Morsetaste",
   "morseKeyHint": "Im Takt des Lichts drücken, das du siehst: kurz für einen Punkt, lang für einen Strich. Die App lernt dein Tempo; die ersten Zeichen werden berichtigt, sobald ein kurzer und ein langer Druck da sind. Mit Tastatur geht auch die Leertaste.",
-  "morseKeyClear": "Neu beginnen"
+  "morseKeyClear": "Neu beginnen",
+  "translatorPacksTitle": "Übersetzer-Sprachpakete",
+  "translatorPacksNone": "Noch keine geladen. Pakete lädt der Übersetzer, sobald eine Richtung fehlt.",
+  "translatorPacksSummary": "{count, plural, =1{1 Richtung, {size}} other{{count} Richtungen, {size}}}",
+  "@translatorPacksSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorPacksOpen": "Zum Übersetzer"
 }

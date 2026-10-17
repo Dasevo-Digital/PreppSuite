@@ -5702,5 +5702,19 @@
   },
   "morseKey": "Morse key",
   "morseKeyHint": "Press in time with the light you see: short for a dot, long for a dash. The app learns your speed; the first signs are corrected once there is a short and a long press. With a keyboard, the space bar works too.",
-  "morseKeyClear": "Start again"
+  "morseKeyClear": "Start again",
+  "translatorPacksTitle": "Translator language packs",
+  "translatorPacksNone": "None downloaded yet. The translator fetches a pack as soon as a direction is missing.",
+  "translatorPacksSummary": "{count, plural, =1{1 direction, {size}} other{{count} directions, {size}}}",
+  "@translatorPacksSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorPacksOpen": "Open the translator"
 }

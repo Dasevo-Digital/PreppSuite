@@ -2649,5 +2649,9 @@
   "phrasebookTranslateQuery": "Traducir «{query}»",
   "morseKey": "Tecla Morse",
   "morseKeyHint": "Pulsa al ritmo de la luz que ves: corto para un punto, largo para una raya. La aplicación aprende tu ritmo; los primeros signos se corrigen en cuanto hay una pulsación corta y una larga. Con teclado también sirve la barra espaciadora.",
-  "morseKeyClear": "Empezar de nuevo"
+  "morseKeyClear": "Empezar de nuevo",
+  "translatorPacksTitle": "Paquetes de idioma del traductor",
+  "translatorPacksNone": "Aún no hay ninguno. El traductor descarga un paquete en cuanto falta una dirección.",
+  "translatorPacksSummary": "{count, plural, =1{1 dirección, {size}} other{{count} direcciones, {size}}}",
+  "translatorPacksOpen": "Abrir el traductor"
 }

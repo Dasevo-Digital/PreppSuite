@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/locale_provider.dart';
+import '../../translator/presentation/translator_packs_card.dart';
 import '../../../core/notification_capabilities.dart';
 import '../../../core/notifications_provider.dart';
 import '../../../core/theme_provider.dart';
@@ -145,6 +146,7 @@ class SettingsScreen extends ConsumerWidget {
               (l10n) => l10n.settingsCategoryOffline,
               (l10n) => [
                 OfflineMapCard(l10n: l10n),
+                TranslatorPacksCard(l10n: l10n),
                 if (offersArticleViewerChoice) ArticleViewerCard(l10n: l10n),
                 DownloadFolderCard(l10n: l10n),
                 PortableDataCard(l10n: l10n),

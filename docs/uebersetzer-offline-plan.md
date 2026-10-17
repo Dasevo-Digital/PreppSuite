@@ -103,6 +103,8 @@ und exportiert nur ihre sechs Funktionen.
   hinein, Text heraus, kopieren. Fehlt ein Paket, steht dort, welches und
   wie groß, mit einem Knopf zum Laden; geladene Pakete lassen sich
   entfernen. Die Liste wird nur abgefragt, wenn ein Paket fehlt.
+- `translator_packs_card.dart`: dieselben Pakete unter Einstellungen →
+  „Offline und Speicher“, neben der Karte, mit Größe und Entfernen (#192).
 
 **Tests.** `test/features/translator/` prüft Liste und Speicher gegen
 einen Ausschnitt der echten Liste, `test/widget/translator_screen_test.dart`
@@ -120,8 +122,6 @@ zeigt.
 3. Android: NDK-Build für arm64-v8a und armeabi-v7a, Messung auf einem
    älteren Telefon. Die Modelle brauchen dort zusammen mit der Engine
    rund 210 MB Arbeitsspeicher.
-4. Pakete auch unter „Offline und Speicher“ zeigen, wie Karten und
-   Archive. Bis dahin verwaltet der Übersetzer-Bildschirm sie selbst.
 
 Bis dahin sagt der Bildschirm auf diesen Plattformen, dass der Übersetzer
 in dieser Ausgabe nicht enthalten ist; der Sprachführer funktioniert

@@ -9655,4 +9655,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get morseKeyClear => 'Start again';
+
+  @override
+  String get translatorPacksTitle => 'Translator language packs';
+
+  @override
+  String get translatorPacksNone =>
+      'None downloaded yet. The translator fetches a pack as soon as a direction is missing.';
+
+  @override
+  String translatorPacksSummary(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count directions, $size',
+      one: '1 direction, $size',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get translatorPacksOpen => 'Open the translator';
 }

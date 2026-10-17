@@ -16014,6 +16014,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start again'**
   String get morseKeyClear;
+
+  /// No description provided for @translatorPacksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Translator language packs'**
+  String get translatorPacksTitle;
+
+  /// No description provided for @translatorPacksNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None downloaded yet. The translator fetches a pack as soon as a direction is missing.'**
+  String get translatorPacksNone;
+
+  /// No description provided for @translatorPacksSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 direction, {size}} other{{count} directions, {size}}}'**
+  String translatorPacksSummary(int count, String size);
+
+  /// No description provided for @translatorPacksOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the translator'**
+  String get translatorPacksOpen;
 }
 
 class _AppLocalizationsDelegate

@@ -9706,4 +9706,25 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get morseKeyClear => 'Neu beginnen';
+
+  @override
+  String get translatorPacksTitle => 'Übersetzer-Sprachpakete';
+
+  @override
+  String get translatorPacksNone =>
+      'Noch keine geladen. Pakete lädt der Übersetzer, sobald eine Richtung fehlt.';
+
+  @override
+  String translatorPacksSummary(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Richtungen, $size',
+      one: '1 Richtung, $size',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get translatorPacksOpen => 'Zum Übersetzer';
 }
