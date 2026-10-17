@@ -1,9 +1,9 @@
 # Freier Übersetzer ohne Netz
 
-Stand 17.10.2026 (#182): **auf dem Mac gebaut**, Linux, Windows und
-Android fehlen noch. Dieses Dokument war der Plan und hält jetzt fest, was
-Stufe 0 ergeben hat, wie der Übersetzer gebaut ist und was noch offen
-ist.
+Stand 17.10.2026 (#182, #184, #185): **gebaut für macOS, Linux, Windows
+und Android** (Android nur 64-Bit-ARM ab Android 9). Dieses Dokument war
+der Plan und hält jetzt fest, was Stufe 0 ergeben hat, wie der Übersetzer
+gebaut ist und was noch offen ist.
 
 ## Was es ist
 
@@ -54,9 +54,20 @@ dazukam.
    „Please call an ambulance. We no longer have drinking water and the
    house is without electricity.“ Ein älteres Android-Telefon ist noch
    nicht gemessen.
-4. **Bauen:** auf dem Mac gelöst, siehe unten. Linux und Android sind
-   absehbar (gleiche CMake-Dateien, Ruy auf ARM), Windows ist offen:
-   mingw-w64 wie bei Xapian ist der erste Versuch.
+4. **Bauen:** für alle vier Plattformen gelöst, siehe unten. Gemessen
+   mit zwei Sätzen Deutsch → Englisch, zweiter Durchlauf:
+
+   | Plattform | Bibliothek | Übersetzen | Speicher |
+   |---|---|---|---|
+   | macOS arm64 | 20 MB (universal) | 0,015 s | 210 MB |
+   | macOS x86_64 (Rosetta) | ebenda | 0,035 s | 210 MB |
+   | Linux x86_64 (TestKubuntu) | 8,4 MB | 0,019 s | 185 MB |
+   | Windows x64 (TestWindows) | 11,4 MB | 0,029 s | – |
+   | Android arm64 (Emulator, API 34) | 8,3 MB | 0,077 s | – |
+
+   Alle übersetzen gleich: „Please call an ambulance. We no longer have
+   drinking water and the house is without electricity.“ Auf einem
+   echten älteren Telefon ist noch nicht gemessen.
 
 ## Wie es gebaut ist
 
@@ -68,17 +79,37 @@ und exportiert nur ihre sechs Funktionen.
 
 - `translate_source.sh` holt die Engine bei einem festen Commit als
   schmalen Checkout mit nur den Submodulen, die ein CPU-Build liest, und
-  ändert vier Zeilen, die neuere Compiler oder SDKs ablehnen (im Skript
-  begründet). PCRE2 für die Satztrennung kommt als Tarball mit
-  festgelegter Prüfsumme dazu; die Engine selbst würde es ungeprüft beim
-  Bauen herunterladen.
+  ändert sechs Stellen, die neuere Compiler, SDKs oder mingw ablehnen
+  (im Skript begründet; jede nur, solange sie noch fällig ist, damit ein
+  zweiter Lauf nichts neu baut). PCRE2 für die Satztrennung kommt als
+  Tarball mit festgelegter Prüfsumme dazu; die Engine selbst würde es
+  ungeprüft beim Bauen herunterladen.
 - `build_macos.sh` baut arm64 (Ruy und Accelerate) und x86_64 (intgemm,
   Grundlinie x86-64-v2) getrennt und fügt sie mit `lipo` zusammen. Ein
   zweiter Lauf baut nur, was sich geändert hat.
+- `build_linux.sh` baut auf dem Linux-Rechner; Fließkomma über Ruy,
+  weil eine BLAS-Bibliothek dort nicht vorausgesetzt werden kann, int8
+  über intgemm. Die Bibliothek hängt nur von libc, libm, libstdc++ und
+  libgcc ab.
+- `build_windows.sh` baut die DLL ebenfalls auf dem Linux-Rechner, mit
+  mingw-w64 (posix-Threads) wie die Xapian-Schicht, alles statisch
+  gebunden; sie hängt nur von Windows-eigenen DLLs ab. Marian ist für
+  MSVC geschrieben: drei Header in Großschreibung bekommen Weiterleitungen,
+  die Windows-Definitionen von MSVC werden gesetzt, und PCRE2 wird als
+  statisch markiert (alles in `CMakeLists.txt`, nur für mingw).
+- `build_android.sh` baut mit dem NDK nur für arm64-v8a und für API 28
+  (Android 9): Marians Pfadbibliothek braucht `iconv`, `nl_langinfo` und
+  `glob`, die Bionic erst dann hat, und seine ARM-Rechenkerne nutzen
+  Befehle, die es nur auf 64-Bit-ARM gibt. Auf Android 7 und 8 und im
+  armeabi-v7a-Paket lädt die Bibliothek nicht, und der Bildschirm sagt,
+  dass der Übersetzer fehlt. Gradle nimmt `build/android-jni/` auf, wenn
+  es da ist.
 - Die Xcode-Phase „Embed Translator“ kopiert die Bibliothek nach
-  `Contents/Frameworks` und signiert sie; fehlt sie, warnt die Phase nur.
-  Deshalb baut `tool/release.sh` sie vor dem Mac-Paket und bricht ab,
-  wenn sie danach nicht im Paket liegt.
+  `Contents/Frameworks` und signiert sie; die CMake-Dateien für Linux und
+  Windows legen sie ins Paket. Fehlt sie, warnen alle nur. Deshalb baut
+  `tool/release.sh` (bzw. `tool/linux_release.sh`) sie vor jedem Paket und
+  bricht ab, wenn sie danach nicht im Paket liegt; der Starttest
+  verlangt sie unter Linux und Windows.
 
 **Dart.** `lib/features/translator/`:
 
@@ -115,17 +146,14 @@ zeigt.
 
 ## Was noch offen ist
 
-1. Linux: `build_linux.sh`, Einbindung in `linux/CMakeLists.txt` und in
-   `tool/linux_release.sh`, Prüfung im Starttest.
-2. Windows: Querbau mit mingw-w64 auf TestKubuntu versuchen; geht das
-   nicht, MSVC auf TestWindows.
-3. Android: NDK-Build für arm64-v8a und armeabi-v7a, Messung auf einem
-   älteren Telefon. Die Modelle brauchen dort zusammen mit der Engine
-   rund 210 MB Arbeitsspeicher.
+1. Android: Messung auf einem echten älteren Telefon. Die Modelle
+   brauchen zusammen mit der Engine rund 200 MB Arbeitsspeicher.
+2. iPhone und iPad: erst mit der Developer-Lizenz; gebaut wird dafür
+   noch nichts.
 
-Bis dahin sagt der Bildschirm auf diesen Plattformen, dass der Übersetzer
-in dieser Ausgabe nicht enthalten ist; der Sprachführer funktioniert
-überall.
+Wo der Übersetzer fehlt (iPhone, Android vor Version 9, 32-Bit-Android),
+sagt der Bildschirm, dass er in dieser Ausgabe nicht enthalten ist; der
+Sprachführer funktioniert überall.
 
 ## Was nicht gebaut wird
 

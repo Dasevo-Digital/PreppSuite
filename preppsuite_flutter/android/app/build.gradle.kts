@@ -108,6 +108,15 @@ android {
     }
 }
 
+// The offline translator (#185), when native/translate/build_android.sh
+// has run: one library per ABI under build/android-jni/. Optional like the
+// desktop ones -- without it the APK has no translator and the screen says
+// so.
+val translatorLibraries = file("../../native/translate/build/android-jni")
+if (translatorLibraries.isDirectory) {
+    android.sourceSets.getByName("main").jniLibs.srcDir(translatorLibraries)
+}
+
 // Debug builds must retain the emulator ABI, including native plugin libs.
 // Distribution keeps exactly the existing ARM-only release packaging.
 androidComponents {

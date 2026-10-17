@@ -2,10 +2,11 @@
 # Runs on the Linux build machine (#125). Called by tool/release.sh with the
 # directory the source archive was unpacked into and the version.
 #
-# Builds the Xapian library for Linux, the app, and the Linux package; runs
-# the start test; then cross-builds the Xapian DLL the Windows build needs, because the Windows
-# machine has no MinGW. Ends with ALLES-FERTIG on its own line, which is
-# what the caller waits for.
+# Builds the Xapian and translator libraries for Linux, the app, and the
+# Linux package; runs the start test; then cross-builds the Xapian and
+# translator DLLs the Windows build needs, because the Windows machine has
+# no MinGW. Ends with ALLES-FERTIG on its own line, which is what the
+# caller waits for.
 set -euo pipefail
 
 work="$1"
@@ -15,6 +16,10 @@ build_number="$3"
 export PATH="$HOME/flutter/bin:$PATH"
 cd "$work/src/preppsuite_flutter"
 native/zim_xapian/build_linux.sh
+# Before the app, or CMake has nothing to bundle; whether it arrived is
+# checked by the caller in the package listing.
+native/translate/build_linux.sh > "$work/translate-linux.log" 2>&1 ||
+  { echo "UEBERSETZER-LINUX: FEHLGESCHLAGEN"; tail -n 20 "$work/translate-linux.log"; }
 flutter pub get
 flutter build linux --release --build-name "$version" --build-number "$build_number"
 
@@ -48,4 +53,5 @@ else
 fi
 
 native/zim_xapian/build_windows.sh > "$work/xapian-win.log" 2>&1 || true
+native/translate/build_windows.sh > "$work/translate-win.log" 2>&1 || true
 echo ALLES-FERTIG

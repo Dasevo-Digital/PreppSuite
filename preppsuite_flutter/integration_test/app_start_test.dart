@@ -17,6 +17,10 @@ import 'package:preppsuite_flutter/features/kids_comic/application/kids_comic.da
 import 'package:preppsuite_flutter/features/kids_comic/application/kids_comic_de.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/xapian_index.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/zstd_stream.dart';
+import 'package:preppsuite_flutter/features/translator/application/translator_engine.dart';
+import 'package:preppsuite_flutter/features/translator/application/translator_store.dart';
+import 'package:preppsuite_flutter/features/phrasebook/application/phrasebook.dart';
+import 'package:preppsuite_flutter/features/translator/application/translator_catalogue.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
@@ -118,6 +122,43 @@ void main() {
     if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
       expect(xapianAvailable, isTrue, reason: 'zim_xapian is missing');
     }
+  });
+
+  testWidgets('the translator library loads where the package carries it', (
+    tester,
+  ) async {
+    // The release builds it for Linux, Windows and Android arm64 (#184,
+    // #185); a working copy or the CI may not have, so Android only
+    // insists when told to. iOS has none.
+    const expectOnAndroid = bool.fromEnvironment(
+      'PREPPSUITE_EXPECT_TRANSLATOR',
+    );
+    if (Platform.isLinux ||
+        Platform.isWindows ||
+        (Platform.isAndroid && expectOnAndroid)) {
+      expect(translatorAvailable, isTrue, reason: 'preppsuite_translate');
+    }
+    if (!translatorAvailable) return;
+    // A real call through the engine: a model that is not there is an
+    // error from the library, not a crash of the app.
+    const missing = InstalledTranslatorPack(
+      direction: TranslatorDirection(PhraseLanguage.de, PhraseLanguage.en),
+      version: 'test',
+      size: 0,
+      modelPath: '/nonexistent/model.bin',
+      lexPath: '/nonexistent/lex.bin',
+      vocabPath: '/nonexistent/vocab.spm',
+    );
+    // Caught inside: runAsync reports what escapes it as a test failure.
+    final error = await tester.runAsync(() async {
+      try {
+        await translateText('Hallo', const [missing]);
+        return null;
+      } on TranslatorException catch (error) {
+        return error;
+      }
+    });
+    expect(error, isA<TranslatorException>());
   });
 
   testWidgets('the emergency help draws and leads to first aid', (

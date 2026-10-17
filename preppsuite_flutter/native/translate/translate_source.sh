@@ -8,8 +8,8 @@
 # checkout of one commit, with only the submodules a CPU build reads:
 # FBGEMM, the CUDA and WebAssembly parts and the websocket server stay out.
 #
-# Four lines are changed after the checkout, each because a newer
-# compiler or SDK refuses what an older one let through. None changes
+# Six places are changed after the checkout, each because a newer
+# compiler, an SDK or mingw refuses what another let through. None changes
 # what the engine computes:
 #
 #   * SentencePiece casts -1 to an enum in a constexpr, which clang 16 and
@@ -22,6 +22,18 @@
 #   * Marian's architecture check knows PowerPC, i386 and x86_64 as macOS
 #     architectures and stops at arm64, which Apple has shipped since
 #     2020. It is let through, and Marian's own "arm" branch takes over.
+#   * The Windows call stack printer annotates one function pointer type
+#     with MSVC's __in and __out, which mean nothing to the compiler and
+#     which mingw does not define. They are dropped.
+#   * Bergamot's aligned buffer asks whether the compiler is MSVC where it
+#     means whether the system is Windows: only Windows has
+#     _aligned_malloc, and only POSIX has posix_memalign. The two places
+#     that allocate and free ask for _WIN32 now, which MSVC defines as
+#     well; the include of MSVC's own runtime header stays as it was.
+#
+# Each change is made only where the old text is still there, so a second
+# run leaves the files -- and their times -- alone and Ninja rebuilds
+# nothing.
 #
 # PCRE2 for the sentence splitter is placed beside it from a tarball with
 # a pinned checksum. Left to itself the engine downloads it at build time
@@ -39,6 +51,7 @@ translate_source() {
   local repo="$work/translations"
   local engine="$repo/inference"
   if [ -f "$work/.source-ready-$TRANSLATE_COMMIT" ]; then
+    translate_patch "$engine" >&2 || return 1
     echo "$engine"
     return
   fi
@@ -55,19 +68,6 @@ translate_source() {
   git -C "$repo" submodule update --init --recursive --quiet \
     inference/marian-fork/src/3rd_party/ruy >&2
 
-  local spm="$engine/marian-fork/src/3rd_party/sentencepiece/src/trainer_interface.cc"
-  local marian="$engine/marian-fork/CMakeLists.txt"
-  local zutil="$engine/marian-fork/src/3rd_party/zlib/zutil.h"
-  local arch="$engine/marian-fork/cmake/TargetArch.cmake"
-  perl -0pi -e 's/  constexpr unicode_script::ScriptType kAnyType =/  const unicode_script::ScriptType kAnyType =/' "$spm"
-  perl -0pi -e 's/list\(APPEND ALL_WARNINGS -Wall; -Werror; -Wextra;/list(APPEND ALL_WARNINGS -Wall; -Wextra;/' "$marian"
-  perl -0pi -e 's/^#if defined\(MACOS\) \|\| defined\(TARGET_OS_MAC\)$/#if defined(MACOS)/m' "$zutil"
-  perl -0pi -e 's/(            elseif\("\$\{osx_arch\}" STREQUAL "x86_64"\)\n                set\(osx_arch_x86_64 TRUE\)\n)/$1            elseif("\$\{osx_arch\}" STREQUAL "arm64")\n                set(osx_arch_arm64 TRUE)\n/; s/(        if\(osx_arch_x86_64\)\n            list\(APPEND ARCH x86_64\)\n        endif\(\)\n)/$1\n        if(osx_arch_arm64)\n            list(APPEND ARCH arm64)\n        endif()\n/' "$arch"
-  grep -q "const unicode_script::ScriptType kAnyType" "$spm" || { echo "patch spm failed" >&2; return 1; }
-  grep -q "ALL_WARNINGS -Wall; -Wextra;" "$marian" || { echo "patch marian failed" >&2; return 1; }
-  grep -q "^#if defined(MACOS)$" "$zutil" || { echo "patch zlib failed" >&2; return 1; }
-  grep -q "list(APPEND ARCH arm64)" "$arch" || { echo "patch arch failed" >&2; return 1; }
-
   local pcre_dir="$engine/3rd_party/ssplit-cpp/src/3rd-party"
   local tarball="$work/pcre2-$PCRE2_VERSION.tar.gz"
   if [ ! -f "$tarball" ]; then
@@ -76,7 +76,11 @@ translate_source() {
     mv "$tarball.part" "$tarball"
   fi
   local actual
-  actual="$(shasum -a 256 "$tarball" | cut -d' ' -f1)"
+  if command -v sha256sum >/dev/null 2>&1; then
+    actual="$(sha256sum "$tarball" | cut -d' ' -f1)"
+  else
+    actual="$(shasum -a 256 "$tarball" | cut -d' ' -f1)"
+  fi
   if [ "$actual" != "$PCRE2_SHA256" ]; then
     echo "pcre2 checksum mismatch: $actual" >&2
     rm -f "$tarball"
@@ -86,5 +90,35 @@ translate_source() {
   tar -xzf "$tarball" -C "$pcre_dir"
 
   touch "$work/.source-ready-$TRANSLATE_COMMIT"
+  translate_patch "$engine" >&2 || return 1
   echo "$engine"
+}
+
+# The changes described at the top, each only where it is still due.
+translate_patch() {
+  local engine="$1"
+  local spm="$engine/marian-fork/src/3rd_party/sentencepiece/src/trainer_interface.cc"
+  local marian="$engine/marian-fork/CMakeLists.txt"
+  local zutil="$engine/marian-fork/src/3rd_party/zlib/zutil.h"
+  local arch="$engine/marian-fork/cmake/TargetArch.cmake"
+  local stack="$engine/marian-fork/src/3rd_party/ExceptionWithCallStack.cpp"
+  local aligned="$engine/src/translator/aligned.h"
+  grep -q "  constexpr unicode_script::ScriptType kAnyType =" "$spm" &&
+    perl -0pi -e 's/  constexpr unicode_script::ScriptType kAnyType =/  const unicode_script::ScriptType kAnyType =/' "$spm"
+  grep -q "ALL_WARNINGS -Wall; -Werror; -Wextra;" "$marian" &&
+    perl -0pi -e 's/list\(APPEND ALL_WARNINGS -Wall; -Werror; -Wextra;/list(APPEND ALL_WARNINGS -Wall; -Wextra;/' "$marian"
+  grep -q "^#if defined(MACOS) || defined(TARGET_OS_MAC)$" "$zutil" &&
+    perl -0pi -e 's/^#if defined\(MACOS\) \|\| defined\(TARGET_OS_MAC\)$/#if defined(MACOS)/m' "$zutil"
+  grep -q "list(APPEND ARCH arm64)" "$arch" ||
+    perl -0pi -e 's/(            elseif\("\$\{osx_arch\}" STREQUAL "x86_64"\)\n                set\(osx_arch_x86_64 TRUE\)\n)/$1            elseif("\$\{osx_arch\}" STREQUAL "arm64")\n                set(osx_arch_arm64 TRUE)\n/; s/(        if\(osx_arch_x86_64\)\n            list\(APPEND ARCH x86_64\)\n        endif\(\)\n)/$1\n        if(osx_arch_arm64)\n            list(APPEND ARCH arm64)\n        endif()\n/' "$arch"
+  grep -q "__in ULONG" "$stack" &&
+    perl -0pi -e 's/\(__in ULONG, __in ULONG, __out PVOID\*, __out_opt PULONG\)/(ULONG, ULONG, PVOID*, PULONG)/' "$stack"
+  perl -0ne 'exit(/#ifdef _MSC_VER\n\s*mem_ = static_cast<T\*>\(_aligned_malloc/ ? 0 : 1)' "$aligned" &&
+    perl -0pi -e 's/#ifdef _MSC_VER(\n\s*mem_ = static_cast<T\*>\(_aligned_malloc)/#ifdef _WIN32$1/; s/#ifdef _MSC_VER(\n\s*_aligned_free\(mem_\);)/#ifdef _WIN32$1/' "$aligned"
+  grep -q "const unicode_script::ScriptType kAnyType" "$spm" || { echo "patch spm failed"; return 1; }
+  grep -q "ALL_WARNINGS -Wall; -Wextra;" "$marian" || { echo "patch marian failed"; return 1; }
+  grep -q "^#if defined(MACOS)$" "$zutil" || { echo "patch zlib failed"; return 1; }
+  grep -q "list(APPEND ARCH arm64)" "$arch" || { echo "patch arch failed"; return 1; }
+  grep -q "(ULONG, ULONG, PVOID\*, PULONG)" "$stack" || { echo "patch stack failed"; return 1; }
+  [ "$(grep -c "^#ifdef _WIN32$" "$aligned")" -eq 2 ] || { echo "patch aligned failed"; return 1; }
 }

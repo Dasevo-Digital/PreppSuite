@@ -27,7 +27,8 @@
 # runs the device check in the iPhone simulator. Linux and Windows each
 # run the start test (integration_test/app_start_test.dart) after their
 # build, and a release whose start test did not pass is not published. The Windows build needs
-# the Xapian DLL the Linux machine cross-compiles, so it comes last.
+# the Xapian and translator DLLs the Linux machine cross-compiles, so it
+# comes last.
 set -euo pipefail
 
 readonly ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -152,10 +153,17 @@ rm -rf "$app"
 
 # --- Android --------------------------------------------------------------
 step "Android"
+# The translator for arm64 first; Gradle picks it up when it is there
+# (#185). 32-bit ARM gets none: the engine's ARM kernels are AArch64 only.
+"$APP_DIR/native/translate/build_android.sh" > "$log/translate-android.log" 2>&1 ||
+  fail "Übersetzer für Android"
 "$ROOT/tool/android_release.sh" > "$log/android.log" 2>&1 || fail "Android-Build"
 apks="$APP_DIR/build/app/outputs/flutter-apk"
 cp "$apks/app-arm64-v8a-release-rotated.apk" "$out/PreppSuite-$version-Android-arm64-v8a.apk"
 cp "$apks/app-armeabi-v7a-release-rotated.apk" "$out/PreppSuite-$version-Android-armeabi-v7a.apk"
+unzip -l "$out/PreppSuite-$version-Android-arm64-v8a.apk" |
+  grep -q 'lib/arm64-v8a/libpreppsuite_translate.so' ||
+  fail "arm64-APK ohne Übersetzer-Bibliothek"
 
 # --- Device check in the iPhone simulator ---------------------------------
 step "Gerätetest im iPhone-Simulator"
@@ -167,7 +175,9 @@ find "$APP_DIR/build" \( -name '*.app' -o -name '*.appex' \) -prune -exec rm -rf
 
 # --- Linux result ---------------------------------------------------------
 step "Auf Linux warten"
-for _ in $(seq 1 360); do
+# Two hours: since the translator (#184) the Linux machine also compiles
+# Mozilla's engine twice, for Linux and for Windows.
+for _ in $(seq 1 720); do
   ssh "$linux" "grep -q ALLES-FERTIG ~/$remote_linux/build.log" && break
   sleep 10
 done
@@ -178,9 +188,14 @@ ssh "$linux" "grep -q 'STARTTEST: BESTANDEN' ~/$remote_linux/build.log" ||
 ssh "$linux" "grep -q 'lib/libzim_xapian.so' ~/$remote_linux/inhalt.txt && \
   grep -q 'lib/libpdfium.so' ~/$remote_linux/inhalt.txt" ||
   fail "Linux-Paket ohne Xapian oder PDFium"
+ssh "$linux" "grep -q 'lib/libpreppsuite_translate.so' ~/$remote_linux/inhalt.txt" ||
+  fail "Linux-Paket ohne Übersetzer-Bibliothek, siehe ~/$remote_linux/translate-linux.log"
 scp -q "$linux:$remote_linux/PreppSuite-$version-linux-x64.tar.gz" "$out/"
 scp -q "$linux:$remote_linux/src/preppsuite_flutter/native/zim_xapian/build/zim_xapian.dll" \
   "$log/zim_xapian.dll" || fail "Xapian-DLL fehlt"
+scp -q "$linux:$remote_linux/src/preppsuite_flutter/native/translate/build/preppsuite_translate.dll" \
+  "$log/preppsuite_translate.dll" ||
+  fail "Übersetzer-DLL fehlt, siehe ~/$remote_linux/translate-win.log"
 
 # --- Windows --------------------------------------------------------------
 step "Windows auf $windows"
@@ -190,9 +205,12 @@ ssh "$windows" "cmd /c \"if exist $winback rmdir /s /q $winback\"" || true
 ssh "$windows" "cmd /c \"mkdir $winback\""
 scp -q "$archive" "$windows:$win/src.tar.gz"
 ssh "$windows" "cmd /c \"cd /d $winback && tar -xzf src.tar.gz && \
-  mkdir src\\preppsuite_flutter\\native\\zim_xapian\\build\""
+  mkdir src\\preppsuite_flutter\\native\\zim_xapian\\build && \
+  mkdir src\\preppsuite_flutter\\native\\translate\\build\""
 scp -q "$log/zim_xapian.dll" \
   "$windows:$win/src/preppsuite_flutter/native/zim_xapian/build/zim_xapian.dll"
+scp -q "$log/preppsuite_translate.dll" \
+  "$windows:$win/src/preppsuite_flutter/native/translate/build/preppsuite_translate.dll"
 scp -q "$ROOT/tool/windows_build.ps1" "$windows:$win/windows_build.ps1"
 ssh "$windows" "powershell -NoProfile -ExecutionPolicy Bypass -File \
   $winback\\windows_build.ps1 -Work $winback -Version $version \

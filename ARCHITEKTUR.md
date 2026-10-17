@@ -877,11 +877,16 @@ model list, the packs on this device, and the FFI binding to the native
 shim in `native/translate/`, which links Mozilla's translation engine
 statically. **The library is optional, like the Xapian shim**: a build
 without it runs and the screen says the translator is not part of it.
-Only the Mac package carries it so far; `tool/release.sh` builds it
-(`native/translate/build_macos.sh`, incremental) before `flutter build
-macos` and refuses a Mac package without
-`Contents/Frameworks/libpreppsuite_translate.dylib`, because the Xcode
-phase that copies it only warns when it is missing. Model packs are
+Every release package carries it except armeabi-v7a (Marian's ARM
+kernels are AArch64 only) and iOS. The release builds it before each
+package and refuses a package without it, because the Xcode phase, the
+Linux/Windows CMake rules and Gradle all only warn when it is missing:
+`build_macos.sh` before `flutter build macos`, `build_android.sh`
+(arm64, API 28 -- Bionic lacks iconv and glob below it) before the APKs,
+and on the Linux machine `build_linux.sh` before the app and
+`build_windows.sh` (mingw-w64, like Xapian) after it, the DLL then going
+to the Windows machine with the Xapian one. The start test insists on
+it under Linux and Windows. Model packs are
 checked against Mozilla's SHA-256 and get their manifest last; the list's
 `filter_expression` is read only in the one shape it has used (OS and
 channel, `==`/`!=`, `||`/`&&`) and a record in any other shape is passed

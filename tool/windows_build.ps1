@@ -1,6 +1,7 @@
 # Runs on the Windows build machine (#125). Called by tool/release.sh after
-# the source archive was unpacked into $Work and the Xapian DLL from the
-# Linux machine was put into native\zim_xapian\build.
+# the source archive was unpacked into $Work and the Xapian and translator
+# DLLs from the Linux machine were put into native\zim_xapian\build and
+# native\translate\build.
 #
 # Builds the app and packs the release folder into one zip. Unsigned: the
 # signed distribution road is tool/windows_release.ps1, which needs an
@@ -16,6 +17,7 @@ $ErrorActionPreference = 'Stop'
 $env:PATH = "$ToolPath;" + $env:PATH
 Set-Location (Join-Path $Work 'src\preppsuite_flutter')
 if (-not (Test-Path native\zim_xapian\build\zim_xapian.dll)) { throw 'zim_xapian.dll fehlt' }
+if (-not (Test-Path native\translate\build\preppsuite_translate.dll)) { throw 'preppsuite_translate.dll fehlt' }
 flutter pub get
 if ($LASTEXITCODE -ne 0) { throw 'pub get fehlgeschlagen' }
 flutter build windows --release --build-name $Version --build-number $BuildNumber
@@ -24,6 +26,7 @@ if ($LASTEXITCODE -ne 0) { throw 'build fehlgeschlagen' }
 $release = 'build\windows\x64\runner\Release'
 Write-Output "== Dateien: $((Get-ChildItem $release -Recurse -File).Count) =="
 if (-not (Test-Path (Join-Path $release 'zim_xapian.dll'))) { throw 'zim_xapian.dll nicht im Paket' }
+if (-not (Test-Path (Join-Path $release 'preppsuite_translate.dll'))) { throw 'preppsuite_translate.dll nicht im Paket' }
 
 # The start test (#142): the package's native libraries, loaded for real
 # in a running app. Works over ssh without a signed-in desktop.

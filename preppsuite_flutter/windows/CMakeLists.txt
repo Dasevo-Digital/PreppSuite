@@ -148,6 +148,21 @@ else()
     "(native/zim_xapian/build_windows.sh baut sie)")
 endif()
 
+# The offline translator (#182, #184), when native/translate has been
+# built. Optional like the Xapian shim: without it the app builds and
+# runs, and the translator screen says it is not part of this build.
+set(PREPPSUITE_TRANSLATE_LIBRARY
+  "${CMAKE_CURRENT_SOURCE_DIR}/../native/translate/build/preppsuite_translate.dll")
+if(EXISTS "${PREPPSUITE_TRANSLATE_LIBRARY}")
+  install(FILES "${PREPPSUITE_TRANSLATE_LIBRARY}"
+    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+    COMPONENT Runtime)
+else()
+  message(STATUS
+    "preppsuite_translate fehlt: kein Übersetzer in diesem Build "
+    "(native/translate/build_windows.sh baut ihn)")
+endif()
+
 # Copy the native assets provided by the build.dart from all packages.
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/windows/")
 install(DIRECTORY "${NATIVE_ASSETS_DIR}"

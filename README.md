@@ -379,8 +379,9 @@ Modelle, mit denen Firefox übersetzt, MPL 2.0; 21 bis 47 MB je
 Richtung), danach geht es offline; zwischen zwei Sprachen ohne Englisch
 übersetzt er über Englisch und braucht zwei Pakete. Kein Text verlässt
 das Gerät. Unter jeder Übersetzung steht, dass sie maschinell ist; sie
-lässt sich wie ein Satz des Sprachführers groß zeigen und vorlesen. Bisher
-nur im Mac-Paket; Linux, Windows und Android folgen
+lässt sich wie ein Satz des Sprachführers groß zeigen und vorlesen. Auf
+macOS, Linux, Windows und Android ab Version 9 (64-Bit); im
+armeabi-v7a-Paket und auf dem iPhone fehlt er
 ([Stand](docs/uebersetzer-offline-plan.md)).
 
 **Karte offline.** Im dunklen Erscheinungsbild ist auch die Karte dunkel –

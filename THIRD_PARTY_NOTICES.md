@@ -33,9 +33,10 @@ ihre jeweils eigenen Bedingungen.
   Quelle `xapian.org`, Bezug und Prüfsumme in
   `preppsuite_flutter/native/zim_xapian/xapian_source.sh`
 - Übersetzungs-Engine aus `mozilla/translations` (Verzeichnis `inference/`,
-  bisher nur im Mac-Paket) — MPL-2.0; Quelle
-  `github.com/mozilla/translations`, Commit und die vier geänderten Zeilen
-  in `preppsuite_flutter/native/translate/translate_source.sh`. Statisch
+  in den Paketen für macOS, Linux, Windows und Android arm64) — MPL-2.0;
+  Quelle `github.com/mozilla/translations`, Commit und die sechs
+  geänderten Stellen in
+  `preppsuite_flutter/native/translate/translate_source.sh`. Statisch
   enthalten: Marian (MIT), intgemm (MIT), SentencePiece (Apache-2.0), Ruy
   (Apache-2.0) mit cpuinfo (BSD-2-Clause), simd_utils (BSD-2-Clause),
   ssplit-cpp (Apache-2.0), PCRE2 10.39 (BSD-3-Clause), yaml-cpp (MIT),
