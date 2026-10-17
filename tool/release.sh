@@ -161,8 +161,10 @@ step "Android"
 apks="$APP_DIR/build/app/outputs/flutter-apk"
 cp "$apks/app-arm64-v8a-release-rotated.apk" "$out/PreppSuite-$version-Android-arm64-v8a.apk"
 cp "$apks/app-armeabi-v7a-release-rotated.apk" "$out/PreppSuite-$version-Android-armeabi-v7a.apk"
-unzip -l "$out/PreppSuite-$version-Android-arm64-v8a.apk" |
-  grep -q 'lib/arm64-v8a/libpreppsuite_translate.so' ||
+# Listed into a file, not piped into grep -q: under pipefail the early
+# close of the pipe fails unzip, and with it the check.
+unzip -l "$out/PreppSuite-$version-Android-arm64-v8a.apk" > "$log/apk-arm64.txt"
+grep -q 'lib/arm64-v8a/libpreppsuite_translate.so' "$log/apk-arm64.txt" ||
   fail "arm64-APK ohne Übersetzer-Bibliothek"
 
 # --- Device check in the iPhone simulator ---------------------------------
