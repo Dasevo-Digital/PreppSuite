@@ -535,4 +535,103 @@ Vogelsbergkreis;06535;HE
       expect(counter.batches, 0);
     });
   });
+
+  group('the detail a warning brought (#177)', () {
+    // The real case, 2026-10-16: a bomb disposal in Braunschweig. The
+    // nationwide feed brought it with its text; the household's district
+    // dashboard came after, compact, and its pass narrowed the key -- and
+    // wrote the text, the instructions and the area away with it.
+    const id = 'mow.DE-NI-BS-SE129-20261016-157-000';
+    final compact = raw(id: id, startDate: '2026-10-16T09:49:32+02:00');
+    final detailed = compact.withDetails(
+      description: 'Aus Sicherheitsgründen ist das Gebiet zu verlassen.',
+      instruction: 'Verlassen Sie sofort das betroffene Gebiet.',
+      areaDescription: 'Braunschweig Leiferde/Stöckheim',
+    );
+
+    Future<Warning> stored() async => (await db.warningsBySource('bbk'))[id]!;
+
+    test('the district pass keeps what the nationwide pass brought', () async {
+      await ingest.ingestBbk([detailed], countryCode: 'DE');
+      await ingest.ingestBbk(
+        [compact],
+        countryCode: 'DE',
+        regionKeyOverride: '03101',
+      );
+
+      final warning = await stored();
+      expect(warning.regionKey, '03101');
+      expect(warning.description, detailed.description);
+      expect(warning.instruction, detailed.instruction);
+      expect(warning.areaDescription, detailed.areaDescription);
+    });
+
+    test(
+      'a detail arriving later is written, and the district stays',
+      () async {
+        await ingest.ingestBbk([compact], countryCode: 'DE');
+        await ingest.ingestBbk(
+          [compact],
+          countryCode: 'DE',
+          regionKeyOverride: '03101',
+        );
+        expect((await stored()).description, isNull);
+
+        // The next nationwide pass, whose detail request went through.
+        final notifiable = await ingest.ingestBbk([
+          detailed,
+        ], countryCode: 'DE');
+
+        final warning = await stored();
+        expect(warning.description, detailed.description);
+        expect(warning.regionKey, '03101', reason: 'widened back to the Land');
+        expect(notifiable, isEmpty, reason: 'nothing new to announce');
+      },
+    );
+
+    test(
+      'a newer version without its detail does not keep the old text',
+      () async {
+        await ingest.ingestBbk([detailed], countryCode: 'DE');
+        await ingest.ingestBbk([
+          raw(id: id, startDate: '2026-10-16T13:37:37+02:00'),
+        ], countryCode: 'DE');
+
+        // Last version's instructions under this version's headline would
+        // be worse than none; the next poll asks for the new detail.
+        expect((await stored()).instruction, isNull);
+      },
+    );
+
+    test(
+      'an unchanged warning that has its detail is not written again',
+      () async {
+        await ingest.ingestBbk([detailed], countryCode: 'DE');
+        await ingest.ingestBbk([compact], countryCode: 'DE');
+
+        expect((await stored()).description, detailed.description);
+      },
+    );
+
+    test('text stored as HTML before this is cleaned once', () async {
+      // What a device that polled before the fix holds: the detail as the
+      // feed sent it, `<br/>` and `&quot;` included.
+      await ingest.ingestBbk([
+        compact.withDetails(
+          description: 'Gebiet &quot;Stöckheim&quot;<br/>verlassen.',
+          instruction: 'Meiden Sie das Gebiet.<br/>Radio an.',
+        ),
+      ], countryCode: 'DE');
+
+      await ingest.ingestBbk([compact], countryCode: 'DE');
+      final cleaned = await stored();
+      expect(cleaned.description, 'Gebiet "Stöckheim"\nverlassen.');
+      expect(cleaned.instruction, 'Meiden Sie das Gebiet.\nRadio an.');
+
+      // And from then on it is left alone.
+      final before = cleaned.updatedAt;
+      await ingest.ingestBbk([compact], countryCode: 'DE');
+      expect((await stored()).updatedAt, before);
+    });
+  });
 }

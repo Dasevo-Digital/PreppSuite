@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart' show Value;
@@ -258,6 +259,136 @@ void main() {
       expect(requested, contains('$bbkBase/dashboard/031010000000.json'));
     },
   );
+
+  group('the detail behind a warning (#177)', () {
+    // The bomb disposal in Braunschweig on 2026-10-16, as the feeds carried
+    // it: in the nationwide MoWaS map, in the district dashboard, and with
+    // its CAP detail -- HTML line breaks and all -- behind both.
+    const id = 'mow.DE-NI-BS-SE129-20261016-157-000';
+    const title =
+        'Entschärfung einer Weltkriegsbombe - Braunschweig Leiferde/Stöckheim';
+    const sent = '2026-10-16T09:49:32+02:00';
+    final mapData = jsonEncode([
+      {
+        'id': id,
+        'version': 1,
+        'startDate': sent,
+        'severity': 'Minor',
+        'type': 'Alert',
+        'i18nTitle': {'de': title},
+      },
+    ]);
+    final districtDashboard = jsonEncode([
+      {
+        'id': id,
+        'sent': sent,
+        'i18nTitle': {'de': title},
+        'payload': {
+          'data': {'severity': 'Minor', 'headline': title},
+        },
+      },
+    ]);
+    final detail = jsonEncode({
+      'identifier': id,
+      'sender': 'DE-NI-BS-SE129',
+      'info': [
+        {
+          'language': 'DE',
+          'description':
+              'Im Bereich Braunschweig Leiferde/Stöckheim kommt es zu einer '
+              'Entschärfung einer Weltkriegsbombe.<br/>Aus '
+              'Sicherheitsgründen ist das Gebiet in einem Umkreis von 1000 '
+              'Meter unverzüglich zu verlassen.',
+          'instruction':
+              'Meiden Sie das betroffene Gebiet.<br/>Verlassen Sie sofort '
+              'das betroffene Gebiet.',
+          'area': [
+            {'areaDesc': 'Braunschweig Leiferde/Stöckheim'},
+          ],
+        },
+      ],
+    });
+    const dashboardUrl = '$bbkBase/dashboard/031010000000.json';
+    const detailUrl = '$bbkBase/warnings/$id.json';
+
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    Future<Warning> stored() async => (await db.warningsBySource('bbk'))[id]!;
+
+    test(
+      'the district pass keeps the text the nationwide pass fetched',
+      () async {
+        await service({
+          ...allBbkSources(mowasBody: mapData),
+          dashboardUrl: districtDashboard,
+          detailUrl: detail,
+        }).poll(countryCode: 'DE', kreisSchluessel: '03101');
+
+        final warning = await stored();
+        expect(warning.regionKey, '03101');
+        expect(warning.areaDescription, 'Braunschweig Leiferde/Stöckheim');
+        expect(
+          warning.description,
+          'Im Bereich Braunschweig Leiferde/Stöckheim kommt es zu einer '
+          'Entschärfung einer Weltkriegsbombe.\nAus Sicherheitsgründen ist '
+          'das Gebiet in einem Umkreis von 1000 Meter unverzüglich zu '
+          'verlassen.',
+        );
+        expect(
+          warning.instruction,
+          'Meiden Sie das betroffene Gebiet.\n'
+          'Verlassen Sie sofort das betroffene Gebiet.',
+        );
+      },
+    );
+
+    test('a detail that failed is asked for again on the next poll', () async {
+      final feeds = {
+        ...allBbkSources(mowasBody: mapData),
+        dashboardUrl: districtDashboard,
+      };
+      await service(feeds).poll(countryCode: 'DE', kreisSchluessel: '03101');
+      expect((await stored()).instruction, isNull);
+
+      await service({
+        ...feeds,
+        detailUrl: detail,
+      }).poll(countryCode: 'DE', kreisSchluessel: '03101');
+
+      final warning = await stored();
+      expect(warning.instruction, contains('Verlassen Sie sofort'));
+      expect(warning.regionKey, '03101');
+    });
+
+    test('asking again is capped per poll', () async {
+      final many = jsonEncode([
+        for (var i = 0; i < 30; i++)
+          {
+            'id': 'mow.DE-NI-BS-SE129-20261016-157-${100 + i}',
+            'startDate': sent,
+            'severity': 'Minor',
+            'i18nTitle': {'de': title},
+          },
+      ]);
+      await service(allBbkSources(mowasBody: many)).poll(countryCode: 'DE');
+
+      final asked = <String>[];
+      final client = FixtureHttpClient(
+        allBbkSources(mowasBody: many),
+        onRequest: asked.add,
+      );
+      await WarningPollService(
+        database: db,
+        bbkClient: BbkClient(httpClient: client),
+        meteoAlarmClient: MeteoAlarmClient(httpClient: client),
+      ).poll(countryCode: 'DE');
+
+      expect(
+        asked.where((url) => url.contains('/warnings/')),
+        hasLength(WarningPollService.detailRetriesPerPoll),
+      );
+    });
+  });
 
   group('pendingNotifications', () {
     /// The captured feeds contain only `Minor` entries, so anything that

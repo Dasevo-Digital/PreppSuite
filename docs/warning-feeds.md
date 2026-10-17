@@ -110,6 +110,42 @@ schlechte Antwort sämtliche aktiven Warnungen stillschweigend zurückziehen.
 MeteoAlarm-Meldungen übernehmen hingegen `cap:expires` aus dem Feed und
 laufen anhand dieses Zeitpunkts ab.
 
+## Die Detailseite einer Warnung
+
+`mapData.json` und `dashboard/{ARS}.json` sind knapp: Kennung, Zeit,
+Warnstufe, Titel. Beschreibung, Handlungsempfehlungen, Gebiet und Fläche
+stehen nur in `warnings/{id}.json`, dem CAP-Datensatz dahinter. Dieselben
+Endpunkte nutzt die NINA-App des BBK und die NINA-Integration von Home
+Assistant; „NINA-Daten“ sind also keine weitere Quelle, sondern diese.
+Am 17.10.2026 live geprüft: Alle sechs Quellen haben hinter jeder Warnung
+eine Detailseite mit Beschreibung, Empfehlungen und Gebiet. Eine beendete
+Warnung antwortet mit einer Weiterleitung ins Archiv
+(`archive/alerts/{id}?contentType=json`), der der Client folgt.
+
+`WarningPollService` holt die Detailseite für neue und geänderte Warnungen
+und für gespeicherte, die noch keine haben, höchstens
+`detailRetriesPerPoll` (12) je Abruf. Das Nachholen gibt es, weil eine
+fehlgeschlagene Detailabfrage sonst endgültig war: Die Warnung galt danach
+als unverändert und wurde nie wieder gefragt.
+
+**Ein knapper Eintrag löscht keine Details** (#177). Der Kreis-Abruf läuft
+nach dem bundesweiten und schreibt die Zeile neu, um den Schlüssel vom Land
+auf den Kreis zu verengen. Bis 2.5.5 schrieb er dabei seine eigenen, leeren
+Felder hinein: Die Entschärfung einer Weltkriegsbombe in Braunschweig am
+16.10.2026 stand mit Überschrift und „keine Handlungsempfehlungen“ in der
+App, während NINA den Räumungsradius von 1000 m und die Sammelunterkunft
+zeigte. Jetzt behält eine unveränderte Warnung, was sie hat, wo ein Abruf
+nichts bringt. Eine *neuere* Fassung übernimmt den alten Text dagegen
+nicht; die Empfehlungen der vorigen Fassung unter der Überschrift der neuen
+wären schlimmer als keine, und der nächste Abruf holt die neuen.
+
+**Die Texte sind HTML.** MoWaS-Beschreibungen tragen Zeilenumbrüche als
+`<br/>` und Anführungszeichen als `&quot;`; DWD und LHP schicken Klartext.
+`cap_text.dart` macht daraus Text, nimmt aber nur die Tags heraus, die
+vorkommen, damit ein ungeschütztes „< 3 m“ einer anderen Quelle nicht
+verschwindet. Schon gespeicherte BBK-Warnungen werden beim nächsten Abruf
+einmal bereinigt.
+
 ## MeteoAlarm-Gebiete auf Kreise abbilden
 
 `areaDesc` nennt Gebiete in Worten — „Kreis Ahrweiler", „Stadt Ulm" —,

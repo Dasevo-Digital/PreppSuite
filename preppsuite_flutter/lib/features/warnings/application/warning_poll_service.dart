@@ -186,10 +186,20 @@ class WarningPollService {
     );
   }
 
+  /// How many stored warnings without a detail one poll asks again for.
+  ///
+  /// Every source has a detail behind every warning (all six checked live
+  /// on 2026-10-17), so a row without one is a request that failed, and
+  /// asking again repairs it. The cap is for the case that proves this
+  /// wrong: a source that stops serving details must cost a few requests
+  /// a poll, not three hundred every fifteen minutes.
+  static const detailRetriesPerPoll = 12;
+
   /// BBK's map feed is deliberately small. Fetch full CAP payloads only for
-  /// new or changed warnings; unchanged rows already carry their cached text.
-  /// Four workers keep a weather event with many notices from serialising a
-  /// refresh without opening an unbounded number of sockets.
+  /// new or changed warnings, and for stored ones that never got theirs;
+  /// the rest already carry their cached text. Four workers keep a weather
+  /// event with many notices from serialising a refresh without opening an
+  /// unbounded number of sockets.
   Future<List<BbkRawWarning>> _detailsForChanged(
     List<BbkRawWarning> warnings,
   ) async {
@@ -199,6 +209,7 @@ class WarningPollService {
     final stored = await _db.warningsBySource(WarningSource.bbk.name);
     final result = List<BbkRawWarning>.from(warnings);
     var next = 0;
+    var retries = 0;
     Future<void> worker() async {
       while (next < warnings.length) {
         final at = next++;
@@ -207,7 +218,11 @@ class WarningPollService {
         final sent = DateTime.tryParse(warning.startDate)?.toUtc();
         final changed =
             existing == null || (sent != null && sent.isAfter(existing.sent));
-        if (changed) result[at] = await _bbk.fetchDetails(warning);
+        final missing =
+            !changed &&
+            lacksBbkDetail(existing) &&
+            retries++ < detailRetriesPerPoll;
+        if (changed || missing) result[at] = await _bbk.fetchDetails(warning);
       }
     }
 

@@ -6,6 +6,7 @@ import '../../../model/categories.dart';
 
 import '../../../local_db/database.dart';
 import 'bbk_client.dart';
+import 'cap_text.dart';
 import '../../household/application/german_states.dart';
 import 'dwd_areas.dart';
 import 'meteoalarm_client.dart';
@@ -175,7 +176,8 @@ class WarningIngest {
     required DateTime? expires,
     required DateTime sent,
   }) {
-    if (existing != null && !sent.isAfter(existing.sent)) {
+    final unchanged = existing != null && !sent.isAfter(existing.sent);
+    if (unchanged) {
       // One exception to "unchanged is a no-op": a row that could not be
       // placed when it arrived and can be placed now. That happens when
       // this app learns a new way to read a region out of a warning --
@@ -191,8 +193,39 @@ class WarningIngest {
       // the same warning is for this district. Without this the district
       // never arrived, and a warning here could not be told from one at
       // the other end of the Land.
-      if (!_narrows(existing.regionKey, regionKey)) return null;
+      //
+      // And a row that never got its detail, getting it now: the first
+      // detail request can fail, and the next poll asks again for exactly
+      // these rows (#177). Or one stored before its text was made plain,
+      // which is rewritten once, cleaned -- MoWaS warnings run for weeks,
+      // and theirs would otherwise keep their `<br/>` until they end.
+      final fillsIn =
+          lacksBbkDetail(existing) &&
+          _hasDetail(description, instruction, areaDescription, polygonsJson);
+      if (!_narrows(existing.regionKey, regionKey) &&
+          !fillsIn &&
+          // BBK only: its new text arrives plain from the detail fetch.
+          // MeteoAlarm's is written as the feed has it, and a row that
+          // never matched its cleaned self would be rewritten every poll.
+          !(source == WarningSource.bbk && _storedAsHtml(existing))) {
+        return null;
+      }
     }
+
+    // An unchanged warning keeps what it already had wherever this pass
+    // brings nothing. The per-Kreis dashboard is compact -- it carries no
+    // text, no area and no polygon -- and its pass rewrites the row to
+    // narrow the key. Written as it came, that replaced the description,
+    // the instructions and the area with nothing, for good: the warning
+    // was unchanged from then on, so nothing asked again. A bomb disposal
+    // in Braunschweig showed its headline and "no instructions" while
+    // NINA showed the evacuation radius (#177). Nor may a pass that only
+    // fills in the text widen a district back to its Land.
+    String? kept(String? incoming, String? stored) =>
+        incoming ?? (unchanged ? capPlainText(stored) : null);
+    final placed = unchanged && !_narrows(existing.regionKey, regionKey)
+        ? existing.regionKey
+        : regionKey;
 
     final escalated =
         existing != null &&
@@ -208,15 +241,17 @@ class WarningIngest {
         source: source.name,
         externalId: externalId,
         countryCode: countryCode,
-        regionKey: Value(regionKey),
+        regionKey: Value(placed),
         severity: severity.name,
         eventType: eventType,
         headline: headline,
-        description: Value(description),
-        instruction: Value(instruction),
-        areaDescription: Value(areaDescription),
-        senderContact: Value(senderContact),
-        polygonsJson: Value(polygonsJson),
+        description: Value(kept(description, existing?.description)),
+        instruction: Value(kept(instruction, existing?.instruction)),
+        areaDescription: Value(
+          kept(areaDescription, existing?.areaDescription),
+        ),
+        senderContact: Value(kept(senderContact, existing?.senderContact)),
+        polygonsJson: Value(kept(polygonsJson, existing?.polygonsJson)),
         effective: effective,
         expires: Value(expires),
         sent: sent,
@@ -335,6 +370,36 @@ String? bbkRegionFromId(String id) {
 /// Whether [next] says more precisely where a warning applies than
 /// [stored]: a key where there was none, or a district of the Land that
 /// was stored.
+/// Whether a warning carries any of what only its CAP detail brings.
+bool _hasDetail(
+  String? description,
+  String? instruction,
+  String? areaDescription,
+  String? polygonsJson,
+) =>
+    description != null ||
+    instruction != null ||
+    areaDescription != null ||
+    polygonsJson != null;
+
+/// Whether a stored warning's text is still the HTML the feed sent rather
+/// than the plain text [capPlainText] makes of it.
+bool _storedAsHtml(Warning warning) => [
+  warning.description,
+  warning.instruction,
+  warning.areaDescription,
+  warning.senderContact,
+].any((text) => text != null && capPlainText(text) != text);
+
+/// Whether a stored BBK warning still lacks its CAP detail entirely, which
+/// is what the poll asks again for.
+bool lacksBbkDetail(Warning warning) => !_hasDetail(
+  warning.description,
+  warning.instruction,
+  warning.areaDescription,
+  warning.polygonsJson,
+);
+
 bool _narrows(String? stored, String? next) {
   if (next == null) return false;
   if (stored == null) return true;

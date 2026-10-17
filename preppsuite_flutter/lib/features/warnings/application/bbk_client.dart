@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'cap_text.dart';
 import 'warning_http.dart';
 import '../../../core/http_client.dart';
 
@@ -153,7 +154,12 @@ class BbkClient {
 
   /// Loads the German CAP detail behind a compact map/dashboard entry.
   /// A failed detail request deliberately returns the compact warning: the
-  /// alert itself remains useful and a later poll can fill its offline cache.
+  /// alert itself remains useful, and the next poll asks again for any
+  /// stored warning that still has no detail (see
+  /// `WarningPollService._detailsForChanged`).
+  ///
+  /// A warning that has ended answers with a redirect to the archive; the
+  /// client follows it, so a late detail still arrives.
   Future<BbkRawWarning> fetchDetails(BbkRawWarning warning) async {
     try {
       final response = await getWarningResponse(
@@ -207,13 +213,13 @@ class BbkClient {
         }
       }
 
-      String? text(Object? value) =>
-          value is String && value.trim().isNotEmpty ? value.trim() : null;
+      // Plain text, not the HTML the MoWaS payloads carry. See
+      // [capPlainText].
       return warning.withDetails(
-        description: text(selected['description']),
-        instruction: text(selected['instruction']),
-        areaDescription: areaNames.isEmpty ? null : areaNames.join('\n'),
-        senderContact: text(contact ?? decoded['sender']),
+        description: capPlainText(selected['description']),
+        instruction: capPlainText(selected['instruction']),
+        areaDescription: capPlainText(areaNames.join('\n')),
+        senderContact: capPlainText(contact ?? decoded['sender']),
         polygons: polygons,
       );
     } on Object {
