@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/morse/presentation/morse_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
@@ -6,10 +7,14 @@ import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'accessibility.dart';
 
 void main() {
+  /// The key's clock, moved by hand.
+  var now = Duration.zero;
+
   Future<void> pump(
     WidgetTester tester, {
     Size size = const Size(400, 800),
   }) async {
+    now = Duration.zero;
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -18,7 +23,7 @@ void main() {
         locale: const Locale('de'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const MorseScreen(),
+        home: MorseScreen(keyClock: () => now),
       ),
     );
     await tester.pump();
@@ -63,6 +68,72 @@ void main() {
 
     expect(find.text('A□B'), findsOneWidget);
     expect(find.text('Unbekannte Zeichen (□): ......-'), findsOneWidget);
+  });
+
+  testWidgets('presses on the key become a message (#191)', (tester) async {
+    await pump(tester, size: const Size(400, 1200));
+    await tester.tap(find.text('Morse → Text'));
+    await tester.pump();
+
+    final key = find.text('Morsetaste');
+    Future<void> press(int milliseconds, {int after = 200}) async {
+      now += Duration(milliseconds: after);
+      final gesture = await tester.startGesture(tester.getCenter(key));
+      now += Duration(milliseconds: milliseconds);
+      await gesture.up();
+      await tester.pump();
+    }
+
+    // S, a letter gap, O, a letter gap, S: 200 ms a dot.
+    for (final length in [200, 200, 200]) {
+      await press(length);
+    }
+    await press(600, after: 600);
+    await press(600);
+    await press(600);
+    await press(200, after: 600);
+    await press(200);
+    await press(200);
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.controller!.text, '... --- ...');
+    expect(find.text('SOS'), findsOneWidget);
+  });
+
+  testWidgets('the space bar keys as well, and the result is read', (
+    tester,
+  ) async {
+    await pump(tester, size: const Size(400, 1200));
+    await tester.tap(find.text('Morse → Text'));
+    await tester.pump();
+    // Focus the key by pressing it once, then start again.
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.text('Morsetaste')),
+    );
+    await gesture.up();
+    await tester.tap(find.text('Neu beginnen'));
+    await tester.pump();
+
+    Future<void> space(int milliseconds, {int after = 200}) async {
+      now += Duration(milliseconds: after);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
+      now += Duration(milliseconds: milliseconds);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
+      await tester.pump();
+    }
+
+    // S, a letter gap, O, a letter gap, S.
+    for (final length in [200, 200, 200]) {
+      await space(length);
+    }
+    await space(600, after: 600);
+    await space(600);
+    await space(600);
+    await space(200, after: 600);
+    await space(200);
+    await space(200);
+
+    expect(find.text('SOS'), findsOneWidget);
   });
 
   testWidgets('the chart has every group and names its source', (

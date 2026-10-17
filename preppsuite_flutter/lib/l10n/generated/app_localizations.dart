@@ -15996,6 +15996,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Translate “{query}”'**
   String phrasebookTranslateQuery(String query);
+
+  /// No description provided for @morseKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Morse key'**
+  String get morseKey;
+
+  /// No description provided for @morseKeyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press in time with the light you see: short for a dot, long for a dash. The app learns your speed; the first signs are corrected once there is a short and a long press. With a keyboard, the space bar works too.'**
+  String get morseKeyHint;
+
+  /// No description provided for @morseKeyClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Start again'**
+  String get morseKeyClear;
 }
 
 class _AppLocalizationsDelegate

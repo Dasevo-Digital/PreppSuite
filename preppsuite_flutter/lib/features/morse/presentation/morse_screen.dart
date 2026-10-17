@@ -6,6 +6,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/morse_code.dart';
+import '../application/morse_keyer.dart';
 import '../../home/application/signal_tone.dart';
 import '../../home/presentation/signal_tone_player.dart';
 
@@ -16,7 +17,11 @@ import '../../home/presentation/signal_tone_player.dart';
 /// rhythm everybody knows; this sends whatever somebody types, to somebody
 /// who can read it -- and reads back what they flash in return.
 class MorseScreen extends StatefulWidget {
-  const MorseScreen({super.key});
+  const MorseScreen({super.key, @visibleForTesting this.keyClock});
+
+  /// The clock the Morse key is timed with; a test's own, so presses can
+  /// be held for an exact length.
+  final Duration Function()? keyClock;
 
   @override
   State<MorseScreen> createState() => _MorseScreenState();
@@ -37,6 +42,16 @@ class _MorseScreenState extends State<MorseScreen>
   final _stopwatch = Stopwatch();
   Timer? _ticker;
   MorseRhythm? _rhythm;
+
+  /// Keying by hand (#191): presses in time with a lamp become the code
+  /// in the field. [_keyedFrom] is what the field held before this run of
+  /// presses, so the keyer can rewrite its own part as it learns the
+  /// speed.
+  final _keyer = MorseKeyer();
+  final _keyClock = Stopwatch()..start();
+  final _keyFocus = FocusNode(debugLabel: 'morse key');
+  var _keyedFrom = '';
+  var _keyDown = false;
 
   /// Sounding what the lamp flashes (#188), one choice with the distress
   /// signal's.
@@ -65,6 +80,7 @@ class _MorseScreenState extends State<MorseScreen>
   void dispose() {
     _stop();
     unawaited(_tone.dispose());
+    _keyFocus.dispose();
     _tabs.dispose();
     _input.dispose();
     super.dispose();
@@ -182,6 +198,7 @@ class _MorseScreenState extends State<MorseScreen>
                 ? encodeMorse(_input.text).format()
                 : decodeMorse(_input.text).text;
             _toMorse = selection.first;
+            _keyer.reset();
             _input.text = previous;
           }),
         ),
@@ -190,7 +207,9 @@ class _MorseScreenState extends State<MorseScreen>
           controller: _input,
           minLines: 2,
           maxLines: 6,
-          onChanged: (_) => setState(() {}),
+          // Typing by hand ends a run of keyed presses: the keyer must not
+          // rewrite what somebody has just corrected.
+          onChanged: (_) => setState(_keyer.reset),
           decoration: InputDecoration(
             labelText: _toMorse ? l10n.morseTextLabel : l10n.morseCodeLabel,
             helperText: _toMorse ? null : l10n.morseCodeHint,
@@ -198,6 +217,10 @@ class _MorseScreenState extends State<MorseScreen>
             border: const OutlineInputBorder(),
           ),
         ),
+        if (!_toMorse) ...[
+          const SizedBox(height: 12),
+          _morseKey(context, l10n),
+        ],
         const SizedBox(height: 12),
         Card(
           margin: EdgeInsets.zero,
@@ -299,6 +322,88 @@ class _MorseScreenState extends State<MorseScreen>
           const SizedBox(height: 8),
           Text(l10n.morseLampHint, style: theme.textTheme.bodySmall),
         ],
+      ],
+    );
+  }
+
+  void _keyPress() {
+    if (_keyDown) return;
+    if (_keyer.isEmpty) {
+      final before = _input.text.trimRight();
+      _keyedFrom = before.isEmpty ? '' : '$before / ';
+    }
+    _keyer.down(widget.keyClock?.call() ?? _keyClock.elapsed);
+    setState(() => _keyDown = true);
+  }
+
+  void _keyRelease() {
+    if (!_keyDown) return;
+    _keyer.up(widget.keyClock?.call() ?? _keyClock.elapsed);
+    _input.text = _keyedFrom + _keyer.code;
+    setState(() => _keyDown = false);
+  }
+
+  /// A large key, pressed for as long as the light is on. Raw pointer
+  /// events rather than a tap recogniser, which waits a moment before it
+  /// reports a press down and would make every press look shorter; the
+  /// space bar works the same where there is a keyboard.
+  Widget _morseKey(BuildContext context, AppLocalizations l10n) {
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Focus(
+          focusNode: _keyFocus,
+          onKeyEvent: (node, event) {
+            if (event.logicalKey != LogicalKeyboardKey.space) {
+              return KeyEventResult.ignored;
+            }
+            if (event is KeyDownEvent) _keyPress();
+            if (event is KeyUpEvent) _keyRelease();
+            return KeyEventResult.handled;
+          },
+          child: Semantics(
+            button: true,
+            label: l10n.morseKey,
+            child: Listener(
+              onPointerDown: (_) {
+                _keyFocus.requestFocus();
+                _keyPress();
+              },
+              onPointerUp: (_) => _keyRelease(),
+              onPointerCancel: (_) => _keyRelease(),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 60),
+                height: 120,
+                decoration: BoxDecoration(
+                  color: _keyDown ? scheme.primary : scheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  l10n.morseKey,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: _keyDown
+                        ? scheme.onPrimary
+                        : scheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(l10n.morseKeyHint, style: Theme.of(context).textTheme.bodySmall),
+        Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: TextButton(
+            onPressed: () => setState(() {
+              _keyer.reset();
+              _input.clear();
+            }),
+            child: Text(l10n.morseKeyClear),
+          ),
+        ),
       ],
     );
   }

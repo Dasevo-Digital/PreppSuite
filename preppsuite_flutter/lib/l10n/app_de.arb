@@ -4083,5 +4083,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "morseKey": "Morsetaste",
+  "morseKeyHint": "Im Takt des Lichts drücken, das du siehst: kurz für einen Punkt, lang für einen Strich. Die App lernt dein Tempo; die ersten Zeichen werden berichtigt, sobald ein kurzer und ein langer Druck da sind. Mit Tastatur geht auch die Leertaste.",
+  "morseKeyClear": "Neu beginnen"
 }

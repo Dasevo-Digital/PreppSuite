@@ -2646,5 +2646,8 @@
   "signalToneHint": "El sonido llega adonde no llega la luz: entre escombros, tras las esquinas, en la niebla.",
   "signalToneUnavailable": "El sonido no está disponible en este dispositivo. La luz funciona igualmente.",
   "phraseSpeak": "Leer en voz alta",
-  "phrasebookTranslateQuery": "Traducir «{query}»"
+  "phrasebookTranslateQuery": "Traducir «{query}»",
+  "morseKey": "Tecla Morse",
+  "morseKeyHint": "Pulsa al ritmo de la luz que ves: corto para un punto, largo para una raya. La aplicación aprende tu ritmo; los primeros signos se corrigen en cuanto hay una pulsación corta y una larga. Con teclado también sirve la barra espaciadora.",
+  "morseKeyClear": "Empezar de nuevo"
 }

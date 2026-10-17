@@ -9645,4 +9645,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String phrasebookTranslateQuery(String query) {
     return 'Translate “$query”';
   }
+
+  @override
+  String get morseKey => 'Morse key';
+
+  @override
+  String get morseKeyHint =>
+      'Press in time with the light you see: short for a dot, long for a dash. The app learns your speed; the first signs are corrected once there is a short and a long press. With a keyboard, the space bar works too.';
+
+  @override
+  String get morseKeyClear => 'Start again';
 }

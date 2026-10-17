@@ -9725,4 +9725,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String phrasebookTranslateQuery(String query) {
     return 'Traducir «$query»';
   }
+
+  @override
+  String get morseKey => 'Tecla Morse';
+
+  @override
+  String get morseKeyHint =>
+      'Pulsa al ritmo de la luz que ves: corto para un punto, largo para una raya. La aplicación aprende tu ritmo; los primeros signos se corrigen en cuanto hay una pulsación corta y una larga. Con teclado también sirve la barra espaciadora.';
+
+  @override
+  String get morseKeyClear => 'Empezar de nuevo';
 }

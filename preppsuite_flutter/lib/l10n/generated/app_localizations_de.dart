@@ -9696,4 +9696,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String phrasebookTranslateQuery(String query) {
     return '„$query“ übersetzen';
   }
+
+  @override
+  String get morseKey => 'Morsetaste';
+
+  @override
+  String get morseKeyHint =>
+      'Im Takt des Lichts drücken, das du siehst: kurz für einen Punkt, lang für einen Strich. Die App lernt dein Tempo; die ersten Zeichen werden berichtigt, sobald ein kurzer und ein langer Druck da sind. Mit Tastatur geht auch die Leertaste.';
+
+  @override
+  String get morseKeyClear => 'Neu beginnen';
 }
