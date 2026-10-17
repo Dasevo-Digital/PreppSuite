@@ -5687,5 +5687,8 @@
   "emergencyCommunicateHeading": "Communicating without a network",
   "emergencyOrientationHeading": "Finding your way without a network",
   "measurementsTitle": "Readings and hazard maps",
-  "measurementsHint": "River levels, radiation, air quality, forest fire, heavy rain and motorway closures"
+  "measurementsHint": "River levels, radiation, air quality, forest fire, heavy rain and motorway closures",
+  "signalToneSwitch": "Sound as well",
+  "signalToneHint": "Sound carries where light does not: through rubble, round corners, in fog.",
+  "signalToneUnavailable": "Sound is not available on this device. The light still works."
 }

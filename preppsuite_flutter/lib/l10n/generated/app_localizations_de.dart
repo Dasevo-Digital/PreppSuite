@@ -9677,4 +9677,15 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get measurementsHint =>
       'Pegel, Strahlung, Luftqualität, Waldbrand, Starkregen und Autobahn-Sperrungen';
+
+  @override
+  String get signalToneSwitch => 'Auch als Ton';
+
+  @override
+  String get signalToneHint =>
+      'Ein Ton reicht, wo Licht nicht hinkommt: durch Trümmer, um Ecken, im Nebel.';
+
+  @override
+  String get signalToneUnavailable =>
+      'Ton ist auf diesem Gerät nicht verfügbar. Das Licht läuft trotzdem.';
 }

@@ -15966,6 +15966,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'River levels, radiation, air quality, forest fire, heavy rain and motorway closures'**
   String get measurementsHint;
+
+  /// No description provided for @signalToneSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound as well'**
+  String get signalToneSwitch;
+
+  /// No description provided for @signalToneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound carries where light does not: through rubble, round corners, in fog.'**
+  String get signalToneHint;
+
+  /// No description provided for @signalToneUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound is not available on this device. The light still works.'**
+  String get signalToneUnavailable;
 }
 
 class _AppLocalizationsDelegate

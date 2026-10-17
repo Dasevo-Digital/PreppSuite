@@ -6,6 +6,8 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/morse_code.dart';
+import '../../home/application/signal_tone.dart';
+import '../../home/presentation/signal_tone_player.dart';
 
 /// Morse code: a translator both ways, the screen as a lamp for a
 /// message, and the whole table (#180).
@@ -36,6 +38,22 @@ class _MorseScreenState extends State<MorseScreen>
   Timer? _ticker;
   MorseRhythm? _rhythm;
 
+  /// Sounding what the lamp flashes (#188), one choice with the distress
+  /// signal's.
+  final _tone = SignalTonePlayer();
+  var _withTone = false;
+  var _starting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(
+      const SignalToneSetting().load().then((on) {
+        if (mounted) setState(() => _withTone = on);
+      }),
+    );
+  }
+
   /// What is being sent, worked out once at the start: each character as
   /// the sender typed it, and its signal.
   List<String> _characters = const [];
@@ -46,6 +64,7 @@ class _MorseScreenState extends State<MorseScreen>
   @override
   void dispose() {
     _stop();
+    unawaited(_tone.dispose());
     _tabs.dispose();
     _input.dispose();
     super.dispose();
@@ -61,8 +80,17 @@ class _MorseScreenState extends State<MorseScreen>
     );
   }
 
-  void _start(MorseEncoding message) {
-    _rhythm = MorseRhythm(message, unit: _speed.unit);
+  Future<void> _start(MorseEncoding message) async {
+    if (_starting) return;
+    final rhythm = MorseRhythm(message, unit: _speed.unit);
+    // Rendered before the lamp starts, so tone and light begin together.
+    if (_withTone && _tone.available) {
+      _starting = true;
+      await _tone.prepare(rhythm, hertz: morseToneHertz);
+      _starting = false;
+      if (!mounted) return;
+    }
+    _rhythm = rhythm;
     _characters = _sentCharacters(_input.text);
     _codes = [for (final word in message.words) ...word];
     _stopwatch
@@ -77,6 +105,7 @@ class _MorseScreenState extends State<MorseScreen>
       final elapsed = _stopwatch.elapsed;
       final lit = rhythm.isLitAt(elapsed);
       final character = rhythm.characterAt(elapsed);
+      if (_withTone) _tone.follow(elapsed);
       if (lit == _lit && character == _character) return;
       setState(() {
         _lit = lit;
@@ -89,6 +118,7 @@ class _MorseScreenState extends State<MorseScreen>
   void _stop() {
     _ticker?.cancel();
     _ticker = null;
+    unawaited(_tone.stop());
     if (_stopwatch.isRunning) _keepScreenOn(false);
     _stopwatch
       ..stop()
@@ -244,6 +274,21 @@ class _MorseScreenState extends State<MorseScreen>
             selected: {_speed},
             onSelectionChanged: (selection) =>
                 setState(() => _speed = selection.first),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            value: _withTone,
+            onChanged: (on) {
+              setState(() => _withTone = on);
+              unawaited(const SignalToneSetting().save(on));
+            },
+            secondary: const Icon(Icons.volume_up_outlined),
+            title: Text(l10n.signalToneSwitch),
+            subtitle: Text(
+              _tone.available
+                  ? l10n.signalToneHint
+                  : l10n.signalToneUnavailable,
+            ),
           ),
           const SizedBox(height: 12),
           FilledButton.icon(

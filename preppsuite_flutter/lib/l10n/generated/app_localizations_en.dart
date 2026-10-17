@@ -9626,4 +9626,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get measurementsHint =>
       'River levels, radiation, air quality, forest fire, heavy rain and motorway closures';
+
+  @override
+  String get signalToneSwitch => 'Sound as well';
+
+  @override
+  String get signalToneHint =>
+      'Sound carries where light does not: through rubble, round corners, in fog.';
+
+  @override
+  String get signalToneUnavailable =>
+      'Sound is not available on this device. The light still works.';
 }

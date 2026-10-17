@@ -342,14 +342,19 @@ das **alpine Notsignal** mit sechs Zeichen in einer Minute und einer
 Minute Pause, und die **Antwort** darauf, drei Zeichen in die Pause des
 anderen hinein. Die Pause gehört zum Signal und steht auch so auf dem
 Bildschirm: sie unterscheidet es von jemandem, der mit einer Lampe
-herumläuft.
+herumläuft. Auf Wunsch auch als Ton („Auch als Ton“), denn das alpine
+Notsignal gilt gesehen *oder gehört*, und ein Ton reicht durch Trümmer und
+um Ecken. Der Ton wird aus demselben Rhythmus berechnet wie das Licht und
+läuft im Takt mit; wo ein Gerät keinen Ton abspielen kann, blinkt die Lampe
+allein weiter.
 
 **Morsecode.** Ein Übersetzer in beide Richtungen: Text wird zu Punkten
 und Strichen, und was jemand zurückblinkt, lässt sich als Morsezeichen
 eintippen und als Text lesen – mit Punkt und Strich in beliebiger
 Schreibweise. Unbekannte Zeichen werden benannt statt still ausgelassen.
 Eine getippte Nachricht sendet der Bildschirm als Lichtsignal, in drei
-Tempi und mit dem gerade gesendeten Zeichen darauf. Dazu die Tafel aller
+Tempi und mit dem gerade gesendeten Zeichen darauf, auf Wunsch zugleich als
+Ton (800 Hz, der übliche Hörton für Morse). Dazu die Tafel aller
 Zeichen nach der Empfehlung ITU-R M.1677-1; Ä, Ö, Ü, ß, CH und Ñ stehen
 gesondert, weil sie nicht zum internationalen Standard gehören.
 

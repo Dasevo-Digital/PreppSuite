@@ -8,6 +8,8 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/distress_signal.dart';
+import '../application/signal_tone.dart';
+import 'signal_tone_player.dart';
 
 /// The screen as a lamp, in a rhythm somebody recognises.
 ///
@@ -35,11 +37,27 @@ class _DistressSignalScreenState extends State<DistressSignalScreen> {
   var _lit = false;
   var _flash = 0;
 
+  /// Sounding as well as flashing (#188), and whether that failed here.
+  final _tone = SignalTonePlayer();
+  var _withTone = false;
+  var _starting = false;
+
   DistressSignalPattern get _pattern => DistressSignalPattern(_choice);
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(
+      const SignalToneSetting().load().then((on) {
+        if (mounted) setState(() => _withTone = on);
+      }),
+    );
+  }
 
   @override
   void dispose() {
     _ticker?.cancel();
+    unawaited(_tone.dispose());
     _keepScreenOn(false);
     super.dispose();
   }
@@ -57,9 +75,11 @@ class _DistressSignalScreenState extends State<DistressSignalScreen> {
     );
   }
 
-  void _toggle() {
+  Future<void> _toggle() async {
+    if (_starting) return;
     if (_stopwatch.isRunning) {
       _ticker?.cancel();
+      unawaited(_tone.stop());
       _stopwatch
         ..stop()
         ..reset();
@@ -69,6 +89,15 @@ class _DistressSignalScreenState extends State<DistressSignalScreen> {
         _flash = 0;
       });
       return;
+    }
+
+    // The tone is rendered before the lamp starts, so the first beep and
+    // the first flash begin together.
+    if (_withTone && _tone.available) {
+      _starting = true;
+      await _tone.prepare(_pattern, hertz: distressToneHertz);
+      _starting = false;
+      if (!mounted) return;
     }
 
     _stopwatch
@@ -83,6 +112,7 @@ class _DistressSignalScreenState extends State<DistressSignalScreen> {
       final elapsed = _stopwatch.elapsed;
       final lit = pattern.isLitAt(elapsed);
       final flash = pattern.flashNumberAt(elapsed);
+      if (_withTone) _tone.follow(elapsed);
       if (lit == _lit && flash == _flash) return;
       if (lit && !_lit) Feel.beat();
       setState(() {
@@ -134,6 +164,20 @@ class _DistressSignalScreenState extends State<DistressSignalScreen> {
                             subtitle: Text(_hintFor(l10n, signal)),
                           ),
                       ],
+                    ),
+                  ),
+                  SwitchListTile(
+                    value: _withTone,
+                    onChanged: (on) {
+                      setState(() => _withTone = on);
+                      unawaited(const SignalToneSetting().save(on));
+                    },
+                    secondary: const Icon(Icons.volume_up_outlined),
+                    title: Text(l10n.signalToneSwitch),
+                    subtitle: Text(
+                      _tone.available
+                          ? l10n.signalToneHint
+                          : l10n.signalToneUnavailable,
                     ),
                   ),
                   const SizedBox(height: 12),

@@ -2641,5 +2641,8 @@
   "emergencyCommunicateHeading": "Comunicarse sin red",
   "emergencyOrientationHeading": "Orientarse sin red",
   "measurementsTitle": "Mediciones y mapas de peligro",
-  "measurementsHint": "Niveles de ríos, radiación, calidad del aire, incendios forestales, lluvias intensas y cortes de autopista"
+  "measurementsHint": "Niveles de ríos, radiación, calidad del aire, incendios forestales, lluvias intensas y cortes de autopista",
+  "signalToneSwitch": "También con sonido",
+  "signalToneHint": "El sonido llega adonde no llega la luz: entre escombros, tras las esquinas, en la niebla.",
+  "signalToneUnavailable": "El sonido no está disponible en este dispositivo. La luz funciona igualmente."
 }

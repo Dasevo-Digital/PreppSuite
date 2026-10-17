@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/home/presentation/distress_signal_screen.dart';
+import 'package:preppsuite_flutter/features/home/presentation/signal_tone_player.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'accessibility.dart';
 
@@ -65,6 +67,33 @@ void main() {
     await tester.tap(find.text('Anhalten'));
     await tester.pump();
     expect(find.text('Signal starten'), findsWidgets);
+  });
+
+  testWidgets('with sound on and no sound here, the light still runs', (
+    tester,
+  ) async {
+    // A test has no audio plugin, which is exactly a device without
+    // sound: the tone must give way, never the signal (#188).
+    SharedPreferences.setMockInitialValues({});
+    await show(tester);
+
+    await tester.tap(find.text('Auch als Ton'));
+    await tester.pumpAndSettle();
+    expect(
+      (await SharedPreferences.getInstance()).getBool('signalToneOn'),
+      isTrue,
+    );
+
+    await tester.tap(find.text('Signal starten').last);
+    // The test's audio never answers; after the wait the lamp starts
+    // without it.
+    await tester.pump(SignalTonePlayer.prepareTimeout);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.textContaining('von 9'), findsOneWidget);
+
+    await tester.tap(find.text('Anhalten'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('nicht verfügbar'), findsOneWidget);
   });
 
   testWidgets('English gets the English screen', (tester) async {
