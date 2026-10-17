@@ -9717,4 +9717,12 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get signalToneUnavailable =>
       'El sonido no está disponible en este dispositivo. La luz funciona igualmente.';
+
+  @override
+  String get phraseSpeak => 'Leer en voz alta';
+
+  @override
+  String phrasebookTranslateQuery(String query) {
+    return 'Traducir «$query»';
+  }
 }

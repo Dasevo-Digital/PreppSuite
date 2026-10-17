@@ -5690,5 +5690,14 @@
   "measurementsHint": "River levels, radiation, air quality, forest fire, heavy rain and motorway closures",
   "signalToneSwitch": "Sound as well",
   "signalToneHint": "Sound carries where light does not: through rubble, round corners, in fog.",
-  "signalToneUnavailable": "Sound is not available on this device. The light still works."
+  "signalToneUnavailable": "Sound is not available on this device. The light still works.",
+  "phraseSpeak": "Read aloud",
+  "phrasebookTranslateQuery": "Translate “{query}”",
+  "@phrasebookTranslateQuery": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  }
 }

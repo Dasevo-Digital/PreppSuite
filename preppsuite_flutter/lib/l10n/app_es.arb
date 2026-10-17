@@ -2644,5 +2644,7 @@
   "measurementsHint": "Niveles de ríos, radiación, calidad del aire, incendios forestales, lluvias intensas y cortes de autopista",
   "signalToneSwitch": "También con sonido",
   "signalToneHint": "El sonido llega adonde no llega la luz: entre escombros, tras las esquinas, en la niebla.",
-  "signalToneUnavailable": "El sonido no está disponible en este dispositivo. La luz funciona igualmente."
+  "signalToneUnavailable": "El sonido no está disponible en este dispositivo. La luz funciona igualmente.",
+  "phraseSpeak": "Leer en voz alta",
+  "phrasebookTranslateQuery": "Traducir «{query}»"
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../translator/presentation/translator_screen.dart';
 import '../application/phrasebook.dart';
+import 'phrase_display.dart';
 
 /// The phrasebook (#181): pick the other person's language, find the
 /// sentence, and hold it up.
@@ -43,8 +44,25 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
     Widget card(Phrase phrase) => _PhraseCard(
       source: phrase[from],
       target: phrase[to],
-      targetRtl: to.isRtl,
-      onShow: () => _show(context, phrase[to], phrase[from], to.isRtl),
+      language: to,
+      onShow: () => showPhraseLarge(
+        context,
+        target: phrase[to],
+        source: phrase[from],
+        language: to,
+      ),
+    );
+
+    // The sentence that is not here, handed to the translator as typed
+    // (#190): from the reader's language into the one chosen above.
+    void translate() => Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => TranslatorScreen(
+          initialText: query.trim().isEmpty ? null : query.trim(),
+          initialFrom: from,
+          initialTo: to,
+        ),
+      ),
     );
 
     return Scaffold(
@@ -109,14 +127,22 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
           ],
           const SizedBox(height: 8),
           if (query.trim().isNotEmpty) ...[
-            if (found.isEmpty)
+            if (found.isEmpty) ...[
               Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
                 child: Text(
                   l10n.phrasebookNoMatch,
                   textAlign: TextAlign.center,
                 ),
               ),
+              Center(
+                child: FilledButton.tonalIcon(
+                  onPressed: translate,
+                  icon: const Icon(Icons.g_translate),
+                  label: Text(l10n.phrasebookTranslateQuery(query.trim())),
+                ),
+              ),
+            ],
             for (final phrase in found) card(phrase),
           ] else
             for (final group in PhraseGroup.values) ...[
@@ -138,64 +164,10 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
               leading: const Icon(Icons.g_translate),
               title: Text(l10n.phrasebookTranslatorHint),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const TranslatorScreen(),
-                ),
-              ),
+              onTap: translate,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  /// The sentence alone, as large as the screen allows, to be held up.
-  Future<void> _show(
-    BuildContext context,
-    String target,
-    String source,
-    bool rtl,
-  ) {
-    final theme = Theme.of(context);
-    return showDialog<void>(
-      context: context,
-      builder: (context) => Dialog.fullscreen(
-        child: Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-          body: SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      target,
-                      textAlign: TextAlign.center,
-                      textDirection: rtl ? TextDirection.rtl : null,
-                      style: theme.textTheme.displaySmall,
-                    ),
-                    const SizedBox(height: 24),
-                    Text(
-                      source,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -215,13 +187,13 @@ class _PhraseCard extends StatelessWidget {
   const _PhraseCard({
     required this.source,
     required this.target,
-    required this.targetRtl,
+    required this.language,
     required this.onShow,
   });
 
   final String source;
   final String target;
-  final bool targetRtl;
+  final PhraseLanguage language;
   final VoidCallback onShow;
 
   @override
@@ -251,7 +223,7 @@ class _PhraseCard extends StatelessWidget {
                     // Persian set left-aligned read as broken.
                     Text(
                       target,
-                      textDirection: targetRtl
+                      textDirection: language.isRtl
                           ? TextDirection.rtl
                           : TextDirection.ltr,
                       style: theme.textTheme.titleLarge,
@@ -259,6 +231,7 @@ class _PhraseCard extends StatelessWidget {
                   ],
                 ),
               ),
+              SpeakPhraseButton(text: target, language: language),
               Tooltip(
                 message: l10n.phrasebookShow,
                 child: const Padding(

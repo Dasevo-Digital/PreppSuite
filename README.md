@@ -363,9 +363,12 @@ es wehtut, nach Wasser, Unterkunft oder einem Kind fragen, dazu Antworten
 zum Zeigen – auf Deutsch, Englisch, Spanisch, Französisch, Polnisch,
 Türkisch, Russisch, Ukrainisch, Arabisch und Persisch. Ohne Netz und ohne
 Download; ein Satz lässt sich groß anzeigen und dem Gegenüber hinhalten,
-Arabisch und Persisch von rechts nach links. **Die Übersetzungen sind
-nicht von Muttersprachlern geprüft**, und das steht auch so auf dem
-Bildschirm.
+Arabisch und Persisch von rechts nach links. Wo das Gerät eine Stimme für
+die Sprache hat, liest es den Satz vor (ohne Netz, mit den Stimmen des
+Systems; auf dem Mac für alle Sprachen außer Persisch). Findet die Suche
+keinen Satz, geht der getippte Text mit einem Tipp an den Übersetzer.
+**Die Übersetzungen sind nicht von Muttersprachlern geprüft**, und das
+steht auch so auf dem Bildschirm.
 
 **Übersetzer.** Freier Text, übersetzt auf dem Gerät und ohne Netz, für
 alles, was der Sprachführer nicht hat – zwischen denselben zehn Sprachen.
@@ -373,7 +376,8 @@ Dafür wird je Richtung einmal ein Sprachpaket von Mozilla geladen (die
 Modelle, mit denen Firefox übersetzt, MPL 2.0; 21 bis 47 MB je
 Richtung), danach geht es offline; zwischen zwei Sprachen ohne Englisch
 übersetzt er über Englisch und braucht zwei Pakete. Kein Text verlässt
-das Gerät. Unter jeder Übersetzung steht, dass sie maschinell ist. Bisher
+das Gerät. Unter jeder Übersetzung steht, dass sie maschinell ist; sie
+lässt sich wie ein Satz des Sprachführers groß zeigen und vorlesen. Bisher
 nur im Mac-Paket; Linux, Windows und Android folgen
 ([Stand](docs/uebersetzer-offline-plan.md)).
 

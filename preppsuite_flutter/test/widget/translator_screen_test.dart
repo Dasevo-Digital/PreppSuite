@@ -135,6 +135,23 @@ void main() {
     expect(calls.single.map((p) => p.direction.code), ['deen']);
   });
 
+  testWidgets('the result can be held up large (#189)', (tester) async {
+    await pump(tester, installed: [const TranslatorDirection(_de, _en)]);
+    await tester.enterText(find.byType(TextField), 'Hilfe');
+    await tester.pump();
+    await tester.tap(find.text('Übersetzen'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Groß zeigen'));
+    await tester.pumpAndSettle();
+    final large = tester.widget<Text>(
+      find.text('Please call an ambulance.').last,
+    );
+    expect(large.style?.fontSize, greaterThan(30));
+    // What was typed, small underneath, so the holder knows what it says.
+    expect(find.text('Hilfe'), findsWidgets);
+  });
+
   testWidgets('nothing to translate, nothing to press', (tester) async {
     await pump(tester, installed: [const TranslatorDirection(_de, _en)]);
 

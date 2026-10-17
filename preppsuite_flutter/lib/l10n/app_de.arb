@@ -4074,5 +4074,14 @@
   "measurementsHint": "Pegel, Strahlung, Luftqualität, Waldbrand, Starkregen und Autobahn-Sperrungen",
   "signalToneSwitch": "Auch als Ton",
   "signalToneHint": "Ein Ton reicht, wo Licht nicht hinkommt: durch Trümmer, um Ecken, im Nebel.",
-  "signalToneUnavailable": "Ton ist auf diesem Gerät nicht verfügbar. Das Licht läuft trotzdem."
+  "signalToneUnavailable": "Ton ist auf diesem Gerät nicht verfügbar. Das Licht läuft trotzdem.",
+  "phraseSpeak": "Vorlesen",
+  "phrasebookTranslateQuery": "„{query}“ übersetzen",
+  "@phrasebookTranslateQuery": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  }
 }

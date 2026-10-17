@@ -9637,4 +9637,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get signalToneUnavailable =>
       'Sound is not available on this device. The light still works.';
+
+  @override
+  String get phraseSpeak => 'Read aloud';
+
+  @override
+  String phrasebookTranslateQuery(String query) {
+    return 'Translate “$query”';
+  }
 }

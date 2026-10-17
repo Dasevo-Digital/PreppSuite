@@ -15984,6 +15984,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sound is not available on this device. The light still works.'**
   String get signalToneUnavailable;
+
+  /// No description provided for @phraseSpeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Read aloud'**
+  String get phraseSpeak;
+
+  /// No description provided for @phrasebookTranslateQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate “{query}”'**
+  String phrasebookTranslateQuery(String query);
 }
 
 class _AppLocalizationsDelegate

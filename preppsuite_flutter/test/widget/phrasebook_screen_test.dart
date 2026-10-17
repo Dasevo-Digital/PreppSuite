@@ -1,11 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/first_aid/application/step_speech.dart';
+import 'package:preppsuite_flutter/features/phrasebook/presentation/phrase_display.dart';
 import 'package:preppsuite_flutter/features/phrasebook/presentation/phrasebook_screen.dart';
+import 'package:preppsuite_flutter/features/translator/application/translator_catalogue.dart';
+import 'package:preppsuite_flutter/features/translator/application/translator_providers.dart';
+import 'package:preppsuite_flutter/features/translator/application/translator_store.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 
 import 'accessibility.dart';
 
+/// A device with an English and a German voice, as the phrasebook asks
+/// for them, and nothing else.
+class _Voices implements StepSpeech {
+  final spoken = <(String, String)>[];
+
+  @override
+  Future<bool> isAvailable(String languageCode) async =>
+      languageCode == 'en-GB' || languageCode == 'de-DE';
+
+  @override
+  Future<void> speak(String text, {required String languageCode}) async =>
+      spoken.add((text, languageCode));
+
+  @override
+  Future<void> stop() async {}
+}
+
+/// No packs, and never the app's real folder.
+class _NoPacks extends TranslatorStore {
+  @override
+  Future<List<InstalledTranslatorPack>> installed() async => const [];
+}
+
 void main() {
+  late _Voices voices;
+
   Future<void> pump(
     WidgetTester tester, {
     Locale locale = const Locale('de'),
@@ -14,12 +45,24 @@ void main() {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+    voices = _Voices();
     await tester.pumpWidget(
-      MaterialApp(
-        locale: locale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const PhrasebookScreen(),
+      ProviderScope(
+        overrides: [
+          phraseSpeechProvider.overrideWithValue(voices),
+          translatorAvailableProvider.overrideWithValue(true),
+          translatorStoreProvider.overrideWithValue(_NoPacks()),
+          // Never Mozilla's list from a test.
+          translatorCatalogueProvider.overrideWith(
+            (ref) async => const TranslatorCatalogue({}),
+          ),
+        ],
+        child: MaterialApp(
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const PhrasebookScreen(),
+        ),
       ),
     );
     await tester.pump();
@@ -87,6 +130,50 @@ void main() {
     await tester.tap(find.byTooltip('Schließen'));
     await tester.pumpAndSettle();
     expect(find.byType(Dialog), findsNothing);
+  });
+
+  testWidgets('a sentence is read out where there is a voice (#189)', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.pump();
+
+    final speak = find.byTooltip('Vorlesen');
+    expect(speak, findsWidgets);
+    await tester.tap(speak.first);
+    await tester.pump();
+    expect(voices.spoken.single, ("I don't speak your language.", 'en-GB'));
+  });
+
+  testWidgets('and not where there is none', (tester) async {
+    await pump(tester);
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+    final persian = find.text('فارسی', skipOffstage: false).last;
+    await tester.ensureVisible(persian);
+    await tester.pumpAndSettle();
+    await tester.tap(persian);
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Vorlesen'), findsNothing);
+  });
+
+  testWidgets('a sentence that is not here goes to the translator (#190)', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.enterText(find.byType(TextField), 'Wo ist der Bahnhof?');
+    await tester.pump();
+
+    await tester.tap(find.text('„Wo ist der Bahnhof?“ übersetzen'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Übersetzer'), findsOneWidget);
+    final input = tester.widget<TextField>(find.byType(TextField));
+    expect(input.controller!.text, 'Wo ist der Bahnhof?');
+    // From the reader's language into the one the phrasebook showed.
+    expect(find.text('Deutsch'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
   });
 
   testWidgets('at twice the text size nothing overflows', (tester) async {

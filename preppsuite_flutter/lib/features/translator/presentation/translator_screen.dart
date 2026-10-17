@@ -6,6 +6,7 @@ import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
 import '../../phrasebook/application/phrasebook.dart';
+import '../../phrasebook/presentation/phrase_display.dart';
 import '../application/translator_catalogue.dart';
 import '../application/translator_providers.dart';
 import '../application/translator_store.dart';
@@ -17,16 +18,27 @@ import '../application/translator_store.dart';
 /// a machine translation is sometimes wrong. The screen says so, every
 /// time, under the result.
 class TranslatorScreen extends ConsumerStatefulWidget {
-  const TranslatorScreen({super.key});
+  const TranslatorScreen({
+    super.key,
+    this.initialText,
+    this.initialFrom,
+    this.initialTo,
+  });
+
+  /// What the phrasebook's search was given and did not find (#190),
+  /// with the languages it was searching in.
+  final String? initialText;
+  final PhraseLanguage? initialFrom;
+  final PhraseLanguage? initialTo;
 
   @override
   ConsumerState<TranslatorScreen> createState() => _TranslatorScreenState();
 }
 
 class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
-  final _input = TextEditingController();
-  PhraseLanguage? _from;
-  PhraseLanguage? _to;
+  late final _input = TextEditingController(text: widget.initialText);
+  late PhraseLanguage? _from = widget.initialFrom;
+  late PhraseLanguage? _to = widget.initialTo;
   String? _result;
   Object? _error;
   var _translating = false;
@@ -164,6 +176,20 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
                           child: Text(
                             l10n.translatorResult,
                             style: theme.textTheme.titleSmall,
+                          ),
+                        ),
+                        // Read out and held up: the result is for the person
+                        // on the other side, as a phrasebook sentence is
+                        // (#189).
+                        SpeakPhraseButton(text: _result!, language: to),
+                        IconButton(
+                          tooltip: l10n.phrasebookShow,
+                          icon: const Icon(Icons.open_in_full),
+                          onPressed: () => showPhraseLarge(
+                            context,
+                            target: _result!,
+                            source: _input.text.trim(),
+                            language: to,
                           ),
                         ),
                         IconButton(
