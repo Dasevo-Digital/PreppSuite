@@ -24,6 +24,14 @@ ihre jeweils eigenen Bedingungen.
 - Tesseract-Sprachdaten `tessdata_fast` Deutsch und Englisch (nur
   Android) — Apache-2.0; vollständiger Text:
   `third_party/tessdata_fast/LICENSE`
+- PDFium aus `bblanchon/pdfium-binaries` (über `pdfrx`/`pdfium_dart`, in
+  allen Paketen) — BSD-3-Clause und Apache-2.0 bzw. die Lizenzen der
+  enthaltenen Bibliotheken; Herkunft geprüft gegen
+  `tool/pdfium_provenance.txt`
+- xapian-core 1.4.32, statisch in der Volltext-Schicht
+  `native/zim_xapian` (Mac-, Linux- und Windows-Paket) — GPL-2.0-or-later;
+  Quelle `xapian.org`, Bezug und Prüfsumme in
+  `preppsuite_flutter/native/zim_xapian/xapian_source.sh`
 - Übersetzungs-Engine aus `mozilla/translations` (Verzeichnis `inference/`,
   bisher nur im Mac-Paket) — MPL-2.0; Quelle
   `github.com/mozilla/translations`, Commit und die vier geänderten Zeilen
