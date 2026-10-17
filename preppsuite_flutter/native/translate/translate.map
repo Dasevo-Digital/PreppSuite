@@ -1,0 +1,8 @@
+# Only the C surface leaves the library. ELF needs this as well as
+# -fvisibility=hidden; see native/zim_xapian/zim_xapian.map for why.
+{
+  global:
+    pt_*;
+  local:
+    *;
+};

@@ -71,6 +71,7 @@ import '../features/kids_comic/application/kids_comic.dart';
 import '../features/kids_comic/presentation/kids_comic_screen.dart';
 import '../features/morse/presentation/morse_screen.dart';
 import '../features/phrasebook/presentation/phrasebook_screen.dart';
+import '../features/translator/presentation/translator_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../model/household_profile.dart';
 
@@ -296,6 +297,23 @@ List<AppDestination> appDestinations() => [
       'translate',
       'phrasebook',
       'idioma',
+    ],
+  ),
+  AppDestination(
+    id: 'translator',
+    title: (l) => l.translatorTitle,
+    icon: Icons.g_translate,
+    area: ShellDestination.emergency,
+    open: (_) => const TranslatorScreen(),
+    aliases: [
+      'ubersetzer',
+      'ubersetzen',
+      'ubersetzung',
+      'freitext',
+      'translator',
+      'translate',
+      'traductor',
+      'traducir',
     ],
   ),
   AppDestination(

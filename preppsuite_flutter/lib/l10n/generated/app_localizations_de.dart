@@ -9577,4 +9577,91 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get phrasebookGroupAnswers => 'Antworten zum Zeigen';
+
+  @override
+  String get translatorTitle => 'Übersetzer';
+
+  @override
+  String get translatorEntryHint =>
+      'Freier Text, auf diesem Gerät übersetzt. Sprachpakete einmal laden, danach ohne Netz.';
+
+  @override
+  String get translatorNotInBuild =>
+      'Der Übersetzer ist in dieser Ausgabe der App nicht enthalten. Der Sprachführer funktioniert trotzdem.';
+
+  @override
+  String get translatorFrom => 'Von';
+
+  @override
+  String get translatorTo => 'Nach';
+
+  @override
+  String get translatorSwap => 'Sprachen tauschen';
+
+  @override
+  String get translatorSameLanguage => 'Beide Seiten haben dieselbe Sprache.';
+
+  @override
+  String get translatorInput => 'Text';
+
+  @override
+  String get translatorTranslate => 'Übersetzen';
+
+  @override
+  String translatorFailed(String error) {
+    return 'Übersetzen hat nicht geklappt: $error';
+  }
+
+  @override
+  String get translatorResult => 'Übersetzung';
+
+  @override
+  String get translatorMachineNote =>
+      'Maschinell übersetzt, auf diesem Gerät und ohne Netz. Das kann falsch sein: kurze Sätze verwenden und im Notfall lieber den Sprachführer nehmen.';
+
+  @override
+  String get translatorSource =>
+      'Sprachmodelle von Mozilla (Firefox-Übersetzungen), Lizenz MPL 2.0. Sie werden von Mozillas Server geladen; übersetzt wird nur auf diesem Gerät, kein Text verlässt es.';
+
+  @override
+  String get translatorPacksNeeded =>
+      'Für diese Richtung fehlt ein Sprachpaket. Einmal laden, danach geht es ohne Netz.';
+
+  @override
+  String translatorCatalogueFailed(String error) {
+    return 'Die Liste der Sprachpakete ließ sich nicht laden: $error';
+  }
+
+  @override
+  String get translatorRetry => 'Erneut versuchen';
+
+  @override
+  String translatorDirection(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String translatorPackUnavailable(String name) {
+    return '$name: derzeit kein Sprachpaket verfügbar';
+  }
+
+  @override
+  String get translatorDownload => 'Laden';
+
+  @override
+  String translatorDownloadFailed(String error) {
+    return 'Laden fehlgeschlagen: $error';
+  }
+
+  @override
+  String translatorInstalled(String size) {
+    return 'Auf diesem Gerät ($size)';
+  }
+
+  @override
+  String get translatorRemove => 'Sprachpaket entfernen';
+
+  @override
+  String get phrasebookTranslatorHint =>
+      'Satz nicht dabei? Der Übersetzer übersetzt freien Text.';
 }

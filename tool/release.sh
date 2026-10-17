@@ -133,8 +133,15 @@ ssh "$linux" "cd ~/$remote_linux && tar xzf src.tar.gz && \
 # --- macOS ----------------------------------------------------------------
 step "macOS"
 app="$APP_DIR/build/macos/Build/Products/Release/PreppSuite.app"
+# The translator library first: the Xcode build only copies it, and skips
+# it with a warning when it is missing -- the same trap the Xapian step is
+# on Linux. Incremental, so a run with nothing changed takes a second.
+"$APP_DIR/native/translate/build_macos.sh" > "$log/translate.log" 2>&1 ||
+  fail "Übersetzer-Bibliothek"
 (cd "$APP_DIR" && flutter build macos --release --build-name "$version" \
   --build-number "$build") > "$log/macos.log" 2>&1 || fail "macOS-Build"
+[ -f "$app/Contents/Frameworks/libpreppsuite_translate.dylib" ] ||
+  fail "Mac-Paket ohne Übersetzer-Bibliothek"
 "$ROOT/tool/macos_sign.sh" "$app" --allow-ad-hoc > "$log/sign.log" 2>&1 ||
   fail "macOS-Signatur"
 codesign --verify --deep --strict "$app" || fail "Signatur ungültig"

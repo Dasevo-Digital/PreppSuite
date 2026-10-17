@@ -9525,4 +9525,91 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get phrasebookGroupAnswers => 'Answers to point at';
+
+  @override
+  String get translatorTitle => 'Translator';
+
+  @override
+  String get translatorEntryHint =>
+      'Free text, translated on this device. Download a language pack once, then offline.';
+
+  @override
+  String get translatorNotInBuild =>
+      'The translator is not part of this build of the app. The phrasebook still works.';
+
+  @override
+  String get translatorFrom => 'From';
+
+  @override
+  String get translatorTo => 'To';
+
+  @override
+  String get translatorSwap => 'Swap languages';
+
+  @override
+  String get translatorSameLanguage => 'Both sides are the same language.';
+
+  @override
+  String get translatorInput => 'Text';
+
+  @override
+  String get translatorTranslate => 'Translate';
+
+  @override
+  String translatorFailed(String error) {
+    return 'Translation failed: $error';
+  }
+
+  @override
+  String get translatorResult => 'Translation';
+
+  @override
+  String get translatorMachineNote =>
+      'Machine translation, on this device and offline. It can be wrong: use short sentences, and in an emergency prefer the phrasebook.';
+
+  @override
+  String get translatorSource =>
+      'Language models by Mozilla (Firefox Translations), licence MPL 2.0. They are downloaded from Mozilla\'s server; translating happens only on this device, and no text leaves it.';
+
+  @override
+  String get translatorPacksNeeded =>
+      'A language pack for this direction is missing. Download it once, then it works offline.';
+
+  @override
+  String translatorCatalogueFailed(String error) {
+    return 'The list of language packs could not be loaded: $error';
+  }
+
+  @override
+  String get translatorRetry => 'Try again';
+
+  @override
+  String translatorDirection(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String translatorPackUnavailable(String name) {
+    return '$name: no language pack available at the moment';
+  }
+
+  @override
+  String get translatorDownload => 'Download';
+
+  @override
+  String translatorDownloadFailed(String error) {
+    return 'Download failed: $error';
+  }
+
+  @override
+  String translatorInstalled(String size) {
+    return 'On this device ($size)';
+  }
+
+  @override
+  String get translatorRemove => 'Remove language pack';
+
+  @override
+  String get phrasebookTranslatorHint =>
+      'Sentence not here? The translator translates free text.';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../translator/presentation/translator_screen.dart';
 import '../application/phrasebook.dart';
 
 /// The phrasebook (#181): pick the other person's language, find the
@@ -128,6 +129,22 @@ class _PhrasebookScreenState extends State<PhrasebookScreen> {
               ),
               for (final phrase in phrasesIn(group)) card(phrase),
             ],
+          const SizedBox(height: 8),
+          // For the sentence that is not here. Last, so the fixed and
+          // checked sentences are always looked through first.
+          Card(
+            margin: EdgeInsets.zero,
+            child: ListTile(
+              leading: const Icon(Icons.g_translate),
+              title: Text(l10n.phrasebookTranslatorHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const TranslatorScreen(),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

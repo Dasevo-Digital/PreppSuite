@@ -5615,5 +5615,73 @@
   "phrasebookGroupHealth": "Health",
   "phrasebookGroupShelter": "Shelter and supplies",
   "phrasebookGroupPeople": "People",
-  "phrasebookGroupAnswers": "Answers to point at"
+  "phrasebookGroupAnswers": "Answers to point at",
+  "translatorTitle": "Translator",
+  "translatorEntryHint": "Free text, translated on this device. Download a language pack once, then offline.",
+  "translatorNotInBuild": "The translator is not part of this build of the app. The phrasebook still works.",
+  "translatorFrom": "From",
+  "translatorTo": "To",
+  "translatorSwap": "Swap languages",
+  "translatorSameLanguage": "Both sides are the same language.",
+  "translatorInput": "Text",
+  "translatorTranslate": "Translate",
+  "translatorFailed": "Translation failed: {error}",
+  "@translatorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorResult": "Translation",
+  "translatorMachineNote": "Machine translation, on this device and offline. It can be wrong: use short sentences, and in an emergency prefer the phrasebook.",
+  "translatorSource": "Language models by Mozilla (Firefox Translations), licence MPL 2.0. They are downloaded from Mozilla's server; translating happens only on this device, and no text leaves it.",
+  "translatorPacksNeeded": "A language pack for this direction is missing. Download it once, then it works offline.",
+  "translatorCatalogueFailed": "The list of language packs could not be loaded: {error}",
+  "@translatorCatalogueFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorRetry": "Try again",
+  "translatorDirection": "{from} → {to}",
+  "@translatorDirection": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorPackUnavailable": "{name}: no language pack available at the moment",
+  "@translatorPackUnavailable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorDownload": "Download",
+  "translatorDownloadFailed": "Download failed: {error}",
+  "@translatorDownloadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorInstalled": "On this device ({size})",
+  "@translatorInstalled": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorRemove": "Remove language pack",
+  "phrasebookTranslatorHint": "Sentence not here? The translator translates free text."
 }

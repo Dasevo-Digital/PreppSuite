@@ -24,6 +24,14 @@ ihre jeweils eigenen Bedingungen.
 - Tesseract-Sprachdaten `tessdata_fast` Deutsch und Englisch (nur
   Android) — Apache-2.0; vollständiger Text:
   `third_party/tessdata_fast/LICENSE`
+- Übersetzungs-Engine aus `mozilla/translations` (Verzeichnis `inference/`,
+  bisher nur im Mac-Paket) — MPL-2.0; Quelle
+  `github.com/mozilla/translations`, Commit und die vier geänderten Zeilen
+  in `preppsuite_flutter/native/translate/translate_source.sh`. Statisch
+  enthalten: Marian (MIT), intgemm (MIT), SentencePiece (Apache-2.0), Ruy
+  (Apache-2.0) mit cpuinfo (BSD-2-Clause), simd_utils (BSD-2-Clause),
+  ssplit-cpp (Apache-2.0), PCRE2 10.39 (BSD-3-Clause), yaml-cpp (MIT),
+  zlib 1.2.11 (zlib) und Teile von faiss (MIT)
 - Weitere Flutter- und Dart-Abhängigkeiten — jeweilige Paketlizenz; Anzeige
   über Flutters Lizenzübersicht im erzeugten Programm
 
@@ -40,7 +48,9 @@ ihre jeweils eigenen Bedingungen.
 
 ## Heruntergeladene Inhalte
 
-Kiwix-/ZIM-Archive und selbst zusammengestellte Erste-Hilfe-Pakete werden
-nicht als Teil des Projektcodes lizenziert. Jedes Archiv beziehungsweise jede
+Kiwix-/ZIM-Archive, selbst zusammengestellte Erste-Hilfe-Pakete und die
+Übersetzungsmodelle werden nicht als Teil des Projektcodes lizenziert. Die
+Übersetzungsmodelle sind die von Firefox, MPL-2.0, und werden aus Mozillas
+Remote Settings geladen. Jedes Archiv beziehungsweise jede
 Mediendatei behält ihre eigene Lizenz. Urheber, Quelle und Lizenz eines
 Erste-Hilfe-Videos müssen im Paketmanifest einzeln angegeben werden.

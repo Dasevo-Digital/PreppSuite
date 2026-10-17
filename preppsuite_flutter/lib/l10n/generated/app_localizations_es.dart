@@ -9606,4 +9606,91 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get phrasebookGroupAnswers => 'Respuestas para señalar';
+
+  @override
+  String get translatorTitle => 'Traductor';
+
+  @override
+  String get translatorEntryHint =>
+      'Texto libre, traducido en este dispositivo. Descargar un paquete de idioma una vez y luego sin conexión.';
+
+  @override
+  String get translatorNotInBuild =>
+      'El traductor no forma parte de esta versión de la aplicación. La guía de frases funciona igualmente.';
+
+  @override
+  String get translatorFrom => 'De';
+
+  @override
+  String get translatorTo => 'A';
+
+  @override
+  String get translatorSwap => 'Intercambiar idiomas';
+
+  @override
+  String get translatorSameLanguage => 'Los dos lados tienen el mismo idioma.';
+
+  @override
+  String get translatorInput => 'Texto';
+
+  @override
+  String get translatorTranslate => 'Traducir';
+
+  @override
+  String translatorFailed(String error) {
+    return 'La traducción falló: $error';
+  }
+
+  @override
+  String get translatorResult => 'Traducción';
+
+  @override
+  String get translatorMachineNote =>
+      'Traducción automática, en este dispositivo y sin conexión. Puede ser incorrecta: usar frases cortas y, en una emergencia, preferir la guía de frases.';
+
+  @override
+  String get translatorSource =>
+      'Modelos de idioma de Mozilla (traducciones de Firefox), licencia MPL 2.0. Se descargan del servidor de Mozilla; la traducción ocurre solo en este dispositivo y ningún texto sale de él.';
+
+  @override
+  String get translatorPacksNeeded =>
+      'Falta un paquete de idioma para esta dirección. Descargarlo una vez y luego funciona sin conexión.';
+
+  @override
+  String translatorCatalogueFailed(String error) {
+    return 'No se pudo cargar la lista de paquetes de idioma: $error';
+  }
+
+  @override
+  String get translatorRetry => 'Reintentar';
+
+  @override
+  String translatorDirection(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String translatorPackUnavailable(String name) {
+    return '$name: ningún paquete de idioma disponible por ahora';
+  }
+
+  @override
+  String get translatorDownload => 'Descargar';
+
+  @override
+  String translatorDownloadFailed(String error) {
+    return 'La descarga falló: $error';
+  }
+
+  @override
+  String translatorInstalled(String size) {
+    return 'En este dispositivo ($size)';
+  }
+
+  @override
+  String get translatorRemove => 'Eliminar paquete de idioma';
+
+  @override
+  String get phrasebookTranslatorHint =>
+      '¿No está la frase? El traductor traduce texto libre.';
 }

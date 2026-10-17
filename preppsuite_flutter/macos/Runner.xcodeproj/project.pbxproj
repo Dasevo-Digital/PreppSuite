@@ -252,6 +252,7 @@
 				3399D490228B24CF009A79C7 /* ShellScript */,
 				15C7115A56D079D3A931D837 /* [CP] Embed Pods Frameworks */,
 				7F3A2C1E5D48409BAE12F001 /* Embed Xapian */,
+				7F3A2C1E5D48409BAE12F002 /* Embed Translator */,
 			);
 			buildRules = (
 			);
@@ -453,6 +454,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\n# The Xapian shim, which lets the knowledge search use the index a Kiwix\n# archive already carries. Optional on purpose: without it the app builds\n# and runs, and the search falls back to the index it builds itself.\nLIBRARY=\"$SRCROOT/../native/zim_xapian/build/libzim_xapian.dylib\"\nif [ ! -f \"$LIBRARY\" ]; then\n  echo \"warning: libzim_xapian.dylib fehlt, Volltextsuche nutzt den eigenen Index (native/zim_xapian/build_macos.sh baut sie)\"\n  exit 0\nfi\n\nDESTINATION=\"$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH\"\nmkdir -p \"$DESTINATION\"\nditto \"$LIBRARY\" \"$DESTINATION/libzim_xapian.dylib\"\n\n# Signed here as well as later: an unsigned library inside a hardened\n# bundle is refused at load time, and a build that is run straight out of\n# Xcode never reaches tool/macos_sign.sh.\ncodesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY:--}\" \\\n  --timestamp=none \"$DESTINATION/libzim_xapian.dylib\"\n";
+		};
+		7F3A2C1E5D48409BAE12F002 /* Embed Translator */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Translator";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\n# The offline translator (#182). Optional, like the Xapian shim: without\n# it the app builds and runs, and the translator screen says it is not\n# part of this build.\nLIBRARY=\"$SRCROOT/../native/translate/build/libpreppsuite_translate.dylib\"\nif [ ! -f \"$LIBRARY\" ]; then\n  echo \"warning: libpreppsuite_translate.dylib fehlt, kein Übersetzer in diesem Build (native/translate/build_macos.sh baut ihn)\"\n  exit 0\nfi\n\nDESTINATION=\"$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH\"\nmkdir -p \"$DESTINATION\"\nditto \"$LIBRARY\" \"$DESTINATION/libpreppsuite_translate.dylib\"\ncodesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY:--}\" \\\n  --timestamp=none \"$DESTINATION/libpreppsuite_translate.dylib\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -15804,6 +15804,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Answers to point at'**
   String get phrasebookGroupAnswers;
+
+  /// No description provided for @translatorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Translator'**
+  String get translatorTitle;
+
+  /// No description provided for @translatorEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Free text, translated on this device. Download a language pack once, then offline.'**
+  String get translatorEntryHint;
+
+  /// No description provided for @translatorNotInBuild.
+  ///
+  /// In en, this message translates to:
+  /// **'The translator is not part of this build of the app. The phrasebook still works.'**
+  String get translatorNotInBuild;
+
+  /// No description provided for @translatorFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get translatorFrom;
+
+  /// No description provided for @translatorTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get translatorTo;
+
+  /// No description provided for @translatorSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap languages'**
+  String get translatorSwap;
+
+  /// No description provided for @translatorSameLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Both sides are the same language.'**
+  String get translatorSameLanguage;
+
+  /// No description provided for @translatorInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get translatorInput;
+
+  /// No description provided for @translatorTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get translatorTranslate;
+
+  /// No description provided for @translatorFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation failed: {error}'**
+  String translatorFailed(String error);
+
+  /// No description provided for @translatorResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get translatorResult;
+
+  /// No description provided for @translatorMachineNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Machine translation, on this device and offline. It can be wrong: use short sentences, and in an emergency prefer the phrasebook.'**
+  String get translatorMachineNote;
+
+  /// No description provided for @translatorSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Language models by Mozilla (Firefox Translations), licence MPL 2.0. They are downloaded from Mozilla\'s server; translating happens only on this device, and no text leaves it.'**
+  String get translatorSource;
+
+  /// No description provided for @translatorPacksNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'A language pack for this direction is missing. Download it once, then it works offline.'**
+  String get translatorPacksNeeded;
+
+  /// No description provided for @translatorCatalogueFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The list of language packs could not be loaded: {error}'**
+  String translatorCatalogueFailed(String error);
+
+  /// No description provided for @translatorRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get translatorRetry;
+
+  /// No description provided for @translatorDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} → {to}'**
+  String translatorDirection(String from, String to);
+
+  /// No description provided for @translatorPackUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: no language pack available at the moment'**
+  String translatorPackUnavailable(String name);
+
+  /// No description provided for @translatorDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get translatorDownload;
+
+  /// No description provided for @translatorDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed: {error}'**
+  String translatorDownloadFailed(String error);
+
+  /// No description provided for @translatorInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'On this device ({size})'**
+  String translatorInstalled(String size);
+
+  /// No description provided for @translatorRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove language pack'**
+  String get translatorRemove;
+
+  /// No description provided for @phrasebookTranslatorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sentence not here? The translator translates free text.'**
+  String get phrasebookTranslatorHint;
 }
 
 class _AppLocalizationsDelegate

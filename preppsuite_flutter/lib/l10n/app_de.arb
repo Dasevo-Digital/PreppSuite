@@ -3999,5 +3999,73 @@
   "phrasebookGroupHealth": "Gesundheit",
   "phrasebookGroupShelter": "Unterkunft und Versorgung",
   "phrasebookGroupPeople": "Personen",
-  "phrasebookGroupAnswers": "Antworten zum Zeigen"
+  "phrasebookGroupAnswers": "Antworten zum Zeigen",
+  "translatorTitle": "Übersetzer",
+  "translatorEntryHint": "Freier Text, auf diesem Gerät übersetzt. Sprachpakete einmal laden, danach ohne Netz.",
+  "translatorNotInBuild": "Der Übersetzer ist in dieser Ausgabe der App nicht enthalten. Der Sprachführer funktioniert trotzdem.",
+  "translatorFrom": "Von",
+  "translatorTo": "Nach",
+  "translatorSwap": "Sprachen tauschen",
+  "translatorSameLanguage": "Beide Seiten haben dieselbe Sprache.",
+  "translatorInput": "Text",
+  "translatorTranslate": "Übersetzen",
+  "translatorFailed": "Übersetzen hat nicht geklappt: {error}",
+  "@translatorFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorResult": "Übersetzung",
+  "translatorMachineNote": "Maschinell übersetzt, auf diesem Gerät und ohne Netz. Das kann falsch sein: kurze Sätze verwenden und im Notfall lieber den Sprachführer nehmen.",
+  "translatorSource": "Sprachmodelle von Mozilla (Firefox-Übersetzungen), Lizenz MPL 2.0. Sie werden von Mozillas Server geladen; übersetzt wird nur auf diesem Gerät, kein Text verlässt es.",
+  "translatorPacksNeeded": "Für diese Richtung fehlt ein Sprachpaket. Einmal laden, danach geht es ohne Netz.",
+  "translatorCatalogueFailed": "Die Liste der Sprachpakete ließ sich nicht laden: {error}",
+  "@translatorCatalogueFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorRetry": "Erneut versuchen",
+  "translatorDirection": "{from} → {to}",
+  "@translatorDirection": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorPackUnavailable": "{name}: derzeit kein Sprachpaket verfügbar",
+  "@translatorPackUnavailable": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorDownload": "Laden",
+  "translatorDownloadFailed": "Laden fehlgeschlagen: {error}",
+  "@translatorDownloadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorInstalled": "Auf diesem Gerät ({size})",
+  "@translatorInstalled": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorRemove": "Sprachpaket entfernen",
+  "phrasebookTranslatorHint": "Satz nicht dabei? Der Übersetzer übersetzt freien Text."
 }

@@ -23,6 +23,7 @@ import 'radio_emergency_screen.dart';
 import '../../../core/phone_call.dart';
 import '../../morse/presentation/morse_screen.dart';
 import '../../phrasebook/presentation/phrasebook_screen.dart';
+import '../../translator/presentation/translator_screen.dart';
 
 const _contactsKey = 'nearbyEmergencyContacts';
 
@@ -248,6 +249,20 @@ class _EmergencyInformationScreenState
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const PhrasebookScreen(),
+                ),
+              ),
+            ),
+          ),
+          // Beside the phrasebook, for what its sentences do not cover.
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.g_translate),
+              title: Text(l10n.translatorTitle),
+              subtitle: Text(l10n.translatorEntryHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const TranslatorScreen(),
                 ),
               ),
             ),

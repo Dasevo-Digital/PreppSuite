@@ -355,6 +355,16 @@ Arabisch und Persisch von rechts nach links. **Die Übersetzungen sind
 nicht von Muttersprachlern geprüft**, und das steht auch so auf dem
 Bildschirm.
 
+**Übersetzer.** Freier Text, übersetzt auf dem Gerät und ohne Netz, für
+alles, was der Sprachführer nicht hat – zwischen denselben zehn Sprachen.
+Dafür wird je Richtung einmal ein Sprachpaket von Mozilla geladen (die
+Modelle, mit denen Firefox übersetzt, MPL 2.0; 21 bis 47 MB je
+Richtung), danach geht es offline; zwischen zwei Sprachen ohne Englisch
+übersetzt er über Englisch und braucht zwei Pakete. Kein Text verlässt
+das Gerät. Unter jeder Übersetzung steht, dass sie maschinell ist. Bisher
+nur im Mac-Paket; Linux, Windows und Android folgen
+([Stand](docs/uebersetzer-offline-plan.md)).
+
 **Karte offline.** Im dunklen Erscheinungsbild ist auch die Karte dunkel –
 der Stil wird umgedreht statt das fertige Bild, sodass ein Park grün bleibt.
 Die Karte lässt sich in der App herunterladen: Ort
