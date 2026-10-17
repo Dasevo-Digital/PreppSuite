@@ -3880,5 +3880,67 @@
         "type": "String"
       }
     }
-  }
+  },
+  "morseTitle": "Morsecode",
+  "morseEntryHint": "Text in Morsezeichen übersetzen und zurück, als Lichtsignal senden, mit Tafel aller Zeichen.",
+  "morseTabTranslate": "Übersetzen",
+  "morseTabChart": "Tafel",
+  "morseToMorse": "Text → Morse",
+  "morseToText": "Morse → Text",
+  "morseTextLabel": "Text",
+  "morseCodeLabel": "Morsezeichen",
+  "morseCodeHint": "Punkt und Strich; Buchstaben mit einem Leerzeichen trennen, Wörter mit /",
+  "morseResult": "Ergebnis",
+  "morseCopy": "Kopieren",
+  "morseCopied": "In die Zwischenablage kopiert.",
+  "morseCannotSend": "Ohne Morsezeichen, ausgelassen: {characters}",
+  "@morseCannotSend": {
+    "placeholders": {
+      "characters": {
+        "type": "String"
+      }
+    }
+  },
+  "morseUnknownCodes": "Unbekannte Zeichen (□): {codes}",
+  "@morseUnknownCodes": {
+    "placeholders": {
+      "codes": {
+        "type": "String"
+      }
+    }
+  },
+  "morseSpeed": "Tempo",
+  "morseSpeedSlow": "langsam",
+  "morseSpeedMedium": "mittel",
+  "morseSpeedFast": "schnell",
+  "morseSend": "Als Lichtsignal senden",
+  "morseStop": "Stopp",
+  "morseLampHint": "Die Nachricht wiederholt sich, mit einer langen Pause am Ende. Bildschirmhelligkeit ganz hochstellen und den Bildschirm zur Gegenstelle halten.",
+  "morseLampSending": "Zeichen {current} von {total}",
+  "@morseLampSending": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "morseChartLetters": "Buchstaben",
+  "morseChartDigits": "Ziffern",
+  "morseChartPunctuation": "Satzzeichen",
+  "morseChartExtensions": "Landessprachliche Zeichen",
+  "morseChartExtensionsNote": "Nicht Teil der internationalen Empfehlung, im Deutschen und Spanischen gebräuchlich. CH wird nur empfangen; ein Text sendet C und H einzeln.",
+  "morseChartProsigns": "Betriebszeichen",
+  "morseProsignSos": "Notzeichen SOS, als ein Zeichen",
+  "morseProsignError": "Irrung",
+  "morseProsignUnderstood": "Verstanden",
+  "morseProsignWait": "Warten",
+  "morseProsignStart": "Spruchanfang",
+  "morseProsignEndOfMessage": "Spruchende",
+  "morseProsignEndOfWork": "Verkehrsende",
+  "morseSource": "Quelle: Empfehlung ITU-R M.1677-1 „Internationaler Morsecode“ (2009).",
+  "morseDotSpoken": "kurz",
+  "morseDashSpoken": "lang"
 }

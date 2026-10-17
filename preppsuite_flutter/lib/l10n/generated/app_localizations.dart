@@ -15438,6 +15438,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fetch failed: {reason}'**
   String warningsRefreshFailed(String reason);
+
+  /// No description provided for @morseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Morse code'**
+  String get morseTitle;
+
+  /// No description provided for @morseEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate text into Morse and back, send it as a light signal, with a chart of every sign.'**
+  String get morseEntryHint;
+
+  /// No description provided for @morseTabTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get morseTabTranslate;
+
+  /// No description provided for @morseTabChart.
+  ///
+  /// In en, this message translates to:
+  /// **'Chart'**
+  String get morseTabChart;
+
+  /// No description provided for @morseToMorse.
+  ///
+  /// In en, this message translates to:
+  /// **'Text → Morse'**
+  String get morseToMorse;
+
+  /// No description provided for @morseToText.
+  ///
+  /// In en, this message translates to:
+  /// **'Morse → text'**
+  String get morseToText;
+
+  /// No description provided for @morseTextLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get morseTextLabel;
+
+  /// No description provided for @morseCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Morse signals'**
+  String get morseCodeLabel;
+
+  /// No description provided for @morseCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Dots and dashes; separate letters with a space and words with /'**
+  String get morseCodeHint;
+
+  /// No description provided for @morseResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get morseResult;
+
+  /// No description provided for @morseCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get morseCopy;
+
+  /// No description provided for @morseCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to the clipboard.'**
+  String get morseCopied;
+
+  /// No description provided for @morseCannotSend.
+  ///
+  /// In en, this message translates to:
+  /// **'No Morse signal, left out: {characters}'**
+  String morseCannotSend(String characters);
+
+  /// No description provided for @morseUnknownCodes.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown signals (□): {codes}'**
+  String morseUnknownCodes(String codes);
+
+  /// No description provided for @morseSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get morseSpeed;
+
+  /// No description provided for @morseSpeedSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'slow'**
+  String get morseSpeedSlow;
+
+  /// No description provided for @morseSpeedMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'medium'**
+  String get morseSpeedMedium;
+
+  /// No description provided for @morseSpeedFast.
+  ///
+  /// In en, this message translates to:
+  /// **'fast'**
+  String get morseSpeedFast;
+
+  /// No description provided for @morseSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send as a light signal'**
+  String get morseSend;
+
+  /// No description provided for @morseStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get morseStop;
+
+  /// No description provided for @morseLampHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The message repeats, with a long pause at the end. Turn the screen brightness all the way up and hold the screen towards whoever is watching.'**
+  String get morseLampHint;
+
+  /// No description provided for @morseLampSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign {current} of {total}'**
+  String morseLampSending(int current, int total);
+
+  /// No description provided for @morseChartLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'Letters'**
+  String get morseChartLetters;
+
+  /// No description provided for @morseChartDigits.
+  ///
+  /// In en, this message translates to:
+  /// **'Figures'**
+  String get morseChartDigits;
+
+  /// No description provided for @morseChartPunctuation.
+  ///
+  /// In en, this message translates to:
+  /// **'Punctuation'**
+  String get morseChartPunctuation;
+
+  /// No description provided for @morseChartExtensions.
+  ///
+  /// In en, this message translates to:
+  /// **'Language extensions'**
+  String get morseChartExtensions;
+
+  /// No description provided for @morseChartExtensionsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Not part of the international Recommendation; in common use in German and Spanish. CH is only received; text is sent as C and H.'**
+  String get morseChartExtensionsNote;
+
+  /// No description provided for @morseChartProsigns.
+  ///
+  /// In en, this message translates to:
+  /// **'Procedure signals'**
+  String get morseChartProsigns;
+
+  /// No description provided for @morseProsignSos.
+  ///
+  /// In en, this message translates to:
+  /// **'Distress signal SOS, sent as one sign'**
+  String get morseProsignSos;
+
+  /// No description provided for @morseProsignError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get morseProsignError;
+
+  /// No description provided for @morseProsignUnderstood.
+  ///
+  /// In en, this message translates to:
+  /// **'Understood'**
+  String get morseProsignUnderstood;
+
+  /// No description provided for @morseProsignWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait'**
+  String get morseProsignWait;
+
+  /// No description provided for @morseProsignStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting signal'**
+  String get morseProsignStart;
+
+  /// No description provided for @morseProsignEndOfMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'End of message'**
+  String get morseProsignEndOfMessage;
+
+  /// No description provided for @morseProsignEndOfWork.
+  ///
+  /// In en, this message translates to:
+  /// **'End of work'**
+  String get morseProsignEndOfWork;
+
+  /// No description provided for @morseSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source: Recommendation ITU-R M.1677-1, “International Morse code” (2009).'**
+  String get morseSource;
+
+  /// No description provided for @morseDotSpoken.
+  ///
+  /// In en, this message translates to:
+  /// **'short'**
+  String get morseDotSpoken;
+
+  /// No description provided for @morseDashSpoken.
+  ///
+  /// In en, this message translates to:
+  /// **'long'**
+  String get morseDashSpoken;
 }
 
 class _AppLocalizationsDelegate

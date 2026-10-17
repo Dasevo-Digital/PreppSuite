@@ -9366,4 +9366,129 @@ class AppLocalizationsDe extends AppLocalizations {
   String warningsRefreshFailed(String reason) {
     return 'Abruf fehlgeschlagen: $reason';
   }
+
+  @override
+  String get morseTitle => 'Morsecode';
+
+  @override
+  String get morseEntryHint =>
+      'Text in Morsezeichen übersetzen und zurück, als Lichtsignal senden, mit Tafel aller Zeichen.';
+
+  @override
+  String get morseTabTranslate => 'Übersetzen';
+
+  @override
+  String get morseTabChart => 'Tafel';
+
+  @override
+  String get morseToMorse => 'Text → Morse';
+
+  @override
+  String get morseToText => 'Morse → Text';
+
+  @override
+  String get morseTextLabel => 'Text';
+
+  @override
+  String get morseCodeLabel => 'Morsezeichen';
+
+  @override
+  String get morseCodeHint =>
+      'Punkt und Strich; Buchstaben mit einem Leerzeichen trennen, Wörter mit /';
+
+  @override
+  String get morseResult => 'Ergebnis';
+
+  @override
+  String get morseCopy => 'Kopieren';
+
+  @override
+  String get morseCopied => 'In die Zwischenablage kopiert.';
+
+  @override
+  String morseCannotSend(String characters) {
+    return 'Ohne Morsezeichen, ausgelassen: $characters';
+  }
+
+  @override
+  String morseUnknownCodes(String codes) {
+    return 'Unbekannte Zeichen (□): $codes';
+  }
+
+  @override
+  String get morseSpeed => 'Tempo';
+
+  @override
+  String get morseSpeedSlow => 'langsam';
+
+  @override
+  String get morseSpeedMedium => 'mittel';
+
+  @override
+  String get morseSpeedFast => 'schnell';
+
+  @override
+  String get morseSend => 'Als Lichtsignal senden';
+
+  @override
+  String get morseStop => 'Stopp';
+
+  @override
+  String get morseLampHint =>
+      'Die Nachricht wiederholt sich, mit einer langen Pause am Ende. Bildschirmhelligkeit ganz hochstellen und den Bildschirm zur Gegenstelle halten.';
+
+  @override
+  String morseLampSending(int current, int total) {
+    return 'Zeichen $current von $total';
+  }
+
+  @override
+  String get morseChartLetters => 'Buchstaben';
+
+  @override
+  String get morseChartDigits => 'Ziffern';
+
+  @override
+  String get morseChartPunctuation => 'Satzzeichen';
+
+  @override
+  String get morseChartExtensions => 'Landessprachliche Zeichen';
+
+  @override
+  String get morseChartExtensionsNote =>
+      'Nicht Teil der internationalen Empfehlung, im Deutschen und Spanischen gebräuchlich. CH wird nur empfangen; ein Text sendet C und H einzeln.';
+
+  @override
+  String get morseChartProsigns => 'Betriebszeichen';
+
+  @override
+  String get morseProsignSos => 'Notzeichen SOS, als ein Zeichen';
+
+  @override
+  String get morseProsignError => 'Irrung';
+
+  @override
+  String get morseProsignUnderstood => 'Verstanden';
+
+  @override
+  String get morseProsignWait => 'Warten';
+
+  @override
+  String get morseProsignStart => 'Spruchanfang';
+
+  @override
+  String get morseProsignEndOfMessage => 'Spruchende';
+
+  @override
+  String get morseProsignEndOfWork => 'Verkehrsende';
+
+  @override
+  String get morseSource =>
+      'Quelle: Empfehlung ITU-R M.1677-1 „Internationaler Morsecode“ (2009).';
+
+  @override
+  String get morseDotSpoken => 'kurz';
+
+  @override
+  String get morseDashSpoken => 'lang';
 }

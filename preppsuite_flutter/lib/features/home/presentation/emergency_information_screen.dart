@@ -21,6 +21,7 @@ import '../../warnings/presentation/pegel_screen.dart';
 import '../../warnings/presentation/radiation_screen.dart';
 import 'radio_emergency_screen.dart';
 import '../../../core/phone_call.dart';
+import '../../morse/presentation/morse_screen.dart';
 
 const _contactsKey = 'nearbyEmergencyContacts';
 
@@ -219,6 +220,19 @@ class _EmergencyInformationScreenState
                 MaterialPageRoute<void>(
                   builder: (_) => const DistressSignalScreen(),
                 ),
+              ),
+            ),
+          ),
+          // Under the distress signal, which sends one rhythm everybody
+          // knows; this sends whatever somebody types, and reads a reply.
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.linear_scale),
+              title: Text(l10n.morseTitle),
+              subtitle: Text(l10n.morseEntryHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const MorseScreen()),
               ),
             ),
           ),

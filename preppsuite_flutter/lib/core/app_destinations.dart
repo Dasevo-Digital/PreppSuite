@@ -69,6 +69,7 @@ import '../features/warnings/presentation/road_closure_screen.dart';
 import '../features/warnings/presentation/warning_situation_map_screen.dart';
 import '../features/kids_comic/application/kids_comic.dart';
 import '../features/kids_comic/presentation/kids_comic_screen.dart';
+import '../features/morse/presentation/morse_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../model/household_profile.dart';
 
@@ -269,7 +270,15 @@ List<AppDestination> appDestinations() => [
     icon: Icons.sos_outlined,
     area: ShellDestination.emergency,
     open: (_) => const DistressSignalScreen(),
-    aliases: ['sos', 'morse', 'signal', 'pfeife'],
+    aliases: ['sos', 'signal', 'pfeife'],
+  ),
+  AppDestination(
+    id: 'morse',
+    title: (l) => l.morseTitle,
+    icon: Icons.linear_scale,
+    area: ShellDestination.emergency,
+    open: (_) => const MorseScreen(),
+    aliases: ['morse', 'morsen', 'morsezeichen', 'funk', 'lichtsignal', 'code'],
   ),
   AppDestination(
     id: 'outage',

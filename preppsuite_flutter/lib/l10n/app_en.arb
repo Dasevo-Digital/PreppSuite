@@ -5496,5 +5496,67 @@
         "type": "String"
       }
     }
-  }
+  },
+  "morseTitle": "Morse code",
+  "morseEntryHint": "Translate text into Morse and back, send it as a light signal, with a chart of every sign.",
+  "morseTabTranslate": "Translate",
+  "morseTabChart": "Chart",
+  "morseToMorse": "Text → Morse",
+  "morseToText": "Morse → text",
+  "morseTextLabel": "Text",
+  "morseCodeLabel": "Morse signals",
+  "morseCodeHint": "Dots and dashes; separate letters with a space and words with /",
+  "morseResult": "Result",
+  "morseCopy": "Copy",
+  "morseCopied": "Copied to the clipboard.",
+  "morseCannotSend": "No Morse signal, left out: {characters}",
+  "@morseCannotSend": {
+    "placeholders": {
+      "characters": {
+        "type": "String"
+      }
+    }
+  },
+  "morseUnknownCodes": "Unknown signals (□): {codes}",
+  "@morseUnknownCodes": {
+    "placeholders": {
+      "codes": {
+        "type": "String"
+      }
+    }
+  },
+  "morseSpeed": "Speed",
+  "morseSpeedSlow": "slow",
+  "morseSpeedMedium": "medium",
+  "morseSpeedFast": "fast",
+  "morseSend": "Send as a light signal",
+  "morseStop": "Stop",
+  "morseLampHint": "The message repeats, with a long pause at the end. Turn the screen brightness all the way up and hold the screen towards whoever is watching.",
+  "morseLampSending": "Sign {current} of {total}",
+  "@morseLampSending": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "morseChartLetters": "Letters",
+  "morseChartDigits": "Figures",
+  "morseChartPunctuation": "Punctuation",
+  "morseChartExtensions": "Language extensions",
+  "morseChartExtensionsNote": "Not part of the international Recommendation; in common use in German and Spanish. CH is only received; text is sent as C and H.",
+  "morseChartProsigns": "Procedure signals",
+  "morseProsignSos": "Distress signal SOS, sent as one sign",
+  "morseProsignError": "Error",
+  "morseProsignUnderstood": "Understood",
+  "morseProsignWait": "Wait",
+  "morseProsignStart": "Starting signal",
+  "morseProsignEndOfMessage": "End of message",
+  "morseProsignEndOfWork": "End of work",
+  "morseSource": "Source: Recommendation ITU-R M.1677-1, “International Morse code” (2009).",
+  "morseDotSpoken": "short",
+  "morseDashSpoken": "long"
 }

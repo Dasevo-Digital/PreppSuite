@@ -329,6 +329,15 @@ anderen hinein. Die Pause gehört zum Signal und steht auch so auf dem
 Bildschirm: sie unterscheidet es von jemandem, der mit einer Lampe
 herumläuft.
 
+**Morsecode.** Ein Übersetzer in beide Richtungen: Text wird zu Punkten
+und Strichen, und was jemand zurückblinkt, lässt sich als Morsezeichen
+eintippen und als Text lesen – mit Punkt und Strich in beliebiger
+Schreibweise. Unbekannte Zeichen werden benannt statt still ausgelassen.
+Eine getippte Nachricht sendet der Bildschirm als Lichtsignal, in drei
+Tempi und mit dem gerade gesendeten Zeichen darauf. Dazu die Tafel aller
+Zeichen nach der Empfehlung ITU-R M.1677-1; Ä, Ö, Ü, ß, CH und Ñ stehen
+gesondert, weil sie nicht zum internationalen Standard gehören.
+
 **Karte offline.** Im dunklen Erscheinungsbild ist auch die Karte dunkel –
 der Stil wird umgedreht statt das fertige Bild, sodass ein Park grün bleibt.
 Die Karte lässt sich in der App herunterladen: Ort

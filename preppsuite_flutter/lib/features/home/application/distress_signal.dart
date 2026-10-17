@@ -40,21 +40,13 @@ enum DistressSignal {
 /// One span of the rhythm: lit or dark, and for how long.
 typedef SignalSpan = ({bool lit, Duration length});
 
-/// A rhythm, as something that can be asked "are you lit right now".
-class DistressSignalPattern {
-  DistressSignalPattern(this.signal, {this.unit = defaultUnit})
-    : assert(unit > Duration.zero),
-      spans = _spansFor(signal, unit);
-
-  /// Half a second a unit. Slow for Morse and deliberately so: this is
-  /// read by an eye across a valley, not by an operator with headphones.
-  static const defaultUnit = Duration(milliseconds: 500);
-
-  final DistressSignal signal;
-
-  /// The length of a Morse dot. Ignored by the alpine rhythms, whose
-  /// timing is given in whole seconds by the convention itself.
-  final Duration unit;
+/// Any rhythm of light and dark, as something that can be asked "are you
+/// lit right now".
+///
+/// Shared by the distress signals and the Morse lamp, so both keep time
+/// the same way: from the elapsed time, never by counting ticks.
+class SignalRhythm {
+  SignalRhythm(this.spans);
 
   final List<SignalSpan> spans;
 
@@ -103,6 +95,23 @@ class DistressSignalPattern {
     }
     return 0;
   }
+}
+
+/// One of the distress rhythms.
+class DistressSignalPattern extends SignalRhythm {
+  DistressSignalPattern(this.signal, {this.unit = defaultUnit})
+    : assert(unit > Duration.zero),
+      super(_spansFor(signal, unit));
+
+  /// Half a second a unit. Slow for Morse and deliberately so: this is
+  /// read by an eye across a valley, not by an operator with headphones.
+  static const defaultUnit = Duration(milliseconds: 500);
+
+  final DistressSignal signal;
+
+  /// The length of a Morse dot. Ignored by the alpine rhythms, whose
+  /// timing is given in whole seconds by the convention itself.
+  final Duration unit;
 
   static List<SignalSpan> _spansFor(DistressSignal signal, Duration unit) {
     switch (signal) {

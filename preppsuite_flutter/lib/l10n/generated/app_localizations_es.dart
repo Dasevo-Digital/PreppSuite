@@ -9394,4 +9394,130 @@ class AppLocalizationsEs extends AppLocalizations {
   String warningsRefreshFailed(String reason) {
     return 'La consulta falló: $reason';
   }
+
+  @override
+  String get morseTitle => 'Código Morse';
+
+  @override
+  String get morseEntryHint =>
+      'Traducir texto a Morse y al revés, enviarlo como señal luminosa, con una tabla de todos los signos.';
+
+  @override
+  String get morseTabTranslate => 'Traducir';
+
+  @override
+  String get morseTabChart => 'Tabla';
+
+  @override
+  String get morseToMorse => 'Texto → Morse';
+
+  @override
+  String get morseToText => 'Morse → texto';
+
+  @override
+  String get morseTextLabel => 'Texto';
+
+  @override
+  String get morseCodeLabel => 'Señales Morse';
+
+  @override
+  String get morseCodeHint =>
+      'Puntos y rayas; separa las letras con un espacio y las palabras con /';
+
+  @override
+  String get morseResult => 'Resultado';
+
+  @override
+  String get morseCopy => 'Copiar';
+
+  @override
+  String get morseCopied => 'Copiado al portapapeles.';
+
+  @override
+  String morseCannotSend(String characters) {
+    return 'Sin señal Morse, omitido: $characters';
+  }
+
+  @override
+  String morseUnknownCodes(String codes) {
+    return 'Señales desconocidas (□): $codes';
+  }
+
+  @override
+  String get morseSpeed => 'Velocidad';
+
+  @override
+  String get morseSpeedSlow => 'lenta';
+
+  @override
+  String get morseSpeedMedium => 'media';
+
+  @override
+  String get morseSpeedFast => 'rápida';
+
+  @override
+  String get morseSend => 'Enviar como señal luminosa';
+
+  @override
+  String get morseStop => 'Parar';
+
+  @override
+  String get morseLampHint =>
+      'El mensaje se repite, con una pausa larga al final. Sube el brillo de la pantalla al máximo y dirígela hacia quien observa.';
+
+  @override
+  String morseLampSending(int current, int total) {
+    return 'Signo $current de $total';
+  }
+
+  @override
+  String get morseChartLetters => 'Letras';
+
+  @override
+  String get morseChartDigits => 'Cifras';
+
+  @override
+  String get morseChartPunctuation => 'Signos de puntuación';
+
+  @override
+  String get morseChartExtensions => 'Signos propios de cada idioma';
+
+  @override
+  String get morseChartExtensionsNote =>
+      'No forman parte de la Recomendación internacional; habituales en alemán y español. CH solo se recibe; un texto se envía como C y H.';
+
+  @override
+  String get morseChartProsigns => 'Señales de procedimiento';
+
+  @override
+  String get morseProsignSos =>
+      'Señal de socorro SOS, enviada como un solo signo';
+
+  @override
+  String get morseProsignError => 'Error';
+
+  @override
+  String get morseProsignUnderstood => 'Entendido';
+
+  @override
+  String get morseProsignWait => 'Espere';
+
+  @override
+  String get morseProsignStart => 'Señal de comienzo';
+
+  @override
+  String get morseProsignEndOfMessage => 'Fin del mensaje';
+
+  @override
+  String get morseProsignEndOfWork => 'Fin del trabajo';
+
+  @override
+  String get morseSource =>
+      'Fuente: Recomendación UIT-R M.1677-1, «Código Morse internacional» (2009).';
+
+  @override
+  String get morseDotSpoken => 'corto';
+
+  @override
+  String get morseDashSpoken => 'largo';
 }
