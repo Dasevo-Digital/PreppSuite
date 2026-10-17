@@ -161,6 +161,10 @@ from there. All are public and key-less.
 **Warnings are fetched by the app.** `WarningPollService` runs from two
 places that must stay interchangeable: `WarningSyncController` while a screen
 is open, and `runWarningBackgroundPoll` in a separate isolate via WorkManager.
+The controller polls at start, every fifteen minutes after that and when the
+warnings screen's refresh button asks, one poll at a time (#178); until then
+it polled once at start, and the three desktops, which have no background
+worker, showed the morning's warnings all day.
 The isolate has no Riverpod, no widget tree and no profile object — it reads
 `WarningRegionStore` (preferences) and the local database. That is why
 relevance takes a plain `WarningRegionFilter` and not the profile itself.

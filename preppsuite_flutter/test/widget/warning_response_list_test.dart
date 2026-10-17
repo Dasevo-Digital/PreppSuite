@@ -10,6 +10,9 @@ import 'package:preppsuite_flutter/features/warnings/presentation/warning_list_s
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_sync_controller.dart';
+
+import 'fake_warning_sync.dart';
 
 class _Profile extends HouseholdProfileController {
   @override
@@ -61,6 +64,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // The screen keeps the poll alive; this one fetches nothing.
+          warningSyncControllerProvider.overrideWith2(FakeWarningSync.new),
           appDatabaseProvider.overrideWithValue(db),
           householdProfileProvider.overrideWith(_Profile.new),
           allWarningsProvider.overrideWith(
@@ -125,6 +130,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // The screen keeps the poll alive; this one fetches nothing.
+          warningSyncControllerProvider.overrideWith2(FakeWarningSync.new),
           appDatabaseProvider.overrideWithValue(db),
           householdProfileProvider.overrideWith(_Profile.new),
           allWarningsProvider.overrideWith(

@@ -9,6 +9,10 @@ import 'package:preppsuite_flutter/model/household_profile.dart';
 
 import 'accessibility.dart';
 
+import 'package:preppsuite_flutter/features/warnings/application/warning_sync_controller.dart';
+
+import 'fake_warning_sync.dart';
+
 /// Whether the filter narrows the list is settled in
 /// `test/features/warning_filter_test.dart`, without a widget tree. What
 /// is left here is the part only the screen can get wrong: that the chips
@@ -69,6 +73,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // The screen keeps the poll alive; this one fetches nothing.
+          warningSyncControllerProvider.overrideWith2(FakeWarningSync.new),
           allWarningsProvider.overrideWith((ref) => Stream.value(warnings)),
         ],
         child: MaterialApp(

@@ -3868,5 +3868,17 @@
         "type": "String"
       }
     }
+  },
+  "warningsRefresh": "Warnungen jetzt abrufen",
+  "warningsRefreshShort": "Jetzt abrufen",
+  "warningsRefreshDone": "Warnungen abgerufen.",
+  "warningsRefreshIncomplete": "Nicht alle Warnquellen haben geantwortet. Was ankam, ist gespeichert; der nächste Abruf versucht es erneut.",
+  "warningsRefreshFailed": "Abruf fehlgeschlagen: {reason}",
+  "@warningsRefreshFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
   }
 }

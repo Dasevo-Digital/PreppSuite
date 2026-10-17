@@ -29,6 +29,7 @@ import '../application/warning_severity_l10n.dart';
 import '../../../core/error_text.dart';
 import '../../maps/presentation/base_map_layer.dart';
 import '../application/warning_freshness.dart';
+import '../application/warning_sync_controller.dart';
 import 'warning_freshness_notice.dart';
 
 class WarningListScreen extends ConsumerStatefulWidget {
@@ -73,15 +74,62 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
     setState(() => _filter = const WarningFilter(onlyMyRegions: true));
   }
 
+  /// Asks the feeds now and says how it went (#178).
+  ///
+  /// What it says comes from the poll itself: every source answered, some
+  /// did not, or the run failed with a reason. "Check your connection"
+  /// would be a guess, and a wrong one whenever a single feed is down.
+  Future<void> _refresh() async {
+    final l10n = AppLocalizations.of(context)!;
+    final controller = ref.read(
+      warningSyncControllerProvider(profile).notifier,
+    );
+    final result = await controller.syncNow();
+    if (!mounted) return;
+    final error = ref.read(warningSyncControllerProvider(profile)).error;
+    final message = result == null
+        ? l10n.warningsRefreshFailed(
+            error == null ? '' : describeError(l10n, error),
+          )
+        : result.complete
+        ? l10n.warningsRefreshDone
+        : l10n.warningsRefreshIncomplete;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final warningsAsync = ref.watch(allWarningsProvider);
+    final fetching = ref
+        .watch(warningSyncControllerProvider(profile))
+        .isLoading;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.warningsTitle),
         actions: [
+          // A spinner in the button's place while any fetch runs, the
+          // timer's included, so a second tap cannot look like it did
+          // nothing.
+          fetching
+              ? Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Semantics(
+                    label: l10n.warningsRefresh,
+                    child: const SizedBox.square(
+                      dimension: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                  ),
+                )
+              : IconButton(
+                  tooltip: l10n.warningsRefresh,
+                  icon: const Icon(Icons.refresh),
+                  onPressed: _refresh,
+                ),
           IconButton(
             tooltip: l10n.warningSituationMapTitle,
             icon: const Icon(Icons.map_outlined),
@@ -150,6 +198,9 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
             freshness: fresh.freshness,
             at: fresh.at,
             now: clock,
+            onRetry: ref.watch(warningSyncControllerProvider(profile)).isLoading
+                ? null
+                : _refresh,
           );
     final current =
         fresh == null || fresh.freshness == WarningFreshness.current;

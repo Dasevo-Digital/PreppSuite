@@ -9376,4 +9376,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String tourSettingsBody(String data, String appearance, String overview) {
     return 'En «$data» compartes el hogar con otros dispositivos y creas una copia de seguridad cifrada; en «$appearance» eliges el idioma y el modo crisis. El recorrido vuelve a estar aquí y tras el signo de interrogación en «$overview».';
   }
+
+  @override
+  String get warningsRefresh => 'Consultar avisos ahora';
+
+  @override
+  String get warningsRefreshShort => 'Consultar ahora';
+
+  @override
+  String get warningsRefreshDone => 'Avisos consultados.';
+
+  @override
+  String get warningsRefreshIncomplete =>
+      'No todas las fuentes de avisos respondieron. Lo recibido está guardado y la próxima consulta lo vuelve a intentar.';
+
+  @override
+  String warningsRefreshFailed(String reason) {
+    return 'La consulta falló: $reason';
+  }
 }

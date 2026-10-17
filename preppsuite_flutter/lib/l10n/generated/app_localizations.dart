@@ -15408,6 +15408,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Under “{data}” you share the household with other devices and make an encrypted backup; under “{appearance}” you choose the language and crisis mode. You will find the tour here again, and behind the question mark on the “{overview}”.'**
   String tourSettingsBody(String data, String appearance, String overview);
+
+  /// No description provided for @warningsRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch warnings now'**
+  String get warningsRefresh;
+
+  /// No description provided for @warningsRefreshShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch now'**
+  String get warningsRefreshShort;
+
+  /// No description provided for @warningsRefreshDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Warnings fetched.'**
+  String get warningsRefreshDone;
+
+  /// No description provided for @warningsRefreshIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Not every warning source answered. What arrived is stored, and the next fetch tries again.'**
+  String get warningsRefreshIncomplete;
+
+  /// No description provided for @warningsRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch failed: {reason}'**
+  String warningsRefreshFailed(String reason);
 }
 
 class _AppLocalizationsDelegate

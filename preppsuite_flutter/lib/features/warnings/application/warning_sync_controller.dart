@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../model/household_profile.dart';
@@ -16,19 +18,40 @@ final warningPollServiceProvider = Provider<WarningPollService>((ref) {
   return WarningPollService(database: ref.watch(appDatabaseProvider));
 });
 
+/// How often the feeds are asked while the app is open.
+///
+/// The same fifteen minutes the warnings screen promises and the
+/// background worker keeps on Android.
+const warningForegroundPollInterval = Duration(minutes: 15);
+
 /// Fetches the warning feeds while a screen is open, and keeps the
 /// background worker's view of the world current.
 ///
 /// There is no push or pull any more — the app talks to BBK and MeteoAlarm
 /// directly. This runs the same [WarningPollService] the background worker
 /// runs; the difference is only who scheduled it.
+///
+/// It used to ask once, when the app started, and never again while it
+/// stayed open. Only Android and iOS have a background worker, so a Mac,
+/// a Linux or a Windows machine left running all day showed the morning's
+/// warnings in the evening, under a notice saying they were stale. Now it
+/// asks every [warningForegroundPollInterval], and [syncNow] is what the
+/// warnings screen's button calls (#178).
 class WarningSyncController extends Notifier<AsyncValue<void>> {
   WarningSyncController(this.profile);
 
   final HouseholdProfile profile;
 
+  Future<WarningPollResult?>? _running;
+
   @override
   AsyncValue<void> build() {
+    final timer = Timer.periodic(
+      warningForegroundPollInterval,
+      (_) => syncNow(),
+    );
+    ref.onDispose(timer.cancel);
+
     // Registering and cancelling both have to follow the switch, not just
     // its first value — see `ensureLoaded` for why that first value lies
     // for one turn of the event loop.
@@ -45,7 +68,17 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
     return const AsyncData(null);
   }
 
-  Future<void> syncNow() async {
+  /// Polls now, or joins the poll already under way.
+  ///
+  /// One at a time: a tap on the button while the timer's run is still
+  /// out must not send every request twice. Null when the poll failed
+  /// outright; the state then holds the error.
+  Future<WarningPollResult?> syncNow() {
+    return _running ??= _poll().whenComplete(() => _running = null);
+  }
+
+  Future<WarningPollResult?> _poll() async {
+    if (ref.mounted) state = const AsyncLoading();
     try {
       final filter = _currentFilter();
       // Written on every pass, so the background isolate — which cannot
@@ -54,7 +87,7 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
       await const WarningRegionStore().save(filter);
 
       final service = ref.read(warningPollServiceProvider);
-      await service.poll(
+      final result = await service.poll(
         countryCode: filter.countryCode,
         kreisSchluessel: filter.ownKreisSchluessel,
         extraKreisSchluessel: [
@@ -63,9 +96,11 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
         ],
       );
       await _notifyIfEnabled(service, filter);
-      state = const AsyncData(null);
+      if (ref.mounted) state = const AsyncData(null);
+      return result;
     } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
+      if (ref.mounted) state = AsyncError(error, stackTrace);
+      return null;
     } finally {
       // Every attempt, answered or not, moves how old the warnings are
       // (#138).

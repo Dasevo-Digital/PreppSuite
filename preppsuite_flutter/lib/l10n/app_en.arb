@@ -5484,5 +5484,17 @@
         "type": "String"
       }
     }
+  },
+  "warningsRefresh": "Fetch warnings now",
+  "warningsRefreshShort": "Fetch now",
+  "warningsRefreshDone": "Warnings fetched.",
+  "warningsRefreshIncomplete": "Not every warning source answered. What arrived is stored, and the next fetch tries again.",
+  "warningsRefreshFailed": "Fetch failed: {reason}",
+  "@warningsRefreshFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
   }
 }

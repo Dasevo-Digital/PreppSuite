@@ -8,6 +8,10 @@ import 'package:preppsuite_flutter/model/household_profile.dart';
 
 import 'accessibility.dart';
 
+import 'package:preppsuite_flutter/features/warnings/application/warning_sync_controller.dart';
+
+import 'fake_warning_sync.dart';
+
 void main() {
   HouseholdProfile profile(String countryCode) => HouseholdProfile(
     id: 'household-1',
@@ -19,6 +23,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // The screen keeps the poll alive; this one fetches nothing.
+          warningSyncControllerProvider.overrideWith2(FakeWarningSync.new),
           // Served as a plain value rather than a drift stream: a real one
           // never settles inside a widget test.
           allWarningsProvider.overrideWith((ref) => Stream.value(const [])),

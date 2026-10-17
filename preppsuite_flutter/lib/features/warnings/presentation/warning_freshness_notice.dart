@@ -11,11 +11,16 @@ class WarningFreshnessNotice extends StatelessWidget {
     required this.freshness,
     required this.at,
     required this.now,
+    this.onRetry,
   });
 
   final WarningFreshness freshness;
   final DateTime? at;
   final DateTime now;
+
+  /// Asks the feeds again, from the card that says they are out of date
+  /// (#178). Null while a fetch is already under way.
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +67,17 @@ class WarningFreshnessNotice extends StatelessWidget {
                             formatWarningTime(l10n, at, now),
                           ),
                     style: TextStyle(color: colours.onErrorContainer),
+                  ),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: colours.onErrorContainer,
+                      ),
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.refresh),
+                      label: Text(l10n.warningsRefreshShort),
+                    ),
                   ),
                 ],
               ),

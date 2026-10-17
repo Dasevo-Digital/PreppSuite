@@ -9348,4 +9348,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String tourSettingsBody(String data, String appearance, String overview) {
     return 'Unter „$data“ teilst du den Haushalt mit weiteren Geräten und legst eine verschlüsselte Sicherung an, unter „$appearance“ wählst du Sprache und Krisenmodus. Den Rundgang findest du hier und über das Fragezeichen in der „$overview“ wieder.';
   }
+
+  @override
+  String get warningsRefresh => 'Warnungen jetzt abrufen';
+
+  @override
+  String get warningsRefreshShort => 'Jetzt abrufen';
+
+  @override
+  String get warningsRefreshDone => 'Warnungen abgerufen.';
+
+  @override
+  String get warningsRefreshIncomplete =>
+      'Nicht alle Warnquellen haben geantwortet. Was ankam, ist gespeichert; der nächste Abruf versucht es erneut.';
+
+  @override
+  String warningsRefreshFailed(String reason) {
+    return 'Abruf fehlgeschlagen: $reason';
+  }
 }

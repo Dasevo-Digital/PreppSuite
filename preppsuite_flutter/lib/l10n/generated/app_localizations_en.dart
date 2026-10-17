@@ -9296,4 +9296,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String tourSettingsBody(String data, String appearance, String overview) {
     return 'Under “$data” you share the household with other devices and make an encrypted backup; under “$appearance” you choose the language and crisis mode. You will find the tour here again, and behind the question mark on the “$overview”.';
   }
+
+  @override
+  String get warningsRefresh => 'Fetch warnings now';
+
+  @override
+  String get warningsRefreshShort => 'Fetch now';
+
+  @override
+  String get warningsRefreshDone => 'Warnings fetched.';
+
+  @override
+  String get warningsRefreshIncomplete =>
+      'Not every warning source answered. What arrived is stored, and the next fetch tries again.';
+
+  @override
+  String warningsRefreshFailed(String reason) {
+    return 'Fetch failed: $reason';
+  }
 }

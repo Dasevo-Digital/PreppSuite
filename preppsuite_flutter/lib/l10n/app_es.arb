@@ -2548,5 +2548,10 @@
   "tourMapBody": "Con «{download}», arriba a la derecha, guardas el mapa de tu zona en el dispositivo; así funciona aunque falle la red. En «{shelters}» aparecen refugios y posibles lugares de protección, cada uno indicando si está confirmado oficialmente.",
   "tourKnowledgeBody": "Consultar sin conexión: descarga en el dispositivo un archivo como la Wikipedia. En «{documents}», arriba, guardas tus propios archivos, por ejemplo manuales en PDF. En ambos se puede buscar.",
   "tourHouseholdBody": "Lo que vale para tu hogar en una emergencia: el «{plan}» con punto de encuentro y contactos, las «{cards}» con lo que los servicios de emergencia deben saber de cada uno, y en «{places}» los lugares de los que recibes avisos.",
-  "tourSettingsBody": "En «{data}» compartes el hogar con otros dispositivos y creas una copia de seguridad cifrada; en «{appearance}» eliges el idioma y el modo crisis. El recorrido vuelve a estar aquí y tras el signo de interrogación en «{overview}»."
+  "tourSettingsBody": "En «{data}» compartes el hogar con otros dispositivos y creas una copia de seguridad cifrada; en «{appearance}» eliges el idioma y el modo crisis. El recorrido vuelve a estar aquí y tras el signo de interrogación en «{overview}».",
+  "warningsRefresh": "Consultar avisos ahora",
+  "warningsRefreshShort": "Consultar ahora",
+  "warningsRefreshDone": "Avisos consultados.",
+  "warningsRefreshIncomplete": "No todas las fuentes de avisos respondieron. Lo recibido está guardado y la próxima consulta lo vuelve a intentar.",
+  "warningsRefreshFailed": "La consulta falló: {reason}"
 }
