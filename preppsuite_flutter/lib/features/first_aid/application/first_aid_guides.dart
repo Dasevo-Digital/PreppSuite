@@ -11,10 +11,24 @@ export 'first_aid_guide.dart';
 /// likelier to be a German speaker's regional variant than an English
 /// reader.
 List<FirstAidGuide> firstAidGuides(String localeName) {
-  return localeName.toLowerCase().startsWith('en')
+  return firstAidGuideLanguage(localeName) == 'en'
       ? firstAidGuidesEn
       : firstAidGuidesDe;
 }
+
+/// The language the guides are shown in for [localeName]: `en` or `de`.
+///
+/// Not the app's language. A Spanish reader gets the German guides until
+/// a qualified reviewer has checked a Spanish version (see
+/// ARCHITEKTUR.md), and everything that follows the text -- the voice
+/// reading it out first of all -- has to follow this, not the locale
+/// (#175).
+String firstAidGuideLanguage(String localeName) =>
+    localeName.toLowerCase().startsWith('en') ? 'en' : 'de';
+
+/// The voice a guide is read out with: the language it is written in.
+String firstAidGuideVoice(String localeName) =>
+    firstAidGuideLanguage(localeName) == 'en' ? 'en-GB' : 'de-DE';
 
 /// One guide by its id, in the language being read.
 ///

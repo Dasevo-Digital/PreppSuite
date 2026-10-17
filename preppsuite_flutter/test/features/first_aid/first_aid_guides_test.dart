@@ -170,6 +170,15 @@ void main() {
     });
   });
 
+  test('the voice reads the language the guide is shown in (#175)', () {
+    // Spanish shows the German guides, so it has to be read in German --
+    // not in English, which is what the app's own language once chose.
+    expect(firstAidGuideVoice('de'), 'de-DE');
+    expect(firstAidGuideVoice('en'), 'en-GB');
+    expect(firstAidGuideVoice('es'), 'de-DE');
+    expect(firstAidGuides('es'), same(firstAidGuidesDe));
+  });
+
   test('the ids a video pack is checked against are the German ones', () {
     expect(firstAidGuideIds, firstAidGuidesDe.map((g) => g.id).toSet());
   });

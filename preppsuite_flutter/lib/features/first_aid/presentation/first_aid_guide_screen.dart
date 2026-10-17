@@ -427,8 +427,8 @@ class _ReadAloudButtonState extends State<_ReadAloudButton> {
     if (mounted) setState(() => _available = available);
   }
 
-  String get _language =>
-      widget.l10n.localeName.startsWith('de') ? 'de-DE' : 'en-GB';
+  /// The guide's own language, which is German for a Spanish reader.
+  String get _language => firstAidGuideVoice(widget.l10n.localeName);
 
   /// The steps as one utterance rather than one call per step: a pause
   /// between them is what the engine's own punctuation gives, and
