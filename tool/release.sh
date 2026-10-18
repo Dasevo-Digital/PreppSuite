@@ -32,8 +32,7 @@
 # runs the device check in the iPhone simulator. Linux and Windows each
 # run the start test (integration_test/app_start_test.dart) after their
 # build, and a release whose start test did not pass is not published. The Windows build needs
-# the Xapian and translator DLLs the Linux machine cross-compiles, so it
-# comes last.
+# the translator DLL the Linux machine cross-compiles, so it comes last.
 set -euo pipefail
 
 readonly ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -159,8 +158,8 @@ ssh "$linux" "cd ~/$remote_linux && tar xzf src.tar.gz && \
 step "macOS"
 app="$APP_DIR/build/macos/Build/Products/Release/PreppSuite.app"
 # The translator library first: the Xcode build only copies it, and skips
-# it with a warning when it is missing -- the same trap the Xapian step is
-# on Linux. Incremental, so a run with nothing changed takes a second.
+# it with a warning when it is missing. Incremental, so a run with nothing
+# changed takes a second.
 "$APP_DIR/native/translate/build_macos.sh" > "$log/translate.log" 2>&1 ||
   fail "Übersetzer-Bibliothek"
 (cd "$APP_DIR" && flutter build macos --release --build-name "$version" \
@@ -220,14 +219,11 @@ ssh "$linux" "grep -q ALLES-FERTIG ~/$remote_linux/build.log" ||
   fail "Linux-Build nicht fertig, siehe ~/$remote_linux/build.log"
 ssh "$linux" "grep -q 'STARTTEST: BESTANDEN' ~/$remote_linux/build.log" ||
   fail "Starttest unter Linux nicht bestanden, siehe ~/$remote_linux/build.log"
-ssh "$linux" "grep -q 'lib/libzim_xapian.so' ~/$remote_linux/inhalt.txt && \
-  grep -q 'lib/libpdfium.so' ~/$remote_linux/inhalt.txt" ||
-  fail "Linux-Paket ohne Xapian oder PDFium"
+ssh "$linux" "grep -q 'lib/libpdfium.so' ~/$remote_linux/inhalt.txt" ||
+  fail "Linux-Paket ohne PDFium"
 ssh "$linux" "grep -q 'lib/libpreppsuite_translate.so' ~/$remote_linux/inhalt.txt" ||
   fail "Linux-Paket ohne Übersetzer-Bibliothek, siehe ~/$remote_linux/translate-linux.log"
 scp -q "$linux:$remote_linux/PreppSuite-$version-linux-x64.tar.gz" "$out/"
-scp -q "$linux:$remote_linux/src/preppsuite_flutter/native/zim_xapian/build/zim_xapian.dll" \
-  "$log/zim_xapian.dll" || fail "Xapian-DLL fehlt"
 scp -q "$linux:$remote_linux/src/preppsuite_flutter/native/translate/build/preppsuite_translate.dll" \
   "$log/preppsuite_translate.dll" ||
   fail "Übersetzer-DLL fehlt, siehe ~/$remote_linux/translate-win.log"
@@ -240,10 +236,7 @@ ssh "$windows" "cmd /c \"if exist $winback rmdir /s /q $winback\"" || true
 ssh "$windows" "cmd /c \"mkdir $winback\""
 scp -q "$archive" "$windows:$win/src.tar.gz"
 ssh "$windows" "cmd /c \"cd /d $winback && tar -xzf src.tar.gz && \
-  mkdir src\\preppsuite_flutter\\native\\zim_xapian\\build && \
   mkdir src\\preppsuite_flutter\\native\\translate\\build\""
-scp -q "$log/zim_xapian.dll" \
-  "$windows:$win/src/preppsuite_flutter/native/zim_xapian/build/zim_xapian.dll"
 scp -q "$log/preppsuite_translate.dll" \
   "$windows:$win/src/preppsuite_flutter/native/translate/build/preppsuite_translate.dll"
 scp -q "$ROOT/tool/windows_build.ps1" "$windows:$win/windows_build.ps1"

@@ -2622,18 +2622,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get knowledgeIndexBuiltInTitle => 'El archivo trae su propio índice';
-
-  @override
-  String knowledgeIndexBuiltIn(int count) {
-    return '$count artículos, que se pueden buscar enseguida. El archivo lleva su propio índice de texto completo, así que no hay nada que crear.';
-  }
-
-  @override
-  String get knowledgeIndexBuiltInStemming =>
-      'Las búsquedas coinciden por raíz: \"supplies\" también encuentra \"supply\".';
-
-  @override
   String get downloadFolderTitle => 'Carpeta de descargas';
 
   @override

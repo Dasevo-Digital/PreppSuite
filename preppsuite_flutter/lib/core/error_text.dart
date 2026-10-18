@@ -10,8 +10,6 @@ import '../features/downloads/application/archive_downloader.dart'
     show DownloadException;
 import '../features/knowledge/application/kiwix_catalogue.dart'
     show KiwixCatalogueException;
-import '../features/knowledge/application/xapian_index.dart'
-    show XapianException;
 import '../features/knowledge/application/zim_archive.dart' show ZimException;
 import '../features/maps/application/pmtiles_archive.dart'
     show PmTilesException;
@@ -45,9 +43,7 @@ String describeError(AppLocalizations l10n, Object error) {
 
     // A file that was there when it was picked and is not now: an unplugged
     // disk, a folder the user tidied, a permission that did not survive.
-    PmTilesException() ||
-    ZimException() ||
-    XapianException() => l10n.errorArchiveUnreadable,
+    PmTilesException() || ZimException() => l10n.errorArchiveUnreadable,
 
     FileSystemException() => l10n.errorFileUnreadable,
 

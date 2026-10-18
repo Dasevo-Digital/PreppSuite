@@ -3,9 +3,8 @@
 # Builds the translator shim for macOS as a universal library that
 # depends on nothing but the system (#182).
 #
-# The engine is compiled from source and linked in statically, as the
-# Xapian shim is: the library goes inside the app bundle and has to carry
-# what it needs. Each architecture is its own build, because they do not
+# The engine is compiled from source and linked in statically: the
+# library goes inside the app bundle and has to carry what it needs. Each architecture is its own build, because they do not
 # share code paths -- arm64 multiplies with Ruy and Accelerate, x86_64
 # with intgemm -- and lipo joins them.
 #

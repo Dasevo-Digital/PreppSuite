@@ -92,7 +92,7 @@ und exportiert nur ihre sechs Funktionen.
   über intgemm. Die Bibliothek hängt nur von libc, libm, libstdc++ und
   libgcc ab.
 - `build_windows.sh` baut die DLL ebenfalls auf dem Linux-Rechner, mit
-  mingw-w64 (posix-Threads) wie die Xapian-Schicht, alles statisch
+  mingw-w64 (posix-Threads), alles statisch
   gebunden; sie hängt nur von Windows-eigenen DLLs ab. Marian ist für
   MSVC geschrieben: drei Header in Großschreibung bekommen Weiterleitungen,
   die Windows-Definitionen von MSVC werden gesetzt, und PCRE2 wird als

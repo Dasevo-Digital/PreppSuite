@@ -41,9 +41,10 @@ class KiwixEntry {
 
   final int articleCount;
 
-  /// Whether the archive carries Xapian's own full-text index. The app
-  /// cannot read it (see `docs/volltextsuche-xapian.md`) but it is a fair
-  /// proxy for how complete an archive is.
+  /// Whether the archive carries Kiwix's own full-text index. The app does
+  /// not read it -- it is a Xapian database, and Xapian's GPL does not go
+  /// with this app's licence (#186) -- but it is a fair proxy for how
+  /// complete an archive is.
   final bool hasFullTextIndex;
 
   final Uri downloadUrl;

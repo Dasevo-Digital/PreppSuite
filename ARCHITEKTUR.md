@@ -52,7 +52,7 @@ because that log carries this machine's paths. It runs every file in
 **The start test runs on every platform a release goes to** (#142).
 `integration_test/app_start_test.dart` loads the native foundation for
 real -- SQLite with its cipher and the daily copy, PDFium drawing a page,
-Zstandard, the Xapian shim where the desktop packages ship it -- and
+Zstandard, the translator library where the package carries it -- and
 draws the emergency help. The iPhone device check and the Android CI pick
 it up with the other files; `tool/linux_release.sh` and
 `tool/windows_build.ps1` run it after their build, and `tool/release.sh`
@@ -91,27 +91,31 @@ along:
 git archive --format=tar.gz --prefix=src/ -o /tmp/src.tar.gz v<version>
 # TestKubuntu: extract, then
 #   flutter pub get
-#   preppsuite_flutter/native/zim_xapian/build_linux.sh   # before the app
+#   preppsuite_flutter/native/translate/build_linux.sh   # before the app
 #   cd preppsuite_flutter && flutter build linux --release
 # TestWindows (cmd.exe over ssh): extract with `tar -xzf`, then
 #   cd ...\preppsuite_flutter && flutter build windows --release
 ```
 
-The Xapian step has to run **before** the app or CMake will not bundle the
-library, and skipping it silently costs the archive's own full-text index —
-1.5.0 shipped a Linux package without `libzim_xapian.so` for exactly that
-reason.
+The translator step has to run **before** the app or CMake will not
+bundle the library, and skipping it silently costs the translator.
 
-**Windows gets the same shim, and never builds it itself.** `flutter build
-windows` produces no `zim_xapian.dll` — the Visual Studio toolchain has
-nothing to build it from, because xapian-core 1.4 dropped its MSVC project
-files. It is cross-built on TestKubuntu with mingw-w64
-(`native/zim_xapian/build_windows.sh`, needs `mingw-w64` and
-`libz-mingw-w64-dev`), copied over, and placed beside the exe **before**
-the zip is made. The translator DLL (`native/translate/build_windows.sh`)
-takes the same road. `tool/windows_build.ps1` checks both DLLs by name in
-the release folder; the file count it prints was 115 for 2.5.7 (the count
-grows with assets, so it is a hint, not the check).
+**Windows gets the translator DLL from the Linux machine, and never builds
+it itself.** Mozilla's engine is written for MSVC but is cross-built on
+TestKubuntu with mingw-w64 (`native/translate/build_windows.sh`), copied
+over, and placed beside the exe **before** the zip is made.
+`tool/windows_build.ps1` checks it by name in the release folder; the file
+count it prints was 115 for 2.5.7, with the Xapian DLL that has gone since
+(the count grows with assets, so it is a hint, not the check).
+
+**No GPL code in the packages** (#186). The app is under the PolyForm
+Strict licence, which forbids what the GPL requires of a combined work, so
+nothing GPL-licensed may be linked into what is shipped. Until 2.5.7 the
+desktop packages carried xapian-core (GPL-2.0-or-later) to read the
+full-text index inside Kiwix archives; 2.5.8 took it out, and the app's
+own index stems instead. Before adding a native library, check its
+licence: MIT, BSD, Apache, MPL and LGPL used as a system library are fine,
+GPL is not.
 
 **After every release, put this Mac back in order** — the machine that
 builds is also the machine that uses the app, and a build leaves copies
@@ -263,26 +267,15 @@ archive carries — version 6 keeps it in an `X/listing` entry, version 5 in
 the header — and capitalizes the query's first letter, because that order
 is by bytes and Wikipedia titles start with a capital.
 
-**Full text has two indexes, and the archive's own is asked first.**
-`builtInIndexProvider` opens the Xapian database lying inside a Kiwix
-archive; `knowledgeFullTextProvider` uses it when it is there and falls
-back to `KnowledgeIndexDatabase` — the FTS5 index `KnowledgeIndexer`
-builds — when it is not. Four ordinary things send it down the fallback:
-no native library in this build (the three desktop platforms carry one),
-an archive with no index, an index in a compressed cluster, and a
-location that is not a path, which is Android. The wrapper is `XapianSearcher`, which keeps
-`XapianIndex` on an isolate of its own: the binding blocks, and one Xapian
-database tolerates exactly one user at a time — the message queue is the
-lock. See [`docs/volltextsuche-xapian.md`](docs/volltextsuche-xapian.md).
-
-**`directAccessInfo` is the only thing the ZIM reader hands out that is a
-position rather than bytes,** and it returns null for every compressed
-cluster on purpose. Xapian opens a database from a file offset, so the
-search index can be read where it lies inside a thirty-gigabyte archive —
-but a compressed blob exists only after decompression and has no place in
-the file to point at. It also reads the blob offsets straight from the
-source rather than through the cluster cache, because an uncompressed
-index cluster is the size of the index.
+**Full text has one index: the one the app builds.**
+`knowledgeFullTextProvider` asks `KnowledgeIndexDatabase`, the FTS5 index
+`KnowledgeIndexer` builds per archive. Kiwix archives carry an index of
+their own, but it is a Xapian database, and reading it needs xapian-core,
+whose GPL does not go with this app's licence; since 2.5.8 the app does
+not read it (#186). What it gave -- stemming, and no indexing run -- is
+half replaced: the app's own index stems German, English, Spanish and
+French (`stemmers.dart`), and a large archive still takes one indexing
+run. See [`docs/volltextsuche-xapian.md`](docs/volltextsuche-xapian.md).
 
 **The indexer reads in cluster order, never entry order.** Entries are
 sorted by URL and clusters are not; reading in entry order would
@@ -877,8 +870,8 @@ with a PDF export meant to be kept somewhere else.
 `features/translator/` is the free offline translator (#182): Mozilla's
 model list, the packs on this device, and the FFI binding to the native
 shim in `native/translate/`, which links Mozilla's translation engine
-statically. **The library is optional, like the Xapian shim**: a build
-without it runs and the screen says the translator is not part of it.
+statically. **The library is optional**: a build without it runs and the
+screen says the translator is not part of it.
 Every release package carries it except armeabi-v7a (Marian's ARM
 kernels are AArch64 only) and iOS. The release builds it before each
 package and refuses a package without it, because the Xcode phase, the
@@ -886,9 +879,8 @@ Linux/Windows CMake rules and Gradle all only warn when it is missing:
 `build_macos.sh` before `flutter build macos`, `build_android.sh`
 (arm64, API 28 -- Bionic lacks iconv and glob below it) before the APKs,
 and on the Linux machine `build_linux.sh` before the app and
-`build_windows.sh` (mingw-w64, like Xapian) after it, the DLL then going
-to the Windows machine with the Xapian one. The start test insists on
-it under Linux and Windows. Model packs are
+`build_windows.sh` (mingw-w64) after it, the DLL then going to the
+Windows machine. The start test insists on it under Linux and Windows. Model packs are
 checked against Mozilla's SHA-256 and get their manifest last; the list's
 `filter_expression` is read only in the one shape it has used (OS and
 channel, `==`/`!=`, `||`/`&&`) and a record in any other shape is passed
@@ -1208,13 +1200,16 @@ tree; the test suite deliberately targets that layer rather than the UI.
   index from before 0.15.0 answers null, is searched unstemmed, and goes
   on working instead of being thrown away, which for a whole Wikipedia
   would be an hour of rebuilding.
-- **The two stemmers have to agree.** Where an archive carries its own
-  index, Xapian stems; where it does not, `germanStem` does. The same
-  search finding different articles depending on the platform would be
-  the worst kind of difference, so the Dart one is a transcription of
-  `german.sbl` rather than an approximation, and it is measured against
-  Xapian's output over a whole German dictionary — 356 006 words, no
-  disagreement. `tool/german_stems.sh` regenerates the fixture.
+- **The stemmers are transcriptions, not approximations, and stay at
+  Snowball 2.** `germanStem`, `englishStem`, `spanishStem` and
+  `frenchStem` follow the `.sbl` sources word for word and are measured
+  against Snowball's own expected output -- 35 033 German, 29 417
+  English, 28 390 Spanish and 20 805 French words, no disagreement
+  (`tool/snowball_stems.sh` regenerates the fixtures from pinned files).
+  Snowball 3 has changed several of the algorithms since; moving to it
+  would make an existing index answer differently than its queries are
+  stemmed, so it would need the stemmer name in the index to change and
+  old indexes to be rebuilt or kept on the old name.
 - **A `regionKey` must never be free text.** The region filter compares
   keys, and a key it cannot match does not read as "somewhere else" — it
   reads as nowhere, and the warning is dropped. MeteoAlarm's `areaDesc`

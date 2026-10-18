@@ -1,5 +1,7 @@
 # Only the C surface leaves the library. ELF needs this as well as
-# -fvisibility=hidden; see native/zim_xapian/zim_xapian.map for why.
+# -fvisibility=hidden: that covers what is compiled here, not the
+# engine's static archives linked in, whose symbols would otherwise be
+# exported too and could clash with another copy in the same process.
 {
   global:
     pt_*;

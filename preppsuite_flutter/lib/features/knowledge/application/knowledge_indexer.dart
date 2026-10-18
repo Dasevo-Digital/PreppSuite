@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'german_stemmer.dart';
+import 'stemmers.dart';
 import 'html_to_text.dart';
 import 'knowledge_index_database.dart';
 import 'zim_archive.dart';

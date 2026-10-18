@@ -126,29 +126,23 @@ Zwei Arten, und die Umschaltung steht über der Trefferliste.
 nichts vorzubereiten. Findet „Trinkwasseraufbereitung" über den Namen und
 nicht den Artikel, der das Wort nur erwähnt.
 
-**Volltext.** Zwei Wege, und welcher greift, entscheidet das Archiv.
+**Volltext.** Die App baut je Archiv einen eigenen Index mit SQLite FTS5
+auf, auf allen Plattformen.
 
-Ein Kiwix-Archiv bringt seinen eigenen Volltextindex mit, eine
-Xapian-Datenbank, die unkomprimiert im Archiv liegt. Seit 0.15.0 nutzt die
-App sie, wo sie kann: nichts aufzubauen, keine Wartezeit, und gesucht wird
-nach Wortstämmen – „Notvorräte" findet „Notvorrat". An der vollständigen
-deutschen Wikipedia gemessen: 3,2 Millionen Artikel, der Index öffnet in
-vier Millisekunden, eine Suche dauert null bis vier.
+Ein Kiwix-Archiv bringt zwar seinen eigenen Volltextindex mit, aber als
+Xapian-Datenbank, und Xapian steht unter der GPL, die mit der Lizenz der
+App nicht zusammengeht. Bis 2.5.7 lasen ihn die Desktop-Pakete über
+`libxapian`; seit 2.5.8 nicht mehr (#186). Warum und was das kostet, steht
+in [Volltextsuche ohne den Index im Archiv](volltextsuche-xapian.md).
 
-Das geht auf macOS, Linux und Windows. Dahinter steckt `libxapian`, eine
-C++-Bibliothek, die je Plattform gebaut und mitgeliefert werden muss –
-unter Android fehlt sie noch; Einzelheiten in
-[Volltextsuche über den Index im Archiv](volltextsuche-xapian.md).
-
-Wo dieser Weg nicht offen steht – unter Android, und bei Archiven ohne
-eigenen Index, etwa selbst gebauten – baut die App wie bisher einen
-eigenen Index mit SQLite FTS5 auf.
-
-**Auch der kennt seit 0.15.0 deutsche Wortstämme.** Nicht über eine
-Bibliothek, sondern über denselben Algorithmus in Dart: gestemmt wird
-beim Aufbau und bei der Suche, und „Notvorräte" findet damit auch dort
-„Notvorrat". Geprüft ist er gegen Xapians eigenen Stemmer über ein ganzes
-deutsches Wörterbuch, 356 006 Wörter, ohne eine einzige Abweichung.
+**Der eigene Index kennt Wortstämme**, in deutschen Archiven seit 0.15.0,
+in englischen, spanischen und französischen seit 2.5.8 (#194). Nicht über
+eine Bibliothek, sondern über die Snowball-Algorithmen in Dart: gestemmt
+wird beim Aufbau und bei der Suche, und „Notvorräte" findet „Notvorrat",
+„repairs" findet „repair". Jeder der vier Stemmer ist an Snowballs eigener
+Testliste geprüft – 35 033 deutsche, 29 417 englische, 28 390 spanische
+und 20 805 französische Wörter, ohne eine einzige Abweichung; der deutsche
+zusätzlich an einem ganzen Wörterbuch, 356 006 Wörter.
 
 Welcher Stemmer benutzt wurde, steht **im Index selbst**. Das ist keine
 Umständlichkeit: eine Anfrage, die anders gestemmt wird als der Text,
@@ -157,9 +151,12 @@ gibt. Ein Index von vor 0.15.0 sagt „keiner" und wird weiter ungestemmt
 durchsucht, statt stillschweigend weggeworfen zu werden; für eine ganze
 Wikipedia wäre das eine Stunde Neuaufbau.
 
-Gestemmt wird nur, wenn das Archiv sich selbst als deutsch ausweist. Ein
-deutscher Stemmer auf englischem Text zerlegt Wörter nach Regeln, die
-für sie nicht gelten.
+Gestemmt wird nur, wenn das Archiv sich selbst als deutsch, englisch,
+spanisch oder französisch ausweist. Ein Stemmer auf Text in einer anderen
+Sprache zerlegt Wörter nach Regeln, die für sie nicht gelten; Archive in
+anderen Sprachen werden ungestemmt indexiert. Ein englisches Archiv, das
+vor 2.5.8 indexiert wurde, sagt „keiner" und wird weiter ungestemmt
+durchsucht; wer die Wortstämme dort will, baut den Index neu auf.
 
 Der Aufbau läuft einmal, mit Fortschrittsanzeige, und lässt sich jederzeit
 anhalten – was schon drin ist, bleibt durchsuchbar, und beim nächsten Mal
@@ -175,10 +172,10 @@ in Minuten fertig. Die vollständige deutsche Wikipedia ist eher eine Stunde
 und mehrere Gigabyte; ab fünfzigtausend Artikeln sagt die App das vorher,
 statt einfach loszulaufen.
 
-**Was der Index nicht kann:** SQLite bringt keinen deutschen Stemmer mit.
-„Notvorräte" findet „Notvorräte", aber nicht „Notvorrat". Umlaute sind
-egal – `remove_diacritics` sorgt dafür, dass „Notvorrate" von einer
-Telefontastatur auch trifft.
+**Was SQLite selbst beiträgt:** Umlaute sind egal – `remove_diacritics`
+sorgt dafür, dass „Notvorrate" von einer Telefontastatur auch trifft. Einen
+Stemmer bringt SQLite für keine dieser Sprachen mit; das macht die App
+davor.
 
 ## Eigene Dokumente
 

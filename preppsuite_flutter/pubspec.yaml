@@ -164,8 +164,7 @@ dependencies:
   # the embedded alternative (webview_cef) costs: a few hundred megabytes
   # per platform, against an app whose whole desktop build is seventy.
   desktop_webview_window: ^0.3.0
-  # The FFI binding to the Xapian shim in native/zim_xapian, which
-  # searches the full-text index a ZIM archive carries inside it.
+  # The FFI binding to the translator shim in native/translate.
   ffi: ^2.1.4
   # Needed directly for scheduling expiry reminders; flutter_local_notifications
   # pulls it in too, but a transitive dependency cannot be imported.

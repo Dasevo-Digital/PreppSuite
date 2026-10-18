@@ -53,29 +53,10 @@ class KnowledgeIndexPanel extends ConsumerWidget {
             KnowledgeIndexStatus.partial => _partial(theme, state, controller),
             KnowledgeIndexStatus.ready => _ready(theme, state, controller),
             KnowledgeIndexStatus.none => _missing(theme, state, controller),
-            KnowledgeIndexStatus.builtIn => _builtIn(theme, state),
           },
         ),
       ),
     );
-  }
-
-  /// The archive brought its own. Nothing to decide, so nothing is asked
-  /// — this only says why there is no button.
-  List<Widget> _builtIn(ThemeData theme, KnowledgeIndexState state) {
-    return [
-      Text(l10n.knowledgeIndexBuiltInTitle, style: theme.textTheme.titleSmall),
-      const SizedBox(height: 6),
-      Text(
-        l10n.knowledgeIndexBuiltIn(state.articleCount ?? 0),
-        style: theme.textTheme.bodyMedium,
-      ),
-      const SizedBox(height: 6),
-      Text(
-        l10n.knowledgeIndexBuiltInStemming,
-        style: theme.textTheme.bodySmall,
-      ),
-    ];
   }
 
   List<Widget> _missing(

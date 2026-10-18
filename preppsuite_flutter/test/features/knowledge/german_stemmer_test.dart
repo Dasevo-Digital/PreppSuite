@@ -2,23 +2,27 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/german_stemmer.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/stemmers.dart';
 
-/// The Dart stemmer against Xapian's.
+/// The Dart stemmer against the standard it transcribes.
 ///
-/// Not a handful of examples but the real thing: `tool/german_stems.sh`
-/// runs a whole German dictionary — 356 006 words — through Xapian's own
-/// German stemmer and writes every 89th pair here. Over the full run the
-/// two agree on all 356 006; the fixture is what fits in a repository.
+/// Two fixtures. `german_stems.csv` is every 89th pair of a whole German
+/// dictionary -- 356 006 words from Debian's wngerman -- run through
+/// Xapian 1.4's German stemmer in 0.15.0, when the archive's own Xapian
+/// index still did the stemming wherever it could; the two agreed on all
+/// 356 006. Xapian is gone from the app since 2.5.8 (#186), but the pairs
+/// are still Snowball 2's German. `german_snowball_stems.csv` is Snowball's
+/// own test vocabulary and expected output, written by
+/// `tool/snowball_stems.sh` (see `snowball_stemmers_test.dart`).
 ///
-/// Why it has to be exact rather than close: where an archive carries its
-/// own index, Xapian does the stemming, and where it does not, this does.
-/// Two stemmers that disagree would make the same search find different
-/// articles depending on which platform someone is holding.
+/// Why it has to be exact rather than close: an index and the queries
+/// against it are stemmed by the same function, but an index built by an
+/// older version of the app is queried by a newer one.
 void main() {
   group('the German stemmer', () {
-    test('agrees with Xapian on every pair in the fixture', () {
+    test('agrees with the dictionary fixture on every pair', () {
       final file = File('test/features/knowledge/german_stems.csv');
-      expect(file.existsSync(), isTrue, reason: 'run tool/german_stems.sh');
+      expect(file.existsSync(), isTrue);
 
       var checked = 0;
       final wrong = <String>[];
@@ -83,12 +87,25 @@ void main() {
   });
 
   group('choosing a stemmer', () {
-    test('German archives get one, others do not', () {
+    test('German, English, Spanish and French archives get one', () {
       expect(stemmerNameFor('deu'), 'german');
       expect(stemmerNameFor('ger'), 'german');
       expect(stemmerNameFor('de'), 'german');
       expect(stemmerNameFor('DEU'), 'german');
-      expect(stemmerNameFor('eng'), 'none');
+      expect(stemmerNameFor('eng'), 'english');
+      expect(stemmerNameFor('en'), 'english');
+      expect(stemmerNameFor('spa'), 'spanish');
+      expect(stemmerNameFor('es'), 'spanish');
+      expect(stemmerNameFor('fra'), 'french');
+      expect(stemmerNameFor('fre'), 'french');
+      expect(stemmerNameFor('fr'), 'french');
+      // A list: the first language decides.
+      expect(stemmerNameFor('eng,fra'), 'english');
+    });
+
+    test('other languages do not', () {
+      expect(stemmerNameFor('ara'), 'none');
+      expect(stemmerNameFor('ukr'), 'none');
       expect(stemmerNameFor('mul'), 'none');
       expect(stemmerNameFor(null), 'none');
       expect(stemmerNameFor(''), 'none');
@@ -99,7 +116,9 @@ void main() {
       // working exactly as it did rather than being silently rebuilt.
       expect(stemmerNamed(null), isNull);
       expect(stemmerNamed('none'), isNull);
-      expect(stemmerNamed('german'), isNotNull);
+      for (final name in ['german', 'english', 'spanish', 'french']) {
+        expect(stemmerNamed(name), isNotNull, reason: name);
+      }
     });
 
     test('text becomes the stems that go into the index', () {

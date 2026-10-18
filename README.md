@@ -879,18 +879,19 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   Speicherplatz ist nie die Grenze. Ein unterbrochener Download wird beim
   nächsten Start fortgesetzt statt neu begonnen. Einzelheiten in
   [`docs/karte-offline.md`](docs/karte-offline.md).
-- Die Volltextsuche nutzt seit 0.15.0 den Index, den ein Kiwix-Archiv
-  ohnehin mitbringt – auf macOS, Linux und Windows. Gemessen an der
-  vollständigen deutschen Wikipedia: 3,2 Millionen Artikel, nichts
-  aufzubauen, eine Suche in wenigen Millisekunden, und „Notvorräte"
-  findet „Notvorrat".
-- Unter Android – und bei Archiven ohne eigenen Index – baut die App
-  weiterhin einen eigenen auf. Der kennt seit 0.15.0 ebenfalls deutsche
-  Wortstämme, über denselben Algorithmus in Dart statt über eine
-  C++-Bibliothek. Für eine Themensammlung sind das Minuten,
-  für die vollständige Wikipedia eher eine Stunde und mehrere Gigabyte.
-  Anhalten geht jederzeit; das Angefangene bleibt durchsuchbar. Dieser
-  Index kennt keinen deutschen Wortstamm.
+- Für die Volltextsuche baut die App je Archiv einmal einen eigenen
+  Index auf. Für eine Themensammlung sind das Minuten, für die
+  vollständige Wikipedia eher eine Stunde und mehrere Gigabyte. Anhalten
+  geht jederzeit; das Angefangene bleibt durchsuchbar.
+- Gesucht wird nach Wortstämmen, in deutschen, englischen, spanischen und
+  französischen Archiven: „Notvorräte" findet „Notvorrat", „repairs"
+  findet „repair". Die Stemmer sind die Snowball-Algorithmen, in Dart
+  übertragen und an Snowballs eigenen Testlisten geprüft.
+- Den Index, den Kiwix-Archive selbst mitbringen, liest die App seit 2.5.8
+  nicht mehr: Er ist eine Xapian-Datenbank, und Xapian steht unter der
+  GPL, die mit der Lizenz der App nicht zusammengeht. Bis 2.5.7 nutzten
+  ihn die Desktop-Pakete; seither braucht auch dort ein großes Archiv
+  einen Indexlauf.
 - Artikel öffnen unter Linux und Windows ein eigenes Fenster statt eines
   Bereichs in der App, weil dort keine eingebettete Browser-Komponente
   erreichbar ist. **Fehlt die Komponente des Systems** — WebView2 unter

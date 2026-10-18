@@ -84,23 +84,54 @@ void main() {
       }
     });
 
-    test('an archive in another language is left unstemmed', () async {
-      // A German stemmer let loose on English would take words apart
-      // along rules that do not apply to them.
+    test('an English archive is stemmed in English (#194)', () async {
+      // Since the archive's own Xapian index is no longer read, the app's
+      // index does the stemming for English archives too: a plural finds
+      // the article that only has the singular, and a verb form the one
+      // with another.
       final archive = await archiveWith([
         language('eng'),
-        article('Water', '<p>Drinking water keeps.</p>'),
+        article('Water', '<p>Boil the water before drinking it.</p>'),
+        article('Wound', '<p>Cover the wound with a bandage.</p>'),
       ]);
 
       final indexer = KnowledgeIndexer(archive: archive, index: index);
       await indexer.run(await indexer.plan(), fingerprint: 'en');
 
-      expect(await index.stemmerName(), 'none');
-      expect(
-        [for (final hit in await hits(archive, 'drinking')) hit.title],
-        ['Water'],
-      );
+      expect(await index.stemmerName(), 'english');
+      for (final (query, title) in const [
+        ('drinks', 'Water'),
+        ('boiling', 'Water'),
+        ('bandages', 'Wound'),
+      ]) {
+        expect(
+          [for (final hit in await hits(archive, query)) hit.title],
+          [title],
+          reason: query,
+        );
+      }
     });
+
+    test(
+      'an archive in a language without a stemmer is left unstemmed',
+      () async {
+        // A stemmer let loose on a language it was not written for would
+        // take words apart along rules that do not apply to them.
+        final archive = await archiveWith([
+          language('ukr'),
+          article('Вода', '<p>Питна вода зберігається.</p>'),
+        ]);
+
+        final indexer = KnowledgeIndexer(archive: archive, index: index);
+        await indexer.run(await indexer.plan(), fingerprint: 'uk');
+
+        expect(await index.stemmerName(), 'none');
+        expect(
+          [for (final hit in await hits(archive, 'вода')) hit.title],
+          ['Вода'],
+        );
+      },
+    );
 
     test('an index that was built unstemmed stays that way', () async {
       // Every index from before 0.15.0. Rebuilding one over a whole

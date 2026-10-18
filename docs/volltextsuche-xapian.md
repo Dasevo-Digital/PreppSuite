@@ -1,233 +1,50 @@
-# Volltextsuche über den Index im Archiv
+# Volltextsuche ohne den Index im Archiv
 
-Ein Kiwix-Archiv bringt seinen eigenen Volltextindex mit. Er ist eine
-[Xapian](https://xapian.org)-Datenbank, die als Block im Archiv liegt –
-unkomprimiert, damit man sie dort lesen kann, wo sie liegt.
+Stand 2.5.8 (#186, #194). Ein Kiwix-Archiv bringt seinen eigenen
+Volltextindex mit: eine [Xapian](https://xapian.org)-Datenbank, die
+unkomprimiert als Block im Archiv liegt. Von 0.15.0 bis 2.5.7 haben die
+Desktop-Pakete ihn gelesen. Seit 2.5.8 tun sie es nicht mehr; die App baut
+überall ihren eigenen Index.
 
-Das ist ein anderer Weg als der, den die App bisher geht: `KnowledgeIndexer`
-baut sich einen eigenen SQLite-FTS5-Index. Beide bleiben. Welcher greift,
-entscheidet das Archiv.
+## Warum
 
-**Stand seit 0.15.0: in der App, auf allen drei Desktop-Systemen.** Wo
-die Bibliothek mitgeliefert wird und das Archiv einen Index trägt, sucht
-die App darin. Sonst fällt sie auf ihren eigenen zurück, ohne dass jemand
-etwas umstellen muss. Offen ist Android; was dort fehlt, steht unten.
+Xapian steht unter der **GPL-2.0-or-later**. Wer ein Programm verbreitet,
+das mit GPL-Code ein Gesamtwerk bildet, muss das Ganze unter GPL-Bedingungen
+weitergeben, also mit dem Recht, es zu ändern und weiterzugeben. Die App
+steht seit 2.3.5 unter der PolyForm Strict, die genau das verbietet. Unsere
+Schicht `native/zim_xapian` band xapian-core statisch ein; die beiden
+Lizenzen ließen sich nicht zugleich einhalten.
 
-An der vollständigen deutschen Wikipedia gemessen, 50 GB:
+Eine Fassung von Xapian unter anderer Lizenz gibt es nicht. Das Projekt
+will seit Jahren weg von der GPL, kann aber alten Code ohne Zustimmung der
+damaligen Rechteinhaber nicht umlizenzieren; die Fassung, die es künftig
+umlizenzieren könnte, enthält das Glass-Format nicht, in dem die Indizes in
+Kiwix-Archiven liegen ([Licensing](https://trac.xapian.org/wiki/Licensing),
+Stand März 2026). Eine andere Bibliothek, die dieses Format liest, gibt es
+auch nicht; libzim, die Referenz für ZIM-Archive, steht selbst unter der
+GPL.
 
-| | |
-|---|---|
-| Index im Archiv | 2914 MB ab Byte 47 677 531 029 |
-| Dokumente | 3 205 145 |
-| Öffnen | 4 ms |
-| `Trinkwasser` | 5961 Treffer, 4 ms |
-| `Notvorrat` | 43 Treffer, 0 ms |
-| `Notvorräte` | 43 Treffer, erster ist `Notvorrat` |
+## Was es kostet
 
-Der eigene Index über dieselbe Datei wäre eine Stunde Rechnen und
-mehrere Gigabyte gewesen.
+Gemessen wurde 0.15.0 an der vollständigen deutschen Wikipedia (50 GB,
+3,2 Millionen Artikel): Der eingebaute Index öffnete in 4 ms, eine Suche
+dauerte 0 bis 4 ms.
 
-## Warum überhaupt
+Der eigene Index dagegen braucht einen **Indexlauf je Archiv**: Minuten für
+eine Themensammlung mit einigen zehntausend Artikeln, eher eine Stunde und
+mehrere Gigabyte für die vollständige Wikipedia. Der Lauf lässt sich
+anhalten und fortsetzen, und was schon drin ist, ist durchsuchbar.
 
-Zwei Dinge, die der eigene Index nicht kann.
+Die Suchqualität bleibt: Der eigene Index stemmt deutsche, englische,
+spanische und französische Archive mit den Snowball-Algorithmen, in Dart
+übertragen und an Snowballs eigenen Testlisten geprüft (`stemmers.dart`,
+`tool/snowball_stems.sh`). Der deutsche liefert dieselben Stämme, die
+Xapian 1.4 geliefert hat; geprüft an 356 006 Wörtern.
 
-**Wortstämme.** FTS5 sucht nach Präfix. „Notvorräte“ findet damit nie
-„Notvorrat“, und „giftig“ nie „Gift“. Xapian stemmt in der Sprache, die im
-Archiv steht – gegen `wikipedia_de_chemistry` gemessen:
+## Was es wieder schneller machen würde
 
-| Suche | Treffer |
-|---|---|
-| `Element` | 434 |
-| `Elementen` | 434 |
-| `giftig` | 44, erster ist `Gift` |
-
-**Kein Indexlauf.** Der eigene Index über die vollständige deutsche
-Wikipedia bedeutet Stunden Rechnen und Gigabyte Platz. Der eingebaute ist
-schon da.
-
-## Wie es funktioniert
-
-```
-ZimArchive.fullTextIndexEntry()   X/fulltext/xapian, sonst Z//fulltextIndex/xapian
-ZimArchive.directAccessInfo()     Blockanfang + 1 Infobyte + Blob-Offset
-        ↓
-zx_open_path / zx_open_fd         lseek auf den Offset, Xapian::Database(fd)
-        ↓
-zx_search("trinkwasser")          Pfade wie "C/Trinkwasser"
-        ↓
-ZimArchive.findByUrl("C", ...)    der Eintrag, den die App ohnehin anzeigt
-```
-
-`Xapian::Database(int fd)` liest eine Einzeldatei-Datenbank ab der Stelle,
-an der der Deskriptor gerade steht. Genau das macht den Trick möglich: aus
-einem dreißig Gigabyte großen Archiv wird nichts ausgepackt.
-
-`directAccessInfo` antwortet nur, wenn der Block **unkomprimiert** ist.
-Komprimierte Bytes gibt es erst nach dem Auspacken und haben keine Stelle in
-der Datei, auf die man zeigen könnte. Kiwix schreibt den Index deshalb
-unkomprimiert; ein von Hand gebautes Archiv muss das nicht tun.
-
-## Was im Archiv steht, und was nicht
-
-Die Metadaten der Indexdatenbank, gelesen aus `wikipedia_de_chemistry_mini`:
-
-```
-data      = fullPath        Dokumentdaten sind "C/Kryokonit", mit Namensraum
-kind      = fulltext
-language  = deu             daraus der Stemmer
-valuesmap = title:0;wordcount:1;geo.position:2
-```
-
-Zwei Fallen darin:
-
-- Der Schlüssel heißt **`data`**, nicht `dbDataType` – letzteres ist nur
-  libzims Name für den Wert.
-- Slot `title` ist **kein Anzeigetitel**, sondern ein kleingeschriebener
-  Sortierschlüssel (`kryokonit`). Deshalb gibt der Shim keinen Titel
-  heraus; der richtige steht im ZIM-Eintrag, den der Pfad auflöst.
-
-Ein **Textausschnitt** steht in diesen Archiven nicht drin: `valuesmap`
-kennt keinen `snippet`-Slot. Der muss also weiter aus dem Artikel selbst
-kommen. Ältere Archive haben ihn, deshalb wird er trotzdem ausgelesen.
-
-## Die Schnittstelle
-
-`native/zim_xapian/` ist reines C nach außen – Dart FFI kann nichts
-anderes rufen. Kein Xapian-Typ überquert die Grenze, kein Rückruf geht
-zurück, und jede Zeichenkette gehört dem Sucher. Die Dart-Seite hat damit
-nur eine einzige Sache freizugeben: den Sucher selbst.
-
-`zx_open_*` gibt **nie** null zurück. Ein Fehlschlag kommt als Handle, dessen
-`zx_error` gesetzt ist, damit es genau einen Aufräumpfad gibt.
-
-Der Deskriptor geht in Xapians Besitz über und wird von dort geschlossen,
-auch wenn das Öffnen scheitert. Auf Android muss das also ein **eigener**
-Deskriptor sein – nicht der, mit dem der Rest des Readers arbeitet.
-
-## In der App
-
-```
-builtInIndexProvider          sucht den Index, öffnet ihn, sonst null
-        ↓
-knowledgeFullTextProvider     fragt ihn zuerst, sonst KnowledgeIndexDatabase
-        ↓
-KnowledgeIndexStatus.builtIn  die Oberfläche fragt nicht nach einem Aufbau
-```
-
-`null` heißt jedes Mal dasselbe: der eigene Index übernimmt. Vier
-gewöhnliche Gründe dafür – keine Bibliothek im Programm, kein Index im
-Archiv, ein komprimierter Indexblock, oder eine Datei ohne Pfad, was
-Android ist.
-
-Gerufen wird über `XapianSearcher`, der `XapianIndex` auf einem eigenen
-Isolate hält. Die Bindung blockiert, und eine Xapian-Datenbank verträgt
-genau einen Nutzer gleichzeitig: die Nachrichtenschlange ist die Sperre.
-Beides ist geprüft – dass gleichzeitig gestellte Fragen jede ihre eigene
-Antwort bekommen, und dass ein geschlossener oder gar nicht geöffneter
-Index einen Fehler liefert statt zu hängen. Ein Aufrufer, der ewig
-wartet, wäre der schlimmere Ausgang: das ist der Ladekreis, der nie
-aufhört.
-
-## Bauen
-
-Ein Skript je Plattform, eine gemeinsame Quelle: `xapian_source.sh` hält
-Fassung und Prüfsumme, damit drei Skripte nicht drei verschiedene
-Tarballs anheften können. Jedes lädt xapian-core 1.4.32, prüft die
-Prüfsumme **vor** dem Auspacken, baut es statisch und bindet die Schicht
-dagegen.
-
-```bash
-native/zim_xapian/build_macos.sh    # universal, arm64 + x86_64, 3,2 MB
-native/zim_xapian/build_linux.sh    # 1,9 MB
-native/zim_xapian/build_windows.sh  # von Linux aus, mit mingw-w64
-```
-
-Warum 1.4 und nicht das neuere 2.x: 1.4 ist die stabile Reihe und die,
-in der Glass geschrieben und gelesen wird.
-
-**macOS.** Braucht kein Homebrew. Heraus kommen 3,2 MB, die nur noch an
-`libz`, `libc++` und `libSystem` hängen. Xcode legt die Datei in
-`Contents/Frameworks` und signiert sie (Bauphase „Embed Xapian“).
-
-**Linux.** Braucht `zlib1g-dev` und `uuid-dev`; welchen C++-Compiler die
-Maschine hat, sucht das Skript sich selbst, weil die Flutter-Kette clang
-mitbringt und g++ nicht unbedingt da ist. CMake legt die `.so` nach
-`bundle/lib/`. Zwei Linkerschalter sind nicht Kosmetik: `--no-undefined`
-macht eine vergessene Bibliothek zum Fehler beim Bauen statt zu einem
-Programm, das startet und dann nichts öffnen kann — `-luuid` war einmal
-vergessen. Und `--version-script` sorgt dafür, dass nur die elf
-`zx_`-Funktionen herausschauen: unter ELF reicht `-fvisibility=hidden`
-nicht, weil die Template-Instanzen aus den libstdc++-Kopfdateien schwache
-Symbole mit voller Sichtbarkeit sind.
-
-**Windows.** Nicht mit MSVC: xapian-core 1.4 hat sein `win32`-Verzeichnis
-verloren, dafür behandelt sein `configure` mingw an einem Dutzend
-Stellen. Das Skript läuft deshalb auf einer Linux-Maschine
-(`mingw-w64`, `libz-mingw-w64-dev`), und die fertige `zim_xapian.dll`
-wird herübergereicht. CMake legt sie neben die `.exe`. 4,5 MB, und sie
-hängt nur an `KERNEL32`, `msvcrt`, `RPCRT4` und `WS2_32` — kein
-GCC-Unterbau, den ein Windows-Rechner nicht hat.
-
-Fehlt die Bibliothek, warnt der Bau und läuft weiter: die App muss auch
-ohne sie übersetzen.
-
-### Zwei Fallen unter Windows
-
-Beide sind in der Schicht abgefangen, beide wären still gewesen:
-
-- Eine Datei ohne `O_BINARY` wird im Textmodus gelesen, und der schreibt
-  Bytes unterwegs um. Für eine Datenbank tödlich.
-- `lseek` nimmt dort einen 32-Bit-Offset. Der Index der vollständigen
-  Wikipedia fängt bei Byte 47 677 531 029 an — der Sprung wäre irgendwo
-  gelandet, ohne Fehler.
-
-Deshalb ist die Windows-Prüfung mit Absicht gegen ein Archiv gelaufen,
-dessen Index bei Byte 3 476 744 340 anfängt, also jenseits dessen, was
-32 Bit vorzeichenbehaftet erreichen. Ergebnis: dieselben Zahlen wie auf
-dem Mac, bis auf den einzelnen Treffer — 40 803 Dokumente, 122 Treffer
-für `Trinkwasser`, `Element` und `Elemente` gleich viele.
-
-Testen gegen ein echtes Archiv:
-
-```bash
-cd preppsuite_flutter
-PREPPSUITE_TEST_ZIM=/pfad/zu/wikipedia_de_chemistry_mini.zim flutter test
-```
-
-Ohne die Variable überspringen sich `xapian_index_test.dart` (die
-Bindung), `xapian_search_test.dart` (das Isolate) und
-`test/live/xapian_speed_test.dart` (die Zahlen oben) selbst. Ein
-Xapian-Index lässt sich nicht als Testfixture nachbauen – das ist das
-Dateiformat einer C++-Bibliothek, und ein Nachbau würde nur beweisen, dass
-der Nachbau gelesen wurde.
-
-## Was noch fehlt
-
-1. **Android**, das einzige Übrige: je ABI bauen (arm64-v8a, armeabi-v7a,
-   x86_64) und über `jniLibs` einbinden, rund 3–6 MB je ABI;
-   [kiwix-build](https://github.com/kiwix/kiwix-build) hat ein Rezept.
-   Dazu ein **eigener Deskriptor** über
-   `ParcelFileDescriptor.detachFd()` im bestehenden Kanal
-   `preppsuite/storage` – Xapian schließt ihn, also darf es nicht der
-   sein, mit dem der Reader arbeitet.
-2. **iOS** ist offen: die Bibliothek ließe sich bauen, aber Archive liegen
-   dort im Speicher der App, und ob eine 50-GB-Datei dorthin gehört, ist
-   keine Frage an diese Seite.
-
-Für Android ist der **deutsche Stemmer in Dart** seit 0.15.0 der Ersatz,
-und er war der bessere Handel: ein Bruchteil der Arbeit, kein Megabyte im
-APK, und er hilft auch jedem Archiv ohne eigenen Index auf allen
-Plattformen. Er nimmt nur die eine Hälfte des Gewinns mit — den Indexlauf
-spart er nicht. Siehe
-[Wissen offline](wissen-offline.md).
-
-## Das Risiko, das bleibt
-
-Native Toolchains sind keine einmalige Arbeit, sondern eine dauerhafte
-Last – eine steht, drei stünden noch aus. Deshalb ist der Rückfall keine
-Höflichkeit gegenüber alten Archiven, sondern das, was die Suche auf
-jeder Plattform am Leben hält, auf der niemand diese Arbeit gemacht hat.
-
-Dazu die Formatversion: Glass ist innerhalb Xapian 1.4 stabil und wird
-auch von 2.1 noch gelesen – baut Kiwix eines Tages mit dem neueren
-Honey-Backend, öffnet unsere Bibliothek die Datei nicht mehr.
+Ein eigener Leser für das Glass-Format, ohne Xapian-Code. Ein Dateiformat
+ist urheberrechtlich nicht geschützt, solange kein Code übernommen wird.
+Der Aufwand wäre groß (das Format ist kaum dokumentiert), und stellt Kiwix
+eines Tages auf ein neueres Format um, bräche der Leser. Bisher ist das
+nicht geplant.

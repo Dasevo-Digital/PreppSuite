@@ -3,13 +3,10 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/platform_storage.dart';
 import '../../../core/memory_pressure_listener.dart';
 import '../../maps/application/map_archive_access.dart' show openMapArchive;
 import 'knowledge_index_database.dart';
 import 'knowledge_indexer.dart';
-import 'xapian_index.dart' show xapianAvailable;
-import 'xapian_search.dart';
 import 'zim_archive.dart';
 import 'zim_http_server.dart';
 import 'zim_store.dart';
@@ -382,78 +379,10 @@ final knowledgeProvider =
       KnowledgeController.new,
     );
 
-/// The full-text index the open archive brings with it, or null when
-/// there is none to be had.
-///
-/// A Kiwix archive carries the index Kiwix itself searches — a Xapian
-/// database lying uncompressed inside the file — and Xapian can open one
-/// from a descriptor at an offset. That turns the app's most expensive
-/// operation into no operation at all: no hours of indexing, no gigabytes
-/// written, and the archive's own stemmer, which is what makes
-/// "Notvorraete" find "Notvorrat".
-///
-/// Null has four ordinary causes, and every one of them falls back to the
-/// index the app builds itself:
-///
-///  - the native library is not in this build (only macOS carries it),
-///  - the archive has no index, which is normal for a hand-built one,
-///  - its index cluster is compressed, so it has no offset to open at,
-///  - the file cannot be named as a path — Android reaches archives
-///    through the Storage Access Framework, which needs a descriptor
-///    instead.
-final builtInIndexProvider = FutureProvider<XapianSearcher?>((ref) async {
-  if (!xapianAvailable) return null;
-
-  // Narrowly watched: opening a Xapian database is cheap but not free,
-  // and the knowledge state changes for reasons that have nothing to do
-  // with which file is open — another archive added, one removed, a
-  // problem reported.
-  final archive = ref.watch(
-    knowledgeProvider.select((state) => state.value?.archive),
-  );
-  final location = ref.watch(
-    knowledgeProvider.select((state) => state.value?.selected?.location),
-  );
-  if (archive == null || location == null) return null;
-
-  final entry = await archive.fullTextIndexEntry();
-  if (entry == null) return null;
-
-  final where = await archive.directAccessInfo(entry);
-  if (where == null) return null;
-
-  final path = await _archivePath(location);
-  if (path == null) return null;
-
-  try {
-    final searcher = await XapianSearcher.open(path, where);
-    ref.onDispose(searcher.close);
-    return searcher;
-  } on Object {
-    // A refused index is not a broken app. The archive is still open,
-    // titles still search, and the indexer is still there to be asked.
-    return null;
-  }
-});
-
-/// The archive as a path Xapian can open, or null when there is none.
-///
-/// Where the app runs sandboxed the location is a bookmark rather than a
-/// path, and resolving it also opens the security scope the descriptor
-/// will hang on — so this is not just a lookup, and the order matters.
-Future<String?> _archivePath(String location) async {
-  if (!isNativeStorageHandle(location)) return location;
-  return resolveStoragePath(location);
-}
-
 /// Whether a usable index exists, and how far it got.
 enum KnowledgeIndexStatus {
   /// No index, or one built from a different archive.
   none,
-
-  /// The archive carries its own, and it is open. Nothing to build and
-  /// nothing to wait for — see [builtInIndexProvider].
-  builtIn,
 
   /// Being built right now.
   running,
@@ -505,7 +434,6 @@ class KnowledgeIndexState {
   final bool compact;
 
   bool get isUsable =>
-      status == KnowledgeIndexStatus.builtIn ||
       status == KnowledgeIndexStatus.ready ||
       status == KnowledgeIndexStatus.partial;
 }
@@ -520,17 +448,6 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
     final archiveId = knowledge?.selectedId;
     if (fingerprint == null || archiveId == null) {
       return const KnowledgeIndexState();
-    }
-
-    // An archive that brings its own index is never offered the choice of
-    // building a second one. Asking someone to spend an hour on what they
-    // already have would be the wrong question.
-    final builtIn = await ref.watch(builtInIndexProvider.future);
-    if (builtIn != null) {
-      return KnowledgeIndexState(
-        status: KnowledgeIndexStatus.builtIn,
-        articleCount: builtIn.documentCount,
-      );
     }
 
     final index = ref.watch(knowledgeIndexDatabaseProvider);
@@ -659,29 +576,17 @@ final knowledgeIndexProvider =
       KnowledgeIndexController.new,
     );
 
-/// Articles whose text matches [query].
+/// Articles whose text matches [query], from the index the app builds
+/// itself.
 ///
-/// Two indexes can answer this, and the archive's own is asked first: it
-/// stems, and it is already there. The one the app builds itself is the
-/// fallback, for archives that carry none.
+/// Kiwix archives carry an index of their own, but it is a Xapian
+/// database, and Xapian's GPL does not go with this app's licence; since
+/// 2.5.8 the app reads none of it (#186). Its own index stems German,
+/// English, Spanish and French instead.
 final knowledgeFullTextProvider = FutureProvider.autoDispose
     .family<List<ZimEntry>, String>((ref, query) async {
       final archive = ref.watch(knowledgeProvider).value?.archive;
       if (archive == null || query.trim().isEmpty) return const [];
-
-      final builtIn = await ref.watch(builtInIndexProvider.future);
-      if (builtIn != null) {
-        final found = await builtIn.search(query.trim());
-        // The index names entries by path, and a path can point at
-        // something the archive no longer holds — a redirect that was
-        // resolved away, an index built against a different revision.
-        // Those are dropped rather than shown as a result that opens
-        // nothing.
-        return [
-          for (final hit in found.hits)
-            ?await archive.findByUrl(hit.namespace, hit.url),
-        ];
-      }
 
       final indexState = ref.watch(knowledgeIndexProvider).value;
       if (!(indexState?.isUsable ?? false)) return const [];

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
-# Builds the translator shim for Windows -- from Linux, with mingw-w64,
-# as the Xapian shim is built (#184).
+# Builds the translator shim for Windows -- from Linux, with mingw-w64
+# (#184).
 #
 # The posix flavour of the compiler, because the engine uses std::thread
 # and std::mutex, which the win32 flavour of mingw's libstdc++ does not

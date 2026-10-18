@@ -112,18 +112,17 @@ Zum Abspielen auf dem Zielrechner braucht es dann noch
 Desktop meist schon hat. Fehlen sie, läuft der Taktgeber weiter und sagt
 auf dem Bildschirm, dass kein Ton kommt — er blinkt dann nur.
 
-`zlib1g-dev` und `uuid-dev` sind für die Volltextsuche im Archiv da —
-das ist, woran xapian-core hängt. Die Bibliothek dafür entsteht vor dem
-Bau der App:
+Der Übersetzer ohne Netz ist eine eigene Bibliothek, die vor dem Bau der
+App entsteht (eine Viertelstunde beim ersten Mal, danach nur, was sich
+geändert hat):
 
 ```bash
-preppsuite_flutter/native/zim_xapian/build_linux.sh
+preppsuite_flutter/native/translate/build_linux.sh
 ```
 
-Das baut `libzim_xapian.so`; CMake legt sie dann nach `bundle/lib/`. Ohne
-sie läuft alles weiter, nur sucht die App im selbst gebauten Index statt
-im Index des Archivs — siehe
-[Volltextsuche über den Index im Archiv](volltextsuche-xapian.md).
+Das baut `libpreppsuite_translate.so`; CMake legt sie dann nach
+`bundle/lib/`. Ohne sie läuft alles weiter, nur fehlt der Übersetzer —
+siehe [Freier Übersetzer ohne Netz](uebersetzer-offline-plan.md).
 
 Ohne Linux-Maschine geht es auch im Container, siehe
 [`tool/docker/`](../tool/docker/). Auf Apple-Silicon kommt dabei arm64
@@ -181,17 +180,16 @@ Nachrüsten ohne die Oberfläche:
   --add Microsoft.VisualStudio.Component.VC.ATL --quiet --norestart
 ```
 
-Die Xapian-Bibliothek entsteht dagegen **nicht** hier, sondern auf einer
-Linux-Maschine — xapian-core 1.4 bringt keine MSVC-Projektdateien mehr
-mit:
+Die Übersetzer-Bibliothek entsteht dagegen **nicht** hier, sondern auf
+einer Linux-Maschine, mit mingw-w64:
 
 ```bash
-sudo apt install mingw-w64 libz-mingw-w64-dev
-preppsuite_flutter/native/zim_xapian/build_windows.sh
+sudo apt install mingw-w64 cmake ninja-build
+preppsuite_flutter/native/translate/build_windows.sh
 ```
 
-Die entstandene `zim_xapian.dll` gehört vor dem Bau nach
-`preppsuite_flutter/native/zim_xapian/build/`; CMake legt sie dann neben
+Die entstandene `preppsuite_translate.dll` gehört vor dem Bau nach
+`preppsuite_flutter/native/translate/build/`; CMake legt sie dann neben
 die `.exe`.
 
 ## Ein Release in einem Lauf
@@ -205,10 +203,11 @@ Reihenfolge, damit die langsamen Maschinen nicht warten: Der Linux-Build
 (`tool/linux_release.sh`) startet zuerst und läuft im Hintergrund, während
 der Mac das macOS- und die Android-Pakete baut und den Gerätetest im
 iPhone-Simulator laufen lässt. Danach holt das Skript das Linux-Paket und
-die quergebaute `zim_xapian.dll` und baut Windows (`tool/windows_build.ps1`).
+die quergebaute `preppsuite_translate.dll` und baut Windows
+(`tool/windows_build.ps1`).
 Linux und Windows lassen nach ihrem Build den Starttest
 (`integration_test/app_start_test.dart`) laufen, der SQLite mit
-Verschlüsselung, PDFium, Zstandard und Xapian wirklich lädt und die
+Verschlüsselung, PDFium, Zstandard und den Übersetzer wirklich lädt und die
 Notfallhilfe zeichnet; ohne „STARTTEST: BESTANDEN“ von beiden bricht das
 Skript ab. Unter Linux braucht das eine angemeldete Desktop-Sitzung des
 Build-Benutzers. Zum Schluss prüft es PDFium in allen sechs Paketen gegen die

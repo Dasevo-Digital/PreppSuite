@@ -132,25 +132,9 @@ if(PLUGIN_BUNDLED_LIBRARIES)
     COMPONENT Runtime)
 endif()
 
-# The Xapian shim, when native/zim_xapian has been built. Optional on
-# purpose: without it the app still builds and the knowledge search falls
-# back to the index it builds itself, so a working copy that has never run
-# the build script is not a broken one.
-set(ZIM_XAPIAN_LIBRARY
-  "${CMAKE_CURRENT_SOURCE_DIR}/../native/zim_xapian/build/zim_xapian.dll")
-if(EXISTS "${ZIM_XAPIAN_LIBRARY}")
-  install(FILES "${ZIM_XAPIAN_LIBRARY}"
-    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
-    COMPONENT Runtime)
-else()
-  message(STATUS
-    "zim_xapian fehlt: Volltextsuche nutzt den eigenen Index "
-    "(native/zim_xapian/build_windows.sh baut sie)")
-endif()
-
 # The offline translator (#182, #184), when native/translate has been
-# built. Optional like the Xapian shim: without it the app builds and
-# runs, and the translator screen says it is not part of this build.
+# built. Optional: without it the app builds and runs, and the
+# translator screen says it is not part of this build.
 set(PREPPSUITE_TRANSLATE_LIBRARY
   "${CMAKE_CURRENT_SOURCE_DIR}/../native/translate/build/preppsuite_translate.dll")
 if(EXISTS "${PREPPSUITE_TRANSLATE_LIBRARY}")

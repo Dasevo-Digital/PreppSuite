@@ -15,7 +15,6 @@ import 'package:preppsuite_flutter/core/local_database_encryption.dart';
 import 'package:preppsuite_flutter/features/first_aid/application/first_aid_guides_de.dart';
 import 'package:preppsuite_flutter/features/kids_comic/application/kids_comic.dart';
 import 'package:preppsuite_flutter/features/kids_comic/application/kids_comic_de.dart';
-import 'package:preppsuite_flutter/features/knowledge/application/xapian_index.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/zstd_stream.dart';
 import 'package:preppsuite_flutter/features/translator/application/translator_engine.dart';
 import 'package:preppsuite_flutter/features/translator/application/translator_store.dart';
@@ -29,7 +28,7 @@ import 'package:preppsuite_flutter/local_db/database.dart';
 /// The unit tests run on the machine that builds, against its libraries.
 /// What ships is another thing: on Linux and Windows the packages were
 /// built and never started, and a library missing from one of them --
-/// SQLite with its cipher, PDFium, Zstandard, the Xapian shim -- would
+/// SQLite with its cipher, PDFium, Zstandard, the translator -- would
 /// have been found by the first person to open it. This runs on every
 /// platform a release goes to, in the release itself, and touches each of
 /// those for real, then draws the screens an emergency needs.
@@ -112,16 +111,6 @@ void main() {
       String.fromCharCodes(zstdDecompress(frame, limit: 1024)),
       'PreppSuite',
     );
-  });
-
-  testWidgets('the Xapian shim is where the package says it is', (
-    tester,
-  ) async {
-    // Shipped with the desktop packages; iOS and Android search with the
-    // app's own index, which is not a failure there.
-    if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
-      expect(xapianAvailable, isTrue, reason: 'zim_xapian is missing');
-    }
   });
 
   testWidgets('the translator library loads where the package carries it', (

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Builds the translator shim for Linux, with the engine linked in
-# statically, as the Xapian shim is (#184).
+# statically (#184).
 #
 # On a Mac the engine multiplies floats with Accelerate; Linux has no
 # such library everywhere, and a dependency on OpenBLAS would be one the

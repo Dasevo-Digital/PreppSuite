@@ -7,15 +7,14 @@ docker run --rm -v "$PWD:/src:ro" preppsuite-linux bash -lc '
   rm -rf preppsuite_flutter/build .dart_tool preppsuite_flutter/.dart_tool
   git config --global --add safe.directory /work
   flutter pub get
-  preppsuite_flutter/native/zim_xapian/build_linux.sh
+  preppsuite_flutter/native/translate/build_linux.sh
   cd preppsuite_flutter && flutter build linux --release'
 ```
 
-Der Schritt dazwischen baut `libzim_xapian.so`, mit der die Volltextsuche
-den Index benutzt, den das Archiv schon mitbringt. Er dauert beim ersten
-Mal ein paar Minuten, weil xapian-core aus dem Quelltext entsteht. Ohne
-ihn laeuft der Bau ebenfalls durch, nur sucht die App dann im selbst
-gebauten Index.
+Der Schritt dazwischen baut `libpreppsuite_translate.so`, den Übersetzer
+ohne Netz. Er dauert beim ersten Mal eine Viertelstunde, weil Mozillas
+Übersetzungs-Engine aus dem Quelltext entsteht. Ohne ihn laeuft der Bau
+ebenfalls durch, nur fehlt der App dann der Übersetzer.
 
 Kopiert wird ins Bild hinein statt hinein gemountet, damit der Linux-Bau
 nicht in dasselbe `build/` schreibt wie der vom Mac. Auf Apple-Silicon

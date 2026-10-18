@@ -122,7 +122,7 @@ List<String> _wordsOf(String text) => [
 /// "-s" or "-es": "melocotones" has to come back to "melocotón", and the
 /// German "-n" and "-e" would only cut Spanish words where they are not
 /// inflected at all. A real stemmer lives in
-/// `features/knowledge/german_stemmer.dart` and is far too eager for this
+/// `features/knowledge/application/german_stemmer.dart` and is far too eager for this
 /// — it is built to make a search box generous, and a generous match here
 /// is a tick beside food that is not in the house.
 Set<String> _stems(String word, {bool spanish = false}) => {

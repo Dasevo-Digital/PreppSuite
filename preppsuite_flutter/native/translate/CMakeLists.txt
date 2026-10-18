@@ -2,7 +2,7 @@
 #
 # The engine is added as a subdirectory from wherever translate_source.sh
 # put it, and linked in statically: the library inside the app has to
-# carry what it needs, as the Xapian shim does.
+# carry what it needs.
 cmake_minimum_required(VERSION 3.16)
 project(preppsuite_translate C CXX)
 

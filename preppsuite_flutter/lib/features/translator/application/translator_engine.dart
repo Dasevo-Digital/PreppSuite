@@ -19,8 +19,8 @@ import 'translator_store.dart';
 
 /// Whether this build carries the translator library at all.
 ///
-/// It is optional, like the Xapian shim: a build without it runs, and the
-/// translator screen says the translator is not part of it.
+/// It is optional: a build without it runs, and the translator screen
+/// says the translator is not part of it.
 bool get translatorAvailable {
   try {
     _bindings;
@@ -101,9 +101,8 @@ _Bindings? _cached;
 
 _Bindings get _bindings => _cached ??= _Bindings(_openLibrary());
 
-/// Looks where the Xapian binding looks, in the same order: told to us,
-/// bundled with the app, on the loader's path, or in the build directory
-/// of a working copy. See `xapian_index.dart`.
+/// Looks in order: told to us, bundled with the app, on the loader's
+/// path, or in the build directory of a working copy.
 DynamicLibrary _openLibrary() {
   final name = Platform.isWindows
       ? 'preppsuite_translate.dll'
@@ -136,8 +135,7 @@ String? _bundled(String name) {
   return null;
 }
 
-/// Hand-written, like the Xapian one: six functions against a header this
-/// repository owns.
+/// Hand-written: six functions against a header this repository owns.
 class _Bindings {
   _Bindings(DynamicLibrary library)
     : open = library

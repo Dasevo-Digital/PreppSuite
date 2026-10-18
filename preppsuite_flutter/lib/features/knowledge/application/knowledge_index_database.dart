@@ -5,7 +5,7 @@ import 'package:drift/drift.dart';
 import '../../../core/app_database_directory.dart';
 import '../../../core/local_database_encryption.dart';
 import '../../../core/open_databases.dart';
-import 'german_stemmer.dart';
+import 'stemmers.dart';
 import 'zim_store.dart' show legacyArchiveId;
 
 part 'knowledge_index_database.g.dart';
@@ -90,9 +90,10 @@ class KnowledgeIndexDatabase extends _$KnowledgeIndexDatabase {
     // opened from the archive itself. That makes a large archive's derived
     // index materially smaller without dropping ordinary word search.
     //
-    // `remove_diacritics 2` so that "Notvorrate" finds "Notvorräte". There
-    // is no German stemmer in SQLite, so "Vorräte" still will not find
-    // "Vorrat" — see docs/wissen-offline.md.
+    // `remove_diacritics 2` so that "Notvorrate" finds "Notvorräte". SQLite
+    // has no stemmer for these languages; the words are stemmed in Dart on
+    // the way in (stemmers.dart), so "Vorräte" finds "Vorrat" -- see
+    // docs/wissen-offline.md.
     await customStatement(
       "CREATE VIRTUAL TABLE IF NOT EXISTS articles USING fts5("
       "text, content='', detail=none, columnsize=0, "

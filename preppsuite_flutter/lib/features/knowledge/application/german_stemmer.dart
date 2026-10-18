@@ -1,17 +1,16 @@
 /// The Snowball German stemmer, in Dart.
 ///
-/// Why a second one when the app already has Xapian's: because Xapian is
-/// a C++ library that has to be built and shipped per platform, and on
-/// Android it is not there. The index the app builds itself matches by
-/// prefix, so "Notvorraete" never finds "Notvorrat". Stemming both the
-/// indexed words and the query closes that gap without a byte of native
-/// code.
+/// The index the app builds itself matches by prefix, so "Notvorraete"
+/// would never find "Notvorrat". Stemming both the indexed words and the
+/// query closes that gap without a byte of native code.
 ///
 /// This is not an approximation of the algorithm but a transcription of
-/// it — `german.sbl`, the same source Xapian generates its own from. It
-/// is checked against Xapian's output over a whole German dictionary,
-/// 356 006 words: see `german_stemmer_test.dart` and
-/// `tool/german_stems.sh`.
+/// it -- `german.sbl` as Snowball 2 has it. It was checked against
+/// Xapian 1.4's German stemmer over a whole German dictionary, 356 006
+/// words, and is checked against Snowball's own test vocabulary, 35 033
+/// words: see `german_stemmer_test.dart` and `tool/snowball_stems.sh`.
+/// Snowball 3 has since changed the algorithm; this keeps version 2, so
+/// that indexes built before go on matching their queries.
 ///
 /// Expects one lowercased word.
 library;
@@ -207,43 +206,3 @@ String? _longestSuffix(String word, List<String> candidates) {
   }
   return best;
 }
-
-/// Which stemmer an archive in [language] is indexed with.
-///
-/// The tag is what a ZIM archive records in its `Language` metadata:
-/// Kiwix writes ISO 639-3 ("deu"), older archives the two-letter code.
-/// Anything else gets `none`, because a German stemmer let loose on
-/// English would take "running" apart along rules that do not apply to
-/// it.
-String stemmerNameFor(String? language) {
-  final tag = (language ?? '').trim().toLowerCase();
-  if (tag.startsWith('deu') || tag.startsWith('ger') || tag == 'de') {
-    return 'german';
-  }
-  return 'none';
-}
-
-/// The stemmer that [name] stands for, or null for none.
-///
-/// Named rather than passed around as a function so that the choice can
-/// be written into the index itself: an index and the queries against it
-/// have to agree, and the only way to be sure is for the index to say.
-String Function(String)? stemmerNamed(String? name) =>
-    name == 'german' ? germanStem : null;
-
-/// [text], reduced to the stems that go into the index.
-///
-/// Tokenized here rather than left to FTS5 because the stemmer has to see
-/// whole words. The split is the same one FTS5's `unicode61` makes, so
-/// what it stores is what it would have stored anyway — only stemmed.
-String stemText(String text, String Function(String) stem) {
-  final words = text.toLowerCase().split(_notAWord);
-  final stems = <String>[];
-  for (final word in words) {
-    if (word.isEmpty) continue;
-    stems.add(stem(word));
-  }
-  return stems.join(' ');
-}
-
-final _notAWord = RegExp(r'[^\p{L}\p{N}]+', unicode: true);
