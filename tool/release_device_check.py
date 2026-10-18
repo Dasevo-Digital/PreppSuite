@@ -161,6 +161,15 @@ def main():
             subprocess.run(["xcrun", "simctl", "boot", udid], check=True)
         subprocess.run(["xcrun", "simctl", "bootstatus", udid, "-b"],
                        check=True, stdout=subprocess.DEVNULL)
+        # A simulator that was already running may still have a test app
+        # open from an earlier run, with a photo or a sheet in front. The
+        # app under test then starts behind it, draws no frames and its
+        # test waits for ever -- 2.5.8's first run hung half an hour on
+        # the backup test that way. Closed first, best effort.
+        for bundle in ("de.dasevo.preppsuite", "de.dasevo.photovault.test"):
+            subprocess.run(["xcrun", "simctl", "terminate", udid, bundle],
+                           check=False, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL)
         code, output = run_tests(udid, folder / f"geraetetest-v{v}.log")
     finally:
         if started_here:

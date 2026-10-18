@@ -139,7 +139,7 @@ if $resume; then
     "PreppSuite-$version-Android-armeabi-v7a.apk" "GERAETETEST-v$version.txt"; do
     [ -f "$out/$kept" ] || fail "$kept fehlt – ohne --resume neu bauen"
   done
-  grep -q "BESTANDEN" "$out/GERAETETEST-v$version.txt" ||
+  grep -qE '^Ergebnis:[[:space:]]+BESTANDEN$' "$out/GERAETETEST-v$version.txt" ||
     fail "Gerätetest im Upload-Ordner nicht bestanden"
   ssh "$linux" "test -f ~/$remote_linux/build.log" ||
     fail "kein Linux-Lauf für $version auf $linux – ohne --resume neu bauen"
@@ -194,7 +194,10 @@ grep -q 'lib/arm64-v8a/libpreppsuite_translate.so' "$log/apk-arm64.txt" ||
 step "Gerätetest im iPhone-Simulator"
 python3 "$ROOT/tool/release_device_check.py" "$out" > "$log/device.log" 2>&1 || true
 grep -E "Ergebnis|Stand|Tests:" "$log/device.log" || true
-grep -q "BESTANDEN" "$log/device.log" || fail "Gerätetest nicht bestanden"
+# The result line itself: "NICHT BESTANDEN" contains "BESTANDEN", and a
+# plain grep let 2.5.8's first, failed device check through.
+grep -qE '^Ergebnis:[[:space:]]+BESTANDEN$' "$log/device.log" ||
+  fail "Gerätetest nicht bestanden"
 # Bundles under build/ show up in Spotlight and can open the real data.
 find "$APP_DIR/build" \( -name '*.app' -o -name '*.appex' \) -prune -exec rm -rf {} +
 fi
