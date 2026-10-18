@@ -108,8 +108,10 @@ nothing to build it from, because xapian-core 1.4 dropped its MSVC project
 files. It is cross-built on TestKubuntu with mingw-w64
 (`native/zim_xapian/build_windows.sh`, needs `mingw-w64` and
 `libz-mingw-w64-dev`), copied over, and placed beside the exe **before**
-the zip is made. Count the entries: **56 is right, 24 means the DLL and
-its dependencies are missing.**
+the zip is made. The translator DLL (`native/translate/build_windows.sh`)
+takes the same road. `tool/windows_build.ps1` checks both DLLs by name in
+the release folder; the file count it prints was 115 for 2.5.7 (the count
+grows with assets, so it is a hint, not the check).
 
 **After every release, put this Mac back in order** — the machine that
 builds is also the machine that uses the app, and a build leaves copies
