@@ -9829,4 +9829,50 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get placePickerUse => 'Usar este punto';
+
+  @override
+  String get translatorPhotoDataTitle =>
+      'Datos para el reconocimiento de texto';
+
+  @override
+  String translatorPhotoDataNeeded(String language, String size) {
+    return 'Para leer $language de una foto, el reconocimiento de texto necesita datos de ese idioma: $size, se descargan una vez y después funciona sin conexión.';
+  }
+
+  @override
+  String translatorPhotoDataBetter(String language, String size) {
+    return 'El reconocimiento de texto lee $language también sin datos propios, pero letras como ł, ş o ñ se pierden a menudo. Con los datos de $language ($size, se descargan una vez) las lee bien.';
+  }
+
+  @override
+  String get translatorPhotoDataFetch => 'Descargar';
+
+  @override
+  String get translatorPhotoDataWithout => 'Leer sin datos';
+
+  @override
+  String translatorPhotoDataLoading(String language) {
+    return 'Descargando los datos de $language…';
+  }
+
+  @override
+  String translatorPhotoDataFailed(String error) {
+    return 'No se pudieron descargar los datos: $error';
+  }
+
+  @override
+  String translatorPhotoNeedsTesseractLanguage(
+    String language,
+    String package,
+  ) {
+    return 'En Linux la app lee las fotos con Tesseract, al que aquí le faltan los datos de $language. En Debian y Ubuntu: sudo apt install $package';
+  }
+
+  @override
+  String get translatorOcrDataTitle => 'Reconocimiento de texto para fotos';
+
+  @override
+  String translatorOcrDataSummary(String languages, String size) {
+    return '$languages · $size';
+  }
 }

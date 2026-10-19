@@ -19,10 +19,11 @@ import '../../phrasebook/application/phrasebook.dart' show PhraseLanguage;
 /// and what it reads lands in the translator's field, to be checked
 /// before it is translated.
 ///
-/// Tesseract reads with the German and English data the app ships, so on
-/// Android and Linux it reads Latin letters and nothing else. Cyrillic,
-/// Arabic and Persian need data of their own; until that can be fetched
-/// the screen says so instead of producing a page of wrong letters.
+/// Tesseract, on Android and Linux, reads with the data it has: German
+/// and English shipped, any other language once its data is there --
+/// fetched by the app on Android, a system package on Linux (#205,
+/// `tesseract_data.dart`). Without it a Latin-script language is still
+/// read with German and English, and another script is not read at all.
 
 /// The languages written in Latin letters, which every engine here reads.
 const _latin = {
@@ -60,14 +61,28 @@ List<String> recognitionLanguagesFor(PhraseLanguage language) => {
 
 bool isLatinScript(PhraseLanguage language) => _latin.contains(language);
 
-/// Whether the engine on [platform] can read [language]'s script at all,
-/// before it is asked. Only Tesseract's limit is known in advance; Vision
-/// and Windows answer for themselves through `support`.
-bool readsScriptOn(TargetPlatform platform, PhraseLanguage language) =>
-    switch (platform) {
-      TargetPlatform.android || TargetPlatform.linux => isLatinScript(language),
-      _ => true,
-    };
+/// Whether [platform] reads photos with Tesseract rather than with an
+/// engine of the system's, which answers for itself through `support`.
+bool readsWithTesseractOn(TargetPlatform platform) =>
+    platform == TargetPlatform.android || platform == TargetPlatform.linux;
+
+/// What Tesseract reads text in [language] with.
+///
+/// German and English with the two that always come with it. Another
+/// language with its own data and English beside it -- a sign in Cyrillic
+/// still says "EXIT" -- once [hasData]. Without its data, a Latin-script
+/// language is read with German and English, where the letters come
+/// through and an ł or a ş may not; another script cannot be read: null.
+List<String>? tesseractRecognitionLanguagesFor(
+  PhraseLanguage language, {
+  required bool hasData,
+}) {
+  if (language == PhraseLanguage.de || language == PhraseLanguage.en) {
+    return const ['de-DE', 'en-US'];
+  }
+  if (hasData) return [_tag(language), 'en-US'];
+  return isLatinScript(language) ? const ['de-DE', 'en-US'] : null;
+}
 
 /// The longest side a photo is read at: the same limit as a scanned page,
 /// enough for a sign across a room and well inside what the engines take.

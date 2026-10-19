@@ -23,7 +23,9 @@ ihre jeweils eigenen Bedingungen.
   Bibliotheken; Quelle `github.com/adaptech-cz/Tesseract4Android`
 - Tesseract-Sprachdaten `tessdata_fast` Deutsch und Englisch (nur
   Android) — Apache-2.0; vollständiger Text:
-  `third_party/tessdata_fast/LICENSE`
+  `third_party/tessdata_fast/LICENSE`. Die Daten weiterer Sprachen sind
+  nicht im Paket: die Android-App lädt sie auf Wunsch aus derselben
+  Quelle, mit festgeschriebenen Prüfsummen (`third_party/tessdata_fast/README.md`)
 - PDFium aus `bblanchon/pdfium-binaries` (über `pdfrx`/`pdfium_dart`, in
   allen Paketen) — BSD-3-Clause und Apache-2.0 bzw. die Lizenzen der
   enthaltenen Bibliotheken; Herkunft geprüft gegen

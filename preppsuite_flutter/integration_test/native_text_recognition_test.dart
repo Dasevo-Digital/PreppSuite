@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
@@ -8,7 +9,9 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:preppsuite_flutter/features/knowledge/application/document_text_recognition.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/personal_document_store.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/tesseract_data.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/text_recognition.dart';
+import 'package:preppsuite_flutter/features/phrasebook/application/phrasebook.dart';
 
 /// The text recognition of each system, actually asked (#66).
 ///
@@ -101,4 +104,70 @@ void main() {
     expect(text?.toLowerCase(), contains('notvorrat'));
     expect(text?.toLowerCase(), contains('zehn'));
   });
+
+  /// [text] drawn by the engine's own text renderer, in the system font,
+  /// as BGRA: the `image` package's bitmap font has no Cyrillic.
+  Future<PageImage> rendered(String text) async {
+    const width = 1400;
+    const height = 300;
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder)
+      ..drawRect(
+        const ui.Rect.fromLTWH(0, 0, 1400, 300),
+        ui.Paint()..color = const ui.Color(0xFFFFFFFF),
+      );
+    final builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: 96))
+      ..pushStyle(ui.TextStyle(color: const ui.Color(0xFF000000)))
+      ..addText(text);
+    final paragraph = builder.build()
+      ..layout(const ui.ParagraphConstraints(width: 1320));
+    canvas.drawParagraph(paragraph, const ui.Offset(40, 80));
+    final image = await recorder.endRecording().toImage(width, height);
+    final rgba = (await image.toByteData(
+      format: ui.ImageByteFormat.rawRgba,
+    ))!.buffer.asUint8List();
+    final bgra = Uint8List(rgba.length);
+    for (var i = 0; i < rgba.length; i += 4) {
+      bgra[i] = rgba[i + 2];
+      bgra[i + 1] = rgba[i + 1];
+      bgra[i + 2] = rgba[i];
+      bgra[i + 3] = rgba[i + 3];
+    }
+    return PageImage(bgra: bgra, width: width, height: height);
+  }
+
+  // Android fetches the Russian data the way "Text aus Foto" does (#205)
+  // and reads with it; Vision on Apple systems reads Cyrillic as it is.
+  // Windows depends on an installed language pack and Linux on a system
+  // package, so neither is asked here.
+  testWidgets(
+    'a sign in Cyrillic is read',
+    (tester) async {
+      final text = await tester.runAsync(() async {
+        const languages = ['ru-RU', 'en-US'];
+        if (Platform.isAndroid) {
+          final data = DownloadedTesseractData();
+          await data
+              .install(tesseractLanguages[PhraseLanguage.ru]!)
+              .drain<void>();
+          expect(
+            await data.has(tesseractLanguages[PhraseLanguage.ru]!),
+            isTrue,
+          );
+        }
+        const recognizer = PlatformTextRecognizer();
+        expect(
+          await recognizer.support(languages: languages),
+          TextRecognitionSupport.available,
+        );
+        return recognizer.recognize(
+          await rendered('ВЫХОД ЗДЕСЬ'),
+          languages: languages,
+        );
+      });
+
+      expect(text?.toLowerCase(), contains('выход'));
+    },
+    skip: !(Platform.isAndroid || Platform.isIOS || Platform.isMacOS),
+  );
 }

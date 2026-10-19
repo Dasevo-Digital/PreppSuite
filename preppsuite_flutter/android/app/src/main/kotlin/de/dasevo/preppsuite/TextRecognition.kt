@@ -23,7 +23,11 @@ import java.util.concurrent.Executors
  * same on every platform; it is turned grey here, which is all Tesseract
  * reads anyway. One engine, on one thread of its own: Tesseract's API is
  * not thread-safe, and loading its language data is the slow part, so the
- * engine is made once and kept.
+ * engine is kept for as long as the same languages are asked for.
+ *
+ * German and English come with the APK. Other languages' data is fetched
+ * by the app into the same folder (#205, `tesseract_data.dart`), which is
+ * why that folder can be asked for.
  */
 class TextRecognition(private val context: Context, messenger: BinaryMessenger) {
     private companion object {
@@ -31,6 +35,9 @@ class TextRecognition(private val context: Context, messenger: BinaryMessenger) 
 
         /** German first; English beside it for the English half of a library. */
         const val LANGUAGES = "deu+eng"
+
+        /** The data in the APK; anything else has to have been fetched. */
+        val SHIPPED = setOf("deu", "eng")
 
         /**
          * Where the language data is copied to. Named after the data's own
@@ -44,8 +51,9 @@ class TextRecognition(private val context: Context, messenger: BinaryMessenger) 
     private val worker = Executors.newSingleThreadExecutor()
     private val main = Handler(Looper.getMainLooper())
 
-    /** Touched only on [worker]. */
+    /** Touched only on [worker]: the engine and what it was made for. */
     private var engine: TessBaseAPI? = null
+    private var engineLanguages: String? = null
 
     init {
         channel.setMethodCallHandler { call, result -> handle(call, result) }
@@ -62,14 +70,27 @@ class TextRecognition(private val context: Context, messenger: BinaryMessenger) 
 
     private fun handle(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "support" -> worker.execute {
-                val ready = runCatching { engine() != null }.getOrDefault(false)
-                main.post { result.success(if (ready) "available" else "unsupported") }
+            "tessdataPath" -> worker.execute {
+                val path = runCatching { dataFolder().absolutePath }.getOrNull()
+                main.post { result.success(path) }
+            }
+            "support" -> {
+                val languages = call.argument<String>("tesseract") ?: LANGUAGES
+                worker.execute {
+                    val answer = when {
+                        !hasData(languages) -> "needsLanguageData"
+                        runCatching { engine(languages) != null }.getOrDefault(false) ->
+                            "available"
+                        else -> "unsupported"
+                    }
+                    main.post { result.success(answer) }
+                }
             }
             "recognize" -> {
                 val bgra = call.argument<ByteArray>("bgra")
                 val width = call.argument<Int>("width") ?: 0
                 val height = call.argument<Int>("height") ?: 0
+                val languages = call.argument<String>("tesseract") ?: LANGUAGES
                 if (bgra == null || width <= 0 || height <= 0 ||
                     bgra.size < width.toLong() * height * 4
                 ) {
@@ -78,7 +99,7 @@ class TextRecognition(private val context: Context, messenger: BinaryMessenger) 
                 }
                 worker.execute {
                     try {
-                        val api = engine() ?: throw IllegalStateException("no engine")
+                        val api = engine(languages) ?: throw IllegalStateException("no engine")
                         api.setImage(grey(bgra, width, height), width, height, 1, width)
                         val text = api.getUTF8Text() ?: ""
                         api.clear()
@@ -92,14 +113,32 @@ class TextRecognition(private val context: Context, messenger: BinaryMessenger) 
         }
     }
 
-    /** The engine, made on first use from the data shipped in the APK. */
-    private fun engine(): TessBaseAPI? {
-        engine?.let { return it }
+    private fun dataFolder(): File =
+        File(File(context.filesDir, DATA_FOLDER), "tessdata").apply { mkdirs() }
+
+    /** Whether every one of [languages] is shipped or has been fetched. */
+    private fun hasData(languages: String): Boolean =
+        languages.split('+').all {
+            it in SHIPPED || File(dataFolder(), "$it.traineddata").length() > 0
+        }
+
+    /**
+     * The engine for [languages], made the first time they are asked for:
+     * the shipped data is copied out of the APK, fetched data is already in
+     * place. A different set of languages replaces the engine rather than
+     * adding one, since each holds its models in memory.
+     */
+    private fun engine(languages: String): TessBaseAPI? {
+        if (engineLanguages == languages) engine?.let { return it }
+        engine?.recycle()
+        engine = null
+        engineLanguages = null
         val root = File(context.filesDir, DATA_FOLDER)
-        val data = File(root, "tessdata").apply { mkdirs() }
-        for (language in LANGUAGES.split('+')) {
+        val data = dataFolder()
+        for (language in languages.split('+')) {
             val target = File(data, "$language.traineddata")
             if (target.length() > 0) continue
+            if (language !in SHIPPED) return null
             // Written beside and moved into place, so a copy cut short by a
             // closed app is never taken for a whole one.
             val partial = File(data, "$language.traineddata.part")
@@ -109,7 +148,7 @@ class TextRecognition(private val context: Context, messenger: BinaryMessenger) 
             if (!partial.renameTo(target)) return null
         }
         val api = TessBaseAPI()
-        if (!api.init(root.absolutePath, LANGUAGES)) {
+        if (!api.init(root.absolutePath, languages)) {
             api.recycle()
             return null
         }
@@ -117,6 +156,7 @@ class TextRecognition(private val context: Context, messenger: BinaryMessenger) 
         // Tesseract's API starts out assuming the latter.
         api.setPageSegMode(TessBaseAPI.PageSegMode.PSM_AUTO)
         engine = api
+        engineLanguages = languages
         return api
     }
 

@@ -4136,5 +4136,69 @@
   "meetingPlaceLocating": "Standort wird bestimmt …",
   "meetingPlaceOnMap": "Auf der Karte zeigen",
   "placePickerHint": "Tippe auf die Karte, um den Punkt zu setzen. „Mein Standort“ setzt ihn dorthin, wo du bist.",
-  "placePickerUse": "Diesen Punkt nehmen"
+  "placePickerUse": "Diesen Punkt nehmen",
+  "translatorPhotoDataTitle": "Daten für die Texterkennung",
+  "translatorPhotoDataNeeded": "Um {language} von einem Foto zu lesen, braucht die Texterkennung Daten für diese Sprache: {size}, einmal geladen, danach ohne Netz.",
+  "@translatorPhotoDataNeeded": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorPhotoDataBetter": "Die Texterkennung liest {language} auch ohne eigene Daten, aber Buchstaben wie ł, ş oder ñ gehen dabei oft verloren. Mit den Daten für {language} ({size}, einmal geladen) liest sie sie richtig.",
+  "@translatorPhotoDataBetter": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorPhotoDataFetch": "Laden",
+  "translatorPhotoDataWithout": "Ohne Daten lesen",
+  "translatorPhotoDataLoading": "Daten für {language} werden geladen …",
+  "@translatorPhotoDataLoading": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorPhotoDataFailed": "Die Daten ließen sich nicht laden: {error}",
+  "@translatorPhotoDataFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorPhotoNeedsTesseractLanguage": "Unter Linux liest die App Fotos mit Tesseract, und dem fehlen hier die Daten für {language}. Unter Debian und Ubuntu: sudo apt install {package}",
+  "@translatorPhotoNeedsTesseractLanguage": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      },
+      "package": {
+        "type": "String"
+      }
+    }
+  },
+  "translatorOcrDataTitle": "Texterkennung für Fotos",
+  "translatorOcrDataSummary": "{languages} · {size}",
+  "@translatorOcrDataSummary": {
+    "placeholders": {
+      "languages": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  }
 }

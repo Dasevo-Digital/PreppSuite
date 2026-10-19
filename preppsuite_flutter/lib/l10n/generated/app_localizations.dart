@@ -16170,6 +16170,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use this point'**
   String get placePickerUse;
+
+  /// No description provided for @translatorPhotoDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data for text recognition'**
+  String get translatorPhotoDataTitle;
+
+  /// No description provided for @translatorPhotoDataNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'To read {language} from a photo, text recognition needs data for that language: {size}, fetched once, then without a network.'**
+  String translatorPhotoDataNeeded(String language, String size);
+
+  /// No description provided for @translatorPhotoDataBetter.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition reads {language} without data of its own too, but letters such as ł, ş or ñ are often lost. With the data for {language} ({size}, fetched once) it reads them properly.'**
+  String translatorPhotoDataBetter(String language, String size);
+
+  /// No description provided for @translatorPhotoDataFetch.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get translatorPhotoDataFetch;
+
+  /// No description provided for @translatorPhotoDataWithout.
+  ///
+  /// In en, this message translates to:
+  /// **'Read without'**
+  String get translatorPhotoDataWithout;
+
+  /// No description provided for @translatorPhotoDataLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching the data for {language} …'**
+  String translatorPhotoDataLoading(String language);
+
+  /// No description provided for @translatorPhotoDataFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The data could not be fetched: {error}'**
+  String translatorPhotoDataFailed(String error);
+
+  /// No description provided for @translatorPhotoNeedsTesseractLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'On Linux the app reads photos with Tesseract, which has no data for {language} here. On Debian and Ubuntu: sudo apt install {package}'**
+  String translatorPhotoNeedsTesseractLanguage(String language, String package);
+
+  /// No description provided for @translatorOcrDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition for photos'**
+  String get translatorOcrDataTitle;
+
+  /// No description provided for @translatorOcrDataSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{languages} · {size}'**
+  String translatorOcrDataSummary(String languages, String size);
 }
 
 class _AppLocalizationsDelegate

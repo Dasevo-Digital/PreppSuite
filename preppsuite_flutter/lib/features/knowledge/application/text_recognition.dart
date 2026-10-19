@@ -27,6 +27,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'tesseract_data.dart';
+
 /// One rendered page: BGRA, eight bits a channel, [width] by [height].
 class PageImage {
   const PageImage({
@@ -50,6 +52,10 @@ enum TextRecognitionSupport {
 
   /// Linux: Tesseract, or its German data, is not installed.
   needsTesseract,
+
+  /// Android: Tesseract has no data for the language asked for. The app
+  /// can fetch it (`tesseract_data.dart`, #205).
+  needsLanguageData,
 
   /// No engine at all.
   unsupported,
@@ -82,8 +88,11 @@ class PlatformTextRecognizer implements TextRecognizer {
   @override
   Future<TextRecognitionSupport> support({List<String>? languages}) async {
     try {
+      final tags = languages ?? PlatformTextRecognizer.languages;
       final answer = await _channel.invokeMethod<String>('support', {
-        'languages': languages ?? PlatformTextRecognizer.languages,
+        'languages': tags,
+        // Android's Tesseract takes its own names; the others ignore it.
+        'tesseract': tesseractLanguageString(tags),
       });
       return TextRecognitionSupport.values.asNameMap()[answer] ??
           TextRecognitionSupport.unsupported;
@@ -96,11 +105,13 @@ class PlatformTextRecognizer implements TextRecognizer {
 
   @override
   Future<String> recognize(PageImage page, {List<String>? languages}) async {
+    final tags = languages ?? PlatformTextRecognizer.languages;
     final text = await _channel.invokeMethod<String>('recognize', {
       'bgra': page.bgra,
       'width': page.width,
       'height': page.height,
-      'languages': languages ?? PlatformTextRecognizer.languages,
+      'languages': tags,
+      'tesseract': tesseractLanguageString(tags),
     });
     return text ?? '';
   }
@@ -116,11 +127,14 @@ class TesseractRecognizer implements TextRecognizer {
 
   final String executable;
 
-  /// German and English, as far as they are installed: `deu+eng`, or one
-  /// of them, or null when neither is. English alone still reads a German
-  /// page's letters, if not every umlaut; the screen asks for the German
-  /// data only when there is nothing at all.
-  Future<String?> _languages() async {
+  /// The languages asked for -- German and English unless told -- as far
+  /// as they are installed: `deu+eng`, or one of them, or null when none
+  /// is. English alone still reads a German page's letters, if not every
+  /// umlaut; the screen asks for the German data only when there is
+  /// nothing at all. The translator asks whether its language is there
+  /// before it reads (`SystemTesseractData`), so a photo in Russian is
+  /// not read with English alone.
+  Future<String?> _languages(List<String>? wanted) async {
     try {
       final result = await Process.run(executable, ['--list-langs']);
       if (result.exitCode != 0) return null;
@@ -128,8 +142,11 @@ class TesseractRecognizer implements TextRecognizer {
           .split('\n')
           .map((line) => line.trim())
           .toSet();
+      final asked = tesseractLanguageString(
+        wanted ?? PlatformTextRecognizer.languages,
+      ).split('+');
       final usable = [
-        for (final language in const ['deu', 'eng'])
+        for (final language in asked)
           if (installed.contains(language)) language,
       ];
       return usable.isEmpty ? null : usable.join('+');
@@ -140,13 +157,13 @@ class TesseractRecognizer implements TextRecognizer {
 
   @override
   Future<TextRecognitionSupport> support({List<String>? languages}) async =>
-      await _languages() == null
+      await _languages(languages) == null
       ? TextRecognitionSupport.needsTesseract
       : TextRecognitionSupport.available;
 
   @override
   Future<String> recognize(PageImage page, {List<String>? languages}) async {
-    final installed = await _languages();
+    final installed = await _languages(languages);
     if (installed == null) {
       throw ProcessException(executable, const [], 'no tessdata for deu/eng');
     }

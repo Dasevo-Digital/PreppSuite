@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
+import '../../knowledge/application/tesseract_data.dart';
 import '../application/translator_providers.dart';
 import 'translator_screen.dart';
 
@@ -28,6 +29,11 @@ class TranslatorPacksCard extends ConsumerWidget {
       );
     }
     final installed = ref.watch(installedTranslatorPacksProvider);
+    // The text recognition data "Text aus Foto" fetched on Android (#205):
+    // the same kind of thing, a language's data for the translator.
+    final ocr =
+        ref.watch(installedTesseractLanguagesProvider).value ?? const [];
+    final ocrData = ref.watch(tesseractDataProvider);
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -68,6 +74,44 @@ class TranslatorPacksCard extends ConsumerWidget {
                     .remove(pack.direction),
               ),
             ),
+          if (ocr.isNotEmpty && ocrData is DownloadedTesseractData) ...[
+            ListTile(
+              leading: const Icon(Icons.document_scanner_outlined),
+              title: Text(l10n.translatorOcrDataTitle),
+              subtitle: Text(
+                l10n.translatorOcrDataSummary(
+                  ocr.map((language) => language.endonym).join(', '),
+                  formatByteSize(
+                    ocr.fold(
+                      0,
+                      (sum, language) =>
+                          sum + tesseractLanguages[language]!.size,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            for (final language in ocr)
+              ListTile(
+                dense: true,
+                contentPadding: const EdgeInsetsDirectional.only(
+                  start: 72,
+                  end: 8,
+                ),
+                title: Text(language.endonym),
+                subtitle: Text(
+                  formatByteSize(tesseractLanguages[language]!.size),
+                ),
+                trailing: IconButton(
+                  tooltip: l10n.translatorRemove,
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () async {
+                    await ocrData.remove(tesseractLanguages[language]!);
+                    ref.invalidate(installedTesseractLanguagesProvider);
+                  },
+                ),
+              ),
+          ],
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: Padding(

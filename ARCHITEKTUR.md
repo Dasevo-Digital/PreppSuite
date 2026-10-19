@@ -2640,9 +2640,24 @@ Seit #203 liest dieselbe Erkennung auch ein Foto für den Übersetzer
 aufrecht gedreht, auf 4000 Pixel verkleinert und als BGRA übergeben, in
 einem eigenen Isolate. Dabei bekommt die Erkennung die Sprache des Textes
 (`support`/`recognize` mit `languages`). Vision und `Windows.Media.Ocr`
-nehmen sie an; Tesseract liest mit den Daten, die da sind, also nur
-lateinische Schrift, und der Übersetzer sagt das vorher
-(`readsScriptOn`), statt eine Seite falscher Buchstaben einzusetzen.
+nehmen sie an. Tesseract liest mit den Daten, die da sind; seit #205
+bekommt es dafür seine eigenen Namen (`tesseract: rus+eng`), und die
+Daten weiterer Sprachen kommen auf Wunsch dazu
+(`knowledge/application/tesseract_data.dart`). **Android** lädt sie aus
+derselben Quelle und mit demselben Tag wie die mitgelieferten
+(`tessdata_fast` 4.1.0) in den Ordner, den die Engine liest, über eine
+`.part`-Datei und gegen eine hier festgeschriebene Prüfsumme; welcher
+Ordner das ist, sagt die Engine selbst (`tessdataPath`), weil er nach der
+Datenversion benannt ist. Die Engine hält ihr Modell für eine Sprachkombination
+und baut sich neu, wenn eine andere verlangt wird. **Linux** nimmt die
+Pakete der Distribution (`tesseract-ocr-rus`) und nennt das fehlende,
+statt eigene Daten neben die des Systems zu legen, die die
+Kommandozeile nicht zusammen lesen könnte. Der Übersetzer fragt vorher,
+ob die Sprache da ist (`TesseractData.has`): Kyrillisch, Arabisch und
+Persisch werden ohne ihre Daten gar nicht gelesen, eine lateinische
+Schrift auf Wunsch mit Deutsch und Englisch, wobei ein ł zum l werden
+kann. Der Gerätetest liest unter Android und auf Apple-Systemen ein
+kyrillisches Schild (`native_text_recognition_test`).
 
 **Kein Erkenner, der Daten an Dritte schickt.** Android liest deshalb mit
 Tesseract und nicht mit ML Kit, obwohl ML Kit in der Messung etwas besser

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
+import '../../knowledge/application/tesseract_data.dart';
 import '../../knowledge/application/text_recognition.dart';
 import '../../phrasebook/application/phrasebook.dart';
 import '../../phrasebook/presentation/phrase_display.dart';
@@ -310,10 +313,13 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
   /// picture for nothing.
   Future<void> _readPhoto(PhraseLanguage from) async {
     final l10n = AppLocalizations.of(context)!;
-    final languages = recognitionLanguagesFor(from);
-    if (!readsScriptOn(defaultTargetPlatform, from)) {
-      _say(l10n.translatorPhotoScript);
-      return;
+    final List<String> languages;
+    if (!kIsWeb && readsWithTesseractOn(defaultTargetPlatform)) {
+      final chosen = await _tesseractLanguages(from, l10n);
+      if (chosen == null || !mounted) return;
+      languages = chosen;
+    } else {
+      languages = recognitionLanguagesFor(from);
     }
     final support = await ref
         .read(textRecognizerProvider)
@@ -327,6 +333,9 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
         return;
       case TextRecognitionSupport.needsTesseract:
         _say(l10n.knowledgeRecognizeNeedsTesseract);
+        return;
+      case TextRecognitionSupport.needsLanguageData:
+        _say(l10n.translatorPhotoScript);
         return;
       case TextRecognitionSupport.unsupported:
         _say(
@@ -363,6 +372,102 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
     } finally {
       if (mounted) setState(() => _reading = false);
     }
+  }
+
+  /// What Tesseract is to read [from] with, after offering the language's
+  /// data where it is missing (#205); null when the photo cannot be read
+  /// or the person changed their mind.
+  Future<List<String>?> _tesseractLanguages(
+    PhraseLanguage from,
+    AppLocalizations l10n,
+  ) async {
+    final pack = tesseractLanguages[from];
+    final data = ref.read(tesseractDataProvider);
+    if (pack == null || data == null) {
+      return tesseractRecognitionLanguagesFor(from, hasData: pack == null);
+    }
+    if (await data.has(pack)) {
+      return tesseractRecognitionLanguagesFor(from, hasData: true);
+    }
+    if (!mounted) return null;
+
+    if (data is DownloadedTesseractData) {
+      final latin = isLatinScript(from);
+      final size = formatByteSize(pack.size);
+      final choice = await showDialog<_DataChoice>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.translatorPhotoDataTitle),
+          content: Text(
+            latin
+                ? l10n.translatorPhotoDataBetter(from.endonym, size)
+                : l10n.translatorPhotoDataNeeded(from.endonym, size),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.cancelButton),
+            ),
+            if (latin)
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(_DataChoice.without),
+                child: Text(l10n.translatorPhotoDataWithout),
+              ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(_DataChoice.fetch),
+              child: Text(l10n.translatorPhotoDataFetch),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return null;
+      switch (choice) {
+        case _DataChoice.fetch:
+          return await _fetchData(data, pack, from, l10n)
+              ? tesseractRecognitionLanguagesFor(from, hasData: true)
+              : null;
+        case _DataChoice.without:
+          return tesseractRecognitionLanguagesFor(from, hasData: false);
+        case null:
+          return null;
+      }
+    }
+
+    // The system's Tesseract: Latin letters without the package, and the
+    // package to install for another script.
+    if (isLatinScript(from)) {
+      return tesseractRecognitionLanguagesFor(from, hasData: false);
+    }
+    _say(
+      l10n.translatorPhotoNeedsTesseractLanguage(
+        from.endonym,
+        pack.linuxPackage,
+      ),
+    );
+    return null;
+  }
+
+  Future<bool> _fetchData(
+    DownloadedTesseractData data,
+    TesseractLanguage pack,
+    PhraseLanguage language,
+    AppLocalizations l10n,
+  ) async {
+    final outcome = await showDialog<Object>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => _DataDownloadDialog(
+        progress: data.install(pack),
+        total: pack.size,
+        title: l10n.translatorPhotoDataLoading(language.endonym),
+      ),
+    );
+    ref.invalidate(installedTesseractLanguagesProvider);
+    if (outcome == true) return true;
+    if (outcome != null && outcome != false && mounted) {
+      _say(l10n.translatorPhotoDataFailed(describeError(l10n, outcome)));
+    }
+    return false;
   }
 
   /// The camera where there is one the picker can use -- a phone -- and
@@ -601,6 +706,85 @@ class _InstalledPacks extends ConsumerWidget {
                   .remove(pack.direction),
             ),
           ),
+      ],
+    );
+  }
+}
+
+enum _DataChoice { fetch, without }
+
+/// Fetching one language's text recognition data, with how far it has
+/// got. Pops with true when the data is in place, false when stopped, and
+/// the error when it failed.
+class _DataDownloadDialog extends StatefulWidget {
+  const _DataDownloadDialog({
+    required this.progress,
+    required this.total,
+    required this.title,
+  });
+
+  final Stream<int> progress;
+  final int total;
+  final String title;
+
+  @override
+  State<_DataDownloadDialog> createState() => _DataDownloadDialogState();
+}
+
+class _DataDownloadDialogState extends State<_DataDownloadDialog> {
+  late final StreamSubscription<int> _subscription;
+  var _received = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = widget.progress.listen(
+      (received) => setState(() => _received = received),
+      onError: (Object error) {
+        if (mounted) Navigator.of(context).pop(error);
+      },
+      onDone: () {
+        if (mounted) Navigator.of(context).pop(true);
+      },
+      cancelOnError: true,
+    );
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return AlertDialog(
+      title: Text(widget.title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          LinearProgressIndicator(
+            value: widget.total == 0
+                ? null
+                : (_received / widget.total).clamp(0.0, 1.0),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${formatByteSize(_received)} / ${formatByteSize(widget.total)}',
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          // Stopping keeps what has arrived; the next try picks it up.
+          onPressed: () {
+            _subscription.cancel();
+            Navigator.of(context).pop(false);
+          },
+          child: Text(l10n.cancelButton),
+        ),
       ],
     );
   }

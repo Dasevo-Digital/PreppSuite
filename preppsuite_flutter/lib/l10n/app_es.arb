@@ -2675,5 +2675,15 @@
   "meetingPlaceLocating": "Buscando tu ubicación…",
   "meetingPlaceOnMap": "Mostrar en el mapa",
   "placePickerHint": "Toca el mapa para marcar el punto. «Mi ubicación» lo pone donde estás.",
-  "placePickerUse": "Usar este punto"
+  "placePickerUse": "Usar este punto",
+  "translatorPhotoDataTitle": "Datos para el reconocimiento de texto",
+  "translatorPhotoDataNeeded": "Para leer {language} de una foto, el reconocimiento de texto necesita datos de ese idioma: {size}, se descargan una vez y después funciona sin conexión.",
+  "translatorPhotoDataBetter": "El reconocimiento de texto lee {language} también sin datos propios, pero letras como ł, ş o ñ se pierden a menudo. Con los datos de {language} ({size}, se descargan una vez) las lee bien.",
+  "translatorPhotoDataFetch": "Descargar",
+  "translatorPhotoDataWithout": "Leer sin datos",
+  "translatorPhotoDataLoading": "Descargando los datos de {language}…",
+  "translatorPhotoDataFailed": "No se pudieron descargar los datos: {error}",
+  "translatorPhotoNeedsTesseractLanguage": "En Linux la app lee las fotos con Tesseract, al que aquí le faltan los datos de {language}. En Debian y Ubuntu: sudo apt install {package}",
+  "translatorOcrDataTitle": "Reconocimiento de texto para fotos",
+  "translatorOcrDataSummary": "{languages} · {size}"
 }

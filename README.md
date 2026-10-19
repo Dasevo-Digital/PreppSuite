@@ -404,9 +404,13 @@ Pakete für beide Richtungen.
 der Texterkennung des Geräts (dieselbe wie für gescannte Dokumente, ohne
 Netz) und setzt den Text ins Eingabefeld, zum Prüfen vor dem Übersetzen.
 Auf dem Mac und unter Windows liest die Systemerkennung auch Kyrillisch
-und Arabisch, soweit sie die Sprache kennt; unter Android und Linux liest
-Tesseract mit den deutschen und englischen Daten nur lateinische
-Schrift, und die App sagt das, bevor ein Foto gemacht wird.
+und Arabisch, soweit sie die Sprache kennt. Unter Android bietet die App
+für jede Sprache außer Deutsch und Englisch einmal deren Daten für die
+Texterkennung an (0,4 bis 4,8 MB, aus Tesseracts `tessdata_fast`), danach
+geht es ohne Netz; unter „Offline und Speicher“ lassen sie sich wieder
+entfernen. Unter Linux nennt sie das Systempaket, etwa
+`tesseract-ocr-rus`. Ohne die Daten liest sie lateinische Schrift mit
+Deutsch und Englisch, Kyrillisch und Arabisch gar nicht.
 
 **Karte offline.** Im dunklen Erscheinungsbild ist auch die Karte dunkel –
 der Stil wird umgedreht statt das fertige Bild, sodass ein Park grün bleibt.

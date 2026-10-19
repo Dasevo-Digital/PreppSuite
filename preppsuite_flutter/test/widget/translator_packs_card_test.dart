@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/tesseract_data.dart';
 import 'package:preppsuite_flutter/features/phrasebook/application/phrasebook.dart';
 import 'package:preppsuite_flutter/features/translator/application/translator_catalogue.dart';
 import 'package:preppsuite_flutter/features/translator/application/translator_providers.dart';
@@ -21,6 +22,21 @@ class _Store extends TranslatorStore {
       packs.removeWhere((pack) => pack.direction == direction);
 }
 
+/// Text recognition data on an Android device, in memory.
+class _Data extends DownloadedTesseractData {
+  _Data(this.present);
+
+  final Set<String> present;
+
+  @override
+  Future<bool> has(TesseractLanguage language) async =>
+      present.contains(language.code);
+
+  @override
+  Future<void> remove(TesseractLanguage language) async =>
+      present.remove(language.code);
+}
+
 InstalledTranslatorPack _pack(PhraseLanguage from, PhraseLanguage to) =>
     InstalledTranslatorPack(
       direction: TranslatorDirection(from, to),
@@ -37,6 +53,7 @@ void main() {
     WidgetTester tester, {
     bool available = true,
     List<InstalledTranslatorPack> packs = const [],
+    TesseractData? data,
   }) async {
     final store = _Store([...packs]);
     await tester.pumpWidget(
@@ -44,6 +61,7 @@ void main() {
         overrides: [
           translatorAvailableProvider.overrideWithValue(available),
           translatorStoreProvider.overrideWithValue(store),
+          tesseractDataProvider.overrideWithValue(data ?? _Data({})),
         ],
         child: MaterialApp(
           locale: const Locale('de'),
@@ -93,5 +111,27 @@ void main() {
     await show(tester, available: false);
     expect(find.textContaining('nicht enthalten'), findsOneWidget);
     expect(find.text('Zum Übersetzer'), findsNothing);
+  });
+
+  testWidgets('the text recognition data for photos is listed and can be '
+      'removed (#205)', (tester) async {
+    final data = _Data({'rus', 'ara'});
+    await show(tester, data: data);
+
+    expect(find.text('Texterkennung für Fotos'), findsOneWidget);
+    expect(find.text('Русский'), findsOneWidget);
+    expect(find.text('العربية'), findsOneWidget);
+    expect(find.textContaining('Русский, العربية · '), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Sprachpaket entfernen').first);
+    await tester.pumpAndSettle();
+
+    expect(data.present, hasLength(1));
+  });
+
+  testWidgets('without such data there is no section for it', (tester) async {
+    await show(tester);
+
+    expect(find.text('Texterkennung für Fotos'), findsNothing);
   });
 }

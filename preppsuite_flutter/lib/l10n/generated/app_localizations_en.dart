@@ -9749,4 +9749,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get placePickerUse => 'Use this point';
+
+  @override
+  String get translatorPhotoDataTitle => 'Data for text recognition';
+
+  @override
+  String translatorPhotoDataNeeded(String language, String size) {
+    return 'To read $language from a photo, text recognition needs data for that language: $size, fetched once, then without a network.';
+  }
+
+  @override
+  String translatorPhotoDataBetter(String language, String size) {
+    return 'Text recognition reads $language without data of its own too, but letters such as ł, ş or ñ are often lost. With the data for $language ($size, fetched once) it reads them properly.';
+  }
+
+  @override
+  String get translatorPhotoDataFetch => 'Download';
+
+  @override
+  String get translatorPhotoDataWithout => 'Read without';
+
+  @override
+  String translatorPhotoDataLoading(String language) {
+    return 'Fetching the data for $language …';
+  }
+
+  @override
+  String translatorPhotoDataFailed(String error) {
+    return 'The data could not be fetched: $error';
+  }
+
+  @override
+  String translatorPhotoNeedsTesseractLanguage(
+    String language,
+    String package,
+  ) {
+    return 'On Linux the app reads photos with Tesseract, which has no data for $language here. On Debian and Ubuntu: sudo apt install $package';
+  }
+
+  @override
+  String get translatorOcrDataTitle => 'Text recognition for photos';
+
+  @override
+  String translatorOcrDataSummary(String languages, String size) {
+    return '$languages · $size';
+  }
 }
