@@ -2239,7 +2239,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsCategoryAboutBody.
   ///
   /// In en, this message translates to:
-  /// **'Versions of the app and local modules'**
+  /// **'Versions, error log and supporting the app'**
   String get settingsCategoryAboutBody;
 
   /// No description provided for @themeSystemOption.
@@ -16020,6 +16020,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open the translator'**
   String get translatorPacksOpen;
+
+  /// No description provided for @supportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Support PreppSuite'**
+  String get supportTitle;
+
+  /// No description provided for @supportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'PreppSuite is free, shows no ads and needs no account. If you would like to support the work on it, you can give something on Ko-fi. The page opens in your browser.'**
+  String get supportBody;
+
+  /// No description provided for @supportOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The browser could not be opened. The address is {address}.'**
+  String supportOpenFailed(String address);
 }
 
 class _AppLocalizationsDelegate

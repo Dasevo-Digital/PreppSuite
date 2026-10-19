@@ -23,6 +23,7 @@ import 'app_lock_card.dart';
 import 'backup_card.dart';
 import 'local_encryption_card.dart';
 import 'reset_card.dart';
+import 'support_card.dart';
 import 'version_info_card.dart';
 import 'warning_readiness_card.dart';
 import 'followed_places_screen.dart';
@@ -163,6 +164,7 @@ class SettingsScreen extends ConsumerWidget {
               (l10n) => const [
                 VersionInfoCard(),
                 ErrorLogCard(),
+                SupportCard(),
               ],
             ),
           ),

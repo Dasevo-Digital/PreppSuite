@@ -356,7 +356,7 @@
   "settingsCategoryOffline": "Sin conexión y almacenamiento",
   "settingsCategoryOfflineBody": "Mapas, archivos y lugares de almacenamiento",
   "settingsCategoryAbout": "Acerca de PreppSuite",
-  "settingsCategoryAboutBody": "Versiones de la app y de los módulos locales",
+  "settingsCategoryAboutBody": "Versiones, registro de errores y apoyo",
   "themeSystemOption": "Sistema",
   "themeLightOption": "Claro",
   "themeDarkOption": "Oscuro",
@@ -2650,5 +2650,8 @@
   "translatorPacksTitle": "Paquetes de idioma del traductor",
   "translatorPacksNone": "Aún no hay ninguno. El traductor descarga un paquete en cuanto falta una dirección.",
   "translatorPacksSummary": "{count, plural, =1{1 dirección, {size}} other{{count} direcciones, {size}}}",
-  "translatorPacksOpen": "Abrir el traductor"
+  "translatorPacksOpen": "Abrir el traductor",
+  "supportTitle": "Apoyar PreppSuite",
+  "supportBody": "PreppSuite es gratuita, no muestra publicidad y no necesita cuenta. Si quieres apoyar el trabajo en ella, puedes aportar algo en Ko-fi. La página se abre en el navegador.",
+  "supportOpenFailed": "No se pudo abrir el navegador. La dirección es {address}."
 }

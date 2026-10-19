@@ -564,7 +564,7 @@
   "settingsCategoryOffline": "Offline and storage",
   "settingsCategoryOfflineBody": "Maps, archives and storage locations",
   "settingsCategoryAbout": "About PreppSuite",
-  "settingsCategoryAboutBody": "Versions of the app and local modules",
+  "settingsCategoryAboutBody": "Versions, error log and supporting the app",
   "themeSystemOption": "System",
   "themeLightOption": "Light",
   "themeDarkOption": "Dark",
@@ -5706,5 +5706,15 @@
       }
     }
   },
-  "translatorPacksOpen": "Open the translator"
+  "translatorPacksOpen": "Open the translator",
+  "supportTitle": "Support PreppSuite",
+  "supportBody": "PreppSuite is free, shows no ads and needs no account. If you would like to support the work on it, you can give something on Ko-fi. The page opens in your browser.",
+  "supportOpenFailed": "The browser could not be opened. The address is {address}.",
+  "@supportOpenFailed": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  }
 }

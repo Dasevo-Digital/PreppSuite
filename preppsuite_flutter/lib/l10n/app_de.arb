@@ -395,7 +395,7 @@
   "settingsCategoryOffline": "Offline und Speicher",
   "settingsCategoryOfflineBody": "Karten, Archive und Speicherorte",
   "settingsCategoryAbout": "Über PreppSuite",
-  "settingsCategoryAboutBody": "Versionen der App und lokaler Module",
+  "settingsCategoryAboutBody": "Versionen, Fehlerprotokoll und Unterstützung",
   "themeSystemOption": "System",
   "themeLightOption": "Hell",
   "themeDarkOption": "Dunkel",
@@ -4097,5 +4097,15 @@
       }
     }
   },
-  "translatorPacksOpen": "Zum Übersetzer"
+  "translatorPacksOpen": "Zum Übersetzer",
+  "supportTitle": "PreppSuite unterstützen",
+  "supportBody": "PreppSuite kostet nichts, zeigt keine Werbung und braucht kein Konto. Wer die Arbeit daran unterstützen möchte, kann über Ko-fi etwas geben. Die Seite öffnet sich im Browser.",
+  "supportOpenFailed": "Der Browser ließ sich nicht öffnen. Die Adresse lautet {address}.",
+  "@supportOpenFailed": {
+    "placeholders": {
+      "address": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -1264,7 +1264,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsCategoryAboutBody =>
-      'Versionen der App und lokaler Module';
+      'Versionen, Fehlerprotokoll und Unterstützung';
 
   @override
   String get themeSystemOption => 'System';
@@ -9715,4 +9715,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get translatorPacksOpen => 'Zum Übersetzer';
+
+  @override
+  String get supportTitle => 'PreppSuite unterstützen';
+
+  @override
+  String get supportBody =>
+      'PreppSuite kostet nichts, zeigt keine Werbung und braucht kein Konto. Wer die Arbeit daran unterstützen möchte, kann über Ko-fi etwas geben. Die Seite öffnet sich im Browser.';
+
+  @override
+  String supportOpenFailed(String address) {
+    return 'Der Browser ließ sich nicht öffnen. Die Adresse lautet $address.';
+  }
 }
