@@ -9676,4 +9676,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String supportOpenFailed(String address) {
     return 'The browser could not be opened. The address is $address.';
   }
+
+  @override
+  String get warningReadAloud => 'Read aloud';
+
+  @override
+  String get warningStopReading => 'Stop reading';
 }

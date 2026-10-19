@@ -32,6 +32,7 @@ import '../../maps/presentation/base_map_layer.dart';
 import '../application/warning_freshness.dart';
 import '../application/warning_sync_controller.dart';
 import 'warning_freshness_notice.dart';
+import 'warning_speech.dart';
 
 class WarningListScreen extends ConsumerStatefulWidget {
   const WarningListScreen({super.key, required this.profile, this.now});
@@ -631,21 +632,26 @@ class _WarningDetails extends StatelessWidget {
           const SizedBox(height: 8),
           Text(warning.headline, style: theme.textTheme.headlineSmall),
           const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Chip(
-              avatar: Icon(
-                Icons.warning_amber_rounded,
-                color: colors.foreground,
-              ),
-              label: Text(
-                l10n.warningDetailsLevel(
-                  localizeWarningSeverity(l10n, severity),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Chip(
+                avatar: Icon(
+                  Icons.warning_amber_rounded,
+                  color: colors.foreground,
                 ),
+                label: Text(
+                  l10n.warningDetailsLevel(
+                    localizeWarningSeverity(l10n, severity),
+                  ),
+                ),
+                backgroundColor: colors.background,
+                side: BorderSide.none,
               ),
-              backgroundColor: colors.background,
-              side: BorderSide.none,
-            ),
+              SpeakWarningButton(warning: warning, source: source),
+            ],
           ),
           if (warning.description != null) ...[
             const SizedBox(height: 12),

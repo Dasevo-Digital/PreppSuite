@@ -9756,4 +9756,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String supportOpenFailed(String address) {
     return 'No se pudo abrir el navegador. La dirección es $address.';
   }
+
+  @override
+  String get warningReadAloud => 'Leer en voz alta';
+
+  @override
+  String get warningStopReading => 'Dejar de leer';
 }

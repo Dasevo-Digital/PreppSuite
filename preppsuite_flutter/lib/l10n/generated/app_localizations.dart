@@ -16038,6 +16038,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The browser could not be opened. The address is {address}.'**
   String supportOpenFailed(String address);
+
+  /// No description provided for @warningReadAloud.
+  ///
+  /// In en, this message translates to:
+  /// **'Read aloud'**
+  String get warningReadAloud;
+
+  /// No description provided for @warningStopReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop reading'**
+  String get warningStopReading;
 }
 
 class _AppLocalizationsDelegate

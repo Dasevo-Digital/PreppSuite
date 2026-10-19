@@ -4107,5 +4107,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "warningReadAloud": "Vorlesen",
+  "warningStopReading": "Vorlesen beenden"
 }

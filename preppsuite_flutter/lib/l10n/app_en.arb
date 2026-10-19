@@ -5716,5 +5716,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "warningReadAloud": "Read aloud",
+  "warningStopReading": "Stop reading"
 }

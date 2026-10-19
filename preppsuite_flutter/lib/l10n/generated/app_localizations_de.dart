@@ -9727,4 +9727,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String supportOpenFailed(String address) {
     return 'Der Browser ließ sich nicht öffnen. Die Adresse lautet $address.';
   }
+
+  @override
+  String get warningReadAloud => 'Vorlesen';
+
+  @override
+  String get warningStopReading => 'Vorlesen beenden';
 }
