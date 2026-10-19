@@ -159,7 +159,8 @@ Neben Vorrat, Checklisten und Budget liegen zwei weitere Sätze im Ordner:
 
 - **Der Notfallplan** – ein Datensatz je Haushalt. Seine `clientId` ist die
   Haushalts-Kennung, damit alle Geräte denselben Datensatz bearbeiten statt
-  je einen eigenen.
+  je einen eigenen. Wo ein Treffpunkt auf der Karte liegt, reist nicht mit:
+  der Punkt ist einer der eigenen Orte des Geräts (#204).
 - **Die Notfallkarten** – eine Zeile je Person. Das sind **Gesundheitsdaten**;
   der Bildschirm sagt vor der Eingabe, ob der Ordner verschlüsselt ist.
 

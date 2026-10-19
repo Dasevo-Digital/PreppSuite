@@ -9771,4 +9771,33 @@ class AppLocalizationsDe extends AppLocalizations {
   String translatorPhotoNeedsLanguagePack(String language) {
     return 'Windows erkennt Text nur in Sprachen, deren Sprachpaket installiert ist, und für $language ist keines da. Es lässt sich unter Einstellungen → Zeit und Sprache → Sprache und Region hinzufügen.';
   }
+
+  @override
+  String get meetingPlaceSet => 'Ort auf der Karte festlegen';
+
+  @override
+  String get meetingPlaceChange => 'Auf der Karte verschieben';
+
+  @override
+  String get meetingPlaceRemove => 'Von der Karte nehmen';
+
+  @override
+  String get meetingPlaceDeviceOnly =>
+      'Nur auf diesem Gerät, wie die eigenen Orte auf der Karte';
+
+  @override
+  String get meetingPlaceWay => 'Wie weit, welche Richtung';
+
+  @override
+  String get meetingPlaceLocating => 'Standort wird bestimmt …';
+
+  @override
+  String get meetingPlaceOnMap => 'Auf der Karte zeigen';
+
+  @override
+  String get placePickerHint =>
+      'Tippe auf die Karte, um den Punkt zu setzen. „Mein Standort“ setzt ihn dorthin, wo du bist.';
+
+  @override
+  String get placePickerUse => 'Diesen Punkt nehmen';
 }

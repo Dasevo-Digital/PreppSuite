@@ -99,6 +99,8 @@ void main() {
       'PersonalPlacesScreen',
       // The two languages chosen in the translator, which it opens from.
       'TranslatorConversationScreen',
+      // Chooses a point for whoever asks for one -- a meeting point.
+      'PlacePickerScreen',
       // Needs a camera.
       'BarcodeScannerScreen',
       'NeighbourOfferScanScreen',

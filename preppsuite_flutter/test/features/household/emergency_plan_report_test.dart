@@ -5,6 +5,7 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:preppsuite_flutter/features/household/application/emergency_plan_report.dart';
+import 'package:preppsuite_flutter/features/household/application/meeting_point_places.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
 import '../../pdf_text.dart';
@@ -121,6 +122,32 @@ void main() {
     expect(text, contains('Anlaufstelle'));
     expect(text, contains('Grundschule Nordstadt'));
   });
+
+  test(
+    'a meeting point on the map is on the paper with its coordinates',
+    () async {
+      // #204: the point stays on the device, but the sheet printed from it
+      // carries it -- the copy that still finds the place when nobody there
+      // knows what "vor der Garage" means.
+      final text = textIn(
+        await const EmergencyPlanReport().build(
+          plan: plan,
+          householdName: 'Familie Muster',
+          strings: strings,
+          meetingPlaces: const {
+            MeetingPoint.near: '52.26890, 10.52680',
+            MeetingPoint.far: '52.30000, 10.60000',
+          },
+          font: pw.Font.helvetica(),
+        ),
+      );
+
+      expect(text, contains('Vor der Garage'));
+      expect(text, contains('52.26890, 10.52680'));
+      // A far point with no text of its own still reaches the paper.
+      expect(text, contains('52.30000, 10.60000'));
+    },
+  );
 
   test('an unset contact point is headed and marked as unfilled', () async {
     // Unlike the emergency cards, where an empty field is left off: on a

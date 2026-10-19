@@ -2666,5 +2666,14 @@
   "translatorPhotoNothing": "No se ha reconocido texto en la foto.",
   "translatorPhotoNote": "Leído de una foto: revísalo antes de traducir, el reconocimiento puede fallar en alguna letra.",
   "translatorPhotoScript": "El reconocimiento de texto de este dispositivo aún no puede leer esta escritura.",
-  "translatorPhotoNeedsLanguagePack": "Windows solo reconoce texto en los idiomas cuyo paquete de idioma está instalado, y para {language} no hay ninguno. Se puede añadir en Configuración → Hora e idioma → Idioma y región."
+  "translatorPhotoNeedsLanguagePack": "Windows solo reconoce texto en los idiomas cuyo paquete de idioma está instalado, y para {language} no hay ninguno. Se puede añadir en Configuración → Hora e idioma → Idioma y región.",
+  "meetingPlaceSet": "Marcarlo en el mapa",
+  "meetingPlaceChange": "Moverlo en el mapa",
+  "meetingPlaceRemove": "Quitarlo del mapa",
+  "meetingPlaceDeviceOnly": "Solo en este dispositivo, como tus lugares propios en el mapa",
+  "meetingPlaceWay": "Qué distancia y en qué dirección",
+  "meetingPlaceLocating": "Buscando tu ubicación…",
+  "meetingPlaceOnMap": "Mostrar en el mapa",
+  "placePickerHint": "Toca el mapa para marcar el punto. «Mi ubicación» lo pone donde estás.",
+  "placePickerUse": "Usar este punto"
 }

@@ -9,6 +9,8 @@ import '../../energy/presentation/outage_screen.dart';
 import '../../first_aid/presentation/first_aid_screen.dart';
 import '../../household/application/household_member_controller.dart';
 import '../../household/application/household_plan_controller.dart';
+import '../../household/application/meeting_point_places.dart';
+import '../../household/presentation/meeting_point_way.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../kids_comic/application/kids_comic.dart';
 import '../../kids_comic/presentation/kids_comic_screen.dart';
@@ -54,6 +56,7 @@ class EmergencyScreen extends ConsumerWidget {
     final checklist =
         ref.watch(allChecklistItemsProvider(profile.id)).value ?? const [];
     final plan = ref.watch(householdPlanProvider(profile.id)).value;
+    final places = ref.watch(meetingPointPlacesProvider).value ?? const {};
     final members =
         ref.watch(householdMembersProvider(profile.id)).value ?? const [];
     final mapReady = ref.watch(offlineMapProvider).value?.isReady ?? false;
@@ -400,15 +403,25 @@ class EmergencyScreen extends ConsumerWidget {
                   )
                 : Column(
                     children: [
+                      // The way there, where this device has the point on
+                      // its map (#204).
                       if (plan.meetingPointNear != null)
                         _PlanRow(
                           icon: Icons.place,
                           value: plan.meetingPointNear!,
+                          trailing: switch (places[MeetingPoint.near]) {
+                            final place? => MeetingPointWayButton(place: place),
+                            null => null,
+                          },
                         ),
                       if (plan.meetingPointFar != null)
                         _PlanRow(
                           icon: Icons.map_outlined,
                           value: plan.meetingPointFar!,
+                          trailing: switch (places[MeetingPoint.far]) {
+                            final place? => MeetingPointWayButton(place: place),
+                            null => null,
+                          },
                         ),
                       if (plan.contactName != null)
                         _PlanRow(
@@ -449,14 +462,16 @@ class _CallButton extends StatelessWidget {
 }
 
 class _PlanRow extends StatelessWidget {
-  const _PlanRow({required this.icon, required this.value});
+  const _PlanRow({required this.icon, required this.value, this.trailing});
   final IconData icon;
   final String value;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) => ListTile(
     leading: Icon(icon),
     title: Text(value),
+    trailing: trailing,
   );
 }
 

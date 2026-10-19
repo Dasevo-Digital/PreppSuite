@@ -4,6 +4,7 @@ import '../../../core/feel.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -15,6 +16,10 @@ import '../application/card_species.dart';
 import '../application/emergency_plan_report.dart';
 import '../application/household_providers.dart';
 import '../application/household_plan_controller.dart';
+import '../application/meeting_point_places.dart';
+import '../../maps/application/personal_place.dart';
+import '../../maps/presentation/place_picker_screen.dart';
+import 'meeting_point_way.dart';
 import '../../../core/error_text.dart';
 
 /// The household's emergency plan.
@@ -73,6 +78,9 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final planAsync = ref.watch(householdPlanProvider(widget.householdId));
+    final places =
+        ref.watch(meetingPointPlacesProvider).value ??
+        const <MeetingPoint, PersonalPlace>{};
 
     return Scaffold(
       appBar: AppBar(
@@ -118,12 +126,22 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
                   label: l10n.householdPlanMeetingNear,
                   hint: l10n.householdPlanMeetingNearHint,
                   icon: Icons.place_outlined,
+                  below: _MeetingPlace(
+                    place: places[MeetingPoint.near],
+                    onPick: () => _pickPlace(MeetingPoint.near, places, l10n),
+                    onRemove: () => _removePlace(MeetingPoint.near),
+                  ),
                 ),
                 _Field(
                   controller: _field('far'),
                   label: l10n.householdPlanMeetingFar,
                   hint: l10n.householdPlanMeetingFarHint,
                   icon: Icons.alt_route,
+                  below: _MeetingPlace(
+                    place: places[MeetingPoint.far],
+                    onPick: () => _pickPlace(MeetingPoint.far, places, l10n),
+                    onRemove: () => _removePlace(MeetingPoint.far),
+                  ),
                 ),
                 _Field(
                   controller: _field('name'),
@@ -208,6 +226,9 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
       await ref
           .read(householdPlanControllerProvider(widget.householdId))
           .save(draft);
+      // The places on the map take the names the plan now has.
+      await ref.read(meetingPointStoreProvider).relabel(_placeLabels(l10n));
+      ref.invalidate(meetingPointPlacesProvider);
       if (!mounted) return;
       messenger.showSnackBar(SnackBar(content: Text(l10n.householdPlanSaved)));
     } catch (error) {
@@ -220,6 +241,49 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  /// What each meeting point is called on the map: what the plan says,
+  /// or which of the two it is while the field is empty.
+  Map<MeetingPoint, String> _placeLabels(AppLocalizations l10n) {
+    String label(String field, String fallback) {
+      final text = _field(field).text.trim();
+      return text.isEmpty ? fallback : text;
+    }
+
+    return {
+      MeetingPoint.near: label('near', l10n.householdPlanMeetingNear),
+      MeetingPoint.far: label('far', l10n.householdPlanMeetingFar),
+    };
+  }
+
+  /// On the map, kept on this device at once: the point is not part of
+  /// the plan that the Save button sends to the other devices (#204).
+  Future<void> _pickPlace(
+    MeetingPoint point,
+    Map<MeetingPoint, PersonalPlace> places,
+    AppLocalizations l10n,
+  ) async {
+    final current = places[point];
+    final label = _placeLabels(l10n)[point]!;
+    final chosen = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(
+        builder: (_) => PlacePickerScreen(
+          title: label,
+          initial: current == null
+              ? null
+              : LatLng(current.latitude, current.longitude),
+        ),
+      ),
+    );
+    if (chosen == null) return;
+    await ref.read(meetingPointStoreProvider).put(point, chosen, label: label);
+    ref.invalidate(meetingPointPlacesProvider);
+  }
+
+  Future<void> _removePlace(MeetingPoint point) async {
+    await ref.read(meetingPointStoreProvider).remove(point);
+    ref.invalidate(meetingPointPlacesProvider);
   }
 
   Future<void> _clear(HouseholdPlan plan, AppLocalizations l10n) async {
@@ -245,6 +309,11 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
     await ref
         .read(householdPlanControllerProvider(widget.householdId))
         .clear(plan);
+    // The points belong to the plan; this device's go with it.
+    for (final point in MeetingPoint.values) {
+      await ref.read(meetingPointStoreProvider).remove(point);
+    }
+    ref.invalidate(meetingPointPlacesProvider);
     if (!mounted) return;
     for (final controller in _controllers.values) {
       controller.clear();
@@ -273,9 +342,16 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
     }
     if (!mounted) return;
 
+    final places = await ref.read(meetingPointStoreProvider).load();
+    if (!mounted) return;
+
     await Printing.layoutPdf(
       onLayout: (_) => const EmergencyPlanReport().build(
         plan: plan,
+        meetingPlaces: {
+          for (final MapEntry(:key, :value) in places.entries)
+            key: formatPlaceCoordinates(value),
+        },
         householdName: profile?.name ?? '',
         members: withCards ? members : const [],
         strings: EmergencyPlanReportStrings(
@@ -409,6 +485,7 @@ class _Field extends StatelessWidget {
     this.hint,
     this.maxLines = 1,
     this.keyboardType,
+    this.below,
   });
 
   final TextEditingController controller;
@@ -417,6 +494,9 @@ class _Field extends StatelessWidget {
   final IconData icon;
   final int maxLines;
   final TextInputType? keyboardType;
+
+  /// Under the hint: where a meeting point is on the map.
+  final Widget? below;
 
   @override
   Widget build(BuildContext context) {
@@ -449,6 +529,73 @@ class _Field extends StatelessWidget {
                 ),
               ),
             ),
+          ?below,
+        ],
+      ),
+    );
+  }
+}
+
+/// Where a meeting point is on this device's map, or the way to put it
+/// there.
+class _MeetingPlace extends StatelessWidget {
+  const _MeetingPlace({
+    required this.place,
+    required this.onPick,
+    required this.onRemove,
+  });
+
+  final PersonalPlace? place;
+  final VoidCallback onPick;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final place = this.place;
+    if (place == null) {
+      return Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: TextButton.icon(
+          onPressed: onPick,
+          icon: const Icon(Icons.add_location_alt_outlined),
+          label: Text(l10n.meetingPlaceSet),
+        ),
+      );
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          const SizedBox(width: 12),
+          Icon(Icons.location_on_outlined, color: theme.colorScheme.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(formatPlaceCoordinates(place)),
+                Text(
+                  l10n.meetingPlaceDeviceOnly,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          MeetingPointWayButton(place: place),
+          IconButton(
+            tooltip: l10n.meetingPlaceChange,
+            icon: const Icon(Icons.edit_location_alt_outlined),
+            onPressed: onPick,
+          ),
+          IconButton(
+            tooltip: l10n.meetingPlaceRemove,
+            icon: const Icon(Icons.location_off_outlined),
+            onPressed: onRemove,
+          ),
         ],
       ),
     );

@@ -16116,6 +16116,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Windows only recognises text in languages whose language pack is installed, and there is none for {language}. It can be added under Settings → Time & language → Language & region.'**
   String translatorPhotoNeedsLanguagePack(String language);
+
+  /// No description provided for @meetingPlaceSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Put it on the map'**
+  String get meetingPlaceSet;
+
+  /// No description provided for @meetingPlaceChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Move on the map'**
+  String get meetingPlaceChange;
+
+  /// No description provided for @meetingPlaceRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Take off the map'**
+  String get meetingPlaceRemove;
+
+  /// No description provided for @meetingPlaceDeviceOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only on this device, like your own places on the map'**
+  String get meetingPlaceDeviceOnly;
+
+  /// No description provided for @meetingPlaceWay.
+  ///
+  /// In en, this message translates to:
+  /// **'How far, which way'**
+  String get meetingPlaceWay;
+
+  /// No description provided for @meetingPlaceLocating.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding where you are …'**
+  String get meetingPlaceLocating;
+
+  /// No description provided for @meetingPlaceOnMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Show on the map'**
+  String get meetingPlaceOnMap;
+
+  /// No description provided for @placePickerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the map to set the point. “My location” puts it where you are.'**
+  String get placePickerHint;
+
+  /// No description provided for @placePickerUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this point'**
+  String get placePickerUse;
 }
 
 class _AppLocalizationsDelegate

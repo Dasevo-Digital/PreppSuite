@@ -4127,5 +4127,14 @@
         "type": "String"
       }
     }
-  }
+  },
+  "meetingPlaceSet": "Ort auf der Karte festlegen",
+  "meetingPlaceChange": "Auf der Karte verschieben",
+  "meetingPlaceRemove": "Von der Karte nehmen",
+  "meetingPlaceDeviceOnly": "Nur auf diesem Gerät, wie die eigenen Orte auf der Karte",
+  "meetingPlaceWay": "Wie weit, welche Richtung",
+  "meetingPlaceLocating": "Standort wird bestimmt …",
+  "meetingPlaceOnMap": "Auf der Karte zeigen",
+  "placePickerHint": "Tippe auf die Karte, um den Punkt zu setzen. „Mein Standort“ setzt ihn dorthin, wo du bist.",
+  "placePickerUse": "Diesen Punkt nehmen"
 }

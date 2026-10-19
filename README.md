@@ -336,6 +336,15 @@ GPX oder KML herein und wieder hinaus. Ein Plan, der die App nicht
 verlassen kann, ist ein Plan, der mit der App endet. Dieselbe Datei
 zweimal einzulesen fügt nichts doppelt hinzu.
 
+Die beiden **Treffpunkte des Notfallplans** lassen sich auf die Karte
+setzen: durch Antippen oder mit „Mein Standort“, wenn man gerade dort
+steht. Dann sagt der Notfall-Tab ohne Netz, wie weit es ist und in welche
+Richtung („1,1 km nördlich“), zeigt den Punkt auf der Karte, und der
+ausgedruckte Plan trägt die Koordinaten. Der Punkt bleibt wie alle
+eigenen Orte auf diesem Gerät; der Text des Treffpunkts geht wie bisher
+mit dem Plan an den ganzen Haushalt. Ein anderes Gerät setzt den Punkt
+selbst oder liest ihn per GPX ein.
+
 **Um Hilfe blinken.** Der Bildschirm als Signallampe, in drei Rhythmen:
 **SOS** in Morse – als *ein* Zeichen gesendet, nicht als drei Buchstaben –,
 das **alpine Notsignal** mit sechs Zeichen in einer Minute und einer

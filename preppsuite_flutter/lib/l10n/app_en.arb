@@ -5736,5 +5736,14 @@
         "type": "String"
       }
     }
-  }
+  },
+  "meetingPlaceSet": "Put it on the map",
+  "meetingPlaceChange": "Move on the map",
+  "meetingPlaceRemove": "Take off the map",
+  "meetingPlaceDeviceOnly": "Only on this device, like your own places on the map",
+  "meetingPlaceWay": "How far, which way",
+  "meetingPlaceLocating": "Finding where you are …",
+  "meetingPlaceOnMap": "Show on the map",
+  "placePickerHint": "Tap the map to set the point. “My location” puts it where you are.",
+  "placePickerUse": "Use this point"
 }

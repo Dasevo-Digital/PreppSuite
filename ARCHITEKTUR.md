@@ -2544,6 +2544,23 @@ das nicht passt, ist auf diesem Bildschirm schlechter als keines.
 Wort mit „Sturm" anfängt: was hereinkommt, ist Wasser.
 
 
+### Ein Treffpunkt auf der Karte bleibt auf dem Gerät
+
+Die Treffpunkte des Notfallplans haben seit #204 einen Ort, und der liegt
+nicht im Plan. Der Plan geht über den gemeinsamen Ordner an jedes Gerät
+des Haushalts; die eigenen Orte der Karte (`PersonalPlace`) tun das
+bewusst nicht, weil die Lage eines Treffpunkts zu dem gehört, was auf dem
+Gerät bleibt, auf dem man sie gesetzt hat. Also sind die beiden Punkte
+zwei dieser Orte, mit festen Kennungen (`MeetingPoint.placeId`), über
+`MeetingPointPlaces`: auf der Karte zu sehen wie die anderen, per GPX zu
+exportieren wie sie, beim Speichern des Plans nach dessen Text benannt.
+Der Notfall-Tab rechnet daraus Entfernung und Richtung (`wayTo`, dieselbe
+Rechnung wie bei den Schutzräumen) aus dem GPS-Fix, ohne Netz; der
+gedruckte Plan nimmt die Koordinaten dieses Geräts mit. Wer die Punkte
+doch abgleichen will, braucht eine Schemaänderung samt der Regel für
+Snapshot-Schlüssel neuer Schemata, und vorher die Entscheidung, dass die
+Lage geteilt werden darf.
+
 ### Sprechen kann nicht jede Plattform
 
 `core/speech_capabilities.dart` hat dieselbe Form wie

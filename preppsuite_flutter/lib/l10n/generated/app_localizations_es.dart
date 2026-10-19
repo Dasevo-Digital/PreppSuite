@@ -9800,4 +9800,33 @@ class AppLocalizationsEs extends AppLocalizations {
   String translatorPhotoNeedsLanguagePack(String language) {
     return 'Windows solo reconoce texto en los idiomas cuyo paquete de idioma está instalado, y para $language no hay ninguno. Se puede añadir en Configuración → Hora e idioma → Idioma y región.';
   }
+
+  @override
+  String get meetingPlaceSet => 'Marcarlo en el mapa';
+
+  @override
+  String get meetingPlaceChange => 'Moverlo en el mapa';
+
+  @override
+  String get meetingPlaceRemove => 'Quitarlo del mapa';
+
+  @override
+  String get meetingPlaceDeviceOnly =>
+      'Solo en este dispositivo, como tus lugares propios en el mapa';
+
+  @override
+  String get meetingPlaceWay => 'Qué distancia y en qué dirección';
+
+  @override
+  String get meetingPlaceLocating => 'Buscando tu ubicación…';
+
+  @override
+  String get meetingPlaceOnMap => 'Mostrar en el mapa';
+
+  @override
+  String get placePickerHint =>
+      'Toca el mapa para marcar el punto. «Mi ubicación» lo pone donde estás.';
+
+  @override
+  String get placePickerUse => 'Usar este punto';
 }

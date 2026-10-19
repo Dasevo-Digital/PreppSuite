@@ -7,6 +7,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../../../local_db/database.dart';
 import 'card_people.dart';
 import 'card_species.dart';
+import 'meeting_point_places.dart';
 
 class EmergencyPlanReportStrings {
   const EmergencyPlanReportStrings({
@@ -112,6 +113,11 @@ class EmergencyPlanReport {
     required EmergencyPlanReportStrings strings,
     List<HouseholdMember> members = const [],
 
+    /// The meeting points' coordinates, where this device has them (#204):
+    /// on paper they are what still finds the place when nobody there
+    /// knows "the corner by the bakery".
+    Map<MeetingPoint, String> meetingPlaces = const {},
+
     /// Overridden in tests. The bundled Noto subsets itself and writes the
     /// text as glyph indices, which makes the finished page unreadable
     /// without the font — fine for printing and useless for checking what
@@ -134,8 +140,13 @@ class EmergencyPlanReport {
       (
         title: strings.meetingPoints,
         rows: [
-          if (plan.meetingPointNear != null) plan.meetingPointNear!,
-          if (plan.meetingPointFar != null) plan.meetingPointFar!,
+          for (final (point, text) in [
+            (MeetingPoint.near, plan.meetingPointNear),
+            (MeetingPoint.far, plan.meetingPointFar),
+          ])
+            if ([?text, ?meetingPlaces[point]] case final parts
+                when parts.isNotEmpty)
+              parts.join(' · '),
         ],
       ),
       (
