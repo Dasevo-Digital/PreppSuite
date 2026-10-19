@@ -1,6 +1,7 @@
 import 'archive_memory_limits.dart';
 
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import '../../maps/application/pmtiles_archive.dart' show ByteRangeSource;
@@ -75,6 +76,57 @@ class ZimArchive {
     return _readEntry(index, pointer);
   }
 
+  /// [count] entries from [start] on, in URL order, read in blocks.
+  ///
+  /// For walking the whole directory, as the indexer's plan does.
+  /// [entryAt] costs two reads per entry, a pointer and then the entry,
+  /// and a German Wikipedia has 9.7 million entries: the walk was its
+  /// reads -- half an hour from a USB disk, and on Android every read is
+  /// a call across the platform channel (#199). This takes the pointers
+  /// in one read and the entries from a window that moves along behind
+  /// them, since the writer puts entries in the order of their pointers.
+  /// An entry outside the window, or cut off by its end, moves it.
+  Future<List<ZimEntry>> entriesAt(int start, int count) async {
+    final end = math.min(start + count, header.entryCount);
+    if (start < 0 || start >= end) return const [];
+
+    final pointers = await _source.read(
+      header.urlPointerPosition + start * 8,
+      (end - start) * 8,
+    );
+    if (pointers.length < (end - start) * 8) {
+      throw const ZimException('the url index runs past the end of the file');
+    }
+    final view = ByteData.sublistView(pointers);
+
+    final entries = <ZimEntry>[];
+    var window = Uint8List(0);
+    var windowStart = 0;
+    for (var i = 0; i < end - start; i++) {
+      final index = start + i;
+      final offset = view.getUint64(i * 8, Endian.little);
+
+      ZimEntry? entry;
+      if (offset >= windowStart && offset < windowStart + window.length) {
+        entry = _parseEntry(
+          index,
+          Uint8List.sublistView(window, offset - windowStart),
+        );
+      }
+      if (entry == null) {
+        window = await _source.read(offset, _directoryWindow);
+        windowStart = offset;
+        entry = _parseEntry(index, window) ?? await _readEntry(index, offset);
+      }
+      entries.add(entry);
+    }
+    return entries;
+  }
+
+  /// How much of the directory [entriesAt] reads at a time: about a
+  /// thousand entries.
+  static const _directoryWindow = 64 * 1024;
+
   /// The entry for [url] in [namespace], or null.
   ///
   /// Binary search over the URL index, which the format keeps sorted by
@@ -127,9 +179,14 @@ class ZimArchive {
       throw const ZimException('entry holds no content');
     }
 
-    final body = await _cluster(cluster);
-    return _blobFrom(body, blob);
+    return readBlobAt(cluster, blob);
   }
+
+  /// The bytes of blob [blob] in cluster [cluster], for a caller that
+  /// already knows where an entry's content is and need not read the
+  /// entry again.
+  Future<Uint8List> readBlobAt(int cluster, int blob) async =>
+      _blobFrom(await _cluster(cluster), blob);
 
   /// Entries whose title starts with [prefix], in title order.
   ///

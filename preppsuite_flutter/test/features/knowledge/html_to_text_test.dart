@@ -48,4 +48,28 @@ void main() {
   test('plain text without any markup comes through', () {
     expect(htmlToIndexableText('Notvorrat'), 'Notvorrat');
   });
+
+  test('script and style are recognised in any case', () {
+    expect(
+      htmlToIndexableText(
+        '<STYLE>p{}</STYLE><p>Text</p><Script type="x">Wasser</sCRIPT>',
+      ),
+      'Text',
+    );
+  });
+
+  test('a long article is read in one pass, not once per tag', () {
+    // Until #198 every tag lower-cased the whole document, so the time
+    // grew with the square of the length: this one took over a minute.
+    // The limit is generous on purpose; the old reading misses it by far.
+    final html = StringBuffer();
+    for (var i = 0; i < 20000; i++) {
+      html.write('<p class="absatz">Wort$i <b>fett</b></p>');
+    }
+    final watch = Stopwatch()..start();
+    final text = htmlToIndexableText(html.toString());
+    expect(watch.elapsed, lessThan(const Duration(seconds: 5)));
+    expect(text, startsWith('Wort0 fett Wort1 fett'));
+    expect(text, endsWith('Wort19999 fett'));
+  });
 }

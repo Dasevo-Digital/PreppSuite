@@ -245,4 +245,59 @@ void main() {
       expect(await archive.searchTitles(''), isEmpty);
     });
   });
+
+  group('walking the directory in blocks', () {
+    // Long enough titles that the directory spans several of the reader's
+    // 64 KiB windows, so moving the window is part of what is tested.
+    ZimFixture many({bool reverseDirectory = false}) => ZimFixture(
+      reverseDirectory: reverseDirectory,
+      entries: [
+        for (var i = 0; i < 1500; i++)
+          ZimFixtureEntry(
+            namespace: 'C',
+            url: 'Artikel${i.toString().padLeft(4, '0')}',
+            title: 'Ein recht langer Titel, Nummer $i ${'x' * (i % 90)}',
+            content: [i % 256],
+          ),
+        const ZimFixtureEntry(
+          namespace: 'C',
+          url: 'Weiterleitung',
+          redirectTo: 'C/Artikel0001',
+        ),
+      ],
+    );
+
+    String describe(ZimEntry e) =>
+        '${e.index} ${e.namespace}/${e.url} "${e.title}" '
+        'mime=${e.mimeTypeIndex} redirect=${e.redirectIndex} '
+        'at=${e.clusterNumber}/${e.blobNumber}';
+
+    Future<void> expectSameAsOneByOne(ZimArchive archive) async {
+      final total = archive.header.entryCount;
+      final blocks = <ZimEntry>[
+        for (var at = 0; at < total; at += 700)
+          ...await archive.entriesAt(at, 700),
+      ];
+      final single = [for (var i = 0; i < total; i++) await archive.entryAt(i)];
+      expect(blocks.map(describe), single.map(describe));
+    }
+
+    test('gives exactly what reading entry by entry gives', () async {
+      await expectSameAsOneByOne(await openFixture(many()));
+    });
+
+    test('does not depend on entries lying in pointer order', () async {
+      await expectSameAsOneByOne(
+        await openFixture(many(reverseDirectory: true)),
+      );
+    });
+
+    test('stops at the end of the directory', () async {
+      final archive = await openFixture(many());
+      final total = archive.header.entryCount;
+
+      expect(await archive.entriesAt(total - 2, 10), hasLength(2));
+      expect(await archive.entriesAt(total, 10), isEmpty);
+    });
+  });
 }

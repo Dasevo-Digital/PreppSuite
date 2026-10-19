@@ -1423,7 +1423,7 @@
       }
     }
   },
-  "knowledgeIndexLargeWarning": "That is a lot. Expect an hour or more and several gigabytes on disk. You can stop at any time and keep what was done.",
+  "knowledgeIndexLargeWarning": "That is a lot. Expect several hours and several gigabytes on disk. You can stop at any time and keep what was done.",
   "knowledgeIndexScanning": "Counting articles: {done} of {total}.",
   "@knowledgeIndexScanning": {
     "placeholders": {

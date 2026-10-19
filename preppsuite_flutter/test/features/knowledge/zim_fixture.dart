@@ -40,6 +40,7 @@ class ZimFixture {
     this.mimeTypes = const ['text/html', 'image/png'],
     this.compression = 1,
     this.includeTitleListing = true,
+    this.reverseDirectory = false,
   });
 
   final List<ZimFixtureEntry> entries;
@@ -52,6 +53,11 @@ class ZimFixture {
   /// Whether to write the `X/listing/titleOrdered/v1` entry that version 6
   /// archives carry.
   final bool includeTitleListing;
+
+  /// Whether to lay the directory entries out in reverse, so their order
+  /// in the file is the opposite of their pointers'. Real writers keep the
+  /// two in step; a reader must not depend on it.
+  final bool reverseDirectory;
 
   Uint8List build() {
     final all = [...entries];
@@ -113,10 +119,14 @@ class ZimFixture {
     final mimeList = _buildMimeList();
 
     var cursor = headerLength + mimeList.length;
-    final entryOffsets = <int>[];
-    for (final bytes in entryBytes) {
-      entryOffsets.add(cursor);
-      cursor += bytes.length;
+    final entryOffsets = List.filled(entryBytes.length, 0);
+    final layout = [
+      for (var i = 0; i < entryBytes.length; i++)
+        reverseDirectory ? entryBytes.length - 1 - i : i,
+    ];
+    for (final i in layout) {
+      entryOffsets[i] = cursor;
+      cursor += entryBytes[i].length;
     }
 
     final urlPointerPosition = cursor;
@@ -147,8 +157,8 @@ class ZimFixture {
       ),
     );
     out.add(mimeList);
-    for (final bytes in entryBytes) {
-      out.add(bytes);
+    for (final i in layout) {
+      out.add(entryBytes[i]);
     }
     out.add(_u64List(entryOffsets));
     if (writeTitleTable) {

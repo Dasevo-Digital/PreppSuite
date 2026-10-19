@@ -40,12 +40,16 @@ String htmlToIndexableText(String html) {
 
 /// The offset just past the tag beginning at [start], skipping the whole
 /// element for script and style.
+///
+/// Compares in place, letter by letter. It used to lower-case the whole
+/// document to look at one tag -- once per tag, so an article with 1,500
+/// tags was copied 1,500 times. Indexing a Wikipedia article took most
+/// of a second, 98 % of it here, and the whole encyclopedia would have
+/// taken weeks (#198).
 int? _skipTag(String html, int start) {
-  final lower = html.toLowerCase();
-
-  for (final element in ['script', 'style']) {
-    if (lower.startsWith('<$element', start)) {
-      final closing = lower.indexOf('</$element', start);
+  for (final element in const ['<script', '<style']) {
+    if (_hasAt(html, element, start)) {
+      final closing = _indexOfTag(html, '</${element.substring(1)}', start);
       if (closing < 0) return null;
       final end = html.indexOf('>', closing);
       return end < 0 ? null : end + 1;
@@ -56,8 +60,36 @@ int? _skipTag(String html, int start) {
   return end < 0 ? null : end + 1;
 }
 
+/// Whether [html] holds [tag], written in lower-case ASCII, at [at] in
+/// any case.
+bool _hasAt(String html, String tag, int at) {
+  if (at + tag.length > html.length) return false;
+  for (var i = 0; i < tag.length; i++) {
+    var unit = html.codeUnitAt(at + i);
+    if (unit >= 0x41 && unit <= 0x5A) unit |= 0x20;
+    if (unit != tag.codeUnitAt(i)) return false;
+  }
+  return true;
+}
+
+/// The first offset from [from] on where [tag] starts, in any case, or -1.
+int _indexOfTag(String html, String tag, int from) {
+  for (
+    var at = html.indexOf('<', from);
+    at >= 0;
+    at = html.indexOf('<', at + 1)
+  ) {
+    if (_hasAt(html, tag, at)) return at;
+  }
+  return -1;
+}
+
+final _whitespace = RegExp(r'\s+');
+final _decimalReference = RegExp(r'&#(\d+);');
+final _hexReference = RegExp(r'&#[xX]([0-9a-fA-F]+);');
+
 void _appendText(StringBuffer out, String raw, {required bool pendingSpace}) {
-  final text = _decodeEntities(raw).replaceAll(RegExp(r'\s+'), ' ');
+  final text = _decodeEntities(raw).replaceAll(_whitespace, ' ');
   if (text.trim().isEmpty) return;
 
   if (out.isNotEmpty && (pendingSpace || text.startsWith(' '))) {
@@ -80,11 +112,11 @@ String _decodeEntities(String text) {
       .replaceAll('&gt;', '>')
       .replaceAll('&quot;', '"')
       .replaceAll('&#39;', "'")
-      .replaceAllMapped(RegExp(r'&#(\d+);'), (match) {
+      .replaceAllMapped(_decimalReference, (match) {
         final code = int.tryParse(match[1]!);
         return code == null ? match[0]! : String.fromCharCode(code);
       })
-      .replaceAllMapped(RegExp(r'&#[xX]([0-9a-fA-F]+);'), (match) {
+      .replaceAllMapped(_hexReference, (match) {
         final code = int.tryParse(match[1]!, radix: 16);
         return code == null ? match[0]! : String.fromCharCode(code);
       });

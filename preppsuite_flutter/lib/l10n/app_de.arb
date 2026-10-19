@@ -801,7 +801,7 @@
   "knowledgeIndexCompactHint": "Dieser Index stammt aus einem älteren Format. Ein kompakter Neuaufbau spart Speicherplatz, ohne die normale Volltextsuche zu verändern.",
   "knowledgeIndexCompactAction": "Kompakt neu aufbauen",
   "knowledgeIndexArticles": "{count} Artikel in dieser Datei.",
-  "knowledgeIndexLargeWarning": "Das sind viele. Rechne mit einer Stunde oder mehr und mit mehreren Gigabyte auf der Platte. Anhalten geht jederzeit, das Angefangene bleibt.",
+  "knowledgeIndexLargeWarning": "Das sind viele. Rechne mit einigen Stunden und mit mehreren Gigabyte auf der Platte. Anhalten geht jederzeit, das Angefangene bleibt.",
   "knowledgeIndexScanning": "Artikel werden gezählt: {done} von {total}.",
   "knowledgeIndexIndexing": "{done} von {total} Artikeln.",
   "knowledgeIndexPartial": "Angehalten bei {done} von {total} Artikeln. Gesucht wird in dem, was schon drin ist.",

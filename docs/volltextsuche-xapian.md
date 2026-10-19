@@ -31,9 +31,12 @@ Gemessen wurde 0.15.0 an der vollständigen deutschen Wikipedia (50 GB,
 dauerte 0 bis 4 ms.
 
 Der eigene Index dagegen braucht einen **Indexlauf je Archiv**: Minuten für
-eine Themensammlung mit einigen zehntausend Artikeln, eher eine Stunde und
+eine Themensammlung mit einigen zehntausend Artikeln, einige Stunden und
 mehrere Gigabyte für die vollständige Wikipedia. Der Lauf lässt sich
-anhalten und fortsetzen, und was schon drin ist, ist durchsuchbar.
+anhalten und fortsetzen, und was schon drin ist, ist durchsuchbar. Die
+Messung dazu steht in [`wissen-offline.md`](wissen-offline.md); bis 2.5.8
+stand hier „eher eine Stunde", und das war wegen eines Fehlers in der
+HTML-Umwandlung um Wochen daneben (#198).
 
 Die Suchqualität bleibt: Der eigene Index stemmt deutsche, englische,
 spanische und französische Archive mit den Snowball-Algorithmen, in Dart

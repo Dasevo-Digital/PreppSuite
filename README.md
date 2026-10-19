@@ -881,7 +881,8 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   [`docs/karte-offline.md`](docs/karte-offline.md).
 - Für die Volltextsuche baut die App je Archiv einmal einen eigenen
   Index auf. Für eine Themensammlung sind das Minuten, für die
-  vollständige Wikipedia eher eine Stunde und mehrere Gigabyte. Anhalten
+  vollständige deutsche Wikipedia einige Stunden (gemessen: rund drei an
+  einem Mac) und mehrere Gigabyte. Anhalten
   geht jederzeit; das Angefangene bleibt durchsuchbar.
 - Gesucht wird nach Wortstämmen, in deutschen, englischen, spanischen und
   französischen Archiven: „Notvorräte" findet „Notvorrat", „repairs"

@@ -715,7 +715,7 @@
   "knowledgeIndexCompactHint": "Este índice usa un formato antiguo. Volver a crearlo en forma compacta ahorra espacio sin cambiar la búsqueda normal de texto completo.",
   "knowledgeIndexCompactAction": "Volver a crear el índice compacto",
   "knowledgeIndexArticles": "{count} artículos en este archivo.",
-  "knowledgeIndexLargeWarning": "Son muchos. Cuenta con una hora o más y varios gigabytes en disco. Puedes detenerlo en cualquier momento y conservar lo hecho.",
+  "knowledgeIndexLargeWarning": "Son muchos. Cuenta con varias horas y varios gigabytes en disco. Puedes detenerlo en cualquier momento y conservar lo hecho.",
   "knowledgeIndexScanning": "Contando artículos: {done} de {total}.",
   "knowledgeIndexIndexing": "{done} de {total} artículos.",
   "knowledgeIndexPartial": "Detenido en {done} de {total} artículos. Busca en lo que ya contiene.",

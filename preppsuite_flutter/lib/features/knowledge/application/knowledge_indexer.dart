@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'stemmers.dart';
 import 'html_to_text.dart';
@@ -9,7 +10,8 @@ import 'zim_archive.dart';
 /// be asked rather than told.
 ///
 /// A themed collection sits well below it and is done in minutes; a whole
-/// encyclopedia is far above and is an hour or more of work on a phone.
+/// encyclopedia is far above and is hours of work -- about three for the
+/// German Wikipedia on a Mac, more on a phone.
 const indexConfirmThreshold = 50000;
 
 /// How many articles go into one transaction.
@@ -17,6 +19,17 @@ const indexConfirmThreshold = 50000;
 /// Small enough that a run killed by the system loses little, large enough
 /// that SQLite is not paying for a transaction per article.
 const _batchSize = 200;
+
+/// How many directory entries the plan reads at a time.
+const _scanChunk = 4096;
+
+/// How long the indexer works before it lets the interface draw a frame.
+///
+/// An article costs a millisecond or two, and most of them come out of a
+/// cluster that is already decompressed -- an `await` that is already
+/// answered, which does not give the event loop a turn. Without a pause
+/// on the clock the screen would stand still for a whole batch.
+const _frameBudget = Duration(milliseconds: 8);
 
 /// What the indexer is doing right now.
 class IndexProgress {
@@ -43,11 +56,23 @@ enum IndexPhase {
 }
 
 /// The articles of an archive, in the order they should be read.
+///
+/// Keeps where each article's content is, so the run reads it straight
+/// from its cluster and does not read the directory a second time. Typed
+/// lists because a whole encyclopedia is three million articles.
 class IndexPlan {
-  const IndexPlan(this.entryIndexes);
+  const IndexPlan(
+    this.entryIndexes, {
+    required this.clusters,
+    required this.blobs,
+  });
 
   /// ZIM entry indexes, ordered so each cluster is decompressed once.
   final List<int> entryIndexes;
+
+  /// The cluster and the blob of the article at the same position.
+  final List<int> clusters;
+  final List<int> blobs;
 
   int get articleCount => entryIndexes.length;
 }
@@ -83,25 +108,24 @@ class KnowledgeIndexer {
     final total = archive.header.entryCount;
     final targets = <({int cluster, int blob, int entry})>[];
 
-    for (var at = 0; at < total; at++) {
-      if (at % 2000 == 0) {
-        if (cancelled?.call() ?? false) break;
-        onProgress?.call(
-          IndexProgress(phase: IndexPhase.scanning, done: at, total: total),
-        );
-        // Lets the interface draw between chunks of a scan that can run
-        // into the millions.
-        await Future<void>.delayed(Duration.zero);
+    for (var at = 0; at < total; at += _scanChunk) {
+      if (cancelled?.call() ?? false) break;
+      onProgress?.call(
+        IndexProgress(phase: IndexPhase.scanning, done: at, total: total),
+      );
+      // Lets the interface draw between chunks of a scan that can run
+      // into the millions.
+      await Future<void>.delayed(Duration.zero);
+
+      for (final entry in await archive.entriesAt(at, _scanChunk)) {
+        if (!_isArticle(entry)) continue;
+
+        targets.add((
+          cluster: entry.clusterNumber!,
+          blob: entry.blobNumber!,
+          entry: entry.index,
+        ));
       }
-
-      final entry = await archive.entryAt(at);
-      if (!_isArticle(entry)) continue;
-
-      targets.add((
-        cluster: entry.clusterNumber!,
-        blob: entry.blobNumber!,
-        entry: at,
-      ));
     }
 
     targets.sort((a, b) {
@@ -109,7 +133,13 @@ class KnowledgeIndexer {
       return clusters != 0 ? clusters : a.blob.compareTo(b.blob);
     });
 
-    return IndexPlan([for (final target in targets) target.entry]);
+    return IndexPlan(
+      Uint32List.fromList([for (final target in targets) target.entry]),
+      clusters: Uint32List.fromList([
+        for (final target in targets) target.cluster,
+      ]),
+      blobs: Uint32List.fromList([for (final target in targets) target.blob]),
+    );
   }
 
   bool _isArticle(ZimEntry entry) {
@@ -155,20 +185,30 @@ class KnowledgeIndexer {
     final total = plan.articleCount;
     var position = resumable ? await index.progress() : 0;
     var batch = <({int entryIndex, String text})>[];
+    final sinceFrame = Stopwatch()..start();
 
     while (position < total) {
+      if (sinceFrame.elapsed >= _frameBudget) {
+        await Future<void>.delayed(Duration.zero);
+        sinceFrame.reset();
+      }
+
       if (cancelled?.call() ?? false) {
         await _flush(batch, position);
         return false;
       }
 
       final entryIndex = plan.entryIndexes[position];
+      final cluster = plan.clusters[position];
+      final blob = plan.blobs[position];
       position++;
 
       try {
-        final entry = await archive.entryAt(entryIndex);
         final text = htmlToIndexableText(
-          utf8.decode(await archive.readBlob(entry), allowMalformed: true),
+          utf8.decode(
+            await archive.readBlobAt(cluster, blob),
+            allowMalformed: true,
+          ),
         );
         if (text.isNotEmpty) {
           batch.add((

@@ -2581,7 +2581,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get knowledgeIndexLargeWarning =>
-      'That is a lot. Expect an hour or more and several gigabytes on disk. You can stop at any time and keep what was done.';
+      'That is a lot. Expect several hours and several gigabytes on disk. You can stop at any time and keep what was done.';
 
   @override
   String knowledgeIndexScanning(int done, int total) {

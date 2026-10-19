@@ -149,7 +149,7 @@ Umständlichkeit: eine Anfrage, die anders gestemmt wird als der Text,
 findet nichts – und das liest sich genau wie ein Artikel, den es nicht
 gibt. Ein Index von vor 0.15.0 sagt „keiner" und wird weiter ungestemmt
 durchsucht, statt stillschweigend weggeworfen zu werden; für eine ganze
-Wikipedia wäre das eine Stunde Neuaufbau.
+Wikipedia wären das Stunden Neuaufbau.
 
 Gestemmt wird nur, wenn das Archiv sich selbst als deutsch, englisch,
 spanisch oder französisch ausweist. Ein Stemmer auf Text in einer anderen
@@ -168,9 +168,27 @@ Der Index ist **contentless** – FTS5 speichert die Begriffe, nicht den
 Text. Der steht ja weiter im Archiv. Zurück kommt die Nummer des Eintrags.
 
 Größenordnungen: eine Themensammlung mit einigen zehntausend Artikeln ist
-in Minuten fertig. Die vollständige deutsche Wikipedia ist eher eine Stunde
-und mehrere Gigabyte; ab fünfzigtausend Artikeln sagt die App das vorher,
-statt einfach loszulaufen.
+in Minuten fertig. Die vollständige deutsche Wikipedia braucht einige
+Stunden und mehrere Gigabyte; ab fünfzigtausend Artikeln sagt die App das
+vorher, statt einfach loszulaufen.
+
+Gemessen am 19.10.2026 in der Testumgebung auf einem Mac, die Archive auf
+einer USB-Platte:
+
+| Archiv | Einträge | Artikel | Verzeichnis lesen | Indexieren |
+|---|---|---|---|---|
+| Klexikon | 24 229 | 3 619 | 0,2 s | 18 s (197 Artikel/s) |
+| Wikipedia Medizin | 85 521 | 22 905 | 0,1 s | 2¼ min (170 Artikel/s) |
+| Wikipedia, vollständig | 9 713 290 | 3 205 145 | 9,5 s | 291 Artikel/s an den ersten 20 000, also rund 3 h; Index etwa 4 GB |
+
+Bis 2.5.8 waren es 1,3 Artikel je Sekunde für die medizinischen Artikel,
+also Wochen für die ganze Wikipedia, und die Angabe hier lautete „eher eine
+Stunde". Zwei Ursachen, beide behoben (#198, #199): Die HTML-Umwandlung
+schrieb für jedes Tag den ganzen Artikel in Kleinbuchstaben um, und das
+waren 98 % der Zeit; und das Verzeichnis wurde Eintrag für Eintrag mit zwei
+Lesezugriffen gelesen, 19 Millionen für die Wikipedia, unter Android jeder
+ein Aufruf über den Plattformkanal. Jetzt liest die App es blockweise, und
+der Plan behält, in welchem Cluster jeder Artikel steht.
 
 **Was SQLite selbst beiträgt:** Umlaute sind egal – `remove_diacritics`
 sorgt dafür, dass „Notvorrate" von einer Telefontastatur auch trifft. Einen

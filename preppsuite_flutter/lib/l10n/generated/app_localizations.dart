@@ -4393,7 +4393,7 @@ abstract class AppLocalizations {
   /// No description provided for @knowledgeIndexLargeWarning.
   ///
   /// In en, this message translates to:
-  /// **'That is a lot. Expect an hour or more and several gigabytes on disk. You can stop at any time and keep what was done.'**
+  /// **'That is a lot. Expect several hours and several gigabytes on disk. You can stop at any time and keep what was done.'**
   String get knowledgeIndexLargeWarning;
 
   /// No description provided for @knowledgeIndexScanning.

@@ -279,7 +279,14 @@ run. See [`docs/volltextsuche-xapian.md`](docs/volltextsuche-xapian.md).
 
 **The indexer reads in cluster order, never entry order.** Entries are
 sorted by URL and clusters are not; reading in entry order would
-decompress the same cluster once per article inside it. It also runs on
+decompress the same cluster once per article inside it. The directory is
+walked with `ZimArchive.entriesAt`, in blocks, never `entryAt` per entry:
+that was two reads per entry, 19 million for a German Wikipedia, each a
+platform-channel call on Android. The plan keeps each article's cluster
+and blob, so the run does not read the directory again (#199). And
+whatever turns an article into terms has to stay linear in its length:
+`htmlToIndexableText` lower-cased the whole article once per tag until
+#198, which was 98 % of the time and weeks for the whole encyclopedia. It also runs on
 the main isolate on purpose: on Android the archive is a `content://`
 document behind a platform channel, which a plain isolate cannot reach.
 

@@ -2599,7 +2599,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get knowledgeIndexLargeWarning =>
-      'Son muchos. Cuenta con una hora o más y varios gigabytes en disco. Puedes detenerlo en cualquier momento y conservar lo hecho.';
+      'Son muchos. Cuenta con varias horas y varios gigabytes en disco. Puedes detenerlo en cualquier momento y conservar lo hecho.';
 
   @override
   String knowledgeIndexScanning(int done, int total) {

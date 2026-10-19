@@ -2599,7 +2599,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get knowledgeIndexLargeWarning =>
-      'Das sind viele. Rechne mit einer Stunde oder mehr und mit mehreren Gigabyte auf der Platte. Anhalten geht jederzeit, das Angefangene bleibt.';
+      'Das sind viele. Rechne mit einigen Stunden und mit mehreren Gigabyte auf der Platte. Anhalten geht jederzeit, das Angefangene bleibt.';
 
   @override
   String knowledgeIndexScanning(int done, int total) {
