@@ -428,6 +428,28 @@ am Kopf, Ohr mit Abstand über Mund und Nase, Blick zur Brust. Sie sind
 von 3600 auf 1400 Pixel Breite verkleinert, damit sie im Speicher nicht
 das Fünffache der übrigen kosten.
 
+**Seit 19.10.2026 wieder illustriert.** Die Zwischenlösung ist abgelöst.
+Grundlage sind die illustrierten Tafeln, wie sie bis 2.5.5 in der App
+waren: ihr Text war geprüft, nur sieben Bilder waren falsch. Diese sieben
+sind neu gezeichnet, die übrigen Felder unverändert. Die Figuren stammen
+aus freigegebenen Tafeln – die Atemkontrolle aus „Bewusstlose Person“
+(Schritt 3), die Herzdruckmassage aus „HLW Erwachsene“ (Schritt 3) –, nur
+der Verletzte wurde gegen Kind, Säugling oder den Mann mit geradem Kopf
+getauscht, der Zwei-Daumen-Griff gegen den aus der zweiten Neuzeichnung.
+Jedes der sieben Bilder ist gegen den Text gelesen: Ohr über Mund und
+Nase bei allen drei Atemkontrollen, beim Säugling und bei der
+Kopfverletzung der Kopf gerade; beim Kind die Handballen auf der unteren
+Brustbeinhälfte, nichts am Hals; beim Säugling beide Daumen nebeneinander,
+die Hände um den Brustkorb. Zwei Abstriche, die keinen Satz des Textes
+verletzen: Die Helferin blickt bei den Atemkontrollen zum Betrachter statt
+zur Brust, wie in der Tafel, aus der sie stammt; und beim Zwei-Daumen-Griff
+in Schritt 4 liegen die Daumen etwa auf Höhe der Brustwarzen, nicht
+sichtbar darunter. Die Bilder haben drei Zeichenstile, weil sie aus zwei
+Tafeln und dem eigenen Stil dieser Tafel zusammenkommen; das ist Optik,
+kein Inhalt. Die schematischen Fassungen bleiben auf dem Schreibtisch
+(`PreppSuite_Tafel_02_korrigiert.svg`, `…_07_…`), falls sie wieder
+gebraucht werden.
+
 Eine Tafel ist ein WebP in voller Größe (`assets/first_aid/de/`,
 zusammen 11 MB), angelegt mit `tool/first_aid/infographic.py`.
 
