@@ -16050,6 +16050,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stop reading'**
   String get warningStopReading;
+
+  /// No description provided for @translatorConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation'**
+  String get translatorConversation;
+
+  /// No description provided for @translatorConversationFlip.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the upper half round'**
+  String get translatorConversationFlip;
+
+  /// No description provided for @translatorConversationNeedsBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'A conversation needs both directions: what you write goes one way, the answer comes back the other.'**
+  String get translatorConversationNeedsBoth;
+
+  /// No description provided for @translatorFromPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Text from a photo'**
+  String get translatorFromPhoto;
+
+  /// No description provided for @translatorPhotoReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading the text …'**
+  String get translatorPhotoReading;
+
+  /// No description provided for @translatorPhotoCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get translatorPhotoCamera;
+
+  /// No description provided for @translatorPhotoGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a photo'**
+  String get translatorPhotoGallery;
+
+  /// No description provided for @translatorPhotoNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'No text was found in the photo.'**
+  String get translatorPhotoNothing;
+
+  /// No description provided for @translatorPhotoNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Read from a photo – check it before translating, recognition can miss letters.'**
+  String get translatorPhotoNote;
+
+  /// No description provided for @translatorPhotoScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition on this device cannot read this script yet.'**
+  String get translatorPhotoScript;
+
+  /// No description provided for @translatorPhotoNeedsLanguagePack.
+  ///
+  /// In en, this message translates to:
+  /// **'Windows only recognises text in languages whose language pack is installed, and there is none for {language}. It can be added under Settings → Time & language → Language & region.'**
+  String translatorPhotoNeedsLanguagePack(String language);
 }
 
 class _AppLocalizationsDelegate

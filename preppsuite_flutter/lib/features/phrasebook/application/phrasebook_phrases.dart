@@ -76,6 +76,21 @@ const phrasebookPhrases = <Phrase>[
     PhraseLanguage.ar: 'من فضلك أرني.',
     PhraseLanguage.fa: 'لطفاً به من نشان دهید.',
   }),
+  // Also the prompt on the other person's half of the translator's
+  // conversation (#202): a fixed sentence there rather than a machine
+  // translation of the app's own wording.
+  Phrase('writeHere', PhraseGroup.basics, {
+    PhraseLanguage.de: 'Bitte schreiben Sie Ihre Antwort hier.',
+    PhraseLanguage.en: 'Please write your answer here.',
+    PhraseLanguage.es: 'Por favor, escriba su respuesta aquí.',
+    PhraseLanguage.fr: 'Veuillez écrire votre réponse ici.',
+    PhraseLanguage.pl: 'Proszę napisać tutaj odpowiedź.',
+    PhraseLanguage.tr: 'Lütfen cevabınızı buraya yazın.',
+    PhraseLanguage.ru: 'Пожалуйста, напишите ваш ответ здесь.',
+    PhraseLanguage.uk: 'Будь ласка, напишіть вашу відповідь тут.',
+    PhraseLanguage.ar: 'من فضلك اكتب إجابتك هنا.',
+    PhraseLanguage.fa: 'لطفاً پاسخ خود را اینجا بنویسید.',
+  }),
   Phrase('thanks', PhraseGroup.basics, {
     PhraseLanguage.de: 'Danke.',
     PhraseLanguage.en: 'Thank you.',

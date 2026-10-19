@@ -97,6 +97,8 @@ void main() {
       'PersonalDocumentReaderScreen',
       'PhotoEditorScreen',
       'PersonalPlacesScreen',
+      // The two languages chosen in the translator, which it opens from.
+      'TranslatorConversationScreen',
       // Needs a camera.
       'BarcodeScannerScreen',
       'NeighbourOfferScanScreen',

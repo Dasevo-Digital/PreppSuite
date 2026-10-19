@@ -5718,5 +5718,23 @@
     }
   },
   "warningReadAloud": "Read aloud",
-  "warningStopReading": "Stop reading"
+  "warningStopReading": "Stop reading",
+  "translatorConversation": "Conversation",
+  "translatorConversationFlip": "Turn the upper half round",
+  "translatorConversationNeedsBoth": "A conversation needs both directions: what you write goes one way, the answer comes back the other.",
+  "translatorFromPhoto": "Text from a photo",
+  "translatorPhotoReading": "Reading the text …",
+  "translatorPhotoCamera": "Take a photo",
+  "translatorPhotoGallery": "Choose a photo",
+  "translatorPhotoNothing": "No text was found in the photo.",
+  "translatorPhotoNote": "Read from a photo – check it before translating, recognition can miss letters.",
+  "translatorPhotoScript": "Text recognition on this device cannot read this script yet.",
+  "translatorPhotoNeedsLanguagePack": "Windows only recognises text in languages whose language pack is installed, and there is none for {language}. It can be added under Settings → Time & language → Language & region.",
+  "@translatorPhotoNeedsLanguagePack": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  }
 }

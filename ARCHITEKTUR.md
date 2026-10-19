@@ -2618,6 +2618,15 @@ Kommandozeile von Tesseract, falls installiert. Erkannter Text wird als
 solcher markiert (`PersonalDocument.recognized`), weil eine Erkennung
 Lücken haben kann, ohne sie zu melden.
 
+Seit #203 liest dieselbe Erkennung auch ein Foto für den Übersetzer
+(`translator/application/photo_text.dart`): das Bild wird mit `package:image`
+aufrecht gedreht, auf 4000 Pixel verkleinert und als BGRA übergeben, in
+einem eigenen Isolate. Dabei bekommt die Erkennung die Sprache des Textes
+(`support`/`recognize` mit `languages`). Vision und `Windows.Media.Ocr`
+nehmen sie an; Tesseract liest mit den Daten, die da sind, also nur
+lateinische Schrift, und der Übersetzer sagt das vorher
+(`readsScriptOn`), statt eine Seite falscher Buchstaben einzusetzen.
+
 **Kein Erkenner, der Daten an Dritte schickt.** Android liest deshalb mit
 Tesseract und nicht mit ML Kit, obwohl ML Kit in der Messung etwas besser
 las: ML Kit sendet nach seinen Bedingungen Nutzungsdaten an Google. Ein

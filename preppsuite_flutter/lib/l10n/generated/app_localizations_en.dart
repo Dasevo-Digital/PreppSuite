@@ -9682,4 +9682,42 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get warningStopReading => 'Stop reading';
+
+  @override
+  String get translatorConversation => 'Conversation';
+
+  @override
+  String get translatorConversationFlip => 'Turn the upper half round';
+
+  @override
+  String get translatorConversationNeedsBoth =>
+      'A conversation needs both directions: what you write goes one way, the answer comes back the other.';
+
+  @override
+  String get translatorFromPhoto => 'Text from a photo';
+
+  @override
+  String get translatorPhotoReading => 'Reading the text …';
+
+  @override
+  String get translatorPhotoCamera => 'Take a photo';
+
+  @override
+  String get translatorPhotoGallery => 'Choose a photo';
+
+  @override
+  String get translatorPhotoNothing => 'No text was found in the photo.';
+
+  @override
+  String get translatorPhotoNote =>
+      'Read from a photo – check it before translating, recognition can miss letters.';
+
+  @override
+  String get translatorPhotoScript =>
+      'Text recognition on this device cannot read this script yet.';
+
+  @override
+  String translatorPhotoNeedsLanguagePack(String language) {
+    return 'Windows only recognises text in languages whose language pack is installed, and there is none for $language. It can be added under Settings → Time & language → Language & region.';
+  }
 }

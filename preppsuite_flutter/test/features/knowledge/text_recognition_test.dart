@@ -38,11 +38,12 @@ class _Reader implements TextRecognizer {
   var read = 0;
 
   @override
-  Future<TextRecognitionSupport> support() async =>
+  Future<TextRecognitionSupport> support({List<String>? languages}) async =>
       TextRecognitionSupport.available;
 
   @override
-  Future<String> recognize(PageImage page) async => pages[read++];
+  Future<String> recognize(PageImage page, {List<String>? languages}) async =>
+      pages[read++];
 }
 
 void main() {

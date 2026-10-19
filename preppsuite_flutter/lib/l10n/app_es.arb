@@ -2655,5 +2655,16 @@
   "supportBody": "PreppSuite es gratuita, no muestra publicidad y no necesita cuenta. Si quieres apoyar el trabajo en ella, puedes aportar algo en Ko-fi. La página se abre en el navegador.",
   "supportOpenFailed": "No se pudo abrir el navegador. La dirección es {address}.",
   "warningReadAloud": "Leer en voz alta",
-  "warningStopReading": "Dejar de leer"
+  "warningStopReading": "Dejar de leer",
+  "translatorConversation": "Conversación",
+  "translatorConversationFlip": "Girar la mitad superior",
+  "translatorConversationNeedsBoth": "Una conversación necesita ambas direcciones: lo que escribes va en una y la respuesta vuelve en la otra.",
+  "translatorFromPhoto": "Texto de una foto",
+  "translatorPhotoReading": "Reconociendo el texto…",
+  "translatorPhotoCamera": "Hacer una foto",
+  "translatorPhotoGallery": "Elegir una foto",
+  "translatorPhotoNothing": "No se ha reconocido texto en la foto.",
+  "translatorPhotoNote": "Leído de una foto: revísalo antes de traducir, el reconocimiento puede fallar en alguna letra.",
+  "translatorPhotoScript": "El reconocimiento de texto de este dispositivo aún no puede leer esta escritura.",
+  "translatorPhotoNeedsLanguagePack": "Windows solo reconoce texto en los idiomas cuyo paquete de idioma está instalado, y para {language} no hay ninguno. Se puede añadir en Configuración → Hora e idioma → Idioma y región."
 }

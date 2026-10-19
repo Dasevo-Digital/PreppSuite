@@ -9733,4 +9733,42 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get warningStopReading => 'Vorlesen beenden';
+
+  @override
+  String get translatorConversation => 'Gespräch';
+
+  @override
+  String get translatorConversationFlip => 'Obere Hälfte drehen';
+
+  @override
+  String get translatorConversationNeedsBoth =>
+      'Für ein Gespräch braucht es beide Richtungen: Was du schreibst, geht hin, die Antwort kommt zurück.';
+
+  @override
+  String get translatorFromPhoto => 'Text aus Foto';
+
+  @override
+  String get translatorPhotoReading => 'Text wird erkannt …';
+
+  @override
+  String get translatorPhotoCamera => 'Foto aufnehmen';
+
+  @override
+  String get translatorPhotoGallery => 'Foto auswählen';
+
+  @override
+  String get translatorPhotoNothing => 'Auf dem Foto wurde kein Text erkannt.';
+
+  @override
+  String get translatorPhotoNote =>
+      'Aus einem Foto gelesen – vor dem Übersetzen prüfen, die Erkennung kann Buchstaben verfehlen.';
+
+  @override
+  String get translatorPhotoScript =>
+      'Diese Schrift kann die Texterkennung auf diesem Gerät noch nicht lesen.';
+
+  @override
+  String translatorPhotoNeedsLanguagePack(String language) {
+    return 'Windows erkennt Text nur in Sprachen, deren Sprachpaket installiert ist, und für $language ist keines da. Es lässt sich unter Einstellungen → Zeit und Sprache → Sprache und Region hinzufügen.';
+  }
 }

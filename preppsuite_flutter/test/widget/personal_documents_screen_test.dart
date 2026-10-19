@@ -276,8 +276,10 @@ class _Recognizer implements TextRecognizer {
   final TextRecognitionSupport answer;
 
   @override
-  Future<TextRecognitionSupport> support() async => answer;
+  Future<TextRecognitionSupport> support({List<String>? languages}) async =>
+      answer;
 
   @override
-  Future<String> recognize(PageImage page) async => '';
+  Future<String> recognize(PageImage page, {List<String>? languages}) async =>
+      '';
 }

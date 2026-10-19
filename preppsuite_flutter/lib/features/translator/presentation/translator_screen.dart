@@ -1,15 +1,20 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
+import '../../knowledge/application/text_recognition.dart';
 import '../../phrasebook/application/phrasebook.dart';
 import '../../phrasebook/presentation/phrase_display.dart';
+import '../application/photo_text.dart';
 import '../application/translator_catalogue.dart';
 import '../application/translator_providers.dart';
 import '../application/translator_store.dart';
+import 'translator_conversation_screen.dart';
 
 /// Free text, translated on this device (#182).
 ///
@@ -42,6 +47,11 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
   String? _result;
   Object? _error;
   var _translating = false;
+  var _reading = false;
+
+  /// Whether the text in the field came from a photo, and should be
+  /// checked before it is translated.
+  var _fromPhoto = false;
 
   @override
   void dispose() {
@@ -107,6 +117,7 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
                   // is read back.
                   if (_result != null) _input.text = _result!;
                   _result = null;
+                  _fromPhoto = false;
                 }),
               ),
               Expanded(
@@ -127,7 +138,7 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
           ],
           if (missing.isNotEmpty) ...[
             const SizedBox(height: 12),
-            _MissingPacks(missing: missing),
+            TranslatorMissingPacks(missing: missing),
           ],
           const SizedBox(height: 12),
           TextField(
@@ -138,6 +149,8 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
               labelText: l10n.translatorInput,
+              helperText: _fromPhoto ? l10n.translatorPhotoNote : null,
+              helperMaxLines: 2,
               border: const OutlineInputBorder(),
             ),
           ),
@@ -153,6 +166,50 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
                   )
                 : const Icon(Icons.translate),
             label: Text(l10n.translatorTranslate),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: _reading ? null : () => _readPhoto(from),
+                icon: _reading
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.document_scanner_outlined),
+                label: Text(
+                  _reading
+                      ? l10n.translatorPhotoReading
+                      : l10n.translatorFromPhoto,
+                ),
+              ),
+              // Both ways, for an answer: the other person writes back in
+              // their language (#202).
+              OutlinedButton.icon(
+                onPressed: needed.isEmpty
+                    ? null
+                    : () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => TranslatorConversationScreen(
+                            mine: from,
+                            theirs: to,
+                            opening: _result == null
+                                ? null
+                                : ConversationTurn(
+                                    from: from,
+                                    text: _input.text.trim(),
+                                    translation: _result,
+                                  ),
+                          ),
+                        ),
+                      ),
+                icon: const Icon(Icons.forum_outlined),
+                label: Text(l10n.translatorConversation),
+              ),
+            ],
           ),
           if (_error != null) ...[
             const SizedBox(height: 12),
@@ -248,6 +305,101 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
     }
   }
 
+  /// Text from a photo into the field (#203). Asks whether the engine
+  /// can read the language before asking for a photo, so nobody takes a
+  /// picture for nothing.
+  Future<void> _readPhoto(PhraseLanguage from) async {
+    final l10n = AppLocalizations.of(context)!;
+    final languages = recognitionLanguagesFor(from);
+    if (!readsScriptOn(defaultTargetPlatform, from)) {
+      _say(l10n.translatorPhotoScript);
+      return;
+    }
+    final support = await ref
+        .read(textRecognizerProvider)
+        .support(languages: languages);
+    if (!mounted) return;
+    switch (support) {
+      case TextRecognitionSupport.available:
+        break;
+      case TextRecognitionSupport.needsLanguagePack:
+        _say(l10n.translatorPhotoNeedsLanguagePack(from.endonym));
+        return;
+      case TextRecognitionSupport.needsTesseract:
+        _say(l10n.knowledgeRecognizeNeedsTesseract);
+        return;
+      case TextRecognitionSupport.unsupported:
+        _say(
+          isLatinScript(from)
+              ? l10n.knowledgeRecognizeUnsupported
+              : l10n.translatorPhotoScript,
+        );
+        return;
+    }
+
+    final source = await _photoSource(l10n);
+    if (source == null || !mounted) return;
+    final bytes = await ref.read(translatorPhotoPickerProvider)(source);
+    if (bytes == null || !mounted) return;
+
+    setState(() => _reading = true);
+    try {
+      final text = (await ref.read(photoTextReaderProvider)(
+        bytes,
+        languages,
+      )).trim();
+      if (!mounted) return;
+      if (text.isEmpty) {
+        _say(l10n.translatorPhotoNothing);
+      } else {
+        setState(() {
+          _input.text = text;
+          _result = null;
+          _fromPhoto = true;
+        });
+      }
+    } on Object {
+      if (mounted) _say(l10n.knowledgeRecognizeFailed);
+    } finally {
+      if (mounted) setState(() => _reading = false);
+    }
+  }
+
+  /// The camera where there is one the picker can use -- a phone -- and
+  /// the library everywhere. On a computer there is only the library, so
+  /// there is nothing to choose.
+  Future<ImageSource?> _photoSource(AppLocalizations l10n) async {
+    final hasCamera =
+        !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS);
+    if (!hasCamera) return ImageSource.gallery;
+    return showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined),
+              title: Text(l10n.translatorPhotoCamera),
+              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(l10n.translatorPhotoGallery),
+              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _say(String message) => ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
+
   Future<void> _copy(AppLocalizations l10n, String text) async {
     final messenger = ScaffoldMessenger.of(context);
     await Clipboard.setData(ClipboardData(text: text));
@@ -288,8 +440,8 @@ class _LanguageField extends StatelessWidget {
 
 /// The directions a translation needs and this device lacks, with their
 /// size from Mozilla's list and a button each.
-class _MissingPacks extends ConsumerWidget {
-  const _MissingPacks({required this.missing});
+class TranslatorMissingPacks extends ConsumerWidget {
+  const TranslatorMissingPacks({super.key, required this.missing});
 
   final List<TranslatorDirection> missing;
 

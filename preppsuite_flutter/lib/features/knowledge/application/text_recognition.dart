@@ -56,11 +56,14 @@ enum TextRecognitionSupport {
 }
 
 abstract interface class TextRecognizer {
-  Future<TextRecognitionSupport> support();
+  /// Whether [languages] -- BCP-47 tags, German and English when left
+  /// out -- can be read. Engines that cannot be told (Tesseract, with the
+  /// data the app ships or the household installed) answer for theirs.
+  Future<TextRecognitionSupport> support({List<String>? languages});
 
   /// The text on [page], lines separated by line breaks and blocks by a
   /// blank line, as the engine found them.
-  Future<String> recognize(PageImage page);
+  Future<String> recognize(PageImage page, {List<String>? languages});
 }
 
 /// The engine behind the app's platform channel: Vision on Apple systems,
@@ -77,10 +80,10 @@ class PlatformTextRecognizer implements TextRecognizer {
   static const languages = ['de-DE', 'en-US'];
 
   @override
-  Future<TextRecognitionSupport> support() async {
+  Future<TextRecognitionSupport> support({List<String>? languages}) async {
     try {
       final answer = await _channel.invokeMethod<String>('support', {
-        'languages': languages,
+        'languages': languages ?? PlatformTextRecognizer.languages,
       });
       return TextRecognitionSupport.values.asNameMap()[answer] ??
           TextRecognitionSupport.unsupported;
@@ -92,12 +95,12 @@ class PlatformTextRecognizer implements TextRecognizer {
   }
 
   @override
-  Future<String> recognize(PageImage page) async {
+  Future<String> recognize(PageImage page, {List<String>? languages}) async {
     final text = await _channel.invokeMethod<String>('recognize', {
       'bgra': page.bgra,
       'width': page.width,
       'height': page.height,
-      'languages': languages,
+      'languages': languages ?? PlatformTextRecognizer.languages,
     });
     return text ?? '';
   }
@@ -136,14 +139,15 @@ class TesseractRecognizer implements TextRecognizer {
   }
 
   @override
-  Future<TextRecognitionSupport> support() async => await _languages() == null
+  Future<TextRecognitionSupport> support({List<String>? languages}) async =>
+      await _languages() == null
       ? TextRecognitionSupport.needsTesseract
       : TextRecognitionSupport.available;
 
   @override
-  Future<String> recognize(PageImage page) async {
-    final languages = await _languages();
-    if (languages == null) {
+  Future<String> recognize(PageImage page, {List<String>? languages}) async {
+    final installed = await _languages();
+    if (installed == null) {
       throw ProcessException(executable, const [], 'no tessdata for deu/eng');
     }
     final directory = await Directory.systemTemp.createTemp('preppsuite-ocr');
@@ -156,7 +160,7 @@ class TesseractRecognizer implements TextRecognizer {
         image.path,
         'stdout',
         '-l',
-        languages,
+        installed,
       ]);
       if (result.exitCode != 0) {
         throw ProcessException(executable, const [], '${result.stderr}');

@@ -360,7 +360,7 @@ Ton (800 Hz, der übliche Hörton für Morse). Dazu die Tafel aller
 Zeichen nach der Empfehlung ITU-R M.1677-1; Ä, Ö, Ü, ß, CH und Ñ stehen
 gesondert, weil sie nicht zum internationalen Standard gehören.
 
-**Sprachführer.** 43 kurze Sätze für den Notfall – Hilfe rufen, sagen, wo
+**Sprachführer.** 44 kurze Sätze für den Notfall – Hilfe rufen, sagen, wo
 es wehtut, nach Wasser, Unterkunft oder einem Kind fragen, dazu Antworten
 zum Zeigen – auf Deutsch, Englisch, Spanisch, Französisch, Polnisch,
 Türkisch, Russisch, Ukrainisch, Arabisch und Persisch. Ohne Netz und ohne
@@ -383,6 +383,21 @@ lässt sich wie ein Satz des Sprachführers groß zeigen und vorlesen. Auf
 macOS, Linux, Windows und Android ab Version 9 (64-Bit); im
 armeabi-v7a-Paket und auf dem iPhone fehlt er
 ([Stand](docs/uebersetzer-offline-plan.md)).
+
+Im **Gespräch** teilen sich zwei Personen den Bildschirm: unten schreibt,
+wer das Gerät hält, oben das Gegenüber, auf dem Telefon auf den Kopf
+gestellt, damit es von der anderen Seite des Tisches richtig herum steht.
+Jede Hälfte zeigt das ganze Gespräch in ihrer Sprache; die Aufforderung im
+Eingabefeld ist der feste Satz des Sprachführers. Dafür braucht es die
+Pakete für beide Richtungen.
+
+**Text aus Foto** liest ein Schild, einen Aushang oder ein Merkblatt mit
+der Texterkennung des Geräts (dieselbe wie für gescannte Dokumente, ohne
+Netz) und setzt den Text ins Eingabefeld, zum Prüfen vor dem Übersetzen.
+Auf dem Mac und unter Windows liest die Systemerkennung auch Kyrillisch
+und Arabisch, soweit sie die Sprache kennt; unter Android und Linux liest
+Tesseract mit den deutschen und englischen Daten nur lateinische
+Schrift, und die App sagt das, bevor ein Foto gemacht wird.
 
 **Karte offline.** Im dunklen Erscheinungsbild ist auch die Karte dunkel –
 der Stil wird umgedreht statt das fertige Bild, sodass ein Park grün bleibt.
