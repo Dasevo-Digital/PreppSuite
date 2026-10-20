@@ -11,6 +11,12 @@ Ortssuche, Schutzräume und den Kiwix-Katalog. Welche Anfrage welche Daten
 vorher geladenen Karten und Wissensarchiven bleiben die Kernfunktionen auch
 offline benutzbar.
 
+PreppSuite ist kostenlos und ohne Werbung. Wer die Entwicklung unterstützen
+möchte, kann das über [Ko-fi](https://ko-fi.com/superkuh86) tun. In der App
+steht der Link unter Einstellungen → Über PreppSuite. Builds für App-Stores
+lassen ihn mit `--dart-define=PREPPSUITE_STORE=true` weg, weil Apple und
+Google Trinkgeld nur über die eigene Bezahlung erlauben.
+
 ## Aus der App
 
 | | |

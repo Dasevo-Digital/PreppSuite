@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/core/store_build.dart';
+import 'package:preppsuite_flutter/features/settings/presentation/settings_screen.dart';
 import 'package:preppsuite_flutter/features/settings/presentation/support_card.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 
@@ -49,6 +51,17 @@ void main() {
         'Die Adresse lautet ko-fi.com/superkuh86.',
       ),
       findsOneWidget,
+    );
+  });
+
+  test('an app-store build leaves the link out, these packages keep it', () {
+    // #197: Apple and Google allow tips only through their own payment.
+    expect(aboutCards(store: true).whereType<SupportCard>(), isEmpty);
+    expect(aboutCards(store: false).whereType<SupportCard>(), hasLength(1));
+    // What was built here, without --dart-define=PREPPSUITE_STORE=true.
+    expect(
+      aboutCards().whereType<SupportCard>(),
+      storeBuild ? isEmpty : hasLength(1),
     );
   });
 }

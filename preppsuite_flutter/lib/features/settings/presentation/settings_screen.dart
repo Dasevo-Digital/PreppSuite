@@ -29,6 +29,7 @@ import 'warning_readiness_card.dart';
 import 'followed_places_screen.dart';
 import 'error_log_card.dart';
 import '../../../core/adaptive_columns.dart';
+import '../../../core/store_build.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key, required this.profile});
@@ -161,11 +162,7 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () => _open(
               context,
               (l10n) => l10n.settingsCategoryAbout,
-              (l10n) => const [
-                VersionInfoCard(),
-                ErrorLogCard(),
-                SupportCard(),
-              ],
+              (l10n) => aboutCards(),
             ),
           ),
           // The second way back into the tour besides the overview's
@@ -196,6 +193,15 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 }
+
+/// What "Über PreppSuite" shows. The support link stays out of an
+/// app-store build (#197), see [storeBuild].
+@visibleForTesting
+List<Widget> aboutCards({bool store = storeBuild}) => [
+  const VersionInfoCard(),
+  const ErrorLogCard(),
+  if (!store) const SupportCard(),
+];
 
 class _CategoryTile extends StatelessWidget {
   const _CategoryTile({
