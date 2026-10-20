@@ -2561,6 +2561,36 @@ doch abgleichen will, braucht eine Schemaänderung samt der Regel für
 Snapshot-Schlüssel neuer Schemata, und vorher die Entscheidung, dass die
 Lage geteilt werden darf.
 
+### Nur ein Release-Build zeigt, was R8 zerbricht
+
+2.6.0 und 2.6.1 öffneten unter Android auf „Der Haushalt lässt sich gerade
+nicht laden“ (#206). `shared_preferences_android` 2.5 ruft seinen
+Kotlin-Code über JNI (`package:jni`) und sucht Klassen und Methoden beim
+Namen, `kotlin.coroutines.Continuation` und die Coroutine- und
+Result-Klassen; R8 hatte sie im Release-Build umbenannt oder entfernt, und
+jedes Lesen der Einstellungen schlug fehl. Kein Test und kein Debug-Build
+sieht das, denn nur der Release-Build wird geschrumpft, und die App fängt
+den Fehler ab, sodass auch das Log sauber bleibt. Seitdem:
+
+- `android/app/proguard-rules.pro` behält diese Klassen, wie die
+  JNI-Klassen von Tesseract.
+- `tool/android_release.sh` prüft in jedem Paket, dass `getAll` seine
+  Signatur mit `Continuation` behalten hat.
+- `tool/android_start_check.sh` startet das fertige arm64-Paket einmal auf
+  dem eigenen Emulator (`preppsuite_test`, nie ein Telefon) und liest den
+  Bildschirm über den Bedienungshilfen-Baum: die Einrichtung muss kommen,
+  die Fehlermeldung darf nicht kommen. `release.sh` ruft es nach dem
+  Android-Build auf.
+
+Wer eine Bibliothek aktualisiert, die über JNI oder Reflection arbeitet,
+schaut zuerst in ihre eigenen R8-Regeln und lässt danach diesen Start
+laufen.
+
+**Store-Fassungen** baut man mit `--dart-define=PREPPSUITE_STORE=true`
+(`core/store_build.dart`). Sie lassen den Ko-fi-Link weg (#197), weil
+Apple und Google Trinkgeld nur über ihre eigene Bezahlung erlauben. Die
+bisherigen Pakete sind keine Store-Fassungen.
+
 ### Sprechen kann nicht jede Plattform
 
 `core/speech_capabilities.dart` hat dieselbe Form wie

@@ -36,6 +36,7 @@ readonly KEY_PROPERTIES="$ANDROID_DIR/key.properties"
 JAVA_HOME="${JAVA_HOME:-/opt/homebrew/opt/openjdk@21}"
 APKSIGNER="${APKSIGNER:-/opt/homebrew/share/android-commandlinetools/build-tools/36.0.0/apksigner}"
 AAPT2="${AAPT2:-/opt/homebrew/share/android-commandlinetools/build-tools/36.0.0/aapt2}"
+DEXDUMP="${DEXDUMP:-/opt/homebrew/share/android-commandlinetools/build-tools/36.0.0/dexdump}"
 DEBUG_KEYSTORE="${DEBUG_KEYSTORE:-$HOME/.android/debug.keystore}"
 export JAVA_HOME
 
@@ -43,6 +44,7 @@ die() { echo "FEHLER: $*" >&2; exit 1; }
 
 [ -x "$APKSIGNER" ] || die "apksigner nicht unter $APKSIGNER — Pfad ueber APKSIGNER setzen."
 [ -x "$AAPT2" ] || die "aapt2 nicht unter $AAPT2 — Pfad ueber AAPT2 setzen."
+[ -x "$DEXDUMP" ] || die "dexdump nicht unter $DEXDUMP — Pfad ueber DEXDUMP setzen."
 [ -x "$JAVA_HOME/bin/java" ] || die "kein JDK unter $JAVA_HOME — Pfad ueber JAVA_HOME setzen."
 [ -s "$LINEAGE" ] || die "Lineage fehlt: $LINEAGE"
 [ -s "$KEY_PROPERTIES" ] || die "key.properties fehlt: $KEY_PROPERTIES"
@@ -201,6 +203,22 @@ for abi in "${ABIS[@]}"; do
     || die "$abi: versionCode $code ohne ABI-Offset -- wurde --split-per-abi entfernt? Siehe Kommentar."
   [ "${code:0:1}" = "$expected_prefix" ] \
     || die "$abi: versionCode $code passt nicht zum erwarteten Offset ${expected_prefix}000."
+
+  echo "== 4c/5 $abi JNI-Signaturen pruefen =="
+  # shared_preferences_android 2.5 finds its Kotlin methods from Dart by
+  # their signature over JNI. R8 renamed kotlin.coroutines.Continuation in
+  # 2.6.0 and 2.6.1, and the settings could not be read at all (#206).
+  # Neither tests nor debug builds shrink, so it is checked in the package;
+  # proguard-rules.pro keeps the classes.
+  dex_dir="$(mktemp -d)"
+  unzip -q -o "$signed" 'classes*.dex' -d "$dex_dir"
+  hits="$(for dex in "$dex_dir"/classes*.dex; do "$DEXDUMP" "$dex" 2>/dev/null; done \
+    | grep -A3 "name          : 'getAll'" \
+    | grep -c 'Lkotlin/coroutines/Continuation;' || true)"
+  rm -rf "$dex_dir"
+  echo "   getAll mit Continuation: $hits"
+  [ "${hits:-0}" -gt 0 ] \
+    || die "$abi: JNI-Signaturen von R8 umbenannt -- proguard-rules.pro pruefen (#206)."
 
   echo "== 5/5 $abi fertig =="
   echo "API 24-32:"; grep -i "certificate DN:\|certificate SHA-256 digest:" <<<"$old_out" | sed 's/^/  /'

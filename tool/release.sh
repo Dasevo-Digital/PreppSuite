@@ -189,6 +189,16 @@ cp "$apks/app-armeabi-v7a-release-rotated.apk" "$out/PreppSuite-$version-Android
 unzip -l "$out/PreppSuite-$version-Android-arm64-v8a.apk" > "$log/apk-arm64.txt"
 grep -q 'lib/arm64-v8a/libpreppsuite_translate.so' "$log/apk-arm64.txt" ||
   fail "arm64-APK ohne Übersetzer-Bibliothek"
+# The shrunk package, started once on the project's emulator (#206):
+# 2.6.0 and 2.6.1 opened on "the household cannot be loaded", and nothing
+# before this ran a release build. Never a phone.
+step "Android-Start auf dem Emulator"
+"$ROOT/tool/android_start_check.sh" "$out/PreppSuite-$version-Android-arm64-v8a.apk" \
+  > "$log/android-start.log" 2>&1 || {
+  tail -3 "$log/android-start.log"
+  fail "Android-Paket startet nicht"
+}
+tail -1 "$log/android-start.log"
 
 # --- Device check in the iPhone simulator ---------------------------------
 step "Gerätetest im iPhone-Simulator"
