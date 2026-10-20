@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart' show EagerGestureRecognizer;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -347,45 +348,64 @@ class _MorseScreenState extends State<MorseScreen>
   /// events rather than a tap recogniser, which waits a moment before it
   /// reports a press down and would make every press look shorter; the
   /// space bar works the same where there is a keyboard.
+  ///
+  /// Its label is not text to select. Every screen can be marked (#39),
+  /// and to the marking two quick dots are a double click: it selected
+  /// the word on the key in the middle of a message.
   Widget _morseKey(BuildContext context, AppLocalizations l10n) {
     final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Focus(
-          focusNode: _keyFocus,
-          onKeyEvent: (node, event) {
-            if (event.logicalKey != LogicalKeyboardKey.space) {
-              return KeyEventResult.ignored;
-            }
-            if (event is KeyDownEvent) _keyPress();
-            if (event is KeyUpEvent) _keyRelease();
-            return KeyEventResult.handled;
-          },
-          child: Semantics(
-            button: true,
-            label: l10n.morseKey,
-            child: Listener(
-              onPointerDown: (_) {
-                _keyFocus.requestFocus();
-                _keyPress();
-              },
-              onPointerUp: (_) => _keyRelease(),
-              onPointerCancel: (_) => _keyRelease(),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 60),
-                height: 120,
-                decoration: BoxDecoration(
-                  color: _keyDown ? scheme.primary : scheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  l10n.morseKey,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: _keyDown
-                        ? scheme.onPrimary
-                        : scheme.onPrimaryContainer,
+        SelectionContainer.disabled(
+          child: Focus(
+            focusNode: _keyFocus,
+            onKeyEvent: (node, event) {
+              if (event.logicalKey != LogicalKeyboardKey.space) {
+                return KeyEventResult.ignored;
+              }
+              if (event is KeyDownEvent) _keyPress();
+              if (event is KeyUpEvent) _keyRelease();
+              return KeyEventResult.handled;
+            },
+            child: Semantics(
+              button: true,
+              label: l10n.morseKey,
+              child: Listener(
+                onPointerDown: (_) {
+                  _keyFocus.requestFocus();
+                  _keyPress();
+                },
+                onPointerUp: (_) => _keyRelease(),
+                onPointerCancel: (_) => _keyRelease(),
+                // Takes every pointer on the key at once, so the screen's
+                // selection never sees the clicks as a double or triple
+                // click; the Listener still gets them all.
+                child: RawGestureDetector(
+                  gestures: {
+                    EagerGestureRecognizer:
+                        GestureRecognizerFactoryWithHandlers<
+                          EagerGestureRecognizer
+                        >(EagerGestureRecognizer.new, (_) {}),
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 60),
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: _keyDown
+                          ? scheme.primary
+                          : scheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      l10n.morseKey,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: _keyDown
+                            ? scheme.onPrimary
+                            : scheme.onPrimaryContainer,
+                      ),
+                    ),
                   ),
                 ),
               ),

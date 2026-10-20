@@ -368,7 +368,7 @@ und Strichen, und was jemand zurückblinkt, lässt sich als Morsezeichen
 eintippen und als Text lesen – mit Punkt und Strich in beliebiger
 Schreibweise – oder auf einer großen **Morsetaste** im Takt des Lichts
 mitdrücken (am Rechner auch mit der Leertaste): kurz ist Punkt, lang ist
-Strich, und die App lernt das Tempo aus den Drücken selbst. Unbekannte Zeichen werden benannt statt still ausgelassen.
+Strich, und die App lernt das Tempo aus den Drücken und den Pausen selbst. Unbekannte Zeichen werden benannt statt still ausgelassen.
 Eine getippte Nachricht sendet der Bildschirm als Lichtsignal, in drei
 Tempi und mit dem gerade gesendeten Zeichen darauf, auf Wunsch zugleich als
 Ton (800 Hz, der übliche Hörton für Morse). Dazu die Tafel aller

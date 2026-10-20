@@ -1,3 +1,5 @@
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
+import 'package:flutter/rendering.dart' show SelectedContent;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -98,6 +100,46 @@ void main() {
     final field = tester.widget<TextField>(find.byType(TextField));
     expect(field.controller!.text, '... --- ...');
     expect(find.text('SOS'), findsOneWidget);
+  });
+
+  testWidgets('quick dots with a mouse select nothing on the key (#191)', (
+    tester,
+  ) async {
+    // Every screen of the app lies in a selection area (#39). To it, two
+    // quick clicks are a double click, and it marked the key's word.
+    SelectedContent? selected;
+    tester.view.physicalSize = const Size(400, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('de'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: SelectionArea(
+          onSelectionChanged: (content) => selected = content,
+          child: MorseScreen(keyClock: () => now),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Morse → Text'));
+    await tester.pump();
+
+    final key = tester.getCenter(find.text('Morsetaste'));
+    for (var i = 0; i < 3; i++) {
+      final click = await tester.startGesture(
+        key,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump(const Duration(milliseconds: 60));
+      await click.up();
+      await tester.pump(const Duration(milliseconds: 60));
+    }
+    await tester.pumpAndSettle();
+
+    expect(selected?.plainText ?? '', isEmpty);
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.controller!.text, '...');
   });
 
   testWidgets('the space bar keys as well, and the result is read', (

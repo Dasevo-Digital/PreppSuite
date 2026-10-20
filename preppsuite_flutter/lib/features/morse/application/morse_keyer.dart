@@ -16,8 +16,18 @@
 ///    a dot of the app's own slowest lamp is 0.5 s, its dash 1.5 s. A fast
 ///    sender's first dashes read as dots until the first real dot arrives,
 ///    and are then corrected, because the message is read again.
-///  * A pause longer than two dots ends a letter, one longer than five
-///    ends a word.
+///  * Pauses are read against the pauses, not against the presses. A
+///    finger or a mouse taps a dot in a tenth of a second, but the pause
+///    after it is longer, and the one after a dash longer still, because
+///    the key has to come up and go down again. Measured in taps, a pause
+///    inside a letter was easily more than two -- and an O fell apart into
+///    T and M. What tells the pauses apart is that between letters a hand
+///    waits on purpose: sorted, the pauses step up at least twofold where
+///    the letters begin. The first such step ends a letter, a second one
+///    above it a word.
+///  * Until there is such a step -- while the first letter is keyed -- a
+///    pause ends a letter only if it is longer than a dash and than two
+///    dots. A word needs at least five pauses inside a letter.
 library;
 
 import 'dart:math' as math;
@@ -86,20 +96,105 @@ class MorseKeyer {
   /// `.` and `-`, a space between letters, ` / ` between words.
   String get code {
     final split = line.inMicroseconds;
-    final unit = dot.inMicroseconds;
+    final pauses = _pauseLines(split);
     final out = StringBuffer();
     for (var i = 0; i < _presses.length; i++) {
       if (i > 0) {
         final gap = _gaps[i];
-        if (gap > 5 * unit) {
-          out.write(' / ');
-        } else if (gap > 2 * unit) {
-          out.write(' ');
-        }
+        final letter = _presses[i - 1] > split
+            ? pauses.afterDash
+            : pauses.afterDot;
+        if (gap > letter) out.write(gap > pauses.word ? ' / ' : ' ');
       }
       out.write(_presses[i] > split ? '-' : '.');
     }
     return out.toString();
+  }
+
+  /// Where a pause stops being inside a letter -- after a dot, and after a
+  /// dash -- and where it starts being between words, in microseconds.
+  ///
+  /// The pauses after dots and after dashes are told apart separately. A
+  /// hand that lets go of a long press takes longer to come down again,
+  /// and when that is twice the pause after a tap, the first step in all
+  /// pauses together would be that one, not the step to the next letter.
+  ({int afterDot, int afterDash, int word}) _pauseLines(int split) {
+    final unit = dot.inMicroseconds;
+    final dashes = _presses.where((p) => p > split).toList();
+    final dash = dashes.isEmpty
+        ? 3 * unit
+        : dashes.reduce((a, b) => a + b) ~/ dashes.length;
+    final afterDots = <int>[];
+    final afterDashes = <int>[];
+    // The first press has no pause before it.
+    for (
+      var i = math.max(1, _presses.length - window);
+      i < _presses.length;
+      i++
+    ) {
+      (_presses[i - 1] > split ? afterDashes : afterDots).add(_gaps[i]);
+    }
+    afterDots.sort();
+    afterDashes.sort();
+
+    // Where one kind has no step -- every pause after a dash is inside a
+    // letter, say -- it takes the other kind's, but no less than a dash
+    // and two dots. Where neither has one, the step can still lie between
+    // them (".- .-": inside a letter after the dot, between letters after
+    // the dash), and only then, before the first letter is through, a
+    // pause ends a letter once it is longer than one and a half dashes.
+    final dotStep = _firstStep(afterDots, above: unit);
+    final dashStep = _firstStep(afterDashes, above: unit);
+    final floor = math.max(2 * unit, dash);
+    final fallback =
+        _firstStep([...afterDots, ...afterDashes]..sort(), above: unit) ??
+        math.max(floor, dash * 3 ~/ 2);
+    final afterDot =
+        dotStep ?? (dashStep == null ? fallback : math.max(dashStep, floor));
+    final afterDash =
+        dashStep ?? (dotStep == null ? fallback : math.max(dotStep, floor));
+
+    final inside = [
+      for (final gap in afterDots)
+        if (gap <= afterDot) gap,
+      for (final gap in afterDashes)
+        if (gap <= afterDash) gap,
+    ]..sort();
+    final between = [
+      for (final gap in afterDots)
+        if (gap > afterDot) gap,
+      for (final gap in afterDashes)
+        if (gap > afterDash) gap,
+    ]..sort();
+    final usual = inside.isEmpty ? unit : inside[inside.length ~/ 2];
+    // Without a second step, every pause between letters so far is one
+    // kind. Read against the shortest of them, as Morse has it (seven to
+    // three): a hand that waits between letters waits far longer than
+    // Morse asks, and against the pauses inside a letter a slow letter
+    // would be a word.
+    final word = math.max(
+      5 * usual,
+      _firstStep(between, above: math.max(afterDot, afterDash)) ??
+          (between.isEmpty ? 0 : between.first * 7 ~/ 3),
+    );
+    return (afterDot: afterDot, afterDash: afterDash, word: word);
+  }
+
+  /// The geometric middle of the first place in [sorted] where a pause is
+  /// at least twice the one before it and the middle lies above [above].
+  ///
+  /// The first, not the largest: one long pause to think is a far bigger
+  /// step than the one between letters, and taking it would make every
+  /// letter before it part of one.
+  static int? _firstStep(List<int> sorted, {required int above}) {
+    for (var i = 1; i < sorted.length; i++) {
+      final shorter = sorted[i - 1];
+      final longer = sorted[i];
+      if (shorter <= 0 || longer < 2 * shorter) continue;
+      final middle = math.sqrt(shorter * longer).round();
+      if (middle >= above) return middle;
+    }
+    return null;
   }
 
   /// Starts a new message.
