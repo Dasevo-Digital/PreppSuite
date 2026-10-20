@@ -8107,9 +8107,39 @@ class AppLocalizationsEs extends AppLocalizations {
       '100 mm de lluvia en una hora, 90 mm en Renania del Norte-Westfalia.';
 
   @override
-  String heavyRainDepth(int radius, String range) {
-    return 'Profundidad del agua en un radio de $radius m: $range';
+  String get heavyRainSectionTitle => 'Lluvia torrencial';
+
+  @override
+  String get heavyRainVerdictDry =>
+      'Apenas agua en ambos casos: menos de 10 cm.';
+
+  @override
+  String heavyRainVerdictWorst(String range) {
+    return 'En el peor caso, $range de agua.';
   }
+
+  @override
+  String heavyRainDepthOnly(String range) {
+    return 'Profundidad del agua: $range';
+  }
+
+  @override
+  String get riverFloodVerdictDry =>
+      'Sin inundación en ninguno de los tres casos.';
+
+  @override
+  String riverFloodVerdictWorst(String range) {
+    return 'En el peor caso: $range.';
+  }
+
+  @override
+  String get riverFloodFrequentBody => 'Más de una vez cada 100 años.';
+
+  @override
+  String get riverFloodHundredBody => 'Estadísticamente una vez cada 100 años.';
+
+  @override
+  String get riverFloodExtremeBody => 'Menos de una vez cada 100 años.';
 
   @override
   String heavyRainFlow(String range) {

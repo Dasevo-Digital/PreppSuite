@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -219,23 +221,20 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
       ),
       body: _restoring
           ? const Center(child: CircularProgressIndicator())
-          // In columns on a wide window (#47): the two rain scenarios and
-          // the river side by side, which is the comparison they invite.
-          : AdaptiveColumns(
+          : hazard == null
+          ? AdaptiveColumns(
               padding: const EdgeInsets.all(16),
               columnWidth: 480,
               spacing: 12,
               blocks: [
                 if (_busy) const LinearProgressIndicator(),
-                if (hazard == null)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _empty(l10n),
-                  )
-                else
-                  ..._result(l10n, hazard),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _empty(l10n),
+                ),
               ],
-            ),
+            )
+          : _result(l10n, hazard),
     );
   }
 
@@ -274,7 +273,17 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
     ];
   }
 
-  List<Widget> _result(AppLocalizations l10n, HeavyRainHazard hazard) {
+  /// One answer, read from the top: where and when, with the ways to ask
+  /// for another place; the rain card and the river card, each saying
+  /// first what its scenarios come to; the cellar; and what goes where.
+  ///
+  /// Not [AdaptiveColumns]: it deals blocks into its columns in turn, and
+  /// with five blocks in two columns the first rain scenario stood at the
+  /// top right, the second under the address at the left, and the buttons
+  /// to ask again between the second and the small print. On a wide
+  /// window only the two cards stand side by side, which is the
+  /// comparison they invite (#47, #209).
+  Widget _result(AppLocalizations l10n, HeavyRainHazard hazard) {
     final theme = Theme.of(context);
     final locale = Localizations.localeOf(context).toString();
     final date = DateFormat.yMMMd(locale).format(hazard.checkedAt.toLocal());
@@ -285,61 +294,94 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
             '${hazard.longitude.toStringAsFixed(4)})';
     final cellar = _cellarCount();
 
-    // Blocks, each kept together in a column: where and when, each
-    // scenario, the river, the cellar, and what the check cannot say.
-    return [
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.heavyRainCheckedAt(place, date),
-            style: theme.textTheme.titleMedium,
-          ),
-          if (_offline) ...[
-            const SizedBox(height: 8),
-            Text(l10n.heavyRainOffline, style: theme.textTheme.bodySmall),
+    final rain = _RainCard(l10n: l10n, hazard: hazard);
+    final river = switch (hazard.river) {
+      final river? => _RiverCard(
+        l10n: l10n,
+        river: river,
+        stateName: hazard.stateName,
+      ),
+      null => null,
+    };
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 12.0;
+        final wide =
+            river != null &&
+            AdaptiveColumns.columnsFor(
+                  constraints.maxWidth - 32,
+                  columnWidth: 480,
+                  spacing: spacing,
+                ) >=
+                2;
+        return ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_busy) ...[
+                      const LinearProgressIndicator(),
+                      const SizedBox(height: spacing),
+                    ],
+                    Text(
+                      l10n.heavyRainCheckedAt(place, date),
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    if (_offline) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.heavyRainOffline,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                    const SizedBox(height: spacing),
+                    ..._choices(l10n),
+                    const SizedBox(height: spacing),
+                    if (wide)
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(child: rain),
+                            const SizedBox(width: spacing),
+                            Expanded(child: river),
+                          ],
+                        ),
+                      )
+                    else ...[
+                      rain,
+                      if (river != null) ...[
+                        const SizedBox(height: spacing),
+                        river,
+                      ],
+                    ],
+                    if (hazard.anyWater && cellar > 0) ...[
+                      const SizedBox(height: spacing),
+                      Card(
+                        child: ListTile(
+                          leading: const Icon(Icons.inventory_2_outlined),
+                          title: Text(l10n.heavyRainCellar(cellar)),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.heavyRainPrivacy,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
-        ],
-      ),
-      if (!hazard.covered)
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(l10n.heavyRainUncovered(hazard.stateName ?? '')),
-          ),
-        )
-      else
-        for (final scenario in HeavyRainScenario.values)
-          _ScenarioCard(
-            l10n: l10n,
-            scenario: scenario,
-            result: hazard.results[scenario] ?? const HeavyRainScenarioResult(),
-          ),
-      if (hazard.river case final river?)
-        _RiverCard(l10n: l10n, river: river, stateName: hazard.stateName),
-      if (hazard.anyWater && cellar > 0)
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.inventory_2_outlined),
-            title: Text(l10n.heavyRainCellar(cellar)),
-          ),
-        ),
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.heavyRainLimits, style: theme.textTheme.bodySmall),
-          const SizedBox(height: 16),
-          ..._choices(l10n),
-          const SizedBox(height: 16),
-          Text(l10n.heavyRainPrivacy, style: theme.textTheme.bodySmall),
-          const SizedBox(height: 8),
-          Text(
-            l10n.heavyRainSource('${hazard.checkedAt.year}'),
-            style: theme.textTheme.bodySmall,
-          ),
-        ],
-      ),
-    ];
+        );
+      },
+    );
   }
 
   /// Supplies whose storage place names a cellar, in any of the app's
@@ -368,82 +410,199 @@ bool isCellar(String storageLocation) {
   ].any(place.contains);
 }
 
-class _ScenarioCard extends StatelessWidget {
-  const _ScenarioCard({
-    required this.l10n,
-    required this.scenario,
-    required this.result,
-  });
+/// The BKG's two scenarios in one card, the more frequent first, under a
+/// sentence that says what they come to (#115).
+class _RainCard extends StatelessWidget {
+  const _RainCard({required this.l10n, required this.hazard});
 
   final AppLocalizations l10n;
-  final HeavyRainScenario scenario;
-  final HeavyRainScenarioResult result;
+  final HeavyRainHazard hazard;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final classes = [
+      for (final scenario in HeavyRainScenario.values)
+        ?hazard.results[scenario]?.depthClass,
+    ];
+    final worst = classes.isEmpty ? null : classes.reduce(math.max);
+    return _HazardCard(
+      title: l10n.heavyRainSectionTitle,
+      verdict: switch (worst) {
+        _ when !hazard.covered => null,
+        null => null,
+        0 => l10n.heavyRainVerdictDry,
+        final depth => l10n.heavyRainVerdictWorst(
+          depthClassLabel(l10n, depth),
+        ),
+      },
+      rows: [
+        if (!hazard.covered)
+          Text(l10n.heavyRainUncovered(hazard.stateName ?? ''))
+        else
+          for (final scenario in HeavyRainScenario.values)
+            _rainRow(
+              theme,
+              scenario,
+              hazard.results[scenario] ?? const HeavyRainScenarioResult(),
+            ),
+      ],
+      notes: [
+        if (hazard.covered) l10n.heavyRainLimits,
+        l10n.heavyRainSource('${hazard.checkedAt.year}'),
+      ],
+    );
+  }
+
+  Widget _rainRow(
+    ThemeData theme,
+    HeavyRainScenario scenario,
+    HeavyRainScenarioResult result,
+  ) {
     final depthClass = result.depthClass;
     final velocityClass = result.velocityClass;
+    return _ScenarioRow(
+      mark: switch (depthClass) {
+        null => const _WaterMark.unknown(),
+        0 => const _WaterMark.none(),
+        final depth => _WaterMark(depthClassColour(depth)),
+      },
+      title: switch (scenario) {
+        HeavyRainScenario.exceptional => l10n.heavyRainScenarioExceptional,
+        HeavyRainScenario.extreme => l10n.heavyRainScenarioExtreme,
+      },
+      body: switch (scenario) {
+        HeavyRainScenario.exceptional => l10n.heavyRainScenarioExceptionalBody,
+        HeavyRainScenario.extreme => l10n.heavyRainScenarioExtremeBody,
+      },
+      values: [
+        if (depthClass == null)
+          l10n.heavyRainNoValue
+        else
+          l10n.heavyRainDepthOnly(depthClassLabel(l10n, depthClass)),
+        if (depthClass != null && velocityClass != null)
+          l10n.heavyRainFlow(velocityClassLabel(l10n, velocityClass)),
+      ],
+    );
+  }
+}
+
+/// A card for one map: its name, what its scenarios come to, one row per
+/// scenario, and its small print at the foot.
+class _HazardCard extends StatelessWidget {
+  const _HazardCard({
+    required this.title,
+    required this.verdict,
+    required this.rows,
+    required this.notes,
+  });
+
+  final String title;
+  final String? verdict;
+  final List<Widget> rows;
+  final List<String> notes;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              switch (scenario) {
-                HeavyRainScenario.exceptional =>
-                  l10n.heavyRainScenarioExceptional,
-                HeavyRainScenario.extreme => l10n.heavyRainScenarioExtreme,
-              },
-              style: theme.textTheme.titleMedium,
-            ),
-            Text(
-              switch (scenario) {
-                HeavyRainScenario.exceptional =>
-                  l10n.heavyRainScenarioExceptionalBody,
-                HeavyRainScenario.extreme => l10n.heavyRainScenarioExtremeBody,
-              },
-              style: theme.textTheme.bodySmall,
-            ),
-            const SizedBox(height: 8),
-            if (depthClass == null)
-              Text(l10n.heavyRainNoValue)
-            else ...[
-              Row(
-                children: [
-                  Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: depthClassColour(depthClass),
-                      border: Border.all(color: theme.colorScheme.outline),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      l10n.heavyRainDepth(
-                        hazardRadiusMetres.round(),
-                        depthClassLabel(l10n, depthClass),
-                      ),
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                  ),
-                ],
-              ),
-              if (velocityClass != null) ...[
-                const SizedBox(height: 4),
-                Text(
-                  l10n.heavyRainFlow(
-                    velocityClassLabel(l10n, velocityClass),
-                  ),
+            Text(title, style: theme.textTheme.titleMedium),
+            if (verdict case final verdict?) ...[
+              const SizedBox(height: 4),
+              Text(
+                verdict,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
+              ),
+            ],
+            const SizedBox(height: 12),
+            for (final row in rows) ...[row, const SizedBox(height: 12)],
+            for (final note in notes) ...[
+              Text(note, style: theme.textTheme.bodySmall),
+              const SizedBox(height: 4),
             ],
           ],
         ),
       ),
+    );
+  }
+}
+
+/// One scenario: a drop, its name and what it means, and what the map
+/// says for it.
+class _ScenarioRow extends StatelessWidget {
+  const _ScenarioRow({
+    required this.mark,
+    required this.title,
+    required this.body,
+    required this.values,
+  });
+
+  final _WaterMark mark;
+  final String title;
+  final String body;
+  final List<String> values;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(padding: const EdgeInsets.only(top: 2), child: mark),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: theme.textTheme.titleSmall),
+              Text(body, style: theme.textTheme.bodySmall),
+              for (final value in values) Text(value),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A drop in the legend's colour where the map shows water, an empty one
+/// where it shows none, a question mark where it has nothing to say.
+///
+/// Not a square: the legend's first class has no colour, and a square
+/// with nothing in it is a checkbox nobody has ticked.
+class _WaterMark extends StatelessWidget {
+  const _WaterMark(Color this.colour) : unknown = false;
+  const _WaterMark.none() : colour = null, unknown = false;
+  const _WaterMark.unknown() : colour = null, unknown = true;
+
+  final Color? colour;
+  final bool unknown;
+
+  @override
+  Widget build(BuildContext context) {
+    final outline = Theme.of(context).colorScheme.outline;
+    const size = 22.0;
+    return ExcludeSemantics(
+      child: switch (colour) {
+        _ when unknown => Icon(Icons.help_outline, size: size, color: outline),
+        null => Icon(Icons.water_drop_outlined, size: size, color: outline),
+        // Outlined over filled, so the lightest blue still has an edge
+        // on a white card.
+        final colour => Stack(
+          children: [
+            Icon(Icons.water_drop, size: size, color: colour),
+            Icon(Icons.water_drop_outlined, size: size, color: outline),
+          ],
+        ),
+      },
     );
   }
 }
@@ -497,66 +656,69 @@ class _RiverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.riverFloodTitle, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            if (!river.covered)
-              Text(l10n.riverFloodUncovered(stateName ?? ''))
-            else ...[
-              for (final scenario in RiverFloodScenario.values)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 16,
-                        height: 16,
-                        margin: const EdgeInsets.only(top: 2),
-                        decoration: BoxDecoration(
-                          color: riverClassColour(river.classes[scenario] ?? 0),
-                          // A scenario without a map shows no colour.
-                          border: Border.all(color: theme.colorScheme.outline),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '${switch (scenario) {
-                            RiverFloodScenario.frequent => l10n.riverFloodFrequent,
-                            RiverFloodScenario.hundred => l10n.riverFloodHundred,
-                            RiverFloodScenario.extreme => l10n.riverFloodExtreme,
-                          }}: ${switch (river.classes[scenario]) {
-                            // Not dry: nobody has mapped it here (#148).
-                            null => l10n.riverFloodNoMap,
-                            final depth => riverClassLabel(l10n, depth),
-                          }}',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: 4),
-              Text(l10n.riverFloodLimits, style: theme.textTheme.bodySmall),
-              const SizedBox(height: 4),
-              Text(switch (river.stateCode) {
-                // Checked first: a Land's own service that did not answer
-                // was replaced by the national map.
-                _ when river.national => l10n.riverFloodSourceNational,
-                'BY' => l10n.riverFloodSourceBY,
-                'NW' => l10n.riverFloodSourceNW,
-                _ => l10n.riverFloodSource,
-              }, style: theme.textTheme.bodySmall),
-            ],
-          ],
+    final classes = river.classes;
+    final known = classes.values.where((depth) => depth >= 1 && depth <= 5);
+    final worst = known.isNotEmpty
+        ? known.reduce(math.max)
+        : classes.values.contains(floodDepthUnknown)
+        ? floodDepthUnknown
+        : null;
+    return _HazardCard(
+      title: l10n.riverFloodTitle,
+      verdict: switch (worst) {
+        _ when !river.covered => null,
+        final depth? => l10n.riverFloodVerdictWorst(
+          riverClassLabel(l10n, depth),
         ),
-      ),
+        // Dry only where all three were mapped: a flood nobody mapped
+        // here is not one that stays away (#148).
+        null when RiverFloodScenario.values.every(classes.containsKey) =>
+          l10n.riverFloodVerdictDry,
+        null => null,
+      },
+      rows: [
+        if (!river.covered)
+          Text(l10n.riverFloodUncovered(stateName ?? ''))
+        else
+          for (final scenario in RiverFloodScenario.values)
+            _ScenarioRow(
+              mark: switch (classes[scenario]) {
+                null => const _WaterMark.unknown(),
+                0 => const _WaterMark.none(),
+                final depth => _WaterMark(riverClassColour(depth)),
+              },
+              title: switch (scenario) {
+                RiverFloodScenario.frequent => l10n.riverFloodFrequent,
+                RiverFloodScenario.hundred => l10n.riverFloodHundred,
+                RiverFloodScenario.extreme => l10n.riverFloodExtreme,
+              },
+              body: switch (scenario) {
+                RiverFloodScenario.frequent => l10n.riverFloodFrequentBody,
+                RiverFloodScenario.hundred => l10n.riverFloodHundredBody,
+                RiverFloodScenario.extreme => l10n.riverFloodExtremeBody,
+              },
+              values: [
+                switch (classes[scenario]) {
+                  // Not dry: nobody has mapped it here (#148).
+                  null => l10n.riverFloodNoMap,
+                  final depth => riverClassLabel(l10n, depth),
+                },
+              ],
+            ),
+      ],
+      notes: [
+        if (river.covered) ...[
+          l10n.riverFloodLimits,
+          switch (river.stateCode) {
+            // Checked first: a Land's own service that did not answer
+            // was replaced by the national map.
+            _ when river.national => l10n.riverFloodSourceNational,
+            'BY' => l10n.riverFloodSourceBY,
+            'NW' => l10n.riverFloodSourceNW,
+            _ => l10n.riverFloodSource,
+          },
+        ],
+      ],
     );
   }
 }

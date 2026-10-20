@@ -8038,9 +8038,38 @@ class AppLocalizationsEn extends AppLocalizations {
       '100 mm of rain in one hour, 90 mm in North Rhine-Westphalia.';
 
   @override
-  String heavyRainDepth(int radius, String range) {
-    return 'Water depth within $radius m: $range';
+  String get heavyRainSectionTitle => 'Heavy rain';
+
+  @override
+  String get heavyRainVerdictDry =>
+      'Hardly any water in either case: under 10 cm.';
+
+  @override
+  String heavyRainVerdictWorst(String range) {
+    return 'In the worse case $range of water.';
   }
+
+  @override
+  String heavyRainDepthOnly(String range) {
+    return 'Water depth: $range';
+  }
+
+  @override
+  String get riverFloodVerdictDry => 'Not flooded in any of the three cases.';
+
+  @override
+  String riverFloodVerdictWorst(String range) {
+    return 'In the worst case: $range.';
+  }
+
+  @override
+  String get riverFloodFrequentBody => 'More often than once in 100 years.';
+
+  @override
+  String get riverFloodHundredBody => 'Statistically once in 100 years.';
+
+  @override
+  String get riverFloodExtremeBody => 'Less often than once in 100 years.';
 
   @override
   String heavyRainFlow(String range) {

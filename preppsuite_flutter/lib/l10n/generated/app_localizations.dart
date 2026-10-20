@@ -13363,11 +13363,59 @@ abstract class AppLocalizations {
   /// **'100 mm of rain in one hour, 90 mm in North Rhine-Westphalia.'**
   String get heavyRainScenarioExtremeBody;
 
-  /// No description provided for @heavyRainDepth.
+  /// No description provided for @heavyRainSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Water depth within {radius} m: {range}'**
-  String heavyRainDepth(int radius, String range);
+  /// **'Heavy rain'**
+  String get heavyRainSectionTitle;
+
+  /// No description provided for @heavyRainVerdictDry.
+  ///
+  /// In en, this message translates to:
+  /// **'Hardly any water in either case: under 10 cm.'**
+  String get heavyRainVerdictDry;
+
+  /// No description provided for @heavyRainVerdictWorst.
+  ///
+  /// In en, this message translates to:
+  /// **'In the worse case {range} of water.'**
+  String heavyRainVerdictWorst(String range);
+
+  /// No description provided for @heavyRainDepthOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Water depth: {range}'**
+  String heavyRainDepthOnly(String range);
+
+  /// No description provided for @riverFloodVerdictDry.
+  ///
+  /// In en, this message translates to:
+  /// **'Not flooded in any of the three cases.'**
+  String get riverFloodVerdictDry;
+
+  /// No description provided for @riverFloodVerdictWorst.
+  ///
+  /// In en, this message translates to:
+  /// **'In the worst case: {range}.'**
+  String riverFloodVerdictWorst(String range);
+
+  /// No description provided for @riverFloodFrequentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'More often than once in 100 years.'**
+  String get riverFloodFrequentBody;
+
+  /// No description provided for @riverFloodHundredBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistically once in 100 years.'**
+  String get riverFloodHundredBody;
+
+  /// No description provided for @riverFloodExtremeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Less often than once in 100 years.'**
+  String get riverFloodExtremeBody;
 
   /// No description provided for @heavyRainFlow.
   ///

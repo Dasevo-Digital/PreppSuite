@@ -1861,6 +1861,16 @@ heading with its list. Blocks are dealt into the lanes in order, so a
 heading can never land in one column with its list in the next. Spacing
 between blocks comes from the layout, not from `SizedBox`es in the caller.
 
+"In order" means in turn: block one to the left lane, block two to the
+right, block three to the left again. That is right for sections that
+stand on their own, and wrong for a page that is read from the top. The
+heavy rain screen had five blocks -- the address, two rain scenarios, the
+river, the small print with the buttons -- and on a wide window the
+rarer rain stood at the top right, the other under the address, the
+buttons between it and the sources. It now lays out a header, the two
+map cards side by side and the footer itself, with
+`AdaptiveColumns.columnsFor` deciding only whether the cards share a row.
+
 Two things it is deliberately not: it is not a way to centre a narrow
 column in a wide window (the space is used, not abandoned), and it is not
 for long or unbounded lists -- it builds every block. The warning list is

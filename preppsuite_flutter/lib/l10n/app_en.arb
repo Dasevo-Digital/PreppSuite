@@ -4548,17 +4548,36 @@
   "heavyRainScenarioExceptionalBody": "Statistically once in 100 years.",
   "heavyRainScenarioExtreme": "Extreme heavy rain",
   "heavyRainScenarioExtremeBody": "100 mm of rain in one hour, 90 mm in North Rhine-Westphalia.",
-  "heavyRainDepth": "Water depth within {radius} m: {range}",
-  "@heavyRainDepth": {
+  "heavyRainSectionTitle": "Heavy rain",
+  "heavyRainVerdictDry": "Hardly any water in either case: under 10 cm.",
+  "heavyRainVerdictWorst": "In the worse case {range} of water.",
+  "@heavyRainVerdictWorst": {
     "placeholders": {
-      "radius": {
-        "type": "int"
-      },
       "range": {
         "type": "String"
       }
     }
   },
+  "heavyRainDepthOnly": "Water depth: {range}",
+  "@heavyRainDepthOnly": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "riverFloodVerdictDry": "Not flooded in any of the three cases.",
+  "riverFloodVerdictWorst": "In the worst case: {range}.",
+  "@riverFloodVerdictWorst": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "riverFloodFrequentBody": "More often than once in 100 years.",
+  "riverFloodHundredBody": "Statistically once in 100 years.",
+  "riverFloodExtremeBody": "Less often than once in 100 years.",
   "heavyRainFlow": "Flow velocity: {range}",
   "@heavyRainFlow": {
     "placeholders": {
