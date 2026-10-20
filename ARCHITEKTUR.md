@@ -2469,6 +2469,16 @@ Archiv behält seine Kennung und damit seinen Suchindex. Was nicht gefunden
 wird, bleibt unverändert: Eine nicht angesteckte Platte ist kein Grund,
 etwas zu vergessen.
 
+Ein eigenes Dokument außerhalb dieser Ordner findet der Start nie wieder,
+etwa ein gescanntes Buch in iCloud Drive (#66). Dessen Lesezeichen löst sich
+nicht mehr auf, und `reachableDocumentLocation` meldet das als
+`PersonalDocumentUnreachable`. Den nativen Leser versucht es dann gar nicht
+erst: Der löst dasselbe Lesezeichen auf, scheitert genauso und sagte dabei
+nur „cannot open the archive“. Texterkennung und Leser fragen stattdessen,
+ob die Datei neu ausgewählt werden soll. `relocate` richtet das Dokument auf
+die neue Auswahl. Kennung, Suchindex, Lesestelle und der Vermerk
+„per Texterkennung“ bleiben dabei erhalten.
+
 
 ### Lebenszeichen per SMS, ohne Server
 

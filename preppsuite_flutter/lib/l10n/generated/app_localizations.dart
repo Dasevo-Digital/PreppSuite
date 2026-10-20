@@ -6550,6 +6550,24 @@ abstract class AppLocalizations {
   /// **'No personal documents have been added yet.'**
   String get knowledgeDocumentsEmpty;
 
+  /// No description provided for @knowledgeDocumentUnreachableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No access to “{name}” any more'**
+  String knowledgeDocumentUnreachableTitle(String name);
+
+  /// No description provided for @knowledgeDocumentUnreachableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Usually after an update: macOS no longer lets the app open a file that was picked outside its download folder, or the file is no longer where it was. Pick it once more and it carries on. Its search index and reading position stay.'**
+  String get knowledgeDocumentUnreachableBody;
+
+  /// No description provided for @knowledgeDocumentRelink.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the file again'**
+  String get knowledgeDocumentRelink;
+
   /// No description provided for @knowledgeDocumentRemove.
   ///
   /// In en, this message translates to:

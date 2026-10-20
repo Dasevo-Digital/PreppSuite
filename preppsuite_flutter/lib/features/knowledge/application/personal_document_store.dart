@@ -260,6 +260,9 @@ class PersonalDocumentStore {
             indexedCharacters: item.indexedCharacters,
             readerOffset: item.readerOffset,
             sourceFingerprint: item.sourceFingerprint,
+            // Or a relinked scan would lose the note that its text was
+            // recognised, and could have gaps (#66).
+            recognized: item.recognized,
           )
         else
           item,

@@ -44,10 +44,7 @@ class PdfPageSource implements PageSource {
   /// limit like everything else the library reads.
   static Future<PdfPageSource> open(PersonalDocument document) async {
     await pdfrxFlutterInitialize();
-    var location = document.location;
-    if (location.startsWith('bookmark://')) {
-      location = await resolveStoragePath(location) ?? location;
-    }
+    final location = await reachableDocumentLocation(document.location);
     if (!isNativeStorageHandle(location)) {
       return PdfPageSource._(await PdfDocument.openFile(location));
     }

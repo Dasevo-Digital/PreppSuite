@@ -25,6 +25,7 @@ class PersonalDocumentsScreen extends StatefulWidget {
     this.downloadsDirectory,
     this.textRecognizer,
     this.pageSource,
+    this.pickFile,
   });
 
   /// Where to look for documents to suggest (#33); the system's Downloads
@@ -37,6 +38,10 @@ class PersonalDocumentsScreen extends StatefulWidget {
 
   /// What draws a document's pages for that; PDFium unless a test says.
   final Future<PageSource> Function(PersonalDocument document)? pageSource;
+
+  /// What asks for a file once more where the app lost its way to one
+  /// (#66); the system's panel unless a test says.
+  final Future<PickedStorage?> Function()? pickFile;
 
   @override
   State<PersonalDocumentsScreen> createState() =>
@@ -65,7 +70,10 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
   /// Reads a scanned PDF by recognising its pages, after saying what that
   /// means: it takes a while, it stays on the device, and what it reads
   /// can have gaps nothing reports (`docs/texterkennung-messung.md`).
-  Future<void> _recognize(PersonalDocument document) async {
+  Future<void> _recognize(
+    PersonalDocument document, {
+    bool confirmed = false,
+  }) async {
     final l10n = AppLocalizations.of(context)!;
     final support = await _recognizer.support();
     if (!mounted) return;
@@ -91,24 +99,29 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
       );
       return;
     }
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.knowledgeRecognizeTitle),
-        content: Text(l10n.knowledgeRecognizeBody),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.knowledgeRecognizeAction),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
+    final go =
+        confirmed ||
+        await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text(l10n.knowledgeRecognizeTitle),
+                content: Text(l10n.knowledgeRecognizeBody),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: Text(
+                      MaterialLocalizations.of(context).cancelButtonLabel,
+                    ),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: Text(l10n.knowledgeRecognizeAction),
+                  ),
+                ],
+              ),
+            ) ==
+            true;
+    if (!go || !mounted) return;
 
     _recognitionCancelled = false;
     setState(() => _recognizing = (id: document.id, done: 0, total: 0));
@@ -117,6 +130,7 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
     // page seventeen. So the screen stays on while this runs.
     await WakelockPlus.enable().catchError((Object _) {});
     PageSource? source;
+    var unreachable = false;
     try {
       final fingerprint = await documentFingerprint(document.location);
       source = await (widget.pageSource ?? PdfPageSource.open)(document);
@@ -144,7 +158,9 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
         recognized: result.status == PersonalDocumentIndexStatus.ready,
       );
       if (!mounted) return;
-      setState(() => _documents = Future.value(updated));
+      setState(() {
+        _documents = Future.value(updated);
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -156,6 +172,8 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
       );
     } on PersonalDocumentCancelled {
       // Stopped on purpose; the document stays as it was.
+    } on PersonalDocumentUnreachable {
+      unreachable = true;
     } on Object catch (error, stack) {
       // "Failed" says nothing about why, and the why is what someone
       // looking at a scan that will not read needs (#66).
@@ -170,6 +188,65 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
       await WakelockPlus.disable().catchError((Object _) {});
       if (mounted) setState(() => _recognizing = null);
     }
+    // After the run has let go of everything: the question, then the run
+    // again with what was picked, without asking a second time.
+    if (unreachable && mounted) {
+      final found = await _relink(document);
+      if (found != null && mounted) await _recognize(found, confirmed: true);
+    }
+  }
+
+  /// Asks for [document] once more where the app has lost its way to it,
+  /// and points it at what was picked (#66).
+  ///
+  /// "Failed" was all a book in iCloud Drive got after an update: the
+  /// bookmark from the earlier build no longer opened, and nothing said
+  /// that picking the file again would do. The document keeps its id, so
+  /// its search index and reading position stay with it.
+  Future<PersonalDocument?> _relink(
+    PersonalDocument document, {
+    bool asked = false,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+    final again =
+        asked ||
+        await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text(
+                  l10n.knowledgeDocumentUnreachableTitle(document.label),
+                ),
+                content: Text(l10n.knowledgeDocumentUnreachableBody),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: Text(
+                      MaterialLocalizations.of(context).cancelButtonLabel,
+                    ),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: Text(l10n.knowledgeDocumentRelink),
+                  ),
+                ],
+              ),
+            ) ==
+            true;
+    if (!again || !mounted) return null;
+    final picked =
+        await (widget.pickFile ??
+            () => pickMapArchive(dialogTitle: l10n.knowledgeDocumentRelink))();
+    if (picked == null) return null;
+    await _store.relocate(document.id, picked.value);
+    final documents = await _store.load();
+    if (!mounted) return null;
+    setState(() {
+      _documents = Future.value(documents);
+    });
+    for (final candidate in documents) {
+      if (candidate.id == document.id) return candidate;
+    }
+    return null;
   }
 
   /// Documents in the Downloads folder the library does not have (#33).
@@ -280,7 +357,11 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
     final document = updated.firstWhere(
       (item) => item.location == picked.value,
     );
-    if (mounted) setState(() => _documents = Future.value(updated));
+    if (mounted) {
+      setState(() {
+        _documents = Future.value(updated);
+      });
+    }
     if (index) await _index(document);
   }
 
@@ -319,7 +400,9 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
         (location: document.value, label: document.label),
     ]);
     if (!mounted) return;
-    setState(() => _documents = Future.value(result.all));
+    setState(() {
+      _documents = Future.value(result.all);
+    });
     _say(
       l10n.knowledgeDocumentFolderAdded(
         result.added.length,
@@ -449,16 +532,28 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
     }
   }
 
-  Future<void> _open(PersonalDocument document) => Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (context) => PersonalDocumentReaderScreen(document: document),
-    ),
-  );
+  /// Opens [document] in the reader. A reader that lost its way to the
+  /// file closes with a request to pick it again, and then the document
+  /// opens once more where it is now (#66).
+  Future<void> _open(PersonalDocument document) async {
+    final relink = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (context) => PersonalDocumentReaderScreen(document: document),
+      ),
+    );
+    if (relink != true || !mounted) return;
+    final found = await _relink(document, asked: true);
+    if (found != null && mounted) await _open(found);
+  }
 
   Future<void> _remove(String id) async {
     await PersonalDocumentIndexer().remove(id);
     final updated = await _store.remove(id);
-    if (mounted) setState(() => _documents = Future.value(updated));
+    if (mounted) {
+      setState(() {
+        _documents = Future.value(updated);
+      });
+    }
   }
 
   Future<void> _clearIndex() async {
@@ -486,7 +581,11 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
     await database.clear();
     await database.close();
     final updated = await _store.clearIndex();
-    if (mounted) setState(() => _documents = Future.value(updated));
+    if (mounted) {
+      setState(() {
+        _documents = Future.value(updated);
+      });
+    }
   }
 
   @override

@@ -331,6 +331,9 @@ class _ReaderFailure extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final error = this.error;
+    if (error is PersonalDocumentUnreachable) {
+      return _unreachable(context, l10n);
+    }
     final message = switch (error) {
       PersonalDocumentTooLarge(bytes: final bytes?, :final limit) =>
         l10n.knowledgeDocumentTooLargeForReader(
@@ -358,6 +361,43 @@ class _ReaderFailure extends StatelessWidget {
                 onPressed: () => openPersonalDocument(document),
                 icon: const Icon(Icons.open_in_new),
                 label: Text(l10n.knowledgeDocumentOpenExternal),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// The app lost its way to the file (#66): what happened, and the way
+  /// back, which the documents screen takes once this reader has closed.
+  Widget _unreachable(BuildContext context, AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.link_off, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                l10n.knowledgeDocumentUnreachableTitle(document.label),
+                style: theme.textTheme.titleMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.knowledgeDocumentUnreachableBody,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).pop(true),
+                icon: const Icon(Icons.folder_open_outlined),
+                label: Text(l10n.knowledgeDocumentRelink),
               ),
             ],
           ),

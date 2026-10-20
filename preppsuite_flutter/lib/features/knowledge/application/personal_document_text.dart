@@ -66,6 +66,42 @@ class PersonalDocumentCancelled implements Exception {
   const PersonalDocumentCancelled();
 }
 
+/// The app has lost its way to the document: a macOS bookmark that no
+/// longer opens (#66).
+///
+/// The sandbox binds a picked file's bookmark to the app's signature, and
+/// an ad hoc signed build has a new one with every release. Archives and
+/// downloads are found again in the folders the app reaches without
+/// asking (`relinkMovedFiles`); a book in iCloud Drive is in none of
+/// them, and only picking it once more gives the permission back.
+class PersonalDocumentUnreachable implements Exception {
+  const PersonalDocumentUnreachable();
+
+  @override
+  String toString() => 'PersonalDocumentUnreachable';
+}
+
+/// Where the document at [location] can be read from with `dart:io`, or
+/// [location] itself where only the native side reads it (Android, iOS).
+///
+/// On macOS a bookmark that does not resolve is [PersonalDocumentUnreachable]
+/// rather than a handle to try natively: the native reader resolves the
+/// same bookmark and fails the same way, and its "cannot open the
+/// archive" said nothing about why. [bookmarks] stands in for the
+/// platform in tests.
+Future<String> reachableDocumentLocation(
+  String location, {
+  @visibleForTesting bool? bookmarks,
+}) async {
+  if (!location.startsWith('bookmark://')) return location;
+  final path = await resolveStoragePath(location);
+  if (path != null) return path;
+  if (bookmarks ?? usesStorageBookmarks) {
+    throw const PersonalDocumentUnreachable();
+  }
+  return location;
+}
+
 /// How far a [PersonalDocumentTextJob] has got.
 sealed class PersonalDocumentProgress {
   const PersonalDocumentProgress();
@@ -272,10 +308,7 @@ Future<Uint8List> readPersonalDocumentBytes(
   void Function(int received)? onProgress,
   bool Function()? isCancelled,
 }) async {
-  var path = location;
-  if (path.startsWith('bookmark://')) {
-    path = await resolveStoragePath(path) ?? path;
-  }
+  final path = await reachableDocumentLocation(location);
   if (!isNativeStorageHandle(path)) {
     final file = File(path);
     final length = await file.length();

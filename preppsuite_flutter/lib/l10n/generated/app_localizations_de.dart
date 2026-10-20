@@ -3923,6 +3923,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Noch keine eigenen Dokumente hinzugefügt.';
 
   @override
+  String knowledgeDocumentUnreachableTitle(String name) {
+    return 'Kein Zugriff mehr auf „$name“';
+  }
+
+  @override
+  String get knowledgeDocumentUnreachableBody =>
+      'Meist nach einem Update: macOS lässt die App eine Datei, die außerhalb ihres Download-Ordners ausgewählt wurde, nicht mehr öffnen, oder die Datei liegt nicht mehr dort. Wähle sie einmal neu aus, dann geht es weiter. Suchindex und Lesestelle bleiben erhalten.';
+
+  @override
+  String get knowledgeDocumentRelink => 'Datei neu auswählen';
+
+  @override
   String get knowledgeDocumentRemove => 'Aus Bibliothek entfernen';
 
   @override

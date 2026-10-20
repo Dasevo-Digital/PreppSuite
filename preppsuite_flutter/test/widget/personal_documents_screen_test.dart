@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/core/platform_storage.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/document_text_recognition.dart';
+import 'package:preppsuite_flutter/features/knowledge/application/personal_document_index.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/personal_document_store.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/text_recognition.dart';
 import 'package:preppsuite_flutter/features/knowledge/presentation/personal_documents_screen.dart';
@@ -205,6 +208,8 @@ void main() {
       WidgetTester tester, {
       required String label,
       required TextRecognitionSupport support,
+      Future<PageSource> Function(PersonalDocument document)? pageSource,
+      Future<PickedStorage?> Function()? pickFile,
     }) async {
       await tester.runAsync(() async {
         const store = PersonalDocumentStore();
@@ -221,6 +226,8 @@ void main() {
           home: PersonalDocumentsScreen(
             downloadsDirectory: () async => null,
             textRecognizer: _Recognizer(support),
+            pageSource: pageSource,
+            pickFile: pickFile,
           ),
         ),
       );
@@ -256,6 +263,59 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('tesseract-ocr-deu'), findsOneWidget);
+    });
+
+    testWidgets('a file the app lost its way to is asked for again', (
+      tester,
+    ) async {
+      // A book in iCloud Drive after an update: the bookmark from the
+      // earlier build no longer opened, and the screen said "failed".
+      final opened = <String>[];
+      await showScan(
+        tester,
+        label: 'Pilze.pdf',
+        support: TextRecognitionSupport.available,
+        pageSource: (document) async {
+          opened.add(document.location);
+          if (opened.length == 1) throw const PersonalDocumentUnreachable();
+          throw StateError('stop here');
+        },
+        pickFile: () async => const PickedStorage(
+          value: '/Neu/Pilze.pdf',
+          label: 'Pilze.pdf',
+        ),
+      );
+
+      await tester.tap(find.byTooltip('Text erkennen'));
+      await tester.pumpAndSettle();
+      // The run reads the file for real, and spins while it does, so it
+      // is moved along by hand rather than settled.
+      Future<void> run() async {
+        for (var round = 0; round < 40; round++) {
+          await tester.pump(const Duration(milliseconds: 100));
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 20)),
+          );
+          await tester.pump();
+        }
+      }
+
+      await tester.tap(find.widgetWithText(FilledButton, 'Text erkennen'));
+      await run();
+
+      expect(find.text('Kein Zugriff mehr auf „Pilze.pdf“'), findsOneWidget);
+      expect(find.textContaining('außerhalb ihres Download-Ordners'), findsOne);
+      await tester.tap(find.text('Datei neu auswählen'));
+      await run();
+
+      // The document points at what was picked, keeps its id, and the
+      // recognition runs again without asking a second time.
+      expect(opened, ['/Scans/Pilze.pdf', '/Neu/Pilze.pdf']);
+      final stored = await tester.runAsync(
+        () => const PersonalDocumentStore().load(),
+      );
+      expect(stored!.single.location, '/Neu/Pilze.pdf');
+      expect(find.text('Text erkennen'), findsNothing);
     });
 
     testWidgets('an EPUB without text is not offered it', (tester) async {

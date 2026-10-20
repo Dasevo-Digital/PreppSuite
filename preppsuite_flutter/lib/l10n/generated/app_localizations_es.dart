@@ -3921,6 +3921,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Aún no se han añadido documentos personales.';
 
   @override
+  String knowledgeDocumentUnreachableTitle(String name) {
+    return 'Ya no hay acceso a «$name»';
+  }
+
+  @override
+  String get knowledgeDocumentUnreachableBody =>
+      'Suele pasar tras una actualización: macOS ya no deja a la app abrir un archivo elegido fuera de su carpeta de descargas, o el archivo ya no está donde estaba. Elígelo una vez más y sigue. Su índice de búsqueda y la posición de lectura se conservan.';
+
+  @override
+  String get knowledgeDocumentRelink => 'Elegir el archivo de nuevo';
+
+  @override
   String get knowledgeDocumentRemove => 'Quitar de la biblioteca';
 
   @override
