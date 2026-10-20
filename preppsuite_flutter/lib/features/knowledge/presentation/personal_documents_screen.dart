@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+import '../../../core/error_log.dart';
 import '../../../core/feel.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
@@ -155,7 +156,10 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
       );
     } on PersonalDocumentCancelled {
       // Stopped on purpose; the document stays as it was.
-    } on Object {
+    } on Object catch (error, stack) {
+      // "Failed" says nothing about why, and the why is what someone
+      // looking at a scan that will not read needs (#66).
+      ErrorLog.instance.record(error, stack, context: 'Texterkennung');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.knowledgeRecognizeFailed)),

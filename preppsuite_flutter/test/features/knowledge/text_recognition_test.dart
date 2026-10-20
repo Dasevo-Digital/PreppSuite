@@ -31,6 +31,23 @@ class _Pages implements PageSource {
   Future<void> close() async => closed = true;
 }
 
+/// Pages that never render, as a file that cannot be read gives them.
+class _Broken implements PageSource {
+  _Broken(this.count);
+
+  final int count;
+
+  @override
+  int get pageCount => count;
+
+  @override
+  Future<PageImage> render(int page) async =>
+      throw StateError('page $page did not render');
+
+  @override
+  Future<void> close() async {}
+}
+
 class _Reader implements TextRecognizer {
   _Reader(this.pages);
 
@@ -65,6 +82,18 @@ void main() {
     ]);
     expect(text.truncated, isFalse);
   });
+
+  test(
+    'when no page reads at all, the error is the answer, not "no text"',
+    () async {
+      // A file the engine cannot open or draw, every page alike: "no text
+      // found" would blame the scan, and the error would reach no log.
+      await expectLater(
+        recognizeDocument(source: _Broken(3), recognizer: _Reader([])),
+        throwsA(isA<StateError>()),
+      );
+    },
+  );
 
   test('stops at the character limit and says so', () async {
     final text = await recognizeDocument(

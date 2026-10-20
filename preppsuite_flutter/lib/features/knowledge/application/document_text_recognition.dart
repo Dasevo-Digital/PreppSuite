@@ -105,6 +105,9 @@ class PdfPageSource implements PageSource {
 /// between pages, which is the only point a recognition can be stopped.
 /// A page that will not render or read is skipped rather than ending the
 /// run: one bad page of a two-hundred-page scan should not cost the rest.
+/// But when not one page could be read, the first page's error is the
+/// answer -- "no text found" would blame the scan for what the engine or
+/// the file did, and the error would never reach the log.
 Future<PersonalDocumentText> recognizeDocument({
   required PageSource source,
   required TextRecognizer recognizer,
@@ -117,6 +120,8 @@ Future<PersonalDocumentText> recognizeDocument({
   var characters = 0;
   var truncated = false;
   final total = source.pageCount;
+  var read = 0;
+  (Object, StackTrace)? firstFailure;
 
   pages:
   for (var page = 0; page < total; page++) {
@@ -127,9 +132,11 @@ Future<PersonalDocumentText> recognizeDocument({
       text = await recognizer.recognize(await source.render(page));
     } on PersonalDocumentCancelled {
       rethrow;
-    } on Object {
+    } on Object catch (error, stack) {
+      firstFailure ??= (error, stack);
       continue;
     }
+    read++;
     for (final block in text.split(RegExp(r'\n\s*\n'))) {
       final paragraph = block.replaceAll(RegExp(r'\s+'), ' ').trim();
       if (paragraph.isEmpty) continue;
@@ -142,6 +149,10 @@ Future<PersonalDocumentText> recognizeDocument({
       paragraphs.add(paragraph);
       characters += paragraph.length + 1;
     }
+  }
+  final failure = firstFailure;
+  if (read == 0 && failure != null) {
+    Error.throwWithStackTrace(failure.$1, failure.$2);
   }
   onProgress?.call(total, total);
   return PersonalDocumentText(
