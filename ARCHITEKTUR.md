@@ -2777,6 +2777,28 @@ bringt dessen Text mit. Deshalb gibt es zwei Stellen
 Karte, Listen und Schieberegler bleiben bedienbar, weil ihre Gesten das
 Gestenrennen gewinnen. `test/widget/selection_test.dart` misst beides.
 
+Ein Eintrag „ConcurrentModificationError … handleClearSelection“ im
+Fehlerprotokoll ist ein Fehler in Flutter, nicht in der App
+(flutter/flutter#192081, #208). Wird eine Markierung aufgehoben, während
+eine Zeile in einer Liste sich abmeldet, ändert sich die Liste, über die
+Flutter gerade läuft. Es geht nur diese eine Aktualisierung der
+Markierung verloren, und die App kann es nicht verhindern, weil die
+betroffene Klasse im Inneren von `Scrollable` sitzt. Er bleibt im
+Protokoll, bis Flutter ihn behoben hat.
+
+### Was das Fehlerprotokoll nicht aufnimmt
+
+Ins Protokoll kommt alles, was bis nach oben durchschlägt, mit genau
+einer Ausnahme: Kartenkacheln, die der Renderer verwirft (#207).
+`vector_map_tiles` beendet die Arbeit an Kacheln, die niemand mehr
+ansieht, mit einer eigenen `CancellationException`. Beim Zusammensetzen
+einer Kachel startet er aber einen Auftrag und gibt auf, bevor er auf ihn
+wartet. Der verworfene Auftrag hat dann niemanden, der zuhört, und Dart
+meldet ihn als unbehandelten Fehler, einen je Kachel. Eine geschlossene
+Karte hinterließ so ein Dutzend „CancellationException: Cancelled“ ohne
+Stack. `isDroppedTileWork` erkennt genau diese Klasse aus `executor_lib`.
+Drifts gleichnamige Klasse ist eine andere und bleibt im Protokoll.
+
 ### Der Rundgang zeigt die echten Bildschirme
 
 Der Rundgang (#173, `features/tour/`) hat acht Stationen, und jede ist

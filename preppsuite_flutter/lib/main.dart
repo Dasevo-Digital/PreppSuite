@@ -13,6 +13,7 @@ import 'core/portable_data.dart';
 import 'features/downloads/application/relink_files.dart';
 import 'features/inventory/application/inventory_photo_service.dart';
 import 'features/inventory/application/open_food_facts_service.dart';
+import 'features/maps/application/dropped_tile_work.dart';
 import 'core/error_log.dart';
 import 'core/error_display.dart';
 import 'core/app_database_directory.dart';
@@ -48,7 +49,11 @@ void main(List<String> args) async {
     presentError?.call(details);
   };
   PlatformDispatcher.instance.onError = (error, stack) {
-    ErrorLog.instance.record(error, stack, context: 'async');
+    // Except the tiles the map renderer drops once nobody looks at them:
+    // a dozen of those per closed map said nothing (#207).
+    if (!isDroppedTileWork(error)) {
+      ErrorLog.instance.record(error, stack, context: 'async');
+    }
     return true;
   };
   // A sentence instead of a grey patch where a part of a screen fails.

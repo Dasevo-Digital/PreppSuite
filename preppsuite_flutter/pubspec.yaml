@@ -138,6 +138,11 @@ dependencies:
   flutter_map: ^8.3.1
   latlong2: ^0.10.1
   vector_map_tiles: ^9.0.0-beta.13
+  # Direct, for the one type the error log has to tell apart: the
+  # renderer's executor ends dropped tile jobs with its own
+  # CancellationException; see
+  # lib/features/maps/application/dropped_tile_work.dart.
+  executor_lib: ^1.1.2
   vector_tile_renderer: ^6.1.0
   # Direct, because the offline "what is nearby" search reads the `poi`
   # layer out of the same tiles the map draws from, and the renderer
