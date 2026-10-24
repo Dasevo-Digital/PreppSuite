@@ -2594,8 +2594,10 @@ den Fehler ab, sodass auch das Log sauber bleibt. Seitdem:
 
 - `android/app/proguard-rules.pro` behält diese Klassen, wie die
   JNI-Klassen von Tesseract.
-- `tool/android_release.sh` prüft in jedem Paket, dass `getAll` seine
-  Signatur mit `Continuation` behalten hat.
+- `tool/android_release.sh` prüfte in jedem Paket, dass `getAll` seine
+  Signatur mit `Continuation` behalten hat. Seit 2.6.5 prüft es
+  stattdessen, dass gar kein JNI-Registrar mehr im Paket ist, siehe den
+  nächsten Absatz.
 - `tool/android_start_check.sh` startet das fertige arm64-Paket einmal auf
   dem eigenen Emulator (`preppsuite_test`, nie ein Telefon) und liest den
   Bildschirm über den Bedienungshilfen-Baum: die Einrichtung muss kommen,
@@ -2605,6 +2607,31 @@ den Fehler ab, sodass auch das Log sauber bleibt. Seitdem:
 Wer eine Bibliothek aktualisiert, die über JNI oder Reflection arbeitet,
 schaut zuerst in ihre eigenen R8-Regeln und lässt danach diesen Start
 laufen.
+
+**Zwei Engines, ein Eintrag (#210).** Auch nach der Korrektur öffnete
+2.6.3 auf einem Telefon mit Haushalt manchmal auf dieselbe Meldung, jetzt
+mit „ein unerwarteter Fehler“. `shared_preferences_android` 2.5 meldet
+seine native Seite in einer prozessweiten Tabelle an, unter einem einzigen
+Namen. Jede Engine trägt sich dort ein und überschreibt die vorige, und
+jede, die endet, löscht den Eintrag, egal wer ihn zuletzt gesetzt hat. Der
+Hintergrundabruf der Warnungen (WorkManager) ist eine zweite Engine im
+selben Prozess. Endete er, während die App gerade startete, fand die
+Oberfläche danach keine native Seite mehr: `ArgumentError: No instance
+with no name has been registered.` Weder „Erneut versuchen“ noch erneutes
+Öffnen half, nur ein neuer Prozess. Der Emulator zeigte das nicht, weil
+dort kein Hintergrundabruf in den Start fiel; ein frischer Start auf dem
+Emulator und das Update von 2.5.8 liefen sauber. Gefunden hat es erst das
+Lesen des Plugins, nachdem 2.6.4 den Fehler auf dem Bildschirm
+protokollierbar gemacht hatte.
+
+Deshalb hält `pubspec.yaml` das Plugin auf 2.4.28, der Fassung bis 2.5.8
+mit Kanälen je Engine. 2.5.3, die neueste beim Festlegen, hat denselben
+Fehler. `test/core/dependency_pins_test.dart` schlägt an, wenn die
+Lock-Datei wieder 2.5 auflöst, und `tool/android_release.sh` sucht im Paket
+nach `SharedPreferencesApiRegistrar`. Die R8-Regeln für die
+Coroutine-Klassen bleiben stehen, sie schaden nicht. Wer das Plugin wieder
+anhebt, prüft zuerst `onDetachedFromEngine`: Es darf nur den eigenen
+Eintrag entfernen.
 
 **Store-Fassungen** baut man mit `--dart-define=PREPPSUITE_STORE=true`
 (`core/store_build.dart`). Sie lassen den Ko-fi-Link weg (#197), weil

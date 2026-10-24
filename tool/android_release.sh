@@ -204,21 +204,23 @@ for abi in "${ABIS[@]}"; do
   [ "${code:0:1}" = "$expected_prefix" ] \
     || die "$abi: versionCode $code passt nicht zum erwarteten Offset ${expected_prefix}000."
 
-  echo "== 4c/5 $abi JNI-Signaturen pruefen =="
-  # shared_preferences_android 2.5 finds its Kotlin methods from Dart by
-  # their signature over JNI. R8 renamed kotlin.coroutines.Continuation in
-  # 2.6.0 and 2.6.1, and the settings could not be read at all (#206).
-  # Neither tests nor debug builds shrink, so it is checked in the package;
-  # proguard-rules.pro keeps the classes.
+  echo "== 4c/5 $abi Einstellungen ohne JNI-Registrar pruefen =="
+  # shared_preferences_android 2.5 registers its native side in one
+  # process-wide table, and every engine that ends removes that entry --
+  # also the one the UI put there. The background warning poll is a second
+  # engine in the process; when it ended while the app was starting, the
+  # household could not be loaded until the process restarted (#210).
+  # pubspec.yaml holds the plugin at 2.4.28, with channels per engine. A
+  # dependency update that brings 2.5 back would be invisible in every
+  # test, so the package itself is checked for its registrar.
   dex_dir="$(mktemp -d)"
   unzip -q -o "$signed" 'classes*.dex' -d "$dex_dir"
   hits="$(for dex in "$dex_dir"/classes*.dex; do "$DEXDUMP" "$dex" 2>/dev/null; done \
-    | grep -A3 "name          : 'getAll'" \
-    | grep -c 'Lkotlin/coroutines/Continuation;' || true)"
+    | grep -c "Lio/flutter/plugins/sharedpreferences/SharedPreferencesApiRegistrar;" || true)"
   rm -rf "$dex_dir"
-  echo "   getAll mit Continuation: $hits"
-  [ "${hits:-0}" -gt 0 ] \
-    || die "$abi: JNI-Signaturen von R8 umbenannt -- proguard-rules.pro pruefen (#206)."
+  echo "   SharedPreferencesApiRegistrar: $hits"
+  [ "${hits:-0}" -eq 0 ] \
+    || die "$abi: shared_preferences_android 2.5 mit JNI-Registrar im Paket -- pubspec.yaml pruefen (#210)."
 
   echo "== 5/5 $abi fertig =="
   echo "API 24-32:"; grep -i "certificate DN:\|certificate SHA-256 digest:" <<<"$old_out" | sed 's/^/  /'

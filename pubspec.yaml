@@ -40,6 +40,17 @@ dependency_overrides:
   # Vision) sind unveraendert. Siehe third_party/LIESMICH.md.
   mobile_scanner:
     path: third_party/mobile_scanner
+  # shared_preferences_android 2.5 (mit 2.6.0 gekommen) meldet seine
+  # native Seite in einer prozessweiten Tabelle unter einem einzigen Namen
+  # an, und jede Engine, die endet, loescht diesen Eintrag -- auch den, den
+  # inzwischen eine andere eingetragen hat. Der Hintergrundabruf der
+  # Warnungen ist eine zweite Engine im selben Prozess. Endete er, waehrend
+  # die App gerade startete, fand die Oberflaeche keine Einstellungen mehr:
+  # "Der Haushalt laesst sich gerade nicht laden", bis der Prozess neu
+  # startete (#210). 2.4.28 ist die Fassung bis 2.5.8, mit Kanaelen je
+  # Engine. Erst wieder anheben, wenn onDetachedFromEngine nur noch den
+  # eigenen Eintrag entfernt; tool/android_release.sh prueft das Paket.
+  shared_preferences_android: 2.4.28
   zstandard_ios:
     path: third_party/zstandard_ios
   zstandard_macos:
