@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart'
     show DriftWrappedException, InvalidDataException;
+import 'package:drift/isolate.dart' show DriftRemoteException;
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:sqlite3/common.dart' show SqliteException;
 
@@ -35,6 +36,14 @@ import 'local_database_encryption.dart';
 /// the useful recovery instruction instead.
 String describeError(AppLocalizations l10n, Object error) {
   return switch (error) {
+    // The databases run in a background isolate, and what fails there
+    // arrives wrapped; unwrapped, a disk that is full still says so
+    // instead of "an unexpected error" (#210).
+    DriftRemoteException(:final remoteCause) => describeError(
+      l10n,
+      remoteCause,
+    ),
+
     // No network. By far the most common of these, and the only one where
     // trying again is the right advice.
     SocketException() ||

@@ -8,8 +8,10 @@ import '../../home/presentation/home_shell.dart';
 import '../../sharing/application/sharing_providers.dart';
 import '../application/household_providers.dart';
 import 'setup_choice_screen.dart';
+import '../../../core/error_log.dart';
 import '../../../core/error_text.dart';
 import '../../../core/emergency_access.dart';
+import '../../settings/presentation/error_log_card.dart';
 import 'snapshot_restore_offer.dart';
 
 /// Shows first-run setup until a profile exists, then the app.
@@ -34,6 +36,10 @@ class _HouseholdGateState extends ConsumerState<HouseholdGate> {
   /// The household whose built-in checklists have already been written on
   /// this run. See [_seedChecklists].
   String? _seededFor;
+
+  /// The last load failure written to the error log, so a rebuild does
+  /// not write the same one twice.
+  Object? _logged;
 
   @override
   void initState() {
@@ -80,6 +86,16 @@ class _HouseholdGateState extends ConsumerState<HouseholdGate> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final profile = ref.watch(householdProfileProvider);
+    // A household that does not load said only "an unexpected error" on
+    // a phone after the update to 2.6.3 (#210), and the why went nowhere:
+    // the provider caught it, and the error log, which would have had it,
+    // sits behind the settings this screen stands in front of. So the
+    // failure is written there, and the log is offered right here.
+    if (profile case AsyncError(:final error, :final stackTrace)
+        when !identical(error, _logged)) {
+      _logged = error;
+      ErrorLog.instance.record(error, stackTrace, context: 'Haushalt laden');
+    }
 
     return profile.when(
       loading: () => const LoadingWithEmergencyAccess(),
@@ -87,34 +103,45 @@ class _HouseholdGateState extends ConsumerState<HouseholdGate> {
       // and with it no way to 112 or to first aid -- neither of which
       // needs the database (#136).
       error: (error, stackTrace) => Scaffold(
+        // Scrolls: with the log below it no longer fits a small phone, nor
+        // any phone at a large text size.
         body: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Icon(Icons.error_outline, size: 48),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.householdLoadFailedTitle,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(describeError(l10n, error), textAlign: TextAlign.center),
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: () => ref.invalidate(householdProfileProvider),
-                    child: Text(l10n.householdLoadRetry),
-                  ),
-                  // The day's automatic copy, if one opens cleanly (#140).
-                  const SnapshotRestoreOffer(),
-                  const SizedBox(height: 24),
-                  const EmergencyAccessButton(),
-                ],
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48),
+                    const SizedBox(height: 16),
+                    Text(
+                      l10n.householdLoadFailedTitle,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      describeError(l10n, error),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: () => ref.invalidate(householdProfileProvider),
+                      child: Text(l10n.householdLoadRetry),
+                    ),
+                    // The day's automatic copy, if one opens cleanly (#140).
+                    const SnapshotRestoreOffer(),
+                    const SizedBox(height: 24),
+                    const EmergencyAccessButton(),
+                    const SizedBox(height: 16),
+                    // What actually failed, for whoever has to find out:
+                    // the sentence above is kept plain on purpose.
+                    const ErrorLogCard(),
+                  ],
+                ),
               ),
             ),
           ),
