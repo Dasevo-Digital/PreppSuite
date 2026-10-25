@@ -24,6 +24,9 @@ import 'barcode_scanner_screen.dart';
 import 'rotation_screen.dart';
 import 'shopping_list_screen.dart';
 import '../application/supply_calculator.dart';
+import '../application/supply_group_l10n.dart';
+import '../application/supply_groups.dart';
+import 'supply_groups_screen.dart';
 import '../application/item_package.dart';
 import 'consume_dialog.dart';
 import 'inventory_csv_import_screen.dart';
@@ -729,7 +732,132 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
               const SizedBox(height: 4),
               _UnmeasuredNotice(householdId: widget.householdId, l10n: l10n),
             ],
+            const Divider(height: 24),
+            _SupplyGroupsLine(
+              householdId: widget.householdId,
+              items: items,
+              persons: household.adults + household.children,
+              days: _days,
+              l10n: l10n,
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The food groups beside water and calories (#212): how many the stores
+/// cover for the days above, which is shortest, and the way to all of it.
+///
+/// Calories alone can be ten days of noodles. The groups said so, but sat
+/// behind the "Lebensmittel" checklist and the search; here they stand
+/// where the stores are counted, counted for the same days.
+class _SupplyGroupsLine extends StatelessWidget {
+  const _SupplyGroupsLine({
+    required this.householdId,
+    required this.items,
+    required this.persons,
+    required this.days,
+    required this.l10n,
+  });
+
+  final String householdId;
+  final List<InventoryItem> items;
+  final int persons;
+  final int days;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final result = supplyGroupCoverage(
+      items: items,
+      persons: persons,
+      days: days,
+    );
+    final coverage = result.coverage;
+    final covered = coverage.where((row) => row.share >= 1).length;
+    final short = coverage.where((row) => row.share < 1).toList()
+      ..sort((a, b) => a.share.compareTo(b.share));
+    final details = [
+      l10n.supplyGroupsSummary(covered, coverage.length, days),
+      if (short.isNotEmpty)
+        l10n.supplyGroupsWeakest(
+          localizeSupplyGroup(l10n, short.first.group),
+          (short.first.share * 100).floor(),
+        ),
+      if (result.unassigned.isNotEmpty)
+        l10n.supplyGroupsUnassignedShort(result.unassigned.length),
+    ];
+
+    return Semantics(
+      button: true,
+      label: l10n.supplyGroupsOpen,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) =>
+                SupplyGroupsScreen(householdId: householdId, initialDays: days),
+          ),
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.donut_small_outlined,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.supplyGroupsTitle,
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        details.join(' · '),
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 6),
+                      // One slim bar per group, in the BLE's order: what
+                      // the sentence counts, at a glance.
+                      ExcludeSemantics(
+                        child: Row(
+                          children: [
+                            for (final row in coverage) ...[
+                              if (row != coverage.first)
+                                const SizedBox(width: 3),
+                              Expanded(
+                                child: Tooltip(
+                                  message: localizeSupplyGroup(l10n, row.group),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(2),
+                                    child: LinearProgressIndicator(
+                                      value: row.share.clamp(0, 1).toDouble(),
+                                      minHeight: 5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -939,32 +1067,36 @@ class _UnmeasuredNotice extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(AppRadius.small),
       onTap: () => showMeasureConversion(context, householdId),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-        child: Row(
-          children: [
-            Icon(
-              Icons.scale_outlined,
-              size: 16,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                l10n.foodWithoutMeasureTitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+      // At least a finger high: the line itself is only small print.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Row(
+            children: [
+              Icon(
+                Icons.scale_outlined,
+                size: 16,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  l10n.foodWithoutMeasureTitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              l10n.measureConvertTitle,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.primary,
+              const SizedBox(width: 8),
+              Text(
+                l10n.measureConvertTitle,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -784,6 +784,30 @@ class AppLocalizationsEn extends AppLocalizations {
       'Source: the crime prevention body of the German federal states and the federation (polizei-beratung.de) and the K-EINBRUCH campaign. Figures from the 2025 police crime statistics.';
 
   @override
+  String supplyGroupsSummary(int covered, int total, int days) {
+    return '$covered of $total groups covered for $days days';
+  }
+
+  @override
+  String supplyGroupsWeakest(String group, int percent) {
+    return 'shortest: $group, $percent%';
+  }
+
+  @override
+  String supplyGroupsUnassignedShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items without a group',
+      one: '1 item without a group',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get supplyGroupsOpen => 'Open the supply groups';
+
+  @override
   String get supplyGroupsTitle => 'Supply groups';
 
   @override

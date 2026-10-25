@@ -1402,6 +1402,30 @@ abstract class AppLocalizations {
   /// **'Source: the crime prevention body of the German federal states and the federation (polizei-beratung.de) and the K-EINBRUCH campaign. Figures from the 2025 police crime statistics.'**
   String get burglarySource;
 
+  /// No description provided for @supplyGroupsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{covered} of {total} groups covered for {days} days'**
+  String supplyGroupsSummary(int covered, int total, int days);
+
+  /// No description provided for @supplyGroupsWeakest.
+  ///
+  /// In en, this message translates to:
+  /// **'shortest: {group}, {percent}%'**
+  String supplyGroupsWeakest(String group, int percent);
+
+  /// No description provided for @supplyGroupsUnassignedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item without a group} other{{count} items without a group}}'**
+  String supplyGroupsUnassignedShort(int count);
+
+  /// No description provided for @supplyGroupsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the supply groups'**
+  String get supplyGroupsOpen;
+
   /// No description provided for @supplyGroupsTitle.
   ///
   /// In en, this message translates to:

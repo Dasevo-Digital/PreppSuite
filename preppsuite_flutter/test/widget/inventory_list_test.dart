@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +7,7 @@ import 'package:preppsuite_flutter/features/inventory/application/inventory_cont
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/consume_dialog.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/inventory_list_screen.dart';
+import 'package:preppsuite_flutter/features/inventory/presentation/supply_groups_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -70,6 +72,11 @@ void main() {
   /// widget tester's fake clock does not do, and `pumpAndSettle` would
   /// spin on the loading spinner until it times out.
   Future<void> pumpList(WidgetTester tester, List<InventoryItem> items) async {
+    // A phone's height: the supply card above the list has grown with the
+    // food groups (#212), and on the default 800 by 600 the rows below it
+    // start outside the screen.
+    await tester.binding.setSurfaceSize(const Size(800, 1400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -185,6 +192,32 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(consumed, isEmpty);
+  });
+
+  testWidgets('the food groups stand in the supply card and open (#212)', (
+    tester,
+  ) async {
+    // Ten days of calories can be ten days of noodles. The groups sat
+    // behind a checklist and the search; now beside water and calories.
+    await pumpList(tester, [
+      item(clientId: 'n', name: 'Nudeln', quantity: 20).copyWith(
+        unit: 'kg',
+        foodGroup: const Value('grain'),
+      ),
+      item(clientId: 'b', name: 'Bohnen', quantity: 3),
+    ]);
+
+    expect(find.text('Vorratsgruppen'), findsOneWidget);
+    expect(
+      find.textContaining('1 von 7 Gruppen für 10 Tage gedeckt'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('am knappsten:'), findsOneWidget);
+    expect(find.textContaining('1 Artikel ohne Gruppe'), findsOneWidget);
+
+    await tester.tap(find.text('Vorratsgruppen'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SupplyGroupsScreen), findsOneWidget);
   });
 
   testWidgets('the inventory list meets the accessibility guidelines', (

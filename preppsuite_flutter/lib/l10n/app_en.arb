@@ -357,6 +357,40 @@
   "burglaryPreventSide": "Side doors can be retrofitted with solid bolts, strong bars or a crossbar lock.",
   "burglaryPreventFit": "Fitted security works only where it is fitted properly. And technology does not replace the second thing the police name: security-aware behaviour and an attentive neighbourhood.",
   "burglarySource": "Source: the crime prevention body of the German federal states and the federation (polizei-beratung.de) and the K-EINBRUCH campaign. Figures from the 2025 police crime statistics.",
+  "supplyGroupsSummary": "{covered} of {total} groups covered for {days} days",
+  "@supplyGroupsSummary": {
+    "placeholders": {
+      "covered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "supplyGroupsWeakest": "shortest: {group}, {percent}%",
+  "@supplyGroupsWeakest": {
+    "placeholders": {
+      "group": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "supplyGroupsUnassignedShort": "{count, plural, =1{1 item without a group} other{{count} items without a group}}",
+  "@supplyGroupsUnassignedShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "supplyGroupsOpen": "Open the supply groups",
   "supplyGroupsTitle": "Supply groups",
   "supplyGroupsEntryHint": "Does the supply cover every group, not only the calories?",
   "supplyGroupsIntro": "Ten days of calories can be ten days of pasta. The German Federal Office for Agriculture and Food states, in its stockpiling calculator, an amount per person and day for each food group. This is your stock beside it.",

@@ -789,6 +789,30 @@ class AppLocalizationsDe extends AppLocalizations {
       'Quelle: Polizeiliche Kriminalprävention der Länder und des Bundes (polizei-beratung.de) und die Initiative K-EINBRUCH. Zahlen aus der Polizeilichen Kriminalstatistik 2025.';
 
   @override
+  String supplyGroupsSummary(int covered, int total, int days) {
+    return '$covered von $total Gruppen für $days Tage gedeckt';
+  }
+
+  @override
+  String supplyGroupsWeakest(String group, int percent) {
+    return 'am knappsten: $group, $percent %';
+  }
+
+  @override
+  String supplyGroupsUnassignedShort(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Artikel ohne Gruppe',
+      one: '1 Artikel ohne Gruppe',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get supplyGroupsOpen => 'Vorratsgruppen öffnen';
+
+  @override
   String get supplyGroupsTitle => 'Vorratsgruppen';
 
   @override

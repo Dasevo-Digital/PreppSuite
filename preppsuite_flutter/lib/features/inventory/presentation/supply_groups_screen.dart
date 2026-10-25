@@ -23,20 +23,27 @@ import '../application/supply_groups.dart';
 /// are in neither — because a figure that quietly leaves rows out is worse
 /// than no figure.
 class SupplyGroupsScreen extends ConsumerStatefulWidget {
-  const SupplyGroupsScreen({super.key, required this.householdId});
+  const SupplyGroupsScreen({
+    super.key,
+    required this.householdId,
+    this.initialDays = 10,
+  });
 
   final String householdId;
+
+  /// The days to start at; from the supply card, the days it shows (#212).
+  final int initialDays;
 
   @override
   ConsumerState<SupplyGroupsScreen> createState() => _SupplyGroupsScreenState();
 }
 
 class _SupplyGroupsScreenState extends ConsumerState<SupplyGroupsScreen> {
-  /// The same ten days the supply calculator starts at. Kept here rather
-  /// than shared with that screen: the two are looked at in different
-  /// sittings, and a stepper that moved behind your back on the other
-  /// screen would be a surprise, not a convenience.
-  int _days = 10;
+  /// Starts where it was opened from -- the supply card hands over its
+  /// own days -- and is this screen's own from then on: a stepper that
+  /// moved behind your back on the other screen would be a surprise, not
+  /// a convenience.
+  late int _days = widget.initialDays;
 
   @override
   Widget build(BuildContext context) {
