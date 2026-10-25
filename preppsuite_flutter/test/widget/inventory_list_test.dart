@@ -194,6 +194,26 @@ void main() {
     expect(consumed, isEmpty);
   });
 
+  testWidgets('a row with more photos says how many more (#211)', (
+    tester,
+  ) async {
+    await pumpList(tester, [
+      item(clientId: 'a', name: 'Linsen').copyWith(
+        photoPath: const Value('p/a.jpg'),
+        secondPhotoPath: const Value('p/b.jpg'),
+        thirdPhotoPath: const Value('p/c.jpg'),
+      ),
+      item(clientId: 'b', name: 'Reis').copyWith(
+        photoPath: const Value('p/r.jpg'),
+      ),
+    ]);
+
+    expect(find.text('+2'), findsOneWidget);
+    // Read out as part of the row, which merges what it holds.
+    expect(find.bySemanticsLabel(RegExp('2 weitere Fotos')), findsOneWidget);
+    expect(find.text('+0'), findsNothing);
+  });
+
   testWidgets('the food groups stand in the supply card and open (#212)', (
     tester,
   ) async {

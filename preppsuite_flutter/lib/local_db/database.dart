@@ -34,7 +34,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 26;
+  static const currentSchemaVersion = 27;
 
   AppDatabase() : super(_openConnection()) {
     OpenDatabases.track(this);
@@ -238,6 +238,8 @@ class AppDatabase extends _$AppDatabase {
               inventoryItems.stockCountedAt,
               inventoryItems.chargeEveryDays,
               inventoryItems.chargeCheckedAt,
+              inventoryItems.secondPhotoPath,
+              inventoryItems.thirdPhotoPath,
             ],
           ),
         );
@@ -385,6 +387,8 @@ class AppDatabase extends _$AppDatabase {
                 inventoryItems.stockCountedAt,
                 inventoryItems.chargeEveryDays,
                 inventoryItems.chargeCheckedAt,
+                inventoryItems.secondPhotoPath,
+                inventoryItems.thirdPhotoPath,
               ],
             ),
           );
@@ -618,6 +622,24 @@ class AppDatabase extends _$AppDatabase {
           );
         }
       }
+      if (from < 27) {
+        // A second and third photo per item (#211). Null after the
+        // upgrade, which is "no further photo" -- what every row had.
+        if (!await _hasTable('inventory_items')) {
+          await m.createTable(inventoryItems);
+        } else {
+          await _addColumnOnce(
+            m,
+            inventoryItems,
+            inventoryItems.secondPhotoPath,
+          );
+          await _addColumnOnce(
+            m,
+            inventoryItems,
+            inventoryItems.thirdPhotoPath,
+          );
+        }
+      }
     },
   );
 
@@ -788,16 +810,26 @@ class AppDatabase extends _$AppDatabase {
   /// `updatedAt` or raise `dirty`. If it did, taking in a photo would look
   /// to every other device like an edit and push the row straight back
   /// out again, with a path that means nothing over there.
+  ///
+  /// [slot] is the photo's place on the item, 0 to 2 (#211); 0 is
+  /// [InventoryItems.photoPath], the one the list shows.
   Future<int> setInventoryPhotoPath({
     required String householdId,
     required String clientId,
     required String photoPath,
+    int slot = 0,
   }) {
+    final path = Value<String?>(photoPath);
     return (update(inventoryItems)..where(
           (t) =>
               t.householdId.equals(householdId) & t.clientId.equals(clientId),
         ))
-        .write(InventoryItemsCompanion(photoPath: Value(photoPath)));
+        .write(switch (slot) {
+          0 => InventoryItemsCompanion(photoPath: path),
+          1 => InventoryItemsCompanion(secondPhotoPath: path),
+          2 => InventoryItemsCompanion(thirdPhotoPath: path),
+          _ => throw RangeError.range(slot, 0, 2, 'slot'),
+        });
   }
 
   /// The same for the possessions list. See [setInventoryPhotoPath].
@@ -1561,6 +1593,8 @@ class AppDatabase extends _$AppDatabase {
     final columns = companion.toColumns(false)
       ..remove('dirty')
       ..remove('photo_path')
+      ..remove('second_photo_path')
+      ..remove('third_photo_path')
       ..remove('updated_at');
     final names = columns.keys.toList()..sort();
     Object? valueOf(String name) {

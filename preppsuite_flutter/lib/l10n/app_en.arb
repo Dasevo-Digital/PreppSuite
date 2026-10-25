@@ -169,6 +169,27 @@
   "takePhotoButton": "Take photo",
   "chooseFromGalleryButton": "Choose from gallery",
   "removePhotoButton": "Remove photo",
+  "itemPhotoNumbered": "Photo {number} of {count}",
+  "@itemPhotoNumbered": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "itemPhotosHint": "Up to three photos. The first one is shown in the list.",
+  "photoMakeFirstButton": "Show this one first",
+  "itemMorePhotos": "{count, plural, =1{1 more photo} other{{count} more photos}}",
+  "@itemMorePhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "csvImportButton": "Import CSV",
   "csvImportTitle": "Import CSV",
   "csvImportInstructionsTitle": "Expected format",

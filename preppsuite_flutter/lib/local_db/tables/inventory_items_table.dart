@@ -182,6 +182,16 @@ class InventoryItems extends Table {
   /// folder. The shared-folder merge leaves this column alone.
   TextColumn get photoPath => text().nullable()();
 
+  /// The second and third photo of the item (#211): the same kind of
+  /// device-local path as [photoPath], left out of every snapshot for the
+  /// same reason. [photoPath] stays the first, the one the list shows.
+  ///
+  /// Two columns rather than one list, because a handover brings pictures
+  /// one at a time and not always all of them: a third photo can arrive
+  /// before the second, and a column per place keeps where it belongs.
+  TextColumn get secondPhotoPath => text().nullable()();
+  TextColumn get thirdPhotoPath => text().nullable()();
+
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();
   BoolColumn get dirty => boolean().withDefault(const Constant(true))();

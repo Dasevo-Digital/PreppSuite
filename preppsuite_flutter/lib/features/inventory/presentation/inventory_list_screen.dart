@@ -511,7 +511,7 @@ class _InventoryTile extends ConsumerWidget {
         item.expirationDate?.isBefore(DateTime(now.year, now.month, now.day)) ??
         false;
 
-    final photoPath = item.photoPath;
+    final photos = item.photoPaths;
     // Read from the row itself: a watch here would be one per row (see
     // "Was eine Liste je Zeile kostet").
     final charge = deviceChargeCheck(item);
@@ -519,16 +519,8 @@ class _InventoryTile extends ConsumerWidget {
     final chargeDue = charge?.isDue(now: now) ?? false;
 
     return ListTile(
-      leading: photoPath != null
-          ? CircleAvatar(
-              backgroundImage: ResizeImage.resizeIfNeeded(
-                96,
-                96,
-                StoredPhotoImage(
-                  InventoryPhotoService.resolvePhotoPath(photoPath),
-                ),
-              ),
-            )
+      leading: photos.isNotEmpty
+          ? _ItemThumbnail(photos: photos, l10n: l10n)
           : CircleAvatar(child: Icon(categoryIcon(category))),
       title: Text(item.name),
       subtitle: Column(
@@ -742,6 +734,38 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// The first photo of an item, with a small count of the others (#211).
+///
+/// The count is how the list says there is more to see without making
+/// the row taller: the other photos are in the form, one tap away.
+class _ItemThumbnail extends StatelessWidget {
+  const _ItemThumbnail({required this.photos, required this.l10n});
+
+  final List<String> photos;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final more = photos.length - 1;
+    final avatar = CircleAvatar(
+      backgroundImage: ResizeImage.resizeIfNeeded(
+        96,
+        96,
+        StoredPhotoImage(InventoryPhotoService.resolvePhotoPath(photos.first)),
+      ),
+    );
+    if (more <= 0) return avatar;
+    return Semantics(
+      label: l10n.itemMorePhotos(more),
+      child: Badge(
+        label: ExcludeSemantics(child: Text('+$more')),
+        offset: const Offset(4, -4),
+        child: avatar,
       ),
     );
   }

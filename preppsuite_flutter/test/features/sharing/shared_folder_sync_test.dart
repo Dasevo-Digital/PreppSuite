@@ -51,6 +51,8 @@ void main() {
     DateTime? updatedAt,
     DateTime? deletedAt,
     String? photoPath,
+    String? secondPhotoPath,
+    String? thirdPhotoPath,
   }) {
     return InventoryItemsCompanion.insert(
       clientId: clientId,
@@ -61,6 +63,8 @@ void main() {
       unit: 'Flasche',
       storageLocation: 'Keller',
       photoPath: Value(photoPath),
+      secondPhotoPath: Value(secondPhotoPath),
+      thirdPhotoPath: Value(thirdPhotoPath),
       updatedAt: updatedAt ?? DateTime.utc(2026, 1, 1),
       deletedAt: Value(deletedAt),
       dirty: const Value(true),
@@ -160,10 +164,20 @@ void main() {
     () async {
       final time = DateTime.utc(2026, 2);
       await phone.upsertInventoryItem(
-        water(updatedAt: time, deletedAt: time, photoPath: 'phone.jpg'),
+        water(
+          updatedAt: time,
+          deletedAt: time,
+          photoPath: 'phone.jpg',
+          secondPhotoPath: 'phone-2.jpg',
+        ),
       );
       await laptop.upsertInventoryItem(
-        water(updatedAt: time, name: 'Z edited', photoPath: 'laptop.jpg'),
+        water(
+          updatedAt: time,
+          name: 'Z edited',
+          photoPath: 'laptop.jpg',
+          thirdPhotoPath: 'laptop-3.jpg',
+        ),
       );
       for (var i = 0; i < 3; i++) {
         await serviceFor(laptop, 'laptop').sync();
@@ -173,6 +187,10 @@ void main() {
       expect((await storedWater(laptop))?.deletedAt?.toUtc(), time);
       expect((await storedWater(phone))?.photoPath, 'phone.jpg');
       expect((await storedWater(laptop))?.photoPath, 'laptop.jpg');
+      expect((await storedWater(phone))?.secondPhotoPath, 'phone-2.jpg');
+      expect((await storedWater(phone))?.thirdPhotoPath, isNull);
+      expect((await storedWater(laptop))?.thirdPhotoPath, 'laptop-3.jpg');
+      expect((await storedWater(laptop))?.secondPhotoPath, isNull);
     },
   );
 
@@ -351,7 +369,13 @@ void main() {
     'a remote row winning does not wipe the local photo, which never '
     'travels in the first place',
     () async {
-      await phone.upsertInventoryItem(water(photoPath: 'photos/water.jpg'));
+      await phone.upsertInventoryItem(
+        water(
+          photoPath: 'photos/water.jpg',
+          secondPhotoPath: 'photos/water-2.jpg',
+          thirdPhotoPath: 'photos/water-3.jpg',
+        ),
+      );
       await serviceFor(phone, 'phone').sync();
       await serviceFor(laptop, 'laptop').sync();
 
@@ -364,6 +388,8 @@ void main() {
       final row = await storedWater(phone);
       expect(row?.quantity, 24, reason: 'the newer row was applied');
       expect(row?.photoPath, 'photos/water.jpg');
+      expect(row?.secondPhotoPath, 'photos/water-2.jpg');
+      expect(row?.thirdPhotoPath, 'photos/water-3.jpg');
     },
   );
 

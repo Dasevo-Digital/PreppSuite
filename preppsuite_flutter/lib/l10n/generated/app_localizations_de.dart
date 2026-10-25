@@ -367,6 +367,28 @@ class AppLocalizationsDe extends AppLocalizations {
   String get removePhotoButton => 'Foto entfernen';
 
   @override
+  String itemPhotoNumbered(int number, int count) {
+    return 'Foto $number von $count';
+  }
+
+  @override
+  String get itemPhotosHint => 'Bis zu drei Fotos. Das erste zeigt die Liste.';
+
+  @override
+  String get photoMakeFirstButton => 'Als erstes Foto zeigen';
+
+  @override
+  String itemMorePhotos(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weitere Fotos',
+      one: '1 weiteres Foto',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get csvImportButton => 'CSV importieren';
 
   @override

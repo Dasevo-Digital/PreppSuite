@@ -287,13 +287,19 @@ void main() {
           unit: 'Flasche',
           storageLocation: 'Keller',
           photoPath: 'photos/water.jpg',
+          secondPhotoPath: 'photos/water-2.jpg',
+          thirdPhotoPath: 'photos/water-3.jpg',
           updatedAt: DateTime.utc(2026),
           dirty: true,
         ),
       );
 
       expect(encoded.containsKey('photoPath'), isFalse);
+      expect(encoded.containsKey('secondPhotoPath'), isFalse);
+      expect(encoded.containsKey('thirdPhotoPath'), isFalse);
       expect(encoded.values, isNot(contains('photos/water.jpg')));
+      expect(encoded.values, isNot(contains('photos/water-2.jpg')));
+      expect(encoded.values, isNot(contains('photos/water-3.jpg')));
       expect(encoded['clientId'], 'water');
     });
   });

@@ -174,6 +174,55 @@ void main() {
     );
   });
 
+  test('a second photo of an item comes back as the second (#211)', () async {
+    BackupCandidate photo(int index, String label, Map<String, Object?> meta) =>
+        BackupCandidate(
+          entry: BackupFileEntry(
+            index: index,
+            kind: BackupFileKind.photo,
+            label: label,
+            size: photoBytes.length,
+            meta: meta,
+          ),
+          open: () async => MemoryByteRangeSource(photoBytes),
+        );
+    final file = await write(
+      files: [
+        photo(0, 'a.jpg', const {'owner': 'inventory', 'clientId': 'water'}),
+        photo(1, 'b.jpg', const {
+          'owner': 'inventory',
+          'clientId': 'water',
+          'slot': 1,
+        }),
+        // A place no item has: refused rather than guessed at.
+        photo(2, 'c.jpg', const {
+          'owner': 'inventory',
+          'clientId': 'water',
+          'slot': 5,
+        }),
+      ],
+    );
+    final opened = (await open(file))!;
+
+    final into = targetsInto(Directory('${temp.path}/ziel'));
+    final result = await restoreBackupFiles(
+      reader: opened.file.reader!,
+      key: opened.key,
+      manifest: opened.files,
+      selected: {0, 1, 2},
+      targets: into.targets,
+    );
+
+    expect(
+      {for (final photo in into.photos) photo.name: photo.slot},
+      {
+        'a.jpg': 0,
+        'b.jpg': 1,
+      },
+    );
+    expect(result.failed, ['c.jpg']);
+  });
+
   test('private files are encrypted, public ones are not', () async {
     final bytes = await (await write()).readAsBytes();
     final text = latin1.decode(bytes);

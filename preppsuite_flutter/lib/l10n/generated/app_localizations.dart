@@ -730,6 +730,30 @@ abstract class AppLocalizations {
   /// **'Remove photo'**
   String get removePhotoButton;
 
+  /// No description provided for @itemPhotoNumbered.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {number} of {count}'**
+  String itemPhotoNumbered(int number, int count);
+
+  /// No description provided for @itemPhotosHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to three photos. The first one is shown in the list.'**
+  String get itemPhotosHint;
+
+  /// No description provided for @photoMakeFirstButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Show this one first'**
+  String get photoMakeFirstButton;
+
+  /// No description provided for @itemMorePhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more photo} other{{count} more photos}}'**
+  String itemMorePhotos(int count);
+
   /// No description provided for @csvImportButton.
   ///
   /// In en, this message translates to:

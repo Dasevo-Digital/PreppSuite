@@ -315,6 +315,28 @@ class $InventoryItemsTable extends InventoryItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _secondPhotoPathMeta = const VerificationMeta(
+    'secondPhotoPath',
+  );
+  @override
+  late final GeneratedColumn<String> secondPhotoPath = GeneratedColumn<String>(
+    'second_photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _thirdPhotoPathMeta = const VerificationMeta(
+    'thirdPhotoPath',
+  );
+  @override
+  late final GeneratedColumn<String> thirdPhotoPath = GeneratedColumn<String>(
+    'third_photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -380,6 +402,8 @@ class $InventoryItemsTable extends InventoryItems
     chargeCheckedAt,
     notes,
     photoPath,
+    secondPhotoPath,
+    thirdPhotoPath,
     updatedAt,
     deletedAt,
     dirty,
@@ -620,6 +644,24 @@ class $InventoryItemsTable extends InventoryItems
         photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
       );
     }
+    if (data.containsKey('second_photo_path')) {
+      context.handle(
+        _secondPhotoPathMeta,
+        secondPhotoPath.isAcceptableOrUnknown(
+          data['second_photo_path']!,
+          _secondPhotoPathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('third_photo_path')) {
+      context.handle(
+        _thirdPhotoPathMeta,
+        thirdPhotoPath.isAcceptableOrUnknown(
+          data['third_photo_path']!,
+          _thirdPhotoPathMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -760,6 +802,14 @@ class $InventoryItemsTable extends InventoryItems
       photoPath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}photo_path'],
+      ),
+      secondPhotoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}second_photo_path'],
+      ),
+      thirdPhotoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}third_photo_path'],
       ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -955,6 +1005,16 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   /// nothing on another device, and the picture itself is not in the
   /// folder. The shared-folder merge leaves this column alone.
   final String? photoPath;
+
+  /// The second and third photo of the item (#211): the same kind of
+  /// device-local path as [photoPath], left out of every snapshot for the
+  /// same reason. [photoPath] stays the first, the one the list shows.
+  ///
+  /// Two columns rather than one list, because a handover brings pictures
+  /// one at a time and not always all of them: a third photo can arrive
+  /// before the second, and a column per place keeps where it belongs.
+  final String? secondPhotoPath;
+  final String? thirdPhotoPath;
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final bool dirty;
@@ -987,6 +1047,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     this.chargeCheckedAt,
     this.notes,
     this.photoPath,
+    this.secondPhotoPath,
+    this.thirdPhotoPath,
     required this.updatedAt,
     this.deletedAt,
     required this.dirty,
@@ -1063,6 +1125,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     }
     if (!nullToAbsent || photoPath != null) {
       map['photo_path'] = Variable<String>(photoPath);
+    }
+    if (!nullToAbsent || secondPhotoPath != null) {
+      map['second_photo_path'] = Variable<String>(secondPhotoPath);
+    }
+    if (!nullToAbsent || thirdPhotoPath != null) {
+      map['third_photo_path'] = Variable<String>(thirdPhotoPath);
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -1144,6 +1212,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       photoPath: photoPath == null && nullToAbsent
           ? const Value.absent()
           : Value(photoPath),
+      secondPhotoPath: secondPhotoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(secondPhotoPath),
+      thirdPhotoPath: thirdPhotoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thirdPhotoPath),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
@@ -1188,6 +1262,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       chargeCheckedAt: serializer.fromJson<DateTime?>(json['chargeCheckedAt']),
       notes: serializer.fromJson<String?>(json['notes']),
       photoPath: serializer.fromJson<String?>(json['photoPath']),
+      secondPhotoPath: serializer.fromJson<String?>(json['secondPhotoPath']),
+      thirdPhotoPath: serializer.fromJson<String?>(json['thirdPhotoPath']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       dirty: serializer.fromJson<bool>(json['dirty']),
@@ -1225,6 +1301,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'chargeCheckedAt': serializer.toJson<DateTime?>(chargeCheckedAt),
       'notes': serializer.toJson<String?>(notes),
       'photoPath': serializer.toJson<String?>(photoPath),
+      'secondPhotoPath': serializer.toJson<String?>(secondPhotoPath),
+      'thirdPhotoPath': serializer.toJson<String?>(thirdPhotoPath),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'dirty': serializer.toJson<bool>(dirty),
@@ -1260,6 +1338,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     Value<DateTime?> chargeCheckedAt = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<String?> photoPath = const Value.absent(),
+    Value<String?> secondPhotoPath = const Value.absent(),
+    Value<String?> thirdPhotoPath = const Value.absent(),
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     bool? dirty,
@@ -1306,6 +1386,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
         : this.chargeCheckedAt,
     notes: notes.present ? notes.value : this.notes,
     photoPath: photoPath.present ? photoPath.value : this.photoPath,
+    secondPhotoPath: secondPhotoPath.present
+        ? secondPhotoPath.value
+        : this.secondPhotoPath,
+    thirdPhotoPath: thirdPhotoPath.present
+        ? thirdPhotoPath.value
+        : this.thirdPhotoPath,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     dirty: dirty ?? this.dirty,
@@ -1370,6 +1456,12 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           : this.chargeCheckedAt,
       notes: data.notes.present ? data.notes.value : this.notes,
       photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
+      secondPhotoPath: data.secondPhotoPath.present
+          ? data.secondPhotoPath.value
+          : this.secondPhotoPath,
+      thirdPhotoPath: data.thirdPhotoPath.present
+          ? data.thirdPhotoPath.value
+          : this.thirdPhotoPath,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
@@ -1407,6 +1499,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ..write('chargeCheckedAt: $chargeCheckedAt, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
+          ..write('secondPhotoPath: $secondPhotoPath, ')
+          ..write('thirdPhotoPath: $thirdPhotoPath, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('dirty: $dirty')
@@ -1444,6 +1538,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     chargeCheckedAt,
     notes,
     photoPath,
+    secondPhotoPath,
+    thirdPhotoPath,
     updatedAt,
     deletedAt,
     dirty,
@@ -1480,6 +1576,8 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           other.chargeCheckedAt == this.chargeCheckedAt &&
           other.notes == this.notes &&
           other.photoPath == this.photoPath &&
+          other.secondPhotoPath == this.secondPhotoPath &&
+          other.thirdPhotoPath == this.thirdPhotoPath &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.dirty == this.dirty);
@@ -1514,6 +1612,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<DateTime?> chargeCheckedAt;
   final Value<String?> notes;
   final Value<String?> photoPath;
+  final Value<String?> secondPhotoPath;
+  final Value<String?> thirdPhotoPath;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<bool> dirty;
@@ -1547,6 +1647,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.chargeCheckedAt = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
+    this.secondPhotoPath = const Value.absent(),
+    this.thirdPhotoPath = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.dirty = const Value.absent(),
@@ -1581,6 +1683,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.chargeCheckedAt = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
+    this.secondPhotoPath = const Value.absent(),
+    this.thirdPhotoPath = const Value.absent(),
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.dirty = const Value.absent(),
@@ -1622,6 +1726,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<DateTime>? chargeCheckedAt,
     Expression<String>? notes,
     Expression<String>? photoPath,
+    Expression<String>? secondPhotoPath,
+    Expression<String>? thirdPhotoPath,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<bool>? dirty,
@@ -1656,6 +1762,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       if (chargeCheckedAt != null) 'charge_checked_at': chargeCheckedAt,
       if (notes != null) 'notes': notes,
       if (photoPath != null) 'photo_path': photoPath,
+      if (secondPhotoPath != null) 'second_photo_path': secondPhotoPath,
+      if (thirdPhotoPath != null) 'third_photo_path': thirdPhotoPath,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (dirty != null) 'dirty': dirty,
@@ -1692,6 +1800,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Value<DateTime?>? chargeCheckedAt,
     Value<String?>? notes,
     Value<String?>? photoPath,
+    Value<String?>? secondPhotoPath,
+    Value<String?>? thirdPhotoPath,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<bool>? dirty,
@@ -1726,6 +1836,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       chargeCheckedAt: chargeCheckedAt ?? this.chargeCheckedAt,
       notes: notes ?? this.notes,
       photoPath: photoPath ?? this.photoPath,
+      secondPhotoPath: secondPhotoPath ?? this.secondPhotoPath,
+      thirdPhotoPath: thirdPhotoPath ?? this.thirdPhotoPath,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       dirty: dirty ?? this.dirty,
@@ -1820,6 +1932,12 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     if (photoPath.present) {
       map['photo_path'] = Variable<String>(photoPath.value);
     }
+    if (secondPhotoPath.present) {
+      map['second_photo_path'] = Variable<String>(secondPhotoPath.value);
+    }
+    if (thirdPhotoPath.present) {
+      map['third_photo_path'] = Variable<String>(thirdPhotoPath.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -1866,6 +1984,8 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
           ..write('chargeCheckedAt: $chargeCheckedAt, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
+          ..write('secondPhotoPath: $secondPhotoPath, ')
+          ..write('thirdPhotoPath: $thirdPhotoPath, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('dirty: $dirty, ')

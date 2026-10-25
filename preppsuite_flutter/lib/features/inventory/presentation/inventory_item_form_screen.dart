@@ -1,6 +1,7 @@
 import 'dart:async' show unawaited;
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -116,7 +117,9 @@ class _InventoryItemFormScreenState
   DateTime? _chargeCheckedAt;
   String? _barcode;
   String? _offProductId;
-  String? _photoPath;
+
+  /// Up to [maxItemPhotos], the first being the one the list shows (#211).
+  List<String> _photoPaths = const [];
   bool _isSubmitting = false;
   bool _isScanning = false;
   bool _allowPop = false;
@@ -151,7 +154,7 @@ class _InventoryItemFormScreenState
     _chargeCheckedAt?.toIso8601String(),
     _barcode,
     _offProductId,
-    _photoPath,
+    _photoPaths,
   ]);
   bool get _hasChanges => _signature != _initialSignature;
 
@@ -278,7 +281,7 @@ class _InventoryItemFormScreenState
     _chargeCheckedAt = existing?.chargeCheckedAt?.toLocal();
     _barcode = existing?.barcode;
     _offProductId = existing?.offProductId;
-    _photoPath = existing?.photoPath;
+    _photoPaths = [...?existing?.photoPaths];
     _initialSignature = _signature;
     for (final controller in _controllers) {
       controller.addListener(_onFieldChanged);
@@ -374,37 +377,60 @@ class _InventoryItemFormScreenState
     }
   }
 
-  Future<void> _replacePhoto(String? newPath) async {
+  /// The photos the item had when the form opened. They stay on disk
+  /// until a save leaves them out.
+  List<String> get _savedPhotos => widget.existing?.photoPaths ?? const [];
+
+  /// Puts [newPath] at [index], or after the last photo when [index] is
+  /// the number of photos there are.
+  Future<void> _putPhoto(int index, String? newPath) async {
     if (newPath == null) return;
     if (!mounted) {
       await const InventoryPhotoService().delete(newPath);
       return;
     }
-    final oldPath = _photoPath;
-    if (newPath != widget.existing?.photoPath) _sessionPhotos.add(newPath);
-    setState(() => _photoPath = newPath);
+    final oldPath = index < _photoPaths.length ? _photoPaths[index] : null;
+    if (!_savedPhotos.contains(newPath)) _sessionPhotos.add(newPath);
+    setState(() {
+      _photoPaths = [
+        for (final (place, path) in _photoPaths.indexed)
+          place == index ? newPath : path,
+        if (index == _photoPaths.length) newPath,
+      ];
+    });
     // Persisted photos remain available if the user discards this form.
-    if (oldPath != newPath && _sessionPhotos.remove(oldPath)) {
+    if (oldPath != null &&
+        oldPath != newPath &&
+        _sessionPhotos.remove(oldPath)) {
       await const InventoryPhotoService().delete(oldPath);
     }
   }
 
-  /// Picks a photo and offers to trim it before it is kept.
+  /// Picks a photo and offers to trim it before it is kept: in place of
+  /// the one at [replacing], or after the others.
   ///
   /// The editor runs on the copy that was just saved, and backing out of
   /// it keeps that copy — the picture is already the one the user chose,
   /// and throwing it away because they decided not to crop would be a
   /// surprise.
-  Future<void> _addPhoto(Future<String?> Function() pick) async {
+  Future<void> _addPhoto(
+    Future<String?> Function() pick, {
+    int? replacing,
+  }) async {
     final picked = await pick();
     if (picked == null) return;
-    await _replacePhoto(picked);
-    if (mounted) await _editPhoto();
+    final index = replacing ?? _photoPaths.length;
+    if (index >= maxItemPhotos) {
+      await const InventoryPhotoService().delete(picked);
+      return;
+    }
+    await _putPhoto(index, picked);
+    if (mounted) await _editPhoto(index);
   }
 
-  Future<void> _editPhoto() async {
-    final path = _photoPath;
-    if (path == null) return;
+  Future<void> _editPhoto(int index) async {
+    if (index >= _photoPaths.length) return;
+    final path = _photoPaths[index];
 
     final edited = await Navigator.of(context).push<Uint8List>(
       MaterialPageRoute(
@@ -415,18 +441,37 @@ class _InventoryItemFormScreenState
     );
     if (edited == null || !mounted) return;
 
-    await _replacePhoto(await const InventoryPhotoService().saveBytes(edited));
+    final saved = await const InventoryPhotoService().saveBytes(edited);
+    // Found again by its path: a photo that is no longer in the form
+    // while the editor was open is not one to put the result in place of.
+    final now = _photoPaths.indexOf(path);
+    if (now < 0) {
+      await const InventoryPhotoService().delete(saved);
+      return;
+    }
+    await _putPhoto(now, saved);
   }
 
-  Future<void> _removePhoto() async {
-    final oldPath = _photoPath;
-    setState(() => _photoPath = null);
+  Future<void> _removePhoto(int index) async {
+    if (index >= _photoPaths.length) return;
+    final oldPath = _photoPaths[index];
+    setState(() => _photoPaths = [..._photoPaths]..removeAt(index));
     if (_sessionPhotos.remove(oldPath)) {
       await const InventoryPhotoService().delete(oldPath);
     }
   }
 
-  Future<void> _showPhotoOptions() async {
+  /// Moves the photo at [index] to the front, where the list shows it.
+  void _showFirst(int index) {
+    if (index <= 0 || index >= _photoPaths.length) return;
+    setState(() {
+      final moved = _photoPaths[index];
+      _photoPaths = [moved, ..._photoPaths.where((path) => path != moved)];
+    });
+  }
+
+  /// The choices for one photo, or for a new one when [index] is null.
+  Future<void> _showPhotoOptions({int? index}) async {
     final l10n = AppLocalizations.of(context)!;
     const service = InventoryPhotoService();
 
@@ -442,7 +487,7 @@ class _InventoryItemFormScreenState
                 title: Text(l10n.takePhotoButton),
                 onTap: () async {
                   Navigator.of(context).pop();
-                  await _addPhoto(service.pickFromCamera);
+                  await _addPhoto(service.pickFromCamera, replacing: index);
                 },
               ),
             ListTile(
@@ -450,24 +495,33 @@ class _InventoryItemFormScreenState
               title: Text(l10n.chooseFromGalleryButton),
               onTap: () async {
                 Navigator.of(context).pop();
-                await _addPhoto(service.pickFromGallery);
+                await _addPhoto(service.pickFromGallery, replacing: index);
               },
             ),
-            if (_photoPath != null) ...[
+            if (index != null) ...[
               ListTile(
                 leading: const Icon(Icons.crop),
                 title: Text(l10n.editPhotoButton),
                 onTap: () async {
                   Navigator.of(context).pop();
-                  await _editPhoto();
+                  await _editPhoto(index);
                 },
               ),
+              if (index > 0)
+                ListTile(
+                  leading: const Icon(Icons.first_page),
+                  title: Text(l10n.photoMakeFirstButton),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    _showFirst(index);
+                  },
+                ),
               ListTile(
                 leading: const Icon(Icons.delete_outline),
                 title: Text(l10n.removePhotoButton),
                 onTap: () {
                   Navigator.of(context).pop();
-                  _removePhoto();
+                  _removePhoto(index);
                 },
               ),
             ],
@@ -669,7 +723,7 @@ class _InventoryItemFormScreenState
           notes: notes.isEmpty ? null : notes,
           barcode: _barcode,
           offProductId: _offProductId,
-          photoPath: _photoPath,
+          photoPaths: _photoPaths,
           nutrition: nutrition,
           memberId: memberId,
           refillLeadDays: refillLeadDays,
@@ -692,7 +746,7 @@ class _InventoryItemFormScreenState
           notes: notes.isEmpty ? null : notes,
           barcode: _barcode,
           offProductId: _offProductId,
-          photoPath: _photoPath,
+          photoPaths: _photoPaths,
           nutrition: nutrition,
           memberId: memberId,
           refillLeadDays: refillLeadDays,
@@ -701,10 +755,11 @@ class _InventoryItemFormScreenState
         );
       }
 
-      _sessionPhotos.remove(_photoPath);
-      final originalPhoto = widget.existing?.photoPath;
-      if (originalPhoto != null && originalPhoto != _photoPath) {
-        await const InventoryPhotoService().delete(originalPhoto);
+      _sessionPhotos.removeAll(_photoPaths);
+      for (final original in _savedPhotos) {
+        if (!_photoPaths.contains(original)) {
+          await const InventoryPhotoService().delete(original);
+        }
       }
       await _finish();
     } catch (error) {
@@ -808,12 +863,21 @@ class _InventoryItemFormScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Center(
-                        child: _PhotoPicker(
-                          photoPath: _photoPath,
-                          onTap: _isSubmitting ? null : _showPhotoOptions,
-                        ),
+                      _PhotoStrip(
+                        photoPaths: _photoPaths,
+                        onAdd: _isSubmitting ? null : _showPhotoOptions,
+                        onOpen: _isSubmitting
+                            ? null
+                            : (index) => _showPhotoOptions(index: index),
                       ),
+                      if (_photoPaths.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.itemPhotosHint,
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       if (_barcode != null) ...[
                         Chip(
@@ -1453,74 +1517,133 @@ class _GramsField extends StatelessWidget {
   }
 }
 
-/// A tappable square that shows the item's photo, or a placeholder icon
-/// with an "add photo" affordance if there isn't one yet.
-class _PhotoPicker extends StatelessWidget {
-  const _PhotoPicker({required this.photoPath, required this.onTap});
+/// The item's photos side by side, and a tile to add one while there is
+/// room for another (#211).
+///
+/// Without a photo it is the one large tile it always was, with a label
+/// saying what it is for. With photos the tiles share the row, and the
+/// add tile says it with its icon: three labelled tiles do not fit a
+/// phone at a large font.
+class _PhotoStrip extends StatelessWidget {
+  const _PhotoStrip({
+    required this.photoPaths,
+    required this.onAdd,
+    required this.onOpen,
+  });
 
-  final String? photoPath;
-  final VoidCallback? onTap;
+  final List<String> photoPaths;
+  final VoidCallback? onAdd;
+  final void Function(int index)? onOpen;
+
+  static const _gap = 12.0;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
-    final photoPath = this.photoPath;
+    final onOpen = this.onOpen;
 
-    final side = MediaQuery.textScalerOf(
+    // A square by design — it stands in for a photograph, and a
+    // photograph does not get bigger with the system font. But the empty
+    // tile holds a label as well, so it has to give a little: at twice
+    // the font size the icon and two lines of text were 6 pixels taller
+    // than the tile and got clipped. Capped at 1.5, because past that a
+    // thumbnail starts taking over the form it belongs to.
+    final scaled = MediaQuery.textScalerOf(
       context,
     ).clamp(maxScaleFactor: 1.5).scale(120);
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Semantics(
-        label: l10n.itemPhotoLabel,
-        image: photoPath != null,
-        button: true,
-        child: Container(
-          // A square by design — it stands in for a photograph, and a
-          // photograph does not get bigger with the system font. But it
-          // holds a label as well, so it has to give a little: at twice the
-          // font size the icon and two lines of text were 6 pixels taller
-          // than the tile and got clipped. Capped at 1.5, because past that
-          // a thumbnail starts taking over the form it belongs to.
-          width: side,
-          height: side,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: colorScheme.surfaceContainerHighest,
-            border: Border.all(color: colorScheme.outlineVariant),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final canAdd = photoPaths.length < maxItemPhotos;
+        final tiles = photoPaths.length + (canAdd ? 1 : 0);
+        final side = math.min(
+          scaled,
+          (constraints.maxWidth - _gap * (tiles - 1)) / tiles,
+        );
+
+        Widget tile({
+          required String label,
+          required bool image,
+          required VoidCallback? onTap,
+          required Widget child,
+        }) => InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Semantics(
+            label: label,
+            image: image,
+            button: true,
+            child: Container(
+              width: side,
+              height: side,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: colorScheme.surfaceContainerHighest,
+                border: Border.all(color: colorScheme.outlineVariant),
+              ),
+              child: child,
+            ),
           ),
-          child: photoPath != null
-              ? Image(
+        );
+
+        final add = Icon(
+          Icons.add_a_photo_outlined,
+          color: colorScheme.onSurfaceVariant,
+        );
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: _gap,
+          children: [
+            for (final (index, path) in photoPaths.indexed)
+              tile(
+                label: photoPaths.length == 1
+                    ? l10n.itemPhotoLabel
+                    : l10n.itemPhotoNumbered(index + 1, photoPaths.length),
+                image: true,
+                onTap: onOpen == null ? null : () => onOpen(index),
+                child: Image(
                   image: ResizeImage.resizeIfNeeded(
                     600,
                     null,
                     StoredPhotoImage(
-                      InventoryPhotoService.resolvePhotoPath(photoPath),
+                      InventoryPhotoService.resolvePhotoPath(path),
                     ),
                   ),
                   fit: BoxFit.cover,
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.add_a_photo_outlined,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.addPhotoButton,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ],
                 ),
-        ),
-      ),
+              ),
+            if (canAdd)
+              tile(
+                label: l10n.addPhotoButton,
+                image: false,
+                onTap: onAdd,
+                child: photoPaths.isEmpty
+                    ? ExcludeSemantics(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            add,
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.addPhotoButton,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          ],
+                        ),
+                      )
+                    : Tooltip(
+                        message: l10n.addPhotoButton,
+                        excludeFromSemantics: true,
+                        child: add,
+                      ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

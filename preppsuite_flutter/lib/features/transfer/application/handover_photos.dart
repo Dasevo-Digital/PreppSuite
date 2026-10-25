@@ -66,12 +66,21 @@ class HandoverPhoto {
     required this.clientId,
     required this.name,
     required this.bytes,
+    this.slot = 0,
   });
 
   final PhotoOwner owner;
 
   /// The row this belongs to, in the household both sides now share.
   final String clientId;
+
+  /// Which of the row's photos this is, 0 to 2 (#211); 0 is the one the
+  /// list shows, and the only one a possession has.
+  ///
+  /// Left out of the JSON when it is 0, which is also what a copy from
+  /// before #211 reads: an older device sends what it has, the first
+  /// photo, and takes a later one as a first one only where it has none.
+  final int slot;
 
   /// The file's own name, which is a UUID the photo service made. Never a
   /// path: see [safeName] for why that matters.
@@ -83,6 +92,7 @@ class HandoverPhoto {
     'owner': owner.marker,
     'clientId': clientId,
     'name': name,
+    if (slot != 0) 'slot': slot,
     'bytes': base64Encode(bytes),
   };
 
@@ -97,18 +107,30 @@ class HandoverPhoto {
     final clientId = raw['clientId'];
     final name = safeName(raw['name']);
     final bytes = raw['bytes'];
+    final slot = safeSlot(owner, raw['slot']);
     if (owner == null || clientId is! String || clientId.isEmpty) return null;
-    if (name == null || bytes is! String) return null;
+    if (name == null || bytes is! String || slot == null) return null;
     try {
       return HandoverPhoto(
         owner: owner,
         clientId: clientId,
         name: name,
         bytes: base64Decode(bytes),
+        slot: slot,
       );
     } on FormatException {
       return null;
     }
+  }
+
+  /// The photo's place on its row, or null when the row has no such place.
+  ///
+  /// Missing is 0, the way a copy from before #211 sends every picture.
+  static int? safeSlot(PhotoOwner? owner, Object? raw) {
+    final slot = raw ?? 0;
+    if (slot is! int) return null;
+    final places = owner == PhotoOwner.inventory ? maxItemPhotos : 1;
+    return slot >= 0 && slot < places ? slot : null;
   }
 
   /// The bare file name, or null when it is anything else.
@@ -147,7 +169,9 @@ Future<PhotoRequest> localPhotoNames(
 /// The pictures this device can send, leaving out anything in [skip].
 ///
 /// Sorted by name so that two handovers in a row make progress through a
-/// large inventory instead of sending the same first twenty again.
+/// large inventory instead of sending the same first twenty again. Every
+/// first photo before any second or third one: when the budget runs out,
+/// the pictures the list shows are the ones that made it.
 Future<List<HandoverPhoto>> readHouseholdPhotos(
   AppDatabase db, {
   required String householdId,
@@ -155,7 +179,7 @@ Future<List<HandoverPhoto>> readHouseholdPhotos(
   int budgetBytes = handoverPhotoBudgetBytes,
 }) async {
   final found = await _photoPaths(db, householdId: householdId);
-  found.sort((a, b) => a.path.compareTo(b.path));
+  found.sort(_bySlotThenPath);
 
   final photos = <HandoverPhoto>[];
   var used = 0;
@@ -184,6 +208,7 @@ Future<List<HandoverPhoto>> readHouseholdPhotos(
         clientId: row.clientId,
         name: name,
         bytes: bytes,
+        slot: row.slot,
       ),
     );
   }
@@ -193,9 +218,12 @@ Future<List<HandoverPhoto>> readHouseholdPhotos(
 /// Writes [photos] into this device's photo folder and points the rows at
 /// them. Answers how many pictures the household gained.
 ///
-/// A row that already has a picture on this machine keeps it. The
-/// alternative — letting whichever device spoke last decide — would mean
-/// a photo somebody replaced here coming back on the next handover.
+/// A row that already has a picture on this machine keeps it, place by
+/// place (#211). The alternative — letting whichever device spoke last
+/// decide — would mean a photo somebody replaced here coming back on the
+/// next handover. A picture the row already shows in another place is not
+/// taken a second time: somebody here moved it, and a restored backup asks
+/// for nothing to be left out the way a handover does.
 /// [into] is where the files land. Left out, it is this copy's own photo
 /// folder, which is what the app wants; a test hands in a temporary one so
 /// that exercising this needs no platform directory plugin.
@@ -207,10 +235,16 @@ Future<int> applyHouseholdPhotos(
 }) async {
   if (photos.isEmpty) return 0;
 
+  final held = await _photoPaths(db, householdId: householdId);
   final existing = {
-    for (final row in await _photoPaths(db, householdId: householdId))
-      (row.owner, row.clientId): row.path,
+    for (final row in held) (row.owner, row.clientId, row.slot): row.path,
   };
+  final shown = <(PhotoOwner, String), Set<String>>{};
+  for (final row in held) {
+    final file = File(InventoryPhotoService.resolvePhotoPath(row.path));
+    if (!await file.exists()) continue;
+    (shown[(row.owner, row.clientId)] ??= {}).add(p.basename(file.path));
+  }
 
   final Directory directory;
   try {
@@ -223,9 +257,12 @@ Future<int> applyHouseholdPhotos(
 
   var taken = 0;
   for (final photo in photos) {
-    final held = existing[(photo.owner, photo.clientId)];
-    if (held != null &&
-        await File(InventoryPhotoService.resolvePhotoPath(held)).exists()) {
+    final place = existing[(photo.owner, photo.clientId, photo.slot)];
+    if (place != null &&
+        await File(InventoryPhotoService.resolvePhotoPath(place)).exists()) {
+      continue;
+    }
+    if (shown[(photo.owner, photo.clientId)]?.contains(photo.name) ?? false) {
       continue;
     }
 
@@ -244,6 +281,7 @@ Future<int> applyHouseholdPhotos(
         householdId: householdId,
         clientId: photo.clientId,
         photoPath: stored,
+        slot: photo.slot,
       ),
       PhotoOwner.possession => await db.setPossessionPhotoPath(
         householdId: householdId,
@@ -255,7 +293,11 @@ Future<int> applyHouseholdPhotos(
     // was deleted between the two halves of the handover. The file stays
     // where it is; a stray picture costs a few kilobytes, and the next
     // handover will find the row.
-    if (written > 0) taken++;
+    if (written > 0) {
+      taken++;
+      existing[(photo.owner, photo.clientId, photo.slot)] = stored;
+      (shown[(photo.owner, photo.clientId)] ??= {}).add(photo.name);
+    }
   }
   return taken;
 }
@@ -265,30 +307,57 @@ Future<int> applyHouseholdPhotos(
 ///
 /// For the backup, which takes the pictures one at a time instead of in
 /// a budgeted batch the way a handover does.
-Future<List<({PhotoOwner owner, String clientId, File file})>>
+Future<List<({PhotoOwner owner, String clientId, int slot, File file})>>
 householdPhotoFiles(AppDatabase db, {required String householdId}) async {
   final found = await _photoPaths(db, householdId: householdId);
-  found.sort((a, b) => a.path.compareTo(b.path));
+  found.sort(_bySlotThenPath);
   return [
     for (final row in found)
       if (File(InventoryPhotoService.resolvePhotoPath(row.path)) case final file
           when file.existsSync())
-        (owner: row.owner, clientId: row.clientId, file: file),
+        (owner: row.owner, clientId: row.clientId, slot: row.slot, file: file),
   ];
 }
 
-typedef _PhotoRow = ({PhotoOwner owner, String clientId, String path});
+typedef _PhotoRow = ({
+  PhotoOwner owner,
+  String clientId,
+  int slot,
+  String path,
+});
 
+int _bySlotThenPath(_PhotoRow a, _PhotoRow b) {
+  final bySlot = a.slot.compareTo(b.slot);
+  return bySlot != 0 ? bySlot : a.path.compareTo(b.path);
+}
+
+/// Every picture the rows name, each with its place. The place is the
+/// column it is in, not its position among the filled ones: a row that
+/// lacks its second photo still has its third in place 2.
 Future<List<_PhotoRow>> _photoPaths(
   AppDatabase db, {
   required String householdId,
 }) async => [
   for (final row in await db.inventoryItemsForSync(householdId))
-    if (row.photoPath case final path?)
-      if (path.isNotEmpty)
-        (owner: PhotoOwner.inventory, clientId: row.clientId, path: path),
+    for (final (slot, stored) in [
+      row.photoPath,
+      row.secondPhotoPath,
+      row.thirdPhotoPath,
+    ].indexed)
+      if (stored case final path? when path.isNotEmpty)
+        (
+          owner: PhotoOwner.inventory,
+          clientId: row.clientId,
+          slot: slot,
+          path: path,
+        ),
   for (final row in await db.possessionsForSync(householdId))
     if (row.photoPath case final path?)
       if (path.isNotEmpty)
-        (owner: PhotoOwner.possession, clientId: row.clientId, path: path),
+        (
+          owner: PhotoOwner.possession,
+          clientId: row.clientId,
+          slot: 0,
+          path: path,
+        ),
 ];

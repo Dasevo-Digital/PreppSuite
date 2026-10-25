@@ -213,7 +213,8 @@ Rapid edits and clock corrections therefore cannot reuse or decrease a
 version. A timestamp is a logical version, not an exact audit time.
 At equal timestamps, tombstones outrank live rows, then the lexicographically
 larger canonical JSON of shared columns wins. Column names are sorted;
-`dirty`, `photo_path` and `updated_at` are excluded, and dates use epoch
+`dirty`, the three photo paths (`photo_path`, `second_photo_path`,
+`third_photo_path`) and `updated_at` are excluded, and dates use epoch
 seconds. Identical snapshots remain no-ops. All household devices need this
 merge rule for guaranteed convergence; the on-disk and wire formats stay
 unchanged. Unseen edits on a device with a fast clock can still win.
@@ -2441,6 +2442,41 @@ Tests: `test/features/settings/backup_container_test.dart` (Format,
 Manipulation, Überspringen, Format 2) und
 `integration_test/native_backup_test.dart` (echter Fotospeicher und
 Download-Ordner auf dem Gerät).
+
+
+### Bis zu drei Fotos je Vorratsartikel, jedes an seinem Platz
+
+Seit #211 hat ein Artikel bis zu drei Fotos (`maxItemPhotos`). Das erste
+steht weiter in `photo_path` und ist das Bild, das die Liste zeigt. Das
+zweite und dritte stehen in `second_photo_path` und `third_photo_path`
+(Schema 27). Hausrat behält sein eines Foto.
+
+- **Zwei Spalten, keine Liste in einer Spalte.** Die Übergabe bringt Fotos
+  einzeln und nicht immer alle: Das Budget kann das zweite zurücklassen,
+  während das dritte mitkommt. Mit einer Spalte je Platz bleibt das dritte
+  an Platz 2 und das zweite findet beim nächsten Mal seine Lücke. Gelesen
+  wird über `InventoryItem.photoPaths`, das die Lücken auslässt. Erst das
+  Formular schließt sie, wenn es speichert.
+- **Gilt nur auf dem Gerät**, wie `photo_path`: nicht im Snapshot, nicht in
+  der kanonischen JSON des Abgleichs. Bei gleichem Zeitstempel entscheidet
+  ein Foto also nicht, welche Zeile gewinnt.
+- **Übergabe und Sicherung tragen den Platz** (`HandoverPhoto.slot`, 0 bis
+  2). Platz 0 wird nicht geschrieben. Eine Fassung vor #211 liest deshalb
+  jedes Foto als erstes und nimmt es nur dort, wo sie keins hat. Gesendet
+  werden alle ersten Fotos vor jedem zweiten oder dritten. Reicht das
+  Budget nicht, kommen die Bilder an, die die Liste zeigt. Ein Platz, der
+  hier schon ein lesbares Foto hat, behält es. Ein Foto, das die Zeile hier
+  an einem anderen Platz zeigt, wird nicht ein zweites Mal genommen: Jemand
+  hat es hier nach vorn geholt, und eine Sicherung fragt nicht wie die
+  Übergabe vorher, was schon da ist.
+- **Ältere Umbauten der Tabelle müssen die Spalten kennen.** Die Neubauten
+  der Tabelle in den Schritten zu Schema 8 und 15 kopieren jede Spalte, die
+  sie *heute* hat. Deshalb stehen die beiden Spalten dort in `newColumns`,
+  wie jede spätere Spalte (siehe den Kommentar dort).
+
+Tests: `test/local_db/migration_to_27_test.dart`,
+`test/features/transfer/handover_photos_test.dart` (Gruppe #211),
+`test/widget/inventory_photos_test.dart`.
 
 
 ### Nach einem Update findet die App ihre Dateien selbst wieder

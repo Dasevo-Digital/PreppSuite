@@ -46,6 +46,8 @@ void main() {
     AppDatabase db, {
     required String clientId,
     String? photoPath,
+    String? secondPhotoPath,
+    String? thirdPhotoPath,
   }) => db.upsertInventoryItem(
     InventoryItemsCompanion.insert(
       clientId: clientId,
@@ -57,6 +59,8 @@ void main() {
       storageLocation: 'Keller',
       updatedAt: DateTime.utc(2026, 9, 20),
       photoPath: Value(photoPath),
+      secondPhotoPath: Value(secondPhotoPath),
+      thirdPhotoPath: Value(thirdPhotoPath),
     ),
   );
 
@@ -64,6 +68,20 @@ void main() {
     final rows = await db.inventoryItemsForSync(household);
     return rows.firstWhere((row) => row.clientId == clientId).photoPath;
   }
+
+  Future<InventoryItem> rowOf(AppDatabase db, String clientId) async {
+    final rows = await db.inventoryItemsForSync(household);
+    return rows.firstWhere((row) => row.clientId == clientId);
+  }
+
+  HandoverPhoto incoming(String name, int fill, {int slot = 0}) =>
+      HandoverPhoto(
+        owner: PhotoOwner.inventory,
+        clientId: 'beans',
+        name: name,
+        bytes: Uint8List.fromList(List.filled(64, fill)),
+        slot: slot,
+      );
 
   group('a name that came off the wire', () {
     test('a plain file name is allowed through', () {
@@ -278,5 +296,182 @@ void main() {
     // Only the one that is really on disk: a row pointing at nothing is
     // exactly the case a handover is meant to repair.
     expect(await localPhotoNames(db, householdId: household), {'a.jpg'});
+  });
+
+  group('up to three pictures of one item (#211)', () {
+    test('each crosses into the place it had', () async {
+      final sender = await database();
+      await addItem(
+        sender,
+        clientId: 'beans',
+        photoPath: await picture(here, 'a.jpg', 1),
+        secondPhotoPath: await picture(here, 'b.jpg', 2),
+        thirdPhotoPath: await picture(here, 'c.jpg', 3),
+      );
+
+      final sent = await readHouseholdPhotos(sender, householdId: household);
+      expect(
+        {for (final photo in sent) photo.name: photo.slot},
+        {
+          'a.jpg': 0,
+          'b.jpg': 1,
+          'c.jpg': 2,
+        },
+      );
+
+      final receiver = await database();
+      await addItem(receiver, clientId: 'beans');
+      expect(
+        await applyHouseholdPhotos(
+          receiver,
+          householdId: household,
+          photos: sent,
+          into: there,
+        ),
+        3,
+      );
+
+      final row = await rowOf(receiver, 'beans');
+      expect(await File(row.photoPath!).readAsBytes(), List.filled(64, 1));
+      expect(
+        await File(row.secondPhotoPath!).readAsBytes(),
+        List.filled(64, 2),
+      );
+      expect(await File(row.thirdPhotoPath!).readAsBytes(), List.filled(64, 3));
+      expect(row.dirty, isTrue, reason: 'unchanged from the insert');
+    });
+
+    test('a third that arrives without the second keeps its place', () async {
+      // The budget or an earlier handover can leave the second behind.
+      // Moved up into the empty place, the third would be in the way when
+      // the second comes next time.
+      final receiver = await database();
+      await addItem(receiver, clientId: 'beans');
+
+      await applyHouseholdPhotos(
+        receiver,
+        householdId: household,
+        photos: [incoming('c.jpg', 3, slot: 2)],
+        into: there,
+      );
+
+      final row = await rowOf(receiver, 'beans');
+      expect(row.photoPath, isNull);
+      expect(row.secondPhotoPath, isNull);
+      expect(p.basename(row.thirdPhotoPath!), 'c.jpg');
+    });
+
+    test('a place already holding a picture here keeps it', () async {
+      final receiver = await database();
+      final mine = await picture(there, 'mine.jpg', 5);
+      await addItem(receiver, clientId: 'beans', secondPhotoPath: mine);
+
+      final taken = await applyHouseholdPhotos(
+        receiver,
+        householdId: household,
+        photos: [incoming('a.jpg', 1), incoming('b.jpg', 2, slot: 1)],
+        into: there,
+      );
+
+      expect(taken, 1);
+      final row = await rowOf(receiver, 'beans');
+      expect(p.basename(row.photoPath!), 'a.jpg');
+      expect(row.secondPhotoPath, mine);
+    });
+
+    test('a picture the row shows in another place is not doubled', () async {
+      // Somebody here put the second photo first. A restored backup does
+      // not ask for anything to be left out, and would bring it back into
+      // the second place as well.
+      final receiver = await database();
+      await addItem(
+        receiver,
+        clientId: 'beans',
+        photoPath: await picture(there, 'b.jpg', 2),
+      );
+
+      final taken = await applyHouseholdPhotos(
+        receiver,
+        householdId: household,
+        photos: [incoming('b.jpg', 2, slot: 1)],
+        into: there,
+      );
+
+      expect(taken, 0);
+      expect((await rowOf(receiver, 'beans')).secondPhotoPath, isNull);
+    });
+
+    test('first pictures go before any second or third', () async {
+      final sender = await database();
+      await addItem(
+        sender,
+        clientId: 'beans',
+        photoPath: await picture(here, 'z.jpg', 1),
+        secondPhotoPath: await picture(here, 'a.jpg', 2),
+      );
+      await addItem(
+        sender,
+        clientId: 'rice',
+        photoPath: await picture(here, 'y.jpg', 3),
+      );
+
+      // Room for two: the two the list shows, not a second photo whose
+      // name happens to sort first.
+      final sent = await readHouseholdPhotos(
+        sender,
+        householdId: household,
+        budgetBytes: 140,
+      );
+
+      expect(sent.map((photo) => photo.name), ['y.jpg', 'z.jpg']);
+    });
+
+    test('the place survives the wire, and a missing one is the first', () {
+      final photo = incoming('b.jpg', 2, slot: 1);
+      final back = HandoverPhoto.fromJson(photo.toJson())!;
+      expect(back.slot, 1);
+
+      // What a copy from before #211 sends.
+      final old = HandoverPhoto.fromJson({
+        'owner': 'inventory',
+        'clientId': 'beans',
+        'name': 'a.jpg',
+        'bytes': 'AAAA',
+      });
+      expect(old?.slot, 0);
+      expect(incoming('a.jpg', 1).toJson().containsKey('slot'), isFalse);
+    });
+
+    test('a place the row does not have is refused', () {
+      Object? decode(String owner, Object? slot) => HandoverPhoto.fromJson({
+        'owner': owner,
+        'clientId': 'beans',
+        'name': 'a.jpg',
+        'bytes': 'AAAA',
+        'slot': slot,
+      });
+
+      expect(decode('inventory', 3), isNull);
+      expect(decode('inventory', -1), isNull);
+      expect(decode('inventory', '1'), isNull);
+      // A possession keeps its one photo.
+      expect(decode('possession', 1), isNull);
+      expect(decode('possession', 0), isNotNull);
+    });
+
+    test('every place is listed as held', () async {
+      final db = await database();
+      await addItem(
+        db,
+        clientId: 'beans',
+        photoPath: await picture(here, 'a.jpg', 1),
+        thirdPhotoPath: await picture(here, 'c.jpg', 3),
+      );
+
+      expect(await localPhotoNames(db, householdId: household), {
+        'a.jpg',
+        'c.jpg',
+      });
+    });
   });
 }

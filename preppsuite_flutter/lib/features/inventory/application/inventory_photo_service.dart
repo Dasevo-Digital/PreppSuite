@@ -11,6 +11,23 @@ import '../../../core/portable_paths.dart';
 import '../../../local_db/database.dart';
 import '../../../core/photo_vault.dart';
 
+/// How many photos one inventory item holds (#211). The possessions list
+/// keeps its one.
+const maxItemPhotos = 3;
+
+/// The photos of an item, in their order.
+extension InventoryItemPhotos on InventoryItem {
+  /// Every photo the row names, first to third, without the empty places.
+  ///
+  /// The first of these is the one the list shows. Usually that is
+  /// [InventoryItem.photoPath]; after a handover that did not bring every
+  /// picture it can be a later one, and showing that beats a placeholder.
+  List<String> get photoPaths => [
+    for (final path in [photoPath, secondPhotoPath, thirdPhotoPath])
+      if (path != null && path.isNotEmpty) path,
+  ];
+}
+
 /// Captures or picks a product photo and stores it on local disk, inside
 /// the app's own support directory.
 ///
@@ -153,7 +170,7 @@ Future<int> deleteHouseholdPhotos(
 }) async {
   final paths = [
     for (final row in await db.inventoryItemsForSync(householdId))
-      ?row.photoPath,
+      ...row.photoPaths,
     for (final row in await db.possessionsForSync(householdId)) ?row.photoPath,
   ];
   var deleted = 0;

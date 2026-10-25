@@ -34,7 +34,9 @@ class InventoryController {
     String? notes,
     String? barcode,
     String? offProductId,
-    String? photoPath,
+
+    /// Up to three, the first being the one the list shows (#211).
+    List<String> photoPaths = const [],
     double? dailyDose,
 
     /// Null keeps the household's own lead times for this item.
@@ -86,7 +88,9 @@ class InventoryController {
         notes: Value(notes),
         barcode: Value(barcode),
         offProductId: Value(offProductId),
-        photoPath: Value(photoPath),
+        photoPath: Value(photoPaths.elementAtOrNull(0)),
+        secondPhotoPath: Value(photoPaths.elementAtOrNull(1)),
+        thirdPhotoPath: Value(photoPaths.elementAtOrNull(2)),
         calories: Value(nutrition.kcal),
         proteinGrams: Value(nutrition.proteinGrams),
         carbohydrateGrams: Value(nutrition.carbohydrateGrams),
@@ -110,7 +114,9 @@ class InventoryController {
     String? notes,
     String? barcode,
     String? offProductId,
-    String? photoPath,
+
+    /// Up to three, the first being the one the list shows (#211).
+    List<String> photoPaths = const [],
     double? dailyDose,
 
     /// Null keeps the household's own lead times for this item.
@@ -166,7 +172,9 @@ class InventoryController {
         chargeEveryDays: Value(chargeEveryDays),
         chargeCheckedAt: Value(chargeCheckedAt?.toUtc()),
         notes: Value(notes),
-        photoPath: Value(photoPath),
+        photoPath: Value(photoPaths.elementAtOrNull(0)),
+        secondPhotoPath: Value(photoPaths.elementAtOrNull(1)),
+        thirdPhotoPath: Value(photoPaths.elementAtOrNull(2)),
         calories: Value(nutrition.kcal),
         proteinGrams: Value(nutrition.proteinGrams),
         carbohydrateGrams: Value(nutrition.carbohydrateGrams),
@@ -231,6 +239,8 @@ class InventoryController {
         minQuantity: Value(existing.minQuantity),
         notes: Value(existing.notes),
         photoPath: Value(existing.photoPath),
+        secondPhotoPath: Value(existing.secondPhotoPath),
+        thirdPhotoPath: Value(existing.thirdPhotoPath),
         calories: Value(existing.calories),
         proteinGrams: Value(existing.proteinGrams),
         carbohydrateGrams: Value(existing.carbohydrateGrams),
@@ -335,6 +345,8 @@ class InventoryController {
         minQuantity: Value(existing.minQuantity),
         notes: Value(existing.notes),
         photoPath: Value(existing.photoPath),
+        secondPhotoPath: Value(existing.secondPhotoPath),
+        thirdPhotoPath: Value(existing.thirdPhotoPath),
         calories: Value(existing.calories),
         proteinGrams: Value(existing.proteinGrams),
         carbohydrateGrams: Value(existing.carbohydrateGrams),

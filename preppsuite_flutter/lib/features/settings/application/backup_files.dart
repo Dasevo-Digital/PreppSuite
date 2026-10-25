@@ -146,7 +146,11 @@ Future<List<BackupCandidate>> collectBackupFiles(
       BackupFileKind.photo,
       p.basename(photo.file.path),
       await _length(photo.file),
-      {'owner': photo.owner.marker, 'clientId': photo.clientId},
+      {
+        'owner': photo.owner.marker,
+        'clientId': photo.clientId,
+        if (photo.slot != 0) 'slot': photo.slot,
+      },
       () async {
         // Opened here: the vault's key belongs to this installation, and
         // the backup has to open on another one.
@@ -325,7 +329,12 @@ Future<BackupFilesRestored> restoreBackupFiles({
       final owner = PhotoOwner.fromMarker(entry.meta['owner']);
       final clientId = entry.meta['clientId'];
       final name = HandoverPhoto.safeName(entry.label);
-      if (!ok || owner == null || clientId is! String || name == null) {
+      final slot = HandoverPhoto.safeSlot(owner, entry.meta['slot']);
+      if (!ok ||
+          owner == null ||
+          clientId is! String ||
+          name == null ||
+          slot == null) {
         failed.add(entry.label);
         continue;
       }
@@ -336,6 +345,7 @@ Future<BackupFilesRestored> restoreBackupFiles({
           clientId: clientId,
           name: name,
           bytes: bytes,
+          slot: slot,
         ),
       );
       photoBytes += bytes.length;
