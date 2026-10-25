@@ -843,7 +843,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supplyGroupsPersonsNote =>
-      'Counted per person and day, without distinguishing by age — that is how the BLE table works. Drinking water is different: there their footnote names children separately, and the supply calculator follows the footnote.';
+      'Counted per person and day, without distinguishing by age — that is how the BLE table works. Drinking water is different: there their footnote names children separately, and the supply calculator follows the footnote. A litre counts as a kilogram, as with oil or milk.';
 
   @override
   String get supplyGroupGrain => 'Grain products, bread, potatoes';
@@ -888,7 +888,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supplyGroupsUnmeasuredBody =>
-      'These have a group, but their unit cannot be reduced to grams or millilitres — or it does not match the group. They are missing from the figures above too.';
+      'These have a group, but their unit is no amount, such as “tin” or “piece”. They are missing from the figures above too. In grams, kilograms, millilitres or litres they count.';
 
   @override
   String get supplyGroupsAllAssigned =>

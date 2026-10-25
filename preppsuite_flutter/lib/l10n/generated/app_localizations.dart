@@ -1471,7 +1471,7 @@ abstract class AppLocalizations {
   /// No description provided for @supplyGroupsPersonsNote.
   ///
   /// In en, this message translates to:
-  /// **'Counted per person and day, without distinguishing by age — that is how the BLE table works. Drinking water is different: there their footnote names children separately, and the supply calculator follows the footnote.'**
+  /// **'Counted per person and day, without distinguishing by age — that is how the BLE table works. Drinking water is different: there their footnote names children separately, and the supply calculator follows the footnote. A litre counts as a kilogram, as with oil or milk.'**
   String get supplyGroupsPersonsNote;
 
   /// No description provided for @supplyGroupGrain.
@@ -1555,7 +1555,7 @@ abstract class AppLocalizations {
   /// No description provided for @supplyGroupsUnmeasuredBody.
   ///
   /// In en, this message translates to:
-  /// **'These have a group, but their unit cannot be reduced to grams or millilitres — or it does not match the group. They are missing from the figures above too.'**
+  /// **'These have a group, but their unit is no amount, such as “tin” or “piece”. They are missing from the figures above too. In grams, kilograms, millilitres or litres they count.'**
   String get supplyGroupsUnmeasuredBody;
 
   /// No description provided for @supplyGroupsAllAssigned.

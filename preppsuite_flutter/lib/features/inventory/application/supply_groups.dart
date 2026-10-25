@@ -112,8 +112,10 @@ class SupplyGroupResult {
   /// Food and water rows with no group set.
   final List<InventoryItem> unassigned;
 
-  /// Rows that have a group but whose unit cannot be reduced — "6 Dosen".
+  /// Rows that have a group but whose unit is no measure — "6 Dosen".
   /// Named for the same reason: they are missing from every total above.
+  /// A litre in a group counted by mass is not among them; see
+  /// [supplyGroupCoverage].
   final List<InventoryItem> unmeasurable;
 }
 
@@ -139,12 +141,17 @@ SupplyGroupResult supplyGroupCoverage({
     }
 
     final amount = measure(item.quantity, item.unit);
-    // The base has to match as well: a litre of oil is not 1000 g of it,
-    // and this app converts between the two nowhere.
-    if (amount == null || amount.base != baseOf(group)) {
+    if (amount == null) {
       unmeasurable.add(item);
       continue;
     }
+    // A litre counts as a kilogram here, whichever base the group has
+    // (#213). Oil and milk are liquids in groups the table measures by
+    // mass, and they are bought by the litre. A litre of oil weighs about
+    // 920 g and a litre of milk about 1030 g; the table's own amounts are
+    // rounder than that, and "1 l Rapsöl" listed as no fat at all was the
+    // far larger error. Nowhere else does the app equate the two: the
+    // nutrition per 100 g or 100 ml still keeps them apart.
     totals[group] = totals[group]! + amount.amount;
   }
 

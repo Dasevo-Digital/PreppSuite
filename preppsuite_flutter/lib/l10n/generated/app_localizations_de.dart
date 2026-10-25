@@ -847,7 +847,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get supplyGroupsPersonsNote =>
-      'Gerechnet wird je Person und Tag, ohne nach Alter zu unterscheiden — so macht es die BLE-Tabelle. Beim Trinkwasser ist das anders, da nennt ihre Fußnote Kinder gesondert; der Vorratsrechner folgt dort der Fußnote.';
+      'Gerechnet wird je Person und Tag, ohne nach Alter zu unterscheiden — so macht es die BLE-Tabelle. Beim Trinkwasser ist das anders, da nennt ihre Fußnote Kinder gesondert; der Vorratsrechner folgt dort der Fußnote. Ein Liter zählt wie ein Kilogramm, etwa bei Öl oder Milch.';
 
   @override
   String get supplyGroupGrain => 'Getreideprodukte, Brot, Kartoffeln';
@@ -892,7 +892,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get supplyGroupsUnmeasuredBody =>
-      'Diese Artikel haben eine Gruppe, aber ihre Einheit lässt sich nicht in Gramm oder Milliliter umrechnen — oder sie passt nicht zur Gruppe. Auch sie fehlen in den Zahlen oben.';
+      'Diese Artikel haben eine Gruppe, aber ihre Einheit ist keine Menge, etwa „Dose“ oder „Stück“. Auch sie fehlen in den Zahlen oben. Mit Gramm, Kilogramm, Milliliter oder Liter zählen sie mit.';
 
   @override
   String get supplyGroupsAllAssigned =>

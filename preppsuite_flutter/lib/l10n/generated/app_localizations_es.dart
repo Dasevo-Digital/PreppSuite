@@ -848,7 +848,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get supplyGroupsPersonsNote =>
-      'Contado por persona y día, sin distinguir por edad: así funciona la tabla de la BLE. El agua potable es distinta: allí su nota a pie de página menciona a los niños por separado, y la calculadora de provisiones sigue esa nota.';
+      'Contado por persona y día, sin distinguir por edad: así funciona la tabla de la BLE. El agua potable es distinta: allí su nota a pie de página menciona a los niños por separado, y la calculadora de provisiones sigue esa nota. Un litro cuenta como un kilo, como con el aceite o la leche.';
 
   @override
   String get supplyGroupGrain => 'Cereales, pan, patatas';
@@ -893,7 +893,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get supplyGroupsUnmeasuredBody =>
-      'Estos tienen grupo, pero su unidad no se puede reducir a gramos o mililitros, o no encaja con el grupo. También faltan en las cifras de arriba.';
+      'Estos tienen grupo, pero su unidad no es una cantidad, como «lata» o «unidad». También faltan en las cifras de arriba. En gramos, kilos, mililitros o litros sí cuentan.';
 
   @override
   String get supplyGroupsAllAssigned =>

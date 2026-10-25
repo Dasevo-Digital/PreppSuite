@@ -106,20 +106,44 @@ void main() {
     expect(result.unmeasurable.map((i) => i.name), ['Bohnen']);
   });
 
-  test('a litre of oil does not count as a kilo of it', () {
-    // Fats are measured by mass in the table. Nothing in this app
-    // converts between mass and volume, and this is where that would
-    // otherwise sneak in.
+  test('a litre of oil counts as a kilo of fat (#213)', () {
+    // Fats are measured by mass in the table, and oil is bought by the
+    // litre. Left out, a full bottle read as no fat at all.
     final result = supplyGroupCoverage(
-      items: [item(name: 'Rapsöl', quantity: 1, unit: 'l', foodGroup: 'fats')],
+      items: [
+        item(name: 'Rapsöl', quantity: 1, unit: 'l', foodGroup: 'fats'),
+        item(name: 'Olivenöl', quantity: 500, unit: 'ml', foodGroup: 'fats'),
+        item(name: 'Butter', quantity: 250, unit: 'g', foodGroup: 'fats'),
+      ],
       persons: 1,
       days: 10,
     );
     expect(
       result.coverage.firstWhere((c) => c.group == SupplyGroup.fats).have,
-      0,
+      1750,
     );
-    expect(result.unmeasurable.map((i) => i.name), ['Rapsöl']);
+    expect(result.unmeasurable, isEmpty);
+  });
+
+  test('milk by the litre counts as dairy, and a kilo as drink', () {
+    final result = supplyGroupCoverage(
+      items: [
+        item(name: 'H-Milch', quantity: 6, unit: 'l', foodGroup: 'dairy'),
+        item(
+          name: 'Saftpulver',
+          quantity: 0.5,
+          unit: 'kg',
+          foodGroup: 'drinks',
+        ),
+      ],
+      persons: 1,
+      days: 10,
+    );
+    double have(SupplyGroup group) =>
+        result.coverage.firstWhere((c) => c.group == group).have;
+    expect(have(SupplyGroup.dairy), 6000);
+    expect(have(SupplyGroup.drinks), 500);
+    expect(result.unmeasurable, isEmpty);
   });
 
   test('tools and medicines are not missing a group, they have none', () {

@@ -1706,10 +1706,19 @@ Rows already counted in tins are **kept and named**, never converted --
 hub. There is no honest factor for a tin, and guessing one would turn a
 gap somebody can see into a wrong number nobody can.
 
-**Mass and volume never mix.** A hundred millilitres of oil is not a
-hundred grams of it, and Open Food Facts states per 100 g for solids and
-per 100 ml for liquids. `FoodAmount` carries which base it is in so a
-caller cannot lose track.
+**Mass and volume never mix for nutrition.** A hundred millilitres of oil
+is not a hundred grams of it, and Open Food Facts states per 100 g for
+solids and per 100 ml for liquids. `FoodAmount` carries which base it is in
+so a caller cannot lose track.
+
+**The supply groups are the one exception (#213).** The BLE table measures
+fats and dairy by mass, and oil and milk are bought by the litre. Until
+2.6.6 such a row stood under "Gruppe ja, Menge nein" and the group read as
+empty with a full bottle on the shelf. `supplyGroupCoverage` now counts a
+litre as a kilogram in every group. Oil is about 920 g a litre and milk
+about 1030 g; the table's amounts are rounder than that error, which is
+also why it is 1 : 1 and not a density per group. Only rows whose unit is
+no measure at all ("Dose", "Stück") remain unmeasurable there.
 
 ### "Not reachable" must mean the network, and nothing else
 

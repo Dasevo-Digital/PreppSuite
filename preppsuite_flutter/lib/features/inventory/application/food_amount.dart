@@ -16,7 +16,9 @@
 /// **Mass and volume are kept apart.** A hundred millilitres of oil is not
 /// a hundred grams of it, and Open Food Facts states per 100 g for solids
 /// and per 100 ml for liquids. The unit decides which basis is meant, and
-/// nothing here converts between the two.
+/// nothing here converts between the two. The supply groups are the one
+/// place that counts a litre as a kilogram, for their rounder purpose;
+/// see `supply_groups.dart`.
 library;
 
 /// The base a measurable unit reduces to.
