@@ -2405,6 +2405,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'There is already a household in this folder, and it cannot be read. It probably comes from a newer version of PreppSuite.';
 
   @override
+  String get sharingErrorNeedsPassphrase =>
+      'Your household is shared encrypted, so a new folder needs a passphrase.';
+
+  @override
+  String get sharingErrorNotEncrypted =>
+      'There is a household in this folder without encryption, and yours is shared encrypted. So that nothing lands there unencrypted, the folder was not taken over. Pick an empty folder and PreppSuite sets it up encrypted.';
+
+  @override
+  String get sharingFoundSealedTitle => 'Set up the folder encrypted';
+
+  @override
+  String get sharingFoundSealedIntro =>
+      'The folder is empty. Your household has been shared encrypted before, so PreppSuite sets up this folder encrypted too. Choose a passphrase for it.';
+
+  @override
   String get sharingErrorVersion =>
       'The files in this folder come from a newer version. Nothing was changed.';
 

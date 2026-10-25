@@ -12,6 +12,8 @@ import '../../../model/household_profile.dart';
 import '../../sharing/application/household_file.dart';
 import '../../sharing/application/shared_folder_access.dart';
 import '../../sharing/application/sharing_providers.dart';
+import '../../sharing/presentation/shared_folder_card.dart'
+    show sharingJoinErrorText;
 import '../../transfer/presentation/qr_receive_screen.dart';
 import '../application/household_providers.dart';
 import 'profile_setup_screen.dart';
@@ -250,10 +252,7 @@ class _SetupChoiceScreenState extends ConsumerState<SetupChoiceScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          l10n.setupJoinFailed(switch (error) {
-            SharedFolderJoinError.unwritable => l10n.sharingErrorUnwritable,
-            SharedFolderJoinError.unreadable => l10n.sharingErrorUnreadable,
-          }),
+          l10n.setupJoinFailed(sharingJoinErrorText(l10n, error)),
         ),
       ),
     );

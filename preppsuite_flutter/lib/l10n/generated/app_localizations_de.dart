@@ -2422,6 +2422,21 @@ class AppLocalizationsDe extends AppLocalizations {
       'Im Ordner liegt bereits ein Haushalt, der sich nicht lesen lässt. Vermutlich stammt er aus einer neueren Version von PreppSuite.';
 
   @override
+  String get sharingErrorNeedsPassphrase =>
+      'Dein Haushalt wird verschlüsselt geteilt. Ein neuer Ordner braucht deshalb ein Kennwort.';
+
+  @override
+  String get sharingErrorNotEncrypted =>
+      'Im Ordner liegt ein unverschlüsselter Haushalt, deiner wird aber verschlüsselt geteilt. Damit nichts unverschlüsselt dort landet, wurde der Ordner nicht übernommen. Wähle einen leeren Ordner, PreppSuite legt ihn dann verschlüsselt an.';
+
+  @override
+  String get sharingFoundSealedTitle => 'Ordner verschlüsselt anlegen';
+
+  @override
+  String get sharingFoundSealedIntro =>
+      'Der Ordner ist leer. Dein Haushalt wurde schon einmal verschlüsselt geteilt, deshalb legt PreppSuite auch diesen Ordner nur verschlüsselt an. Wähle dafür ein Kennwort.';
+
+  @override
   String get sharingErrorVersion =>
       'Die Dateien im Ordner stammen aus einer neueren Version. Es wurde nichts verändert.';
 

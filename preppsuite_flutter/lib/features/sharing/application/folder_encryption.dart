@@ -103,6 +103,51 @@ class FolderEncryption {
     }
   }
 
+  /// Founds an empty folder sealed, for a household that has been shared
+  /// encrypted before.
+  ///
+  /// Such a household may not found a folder in the clear — that is the
+  /// downgrade [FolderKeyStore.requiresEncryption] exists to stop — and
+  /// it cannot reuse the key it may still hold: the folder needs a salt to
+  /// derive it from, and the salt lived in the old folder's
+  /// `household.json`. So a new folder takes a password, the way turning
+  /// encryption on does, and every other device joins with it (#214).
+  ///
+  /// The key is stored before the file is written, as in [enable].
+  Future<FolderEncryptionError?> found({
+    required HouseholdFile identity,
+    required String passphrase,
+  }) async {
+    if (passphrase.length < minimumPassphraseLength) {
+      return FolderEncryptionError.tooShort;
+    }
+
+    try {
+      // Somebody else may have founded it in the meantime. Writing over
+      // their file would strand whoever holds that one's key.
+      if (await _folder.readHouseholdFile() != null) {
+        return FolderEncryptionError.failed;
+      }
+
+      final parameters = VaultParameters(salt: newSalt());
+      final key = await deriveFolderKey(passphrase, parameters);
+      final sealed = HouseholdFile(
+        householdId: identity.householdId,
+        name: identity.name,
+        countryCode: identity.countryCode,
+        createdAt: identity.createdAt,
+        vault: parameters,
+        check: await buildCheckValue(key),
+      ).encode();
+
+      await _keyStore.write(identity.householdId, key);
+      await _folder.writeHouseholdFile(sealed);
+      return null;
+    } on Object {
+      return FolderEncryptionError.failed;
+    }
+  }
+
   /// Takes the key back after a failed switch, if nothing was sealed.
   ///
   /// Only on proof: a write can fail after the bytes arrived, and a sealed

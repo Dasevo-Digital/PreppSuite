@@ -4078,6 +4078,30 @@ abstract class AppLocalizations {
   /// **'There is already a household in this folder, and it cannot be read. It probably comes from a newer version of PreppSuite.'**
   String get sharingErrorUnreadable;
 
+  /// No description provided for @sharingErrorNeedsPassphrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Your household is shared encrypted, so a new folder needs a passphrase.'**
+  String get sharingErrorNeedsPassphrase;
+
+  /// No description provided for @sharingErrorNotEncrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'There is a household in this folder without encryption, and yours is shared encrypted. So that nothing lands there unencrypted, the folder was not taken over. Pick an empty folder and PreppSuite sets it up encrypted.'**
+  String get sharingErrorNotEncrypted;
+
+  /// No description provided for @sharingFoundSealedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up the folder encrypted'**
+  String get sharingFoundSealedTitle;
+
+  /// No description provided for @sharingFoundSealedIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'The folder is empty. Your household has been shared encrypted before, so PreppSuite sets up this folder encrypted too. Choose a passphrase for it.'**
+  String get sharingFoundSealedIntro;
+
   /// No description provided for @sharingErrorVersion.
   ///
   /// In en, this message translates to:

@@ -93,9 +93,9 @@ class _FolderEncryptionSectionState
 
   Future<void> _open({required bool encrypted}) async {
     final l10n = AppLocalizations.of(context)!;
-    final passphrase = await showDialog<String>(
-      context: context,
-      builder: (_) => _PassphraseDialog(enabling: !encrypted, l10n: l10n),
+    final passphrase = await askFolderPassphrase(
+      context,
+      enabling: !encrypted,
     );
     if (passphrase == null || !mounted) return;
 
@@ -160,12 +160,40 @@ class _FolderEncryptionSectionState
       };
 }
 
+/// Asks for the folder's password, or null when the dialog was closed.
+///
+/// [enabling] asks twice and warns first, for a password that is being
+/// chosen; without it the password is asked once, to unlock. [title] and
+/// [intro] are for founding a new folder sealed (#214), where the reason
+/// has to be said before anything is typed.
+Future<String?> askFolderPassphrase(
+  BuildContext context, {
+  required bool enabling,
+  String? title,
+  String? intro,
+}) => showDialog<String>(
+  context: context,
+  builder: (_) => _PassphraseDialog(
+    enabling: enabling,
+    l10n: AppLocalizations.of(context)!,
+    title: title,
+    intro: intro,
+  ),
+);
+
 class _PassphraseDialog extends StatefulWidget {
-  const _PassphraseDialog({required this.enabling, required this.l10n});
+  const _PassphraseDialog({
+    required this.enabling,
+    required this.l10n,
+    this.title,
+    this.intro,
+  });
 
   /// Turning encryption on asks twice and warns; unlocking asks once.
   final bool enabling;
   final AppLocalizations l10n;
+  final String? title;
+  final String? intro;
 
   @override
   State<_PassphraseDialog> createState() => _PassphraseDialogState();
@@ -188,17 +216,23 @@ class _PassphraseDialogState extends State<_PassphraseDialog> {
     final l10n = widget.l10n;
     final theme = Theme.of(context);
 
+    final intro = widget.intro;
     return AlertDialog(
       title: Text(
-        widget.enabling
-            ? l10n.folderEncryptionEnable
-            : l10n.folderEncryptionUnlock,
+        widget.title ??
+            (widget.enabling
+                ? l10n.folderEncryptionEnable
+                : l10n.folderEncryptionUnlock),
       ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (intro != null) ...[
+              Text(intro, style: theme.textTheme.bodyMedium),
+              const SizedBox(height: 12),
+            ],
             if (widget.enabling) ...[
               // Said before the field, not after: someone who reads it
               // afterwards has already chosen.

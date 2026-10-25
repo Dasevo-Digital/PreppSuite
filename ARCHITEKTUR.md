@@ -1057,6 +1057,17 @@ tree; the test suite deliberately targets that layer rather than the UI.
   `encryptionChanged`, including a second identity check before publication.
   Version 2 without vault metadata is invalid. A saved key must pass the
   folder's authenticated check value before reading or writing.
+- **A new folder for such a household is founded sealed, with a new
+  password (#214).** The requirement also forbids founding an empty folder
+  in the clear, and the old key cannot be reused: the salt it was derived
+  from lived in the old folder's `household.json`. Until 2.6.7 the join
+  stopped there and said `unreadable` ("liegt bereits ein Haushalt") about
+  a folder that was empty, with no way on. `joinFolder` now answers
+  `needsPassphrase`; the settings card asks for a password and joins again,
+  and `FolderEncryption.found` writes a sealed `household.json` with a
+  fresh salt, the key stored first as in `enable`. A plain folder offered
+  to an encrypted household is `notEncrypted`, its own message, no longer
+  `unreadable`.
 - **A device without the folder key writes nothing at all**
   (`SharedFolderSyncError.locked`). Publishing a plaintext device file
   into an encrypted folder would silently undo the encryption for every

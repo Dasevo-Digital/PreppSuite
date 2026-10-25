@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_database_providers.dart';
 import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
+import 'folder_encryption.dart';
 import 'household_file.dart';
 import 'shared_folder_access.dart';
 import 'shared_folder_store.dart';
@@ -21,6 +22,16 @@ enum SharedFolderJoinError {
   /// There is a `household.json` there, but it is damaged or was written
   /// by a newer version of the app.
   unreadable,
+
+  /// The folder is empty, and this household has been shared encrypted
+  /// before. It is founded sealed, which takes a password: ask for one
+  /// and join again with it (#214). Until then this came back as
+  /// [unreadable], saying a household was there when nothing was.
+  needsPassphrase,
+
+  /// The folder holds a household in the clear, and this one is shared
+  /// encrypted. Its rows would land there unsealed, so nothing is joined.
+  notEncrypted,
 }
 
 class SharedFolderState {
@@ -101,10 +112,14 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   /// this device's rows are deleted instead of re-stamped — but only once
   /// the folder has been checked and is known to hold a household, so a
   /// join that fails leaves them where they were.
+  ///
+  /// [passphrase] is the answer to [SharedFolderJoinError.needsPassphrase]
+  /// and is used for nothing else.
   Future<SharedFolderJoinError?> joinFolder(
     SharedFolderLocation location, {
     required HouseholdProfile profile,
     bool discardOwnRows = false,
+    String? passphrase,
   }) async {
     final folder = syncFolderFor(location.value);
     if (!await folder.isWritable()) return SharedFolderJoinError.unwritable;
@@ -112,9 +127,14 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
     final raw = await folder.readHouseholdFile();
     if (raw == null) {
       if (await const FolderKeyStore().requiresEncryption(profile.id)) {
-        return SharedFolderJoinError.unreadable;
+        if (passphrase == null) return SharedFolderJoinError.needsPassphrase;
+        final error = await FolderEncryption(
+          folder: folder,
+        ).found(identity: _identityOf(profile), passphrase: passphrase);
+        if (error != null) return SharedFolderJoinError.unwritable;
+      } else {
+        await folder.writeHouseholdFile(_identityOf(profile).encode());
       }
-      await folder.writeHouseholdFile(_identityOf(profile).encode());
     } else {
       final existing = HouseholdFile.decode(raw);
       if (existing == null) return SharedFolderJoinError.unreadable;
@@ -122,7 +142,7 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
           await const FolderKeyStore().requiresEncryption(
             existing.householdId,
           )) {
-        return SharedFolderJoinError.unreadable;
+        return SharedFolderJoinError.notEncrypted;
       }
       if (existing.isEncrypted) {
         await const FolderKeyStore().rememberEncryption(existing.householdId);

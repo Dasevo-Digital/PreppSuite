@@ -143,7 +143,7 @@ class _Body extends ConsumerWidget {
     if (!context.mounted) return;
 
     final previousId = profile.id;
-    final error = await ref
+    Future<SharedFolderJoinError?> join({String? passphrase}) => ref
         .read(sharedFolderProvider.notifier)
         .joinFolder(
           picked,
@@ -152,14 +152,27 @@ class _Body extends ConsumerWidget {
           // folder has been read: deleting first left a device with
           // nothing whenever the join then failed.
           discardOwnRows: choice == HouseholdConflictChoice.replace,
+          passphrase: passphrase,
         );
+    var error = await join();
     if (!context.mounted) return;
 
+    // An empty folder for a household that has been shared encrypted:
+    // founded sealed, with a password chosen here (#214).
+    if (error == SharedFolderJoinError.needsPassphrase) {
+      final passphrase = await askFolderPassphrase(
+        context,
+        enabling: true,
+        title: l10n.sharingFoundSealedTitle,
+        intro: l10n.sharingFoundSealedIntro,
+      );
+      if (passphrase == null || !context.mounted) return;
+      error = await join(passphrase: passphrase);
+      if (!context.mounted) return;
+    }
+
     if (error != null) {
-      _tell(context, switch (error) {
-        SharedFolderJoinError.unwritable => l10n.sharingErrorUnwritable,
-        SharedFolderJoinError.unreadable => l10n.sharingErrorUnreadable,
-      });
+      _tell(context, sharingJoinErrorText(l10n, error));
       return;
     }
 
@@ -240,6 +253,17 @@ class _Body extends ConsumerWidget {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
+
+/// What to tell the user when a folder could not be joined.
+String sharingJoinErrorText(
+  AppLocalizations l10n,
+  SharedFolderJoinError error,
+) => switch (error) {
+  SharedFolderJoinError.unwritable => l10n.sharingErrorUnwritable,
+  SharedFolderJoinError.unreadable => l10n.sharingErrorUnreadable,
+  SharedFolderJoinError.needsPassphrase => l10n.sharingErrorNeedsPassphrase,
+  SharedFolderJoinError.notEncrypted => l10n.sharingErrorNotEncrypted,
+};
 
 /// What the last run did, in one or two lines.
 class _StatusLine extends StatelessWidget {

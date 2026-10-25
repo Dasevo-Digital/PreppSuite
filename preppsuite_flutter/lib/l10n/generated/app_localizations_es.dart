@@ -2422,6 +2422,21 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ya hay un hogar en esta carpeta y no se puede leer. Probablemente viene de una versión más reciente de PreppSuite.';
 
   @override
+  String get sharingErrorNeedsPassphrase =>
+      'Tu hogar se comparte cifrado; por eso una carpeta nueva necesita una frase de contraseña.';
+
+  @override
+  String get sharingErrorNotEncrypted =>
+      'En esta carpeta hay un hogar sin cifrar, y el tuyo se comparte cifrado. Para que nada quede ahí sin cifrar, no se ha adoptado la carpeta. Elige una carpeta vacía y PreppSuite la creará cifrada.';
+
+  @override
+  String get sharingFoundSealedTitle => 'Crear la carpeta cifrada';
+
+  @override
+  String get sharingFoundSealedIntro =>
+      'La carpeta está vacía. Tu hogar ya se compartió cifrado antes, así que PreppSuite también crea esta carpeta cifrada. Elige una frase de contraseña para ella.';
+
+  @override
   String get sharingErrorVersion =>
       'Los archivos de esta carpeta vienen de una versión más reciente. No se ha cambiado nada.';
 

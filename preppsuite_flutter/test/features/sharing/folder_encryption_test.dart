@@ -114,6 +114,54 @@ void main() {
     );
   });
 
+  group('founding an empty folder sealed (#214)', () {
+    // A household that has been shared encrypted may not found a folder
+    // in the clear, and before #214 it could not found one at all.
+    final identity = HouseholdFile(
+      householdId: 'h1',
+      name: 'Zuhause',
+      countryCode: 'DE',
+      createdAt: DateTime.utc(2026, 1, 1),
+    );
+
+    setUp(() => folder.householdFile = null);
+
+    test('seals it, and a second device gets in with the words', () async {
+      expect(
+        await encryption.found(identity: identity, passphrase: passphrase),
+        isNull,
+      );
+      expect(folder.householdFile, contains('"version": 2'));
+      expect(folder.householdFile, isNot(contains(passphrase)));
+      final first = await const FolderKeyStore().read('h1');
+
+      SharedPreferences.setMockInitialValues({});
+      expect(
+        await encryption.unlock(householdId: 'h1', passphrase: passphrase),
+        isNull,
+      );
+      expect((await const FolderKeyStore().read('h1'))!.bytes, first!.bytes);
+    });
+
+    test('writes over nobody who founded it in the meantime', () async {
+      folder.householdFile = identity.encode();
+
+      expect(
+        await encryption.found(identity: identity, passphrase: passphrase),
+        FolderEncryptionError.failed,
+      );
+      expect(folder.householdFile, contains('"version": 1'));
+    });
+
+    test('refuses a short password and writes nothing', () async {
+      expect(
+        await encryption.found(identity: identity, passphrase: 'kurz'),
+        FolderEncryptionError.tooShort,
+      );
+      expect(folder.householdFile, isNull);
+    });
+  });
+
   group('a switch whose household.json could not be written', () {
     // The key is stored first, on purpose. A write that then failed used
     // to leave it there over a plain folder: every sync stopped with

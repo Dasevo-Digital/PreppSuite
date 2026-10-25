@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/app_database_providers.dart';
 import 'package:preppsuite_flutter/core/platform_storage.dart';
 import 'package:preppsuite_flutter/features/household/application/household_providers.dart';
+import 'package:preppsuite_flutter/features/sharing/application/folder_key_store.dart';
 import 'package:preppsuite_flutter/features/sharing/application/household_file.dart';
 import 'package:preppsuite_flutter/features/sharing/application/sharing_providers.dart';
 import 'package:preppsuite_flutter/features/sharing/application/sync_folder.dart';
@@ -206,6 +207,69 @@ void main() {
       expect(error, SharedFolderJoinError.unreadable);
       expect(await names(mine.id), ['Trinkwasser']);
       expect(container.read(householdProfileProvider).value?.id, mine.id);
+    });
+  });
+
+  group('a household shared encrypted before (#214)', () {
+    late Directory root;
+
+    setUp(() async {
+      root = Directory.systemTemp.createTempSync('preppsuite-sealed');
+      await const FolderKeyStore().rememberEncryption(mine.id);
+    });
+
+    tearDown(() => root.deleteSync(recursive: true));
+
+    PickedStorage location() =>
+        PickedStorage(value: root.path, label: 'Ordner');
+
+    Future<HouseholdFile?> stored() async {
+      final raw = await IoSyncFolder(root.path).readHouseholdFile();
+      return raw == null ? null : HouseholdFile.decode(raw);
+    }
+
+    test('asks for a password for an empty folder, not "unreadable"', () async {
+      final error = await container
+          .read(sharedFolderProvider.notifier)
+          .joinFolder(location(), profile: mine);
+
+      expect(error, SharedFolderJoinError.needsPassphrase);
+      expect(await stored(), isNull, reason: 'nothing founded in the clear');
+      expect(container.read(sharedFolderProvider).value?.folder, isNull);
+    });
+
+    test('founds it sealed with the password and joins', () async {
+      final error = await container
+          .read(sharedFolderProvider.notifier)
+          .joinFolder(
+            location(),
+            profile: mine,
+            passphrase: 'einhaushaltmitvorrat',
+          );
+
+      expect(error, isNull);
+      final file = await stored();
+      expect(file?.householdId, mine.id);
+      expect(file?.isEncrypted, isTrue);
+      expect(await const FolderKeyStore().read(mine.id), isNotNull);
+      expect(container.read(sharedFolderProvider).value?.folder, isNotNull);
+    });
+
+    test('turns down a folder that holds it in the clear', () async {
+      await IoSyncFolder(root.path).writeHouseholdFile(
+        HouseholdFile(
+          householdId: mine.id,
+          name: mine.name,
+          countryCode: 'DE',
+          createdAt: DateTime.utc(2026),
+        ).encode(),
+      );
+
+      final error = await container
+          .read(sharedFolderProvider.notifier)
+          .joinFolder(location(), profile: mine);
+
+      expect(error, SharedFolderJoinError.notEncrypted);
     });
   });
 }
