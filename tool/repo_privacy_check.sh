@@ -29,34 +29,39 @@ report() {
   fail=1
 }
 
+# Findings are reported by where they are -- file and line, or commit --
+# and never with what was found. The check also runs in the CI on GitHub,
+# whose logs are public, and a check that printed a leaked name or
+# address there would publish it a second time.
+locations() { sed -E 's/^([^:]+:[0-9]+):.*$/\1/'; }
+
 # Names from development machines and earlier project metadata must never
 # return. This is deliberately a small denylist: names cannot be recognized
 # reliably by a generic regular expression.
 if matches=$(git grep -n -I -i -E 'ma'""'rco|guen'""'ther|Leonardo'""'Gamar' -- . "${EXCLUDED[@]}" || true); then
   if [[ -n "$matches" ]]; then
     report "Personal identifier in a tracked file:"
-    printf '%s\n' "$matches" >&2
+    printf '%s\n' "$matches" | locations >&2
   fi
 fi
 
 # The project contains no contact address. An address in product code or a
 # document must be the generic project identity, never an individual's. Match
-# without regard to case: addresses are normally lower-case. Only locations
-# are printed, so the check itself cannot copy a leaked address into a log.
+# without regard to case: addresses are normally lower-case.
 if matches=$(git grep -n -I -i -E '[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}' -- . "${EXCLUDED[@]}" || true); then
   if [[ -n "$matches" ]]; then
     report "Email address in a tracked file:"
-    printf '%s\n' "$matches" | sed -E 's/^([^:]+:[0-9]+):.*$/\1/' >&2
+    printf '%s\n' "$matches" | locations >&2
   fi
 fi
 
 # The history was rewritten on 2026-10-07 to this identity throughout, so the
 # whole reachable history is checked.
-if identities=$(git log HEAD --format='%aN <%aE>%n%cN <%cE>' | sort -u | grep -vFx "$IDENTITY" || true); then
-  if [[ -n "$identities" ]]; then
-    report "Personal author or committer identity in reachable Git history:"
-    printf '%s\n' "$identities" >&2
-  fi
+foreign=$(git log HEAD --format='%h%x09%aN <%aE>%x09%cN <%cE>' |
+  awk -F '\t' -v id="$IDENTITY" '$2 != id || $3 != id { print $1 }')
+if [[ -n "$foreign" ]]; then
+  report "Another author or committer identity in reachable Git history, in:"
+  printf '%s\n' "$foreign" >&2
 fi
 
 # Commit and tag messages are published to GitHub along with the code, and
@@ -95,14 +100,20 @@ def messages():
             yield sha, text
 
 
-bad = []
+bad = {}
 for sha, text in messages():
     for line in text.splitlines():
-        found = [a for a in email.findall(line) if a.lower() != noreply.lower()]
-        if found or names.search(line) or (tools.search(line) and sha not in known):
-            bad.append(f"{sha[:10]}: {line.strip()}")
-for entry in bad:
-    print(entry, file=sys.stderr)
+        kinds = bad.setdefault(sha[:10], set())
+        if [a for a in email.findall(line) if a.lower() != noreply.lower()]:
+            kinds.add("address")
+        if names.search(line):
+            kinds.add("name")
+        if tools.search(line) and sha not in known:
+            kinds.add("tool reference")
+bad = {sha: kinds for sha, kinds in bad.items() if kinds}
+# What kind, not the line: see the note on locations above.
+for sha, kinds in bad.items():
+    print(f"{sha}: {', '.join(sorted(kinds))}", file=sys.stderr)
 sys.exit(1 if bad else 0)
 PY
 then

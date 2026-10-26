@@ -40,6 +40,62 @@ fi
 git reset -q HEAD -- leak.txt
 rm leak.txt
 
+# The same for a name, which must not be repeated in the log either.
+bad_name='Ma'"rco"
+printf 'Signed %s\n' "$bad_name" >name.txt
+git add name.txt
+if output=$(bash tool/repo_privacy_check.sh 2>&1); then
+  printf 'Name in a tracked file was not rejected.\n' >&2
+  exit 1
+fi
+if ! grep -Fq 'name.txt:1' <<<"$output"; then
+  printf 'Rejected name did not report its location.\n' >&2
+  exit 1
+fi
+if grep -Fiq "$bad_name" <<<"$output"; then
+  printf 'Rejected name was copied into the diagnostic.\n' >&2
+  exit 1
+fi
+git reset -q HEAD -- name.txt
+rm name.txt
+
+# A name in a commit message is reported by commit, not by its line.
+git commit -q --allow-empty -m "Thanks to $bad_name"
+leaky=$(git rev-parse --short=10 HEAD)
+if output=$(bash tool/repo_privacy_check.sh 2>&1); then
+  printf 'Name in a commit message was not rejected.\n' >&2
+  exit 1
+fi
+if ! grep -Fq "$leaky: name" <<<"$output"; then
+  printf 'Rejected message did not report its commit.\n' >&2
+  exit 1
+fi
+if grep -Fiq "$bad_name" <<<"$output"; then
+  printf 'Rejected message was copied into the diagnostic.\n' >&2
+  exit 1
+fi
+git reset -q --hard HEAD~1
+
+# And another identity in the history by commit, not by name and address.
+other_name='Erika Muster'"frau"
+other_address='erika'@'example.invalid'
+git -c user.name="$other_name" -c user.email="$other_address" \
+  commit -q --allow-empty -m 'Other identity'
+foreign=$(git rev-parse --short HEAD)
+if output=$(bash tool/repo_privacy_check.sh 2>&1); then
+  printf 'Another identity in the history was not rejected.\n' >&2
+  exit 1
+fi
+if ! grep -Fxq "$foreign" <<<"$output"; then
+  printf 'Rejected identity did not report its commit.\n' >&2
+  exit 1
+fi
+if grep -Fq -e "$other_name" -e "$other_address" <<<"$output"; then
+  printf 'Rejected identity was copied into the diagnostic.\n' >&2
+  exit 1
+fi
+git reset -q --hard HEAD~1
+
 # These are public upstream metadata and an Xcode scale suffix, not project
 # contact addresses. Their exact paths are the deliberately narrow allowlist.
 mkdir -p third_party/flutter_tts/ios
