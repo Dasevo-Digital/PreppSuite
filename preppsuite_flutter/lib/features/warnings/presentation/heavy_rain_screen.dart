@@ -13,6 +13,7 @@ import '../../inventory/application/inventory_providers.dart';
 import '../application/heavy_rain_hazard.dart';
 import '../application/river_flood.dart';
 import '../../../core/adaptive_columns.dart';
+import 'address_dialog.dart';
 
 /// Water after a cloudburst, at one address (#115).
 ///
@@ -87,30 +88,7 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
 
   Future<void> _enterAddress() async {
     final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-    final query = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.heavyRainSearchAddress),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(hintText: l10n.heavyRainAddressHint),
-          onSubmitted: (value) => Navigator.pop(context, value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: Text(l10n.heavyRainCheck),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
+    final query = await askAddress(context, title: l10n.heavyRainSearchAddress);
     if (query == null || query.trim().isEmpty || !mounted) return;
 
     setState(() => _busy = true);

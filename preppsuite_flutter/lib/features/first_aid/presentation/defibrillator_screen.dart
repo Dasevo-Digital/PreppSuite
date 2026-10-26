@@ -5,10 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/error_log.dart';
 import '../../../core/error_text.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../shelters/application/overpass_shelter_client.dart'
+    show OverpassException;
 import '../application/defibrillators.dart';
+import '../../warnings/presentation/address_dialog.dart';
 
 /// Where the nearest defibrillators hang (#117).
 ///
@@ -34,6 +38,35 @@ class DefibrillatorScreen extends StatefulWidget {
   State<DefibrillatorScreen> createState() => _DefibrillatorScreenState();
 }
 
+/// Why a search near a point brought nothing new (#217).
+enum NearbySearchProblem {
+  /// This device reached no server at all.
+  offline,
+
+  /// It reached them, and none answered in time or properly.
+  noAnswer,
+}
+
+NearbySearchProblem nearbySearchProblemOf(Object error) =>
+    error is OverpassException && error.noNetwork
+    ? NearbySearchProblem.offline
+    : NearbySearchProblem.noAnswer;
+
+/// What to say about [problem], and about the last search only where
+/// there is one. Before #217 every failure read "Keine Verbindung.
+/// Gezeigt wird die letzte Suche." -- on a network that worked, above a
+/// list that was not there.
+String nearbySearchProblemText(
+  AppLocalizations l10n,
+  NearbySearchProblem problem, {
+  required bool kept,
+}) => switch ((problem, kept)) {
+  (NearbySearchProblem.offline, true) => l10n.aedOffline,
+  (NearbySearchProblem.offline, false) => l10n.aedOfflineNothingKept,
+  (NearbySearchProblem.noAnswer, true) => l10n.aedNoAnswerKept,
+  (NearbySearchProblem.noAnswer, false) => l10n.aedNoAnswer,
+};
+
 class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
   late final DefibrillatorClient _client =
       widget.client ?? DefibrillatorClient();
@@ -43,7 +76,9 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
   DefibrillatorSearch? _search;
   var _restoring = true;
   var _busy = false;
-  var _offline = false;
+
+  /// Why the last search brought nothing new, or null after one that did.
+  NearbySearchProblem? _problem;
 
   @override
   void initState() {
@@ -79,30 +114,7 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
 
   Future<void> _enterAddress() async {
     final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-    final query = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.aedSearchAddress),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(hintText: l10n.heavyRainAddressHint),
-          onSubmitted: (value) => Navigator.pop(context, value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: Text(l10n.heavyRainCheck),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
+    final query = await askAddress(context, title: l10n.aedSearchAddress);
     if (query == null || query.trim().isEmpty || !mounted) return;
 
     setState(() => _busy = true);
@@ -121,14 +133,18 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
   }
 
   Future<void> _find(double latitude, double longitude, String? name) async {
-    final l10n = AppLocalizations.of(context)!;
     final List<Defibrillator> found;
     try {
       found = await _client.near(latitude, longitude);
-    } on Object {
+    } on Object catch (error, stack) {
+      final problem = nearbySearchProblemOf(error);
+      // A device without network is not a fault worth keeping. A network
+      // that works and no answer is, and the protocol is what shows why.
+      if (problem == NearbySearchProblem.noAnswer) {
+        ErrorLog.instance.record(error, stack, context: 'Defibrillatoren');
+      }
       if (!mounted) return;
-      setState(() => _offline = true);
-      _say(l10n.aedFailed);
+      setState(() => _problem = problem);
       return;
     }
     final search = DefibrillatorSearch(
@@ -142,7 +158,7 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
     if (!mounted) return;
     setState(() {
       _search = search;
-      _offline = false;
+      _problem = null;
     });
   }
 
@@ -213,8 +229,15 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                if (_offline)
-                  Text(l10n.aedOffline, style: theme.textTheme.bodySmall),
+                if (_problem case final problem?)
+                  Text(
+                    nearbySearchProblemText(
+                      l10n,
+                      problem,
+                      kept: search != null,
+                    ),
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 if (search != null) ..._results(l10n, search),
                 const SizedBox(height: 16),
                 Text(l10n.aedIncomplete, style: theme.textTheme.bodySmall),

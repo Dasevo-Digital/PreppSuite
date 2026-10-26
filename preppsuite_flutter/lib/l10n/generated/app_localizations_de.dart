@@ -8420,10 +8420,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aedOpenMap => 'Auf der Karte öffnen';
 
   @override
-  String get aedFailed => 'OpenStreetMap hat nicht geantwortet.';
+  String get aedOffline => 'Keine Verbindung. Gezeigt wird die letzte Suche.';
 
   @override
-  String get aedOffline => 'Keine Verbindung. Gezeigt wird die letzte Suche.';
+  String get aedOfflineNothingKept =>
+      'Keine Verbindung, und eine frühere Suche ist nicht gespeichert. Einmal mit Netz suchen, danach geht es auch offline.';
+
+  @override
+  String get aedNoAnswer =>
+      'OpenStreetMap antwortet gerade nicht. Bitte gleich noch einmal versuchen.';
+
+  @override
+  String get aedNoAnswerKept =>
+      'OpenStreetMap antwortet gerade nicht. Gezeigt wird die letzte Suche.';
 
   @override
   String get aedIncomplete =>

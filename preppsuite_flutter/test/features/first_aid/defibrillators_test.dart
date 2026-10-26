@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:preppsuite_flutter/features/first_aid/application/defibrillators.dart';
+import 'package:preppsuite_flutter/core/geolocation_service.dart';
 import 'package:preppsuite_flutter/features/first_aid/presentation/defibrillator_screen.dart';
+import 'package:preppsuite_flutter/features/shelters/application/overpass_shelter_client.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -123,5 +127,121 @@ void main() {
     expect(find.text('Defibrillator · 500 m nördlich'), findsOneWidget);
     expect(find.textContaining('Neben Raum 143'), findsOneWidget);
     expect(find.textContaining('Etage: 1'), findsOneWidget);
+  });
+
+  group('when no list comes back (#217)', () {
+    DefibrillatorClient failing(Object Function() error) => DefibrillatorClient(
+      retryDelay: Duration.zero,
+      httpClient: MockClient((request) async => throw error()),
+    );
+
+    test('no network is told apart from a server that does not answer', () {
+      expect(
+        failing(() => const SocketException('Failed host lookup')).near(52, 10),
+        throwsA(
+          isA<OverpassException>().having(
+            (e) => e.noNetwork,
+            'noNetwork',
+            true,
+          ),
+        ),
+      );
+      expect(
+        failing(() => TimeoutException('no answer')).near(52, 10),
+        throwsA(
+          isA<OverpassException>().having(
+            (e) => e.noNetwork,
+            'noNetwork',
+            false,
+          ),
+        ),
+      );
+    });
+
+    // Geocoding answers; only OpenStreetMap's Overpass does not.
+    GeolocationService geolocation() => GeolocationService(
+      httpClient: MockClient(
+        (request) async => http.Response(
+          jsonEncode([
+            {'lat': '52.2689', 'lon': '10.5268'},
+          ]),
+          200,
+        ),
+      ),
+    );
+
+    Future<void> searchAddress(
+      WidgetTester tester,
+      DefibrillatorClient client,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: DefibrillatorScreen(client: client, geolocation: geolocation()),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Adresse eingeben'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'Braunschweig');
+      await tester.tap(find.text('Abfragen'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('no answer and nothing kept says nothing of a last search', (
+      tester,
+    ) async {
+      await searchAddress(
+        tester,
+        DefibrillatorClient(
+          retryDelay: Duration.zero,
+          httpClient: MockClient((request) async => http.Response('', 504)),
+        ),
+      );
+
+      expect(
+        find.text(
+          'OpenStreetMap antwortet gerade nicht. '
+          'Bitte gleich noch einmal versuchen.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Keine Verbindung'), findsNothing);
+      expect(find.textContaining('letzte Suche'), findsNothing);
+    });
+
+    testWidgets('no network over a kept list says it is the last one', (
+      tester,
+    ) async {
+      await const DefibrillatorStore().save(
+        DefibrillatorSearch(
+          latitude: 52.2689,
+          longitude: 10.5268,
+          placeName: 'Braunschweig',
+          checkedAt: DateTime(2026, 10, 6),
+          found: const [
+            Defibrillator(
+              id: 1,
+              latitude: 52.2733,
+              longitude: 10.5254,
+              tags: {'defibrillator:location': 'Neben Raum 143'},
+            ),
+          ],
+        ),
+      );
+
+      await searchAddress(
+        tester,
+        failing(() => const SocketException('Network is unreachable')),
+      );
+
+      expect(
+        find.text('Keine Verbindung. Gezeigt wird die letzte Suche.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Neben Raum 143'), findsOneWidget);
+    });
   });
 }

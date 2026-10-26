@@ -9,9 +9,15 @@ import '../../../core/error_text.dart';
 import '../../../core/geolocation_service.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../first_aid/application/defibrillators.dart' show compassOctant;
+import '../../../core/error_log.dart';
 import '../../first_aid/presentation/defibrillator_screen.dart'
-    show compassLabel;
+    show
+        NearbySearchProblem,
+        compassLabel,
+        nearbySearchProblemOf,
+        nearbySearchProblemText;
 import '../application/emergency_points.dart';
+import '../../warnings/presentation/address_dialog.dart';
 
 /// Emergency wells, help points and the nearest siren (#127, #128).
 ///
@@ -45,7 +51,9 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
   EmergencyPointSearch? _search;
   var _restoring = true;
   var _busy = false;
-  var _offline = false;
+
+  /// Why the last search brought nothing new, or null after one that did.
+  NearbySearchProblem? _problem;
 
   @override
   void initState() {
@@ -81,30 +89,7 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
 
   Future<void> _enterAddress() async {
     final l10n = AppLocalizations.of(context)!;
-    final controller = TextEditingController();
-    final query = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.aedSearchAddress),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(hintText: l10n.heavyRainAddressHint),
-          onSubmitted: (value) => Navigator.pop(context, value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: Text(l10n.heavyRainCheck),
-          ),
-        ],
-      ),
-    );
-    controller.dispose();
+    final query = await askAddress(context, title: l10n.aedSearchAddress);
     if (query == null || query.trim().isEmpty || !mounted) return;
 
     setState(() => _busy = true);
@@ -123,14 +108,16 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
   }
 
   Future<void> _find(double latitude, double longitude, String? name) async {
-    final l10n = AppLocalizations.of(context)!;
     final List<EmergencyPoint> found;
     try {
       found = await _client.near(latitude, longitude);
-    } on Object {
+    } on Object catch (error, stack) {
+      final problem = nearbySearchProblemOf(error);
+      if (problem == NearbySearchProblem.noAnswer) {
+        ErrorLog.instance.record(error, stack, context: 'Notfallpunkte');
+      }
       if (!mounted) return;
-      setState(() => _offline = true);
-      _say(l10n.aedFailed);
+      setState(() => _problem = problem);
       return;
     }
     final search = EmergencyPointSearch(
@@ -144,7 +131,7 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
     if (!mounted) return;
     setState(() {
       _search = search;
-      _offline = false;
+      _problem = null;
     });
   }
 
@@ -204,8 +191,15 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                if (_offline)
-                  Text(l10n.aedOffline, style: theme.textTheme.bodySmall),
+                if (_problem case final problem?)
+                  Text(
+                    nearbySearchProblemText(
+                      l10n,
+                      problem,
+                      kept: search != null,
+                    ),
+                    style: theme.textTheme.bodyMedium,
+                  ),
                 if (search != null) ..._results(l10n, search),
                 const SizedBox(height: 16),
                 Text(

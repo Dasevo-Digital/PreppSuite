@@ -141,6 +141,9 @@ class DefibrillatorClient {
       _httpClient,
       query,
       retryDelay: _retryDelay,
+      // Somebody may be kneeling next to a person while this runs. The
+      // query is tiny and normally back within a second or two.
+      timeout: const Duration(seconds: 15),
     );
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
     final elements = decoded is Map ? decoded['elements'] : null;

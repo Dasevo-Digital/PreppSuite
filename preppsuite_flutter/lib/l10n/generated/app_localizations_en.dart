@@ -8378,10 +8378,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aedOpenMap => 'Open on the map';
 
   @override
-  String get aedFailed => 'OpenStreetMap did not answer.';
+  String get aedOffline => 'No connection. Showing the last search.';
 
   @override
-  String get aedOffline => 'No connection. Showing the last search.';
+  String get aedOfflineNothingKept =>
+      'No connection, and no earlier search is saved. Search once with a connection; after that it works offline too.';
+
+  @override
+  String get aedNoAnswer =>
+      'OpenStreetMap is not answering right now. Please try again in a moment.';
+
+  @override
+  String get aedNoAnswerKept =>
+      'OpenStreetMap is not answering right now. Showing the last search.';
 
   @override
   String get aedIncomplete =>

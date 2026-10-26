@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' show SocketException;
 
 import 'package:http/http.dart' as http;
 
@@ -186,12 +187,17 @@ class OverpassShelterClient {
 /// the moment rather than the request. Anything else is a bad request
 /// or a broken instance, where a second identical try is just another
 /// request against a server run for other people.
+///
+/// [timeout] is per instance. A screen somebody is waiting at in an
+/// emergency can ask for less than the thirty seconds a map can afford.
 Future<http.Response> askOverpass(
   http.Client httpClient,
   String query, {
   Duration retryDelay = OverpassShelterClient.defaultRetryDelay,
+  Duration timeout = const Duration(seconds: 30),
 }) async {
   OverpassException? last;
+  Object? failure;
 
   for (final endpoint in OverpassShelterClient.endpoints) {
     for (var attempt = 0; attempt < 2; attempt++) {
@@ -210,9 +216,10 @@ Future<http.Response> askOverpass(
               headers: {'User-Agent': 'PreppSuite/1.0'},
               body: {'data': query},
             )
-            .timeout(const Duration(seconds: 30));
-      } on Object {
+            .timeout(timeout);
+      } on Object catch (error) {
         // A dead instance is worth moving on from, not retrying.
+        failure = error;
         break;
       }
 
@@ -223,7 +230,7 @@ Future<http.Response> askOverpass(
     }
   }
 
-  throw last ?? const OverpassException(0);
+  throw last ?? OverpassException(0, cause: failure);
 }
 
 class _CachedShelters {
@@ -241,15 +248,26 @@ class _CachedShelters {
 /// unreachable, which does not. The shelter screen used to report both
 /// as one sentence with no reason in it at all.
 class OverpassException implements Exception {
-  const OverpassException(this.statusCode);
+  const OverpassException(this.statusCode, {this.cause});
 
   /// The HTTP status, or 0 when no instance answered at all.
   final int statusCode;
+
+  /// Why no instance answered, when none did: the last error on the way.
+  final Object? cause;
+
+  /// Whether this device could not reach any instance at all, as opposed
+  /// to reaching them and getting no answer in time. Only the first is
+  /// "no connection"; saying so for the second sends somebody to look at
+  /// a network that works (#217).
+  bool get noNetwork => statusCode == 0 && cause is SocketException;
 
   /// Whether this is the rate limit or their own query timeout — the two
   /// that are about the moment rather than the request.
   bool get isBusy => statusCode == 429 || statusCode == 504;
 
   @override
-  String toString() => 'OverpassException($statusCode)';
+  String toString() => cause == null
+      ? 'OverpassException($statusCode)'
+      : 'OverpassException($statusCode, ${cause.runtimeType}: $cause)';
 }

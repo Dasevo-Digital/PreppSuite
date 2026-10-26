@@ -1758,6 +1758,28 @@ fall through to the next address: it is `LocalHandoverFailure.interrupted`,
 which says the connection was made and to try again, rather than sending
 somebody to look at the one thing that was demonstrably fine.
 
+**The same for OpenStreetMap's Overpass (#217).** `askOverpass` used to
+swallow every transport error and end in `OverpassException(0)`, so the
+defibrillator and emergency-point screens could not tell "this device has
+no network" from "the servers took the request and never answered" -- and
+said "Keine Verbindung. Gezeigt wird die letzte Suche." for both, also
+above a list that did not exist. On 26.10.2026 every Overpass instance
+held requests from the household's address without answering while the
+rest of OpenStreetMap answered at once. The exception now carries the last
+`cause`; `noNetwork` is true only for a `SocketException`, and
+`nearbySearchProblemText` mentions a last search only where one is kept.
+A failure with a working network goes into the error log, one without
+does not. The defibrillator query waits fifteen seconds per instance,
+not thirty: somebody may be kneeling next to a person while it runs.
+
+**A dialog's text controller lives in the dialog's own state.** Three
+address dialogs and the app-lock passphrase dialog created the controller
+in the caller and disposed it as soon as `showDialog` returned. The
+dialog is still fading out at that moment and builds its field again, so
+a debug build stopped on a disposed controller; nothing had typed into
+one of them in a test before #217. `askAddress` and `_PassphraseDialog`
+now own theirs.
+
 ### base64 runs twice on the way out, and the ceiling has to know it
 
 `localHandoverMaxRequestBytes` was a flat 32 MB, with a comment allowing

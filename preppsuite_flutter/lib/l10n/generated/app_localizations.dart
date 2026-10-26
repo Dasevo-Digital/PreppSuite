@@ -13897,17 +13897,29 @@ abstract class AppLocalizations {
   /// **'Open on the map'**
   String get aedOpenMap;
 
-  /// No description provided for @aedFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'OpenStreetMap did not answer.'**
-  String get aedFailed;
-
   /// No description provided for @aedOffline.
   ///
   /// In en, this message translates to:
   /// **'No connection. Showing the last search.'**
   String get aedOffline;
+
+  /// No description provided for @aedOfflineNothingKept.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection, and no earlier search is saved. Search once with a connection; after that it works offline too.'**
+  String get aedOfflineNothingKept;
+
+  /// No description provided for @aedNoAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenStreetMap is not answering right now. Please try again in a moment.'**
+  String get aedNoAnswer;
+
+  /// No description provided for @aedNoAnswerKept.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenStreetMap is not answering right now. Showing the last search.'**
+  String get aedNoAnswerKept;
 
   /// No description provided for @aedIncomplete.
   ///

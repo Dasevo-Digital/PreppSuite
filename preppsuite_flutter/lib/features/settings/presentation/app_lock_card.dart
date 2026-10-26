@@ -103,81 +103,72 @@ class AppLockCard extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
-  Future<String?> _choosePassphrase(BuildContext context) async {
-    final first = TextEditingController();
-    final second = TextEditingController();
-    try {
-      return await showDialog<String>(
-        context: context,
-        builder: (context) => _PassphraseDialog(
-          title: l10n.appLockSetTitle,
-          confirmLabel: l10n.appLockEnableButton,
-          confirmation: second,
-          passphrase: first,
-          l10n: l10n,
-        ),
-      );
-    } finally {
-      first.dispose();
-      second.dispose();
-    }
-  }
+  Future<String?> _choosePassphrase(BuildContext context) => showDialog<String>(
+    context: context,
+    builder: (context) => _PassphraseDialog(
+      title: l10n.appLockSetTitle,
+      confirmLabel: l10n.appLockEnableButton,
+      confirm: true,
+      l10n: l10n,
+    ),
+  );
 
   Future<String?> _askPassphrase(
     BuildContext context, {
     required String title,
     required String confirmLabel,
-  }) async {
-    final controller = TextEditingController();
-    try {
-      return await showDialog<String>(
-        context: context,
-        builder: (context) => _PassphraseDialog(
-          title: title,
-          confirmLabel: confirmLabel,
-          passphrase: controller,
-          l10n: l10n,
-        ),
-      );
-    } finally {
-      controller.dispose();
-    }
-  }
+  }) => showDialog<String>(
+    context: context,
+    builder: (context) =>
+        _PassphraseDialog(title: title, confirmLabel: confirmLabel, l10n: l10n),
+  );
 }
 
+/// The fields' controllers belong to the dialog's own state: disposed by
+/// the caller as soon as `showDialog` returned, they were gone while the
+/// dialog was still fading out and building them (#217).
 class _PassphraseDialog extends StatefulWidget {
   const _PassphraseDialog({
     required this.title,
     required this.confirmLabel,
-    required this.passphrase,
     required this.l10n,
-    this.confirmation,
+    this.confirm = false,
   });
 
   final String title;
   final String confirmLabel;
-  final TextEditingController passphrase;
-  final TextEditingController? confirmation;
   final AppLocalizations l10n;
+
+  /// Asks a second time, for a passphrase that is being chosen.
+  final bool confirm;
 
   @override
   State<_PassphraseDialog> createState() => _PassphraseDialogState();
 }
 
 class _PassphraseDialogState extends State<_PassphraseDialog> {
+  final _passphrase = TextEditingController();
+  late final _confirmation = widget.confirm ? TextEditingController() : null;
   String? _error;
 
+  @override
+  void dispose() {
+    _passphrase.dispose();
+    _confirmation?.dispose();
+    super.dispose();
+  }
+
   void _submit() {
-    if (widget.passphrase.text.runes.length < 12) {
+    if (_passphrase.text.runes.length < 12) {
       setState(() => _error = widget.l10n.appLockPassphraseTooShort);
       return;
     }
-    if (widget.confirmation != null &&
-        widget.passphrase.text != widget.confirmation!.text) {
+    final confirmation = _confirmation;
+    if (confirmation != null && _passphrase.text != confirmation.text) {
       setState(() => _error = widget.l10n.appLockPassphraseMismatch);
       return;
     }
-    Navigator.pop(context, widget.passphrase.text);
+    Navigator.pop(context, _passphrase.text);
   }
 
   @override
@@ -189,26 +180,26 @@ class _PassphraseDialogState extends State<_PassphraseDialog> {
         Text(widget.l10n.appLockDialogHint),
         const SizedBox(height: 12),
         TextField(
-          controller: widget.passphrase,
+          controller: _passphrase,
           autofocus: true,
           obscureText: true,
           enableSuggestions: false,
           autocorrect: false,
-          textInputAction: widget.confirmation == null
+          textInputAction: _confirmation == null
               ? TextInputAction.done
               : TextInputAction.next,
           onSubmitted: (_) {
-            if (widget.confirmation == null) _submit();
+            if (_confirmation == null) _submit();
           },
           decoration: InputDecoration(
             labelText: widget.l10n.appLockPassphraseLabel,
             errorText: _error,
           ),
         ),
-        if (widget.confirmation != null) ...[
+        if (_confirmation case final confirmation?) ...[
           const SizedBox(height: 8),
           TextField(
-            controller: widget.confirmation,
+            controller: confirmation,
             obscureText: true,
             enableSuggestions: false,
             autocorrect: false,
