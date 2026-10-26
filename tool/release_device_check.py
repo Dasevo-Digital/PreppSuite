@@ -4,12 +4,13 @@ an iPhone simulator and write down that it happened.
 
     tool/release_device_check.py <release folder>
 
-`tool/pre_release_check.sh` runs everything that needs no device. The four
-tests in `preppsuite_flutter/integration_test/` check the Swift side of the
-storage bridge, the photo vault, the archive reader and the web view --
-nothing else notices if there is nobody on the other end of a channel. There
-is no runner on Gitea to do this (#79), so it is done here, before a release,
-and the folder gets a protocol that says so:
+`tool/pre_release_check.sh` runs everything that needs no device. Every
+`*_test.dart` in `preppsuite_flutter/integration_test/` is run separately;
+together they check the Swift side of the storage bridge, the photo vault,
+the archive reader, the web view and the other native app paths. Nothing else
+notices if there is nobody on the other end of a channel. There is no runner
+on Gitea to do this (#79), so it is done here, before a release, and the folder
+gets a protocol that says so:
 
     GERAETETEST-v<version>.txt   summary, uploaded with the release
     geraetetest-v<version>.log   the full output, stays on this machine

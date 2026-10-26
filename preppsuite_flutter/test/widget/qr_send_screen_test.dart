@@ -62,14 +62,31 @@ void main() {
     expect(slower, findsOneWidget);
     expect(faster, findsOneWidget);
 
-    for (final control in [slower, faster, slower]) {
-      final target = find
-          .ancestor(of: control, matching: find.byType(OutlinedButton))
-          .first;
-      if (tester.widget<OutlinedButton>(target).onPressed == null) continue;
-      await tester.tap(target);
-      await tester.pump();
-    }
+    Finder button(Finder icon) =>
+        find.ancestor(of: icon, matching: find.byType(OutlinedButton)).first;
+    OutlinedButton current(Finder icon) =>
+        tester.widget<OutlinedButton>(button(icon));
+
+    await tester.ensureVisible(slower);
+    await tester.pump();
+    expect(slower.hitTestable(), findsOneWidget);
+    expect(current(slower).onPressed, isNotNull);
+    expect(current(faster).onPressed, isNotNull);
+
+    await tester.tap(button(slower));
+    await tester.pump();
+    expect(current(slower).onPressed, isNull);
+    expect(current(faster).onPressed, isNotNull);
+
+    await tester.tap(button(faster));
+    await tester.pump();
+    expect(current(slower).onPressed, isNotNull);
+    expect(current(faster).onPressed, isNotNull);
+
+    await tester.tap(button(faster));
+    await tester.pump();
+    expect(current(slower).onPressed, isNotNull);
+    expect(current(faster).onPressed, isNull);
 
     expect(tester.takeException(), isNull);
   });

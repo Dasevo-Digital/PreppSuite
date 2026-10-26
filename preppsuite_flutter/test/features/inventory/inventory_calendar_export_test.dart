@@ -64,6 +64,18 @@ void main() {
     );
   });
 
+  test('an all-day event ends after the daylight-saving fallback day', () {
+    final ics = build([item('dst', expires: DateTime(2026, 10, 25))])!;
+
+    expect(
+      lines(ics),
+      containsAllInOrder([
+        'DTSTART;VALUE=DATE:20261025',
+        'DTEND;VALUE=DATE:20261026',
+      ]),
+    );
+  });
+
   test('the household lead times become reminders at nine', () {
     final ics = build([item('a', expires: DateTime(2026, 12, 24))])!;
 

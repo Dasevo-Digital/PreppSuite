@@ -43,12 +43,12 @@ void main() {
     int dogs = 0,
   }) async {
     await tallSurface(tester);
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          appDatabaseProvider.overrideWithValue(
-            AppDatabase.forTesting(NativeDatabase.memory()),
-          ),
+          appDatabaseProvider.overrideWithValue(db),
           householdProfileProvider.overrideWith(
             () => _FixedProfile(
               HouseholdProfile(

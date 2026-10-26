@@ -58,7 +58,7 @@ String? buildInventoryCalendar({
       'UID:${item.clientId}-expiry@preppsuite',
       'DTSTAMP:$stamp',
       'DTSTART;VALUE=DATE:${_date(day)}',
-      'DTEND;VALUE=DATE:${_date(day.add(const Duration(days: 1)))}',
+      'DTEND;VALUE=DATE:${_date(_nextCalendarDay(day))}',
       'SUMMARY:${_text(expiryTitle(item))}',
       'TRANSP:TRANSPARENT',
       for (final lead in leadDays) ..._alarm(lead),
@@ -73,7 +73,7 @@ String? buildInventoryCalendar({
       'UID:charge-check@preppsuite',
       'DTSTAMP:$stamp',
       'DTSTART;VALUE=DATE:${_date(due)}',
-      'DTEND;VALUE=DATE:${_date(due.add(const Duration(days: 1)))}',
+      'DTEND;VALUE=DATE:${_date(_nextCalendarDay(due))}',
       'RRULE:FREQ=DAILY;INTERVAL=${charge.everyDays}',
       'SUMMARY:${_text(chargeTitle)}',
       'DESCRIPTION:${_text(chargeDescription)}',
@@ -94,7 +94,7 @@ String? buildInventoryCalendar({
       'UID:${device.item.clientId}-charge@preppsuite',
       'DTSTAMP:$stamp',
       'DTSTART;VALUE=DATE:${_date(day)}',
-      'DTEND;VALUE=DATE:${_date(day.add(const Duration(days: 1)))}',
+      'DTEND;VALUE=DATE:${_date(_nextCalendarDay(day))}',
       'RRULE:FREQ=DAILY;INTERVAL=${device.check.everyDays}',
       'SUMMARY:${_text(deviceChargeTitle(device.item))}',
       'TRANSP:TRANSPARENT',
@@ -146,6 +146,12 @@ String _date(DateTime day) =>
     '${day.year.toString().padLeft(4, '0')}'
     '${day.month.toString().padLeft(2, '0')}'
     '${day.day.toString().padLeft(2, '0')}';
+
+// A calendar day is not always 24 hours. At the end of daylight saving time,
+// midnight plus 24 hours can still have the same local date. DTSTART/DTEND for
+// an all-day event need adjacent calendar dates instead.
+DateTime _nextCalendarDay(DateTime day) =>
+    DateTime(day.year, day.month, day.day + 1);
 
 String _utcStamp(DateTime time) {
   final utc = time.toUtc();

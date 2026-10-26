@@ -12,7 +12,15 @@ readonly IDENTITY="superkuh86 <$AUTHOR_EMAIL>"
 readonly EXCLUDED=(
   ':(exclude)preppsuite_flutter/assets/fonts/OFL.txt'
   ':(exclude)preppsuite_flutter/ios/**/Package.resolved'
+  ':(exclude)preppsuite_flutter/ios/Runner/Assets.xcassets/**/Contents.json'
   ':(exclude)preppsuite_flutter/test/fixtures/**'
+  # Unchanged upstream metadata in the patched, vendored packages. These
+  # addresses name their public maintainers, not anybody working on this repo.
+  ':(exclude)third_party/flutter_tts/CODE_OF_CONDUCT.md'
+  ':(exclude)third_party/flutter_tts/ios/flutter_tts.podspec'
+  ':(exclude)third_party/flutter_tts/macos/flutter_tts.podspec'
+  ':(exclude)third_party/zstandard_ios/ios/zstandard_ios.podspec'
+  ':(exclude)third_party/zstandard_macos/macos/zstandard_macos.podspec'
 )
 
 fail=0
@@ -32,11 +40,13 @@ if matches=$(git grep -n -I -i -E 'ma'""'rco|guen'""'ther|Leonardo'""'Gamar' -- 
 fi
 
 # The project contains no contact address. An address in product code or a
-# document must be the generic project identity, never an individual's.
-if matches=$(git grep -n -I -E '[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}' -- . "${EXCLUDED[@]}" || true); then
+# document must be the generic project identity, never an individual's. Match
+# without regard to case: addresses are normally lower-case. Only locations
+# are printed, so the check itself cannot copy a leaked address into a log.
+if matches=$(git grep -n -I -i -E '[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}' -- . "${EXCLUDED[@]}" || true); then
   if [[ -n "$matches" ]]; then
     report "Email address in a tracked file:"
-    printf '%s\n' "$matches" >&2
+    printf '%s\n' "$matches" | sed -E 's/^([^:]+:[0-9]+):.*$/\1/' >&2
   fi
 fi
 

@@ -26,6 +26,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Run calendar daylight-saving regression
+        working-directory: preppsuite_flutter
+        env:
+          TZ: Europe/Berlin
+        run: flutter test test/features/inventory/inventory_calendar_export_test.dart
+
       - name: Run tests
         working-directory: preppsuite_flutter
         run: flutter test

@@ -42,6 +42,13 @@ else
 fi
 cd "$dir"
 
+# Git invokes hooks with the current checkout in the environment. Keeping
+# these values after changing into a linked or temporary worktree makes
+# Flutter mistake that checkout for its own repository and can alter the
+# shared SDK's tool stamp. Git commands below rediscover this worktree from
+# the current directory instead.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
+
 step() {
   echo "pre-push: $*" >&2
   if ! "$@" >"$log" 2>&1; then
@@ -55,5 +62,6 @@ step tool/repo_privacy_check.sh
 step flutter pub get
 step flutter analyze
 step dart format --output=none --set-exit-if-changed .
+step bash -c "cd preppsuite_flutter && TZ=Europe/Berlin flutter test test/features/inventory/inventory_calendar_export_test.dart"
 step bash -c "cd preppsuite_flutter && flutter test"
 echo "pre-push: all checks passed" >&2
