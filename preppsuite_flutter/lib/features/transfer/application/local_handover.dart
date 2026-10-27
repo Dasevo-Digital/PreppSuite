@@ -496,6 +496,12 @@ Future<LocalHandoverResult> joinLocalHandover({
             LocalHandoverFailure.otherHousehold,
           );
         }
+        if (response.statusCode == HttpStatus.serviceUnavailable ||
+            response.statusCode == HttpStatus.requestTimeout) {
+          // A busy or timed-out host says nothing about the payload's
+          // readability. Try another address, then offer a retry.
+          continue;
+        }
         if (response.statusCode != HttpStatus.ok) {
           throw const LocalHandoverException(LocalHandoverFailure.unreadable);
         }

@@ -143,6 +143,23 @@ void main() {
       }
 
       expect(await status(), 503);
+      final guest = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(guest.close);
+      await expectLater(
+        joinLocalHandover(
+          db: guest,
+          deviceId: 'guest',
+          householdId: 'home',
+          invitation: host.invitation,
+        ),
+        throwsA(
+          isA<LocalHandoverException>().having(
+            (error) => error.reason,
+            'reason',
+            LocalHandoverFailure.interrupted,
+          ),
+        ),
+      );
       for (final socket in sockets) {
         socket.destroy();
       }
