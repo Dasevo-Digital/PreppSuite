@@ -172,6 +172,10 @@ codesign --verify --deep --strict "$app" || fail "Signatur ungültig"
 [ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' \
   "$app/Contents/Info.plist")" = "$version" ] || fail "falsche Version im Mac-Paket"
 ditto -c -k --keepParent "$app" "$out/PreppSuite-$version-macos-local-ad-hoc.zip"
+# No unpacked copy in the upload folder, unlike the general release
+# layout: Spotlight lists every PreppSuite.app it finds, and each of them
+# opens the real household. After a release there are exactly two,
+# installed from this zip by tool/macos_install.sh.
 rm -rf "$app"
 
 # --- Android --------------------------------------------------------------
