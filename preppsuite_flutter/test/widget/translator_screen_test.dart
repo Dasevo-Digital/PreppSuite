@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -281,4 +283,113 @@ void main() {
     await tester.pumpAndSettle();
     await expectAccessible(tester);
   });
+
+  group('all language packs at once (#182)', () {
+    const enFr = TranslatorDirection(_en, _fr);
+    const frEn = TranslatorDirection(_fr, _en);
+    const deEn = TranslatorDirection(_de, _en);
+    const enDe = TranslatorDirection(_en, _de);
+
+    testWidgets('says how many and how much, then fetches them in turn', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        installed: [deEn],
+        offered: [enFr, frEn, deEn, enDe],
+      );
+
+      final button = find.text('Alle Sprachpakete laden');
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      // Three packs are missing; the one here is not counted.
+      expect(find.textContaining('3 Richtungen, zusammen '), findsOneWidget);
+      expect(
+        find.textContaining('MB. Sie werden nacheinander'),
+        findsOneWidget,
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Laden'));
+      await tester.pumpAndSettle();
+
+      // German first, so German works both ways before the rest arrives.
+      expect(store.installs, [enDe, enFr, frEn]);
+      expect(find.textContaining('von 3 fertig'), findsNothing);
+    });
+
+    testWidgets('with everything here it says so and fetches nothing', (
+      tester,
+    ) async {
+      await pump(tester, installed: [deEn, enDe], offered: [deEn, enDe]);
+
+      final button = find.text('Alle Sprachpakete laden');
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Alle Sprachpakete sind schon auf diesem Gerät.'),
+        findsOneWidget,
+      );
+      expect(store.installs, isEmpty);
+    });
+
+    testWidgets('closing the question fetches nothing', (tester) async {
+      await pump(tester, offered: [deEn, enDe]);
+
+      final button = find.text('Alle Sprachpakete laden');
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Abbrechen'));
+      await tester.pumpAndSettle();
+
+      expect(store.installs, isEmpty);
+    });
+  });
+
+  test('stopping finishes the pack on its way and starts no other', () async {
+    final gate = Completer<void>();
+    final slow = _SlowStore(gate.future);
+    final container = ProviderContainer(
+      overrides: [translatorStoreProvider.overrideWithValue(slow)],
+    );
+    addTearDown(container.dispose);
+    final controller = container.read(translatorInstallProvider.notifier);
+
+    final run = controller.installAll([
+      _offered(const TranslatorDirection(_de, _en)),
+      _offered(const TranslatorDirection(_en, _de)),
+      _offered(const TranslatorDirection(_en, _fr)),
+    ]);
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(translatorInstallProvider).batch?.total, 3);
+
+    controller.stopAll();
+    expect(container.read(translatorInstallProvider).batch?.stopping, isTrue);
+    gate.complete();
+    await run;
+
+    expect(slow.installs.map((d) => d.code), ['deen']);
+    expect(container.read(translatorInstallProvider).batch, isNull);
+  });
+}
+
+/// Holds the first install until [gate] opens.
+class _SlowStore extends TranslatorStore {
+  _SlowStore(this.gate);
+
+  final Future<void> gate;
+  final installs = <TranslatorDirection>[];
+
+  @override
+  Future<List<InstalledTranslatorPack>> installed() async => const [];
+
+  @override
+  Stream<TranslatorInstallProgress> install(TranslatorPack pack) async* {
+    installs.add(pack.direction);
+    await gate;
+    yield TranslatorInstallProgress(received: pack.size, total: pack.size);
+  }
 }

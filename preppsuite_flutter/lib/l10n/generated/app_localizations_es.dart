@@ -9784,6 +9784,50 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get translatorDownloadAll => 'Descargar todos los paquetes de idioma';
+
+  @override
+  String get translatorDownloadAllTitle =>
+      '¿Descargar todos los paquetes de idioma?';
+
+  @override
+  String translatorDownloadAllBody(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count direcciones',
+      one: '1 dirección',
+    );
+    return '$_temp0, $size en total. Se descargan una tras otra, mejor por wifi. Después PreppSuite traduce entre todos los idiomas sin conexión.';
+  }
+
+  @override
+  String translatorDownloadAllProgress(int done, int total) {
+    return 'Paquetes de idioma: $done de $total listos';
+  }
+
+  @override
+  String get translatorDownloadAllStop => 'Detener';
+
+  @override
+  String get translatorDownloadAllStopping => 'Se detiene tras este paquete…';
+
+  @override
+  String get translatorDownloadAllNothing =>
+      'Todos los paquetes de idioma ya están en este dispositivo.';
+
+  @override
+  String translatorDownloadAllFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'No se pudieron descargar $count paquetes.',
+      one: 'No se pudo descargar 1 paquete.',
+    );
+    return '$_temp0 Vuelve a pulsar para descargar lo que falta.';
+  }
+
+  @override
   String translatorInstalled(String size) {
     return 'En este dispositivo ($size)';
   }

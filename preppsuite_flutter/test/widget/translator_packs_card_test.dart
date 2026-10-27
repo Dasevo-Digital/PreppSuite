@@ -134,4 +134,19 @@ void main() {
 
     expect(find.text('Texterkennung für Fotos'), findsNothing);
   });
+
+  testWidgets('all packs can be fetched from here too (#182)', (tester) async {
+    await show(tester);
+
+    expect(find.text('Alle Sprachpakete laden'), findsOneWidget);
+    expect(find.text('Zum Übersetzer'), findsOneWidget);
+  });
+
+  testWidgets('a build without the library offers nothing to fetch', (
+    tester,
+  ) async {
+    await show(tester, available: false);
+
+    expect(find.text('Alle Sprachpakete laden'), findsNothing);
+  });
 }

@@ -9702,6 +9702,49 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get translatorDownloadAll => 'Download all language packs';
+
+  @override
+  String get translatorDownloadAllTitle => 'Download all language packs?';
+
+  @override
+  String translatorDownloadAllBody(int count, String size) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count directions',
+      one: '1 direction',
+    );
+    return '$_temp0, $size in all. They are downloaded one after another, preferably over Wi-Fi. After that PreppSuite translates between all languages without a connection.';
+  }
+
+  @override
+  String translatorDownloadAllProgress(int done, int total) {
+    return 'Language packs: $done of $total done';
+  }
+
+  @override
+  String get translatorDownloadAllStop => 'Stop';
+
+  @override
+  String get translatorDownloadAllStopping => 'Stopping after this pack …';
+
+  @override
+  String get translatorDownloadAllNothing =>
+      'All language packs are already on this device.';
+
+  @override
+  String translatorDownloadAllFailed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count packs could not be downloaded.',
+      one: '1 pack could not be downloaded.',
+    );
+    return '$_temp0 Tap again to fetch what is missing.';
+  }
+
+  @override
   String translatorInstalled(String size) {
     return 'On this device ($size)';
   }

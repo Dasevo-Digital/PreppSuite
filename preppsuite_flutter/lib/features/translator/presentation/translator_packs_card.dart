@@ -6,12 +6,14 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../downloads/application/byte_size.dart';
 import '../../knowledge/application/tesseract_data.dart';
 import '../application/translator_providers.dart';
+import 'translator_download_all.dart';
 import 'translator_screen.dart';
 
 /// The translator's language packs beside the map and the archives, in
 /// "Offline und Speicher" (#192): what is on the device, how much room it
-/// takes, and the way to remove it. Fetching stays on the translator's own
-/// screen, where it is clear which direction a sentence needs.
+/// takes, and the way to remove it. Single directions are fetched on the
+/// translator's own screen, where it is clear which one a sentence needs;
+/// all of them at once can be fetched here too, like the map (#182).
 class TranslatorPacksCard extends ConsumerWidget {
   const TranslatorPacksCard({super.key, required this.l10n});
 
@@ -112,6 +114,10 @@ class TranslatorPacksCard extends ConsumerWidget {
                 ),
               ),
           ],
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: TranslatorDownloadAll(),
+          ),
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: Padding(

@@ -16057,6 +16057,54 @@ abstract class AppLocalizations {
   /// **'Download failed: {error}'**
   String translatorDownloadFailed(String error);
 
+  /// No description provided for @translatorDownloadAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Download all language packs'**
+  String get translatorDownloadAll;
+
+  /// No description provided for @translatorDownloadAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Download all language packs?'**
+  String get translatorDownloadAllTitle;
+
+  /// No description provided for @translatorDownloadAllBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 direction} other{{count} directions}}, {size} in all. They are downloaded one after another, preferably over Wi-Fi. After that PreppSuite translates between all languages without a connection.'**
+  String translatorDownloadAllBody(int count, String size);
+
+  /// No description provided for @translatorDownloadAllProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Language packs: {done} of {total} done'**
+  String translatorDownloadAllProgress(int done, int total);
+
+  /// No description provided for @translatorDownloadAllStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get translatorDownloadAllStop;
+
+  /// No description provided for @translatorDownloadAllStopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopping after this pack …'**
+  String get translatorDownloadAllStopping;
+
+  /// No description provided for @translatorDownloadAllNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'All language packs are already on this device.'**
+  String get translatorDownloadAllNothing;
+
+  /// No description provided for @translatorDownloadAllFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pack could not be downloaded.} other{{count} packs could not be downloaded.}} Tap again to fetch what is missing.'**
+  String translatorDownloadAllFailed(int count);
+
   /// No description provided for @translatorInstalled.
   ///
   /// In en, this message translates to:

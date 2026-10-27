@@ -136,6 +136,14 @@ und exportiert nur ihre sechs Funktionen.
   entfernen. Die Liste wird nur abgefragt, wenn ein Paket fehlt.
 - `translator_packs_card.dart`: dieselben Pakete unter Einstellungen →
   „Offline und Speicher“, neben der Karte, mit Größe und Entfernen (#192).
+- `translator_download_all.dart`: „Alle Sprachpakete laden“ auf beiden
+  Bildschirmen (#182). Fragt die Liste erst beim Tippen, nennt Anzahl und
+  Gesamtgröße der fehlenden Richtungen und lädt sie nacheinander, die mit
+  Deutsch zuerst. Nacheinander, weil ein schwaches Netz achtzehn
+  gleichzeitige Downloads alle verliert. Der Lauf gehört dem
+  `TranslatorInstallController` und geht weiter, wenn der Bildschirm
+  geschlossen wird; „Anhalten“ beendet das laufende Paket und startet
+  kein weiteres. Ein Paket, das scheitert, hält die anderen nicht auf.
 
 **Tests.** `test/features/translator/` prüft Liste und Speicher gegen
 einen Ausschnitt der echten Liste, `test/widget/translator_screen_test.dart`

@@ -18,6 +18,7 @@ import '../application/translator_catalogue.dart';
 import '../application/translator_providers.dart';
 import '../application/translator_store.dart';
 import 'translator_conversation_screen.dart';
+import 'translator_download_all.dart';
 
 /// Free text, translated on this device (#182).
 ///
@@ -281,6 +282,8 @@ class _TranslatorScreenState extends ConsumerState<TranslatorScreen> {
           ],
           const SizedBox(height: 24),
           _InstalledPacks(installed: installed),
+          const SizedBox(height: 8),
+          const TranslatorDownloadAll(),
           const SizedBox(height: 12),
           Text(l10n.translatorSource, style: theme.textTheme.bodySmall),
         ],

@@ -5754,6 +5754,17 @@
       }
     }
   },
+  "translatorDownloadAll": "Download all language packs",
+  "translatorDownloadAllTitle": "Download all language packs?",
+  "translatorDownloadAllBody": "{count, plural, =1{1 direction} other{{count} directions}}, {size} in all. They are downloaded one after another, preferably over Wi-Fi. After that PreppSuite translates between all languages without a connection.",
+  "@translatorDownloadAllBody": {"placeholders": {"count": {"type": "int"}, "size": {"type": "String"}}},
+  "translatorDownloadAllProgress": "Language packs: {done} of {total} done",
+  "@translatorDownloadAllProgress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "translatorDownloadAllStop": "Stop",
+  "translatorDownloadAllStopping": "Stopping after this pack …",
+  "translatorDownloadAllNothing": "All language packs are already on this device.",
+  "translatorDownloadAllFailed": "{count, plural, =1{1 pack could not be downloaded.} other{{count} packs could not be downloaded.}} Tap again to fetch what is missing.",
+  "@translatorDownloadAllFailed": {"placeholders": {"count": {"type": "int"}}},
   "translatorInstalled": "On this device ({size})",
   "@translatorInstalled": {
     "placeholders": {
