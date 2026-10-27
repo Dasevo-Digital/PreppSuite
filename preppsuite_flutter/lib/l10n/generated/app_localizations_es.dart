@@ -9784,11 +9784,15 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get translatorDownloadAll => 'Descargar todos los paquetes de idioma';
+  String get translatorDownloadAll =>
+      'Descargar o actualizar todos los paquetes de idioma';
 
   @override
   String get translatorDownloadAllTitle =>
       '¿Descargar todos los paquetes de idioma?';
+
+  @override
+  String get translatorUpdateAllTitle => '¿Actualizar los paquetes de idioma?';
 
   @override
   String translatorDownloadAllBody(int count, String size) {
@@ -9799,6 +9803,18 @@ class AppLocalizationsEs extends AppLocalizations {
       one: '1 dirección',
     );
     return '$_temp0, $size en total. Se descargan una tras otra, mejor por wifi. Después PreppSuite traduce entre todos los idiomas sin conexión.';
+  }
+
+  @override
+  String translatorDownloadAllUpdates(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count de ellas son versiones más recientes de paquetes que ya están aquí.',
+      one: '1 de ellas es una versión más reciente de un paquete que ya está aquí.',
+    );
+    return '$_temp0 La versión anterior sigue traduciendo hasta que la nueva esté descargada y comprobada.';
   }
 
   @override
@@ -9814,7 +9830,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get translatorDownloadAllNothing =>
-      'Todos los paquetes de idioma ya están en este dispositivo.';
+      'Todos los paquetes de idioma están en este dispositivo, cada uno en su versión más reciente.';
 
   @override
   String translatorDownloadAllFailed(int count) {
@@ -9834,6 +9850,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get translatorRemove => 'Eliminar paquete de idioma';
+
+  @override
+  String translatorPackVersion(String size, String version) {
+    return '$size · versión $version';
+  }
 
   @override
   String get phrasebookTranslatorHint =>

@@ -92,6 +92,8 @@ void main() {
 
     expect(find.textContaining('2 Richtungen'), findsOneWidget);
     expect(find.text('Deutsch → English'), findsOneWidget);
+    // The version, so an update can be seen to have arrived (#220).
+    expect(find.textContaining(' · Fassung 1.0'), findsNWidgets(2));
     await tester.tap(find.byTooltip('Sprachpaket entfernen').first);
     await tester.pumpAndSettle();
 
@@ -138,7 +140,10 @@ void main() {
   testWidgets('all packs can be fetched from here too (#182)', (tester) async {
     await show(tester);
 
-    expect(find.text('Alle Sprachpakete laden'), findsOneWidget);
+    expect(
+      find.text('Alle Sprachpakete laden oder aktualisieren'),
+      findsOneWidget,
+    );
     expect(find.text('Zum Übersetzer'), findsOneWidget);
   });
 
@@ -147,6 +152,9 @@ void main() {
   ) async {
     await show(tester, available: false);
 
-    expect(find.text('Alle Sprachpakete laden'), findsNothing);
+    expect(
+      find.text('Alle Sprachpakete laden oder aktualisieren'),
+      findsNothing,
+    );
   });
 }

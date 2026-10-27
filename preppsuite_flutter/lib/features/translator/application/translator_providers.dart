@@ -82,19 +82,39 @@ List<TranslatorPack> missingTranslatorPacks(
   Iterable<TranslatorDirection> present,
 ) {
   final have = present.toSet();
-  int rank(TranslatorDirection d) =>
-      d.from == PhraseLanguage.de || d.to == PhraseLanguage.de ? 0 : 1;
   return [
     for (final pack in catalogue.packs.values)
       if (!have.contains(pack.direction)) pack,
-  ]..sort((a, b) {
-    final byRank = rank(a.direction).compareTo(rank(b.direction));
-    if (byRank != 0) return byRank;
-    final byFrom = a.direction.from.index.compareTo(b.direction.from.index);
-    return byFrom != 0
-        ? byFrom
-        : a.direction.to.index.compareTo(b.direction.to.index);
-  });
+  ]..sort(_inBatchOrder);
+}
+
+/// The directions on this device for which [catalogue] has a newer
+/// version (#220), in the same order. Mozilla improves a model now and
+/// then, and a pack fetched once would otherwise stay on its first
+/// version for good. One that is newer here than in the list -- a
+/// version taken back -- is left as it is.
+List<TranslatorPack> outdatedTranslatorPacks(
+  TranslatorCatalogue catalogue,
+  Iterable<InstalledTranslatorPack> installed,
+) {
+  final versions = {for (final pack in installed) pack.direction: pack.version};
+  return [
+    for (final pack in catalogue.packs.values)
+      if (versions[pack.direction] case final version?
+          when compareModelVersions(version, pack.version) < 0)
+        pack,
+  ]..sort(_inBatchOrder);
+}
+
+int _inBatchOrder(TranslatorPack a, TranslatorPack b) {
+  int rank(TranslatorDirection d) =>
+      d.from == PhraseLanguage.de || d.to == PhraseLanguage.de ? 0 : 1;
+  final byRank = rank(a.direction).compareTo(rank(b.direction));
+  if (byRank != 0) return byRank;
+  final byFrom = a.direction.from.index.compareTo(b.direction.from.index);
+  return byFrom != 0
+      ? byFrom
+      : a.direction.to.index.compareTo(b.direction.to.index);
 }
 
 class TranslatorInstallController extends Notifier<TranslatorInstallState> {

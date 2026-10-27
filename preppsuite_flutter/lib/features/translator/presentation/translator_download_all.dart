@@ -10,8 +10,10 @@ import '../application/translator_catalogue.dart';
 import '../application/translator_providers.dart';
 import '../application/translator_store.dart';
 
-/// "Alle Sprachpakete laden" (#182): every direction Mozilla offers that
-/// this device lacks, after saying how many and how much.
+/// "Alle Sprachpakete laden oder aktualisieren" (#182, #220): every
+/// direction Mozilla offers that this device lacks, and every one here
+/// that Mozilla has a newer version of, after saying how many and how
+/// much.
 ///
 /// On the translator and beside the map in "Offline und Speicher". The
 /// run belongs to [translatorInstallProvider], so it carries on when the
@@ -63,20 +65,40 @@ class _TranslatorDownloadAllState extends ConsumerState<TranslatorDownloadAll> {
       catalogue,
       installed.map((pack) => pack.direction),
     );
-    if (missing.isEmpty) {
+    final outdated = outdatedTranslatorPacks(catalogue, installed);
+    // What is missing first: a direction that cannot translate at all
+    // matters more than a better version of one that can.
+    final packs = [...missing, ...outdated];
+    if (packs.isEmpty) {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.translatorDownloadAllNothing)),
       );
       return;
     }
 
-    final size = missing.fold(0, (sum, pack) => sum + pack.size);
+    final size = packs.fold(0, (sum, pack) => sum + pack.size);
     final go = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.translatorDownloadAllTitle),
-        content: Text(
-          l10n.translatorDownloadAllBody(missing.length, formatByteSize(size)),
+        title: Text(
+          missing.isEmpty
+              ? l10n.translatorUpdateAllTitle
+              : l10n.translatorDownloadAllTitle,
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 8,
+          children: [
+            Text(
+              l10n.translatorDownloadAllBody(
+                packs.length,
+                formatByteSize(size),
+              ),
+            ),
+            if (outdated.isNotEmpty)
+              Text(l10n.translatorDownloadAllUpdates(outdated.length)),
+          ],
         ),
         actions: [
           TextButton(
@@ -92,7 +114,7 @@ class _TranslatorDownloadAllState extends ConsumerState<TranslatorDownloadAll> {
     );
     if (go != true || !mounted) return;
     unawaited(
-      ref.read(translatorInstallProvider.notifier).installAll(missing),
+      ref.read(translatorInstallProvider.notifier).installAll(packs),
     );
   }
 

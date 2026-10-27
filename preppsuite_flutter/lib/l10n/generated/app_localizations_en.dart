@@ -9702,10 +9702,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get translatorDownloadAll => 'Download all language packs';
+  String get translatorDownloadAll => 'Download or update all language packs';
 
   @override
   String get translatorDownloadAllTitle => 'Download all language packs?';
+
+  @override
+  String get translatorUpdateAllTitle => 'Update language packs?';
 
   @override
   String translatorDownloadAllBody(int count, String size) {
@@ -9716,6 +9719,17 @@ class AppLocalizationsEn extends AppLocalizations {
       one: '1 direction',
     );
     return '$_temp0, $size in all. They are downloaded one after another, preferably over Wi-Fi. After that PreppSuite translates between all languages without a connection.';
+  }
+
+  @override
+  String translatorDownloadAllUpdates(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count of them are newer versions of packs already here.',
+      one: '1 of them is a newer version of a pack already here.',
+    );
+    return '$_temp0 The old version keeps translating until the new one is downloaded and checked.';
   }
 
   @override
@@ -9731,7 +9745,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get translatorDownloadAllNothing =>
-      'All language packs are already on this device.';
+      'All language packs are on this device, each in its newest version.';
 
   @override
   String translatorDownloadAllFailed(int count) {
@@ -9751,6 +9765,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get translatorRemove => 'Remove language pack';
+
+  @override
+  String translatorPackVersion(String size, String version) {
+    return '$size · version $version';
+  }
 
   @override
   String get phrasebookTranslatorHint =>

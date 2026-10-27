@@ -16060,7 +16060,7 @@ abstract class AppLocalizations {
   /// No description provided for @translatorDownloadAll.
   ///
   /// In en, this message translates to:
-  /// **'Download all language packs'**
+  /// **'Download or update all language packs'**
   String get translatorDownloadAll;
 
   /// No description provided for @translatorDownloadAllTitle.
@@ -16069,11 +16069,23 @@ abstract class AppLocalizations {
   /// **'Download all language packs?'**
   String get translatorDownloadAllTitle;
 
+  /// No description provided for @translatorUpdateAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update language packs?'**
+  String get translatorUpdateAllTitle;
+
   /// No description provided for @translatorDownloadAllBody.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 direction} other{{count} directions}}, {size} in all. They are downloaded one after another, preferably over Wi-Fi. After that PreppSuite translates between all languages without a connection.'**
   String translatorDownloadAllBody(int count, String size);
+
+  /// No description provided for @translatorDownloadAllUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 of them is a newer version of a pack already here.} other{{count} of them are newer versions of packs already here.}} The old version keeps translating until the new one is downloaded and checked.'**
+  String translatorDownloadAllUpdates(int count);
 
   /// No description provided for @translatorDownloadAllProgress.
   ///
@@ -16096,7 +16108,7 @@ abstract class AppLocalizations {
   /// No description provided for @translatorDownloadAllNothing.
   ///
   /// In en, this message translates to:
-  /// **'All language packs are already on this device.'**
+  /// **'All language packs are on this device, each in its newest version.'**
   String get translatorDownloadAllNothing;
 
   /// No description provided for @translatorDownloadAllFailed.
@@ -16116,6 +16128,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove language pack'**
   String get translatorRemove;
+
+  /// No description provided for @translatorPackVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} · version {version}'**
+  String translatorPackVersion(String size, String version);
 
   /// No description provided for @phrasebookTranslatorHint.
   ///

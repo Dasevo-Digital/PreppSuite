@@ -6,6 +6,11 @@
 /// without one is a download that did not finish, and is never handed to
 /// the engine. A model is about 20 to 37 MB a direction and can be fetched
 /// again, so it is in no backup, like a downloaded map.
+///
+/// A newer version of a direction that is already here (#220) is fetched
+/// beside it, into `<code>.new`, and takes the old one's place only once
+/// every file has passed. Until then the old one keeps translating, and a
+/// download that breaks off leaves it as it was.
 library;
 
 import 'dart:async';
@@ -17,6 +22,7 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 
 import '../../../core/app_database_directory.dart';
+import '../../../core/platform_storage.dart' show excludeFromBackup;
 import '../../downloads/application/archive_downloader.dart';
 import '../../phrasebook/application/phrasebook.dart' show PhraseLanguage;
 import 'translator_catalogue.dart';
@@ -63,6 +69,14 @@ class TranslatorStore {
 
   static const _manifestName = 'manifest.json';
 
+  /// The next version of a direction while it is fetched, and the old one
+  /// for the moment of the swap.
+  static const _newSuffix = '.new';
+  static const _oldSuffix = '.old';
+
+  /// Folders being swapped right now, which [_settle] leaves alone.
+  final _swapping = <String>{};
+
   Future<Directory> _directory() async =>
       root ??
       Directory(p.join((await appSupportDirectory()).path, 'translator'));
@@ -74,6 +88,15 @@ class TranslatorStore {
   Future<List<InstalledTranslatorPack>> installed() async {
     final root = await _directory();
     if (!await root.exists()) return const [];
+    await for (final entry in root.list()) {
+      if (entry is Directory && entry.path.endsWith(_oldSuffix)) {
+        await _settle(
+          Directory(
+            entry.path.substring(0, entry.path.length - _oldSuffix.length),
+          ),
+        );
+      }
+    }
     final packs = <InstalledTranslatorPack>[];
     await for (final entry in root.list()) {
       if (entry is! Directory) continue;
@@ -85,8 +108,11 @@ class TranslatorStore {
   }
 
   /// [direction] if it is complete on this device.
-  Future<InstalledTranslatorPack?> find(TranslatorDirection direction) async =>
-      _read(await _folderFor(direction));
+  Future<InstalledTranslatorPack?> find(TranslatorDirection direction) async {
+    final folder = await _folderFor(direction);
+    await _settle(folder);
+    return _read(folder);
+  }
 
   Future<InstalledTranslatorPack?> _read(Directory folder) async {
     final manifest = File(p.join(folder.path, _manifestName));
@@ -98,8 +124,11 @@ class TranslatorStore {
       final to = languages[json['to']];
       final files = (json['files'] as Map).cast<String, String>();
       String path(String kind) => p.join(folder.path, p.basename(files[kind]!));
+      final direction = TranslatorDirection(from!, to!);
+      // Only under its own name: `deen.new` is a version on its way.
+      if (p.basename(folder.path) != direction.code) return null;
       final pack = InstalledTranslatorPack(
-        direction: TranslatorDirection(from!, to!),
+        direction: direction,
         version: json['version'] as String,
         size: json['size'] as int,
         modelPath: path('model'),
@@ -120,20 +149,33 @@ class TranslatorStore {
   ///
   /// Each file resumes where an earlier attempt stopped, as maps and
   /// archives do. A file whose checksum does not match is deleted, not
-  /// kept under its name -- the same rule as for a video pack.
+  /// kept under its name -- the same rule as for a video pack. Another
+  /// version of a direction already here is fetched beside it and swapped
+  /// in at the end; a file it shares with the old one is copied, not
+  /// fetched again.
   Stream<TranslatorInstallProgress> install(TranslatorPack pack) async* {
     final folder = await _folderFor(pack.direction);
-    await folder.create(recursive: true);
-    final manifest = File(p.join(folder.path, _manifestName));
+    await _settle(folder);
+    final current = await _read(folder);
+    final replacing = current != null && current.version != pack.version;
+    final into = replacing ? Directory('${folder.path}$_newSuffix') : folder;
+    await into.create(recursive: true);
+    final manifest = File(p.join(into.path, _manifestName));
     if (await manifest.exists()) await manifest.delete();
 
     final downloader = ArchiveDownloader(httpClient: httpClient);
     var done = 0;
     for (final file in pack.files) {
-      final target = File(p.join(folder.path, file.name));
-      if (!await target.exists() ||
-          await target.length() != file.size ||
-          await _sha256(target) != file.sha256) {
+      final target = File(p.join(into.path, file.name));
+      final kept = File(p.join(folder.path, file.name));
+      var ready = await _matches(target, file);
+      if (!ready && replacing && await _matches(kept, file)) {
+        if (await target.exists()) await target.delete();
+        await kept.copy(target.path);
+        await excludeFromBackup(target.path);
+        ready = true;
+      }
+      if (!ready) {
         if (await target.exists()) await target.delete();
         await for (final progress in downloader.download(
           url: file.url,
@@ -156,6 +198,13 @@ class TranslatorStore {
       yield TranslatorInstallProgress(received: done, total: pack.size);
     }
 
+    // What an earlier attempt at another version left in the folder.
+    final wanted = {for (final file in pack.files) file.name};
+    await for (final entry in into.list()) {
+      if (entry is File && !wanted.contains(p.basename(entry.path))) {
+        await entry.delete();
+      }
+    }
     await manifest.writeAsString(
       jsonEncode({
         'from': pack.direction.from.name,
@@ -165,13 +214,57 @@ class TranslatorStore {
         'files': {for (final file in pack.files) file.kind.name: file.name},
       }),
     );
+    if (replacing) await _swap(folder, into);
   }
 
-  /// Removes [direction] from this device, files and all.
+  /// Puts [fresh] where [folder] is. Two renames, the old folder deleted
+  /// only after both: on Windows the first one can fail while a
+  /// translation has the model open, and then nothing has changed.
+  Future<void> _swap(Directory folder, Directory fresh) async {
+    final old = Directory('${folder.path}$_oldSuffix');
+    _swapping.add(folder.path);
+    try {
+      if (await old.exists()) await old.delete(recursive: true);
+      await folder.rename(old.path);
+      try {
+        await fresh.rename(folder.path);
+      } on Object {
+        await old.rename(folder.path);
+        rethrow;
+      }
+    } finally {
+      _swapping.remove(folder.path);
+    }
+    await old.delete(recursive: true);
+  }
+
+  /// Puts back a direction whose swap was cut short between its two
+  /// renames, and clears the old folder a finished one left behind.
+  Future<void> _settle(Directory folder) async {
+    if (_swapping.contains(folder.path)) return;
+    final old = Directory('${folder.path}$_oldSuffix');
+    if (!await old.exists()) return;
+    if (await folder.exists()) {
+      await old.delete(recursive: true);
+    } else {
+      await old.rename(folder.path);
+    }
+  }
+
+  /// Removes [direction] from this device, files and all, with any
+  /// version of it on its way.
   Future<void> remove(TranslatorDirection direction) async {
     final folder = await _folderFor(direction);
-    if (await folder.exists()) await folder.delete(recursive: true);
+    for (final suffix in const ['', _newSuffix, _oldSuffix]) {
+      final each = Directory('${folder.path}$suffix');
+      if (await each.exists()) await each.delete(recursive: true);
+    }
   }
+
+  static Future<bool> _matches(File file, TranslatorFile expected) async =>
+      await file.exists() &&
+      await file.length() == expected.size &&
+      await _sha256(file) == expected.sha256;
 
   static Future<String> _sha256(File file) async {
     final sink = Sha256().newHashSink();

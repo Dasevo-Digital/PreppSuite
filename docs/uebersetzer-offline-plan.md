@@ -124,7 +124,11 @@ und exportiert nur ihre sechs Funktionen.
 - `translator_store.dart` legt je Richtung einen Ordner im
   Anwendungsverzeichnis an, lädt mit dem Downloader der Karten
   (fortsetzbar), prüft jede Datei gegen ihre SHA-256 und schreibt das
-  Manifest zuletzt. Ein Ordner ohne Manifest ist kein Paket.
+  Manifest zuletzt. Ein Ordner ohne Manifest ist kein Paket. Eine neuere
+  Version einer schon vorhandenen Richtung (#220) lädt er daneben nach
+  `<code>.new` und tauscht sie erst ein, wenn alles geprüft ist; bis dahin
+  übersetzt die alte, und ein abgebrochenes Update kostet sie nicht.
+  Dateien, die beide Versionen teilen, werden kopiert statt geladen.
 - `translator_engine.dart` übersetzt auf einem eigenen Isolate und öffnet
   die Modelle für jeden Aufruf neu: 0,04 s sind billiger, als zwei
   Modelle und den Arbeitsspeicher der Engine für einen selten geöffneten
@@ -136,10 +140,13 @@ und exportiert nur ihre sechs Funktionen.
   entfernen. Die Liste wird nur abgefragt, wenn ein Paket fehlt.
 - `translator_packs_card.dart`: dieselben Pakete unter Einstellungen →
   „Offline und Speicher“, neben der Karte, mit Größe und Entfernen (#192).
-- `translator_download_all.dart`: „Alle Sprachpakete laden“ auf beiden
-  Bildschirmen (#182). Fragt die Liste erst beim Tippen, nennt Anzahl und
-  Gesamtgröße der fehlenden Richtungen und lädt sie nacheinander, die mit
-  Deutsch zuerst. Nacheinander, weil ein schwaches Netz achtzehn
+- `translator_download_all.dart`: „Alle Sprachpakete laden oder
+  aktualisieren“ auf beiden Bildschirmen (#182, #220). Fragt die Liste
+  erst beim Tippen, nennt Anzahl und Gesamtgröße der fehlenden Richtungen
+  und der Richtungen, für die Mozilla eine neuere Version hat, und lädt
+  sie nacheinander: erst was fehlt, dann die Updates, jeweils die mit
+  Deutsch zuerst. Eine ältere Version in der Liste als auf dem Gerät
+  (zurückgezogen) ersetzt nichts. Nacheinander, weil ein schwaches Netz achtzehn
   gleichzeitige Downloads alle verliert. Der Lauf gehört dem
   `TranslatorInstallController` und geht weiter, wenn der Bildschirm
   geschlossen wird; „Anhalten“ beendet das laufende Paket und startet

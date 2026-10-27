@@ -700,7 +700,12 @@ class _InstalledPacks extends ConsumerWidget {
                 pack.direction.to.endonym,
               ),
             ),
-            subtitle: Text(formatByteSize(pack.size)),
+            subtitle: Text(
+              l10n.translatorPackVersion(
+                formatByteSize(pack.size),
+                pack.version,
+              ),
+            ),
             trailing: IconButton(
               tooltip: l10n.translatorRemove,
               icon: const Icon(Icons.delete_outline),

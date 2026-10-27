@@ -4080,13 +4080,15 @@
       }
     }
   },
-  "translatorDownloadAll": "Alle Sprachpakete laden",
+  "translatorDownloadAll": "Alle Sprachpakete laden oder aktualisieren",
   "translatorDownloadAllTitle": "Alle Sprachpakete laden?",
+  "translatorUpdateAllTitle": "Sprachpakete aktualisieren?",
   "translatorDownloadAllBody": "{count, plural, =1{1 Richtung} other{{count} Richtungen}}, zusammen {size}. Sie werden nacheinander geladen, am besten im WLAN. Danach übersetzt PreppSuite zwischen allen Sprachen ohne Netz.",
+  "translatorDownloadAllUpdates": "{count, plural, =1{Davon ist 1 die neuere Fassung eines Pakets, das schon hier ist.} other{Davon sind {count} neuere Fassungen von Paketen, die schon hier sind.}} Die alte Fassung übersetzt weiter, bis die neue geladen und geprüft ist.",
   "translatorDownloadAllProgress": "Sprachpakete: {done} von {total} fertig",
   "translatorDownloadAllStop": "Anhalten",
   "translatorDownloadAllStopping": "Hält nach diesem Paket an …",
-  "translatorDownloadAllNothing": "Alle Sprachpakete sind schon auf diesem Gerät.",
+  "translatorDownloadAllNothing": "Alle Sprachpakete sind auf diesem Gerät, jeweils in der neuesten Fassung.",
   "translatorDownloadAllFailed": "{count, plural, =1{1 Paket ließ sich nicht laden.} other{{count} Pakete ließen sich nicht laden.}} Noch einmal tippen lädt, was fehlt.",
   "translatorInstalled": "Auf diesem Gerät ({size})",
   "@translatorInstalled": {
@@ -4097,6 +4099,7 @@
     }
   },
   "translatorRemove": "Sprachpaket entfernen",
+  "translatorPackVersion": "{size} · Fassung {version}",
   "phrasebookTranslatorHint": "Satz nicht dabei? Der Übersetzer übersetzt freien Text.",
   "emergencyCommunicateHeading": "Verständigen ohne Netz",
   "emergencyOrientationHeading": "Orientierung ohne Netz",

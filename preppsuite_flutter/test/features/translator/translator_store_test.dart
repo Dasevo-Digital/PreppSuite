@@ -112,4 +112,126 @@ void main() {
     expect(await store.find(direction), isNull);
     expect(Directory('${root.path}/deen').existsSync(), isFalse);
   });
+
+  group('a newer version of a direction here (#220)', () {
+    final newModel = utf8.encode('better model bytes');
+    final served = {...bodies, 'https://cdn.test/model-2.1': newModel};
+
+    /// 2.1, with a new model under a new name and the other two files as
+    /// they were in 2.0.
+    Future<TranslatorPack> update({String? modelHash}) async {
+      final old = await pack();
+      return TranslatorPack(
+        direction: direction,
+        version: '2.1',
+        files: [
+          TranslatorFile(
+            kind: TranslatorFileKind.model,
+            name: 'model.deen.v2.bin',
+            size: newModel.length,
+            sha256: modelHash ?? await _sha(newModel),
+            url: Uri.parse('https://cdn.test/model-2.1'),
+          ),
+          ...old.files.where((f) => f.kind != TranslatorFileKind.model),
+        ],
+      );
+    }
+
+    test('fetches only what changed and swaps it in whole', () async {
+      final client = _Files(served);
+      final store = TranslatorStore(root: root, httpClient: client);
+      await store.install(await pack()).drain<void>();
+      client.requested.clear();
+
+      await store.install(await update()).drain<void>();
+
+      // The shortlist and the vocabulary are the same files: copied over.
+      expect(client.requested, ['https://cdn.test/model-2.1']);
+      final found = await store.find(direction);
+      expect(found!.version, '2.1');
+      expect(File(found.modelPath).readAsStringSync(), 'better model bytes');
+      expect(File(found.lexPath).readAsStringSync(), 'shortlist bytes');
+      // The old model went with the old folder; nothing is left beside it.
+      expect(File('${root.path}/deen/model.deen.bin').existsSync(), isFalse);
+      expect(
+        root.listSync().map((e) => e.path.split(Platform.pathSeparator).last),
+        ['deen'],
+      );
+      expect(await store.installed(), hasLength(1));
+    });
+
+    test('an update that fails leaves the old version translating', () async {
+      final store = TranslatorStore(root: root, httpClient: _Files(served));
+      await store.install(await pack()).drain<void>();
+
+      await expectLater(
+        store.install(await update(modelHash: '0' * 64)).drain<void>(),
+        throwsA(isA<TranslatorStoreException>()),
+      );
+
+      final found = await store.find(direction);
+      expect(found!.version, '2.0');
+      expect(File(found.modelPath).readAsStringSync(), 'model bytes');
+      // The version on its way is not a second pack.
+      expect(await store.installed(), hasLength(1));
+    });
+
+    test('a later attempt resumes beside the old version, and leaves '
+        'nothing of another one', () async {
+      final client = _Files(served);
+      final store = TranslatorStore(root: root, httpClient: client);
+      await store.install(await pack()).drain<void>();
+      await expectLater(
+        store.install(await update(modelHash: '0' * 64)).drain<void>(),
+        throwsA(isA<TranslatorStoreException>()),
+      );
+      // Something an attempt at yet another version left there.
+      File('${root.path}/deen.new/model.deen.v3.bin').writeAsStringSync('x');
+      client.requested.clear();
+
+      await store.install(await update()).drain<void>();
+
+      expect(client.requested, ['https://cdn.test/model-2.1']);
+      expect((await store.find(direction))!.version, '2.1');
+      expect(File('${root.path}/deen/model.deen.v3.bin').existsSync(), isFalse);
+      expect(Directory('${root.path}/deen.new').existsSync(), isFalse);
+    });
+
+    test('the same version again is checked in place, not fetched', () async {
+      final client = _Files(served);
+      final store = TranslatorStore(root: root, httpClient: client);
+      await store.install(await pack()).drain<void>();
+      client.requested.clear();
+
+      await store.install(await pack()).drain<void>();
+
+      expect(client.requested, isEmpty);
+      expect(Directory('${root.path}/deen.new').existsSync(), isFalse);
+    });
+
+    test('a swap cut short between its two renames is put back', () async {
+      final store = TranslatorStore(root: root, httpClient: _Files(served));
+      await store.install(await pack()).drain<void>();
+      // As if the app ended right after moving the old folder aside.
+      Directory('${root.path}/deen').renameSync('${root.path}/deen.old');
+
+      final packs = await store.installed();
+
+      expect(packs.single.version, '2.0');
+      expect(Directory('${root.path}/deen.old').existsSync(), isFalse);
+    });
+
+    test('removing also takes a version on its way', () async {
+      final store = TranslatorStore(root: root, httpClient: _Files(served));
+      await store.install(await pack()).drain<void>();
+      await expectLater(
+        store.install(await update(modelHash: '0' * 64)).drain<void>(),
+        throwsA(isA<TranslatorStoreException>()),
+      );
+
+      await store.remove(direction);
+
+      expect(root.listSync(), isEmpty);
+    });
+  });
 }

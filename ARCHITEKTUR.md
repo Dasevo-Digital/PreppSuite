@@ -890,7 +890,11 @@ Linux/Windows CMake rules and Gradle all only warn when it is missing:
 and on the Linux machine `build_linux.sh` before the app and
 `build_windows.sh` (mingw-w64) after it, the DLL then going to the
 Windows machine. The start test insists on it under Linux and Windows. Model packs are
-checked against Mozilla's SHA-256 and get their manifest last; the list's
+checked against Mozilla's SHA-256 and get their manifest last. **A newer
+version of a pack already here never replaces it in place** (#220): it is
+fetched into `<code>.new` and swapped in by two renames once every file
+has passed, so a broken-off update leaves the working pack as it was; a
+`<code>.old` without its `<code>` is put back on the next read. The list's
 `filter_expression` is read only in the one shape it has used (OS and
 channel, `==`/`!=`, `||`/`&&`) and a record in any other shape is passed
 over. See [`docs/uebersetzer-offline-plan.md`](docs/uebersetzer-offline-plan.md).

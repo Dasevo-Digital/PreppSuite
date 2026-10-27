@@ -16,19 +16,24 @@ const _de = PhraseLanguage.de;
 const _en = PhraseLanguage.en;
 const _fr = PhraseLanguage.fr;
 
-InstalledTranslatorPack _installed(TranslatorDirection direction) =>
-    InstalledTranslatorPack(
-      direction: direction,
-      version: '1.0',
-      size: 30 * 1024 * 1024,
-      modelPath: '/models/${direction.code}/model.bin',
-      lexPath: '/models/${direction.code}/lex.bin',
-      vocabPath: '/models/${direction.code}/vocab.spm',
-    );
-
-TranslatorPack _offered(TranslatorDirection direction) => TranslatorPack(
+InstalledTranslatorPack _installed(
+  TranslatorDirection direction, {
+  String version = '1.0',
+}) => InstalledTranslatorPack(
   direction: direction,
-  version: '1.0',
+  version: version,
+  size: 30 * 1024 * 1024,
+  modelPath: '/models/${direction.code}/model.bin',
+  lexPath: '/models/${direction.code}/lex.bin',
+  vocabPath: '/models/${direction.code}/vocab.spm',
+);
+
+TranslatorPack _offered(
+  TranslatorDirection direction, {
+  String version = '1.0',
+}) => TranslatorPack(
+  direction: direction,
+  version: version,
   files: [
     for (final kind in TranslatorFileKind.values)
       TranslatorFile(
@@ -56,7 +61,9 @@ class _FakeStore extends TranslatorStore {
   Stream<TranslatorInstallProgress> install(TranslatorPack pack) async* {
     installs.add(pack.direction);
     yield TranslatorInstallProgress(received: pack.size, total: pack.size);
-    packs.add(_installed(pack.direction));
+    packs
+      ..removeWhere((each) => each.direction == pack.direction)
+      ..add(_installed(pack.direction, version: pack.version));
   }
 
   @override
@@ -73,6 +80,7 @@ void main() {
     bool available = true,
     Iterable<TranslatorDirection> installed = const [],
     Iterable<TranslatorDirection> offered = const [],
+    Map<TranslatorDirection, String> versions = const {},
     Locale locale = const Locale('de'),
   }) async {
     tester.view.physicalSize = const Size(500, 1400);
@@ -86,8 +94,10 @@ void main() {
           translatorAvailableProvider.overrideWithValue(available),
           translatorStoreProvider.overrideWithValue(store),
           translatorCatalogueProvider.overrideWith(
-            (ref) async =>
-                TranslatorCatalogue({for (final d in offered) d: _offered(d)}),
+            (ref) async => TranslatorCatalogue({
+              for (final d in offered)
+                d: _offered(d, version: versions[d] ?? '1.0'),
+            }),
           ),
           translateTextProvider.overrideWithValue((text, packs) async {
             calls.add(packs);
@@ -299,7 +309,7 @@ void main() {
         offered: [enFr, frEn, deEn, enDe],
       );
 
-      final button = find.text('Alle Sprachpakete laden');
+      final button = find.text('Alle Sprachpakete laden oder aktualisieren');
       await tester.ensureVisible(button);
       await tester.tap(button);
       await tester.pumpAndSettle();
@@ -323,22 +333,94 @@ void main() {
     ) async {
       await pump(tester, installed: [deEn, enDe], offered: [deEn, enDe]);
 
-      final button = find.text('Alle Sprachpakete laden');
+      final button = find.text('Alle Sprachpakete laden oder aktualisieren');
       await tester.ensureVisible(button);
       await tester.tap(button);
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Alle Sprachpakete sind schon auf diesem Gerät.'),
+        find.text(
+          'Alle Sprachpakete sind auf diesem Gerät, jeweils in der neuesten '
+          'Fassung.',
+        ),
         findsOneWidget,
       );
       expect(store.installs, isEmpty);
     });
 
+    testWidgets('a newer version of a pack here is offered as an update '
+        '(#220)', (tester) async {
+      await pump(
+        tester,
+        installed: [deEn, enDe],
+        offered: [deEn, enDe],
+        versions: {deEn: '1.1'},
+      );
+      expect(find.textContaining('Fassung 1.0'), findsNWidgets(2));
+
+      final button = find.text('Alle Sprachpakete laden oder aktualisieren');
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sprachpakete aktualisieren?'), findsOneWidget);
+      expect(find.textContaining('1 Richtung, zusammen '), findsOneWidget);
+      expect(
+        find.textContaining('Davon ist 1 die neuere Fassung'),
+        findsOneWidget,
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Laden'));
+      await tester.pumpAndSettle();
+
+      expect(store.installs, [deEn]);
+      expect(find.textContaining('Fassung 1.1'), findsOneWidget);
+    });
+
+    testWidgets('what is missing comes before what is merely older', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        installed: [deEn],
+        offered: [deEn, enDe],
+        versions: {deEn: '1.1'},
+      );
+
+      final button = find.text('Alle Sprachpakete laden oder aktualisieren');
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Alle Sprachpakete laden?'), findsOneWidget);
+      expect(find.textContaining('2 Richtungen, zusammen '), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilledButton, 'Laden'));
+      await tester.pumpAndSettle();
+
+      expect(store.installs, [enDe, deEn]);
+    });
+
+    test('only a newer version counts as an update, never an older one', () {
+      final catalogue = TranslatorCatalogue({
+        deEn: _offered(deEn, version: '1.1'),
+        enDe: _offered(enDe, version: '1.1'),
+        enFr: _offered(enFr, version: '2.0'),
+        frEn: _offered(frEn, version: '1.0'),
+      });
+      final outdated = outdatedTranslatorPacks(catalogue, [
+        _installed(deEn, version: '1.0'),
+        // A version Mozilla took back: kept, not swapped for the older one.
+        _installed(enDe, version: '2.0'),
+        // An early build of the version now released.
+        _installed(enFr, version: '2.0a1'),
+        _installed(frEn, version: '1.0'),
+      ]);
+      expect(outdated.map((pack) => pack.direction), [deEn, enFr]);
+    });
+
     testWidgets('closing the question fetches nothing', (tester) async {
       await pump(tester, offered: [deEn, enDe]);
 
-      final button = find.text('Alle Sprachpakete laden');
+      final button = find.text('Alle Sprachpakete laden oder aktualisieren');
       await tester.ensureVisible(button);
       await tester.tap(button);
       await tester.pumpAndSettle();
