@@ -286,52 +286,60 @@ class BackupReader {
     required Future<void> Function(Uint8List bytes) write,
     BackupCancellation? cancellation,
     void Function(int bytes)? onBytes,
+    bool preservePosition = false,
   }) async {
-    final hash = const DartSha256().newHashSink();
-    var size = 0;
-    var chunk = 0;
-    while (true) {
-      cancellation?.check();
-      final length = await _u32At(_offset);
-      _offset += 4;
-      if (length == 0) break;
-      if (length > _maxChunkLength) {
-        throw const BackupFormatException('chunk too large');
-      }
-      final stored = await _readExactly(_source, _offset, length);
-      _offset += length;
-      final clear = encrypted
-          ? await _openChunk(stored, key.bytes, index, chunk)
-          : stored;
-      if (clear == null) return false;
-      hash.add(clear);
-      size += clear.length;
-      chunk++;
-      await write(clear);
-      onBytes?.call(clear.length);
-    }
-    hash.close();
-
-    final trailerLength = await _u32At(_offset);
-    _offset += 4;
-    if (trailerLength > _maxTrailerLength) {
-      throw const BackupFormatException('trailer too large');
-    }
-    final trailer = await _readExactly(_source, _offset, trailerLength);
-    _offset += trailerLength;
-
-    final clear = await decryptFromFolder(utf8.decode(trailer), key);
-    if (clear == null) return false;
-    final Object? facts;
+    // A restore may authenticate and hash before deciding whether an
+    // existing file is identical. A mismatch then needs a second pass.
+    final start = _offset;
     try {
-      facts = jsonDecode(clear);
-    } on FormatException {
-      return false;
+      final hash = const DartSha256().newHashSink();
+      var size = 0;
+      var chunk = 0;
+      while (true) {
+        cancellation?.check();
+        final length = await _u32At(_offset);
+        _offset += 4;
+        if (length == 0) break;
+        if (length > _maxChunkLength) {
+          throw const BackupFormatException('chunk too large');
+        }
+        final stored = await _readExactly(_source, _offset, length);
+        _offset += length;
+        final clear = encrypted
+            ? await _openChunk(stored, key.bytes, index, chunk)
+            : stored;
+        if (clear == null) return false;
+        hash.add(clear);
+        size += clear.length;
+        chunk++;
+        await write(clear);
+        onBytes?.call(clear.length);
+      }
+      hash.close();
+
+      final trailerLength = await _u32At(_offset);
+      _offset += 4;
+      if (trailerLength > _maxTrailerLength) {
+        throw const BackupFormatException('trailer too large');
+      }
+      final trailer = await _readExactly(_source, _offset, trailerLength);
+      _offset += trailerLength;
+
+      final clear = await decryptFromFolder(utf8.decode(trailer), key);
+      if (clear == null) return false;
+      final Object? facts;
+      try {
+        facts = jsonDecode(clear);
+      } on FormatException {
+        return false;
+      }
+      if (facts is! Map<String, Object?>) return false;
+      return facts['index'] == index &&
+          facts['size'] == size &&
+          facts['sha256'] == base64Encode(hash.hashBytes);
+    } finally {
+      if (preservePosition) _offset = start;
     }
-    if (facts is! Map<String, Object?>) return false;
-    return facts['index'] == index &&
-        facts['size'] == size &&
-        facts['sha256'] == base64Encode(hash.hashBytes);
   }
 
   Future<int> _u32At(int offset) async {

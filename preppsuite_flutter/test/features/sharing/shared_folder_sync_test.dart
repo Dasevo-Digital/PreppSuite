@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 import 'package:preppsuite_flutter/features/sharing/application/device_snapshot.dart';
 import 'package:preppsuite_flutter/features/sharing/application/household_file.dart';
 import 'package:preppsuite_flutter/features/sharing/application/shared_folder_sync_service.dart';
@@ -86,6 +87,28 @@ void main() {
     expect(pulled.received, 1);
     expect((await storedWater(laptop))?.name, 'Trinkwasser');
   });
+
+  test(
+    'a write failure after the writable check keeps edits pending',
+    () async {
+      final failing = _EditingFolder()..householdFile = identity.encode();
+      folder = failing;
+      await phone.upsertInventoryItem(water());
+      final service = serviceFor(phone, 'phone');
+      await service.sync();
+      final before = folder.deviceFiles['phone'];
+      await phone.upsertInventoryItem(water(quantity: 12));
+      failing.onWrite = () async =>
+          throw PlatformException(code: 'write-failed');
+      final failed = await service.sync();
+      expect(failed.error, SharedFolderSyncError.failed);
+      expect(failed.published, isFalse);
+      expect(await phone.dirtyInventoryItems(householdId), hasLength(1));
+      expect(folder.deviceFiles['phone'], before);
+      expect((await service.sync()).published, isTrue);
+      expect(await phone.dirtyInventoryItems(householdId), isEmpty);
+    },
+  );
 
   test('the newer edit wins, whichever device syncs last', () async {
     await phone.upsertInventoryItem(water(quantity: 6));

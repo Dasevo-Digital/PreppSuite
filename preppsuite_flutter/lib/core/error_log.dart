@@ -1,6 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:sqlite3/sqlite3.dart' show SqliteException;
+import 'package:drift/drift.dart'
+    show DriftWrappedException, CouldNotRollBackException, InvalidDataException;
+// Drift's isolate error envelope must be unwrapped before redaction.
+// ignore: experimental_member_use
+import 'package:drift/remote.dart' show DriftRemoteException;
 
 /// What went wrong on this device, kept on this device (#141).
 ///
@@ -107,6 +113,7 @@ class ErrorLog {
     String? context,
     String? home,
   }) {
+    final database = _databaseDescription(error);
     String clean(String text) =>
         home == null || home.isEmpty ? text : text.replaceAll(home, '~');
     final frames = stack == null
@@ -121,9 +128,39 @@ class ErrorLog {
     return [
       '=== ${at.toUtc().toIso8601String()} · ${Platform.operatingSystem}'
           '${context == null ? '' : ' · $context'}',
-      clean('${error.runtimeType}: $error'),
+      // SQLite's toString includes the statement and its bound values.
+      // Codes and stack frames diagnose the failure without copying the
+      // household into an unencrypted text file.
+      if (database != null) database else clean('${error.runtimeType}: $error'),
       ...frames,
       '',
     ].join('\n');
+  }
+
+  static String? _databaseDescription(Object error, [int depth = 0]) {
+    if (depth > 8) return 'Database exception';
+    if (error is SqliteException) {
+      return 'SqliteException(code: ${error.resultCode}, extended: ${error.extendedResultCode})';
+    }
+    if (error is DriftRemoteException) {
+      return _databaseDescription(error.remoteCause, depth + 1) ??
+          'DriftRemoteException';
+    }
+    if (error is DriftWrappedException) {
+      final cause = error.cause;
+      return cause == null
+          ? 'DriftWrappedException'
+          : _databaseDescription(cause, depth + 1) ?? 'DriftWrappedException';
+    }
+    if (error is CouldNotRollBackException) {
+      final original =
+          _databaseDescription(error.cause, depth + 1) ?? 'Database exception';
+      final rollback =
+          _databaseDescription(error.exception, depth + 1) ??
+          'Database exception';
+      return 'CouldNotRollBackException: $original; rollback: $rollback';
+    }
+    if (error is InvalidDataException) return 'InvalidDataException';
+    return null;
   }
 }

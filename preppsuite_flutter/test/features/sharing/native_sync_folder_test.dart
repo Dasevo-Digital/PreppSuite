@@ -34,6 +34,18 @@ void main() {
 
   const folder = NativeSyncFolder('content://tree/primary%3ASync');
 
+  test('a native write failure reaches the publisher', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          channel,
+          (_) async => throw PlatformException(code: 'write-failed'),
+        );
+    await expectLater(
+      folder.writeDeviceFile('phone', '{}'),
+      throwsA(isA<PlatformException>()),
+    );
+  });
+
   test('asks for the same paths the desktop folder uses', () async {
     await folder.readHouseholdFile();
     await folder.writeDeviceFile('phone', '{}');

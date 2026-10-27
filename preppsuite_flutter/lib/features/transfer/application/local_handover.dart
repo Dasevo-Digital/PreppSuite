@@ -156,11 +156,23 @@ enum LocalHandoverFailure {
 
 /// The side that waits.
 class LocalHandoverHost {
-  LocalHandoverHost._(this._server, this.invitation, this._maxRequestBytes);
+  LocalHandoverHost._(
+    this._server,
+    this.invitation,
+    this._maxRequestBytes,
+    this._requestIdleTimeout,
+    this._requestBodyTimeout,
+  );
 
   final HttpServer _server;
   final LocalHandoverInvitation invitation;
   final int _maxRequestBytes;
+  final Duration _requestIdleTimeout;
+  final Duration _requestBodyTimeout;
+  final _active = <Future<void>>{};
+  bool _stopping = false;
+  static const _maxConcurrentRequests = 2;
+  static const _drainSlackBytes = 64 * 1024;
 
   final _done = StreamController<LocalHandoverResult>.broadcast();
 
@@ -185,6 +197,8 @@ class LocalHandoverHost {
     CarriedHousehold offering = const CarriedHousehold(),
     List<String>? addresses,
     int maxRequestBytes = localHandoverMaxRequestBytes,
+    Duration requestIdleTimeout = const Duration(seconds: 10),
+    Duration? requestBodyTimeout,
   }) async {
     if (maxRequestBytes < 1) {
       throw ArgumentError.value(maxRequestBytes, 'maxRequestBytes');
@@ -204,6 +218,8 @@ class LocalHandoverHost {
         key: FolderKey(_freshKey()),
       ),
       maxRequestBytes,
+      requestIdleTimeout,
+      requestBodyTimeout ?? exchangeTimeoutFor(maxRequestBytes),
     );
 
     unawaited(
@@ -224,123 +240,163 @@ class LocalHandoverHost {
     required CarriedHousehold offering,
   }) async {
     await for (final request in _server) {
-      try {
-        if (request.method != 'POST' || request.uri.path != '/handover') {
-          request.response.statusCode = HttpStatus.notFound;
-          await request.response.close();
-          continue;
-        }
+      if (_active.length >= _maxConcurrentRequests) {
+        await _finishError(request, HttpStatus.serviceUnavailable);
+        continue;
+      }
+      late final Future<void> work;
+      work = _handle(
+        request,
+        db: db,
+        deviceId: deviceId,
+        householdId: householdId,
+        offering: offering,
+      ).whenComplete(() => _active.remove(work));
+      _active.add(work);
+    }
+  }
 
-        final raw = await _readRequest(request);
-        final read = await HandoverPayload.unseal(raw, invitation.key);
-        if (!read.opened) {
-          // Wrong key: somebody on the network who did not see the
-          // screen. Nothing to explain to them.
-          request.response.statusCode = HttpStatus.forbidden;
-          await request.response.close();
-          continue;
-        }
+  Future<void> _handle(
+    HttpRequest request, {
+    required AppDatabase db,
+    required String deviceId,
+    required String householdId,
+    required CarriedHousehold offering,
+  }) async {
+    try {
+      if (request.method != 'POST' || request.uri.path != '/handover') {
+        await _finishError(request, HttpStatus.notFound);
+        return;
+      }
 
-        final incoming = read.payload;
-        if (incoming == null || incoming.snapshot.householdId != householdId) {
-          request.response.statusCode = HttpStatus.conflict;
-          await request.response.close();
-          continue;
-        }
+      final raw = await _readRequest(request);
+      final read = await HandoverPayload.unseal(raw, invitation.key);
+      if (!read.opened) {
+        // Wrong key: somebody on the network who did not see the
+        // screen. Nothing to explain to them.
+        await _finishError(request, HttpStatus.forbidden);
+        return;
+      }
 
-        final received = await applyHouseholdSnapshot(db, incoming.snapshot);
-        await applySyncedSettings(incoming.snapshot.settings);
-        // After the rows and not before: a picture belongs to a row, and
-        // on a device being set up that row arrived a moment ago.
-        final tookPhotos = await applyHouseholdPhotos(
+      final incoming = read.payload;
+      if (incoming == null || incoming.snapshot.householdId != householdId) {
+        await _finishError(request, HttpStatus.conflict);
+        return;
+      }
+
+      final received = await applyHouseholdSnapshot(db, incoming.snapshot);
+      await applySyncedSettings(incoming.snapshot.settings);
+      // After the rows and not before: a picture belongs to a row, and
+      // on a device being set up that row arrived a moment ago.
+      final tookPhotos = await applyHouseholdPhotos(
+        db,
+        householdId: householdId,
+        photos: incoming.photos,
+      );
+
+      // Answer with ours, so both sides end up agreeing rather than one
+      // being copied onto the other.
+      final ours = await readHouseholdSnapshot(
+        db,
+        deviceId: deviceId,
+        householdId: householdId,
+        settings: await readSyncedSettings(),
+      );
+      final answer = HandoverPayload(
+        snapshot: ours,
+        household: offering,
+        // Only what the other side said it was missing.
+        photos: await readHouseholdPhotos(
           db,
           householdId: householdId,
-          photos: incoming.photos,
-        );
+          skip: incoming.knownPhotos,
+        ),
+      );
+      final body = await answer.seal(invitation.key);
+      request.response
+        ..statusCode = HttpStatus.ok
+        ..headers.contentType = ContentType.text
+        ..write(body);
+      await request.response.close();
 
-        // Answer with ours, so both sides end up agreeing rather than one
-        // being copied onto the other.
-        final ours = await readHouseholdSnapshot(
-          db,
-          deviceId: deviceId,
-          householdId: householdId,
-          settings: await readSyncedSettings(),
-        );
-        final answer = HandoverPayload(
-          snapshot: ours,
-          household: offering,
-          // Only what the other side said it was missing.
-          photos: await readHouseholdPhotos(
-            db,
-            householdId: householdId,
-            skip: incoming.knownPhotos,
-          ),
-        );
-        final body = await answer.seal(invitation.key);
-        request.response
-          ..statusCode = HttpStatus.ok
-          ..headers.contentType = ContentType.text
-          ..write(body);
-        await request.response.close();
-
+      if (!_stopping) {
         _done.add((
           received: received,
           sent: ours.rowCount,
           photos: tookPhotos,
           household: const CarriedHousehold(),
         ));
-      } on _HandoverTooLarge {
-        try {
-          // No draining needed: [_readRequest] has already read to the
-          // end, which is what makes this answer reach the guest at all.
-          request.response.statusCode = HttpStatus.requestEntityTooLarge;
-          await request.response.close();
-        } on Object {
-          // The client went away after being told its request is too large.
-        }
-      } on Object {
-        // One bad request must not take the socket down: the person is
-        // still standing there with the other device.
-        try {
-          request.response.statusCode = HttpStatus.internalServerError;
-          await request.response.close();
-        } on Object {
-          // The connection went away mid-answer. Nothing left to do.
-        }
       }
+    } on _HandoverTooLarge {
+      await _finishError(request, HttpStatus.requestEntityTooLarge);
+    } on Object {
+      // One bad request must not take the socket down: the person is
+      // still standing there with the other device.
+      await _finishError(request, HttpStatus.internalServerError);
     }
   }
 
-  /// The body, or [_HandoverTooLarge] if it is over the ceiling.
-  ///
-  /// **Read to the end either way**, and that is the point of it. Bailing
-  /// out mid-stream leaves the guest still uploading into a socket the
-  /// host has stopped listening to, so the 413 never lands: the guest
-  /// gets a broken pipe and reports a handover that started and did not
-  /// finish, which sends somebody to look at their network. What is
-  /// dropped is the *buffer*, not the reading — nothing is held on to
-  /// past the ceiling, so an oversized body costs the time to receive it
-  /// and no memory.
+  /// Allows a small bounded drain for a size error, so an ordinary guest
+  /// can receive 413. Neither oversized nor trickling unauthenticated
+  /// bodies may occupy a slot indefinitely.
   Future<String> _readRequest(HttpRequest request) async {
+    if (request.contentLength > _maxRequestBytes + _drainSlackBytes) {
+      throw const _HandoverTooLarge();
+    }
     final bytes = BytesBuilder(copy: false);
     var tooLarge = request.contentLength > _maxRequestBytes;
     var seen = 0;
-
-    await for (final chunk in request) {
-      seen += chunk.length;
-      if (!tooLarge && seen > _maxRequestBytes) {
-        tooLarge = true;
-        bytes.clear();
+    var expired = false;
+    final deadline = Timer(_requestBodyTimeout, () {
+      expired = true;
+      unawaited(_finishError(request, HttpStatus.requestTimeout));
+    });
+    try {
+      await for (final chunk in request.timeout(
+        _requestIdleTimeout,
+        onTimeout: (sink) {
+          unawaited(_finishError(request, HttpStatus.requestTimeout));
+          sink.addError(TimeoutException('Request body stalled'));
+        },
+      )) {
+        seen += chunk.length;
+        if (seen > _maxRequestBytes + _drainSlackBytes) {
+          throw const _HandoverTooLarge();
+        }
+        if (!tooLarge && seen > _maxRequestBytes) {
+          tooLarge = true;
+          bytes.clear();
+        }
+        if (!tooLarge) bytes.add(chunk);
       }
-      if (!tooLarge) bytes.add(chunk);
+      if (expired) throw TimeoutException('Request body deadline');
+      if (tooLarge) throw const _HandoverTooLarge();
+      return utf8.decode(bytes.takeBytes());
+    } finally {
+      deadline.cancel();
     }
+  }
 
-    if (tooLarge) throw const _HandoverTooLarge();
-    return utf8.decode(bytes.takeBytes());
+  Future<void> _finishError(HttpRequest request, int status) async {
+    try {
+      request.response.statusCode = status;
+      request.response.contentLength = 0;
+      request.response.persistentConnection = false;
+      final socket = await request.response.detachSocket();
+      try {
+        await socket.flush().timeout(const Duration(seconds: 1));
+      } finally {
+        socket.destroy();
+      }
+    } on Object {
+      // Already detached, stopped, or disconnected.
+    }
   }
 
   Future<void> stop() async {
+    _stopping = true;
     await _server.close(force: true);
+    await Future.wait(_active.toList());
     await _done.close();
   }
 }

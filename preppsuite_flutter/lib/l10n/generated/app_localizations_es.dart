@@ -10053,4 +10053,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String translatorOcrDataSummary(String languages, String size) {
     return '$languages · $size';
   }
+
+  @override
+  String get firstAidVideoPackInvalidImport =>
+      'El paquete de vídeos está incompleto, dañado o supera el tamaño permitido.';
 }

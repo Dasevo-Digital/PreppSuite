@@ -9968,4 +9968,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String translatorOcrDataSummary(String languages, String size) {
     return '$languages · $size';
   }
+
+  @override
+  String get firstAidVideoPackInvalidImport =>
+      'The video pack is incomplete, damaged or exceeds the allowed size.';
 }

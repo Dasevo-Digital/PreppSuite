@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'local_database_encryption.dart';
 import 'emergency_access.dart';
+import 'protected_navigation.dart';
 
 /// Stands in front of the app when the local databases cannot be opened.
 ///
@@ -12,9 +13,15 @@ import 'emergency_access.dart';
 /// restored device, a Linux session whose keyring never started. The
 /// files are all still there, and saying so is most of the help.
 class LocalDataGate extends StatefulWidget {
-  const LocalDataGate({super.key, required this.child, this.encryption});
+  const LocalDataGate({
+    super.key,
+    required this.child,
+    this.encryption,
+    this.gateNavigatorKey,
+  });
 
   final Widget child;
+  final GlobalKey<NavigatorState>? gateNavigatorKey;
 
   /// Only ever passed by tests. The app has exactly one of these, and a
   /// gate that read a different one would be guarding nothing.
@@ -42,7 +49,7 @@ class _LocalDataGateState extends State<LocalDataGate> {
     if (mounted) setState(() => _busy = false);
   }
 
-  Future<void> _startOver() async {
+  Future<void> _startOver(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -70,7 +77,14 @@ class _LocalDataGateState extends State<LocalDataGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_locked) return widget.child;
+    return ProtectedNavigation(
+      gate: _locked ? Builder(builder: _recovery) : null,
+      gateNavigatorKey: widget.gateNavigatorKey,
+      child: widget.child,
+    );
+  }
+
+  Widget _recovery(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -105,7 +119,7 @@ class _LocalDataGateState extends State<LocalDataGate> {
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton(
-                    onPressed: _startOver,
+                    onPressed: () => _startOver(context),
                     child: Text(l10n.localDataRecoveryStartOver),
                   ),
                 ],

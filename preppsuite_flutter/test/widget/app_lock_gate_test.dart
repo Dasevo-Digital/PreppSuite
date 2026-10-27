@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:preppsuite_flutter/app.dart';
 import 'package:preppsuite_flutter/core/app_lock_gate.dart';
 import 'package:preppsuite_flutter/core/emergency_access.dart';
 import 'package:preppsuite_flutter/core/app_lock_provider.dart';
@@ -30,7 +34,7 @@ class _BiometricOff extends AppLockBiometricController {
 class _Sensor implements BiometricAuth {
   _Sensor({required this.recognises});
 
-  final bool recognises;
+  bool recognises;
   var asked = 0;
 
   @override
@@ -43,7 +47,186 @@ class _Sensor implements BiometricAuth {
   }
 }
 
+class _PendingSensor extends _Sensor {
+  _PendingSensor() : super(recognises: false);
+  final requests = <Completer<bool>>[];
+
+  @override
+  Future<bool> authenticate(String reason) {
+    final request = Completer<bool>();
+    requests.add(request);
+    return request.future;
+  }
+}
+
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({'localeOverride': 'de'}));
+
+  testWidgets('a biometric result from before relocking cannot open the app', (
+    tester,
+  ) async {
+    final sensor = _PendingSensor();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appLockProvider.overrideWith(_Locked.new),
+          appLockBiometricProvider.overrideWith(_BiometricOn.new),
+          biometricAuthProvider.overrideWithValue(sensor),
+        ],
+        child: MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          builder: (_, child) => AppLockGate(child: child!),
+          home: const Text('private household data'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(sensor.requests, hasLength(1));
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump();
+    expect(sensor.requests, hasLength(1));
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(sensor.requests, hasLength(2));
+    sensor.requests.first.complete(true);
+    sensor.requests.last.complete(false);
+    await tester.pumpAndSettle();
+    expect(find.text('private household data'), findsNothing);
+    expect(find.text('PreppSuite entsperren'), findsOneWidget);
+  });
+
+  for (final kind in ['page', 'dialog', 'sheet']) {
+    testWidgets(
+      'relocking covers a private $kind and preserves it for unlock',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        try {
+          final sensor = _Sensor(recognises: true);
+          var actions = 0;
+          Widget detail() => Scaffold(
+            body: TextButton(
+              onPressed: () => actions++,
+              child: const Text('private action'),
+            ),
+          );
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [
+                appLockProvider.overrideWith(_Locked.new),
+                appLockBiometricProvider.overrideWith(_BiometricOn.new),
+                biometricAuthProvider.overrideWithValue(sensor),
+              ],
+              child: MaterialApp(
+                locale: const Locale('de'),
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                builder: (_, child) => AppLockGate(child: child!),
+                home: Builder(
+                  builder: (context) => Scaffold(
+                    body: TextButton(
+                      child: const Text('open private'),
+                      onPressed: () {
+                        if (kind == 'dialog') {
+                          showDialog<void>(
+                            context: context,
+                            builder: (_) => detail(),
+                          );
+                        } else if (kind == 'sheet') {
+                          showModalBottomSheet<void>(
+                            context: context,
+                            builder: (_) => detail(),
+                          );
+                        } else {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(builder: (_) => detail()),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('open private'));
+          await tester.pumpAndSettle();
+          expect(find.text('private action'), findsOneWidget);
+          sensor.recognises = false;
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.inactive,
+          );
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.hidden,
+          );
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.paused,
+          );
+          await tester.pump();
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.hidden,
+          );
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.inactive,
+          );
+          tester.binding.handleAppLifecycleStateChanged(
+            AppLifecycleState.resumed,
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('private action'), findsNothing);
+          expect(find.bySemanticsLabel('private action'), findsNothing);
+          expect(find.text('PreppSuite entsperren'), findsOneWidget);
+          expect(actions, 0);
+          await tester.tap(find.text('Notfall: 112 und Erste Hilfe'));
+          await tester.pumpAndSettle();
+          expect(find.byType(EmergencyAccessScreen), findsOneWidget);
+          expect(find.text('private action'), findsNothing);
+          await tester.tap(find.byType(BackButton));
+          await tester.pumpAndSettle();
+          sensor.recognises = true;
+          await tester.tap(find.text('Mit Gesicht oder Fingerabdruck'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('private action'));
+          expect(actions, 1);
+        } finally {
+          semantics.dispose();
+        }
+      },
+    );
+  }
+
+  testWidgets('system back in the app returns from public help to the lock', (
+    tester,
+  ) async {
+    tester.platformDispatcher.localeTestValue = const Locale('de');
+    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appLockProvider.overrideWith(_Locked.new),
+          appLockBiometricProvider.overrideWith(_BiometricOff.new),
+        ],
+        child: const PreppSuiteApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Notfall: 112 und Erste Hilfe'));
+    await tester.pumpAndSettle();
+    expect(find.byType(EmergencyAccessScreen), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.byType(EmergencyAccessScreen), findsNothing);
+    expect(find.text('PreppSuite entsperren'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('PreppSuite entsperren'), findsOneWidget);
+  });
   testWidgets('does not reveal the app when lock status cannot be read', (
     tester,
   ) async {

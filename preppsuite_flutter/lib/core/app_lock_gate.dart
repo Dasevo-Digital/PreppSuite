@@ -6,12 +6,14 @@ import 'app_lock.dart';
 import 'app_lock_provider.dart';
 import 'biometric_unlock.dart';
 import 'emergency_access.dart';
+import 'protected_navigation.dart';
 
 /// Locks the whole UI after the app leaves the foreground.
 class AppLockGate extends ConsumerStatefulWidget {
-  const AppLockGate({super.key, required this.child});
+  const AppLockGate({super.key, required this.child, this.gateNavigatorKey});
 
   final Widget child;
+  final GlobalKey<NavigatorState>? gateNavigatorKey;
 
   @override
   ConsumerState<AppLockGate> createState() => _AppLockGateState();
@@ -23,6 +25,8 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   bool _unlocked = false;
   bool _checking = false;
   bool _wrongPassphrase = false;
+  int _generation = 0;
+  bool _foreground = true;
 
   /// Whether face or fingerprint has been asked for since the app was last
   /// locked: once by itself, then only on the button (#143).
@@ -35,6 +39,9 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
       onHide: _lock,
       onPause: _lock,
       onDetach: _lock,
+      onResume: () {
+        if (mounted) setState(() => _foreground = true);
+      },
     );
   }
 
@@ -46,21 +53,26 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   }
 
   void _lock() {
-    if (_unlocked && mounted) {
+    if (mounted) {
       setState(() {
+        _generation++;
+        _foreground = false;
         _unlocked = false;
         _prompted = false;
+        _checking = false;
+        _controller.clear();
       });
     }
   }
 
   Future<void> _unlockWithBiometrics() async {
+    final generation = _generation;
     _prompted = true;
     final l10n = AppLocalizations.of(context)!;
     final recognised = await ref
         .read(biometricAuthProvider)
         .authenticate(l10n.appLockBiometricReason);
-    if (!mounted || !recognised) return;
+    if (!mounted || !recognised || generation != _generation) return;
     setState(() {
       _unlocked = true;
       _controller.clear();
@@ -69,12 +81,13 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
 
   Future<void> _unlock() async {
     if (_checking) return;
+    final generation = _generation;
     setState(() {
       _checking = true;
       _wrongPassphrase = false;
     });
     final accepted = await AppLockStore().verify(_controller.text);
-    if (!mounted) return;
+    if (!mounted || generation != _generation) return;
     setState(() {
       _checking = false;
       _wrongPassphrase = !accepted;
@@ -86,7 +99,7 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   @override
   Widget build(BuildContext context) {
     final enabled = ref.watch(appLockProvider);
-    return enabled.when(
+    final gate = enabled.when<Widget?>(
       loading: () => const LoadingWithEmergencyAccess(),
       // A lock whose state cannot be read must never reveal the protected
       // surface. Secure storage can temporarily be unavailable after an OS
@@ -95,10 +108,10 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
         onRetry: () => ref.invalidate(appLockProvider),
       ),
       data: (isEnabled) {
-        if (!isEnabled || _unlocked) return widget.child;
+        if (!isEnabled || _unlocked) return null;
         final l10n = AppLocalizations.of(context)!;
         final biometric = ref.watch(appLockBiometricProvider).value ?? false;
-        if (biometric && !_prompted) {
+        if (biometric && !_prompted && _foreground) {
           _prompted = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) _unlockWithBiometrics();
@@ -167,6 +180,11 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
           ),
         );
       },
+    );
+    return ProtectedNavigation(
+      gate: gate,
+      gateNavigatorKey: widget.gateNavigatorKey,
+      child: widget.child,
     );
   }
 }

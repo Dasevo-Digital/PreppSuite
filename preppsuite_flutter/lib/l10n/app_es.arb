@@ -2721,5 +2721,6 @@
   "translatorPhotoDataFailed": "No se pudieron descargar los datos: {error}",
   "translatorPhotoNeedsTesseractLanguage": "En Linux la app lee las fotos con Tesseract, al que aquí le faltan los datos de {language}. En Debian y Ubuntu: sudo apt install {package}",
   "translatorOcrDataTitle": "Reconocimiento de texto para fotos",
-  "translatorOcrDataSummary": "{languages} · {size}"
+  "translatorOcrDataSummary": "{languages} · {size}",
+  "firstAidVideoPackInvalidImport": "El paquete de vídeos está incompleto, dañado o supera el tamaño permitido."
 }

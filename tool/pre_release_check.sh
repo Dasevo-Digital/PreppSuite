@@ -11,6 +11,10 @@ APP="$ROOT/preppsuite_flutter"
 bash "$ROOT/tool/repo_privacy_check_test.sh"
 bash "$ROOT/tool/pre_push_hook_test.sh"
 
+if [[ "$(uname -s)" == Darwin ]]; then
+  python3 "$ROOT/tool/storage_bridge_check.py"
+fi
+
 # The hosted checks build with the Flutter pinned in the workflows, the
 # release machines with their own. A release built with another one than
 # the checks used is not what they tested (#218).

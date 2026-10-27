@@ -256,9 +256,6 @@ class WarningPollService {
   }
 
   Future<void> markNotified(List<Warning> warnings) {
-    return _db.markWarningsNotified([
-      for (final warning in warnings)
-        (source: warning.source, externalId: warning.externalId),
-    ]);
+    return _db.markWarningsNotified(warnings);
   }
 }

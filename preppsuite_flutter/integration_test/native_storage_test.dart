@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:preppsuite_flutter/core/platform_storage.dart';
 
@@ -20,6 +21,25 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('the native storage bridge', () {
+    testWidgets('a write through a dead handle reports failure', (
+      tester,
+    ) async {
+      expect(usesNativeStoragePicker, isTrue);
+      await expectLater(
+        nativeStorageChannel.invokeMethod<void>('write', {
+          'uri': 'bookmark://00000000-0000-0000-0000-000000000000',
+          'path': 'preppsuite/devices/test.json',
+          'contents': '{}',
+        }),
+        throwsA(
+          isA<PlatformException>().having(
+            (error) => error.code,
+            'code',
+            'write-failed',
+          ),
+        ),
+      );
+    });
     testWidgets('answers at all', (tester) async {
       expect(
         usesNativeStoragePicker,

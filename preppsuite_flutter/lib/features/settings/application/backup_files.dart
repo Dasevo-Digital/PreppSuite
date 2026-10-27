@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:path/path.dart' as p;
+import 'package:cryptography/cryptography.dart';
 
 import '../../../core/photo_vault.dart';
 import '../../../core/platform_storage.dart';
@@ -397,9 +398,9 @@ Future<BackupFilesRestored> restoreBackupFiles({
 /// Writes one entry into the target folder and returns its path, or null
 /// when it did not survive the check.
 ///
-/// A file of the same name and size that is already there is taken as it
-/// is: restoring onto the machine that made the backup should not copy
-/// fifty gigabytes over themselves.
+/// Reusing a file requires authenticated matching contents, not just its
+/// name and size. Compare as streams so identical large archives do not
+/// require a second copy's worth of free disk space.
 Future<String?> _restoreToFile(
   BackupReader reader,
   BackupFileEntry entry, {
@@ -422,8 +423,31 @@ Future<String?> _restoreToFile(
   var target = File(p.join(directory.path, name));
   if (await target.exists()) {
     if (entry.size != null && await _length(target) == entry.size) {
-      await reader.skipEntry();
-      return target.path;
+      final hash = Sha256().newHashSink();
+      final valid = await reader.copyEntry(
+        entry.index,
+        encrypted: entry.kind.encrypted,
+        key: key,
+        write: (bytes) async => hash.add(bytes),
+        cancellation: cancellation,
+        onBytes: onBytes,
+        preservePosition: true,
+      );
+      hash.close();
+      if (!valid) {
+        await reader.skipEntry();
+        return null;
+      }
+      final existing = Sha256().newHashSink();
+      await for (final bytes in target.openRead()) {
+        cancellation?.check();
+        existing.add(bytes);
+      }
+      existing.close();
+      if (await hash.hash() == await existing.hash()) {
+        await reader.skipEntry();
+        return target.path;
+      }
     }
     target = await _freeName(directory, name);
   }

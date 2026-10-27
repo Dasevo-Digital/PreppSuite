@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -20,6 +22,134 @@ import 'package:preppsuite_flutter/local_db/database.dart';
 /// decrypted. A handover that works against a fake and not against a
 /// socket is the only kind of failure that matters in this file.
 void main() {
+  test(
+    'a stalled unauthenticated POST does not block another connection',
+    () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final host = await LocalHandoverHost.start(
+        db: db,
+        deviceId: 'host',
+        householdId: 'home',
+        addresses: ['127.0.0.1'],
+      );
+      addTearDown(host.stop);
+      final slow = await Socket.connect('127.0.0.1', host.invitation.port);
+      addTearDown(slow.destroy);
+      slow.write(
+        'POST /handover HTTP/1.1\r\nHost: localhost\r\nContent-Length: 100\r\n\r\na',
+      );
+      await slow.flush();
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      final client = HttpClient();
+      addTearDown(() => client.close(force: true));
+      final next = await client.get(
+        '127.0.0.1',
+        host.invitation.port,
+        '/probe',
+      );
+      expect(
+        (await next.close().timeout(const Duration(seconds: 2))).statusCode,
+        404,
+      );
+    },
+  );
+
+  for (final trickle in [false, true]) {
+    test('an unauthenticated body expires (trickle: $trickle)', () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final host = await LocalHandoverHost.start(
+        db: db,
+        deviceId: 'host',
+        householdId: 'home',
+        addresses: ['127.0.0.1'],
+        requestIdleTimeout: const Duration(milliseconds: 100),
+        requestBodyTimeout: const Duration(milliseconds: 300),
+      );
+      addTearDown(host.stop);
+      final slow = await Socket.connect('127.0.0.1', host.invitation.port);
+      addTearDown(slow.destroy);
+      // A peer still uploading may receive a TCP reset after the bounded
+      // error response. Both release the slot without an unhandled sink error.
+      unawaited(slow.done.then<void>((_) {}, onError: (Object _) {}));
+      final answer = utf8.decoder
+          .bind(slow)
+          .join()
+          .then<String>(
+            (text) => text,
+            onError: (Object error) {
+              if (error is SocketException) return 'closed';
+              throw error;
+            },
+          );
+      slow.write(
+        'POST /handover HTTP/1.1\r\nHost: localhost\r\nContent-Length: 10000\r\n\r\na',
+      );
+      await slow.flush();
+      final timer = trickle
+          ? Timer.periodic(
+              const Duration(milliseconds: 25),
+              (_) => slow.write('a'),
+            )
+          : null;
+      addTearDown(() => timer?.cancel());
+      final response = await answer.timeout(const Duration(seconds: 2));
+      expect(response == 'closed' || response.contains('408'), isTrue);
+      timer?.cancel();
+    });
+  }
+
+  test(
+    'busy slots are bounded and released when their connections close',
+    () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final host = await LocalHandoverHost.start(
+        db: db,
+        deviceId: 'host',
+        householdId: 'home',
+        addresses: ['127.0.0.1'],
+      );
+      addTearDown(host.stop);
+      final sockets = <Socket>[];
+      addTearDown(() {
+        for (final socket in sockets) {
+          socket.destroy();
+        }
+      });
+      for (var i = 0; i < 2; i++) {
+        final socket = await Socket.connect('127.0.0.1', host.invitation.port);
+        sockets.add(socket);
+        socket.write(
+          'POST /handover HTTP/1.1\r\nHost: localhost\r\nContent-Length: 100\r\n\r\na',
+        );
+        await socket.flush();
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      final client = HttpClient();
+      addTearDown(() => client.close(force: true));
+      Future<int> status() async {
+        final request = await client.get(
+          '127.0.0.1',
+          host.invitation.port,
+          '/probe',
+        );
+        final response = await request.close().timeout(
+          const Duration(seconds: 2),
+        );
+        await response.drain<void>();
+        return response.statusCode;
+      }
+
+      expect(await status(), 503);
+      for (final socket in sockets) {
+        socket.destroy();
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(await status(), 404);
+    },
+  );
   const householdId = 'household-1';
 
   AppDatabase open() {

@@ -2,6 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:drift/native.dart';
+import 'package:drift/drift.dart'
+    show DriftWrappedException, CouldNotRollBackException;
+import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/core/emergency_access.dart';
 import 'package:preppsuite_flutter/core/error_display.dart';
 import 'package:preppsuite_flutter/core/error_log.dart';
@@ -14,6 +18,50 @@ void main() {
   late Directory dir;
   setUp(() => dir = Directory.systemTemp.createTempSync('errorlog'));
   tearDown(() => dir.deleteSync(recursive: true));
+
+  for (final background in [false, true]) {
+    test(
+      'SQLite bind values never enter the log (background: $background)',
+      () async {
+        final db = AppDatabase.forTesting(
+          background
+              ? NativeDatabase.createInBackground(
+                  File('${dir.path}/test.sqlite'),
+                )
+              : NativeDatabase.memory(),
+        );
+        addTearDown(db.close);
+        await db.customStatement(
+          'CREATE TABLE private_values (data TEXT CHECK(length(data) < 3))',
+        );
+        Object? failure;
+        try {
+          await db.customStatement(
+            'INSERT INTO private_values (data) VALUES (?)',
+            ['private-probe-value'],
+          );
+        } catch (error) {
+          failure = error;
+        }
+        expect(failure, isNotNull);
+        final log = ErrorLog.forTesting()..attach(dir);
+        log.record(failure!, StackTrace.current);
+        log.record(
+          DriftWrappedException(message: 'private-probe-value', cause: failure),
+          StackTrace.current,
+        );
+        log.record(
+          CouldNotRollBackException(failure, StackTrace.current, failure),
+          StackTrace.current,
+        );
+        final text = await log.read();
+        expect(text, contains('SqliteException(code:'));
+        expect(text, isNot(contains('private-probe-value')));
+        expect(text, isNot(contains('INSERT INTO')));
+        expect(text, isNot(contains('parameters')));
+      },
+    );
+  }
 
   test('an entry says when, what and where, without the home folder', () {
     final entry = ErrorLog.format(

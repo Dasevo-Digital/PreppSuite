@@ -20,6 +20,49 @@ void main() {
   setUp(() => db = AppDatabase.forTesting(NativeDatabase.memory()));
   tearDown(() => db.close());
 
+  for (final sameTimestamp in [false, true]) {
+    test(
+      'an old acknowledgement leaves an escalation pending (same time: $sameTimestamp)',
+      () async {
+        final service = WarningPollService(database: db);
+        final at = DateTime.now().toUtc();
+        Future<void> put(String severity, DateTime sent) => db.upsertWarning(
+          WarningsCompanion.insert(
+            source: 'bbk',
+            externalId: 'escalation',
+            countryCode: 'DE',
+            severity: severity,
+            eventType: 'Test',
+            headline: 'Test',
+            effective: sent,
+            sent: sent,
+            updatedAt: sent,
+            notified: const Value(false),
+          ),
+        );
+        await put('moderate', at);
+        final before = await service.pendingNotifications(
+          isRelevant: (_) => true,
+        );
+        expect(before, hasLength(1));
+        await put(
+          'extreme',
+          sameTimestamp ? at : at.add(const Duration(minutes: 1)),
+        );
+        await service.markNotified(before);
+        final after = await service.pendingNotifications(
+          isRelevant: (_) => true,
+        );
+        expect(after.single.severity, 'extreme');
+        await service.markNotified(after);
+        expect(
+          await service.pendingNotifications(isRelevant: (_) => true),
+          isEmpty,
+        );
+      },
+    );
+  }
+
   final mowas = File('test/fixtures/bbk_mowas_sample.json').readAsStringSync();
   final dashboard = File(
     'test/fixtures/bbk_dashboard_sample.json',

@@ -9,6 +9,7 @@ import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dar
 import 'package:preppsuite_flutter/features/settings/application/backup_container.dart';
 import 'package:preppsuite_flutter/features/settings/application/backup_files.dart';
 import 'package:preppsuite_flutter/features/settings/application/backup_service.dart';
+import 'package:preppsuite_flutter/features/sharing/application/folder_crypto.dart';
 import 'package:preppsuite_flutter/features/transfer/application/handover_photos.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -295,6 +296,105 @@ void main() {
     expect(into.archives.single, existing.path);
     expect(existing.lastModifiedSync(), modified);
   });
+
+  test(
+    'different documents with the same name and size both survive',
+    () async {
+      final files = [
+        for (final text in ['AAAA', 'BBBB'])
+          BackupCandidate(
+            entry: const BackupFileEntry(
+              index: 0,
+              kind: BackupFileKind.document,
+              label: 'plan.txt',
+              size: 4,
+            ),
+            open: () async =>
+                MemoryByteRangeSource(Uint8List.fromList(utf8.encode(text))),
+          ),
+      ];
+      final opened = (await open(await write(files: files)))!;
+      final into = targetsInto(Directory('${temp.path}/ziel'));
+      final result = await restoreBackupFiles(
+        reader: opened.file.reader!,
+        key: opened.key,
+        manifest: opened.files,
+        selected: {0, 1},
+        targets: into.targets,
+      );
+      expect(result.restored, 2);
+      expect(result.failed, isEmpty);
+      expect(into.documents.toSet(), hasLength(2));
+      expect(
+        [for (final path in into.documents) File(path).readAsStringSync()],
+        ['AAAA', 'BBBB'],
+      );
+    },
+  );
+
+  test('same-sized wrong contents are not reused', () async {
+    final opened = (await open(await write()))!;
+    final folder = Directory('${temp.path}/ziel')..createSync();
+    final wrong = Uint8List.fromList(archiveBytes)..[0] ^= 1;
+    final existing = File('${folder.path}/wikipedia_de_test.zim')
+      ..writeAsBytesSync(wrong);
+    final into = targetsInto(folder);
+    final result = await restoreBackupFiles(
+      reader: opened.file.reader!,
+      key: opened.key,
+      manifest: opened.files,
+      selected: {2},
+      targets: into.targets,
+    );
+    expect(result.restored, 1);
+    expect(into.archives.single, isNot(existing.path));
+    expect(File(into.archives.single).readAsBytesSync(), archiveBytes);
+    expect(existing.readAsBytesSync(), wrong);
+  });
+
+  test(
+    'an identical existing file does not bypass backup authentication',
+    () async {
+      final file = File('${temp.path}/authentication.backup');
+      final out = await file.open(mode: FileMode.write);
+      final writer = BackupWriter(
+        out,
+        FolderKey(Uint8List.fromList(List.filled(32, 7))),
+      );
+      await writer.writeHeader({});
+      final bytes = Uint8List.fromList([1, 2, 3, 4]);
+      await writer.writeEntry(
+        0,
+        MemoryByteRangeSource(bytes),
+        encrypted: false,
+      );
+      await writer.finish();
+      await out.close();
+      final input = await FileByteRangeSource.open(file);
+      addTearDown(input.close);
+      final reader = (await BackupReader.open(input))!;
+      final folder = Directory('${temp.path}/ziel')..createSync();
+      File('${folder.path}/archive.zim').writeAsBytesSync(bytes);
+      final into = targetsInto(folder);
+      final result = await restoreBackupFiles(
+        reader: reader,
+        key: FolderKey(Uint8List.fromList(List.filled(32, 8))),
+        manifest: [
+          const BackupFileEntry(
+            index: 0,
+            kind: BackupFileKind.archive,
+            label: 'archive.zim',
+            size: 4,
+          ),
+        ],
+        selected: {0},
+        targets: into.targets,
+      );
+      expect(result.restored, 0);
+      expect(result.failed, ['archive.zim']);
+      expect(into.archives, isEmpty);
+    },
+  );
 
   // What restoring must never do is write over a file that is already
   // there and is not the one in the backup (#132).

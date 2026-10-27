@@ -265,6 +265,42 @@ class FirstAidVideoPack {
 class FirstAidVideoLibrary {
   const FirstAidVideoLibrary(this.folder);
 
+  static final _importing = <String>{};
+  static const _transactionMarker = 'first-aid-pack-swap-v1';
+
+  Future<void> _settle() async {
+    if (_importing.contains(folder.path) || !await folder.parent.exists()) {
+      return;
+    }
+    final prefix = '.${p.basename(folder.path)}.swap-';
+    await for (final entry in folder.parent.list(followLinks: false)) {
+      if (entry is! Directory || !p.basename(entry.path).startsWith(prefix)) {
+        continue;
+      }
+      final marker = File(p.join(entry.path, '.pack-transaction'));
+      if (!await marker.exists() ||
+          await marker.length() != _transactionMarker.length ||
+          await marker.readAsString() != _transactionMarker) {
+        continue;
+      }
+      final previous = Directory(p.join(entry.path, 'previous'));
+      if (await previous.exists()) {
+        if (!await folder.exists()) {
+          await previous.rename(folder.path);
+        } else if (await Directory(p.join(entry.path, 'next')).exists()) {
+          // The candidate never moved into place: keep the previous pack
+          // when an unrelated folder appeared at the destination.
+          continue;
+        }
+      }
+      try {
+        await entry.delete(recursive: true);
+      } on FileSystemException {
+        // A committed pack remains usable; cleanup can retry next time.
+      }
+    }
+  }
+
   /// The folder holding `paket.json` and the video files.
   final Directory folder;
 
@@ -283,6 +319,7 @@ class FirstAidVideoLibrary {
   /// than throwing: the screen must open either way, and the remedy —
   /// fetch the pack again — is the same.
   Future<FirstAidVideoPack?> installed() async {
+    await _settle();
     if (!await manifestFile.exists()) return null;
     try {
       return FirstAidVideoPack.parse(await manifestFile.readAsString());
@@ -361,9 +398,21 @@ class FirstAidVideoLibrary {
   /// read as a stream and each entry written straight out, because a pack
   /// is hundreds of megabytes and decoding one into memory on a phone is
   /// how an app gets killed by the system mid-import.
-  Future<String?> importZip(String zipPath) async {
-    final input = InputFileStream(zipPath);
+  Future<String?> importZip(
+    String zipPath, {
+    int maxManifestBytes = 1024 * 1024,
+    int maxVideoBytes = 2 * 1024 * 1024 * 1024,
+    int maxTotalBytes = 8 * 1024 * 1024 * 1024,
+  }) async {
+    await _settle();
+    if (!_importing.add(folder.path)) {
+      return 'A pack import is already running.';
+    }
+    InputFileStream? input;
+    Directory? transaction;
+    var committed = false;
     try {
+      input = InputFileStream(zipPath);
       final Archive archive;
       try {
         archive = ZipDecoder().decodeStream(input);
@@ -383,26 +432,39 @@ class FirstAidVideoLibrary {
       ArchiveFile? manifest;
       for (final entry in archive.files) {
         if (entry.isFile && p.basename(entry.name) == firstAidPackFileName) {
+          if (manifest != null) return 'The pack contains an ambiguous file.';
           manifest = entry;
-          break;
         }
       }
       if (manifest == null) {
         return 'That zip holds no $firstAidPackFileName.';
       }
+      if (manifest.size > maxManifestBytes || manifest.isSymbolicLink) {
+        return 'The pack description is too large or invalid.';
+      }
 
       final FirstAidVideoPack pack;
       try {
+        final content = manifest.readBytes() ?? const <int>[];
+        if (manifest.crc32 != null && getCrc32(content) != manifest.crc32) {
+          return 'The file does not match its checksum.';
+        }
         pack = FirstAidVideoPack.parse(
-          utf8.decode(manifest.readBytes() ?? const [], allowMalformed: true),
+          utf8.decode(content, allowMalformed: true),
         );
       } on FormatException catch (error) {
         return error.message;
       }
 
-      await folder.create(recursive: true);
       final wanted = {for (final video in pack.videos) video.fileName};
-
+      if (wanted.length != pack.videos.length ||
+          wanted.contains(firstAidPackFileName) ||
+          pack.videos.map((video) => video.id).toSet().length !=
+              pack.videos.length) {
+        return 'The pack lists a file more than once.';
+      }
+      final entries = <String, ArchiveFile>{};
+      var total = 0;
       for (final entry in archive.files) {
         if (!entry.isFile) continue;
         // By basename and against the manifest's own list: an entry the
@@ -410,18 +472,82 @@ class FirstAidVideoLibrary {
         // keeps a crafted zip from putting a file anywhere it likes.
         final name = p.basename(entry.name);
         if (!wanted.contains(name)) continue;
-        final output = OutputFileStream(p.join(folder.path, name));
+        if (entries.containsKey(name) || entry.isSymbolicLink) {
+          return 'The pack contains an ambiguous file.';
+        }
+        total += entry.size;
+        if (entry.size < 0 ||
+            entry.size > maxVideoBytes ||
+            total > maxTotalBytes) {
+          return 'The video pack is too large.';
+        }
+        entries[name] = entry;
+      }
+      if (entries.length != wanted.length) {
+        return 'The pack is missing a video.';
+      }
+
+      await folder.parent.create(recursive: true);
+      transaction = await folder.parent.createTemp(
+        '.${p.basename(folder.path)}.swap-',
+      );
+      await File(p.join(transaction.path, '.pack-transaction'))
+          .writeAsString(_transactionMarker, flush: true);
+      final staging = await Directory(p.join(transaction.path, 'next'))
+          .create();
+      final fresh = FirstAidVideoLibrary(staging);
+      for (final video in pack.videos) {
+        final entry = entries[video.fileName]!;
+        final output = OutputFileStream(fresh.fileFor(video).path);
         try {
+          // The decoder bounds output by the ZIP entry's declared size,
+          // checked above, including when its compressed stream lies.
           entry.writeContent(output);
         } finally {
           await output.close();
         }
+        final problem = await fresh.verify(video);
+        if (problem != null) return problem;
+        if (entry.crc32 != null) {
+          var crc = 0;
+          await for (final bytes in fresh.fileFor(video).openRead()) {
+            crc = getCrc32(bytes, crc);
+          }
+          if (crc != entry.crc32) {
+            return 'The file does not match its checksum.';
+          }
+        }
       }
 
-      await writeManifest(pack);
+      await fresh.writeManifest(pack);
+      final old = Directory(p.join(transaction.path, 'previous'));
+      final replacing = await folder.exists();
+      if (replacing) await folder.rename(old.path);
+      try {
+        await staging.rename(folder.path);
+        committed = true;
+      } on Object {
+        if (replacing) await old.rename(folder.path);
+        rethrow;
+      }
       return null;
+    } on FormatException {
+      return 'That file is not a pack.';
     } finally {
-      await input.close();
+      await input?.close();
+      try {
+        if (transaction != null &&
+            await transaction.exists() &&
+            (committed ||
+                !await Directory(p.join(transaction.path, 'previous'))
+                    .exists())) {
+          await transaction.delete(recursive: true);
+        }
+      } on FileSystemException {
+        // Do not turn a completed install into a failure over cleanup.
+      } finally {
+        _importing.remove(folder.path);
+      }
     }
   }
 

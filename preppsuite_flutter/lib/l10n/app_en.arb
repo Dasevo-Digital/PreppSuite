@@ -5915,5 +5915,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "firstAidVideoPackInvalidImport": "The video pack is incomplete, damaged or exceeds the allowed size."
 }

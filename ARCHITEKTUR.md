@@ -183,6 +183,10 @@ server stopped pre-filtering.
 
 **The `notified` column is the record of what has been announced,** not an
 in-memory list. A background isolate ends after every run.
+Acknowledgement compares the complete stored warning to the version actually
+sent, in one transaction. Source and external id alone are insufficient: a
+foreground poll and a background poll can overlap, and an escalation must
+stay pending even when its source reuses a timestamp.
 
 **`HouseholdProfile.id` is the partition key for every local table.** It is
 generated once and changes exactly once more: joining a folder that already
@@ -224,6 +228,11 @@ unchanged. Unseen edits on a device with a fast clock can still win.
 Only the client ids and timestamps actually included in the uploaded snapshot
 may have `dirty` cleared. Edits made during the write remain pending, even
 when the logical timestamp leads the clock.
+The native storage channel must throw on any failed write, including missing
+handles, directories or streams and coordination/close errors. A writable
+preflight does not promise that the later write will work. macOS checks this
+with `tool/storage_bridge_check.py` against the actual dispatcher and
+Foundation, without starting an app; the device suite checks the real channel.
 The first sync after upgrading republishes clean rows once, recorded per
 household/device in `sync_state`, to recover old write/ack races.
 
@@ -694,6 +703,13 @@ basename; anything with a path in it is dropped rather than written. On
 import, only entries the manifest itself names are extracted. Size and
 sha256 are checked after every download, and a file that fails is deleted
 rather than kept under its final name.
+ZIP imports apply the same checks in an owned sibling transaction directory. Missing
+and ambiguous entries are refused; the manifest is bounded to 1 MiB, a video
+to 2 GiB and the pack to 8 GiB before decompression. Only a complete verified
+pack replaces the working directory, with the previous directory retained across
+an interrupted swap. Recovery and cleanup require the transaction's ownership
+marker; unrelated backup or staging directories are never removed. ZIP CRC is
+checked even where a manifest provides no additional SHA-256.
 
 **There is one folder, and it is a document, not five exports.** This
 app is built on the assumption that the device may be gone — that is why
@@ -1800,10 +1816,12 @@ did not finish, and sent a household off to check its wifi.
 
 Two things follow, and both are in the code now. The ceiling is **derived**
 from `handoverPhotoBudgetBytes` rather than picked, so the two cannot drift
-apart again. And `_readRequest` reads an oversized body **to the end**,
-dropping the buffer rather than the reading: nothing is held past the
-ceiling, so it costs the time to receive and no memory, and the 413
-actually reaches the guest.
+apart again. An oversized body gets only 64 KiB of drain allowance beyond
+that ceiling, without retaining its buffer. Larger claims are rejected before
+reading. A ten-second idle bound and a total deadline derived from the maximum
+permitted body prevent slow unauthenticated requests from holding a connection
+forever. At most two requests run together; further ones receive 503. Stopping
+the host closes its sockets and waits for these workers before closing events.
 
 An address that answers and then fails still lets the remaining addresses
 have their turn -- a machine can have a VPN interface that accepts a
@@ -2475,8 +2493,11 @@ nicht lesen.
   Dokumente in den Unterordner `PreppSuite-Dokumente`. Erst als `.part`, nach
   bestandener Prüfung umbenannt, dann über `rememberStoragePath` und die
   Controller in Gebrauch genommen, genau wie ein Download. Eine Datei
-  gleichen Namens und gleicher Größe, die schon dort liegt, wird genommen,
-  nicht überschrieben. Fotos gehen durch `applyHouseholdPhotos`, also
+  gleichen Namens und gleicher Größe wird erst nach Authentifizierung des
+  Sicherungseintrags und SHA-256-Vergleich des tatsächlichen Inhalts genommen.
+  Das liest beide Seiten als Streams, ohne eine zweite Archivkopie anzulegen.
+  Bei unterschiedlichem Inhalt wird ein freier Name verwendet. Fotos gehen
+  durch `applyHouseholdPhotos`, also
   **nach** den Zeilen, zu denen sie gehören.
 - **Nicht dabei** sind die Suchindizes. Sie sind aus den Dateien abgeleitet
   und mit dem Schlüssel dieses Geräts versiegelt. Eigene Dokumente, die
@@ -2606,11 +2627,22 @@ drei Regeln:
   etwas geschützt wurde, ist ein fehlender Schlüsselbund kein Grund,
   jemanden auszusperren.
 - Mit Markierung wirft `isEnabled()` `AppLockStatusUnavailable`, und die
-  Weiche bleibt zu.
+  Weiche bleibt zu. Das gilt auch für fehlende oder ungültige sichere Werte,
+  nicht nur für Ausnahmen. Nur bewusstes Abschalten entfernt die Markierung.
 - Die Markierung wird beim Einrichten **zuletzt** gesetzt und beim
   Abschalten **zuletzt** entfernt. Andersherum sperrt ein fehlgeschlagener
   Schreibvorgang jemanden aus seinem eigenen Haushalt aus, für den es
   keine Passphrase gibt.
+
+Beide Weichen stehen im `MaterialApp.builder` vor dem gesamten Navigator,
+zuerst der Datenschlüssel, dann die App-Sperre. `ProtectedNavigation` nimmt
+auch geöffnete Seiten, Dialoge und Sheets aus Anzeige, Fokus und Semantik.
+Vor dem ersten Öffnen wird der private Navigator nicht aufgebaut; nach einer
+erneuten Sperre bleibt sein Zustand verborgen erhalten. Öffentliche Notfallhilfe
+hat einen getrennten Navigator und eine eigene Textauswahl. System-Zurück
+erreicht ausschließlich diesen Navigator, solange eine Weiche geschlossen ist.
+Ein verspätetes biometrisches Ergebnis aus der vorigen Öffnung kann die neue
+Sperre nicht aufheben; im Hintergrund wird kein neuer Dialog angefordert.
 
 Beim **Datenschlüssel** darf derselbe Fehler verschluckt werden, und das ist
 kein Widerspruch: „kein Schlüssel" wird dort von den Dateien auf der Platte
@@ -2917,6 +2949,11 @@ betroffene Klasse im Inneren von `Scrollable` sitzt. Er bleibt im
 Protokoll, bis Flutter ihn behoben hat.
 
 ### Was das Fehlerprotokoll nicht aufnimmt
+
+SQLite-Ausnahmen werden auch nach dem Verpacken durch einen Datenbank-Isolate
+auf Ergebnis- und erweiterten Fehlercode reduziert. SQL-Anweisungen, gebundene
+Werte und der rohe Exception-Text gehören nicht in das unverschlüsselte Log.
+Die Stackframes bleiben für die Diagnose erhalten.
 
 Ins Protokoll kommt alles, was bis nach oben durchschlägt, mit genau
 einer Ausnahme: Kartenkacheln, die der Renderer verwirft (#207).

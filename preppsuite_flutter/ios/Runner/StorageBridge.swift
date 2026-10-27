@@ -107,12 +107,16 @@ final class StorageBridge: NSObject {
     case "read":
       result(read(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? ""))
     case "write":
-      write(
-        arguments["uri"] as? String ?? "",
-        path: arguments["path"] as? String ?? "",
-        contents: arguments["contents"] as? String ?? ""
-      )
-      result(nil)
+      do {
+        try write(
+          arguments["uri"] as? String ?? "",
+          path: arguments["path"] as? String ?? "",
+          contents: arguments["contents"] as? String ?? ""
+        )
+        result(nil)
+      } catch {
+        result(FlutterError(code: "write-failed", message: "The selected folder could not be written.", details: nil))
+      }
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -268,20 +272,24 @@ final class StorageBridge: NSObject {
     }
   }
 
-  private func write(_ uri: String, path: String, contents: String) {
-    _ = withAccess(uri) { root -> Bool? in
-      var segments = Self.segments(path)
-      guard let name = segments.popLast(),
-            let folder = directory(in: root, segments: segments, create: true)
-      else { return nil }
+  private func write(_ uri: String, path: String, contents: String) throws {
+    guard let root = resolve(uri) else { throw CocoaError(.fileNoSuchFile) }
+    let scoped = root.startAccessingSecurityScopedResource()
+    defer { if scoped { root.stopAccessingSecurityScopedResource() } }
+    var segments = Self.segments(path)
+    guard let name = segments.popLast(),
+          let folder = directory(in: root, segments: segments, create: true)
+    else { throw CocoaError(.fileWriteUnknown) }
 
-      let file = folder.appendingPathComponent(name)
-      var coordinationError: NSError?
-      NSFileCoordinator().coordinate(writingItemAt: file, options: .forReplacing, error: &coordinationError) { url in
-        try? contents.write(to: url, atomically: true, encoding: .utf8)
-      }
-      return true
+    let file = folder.appendingPathComponent(name)
+    var coordinationError: NSError?
+    var written: Result<Void, Error>?
+    NSFileCoordinator().coordinate(writingItemAt: file, options: .forReplacing, error: &coordinationError) { url in
+      written = Result { try contents.write(to: url, atomically: true, encoding: .utf8) }
     }
+    if let error = coordinationError { throw error }
+    guard let outcome = written else { throw CocoaError(.fileWriteUnknown) }
+    try outcome.get()
   }
 
   private func directory(in root: URL, segments: [String], create: Bool) -> URL? {

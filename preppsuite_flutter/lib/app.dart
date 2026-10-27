@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PredictiveBackEvent;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/app_theme.dart';
@@ -11,11 +14,52 @@ import 'core/theme_provider.dart';
 import 'features/household/presentation/household_gate.dart';
 import 'l10n/generated/app_localizations.dart';
 
-class PreppSuiteApp extends ConsumerWidget {
+class PreppSuiteApp extends ConsumerStatefulWidget {
   const PreppSuiteApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PreppSuiteApp> createState() => _PreppSuiteAppState();
+}
+
+class _PreppSuiteAppState extends ConsumerState<PreppSuiteApp>
+    with WidgetsBindingObserver {
+  final _dataGate = GlobalKey<NavigatorState>();
+  final _lockGate = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Registered before WidgetsApp: system back must reach public help,
+    // never a route in the hidden household navigator.
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  NavigatorState? get _publicNavigator =>
+      _dataGate.currentState ?? _lockGate.currentState;
+
+  @override
+  Future<bool> didPopRoute() async {
+    final navigator = _publicNavigator;
+    if (navigator == null) return false;
+    await navigator.maybePop();
+    return true;
+  }
+
+  @override
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) =>
+      _publicNavigator != null;
+
+  @override
+  void handleCommitBackGesture() => unawaited(didPopRoute());
+
+  @override
+  Widget build(BuildContext context) {
     final crisisMode = ref.watch(crisisModeProvider);
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
@@ -46,24 +90,27 @@ class PreppSuiteApp extends ConsumerWidget {
       // it takes both.
       builder: (context, child) {
         final media = MediaQuery.of(context);
-        return SelectableEverywhere(
-          child: !crisisMode
-              ? child!
-              : MediaQuery(
-                  data: media.copyWith(
-                    textScaler: crisisTextScaler(media.textScaler),
-                    disableAnimations: true,
-                  ),
-                  child: child!,
-                ),
+        // Outside the app lock: a device that cannot open its databases
+        // cannot check the lock either, and the passphrase prompt would
+        // be asking for something that leads nowhere.
+        final surface = LocalDataGate(
+          gateNavigatorKey: _dataGate,
+          child: AppLockGate(
+            gateNavigatorKey: _lockGate,
+            child: SelectableEverywhere(child: child!),
+          ),
         );
+        return !crisisMode
+            ? surface
+            : MediaQuery(
+                data: media.copyWith(
+                  textScaler: crisisTextScaler(media.textScaler),
+                  disableAnimations: true,
+                ),
+                child: surface,
+              );
       },
-      // Outside the app lock: a device that cannot open its databases
-      // cannot check the lock either, and the passphrase prompt would
-      // be asking for something that leads nowhere.
-      home: const LocalDataGate(
-        child: AppLockGate(child: HouseholdGate()),
-      ),
+      home: const HouseholdGate(),
     );
   }
 }

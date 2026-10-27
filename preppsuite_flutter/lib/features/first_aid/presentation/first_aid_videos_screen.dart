@@ -223,9 +223,19 @@ class _FirstAidVideosScreenState extends ConsumerState<FirstAidVideosScreen> {
       final library = await ref.read(firstAidLibraryProvider.future);
       final problem = await library.importZip(path);
       ref.invalidate(installedFirstAidPackProvider);
-      if (mounted) setState(() => _problem = problem);
+      if (mounted) {
+        setState(
+          () => _problem = problem == null
+              ? null
+              : AppLocalizations.of(context)!.firstAidVideoPackInvalidImport,
+        );
+      }
     } on Object catch (error) {
-      if (mounted) setState(() => _problem = '$error');
+      if (mounted) {
+        setState(
+          () => _problem = describeError(AppLocalizations.of(context)!, error),
+        );
+      }
     } finally {
       if (mounted) setState(() => _busy = false);
     }

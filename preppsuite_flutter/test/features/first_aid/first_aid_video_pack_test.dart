@@ -331,6 +331,136 @@ void main() {
       return path;
     }
 
+    for (final badSize in [false, true]) {
+      test(
+        'a damaged ZIP leaves the working pack intact (bad size: $badSize)',
+        () async {
+          final old = FirstAidVideoPack.parse(manifest(bytes: 3));
+          await library.writeManifest(old);
+          await library.fileFor(old.videos.single).writeAsBytes([7, 7, 7]);
+          final text = jsonDecode(manifest(bytes: badSize ? 1000 : 3)) as Map;
+          (text['videos'] as List).single['sha256'] = '0' * 64;
+          final path = await writeZip({
+            firstAidPackFileName: utf8.encode(jsonEncode(text)),
+            'cpr.mp4': [1, 2, 3],
+          });
+          expect(await library.importZip(path), isNotNull);
+          expect(await library.fileFor(old.videos.single).readAsBytes(), [
+            7,
+            7,
+            7,
+          ]);
+          expect(await library.manifestFile.readAsString(), old.toJsonString());
+          expect(temp.listSync().whereType<Directory>().map((d) => d.path), [
+            library.folder.path,
+          ]);
+        },
+      );
+    }
+
+    test('a missing video and ambiguous ZIP names are refused', () async {
+      for (final files in [
+        <String, List<int>>{},
+        {
+          'one/cpr.mp4': [1, 2, 3],
+          'two/cpr.mp4': [4, 5, 6],
+        },
+      ]) {
+        final path = await writeZip({
+          firstAidPackFileName: utf8.encode(manifest(bytes: 3)),
+          ...files,
+        });
+        expect(await library.importZip(path), isNotNull);
+        expect(await library.installed(), isNull);
+      }
+    });
+
+    test('multiple ZIP manifests are refused', () async {
+      final description = utf8.encode(manifest(bytes: 3));
+      final path = await writeZip({
+        firstAidPackFileName: description,
+        'nested/$firstAidPackFileName': description,
+        'cpr.mp4': [1, 2, 3],
+      });
+      expect(await library.importZip(path), isNotNull);
+      expect(await library.installed(), isNull);
+    });
+
+    test(
+      'ZIP CRC detects damaged videos even without a manifest digest',
+      () async {
+        final payload = utf8.encode('unique-video-payload');
+        final archive = Archive()
+          ..add(
+            ArchiveFile.bytes(
+              firstAidPackFileName,
+              utf8.encode(manifest(bytes: payload.length)),
+            ),
+          )
+          ..add(ArchiveFile.noCompress('cpr.mp4', payload.length, payload));
+        final bytes = ZipEncoder().encodeBytes(archive);
+        final offset = String.fromCharCodes(bytes)
+            .indexOf(String.fromCharCodes(payload));
+        expect(offset, greaterThan(0));
+        bytes[offset] ^= 1;
+        final file = File('${temp.path}/damaged.zip');
+        await file.writeAsBytes(bytes);
+        expect(await library.importZip(file.path), contains('checksum'));
+        expect(await library.installed(), isNull);
+      },
+    );
+
+    test(
+      'manifest, single-file and total extraction budgets are enforced',
+      () async {
+        final path = await writeZip({
+          firstAidPackFileName: utf8.encode(manifest(bytes: 3)),
+          'cpr.mp4': [1, 2, 3],
+        });
+        expect(await library.importZip(path, maxManifestBytes: 8), isNotNull);
+        expect(await library.importZip(path, maxVideoBytes: 2), isNotNull);
+        expect(await library.importZip(path, maxTotalBytes: 2), isNotNull);
+        expect(await library.installed(), isNull);
+      },
+    );
+
+    test('duplicate manifest file names are refused', () async {
+      final text = jsonDecode(manifest(bytes: 3)) as Map;
+      final videos = text['videos'] as List;
+      videos.add({...videos.single as Map, 'id': 'second'});
+      final path = await writeZip({
+        firstAidPackFileName: utf8.encode(jsonEncode(text)),
+        'cpr.mp4': [1, 2, 3],
+      });
+      expect(await library.importZip(path), isNotNull);
+      expect(await library.installed(), isNull);
+    });
+
+    test(
+      'a checked update replaces the old pack and an interrupted swap recovers',
+      () async {
+        final old = FirstAidVideoPack.parse(manifest(bytes: 3));
+        await library.writeManifest(old);
+        await library.fileFor(old.videos.single).writeAsBytes([7, 7, 7]);
+        final transaction = await temp.createTemp('.ErsteHilfe.swap-');
+        await File('${transaction.path}/.pack-transaction')
+            .writeAsString('first-aid-pack-swap-v1');
+        await library.folder.rename('${transaction.path}/previous');
+        expect(await library.installed(), isNotNull);
+        final path = await writeZip({
+          firstAidPackFileName: utf8.encode(manifest(bytes: 3)),
+          'cpr.mp4': [1, 2, 3],
+        });
+        expect(await library.importZip(path), isNull);
+        expect(await library.fileFor(old.videos.single).readAsBytes(), [
+          1,
+          2,
+          3,
+        ]);
+        expect(await transaction.exists(), isFalse);
+      },
+    );
+
     test('is unpacked and becomes the installed pack', () async {
       final path = await writeZip({
         firstAidPackFileName: utf8.encode(manifest(url: null, bytes: 3)),
@@ -341,6 +471,24 @@ void main() {
       final installed = await library.installed();
       expect(installed?.videos.single.id, 'cpr-1');
       expect(await library.fileFor(installed!.videos.single).exists(), isTrue);
+    });
+
+    test('unrelated backup and staging folders are never removed', () async {
+      final backup = Directory('${library.folder.path}.old')..createSync();
+      final unrelated = Directory('${temp.path}/.ErsteHilfe.swap-unrelated')
+        ..createSync();
+      for (final directory in [backup, unrelated]) {
+        File('${directory.path}/notes.txt').writeAsStringSync('keep');
+      }
+      expect(await library.installed(), isNull);
+      final path = await writeZip({
+        firstAidPackFileName: utf8.encode(manifest(bytes: 3)),
+        'cpr.mp4': [1, 2, 3],
+      });
+      expect(await library.importZip(path), isNull);
+      for (final directory in [backup, unrelated]) {
+        expect(File('${directory.path}/notes.txt').readAsStringSync(), 'keep');
+      }
     });
 
     test('a zip with no description in it is refused', () async {

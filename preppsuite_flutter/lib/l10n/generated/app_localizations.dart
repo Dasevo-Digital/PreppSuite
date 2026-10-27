@@ -16446,6 +16446,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{languages} · {size}'**
   String translatorOcrDataSummary(String languages, String size);
+
+  /// No description provided for @firstAidVideoPackInvalidImport.
+  ///
+  /// In en, this message translates to:
+  /// **'The video pack is incomplete, damaged or exceeds the allowed size.'**
+  String get firstAidVideoPackInvalidImport;
 }
 
 class _AppLocalizationsDelegate

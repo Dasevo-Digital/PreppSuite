@@ -1191,16 +1191,29 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> markWarningsNotified(
-    List<({String source, String externalId})> keys,
+    List<Warning> announced,
   ) async {
-    await batch((b) {
-      for (final key in keys) {
-        b.update(
-          warnings,
-          const WarningsCompanion(notified: Value(true)),
-          where: (t) =>
-              t.source.equals(key.source) & t.externalId.equals(key.externalId),
-        );
+    await transaction(() async {
+      for (final warning in announced) {
+        final current =
+            await (select(warnings)..where(
+                  (t) =>
+                      t.source.equals(warning.source) &
+                      t.externalId.equals(warning.externalId),
+                ))
+                .getSingleOrNull();
+        // Compare the whole stored version, even if a source reused its
+        // timestamp. A concurrent poll must not acknowledge an escalation
+        // that was never handed to the notification service.
+        if (current != warning) continue;
+        await (update(warnings)..where(
+              (t) =>
+                  t.source.equals(warning.source) &
+                  t.externalId.equals(warning.externalId),
+            ))
+            .write(
+              const WarningsCompanion(notified: Value(true)),
+            );
       }
     });
   }

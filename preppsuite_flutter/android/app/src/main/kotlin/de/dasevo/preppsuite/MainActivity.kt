@@ -95,12 +95,16 @@ class MainActivity : FlutterFragmentActivity() {
                 read(call.argument("uri")!!, call.argument("path")!!)
             )
             "write" -> {
-                write(
-                    call.argument("uri")!!,
-                    call.argument("path")!!,
-                    call.argument("contents")!!,
-                )
-                result.success(null)
+                try {
+                    write(
+                        call.argument("uri")!!,
+                        call.argument("path")!!,
+                        call.argument("contents")!!,
+                    )
+                    result.success(null)
+                } catch (_: Exception) {
+                    result.error("write-failed", "The selected folder could not be written.", null)
+                }
             }
             else -> result.notImplemented()
         }
@@ -275,14 +279,17 @@ class MainActivity : FlutterFragmentActivity() {
     private fun write(uri: String, path: String, contents: String) {
         val segments = path.split('/')
         val directory = directoryAt(uri, segments.dropLast(1).joinToString("/"), create = true)
-            ?: return
+            ?: throw java.io.IOException("No writable directory")
         val name = segments.last()
         val file = directory.findFile(name)
             ?: directory.createFile("application/json", name)
-            ?: return
+            ?: throw java.io.IOException("No writable file")
 
-        contentResolver.openOutputStream(file.uri, "wt")?.use {
+        val stream = contentResolver.openOutputStream(file.uri, "wt")
+            ?: throw java.io.IOException("No output stream")
+        stream.use {
             it.write(contents.toByteArray(Charsets.UTF_8))
+            it.flush()
         }
     }
 

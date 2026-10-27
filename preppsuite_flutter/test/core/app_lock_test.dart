@@ -81,6 +81,32 @@ void main() {
   });
 
   group('when the key store will not answer', () {
+    for (final value in [null, 'false', 'invalid']) {
+      test(
+        'a configured lock stays closed for missing or invalid state: $value',
+        () async {
+          final storage = _MemoryStorage();
+          final lock = store(storage);
+          await lock.enable('test-passphrase');
+          if (value == null) {
+            storage.values.clear();
+          } else {
+            storage.values['appLock.enabled.v1'] = value;
+          }
+          await expectLater(
+            lock.isEnabled(),
+            throwsA(isA<AppLockStatusUnavailable>()),
+          );
+          expect(
+            (await SharedPreferences.getInstance()).getBool(
+              'appLockConfigured.v1',
+            ),
+            isTrue,
+          );
+        },
+      );
+    }
+
     test('an app that was never locked still starts', () async {
       // The case a Mac without a signing certificate lands in. Keeping
       // somebody out of an app that protects nothing yet would be the

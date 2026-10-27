@@ -99,12 +99,18 @@ class AppLockStore {
   /// lands in, and it has to start.
   Future<bool> isEnabled() async {
     try {
-      final enabled = await _storage.read(_enabledKey) == 'true';
+      final value = await _storage.read(_enabledKey);
+      if (value != 'true') {
+        // Absence is not proof of a deliberate disable. Restores and
+        // unavailable key stores can return null without throwing.
+        if (await _wasConfigured()) throw const AppLockStatusUnavailable();
+        return false;
+      }
       // Written from here rather than only in `enable`, so that an
       // installation that was locked before this marker existed gets one
       // the first time it is read successfully.
-      await _rememberConfigured(enabled);
-      return enabled;
+      await _rememberConfigured(true);
+      return true;
     } on Object {
       if (await _wasConfigured()) throw const AppLockStatusUnavailable();
       return false;
