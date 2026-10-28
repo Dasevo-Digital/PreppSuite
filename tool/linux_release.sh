@@ -8,6 +8,12 @@
 # ALLES-FERTIG on its own line, which is what the caller waits for.
 set -euo pipefail
 
+# Or LINUX-FEHLGESCHLAGEN, when a step stops the script. Without it the
+# caller cannot tell a dead build from a slow one: 2.7.4's first Linux
+# build died after five minutes on a download that timed out, and the
+# caller waited out its full two hours (#227).
+trap '[ $? -eq 0 ] || echo LINUX-FEHLGESCHLAGEN' EXIT
+
 work="$1"
 version="$2"
 build_number="$3"

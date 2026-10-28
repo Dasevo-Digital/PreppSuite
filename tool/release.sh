@@ -223,6 +223,11 @@ step "Auf Linux warten"
 keyring_told=false
 for _ in $(seq 1 720); do
   ssh "$linux" "grep -q ALLES-FERTIG ~/$remote_linux/build.log" && break
+  # A build that stopped says so (#227) and is not waited for.
+  if ssh "$linux" "grep -q LINUX-FEHLGESCHLAGEN ~/$remote_linux/build.log"; then
+    ssh "$linux" "grep -E 'ERROR|error:|FEHLGESCHLAGEN' ~/$remote_linux/build.log | tail -5" || true
+    fail "Linux-Build abgebrochen, siehe ~/$remote_linux/build.log auf $linux"
+  fi
   # The start test reads the desktop keyring, which waits for somebody to
   # unlock it; linux_release.sh says so in its log rather than hanging.
   if ! $keyring_told &&
