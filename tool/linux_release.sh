@@ -40,6 +40,10 @@ translator() { native/translate/build_linux.sh > "$work/translate-linux.log" 2>&
 retry translator ||
   { echo "UEBERSETZER-LINUX: FEHLGESCHLAGEN"; tail -n 20 "$work/translate-linux.log"; }
 flutter pub get
+# A start test run earlier in this folder leaves the debug kernel in the
+# shared build/flutter_assets, and the release build copies it into the
+# bundle: 2.7.5's rebuilt package carried 138 MB of it.
+rm -rf build/flutter_assets build/linux/x64/release/bundle
 retry flutter build linux --release --build-name "$version" --build-number "$build_number"
 
 cd "$work"
@@ -50,6 +54,10 @@ tar czf "$work/PreppSuite-$version-linux-x64.tar.gz" PreppSuite-x64
 # Listed into a file, not piped into head: under pipefail the early close
 # of the pipe failed the script here and the Windows step below never ran.
 tar tzf "$work/PreppSuite-$version-linux-x64.tar.gz" > "$work/inhalt.txt"
+if grep -q 'kernel_blob.bin' "$work/inhalt.txt"; then
+  echo "PAKET: enthält einen Debug-Kernel (kernel_blob.bin)"
+  exit 1
+fi
 
 # The start test (#142): the package's native libraries, loaded for real
 # in a running app. It needs a display; the build machine's own desktop
