@@ -56,24 +56,31 @@ translate_source() {
     return
   fi
 
+  # Every step returns on failure by hand: this runs in a command
+  # substitution, where the callers' set -e does not reach. Without it a
+  # clone that timed out went on to the tarball, and when that one came
+  # through, the marker below told every later run that the sources were
+  # there -- each then stopped at "patch spm failed" (#227).
   rm -rf "$repo"
-  git clone --quiet --filter=blob:none --no-checkout "$TRANSLATE_REPO" "$repo" >&2
-  git -C "$repo" sparse-checkout set inference >&2
-  git -C "$repo" checkout --quiet "$TRANSLATE_COMMIT" >&2
+  git clone --quiet --filter=blob:none --no-checkout "$TRANSLATE_REPO" "$repo" >&2 ||
+    return 1
+  git -C "$repo" sparse-checkout set inference >&2 || return 1
+  git -C "$repo" checkout --quiet "$TRANSLATE_COMMIT" >&2 || return 1
   git -C "$repo" submodule update --init --quiet \
     inference/3rd_party/ssplit-cpp \
     inference/marian-fork/src/3rd_party/intgemm \
     inference/marian-fork/src/3rd_party/sentencepiece \
-    inference/marian-fork/src/3rd_party/simd_utils >&2
+    inference/marian-fork/src/3rd_party/simd_utils >&2 || return 1
   git -C "$repo" submodule update --init --recursive --quiet \
-    inference/marian-fork/src/3rd_party/ruy >&2
+    inference/marian-fork/src/3rd_party/ruy >&2 || return 1
 
   local pcre_dir="$engine/3rd_party/ssplit-cpp/src/3rd-party"
   local tarball="$work/pcre2-$PCRE2_VERSION.tar.gz"
   if [ ! -f "$tarball" ]; then
     curl --fail --silent --show-error --location -o "$tarball.part" \
-      "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-$PCRE2_VERSION/pcre2-$PCRE2_VERSION.tar.gz" >&2
-    mv "$tarball.part" "$tarball"
+      "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-$PCRE2_VERSION/pcre2-$PCRE2_VERSION.tar.gz" >&2 ||
+      { rm -f "$tarball.part"; return 1; }
+    mv "$tarball.part" "$tarball" || return 1
   fi
   local actual
   if command -v sha256sum >/dev/null 2>&1; then
@@ -86,8 +93,8 @@ translate_source() {
     rm -f "$tarball"
     return 1
   fi
-  mkdir -p "$pcre_dir"
-  tar -xzf "$tarball" -C "$pcre_dir"
+  mkdir -p "$pcre_dir" || return 1
+  tar -xzf "$tarball" -C "$pcre_dir" || return 1
 
   touch "$work/.source-ready-$TRANSLATE_COMMIT"
   translate_patch "$engine" >&2 || return 1
