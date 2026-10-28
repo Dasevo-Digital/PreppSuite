@@ -18,8 +18,16 @@ Set-Location (Join-Path $Work 'src\preppsuite_flutter')
 if (-not (Test-Path native\translate\build\preppsuite_translate.dll)) { throw 'preppsuite_translate.dll fehlt' }
 flutter pub get
 if ($LASTEXITCODE -ne 0) { throw 'pub get fehlgeschlagen' }
-flutter build windows --release --build-name $Version --build-number $BuildNumber
-if ($LASTEXITCODE -ne 0) { throw 'build fehlgeschlagen' }
+# The sqlite3 build hook downloads its library from GitHub, which drops
+# connections from this network now and then (#227). Three tries, a
+# minute apart.
+foreach ($attempt in 1..3) {
+  flutter build windows --release --build-name $Version --build-number $BuildNumber
+  if ($LASTEXITCODE -eq 0) { break }
+  if ($attempt -eq 3) { throw 'build fehlgeschlagen' }
+  Write-Output "== Build-Versuch $attempt fehlgeschlagen, neuer Versuch in 60 s =="
+  Start-Sleep -Seconds 60
+}
 
 $release = 'build\windows\x64\runner\Release'
 Write-Output "== Dateien: $((Get-ChildItem $release -Recurse -File).Count) =="

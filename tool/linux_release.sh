@@ -19,13 +19,28 @@ version="$2"
 build_number="$3"
 
 export PATH="$HOME/flutter/bin:$PATH"
+
+# The translator's sources and the sqlite3 build hook's library come from
+# GitHub, which drops connections from this network now and then: 2.7.4
+# and 2.7.5 each lost a build to it (#227). Three tries, a minute apart.
+retry() {
+  local attempt
+  for attempt in 1 2 3; do
+    "$@" && return 0
+    [ "$attempt" = 3 ] && return 1
+    echo "Versuch $attempt fehlgeschlagen, neuer Versuch in 60 s: $1"
+    sleep 60
+  done
+}
+
 cd "$work/src/preppsuite_flutter"
 # Before the app, or CMake has nothing to bundle; whether it arrived is
 # checked by the caller in the package listing.
-native/translate/build_linux.sh > "$work/translate-linux.log" 2>&1 ||
+translator() { native/translate/build_linux.sh > "$work/translate-linux.log" 2>&1; }
+retry translator ||
   { echo "UEBERSETZER-LINUX: FEHLGESCHLAGEN"; tail -n 20 "$work/translate-linux.log"; }
 flutter pub get
-flutter build linux --release --build-name "$version" --build-number "$build_number"
+retry flutter build linux --release --build-name "$version" --build-number "$build_number"
 
 cd "$work"
 rm -rf paket && mkdir -p paket/PreppSuite-x64
