@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -17,6 +18,8 @@ import '../application/download_suggestions.dart';
 import '../application/personal_document_index.dart';
 import '../application/document_fingerprint.dart';
 import '../application/personal_document_store.dart';
+import '../application/document_deadline.dart';
+import 'document_deadline_dialog.dart';
 import 'personal_document_reader_screen.dart';
 
 class PersonalDocumentsScreen extends StatefulWidget {
@@ -48,7 +51,8 @@ class PersonalDocumentsScreen extends StatefulWidget {
       _PersonalDocumentsScreenState();
 }
 
-class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
+class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen>
+    with WidgetsBindingObserver {
   static const _store = PersonalDocumentStore();
   late Future<List<PersonalDocument>> _documents = _store.load();
 
@@ -56,6 +60,100 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
   /// built from (#77). Found after the list is shown, not before it: a
   /// library of large files should not wait on its own check to appear.
   Set<String> _changed = const {};
+  bool _deadlinesOnly = false;
+  Timer? _dayTimer;
+  StreamSubscription<int>? _updates;
+
+  void _watchDay() {
+    _dayTimer?.cancel();
+    final now = DateTime.now();
+    final next = DateTime(now.year, now.month, now.day + 1);
+    _dayTimer = Timer(next.difference(now) + const Duration(seconds: 1), () {
+      if (mounted) setState(() {});
+      _watchDay();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {
+        _documents = _store.load();
+      });
+      _watchDay();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _dayTimer?.cancel();
+    unawaited(_updates?.cancel());
+    super.dispose();
+  }
+
+  Future<void> _editDeadline(PersonalDocument document) async {
+    final draft = await showDialog<DocumentDeadlineDraft>(
+      context: context,
+      builder: (_) => DocumentDeadlineDialog(document: document),
+    );
+    if (draft == null || !mounted) return;
+    try {
+      final updated = await _store.updateDeadline(
+        document.id,
+        validUntil: draft.validUntil,
+        remindOn: draft.remindOn,
+        reviewedOn: draft.reviewedOn,
+        originalLocation: draft.originalLocation,
+      );
+      if (mounted) {
+        setState(() {
+          _documents = Future.value(updated);
+        });
+      }
+    } on Object {
+      if (mounted) {
+        _say(AppLocalizations.of(context)!.documentDeadlineSaveFailed);
+      }
+    }
+  }
+
+  Widget _deadline(PersonalDocument document) {
+    final l = AppLocalizations.of(context)!;
+    final date = DateFormat.yMMMd(l.localeName);
+    final status = documentDeadlineStatus(document, now: DateTime.now());
+    final text = switch (status) {
+      DocumentDeadlineStatus.expired => l.documentExpired(
+        date.format(document.validUntil!),
+      ),
+      DocumentDeadlineStatus.expiresToday => l.documentExpiresToday,
+      DocumentDeadlineStatus.reminderDue => l.documentReminderDue,
+      DocumentDeadlineStatus.current =>
+        document.validUntil == null
+            ? null
+            : l.documentValidUntilValue(date.format(document.validUntil!)),
+    };
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (text != null)
+          Text(
+            text,
+            style: TextStyle(
+              color: status == DocumentDeadlineStatus.current
+                  ? null
+                  : Theme.of(context).colorScheme.error,
+            ),
+          ),
+        if (document.remindOn != null)
+          Text(l.documentRemindOnValue(date.format(document.remindOn!))),
+        if (document.reviewedOn != null)
+          Text(l.documentReviewedOnValue(date.format(document.reviewedOn!))),
+        if (document.originalLocation.isNotEmpty)
+          Text(l.documentOriginalLocationValue(document.originalLocation)),
+      ],
+    );
+  }
 
   /// The scanned document being read, and how far it has got (#66).
   ({String id, int done, int total})? _recognizing;
@@ -255,6 +353,15 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _watchDay();
+    _updates = PersonalDocumentStore.changes.listen((_) {
+      if (mounted) {
+        setState(() {
+          _documents = _store.load();
+        });
+      }
+    });
     _checkForChanges();
   }
 
@@ -620,6 +727,13 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           final documents = snapshot.data!;
+          final due = documents
+              .where(
+                (d) =>
+                    documentDeadlineStatus(d, now: DateTime.now()) !=
+                    DocumentDeadlineStatus.current,
+              )
+              .toList();
           final indexed = documents.where((item) => item.isSearchable).length;
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
@@ -644,6 +758,22 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
                   ),
                 ),
               ),
+              if (documents.isNotEmpty)
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ChoiceChip(
+                      label: Text(l10n.documentShowAll),
+                      selected: !_deadlinesOnly,
+                      onSelected: (_) => setState(() => _deadlinesOnly = false),
+                    ),
+                    ChoiceChip(
+                      label: Text(l10n.documentDueCount(due.length)),
+                      selected: _deadlinesOnly,
+                      onSelected: (_) => setState(() => _deadlinesOnly = true),
+                    ),
+                  ],
+                ),
               FutureBuilder<List<DownloadSuggestion>>(
                 future: _suggestions,
                 builder: (context, snapshot) {
@@ -700,8 +830,16 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
                     textAlign: TextAlign.center,
                   ),
                 )
+              else if (_deadlinesOnly && due.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Text(
+                    l10n.documentNoDeadlinesDue,
+                    textAlign: TextAlign.center,
+                  ),
+                )
               else
-                for (final document in documents)
+                for (final document in _deadlinesOnly ? due : documents)
                   Card(
                     child: ListTile(
                       leading: Icon(_icon(document.extension)),
@@ -726,11 +864,17 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
                               ),
                             ],
                           ),
-                        _ => Text(
-                          '${document.extension.toUpperCase()} · '
-                          '${_changed.contains(document.id) ? l10n.knowledgeDocumentChanged : _indexStatus(l10n, document.indexStatus)}'
-                          '${document.recognized ? ' · ${l10n.knowledgeRecognizedNote}' : ''}'
-                          '${document.readerOffset > 0 ? ' · ${l10n.knowledgeDocumentContinue}' : ''}',
+                        _ => Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${document.extension.toUpperCase()} · '
+                              '${_changed.contains(document.id) ? l10n.knowledgeDocumentChanged : _indexStatus(l10n, document.indexStatus)}'
+                              '${document.recognized ? ' · ${l10n.knowledgeRecognizedNote}' : ''}'
+                              '${document.readerOffset > 0 ? ' · ${l10n.knowledgeDocumentContinue}' : ''}',
+                            ),
+                            _deadline(document),
+                          ],
                         ),
                       },
                       onTap: () => _open(document),
@@ -754,17 +898,33 @@ class _PersonalDocumentsScreenState extends State<PersonalDocumentsScreen> {
                                   ? () => _recognize(document)
                                   : null,
                             ),
-                          IconButton(
-                            tooltip: l10n.knowledgeDocumentReindex,
-                            icon: const Icon(Icons.manage_search_outlined),
-                            onPressed: document.indexStatus == 'indexing'
-                                ? null
-                                : () => _index(document),
-                          ),
-                          IconButton(
-                            tooltip: l10n.knowledgeDocumentRemove,
-                            icon: const Icon(Icons.delete_outline),
-                            onPressed: () => _remove(document.id),
+                          PopupMenuButton<String>(
+                            tooltip: l10n.documentActions,
+                            onSelected: (value) {
+                              switch (value) {
+                                case 'deadline':
+                                  _editDeadline(document);
+                                case 'index':
+                                  _index(document);
+                                case 'remove':
+                                  _remove(document.id);
+                              }
+                            },
+                            itemBuilder: (_) => [
+                              PopupMenuItem(
+                                value: 'deadline',
+                                child: Text(l10n.documentDeadlineEdit),
+                              ),
+                              PopupMenuItem(
+                                value: 'index',
+                                enabled: document.indexStatus != 'indexing',
+                                child: Text(l10n.knowledgeDocumentReindex),
+                              ),
+                              PopupMenuItem(
+                                value: 'remove',
+                                child: Text(l10n.knowledgeDocumentRemove),
+                              ),
+                            ],
                           ),
                         ],
                       ),

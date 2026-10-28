@@ -10024,4 +10024,192 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get firstAidVideoPackInvalidImport =>
       'Das Videopaket ist unvollständig, beschädigt oder überschreitet die zulässige Größe.';
+
+  @override
+  String get documentDeadlineEdit => 'Fristen und Original';
+
+  @override
+  String get documentValidUntil => 'Gültig bis';
+
+  @override
+  String get documentRemindOn => 'Erinnern am';
+
+  @override
+  String get documentReviewedOn => 'Zuletzt geprüft';
+
+  @override
+  String get documentOriginalLocation => 'Ablageort des Originals';
+
+  @override
+  String get documentDateUnset => 'Nicht festgelegt';
+
+  @override
+  String documentDateClear(String field) {
+    return '$field entfernen';
+  }
+
+  @override
+  String get documentReviewedToday => 'Heute geprüft';
+
+  @override
+  String get documentReminderAfterExpiry =>
+      'Die Erinnerung muss vor oder am Gültigkeitsende liegen.';
+
+  @override
+  String get documentReminderHint =>
+      'Mit aktivierten Benachrichtigungen wird um 9 Uhr erinnert. Auf dem Sperrbildschirm erscheint nur ein allgemeiner Hinweis.';
+
+  @override
+  String get documentReminderInAppOnly =>
+      'Auf dieser Plattform werden fällige Fristen in der App angezeigt.';
+
+  @override
+  String get documentDeadlineSave => 'Speichern';
+
+  @override
+  String get documentDeadlineSaveFailed =>
+      'Die Frist konnte nicht gespeichert werden. Bitte erneut versuchen.';
+
+  @override
+  String get documentReminderTitle => 'Dokumentenfrist';
+
+  @override
+  String get documentReminderBody =>
+      'Ein Dokument ist zur Prüfung vorgemerkt. Öffne deine Dokumentenverwaltung.';
+
+  @override
+  String documentExpired(String date) {
+    return 'Gültigkeit abgelaufen: $date';
+  }
+
+  @override
+  String get documentExpiresToday => 'Gültigkeit endet heute';
+
+  @override
+  String get documentReminderDue => 'Prüfung fällig';
+
+  @override
+  String documentValidUntilValue(String date) {
+    return 'Gültig bis: $date';
+  }
+
+  @override
+  String documentRemindOnValue(String date) {
+    return 'Erinnerung: $date';
+  }
+
+  @override
+  String documentReviewedOnValue(String date) {
+    return 'Zuletzt geprüft: $date';
+  }
+
+  @override
+  String documentOriginalLocationValue(String location) {
+    return 'Original: $location';
+  }
+
+  @override
+  String get documentShowAll => 'Alle Dokumente';
+
+  @override
+  String documentDueCount(int count) {
+    return 'Fällige Fristen: $count';
+  }
+
+  @override
+  String get documentActions => 'Dokumentaktionen';
+
+  @override
+  String get offlineProbeTitle => 'Offline-Probelauf';
+
+  @override
+  String get offlineProbeIntro =>
+      'Liest Stichproben aus gespeicherten Karten, Wissensarchiven, Dokumenten und Sprachpaketen. Bis zu 100 Inhalte, Dokumente bis 32 MB.';
+
+  @override
+  String get offlineProbeNetworkHint =>
+      'Die App fragt dabei keine Online-Dienste ab. Dateianbieter können jedoch Inhalte nachladen. Trenne für einen echten Offline-Probelauf vorher die Netzverbindung; die App ändert deine Netzwerkeinstellungen nicht.';
+
+  @override
+  String get offlineProbeNetworkDisconnected =>
+      'Ich habe die Netzverbindung für diesen Test getrennt.';
+
+  @override
+  String get offlineProbeStart => 'Offline-Probelauf starten';
+
+  @override
+  String get offlineProbeReadTest => 'Lesetest starten';
+
+  @override
+  String get offlineProbeRunning => 'Inhalte werden nacheinander geprüft …';
+
+  @override
+  String get offlineProbeStopping => 'Prüfung wird beendet …';
+
+  @override
+  String get offlineProbeStop => 'Prüfung abbrechen';
+
+  @override
+  String offlineProbeAt(String mode, String date) {
+    return '$mode · $date';
+  }
+
+  @override
+  String offlineProbeSummary(int passed, int failed, int unchecked) {
+    return '$passed lesbar · $failed fehlgeschlagen · $unchecked nicht geprüft';
+  }
+
+  @override
+  String get offlineProbeFailed =>
+      'Die Prüfung konnte nicht vollständig geladen werden. Bitte erneut versuchen.';
+
+  @override
+  String get offlineProbeReadable => 'Stichprobe erfolgreich gelesen';
+
+  @override
+  String get offlineProbeMissing => 'Kein Inhalt eingerichtet';
+
+  @override
+  String get offlineProbeUnsupported => 'Auf diesem Gerät nicht prüfbar';
+
+  @override
+  String get offlineProbeUnreadable =>
+      'Nicht lesbar oder beschädigt; im jeweiligen Bereich prüfen.';
+
+  @override
+  String get offlineProbeLimit =>
+      'Prüfgrenze erreicht; Inhalt bitte direkt öffnen.';
+
+  @override
+  String get offlineProbeTimeout =>
+      'Zeitlimit erreicht; Inhalt bitte direkt öffnen.';
+
+  @override
+  String get offlineProbeCancelled => 'Prüfung abgebrochen';
+
+  @override
+  String get offlineProbeNoSample =>
+      'Keine passende Stichprobe gefunden; Inhalt bitte direkt öffnen.';
+
+  @override
+  String get offlineProbeMap => 'Offline-Karte';
+
+  @override
+  String get offlineProbeArchive => 'Wissensarchiv';
+
+  @override
+  String get offlineProbeDocument => 'Dokument';
+
+  @override
+  String get offlineProbeTranslation => 'Sprachpaket';
+
+  @override
+  String get offlineProbeOther => 'Weitere Inhalte';
+
+  @override
+  String get documentNoDeadlinesDue =>
+      'Zurzeit sind keine Dokumentenfristen fällig.';
+
+  @override
+  String get offlineProbeReadMode => 'Lesetest';
 }

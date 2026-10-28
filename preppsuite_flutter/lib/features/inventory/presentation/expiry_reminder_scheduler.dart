@@ -12,6 +12,8 @@ import '../application/expiry_reminder_provider.dart';
 import '../application/inventory_providers.dart';
 import '../application/device_charge.dart';
 import '../application/refill_reminder_planner.dart';
+import '../../knowledge/application/document_deadline.dart';
+import '../../knowledge/application/personal_document_provider.dart';
 
 /// Invisible widget that keeps the scheduled expiry reminders -- and the
 /// prescription reminders beside them (#150) -- in step with the
@@ -32,8 +34,22 @@ class ExpiryReminderScheduler extends ConsumerStatefulWidget {
 }
 
 class _ExpiryReminderSchedulerState
-    extends ConsumerState<ExpiryReminderScheduler> {
+    extends ConsumerState<ExpiryReminderScheduler>
+    with WidgetsBindingObserver {
   Timer? _debounce;
+  bool _running = false;
+  bool _again = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _scheduleReschedule();
+  }
 
   /// Coalesces bursts of writes — a CSV import commits as one batch but
   /// still lands as several stream emissions — into a single reschedule,
@@ -42,6 +58,7 @@ class _ExpiryReminderSchedulerState
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _debounce?.cancel();
     super.dispose();
   }
@@ -52,6 +69,24 @@ class _ExpiryReminderSchedulerState
   }
 
   Future<void> _reschedule() async {
+    if (_running) {
+      _again = true;
+      return;
+    }
+    _running = true;
+    try {
+      do {
+        _again = false;
+        await _rescheduleOnce();
+      } while (_again && mounted);
+    } finally {
+      _running = false;
+    }
+  }
+
+  Future<void> _rescheduleOnce() async {
+    if (!mounted) return;
+    await ref.read(notificationsEnabledProvider.notifier).ensureLoaded();
     if (!mounted) return;
 
     final l10n = AppLocalizations.of(context)!;
@@ -74,10 +109,24 @@ class _ExpiryReminderSchedulerState
       await NotificationService.instance.cancelExpiryReminders();
       await NotificationService.instance.cancelRefillReminders();
       await NotificationService.instance.cancelDeviceChargeReminders();
+      await NotificationService.instance.cancelDocumentReminders();
+      return;
+    }
+
+    if (!ref.read(inventoryItemsProvider(widget.householdId)).hasValue ||
+        !ref.read(personalDocumentsProvider).hasValue) {
       return;
     }
 
     final now = DateTime.now();
+    // Clear the old allocation before adding any category. Otherwise a
+    // new refill can briefly exceed iOS's limit while yesterday's 60
+    // expiry reminders still occupy their slots and be silently dropped.
+    await NotificationService.instance.cancelExpiryReminders();
+    await NotificationService.instance.cancelRefillReminders();
+    await NotificationService.instance.cancelDeviceChargeReminders();
+    await NotificationService.instance.cancelDocumentReminders();
+
     // Planned first, and taken out of the expiry reminders' share of the
     // 64 notifications iOS keeps: a household with a few medicines in
     // daily use has a few of these, and each one matters more than the
@@ -108,11 +157,26 @@ class _ExpiryReminderSchedulerState
       body: (reminder) => l10n.deviceChargeReminderBody(reminder.itemName),
     );
 
+    final documents = planDocumentReminders(
+      ref.read(personalDocumentsProvider).value ?? const [],
+      now: now,
+      limit: maxScheduledExpiryReminders - refills.length - charges.length,
+    );
+    await NotificationService.instance.scheduleDocumentReminders(
+      documents,
+      title: l10n.documentReminderTitle,
+      body: l10n.documentReminderBody,
+    );
+
     final reminders = planExpiryReminders(
       items: items,
       now: now,
       leadDays: leadDays,
-      limit: maxScheduledExpiryReminders - refills.length - charges.length,
+      limit:
+          maxScheduledExpiryReminders -
+          refills.length -
+          charges.length -
+          documents.length,
     );
 
     await NotificationService.instance.scheduleExpiryReminders(
@@ -133,6 +197,9 @@ class _ExpiryReminderSchedulerState
     });
     ref.listen(expiryLeadDaysProvider, (_, _) => _scheduleReschedule());
     ref.listen(notificationsEnabledProvider, (_, _) => _scheduleReschedule());
+    ref.listen(personalDocumentsProvider, (_, next) {
+      if (next.hasValue) _scheduleReschedule();
+    });
 
     return const SizedBox.shrink();
   }

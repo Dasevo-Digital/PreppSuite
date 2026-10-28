@@ -33,7 +33,10 @@ class FlutterError: NSObject {
   let code: String
   init(code: String, message: String?, details: Any?) { self.code = code }
 }
-class FlutterStandardTypedData { init(bytes: Data) {} }
+class FlutterStandardTypedData {
+  let data: Data
+  init(bytes: Data) { data = bytes }
+}
 let FlutterMethodNotImplemented = NSObject()
 final class TestDefaults {
   static let standard = TestDefaults()
@@ -51,6 +54,10 @@ func call(_ method: String, _ arguments: [String: Any]) -> Any? {
   FlutterMethodChannel.handler!(FlutterMethodCall(method, arguments)) { value in
     answered = true
     reply = value
+  }
+  let deadline = Date(timeIntervalSinceNow: 5)
+  while !answered && Date() < deadline {
+    RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.01))
   }
   precondition(answered, "storage dispatcher did not answer")
   return reply
@@ -76,6 +83,21 @@ print("storage: invalid parent rejected")
 try FileManager.default.createDirectory(at: root.appendingPathComponent("directory.json"), withIntermediateDirectories: true)
 precondition(write(uri, "directory.json") is FlutterError)
 print("storage: failed coordinated write rejected")
+let path = root.appendingPathComponent("nested/test.json").path
+guard let file = call("remember", ["path": path]) as? [String: String],
+      let fileURI = file["uri"] else { fatalError("file bookmark missing") }
+precondition(call("openFile", ["uri": fileURI, "fileToken": "reader-a"]) as? Bool == true)
+precondition(call("openFile", ["uri": fileURI, "fileToken": "reader-b"]) as? Bool == true)
+_ = call("closeFile", ["uri": fileURI, "fileToken": "reader-a"])
+let read = call("readRange", ["uri": fileURI, "fileToken": "reader-b", "offset": 0, "length": 4]) as? FlutterStandardTypedData
+precondition(read?.data == Data("test".utf8))
+print("storage: closing one reader preserves the second")
+precondition(call("openFile", ["uri": fileURI]) as? Bool == true)
+_ = call("closeFile", ["uri": fileURI])
+let again = call("readRange", ["uri": fileURI, "fileToken": "reader-b", "offset": 5, "length": 8]) as? FlutterStandardTypedData
+precondition(again?.data == Data("contents".utf8))
+_ = call("closeFile", ["uri": fileURI, "fileToken": "reader-b"])
+print("storage: legacy reader remains independent of leased readers")
 withExtendedLifetime(bridge) {}
 '''
 

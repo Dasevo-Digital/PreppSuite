@@ -3019,6 +3019,59 @@ liegt nur im Speicher; ein Neustart beginnt ohne ihn.
 
 ## Conventions
 
+### Document deadlines and offline checks
+
+Personal documents can carry an expiry date, a reminder date, the date of
+the last review and a note about the original's location. These stay in the
+device's existing private document preferences, alongside its local file
+handles; they are not household sync data. Dates are stored as calendar dates
+(`YYYY-MM-DD`), so a restore in another time zone does not change them. Old
+documents and backups need no migration. File backups carry these fields in
+the encrypted document manifest and restore only the four allowed fields.
+
+`PersonalDocumentStore` serializes read/modify/write operations. Indexing,
+reading position, relinking and deadline edits must preserve one another's
+fields, and must not resurrect a removed document. Its change stream refreshes
+the list and notification planner. The due filter also refreshes at local
+midnight and when the app resumes. A review dismisses an earlier reminder;
+it never extends the document's validity. Expiry today remains valid through
+the day. Reminders are optional, future dates at 09:00 local time, and use
+generic lock-screen text without document titles or original locations.
+They share the existing 60-slot budget: prescription refills, device charging,
+documents, then inventory expiry. The global notification switch cancels all
+four categories. Linux keeps the in-app due list without scheduled delivery.
+
+The readiness screen's `OfflineProbe` reads actual samples after an explicit
+start: PMTiles metadata and up to two vector tiles, a ZIM main page, document
+text extraction, and a translation with each installed model where supported.
+A missing sample, unsupported platform, cancellation or limit is **not
+checked**, never a successful result. This is a readability sample, not an
+exhaustive archive, map coverage, rendering or translation-quality check.
+Results remain in memory and do not change readiness scores or backup checks.
+
+The probe creates no downloads or online-service requests. Its HTTP guard is
+scoped to the operation; it must not disable warning polling or global network
+access. OS file providers can still fetch a cloud file outside Dart's HTTP
+stack. The interface therefore calls the default a read test and asks the user
+to disconnect the network before confirming an offline run. It never changes
+system network settings or claims to have verified that confirmation.
+
+Checks run sequentially, with 100 targets, 20 seconds per operation, 32 MB
+per document, 64 MiB of requested archive reads and 2 MiB per decoded vector
+tile as probe limits, in addition to each format's decompression limits. A
+timeout stops subsequent work; native work already running may finish later.
+Document extraction can be cancelled by killing its worker isolate. Archive
+and map sources are closed independently after their check.
+
+`NativeByteRangeSource` owns a unique `fileToken`. Android, iOS and macOS key
+open descriptors by that token, with a URI fallback for older callers. Two
+readers of one file must not close one another; the probe must leave an active
+map or article usable. Android uses positional reads without stream wrappers
+that would close the descriptor after the first range. The macOS storage
+bridge gate checks two simultaneous readers and compatibility with an older
+caller; the Android integration test reads an actual cache-backed content URI
+repeatedly, then closes one of two readers and reads with the other.
+
 Comments explain *why*, not *what* — the existing ones are the model to match,
 including their density. Prefer extending an existing service over adding a
 parallel one.

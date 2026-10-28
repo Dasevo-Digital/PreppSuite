@@ -32,6 +32,20 @@ Standortdaten verwendet.
 
 ## Was sie kann
 
+**Dokumentenfristen.** Eigene Dokumente können ein Gültigkeitsdatum, einen
+Erinnerungstermin, die letzte Prüfung und einen Hinweis zum Aufbewahrungsort
+des Originals bekommen. Die Dokumentaktionen öffnen „Fristen und Original“;
+ein Filter zeigt fällige Termine. Optionale Benachrichtigungen nennen keine
+Dokumenttitel oder Lagerorte. Die Angaben bleiben auf dem Gerät und werden
+mit dem Dokument in die verschlüsselte Dateisicherung aufgenommen.
+
+**Offline-Probelauf.** Die Bereitschaftsübersicht liest auf Wunsch Stichproben
+aus gespeicherten Karten, Wissensarchiven, eigenen Dokumenten und verfügbaren
+Sprachpaketen. Fehler, Abbruch und nicht prüfbare Inhalte werden getrennt
+angezeigt. Für einen echten Offline-Test vorher die Netzverbindung trennen:
+Dateianbieter können eine Cloud-Datei sonst unbemerkt nachladen. Die Prüfung
+lädt selbst nichts herunter und ersetzt keine vollständige Inhaltsprüfung.
+
 **Vorräte.** Artikel mit Menge, Einheit, Lagerort, Mindestbestand und
 Ablaufdatum. Erfassung per Barcode über Open Food Facts, wahlweise mit
 Foto. Bestehende Listen lassen sich als CSV einlesen, samt Behandlung

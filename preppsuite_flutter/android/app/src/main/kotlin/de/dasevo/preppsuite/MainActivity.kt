@@ -3,13 +3,12 @@ package de.dasevo.preppsuite
 import android.content.Intent
 import android.net.Uri
 import android.os.ParcelFileDescriptor
+import android.system.Os
 import androidx.documentfile.provider.DocumentFile
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import java.io.FileInputStream
-import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
 /**
@@ -39,7 +38,7 @@ class MainActivity : FlutterFragmentActivity() {
     private var pendingPick: MethodChannel.Result? = null
 
     /**
-     * Open descriptors for files being read in ranges, by URI.
+     * Open descriptors for files being read in ranges, by reader token.
      *
      * A map archive is gigabytes and is read a few kilobytes at a time,
      * once per tile. Reopening it for every read would be the difference
@@ -76,15 +75,15 @@ class MainActivity : FlutterFragmentActivity() {
         when (call.method) {
             "pick" -> pick(Intent.ACTION_OPEN_DOCUMENT_TREE, PICK_FOLDER_REQUEST, result)
             "pickFile" -> pick(Intent.ACTION_OPEN_DOCUMENT, PICK_FILE_REQUEST, result)
-            "openFile" -> result.success(openFile(call.argument("uri")!!))
+            "openFile" -> result.success(openFile(call.argument("uri")!!, call.argument("fileToken")))
             "readRange" -> readRange(
-                call.argument("uri")!!,
+                call.argument<String>("fileToken") ?: call.argument("uri")!!,
                 (call.argument<Number>("offset")!!).toLong(),
                 (call.argument<Number>("length")!!).toInt(),
                 result,
             )
             "closeFile" -> {
-                closeFile(call.argument("uri")!!)
+                closeFile(call.argument<String>("fileToken") ?: call.argument("uri")!!)
                 result.success(null)
             }
             "ensureWritable" -> result.success(ensureWritable(call.argument("uri")!!))
@@ -171,12 +170,13 @@ class MainActivity : FlutterFragmentActivity() {
 
     // --- Ranged reads, for the offline map archive ----------------------
 
-    private fun openFile(uri: String): Boolean {
-        closeFile(uri)
+    private fun openFile(uri: String, token: String? = null): Boolean {
+        val key = token ?: uri
+        closeFile(key)
         return runCatching {
             val descriptor = contentResolver.openFileDescriptor(Uri.parse(uri), "r")
                 ?: return false
-            openFiles[uri] = descriptor
+            openFiles[key] = descriptor
             true
         }.getOrDefault(false)
     }
@@ -195,18 +195,20 @@ class MainActivity : FlutterFragmentActivity() {
 
         fileReads.execute {
             val outcome = runCatching {
-                // A fresh stream per read: the descriptor is shared, and a
-                // position set on one channel is visible to the others.
-                FileInputStream(descriptor.fileDescriptor).channel.use { channel ->
-                    val buffer = ByteBuffer.allocate(length)
-                    var position = offset
-                    while (buffer.hasRemaining()) {
-                        val read = channel.read(buffer, position)
-                        if (read <= 0) break
-                        position += read
-                    }
-                    buffer.array().copyOf(buffer.position())
+                // A stream around this descriptor would close it after the
+                // first read. Positional reads keep its lifetime with the
+                // reader and do not change another request's file offset.
+                val buffer = ByteArray(length)
+                var received = 0
+                while (received < length) {
+                    val read = Os.pread(
+                        descriptor.fileDescriptor, buffer, received,
+                        length - received, offset + received,
+                    )
+                    if (read <= 0) break
+                    received += read
                 }
+                buffer.copyOf(received)
             }
             runOnUiThread {
                 outcome.fold(

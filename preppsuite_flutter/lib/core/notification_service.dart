@@ -9,6 +9,7 @@ import '../features/inventory/application/expiry_reminder_planner.dart';
 import '../features/inventory/application/device_charge.dart';
 import '../features/inventory/application/refill_reminder_planner.dart';
 import 'notification_capabilities.dart';
+import '../features/knowledge/application/document_deadline.dart';
 
 /// How insistently a warning may interrupt on iOS (#101).
 ///
@@ -162,6 +163,7 @@ class NotificationService {
   static const _expiryPayloadPrefix = 'expiry:';
   static const _refillPayloadPrefix = 'refill:';
   static const _deviceChargePayloadPrefix = 'charge-item:';
+  static const _documentPayloadPrefix = 'document-deadline:';
   static const _chargeReminderId = 90407;
   static const _warningDayId = 90408;
   static const _backupReminderId = 90409;
@@ -228,6 +230,48 @@ class NotificationService {
     final pending = await _plugin.pendingNotificationRequests();
     for (final request in pending) {
       if (request.payload?.startsWith(_expiryPayloadPrefix) ?? false) {
+        await _plugin.cancel(id: request.id);
+      }
+    }
+  }
+
+  Future<void> scheduleDocumentReminders(
+    List<DocumentReminder> reminders, {
+    required String title,
+    required String body,
+  }) async {
+    if (!supportsScheduledNotifications) return;
+    await _ensureInitialized();
+    await cancelDocumentReminders();
+    for (final reminder in reminders) {
+      await _plugin.zonedSchedule(
+        id: reminder.id,
+        title: title,
+        // A lock-screen notification must not disclose document names,
+        // deadlines or where somebody keeps the original.
+        body: body,
+        payload: '$_documentPayloadPrefix${reminder.documentId}',
+        scheduledDate: tz.TZDateTime.from(reminder.fireAt.toUtc(), tz.UTC),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        notificationDetails: NotificationDetails(
+          macOS: const DarwinNotificationDetails(),
+          iOS: const DarwinNotificationDetails(),
+          android: AndroidNotificationDetails(
+            'document-deadlines',
+            title,
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> cancelDocumentReminders() async {
+    if (!supportsScheduledNotifications) return;
+    await _ensureInitialized();
+    for (final request in await _plugin.pendingNotificationRequests()) {
+      if (request.payload?.startsWith(_documentPayloadPrefix) ?? false) {
         await _plugin.cancel(id: request.id);
       }
     }

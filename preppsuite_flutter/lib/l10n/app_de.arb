@@ -4237,5 +4237,129 @@
       }
     }
   },
-  "firstAidVideoPackInvalidImport": "Das Videopaket ist unvollständig, beschädigt oder überschreitet die zulässige Größe."
+  "firstAidVideoPackInvalidImport": "Das Videopaket ist unvollständig, beschädigt oder überschreitet die zulässige Größe.",
+  "documentDeadlineEdit": "Fristen und Original",
+  "documentValidUntil": "Gültig bis",
+  "documentRemindOn": "Erinnern am",
+  "documentReviewedOn": "Zuletzt geprüft",
+  "documentOriginalLocation": "Ablageort des Originals",
+  "documentDateUnset": "Nicht festgelegt",
+  "documentDateClear": "{field} entfernen",
+  "@documentDateClear": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "documentReviewedToday": "Heute geprüft",
+  "documentReminderAfterExpiry": "Die Erinnerung muss vor oder am Gültigkeitsende liegen.",
+  "documentReminderHint": "Mit aktivierten Benachrichtigungen wird um 9 Uhr erinnert. Auf dem Sperrbildschirm erscheint nur ein allgemeiner Hinweis.",
+  "documentReminderInAppOnly": "Auf dieser Plattform werden fällige Fristen in der App angezeigt.",
+  "documentDeadlineSave": "Speichern",
+  "documentDeadlineSaveFailed": "Die Frist konnte nicht gespeichert werden. Bitte erneut versuchen.",
+  "documentReminderTitle": "Dokumentenfrist",
+  "documentReminderBody": "Ein Dokument ist zur Prüfung vorgemerkt. Öffne deine Dokumentenverwaltung.",
+  "documentExpired": "Gültigkeit abgelaufen: {date}",
+  "@documentExpired": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "documentExpiresToday": "Gültigkeit endet heute",
+  "documentReminderDue": "Prüfung fällig",
+  "documentValidUntilValue": "Gültig bis: {date}",
+  "@documentValidUntilValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "documentRemindOnValue": "Erinnerung: {date}",
+  "@documentRemindOnValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "documentReviewedOnValue": "Zuletzt geprüft: {date}",
+  "@documentReviewedOnValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "documentOriginalLocationValue": "Original: {location}",
+  "@documentOriginalLocationValue": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "documentShowAll": "Alle Dokumente",
+  "documentDueCount": "Fällige Fristen: {count}",
+  "@documentDueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentActions": "Dokumentaktionen",
+  "offlineProbeTitle": "Offline-Probelauf",
+  "offlineProbeIntro": "Liest Stichproben aus gespeicherten Karten, Wissensarchiven, Dokumenten und Sprachpaketen. Bis zu 100 Inhalte, Dokumente bis 32 MB.",
+  "offlineProbeNetworkHint": "Die App fragt dabei keine Online-Dienste ab. Dateianbieter können jedoch Inhalte nachladen. Trenne für einen echten Offline-Probelauf vorher die Netzverbindung; die App ändert deine Netzwerkeinstellungen nicht.",
+  "offlineProbeNetworkDisconnected": "Ich habe die Netzverbindung für diesen Test getrennt.",
+  "offlineProbeStart": "Offline-Probelauf starten",
+  "offlineProbeReadTest": "Lesetest starten",
+  "offlineProbeRunning": "Inhalte werden nacheinander geprüft …",
+  "offlineProbeStopping": "Prüfung wird beendet …",
+  "offlineProbeStop": "Prüfung abbrechen",
+  "offlineProbeAt": "{mode} · {date}",
+  "@offlineProbeAt": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineProbeSummary": "{passed} lesbar · {failed} fehlgeschlagen · {unchecked} nicht geprüft",
+  "@offlineProbeSummary": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "unchecked": {
+        "type": "int"
+      }
+    }
+  },
+  "offlineProbeFailed": "Die Prüfung konnte nicht vollständig geladen werden. Bitte erneut versuchen.",
+  "offlineProbeReadable": "Stichprobe erfolgreich gelesen",
+  "offlineProbeMissing": "Kein Inhalt eingerichtet",
+  "offlineProbeUnsupported": "Auf diesem Gerät nicht prüfbar",
+  "offlineProbeUnreadable": "Nicht lesbar oder beschädigt; im jeweiligen Bereich prüfen.",
+  "offlineProbeLimit": "Prüfgrenze erreicht; Inhalt bitte direkt öffnen.",
+  "offlineProbeTimeout": "Zeitlimit erreicht; Inhalt bitte direkt öffnen.",
+  "offlineProbeCancelled": "Prüfung abgebrochen",
+  "offlineProbeNoSample": "Keine passende Stichprobe gefunden; Inhalt bitte direkt öffnen.",
+  "offlineProbeMap": "Offline-Karte",
+  "offlineProbeArchive": "Wissensarchiv",
+  "offlineProbeDocument": "Dokument",
+  "offlineProbeTranslation": "Sprachpaket",
+  "offlineProbeOther": "Weitere Inhalte",
+  "documentNoDeadlinesDue": "Zurzeit sind keine Dokumentenfristen fällig.",
+  "offlineProbeReadMode": "Lesetest"
 }

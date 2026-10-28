@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import '../../../core/private_preferences.dart';
@@ -5,6 +6,7 @@ import '../../../core/private_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/portable_paths.dart';
+import 'document_calendar.dart';
 
 const _documentsKey = 'knowledgePersonalDocuments';
 
@@ -19,12 +21,23 @@ class PersonalDocument {
     this.readerOffset = 0,
     this.sourceFingerprint,
     this.recognized = false,
+    this.validUntil,
+    this.remindOn,
+    this.reviewedOn,
+    this.originalLocation = '',
   });
 
   final String id;
   final String location;
   final String label;
   final DateTime addedAt;
+
+  /// Calendar dates, not instants: moving the backup to another time zone
+  /// must not move a document's deadline to the previous day.
+  final DateTime? validUntil;
+  final DateTime? remindOn;
+  final DateTime? reviewedOn;
+  final String originalLocation;
 
   /// `ready`, `noText`, `failed`, `tooLarge`, or `notIndexed`.
   final String indexStatus;
@@ -65,6 +78,10 @@ class PersonalDocument {
     'readerOffset': readerOffset,
     'sourceFingerprint': ?sourceFingerprint,
     if (recognized) 'recognized': true,
+    if (validUntil != null) 'validUntil': storeDocumentDate(validUntil!),
+    if (remindOn != null) 'remindOn': storeDocumentDate(remindOn!),
+    if (reviewedOn != null) 'reviewedOn': storeDocumentDate(reviewedOn!),
+    if (originalLocation.isNotEmpty) 'originalLocation': originalLocation,
   };
 
   static PersonalDocument? fromJson(Object? value) {
@@ -97,6 +114,12 @@ class PersonalDocument {
           ? value['sourceFingerprint'] as String
           : null,
       recognized: value['recognized'] == true,
+      validUntil: readDocumentDate(value['validUntil']),
+      remindOn: readDocumentDate(value['remindOn']),
+      reviewedOn: readDocumentDate(value['reviewedOn']),
+      originalLocation: value['originalLocation'] is String
+          ? value['originalLocation'] as String
+          : '',
     );
   }
 
@@ -107,9 +130,17 @@ class PersonalDocument {
     String? sourceFingerprint,
     bool clearFingerprint = false,
     bool? recognized,
+    String? location,
+    DateTime? validUntil,
+    DateTime? remindOn,
+    DateTime? reviewedOn,
+    bool clearValidUntil = false,
+    bool clearRemindOn = false,
+    bool clearReviewedOn = false,
+    String? originalLocation,
   }) => PersonalDocument(
     id: id,
-    location: location,
+    location: location ?? this.location,
     label: label,
     addedAt: addedAt,
     indexStatus: indexStatus ?? this.indexStatus,
@@ -119,13 +150,44 @@ class PersonalDocument {
         ? null
         : sourceFingerprint ?? this.sourceFingerprint,
     recognized: recognized ?? this.recognized,
+    validUntil: clearValidUntil ? null : validUntil ?? this.validUntil,
+    remindOn: clearRemindOn ? null : remindOn ?? this.remindOn,
+    reviewedOn: clearReviewedOn ? null : reviewedOn ?? this.reviewedOn,
+    originalLocation: originalLocation ?? this.originalLocation,
   );
 }
 
 class PersonalDocumentStore {
   const PersonalDocumentStore();
 
-  Future<List<PersonalDocument>> load() async {
+  static Future<void>? _pending;
+  static final _changes = StreamController<int>.broadcast();
+  static var _revision = 0;
+
+  static Stream<int> get changes => _changes.stream;
+
+  /// Indexing, reading position and the deadline editor can write at once.
+  /// Serialize their read/modify/write cycles so none restores an old copy
+  /// of another field. A failed write must not poison later operations.
+  Future<T> _mutate<T>(Future<T> Function() action) {
+    final result = _pending?.then((_) => action()) ?? action();
+    final queued = result.then<void>(
+      (_) => _changes.add(++_revision),
+      onError: (Object _, StackTrace _) {},
+    );
+    _pending = queued;
+    unawaited(
+      queued.then((_) {
+        if (identical(_pending, queued)) _pending = null;
+      }),
+    );
+    return result;
+  }
+
+  Future<List<PersonalDocument>> load() =>
+      _pending?.then((_) => _read()) ?? _read();
+
+  Future<List<PersonalDocument>> _read() async {
     final raw = await const PrivatePreferences().getString(_documentsKey);
     if (raw == null) return const [];
     try {
@@ -142,8 +204,8 @@ class PersonalDocumentStore {
   Future<List<PersonalDocument>> add({
     required String location,
     required String label,
-  }) async {
-    final documents = await load();
+  }) => _mutate(() async {
+    final documents = await _read();
     if (documents.any((document) => document.location == location)) {
       return documents;
     }
@@ -158,7 +220,7 @@ class PersonalDocumentStore {
     ];
     await _save(updated);
     return updated;
-  }
+  });
 
   /// Adds several at once, in one read and one write.
   ///
@@ -170,8 +232,8 @@ class PersonalDocumentStore {
   /// there.
   Future<({List<PersonalDocument> all, List<PersonalDocument> added})> addAll(
     List<({String location, String label})> entries,
-  ) async {
-    final documents = await load();
+  ) => _mutate(() async {
+    final documents = await _read();
     final known = {for (final document in documents) document.location};
     final added = <PersonalDocument>[];
     for (final entry in entries) {
@@ -191,16 +253,16 @@ class PersonalDocumentStore {
     final updated = [...documents, ...added];
     await _save(updated);
     return (all: updated, added: added);
-  }
+  });
 
-  Future<List<PersonalDocument>> remove(String id) async {
+  Future<List<PersonalDocument>> remove(String id) => _mutate(() async {
     final updated = [
-      for (final item in await load())
+      for (final item in await _read())
         if (item.id != id) item,
     ];
     await _save(updated);
     return updated;
-  }
+  });
 
   /// [fingerprint] is the file as it was read for this index, and is
   /// written whenever it is given; a status without one (`indexing`)
@@ -214,9 +276,9 @@ class PersonalDocumentStore {
     /// Whether the text was recognised from page images (#66). Every
     /// other index run is the file's own text, so it clears the mark.
     bool recognized = false,
-  }) async {
+  }) => _mutate(() async {
     final updated = [
-      for (final item in await load())
+      for (final item in await _read())
         if (item.id == id)
           item.copyWith(
             indexStatus: status,
@@ -229,11 +291,11 @@ class PersonalDocumentStore {
     ];
     await _save(updated);
     return updated;
-  }
+  });
 
-  Future<List<PersonalDocument>> clearIndex() async {
+  Future<List<PersonalDocument>> clearIndex() => _mutate(() async {
     final updated = [
-      for (final item in await load())
+      for (final item in await _read())
         item.copyWith(
           indexStatus: 'notIndexed',
           indexedCharacters: 0,
@@ -242,40 +304,67 @@ class PersonalDocumentStore {
     ];
     await _save(updated);
     return updated;
-  }
+  });
 
   /// Points document [id] at [location], keeping everything else about
   /// it -- its index, its reading position. For a file that is still
   /// there but could no longer be reached by the old handle.
-  Future<void> relocate(String id, String location) async {
+  Future<void> relocate(String id, String location) => _mutate(() async {
     final updated = [
-      for (final item in await load())
+      for (final item in await _read())
+        if (item.id == id) item.copyWith(location: location) else item,
+    ];
+    await _save(updated);
+  });
+
+  Future<void> updateReaderOffset(String id, double offset) =>
+      _mutate(() async {
+        final updated = [
+          for (final item in await _read())
+            if (item.id == id) item.copyWith(readerOffset: offset) else item,
+        ];
+        await _save(updated);
+      });
+
+  Future<List<PersonalDocument>> updateDeadline(
+    String id, {
+    required DateTime? validUntil,
+    required DateTime? remindOn,
+    required DateTime? reviewedOn,
+    required String originalLocation,
+  }) => _mutate(() async {
+    final updated = [
+      for (final item in await _read())
         if (item.id == id)
-          PersonalDocument(
-            id: item.id,
-            location: location,
-            label: item.label,
-            addedAt: item.addedAt,
-            indexStatus: item.indexStatus,
-            indexedCharacters: item.indexedCharacters,
-            readerOffset: item.readerOffset,
-            sourceFingerprint: item.sourceFingerprint,
-            // Or a relinked scan would lose the note that its text was
-            // recognised, and could have gaps (#66).
-            recognized: item.recognized,
+          item.copyWith(
+            validUntil: validUntil,
+            clearValidUntil: validUntil == null,
+            remindOn: remindOn,
+            clearRemindOn: remindOn == null,
+            reviewedOn: reviewedOn,
+            clearReviewedOn: reviewedOn == null,
+            originalLocation: originalLocation.trim(),
           )
         else
           item,
     ];
     await _save(updated);
-  }
+    return updated;
+  });
 
-  Future<void> updateReaderOffset(String id, double offset) async {
-    final updated = [
-      for (final item in await load())
-        if (item.id == id) item.copyWith(readerOffset: offset) else item,
-    ];
-    await _save(updated);
+  /// Old backups have no metadata and leave a current document's dates alone.
+  /// Only these four fields may come back from the encrypted file manifest.
+  Future<void> restoreDeadline(PersonalDocument document, Object? raw) async {
+    if (raw is! Map) return;
+    await updateDeadline(
+      document.id,
+      validUntil: readDocumentDate(raw['validUntil']),
+      remindOn: readDocumentDate(raw['remindOn']),
+      reviewedOn: readDocumentDate(raw['reviewedOn']),
+      originalLocation: raw['originalLocation'] is String
+          ? raw['originalLocation'] as String
+          : '',
+    );
   }
 
   Future<void> _save(List<PersonalDocument> documents) async {

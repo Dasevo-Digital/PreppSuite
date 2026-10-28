@@ -19,6 +19,8 @@ import '../../settings/application/backup_reminder.dart';
 import '../../settings/presentation/backup_card.dart' show backupAge;
 import '../../household/application/card_species.dart';
 import '../../../core/adaptive_columns.dart';
+import '../application/offline_probe.dart';
+import 'offline_probe_card.dart';
 
 final _warningPollStatusProvider = FutureProvider(
   (ref) => const WarningPollStatusStore().load(),
@@ -36,9 +38,14 @@ final _personalPlacesProvider = FutureProvider(
 /// use. It does not test the internet; the warning timestamp is the evidence
 /// of the last successful complete refresh.
 class ReadinessScreen extends ConsumerWidget {
-  const ReadinessScreen({super.key, required this.profile});
+  const ReadinessScreen({
+    super.key,
+    required this.profile,
+    this.probe = const OfflineProbe(),
+  });
 
   final HouseholdProfile profile;
+  final OfflineProbe probe;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -224,6 +231,7 @@ class ReadinessScreen extends ConsumerWidget {
               ),
             ],
           ),
+          OfflineProbeCard(probe: probe),
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

@@ -9972,4 +9972,193 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get firstAidVideoPackInvalidImport =>
       'The video pack is incomplete, damaged or exceeds the allowed size.';
+
+  @override
+  String get documentDeadlineEdit => 'Dates and original';
+
+  @override
+  String get documentValidUntil => 'Valid until';
+
+  @override
+  String get documentRemindOn => 'Remind on';
+
+  @override
+  String get documentReviewedOn => 'Last reviewed';
+
+  @override
+  String get documentOriginalLocation => 'Where the original is kept';
+
+  @override
+  String get documentDateUnset => 'Not set';
+
+  @override
+  String documentDateClear(String field) {
+    return 'Clear $field';
+  }
+
+  @override
+  String get documentReviewedToday => 'Reviewed today';
+
+  @override
+  String get documentReminderAfterExpiry =>
+      'The reminder must be on or before the expiry date.';
+
+  @override
+  String get documentReminderHint =>
+      'When notifications are enabled, a reminder is scheduled for 9 am. Only a general message appears on the lock screen.';
+
+  @override
+  String get documentReminderInAppOnly =>
+      'On this platform, due dates are shown in the app.';
+
+  @override
+  String get documentDeadlineSave => 'Save';
+
+  @override
+  String get documentDeadlineSaveFailed =>
+      'The dates could not be saved. Please try again.';
+
+  @override
+  String get documentReminderTitle => 'Document reminder';
+
+  @override
+  String get documentReminderBody =>
+      'A document is due for review. Open your documents.';
+
+  @override
+  String documentExpired(String date) {
+    return 'Expired: $date';
+  }
+
+  @override
+  String get documentExpiresToday => 'Expires today';
+
+  @override
+  String get documentReminderDue => 'Review due';
+
+  @override
+  String documentValidUntilValue(String date) {
+    return 'Valid until: $date';
+  }
+
+  @override
+  String documentRemindOnValue(String date) {
+    return 'Reminder: $date';
+  }
+
+  @override
+  String documentReviewedOnValue(String date) {
+    return 'Last reviewed: $date';
+  }
+
+  @override
+  String documentOriginalLocationValue(String location) {
+    return 'Original: $location';
+  }
+
+  @override
+  String get documentShowAll => 'All documents';
+
+  @override
+  String documentDueCount(int count) {
+    return 'Due dates: $count';
+  }
+
+  @override
+  String get documentActions => 'Document actions';
+
+  @override
+  String get offlineProbeTitle => 'Offline trial';
+
+  @override
+  String get offlineProbeIntro =>
+      'Reads samples from saved maps, knowledge archives, documents and language packs. Up to 100 items, documents up to 32 MB.';
+
+  @override
+  String get offlineProbeNetworkHint =>
+      'The app does not contact online services during this check. File providers may still fetch content. Disconnect the network first for a true offline trial; the app does not change your network settings.';
+
+  @override
+  String get offlineProbeNetworkDisconnected =>
+      'I have disconnected the network for this test.';
+
+  @override
+  String get offlineProbeStart => 'Start offline trial';
+
+  @override
+  String get offlineProbeReadTest => 'Start read test';
+
+  @override
+  String get offlineProbeRunning =>
+      'Checking saved content one item at a time…';
+
+  @override
+  String get offlineProbeStopping => 'Stopping the check…';
+
+  @override
+  String get offlineProbeStop => 'Stop check';
+
+  @override
+  String offlineProbeAt(String mode, String date) {
+    return '$mode · $date';
+  }
+
+  @override
+  String offlineProbeSummary(int passed, int failed, int unchecked) {
+    return '$passed readable · $failed failed · $unchecked not checked';
+  }
+
+  @override
+  String get offlineProbeFailed =>
+      'The check could not be loaded completely. Please try again.';
+
+  @override
+  String get offlineProbeReadable => 'Sample read successfully';
+
+  @override
+  String get offlineProbeMissing => 'No content configured';
+
+  @override
+  String get offlineProbeUnsupported => 'Cannot be checked on this device';
+
+  @override
+  String get offlineProbeUnreadable =>
+      'Unreadable or damaged; check it in its section.';
+
+  @override
+  String get offlineProbeLimit =>
+      'Check limit reached; open the content directly.';
+
+  @override
+  String get offlineProbeTimeout =>
+      'Time limit reached; open the content directly.';
+
+  @override
+  String get offlineProbeCancelled => 'Check cancelled';
+
+  @override
+  String get offlineProbeNoSample =>
+      'No suitable sample found; open the content directly.';
+
+  @override
+  String get offlineProbeMap => 'Offline map';
+
+  @override
+  String get offlineProbeArchive => 'Knowledge archive';
+
+  @override
+  String get offlineProbeDocument => 'Document';
+
+  @override
+  String get offlineProbeTranslation => 'Language pack';
+
+  @override
+  String get offlineProbeOther => 'Further content';
+
+  @override
+  String get documentNoDeadlinesDue =>
+      'No document deadlines are currently due.';
+
+  @override
+  String get offlineProbeReadMode => 'Read test';
 }

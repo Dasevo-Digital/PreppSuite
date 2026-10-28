@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/platform_storage.dart';
 import '../../downloads/application/download_folder.dart';
@@ -78,13 +79,18 @@ Future<ByteRangeSource> openMapArchive(String location) async {
 /// tile, off the main thread. On iOS the security scope is held open
 /// alongside that descriptor, because it is what the descriptor hangs on.
 class NativeByteRangeSource implements ByteRangeSource {
-  NativeByteRangeSource._(this.uri);
+  NativeByteRangeSource._(this.uri, this._fileToken);
 
   final String uri;
+  final String _fileToken;
 
   static Future<NativeByteRangeSource> open(String uri) async {
+    // Two readers of the same URI own separate descriptors. In particular,
+    // closing a readiness probe must not close the map already on screen.
+    final token = const Uuid().v4();
     final opened = await nativeStorageChannel.invokeMethod<bool>('openFile', {
       'uri': uri,
+      'fileToken': token,
     });
     if (opened != true) {
       // The usual cause is a permission that did not survive: a
@@ -92,20 +98,22 @@ class NativeByteRangeSource implements ByteRangeSource {
       // bookmark whose file has been moved out from under it.
       throw const PmTilesException('cannot open the archive');
     }
-    return NativeByteRangeSource._(uri);
+    return NativeByteRangeSource._(uri, token);
   }
 
   @override
   Future<Uint8List> read(int offset, int length) async {
     final bytes = await nativeStorageChannel.invokeMethod<Uint8List>(
       'readRange',
-      {'uri': uri, 'offset': offset, 'length': length},
+      {'uri': uri, 'fileToken': _fileToken, 'offset': offset, 'length': length},
     );
     if (bytes == null) throw const PmTilesException('read returned nothing');
     return bytes;
   }
 
   @override
-  Future<void> close() =>
-      nativeStorageChannel.invokeMethod<void>('closeFile', {'uri': uri});
+  Future<void> close() => nativeStorageChannel.invokeMethod<void>('closeFile', {
+    'uri': uri,
+    'fileToken': _fileToken,
+  });
 }

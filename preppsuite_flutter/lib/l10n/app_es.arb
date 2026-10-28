@@ -2722,5 +2722,129 @@
   "translatorPhotoNeedsTesseractLanguage": "En Linux la app lee las fotos con Tesseract, al que aquí le faltan los datos de {language}. En Debian y Ubuntu: sudo apt install {package}",
   "translatorOcrDataTitle": "Reconocimiento de texto para fotos",
   "translatorOcrDataSummary": "{languages} · {size}",
-  "firstAidVideoPackInvalidImport": "El paquete de vídeos está incompleto, dañado o supera el tamaño permitido."
+  "firstAidVideoPackInvalidImport": "El paquete de vídeos está incompleto, dañado o supera el tamaño permitido.",
+  "documentDeadlineEdit": "Fechas y original",
+  "documentValidUntil": "Válido hasta",
+  "documentRemindOn": "Recordar el",
+  "documentReviewedOn": "Última revisión",
+  "documentOriginalLocation": "Ubicación del original",
+  "documentDateUnset": "Sin establecer",
+  "documentDateClear": "Borrar {field}",
+  "@documentDateClear": {
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "documentReviewedToday": "Revisado hoy",
+  "documentReminderAfterExpiry": "El recordatorio debe ser anterior o igual a la fecha de vencimiento.",
+  "documentReminderHint": "Con las notificaciones activadas, se programa un recordatorio a las 9. En la pantalla de bloqueo solo aparece un aviso general.",
+  "documentReminderInAppOnly": "En esta plataforma, las fechas pendientes se muestran en la aplicación.",
+  "documentDeadlineSave": "Guardar",
+  "documentDeadlineSaveFailed": "No se han podido guardar las fechas. Inténtalo de nuevo.",
+  "documentReminderTitle": "Recordatorio de documento",
+  "documentReminderBody": "Hay un documento pendiente de revisión. Abre tus documentos.",
+  "documentExpired": "Venció el {date}",
+  "@documentExpired": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "documentExpiresToday": "Vence hoy",
+  "documentReminderDue": "Revisión pendiente",
+  "documentValidUntilValue": "Válido hasta: {date}",
+  "@documentValidUntilValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "documentRemindOnValue": "Recordatorio: {date}",
+  "@documentRemindOnValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "documentReviewedOnValue": "Última revisión: {date}",
+  "@documentReviewedOnValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "documentOriginalLocationValue": "Original: {location}",
+  "@documentOriginalLocationValue": {
+    "placeholders": {
+      "location": {
+        "type": "String"
+      }
+    }
+  },
+  "documentShowAll": "Todos los documentos",
+  "documentDueCount": "Fechas pendientes: {count}",
+  "@documentDueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentActions": "Acciones del documento",
+  "offlineProbeTitle": "Prueba sin conexión",
+  "offlineProbeIntro": "Lee muestras de mapas, archivos de conocimiento, documentos y paquetes de idiomas guardados. Hasta 100 elementos y documentos de hasta 32 MB.",
+  "offlineProbeNetworkHint": "La aplicación no consulta servicios en línea durante la prueba. Los proveedores de archivos pueden descargar contenido. Desconecta primero la red para una prueba sin conexión; la aplicación no cambia tus ajustes de red.",
+  "offlineProbeNetworkDisconnected": "He desconectado la red para esta prueba.",
+  "offlineProbeStart": "Iniciar prueba sin conexión",
+  "offlineProbeReadTest": "Iniciar prueba de lectura",
+  "offlineProbeRunning": "Se comprueban los contenidos uno por uno…",
+  "offlineProbeStopping": "Terminando la prueba…",
+  "offlineProbeStop": "Detener prueba",
+  "offlineProbeAt": "{mode} · {date}",
+  "@offlineProbeAt": {
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "offlineProbeSummary": "{passed} legibles · {failed} fallidos · {unchecked} sin comprobar",
+  "@offlineProbeSummary": {
+    "placeholders": {
+      "passed": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "unchecked": {
+        "type": "int"
+      }
+    }
+  },
+  "offlineProbeFailed": "No se ha podido cargar toda la prueba. Inténtalo de nuevo.",
+  "offlineProbeReadable": "Muestra leída correctamente",
+  "offlineProbeMissing": "Sin contenido configurado",
+  "offlineProbeUnsupported": "No se puede comprobar en este dispositivo",
+  "offlineProbeUnreadable": "No se puede leer o está dañado; compruébalo en su sección.",
+  "offlineProbeLimit": "Se ha alcanzado el límite de la prueba; abre el contenido directamente.",
+  "offlineProbeTimeout": "Se ha alcanzado el tiempo límite; abre el contenido directamente.",
+  "offlineProbeCancelled": "Prueba cancelada",
+  "offlineProbeNoSample": "No se ha encontrado una muestra adecuada; abre el contenido directamente.",
+  "offlineProbeMap": "Mapa sin conexión",
+  "offlineProbeArchive": "Archivo de conocimiento",
+  "offlineProbeDocument": "Documento",
+  "offlineProbeTranslation": "Paquete de idioma",
+  "offlineProbeOther": "Más contenido",
+  "documentNoDeadlinesDue": "No hay plazos de documentos pendientes.",
+  "offlineProbeReadMode": "Prueba de lectura"
 }

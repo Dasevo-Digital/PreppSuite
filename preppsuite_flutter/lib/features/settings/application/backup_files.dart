@@ -172,6 +172,16 @@ Future<List<BackupCandidate>> collectBackupFiles(
       {
         'addedAt': document.addedAt.toUtc().toIso8601String(),
         'indexed': document.isSearchable,
+        if (document.validUntil != null ||
+            document.remindOn != null ||
+            document.reviewedOn != null ||
+            document.originalLocation.isNotEmpty)
+          'documentDeadline': {
+            'validUntil': document.toJson()['validUntil'],
+            'remindOn': document.toJson()['remindOn'],
+            'reviewedOn': document.toJson()['reviewedOn'],
+            'originalLocation': document.originalLocation,
+          },
       },
       () => openMapArchive(document.location),
     );

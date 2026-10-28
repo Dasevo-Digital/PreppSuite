@@ -10057,4 +10057,193 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get firstAidVideoPackInvalidImport =>
       'El paquete de vídeos está incompleto, dañado o supera el tamaño permitido.';
+
+  @override
+  String get documentDeadlineEdit => 'Fechas y original';
+
+  @override
+  String get documentValidUntil => 'Válido hasta';
+
+  @override
+  String get documentRemindOn => 'Recordar el';
+
+  @override
+  String get documentReviewedOn => 'Última revisión';
+
+  @override
+  String get documentOriginalLocation => 'Ubicación del original';
+
+  @override
+  String get documentDateUnset => 'Sin establecer';
+
+  @override
+  String documentDateClear(String field) {
+    return 'Borrar $field';
+  }
+
+  @override
+  String get documentReviewedToday => 'Revisado hoy';
+
+  @override
+  String get documentReminderAfterExpiry =>
+      'El recordatorio debe ser anterior o igual a la fecha de vencimiento.';
+
+  @override
+  String get documentReminderHint =>
+      'Con las notificaciones activadas, se programa un recordatorio a las 9. En la pantalla de bloqueo solo aparece un aviso general.';
+
+  @override
+  String get documentReminderInAppOnly =>
+      'En esta plataforma, las fechas pendientes se muestran en la aplicación.';
+
+  @override
+  String get documentDeadlineSave => 'Guardar';
+
+  @override
+  String get documentDeadlineSaveFailed =>
+      'No se han podido guardar las fechas. Inténtalo de nuevo.';
+
+  @override
+  String get documentReminderTitle => 'Recordatorio de documento';
+
+  @override
+  String get documentReminderBody =>
+      'Hay un documento pendiente de revisión. Abre tus documentos.';
+
+  @override
+  String documentExpired(String date) {
+    return 'Venció el $date';
+  }
+
+  @override
+  String get documentExpiresToday => 'Vence hoy';
+
+  @override
+  String get documentReminderDue => 'Revisión pendiente';
+
+  @override
+  String documentValidUntilValue(String date) {
+    return 'Válido hasta: $date';
+  }
+
+  @override
+  String documentRemindOnValue(String date) {
+    return 'Recordatorio: $date';
+  }
+
+  @override
+  String documentReviewedOnValue(String date) {
+    return 'Última revisión: $date';
+  }
+
+  @override
+  String documentOriginalLocationValue(String location) {
+    return 'Original: $location';
+  }
+
+  @override
+  String get documentShowAll => 'Todos los documentos';
+
+  @override
+  String documentDueCount(int count) {
+    return 'Fechas pendientes: $count';
+  }
+
+  @override
+  String get documentActions => 'Acciones del documento';
+
+  @override
+  String get offlineProbeTitle => 'Prueba sin conexión';
+
+  @override
+  String get offlineProbeIntro =>
+      'Lee muestras de mapas, archivos de conocimiento, documentos y paquetes de idiomas guardados. Hasta 100 elementos y documentos de hasta 32 MB.';
+
+  @override
+  String get offlineProbeNetworkHint =>
+      'La aplicación no consulta servicios en línea durante la prueba. Los proveedores de archivos pueden descargar contenido. Desconecta primero la red para una prueba sin conexión; la aplicación no cambia tus ajustes de red.';
+
+  @override
+  String get offlineProbeNetworkDisconnected =>
+      'He desconectado la red para esta prueba.';
+
+  @override
+  String get offlineProbeStart => 'Iniciar prueba sin conexión';
+
+  @override
+  String get offlineProbeReadTest => 'Iniciar prueba de lectura';
+
+  @override
+  String get offlineProbeRunning => 'Se comprueban los contenidos uno por uno…';
+
+  @override
+  String get offlineProbeStopping => 'Terminando la prueba…';
+
+  @override
+  String get offlineProbeStop => 'Detener prueba';
+
+  @override
+  String offlineProbeAt(String mode, String date) {
+    return '$mode · $date';
+  }
+
+  @override
+  String offlineProbeSummary(int passed, int failed, int unchecked) {
+    return '$passed legibles · $failed fallidos · $unchecked sin comprobar';
+  }
+
+  @override
+  String get offlineProbeFailed =>
+      'No se ha podido cargar toda la prueba. Inténtalo de nuevo.';
+
+  @override
+  String get offlineProbeReadable => 'Muestra leída correctamente';
+
+  @override
+  String get offlineProbeMissing => 'Sin contenido configurado';
+
+  @override
+  String get offlineProbeUnsupported =>
+      'No se puede comprobar en este dispositivo';
+
+  @override
+  String get offlineProbeUnreadable =>
+      'No se puede leer o está dañado; compruébalo en su sección.';
+
+  @override
+  String get offlineProbeLimit =>
+      'Se ha alcanzado el límite de la prueba; abre el contenido directamente.';
+
+  @override
+  String get offlineProbeTimeout =>
+      'Se ha alcanzado el tiempo límite; abre el contenido directamente.';
+
+  @override
+  String get offlineProbeCancelled => 'Prueba cancelada';
+
+  @override
+  String get offlineProbeNoSample =>
+      'No se ha encontrado una muestra adecuada; abre el contenido directamente.';
+
+  @override
+  String get offlineProbeMap => 'Mapa sin conexión';
+
+  @override
+  String get offlineProbeArchive => 'Archivo de conocimiento';
+
+  @override
+  String get offlineProbeDocument => 'Documento';
+
+  @override
+  String get offlineProbeTranslation => 'Paquete de idioma';
+
+  @override
+  String get offlineProbeOther => 'Más contenido';
+
+  @override
+  String get documentNoDeadlinesDue =>
+      'No hay plazos de documentos pendientes.';
+
+  @override
+  String get offlineProbeReadMode => 'Prueba de lectura';
 }

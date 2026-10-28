@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:preppsuite_flutter/core/platform_storage.dart';
+import 'package:preppsuite_flutter/features/maps/application/map_archive_access.dart';
 
 /// Checks that something is actually answering on the storage channel.
 ///
@@ -21,6 +26,59 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('the native storage bridge', () {
+    testWidgets(
+      'Android ranged readers survive repeated reads and another close',
+      (
+        tester,
+      ) async {
+        await tester.runAsync(() async {
+          // Use the app's existing share provider to obtain a real content URI
+          // without a picker or any permission outside this test's cache file.
+          final cache = await getTemporaryDirectory();
+          final folder = await Directory('${cache.path}/share_plus').create();
+          final name = 'reader-${DateTime.now().microsecondsSinceEpoch}.bin';
+          final file = File('${folder.path}/$name')
+            ..writeAsBytesSync([10, 20, 30, 40]);
+          addTearDown(file.delete);
+          final package = (await PackageInfo.fromPlatform()).packageName;
+          final uri = 'content://$package.flutter.share_provider/cache/$name';
+          final first = await NativeByteRangeSource.open(uri);
+          final second = await NativeByteRangeSource.open(uri);
+          addTearDown(first.close);
+          addTearDown(second.close);
+          expect(await first.read(0, 2), [10, 20]);
+          expect(await first.read(2, 2), [30, 40]);
+          await first.close();
+          expect(await second.read(1, 2), [20, 30]);
+          expect(await second.read(0, 4), [10, 20, 30, 40]);
+        });
+      },
+      skip: !Platform.isAndroid,
+    );
+
+    testWidgets('an invalid leased reader is rejected and closes harmlessly', (
+      tester,
+    ) async {
+      const arguments = {
+        'uri': 'bookmark://00000000-0000-0000-0000-000000000000',
+        'fileToken': 'unavailable-reader',
+      };
+      expect(
+        await nativeStorageChannel.invokeMethod<bool>('openFile', arguments),
+        isFalse,
+      );
+      await nativeStorageChannel.invokeMethod<void>('closeFile', arguments);
+      await expectLater(
+        nativeStorageChannel.invokeMethod<Object>('readRange', {
+          ...arguments,
+          'offset': 0,
+          'length': 1,
+        }),
+        throwsA(
+          isA<PlatformException>().having((e) => e.code, 'code', 'not-open'),
+        ),
+      );
+    });
     testWidgets('a write through a dead handle reports failure', (
       tester,
     ) async {

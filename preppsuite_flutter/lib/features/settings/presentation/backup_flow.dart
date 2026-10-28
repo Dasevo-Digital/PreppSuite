@@ -606,11 +606,15 @@ Future<BackupFilesRestored?> restoreBackupFilesWithProgress(
         location: location,
         label: label,
       );
+      final document = documents.firstWhere((d) => d.location == location);
+      await const PersonalDocumentStore().restoreDeadline(
+        document,
+        entry.meta['documentDeadline'],
+      );
       // Indexed again where it was indexed before, so a search finds it
       // as it did. The index itself is not in the backup: it is derived
       // from the file and sealed with this device's key.
       if (entry.meta['indexed'] != true) return;
-      final document = documents.firstWhere((d) => d.location == location);
       final fingerprint = await documentFingerprint(location);
       final result = await PersonalDocumentIndexer().index(document);
       await const PersonalDocumentStore().updateIndex(

@@ -101,16 +101,17 @@ final class StorageBridge: NSObject {
     case "remember":
       remember(path: arguments["path"] as? String ?? "", result)
     case "openFile":
-      result(openFile(arguments["uri"] as? String ?? ""))
+      result(openFile(arguments["uri"] as? String ?? "",
+        token: arguments["fileToken"] as? String))
     case "readRange":
       readRange(
-        arguments["uri"] as? String ?? "",
+        arguments["fileToken"] as? String ?? arguments["uri"] as? String ?? "",
         offset: (arguments["offset"] as? NSNumber)?.uint64Value ?? 0,
         length: (arguments["length"] as? NSNumber)?.intValue ?? 0,
         result
       )
     case "closeFile":
-      closeFile(arguments["uri"] as? String ?? "")
+      closeFile(arguments["fileToken"] as? String ?? arguments["uri"] as? String ?? "")
       result(nil)
     case "ensureWritable":
       result(ensureWritable(arguments["uri"] as? String ?? ""))
@@ -366,8 +367,9 @@ final class StorageBridge: NSObject {
 
   // MARK: - Ranged reads, for the map and encyclopedia archives
 
-  private func openFile(_ uri: String) -> Bool {
-    closeFile(uri)
+  private func openFile(_ uri: String, token: String? = nil) -> Bool {
+    let key = token ?? uri
+    closeFile(key)
 
     guard let url = resolve(uri) else { return false }
     let scoped = url.startAccessingSecurityScopedResource()
@@ -377,7 +379,7 @@ final class StorageBridge: NSObject {
     }
     // The scope stays open until closeFile: it is what the descriptor
     // hangs on, and reacquiring it per read would cost more than the read.
-    openFiles[uri] = OpenFile(url: url, handle: handle, scoped: scoped)
+    openFiles[key] = OpenFile(url: url, handle: handle, scoped: scoped)
     return true
   }
 

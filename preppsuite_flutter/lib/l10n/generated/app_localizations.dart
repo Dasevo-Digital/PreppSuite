@@ -16452,6 +16452,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The video pack is incomplete, damaged or exceeds the allowed size.'**
   String get firstAidVideoPackInvalidImport;
+
+  /// No description provided for @documentDeadlineEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Dates and original'**
+  String get documentDeadlineEdit;
+
+  /// No description provided for @documentValidUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until'**
+  String get documentValidUntil;
+
+  /// No description provided for @documentRemindOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind on'**
+  String get documentRemindOn;
+
+  /// No description provided for @documentReviewedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Last reviewed'**
+  String get documentReviewedOn;
+
+  /// No description provided for @documentOriginalLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the original is kept'**
+  String get documentOriginalLocation;
+
+  /// No description provided for @documentDateUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get documentDateUnset;
+
+  /// No description provided for @documentDateClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear {field}'**
+  String documentDateClear(String field);
+
+  /// No description provided for @documentReviewedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed today'**
+  String get documentReviewedToday;
+
+  /// No description provided for @documentReminderAfterExpiry.
+  ///
+  /// In en, this message translates to:
+  /// **'The reminder must be on or before the expiry date.'**
+  String get documentReminderAfterExpiry;
+
+  /// No description provided for @documentReminderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When notifications are enabled, a reminder is scheduled for 9 am. Only a general message appears on the lock screen.'**
+  String get documentReminderHint;
+
+  /// No description provided for @documentReminderInAppOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'On this platform, due dates are shown in the app.'**
+  String get documentReminderInAppOnly;
+
+  /// No description provided for @documentDeadlineSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get documentDeadlineSave;
+
+  /// No description provided for @documentDeadlineSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The dates could not be saved. Please try again.'**
+  String get documentDeadlineSaveFailed;
+
+  /// No description provided for @documentReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Document reminder'**
+  String get documentReminderTitle;
+
+  /// No description provided for @documentReminderBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A document is due for review. Open your documents.'**
+  String get documentReminderBody;
+
+  /// No description provided for @documentExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired: {date}'**
+  String documentExpired(String date);
+
+  /// No description provided for @documentExpiresToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Expires today'**
+  String get documentExpiresToday;
+
+  /// No description provided for @documentReminderDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Review due'**
+  String get documentReminderDue;
+
+  /// No description provided for @documentValidUntilValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Valid until: {date}'**
+  String documentValidUntilValue(String date);
+
+  /// No description provided for @documentRemindOnValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder: {date}'**
+  String documentRemindOnValue(String date);
+
+  /// No description provided for @documentReviewedOnValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Last reviewed: {date}'**
+  String documentReviewedOnValue(String date);
+
+  /// No description provided for @documentOriginalLocationValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Original: {location}'**
+  String documentOriginalLocationValue(String location);
+
+  /// No description provided for @documentShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All documents'**
+  String get documentShowAll;
+
+  /// No description provided for @documentDueCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Due dates: {count}'**
+  String documentDueCount(int count);
+
+  /// No description provided for @documentActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Document actions'**
+  String get documentActions;
+
+  /// No description provided for @offlineProbeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline trial'**
+  String get offlineProbeTitle;
+
+  /// No description provided for @offlineProbeIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Reads samples from saved maps, knowledge archives, documents and language packs. Up to 100 items, documents up to 32 MB.'**
+  String get offlineProbeIntro;
+
+  /// No description provided for @offlineProbeNetworkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The app does not contact online services during this check. File providers may still fetch content. Disconnect the network first for a true offline trial; the app does not change your network settings.'**
+  String get offlineProbeNetworkHint;
+
+  /// No description provided for @offlineProbeNetworkDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'I have disconnected the network for this test.'**
+  String get offlineProbeNetworkDisconnected;
+
+  /// No description provided for @offlineProbeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start offline trial'**
+  String get offlineProbeStart;
+
+  /// No description provided for @offlineProbeReadTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Start read test'**
+  String get offlineProbeReadTest;
+
+  /// No description provided for @offlineProbeRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking saved content one item at a time…'**
+  String get offlineProbeRunning;
+
+  /// No description provided for @offlineProbeStopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Stopping the check…'**
+  String get offlineProbeStopping;
+
+  /// No description provided for @offlineProbeStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop check'**
+  String get offlineProbeStop;
+
+  /// No description provided for @offlineProbeAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{mode} · {date}'**
+  String offlineProbeAt(String mode, String date);
+
+  /// No description provided for @offlineProbeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{passed} readable · {failed} failed · {unchecked} not checked'**
+  String offlineProbeSummary(int passed, int failed, int unchecked);
+
+  /// No description provided for @offlineProbeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The check could not be loaded completely. Please try again.'**
+  String get offlineProbeFailed;
+
+  /// No description provided for @offlineProbeReadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample read successfully'**
+  String get offlineProbeReadable;
+
+  /// No description provided for @offlineProbeMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'No content configured'**
+  String get offlineProbeMissing;
+
+  /// No description provided for @offlineProbeUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot be checked on this device'**
+  String get offlineProbeUnsupported;
+
+  /// No description provided for @offlineProbeUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unreadable or damaged; check it in its section.'**
+  String get offlineProbeUnreadable;
+
+  /// No description provided for @offlineProbeLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Check limit reached; open the content directly.'**
+  String get offlineProbeLimit;
+
+  /// No description provided for @offlineProbeTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Time limit reached; open the content directly.'**
+  String get offlineProbeTimeout;
+
+  /// No description provided for @offlineProbeCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Check cancelled'**
+  String get offlineProbeCancelled;
+
+  /// No description provided for @offlineProbeNoSample.
+  ///
+  /// In en, this message translates to:
+  /// **'No suitable sample found; open the content directly.'**
+  String get offlineProbeNoSample;
+
+  /// No description provided for @offlineProbeMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline map'**
+  String get offlineProbeMap;
+
+  /// No description provided for @offlineProbeArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Knowledge archive'**
+  String get offlineProbeArchive;
+
+  /// No description provided for @offlineProbeDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get offlineProbeDocument;
+
+  /// No description provided for @offlineProbeTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Language pack'**
+  String get offlineProbeTranslation;
+
+  /// No description provided for @offlineProbeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Further content'**
+  String get offlineProbeOther;
+
+  /// No description provided for @documentNoDeadlinesDue.
+  ///
+  /// In en, this message translates to:
+  /// **'No document deadlines are currently due.'**
+  String get documentNoDeadlinesDue;
+
+  /// No description provided for @offlineProbeReadMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Read test'**
+  String get offlineProbeReadMode;
 }
 
 class _AppLocalizationsDelegate
