@@ -11,7 +11,10 @@ class _MemoryStorage implements AppLockStorage {
   var refusing = false;
 
   @override
-  Future<void> delete(String key) async => values.remove(key);
+  Future<void> delete(String key) async {
+    if (refusing) throw StateError('no key store');
+    values.remove(key);
+  }
 
   @override
   Future<String?> read(String key) async {
@@ -157,6 +160,45 @@ void main() {
       storage.refusing = true;
 
       expect(await lock.isEnabled(), isFalse);
+    });
+
+    test(
+      'starting over forgets a lock whose verifier is gone (#222)',
+      () async {
+        // An Android device transfer: the preferences with the marker came
+        // along, the Keystore key did not, and the secure storage deleted
+        // what it could no longer decrypt.
+        final storage = _MemoryStorage();
+        final lock = store(storage);
+        await lock.enable('ein-langer-test-schluessel');
+        storage.values.clear();
+        await expectLater(
+          lock.isEnabled(),
+          throwsA(isA<AppLockStatusUnavailable>()),
+        );
+
+        await lock.forgetForFreshStart();
+
+        expect(await lock.isEnabled(), isFalse);
+      },
+    );
+
+    test('starting over drops the marker even when deleting is refused, '
+        'and a lock that comes back is recognised again', () async {
+      final storage = _MemoryStorage();
+      final lock = store(storage);
+      await lock.enable('ein-langer-test-schluessel');
+      storage.refusing = true;
+
+      await lock.forgetForFreshStart();
+
+      expect(await lock.isEnabled(), isFalse);
+      storage.refusing = false;
+      expect(await lock.isEnabled(), isTrue);
+      expect(
+        (await SharedPreferences.getInstance()).getBool('appLockConfigured.v1'),
+        isTrue,
+      );
     });
   });
 }

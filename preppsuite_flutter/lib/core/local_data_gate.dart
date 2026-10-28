@@ -1,9 +1,29 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/generated/app_localizations.dart';
+import 'app_lock.dart';
 import 'local_database_encryption.dart';
 import 'emergency_access.dart';
 import 'protected_navigation.dart';
+
+/// What "start over" does once it is confirmed.
+///
+/// The app lock goes with the household it guarded (#222). Its verifier
+/// sat in the same key store that no longer opens the databases, and the
+/// fresh installation behind it must reach setup, where the household
+/// comes back from a backup. After the files and only if they really were
+/// set aside: a household still in place keeps its lock.
+Future<void> startOverLocalData(
+  LocalDatabaseEncryption encryption, {
+  AppLockStore? appLock,
+}) async {
+  await encryption.startOverKeepingUnreadableFiles();
+  if (!encryption.isInitialized ||
+      encryption.mode == LocalDatabaseEncryptionMode.recoveryRequired) {
+    return;
+  }
+  await (appLock ?? AppLockStore()).forgetForFreshStart();
+}
 
 /// Stands in front of the app when the local databases cannot be opened.
 ///
@@ -71,7 +91,7 @@ class _LocalDataGateState extends State<LocalDataGate> {
     if (confirmed != true) return;
 
     setState(() => _busy = true);
-    await _encryption.startOverKeepingUnreadableFiles();
+    await startOverLocalData(_encryption);
     if (mounted) setState(() => _busy = false);
   }
 

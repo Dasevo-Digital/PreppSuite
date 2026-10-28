@@ -2628,7 +2628,16 @@ drei Regeln:
   jemanden auszusperren.
 - Mit Markierung wirft `isEnabled()` `AppLockStatusUnavailable`, und die
   Weiche bleibt zu. Das gilt auch für fehlende oder ungültige sichere Werte,
-  nicht nur für Ausnahmen. Nur bewusstes Abschalten entfernt die Markierung.
+  nicht nur für Ausnahmen. Die Markierung entfernen nur bewusstes Abschalten
+  und „Neu einrichten“ in der Datenweiche (#222): Dort liegt der Prüfwert im
+  selben Schlüsselspeicher, der die Datenbanken nicht mehr öffnet, und die
+  leere Installation muss zur Einrichtung durchkommen, wo „Aus einer
+  Sicherung wiederherstellen“ steht. Nach einer Android-Geräteübertragung
+  ist das der Normalfall: `flutter_secure_storage` löscht, was es ohne den
+  Keystore-Schlüssel nicht mehr entschlüsseln kann, und liefert `null`.
+  `startOverLocalData` vergisst die Sperre erst, wenn die Dateien wirklich
+  beiseitegelegt sind, und die Markierung auch dann, wenn der
+  Schlüsselspeicher das Löschen verweigert.
 - Die Markierung wird beim Einrichten **zuletzt** gesetzt und beim
   Abschalten **zuletzt** entfernt. Andersherum sperrt ein fehlgeschlagener
   Schreibvorgang jemanden aus seinem eigenen Haushalt aus, für den es

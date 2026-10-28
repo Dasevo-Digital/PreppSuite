@@ -6,14 +6,6 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// The optional lock in front of the app's local household data.
-///
-/// The verifier is deliberately held by the platform's secure store, never in
-/// preferences beside the household. The passphrase itself is never saved;
-/// reopening the app derives a fresh key and proves it by authenticating the
-/// fixed marker. This protects a running, unattended device without turning a
-/// forgotten passphrase into lost household data: resetting the device lock
-/// removes the verifier, not the database.
 /// The lock exists but its state cannot be read right now.
 ///
 /// Kept apart from "no lock is set" on purpose, because the two look
@@ -53,6 +45,14 @@ class SecureAppLockStorage implements AppLockStorage {
       _storage.write(key: key, value: value);
 }
 
+/// The optional lock in front of the app's local household data.
+///
+/// The verifier is deliberately held by the platform's secure store, never in
+/// preferences beside the household. The passphrase itself is never saved;
+/// reopening the app derives a fresh key and proves it by authenticating the
+/// fixed marker. This protects a running, unattended device without turning a
+/// forgotten passphrase into lost household data: resetting the device lock
+/// removes the verifier, not the database.
 class AppLockStore {
   AppLockStore({
     AppLockStorage? storage,
@@ -217,6 +217,31 @@ class AppLockStore {
     // And here the other way round: the marker goes last, so a deletion
     // that fails leaves it standing and the gate keeps failing closed
     // rather than opening on a lock that is still there.
+    await _rememberConfigured(false);
+  }
+
+  /// Forgets the lock of a household that "start over" just set aside
+  /// (#222).
+  ///
+  /// The databases were moved away because this key store no longer opens
+  /// them, and the verifier lives in that same key store. Left standing,
+  /// the marker would keep the fresh, empty installation behind a lock no
+  /// passphrase opens, and away from "restore from a backup". That is what
+  /// a device transfer on Android produced: preferences and files arrive,
+  /// the Keystore key does not, and the secure storage answers what it can
+  /// no longer decrypt by deleting it and returning nothing.
+  ///
+  /// Unlike [disable], the marker goes even when the key store refuses the
+  /// deletions. Should it come back holding the old lock after all,
+  /// [isEnabled] reads `true` and sets the marker again.
+  Future<void> forgetForFreshStart() async {
+    for (final key in [_biometricKey, _enabledKey, _saltKey, _checkKey]) {
+      try {
+        await _storage.delete(key);
+      } on Object {
+        // A key store that cannot be read usually cannot be written either.
+      }
+    }
     await _rememberConfigured(false);
   }
 
