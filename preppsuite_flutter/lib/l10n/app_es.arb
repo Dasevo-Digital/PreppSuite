@@ -2744,7 +2744,7 @@
   "documentDeadlineSave": "Guardar",
   "documentDeadlineSaveFailed": "No se han podido guardar las fechas. Inténtalo de nuevo.",
   "documentReminderTitle": "Recordatorio de documento",
-  "documentReminderBody": "Hay un documento pendiente de revisión. Abre tus documentos.",
+  "documentReminderBody": "Hay un documento pendiente de revisión. Lo encontrarás en Saber → «Documentos personales».",
   "documentExpired": "Venció el {date}",
   "@documentExpired": {
     "placeholders": {

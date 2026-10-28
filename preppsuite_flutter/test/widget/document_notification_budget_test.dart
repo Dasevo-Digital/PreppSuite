@@ -162,4 +162,93 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );
+
+  testWidgets(
+    'a saved reading position replans nothing, a changed deadline does (#229)',
+    (tester) async {
+      AndroidFlutterLocalNotificationsPlugin.registerWith();
+      SharedPreferences.setMockInitialValues({'notificationsEnabled': true});
+      final now = DateTime.now();
+      const store = PersonalDocumentStore();
+      final document = (await store.add(
+        location: '/private/reader.md',
+        label: 'Reisepass.md',
+      )).last;
+      await store.updateDeadline(
+        document.id,
+        validUntil: null,
+        remindOn: DateTime(now.year, now.month, now.day + 5),
+        reviewedOn: null,
+        originalLocation: '',
+      );
+      var scheduled = 0;
+      final pending = <int, Map<String, dynamic>>{};
+      const channel = MethodChannel(
+        'dexterous.com/flutter/local_notifications',
+      );
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        switch (call.method) {
+          case 'initialize':
+            return true;
+          case 'pendingNotificationRequests':
+            return pending.values.toList();
+          case 'zonedSchedule':
+            final a = Map<String, dynamic>.from(call.arguments as Map);
+            pending[a['id'] as int] = a;
+            scheduled++;
+            return null;
+          case 'cancel':
+            pending.remove((call.arguments as Map)['id']);
+            return null;
+        }
+        return null;
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            inventoryItemsProvider(
+              'home',
+            ).overrideWith((_) => Stream.value(const <InventoryItem>[])),
+          ],
+          child: MaterialApp(
+            locale: const Locale('de'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(
+              body: ExpiryReminderScheduler(householdId: 'home'),
+            ),
+          ),
+        ),
+      );
+      Future<void> settle() async {
+        await tester.pumpAndSettle();
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pumpAndSettle();
+      }
+
+      await settle();
+      expect(scheduled, 1);
+
+      // What the reader does every few lines while somebody scrolls.
+      for (var offset = 240.0; offset <= 960; offset += 240) {
+        await store.updateReaderOffset(document.id, offset);
+        await settle();
+      }
+      expect(scheduled, 1);
+
+      await store.updateDeadline(
+        document.id,
+        validUntil: null,
+        remindOn: DateTime(now.year, now.month, now.day + 6),
+        reviewedOn: null,
+        originalLocation: '',
+      );
+      await settle();
+      expect(scheduled, 2);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
 }

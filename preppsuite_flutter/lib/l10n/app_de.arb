@@ -4259,7 +4259,7 @@
   "documentDeadlineSave": "Speichern",
   "documentDeadlineSaveFailed": "Die Frist konnte nicht gespeichert werden. Bitte erneut versuchen.",
   "documentReminderTitle": "Dokumentenfrist",
-  "documentReminderBody": "Ein Dokument ist zur Prüfung vorgemerkt. Öffne deine Dokumentenverwaltung.",
+  "documentReminderBody": "Ein Dokument ist zur Prüfung vorgemerkt. Du findest es unter Wissen → „Eigene Dokumente“.",
   "documentExpired": "Gültigkeit abgelaufen: {date}",
   "@documentExpired": {
     "placeholders": {

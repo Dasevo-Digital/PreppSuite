@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -197,8 +198,16 @@ class _ExpiryReminderSchedulerState
     });
     ref.listen(expiryLeadDaysProvider, (_, _) => _scheduleReschedule());
     ref.listen(notificationsEnabledProvider, (_, _) => _scheduleReschedule());
-    ref.listen(personalDocumentsProvider, (_, next) {
-      if (next.hasValue) _scheduleReschedule();
+    ref.listen(personalDocumentsProvider, (previous, next) {
+      if (!next.hasValue) return;
+      if (previous?.value case final before?
+          when listEquals(
+            documentReminderInputs(before),
+            documentReminderInputs(next.requireValue),
+          )) {
+        return;
+      }
+      _scheduleReschedule();
     });
 
     return const SizedBox.shrink();

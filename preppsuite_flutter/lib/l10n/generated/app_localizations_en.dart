@@ -10023,7 +10023,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get documentReminderBody =>
-      'A document is due for review. Open your documents.';
+      'A document is due for review. You will find it under Knowledge → “Personal documents”.';
 
   @override
   String documentExpired(String date) {

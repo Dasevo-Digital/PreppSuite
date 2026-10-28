@@ -5938,7 +5938,7 @@
   "documentDeadlineSave": "Save",
   "documentDeadlineSaveFailed": "The dates could not be saved. Please try again.",
   "documentReminderTitle": "Document reminder",
-  "documentReminderBody": "A document is due for review. Open your documents.",
+  "documentReminderBody": "A document is due for review. You will find it under Knowledge → “Personal documents”.",
   "documentExpired": "Expired: {date}",
   "@documentExpired": {
     "placeholders": {

@@ -10108,7 +10108,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get documentReminderBody =>
-      'Hay un documento pendiente de revisión. Abre tus documentos.';
+      'Hay un documento pendiente de revisión. Lo encontrarás en Saber → «Documentos personales».';
 
   @override
   String documentExpired(String date) {

@@ -10075,7 +10075,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get documentReminderBody =>
-      'Ein Dokument ist zur Prüfung vorgemerkt. Öffne deine Dokumentenverwaltung.';
+      'Ein Dokument ist zur Prüfung vorgemerkt. Du findest es unter Wissen → „Eigene Dokumente“.';
 
   @override
   String documentExpired(String date) {

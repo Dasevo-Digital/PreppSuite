@@ -27,6 +27,22 @@ DocumentDeadlineStatus documentDeadlineStatus(
   return DocumentDeadlineStatus.current;
 }
 
+/// What [planDocumentReminders] reads of each document, in order. Two
+/// lists with the same inputs plan the same reminders, whatever else about
+/// the documents changed -- the reader saves its position every few lines,
+/// and that is no reason to replan every notification (#229).
+List<(String, DateTime?, DateTime?, DateTime?)> documentReminderInputs(
+  Iterable<PersonalDocument> documents,
+) => [
+  for (final document in documents)
+    (
+      document.id,
+      document.validUntil,
+      document.remindOn,
+      document.reviewedOn,
+    ),
+];
+
 class DocumentReminder {
   const DocumentReminder({required this.documentId, required this.fireAt});
   final String documentId;

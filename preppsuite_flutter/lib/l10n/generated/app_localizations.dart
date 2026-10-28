@@ -16540,7 +16540,7 @@ abstract class AppLocalizations {
   /// No description provided for @documentReminderBody.
   ///
   /// In en, this message translates to:
-  /// **'A document is due for review. Open your documents.'**
+  /// **'A document is due for review. You will find it under Knowledge → “Personal documents”.'**
   String get documentReminderBody;
 
   /// No description provided for @documentExpired.
