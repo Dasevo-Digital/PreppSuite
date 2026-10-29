@@ -24,6 +24,7 @@ library;
 import 'dart:math' as math;
 
 import 'inventory_numbers.dart';
+import '../../../core/calendar_days.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
 
@@ -59,7 +60,7 @@ class MedicationRange {
   /// Days since [countedOn] that a pack in daily use has already been
   /// taken from. Nothing for a reserve.
   int get _daysTaken =>
-      inDailyUse ? math.max(0, _calendarDaysBetween(countedOn, today)) : 0;
+      inDailyUse ? math.max(0, calendarDaysBetween(countedOn, today)) : 0;
 
   /// Fractional on purpose: eleven tablets at two a day is five and a
   /// half days, and rounding that up to six is how a household runs out
@@ -93,12 +94,6 @@ class MedicationRange {
     return DateTime(end.year, end.month, end.day - lead);
   }
 }
-
-int _calendarDaysBetween(DateTime from, DateTime to) => DateTime.utc(
-  to.year,
-  to.month,
-  to.day,
-).difference(DateTime.utc(from.year, from.month, from.day)).inDays;
 
 /// Every medicine that can be answered, soonest to run out first.
 ///

@@ -1066,6 +1066,19 @@ tree; the test suite deliberately targets that layer rather than the UI.
   reads as 1 and not 0. Its `soon` window is the overview's `soonWindow`,
   re-exported rather than redeclared: the two must never disagree about
   the same item.
+- **Days between two dates are counted on the dates.**
+  `calendarDaysBetween` (`lib/core/calendar_days.dart`) is the one way the
+  rotation, the backup reminder, the charge check, the medicines and the
+  warning day count them. Two local midnights are only 23 hours apart
+  across the start of summer time, and `difference(...).inDays` rounds
+  that down: until 2.7.6 every count from winter into summer was a day
+  short, and the day after the change an item that ran out the day before
+  read "heute" (#233). A date is also good through its day everywhere: the
+  overview and the attention badge counted an item as expired from
+  midnight on its date while the list and the rotation said "heute"
+  (#234). `test/core/calendar_days_test.dart` runs a second time under
+  `TZ=Europe/Berlin`, beside the calendar export's test; in UTC it cannot
+  fail.
 - **An encrypted folder is written as `household.json` version 2, a plain
   one stays at version 1.** Writing 2 unconditionally would lock every
   household out of its own folder the day one member updated, because an

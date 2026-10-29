@@ -6,6 +6,7 @@
 /// with.
 library;
 
+import '../../../core/calendar_days.dart';
 import '../../../local_db/database.dart';
 import '../../home/application/home_overview.dart' show soonWindow;
 
@@ -67,7 +68,7 @@ List<RotationEntry> buildRotation(
     if (expiry == null) continue;
     if (item.quantity <= 0) continue;
 
-    final daysLeft = _dateOnly(expiry).difference(today).inDays;
+    final daysLeft = calendarDaysBetween(today, _dateOnly(expiry));
     entries.add(
       RotationEntry(
         item: item,
@@ -89,8 +90,7 @@ List<RotationEntry> buildRotation(
   return entries;
 }
 
-/// Midnight local time, so a difference counts date boundaries crossed
-/// rather than hours elapsed.
+/// The local day of [value]: a UTC stamp is the day it is here.
 DateTime _dateOnly(DateTime value) {
   final local = value.isUtc ? value.toLocal() : value;
   return DateTime(local.year, local.month, local.day);

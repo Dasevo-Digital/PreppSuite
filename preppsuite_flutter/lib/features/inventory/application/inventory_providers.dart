@@ -23,11 +23,13 @@ final inventoryAttentionCountProvider = Provider.autoDispose
       final itemsAsync = ref.watch(inventoryItemsProvider(householdId));
       final items = itemsAsync.value ?? const [];
       final now = DateTime.now();
+      // Past its date from the day after, as everywhere else (#234).
+      final today = DateTime(now.year, now.month, now.day);
       return items.where((item) {
         final isLowStock =
             item.minQuantity != null && item.quantity < item.minQuantity!;
         final isExpired =
-            item.expirationDate != null && item.expirationDate!.isBefore(now);
+            item.expirationDate != null && item.expirationDate!.isBefore(today);
         // A device whose battery check has come round wants looking at
         // as much as an empty shelf does (#179).
         final chargeDue = deviceChargeCheck(item)?.isDue(now: now) ?? false;

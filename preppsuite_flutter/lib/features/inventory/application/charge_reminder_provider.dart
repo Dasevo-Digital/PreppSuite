@@ -3,6 +3,8 @@ import 'dart:async' show unawaited;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/calendar_days.dart';
+
 const _chargeReminderDaysPrefsKey = 'chargeReminderDays';
 const _chargeReminderCheckedPrefsKey = 'chargeReminderLastChecked';
 
@@ -105,8 +107,7 @@ class ChargeCheck {
   int? daysUntilDue({DateTime? now}) {
     final due = dueAt;
     if (due == null) return null;
-    final today = _midnight(now ?? DateTime.now());
-    return _midnight(due).difference(today).inDays;
+    return calendarDaysBetween(now ?? DateTime.now(), due);
   }
 
   /// True once the interval has elapsed. False while it has not, and false
@@ -116,9 +117,6 @@ class ChargeCheck {
     final days = daysUntilDue(now: now);
     return days != null && days <= 0;
   }
-
-  static DateTime _midnight(DateTime value) =>
-      DateTime(value.year, value.month, value.day);
 }
 
 class ChargeCheckController extends Notifier<ChargeCheck> {

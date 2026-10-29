@@ -206,7 +206,9 @@ class _DaylightScreenState extends State<DaylightScreen> {
     final theme = Theme.of(context);
     final locale = Localizations.localeOf(context).toString();
     final now = widget.now ?? DateTime.now();
-    final tomorrow = now.add(const Duration(days: 1));
+    // The next date, not 24 hours on: the evening before summer time
+    // begins, 24 hours on is already the day after tomorrow.
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
 
     final sun = sunTimesFor(now, place.latitude, place.longitude);
     final moon = moonFor(now, place.latitude, place.longitude);

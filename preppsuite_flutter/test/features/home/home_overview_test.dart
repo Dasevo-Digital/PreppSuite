@@ -56,6 +56,17 @@ void main() {
       expect(overview.total, 4);
     });
 
+    test('an item dated today runs out today and is not past it (#234)', () {
+      final afternoon = DateTime(2026, 9, 6, 15);
+      final overview = summarizeInventory([
+        item(clientId: 'a', expirationDate: DateTime(2026, 9, 6)),
+        item(clientId: 'b', expirationDate: DateTime(2026, 9, 5)),
+      ], now: afternoon);
+
+      expect(overview.expired, 1, reason: 'only the one from yesterday');
+      expect(overview.expiringSoon, 1);
+    });
+
     test('the day the window closes is still soon, not yet expired', () {
       final overview = summarizeInventory([
         item(expirationDate: now.add(soonWindow - const Duration(hours: 1))),

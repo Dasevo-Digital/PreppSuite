@@ -115,8 +115,16 @@ class _OutageScreenState extends State<OutageScreen> {
     );
     // A time later than now means the household meant yesterday: at
     // 02:00 one enters "22:30" for a blackout that began last night.
+    // Yesterday's date at the same time, not 24 hours back, which is an
+    // hour off when the clocks changed overnight.
     if (startedAt.isAfter(DateTime.now())) {
-      startedAt = startedAt.subtract(const Duration(days: 1));
+      startedAt = DateTime(
+        local.year,
+        local.month,
+        local.day - 1,
+        picked.hour,
+        picked.minute,
+      );
     }
 
     final updated = OutageClock(

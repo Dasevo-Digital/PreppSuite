@@ -32,7 +32,7 @@ List<InventoryItem> filterInventory(
 }) {
   final clock = now ?? DateTime.now();
   final today = DateTime(clock.year, clock.month, clock.day);
-  final end = today.add(const Duration(days: 8));
+  final end = DateTime(today.year, today.month, today.day + 8);
   bool expired(InventoryItem item) =>
       item.expirationDate?.isBefore(today) ?? false;
   bool expiring(InventoryItem item) =>

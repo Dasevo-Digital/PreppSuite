@@ -3,6 +3,8 @@ import 'dart:async' show unawaited;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/calendar_days.dart';
+
 /// When this device last wrote a backup, and when it should again (#122).
 ///
 /// Since format 3 a backup is the only way the photos, the household's own
@@ -62,9 +64,7 @@ class BackupStatus {
   int? daysSince({DateTime? now}) {
     final last = lastBackup;
     if (last == null) return null;
-    return _midnight(
-      now ?? DateTime.now(),
-    ).difference(_midnight(last.toLocal())).inDays;
+    return calendarDaysBetween(last.toLocal(), now ?? DateTime.now());
   }
 
   /// When the next backup is due: the interval after the last one, or --
@@ -84,9 +84,6 @@ class BackupStatus {
     if (days == null) return false;
     return days < (isOff ? defaultBackupReminderDays : everyDays);
   }
-
-  static DateTime _midnight(DateTime value) =>
-      DateTime(value.year, value.month, value.day);
 }
 
 class BackupStatusController extends Notifier<BackupStatus> {

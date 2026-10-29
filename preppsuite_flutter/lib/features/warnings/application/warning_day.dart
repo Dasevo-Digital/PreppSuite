@@ -17,6 +17,8 @@
 /// nothing.
 library;
 
+import '../../../core/calendar_days.dart';
+
 /// 11:00 is when the test warning goes out, 11:45 the all-clear.
 const warningDayTestHour = 11;
 const warningDayAllClearMinute = 45;
@@ -44,7 +46,7 @@ DateTime nextFederalWarningDay({DateTime? from}) {
 /// Whole days from [from] to the next warning day; zero on the day.
 int daysUntilFederalWarningDay({DateTime? from}) {
   final today = _midnight(from ?? DateTime.now());
-  return nextFederalWarningDay(from: today).difference(today).inDays;
+  return calendarDaysBetween(today, nextFederalWarningDay(from: today));
 }
 
 /// Whether [when] falls on a warning day.

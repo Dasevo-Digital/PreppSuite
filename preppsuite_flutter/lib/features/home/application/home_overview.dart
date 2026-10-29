@@ -52,6 +52,10 @@ InventoryOverview summarizeInventory(
   DateTime? now,
 }) {
   final at = now ?? DateTime.now();
+  // Good through its date, as the inventory list and the rotation read it:
+  // an item marked for today runs out today and is not past it yet (#234).
+  final local = at.toLocal();
+  final today = DateTime(local.year, local.month, local.day);
   final horizon = at.add(soonWindow);
 
   final byCategory = {
@@ -68,7 +72,7 @@ InventoryOverview summarizeInventory(
 
     final expiry = item.expirationDate;
     if (expiry != null) {
-      if (expiry.isBefore(at)) {
+      if (expiry.isBefore(today)) {
         expired++;
       } else if (expiry.isBefore(horizon)) {
         expiringSoon++;

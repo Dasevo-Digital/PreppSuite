@@ -88,6 +88,27 @@ void main() {
     expect(await attentionCountAfterSettling(), 1);
   });
 
+  test('an item dated today is due today, not yet expired (#234)', () async {
+    // The list, its filter and the rotation all read a date as good through
+    // that day. The badge counted it from midnight, so it stood at one
+    // while the list it pointed to showed nothing expired.
+    final now = DateTime.now();
+    await db.upsertInventoryItem(
+      draft(
+        clientId: 'today',
+        expirationDate: DateTime(now.year, now.month, now.day),
+      ),
+    );
+    await db.upsertInventoryItem(
+      draft(
+        clientId: 'yesterday',
+        expirationDate: DateTime(now.year, now.month, now.day - 1),
+      ),
+    );
+
+    expect(await attentionCountAfterSettling(), 1);
+  });
+
   test('counts an item only once even if both low-stock and expired', () async {
     await db.upsertInventoryItem(
       draft(
