@@ -132,10 +132,16 @@ class BackupCard extends ConsumerWidget {
       if (passphrase == null || !context.mounted) return;
 
       final service = BackupService(ref.read(appDatabaseProvider));
-      final opened = await service.open(
-        picked.file,
-        passphrase,
-        householdId: householdId,
+      final backup = picked.file;
+      final opened = await runWithBackupProgress(
+        context,
+        title: l10n.backupProgressPreparing,
+        job: (progress) => service.open(
+          backup,
+          passphrase,
+          householdId: householdId,
+          cancellation: progress.cancellation,
+        ),
       );
       if (opened == null) {
         messenger.showSnackBar(SnackBar(content: Text(l10n.backupInvalid)));

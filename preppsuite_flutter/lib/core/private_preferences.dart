@@ -49,6 +49,24 @@ class PrivatePreferences {
 
   static Uint8List? _derivedFrom;
   static FolderKey? _derived;
+  static final _pending = <String, Future<void>>{};
+
+  // A read can migrate an old value. It must share the same order as
+  // edits and deletion, including calls from another store instance.
+  Future<T> _serialized<T>(String key, Future<T> Function() action) {
+    final previous = _pending[key];
+    final result = previous == null
+        ? Future<T>.sync(action)
+        : previous.then((_) => action());
+    final queued = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace _) {},
+    );
+    _pending[key] = queued;
+    return result.whenComplete(() {
+      if (identical(_pending[key], queued)) _pending.remove(key);
+    });
+  }
 
   Future<FolderKey?> _key() async {
     // A carried folder travels to another computer; the key does not, it
@@ -86,52 +104,64 @@ class PrivatePreferences {
     return true;
   }
 
-  Future<String?> getString(String key) async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<String?> getString(String key, {SharedPreferences? preferences}) =>
+      _serialized(
+        key,
+        () async => _readString(
+          key,
+          preferences ?? await SharedPreferences.getInstance(),
+        ),
+      );
+
+  Future<String?> _readString(String key, SharedPreferences prefs) async {
     final stored = prefs.getString(key);
     if (stored == null) return null;
-
     final folderKey = await _key();
     if (readEnvelope(stored) == null) {
-      // Written before this installation had a key, or written while it
-      // had none. Take the chance to put it away properly.
       if (folderKey != null) {
-        await prefs.setString(key, await encryptForFolder(stored, folderKey));
+        final sealed = await encryptForFolder(stored, folderKey);
+        // Also tolerate a legacy caller clearing raw preferences while
+        // the key was being derived. Migration must not recreate its data.
+        if (prefs.getString(key) == stored) await prefs.setString(key, sealed);
       }
       return stored;
     }
-
     if (folderKey == null) return null;
     return decryptFromFolder(stored, folderKey);
   }
 
-  Future<void> setString(String key, String value) async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> setString(
+    String key,
+    String value, {
+    SharedPreferences? preferences,
+  }) => _serialized(key, () async {
+    final prefs = preferences ?? await SharedPreferences.getInstance();
     final folderKey = await _key();
     await prefs.setString(
       key,
       folderKey == null ? value : await encryptForFolder(value, folderKey),
     );
-  }
+  });
 
-  /// A list, kept as one encrypted string rather than as a preference
-  /// list: the envelope has to cover the whole thing, and a list of
-  /// envelopes would leak how many entries there are.
-  Future<List<String>?> getStringList(String key) async {
-    final prefs = await SharedPreferences.getInstance();
+  /// A list is one encrypted string so the envelope covers its length too.
+  Future<List<String>?> getStringList(
+    String key, {
+    SharedPreferences? preferences,
+  }) => _serialized(key, () async {
+    final prefs = preferences ?? await SharedPreferences.getInstance();
     final legacy = _stringListOrNull(prefs, key);
     if (legacy != null) {
       final folderKey = await _key();
       if (folderKey != null) {
-        await prefs.setString(
-          key,
-          await encryptForFolder(jsonEncode(legacy), folderKey),
-        );
+        final sealed = await encryptForFolder(jsonEncode(legacy), folderKey);
+        final current = _stringListOrNull(prefs, key);
+        if (current != null && _sameStrings(legacy, current)) {
+          await prefs.setString(key, sealed);
+        }
       }
       return legacy;
     }
-
-    final stored = await getString(key);
+    final stored = await _readString(key, prefs);
     if (stored == null) return null;
     try {
       final decoded = jsonDecode(stored);
@@ -139,14 +169,19 @@ class PrivatePreferences {
     } on FormatException {
       return null;
     }
-  }
+  });
 
   Future<void> setStringList(String key, List<String> value) =>
       setString(key, jsonEncode(value));
 
-  /// Null unless the value really is a preference list, i.e. was written
-  /// by a version before this one. `getStringList` on a string throws on
-  /// some platforms and returns null on others.
+  static bool _sameStrings(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
   static List<String>? _stringListOrNull(SharedPreferences prefs, String key) {
     try {
       return prefs.getStringList(key);
@@ -155,15 +190,15 @@ class PrivatePreferences {
     }
   }
 
-  Future<void> remove(String key) async {
+  Future<void> remove(String key) => _serialized(key, () async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(key);
-  }
+  });
 
-  Future<bool> containsKey(String key) async {
+  Future<bool> containsKey(String key) => _serialized(key, () async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey(key);
-  }
+  });
 
   /// Forgets the derived key. Only for tests and for a device that has
   /// just been given a different data key.

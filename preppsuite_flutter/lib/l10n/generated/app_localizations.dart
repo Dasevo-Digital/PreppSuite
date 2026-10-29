@@ -16764,6 +16764,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Read test'**
   String get offlineProbeReadMode;
+
+  /// No description provided for @inventoryInvalidNumbers.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid stock values: please correct the amounts and nutrition of the affected items. They are not counted as available supplies.'**
+  String get inventoryInvalidNumbers;
+
+  /// No description provided for @errorInputLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'The file exceeds the supported size or processing limits. Please use a smaller file.'**
+  String get errorInputLimit;
 }
 
 class _AppLocalizationsDelegate

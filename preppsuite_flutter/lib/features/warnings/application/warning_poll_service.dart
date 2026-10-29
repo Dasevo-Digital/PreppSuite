@@ -48,10 +48,12 @@ class WarningPollService {
     required AppDatabase database,
     BbkClient? bbkClient,
     MeteoAlarmClient? meteoAlarmClient,
+    this.detailBudget = const Duration(seconds: 80),
   }) : _db = database,
        _bbk = bbkClient ?? BbkClient(),
        _meteoAlarm = meteoAlarmClient ?? MeteoAlarmClient();
 
+  final Duration detailBudget;
   final AppDatabase _db;
   final BbkClient _bbk;
   final MeteoAlarmClient _meteoAlarm;
@@ -69,6 +71,7 @@ class WarningPollService {
     String? kreisSchluessel,
     Iterable<String> extraKreisSchluessel = const [],
   }) async {
+    final clock = Stopwatch()..start();
     final newsworthy = <NotifiableWarning>[];
     var fetched = 0;
     var retired = 0;
@@ -93,6 +96,7 @@ class WarningPollService {
       final nationwide = await _bbk.fetchAll();
       final detailedNationwide = await _detailsForChanged(
         nationwide.warnings,
+        clock: clock,
       );
       complete = nationwide.complete;
       sourcesOk['bbk'] = nationwide.complete;
@@ -114,11 +118,23 @@ class WarningPollService {
           if (extra.length >= 5) extra.substring(0, 5),
       };
       for (final district in districts) {
+        // Reserve time for the independent weather source. Optional details
+        // must not keep a refresh occupied for an unbounded number of calls.
+        if (clock.elapsed >= detailBudget) {
+          // A district-only warning may still be active. Without this
+          // requested dashboard, absence from the national feed proves nothing.
+          complete = false;
+          sourcesOk['bbk'] = false;
+          break;
+        }
         // A precise dashboard is an enhancement over the nationwide feed.
         // One offline "Meine Orte" entry must not cancel all current alerts.
         try {
           final compactPrecise = await _bbk.fetchDashboard(district);
-          final precise = await _detailsForChanged(compactPrecise);
+          final precise = await _detailsForChanged(
+            compactPrecise,
+            clock: clock,
+          );
           fetched += precise.length;
           newsworthy.addAll(
             await _ingest.ingestBbk(
@@ -201,8 +217,9 @@ class WarningPollService {
   /// event with many notices from serialising a refresh without opening an
   /// unbounded number of sockets.
   Future<List<BbkRawWarning>> _detailsForChanged(
-    List<BbkRawWarning> warnings,
-  ) async {
+    List<BbkRawWarning> warnings, {
+    required Stopwatch clock,
+  }) async {
     // Loaded once, before the workers start. Asked inside the loop this was
     // one query per warning, and the ingest below then asked the same
     // question again for every one of them.
@@ -211,7 +228,7 @@ class WarningPollService {
     var next = 0;
     var retries = 0;
     Future<void> worker() async {
-      while (next < warnings.length) {
+      while (next < warnings.length && clock.elapsed < detailBudget) {
         final at = next++;
         final warning = warnings[at];
         final existing = stored[warning.id];

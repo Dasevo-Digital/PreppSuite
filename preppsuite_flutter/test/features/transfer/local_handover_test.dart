@@ -22,6 +22,54 @@ import 'package:preppsuite_flutter/local_db/database.dart';
 /// decrypted. A handover that works against a fake and not against a
 /// socket is the only kind of failure that matters in this file.
 void main() {
+  for (final declared in [true, false]) {
+    test(
+      'oversized ${declared ? "declared" : "chunked"} response is stopped before applying data',
+      () async {
+        final db = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(db.close);
+        final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+        addTearDown(() => server.close(force: true));
+        server.listen((request) async {
+          await request.drain<void>();
+          if (declared) request.response.contentLength = 100000;
+          request.response.bufferOutput = false;
+          request.response.add(List.filled(33, 32));
+          try {
+            await request.response.flush();
+            if (!declared) await request.response.close();
+          } on Object {
+            return;
+          }
+          // Leave the response open: rejection must not wait for EOF.
+        });
+        await expectLater(
+          joinLocalHandover(
+            db: db,
+            deviceId: 'guest',
+            householdId: 'home',
+            maxResponseBytes: 32,
+            exchangeTimeout: const Duration(seconds: 2),
+            invitation: LocalHandoverInvitation(
+              addresses: ['127.0.0.1'],
+              port: server.port,
+              householdId: 'home',
+              key: FolderKey(Uint8List(32)),
+            ),
+          ),
+          throwsA(
+            isA<LocalHandoverException>().having(
+              (e) => e.reason,
+              'reason',
+              LocalHandoverFailure.tooLarge,
+            ),
+          ),
+        );
+        expect(await db.inventoryItemsForSync('home'), isEmpty);
+      },
+    );
+  }
+
   test(
     'a stalled unauthenticated POST does not block another connection',
     () async {

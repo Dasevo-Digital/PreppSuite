@@ -1,4 +1,8 @@
 import 'dart:io';
+import 'dart:convert';
+
+import '../../../core/bounded_input.dart';
+import '../../../core/resource_limits.dart';
 
 import 'package:path/path.dart' as p;
 
@@ -103,11 +107,16 @@ class IoSyncFolder implements SyncFolder {
   }
 
   @override
-  Future<String?> readDeviceFile(String deviceId) =>
-      _readIfPresent(File(p.join(_devices.path, '$deviceId.json')));
+  Future<String?> readDeviceFile(String deviceId) => _readIfPresent(
+    File(p.join(_devices.path, '$deviceId.json')),
+    maxSnapshotBytes,
+  );
 
   @override
   Future<void> writeDeviceFile(String deviceId, String contents) async {
+    if (utf8.encode(contents).length > maxSnapshotBytes) {
+      throw const InputTooLarge(maxSnapshotBytes);
+    }
     await _devices.create(recursive: true);
     await _writeAtomically(
       File(p.join(_devices.path, '$deviceId.json')),
@@ -116,11 +125,16 @@ class IoSyncFolder implements SyncFolder {
   }
 
   @override
-  Future<String?> readHouseholdFile() =>
-      _readIfPresent(File(p.join(_base.path, _householdFileName)));
+  Future<String?> readHouseholdFile() => _readIfPresent(
+    File(p.join(_base.path, _householdFileName)),
+    maxHouseholdMetadataBytes,
+  );
 
   @override
   Future<void> writeHouseholdFile(String contents) async {
+    if (utf8.encode(contents).length > maxHouseholdMetadataBytes) {
+      throw const InputTooLarge(maxHouseholdMetadataBytes);
+    }
     await _base.create(recursive: true);
     await _writeAtomically(
       File(p.join(_base.path, _householdFileName)),
@@ -128,10 +142,17 @@ class IoSyncFolder implements SyncFolder {
     );
   }
 
-  Future<String?> _readIfPresent(File file) async {
+  Future<String?> _readIfPresent(File file, int maxBytes) async {
     try {
       if (!await file.exists()) return null;
-      return await file.readAsString();
+      return utf8.decode(
+        await readBoundedBytes(
+          file.openRead(),
+          maxBytes: maxBytes,
+          declaredLength: await file.length(),
+          timeout: const Duration(seconds: 60),
+        ),
+      );
     } on FileSystemException {
       // A file the sync engine is mid-download on, or one the user has no
       // permission for. Both are worth skipping rather than failing the

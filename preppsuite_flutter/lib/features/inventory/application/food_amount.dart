@@ -101,8 +101,9 @@ bool isMeasurableUnit(String unit) => _read(unit) != null;
 /// names no measure.
 FoodAmount? measure(double quantity, String unit) {
   final read = _read(unit);
-  if (read == null) return null;
-  return FoodAmount(quantity * read.$1, read.$2);
+  if (read == null || !quantity.isFinite || quantity < 0) return null;
+  final amount = quantity * read.$1;
+  return amount.isFinite ? FoodAmount(amount, read.$2) : null;
 }
 
 /// One of [unit], for showing what a single one comes to.

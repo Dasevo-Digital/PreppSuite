@@ -1,10 +1,29 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/core/local_database_encryption.dart';
+import 'package:preppsuite_flutter/core/private_preferences.dart';
+import 'package:preppsuite_flutter/features/sharing/application/folder_crypto.dart';
 import 'package:preppsuite_flutter/features/sharing/application/carried_settings.dart';
 import 'package:preppsuite_flutter/features/sharing/application/settings_sync.dart';
 import 'package:preppsuite_flutter/features/sharing/application/settings_sync_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class _MemoryKeys implements LocalDatabaseKeyStorage {
+  final values = <String, String>{};
+  @override
+  Future<String?> read(String key) async => values[key];
+  @override
+  Future<void> write(String key, String value) async {
+    values[key] = value;
+  }
+
+  @override
+  Future<void> delete(String key) async {
+    values.remove(key);
+  }
+}
 
 /// The settings keeping step between two devices, end to end.
 void main() {
@@ -15,6 +34,59 @@ void main() {
     SharedPreferences.setMockInitialValues(values);
     return SharedPreferences.getInstance();
   }
+
+  test(
+    'private settings never leave a plaintext synchronization baseline',
+    () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      final directory = await Directory.systemTemp.createTemp('sync-private-');
+      final previous = LocalDatabaseEncryption.instance;
+      addTearDown(() async {
+        LocalDatabaseEncryption.instance = previous;
+        PrivatePreferences.forgetDerivedKey();
+        await directory.delete(recursive: true);
+      });
+      final source = LocalDatabaseEncryption(storage: _MemoryKeys());
+      await source.initialize(directory: directory);
+      LocalDatabaseEncryption.instance = source;
+      PrivatePreferences.forgetDerivedKey();
+      final prefs = await device({});
+      const sentinel = 'private-contact-fixture';
+      await const PrivatePreferences().setString(
+        'checkInContacts.v1',
+        sentinel,
+      );
+      final out = await readSyncedSettings(preferences: prefs, now: monday);
+      expect(out['checkInContacts.v1']?.value, sentinel);
+      expect(
+        prefs.getString('carriedSettingStampsV1'),
+        isNot(contains(sentinel)),
+      );
+      expect(
+        readEnvelope(prefs.getString('carriedSettingStampsV1')!),
+        isNotNull,
+      );
+      expect(
+        (await const SettingsSyncStore().load(
+          prefs,
+        ))['checkInContacts.v1']?.value,
+        sentinel,
+      );
+      // A baseline left by an older version is sealed without changing its
+      // stamps, so upgrading cannot make an old edit look like a new one.
+      await prefs.setString(
+        'carriedSettingStampsV1',
+        jsonEncode(encodeStampedSettings(out)),
+      );
+      final migrated = await const SettingsSyncStore().load(prefs);
+      expect(migrated['checkInContacts.v1']?.at, settingsEpoch);
+      expect(
+        prefs.getString('carriedSettingStampsV1'),
+        isNot(contains(sentinel)),
+      );
+    },
+    skip: !LocalDatabaseEncryption.cipherAvailable,
+  );
 
   group('what goes out', () {
     test('an untouched device starts everything at the floor', () async {

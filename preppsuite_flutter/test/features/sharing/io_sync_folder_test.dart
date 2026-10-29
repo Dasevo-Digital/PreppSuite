@@ -1,5 +1,8 @@
 import 'dart:io';
 
+import 'package:preppsuite_flutter/core/bounded_input.dart';
+import 'package:preppsuite_flutter/core/resource_limits.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:drift/native.dart';
@@ -21,6 +24,23 @@ void main() {
 
   tearDown(() => root.deleteSync(recursive: true));
 
+  test(
+    'oversized identity is an error rather than an absent household',
+    () async {
+      await folder.writeHouseholdFile('{}');
+      await File(p.join(root.path, preppSuiteFolderName, 'household.json'))
+          .writeAsString('x' * (maxHouseholdMetadataBytes + 1));
+      await expectLater(
+        folder.readHouseholdFile(),
+        throwsA(isA<InputTooLarge>()),
+      );
+      expect(
+        await File(p.join(root.path, preppSuiteFolderName, 'household.json'))
+            .length(),
+        maxHouseholdMetadataBytes + 1,
+      );
+    },
+  );
   test(
     'claims its own subdirectory rather than the folder it was given',
     () async {

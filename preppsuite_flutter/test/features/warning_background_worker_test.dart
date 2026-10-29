@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:preppsuite_flutter/core/local_database_encryption.dart';
+import 'package:preppsuite_flutter/core/private_preferences.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,6 +13,21 @@ import 'package:preppsuite_flutter/features/warnings/application/warning_poll_st
 import 'package:preppsuite_flutter/features/warnings/application/warning_region_store.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class _MemoryKeys implements LocalDatabaseKeyStorage {
+  final values = <String, String>{};
+  @override
+  Future<String?> read(String key) async => values[key];
+  @override
+  Future<void> write(String key, String value) async {
+    values[key] = value;
+  }
+
+  @override
+  Future<void> delete(String key) async {
+    values.remove(key);
+  }
+}
 
 /// A poll service that writes a fixed warning instead of going to the
 /// network, so the worker's own behaviour is what is under test.
@@ -182,6 +201,63 @@ void main() {
     expect(await db.watchAllWarnings().first, hasLength(1));
     expect(notifications.shown, isEmpty);
   });
+
+  test(
+    'a cold worker initializes the key before reading its encrypted region',
+    () async {
+      final directory = await Directory.systemTemp.createTemp('cold-warning-');
+      final keys = _MemoryKeys();
+      final previous = LocalDatabaseEncryption.instance;
+      addTearDown(() async {
+        LocalDatabaseEncryption.instance = previous;
+        PrivatePreferences.forgetDerivedKey();
+        await directory.delete(recursive: true);
+      });
+      SharedPreferences.setMockInitialValues({'notificationsEnabled': true});
+      final foreground = LocalDatabaseEncryption(storage: keys);
+      await foreground.initialize(directory: directory);
+      LocalDatabaseEncryption.instance = foreground;
+      await const WarningRegionStore().save(
+        const WarningRegionFilter(countryCode: 'DE', ownRegionKey: '05334'),
+      );
+      final cold = LocalDatabaseEncryption(storage: keys);
+      LocalDatabaseEncryption.instance = cold;
+      final poller = _StubPollService(db);
+      final ok = await runWarningBackgroundPoll(
+        database: db,
+        pollService: poller,
+        notifications: _RecordingNotifications(),
+        initializeLocalData: () async {
+          await cold.initialize(directory: directory);
+          return cold.mode != LocalDatabaseEncryptionMode.recoveryRequired;
+        },
+      );
+      expect(ok, isTrue);
+      expect(poller.polls, 1);
+    },
+    skip: !LocalDatabaseEncryption.cipherAvailable,
+  );
+
+  test(
+    'a configured region with an unavailable key records a blocked run',
+    () async {
+      SharedPreferences.setMockInitialValues({
+        'notificationsEnabled': true,
+        'warningCountryCode': 'configured',
+      });
+      final poller = _StubPollService(db);
+      expect(
+        await runWarningBackgroundPoll(
+          database: db,
+          pollService: poller,
+          initializeLocalData: () async => false,
+        ),
+        isFalse,
+      );
+      expect(poller.polls, 0);
+      expect((await const WarningPollStatusStore().load()).isBlocked, isTrue);
+    },
+  );
 
   test('reports failure when the local data cannot be opened', () async {
     // No injected database, so the worker has to open its own -- which in

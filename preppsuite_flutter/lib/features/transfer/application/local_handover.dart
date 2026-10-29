@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+
+import '../../../core/bounded_input.dart';
 
 import '../../../local_db/database.dart';
 import '../../sharing/application/carried_settings.dart';
@@ -143,6 +146,9 @@ enum LocalHandoverFailure {
 
   /// The body did not decrypt, or was not a snapshot.
   unreadable,
+
+  /// Refused before decoding or authentication.
+  tooLarge,
 
   /// The other device answered and the exchange then did not finish.
   ///
@@ -423,6 +429,7 @@ Future<LocalHandoverResult> joinLocalHandover({
   /// How long the exchange itself may take. Worked out from the body
   /// when left out.
   Duration? exchangeTimeout,
+  int maxResponseBytes = localHandoverMaxRequestBytes,
 
   /// Where arriving pictures are written. The app's own photo folder when
   /// left out; a test hands in a temporary one so that exercising a real
@@ -505,7 +512,17 @@ Future<LocalHandoverResult> joinLocalHandover({
         if (response.statusCode != HttpStatus.ok) {
           throw const LocalHandoverException(LocalHandoverFailure.unreadable);
         }
-        answer = await utf8.decoder.bind(response).join().timeout(exchange);
+        answer = utf8.decode(
+          await readBoundedBytes(
+            response,
+            maxBytes: min(maxResponseBytes, localHandoverMaxRequestBytes),
+            declaredLength: response.contentLength,
+            timeout: exchange,
+            onAbort: () => client.close(force: true),
+          ),
+        );
+      } on InputTooLarge {
+        throw const LocalHandoverException(LocalHandoverFailure.tooLarge);
       } on LocalHandoverException {
         rethrow;
       } on Object {

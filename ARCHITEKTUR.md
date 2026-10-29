@@ -3133,3 +3133,44 @@ parallel one.
 - The overview offers a direct first-item action for an empty household,
   visibly marks cards as links, and uses two columns on wide screens when text
   size permits. Displayed supply quantities follow the selected locale.
+
+
+### Fremde Eingaben sind begrenzt und abbrechbar
+
+Dateigrößen werden vor dem Dekodieren geprüft und während des Lesens nochmals
+gezählt. CSV und GPX/KML erlauben höchstens 8 MiB und 10.000 Zeilen beziehungsweise
+Orte; XML zusätzlich höchstens 64 Ebenen und 100.000 Elemente, ohne DTD. Die
+Parser laufen in beendbaren Isolates mit einer Minute Zeitbudget. Eine
+CSV-Vorschau baut nur sichtbare Zeilen auf. Abbruch oder ein überschrittenes
+Budget verändert keine gespeicherten Bestände oder Orte.
+
+Ein Geräte-Snapshot darf höchstens 64 MiB, die gemeinsame Identitätsdatei
+höchstens 1 MiB belegen. Diese Grenzen gelten auch in den nativen Lesern, bevor
+Daten über den Plattformkanal gelangen. Eine zu große Identitätsdatei ist ein
+Fehler, kein vermeintlich leerer Ordner, der neu gegründet werden dürfte.
+Lokale Übergaben begrenzen Antworten ebenso wie Anfragen vor der Entschlüsselung.
+
+HTTP-Zeitüberschreitungen brechen die jeweilige Transportanfrage ab. Lange
+Archivdownloads dürfen weiterlaufen, solange Daten eintreffen; Warnungsantworten
+haben zusätzlich ein Gesamtbudget von 20 Sekunden. Optionale Warnungsdetails
+starten nach 80 Sekunden keine weiteren Anfragen, damit die unabhängige
+Wetterquelle noch abgefragt werden kann.
+
+Argon2id bleibt bei 64 MiB und drei Durchläufen. Eingelesene Parameter sind auf
+128 MiB, sechs Durchläufe, vier parallele Bahnen und ein kombiniertes Budget von
+393.216 KiB-Durchläufen begrenzt; Salze haben 8 bis 64 Bytes. Die Ableitung läuft
+in einem beendbaren Worker, höchstens eine Minute. Nicht unterstützte Parameter
+werden vor der Speicherbelegung abgelehnt, nicht heruntergesetzt.
+
+Private Einstellungen bleiben auch in den Vergleichsdaten des Abgleichs
+verschlüsselt. Lesen samt Altdatenmigration, Schreiben und Löschen sind je
+Schlüssel geordnet, damit eine verspätete Migration keine Löschung oder neuere
+Änderung überschreibt. Ein kalter Hintergrundlauf lädt den Geräteschlüssel vor
+der privaten Warnregion; ein gesperrter Schlüssel ist ein blockierter Abruf.
+
+Mengen, Mindestbestände, Dosierungen und Nährwerte müssen endlich und nicht
+negativ sein. Ungültige Altwerte bleiben bearbeitbar, werden sichtbar markiert
+und nicht als verfügbare Vorräte gezählt. Ein Export verlangt eine Korrektur.
+Gelöschte fehlerhafte Zeilen können als Tombstone mit neutralen Zahlen übertragen
+werden; das Original bleibt lokal für die Rücknahme erhalten. Kalenderdaten
+aus CSV müssen nach der Konstruktion mit Jahr, Monat und Tag übereinstimmen.

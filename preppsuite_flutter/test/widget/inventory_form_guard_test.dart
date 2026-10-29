@@ -73,6 +73,28 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  testWidgets('quantity validator rejects nonfinite values before saving', (
+    tester,
+  ) async {
+    await open(tester);
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(InventoryItemFormScreen)),
+    )!;
+    final quantity = find.byWidgetPredicate(
+      (widget) =>
+          widget is TextField &&
+          widget.decoration?.labelText == l10n.quantityLabel,
+    );
+    await tester.ensureVisible(quantity);
+    for (final value in ['Infinity', '-Infinity', 'NaN', '1e999']) {
+      await tester.enterText(quantity, value);
+      expect(tester.state<FormState>(find.byType(Form)).validate(), isFalse);
+      await tester.pump();
+      expect(find.text(l10n.invalidNumber), findsWidgets);
+    }
+    expect(await db.inventoryItemsForSync('h'), isEmpty);
+  });
+
   testWidgets('unchanged form leaves without a confirmation', (tester) async {
     await open(tester);
     await tester.tap(find.byType(BackButton));

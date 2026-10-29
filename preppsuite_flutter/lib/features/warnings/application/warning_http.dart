@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:typed_data';
+
+import '../../../core/bounded_input.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -18,19 +19,48 @@ Future<http.Response> getWarningResponse(
   Duration timeout = warningRequestTimeout,
   int maxResponseBytes = warningResponseMaxBytes,
 }) async {
-  final streamed = await client.send(http.Request('GET', uri)).timeout(timeout);
-  final bytes = BytesBuilder(copy: false);
-  await for (final chunk in streamed.stream.timeout(timeout)) {
-    if (bytes.length + chunk.length > maxResponseBytes) {
-      throw const WarningResponseTooLarge();
-    }
-    bytes.add(chunk);
+  final abort = Completer<void>();
+  final clock = Stopwatch()..start();
+  void stop() {
+    if (!abort.isCompleted) abort.complete();
   }
-  return http.Response.bytes(
-    bytes.takeBytes(),
-    streamed.statusCode,
-    headers: streamed.headers,
-    request: streamed.request,
-    reasonPhrase: streamed.reasonPhrase,
-  );
+
+  try {
+    final request = http.AbortableRequest(
+      'GET',
+      uri,
+      abortTrigger: abort.future,
+    );
+    final streamed = await client
+        .send(request)
+        .timeout(
+          timeout,
+          onTimeout: () {
+            stop();
+            throw TimeoutException('Warning deadline', timeout);
+          },
+        );
+    final remaining = timeout - clock.elapsed;
+    if (remaining <= Duration.zero) {
+      throw TimeoutException('Warning deadline', timeout);
+    }
+    final bytes = await readBoundedBytes(
+      streamed.stream,
+      maxBytes: maxResponseBytes,
+      declaredLength: streamed.contentLength,
+      timeout: remaining,
+      onAbort: stop,
+    );
+    return http.Response.bytes(
+      bytes,
+      streamed.statusCode,
+      headers: streamed.headers,
+      request: streamed.request,
+      reasonPhrase: streamed.reasonPhrase,
+    );
+  } on InputTooLarge {
+    throw const WarningResponseTooLarge();
+  } finally {
+    stop();
+  }
 }

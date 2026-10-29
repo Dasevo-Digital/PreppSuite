@@ -1,4 +1,7 @@
+import 'package:drift/drift.dart' show Value;
+
 import '../../../local_db/database.dart';
+import '../../inventory/application/inventory_numbers.dart';
 import 'device_snapshot.dart';
 import 'settings_sync.dart';
 
@@ -26,6 +29,14 @@ Future<DeviceSnapshot> readHouseholdSnapshot(
   /// changed the river gauge last.
   Map<String, StampedSetting> settings = const {},
 }) async {
+  // Do not silently drop or rewrite a bad legacy row. Keep it editable
+  // and tell the household to correct it before exporting a safety copy.
+  final inventory = await db.inventoryItemsForSync(householdId);
+  if (inventory.any(
+    (row) => row.deletedAt == null && hasInvalidInventoryNumbers(row),
+  )) {
+    throw const InvalidInventoryNumbers();
+  }
   return DeviceSnapshot(
     settings: settings,
     deviceId: deviceId,
@@ -34,8 +45,22 @@ Future<DeviceSnapshot> readHouseholdSnapshot(
     // this instant.
     writtenAt: DateTime.now().toUtc(),
     inventoryItems: [
-      for (final row in await db.inventoryItemsForSync(householdId))
-        encodeInventoryItem(row),
+      for (final row in inventory)
+        encodeInventoryItem(
+          row.deletedAt != null && hasInvalidInventoryNumbers(row)
+              ? row.copyWith(
+                  quantity: 0,
+                  minQuantity: const Value(null),
+                  dailyDose: const Value(null),
+                  packageSize: const Value(null),
+                  calories: const Value(null),
+                  proteinGrams: const Value(null),
+                  carbohydrateGrams: const Value(null),
+                  fatGrams: const Value(null),
+                  fiberGrams: const Value(null),
+                )
+              : row,
+        ),
     ],
     checklistTemplates: [
       for (final row in await db.checklistTemplatesForSync(householdId))

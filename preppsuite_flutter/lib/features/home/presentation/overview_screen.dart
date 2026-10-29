@@ -1,3 +1,5 @@
+import '../../inventory/application/inventory_numbers.dart';
+
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -103,6 +105,14 @@ class OverviewScreen extends ConsumerWidget {
                 TourOfferCard(profile: profile),
                 const SizedBox(height: 12),
               ],
+              if (items.any(hasInvalidInventoryNumbers))
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.warning_amber),
+                    title: Text(l10n.inventoryInvalidNumbers),
+                    onTap: () => onNavigate(ShellDestination.inventory),
+                  ),
+                ),
               if (inventory.hasValue && items.isEmpty) ...[
                 Card(
                   color: Theme.of(context).colorScheme.primaryContainer,

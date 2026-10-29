@@ -20,7 +20,15 @@
 /// through.
 library;
 
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:uuid/uuid.dart';
+import 'package:xml/xml_events.dart';
+
+import '../../../core/bounded_input.dart';
+import '../../../core/resource_limits.dart';
+
 import 'package:xml/xml.dart';
 
 import 'personal_place.dart';
@@ -105,9 +113,31 @@ String placesToKml(List<PersonalPlace> places) {
 /// [newId] exists so a test can say what the ids will be; by default they
 /// are fresh, because an id from another device means nothing here.
 List<PersonalPlace> placesFromXml(String raw, {String Function()? newId}) {
+  if (raw.length > maxImportBytes || utf8.encode(raw).length > maxImportBytes) {
+    throw const InputTooLarge(maxImportBytes);
+  }
   final makeId = newId ?? const Uuid().v4;
   final XmlDocument document;
   try {
+    var depth = 0;
+    var elements = 0;
+    var points = 0;
+    for (final event in parseEvents(raw, validateNesting: true)) {
+      if (event is XmlDoctypeEvent) throw const InputTooLarge(maxXmlElements);
+      if (event is XmlStartElementEvent) {
+        if (++elements > maxXmlElements || depth + 1 > maxXmlDepth) {
+          throw const InputTooLarge(maxXmlElements);
+        }
+        if (event.name == 'wpt' || event.name == 'Placemark') {
+          if (++points > maxImportRows) {
+            throw const InputTooLarge(maxImportRows);
+          }
+        }
+        if (!event.isSelfClosing) depth++;
+      } else if (event is XmlEndElementEvent) {
+        depth--;
+      }
+    }
     document = XmlDocument.parse(raw);
   } on XmlException {
     return const [];
@@ -188,4 +218,9 @@ String _fallbackLabel(double lat, double lon) =>
 String? _text(XmlElement? parent, String name) {
   final value = parent?.findElements(name).firstOrNull?.innerText.trim();
   return value == null || value.isEmpty ? null : value;
+}
+
+List<PersonalPlace> placesFromBytes(Uint8List bytes) {
+  if (bytes.length > maxImportBytes) throw const InputTooLarge(maxImportBytes);
+  return placesFromXml(utf8.decode(bytes, allowMalformed: true));
 }

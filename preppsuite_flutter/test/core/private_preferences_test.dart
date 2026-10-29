@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 import 'package:preppsuite_flutter/core/local_database_encryption.dart';
 import 'package:preppsuite_flutter/core/portable_data.dart';
@@ -33,6 +35,22 @@ class _NoKeyStorage implements LocalDatabaseKeyStorage {
   @override
   Future<void> write(String key, String value) async =>
       throw StateError('no key store');
+}
+
+class _DelayedPreferences extends InMemorySharedPreferencesStore {
+  _DelayedPreferences() : super.withData({'flutter.sample': 'old'});
+  final started = Completer<void>();
+  final release = Completer<void>();
+  bool first = true;
+  @override
+  Future<bool> setValue(String type, String key, Object value) async {
+    if (first && key == 'flutter.sample') {
+      first = false;
+      started.complete();
+      await release.future;
+    }
+    return super.setValue(type, key, value);
+  }
 }
 
 void main() {
@@ -87,6 +105,52 @@ void main() {
     expect(readEnvelope((await raw('warningRegion'))!), isNotNull);
     expect(await store.getString('warningRegion'), '05334');
   }, skip: _skip);
+
+  test(
+    'a migrated read cannot undo a concurrent deletion after reload',
+    () async {
+      SharedPreferences.setMockInitialValues({'sample': 'old'});
+      final store = PrivatePreferences(await withKey());
+      final reading = store.getString('sample');
+      await store.remove('sample');
+      await reading;
+      await (await SharedPreferences.getInstance()).reload();
+      expect(await store.getString('sample'), isNull);
+    },
+    skip: _skip,
+  );
+
+  test('a legacy list migration cannot recreate a removed list', () async {
+    SharedPreferences.setMockInitialValues({
+      'sample': <String>['old'],
+    });
+    final store = PrivatePreferences(await withKey());
+    final reading = store.getStringList('sample');
+    await store.remove('sample');
+    await reading;
+    expect(await store.getStringList('sample'), isNull);
+  }, skip: _skip);
+
+  test(
+    'slow migration preserves a later edit and does not block another key',
+    () async {
+      SharedPreferences.setMockInitialValues({'sample': 'old'});
+      final backend = _DelayedPreferences();
+      SharedPreferencesStorePlatform.instance = backend;
+      final store = PrivatePreferences(await withKey());
+      final reading = store.getString('sample');
+      await backend.started.future;
+      final writing = store.setString('sample', 'new');
+      await store.setString('other', 'independent');
+      backend.release.complete();
+      await reading;
+      await writing;
+      await (await SharedPreferences.getInstance()).reload();
+      expect(await store.getString('sample'), 'new');
+      expect(await store.getString('other'), 'independent');
+    },
+    skip: _skip,
+  );
 
   test('a device without a key store keeps storing as before', () async {
     final encryption = LocalDatabaseEncryption(storage: _NoKeyStorage());

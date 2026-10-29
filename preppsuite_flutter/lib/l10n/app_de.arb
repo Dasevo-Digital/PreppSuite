@@ -4361,5 +4361,7 @@
   "offlineProbeTranslation": "Sprachpaket",
   "offlineProbeOther": "Weitere Inhalte",
   "documentNoDeadlinesDue": "Zurzeit sind keine Dokumentenfristen fällig.",
-  "offlineProbeReadMode": "Lesetest"
+  "offlineProbeReadMode": "Lesetest",
+  "inventoryInvalidNumbers": "Ungültige Vorratswerte: Bitte Mengen und Nährwerte der betroffenen Artikel korrigieren. Sie werden nicht als verfügbare Vorräte gezählt.",
+  "errorInputLimit": "Die Datei überschreitet die unterstützten Größen- oder Verarbeitungsgrenzen. Bitte eine kleinere Datei verwenden."
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/services.dart';
+import 'package:preppsuite_flutter/core/bounded_input.dart';
+import 'package:preppsuite_flutter/core/resource_limits.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/platform_storage.dart';
 import 'package:preppsuite_flutter/features/sharing/application/native_sync_folder.dart';
@@ -34,6 +36,23 @@ void main() {
 
   const folder = NativeSyncFolder('content://tree/primary%3ASync');
 
+  test('native limits differ for identity and device snapshots', () async {
+    await folder.readHouseholdFile();
+    await folder.readDeviceFile('test');
+    expect(calls.map((c) => c.arguments['maxBytes']), [
+      maxHouseholdMetadataBytes,
+      maxSnapshotBytes,
+    ]);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          channel,
+          (_) async => throw PlatformException(code: 'read-too-large'),
+        );
+    await expectLater(
+      folder.readHouseholdFile(),
+      throwsA(isA<InputTooLarge>()),
+    );
+  });
   test('a native write failure reaches the publisher', () async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(

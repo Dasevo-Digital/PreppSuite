@@ -10,6 +10,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/private_preferences.dart';
+
 import 'carried_settings.dart';
 import 'settings_sync.dart';
 
@@ -21,8 +23,10 @@ class SettingsSyncStore {
   Future<Map<String, StampedSetting>> load([
     SharedPreferences? preferences,
   ]) async {
-    final prefs = preferences ?? await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
+    final raw = await const PrivatePreferences().getString(
+      _key,
+      preferences: preferences,
+    );
     if (raw == null) return {};
     try {
       return decodeStampedSettings(jsonDecode(raw));
@@ -37,10 +41,12 @@ class SettingsSyncStore {
     Map<String, StampedSetting> settings, [
     SharedPreferences? preferences,
   ]) async {
-    final prefs = preferences ?? await SharedPreferences.getInstance();
-    await prefs.setString(
+    // This baseline includes decrypted private values, not just stamps.
+    // Keeping it beside their encrypted originals in clear would undo them.
+    await const PrivatePreferences().setString(
       _key,
       jsonEncode(encodeStampedSettings(settings)),
+      preferences: preferences,
     );
   }
 }

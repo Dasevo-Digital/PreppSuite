@@ -1,5 +1,8 @@
 import 'dart:async';
+
 import 'dart:io';
+
+import '../../../core/bounded_input.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -706,4 +709,5 @@ String? describeFilesRestored(
 }
 
 /// Whether [error] is a cancelled backup job rather than a failed one.
-bool isBackupCancelled(Object error) => error is BackupCancelled;
+bool isBackupCancelled(Object error) =>
+    error is BackupCancelled || error is OperationCancelled;

@@ -10,6 +10,8 @@ import 'inventory_csv_import.dart';
 import 'inventory_providers.dart';
 import 'item_package.dart';
 import 'package_nutrition.dart';
+import 'inventory_numbers.dart';
+import '../../../core/number_input.dart';
 
 /// Local writes: create, update, and delete-as-tombstone. The UI never
 /// talks to Drift directly — everything goes through here, which is what
@@ -63,6 +65,15 @@ class InventoryController {
     /// When it was last checked.
     DateTime? chargeCheckedAt,
   }) async {
+    requireInventoryNumbers(
+      quantity: quantity,
+      minQuantity: minQuantity,
+      dailyDose: dailyDose,
+      nutrition: nutrition,
+    );
+    if (package != null && !isNonNegativeFinite(package.size)) {
+      throw const InvalidInventoryNumbers();
+    }
     final now = DateTime.now().toUtc();
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
@@ -143,10 +154,19 @@ class InventoryController {
     /// When it was last checked.
     DateTime? chargeCheckedAt,
   }) async {
+    requireInventoryNumbers(
+      quantity: quantity,
+      minQuantity: minQuantity,
+      dailyDose: dailyDose,
+      nutrition: nutrition,
+    );
     final now = DateTime.now().toUtc();
     // A new figure is a new count. Anything else on the row -- a name, a
     // shelf, a note -- leaves the count where it was: a pack in daily use
     // counted from a rename would read as full again (#150).
+    if (package != null && !isNonNegativeFinite(package.size)) {
+      throw const InvalidInventoryNumbers();
+    }
     final recounted = quantity != existing.quantity;
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
@@ -190,6 +210,12 @@ class InventoryController {
   /// row gets a fresh [clientId], same as [addItem].
   Future<void> addItemsBulk(List<ParsedInventoryRow> rows) async {
     if (rows.isEmpty) return;
+    for (final row in rows) {
+      requireInventoryNumbers(
+        quantity: row.quantity,
+        minQuantity: row.minQuantity,
+      );
+    }
     await _db.upsertInventoryItems([
       for (final row in rows)
         InventoryItemsCompanion.insert(
@@ -219,6 +245,9 @@ class InventoryController {
   /// missing-equipment report are for; deleting it would quietly drop it
   /// off both, which is the opposite of what an emptied supply should do.
   Future<void> consumeQuantity(InventoryItem existing, double amount) async {
+    if (!isNonNegativeFinite(amount) || hasInvalidInventoryNumbers(existing)) {
+      throw const InvalidInventoryNumbers();
+    }
     final remaining = (existing.quantity - amount).clamp(
       0.0,
       existing.quantity,
@@ -269,8 +298,18 @@ class InventoryController {
     required double perPackage,
     required String measure,
   }) async {
+    if (!isNonNegativeFinite(perPackage) ||
+        hasInvalidInventoryNumbers(existing)) {
+      throw const InvalidInventoryNumbers();
+    }
     final package = ItemPackage.from(existing.unit, perPackage);
     if (package == null) return;
+    requireInventoryNumbers(
+      quantity: package.toUnits(existing.quantity),
+      minQuantity: existing.minQuantity == null
+          ? null
+          : package.toUnits(existing.minQuantity!),
+    );
     final minimum = existing.minQuantity;
     await _db.upsertInventoryItem(
       existing

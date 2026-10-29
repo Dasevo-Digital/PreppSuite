@@ -253,6 +253,7 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
           LocalHandoverFailure.otherHousehold => l10n.transferWrongHousehold,
           LocalHandoverFailure.unreachable => l10n.transferUnreachable,
           LocalHandoverFailure.unreadable => l10n.transferBroken,
+          LocalHandoverFailure.tooLarge => l10n.errorInputLimit,
           // Not the same sentence as unreachable on purpose: that one
           // sends somebody to look at their wifi, and here the wifi is
           // demonstrably fine.

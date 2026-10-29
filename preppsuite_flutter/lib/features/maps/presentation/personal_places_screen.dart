@@ -1,10 +1,13 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/feel.dart';
+import '../../../core/bounded_input.dart';
+import '../../../core/error_text.dart';
+import '../../../core/resource_limits.dart';
+import '../../../core/worker_job.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -27,6 +30,14 @@ class PersonalPlacesScreen extends StatefulWidget {
 class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
   static const _store = PersonalPlaceStore();
   late List<PersonalPlace> _places = [...widget.places];
+
+  CancellationToken? _importing;
+
+  @override
+  void dispose() {
+    _importing?.cancel();
+    super.dispose();
+  }
 
   Future<void> _edit({PersonalPlace? existing}) async {
     final l10n = AppLocalizations.of(context)!;
@@ -221,35 +232,47 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
   /// importing twice is what people do when they are not sure it worked.
   Future<void> _import() async {
     final l10n = AppLocalizations.of(context)!;
-    final file = await FilePicker.pickFile(
-      type: FileType.custom,
-      // Lower case only: the picker matches these literally, and a file
-      // off a camera or a receiver is as likely to shout as not.
-      allowedExtensions: const ['gpx', 'kml', 'xml'],
-    );
-    if (file == null || !mounted) return;
-    final bytes = await file.readAsBytes();
-    if (!mounted) return;
-
-    final String raw;
+    final token = CancellationToken();
+    _importing?.cancel();
+    setState(() => _importing = token);
     try {
-      raw = utf8.decode(bytes, allowMalformed: true);
-    } on Object {
-      _say(l10n.mapPlacesImportNothing);
-      return;
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: const ['gpx', 'kml', 'xml'],
+      );
+      if (file == null || !mounted || token.cancelled) return;
+      final bytes = await readBoundedBytes(
+        file.readAsByteStream(),
+        maxBytes: maxImportBytes,
+        declaredLength: file.lengthSync(),
+        cancellation: token,
+        timeout: const Duration(seconds: 60),
+      );
+      final incoming = await runInWorker(
+        bytes,
+        placesFromBytes,
+        cancellation: token,
+      );
+      if (!mounted || token.cancelled) return;
+      if (incoming.isEmpty) {
+        _say(l10n.mapPlacesImportNothing);
+        return;
+      }
+      final merged = mergePlaces(_places, incoming);
+      final added = merged.length - _places.length;
+      await _store.save(merged);
+      if (!mounted) return;
+      setState(() => _places = merged);
+      _say(l10n.mapPlacesImported(added));
+    } on OperationCancelled {
+      // Cancellation leaves the stored places intact.
+    } catch (error) {
+      if (mounted && !token.cancelled) _say(describeError(l10n, error));
+    } finally {
+      if (mounted && identical(_importing, token)) {
+        setState(() => _importing = null);
+      }
     }
-
-    final incoming = placesFromXml(raw);
-    if (incoming.isEmpty) {
-      _say(l10n.mapPlacesImportNothing);
-      return;
-    }
-    final merged = mergePlaces(_places, incoming);
-    final added = merged.length - _places.length;
-    setState(() => _places = merged);
-    await _store.save(_places);
-    if (!mounted) return;
-    _say(l10n.mapPlacesImported(added));
   }
 
   void _say(String message) => ScaffoldMessenger.of(
@@ -269,7 +292,7 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
           title: Text(l10n.mapPlacesTitle),
           actions: [
             IconButton(
-              onPressed: _import,
+              onPressed: _importing == null ? _import : null,
               tooltip: l10n.mapPlacesImport,
               icon: const Icon(Icons.file_download_outlined),
             ),
@@ -293,7 +316,20 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
             ),
           ],
         ),
-        body: _places.isEmpty
+        body: _importing != null
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(),
+                    TextButton(
+                      onPressed: () => _importing?.cancel(),
+                      child: Text(l10n.cancelButton),
+                    ),
+                  ],
+                ),
+              )
+            : _places.isEmpty
             ? Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32),

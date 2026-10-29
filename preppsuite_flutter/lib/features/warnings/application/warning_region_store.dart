@@ -20,6 +20,9 @@ const _extraRegionsKey = 'warningExtraRegions';
 class WarningRegionStore {
   const WarningRegionStore();
 
+  Future<bool> isConfigured() =>
+      const PrivatePreferences().containsKey(_countryKey);
+
   Future<void> save(WarningRegionFilter filter) async {
     const store = PrivatePreferences();
     await store.setString(_countryKey, filter.countryCode);

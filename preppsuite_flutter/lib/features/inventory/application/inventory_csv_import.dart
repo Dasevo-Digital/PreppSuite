@@ -4,6 +4,9 @@ import 'dart:typed_data';
 import 'package:csv/csv.dart';
 
 import '../../../model/categories.dart';
+import '../../../core/number_input.dart';
+import '../../../core/bounded_input.dart';
+import '../../../core/resource_limits.dart';
 
 /// A single successfully-parsed CSV row, ready to hand to
 /// [InventoryController.addItemsBulk]. Also what an edited [InventoryCsvRow]
@@ -182,8 +185,7 @@ String decodeCsvBytes(Uint8List bytes) {
 }
 
 double? parseCsvNumber(String raw) {
-  if (raw.isEmpty) return null;
-  return double.tryParse(raw.replaceAll(',', '.'));
+  return readNonNegativeNumber(raw);
 }
 
 DateTime? parseCsvDate(String raw) {
@@ -192,7 +194,7 @@ DateTime? parseCsvDate(String raw) {
 
   var match = iso.firstMatch(raw);
   if (match != null) {
-    return DateTime(
+    return _calendarDate(
       int.parse(match[1]!),
       int.parse(match[2]!),
       int.parse(match[3]!),
@@ -203,10 +205,17 @@ DateTime? parseCsvDate(String raw) {
   if (match != null) {
     var year = int.parse(match[3]!);
     if (year < 100) year += 2000;
-    return DateTime(year, int.parse(match[2]!), int.parse(match[1]!));
+    return _calendarDate(year, int.parse(match[2]!), int.parse(match[1]!));
   }
 
   return null;
+}
+
+DateTime? _calendarDate(int year, int month, int day) {
+  final date = DateTime(year, month, day);
+  return date.year == year && date.month == month && date.day == day
+      ? date
+      : null;
 }
 
 InventoryItemCategory? matchCategory(String raw) {
@@ -230,9 +239,17 @@ InventoryItemCategory? matchCategory(String raw) {
 /// [InventoryCsvRowError] instead of a [ParsedInventoryRow], so the UI can
 /// offer to fix them rather than silently dropping them.
 InventoryCsvParseResult parseInventoryCsv(String content) {
+  if (content.length > maxImportBytes ||
+      utf8.encode(content).length > maxImportBytes) {
+    throw const InputTooLarge(maxImportBytes);
+  }
   // `autoDetect` picks between `,` and `;` per line — German spreadsheet
   // exports commonly use `;` since `,` is the decimal separator there.
-  final table = Csv(autoDetect: true).decode(content);
+  final table = <List<dynamic>>[];
+  final decoder = Csv(autoDetect: true).decoder
+      .startChunkedConversion(_BoundedCsvRows(table));
+  decoder.add(content);
+  decoder.close();
 
   if (table.isEmpty) {
     return const InventoryCsvParseResult(rows: []);
@@ -346,6 +363,7 @@ InventoryCsvParseResult parseInventoryCsv(String content) {
       );
     }
 
+    if (rows.length >= maxImportRows) throw const InputTooLarge(maxImportRows);
     rows.add(
       InventoryCsvRow(
         rowNumber: rowNumber,
@@ -363,5 +381,27 @@ InventoryCsvParseResult parseInventoryCsv(String content) {
     );
   }
 
+  if (rows.length > maxImportRows) throw const InputTooLarge(maxImportRows);
   return InventoryCsvParseResult(rows: rows);
+}
+
+InventoryCsvParseResult parseInventoryCsvBytes(Uint8List bytes) {
+  if (bytes.length > maxImportBytes) throw const InputTooLarge(maxImportBytes);
+  return parseInventoryCsv(decodeCsvBytes(bytes));
+}
+
+/// Reject excess rows as the decoder emits them, before retaining a table.
+class _BoundedCsvRows implements Sink<List<dynamic>> {
+  _BoundedCsvRows(this.rows);
+  final List<List<dynamic>> rows;
+  @override
+  void add(List<dynamic> row) {
+    if (rows.length >= maxImportRows + 1) {
+      throw const InputTooLarge(maxImportRows);
+    }
+    rows.add(row);
+  }
+
+  @override
+  void close() {}
 }

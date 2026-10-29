@@ -10212,4 +10212,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get offlineProbeReadMode => 'Lesetest';
+
+  @override
+  String get inventoryInvalidNumbers =>
+      'Ungültige Vorratswerte: Bitte Mengen und Nährwerte der betroffenen Artikel korrigieren. Sie werden nicht als verfügbare Vorräte gezählt.';
+
+  @override
+  String get errorInputLimit =>
+      'Die Datei überschreitet die unterstützten Größen- oder Verarbeitungsgrenzen. Bitte eine kleinere Datei verwenden.';
 }

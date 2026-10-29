@@ -2846,5 +2846,7 @@
   "offlineProbeTranslation": "Paquete de idioma",
   "offlineProbeOther": "Más contenido",
   "documentNoDeadlinesDue": "No hay plazos de documentos pendientes.",
-  "offlineProbeReadMode": "Prueba de lectura"
+  "offlineProbeReadMode": "Prueba de lectura",
+  "inventoryInvalidNumbers": "Valores de existencias no válidos: corrige las cantidades y los nutrientes de los artículos afectados. No se cuentan como provisiones disponibles.",
+  "errorInputLimit": "El archivo supera los límites de tamaño o procesamiento admitidos. Utiliza un archivo más pequeño."
 }

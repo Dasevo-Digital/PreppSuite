@@ -23,6 +23,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'inventory_numbers.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
 
@@ -117,11 +118,12 @@ List<MedicationRange> medicationRanges(
   final today = DateTime(at.year, at.month, at.day);
   final ranges = <MedicationRange>[
     for (final item in items)
-      if (InventoryItemCategory.fromName(item.category) ==
-          InventoryItemCategory.medical)
-        if (item.dailyDose case final dose? when dose > 0)
-          if (item.quantity > 0)
-            MedicationRange(item: item, dailyDose: dose, today: today),
+      if (!hasInvalidInventoryNumbers(item))
+        if (InventoryItemCategory.fromName(item.category) ==
+            InventoryItemCategory.medical)
+          if (item.dailyDose case final dose? when dose > 0)
+            if (item.quantity > 0)
+              MedicationRange(item: item, dailyDose: dose, today: today),
   ];
   ranges.sort((a, b) => a.days.compareTo(b.days));
   return ranges;

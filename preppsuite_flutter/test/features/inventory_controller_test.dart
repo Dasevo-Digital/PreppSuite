@@ -1,4 +1,8 @@
 import 'package:drift/drift.dart' show Value;
+import 'package:preppsuite_flutter/features/inventory/application/inventory_numbers.dart';
+import 'package:preppsuite_flutter/features/inventory/application/inventory_csv_import.dart';
+import 'package:preppsuite_flutter/features/sharing/application/snapshot_exchange.dart';
+import 'package:preppsuite_flutter/features/sharing/application/device_snapshot.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:preppsuite_flutter/model/categories.dart';
@@ -52,6 +56,120 @@ void main() {
       ),
     );
   }
+
+  test(
+    'all controller paths reject nonfinite numbers without writing',
+    () async {
+      for (final number in [double.infinity, double.nan, -1.0]) {
+        await expectLater(
+          controller.addItem(
+            name: 'test',
+            category: InventoryItemCategory.water,
+            quantity: number,
+            unit: 'l',
+            storageLocation: 'box',
+          ),
+          throwsA(isA<InvalidInventoryNumbers>()),
+        );
+      }
+      const valid = ParsedInventoryRow(
+        name: 'test',
+        category: InventoryItemCategory.water,
+        quantity: 1,
+        unit: 'l',
+        storageLocation: 'box',
+      );
+      const invalid = ParsedInventoryRow(
+        name: 'test',
+        category: InventoryItemCategory.water,
+        quantity: double.infinity,
+        unit: 'l',
+        storageLocation: 'box',
+      );
+      await expectLater(
+        controller.addItemsBulk([valid, invalid]),
+        throwsA(isA<InvalidInventoryNumbers>()),
+      );
+      expect(await db.inventoryItemsForSync(householdId), isEmpty);
+      await addItem();
+      final item = await storedItem();
+      await expectLater(
+        controller.consumeQuantity(item, double.infinity),
+        throwsA(isA<InvalidInventoryNumbers>()),
+      );
+      await expectLater(
+        controller.countInMeasure(
+          item,
+          perPackage: double.infinity,
+          measure: 'g',
+        ),
+        throwsA(isA<InvalidInventoryNumbers>()),
+      );
+      expect((await storedItem()).quantity, 5);
+    },
+  );
+  test(
+    'invalid legacy values do not block an unrelated incoming row',
+    () async {
+      await addItem(quantity: double.infinity);
+      final row = encodeInventoryItem(await storedItem());
+      final snapshot = DeviceSnapshot(
+        deviceId: 'remote',
+        householdId: householdId,
+        writtenAt: DateTime.now().toUtc(),
+        inventoryItems: [
+          {...row, 'clientId': 'b', 'quantity': 2},
+        ],
+      );
+      expect(await applyHouseholdSnapshot(db, snapshot), 1);
+      expect(await db.inventoryItemsForSync(householdId), hasLength(2));
+    },
+  );
+  test(
+    'legacy invalid stock is excluded, repairable and deletable with undo',
+    () async {
+      await addItem(quantity: double.infinity);
+      final item = await storedItem();
+      expect(calculateSupply(items: [item], days: 1).caloriesCurrent, 0);
+      await expectLater(
+        readHouseholdSnapshot(db, deviceId: 'test', householdId: householdId),
+        throwsA(isA<InvalidInventoryNumbers>()),
+      );
+      await controller.deleteItem(item);
+      final snapshot = await readHouseholdSnapshot(
+        db,
+        deviceId: 'test',
+        householdId: householdId,
+      );
+      expect(snapshot.encode(), contains('deletedAt'));
+      expect(snapshot.inventoryItems.single['quantity'], 0);
+      await controller.restoreItem(item.clientId);
+      expect((await storedItem()).quantity, double.infinity);
+      await controller.updateItem(
+        await storedItem(),
+        name: 'fixed',
+        category: InventoryItemCategory.water,
+        quantity: 2,
+        unit: 'l',
+        storageLocation: 'box',
+      );
+      expect(
+        calculateSupply(
+          items: [await storedItem()],
+          days: 1,
+        ).waterCurrentLiters,
+        2,
+      );
+      expect(
+        (await readHouseholdSnapshot(
+          db,
+          deviceId: 'test',
+          householdId: householdId,
+        )).encode(),
+        isNotEmpty,
+      );
+    },
+  );
 
   test(
     'undo restores a deletion with a newer version and can sync again',

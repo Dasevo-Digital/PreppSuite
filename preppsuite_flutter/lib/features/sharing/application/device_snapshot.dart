@@ -234,10 +234,26 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
       name == null ||
       category == null ||
       quantity == null ||
+      quantity < 0 ||
       updatedAt == null) {
     return null;
   }
 
+  for (final field in [
+    'minQuantity',
+    'calories',
+    'proteinGrams',
+    'carbohydrateGrams',
+    'fatGrams',
+    'fiberGrams',
+    'dailyDose',
+    'packageSize',
+  ]) {
+    if (json[field] != null) {
+      final number = _double(json[field]);
+      if (number == null || number < 0) return null;
+    }
+  }
   return InventoryItemsCompanion.insert(
     clientId: clientId,
     householdId: householdId,
@@ -643,4 +659,5 @@ String? _text(Object? value) => value is String ? value : null;
 
 int? _int(Object? value) => value is num ? value.toInt() : null;
 
-double? _double(Object? value) => value is num ? value.toDouble() : null;
+double? _double(Object? value) =>
+    value is num && value.toDouble().isFinite ? value.toDouble() : null;

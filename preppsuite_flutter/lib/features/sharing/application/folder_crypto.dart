@@ -6,10 +6,9 @@
 /// account, and anyone who finds the directory on a shared disk. That is
 /// the threat this file answers — and only that one.
 ///
-/// It is deliberately *not* an answer to someone holding an unlocked
-/// device. The local database is plain SQLite and the derived key sits in
-/// app-private storage beside it: protecting the key harder than the data
-/// it opens would be theatre. See `docs/gemeinsamer-ordner.md`.
+/// Local databases and private settings are encrypted separately with a
+/// device key. This key and format protect copies in a shared folder;
+/// neither replaces the operating system's device access protection.
 library;
 
 import 'dart:convert';
@@ -18,10 +17,13 @@ import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 
+import '../../../core/bounded_input.dart';
+import '../../../core/worker_job.dart';
+
 /// Work factors for [Argon2id].
 ///
-/// 64 MB and three passes is the OWASP recommendation for Argon2id at
-/// this parallelism. It costs roughly a second on a mid-range phone,
+/// 64 MiB and three passes is the shipped Argon2id profile. It costs roughly
+/// a second on a mid-range phone,
 /// which is paid once when a folder is opened and never during a sync —
 /// the derived key is kept. Chosen high because the thing being guessed
 /// is a household passphrase, and those are short.
@@ -86,14 +88,16 @@ class VaultParameters {
     if (json['kdf'] != 'argon2id') return null;
 
     final salt = _base64OrNull(json['salt']);
-    if (salt == null || salt.length < 8) return null;
+    if (salt == null || salt.length < 8 || salt.length > 64) return null;
 
     final memory = json['memory'];
     final iterations = json['iterations'];
     final parallelism = json['parallelism'];
-    if (memory is! int || memory < 1024 || memory > 1048576) return null;
-    if (iterations is! int || iterations < 1 || iterations > 64) return null;
-    if (parallelism is! int || parallelism < 1 || parallelism > 16) return null;
+    if (memory is! int || memory < 1024 || memory > 131072) return null;
+    if (iterations is! int || iterations < 1 || iterations > 6) return null;
+    if (parallelism is! int || parallelism < 1 || parallelism > 4) return null;
+
+    if (memory * iterations > 393216) return null;
 
     return VaultParameters(
       salt: salt,
@@ -126,8 +130,24 @@ class FolderKey {
 /// Derives the folder key from a passphrase.
 Future<FolderKey> deriveFolderKey(
   String passphrase,
-  VaultParameters parameters,
-) async {
+  VaultParameters parameters, {
+  CancellationToken? cancellation,
+  Duration timeout = const Duration(seconds: 60),
+}) async {
+  // Also validate callers constructing parameters directly, before allocation.
+  if (VaultParameters.fromJson(parameters.toJson()) == null) {
+    throw const FormatException('Unsupported key derivation parameters');
+  }
+  return runInWorker(
+    (passphrase, parameters),
+    _deriveFolderKey,
+    cancellation: cancellation,
+    timeout: timeout,
+  );
+}
+
+Future<FolderKey> _deriveFolderKey((String, VaultParameters) input) async {
+  final (passphrase, parameters) = input;
   final algorithm = Argon2id(
     memory: parameters.memory,
     iterations: parameters.iterations,

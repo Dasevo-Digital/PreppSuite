@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../model/categories.dart';
+import '../../../core/bounded_input.dart';
+import '../../../core/error_text.dart';
+import '../../../core/resource_limits.dart';
+import '../../../core/worker_job.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/inventory_category_l10n.dart';
@@ -38,41 +42,61 @@ class _InventoryCsvImportScreenState
   bool _isParsing = false;
   bool _isImporting = false;
 
+  CancellationToken? _parsing;
+
+  @override
+  void dispose() {
+    _parsing?.cancel();
+    super.dispose();
+  }
+
   Future<void> _pickFile() async {
+    final token = CancellationToken();
+    _parsing?.cancel();
+    _parsing = token;
     setState(() {
       _readError = null;
       _rows = null;
       _missingColumns = false;
-    });
-
-    final file = await FilePicker.pickFile(
-      type: FileType.custom,
-      allowedExtensions: ['csv'],
-    );
-    if (file == null || !mounted) return;
-    final bytes = await file.readAsBytes();
-    if (!mounted) return;
-
-    setState(() {
-      _fileName = file.name;
       _isParsing = true;
     });
-
     try {
-      final content = decodeCsvBytes(bytes);
-      final result = parseInventoryCsv(content);
-      if (!mounted) return;
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+      if (file == null || !mounted || token.cancelled) return;
+      setState(() => _fileName = file.name);
+      final bytes = await readBoundedBytes(
+        file.readAsByteStream(),
+        maxBytes: maxImportBytes,
+        declaredLength: file.lengthSync(),
+        cancellation: token,
+        timeout: const Duration(seconds: 60),
+      );
+      final result = await runInWorker(
+        bytes,
+        parseInventoryCsvBytes,
+        cancellation: token,
+      );
+      if (!mounted || token.cancelled) return;
       setState(() {
         _rows = List.of(result.rows);
         _missingColumns = result.missingColumns;
-        _isParsing = false;
       });
+    } on OperationCancelled {
+      // Closing or cancelling a preview makes no changes to the inventory.
     } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _readError = error.toString();
-        _isParsing = false;
-      });
+      if (mounted && !token.cancelled) {
+        setState(
+          () =>
+              _readError = describeError(AppLocalizations.of(context)!, error),
+        );
+      }
+    } finally {
+      if (mounted && identical(_parsing, token)) {
+        setState(() => _isParsing = false);
+      }
     }
   }
 
@@ -100,11 +124,21 @@ class _InventoryCsvImportScreenState
     if (validRows.isEmpty) return;
 
     setState(() => _isImporting = true);
-    await ref
-        .read(inventoryControllerProvider(widget.householdId))
-        .addItemsBulk(validRows);
-
-    if (mounted) Navigator.of(context).pop(validRows.length);
+    try {
+      await ref
+          .read(inventoryControllerProvider(widget.householdId))
+          .addItemsBulk(validRows);
+      if (mounted) Navigator.of(context).pop(validRows.length);
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () =>
+              _readError = describeError(AppLocalizations.of(context)!, error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isImporting = false);
+    }
   }
 
   @override
@@ -112,119 +146,117 @@ class _InventoryCsvImportScreenState
     final l10n = AppLocalizations.of(context)!;
     final rows = _rows;
     final validCount = rows?.where((row) => row.isValid).length ?? 0;
-
     return Scaffold(
       appBar: AppBar(title: Text(l10n.csvImportTitle)),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
-            child: ListView(
-              padding: const EdgeInsets.all(24),
-              children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(24),
+                  sliver: SliverList.list(
+                    children: [
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.csvImportInstructionsTitle,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(l10n.csvImportInstructionsBody),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      OutlinedButton.icon(
+                        onPressed: _isParsing || _isImporting
+                            ? null
+                            : _pickFile,
+                        icon: const Icon(Icons.upload_file),
+                        label: Text(
+                          _fileName == null
+                              ? l10n.csvImportPickFileButton
+                              : l10n.csvImportChangeFileButton,
+                        ),
+                      ),
+                      if (_fileName != null)
                         Text(
-                          l10n.csvImportInstructionsTitle,
+                          _fileName!,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      if (_isParsing) ...[
+                        const LinearProgressIndicator(),
+                        Text(l10n.csvImportParsing),
+                        TextButton(
+                          onPressed: () => _parsing?.cancel(),
+                          child: Text(l10n.cancelButton),
+                        ),
+                      ],
+                      if (_readError != null)
+                        Text(
+                          l10n.csvImportFileReadError(_readError!),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      if (_missingColumns)
+                        Text(
+                          l10n.csvImportReasonMissingColumns,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      if (rows != null) ...[
+                        const SizedBox(height: 24),
+                        Text(
+                          l10n.csvImportSummary(validCount, rows.length),
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        const SizedBox(height: 8),
-                        Text(l10n.csvImportInstructionsBody),
+                        if (rows.isEmpty) Text(l10n.csvImportNoValidRows),
                       ],
-                    ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                OutlinedButton.icon(
-                  onPressed: _isParsing || _isImporting ? null : _pickFile,
-                  icon: const Icon(Icons.upload_file),
-                  label: Text(
-                    _fileName == null
-                        ? l10n.csvImportPickFileButton
-                        : l10n.csvImportChangeFileButton,
-                  ),
-                ),
-                if (_fileName != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _fileName!,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-                if (_isParsing) ...[
-                  const SizedBox(height: 24),
-                  Center(
-                    child: Column(
-                      children: [
-                        const CircularProgressIndicator(),
-                        const SizedBox(height: 8),
-                        Text(l10n.csvImportParsing),
-                      ],
-                    ),
-                  ),
-                ],
-                if (_readError != null) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.csvImportFileReadError(_readError!),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ],
-                if (_missingColumns) ...[
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.csvImportReasonMissingColumns,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ],
-                if (rows != null) ...[
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.csvImportSummary(validCount, rows.length),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  if (rows.isEmpty) ...[
-                    const SizedBox(height: 16),
-                    Text(l10n.csvImportNoValidRows),
-                  ] else ...[
-                    const SizedBox(height: 16),
-                    Card(
-                      margin: EdgeInsets.zero,
-                      child: Column(
-                        children: [
-                          for (var i = 0; i < rows.length; i++) ...[
-                            if (i > 0) const Divider(height: 1),
-                            _ImportRowTile(
-                              row: rows[i],
-                              l10n: l10n,
-                              onTap: () => _editRow(i),
-                              onRemove: () => _removeRow(i),
-                            ),
-                          ],
-                        ],
+                if (rows != null)
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    sliver: SliverList.builder(
+                      itemCount: rows.length,
+                      itemBuilder: (context, i) => Card(
+                        child: _ImportRowTile(
+                          row: rows[i],
+                          l10n: l10n,
+                          onTap: () {
+                            if (!_isImporting) _editRow(i);
+                          },
+                          onRemove: () {
+                            if (!_isImporting) _removeRow(i);
+                          },
+                        ),
                       ),
                     ),
-                  ],
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: validCount == 0 || _isImporting ? null : _import,
-                    child: _isImporting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(l10n.csvImportImportButton(validCount)),
                   ),
-                ],
+                if (rows != null)
+                  SliverPadding(
+                    padding: const EdgeInsets.all(24),
+                    sliver: SliverToBoxAdapter(
+                      child: FilledButton(
+                        onPressed: validCount == 0 || _isImporting
+                            ? null
+                            : _import,
+                        child: _isImporting
+                            ? const CircularProgressIndicator(strokeWidth: 2)
+                            : Text(l10n.csvImportImportButton(validCount)),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -412,13 +444,13 @@ class _EditRowDialogState extends State<_EditRowDialog> {
       ParsedInventoryRow(
         name: _nameController.text.trim(),
         category: _category,
-        quantity: double.parse(_quantityController.text.trim()),
+        quantity: parseCsvNumber(_quantityController.text)!,
         unit: _unitController.text.trim(),
         storageLocation: _storageLocationController.text.trim(),
         expirationDate: _expirationDate,
         minQuantity: minQuantityText.isEmpty
             ? null
-            : double.parse(minQuantityText),
+            : parseCsvNumber(minQuantityText)!,
         notes: notes.isEmpty ? null : notes,
       ),
     );
@@ -433,7 +465,7 @@ class _EditRowDialogState extends State<_EditRowDialog> {
       if (trimmed.isEmpty) {
         return required ? l10n.fieldRequired : null;
       }
-      return double.tryParse(trimmed) == null ? l10n.invalidNumber : null;
+      return parseCsvNumber(trimmed) == null ? l10n.invalidNumber : null;
     };
   }
 

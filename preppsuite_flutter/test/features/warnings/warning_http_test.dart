@@ -6,6 +6,34 @@ import 'package:http/testing.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_http.dart';
 
 void main() {
+  test('steady trickle still stops at the total response deadline', () async {
+    var cancelled = false;
+    late Timer timer;
+    final stream = StreamController<List<int>>(
+      onCancel: () {
+        cancelled = true;
+        timer.cancel();
+      },
+    );
+    timer = Timer.periodic(
+      const Duration(milliseconds: 10),
+      (_) => stream.add([1]),
+    );
+    final client = MockClient.streaming(
+      (_, _) async => http.StreamedResponse(stream.stream, 200),
+    );
+    await expectLater(
+      getWarningResponse(
+        client,
+        Uri.parse('https://warnings.invalid/feed'),
+        timeout: const Duration(milliseconds: 50),
+      ),
+      throwsA(isA<TimeoutException>()),
+    );
+    expect(cancelled, isTrue);
+    await stream.close();
+    client.close();
+  });
   final uri = Uri.parse('https://warnings.invalid/feed');
 
   test('returns a complete response inside its limits', () async {

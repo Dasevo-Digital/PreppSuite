@@ -1612,7 +1612,14 @@ class AppDatabase extends _$AppDatabase {
     final names = columns.keys.toList()..sort();
     Object? valueOf(String name) {
       final value = (columns[name] as Variable).value;
-      return value is DateTime ? value.millisecondsSinceEpoch ~/ 1000 : value;
+      if (value is DateTime) return value.millisecondsSinceEpoch ~/ 1000;
+      // Legacy nonfinite SQLite values must not prevent unrelated merges.
+      // This representation is only a deterministic tie-break key, never
+      // exported as a household value.
+      if (value is double && !value.isFinite) {
+        return {'nonFinite': value.toString()};
+      }
+      return value;
     }
 
     final deleted =

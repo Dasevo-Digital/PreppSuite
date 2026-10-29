@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/bounded_input.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -32,6 +35,13 @@ class FolderEncryptionSection extends ConsumerStatefulWidget {
 class _FolderEncryptionSectionState
     extends ConsumerState<FolderEncryptionSection> {
   bool _busy = false;
+  CancellationToken? _deriving;
+
+  @override
+  void dispose() {
+    _deriving?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +64,11 @@ class _FolderEncryptionSectionState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (_busy)
+            TextButton(
+              onPressed: () => _deriving?.cancel(),
+              child: Text(l10n.cancelButton),
+            ),
           Row(
             children: [
               Icon(
@@ -107,17 +122,21 @@ class _FolderEncryptionSectionState
       if (folder == null || profile == null) return;
 
       final encryption = FolderEncryption(folder: syncFolderFor(folder.value));
+      final token = CancellationToken();
+      _deriving = token;
       final error = encrypted
           ? await encryption.unlock(
               householdId: profile.id,
               passphrase: passphrase,
+              cancellation: token,
             )
           : await encryption.enable(
               householdId: profile.id,
               passphrase: passphrase,
+              cancellation: token,
             );
 
-      if (!mounted) return;
+      if (!mounted || token.cancelled) return;
       final messenger = ScaffoldMessenger.of(context);
       messenger.hideCurrentSnackBar();
       if (error != null) {

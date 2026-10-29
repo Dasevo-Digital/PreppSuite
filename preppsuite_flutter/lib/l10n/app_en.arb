@@ -6040,5 +6040,7 @@
   "offlineProbeTranslation": "Language pack",
   "offlineProbeOther": "Further content",
   "documentNoDeadlinesDue": "No document deadlines are currently due.",
-  "offlineProbeReadMode": "Read test"
+  "offlineProbeReadMode": "Read test",
+  "inventoryInvalidNumbers": "Invalid stock values: please correct the amounts and nutrition of the affected items. They are not counted as available supplies.",
+  "errorInputLimit": "The file exceeds the supported size or processing limits. Please use a smaller file."
 }

@@ -1,9 +1,12 @@
 import 'dart:convert';
+
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import '../../maps/application/pmtiles_archive.dart' show ByteRangeSource;
+
+import '../../../core/bounded_input.dart';
 
 import '../../../local_db/database.dart';
 import '../../preparedness/application/preparedness_hub_store.dart';
@@ -58,7 +61,10 @@ class BackupService {
     void Function(BackupFileEntry entry)? onFile,
     void Function(int bytes)? onBytes,
   }) async {
-    final (key, parameters) = await _newKey(passphrase);
+    final (key, parameters) = await _newKey(
+      passphrase,
+      cancellation: cancellation,
+    );
     final manifest = [
       for (var i = 0; i < files.length; i++) files[i].entry.withIndex(i),
     ];
@@ -104,14 +110,28 @@ class BackupService {
     return unreadable;
   }
 
-  Future<(FolderKey, VaultParameters)> _newKey(String passphrase) async {
+  Future<(FolderKey, VaultParameters)> _newKey(
+    String passphrase, {
+    CancellationToken? cancellation,
+  }) async {
     final random = Random.secure();
     final parameters = VaultParameters(
       salt: Uint8List.fromList(
         List.generate(saltLength, (_) => random.nextInt(256)),
       ),
     );
-    return (await deriveFolderKey(passphrase, parameters), parameters);
+    try {
+      return (
+        await deriveFolderKey(
+          passphrase,
+          parameters,
+          cancellation: cancellation,
+        ),
+        parameters,
+      );
+    } on OperationCancelled {
+      throw const BackupCancelled();
+    }
   }
 
   Future<Map<String, Object?>> _envelope(
@@ -155,8 +175,14 @@ class BackupService {
     BackupFile file,
     String passphrase, {
     String? householdId,
+    CancellationToken? cancellation,
   }) async {
-    final opened = await _open(file.envelope, householdId, passphrase);
+    final opened = await _open(
+      file.envelope,
+      householdId,
+      passphrase,
+      cancellation: cancellation,
+    );
     if (opened == null) return null;
     final (snapshot, key, envelope) = opened;
     return OpenedBackup(
@@ -317,8 +343,9 @@ class BackupService {
   Future<(DeviceSnapshot, FolderKey, Map<String, Object?>)?> _open(
     Map<String, Object?> envelope,
     String? householdId,
-    String passphrase,
-  ) async {
+    String passphrase, {
+    CancellationToken? cancellation,
+  }) async {
     if (!const {1, 2, backupContainerVersion}.contains(
           envelope['preppsuiteBackup'],
         ) ||
@@ -330,7 +357,11 @@ class BackupService {
       envelope['key']! as Map<String, Object?>,
     );
     if (parameters == null) return null;
-    final key = await deriveFolderKey(passphrase, parameters);
+    final key = await deriveFolderKey(
+      passphrase,
+      parameters,
+      cancellation: cancellation,
+    );
     final clear = await decryptFromFolder(envelope['payload']! as String, key);
     if (clear == null) return null;
     final snapshot = DeviceSnapshot.decode(clear);

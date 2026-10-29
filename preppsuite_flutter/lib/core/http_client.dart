@@ -32,38 +32,105 @@ class TimeoutClient extends http.BaseClient {
   final Duration responseTimeout;
   final Duration idleTimeout;
 
+  final _active = <Completer<void>>{};
+
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
-    final response = await _inner
-        .send(request)
-        .timeout(
-          responseTimeout,
-          onTimeout: () => throw TimeoutException(
-            'no answer from ${request.url.host}',
+    final abort = Completer<void>();
+    _active.add(abort);
+    void stop() {
+      if (!abort.isCompleted) abort.complete();
+      _active.remove(abort);
+    }
+
+    if (request is http.Abortable) {
+      final weak = WeakReference(abort);
+      unawaited(
+        request.abortTrigger?.then((_) {
+          final signal = weak.target;
+          if (signal != null && !signal.isCompleted) signal.complete();
+        }),
+      );
+    }
+    try {
+      final response = await _inner
+          .send(_AbortableProxy(request, abort.future))
+          .timeout(
             responseTimeout,
-          ),
-        );
-    final body = response.stream.timeout(
-      idleTimeout,
-      onTimeout: (sink) {
-        sink.addError(
-          TimeoutException('${request.url.host} stopped sending', idleTimeout),
-        );
-        sink.close();
-      },
-    );
-    return http.StreamedResponse(
-      http.ByteStream(body),
-      response.statusCode,
-      contentLength: response.contentLength,
-      request: response.request,
-      headers: response.headers,
-      isRedirect: response.isRedirect,
-      persistentConnection: response.persistentConnection,
-      reasonPhrase: response.reasonPhrase,
-    );
+            onTimeout: () {
+              stop();
+              throw TimeoutException('Response deadline', responseTimeout);
+            },
+          );
+      final body = response.stream.timeout(
+        idleTimeout,
+        onTimeout: (sink) {
+          stop();
+          sink.addError(
+            TimeoutException('Response idle deadline', idleTimeout),
+          );
+          sink.close();
+        },
+      );
+      return http.StreamedResponse(
+        _finishBody(body, stop),
+        response.statusCode,
+        contentLength: response.contentLength,
+        request: response.request,
+        headers: response.headers,
+        isRedirect: response.isRedirect,
+        persistentConnection: response.persistentConnection,
+        reasonPhrase: response.reasonPhrase,
+      );
+    } catch (_) {
+      stop();
+      rethrow;
+    }
   }
 
   @override
-  void close() => _inner.close();
+  void close() {
+    for (final abort in _active.toList()) {
+      if (!abort.isCompleted) abort.complete();
+    }
+    _active.clear();
+    _inner.close();
+  }
+}
+
+Stream<List<int>> _finishBody(
+  Stream<List<int>> body,
+  void Function() stop,
+) async* {
+  try {
+    yield* body;
+  } finally {
+    stop();
+  }
+}
+
+/// Preserve arbitrary request bodies, including multipart uploads, while
+/// giving the transport a request-local abort signal.
+class _AbortableProxy extends http.BaseRequest with http.Abortable {
+  _AbortableProxy(this.original, this.abortTrigger)
+    : super(original.method, original.url) {
+    headers.addAll(original.headers);
+    contentLength = original.contentLength;
+    followRedirects = original.followRedirects;
+    maxRedirects = original.maxRedirects;
+    persistentConnection = original.persistentConnection;
+  }
+  final http.BaseRequest original;
+  @override
+  final Future<void> abortTrigger;
+  @override
+  http.ByteStream finalize() {
+    super.finalize();
+    final body = original.finalize();
+    // Multipart requests create their boundary during finalize().
+    headers
+      ..clear()
+      ..addAll(original.headers);
+    return body;
+  }
 }

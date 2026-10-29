@@ -10246,4 +10246,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get offlineProbeReadMode => 'Prueba de lectura';
+
+  @override
+  String get inventoryInvalidNumbers =>
+      'Valores de existencias no válidos: corrige las cantidades y los nutrientes de los artículos afectados. No se cuentan como provisiones disponibles.';
+
+  @override
+  String get errorInputLimit =>
+      'El archivo supera los límites de tamaño o procesamiento admitidos. Utiliza un archivo más pequeño.';
 }

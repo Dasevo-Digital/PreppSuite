@@ -1,3 +1,4 @@
+import 'inventory_numbers.dart';
 import '../../../local_db/database.dart';
 import 'food_amount.dart';
 
@@ -129,6 +130,7 @@ SupplyGroupResult supplyGroupCoverage({
   final unmeasurable = <InventoryItem>[];
 
   for (final item in items) {
+    if (hasInvalidInventoryNumbers(item)) continue;
     if (item.deletedAt != null) continue;
     // Only what the table is about. A torch has no group and is not
     // missing one.

@@ -32,9 +32,12 @@
 library;
 
 import 'dart:convert';
+
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
+
+import '../../../core/bounded_input.dart';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:cryptography/dart.dart';
@@ -105,15 +108,11 @@ class BackupCancelled implements Exception {
 }
 
 /// Asked between chunks whether to stop.
-class BackupCancellation {
-  var _cancelled = false;
-
-  bool get isCancelled => _cancelled;
-
-  void cancel() => _cancelled = true;
-
+class BackupCancellation extends CancellationToken {
+  bool get isCancelled => cancelled;
+  @override
   void check() {
-    if (_cancelled) throw const BackupCancelled();
+    if (cancelled) throw const BackupCancelled();
   }
 }
 

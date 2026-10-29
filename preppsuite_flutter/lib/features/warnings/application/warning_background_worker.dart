@@ -60,27 +60,24 @@ Future<bool> runWarningBackgroundPoll({
   WarningRegionStore regionStore = const WarningRegionStore(),
   NotificationService? notifications,
   WarningPollService? pollService,
+  Future<bool> Function()? initializeLocalData,
 }) async {
   // The isolate starts bare; plugins are unusable until this runs.
   WidgetsFlutterBinding.ensureInitialized();
 
-  final filter = await regionStore.load();
-  // Nothing set up yet — no household, no region, nothing to poll for.
-  if (filter == null) return true;
+  if (!await const NotificationsEnabledStore().isEnabled()) return true;
+  if (!await regionStore.isConfigured()) return true;
 
-  if (!await const NotificationsEnabledStore().isEnabled()) {
-    // The user switched notifications off. Polling anyway would spend
-    // their battery and data on something they asked not to be told.
-    return true;
+  // The region is private data too. On a cold isolate its key must be
+  // loaded before reading it, or an encrypted value looks unconfigured.
+  // An injected database is already initialized by its owner in tests.
+  if ((database == null || initializeLocalData != null) &&
+      !await (initializeLocalData ?? _localDatabaseIsOpenable)()) {
+    await const WarningPollStatusStore().recordBlocked();
+    return false;
   }
-
-  // This task has its own isolate and must obtain the device-protected key
-  // before it opens Drift. It can genuinely be unavailable — an Android
-  // device rebooted and not yet unlocked has no keystore — but that is a
-  // failed run, not a finished one. Reporting success would let the device
-  // stop warning for good without anything anywhere saying so; the marker
-  // below is what the readiness card in Settings reads back.
-  if (database == null && !await _localDatabaseIsOpenable()) {
+  final filter = await regionStore.load();
+  if (filter == null) {
     await const WarningPollStatusStore().recordBlocked();
     return false;
   }

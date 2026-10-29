@@ -1,6 +1,8 @@
 import 'dart:async' show TimeoutException;
 import 'dart:io';
 
+import 'bounded_input.dart';
+
 import 'package:drift/drift.dart'
     show DriftWrappedException, InvalidDataException;
 import 'package:drift/isolate.dart' show DriftRemoteException;
@@ -21,6 +23,7 @@ import '../features/shelters/application/overpass_shelter_client.dart'
     show OverpassException;
 import '../l10n/generated/app_localizations.dart';
 import 'local_database_encryption.dart';
+import '../features/inventory/application/inventory_numbers.dart';
 
 /// What to put on the screen when something failed.
 ///
@@ -36,6 +39,8 @@ import 'local_database_encryption.dart';
 /// the useful recovery instruction instead.
 String describeError(AppLocalizations l10n, Object error) {
   return switch (error) {
+    InputTooLarge() => l10n.errorInputLimit,
+    InvalidInventoryNumbers() => l10n.inventoryInvalidNumbers,
     // The databases run in a background isolate, and what fails there
     // arrives wrapped; unwrapped, a disk that is full still says so
     // instead of "an unexpected error" (#210).

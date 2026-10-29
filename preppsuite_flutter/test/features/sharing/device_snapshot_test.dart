@@ -22,6 +22,27 @@ void main() {
   };
 
   group('inventory rows', () {
+    test(
+      'required and optional numeric fields reject nonfinite or negative data',
+      () {
+        for (final field in [
+          'quantity',
+          'minQuantity',
+          'calories',
+          'dailyDose',
+          'packageSize',
+          'fatGrams',
+        ]) {
+          for (final number in [double.infinity, double.nan, -1]) {
+            expect(
+              decodeInventoryItem(water(overrides: {field: number})),
+              isNull,
+            );
+          }
+        }
+      },
+    );
+
     test('every field the folder carries survives a decode', () {
       final companion = decodeInventoryItem(water())!;
 

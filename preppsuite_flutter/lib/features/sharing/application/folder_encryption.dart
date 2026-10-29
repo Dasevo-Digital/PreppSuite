@@ -6,6 +6,7 @@
 library;
 
 import 'folder_crypto.dart';
+import '../../../core/bounded_input.dart';
 import 'folder_key_store.dart';
 import 'household_file.dart';
 import 'sync_folder.dart';
@@ -59,6 +60,7 @@ class FolderEncryption {
   Future<FolderEncryptionError?> enable({
     required String householdId,
     required String passphrase,
+    CancellationToken? cancellation,
   }) async {
     if (passphrase.length < minimumPassphraseLength) {
       return FolderEncryptionError.tooShort;
@@ -79,7 +81,11 @@ class FolderEncryption {
       if (stored.isEncrypted) return FolderEncryptionError.alreadyEncrypted;
 
       final parameters = VaultParameters(salt: newSalt());
-      final key = await deriveFolderKey(passphrase, parameters);
+      final key = await deriveFolderKey(
+        passphrase,
+        parameters,
+        cancellation: cancellation,
+      );
 
       final sealed = HouseholdFile(
         householdId: stored.householdId,
@@ -90,6 +96,7 @@ class FolderEncryption {
         check: await buildCheckValue(key),
       ).encode();
 
+      cancellation?.check();
       await _keyStore.write(householdId, key);
       try {
         await _folder.writeHouseholdFile(sealed);
@@ -117,6 +124,7 @@ class FolderEncryption {
   Future<FolderEncryptionError?> found({
     required HouseholdFile identity,
     required String passphrase,
+    CancellationToken? cancellation,
   }) async {
     if (passphrase.length < minimumPassphraseLength) {
       return FolderEncryptionError.tooShort;
@@ -130,7 +138,11 @@ class FolderEncryption {
       }
 
       final parameters = VaultParameters(salt: newSalt());
-      final key = await deriveFolderKey(passphrase, parameters);
+      final key = await deriveFolderKey(
+        passphrase,
+        parameters,
+        cancellation: cancellation,
+      );
       final sealed = HouseholdFile(
         householdId: identity.householdId,
         name: identity.name,
@@ -140,6 +152,7 @@ class FolderEncryption {
         check: await buildCheckValue(key),
       ).encode();
 
+      cancellation?.check();
       await _keyStore.write(identity.householdId, key);
       await _folder.writeHouseholdFile(sealed);
       return null;
@@ -174,6 +187,7 @@ class FolderEncryption {
   Future<FolderEncryptionError?> unlock({
     required String householdId,
     required String passphrase,
+    CancellationToken? cancellation,
   }) async {
     try {
       final raw = await _folder.readHouseholdFile();
@@ -186,11 +200,16 @@ class FolderEncryption {
         return FolderEncryptionError.failed;
       }
 
-      final key = await deriveFolderKey(passphrase, stored.vault!);
+      final key = await deriveFolderKey(
+        passphrase,
+        stored.vault!,
+        cancellation: cancellation,
+      );
       if (!await checkFolderKey(key, stored.check!)) {
         return FolderEncryptionError.wrongPassphrase;
       }
 
+      cancellation?.check();
       await _keyStore.write(householdId, key);
       return null;
     } on Object {

@@ -111,6 +111,58 @@ void main() {
     );
   }
 
+  test(
+    'detail budget keeps regional warnings and still polls weather',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final now = DateTime.now().toUtc();
+      await db.upsertWarning(
+        WarningsCompanion.insert(
+          source: 'bbk',
+          externalId: 'regional-only',
+          countryCode: 'DE',
+          regionKey: const Value('05334'),
+          severity: 'moderate',
+          eventType: 'Test',
+          headline: 'Test',
+          effective: now,
+          sent: now,
+          updatedAt: now,
+          expires: Value(now.add(const Duration(days: 1))),
+        ),
+      );
+      final requested = <String>[];
+      final client = FixtureHttpClient({
+        ...allBbkSources(mowasBody: mowas),
+        meteoUrl: meteoalarm,
+      }, onRequest: requested.add);
+      final result = await WarningPollService(
+        database: db,
+        bbkClient: BbkClient(httpClient: client),
+        meteoAlarmClient: MeteoAlarmClient(httpClient: client),
+        detailBudget: Duration.zero,
+      ).poll(countryCode: 'DE', kreisSchluessel: '05334');
+      expect(result.complete, isFalse);
+      expect(result.retired, 0);
+      expect(requested, contains(meteoUrl));
+      expect(
+        requested.where(
+          (url) => url.contains('/dashboard/') || url.contains('/warnings/'),
+        ),
+        isEmpty,
+      );
+      expect(
+        (await db.watchAllWarnings().first).any(
+          (w) => w.externalId == 'regional-only',
+        ),
+        isTrue,
+      );
+      final status = await const WarningPollStatusStore().load();
+      expect(status.sourceComplete['meteoalarm'], isNotNull);
+      expect(status.sourceComplete['bbk'], isNull);
+    },
+  );
+
   test('stores warnings from both feeds', () async {
     final result = await service({
       ...allBbkSources(mowasBody: mowas),

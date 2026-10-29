@@ -118,7 +118,11 @@ final class StorageBridge: NSObject {
     case "list":
       result(list(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? ""))
     case "read":
-      result(read(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? ""))
+      fileReads.async {
+        let value = self.read(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? "",
+          maxBytes: arguments["maxBytes"] as? Int ?? 64 * 1024 * 1024)
+        DispatchQueue.main.async { result(value) }
+      }
     case "write":
       do {
         try write(
@@ -303,22 +307,39 @@ final class StorageBridge: NSObject {
     } ?? []
   }
 
-  private func read(_ uri: String, _ path: String) -> String? {
-    return withAccess(uri) { root -> String? in
+  private func read(_ uri: String, _ path: String, maxBytes: Int) -> Any? {
+    let limit = max(0, min(maxBytes, 64 * 1024 * 1024))
+    return withAccess(uri) { root -> Any? in
       var segments = Self.segments(path)
       guard let name = segments.popLast(),
             let folder = directory(in: root, segments: segments, create: false)
       else { return nil }
 
       let file = folder.appendingPathComponent(name)
-      var text: String?
+      var text: Any?
       // Coordinated because the folder is the whole point of the feature
       // and it is normally a cloud one — iCloud Drive, Nextcloud. An
       // uncoordinated read of a file another device just wrote can find a
       // placeholder that has not been downloaded yet.
       var coordinationError: NSError?
       NSFileCoordinator().coordinate(readingItemAt: file, options: [], error: &coordinationError) { url in
-        text = try? String(contentsOf: url, encoding: .utf8)
+        do {
+          let handle = try FileHandle(forReadingFrom: url)
+          defer { handle.closeFile() }
+          var data = Data()
+          while data.count <= limit {
+            let chunk: Data
+            let count = min(8192, limit - data.count + 1)
+            if #available(macOS 10.15.4, iOS 13.0, *) {
+              chunk = try handle.read(upToCount: count) ?? Data()
+            } else { chunk = handle.readData(ofLength: count) }
+            if chunk.isEmpty { break }
+            data.append(chunk)
+          }
+          if data.count > limit {
+            text = FlutterError(code: "read-too-large", message: "File exceeds the read limit.", details: nil)
+          } else { text = String(data: data, encoding: .utf8) }
+        } catch { text = nil }
       }
       return text
     }

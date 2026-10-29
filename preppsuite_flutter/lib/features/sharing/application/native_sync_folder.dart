@@ -1,4 +1,10 @@
+import 'dart:convert';
+
 import 'package:path/path.dart' as p;
+import 'package:flutter/services.dart';
+
+import '../../../core/bounded_input.dart';
+import '../../../core/resource_limits.dart';
 
 import '../../../core/platform_storage.dart';
 import 'sync_folder.dart';
@@ -51,26 +57,42 @@ class NativeSyncFolder implements SyncFolder {
 
   @override
   Future<String?> readDeviceFile(String deviceId) =>
-      _read(deviceFilePath(deviceId));
+      _read(deviceFilePath(deviceId), maxSnapshotBytes);
 
   @override
   Future<void> writeDeviceFile(String deviceId, String contents) =>
       _write(deviceFilePath(deviceId), contents);
 
   @override
-  Future<String?> readHouseholdFile() => _read(householdFilePath);
+  Future<String?> readHouseholdFile() =>
+      _read(householdFilePath, maxHouseholdMetadataBytes);
 
   @override
   Future<void> writeHouseholdFile(String contents) =>
       _write(householdFilePath, contents);
 
-  Future<String?> _read(String path) => nativeStorageChannel
-      .invokeMethod<String>('read', {'uri': treeUri, 'path': path});
-
-  Future<void> _write(String path, String contents) =>
-      nativeStorageChannel.invokeMethod<void>('write', {
+  Future<String?> _read(String path, int maxBytes) async {
+    try {
+      return await nativeStorageChannel.invokeMethod<String>('read', {
         'uri': treeUri,
         'path': path,
-        'contents': contents,
+        'maxBytes': maxBytes,
       });
+    } on PlatformException catch (error) {
+      if (error.code == 'read-too-large') throw InputTooLarge(maxBytes);
+      rethrow;
+    }
+  }
+
+  Future<void> _write(String path, String contents) async {
+    final limit = path == householdFilePath
+        ? maxHouseholdMetadataBytes
+        : maxSnapshotBytes;
+    if (utf8.encode(contents).length > limit) throw InputTooLarge(limit);
+    await nativeStorageChannel.invokeMethod<void>('write', {
+      'uri': treeUri,
+      'path': path,
+      'contents': contents,
+    });
+  }
 }

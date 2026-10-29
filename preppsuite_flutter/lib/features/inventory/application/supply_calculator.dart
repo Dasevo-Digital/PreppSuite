@@ -1,5 +1,6 @@
 import '../../../model/categories.dart';
 
+import 'inventory_numbers.dart';
 import '../../../local_db/database.dart';
 import 'food_amount.dart';
 import 'inventory_category_l10n.dart';
@@ -136,6 +137,7 @@ SupplyCalculatorResult calculateSupply({
   var caloriesCurrent = 0.0;
 
   for (final item in items) {
+    if (hasInvalidInventoryNumbers(item)) continue;
     final category = InventoryItemCategoryX.fromName(item.category);
     if (category == InventoryItemCategory.water) {
       final liters = normalizeToLiters(item.quantity, item.unit);

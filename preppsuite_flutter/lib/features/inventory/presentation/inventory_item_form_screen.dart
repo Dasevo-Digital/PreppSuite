@@ -18,6 +18,7 @@ import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/error_text.dart';
+import '../../../core/number_input.dart';
 import '../../../local_db/database.dart';
 import '../application/inventory_category_l10n.dart';
 import '../application/expiry_reminder_provider.dart';
@@ -623,8 +624,7 @@ class _InventoryItemFormScreenState
   /// comma handling, which is two refusals in one. A household counting
   /// in grams has to write 2.13, and neither "2,13" nor "2.13" was
   /// accepted — so the field asked for a figure it would not take.
-  static double? _decimal(String text) =>
-      double.tryParse(text.trim().replaceAll(',', '.'));
+  static double? _decimal(String text) => readNonNegativeNumber(text);
 
   /// A package is a name and a size, or nothing. Either half alone is
   /// refused: a jar of unknown size cannot convert anything, and a size
@@ -674,11 +674,11 @@ class _InventoryItemFormScreenState
       final controller = ref.read(
         inventoryControllerProvider(widget.householdId),
       );
-      final quantity = double.parse(_quantityController.text.trim());
+      final quantity = readNonNegativeNumber(_quantityController.text)!;
       final minQuantityText = _minQuantityController.text.trim();
       final minQuantity = minQuantityText.isEmpty
           ? null
-          : double.parse(minQuantityText);
+          : readNonNegativeNumber(minQuantityText)!;
       final nutrition = _readNutrition();
       // Only for a medicine or an animal's food (#151). A dose left behind
       // on an item whose category was changed afterwards would put a tin
@@ -687,7 +687,7 @@ class _InventoryItemFormScreenState
       final takenDaily = _takenDaily;
       final doseText = _dailyDoseController.text.trim();
       final dailyDose = takenDaily && doseText.isNotEmpty
-          ? double.parse(doseText)
+          ? readNonNegativeNumber(doseText)!
           : null;
       // Whose it is goes with the same two. The reminder is a medicine's
       // alone, and only one with a dose: without one there is no end to
@@ -1333,7 +1333,7 @@ class _InventoryItemFormScreenState
       if (trimmed.isEmpty) {
         return required ? l10n.fieldRequired : null;
       }
-      return double.tryParse(trimmed) == null ? l10n.invalidNumber : null;
+      return readNonNegativeNumber(trimmed) == null ? l10n.invalidNumber : null;
     };
   }
 
@@ -1343,7 +1343,7 @@ class _InventoryItemFormScreenState
     return (value) {
       final trimmed = (value ?? '').trim().replaceAll(',', '.');
       if (trimmed.isEmpty) return null;
-      final parsed = double.tryParse(trimmed);
+      final parsed = readNonNegativeNumber(trimmed);
       if (parsed == null || parsed < 0) return l10n.invalidNumber;
       return null;
     };

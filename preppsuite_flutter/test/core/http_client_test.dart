@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +10,64 @@ import 'package:preppsuite_flutter/core/http_client.dart';
 /// A network that is up but not working must end in an error, not in a
 /// spinner (#139).
 void main() {
+  test('response timeout closes only its own live socket', () async {
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    final sockets = <Socket>[];
+    final disconnected = Completer<void>();
+    final listening = server.listen((socket) {
+      sockets.add(socket);
+      socket.listen(
+        (bytes) {
+          if (utf8.decode(bytes).contains('/ok ')) {
+            socket.write('HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok');
+          }
+        },
+        onDone: () {
+          if (!disconnected.isCompleted) disconnected.complete();
+        },
+      );
+    });
+    final client = TimeoutClient(
+      responseTimeout: const Duration(milliseconds: 100),
+    );
+    final base = 'http://127.0.0.1:${server.port}';
+    try {
+      final hanging = expectLater(
+        client.get(Uri.parse('$base/hang')),
+        throwsA(isA<TimeoutException>()),
+      );
+      expect((await client.get(Uri.parse('$base/ok'))).body, 'ok');
+      await hanging;
+      await disconnected.future.timeout(const Duration(seconds: 2));
+      expect((await client.get(Uri.parse('$base/ok'))).body, 'ok');
+    } finally {
+      client.close();
+      for (final socket in sockets) {
+        socket.destroy();
+      }
+      await listening.cancel();
+      await server.close();
+    }
+  });
+
+  test('multipart headers still match the finalized request body', () async {
+    final client = TimeoutClient(
+      inner: MockClient.streaming((request, body) async {
+        final text = await body.bytesToString();
+        final type = request.headers['content-type']!;
+        expect(type, startsWith('multipart/form-data; boundary='));
+        expect(text, contains(type.split('boundary=').last));
+        expect(text, contains('payload'));
+        return http.StreamedResponse(Stream.value([111, 107]), 200);
+      }),
+    );
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('https://example.org/'),
+    )..fields['field'] = 'payload';
+    expect(await (await client.send(request)).stream.bytesToString(), 'ok');
+    client.close();
+  });
   const short = Duration(milliseconds: 100);
 
   test('an answer in time comes through unchanged', () async {

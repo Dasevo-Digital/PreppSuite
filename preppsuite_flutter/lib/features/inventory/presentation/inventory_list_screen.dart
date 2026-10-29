@@ -1,3 +1,5 @@
+import '../application/inventory_numbers.dart';
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -526,6 +528,11 @@ class _InventoryTile extends ConsumerWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (hasInvalidInventoryNumbers(item))
+            Text(
+              l10n.inventoryInvalidNumbers,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
           Text(
             [
               '${_formatQuantity(item.quantity)} ${item.unit}',
@@ -627,7 +634,9 @@ class _InventoryTile extends ConsumerWidget {
   /// Null for an item without a package, and for one used up entirely.
   String? _packages(InventoryItem item) {
     final package = ItemPackage.of(item);
-    if (package == null || item.quantity <= 0) return null;
+    if (package == null || !item.quantity.isFinite || item.quantity <= 0) {
+      return null;
+    }
     final (:count, :exact) = packageCount(item.quantity, package);
     final formatted = _formatQuantity(count);
     return exact
