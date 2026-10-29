@@ -62,6 +62,6 @@ step tool/repo_privacy_check.sh
 step flutter pub get
 step flutter analyze
 step dart format --output=none --set-exit-if-changed .
-step bash -c "cd preppsuite_flutter && TZ=Europe/Berlin flutter test test/features/inventory/inventory_calendar_export_test.dart"
+step bash -c "cd preppsuite_flutter && TZ=Europe/Berlin flutter test test/features/inventory/inventory_calendar_export_test.dart test/core/calendar_days_test.dart"
 step bash -c "cd preppsuite_flutter && flutter test"
 echo "pre-push: all checks passed" >&2
