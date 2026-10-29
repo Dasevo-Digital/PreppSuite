@@ -41,7 +41,20 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
+    // SQLite work is not driven by the widget clock. Wait for the actual
+    // frames, rather than assuming two pumps completed the snapshot.
+    final ready = find.byIcon(Icons.slow_motion_video);
+    for (
+      var attempt = 0;
+      attempt < 500 && ready.evaluate().isEmpty;
+      attempt++
+    ) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 10)),
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    expect(ready, findsOneWidget);
   }
 
   testWidgets('shows a picture even for an empty household', (tester) async {

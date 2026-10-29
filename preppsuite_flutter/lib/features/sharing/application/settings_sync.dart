@@ -9,14 +9,14 @@
 ///
 /// So they get timestamps. Two decisions make that cheap and safe:
 ///
-/// **Stamped on publish, not on write.** Nothing intercepts
-/// `prefs.setString`. Instead the values that go out are compared with
+/// **Stamped before exchange, not on write.** Nothing intercepts
+/// `prefs.setString`. Before publish and receive the values are compared with
 /// the ones that went out last time, and whatever differs is stamped
 /// with that moment. No write site to remember, and therefore no write
 /// site to forget — which is the class of bug this codebase keeps
 /// finding. The cost is that a change made offline carries the time of
-/// the next publish rather than of the change itself. For settling which
-/// of two devices is ahead, that is the same answer.
+/// the next exchange rather than of the change itself. An unsent local edit
+/// is therefore seen before an old incoming snapshot can replace it.
 ///
 /// **A floor, so nobody starts out shouting.** The first publish after
 /// this arrives would otherwise stamp every value with "now", and two
@@ -28,7 +28,7 @@
 library;
 
 /// A value, and when this device last saw it change.
-typedef StampedSetting = ({Object value, DateTime at});
+typedef StampedSetting = ({Object? value, DateTime at});
 
 /// Where a value that has never been seen to change sits.
 ///
@@ -39,18 +39,24 @@ final settingsEpoch = DateTime.utc(2024, 1, 1);
 ///
 /// A value equal to what went out last time keeps the stamp it had. A
 /// value that differs, or that is new, is stamped [now]. A value that
-/// has disappeared is dropped: a setting nobody holds any more is not a
-/// setting to argue about.
+/// has disappeared keeps a versioned deletion. Otherwise an old device
+/// would select a station again after it had been cleared here.
 Map<String, StampedSetting> stampSettings({
   required Map<String, Object> current,
   required Map<String, StampedSetting> previous,
   required DateTime now,
 }) {
   return {
-    for (final entry in current.entries)
-      entry.key: switch (previous[entry.key]) {
-        final held? when _same(held.value, entry.value) => held,
-        _ => (value: entry.value, at: now),
+    for (final key in {...previous.keys, ...current.keys})
+      key: switch (previous[key]) {
+        final held? when _same(held.value, current[key]) => held,
+        final held? => (
+          value: current[key],
+          at: now.isAfter(held.at)
+              ? now
+              : held.at.add(const Duration(microseconds: 1)),
+        ),
+        _ => (value: current[key], at: now),
       },
   };
 }
@@ -67,7 +73,9 @@ Map<String, StampedSetting> mergeSettings({
   final merged = {...local};
   for (final entry in incoming.entries) {
     final held = merged[entry.key];
-    if (held == null || entry.value.at.isAfter(held.at)) {
+    if (held == null ||
+        entry.value.at.isAfter(held.at) ||
+        (entry.value.at == held.at && entry.value.value == null)) {
       merged[entry.key] = entry.value;
     }
   }
@@ -79,7 +87,7 @@ Map<String, StampedSetting> mergeSettings({
 /// Only these are written back, so a merge that changed nothing touches
 /// nothing — and the screens watching those preferences do not rebuild
 /// for an answer that was already theirs.
-Map<String, Object> changedBy({
+Map<String, Object?> changedBy({
   required Map<String, Object> current,
   required Map<String, StampedSetting> merged,
 }) {
@@ -96,7 +104,10 @@ Map<String, Object?> encodeStampedSettings(
 ) => {
   for (final entry in settings.entries)
     entry.key: {
-      'v': entry.value.value,
+      if (entry.value.value == null)
+        'deleted': true
+      else
+        'v': entry.value.value,
       'at': entry.value.at.toUtc().toIso8601String(),
     },
 };
@@ -113,7 +124,8 @@ Map<String, StampedSetting> decodeStampedSettings(Object? raw) {
     if (key is! String || body is! Map) continue;
     final value = body['v'];
     final at = DateTime.tryParse('${body['at']}');
-    if (value is! Object || at == null) continue;
+    final deleted = body['deleted'] == true && !body.containsKey('v');
+    if ((!deleted && value is! Object) || at == null) continue;
     out[key] = (value: value, at: at.toUtc());
   }
   return out;

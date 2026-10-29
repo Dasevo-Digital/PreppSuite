@@ -159,7 +159,13 @@ SupplyCalculatorResult calculateSupply({
     }
   }
 
-  if (!waterCurrent.isFinite || !caloriesCurrent.isFinite) {
+  // All consumers divide or round these totals to whole days/calories.
+  // Beyond the exact JSON integer range the answer is no longer portable.
+  const maxExactAmount = 9007199254740991;
+  if (!waterCurrent.isFinite ||
+      !caloriesCurrent.isFinite ||
+      waterCurrent > maxExactAmount ||
+      caloriesCurrent > maxExactAmount) {
     throw const InvalidInventoryNumbers();
   }
   return SupplyCalculatorResult(

@@ -51,7 +51,7 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
     final note = TextEditingController(text: existing?.note ?? '');
     String? error;
 
-    final result = await showDialog<PersonalPlace>(
+    final route = DialogRoute<PersonalPlace>(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
@@ -149,21 +149,29 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
         ),
       ),
     );
+    final result = await Navigator.of(context, rootNavigator: true).push(route);
+    // The pop result precedes the closing animation. Its text fields
+    // still use these controllers until the route has left the overlay.
+    await route.completed;
     label.dispose();
     latitude.dispose();
     longitude.dispose();
     note.dispose();
     if (result == null || !mounted) return;
 
-    setState(() {
-      _places = existing == null
-          ? [..._places, result]
-          : [
-              for (final place in _places)
-                if (place.id == existing.id) result else place,
-            ];
-    });
-    await _store.save(_places);
+    try {
+      final saved = await _store.update(
+        (current) => existing == null
+            ? [...current, result]
+            : [
+                for (final place in current)
+                  if (place.id == existing.id) result else place,
+              ],
+      );
+      if (mounted) setState(() => _places = saved);
+    } catch (error) {
+      if (mounted) _say(describeError(l10n, error));
+    }
   }
 
   Future<void> _delete(PersonalPlace place) async {
@@ -185,9 +193,19 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
       ),
     );
     if (confirmed != true || !mounted) return;
-    Feel.removed();
-    setState(() => _places.removeWhere((item) => item.id == place.id));
-    await _store.save(_places);
+    try {
+      final saved = await _store.update(
+        (current) => [
+          for (final item in current)
+            if (item.id != place.id) item,
+        ],
+      );
+      if (!mounted) return;
+      Feel.removed();
+      setState(() => _places = saved);
+    } catch (error) {
+      if (mounted) _say(describeError(l10n, error));
+    }
   }
 
   /// Hands the places to whatever else can read a map.
@@ -258,9 +276,12 @@ class _PersonalPlacesScreenState extends State<PersonalPlacesScreen> {
         _say(l10n.mapPlacesImportNothing);
         return;
       }
-      final merged = mergePlaces(_places, incoming);
-      final added = merged.length - _places.length;
-      await _store.save(merged);
+      var added = 0;
+      final merged = await _store.update((current) {
+        final merged = mergePlaces(current, incoming);
+        added = merged.length - current.length;
+        return merged;
+      });
       if (!mounted) return;
       setState(() => _places = merged);
       _say(l10n.mapPlacesImported(added));

@@ -35,6 +35,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/private_preferences.dart';
 import '../../../model/household_profile.dart';
 import '../../../model/household_profile_store.dart';
+import '../../inventory/application/expiry_reminder_provider.dart';
+import '../../inventory/application/charge_reminder_provider.dart';
 
 /// What kind of value a setting holds.
 ///
@@ -126,9 +128,9 @@ const carriedSettings = <String, CarriedSetting>{
   'drillProgress': (kind: CarriedKind.textList, when: _always),
   'drillLastCompleted': (kind: CarriedKind.text, when: _always),
 
-  // What the household has worked out about itself in the crisis
-  // overview: the answers the records cannot supply, entered by hand.
-  'preparednessHubV1': (kind: CarriedKind.text, when: _always),
+  // Private routes, document locations and notes belong in this device's
+  // backup, never in an automatic copy to the other household devices.
+  'preparednessHubV1': (kind: CarriedKind.text, when: _deviceOnly),
 
   // The meeting point, the way out, the well. Where somebody will be is
   // not something the other devices are told: the places stay on the
@@ -146,7 +148,7 @@ const carriedSettings = <String, CarriedSetting>{
   'heavyRainHazard.v1': (kind: CarriedKind.text, when: _always),
 
   // How far ahead the household wants to be warned.
-  'expiryLeadDays': (kind: CarriedKind.integer, when: _always),
+  'expiryLeadDays': (kind: CarriedKind.text, when: _always),
   'chargeReminderDays': (kind: CarriedKind.integer, when: _always),
 
   // Which tiles new map downloads come from. The key for them does not
@@ -246,7 +248,10 @@ Future<Map<String, Object>> readCarriedSettings({
     if (when != null && entry.value.when != when) continue;
     if (!forBackup && entry.value.when == _deviceOnly) continue;
     final value = await _read(prefs, entry.key, entry.value.kind);
-    if (value != null) values[entry.key] = value;
+    final normalized = normalizedCarriedSettingValue(entry.key, value);
+    if (normalized != null) {
+      values[entry.key] = normalized;
+    }
   }
   return values;
 }
@@ -293,6 +298,7 @@ Future<Object?> _read(
   CarriedKind kind,
 ) async {
   try {
+    if (key == 'expiryLeadDays') return prefs.get(key);
     if (_privateSettings.contains(key)) {
       const store = PrivatePreferences();
       return kind == CarriedKind.textList
@@ -319,6 +325,8 @@ Future<bool> _write(
   CarriedKind kind,
   Object? value,
 ) async {
+  value = normalizedCarriedSettingValue(key, value);
+  if (value == null) return false;
   try {
     if (_privateSettings.contains(key)) {
       const store = PrivatePreferences();
@@ -337,25 +345,131 @@ Future<bool> _write(
     switch (kind) {
       case CarriedKind.boolean:
         if (value is! bool) return false;
-        await prefs.setBool(key, value);
+        return await _confirmedWrite(prefs, prefs.setBool(key, value));
       case CarriedKind.integer:
         if (value is! num) return false;
-        await prefs.setInt(key, value.toInt());
+        return await _confirmedWrite(prefs, prefs.setInt(key, value.toInt()));
       case CarriedKind.decimal:
         if (value is! num) return false;
-        await prefs.setDouble(key, value.toDouble());
+        return await _confirmedWrite(
+          prefs,
+          prefs.setDouble(key, value.toDouble()),
+        );
       case CarriedKind.text:
         if (value is! String) return false;
-        await prefs.setString(key, value);
+        return await _confirmedWrite(prefs, prefs.setString(key, value));
       case CarriedKind.textList:
         if (value is! List) return false;
-        await prefs.setStringList(key, [
-          for (final item in value)
-            if (item is String) item,
-        ]);
+        return await _confirmedWrite(
+          prefs,
+          prefs.setStringList(key, [
+            for (final item in value)
+              if (item is String) item,
+          ]),
+        );
     }
-    return true;
   } on Object {
     return false;
   }
+}
+
+Future<bool> _confirmedWrite(
+  SharedPreferences prefs,
+  Future<bool> write,
+) async {
+  try {
+    final saved = await write;
+    if (saved) return true;
+  } catch (_) {
+    // The caller counts only confirmed values; the cache must agree.
+  }
+  try {
+    await prefs.reload();
+  } catch (_) {
+    /* Leave the write unacknowledged. */
+  }
+  return false;
+}
+
+/// The same boundary for setup, synchronization and backup. JSON numbers
+/// can overflow to infinity without being a syntax error.
+bool validCarriedSettingValue(String key, Object? value) =>
+    normalizedCarriedSettingValue(key, value) != null;
+
+Object? normalizedCarriedSettingValue(String key, Object? value) {
+  final setting = carriedSettings[key];
+  if (setting == null) return null;
+  if (key == 'expiryLeadDays') {
+    // Older senders used a single integer although the controller stores
+    // comma-separated lead times. Never install the wrong preference type.
+    if (value is num && value.isFinite && value == value.toInt()) {
+      if (value == 0) return '';
+      if (selectableExpiryLeadDays.contains(value.toInt())) {
+        return '${value.toInt()}';
+      }
+      return null;
+    }
+    if (value is! String) return null;
+    if (value.isNotEmpty &&
+        !value
+            .split(',')
+            .every(
+              (part) => selectableExpiryLeadDays.contains(int.tryParse(part)),
+            )) {
+      return null;
+    }
+  }
+  final valid = switch (setting.kind) {
+    CarriedKind.boolean => value is bool,
+    CarriedKind.integer =>
+      value is num &&
+          value.isFinite &&
+          value >= 0 &&
+          value == value.toInt() &&
+          isChargeReminderDays(value.toInt()),
+    CarriedKind.decimal =>
+      value is num &&
+          value.isFinite &&
+          (key == 'daylightLatitude' ? value.abs() <= 90 : value.abs() <= 180),
+    CarriedKind.text => value is String,
+    CarriedKind.textList =>
+      value is List && value.every((item) => item is String),
+  };
+  return valid ? value : null;
+}
+
+/// Used only by the versioned merge. A tombstone is a deletion, whereas
+/// null in an unversioned setup remains an absent opinion.
+Future<bool> applySyncedSettingIfUnchanged(
+  String key,
+  Object? value, {
+  required Object? expectedStored,
+  required SharedPreferences preferences,
+}) async {
+  if (carriedSettings[key]?.when != CarriedWhen.always) return false;
+  if (value != null) {
+    value = normalizedCarriedSettingValue(key, value);
+    if (value == null) return false;
+  }
+  if (_privateSettings.contains(key)) {
+    return const PrivatePreferences().compareAndSetString(
+      key,
+      expectedStored: expectedStored,
+      value: value as String?,
+      preferences: preferences,
+    );
+  }
+  final current = preferences.get(key);
+  final same = current is List && expectedStored is List
+      ? current.length == expectedStored.length &&
+            List.generate(
+              current.length,
+              (i) => current[i] == expectedStored[i],
+            ).every((same) => same)
+      : current == expectedStored;
+  if (!same) return false;
+  if (value == null) {
+    return _confirmedWrite(preferences, preferences.remove(key));
+  }
+  return _write(preferences, key, carriedSettings[key]!.kind, value);
 }

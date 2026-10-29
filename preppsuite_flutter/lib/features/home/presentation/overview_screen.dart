@@ -375,11 +375,22 @@ class _SupplyCard extends StatelessWidget {
       dogs: profile.dogs,
       cats: profile.cats,
     );
-    final result = calculateSupply(
-      items: items,
-      days: days,
-      household: household,
+    final result = inventoryNumbersOrNull(
+      () => calculateSupply(
+        items: items,
+        days: days,
+        household: household,
+      ),
     );
+
+    if (result == null) {
+      return _OverviewCard(
+        icon: Icons.inventory_2_outlined,
+        title: l10n.overviewSupplyTitle(days),
+        onOpen: onOpen,
+        child: Text(l10n.inventoryInvalidNumbers),
+      );
+    }
 
     return _OverviewCard(
       icon: Icons.inventory_2_outlined,

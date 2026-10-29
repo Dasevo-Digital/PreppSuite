@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -22,6 +23,22 @@ class _MemoryKeys implements LocalDatabaseKeyStorage {
   @override
   Future<void> delete(String key) async {
     values.remove(key);
+  }
+}
+
+class _PausedSave extends SettingsSyncStore {
+  final started = Completer<void>();
+  final resume = Completer<void>();
+  @override
+  Future<void> save(
+    Map<String, StampedSetting> settings, [
+    SharedPreferences? preferences,
+  ]) async {
+    if (!started.isCompleted) {
+      started.complete();
+      await resume.future;
+    }
+    await super.save(settings, preferences);
   }
 }
 
@@ -228,6 +245,143 @@ void main() {
 
     await applySyncedSettings(afterChange, preferences: desktop);
     expect(desktop.getString('pegelStation'), 'MAGDEBURG');
+  });
+
+  group('local edits and deletions survive reception', () {
+    test('an unsent edit wins over an older remote change', () async {
+      final prefs = await device({
+        'energyDraws': <String>['old'],
+      });
+      await readSyncedSettings(preferences: prefs, now: monday);
+      await prefs.setStringList('energyDraws', ['new-local']);
+      await applySyncedSettings(
+        {
+          'energyDraws': (value: <String>['remote'], at: monday),
+        },
+        preferences: prefs,
+        now: tuesday,
+      );
+      expect(prefs.getStringList('energyDraws'), ['new-local']);
+      expect(
+        (await const SettingsSyncStore().load(prefs))['energyDraws']!.value,
+        ['new-local'],
+      );
+    });
+    test('an unrelated remote key cannot roll back a local edit', () async {
+      final prefs = await device({
+        'energyDraws': <String>['old'],
+      });
+      await readSyncedSettings(preferences: prefs, now: monday);
+      await prefs.setStringList('energyDraws', ['new-local']);
+      expect(
+        await applySyncedSettings(
+          {'daylightLatitude': (value: 52.0, at: monday)},
+          preferences: prefs,
+          now: tuesday,
+        ),
+        1,
+      );
+      expect(prefs.getStringList('energyDraws'), ['new-local']);
+      expect(prefs.getDouble('daylightLatitude'), 52);
+    });
+    test(
+      'a published deletion beats an old snapshot and reaches a peer',
+      () async {
+        final prefs = await device({'pegelStation': 'old'});
+        final original = await readSyncedSettings(
+          preferences: prefs,
+          now: monday,
+        );
+        await prefs.remove('pegelStation');
+        final removed = await readSyncedSettings(
+          preferences: prefs,
+          now: tuesday,
+        );
+        expect(removed['pegelStation']!.value, isNull);
+        await applySyncedSettings(original, preferences: prefs);
+        expect(prefs.containsKey('pegelStation'), isFalse);
+        final other = await device({'pegelStation': 'old'});
+        await readSyncedSettings(preferences: other, now: monday);
+        expect(await applySyncedSettings(removed, preferences: other), 1);
+        expect(other.containsKey('pegelStation'), isFalse);
+        expect(await applySyncedSettings(removed, preferences: other), 0);
+      },
+    );
+    test(
+      'an unsent deletion is stamped before merging an old snapshot',
+      () async {
+        final prefs = await device({'pegelStation': 'old'});
+        final original = await readSyncedSettings(
+          preferences: prefs,
+          now: monday,
+        );
+        await prefs.remove('pegelStation');
+        await applySyncedSettings(original, preferences: prefs, now: tuesday);
+        expect(prefs.containsKey('pegelStation'), isFalse);
+      },
+    );
+    test(
+      'publish and receive share an order while persistence is delayed',
+      () async {
+        final prefs = await device({'pegelStation': 'old'});
+        await readSyncedSettings(preferences: prefs, now: monday);
+        await prefs.setString('pegelStation', 'new-local');
+        final paused = _PausedSave();
+        final publishing = readSyncedSettings(
+          preferences: prefs,
+          store: paused,
+          now: tuesday,
+        );
+        await paused.started.future;
+        var received = false;
+        final receiving = applySyncedSettings(
+          {'pegelStation': (value: 'remote-old', at: monday)},
+          preferences: prefs,
+          now: tuesday,
+        ).then((_) => received = true);
+        await Future<void>.delayed(Duration.zero);
+        expect(received, isFalse);
+        paused.resume.complete();
+        await publishing;
+        await receiving;
+        expect(prefs.getString('pegelStation'), 'new-local');
+      },
+    );
+    test(
+      'a private compare-and-set preserves an edit during sealing',
+      () async {
+        final prefs = await device({'checkInContacts.v1': 'old'});
+        final applying = const PrivatePreferences().compareAndSetString(
+          'checkInContacts.v1',
+          expectedStored: 'old',
+          value: 'remote',
+          preferences: prefs,
+        );
+        await prefs.setString('checkInContacts.v1', 'new-local');
+        expect(await applying, isFalse);
+        expect(prefs.getString('checkInContacts.v1'), 'new-local');
+      },
+    );
+    test(
+      'invalid remote values do not poison the comparison baseline',
+      () async {
+        final prefs = await device({'daylightLatitude': 52.0});
+        await readSyncedSettings(preferences: prefs, now: monday);
+        expect(
+          await applySyncedSettings({
+            'daylightLatitude': (value: double.infinity, at: tuesday),
+          }, preferences: prefs),
+          0,
+        );
+        expect(prefs.getDouble('daylightLatitude'), 52);
+        expect(
+          (await const SettingsSyncStore().load(
+            prefs,
+          ))['daylightLatitude']!.value,
+          52,
+        );
+      },
+    );
   });
 
   group('every road applies them', () {

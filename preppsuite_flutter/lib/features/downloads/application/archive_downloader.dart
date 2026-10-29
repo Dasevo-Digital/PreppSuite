@@ -66,11 +66,11 @@ class ArchiveDownloader {
     http.Client? httpClient,
     Duration? reportEvery,
     List<Duration>? retryDelays,
-  }) : _httpClient = httpClient ?? TimeoutClient(),
+  }) : _providedClient = httpClient,
        _reportEvery = reportEvery ?? const Duration(milliseconds: 250),
        _retryDelays = retryDelays ?? defaultRetryDelays;
 
-  final http.Client _httpClient;
+  final http.Client? _providedClient;
 
   /// How long to wait before each retry, and — by its length — how many
   /// times in a row to bother.
@@ -130,12 +130,58 @@ class ArchiveDownloader {
     required Uri url,
     required String targetPath,
     int? estimatedLength,
+  }) {
+    // Each subscription owns its transport lifetime. Cancel is available
+    // while headers or a retry delay are pending, not just at the next yield.
+    final client = _providedClient ?? TimeoutClient();
+    final abort = Completer<void>();
+    StreamSubscription<DownloadProgress>? subscription;
+    void stop() {
+      if (!abort.isCompleted) abort.complete();
+      if (_providedClient == null) client.close();
+    }
+
+    late final StreamController<DownloadProgress> controller;
+    controller = StreamController<DownloadProgress>(
+      onListen: () {
+        subscription =
+            _download(
+              client: client,
+              abort: abort,
+              url: url,
+              targetPath: targetPath,
+              estimatedLength: estimatedLength,
+            ).listen(
+              controller.add,
+              onError: controller.addError,
+              onDone: () {
+                stop();
+                unawaited(controller.close());
+              },
+            );
+      },
+      onPause: () => subscription?.pause(),
+      onResume: () => subscription?.resume(),
+      onCancel: () {
+        stop();
+        return subscription?.cancel();
+      },
+    );
+    return controller.stream;
+  }
+
+  Stream<DownloadProgress> _download({
+    required http.Client client,
+    required Completer<void> abort,
+    required Uri url,
+    required String targetPath,
+    int? estimatedLength,
   }) async* {
     final partial = File('$targetPath$partialSuffix');
     var failures = 0;
     DownloadProgress? last;
 
-    while (true) {
+    while (!abort.isCompleted) {
       var before = await partial.exists() ? await partial.length() : 0;
 
       try {
@@ -144,6 +190,8 @@ class ArchiveDownloader {
         // the try around it, so with `yield*` the retry below would never
         // run once.
         await for (final progress in _fetch(
+          client: client,
+          abort: abort.future,
           url: url,
           targetPath: targetPath,
           estimatedLength: estimatedLength,
@@ -153,6 +201,7 @@ class ArchiveDownloader {
         }
         return;
       } on Object catch (error) {
+        if (abort.isCompleted) return;
         if (!_worthRetrying(error)) rethrow;
 
         final after = await partial.exists() ? await partial.length() : 0;
@@ -167,7 +216,13 @@ class ArchiveDownloader {
           total: last?.total,
           resuming: true,
         );
-        await Future<void>.delayed(_retryDelays[failures]);
+        final ready = Completer<void>();
+        final timer = Timer(_retryDelays[failures], ready.complete);
+        try {
+          await Future.any<void>([ready.future, abort.future]);
+        } finally {
+          timer.cancel();
+        }
         failures++;
       }
     }
@@ -188,6 +243,8 @@ class ArchiveDownloader {
 
   /// One attempt, from wherever the partial file currently ends.
   Stream<DownloadProgress> _fetch({
+    required http.Client client,
+    required Future<void> abort,
     required Uri url,
     required String targetPath,
     int? estimatedLength,
@@ -202,90 +259,121 @@ class ArchiveDownloader {
     // backed up either — those are the large ones that sit around longest.
     await excludeFromBackup(partial.path);
 
-    final request = http.Request('GET', url);
+    final attemptAbort = Completer<void>();
+    unawaited(
+      abort.then((_) {
+        if (!attemptAbort.isCompleted) attemptAbort.complete();
+      }),
+    );
+    final request = http.AbortableRequest(
+      'GET',
+      url,
+      abortTrigger: attemptAbort.future,
+    );
     if (received > 0) request.headers['range'] = 'bytes=$received-';
 
-    final response = await _httpClient.send(request);
-
-    var append = true;
-
-    /// What the server says the whole file is. Null means it did not say.
-    int? stated;
-
-    switch (response.statusCode) {
-      case 206:
-        stated = _totalFromContentRange(response.headers['content-range']);
-      case 200:
-        // The server ignored the range and is sending the whole file
-        // again. Starting over is the only correct reading of that.
-        append = false;
-        received = 0;
-        stated = response.contentLength;
-      case 416:
-        // "Range not satisfiable": the partial file is at least as long
-        // as the whole one. Servers state the real length here as
-        // `bytes */N`, which is the only way to tell a finished download
-        // from a corrupted one.
-        final whole = _totalFromContentRange(response.headers['content-range']);
-        if (whole != null && await partial.length() == whole) {
-          await partial.rename(targetPath);
-          yield DownloadProgress(received: whole, total: whole);
-          return;
-        }
-        await partial.delete();
-        throw const DownloadException('the partial file does not match');
-      default:
-        throw DownloadException('the server answered ${response.statusCode}');
-    }
-
-    final total = stated ?? estimatedLength;
-
-    final sink = partial.openWrite(
-      mode: append ? FileMode.append : FileMode.write,
-    );
-
-    var reported = DateTime.now();
+    http.StreamedResponse? response;
+    var bodyListened = false;
     try {
-      yield DownloadProgress(received: received, total: total);
+      response = await client.send(request);
 
-      await for (final chunk in response.stream) {
-        sink.add(chunk);
-        received += chunk.length;
+      var append = true;
 
-        final now = DateTime.now();
-        if (now.difference(reported) >= _reportEvery) {
-          reported = now;
-          // Flushing on the same beat as reporting keeps a fast link from
-          // filling memory while a slow disk catches up.
-          await sink.flush();
-          yield DownloadProgress(received: received, total: total);
-        }
+      /// What the server says the whole file is. Null means it did not say.
+      int? stated;
+
+      switch (response.statusCode) {
+        case 206:
+          stated = _totalFromContentRange(response.headers['content-range']);
+        case 200:
+          // The server ignored the range and is sending the whole file
+          // again. Starting over is the only correct reading of that.
+          append = false;
+          received = 0;
+          stated = response.contentLength;
+        case 416:
+          // "Range not satisfiable": the partial file is at least as long
+          // as the whole one. Servers state the real length here as
+          // `bytes */N`, which is the only way to tell a finished download
+          // from a corrupted one.
+          final whole = _totalFromContentRange(
+            response.headers['content-range'],
+          );
+          if (whole != null && await partial.length() == whole) {
+            await partial.rename(targetPath);
+            yield DownloadProgress(received: whole, total: whole);
+            return;
+          }
+          await partial.delete();
+          throw const DownloadException('the partial file does not match');
+        default:
+          throw DownloadException('the server answered ${response.statusCode}');
       }
-      await sink.flush();
-    } finally {
-      await sink.close();
-    }
 
-    final onDisk = await partial.length();
-    if (stated != null && onDisk != stated) {
-      // Handing over a truncated archive would look like a corrupt file
-      // rather than an interrupted download, so it stays a partial file
-      // and the next attempt resumes it.
-      throw DownloadException(
-        'got $onDisk bytes of an expected $stated',
-        // The usual cause is the connection being dropped mid-transfer,
-        // which on an 11 GB file over a public mirror is an ordinary
-        // event rather than a failure of the download.
-        retryable: true,
+      final total = stated ?? estimatedLength;
+
+      final sink = partial.openWrite(
+        mode: append ? FileMode.append : FileMode.write,
       );
-    }
 
-    await partial.rename(targetPath);
-    // Again under the final name. The flag is an extended attribute and
-    // survives a rename on the same volume, but this is the state that
-    // has to be right, and it costs one call.
-    await excludeFromBackup(targetPath);
-    yield DownloadProgress(received: onDisk, total: onDisk);
+      var reported = DateTime.now();
+      try {
+        yield DownloadProgress(received: received, total: total);
+
+        bodyListened = true;
+        await for (final chunk in response.stream) {
+          sink.add(chunk);
+          received += chunk.length;
+
+          final now = DateTime.now();
+          if (now.difference(reported) >= _reportEvery) {
+            reported = now;
+            // Flushing on the same beat as reporting keeps a fast link from
+            // filling memory while a slow disk catches up.
+            await sink.flush();
+            yield DownloadProgress(received: received, total: total);
+          }
+        }
+        await sink.flush();
+      } finally {
+        await sink.close();
+      }
+
+      final onDisk = await partial.length();
+      if (stated != null && onDisk != stated) {
+        // Handing over a truncated archive would look like a corrupt file
+        // rather than an interrupted download, so it stays a partial file
+        // and the next attempt resumes it.
+        throw DownloadException(
+          'got $onDisk bytes of an expected $stated',
+          // The usual cause is the connection being dropped mid-transfer,
+          // which on an 11 GB file over a public mirror is an ordinary
+          // event rather than a failure of the download.
+          retryable: true,
+        );
+      }
+
+      await partial.rename(targetPath);
+      // Again under the final name. The flag is an extended attribute and
+      // survives a rename on the same volume, but this is the state that
+      // has to be right, and it costs one call.
+      await excludeFromBackup(targetPath);
+      yield DownloadProgress(received: onDisk, total: onDisk);
+    } finally {
+      // Status rejection and the 416 shortcut never enter the body loop.
+      // Listen before aborting so IOClient can cancel the native response;
+      // never drain an arbitrary error page to completion.
+      if (response != null && !bodyListened) {
+        final abandoned = response.stream.listen(
+          (_) {},
+          onError: (Object _) {},
+        );
+        if (!attemptAbort.isCompleted) attemptAbort.complete();
+        await abandoned.cancel();
+      } else if (!attemptAbort.isCompleted) {
+        attemptAbort.complete();
+      }
+    }
   }
 
   /// `bytes 200-1023/1024` — the part after the slash.

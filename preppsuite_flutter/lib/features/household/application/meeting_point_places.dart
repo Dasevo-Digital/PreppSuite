@@ -8,8 +8,7 @@ import '../../shelters/application/shelter_bearing.dart';
 /// (#204).
 ///
 /// Kept as two of the device's own places ("Eigene Orte") and not in the
-/// plan. The plan travels through the household's folder; the map's own
-/// places deliberately do not, because where a household meets is the
+/// plan. Both the private plan and the map's own places stay here, because where a household meets is the
 /// kind of thing that stays on the device it was put on (see
 /// [PersonalPlace]). As one of those places a meeting point is on the map
 /// with the others and leaves in a GPX file like them, which is how a
@@ -44,27 +43,27 @@ class MeetingPointPlaces {
     LatLng at, {
     required String label,
   }) async {
-    final places = await _store.load();
     final placed = PersonalPlace(
       id: point.placeId,
       label: label,
       latitude: at.latitude,
       longitude: at.longitude,
     );
-    final index = places.indexWhere((place) => place.id == point.placeId);
-    await _store.save(
-      index < 0
+    await _store.update((places) {
+      final index = places.indexWhere((place) => place.id == point.placeId);
+      return index < 0
           ? [...places, placed]
-          : [...places.take(index), placed, ...places.skip(index + 1)],
-    );
+          : [...places.take(index), placed, ...places.skip(index + 1)];
+    });
   }
 
   Future<void> remove(MeetingPoint point) async {
-    final places = await _store.load();
-    await _store.save([
-      for (final place in places)
-        if (place.id != point.placeId) place,
-    ]);
+    await _store.update(
+      (places) => [
+        for (final place in places)
+          if (place.id != point.placeId) place,
+      ],
+    );
   }
 
   /// Gives the places the names the plan has now, leaving them where
@@ -73,27 +72,26 @@ class MeetingPointPlaces {
     final wanted = {
       for (final point in MeetingPoint.values) point.placeId: ?labels[point],
     };
-    final places = await _store.load();
-    var changed = false;
-    final relabelled = <PersonalPlace>[];
-    for (final place in places) {
-      final label = wanted[place.id];
-      if (label == null || label == place.label) {
-        relabelled.add(place);
-        continue;
+    await _store.update((places) {
+      final relabelled = <PersonalPlace>[];
+      for (final place in places) {
+        final label = wanted[place.id];
+        if (label == null || label == place.label) {
+          relabelled.add(place);
+          continue;
+        }
+        relabelled.add(
+          PersonalPlace(
+            id: place.id,
+            label: label,
+            latitude: place.latitude,
+            longitude: place.longitude,
+            note: place.note,
+          ),
+        );
       }
-      changed = true;
-      relabelled.add(
-        PersonalPlace(
-          id: place.id,
-          label: label,
-          latitude: place.latitude,
-          longitude: place.longitude,
-          note: place.note,
-        ),
-      );
-    }
-    if (changed) await _store.save(relabelled);
+      return relabelled;
+    });
   }
 }
 

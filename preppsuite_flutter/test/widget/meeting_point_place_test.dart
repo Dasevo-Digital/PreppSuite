@@ -40,6 +40,13 @@ class _MemoryStore extends PersonalPlaceStore {
   @override
   Future<void> save(List<PersonalPlace> places) async =>
       this.places = [...places];
+
+  @override
+  Future<List<PersonalPlace>> update(
+    List<PersonalPlace> Function(List<PersonalPlace>) change,
+  ) async => places = [
+    ...change([...places]),
+  ];
 }
 
 class _FixedPosition extends GeolocationService {

@@ -1,3 +1,5 @@
+import '../../inventory/application/inventory_numbers.dart';
+
 import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
@@ -61,16 +63,18 @@ class _ScenarioScreenState extends ConsumerState<ScenarioScreen> {
     final items = itemsAsync.value;
     final gaps = items == null || energy == null
         ? null
-        : scenarioGaps(
-            items: items,
-            household: SupplyHousehold(
-              adults: profile?.personCount ?? 1,
-              children: profile?.children ?? 0,
-              dogs: profile?.dogs ?? 0,
-              cats: profile?.cats ?? 0,
+        : inventoryNumbersOrNull(
+            () => scenarioGaps(
+              items: items,
+              household: SupplyHousehold(
+                adults: profile?.personCount ?? 1,
+                children: profile?.children ?? 0,
+                dogs: profile?.dogs ?? 0,
+                cats: profile?.cats ?? 0,
+              ),
+              energy: energy,
+              days: _days,
             ),
-            energy: energy,
-            days: _days,
           );
 
     return Scaffold(
@@ -88,6 +92,8 @@ class _ScenarioScreenState extends ConsumerState<ScenarioScreen> {
       body: ContentSwap(
         child: itemsAsync.hasError
             ? Center(child: Text(describeError(l10n, itemsAsync.error!)))
+            : items != null && energy != null && gaps == null
+            ? Center(child: Text(l10n.inventoryInvalidNumbers))
             : gaps == null || energy == null
             ? const Center(child: CircularProgressIndicator())
             : _Body(

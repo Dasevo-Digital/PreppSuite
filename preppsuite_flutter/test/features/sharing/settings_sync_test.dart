@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/sharing/application/settings_sync.dart';
 
@@ -31,7 +33,7 @@ void main() {
       expect(stamped['pegelStation']!.at, tuesday);
     });
 
-    test('a value nobody holds any more is dropped', () {
+    test('a removed value keeps a versioned deletion', () {
       // A setting that has been cleared is not a setting to argue over.
       final stamped = stampSettings(
         current: const {},
@@ -39,7 +41,8 @@ void main() {
         now: tuesday,
       );
 
-      expect(stamped, isEmpty);
+      expect(stamped['pegelStation']!.value, isNull);
+      expect(stamped['pegelStation']!.at, tuesday);
     });
 
     test('a list is compared by contents, not by identity', () {
@@ -209,5 +212,40 @@ void main() {
       expect(decodeStampedSettings(null), isEmpty);
       expect(decodeStampedSettings('nope'), isEmpty);
     });
+  });
+  test('deletions round trip and win a tie against live data', () {
+    final deleted = <String, StampedSetting>{
+      'pegelStation': (value: null, at: tuesday),
+    };
+    final encoded = encodeStampedSettings(deleted);
+    expect(
+      (encoded['pegelStation'] as Map).containsKey('v'),
+      isFalse,
+      reason: 'Older readers ignore an unknown deletion instead of installing a fake value.',
+    );
+    final decoded = decodeStampedSettings(jsonDecode(jsonEncode(encoded)));
+    expect(decoded['pegelStation']!.value, isNull);
+    for (final remoteFirst in [false, true]) {
+      final live = {'pegelStation': (value: 'old', at: tuesday)};
+      final merged = mergeSettings(
+        local: remoteFirst ? deleted : live,
+        incoming: remoteFirst ? live : deleted,
+      );
+      expect(merged['pegelStation']!.value, isNull);
+    }
+    final unchanged = stampSettings(
+      current: const {},
+      previous: decoded,
+      now: tuesday.add(const Duration(days: 1)),
+    );
+    expect(unchanged['pegelStation']!.at, tuesday);
+  });
+  test('a local edit advances even if the clock went backwards', () {
+    final stamped = stampSettings(
+      current: {'pegelStation': 'new'},
+      previous: {'pegelStation': (value: 'old', at: tuesday)},
+      now: monday,
+    );
+    expect(stamped['pegelStation']!.at.isAfter(tuesday), isTrue);
   });
 }

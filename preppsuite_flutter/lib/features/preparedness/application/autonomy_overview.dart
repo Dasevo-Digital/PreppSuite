@@ -27,6 +27,7 @@ import '../../../model/categories.dart';
 import '../../energy/application/energy_range.dart' as power;
 import '../../energy/application/energy_store.dart';
 import '../../inventory/application/medication_range.dart';
+import '../../inventory/application/inventory_numbers.dart';
 import '../../inventory/application/supply_calculator.dart';
 import 'preparedness_hub_store.dart';
 
@@ -43,6 +44,9 @@ enum AutonomyBasis {
 
 /// Why the stock could not answer.
 enum AutonomyGap {
+  /// Totals cannot be represented; correct the stock instead of guessing.
+  invalidNumbers,
+
   /// Nothing of this kind has been recorded at all.
   nothingRecorded,
 
@@ -94,8 +98,16 @@ List<AutonomyReach> autonomyReaches({
   required EnergyPlan energy,
   required AutonomySnapshot entered,
 }) => [
-  _water(items, household, entered),
-  _food(items, household, entered),
+  inventoryNumbersOrNull(() => _water(items, household, entered)) ??
+      const AutonomyReach(
+        resource: AutonomyResource.water,
+        gap: AutonomyGap.invalidNumbers,
+      ),
+  inventoryNumbersOrNull(() => _food(items, household, entered)) ??
+      const AutonomyReach(
+        resource: AutonomyResource.food,
+        gap: AutonomyGap.invalidNumbers,
+      ),
   _medicine(items, entered),
   _energy(energy, entered),
   _hygiene(entered),

@@ -1,3 +1,5 @@
+import '../application/inventory_numbers.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -51,10 +53,12 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
     final items = itemsAsync.value;
     final shoppingList = items == null
         ? null
-        : buildShoppingList(
-            items: items,
-            days: widget.days,
-            household: household,
+        : inventoryNumbersOrNull(
+            () => buildShoppingList(
+              items: items,
+              days: widget.days,
+              household: household,
+            ),
           );
 
     return Scaffold(
@@ -75,7 +79,10 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
           error: (error, _) => Center(child: Text(describeError(l10n, error))),
           data: (_) {
             // Worked out above, from the same items.
-            final list = shoppingList!;
+            final list = shoppingList;
+            if (list == null) {
+              return Center(child: Text(l10n.inventoryInvalidNumbers));
+            }
 
             // Built by index rather than as a list of children. The items
             // section used to be a `Column` inside this `ListView`, and a

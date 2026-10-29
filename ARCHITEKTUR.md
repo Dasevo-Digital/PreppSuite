@@ -408,6 +408,25 @@ date it was last checked, and the later one wins, so a restore onto a
 device somebody kept using cannot wind the plan back. Crisis mode is not
 in the plan at all — see below.
 
+`preparednessHubV1` and `personalMapPlaces.v1` are `deviceOnly` in the carried
+settings. Neither setup nor synchronization accepts them from another device,
+including values from older senders. The local backup retains both. Old
+comparison baselines are filtered through the same boundary before use.
+
+Settings have versioned deletions (`deleted: true`, no `v` field); an older
+reader ignores this extension rather than installing a placeholder. Deletions
+reach other devices once those devices understand the extension. A tombstone
+wins a timestamp tie. Before receiving, the current local edits and deletions
+are stamped, and publish/receive share one queue. Each write also compares the
+stored value against its read token, after any encryption, so a concurrent
+local edit is not overwritten or acknowledged as an applied remote value.
+
+Carried numeric values must be finite and within their domain. Daylight
+coordinates stay within latitude/longitude bounds; unsupported stored values
+are omitted from exports and the daylight screen offers location setup again.
+Expiry lead times use the controller's comma-separated text; legacy single
+integers are accepted at the boundary without installing the wrong type.
+
 Anything else that grows outside drift inherits this problem. A new
 `SharedPreferences` key that holds something a household would be sorry
 to lose is not finished until it is named here and in a backup test.
@@ -3229,3 +3248,20 @@ Nährwertprodukte, Packungsumrechnungen und Dosierungsquotienten werden vor dem
 Schreiben geprüft. Medikamentenreichweiten über zehn Millionen Tage sind kein
 unterstützbarer Kalenderhorizont. Ein Überlauf der Haushaltssumme liefert den
 fachlichen Korrekturhinweis, bevor Ganzzahl- oder Datumsoperationen erfolgen.
+Die Vorratssummen bleiben zusätzlich im exakt darstellbaren JSON-Ganzzahlbereich
+bis 2^53-1. Ein typisierter Rechenfehler wird in Vorrat, Übersicht, Einkauf und
+Szenario als Korrekturhinweis gezeigt; Ampel und Autarkie erfinden daraus keine
+verfügbare Reichweite. Die Bestandsliste bleibt zum Bearbeiten erreichbar.
+
+Änderungen an eigenen Kartenorten gehen über `PersonalPlaceStore.update` und
+die gemeinsame Schlüssel-Queue von `PrivatePreferences`. Treffpunkte, Import,
+Umbenennen und Löschen arbeiten damit auf dem neuesten bestätigten Bestand.
+Die Oberfläche meldet erst nach erfolgreichem Schreiben Erfolg. Ein Backend-
+Fehler wird weitergereicht und die vorzeitig geänderte Preferences-Kopie neu
+geladen, damit ein ungespeicherter Wert nicht zum nächsten Ausgangsstand wird.
+
+`ArchiveDownloader` besitzt pro Download einen eigenen Standard-Client und
+schließt ihn bei Ende, Fehler oder Abbruch. Ein übergebener Client bleibt beim
+Aufrufer. Auch verworfene Statusantworten und der 416-Abschluss abonnieren und
+beenden den Body, damit der native Transport seine Verbindung freigibt.
+Ein Abbruch beendet bereits das Warten auf Header oder eine Wiederholung.

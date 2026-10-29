@@ -34,9 +34,14 @@ class ExpiryLeadDaysController extends Notifier<List<int>> {
     // async gap.
     if (!ref.mounted) return;
 
-    final stored = prefs.getString(_expiryLeadDaysPrefsKey);
+    final stored = prefs.get(_expiryLeadDaysPrefsKey);
     if (stored == null) return;
-    state = _decode(stored);
+    if (stored is String) {
+      state = _decode(stored);
+    } else if (stored is int) {
+      // Compatibility with the single integer sent by older households.
+      state = _normalize([stored]);
+    }
   }
 
   Future<void> setLeadDays(List<int> leadDays) async {

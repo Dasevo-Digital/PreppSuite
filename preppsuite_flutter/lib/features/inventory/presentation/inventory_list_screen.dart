@@ -677,11 +677,22 @@ class _SupplyCalculatorCardState extends ConsumerState<_SupplyCalculatorCard> {
       dogs: profile?.dogs ?? 0,
       cats: profile?.cats ?? 0,
     );
-    final result = calculateSupply(
-      items: items,
-      days: _days,
-      household: household,
+    final result = inventoryNumbersOrNull(
+      () => calculateSupply(
+        items: items,
+        days: _days,
+        household: household,
+      ),
     );
+
+    if (result == null) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(l10n.inventoryInvalidNumbers),
+        ),
+      );
+    }
 
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),

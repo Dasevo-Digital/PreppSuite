@@ -7,6 +7,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,7 +30,7 @@ class SettingsSyncStore {
     );
     if (raw == null) return {};
     try {
-      return decodeStampedSettings(jsonDecode(raw));
+      return _shareable(decodeStampedSettings(jsonDecode(raw)));
     } on FormatException {
       // Unreadable is the same as absent: the next publish rebuilds it
       // from the floor, which costs one round of ties and nothing else.
@@ -45,11 +46,99 @@ class SettingsSyncStore {
     // Keeping it beside their encrypted originals in clear would undo them.
     await const PrivatePreferences().setString(
       _key,
-      jsonEncode(encodeStampedSettings(settings)),
+      jsonEncode(encodeStampedSettings(_shareable(settings))),
       preferences: preferences,
     );
   }
 }
+
+Map<String, StampedSetting> _shareable(Map<String, StampedSetting> values) => {
+  for (final entry in values.entries)
+    if (carriedSettings[entry.key]?.when == CarriedWhen.always &&
+        (entry.value.value == null ||
+            validCarriedSettingValue(entry.key, entry.value.value)))
+      entry.key: (
+        value: normalizedCarriedSettingValue(entry.key, entry.value.value),
+        at: entry.value.at,
+      ),
+};
+
+Future<void>? _pending;
+
+// Publish and receive share one order, including separate service instances.
+Future<T> _serialized<T>(Future<T> Function() action) {
+  final previous = _pending;
+  final result = previous == null
+      ? Future<T>.sync(action)
+      : previous.then((_) => action());
+  final queued = result.then<void>(
+    (_) {},
+    onError: (Object _, StackTrace _) {},
+  );
+  _pending = queued;
+  return result.whenComplete(() {
+    // Do not retain an idle operation's zone or callbacks forever.
+    if (identical(_pending, queued)) _pending = null;
+  });
+}
+
+typedef _SettingsRead = ({
+  Map<String, Object> values,
+  Map<String, Object?> stored,
+});
+
+Map<String, Object?> _stored(SharedPreferences prefs) => {
+  for (final entry in carriedSettings.entries)
+    if (entry.value.when == CarriedWhen.always)
+      entry.key: switch (prefs.get(entry.key)) {
+        final List value => [...value],
+        final value => value,
+      },
+};
+
+Future<_SettingsRead> _current(SharedPreferences prefs) async {
+  // A private read can migrate a value. Retry that benign change too;
+  // never pair an old plaintext value with a newer raw comparison token.
+  for (var attempt = 0; attempt < 3; attempt++) {
+    final before = _stored(prefs);
+    final values = await readCarriedSettings(
+      preferences: prefs,
+      when: CarriedWhen.always,
+    );
+    final after = _stored(prefs);
+    if (before.keys.every((key) => _sameStored(before[key], after[key]))) {
+      return (values: values, stored: after);
+    }
+  }
+  throw StateError('Settings changed during read');
+}
+
+bool _sameStored(Object? a, Object? b) {
+  if (a is List && b is List) {
+    return a.length == b.length &&
+        List.generate(
+          a.length,
+          (i) => _sameStored(a[i], b[i]),
+        ).every((same) => same);
+  }
+  if (a is double && b is double && a.isNaN && b.isNaN) return true;
+  return a == b;
+}
+
+Map<String, StampedSetting> _localSettings(
+  Map<String, Object> current,
+  Map<String, StampedSetting> previous,
+  DateTime now,
+) => stampSettings(
+  current: current,
+  previous: previous.isNotEmpty
+      ? previous
+      : {
+          for (final entry in current.entries)
+            entry.key: (value: entry.value, at: settingsEpoch),
+        },
+  now: now.toUtc(),
+);
 
 /// The household's settings, stamped and ready to travel.
 ///
@@ -65,7 +154,9 @@ Future<Map<String, StampedSetting>> readSyncedSettings({
   DateTime? now,
 }) async {
   try {
-    return await _readSyncedSettings(preferences, store, now);
+    return await _serialized(
+      () => _readSyncedSettings(preferences, store, now),
+    );
   } on Object {
     // A preferences store that cannot be reached is not a reason to
     // fail a household sync. The rows are the payload; the settings
@@ -81,27 +172,12 @@ Future<Map<String, StampedSetting>> _readSyncedSettings(
   DateTime? now,
 ) async {
   final prefs = preferences ?? await SharedPreferences.getInstance();
-  final current = await readCarriedSettings(
-    preferences: prefs,
-    when: CarriedWhen.always,
-  );
   final previous = await store.load(prefs);
-
-  // Nothing written down yet: start everything level at the floor
-  // rather than stamping it all with this moment. See the note in
-  // `settings_sync.dart` -- two devices upgrading a minute apart must
-  // not decide the later one is right about everything.
-  final base = previous.isNotEmpty
-      ? previous
-      : {
-          for (final entry in current.entries)
-            entry.key: (value: entry.value, at: settingsEpoch),
-        };
-
-  final stamped = stampSettings(
-    current: current,
-    previous: base,
-    now: (now ?? DateTime.now()).toUtc(),
+  final current = await _current(prefs);
+  final stamped = _localSettings(
+    current.values,
+    previous,
+    now ?? DateTime.now(),
   );
   await store.save(stamped, prefs);
   return stamped;
@@ -117,10 +193,13 @@ Future<int> applySyncedSettings(
   Map<String, StampedSetting> incoming, {
   SharedPreferences? preferences,
   SettingsSyncStore store = const SettingsSyncStore(),
+  DateTime? now,
 }) async {
   if (incoming.isEmpty) return 0;
   try {
-    return await _applySyncedSettings(incoming, preferences, store);
+    return await _serialized(
+      () => _applySyncedSettings(incoming, preferences, store, now),
+    );
   } on Object {
     return 0;
   }
@@ -130,30 +209,41 @@ Future<int> _applySyncedSettings(
   Map<String, StampedSetting> incoming,
   SharedPreferences? preferences,
   SettingsSyncStore store,
+  DateTime? now,
 ) async {
   final prefs = preferences ?? await SharedPreferences.getInstance();
 
   // Only what this device is willing to keep in step. An incoming key
   // that is setup-only here -- or unknown, because the other side is a
   // newer version -- is dropped rather than written.
-  final offered = {
-    for (final entry in incoming.entries)
-      if (carriedSettings[entry.key]?.when == CarriedWhen.always)
-        entry.key: entry.value,
-  };
+  final offered = _shareable(incoming);
   if (offered.isEmpty) return 0;
 
-  final current = await readCarriedSettings(
-    preferences: prefs,
-    when: CarriedWhen.always,
-  );
-  final local = await store.load(prefs);
+  final previous = await store.load(prefs);
+  final current = await _current(prefs);
+  final local = _localSettings(current.values, previous, now ?? DateTime.now());
   final merged = mergeSettings(local: local, incoming: offered);
-  final changed = changedBy(current: current, merged: merged);
+  final changed = changedBy(current: current.values, merged: merged);
 
-  if (changed.isNotEmpty) {
-    await applyCarriedSettings(changed, prefs);
+  var applied = 0;
+  for (final entry in changed.entries) {
+    if (await applySyncedSettingIfUnchanged(
+      entry.key,
+      entry.value,
+      expectedStored: current.stored[entry.key],
+      preferences: prefs,
+    )) {
+      applied++;
+    } else {
+      // A newer local edit or a failed write is not an acknowledged
+      // remote value. The next publish must still see that local change.
+      if (local[entry.key] case final held?) {
+        merged[entry.key] = held;
+      } else {
+        merged.remove(entry.key);
+      }
+    }
   }
   await store.save(merged, prefs);
-  return changed.length;
+  return applied;
 }

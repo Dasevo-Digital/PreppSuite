@@ -19,6 +19,7 @@
 library;
 
 import '../../../local_db/database.dart';
+import '../../inventory/application/inventory_numbers.dart';
 import '../../../model/categories.dart';
 import '../../inventory/application/shopping_list.dart';
 import '../../inventory/application/supply_calculator.dart';
@@ -75,6 +76,15 @@ class SupplyStatus {
 /// household has recorded nothing to divide, or it consumes nothing
 /// because nobody is entered as living here. Neither is a shortage.
 SupplyStatus supplyStatus({
+  required List<InventoryItem> items,
+  required SupplyHousehold household,
+}) =>
+    inventoryNumbersOrNull(
+      () => _supplyStatus(items: items, household: household),
+    ) ??
+    const SupplyStatus(light: SupplyLight.unknown);
+
+SupplyStatus _supplyStatus({
   required List<InventoryItem> items,
   required SupplyHousehold household,
 }) {

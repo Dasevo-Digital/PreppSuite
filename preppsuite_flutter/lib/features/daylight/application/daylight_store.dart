@@ -32,7 +32,14 @@ class DaylightStore {
     final prefs = await SharedPreferences.getInstance();
     final latitude = prefs.getDouble(_latitudeKey);
     final longitude = prefs.getDouble(_longitudeKey);
-    if (latitude == null || longitude == null) return null;
+    if (latitude == null ||
+        longitude == null ||
+        !latitude.isFinite ||
+        !longitude.isFinite ||
+        latitude.abs() > 90 ||
+        longitude.abs() > 180) {
+      return null;
+    }
     return DaylightPlace(
       latitude: latitude,
       longitude: longitude,
@@ -41,6 +48,12 @@ class DaylightStore {
   }
 
   Future<void> save(DaylightPlace place) async {
+    if (!place.latitude.isFinite ||
+        !place.longitude.isFinite ||
+        place.latitude.abs() > 90 ||
+        place.longitude.abs() > 180) {
+      throw ArgumentError('Invalid coordinates');
+    }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_latitudeKey, place.latitude);
     await prefs.setDouble(_longitudeKey, place.longitude);

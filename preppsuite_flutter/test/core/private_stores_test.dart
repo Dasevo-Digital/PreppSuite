@@ -148,9 +148,17 @@ void main() {
       ),
     );
 
+    await const PrivatePreferences().setString(
+      'checkInContacts.v1',
+      'shared-contact-fixture',
+    );
     final carried = await readCarriedSettings();
-
-    expect(carried['preparednessHubV1'], contains('Eiche'));
+    expect(carried['checkInContacts.v1'], 'shared-contact-fixture');
+    expect(carried, isNot(contains('preparednessHubV1')));
+    expect(
+      (await readBackupHousehold()).settings['preparednessHubV1'],
+      contains('Eiche'),
+    );
   }, skip: _skip);
 }
 

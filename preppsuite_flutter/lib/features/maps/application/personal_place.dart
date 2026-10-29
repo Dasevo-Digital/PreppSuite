@@ -70,31 +70,47 @@ class PersonalPlaceStore {
 
   static const _key = 'personalMapPlaces.v1';
 
+  static List<PersonalPlace> _decode(String? raw) {
+    if (raw == null) return [];
+    try {
+      final decoded = jsonDecode(raw);
+      return decoded is List
+          ? [for (final item in decoded) ?PersonalPlace.fromJson(item)]
+          : [];
+    } on FormatException {
+      return [];
+    }
+  }
+
   Future<List<PersonalPlace>> load() async {
     try {
       final raw = await const PrivatePreferences().getString(_key);
-      if (raw == null) return const [];
-      final decoded = jsonDecode(raw);
-      if (decoded is! List) return const [];
-      return [for (final item in decoded) ?PersonalPlace.fromJson(item)];
+      return _decode(raw);
     } on Object {
       return const [];
     }
   }
 
   Future<void> save(List<PersonalPlace> places) async {
-    try {
-      const store = PrivatePreferences();
-      if (places.isEmpty) {
-        await store.remove(_key);
-        return;
+    await update((_) => places);
+  }
+
+  /// Share the private preference's queue with every writer, not just
+  /// this store instance. Screens must merge against the current list.
+  Future<List<PersonalPlace>> update(
+    List<PersonalPlace> Function(List<PersonalPlace> current) change,
+  ) async {
+    final raw = await const PrivatePreferences().updateString(_key, (raw) {
+      final places = change(_decode(raw));
+      if (places.any(
+        (place) => PersonalPlace.fromJson(place.toJson()) == null,
+      )) {
+        throw const FormatException('Invalid place');
       }
-      await store.setString(
-        _key,
-        jsonEncode([for (final place in places) place.toJson()]),
-      );
-    } on Object {
-      // Saving is best effort. The visible map remains usable for this run.
-    }
+      return places.isEmpty
+          ? null
+          : jsonEncode([for (final place in places) place.toJson()]);
+    });
+    return _decode(raw);
   }
 }

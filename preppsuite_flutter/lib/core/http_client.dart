@@ -45,10 +45,12 @@ class TimeoutClient extends http.BaseClient {
 
     if (request is http.Abortable) {
       final weak = WeakReference(abort);
+      final owner = WeakReference(this);
       unawaited(
         request.abortTrigger?.then((_) {
           final signal = weak.target;
           if (signal != null && !signal.isCompleted) signal.complete();
+          if (signal != null) owner.target?._active.remove(signal);
         }),
       );
     }
@@ -101,12 +103,30 @@ class TimeoutClient extends http.BaseClient {
 Stream<List<int>> _finishBody(
   Stream<List<int>> body,
   void Function() stop,
-) async* {
-  try {
-    yield* body;
-  } finally {
-    stop();
-  }
+) {
+  StreamSubscription<List<int>>? subscription;
+  late final StreamController<List<int>> controller;
+  controller = StreamController<List<int>>(
+    // Subscribe synchronously. IOClient must see its response listened to
+    // before an abort, or it cannot cancel the underlying response socket.
+    onListen: () {
+      subscription = body.listen(
+        controller.add,
+        onError: controller.addError,
+        onDone: () {
+          stop();
+          unawaited(controller.close());
+        },
+      );
+    },
+    onPause: () => subscription?.pause(),
+    onResume: () => subscription?.resume(),
+    onCancel: () {
+      stop();
+      return subscription?.cancel();
+    },
+  );
+  return controller.stream;
 }
 
 /// Preserve arbitrary request bodies, including multipart uploads, while

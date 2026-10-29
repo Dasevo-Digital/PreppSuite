@@ -10,6 +10,16 @@ class InvalidInventoryNumbers implements Exception {
 // horizon. This still permits over 27,000 years of daily medication.
 const maxMedicationSpanDays = 10000000;
 
+/// A domain failure is recoverable in the screen that owns the inputs.
+/// Do not catch unrelated programming or storage errors as invalid stock.
+T? inventoryNumbersOrNull<T>(T Function() calculate) {
+  try {
+    return calculate();
+  } on InvalidInventoryNumbers {
+    return null;
+  }
+}
+
 bool validInventoryNumbers({
   required double quantity,
   double? minQuantity,

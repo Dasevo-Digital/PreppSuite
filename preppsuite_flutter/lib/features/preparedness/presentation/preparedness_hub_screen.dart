@@ -627,6 +627,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   }
 
   String _gapReason(AutonomyReach reach) => switch (reach.gap) {
+    AutonomyGap.invalidNumbers => _l10n.inventoryInvalidNumbers,
     AutonomyGap.onlyByHand => _l10n.hubGapOnlyByHand,
     AutonomyGap.nothingRecorded => switch (reach.resource) {
       AutonomyResource.energy => _l10n.hubGapNoEnergyPlan,

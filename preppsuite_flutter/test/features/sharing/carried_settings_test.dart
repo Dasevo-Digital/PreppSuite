@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/daylight/application/daylight_store.dart';
 import 'package:preppsuite_flutter/features/sharing/application/carried_settings.dart';
 import 'package:preppsuite_flutter/features/sharing/application/settings_sync_store.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
@@ -83,7 +86,7 @@ void main() {
         'Router;12',
       ]);
       expect(prefs.getDouble('daylightLatitude'), 52.52);
-      expect(prefs.getInt('expiryLeadDays'), 14);
+      expect(prefs.getString('expiryLeadDays'), '14');
       expect(prefs.getBool('outageFreezerFull'), isTrue);
       expect(prefs.getString('pegelStation'), 'DRESDEN');
       expect(prefs.getString('syncDeviceId'), isNull);
@@ -180,7 +183,7 @@ void main() {
     });
   });
 
-  group('what stays on the device (#231)', () {
+  group('what stays on the device', () {
     // The meeting point among them. The map screen says the places stay
     // on this device, and until 2.7.6 every sync carried them anyway.
     const places = '[{"id":"meeting-1","name":"Treffpunkt"}]';
@@ -238,4 +241,109 @@ void main() {
       expect(prefs.getString('personalMapPlaces.v1'), places);
     });
   });
+  group('the crisis plan stays local on every road', () {
+    const plan = '{"communication":{"text":"private-plan-fixture"}}';
+    setUp(
+      () => SharedPreferences.setMockInitialValues({'preparednessHubV1': plan}),
+    );
+    test(
+      'setup, sync and old comparison baselines cannot transmit it',
+      () async {
+        expect(
+          (await readCarriedHousehold()).settings,
+          isNot(contains('preparednessHubV1')),
+        );
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(
+          'carriedSettingStampsV1',
+          jsonEncode({
+            'preparednessHubV1': {'v': plan, 'at': '2026-01-01T00:00:00Z'},
+          }),
+        );
+        expect(await readSyncedSettings(), isEmpty);
+        expect(
+          prefs.getString('carriedSettingStampsV1'),
+          isNot(contains('private-plan-fixture')),
+        );
+      },
+    );
+    test('old senders cannot replace the local plan', () async {
+      expect(
+        await applyCarriedSettings({'preparednessHubV1': 'foreign-plan'}),
+        0,
+      );
+      expect(
+        await applySyncedSettings({
+          'preparednessHubV1': (value: 'foreign-plan', at: DateTime.utc(2027)),
+        }),
+        0,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('preparednessHubV1'), plan);
+    });
+    test('its own backup still restores the plan', () async {
+      final backup = await readBackupHousehold();
+      expect(backup.settings['preparednessHubV1'], plan);
+      SharedPreferences.setMockInitialValues({});
+      expect(await restoreBackupSettings(backup.settings), 1);
+      expect(
+        (await SharedPreferences.getInstance()).getString('preparednessHubV1'),
+        plan,
+      );
+    });
+  });
+
+  test('invalid numeric exchange cannot poison the next backup', () async {
+    SharedPreferences.setMockInitialValues({});
+    for (final value in [
+      double.nan,
+      double.infinity,
+      double.negativeInfinity,
+      91,
+      -91,
+    ]) {
+      expect(await applyCarriedSettings({'daylightLatitude': value}), 0);
+    }
+    for (final value in [181, -181, double.infinity]) {
+      expect(await applyCarriedSettings({'daylightLongitude': value}), 0);
+    }
+    final incoming = jsonDecode(
+      '{"daylightLatitude":1e999,"daylightLongitude":2}',
+    ) as Map<String, dynamic>;
+    expect(await applyCarriedSettings(incoming), 1);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('daylightLatitude', double.infinity);
+    expect(await const DaylightStore().load(), isNull);
+    await expectLater(
+      const DaylightStore().save(
+        const DaylightPlace(latitude: 91, longitude: 2),
+      ),
+      throwsArgumentError,
+    );
+    final backup = await readBackupHousehold();
+    expect(backup.settings, isNot(contains('daylightLatitude')));
+    expect(() => jsonEncode(backup.toJson()), returnsNormally);
+    expect(await applyCarriedSettings({'chargeReminderDays': -1}), 0);
+    expect(await applyCarriedSettings({'chargeReminderDays': 1.5}), 0);
+  });
+  test(
+    'lead times use the controller type and retain legacy single values',
+    () async {
+      SharedPreferences.setMockInitialValues({'expiryLeadDays': '90,14,1'});
+      final sent = await readCarriedSettings();
+      expect(sent['expiryLeadDays'], '90,14,1');
+      SharedPreferences.setMockInitialValues({});
+      expect(await applyCarriedSettings(sent), 1);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('expiryLeadDays'), '90,14,1');
+      expect(await applyCarriedSettings({'expiryLeadDays': 14}), 1);
+      expect(prefs.getString('expiryLeadDays'), '14');
+      expect(await applyCarriedSettings({'expiryLeadDays': 0}), 1);
+      expect(prefs.getString('expiryLeadDays'), '');
+      for (final invalid in [-1, 1.5, 366, double.infinity]) {
+        expect(await applyCarriedSettings({'chargeReminderDays': invalid}), 0);
+      }
+      expect(await applyCarriedSettings({'chargeReminderDays': 365}), 1);
+    },
+  );
 }

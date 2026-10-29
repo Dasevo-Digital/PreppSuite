@@ -136,11 +136,70 @@ class PrivatePreferences {
     SharedPreferences? preferences,
   }) => _serialized(key, () async {
     final prefs = preferences ?? await SharedPreferences.getInstance();
+    await _writeString(key, value, prefs);
+  });
+
+  Future<void> _writeString(
+    String key,
+    String? value,
+    SharedPreferences prefs,
+  ) async {
     final folderKey = await _key();
-    await prefs.setString(
-      key,
-      folderKey == null ? value : await encryptForFolder(value, folderKey),
-    );
+    final stored = value == null || folderKey == null
+        ? value
+        : await encryptForFolder(value, folderKey);
+    await _persistString(key, stored, prefs);
+  }
+
+  Future<void> _persistString(
+    String key,
+    String? value,
+    SharedPreferences prefs,
+  ) async {
+    try {
+      final saved = value == null
+          ? await prefs.remove(key)
+          : await prefs.setString(key, value);
+      if (!saved) throw StateError('Preference write failed');
+    } catch (_) {
+      // shared_preferences updates its cache before the backend answers.
+      // A failed write must not become the next edit's phantom baseline.
+      try {
+        await prefs.reload();
+      } catch (_) {
+        /* Preserve the write error. */
+      }
+      rethrow;
+    }
+  }
+
+  /// The whole edit shares the key's queue, including writers in another
+  /// store and a backup restore. A lock around setString alone loses edits.
+  Future<String?> updateString(
+    String key,
+    String? Function(String? current) update,
+  ) => _serialized(key, () async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = update(await _readString(key, prefs));
+    await _writeString(key, value, prefs);
+    return value;
+  });
+
+  /// Refuse a received value if a local edit landed while it was being
+  /// decrypted or sealed. Check after encryption, immediately before writing.
+  Future<bool> compareAndSetString(
+    String key, {
+    required Object? expectedStored,
+    required String? value,
+    required SharedPreferences preferences,
+  }) => _serialized(key, () async {
+    final folderKey = await _key();
+    final stored = value == null || folderKey == null
+        ? value
+        : await encryptForFolder(value, folderKey);
+    if (preferences.get(key) != expectedStored) return false;
+    await _persistString(key, stored, preferences);
+    return true;
   });
 
   /// A list is one encrypted string so the envelope covers its length too.
@@ -192,7 +251,7 @@ class PrivatePreferences {
 
   Future<void> remove(String key) => _serialized(key, () async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(key);
+    await _persistString(key, null, prefs);
   });
 
   Future<bool> containsKey(String key) => _serialized(key, () async {

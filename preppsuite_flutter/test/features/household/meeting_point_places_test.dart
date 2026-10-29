@@ -95,4 +95,30 @@ void main() {
     expect(way.meters, closeTo(1112, 5));
     expect(way.direction, CompassPoint.north);
   });
+  test('two stores keep both simultaneous meeting point writes', () async {
+    await Future.wait([
+      const MeetingPointPlaces(PersonalPlaceStore())
+          .put(MeetingPoint.near, const LatLng(1, 2), label: 'Near'),
+      const MeetingPointPlaces(PersonalPlaceStore())
+          .put(MeetingPoint.far, const LatLng(3, 4), label: 'Far'),
+    ]);
+    expect(
+      (await const MeetingPointPlaces().load()).keys,
+      containsAll(MeetingPoint.values),
+    );
+  });
+  test(
+    'a queued relabel cannot resurrect a removed point or lose an import',
+    () async {
+      const points = MeetingPointPlaces();
+      await points.put(MeetingPoint.near, const LatLng(1, 2), label: 'Near');
+      await Future.wait([
+        points.remove(MeetingPoint.near),
+        points.relabel({MeetingPoint.near: 'Renamed'}),
+        const PersonalPlaceStore().update((current) => [...current, well]),
+      ]);
+      final saved = await const PersonalPlaceStore().load();
+      expect(saved.map((point) => point.id), ['p1']);
+    },
+  );
 }
