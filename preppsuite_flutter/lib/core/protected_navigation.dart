@@ -56,9 +56,12 @@ class _ProtectedNavigationState extends State<ProtectedNavigation> {
               child: Navigator(
                 key: widget.gateNavigatorKey,
                 pages: [
+                  // No PopScope: the only page of its navigator cannot be
+                  // popped anyway, and refusing made system back "handled"
+                  // with nothing done (#224).
                   MaterialPage<void>(
                     key: const ValueKey('closed-gate'),
-                    child: PopScope(canPop: false, child: gate),
+                    child: gate,
                   ),
                 ],
                 onDidRemovePage: (_) {},

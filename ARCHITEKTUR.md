@@ -2658,6 +2658,19 @@ drei Regeln:
   `startOverLocalData` vergisst die Sperre erst, wenn die Dateien wirklich
   beiseitegelegt sind, und die Markierung auch dann, wenn der
   Schlüsselspeicher das Löschen verweigert.
+- Ein unverschlüsselter Haushalt kommt nie in die Datenweiche: Nach der
+  Übertragung öffnet sich seine Datenbank, und nur der Prüfwert fehlt.
+  Bis 2.7.6 stand dann „Sperrstatus nicht verfügbar“ für immer davor,
+  und keine Passphrase konnte es je öffnen (#223). Seit 2.7.7 bietet der
+  Bildschirm „Sperre zurücksetzen“: Die Bildschirmsperre des Geräts
+  bestätigt (PIN, Muster, Passwort, Gesicht oder Finger;
+  `DeviceOwnerCheck`), danach vergisst `forgetUnreadable` die Sperre wie
+  „Neu einrichten“, und die Daten bleiben. Hat das Gerät keine
+  Bildschirmsperre oder kann die Plattform nicht fragen (Linux), genügt
+  eine Bestätigung im Bildschirm: Wer ein solches Gerät hält, kann ohnehin
+  alles andere darauf. Nur „nichts eingerichtet“ führt dorthin; eine
+  Sperre nach zu vielen Fehlversuchen zählt als Ablehnung, sonst wären
+  fünf falsche PINs der Weg um die PIN herum.
 - Die Markierung wird beim Einrichten **zuletzt** gesetzt und beim
   Abschalten **zuletzt** entfernt. Andersherum sperrt ein fehlgeschlagener
   Schreibvorgang jemanden aus seinem eigenen Haushalt aus, für den es
@@ -2670,6 +2683,12 @@ Vor dem ersten Öffnen wird der private Navigator nicht aufgebaut; nach einer
 erneuten Sperre bleibt sein Zustand verborgen erhalten. Öffentliche Notfallhilfe
 hat einen getrennten Navigator und eine eigene Textauswahl. System-Zurück
 erreicht ausschließlich diesen Navigator, solange eine Weiche geschlossen ist.
+Auf der Seite der Weiche selbst gibt es nichts zurückzunehmen, und
+Zurück schickt die App wie auf jeder ersten Seite in den Hintergrund
+(`SystemNavigator.pop`). Weitergereicht würde es `WidgetsApp` erreichen
+und den verborgenen Navigator zurücknehmen. Von 2.7.3 bis 2.7.6 hielt ein
+`PopScope(canPop: false)` die Seite fest; eine Weigerung gilt als
+„erledigt“, und Zurück tat auf dem Sperrbildschirm gar nichts (#224).
 Ein verspätetes biometrisches Ergebnis aus der vorigen Öffnung kann die neue
 Sperre nicht aufheben; im Hintergrund wird kein neuer Dialog angefordert.
 

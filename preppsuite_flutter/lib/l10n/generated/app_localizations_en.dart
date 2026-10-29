@@ -8813,6 +8813,38 @@ class AppLocalizationsEn extends AppLocalizations {
       'Face or fingerprint was not confirmed. The setting stays off.';
 
   @override
+  String get appLockResetHint =>
+      'If this persists, for example after moving to a new device, the lock can be reset with this device\'s screen lock. The household\'s data is kept.';
+
+  @override
+  String get appLockResetButton => 'Reset the lock';
+
+  @override
+  String get appLockResetReason => 'Reset the PreppSuite app lock';
+
+  @override
+  String get appLockResetConfirmTitle =>
+      'Reset the lock without a screen lock?';
+
+  @override
+  String get appLockResetConfirmBody =>
+      'This device has no screen lock that PreppSuite can ask. The app lock will be removed; the household\'s data stays. A new lock can be set up afterwards under Settings → Data and security.';
+
+  @override
+  String get appLockResetConfirmAction => 'Reset';
+
+  @override
+  String get appLockResetRefused => 'Not confirmed. The lock stays in place.';
+
+  @override
+  String get appLockResetFailed =>
+      'The lock could not be reset. Please try again.';
+
+  @override
+  String get appLockResetDone =>
+      'App lock removed. It can be set up again under Settings → Data and security.';
+
+  @override
   String get shoppingListExport => 'Export as a file';
 
   @override

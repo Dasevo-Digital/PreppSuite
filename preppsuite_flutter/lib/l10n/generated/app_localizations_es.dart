@@ -8889,6 +8889,38 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se confirmó la cara o la huella. El ajuste sigue desactivado.';
 
   @override
+  String get appLockResetHint =>
+      'Si sigue así, por ejemplo después de pasar a un dispositivo nuevo, el bloqueo se puede restablecer con el bloqueo de pantalla de este dispositivo. Los datos del hogar se conservan.';
+
+  @override
+  String get appLockResetButton => 'Restablecer el bloqueo';
+
+  @override
+  String get appLockResetReason => 'Restablecer el bloqueo de PreppSuite';
+
+  @override
+  String get appLockResetConfirmTitle =>
+      '¿Restablecer el bloqueo sin bloqueo de pantalla?';
+
+  @override
+  String get appLockResetConfirmBody =>
+      'Este dispositivo no tiene un bloqueo de pantalla que PreppSuite pueda consultar. Se quitará el bloqueo de la app; los datos del hogar se conservan. Después se puede configurar un bloqueo nuevo en Ajustes → Datos y seguridad.';
+
+  @override
+  String get appLockResetConfirmAction => 'Restablecer';
+
+  @override
+  String get appLockResetRefused => 'No confirmado. El bloqueo se mantiene.';
+
+  @override
+  String get appLockResetFailed =>
+      'No se pudo restablecer el bloqueo. Vuelve a intentarlo.';
+
+  @override
+  String get appLockResetDone =>
+      'Bloqueo de la app quitado. Se puede volver a configurar en Ajustes → Datos y seguridad.';
+
+  @override
   String get shoppingListExport => 'Exportar como archivo';
 
   @override

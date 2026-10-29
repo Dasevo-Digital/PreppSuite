@@ -8860,6 +8860,39 @@ class AppLocalizationsDe extends AppLocalizations {
       'Gesicht oder Fingerabdruck wurde nicht bestätigt. Die Einstellung bleibt aus.';
 
   @override
+  String get appLockResetHint =>
+      'Bleibt das so, etwa nach dem Umzug auf ein neues Gerät, lässt sich die Sperre mit der Bildschirmsperre dieses Geräts zurücksetzen. Die Daten des Haushalts bleiben dabei erhalten.';
+
+  @override
+  String get appLockResetButton => 'Sperre zurücksetzen';
+
+  @override
+  String get appLockResetReason => 'App-Sperre von PreppSuite zurücksetzen';
+
+  @override
+  String get appLockResetConfirmTitle =>
+      'Sperre ohne Bildschirmsperre zurücksetzen?';
+
+  @override
+  String get appLockResetConfirmBody =>
+      'Dieses Gerät hat keine Bildschirmsperre, die PreppSuite abfragen kann. Die App-Sperre wird aufgehoben, die Daten des Haushalts bleiben. Eine neue Sperre lässt sich danach unter Einstellungen → Daten und Sicherheit einrichten.';
+
+  @override
+  String get appLockResetConfirmAction => 'Zurücksetzen';
+
+  @override
+  String get appLockResetRefused =>
+      'Nicht bestätigt. Die Sperre bleibt bestehen.';
+
+  @override
+  String get appLockResetFailed =>
+      'Die Sperre ließ sich nicht zurücksetzen. Bitte erneut versuchen.';
+
+  @override
+  String get appLockResetDone =>
+      'App-Sperre aufgehoben. Unter Einstellungen → Daten und Sicherheit lässt sie sich neu einrichten.';
+
+  @override
   String get shoppingListExport => 'Als Datei exportieren';
 
   @override

@@ -18,6 +18,26 @@ class AppLockController extends AsyncNotifier<bool> {
     // The lock took the face or fingerprint with it.
     ref.invalidate(appLockBiometricProvider);
   }
+
+  /// Sets aside a lock that can no longer be read, once the device's owner
+  /// has confirmed it (#223). True when the app is open afterwards.
+  ///
+  /// The household's data stays where it is; only the lock goes. Should
+  /// the key store still hold it after all, the lock is back and asks for
+  /// its passphrase -- that is not a failure, but it is not open either.
+  Future<bool> forgetUnreadable() async {
+    final store = AppLockStore();
+    await store.forgetForFreshStart();
+    ref.invalidate(appLockBiometricProvider);
+    try {
+      final enabled = await store.isEnabled();
+      state = AsyncData(enabled);
+      return !enabled;
+    } on Object catch (error, stack) {
+      state = AsyncError(error, stack);
+      return false;
+    }
+  }
 }
 
 final appLockProvider = AsyncNotifierProvider<AppLockController, bool>(

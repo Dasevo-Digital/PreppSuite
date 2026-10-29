@@ -69,3 +69,69 @@ final biometricAuthProvider = Provider<BiometricAuth>(
 final biometricAvailableProvider = FutureProvider<bool>(
   (ref) => ref.watch(biometricAuthProvider).available(),
 );
+
+/// What the device's own screen lock said when asked (#223).
+enum DeviceOwnerAnswer {
+  /// The person unlocked it: PIN, pattern, password, face or fingerprint.
+  confirmed,
+
+  /// Asked and not confirmed -- cancelled, wrong, or locked out after too
+  /// many tries.
+  refused,
+
+  /// There is nothing to ask: no screen lock is set, or the platform has
+  /// no way of asking (Linux).
+  cannotAsk,
+}
+
+/// Asks the device's screen lock whether the owner is here.
+///
+/// Not the app lock's face or fingerprint: that one replaces typing a
+/// passphrase the person knows. This is for the one case where nobody
+/// knows it any more -- the lock's verifier is gone from the key store,
+/// and no passphrase opens the app (#223). The device's own lock is the
+/// best evidence left that the hand on the screen is the household's, so
+/// the PIN counts here as much as a face.
+abstract interface class DeviceOwnerCheck {
+  Future<DeviceOwnerAnswer> confirm(String reason);
+}
+
+class LocalDeviceOwnerCheck implements DeviceOwnerCheck {
+  LocalDeviceOwnerCheck({LocalAuthentication? auth, bool? platformCanAsk})
+    : _auth = auth ?? LocalAuthentication(),
+      // There is no implementation for Linux at all, and asking it throws.
+      _platformCanAsk = platformCanAsk ?? !Platform.isLinux;
+
+  final LocalAuthentication _auth;
+  final bool _platformCanAsk;
+
+  @override
+  Future<DeviceOwnerAnswer> confirm(String reason) async {
+    if (!_platformCanAsk) return DeviceOwnerAnswer.cannotAsk;
+    try {
+      if (!await _auth.isDeviceSupported()) return DeviceOwnerAnswer.cannotAsk;
+    } on Object {
+      return DeviceOwnerAnswer.cannotAsk;
+    }
+    try {
+      final unlocked = await _auth.authenticate(
+        localizedReason: reason,
+        persistAcrossBackgrounding: true,
+      );
+      return unlocked ? DeviceOwnerAnswer.confirmed : DeviceOwnerAnswer.refused;
+    } on LocalAuthException catch (error) {
+      // Only "nothing is set up" may lead to the confirmation without a
+      // lock. A lockout after wrong tries is a refusal: otherwise five
+      // wrong PINs would be the way round the PIN.
+      return error.code == LocalAuthExceptionCode.noCredentialsSet
+          ? DeviceOwnerAnswer.cannotAsk
+          : DeviceOwnerAnswer.refused;
+    } on Object {
+      return DeviceOwnerAnswer.refused;
+    }
+  }
+}
+
+final deviceOwnerCheckProvider = Provider<DeviceOwnerCheck>(
+  (ref) => LocalDeviceOwnerCheck(),
+);

@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show PredictiveBackEvent;
+import 'package:flutter/services.dart'
+    show PredictiveBackEvent, SystemNavigator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/app_theme.dart';
@@ -47,7 +48,13 @@ class _PreppSuiteAppState extends ConsumerState<PreppSuiteApp>
   Future<bool> didPopRoute() async {
     final navigator = _publicNavigator;
     if (navigator == null) return false;
-    await navigator.maybePop();
+    // A closed gate keeps system back to itself: handed on, it would reach
+    // WidgetsApp and pop the hidden household navigator. Public help pops
+    // back to the gate. On the gate's own page there is nothing to go back
+    // to, and back does what it does on any first page -- the app goes to
+    // the background. It did nothing from 2.7.3 on, which left the lock
+    // screen with no way out but the home button (#224).
+    if (!await navigator.maybePop()) await SystemNavigator.pop();
     return true;
   }
 

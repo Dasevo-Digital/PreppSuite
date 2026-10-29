@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemChannels;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:preppsuite_flutter/app.dart';
+import 'package:preppsuite_flutter/core/app_lock.dart';
 import 'package:preppsuite_flutter/core/app_lock_gate.dart';
 import 'package:preppsuite_flutter/core/emergency_access.dart';
 import 'package:preppsuite_flutter/core/app_lock_provider.dart';
@@ -14,6 +16,38 @@ import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 class _UnavailableLock extends AppLockController {
   @override
   Future<bool> build() => Future<bool>.error(StateError('secure storage'));
+}
+
+/// A lock that is set and cannot be read: the verifier is gone (#223).
+class _LostLock extends AppLockController {
+  _LostLock({this.resets = true});
+
+  final bool resets;
+  static var forgotten = 0;
+
+  @override
+  Future<bool> build() => Future<bool>.error(const AppLockStatusUnavailable());
+
+  @override
+  Future<bool> forgetUnreadable() async {
+    forgotten++;
+    if (!resets) return false;
+    state = const AsyncData(false);
+    return true;
+  }
+}
+
+class _Owner implements DeviceOwnerCheck {
+  _Owner(this.answer);
+
+  final DeviceOwnerAnswer answer;
+  var asked = 0;
+
+  @override
+  Future<DeviceOwnerAnswer> confirm(String reason) async {
+    asked++;
+    return answer;
+  }
 }
 
 class _Locked extends AppLockController {
@@ -57,6 +91,23 @@ class _PendingSensor extends _Sensor {
     requests.add(request);
     return request.future;
   }
+}
+
+/// What the app asks of the platform channel, answered with nothing.
+///
+/// Back on the lock's own page ends in `SystemNavigator.pop` (#224), and
+/// the test engine never answers that channel by itself.
+List<String> _recordPlatformCalls(WidgetTester tester) {
+  final calls = <String>[];
+  final messenger = tester.binding.defaultBinaryMessenger;
+  messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+    calls.add(call.method);
+    return null;
+  });
+  addTearDown(
+    () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+  );
+  return calls;
 }
 
 void main() {
@@ -204,6 +255,7 @@ void main() {
   testWidgets('system back in the app returns from public help to the lock', (
     tester,
   ) async {
+    _recordPlatformCalls(tester);
     tester.platformDispatcher.localeTestValue = const Locale('de');
     addTearDown(tester.platformDispatcher.clearLocaleTestValue);
     await tester.pumpWidget(
@@ -225,6 +277,33 @@ void main() {
     expect(find.text('PreppSuite entsperren'), findsOneWidget);
     await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();
+    expect(find.text('PreppSuite entsperren'), findsOneWidget);
+  });
+
+  testWidgets('system back on the lock itself sends the app away (#224)', (
+    tester,
+  ) async {
+    // From 2.7.3 on it was swallowed: the gate's page refused to pop, and a
+    // refusal counts as handled. The lock screen then had no way out.
+    final platformCalls = _recordPlatformCalls(tester);
+    tester.platformDispatcher.localeTestValue = const Locale('de');
+    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          appLockProvider.overrideWith(_Locked.new),
+          appLockBiometricProvider.overrideWith(_BiometricOff.new),
+        ],
+        child: const PreppSuiteApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('PreppSuite entsperren'), findsOneWidget);
+
+    expect(await tester.binding.handlePopRoute(), isTrue);
+    await tester.pumpAndSettle();
+
+    expect(platformCalls, contains('SystemNavigator.pop'));
     expect(find.text('PreppSuite entsperren'), findsOneWidget);
   });
   testWidgets('does not reveal the app when lock status cannot be read', (
@@ -358,6 +437,112 @@ void main() {
       expect(sensor.asked, 0);
       expect(find.text('Mit Gesicht oder Fingerabdruck'), findsNothing);
       expect(find.text('private household data'), findsNothing);
+    });
+  });
+
+  group('a lock nobody can open any more (#223)', () {
+    setUp(() => _LostLock.forgotten = 0);
+
+    Future<void> pumpLost(
+      WidgetTester tester,
+      _Owner owner, {
+      bool resets = true,
+    }) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            appLockProvider.overrideWith(() => _LostLock(resets: resets)),
+            deviceOwnerCheckProvider.overrideWithValue(owner),
+          ],
+          child: MaterialApp(
+            locale: const Locale('de'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(
+              body: AppLockGate(child: Text('private household data')),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Sperrstatus nicht verfügbar'), findsOneWidget);
+    }
+
+    testWidgets('the screen lock of the device sets it aside', (
+      tester,
+    ) async {
+      final owner = _Owner(DeviceOwnerAnswer.confirmed);
+      await pumpLost(tester, owner);
+
+      await tester.tap(find.text('Sperre zurücksetzen'));
+      await tester.pumpAndSettle();
+
+      expect(owner.asked, 1);
+      expect(_LostLock.forgotten, 1);
+      expect(find.text('private household data'), findsOneWidget);
+      expect(find.textContaining('App-Sperre aufgehoben'), findsOneWidget);
+    });
+
+    testWidgets("an answer that is not the owner's changes nothing", (
+      tester,
+    ) async {
+      await pumpLost(tester, _Owner(DeviceOwnerAnswer.refused));
+
+      await tester.tap(find.text('Sperre zurücksetzen'));
+      await tester.pumpAndSettle();
+
+      expect(_LostLock.forgotten, 0);
+      expect(find.text('private household data'), findsNothing);
+      expect(
+        find.text('Nicht bestätigt. Die Sperre bleibt bestehen.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('without a screen lock it asks on the screen instead', (
+      tester,
+    ) async {
+      await pumpLost(tester, _Owner(DeviceOwnerAnswer.cannotAsk));
+
+      await tester.tap(find.text('Sperre zurücksetzen'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Sperre ohne Bildschirmsperre zurücksetzen?'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Abbrechen'));
+      await tester.pumpAndSettle();
+      expect(_LostLock.forgotten, 0);
+      expect(find.text('private household data'), findsNothing);
+
+      await tester.tap(find.text('Sperre zurücksetzen'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Zurücksetzen'));
+      await tester.pumpAndSettle();
+
+      expect(_LostLock.forgotten, 1);
+      expect(find.text('private household data'), findsOneWidget);
+    });
+
+    testWidgets('a reset that does not take says so and stays closed', (
+      tester,
+    ) async {
+      await pumpLost(
+        tester,
+        _Owner(DeviceOwnerAnswer.confirmed),
+        resets: false,
+      );
+
+      await tester.tap(find.text('Sperre zurücksetzen'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('private household data'), findsNothing);
+      expect(
+        find.text(
+          'Die Sperre ließ sich nicht zurücksetzen. Bitte erneut versuchen.',
+        ),
+        findsOneWidget,
+      );
     });
   });
 }

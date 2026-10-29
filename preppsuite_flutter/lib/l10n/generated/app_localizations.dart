@@ -14605,6 +14605,60 @@ abstract class AppLocalizations {
   /// **'Face or fingerprint was not confirmed. The setting stays off.'**
   String get appLockBiometricNotConfirmed;
 
+  /// No description provided for @appLockResetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If this persists, for example after moving to a new device, the lock can be reset with this device\'s screen lock. The household\'s data is kept.'**
+  String get appLockResetHint;
+
+  /// No description provided for @appLockResetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset the lock'**
+  String get appLockResetButton;
+
+  /// No description provided for @appLockResetReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset the PreppSuite app lock'**
+  String get appLockResetReason;
+
+  /// No description provided for @appLockResetConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset the lock without a screen lock?'**
+  String get appLockResetConfirmTitle;
+
+  /// No description provided for @appLockResetConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no screen lock that PreppSuite can ask. The app lock will be removed; the household\'s data stays. A new lock can be set up afterwards under Settings → Data and security.'**
+  String get appLockResetConfirmBody;
+
+  /// No description provided for @appLockResetConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get appLockResetConfirmAction;
+
+  /// No description provided for @appLockResetRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed. The lock stays in place.'**
+  String get appLockResetRefused;
+
+  /// No description provided for @appLockResetFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The lock could not be reset. Please try again.'**
+  String get appLockResetFailed;
+
+  /// No description provided for @appLockResetDone.
+  ///
+  /// In en, this message translates to:
+  /// **'App lock removed. It can be set up again under Settings → Data and security.'**
+  String get appLockResetDone;
+
   /// No description provided for @shoppingListExport.
   ///
   /// In en, this message translates to:
