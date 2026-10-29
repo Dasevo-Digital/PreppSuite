@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart' show Value;
+import 'package:cryptography/cryptography.dart';
+import 'package:cryptography/dart.dart';
+import 'package:preppsuite_flutter/core/bounded_input.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/preparedness/application/preparedness_hub_store.dart';
@@ -12,11 +15,64 @@ import 'package:preppsuite_flutter/model/household_profile.dart';
 import 'package:preppsuite_flutter/model/household_profile_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+class _CancelDuringDecryption extends DartCryptography {
+  _CancelDuringDecryption(this.token);
+  final CancellationToken token;
+  @override
+  AesGcm aesGcm({int secretKeyLength = 32, int nonceLength = 12}) =>
+      _CancellingCipher(
+        token,
+        secretKeyLength: secretKeyLength,
+        nonceLength: nonceLength,
+      );
+}
+
+class _CancellingCipher extends DartAesGcm {
+  _CancellingCipher(this.token, {super.secretKeyLength, super.nonceLength});
+  final CancellationToken token;
+  @override
+  List<int> decryptSync(
+    SecretBox box, {
+    required SecretKeyData secretKeyData,
+    List<int> aad = const [],
+  }) {
+    token.cancel();
+    return super.decryptSync(box, secretKeyData: secretKeyData, aad: aad);
+  }
+}
+
 void main() {
   // A backup carries the crisis plan alongside the household, and that
   // plan lives in the platform's own store.
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  test(
+    'cancelling after derivation never exposes a restorable backup',
+    () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final service = BackupService(db);
+      final file = BackupFile.fromString(
+        await service.exportHousehold('home', 'test-passphrase'),
+      )!;
+      final original = Cryptography.instance;
+      final token = CancellationToken();
+      Cryptography.instance = _CancelDuringDecryption(token);
+      addTearDown(() => Cryptography.instance = original);
+      await expectLater(
+        service.open(
+          file,
+          'test-passphrase',
+          householdId: 'home',
+          cancellation: token,
+        ),
+        throwsA(isA<OperationCancelled>()),
+      );
+      expect(token.cancelled, isTrue);
+      expect(await db.inventoryItemsForSync('home'), isEmpty);
+    },
+  );
 
   test(
     'a household backup restores its inventory into an empty database',

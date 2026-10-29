@@ -65,6 +65,7 @@ class BackupService {
       passphrase,
       cancellation: cancellation,
     );
+    cancellation?.check();
     final manifest = [
       for (var i = 0; i < files.length; i++) files[i].entry.withIndex(i),
     ];
@@ -77,6 +78,7 @@ class BackupService {
         key,
       );
 
+    cancellation?.check();
     final writer = BackupWriter(out, key);
     await writer.writeHeader(envelope);
     final unreadable = <String>[];
@@ -106,6 +108,7 @@ class BackupService {
         await source.close();
       }
     }
+    cancellation?.check();
     await writer.finish();
     return unreadable;
   }
@@ -183,13 +186,16 @@ class BackupService {
       passphrase,
       cancellation: cancellation,
     );
+    cancellation?.check();
     if (opened == null) return null;
     final (snapshot, key, envelope) = opened;
+    final files = await _manifest(envelope['files'], key);
+    cancellation?.check();
     return OpenedBackup(
       file: file,
       snapshot: snapshot,
       key: key,
-      files: await _manifest(envelope['files'], key),
+      files: files,
     );
   }
 
