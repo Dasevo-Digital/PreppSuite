@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/sharing/application/carried_settings.dart';
+import 'package:preppsuite_flutter/features/sharing/application/settings_sync_store.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -164,12 +165,6 @@ void main() {
   });
 
   group('what belongs to the household and used to stay behind', () {
-    test('the places the household agreed on travel', () {
-      // The meeting point, the way out, the well. They are coordinates,
-      // not paths, so nothing about them points at the other machine.
-      expect(carriedSettings['personalMapPlaces.v1']!.kind, CarriedKind.text);
-    });
-
     test('and so does what the crisis overview was told by hand', () {
       // The answers the records cannot supply. Re-entering them on every
       // device is exactly the work a handover is supposed to save.
@@ -182,6 +177,65 @@ void main() {
       for (final key in ['personalMapPlaces.v1', 'preparednessHubV1']) {
         expect(carriedSettings[key]!.kind, CarriedKind.text, reason: key);
       }
+    });
+  });
+
+  group('what stays on the device (#231)', () {
+    // The meeting point among them. The map screen says the places stay
+    // on this device, and until 2.7.6 every sync carried them anyway.
+    const places = '[{"id":"meeting-1","name":"Treffpunkt"}]';
+
+    test('the places of the map are not handed over', () async {
+      SharedPreferences.setMockInitialValues({
+        'personalMapPlaces.v1': places,
+        'pegelStation': 'DRESDEN',
+      });
+
+      expect(await readCarriedSettings(), {'pegelStation': 'DRESDEN'});
+      expect(
+        (await readCarriedHousehold()).settings,
+        isNot(contains('personalMapPlaces.v1')),
+      );
+    });
+
+    test('nor kept in step with the other devices', () async {
+      SharedPreferences.setMockInitialValues({
+        'personalMapPlaces.v1': places,
+        'pegelStation': 'DRESDEN',
+      });
+
+      final synced = await readSyncedSettings();
+
+      expect(synced.keys, ['pegelStation']);
+    });
+
+    test('an older device that still sends them is not listened to', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      expect(await applyCarriedSettings({'personalMapPlaces.v1': places}), 0);
+      expect(
+        await applySyncedSettings({
+          'personalMapPlaces.v1': (
+            value: places,
+            at: DateTime.utc(2026, 10, 29),
+          ),
+        }),
+        0,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('personalMapPlaces.v1'), isNull);
+    });
+
+    test('this device\'s own backup keeps them', () async {
+      SharedPreferences.setMockInitialValues({'personalMapPlaces.v1': places});
+
+      final backup = await readBackupHousehold();
+      expect(backup.settings['personalMapPlaces.v1'], places);
+
+      SharedPreferences.setMockInitialValues({});
+      expect(await restoreBackupSettings(backup.settings), 1);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('personalMapPlaces.v1'), places);
     });
   });
 }

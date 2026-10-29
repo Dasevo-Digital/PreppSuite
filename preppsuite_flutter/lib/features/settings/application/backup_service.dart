@@ -148,7 +148,7 @@ class BackupService {
       householdId: householdId,
     )).encode();
     final plan = jsonEncode((await hub.load()).toJson());
-    final carried = jsonEncode((await readCarriedHousehold()).toJson());
+    final carried = jsonEncode((await readBackupHousehold()).toJson());
     return {
       'preppsuiteBackup': 2,
       'key': parameters.toJson(),
@@ -396,7 +396,7 @@ class BackupService {
     if (clear == null) return null;
     try {
       final carried = CarriedHousehold.fromJson(jsonDecode(clear));
-      await applyCarriedSettings({
+      await restoreBackupSettings({
         for (final entry in carried.settings.entries)
           // The plan is restored by `_restorePlan`, which *merges* it.
           // Writing it again from here would hand back the older of the

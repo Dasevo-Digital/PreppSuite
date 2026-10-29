@@ -7,7 +7,7 @@
 /// re-entering it by hand on every device is exactly the kind of work the
 /// join was supposed to save.
 ///
-/// **An allow-list and not a copy of everything**, because three kinds of
+/// **An allow-list and not a copy of everything**, because four kinds of
 /// setting must not travel:
 ///
 ///  * **Identity.** `syncDeviceId` is what tells two devices apart. Copied
@@ -20,6 +20,10 @@
 ///    store on purpose. Carrying it would land it in the preferences file,
 ///    which on the desktops is plain JSON — that is a downgrade, not a
 ///    convenience, so the key is entered again on the new device.
+///  * **Whereabouts.** The personal places of the map, the meeting points
+///    among them, stay on the device they were set on (#204). They are on
+///    the list only so that this device's own backup brings them back; see
+///    [CarriedWhen.deviceOnly].
 ///
 /// Caches — the last reading from each station, when the warning feed was
 /// last polled — are left out for a duller reason: they are refetched in
@@ -57,6 +61,11 @@ enum CarriedWhen {
   /// Carried once, when a device is being set up from another, and left
   /// alone after that.
   setupOnly,
+
+  /// Never handed to another device, by any road. Kept in this device's
+  /// own backup, which is a copy of this device and nobody else's, so a
+  /// restore brings it back.
+  deviceOnly,
 }
 
 /// What a carried setting is: the shape of its value, and whether it
@@ -65,6 +74,7 @@ typedef CarriedSetting = ({CarriedKind kind, CarriedWhen when});
 
 const _always = CarriedWhen.always;
 const _setupOnly = CarriedWhen.setupOnly;
+const _deviceOnly = CarriedWhen.deviceOnly;
 
 /// Carried settings that are kept encrypted on the device.
 ///
@@ -120,12 +130,12 @@ const carriedSettings = <String, CarriedSetting>{
   // overview: the answers the records cannot supply, entered by hand.
   'preparednessHubV1': (kind: CarriedKind.text, when: _always),
 
-  // The meeting point, the way out, the well. Places the household
-  // agreed on — the most useful thing on the map and, until now, the
-  // one thing about the map that did not travel with a handover. They
-  // are coordinates, not paths, so nothing here points at a file on the
-  // other machine.
-  'personalMapPlaces.v1': (kind: CarriedKind.text, when: _always),
+  // The meeting point, the way out, the well. Where somebody will be is
+  // not something the other devices are told: the places stay on the
+  // device they were set on (#204) and go elsewhere only as a GPX or KML
+  // file somebody hands over. Until 2.7.6 they travelled with every sync
+  // all the same, against what the map screen says about them (#231).
+  'personalMapPlaces.v1': (kind: CarriedKind.text, when: _deviceOnly),
 
   // Who is told that the household is alive. Typed in once, and the
   // thing nobody wants to be typing on a second phone after the event.
@@ -207,19 +217,34 @@ Future<CarriedHousehold> readCarriedHousehold([
   settings: await readCarriedSettings(preferences: preferences),
 );
 
+/// What this device's own backup keeps of how it is set up: what
+/// [readCarriedHousehold] hands over, and what stays on the device.
+Future<CarriedHousehold> readBackupHousehold([
+  SharedPreferences? preferences,
+]) async => CarriedHousehold(
+  profile: await const HouseholdProfileStore().load(),
+  settings: await readCarriedSettings(
+    preferences: preferences,
+    forBackup: true,
+  ),
+);
+
 /// Reads the carried settings out of this device, ready to send.
 ///
 /// A setting that was never touched is left out entirely rather than sent
 /// as a null, so a household that has no opinion about something does not
-/// overwrite one that does.
+/// overwrite one that does. What is [CarriedWhen.deviceOnly] is read only
+/// [forBackup].
 Future<Map<String, Object>> readCarriedSettings({
   SharedPreferences? preferences,
   CarriedWhen? when,
+  bool forBackup = false,
 }) async {
   final prefs = preferences ?? await SharedPreferences.getInstance();
   final values = <String, Object>{};
   for (final entry in carriedSettings.entries) {
     if (when != null && entry.value.when != when) continue;
+    if (!forBackup && entry.value.when == _deviceOnly) continue;
     final value = await _read(prefs, entry.key, entry.value.kind);
     if (value != null) values[entry.key] = value;
   }
@@ -231,16 +256,32 @@ Future<Map<String, Object>> readCarriedSettings({
 /// Anything not on the allow-list, and anything whose value does not match
 /// the kind the allow-list gives, is dropped without comment: the far side
 /// may be a newer or an older version of the app, and a handover must not
-/// fail over a setting.
+/// fail over a setting. So is what is [CarriedWhen.deviceOnly]: a version
+/// before 2.7.6 still sends the places of its map (#231), and they are
+/// not this device's to keep.
 Future<int> applyCarriedSettings(
   Map<String, Object?> values, [
   SharedPreferences? preferences,
-]) async {
+]) => _apply(values, preferences, fromBackup: false);
+
+/// [applyCarriedSettings] for this device's own backup, which also brings
+/// back what stays on the device.
+Future<int> restoreBackupSettings(
+  Map<String, Object?> values, [
+  SharedPreferences? preferences,
+]) => _apply(values, preferences, fromBackup: true);
+
+Future<int> _apply(
+  Map<String, Object?> values,
+  SharedPreferences? preferences, {
+  required bool fromBackup,
+}) async {
   final prefs = preferences ?? await SharedPreferences.getInstance();
   var applied = 0;
   for (final entry in values.entries) {
     final setting = carriedSettings[entry.key];
     if (setting == null) continue;
+    if (!fromBackup && setting.when == _deviceOnly) continue;
     if (await _write(prefs, entry.key, setting.kind, entry.value)) applied++;
   }
   return applied;

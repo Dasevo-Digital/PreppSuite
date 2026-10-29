@@ -312,6 +312,27 @@ void main() {
     );
   });
 
+  test('the places of the map come back with the backup (#231)', () async {
+    // They no longer travel to the other devices of the household, so a
+    // backup is the one road on which they leave this device.
+    final source = AppDatabase.forTesting(NativeDatabase.memory());
+    final target = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(source.close);
+    addTearDown(target.close);
+    const places = '[{"id":"meeting-1","name":"Treffpunkt"}]';
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('personalMapPlaces.v1', places);
+
+    final raw = await BackupService(source).exportHousehold('home', 'passwort');
+    SharedPreferences.setMockInitialValues({});
+    await BackupService(target).restore(raw, 'home', 'passwort');
+
+    expect(
+      (await SharedPreferences.getInstance()).getString('personalMapPlaces.v1'),
+      places,
+    );
+  });
+
   test(
     'a restored profile reaches the background poll and the caller',
     () async {

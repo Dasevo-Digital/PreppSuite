@@ -2294,6 +2294,13 @@ vielleicht gar nicht hat, gehört ihm nicht — sonst würde der Rechner
 dunkel, weil jemand im Zug das Telefon umgestellt hat. Die reisen weiter
 **einmal**, bei der Einrichtung.
 
+**Und manches reist gar nicht.** `CarriedWhen.deviceOnly` steht in der
+Liste nur, damit die eigene Datensicherung dieses Geräts es mitnimmt
+(`readBackupHousehold`, `restoreBackupSettings`). Keine Übergabe und kein
+Abgleich liest es, und was ein älteres Gerät davon noch schickt, wird
+verworfen. Das sind die eigenen Orte der Karte (#231, siehe „Ein
+Treffpunkt auf der Karte bleibt auf dem Gerät").
+
 **Die Zeilen zuerst, die Einstellungen danach.** Eine Einstellung, die
 sich nicht speichern lässt, darf die Zeilen nicht kosten: `readSynced-`
 und `applySyncedSettings` geben im Fehlerfall leer beziehungsweise null
@@ -2421,10 +2428,10 @@ in einen SQLite-Fehler drei Bildschirme später, sondern in
 `recoveryRequired`.
 
 **Was zwischen Geräten reist, reist im Klartext im verschlüsselten Kanal.**
-`carried_settings.dart` liest die beiden privaten Schlüssel
-(`preparednessHubV1`, `personalMapPlaces.v1`) ebenfalls durch den Container,
-sonst bekäme die Gegenseite den Umschlag dieses Geräts, den sie nie öffnen
-kann.
+`carried_settings.dart` liest die privaten Schlüssel (`_privateSettings`)
+ebenfalls durch den Container, sonst bekäme die Gegenseite den Umschlag
+dieses Geräts, den sie nie öffnen kann. Für `personalMapPlaces.v1` gilt
+das nur noch in der eigenen Sicherung; an andere Geräte geht es nicht.
 
 
 ### Sicherungsformat 2, und der Weg zurück
@@ -2704,6 +2711,16 @@ gedruckte Plan nimmt die Koordinaten dieses Geräts mit. Wer die Punkte
 doch abgleichen will, braucht eine Schemaänderung samt der Regel für
 Snapshot-Schlüssel neuer Schemata, und vorher die Entscheidung, dass die
 Lage geteilt werden darf.
+
+Bis 2.7.5 stimmte das nicht (#231). Die Orte standen in
+`carried_settings.dart` als `CarriedWhen.always`, schon seit dem 22.09.,
+und gingen so mit jedem Abgleich, jeder Übergabe und der QR-Kette an alle
+Geräte des Haushalts, die Treffpunkte eingeschlossen -- während die Karte
+sagte, sie blieben auf diesem Gerät, und dieser Abschnitt dasselbe
+behauptete. Ein Test hielt das Mitreisen sogar fest. Seit 2.7.6 sind sie
+`deviceOnly`. Was schon auf anderen Geräten angekommen ist, bleibt dort;
+es zu löschen hieße, dort Daten zu verlieren, die jemand vielleicht schon
+weiterbearbeitet hat.
 
 ### Nur ein Release-Build zeigt, was R8 zerbricht
 
