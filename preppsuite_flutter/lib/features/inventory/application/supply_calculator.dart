@@ -159,6 +159,9 @@ SupplyCalculatorResult calculateSupply({
     }
   }
 
+  if (!waterCurrent.isFinite || !caloriesCurrent.isFinite) {
+    throw const InvalidInventoryNumbers();
+  }
   return SupplyCalculatorResult(
     waterTargetLiters: household.litersPerDay * days,
     waterCurrentLiters: waterCurrent,

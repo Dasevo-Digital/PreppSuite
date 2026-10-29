@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../../../local_db/database.dart';
+import '../../inventory/application/inventory_numbers.dart';
+import '../../inventory/application/package_nutrition.dart';
 import 'settings_sync.dart';
 
 /// Everything one device knows, as one file.
@@ -253,6 +255,21 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
       final number = _double(json[field]);
       if (number == null || number < 0) return null;
     }
+  }
+  if (!validInventoryNumbers(
+    quantity: quantity,
+    minQuantity: _double(json['minQuantity']),
+    dailyDose: _double(json['dailyDose']),
+    packageSize: _double(json['packageSize']),
+    nutrition: PackageNutrition(
+      kcal: _double(json['calories']),
+      proteinGrams: _double(json['proteinGrams']),
+      carbohydrateGrams: _double(json['carbohydrateGrams']),
+      fatGrams: _double(json['fatGrams']),
+      fiberGrams: _double(json['fiberGrams']),
+    ),
+  )) {
+    return null;
   }
   return InventoryItemsCompanion.insert(
     clientId: clientId,

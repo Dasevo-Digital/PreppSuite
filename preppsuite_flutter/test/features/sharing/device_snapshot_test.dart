@@ -23,6 +23,21 @@ void main() {
 
   group('inventory rows', () {
     test(
+      'finite but unrepresentable medication and package ratios are refused',
+      () {
+        expect(
+          decodeInventoryItem(water(overrides: {'dailyDose': 1e-300})),
+          isNull,
+        );
+        expect(
+          decodeInventoryItem(
+            water(overrides: {'packageSize': 1e-300, 'quantity': 1e308}),
+          ),
+          isNull,
+        );
+      },
+    );
+    test(
       'required and optional numeric fields reject nonfinite or negative data',
       () {
         for (final field in [

@@ -70,6 +70,7 @@ class InventoryController {
       minQuantity: minQuantity,
       dailyDose: dailyDose,
       nutrition: nutrition,
+      packageSize: package?.size,
     );
     if (package != null && !isNonNegativeFinite(package.size)) {
       throw const InvalidInventoryNumbers();
@@ -159,6 +160,7 @@ class InventoryController {
       minQuantity: minQuantity,
       dailyDose: dailyDose,
       nutrition: nutrition,
+      packageSize: package?.size,
     );
     final now = DateTime.now().toUtc();
     // A new figure is a new count. Anything else on the row -- a name, a
@@ -305,6 +307,9 @@ class InventoryController {
     final package = ItemPackage.from(existing.unit, perPackage);
     if (package == null) return;
     requireInventoryNumbers(
+      nutrition: PackageNutrition.ofItem(existing),
+      dailyDose: existing.dailyDose,
+      packageSize: package.size,
       quantity: package.toUnits(existing.quantity),
       minQuantity: existing.minQuantity == null
           ? null

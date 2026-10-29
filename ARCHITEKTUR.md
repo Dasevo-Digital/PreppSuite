@@ -3174,3 +3174,9 @@ und nicht als verfügbare Vorräte gezählt. Ein Export verlangt eine Korrektur.
 Gelöschte fehlerhafte Zeilen können als Tombstone mit neutralen Zahlen übertragen
 werden; das Original bleibt lokal für die Rücknahme erhalten. Kalenderdaten
 aus CSV müssen nach der Konstruktion mit Jahr, Monat und Tag übereinstimmen.
+
+Auch aus endlichen Eingaben dürfen keine unendlichen Ergebnisse entstehen:
+Nährwertprodukte, Packungsumrechnungen und Dosierungsquotienten werden vor dem
+Schreiben geprüft. Medikamentenreichweiten über zehn Millionen Tage sind kein
+unterstützbarer Kalenderhorizont. Ein Überlauf der Haushaltssumme liefert den
+fachlichen Korrekturhinweis, bevor Ganzzahl- oder Datumsoperationen erfolgen.

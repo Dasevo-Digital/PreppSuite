@@ -58,6 +58,42 @@ void main() {
   }
 
   test(
+    'finite inputs cannot overflow derived food, packages or medication dates',
+    () async {
+      expect(
+        validInventoryNumbers(
+          quantity: 1e308,
+          nutrition: const PackageNutrition(kcal: 1e308),
+        ),
+        isFalse,
+      );
+      expect(validInventoryNumbers(quantity: 1, dailyDose: 1e-300), isFalse);
+      expect(
+        validInventoryNumbers(quantity: 1e308, packageSize: 1e-300),
+        isFalse,
+      );
+      await expectLater(
+        controller.addItem(
+          name: 'test',
+          category: InventoryItemCategory.medical,
+          quantity: 1,
+          dailyDose: 1e-300,
+          unit: 'Stk',
+          storageLocation: 'box',
+        ),
+        throwsA(isA<InvalidInventoryNumbers>()),
+      );
+      expect(await db.inventoryItemsForSync(householdId), isEmpty);
+      await addItem(quantity: 1e308);
+      final item = (await storedItem()).copyWith(category: 'water', unit: 'l');
+      expect(
+        () => calculateSupply(items: [item, item], days: 1),
+        throwsA(isA<InvalidInventoryNumbers>()),
+      );
+    },
+  );
+
+  test(
     'all controller paths reject nonfinite numbers without writing',
     () async {
       for (final number in [double.infinity, double.nan, -1.0]) {

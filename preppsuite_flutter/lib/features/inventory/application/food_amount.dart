@@ -40,7 +40,10 @@ class FoodAmount {
   final FoodBase base;
 
   /// What a per-100 figure comes to over this amount.
-  double per100(double value) => value * amount / 100;
+  double per100(double value) {
+    final product = value * amount;
+    return product.isFinite ? product / 100 : value * (amount / 100);
+  }
 
   @override
   bool operator ==(Object other) =>
