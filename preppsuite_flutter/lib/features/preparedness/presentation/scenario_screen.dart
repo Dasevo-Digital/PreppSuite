@@ -1,5 +1,3 @@
-import '../../inventory/application/inventory_numbers.dart';
-
 import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
@@ -13,6 +11,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../energy/application/energy_l10n.dart';
 import '../../energy/application/energy_store.dart';
 import '../../household/application/household_providers.dart';
+import '../../inventory/application/inventory_numbers.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/application/supply_calculator.dart';
 import '../../inventory/presentation/shopping_file_share.dart';

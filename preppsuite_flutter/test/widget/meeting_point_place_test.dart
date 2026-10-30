@@ -49,6 +49,16 @@ class _MemoryStore extends PersonalPlaceStore {
   ];
 }
 
+/// A store whose writes fail, as a full or locked preferences file does.
+class _RefusingStore extends _MemoryStore {
+  _RefusingStore(super.places);
+
+  @override
+  Future<List<PersonalPlace>> update(
+    List<PersonalPlace> Function(List<PersonalPlace>) change,
+  ) async => throw StateError('Preference write failed');
+}
+
 class _FixedPosition extends GeolocationService {
   _FixedPosition(this.here);
 
@@ -87,11 +97,12 @@ void main() {
     Future<void> pump(
       WidgetTester tester, [
       List<PersonalPlace> places = const [],
+      bool refusing = false,
     ]) async {
       tester.view.physicalSize = const Size(800, 2400);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      store = _MemoryStore(places);
+      store = refusing ? _RefusingStore(places) : _MemoryStore(places);
       await tester.pumpWidget(
         _app(
           const HouseholdPlanScreen(householdId: 'h'),
@@ -137,6 +148,27 @@ void main() {
 
       expect(find.text('52.26890, 10.52680'), findsNothing);
       expect(store.places, isEmpty);
+    });
+
+    testWidgets('a point that cannot come off says so and stays (#235)', (
+      tester,
+    ) async {
+      const near = PersonalPlace(
+        id: 'meetingPoint.near',
+        label: 'Vor der Garage',
+        latitude: 52.2689,
+        longitude: 10.5268,
+      );
+      await pump(tester, const [near], true);
+
+      await tester.tap(find.byTooltip('Von der Karte nehmen'));
+      await tester.pumpAndSettle();
+
+      // Answered on screen, not thrown past it.
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('52.26890, 10.52680'), findsOneWidget);
+      expect(store.places, [near]);
     });
   });
 

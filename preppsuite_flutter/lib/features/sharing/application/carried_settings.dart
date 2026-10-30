@@ -30,6 +30,7 @@
 /// seconds and carrying them would only make the handover bigger.
 library;
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/private_preferences.dart';
@@ -426,17 +427,34 @@ Object? normalizedCarriedSettingValue(String key, Object? value) {
           value.isFinite &&
           value >= 0 &&
           value == value.toInt() &&
-          isChargeReminderDays(value.toInt()),
+          _withinRange(key, value),
     CarriedKind.decimal =>
-      value is num &&
-          value.isFinite &&
-          (key == 'daylightLatitude' ? value.abs() <= 90 : value.abs() <= 180),
+      value is num && value.isFinite && _withinRange(key, value),
     CarriedKind.text => value is String,
     CarriedKind.textList =>
       value is List && value.every((item) => item is String),
   };
   return valid ? value : null;
 }
+
+/// The carried numbers that have a range of their own. A test holds this
+/// to every number in [carriedSettings], so a new one is a decision.
+@visibleForTesting
+const carriedNumberRanges = {
+  'chargeReminderDays',
+  'daylightLatitude',
+  'daylightLongitude',
+};
+
+/// The range each carried number may take, named by key. Checked by kind
+/// alone, the next whole number added here would have had to be a charge
+/// interval and the next decimal a longitude.
+bool _withinRange(String key, num value) => switch (key) {
+  'chargeReminderDays' => isChargeReminderDays(value.toInt()),
+  'daylightLatitude' => value.abs() <= 90,
+  'daylightLongitude' => value.abs() <= 180,
+  _ => true,
+};
 
 /// Used only by the versioned merge. A tombstone is a deletion, whereas
 /// null in an unversioned setup remains an absent opinion.

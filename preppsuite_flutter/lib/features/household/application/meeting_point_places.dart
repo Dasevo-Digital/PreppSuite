@@ -8,7 +8,8 @@ import '../../shelters/application/shelter_bearing.dart';
 /// (#204).
 ///
 /// Kept as two of the device's own places ("Eigene Orte") and not in the
-/// plan. Both the private plan and the map's own places stay here, because where a household meets is the
+/// plan. The plan travels through the household's folder; the map's own
+/// places deliberately do not, because where a household meets is the
 /// kind of thing that stays on the device it was put on (see
 /// [PersonalPlace]). As one of those places a meeting point is on the map
 /// with the others and leaves in a GPX file like them, which is how a

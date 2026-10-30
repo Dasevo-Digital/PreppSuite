@@ -421,7 +421,10 @@ are stamped, and publish/receive share one queue. Each write also compares the
 stored value against its read token, after any encryption, so a concurrent
 local edit is not overwritten or acknowledged as an applied remote value.
 
-Carried numeric values must be finite and within their domain. Daylight
+Carried numeric values must be finite and within their domain. The range
+is named per key (`carriedNumberRanges`), and a test holds that list to
+every number in the table, so a new number does not inherit the charge
+interval's range or the longitude's. Daylight
 coordinates stay within latitude/longitude bounds; unsupported stored values
 are omitted from exports and the daylight screen offers location setup again.
 Expiry lead times use the controller's comma-separated text; legacy single
@@ -3259,6 +3262,8 @@ Umbenennen und Löschen arbeiten damit auf dem neuesten bestätigten Bestand.
 Die Oberfläche meldet erst nach erfolgreichem Schreiben Erfolg. Ein Backend-
 Fehler wird weitergereicht und die vorzeitig geänderte Preferences-Kopie neu
 geladen, damit ein ungespeicherter Wert nicht zum nächsten Ausgangsstand wird.
+Jeder Aufrufer beantwortet diesen Fehler; auch der Haushaltsplan zeigt ihn
+beim Festlegen, Entfernen und Leeren der Treffpunkte an (#235).
 
 `ArchiveDownloader` besitzt pro Download einen eigenen Standard-Client und
 schließt ihn bei Ende, Fehler oder Abbruch. Ein übergebener Client bleibt beim

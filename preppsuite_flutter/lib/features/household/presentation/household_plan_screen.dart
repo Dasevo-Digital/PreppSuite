@@ -129,7 +129,7 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
                   below: _MeetingPlace(
                     place: places[MeetingPoint.near],
                     onPick: () => _pickPlace(MeetingPoint.near, places, l10n),
-                    onRemove: () => _removePlace(MeetingPoint.near),
+                    onRemove: () => _removePlace(MeetingPoint.near, l10n),
                   ),
                 ),
                 _Field(
@@ -140,7 +140,7 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
                   below: _MeetingPlace(
                     place: places[MeetingPoint.far],
                     onPick: () => _pickPlace(MeetingPoint.far, places, l10n),
-                    onRemove: () => _removePlace(MeetingPoint.far),
+                    onRemove: () => _removePlace(MeetingPoint.far, l10n),
                   ),
                 ),
                 _Field(
@@ -277,13 +277,35 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
       ),
     );
     if (chosen == null) return;
-    await ref.read(meetingPointStoreProvider).put(point, chosen, label: label);
-    ref.invalidate(meetingPointPlacesProvider);
+    await _changePlaces(
+      l10n,
+      (store) => store.put(point, chosen, label: label),
+    );
   }
 
-  Future<void> _removePlace(MeetingPoint point) async {
-    await ref.read(meetingPointStoreProvider).remove(point);
-    ref.invalidate(meetingPointPlacesProvider);
+  Future<void> _removePlace(MeetingPoint point, AppLocalizations l10n) =>
+      _changePlaces(l10n, (store) => store.remove(point));
+
+  /// Writes the points and says so when that fails. The store now passes
+  /// a failed write on instead of keeping quiet (#235); unanswered here it
+  /// was an error nobody saw, and the point simply did not move.
+  Future<bool> _changePlaces(
+    AppLocalizations l10n,
+    Future<void> Function(MeetingPointPlaces store) change,
+  ) async {
+    try {
+      await change(ref.read(meetingPointStoreProvider));
+      return true;
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(describeError(l10n, error))));
+      }
+      return false;
+    } finally {
+      if (mounted) ref.invalidate(meetingPointPlacesProvider);
+    }
   }
 
   Future<void> _clear(HouseholdPlan plan, AppLocalizations l10n) async {
@@ -310,14 +332,18 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
         .read(householdPlanControllerProvider(widget.householdId))
         .clear(plan);
     // The points belong to the plan; this device's go with it.
-    for (final point in MeetingPoint.values) {
-      await ref.read(meetingPointStoreProvider).remove(point);
-    }
-    ref.invalidate(meetingPointPlacesProvider);
+    final placesGone = await _changePlaces(l10n, (store) async {
+      for (final point in MeetingPoint.values) {
+        await store.remove(point);
+      }
+    });
     if (!mounted) return;
     for (final controller in _controllers.values) {
       controller.clear();
     }
+    // The plan is gone either way; a point still on the map has its
+    // message on screen, which "cleared" must not replace.
+    if (!placesGone) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(content: Text(l10n.householdPlanCleared)));

@@ -19,8 +19,8 @@
 library;
 
 import '../../../local_db/database.dart';
-import '../../inventory/application/inventory_numbers.dart';
 import '../../../model/categories.dart';
+import '../../inventory/application/inventory_numbers.dart';
 import '../../inventory/application/shopping_list.dart';
 import '../../inventory/application/supply_calculator.dart';
 

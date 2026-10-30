@@ -1,5 +1,3 @@
-import '../application/inventory_numbers.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
 import '../../household/application/household_providers.dart';
+import '../application/inventory_numbers.dart';
 import '../application/inventory_providers.dart';
 import '../application/shopping_list.dart';
 import '../application/shopping_list_export.dart';

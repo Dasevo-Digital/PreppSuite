@@ -346,4 +346,18 @@ void main() {
       expect(await applyCarriedSettings({'chargeReminderDays': 365}), 1);
     },
   );
+
+  test('every carried number has a range of its own', () {
+    // A new number among the carried settings must say what it may hold
+    // instead of borrowing the charge interval's or the longitude's.
+    final numbers = {
+      for (final entry in carriedSettings.entries)
+        if (entry.value.kind == CarriedKind.integer ||
+            entry.value.kind == CarriedKind.decimal)
+          entry.key,
+    };
+    expect(numbers, carriedNumberRanges);
+    expect(validCarriedSettingValue('daylightLongitude', 120.5), isTrue);
+    expect(validCarriedSettingValue('daylightLatitude', 90.5), isFalse);
+  });
 }
