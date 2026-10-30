@@ -483,6 +483,7 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
               title: entry.title,
               uri: uri,
               archiveId: state.selectedId,
+              archiveName: state.selected?.name,
               entryUrl: resolved.url,
             ),
           ),
@@ -523,6 +524,10 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
   ) async {
     final bookmarks = await const KnowledgeBookmarkStore().load();
     if (!mounted) return;
+    // By the archive's own name where both know it: the id is this
+    // device's, and a bookmark from another device never matched it.
+    bool inOpenArchive(KnowledgeBookmark bookmark) =>
+        bookmark.isIn(state?.selectedId, state?.selected?.name);
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -543,13 +548,11 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                       leading: const Icon(Icons.bookmark),
                       title: Text(bookmark.title),
                       subtitle: Text(
-                        state?.selectedId == bookmark.archiveId
+                        inOpenArchive(bookmark)
                             ? l10n.knowledgeInOpenArchive
                             : l10n.knowledgeOpenArchiveFirst,
                       ),
-                      onTap:
-                          state?.selectedId == bookmark.archiveId &&
-                              state?.archive != null
+                      onTap: inOpenArchive(bookmark) && state?.archive != null
                           ? () async {
                               final entry =
                                   await state!.archive!.findByUrl(

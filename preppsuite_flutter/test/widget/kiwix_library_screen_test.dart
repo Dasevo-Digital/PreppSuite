@@ -154,6 +154,48 @@ void main() {
       expect(find.textContaining('3 Sprachen'), findsOneWidget);
     });
 
+    testWidgets('a list that could not be fetched is asked for again on '
+        'the next opening (#242)', (tester) async {
+      // Offline at the first look: the languages do not arrive.
+      final responses = {
+        'https://opds.library.kiwix.org/catalog/v2/entries'
+                '?lang=deu&start=0&count=25':
+            entriesXml,
+      };
+      final container = ProviderContainer(
+        overrides: [
+          kiwixCatalogueProvider.overrideWithValue(
+            KiwixCatalogue(httpClient: FixtureHttpClient(responses)),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      Future<void> open(Widget child) async {
+        await tester.pumpWidget(
+          UncontrolledProviderScope(container: container, child: child),
+        );
+        await tester.pumpAndSettle();
+      }
+
+      const library = MaterialApp(
+        locale: Locale('de'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: KiwixLibraryScreen(),
+      );
+      await open(library);
+      expect(find.textContaining('Sprachen'), findsNothing);
+
+      await open(const SizedBox());
+      responses['https://opds.library.kiwix.org/catalog/v2/languages'] =
+          languagesXml;
+      await open(library);
+
+      // Until 2.7.9 the failure stood for the rest of the run, and the
+      // field could not be tapped.
+      expect(find.textContaining('3 Sprachen'), findsOneWidget);
+    });
+
     testWidgets('the list opens and can be searched', (tester) async {
       await showWithLanguages(tester);
 

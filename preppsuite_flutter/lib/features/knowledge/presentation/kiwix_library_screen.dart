@@ -21,7 +21,10 @@ import '../application/recommended_archives.dart';
 /// catalogue instead of the live library.
 final kiwixCatalogueProvider = Provider((ref) => KiwixCatalogue());
 
-final _languagesProvider = FutureProvider(
+// Asked again each time the library opens. Kept alive, a list that could
+// not be fetched once (offline at the first look) left the language field
+// dead for the rest of the run (#242).
+final _languagesProvider = FutureProvider.autoDispose(
   (ref) => ref.read(kiwixCatalogueProvider).languages(),
 );
 

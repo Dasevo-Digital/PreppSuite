@@ -168,6 +168,43 @@ void main() {
     expect(find.textContaining('Waldbrandsaison'), findsOneWidget);
   });
 
+  testWidgets('yesterday’s row shows today’s column as today (#238)', (
+    tester,
+  ) async {
+    // Level 4 was yesterday's. Before the DWD's run the newest row is
+    // the one from the day before, and its first column is not today.
+    await show(
+      tester,
+      fire: client(row: '662;20260910 04:14;4;2;2;5;1;1;1'),
+      now: DateTime(2026, 9, 11, 3),
+    );
+    await choose(tester, 'Braunschweig');
+
+    expect(find.text('Stufe 2 von 5'), findsOneWidget);
+    expect(find.text('Gilt für 11.9.2026'), findsOneWidget);
+    expect(find.text('Steigt auf Stufe 5 in 2 Tagen'), findsOneWidget);
+    // Six days left in the row: today, tomorrow and four more.
+    expect(find.text('Heute'), findsOneWidget);
+    expect(find.text('In 5 Tagen'), findsOneWidget);
+    expect(find.text('In 6 Tagen'), findsNothing);
+  });
+
+  testWidgets('a row from the end of the season names no today at all', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      fire: client(row: '662;20251030 04:14;3;3;2;2;1;1;1'),
+      now: DateTime(2026, 1, 15),
+    );
+    await choose(tester, 'Braunschweig');
+
+    expect(find.text('Gilt für 30.10.2025'), findsOneWidget);
+    expect(find.text('Heute'), findsNothing);
+    expect(find.text('Morgen'), findsNothing);
+    expect(find.textContaining('Steigt'), findsNothing);
+  });
+
   testWidgets('a failed fetch keeps the last forecast and says so', (
     tester,
   ) async {

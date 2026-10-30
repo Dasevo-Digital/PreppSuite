@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/checklists/application/checklist_providers.dart';
 import 'package:preppsuite_flutter/features/home/presentation/readiness_screen.dart';
@@ -8,6 +9,8 @@ import 'package:preppsuite_flutter/features/household/application/household_plan
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/knowledge_providers.dart';
 import 'package:preppsuite_flutter/features/maps/application/offline_map_providers.dart';
+import 'package:preppsuite_flutter/features/settings/application/local_encryption_readiness_store.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_poll_status_store.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
@@ -75,6 +78,32 @@ void main() {
     dirty: false,
   );
 
+  List<Override> overrides({
+    List<InventoryItem> inventory = const [],
+    List<ChecklistItem> checklist = const [],
+  }) => [
+    inventoryItemsProvider(
+      householdId,
+    ).overrideWith((ref) => Stream.value(inventory)),
+    allChecklistItemsProvider(
+      householdId,
+    ).overrideWith((ref) => Stream.value(checklist)),
+    householdPlanProvider(householdId)
+        .overrideWith((ref) => Stream.value(null)),
+    householdMembersProvider(
+      householdId,
+    ).overrideWith((ref) => Stream.value(const [])),
+    offlineMapProvider.overrideWith(_NoMap.new),
+    knowledgeProvider.overrideWith(_NoArchive.new),
+  ];
+
+  Widget app() => MaterialApp(
+    locale: const Locale('de'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: const ReadinessScreen(profile: profile),
+  );
+
   Future<void> show(
     WidgetTester tester, {
     List<InventoryItem> inventory = const [],
@@ -85,28 +114,8 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          inventoryItemsProvider(
-            householdId,
-          ).overrideWith((ref) => Stream.value(inventory)),
-          allChecklistItemsProvider(
-            householdId,
-          ).overrideWith((ref) => Stream.value(checklist)),
-          householdPlanProvider(
-            householdId,
-          ).overrideWith((ref) => Stream.value(null)),
-          householdMembersProvider(
-            householdId,
-          ).overrideWith((ref) => Stream.value(const [])),
-          offlineMapProvider.overrideWith(_NoMap.new),
-          knowledgeProvider.overrideWith(_NoArchive.new),
-        ],
-        child: MaterialApp(
-          locale: const Locale('de'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: const ReadinessScreen(profile: profile),
-        ),
+        overrides: overrides(inventory: inventory, checklist: checklist),
+        child: app(),
       ),
     );
     await tester.pumpAndSettle();
@@ -177,6 +186,52 @@ void main() {
     );
 
     expect(find.textContaining('1 von 9'), findsOneWidget);
+  });
+
+  testWidgets('what happened since the last look is there at the next (#241)', (
+    tester,
+  ) async {
+    // Tall enough that the warning card at the end is built at all.
+    await tester.binding.setSurfaceSize(const Size(500, 3200));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    // One app run: the screen is opened, closed and opened again.
+    final container = ProviderContainer(overrides: overrides());
+    addTearDown(container.dispose);
+    Future<void> open(Widget child) async {
+      await tester.pumpWidget(
+        UncontrolledProviderScope(container: container, child: child),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    await open(app());
+    expect(
+      find.textContaining('Noch keine Sicherung hier', skipOffstage: false),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Noch keine vollständige', skipOffstage: false),
+      findsOneWidget,
+    );
+
+    await open(const SizedBox());
+    await const LocalEncryptionReadinessStore().recordVerified();
+    await const WarningPollStatusStore().record(complete: true);
+
+    await open(app());
+    // Until 2.7.9 both stood as they were until the app was restarted.
+    expect(
+      find.textContaining('Noch keine Sicherung hier', skipOffstage: false),
+      findsNothing,
+    );
+    expect(
+      find.textContaining('lesbar geprüft', skipOffstage: false),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Zuletzt vollständig', skipOffstage: false),
+      findsOneWidget,
+    );
   });
 
   testWidgets('the screen meets the accessibility guidelines', (tester) async {

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'radiation_client.dart';
 import 'radiation_level.dart';
+import 'station_reading_cache.dart';
 
 /// Which probe this household watches, and what it last read.
 ///
@@ -55,7 +56,8 @@ class RadiationStore {
     }
   }
 
-  Future<RadiationReading?> loadReading() async {
+  /// The last reading taken at [station], or null.
+  Future<RadiationReading?> loadReading(RadiationStation station) async {
     try {
       final raw = (await SharedPreferences.getInstance()).getString(
         _readingKey,
@@ -63,6 +65,13 @@ class RadiationStore {
       if (raw == null) return null;
       final json = jsonDecode(raw);
       if (json is! Map<String, Object?>) return null;
+      if (!isReadingOf(
+        json,
+        stationId: station.id,
+        stationName: station.name,
+      )) {
+        return null;
+      }
 
       final at = DateTime.tryParse(json['measuredAt'] as String? ?? '');
       final value = (json['microsievertsPerHour'] as num?)?.toDouble();
@@ -85,12 +94,16 @@ class RadiationStore {
     }
   }
 
-  Future<void> saveReading(RadiationReading reading) async {
+  Future<void> saveReading(
+    RadiationStation station,
+    RadiationReading reading,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
         _readingKey,
         jsonEncode({
+          'stationId': station.id,
           'stationName': reading.stationName,
           'microsievertsPerHour': reading.microsievertsPerHour,
           'measuredAt': reading.measuredAt.toIso8601String(),

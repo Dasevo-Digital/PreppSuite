@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/sharing/application/settings_sync_store.dart';
 import 'package:preppsuite_flutter/features/warnings/application/pegel_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/pegel_level.dart';
 import 'package:preppsuite_flutter/features/warnings/application/pegel_store.dart';
@@ -24,6 +27,8 @@ void main() {
     longitude: 6.9633,
   );
 
+  const maxau = PegelStation(uuid: 'other', name: 'MAXAU', water: 'RHEIN');
+
   final reading = PegelReading(
     stationName: 'KÖLN',
     water: 'RHEIN',
@@ -39,7 +44,7 @@ void main() {
 
   test('nothing is stored to begin with', () async {
     expect(await store.loadStation(), isNull);
-    expect(await store.loadReading(), isNull);
+    expect(await store.loadReading(koeln), isNull);
   });
 
   test('a chosen gauge comes back whole', () async {
@@ -55,8 +60,8 @@ void main() {
   });
 
   test('a reading comes back with its references and its trend', () async {
-    await store.saveReading(reading);
-    final loaded = await store.loadReading();
+    await store.saveReading(koeln, reading);
+    final loaded = await store.loadReading(koeln);
 
     expect(loaded!.centimetres, 712);
     expect(loaded.measuredAt, DateTime.utc(2026, 9, 10, 16, 15));
@@ -73,23 +78,55 @@ void main() {
     // Left behind, it would appear under the new gauge's name at the next
     // launch — the same number, the wrong river.
     await store.saveStation(koeln);
-    await store.saveReading(reading);
+    await store.saveReading(koeln, reading);
 
-    await store.saveStation(
-      const PegelStation(uuid: 'other', name: 'MAXAU', water: 'RHEIN'),
-    );
+    await store.saveStation(maxau);
 
     expect((await store.loadStation())!.name, 'MAXAU');
-    expect(await store.loadReading(), isNull);
+    expect(await store.loadReading(maxau), isNull);
+  });
+
+  test(
+    'a gauge from another device does not get the old reading (#239)',
+    () async {
+      // Sync, a handover and a backup write the setting directly, past
+      // saveStation. Until 2.7.9 the screen then showed Maxau's name over
+      // Cologne's 712 cm whenever it was offline.
+      await store.saveStation(koeln);
+      await store.saveReading(koeln, reading);
+      await applySyncedSettings({
+        'pegelStation': (
+          value: jsonEncode(maxau.toJson()),
+          at: DateTime.now().toUtc(),
+        ),
+      });
+
+      final station = (await store.loadStation())!;
+      expect(station.name, 'MAXAU');
+      expect(await store.loadReading(station), isNull);
+      // Cologne's own reading is still Cologne's.
+      expect((await store.loadReading(koeln))!.centimetres, 712);
+    },
+  );
+
+  test('a reading kept before 2.8.0 is matched by the station name', () async {
+    SharedPreferences.setMockInitialValues({
+      'pegelLastReading':
+          '{"stationName":"KÖLN","water":"RHEIN","centimetres":712.0,'
+          '"measuredAt":"2026-09-10T16:15:00.000Z"}',
+    });
+
+    expect((await store.loadReading(koeln))!.centimetres, 712);
+    expect(await store.loadReading(maxau), isNull);
   });
 
   test('clearing removes both', () async {
     await store.saveStation(koeln);
-    await store.saveReading(reading);
+    await store.saveReading(koeln, reading);
     await store.clearStation();
 
     expect(await store.loadStation(), isNull);
-    expect(await store.loadReading(), isNull);
+    expect(await store.loadReading(koeln), isNull);
   });
 
   test('a corrupted entry reads as nothing stored, not as a crash', () async {
@@ -99,7 +136,7 @@ void main() {
     });
 
     expect(await store.loadStation(), isNull);
-    expect(await store.loadReading(), isNull);
+    expect(await store.loadReading(koeln), isNull);
   });
 
   test('a reading without a timestamp is refused', () async {
@@ -109,6 +146,6 @@ void main() {
       'pegelLastReading': '{"stationName":"KÖLN","centimetres":712.0}',
     });
 
-    expect(await store.loadReading(), isNull);
+    expect(await store.loadReading(koeln), isNull);
   });
 }

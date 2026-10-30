@@ -55,7 +55,8 @@ class AirQualityStore {
     }
   }
 
-  Future<AirQualityReading?> loadReading() async {
+  /// The last reading taken at [station], or null.
+  Future<AirQualityReading?> loadReading(AirQualityStation station) async {
     try {
       final raw = (await SharedPreferences.getInstance()).getString(
         _readingKey,
@@ -67,6 +68,8 @@ class AirQualityStore {
       final at = DateTime.tryParse(json['measuredAt'] as String? ?? '');
       final stationId = json['stationId'] as String?;
       if (at == null || stationId == null) return null;
+      // Named from the start, and not compared until 2.8.0 (#239).
+      if (stationId != station.id) return null;
 
       final components = <AirQualityComponent>[];
       for (final entry in (json['components'] as List? ?? const [])) {

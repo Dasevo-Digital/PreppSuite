@@ -49,7 +49,9 @@ class _PegelScreenState extends State<PegelScreen> {
 
   Future<void> _restore() async {
     final station = await widget.store.loadStation();
-    final kept = await widget.store.loadReading();
+    final kept = station == null
+        ? null
+        : await widget.store.loadReading(station);
     if (!mounted) return;
     setState(() {
       _station = station;
@@ -65,7 +67,7 @@ class _PegelScreenState extends State<PegelScreen> {
     setState(() => _loading = true);
 
     final fetched = await _client.fetchReading(station);
-    if (fetched != null) await widget.store.saveReading(fetched);
+    if (fetched != null) await widget.store.saveReading(station, fetched);
     if (!mounted) return;
     setState(() {
       _loading = false;

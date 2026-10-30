@@ -72,7 +72,7 @@ StationsID;Termin;wbi_0;wbi_1;wbi_2;wbi_3;wbi_4;wbi_5;wbi_6
       final forecast = parseForecast(csv, station: 'Braunschweig').first;
 
       expect(forecast.days.map((d) => d.step), [2, 2, 1, 1, 1, 1, 1]);
-      expect(forecast.today, FireDangerLevel.low);
+      expect(forecast.days.first, FireDangerLevel.low);
       expect(forecast.stationName, 'Braunschweig');
     });
 
@@ -94,7 +94,7 @@ StationsID;Termin;wbi_0
 ''', station: 'Braunschweig');
 
       expect(rows, hasLength(1));
-      expect(rows.single.today, FireDangerLevel.moderate);
+      expect(rows.single.days.single, FireDangerLevel.moderate);
     });
 
     test('a step outside one to five ends the run rather than shifting it', () {
@@ -119,6 +119,7 @@ StationsID;Termin;wbi_0
   });
 
   group('what the days ahead say', () {
+    final issueDay = DateTime(2026, 9, 11, 9);
     FireDangerForecast forecast(List<int> steps) => FireDangerForecast(
       stationName: 'X',
       issuedFor: DateTime(2026, 9, 11),
@@ -128,26 +129,54 @@ StationsID;Termin;wbi_0
     test('a rise ahead is named, with how far away it is', () {
       // The one thing a single number cannot say: level 2 today with
       // level 5 on Friday is a different week from level 2 throughout.
-      final peak = forecast([2, 2, 3, 5, 4]).peakAhead;
+      final peak = forecast([2, 2, 3, 5, 4]).peakAhead(now: issueDay);
 
       expect(peak!.level, FireDangerLevel.veryHigh);
       expect(peak.inDays, 3);
     });
 
     test('tomorrow is reported as one day', () {
-      expect(forecast([1, 4, 1]).peakAhead!.inDays, 1);
+      expect(forecast([1, 4, 1]).peakAhead(now: issueDay)!.inDays, 1);
     });
 
     test('a week that only falls has no peak to report', () {
-      expect(forecast([4, 3, 2, 1]).peakAhead, isNull);
+      expect(forecast([4, 3, 2, 1]).peakAhead(now: issueDay), isNull);
     });
 
     test('a flat week has none either', () {
-      expect(forecast([2, 2, 2]).peakAhead, isNull);
+      expect(forecast([2, 2, 2]).peakAhead(now: issueDay), isNull);
     });
 
     test('and a forecast of only today has nothing ahead at all', () {
-      expect(forecast([3]).peakAhead, isNull);
+      expect(forecast([3]).peakAhead(now: issueDay), isNull);
+    });
+
+    test('yesterday’s row is read from its second day (#238)', () {
+      // Offline, or before the DWD's run, the newest row is yesterday's.
+      // Its first column is yesterday, and until 2.7.9 it stood as today.
+      final row = forecast([4, 2, 2, 5, 1]);
+      final nextDay = DateTime(2026, 9, 12, 7);
+
+      expect(row.todayIndex(now: nextDay), 1);
+      expect(row.today(now: nextDay), FireDangerLevel.low);
+      final peak = row.peakAhead(now: nextDay)!;
+      expect(peak.level, FireDangerLevel.veryHigh);
+      expect(peak.inDays, 2);
+    });
+
+    test('a row that has run out of days has no today', () {
+      final row = forecast([2, 3]);
+
+      expect(row.today(now: DateTime(2026, 9, 12)), FireDangerLevel.moderate);
+      expect(row.today(now: DateTime(2026, 9, 13)), isNull);
+      expect(row.peakAhead(now: DateTime(2026, 9, 13)), isNull);
+    });
+
+    test('a clock behind the DWD’s date counts as the issue day', () {
+      final row = forecast([2, 3]);
+
+      expect(row.todayIndex(now: DateTime(2026, 9, 10, 23)), 0);
+      expect(row.today(now: DateTime(2026, 9, 10, 23)), FireDangerLevel.low);
     });
   });
 
@@ -183,6 +212,20 @@ StationsID;Termin;wbi_0
         issued(DateTime(2026, 9, 8)).isStale(now: DateTime(2026, 9, 11)),
         isTrue,
       );
+    });
+
+    test('two days are two days across the start of summer time', () {
+      // Saturday to Monday over 29 March 2026 is 47 hours, which
+      // `inDays` called one day: a stale row passed for a current one.
+      final row = FireDangerForecast(
+        stationName: 'X',
+        issuedFor: DateTime(2026, 3, 28),
+        days: const [FireDangerLevel.low, FireDangerLevel.low],
+      );
+      final monday = DateTime(2026, 3, 30);
+
+      expect(row.isStale(now: monday), isTrue);
+      expect(row.todayIndex(now: monday), 2);
     });
   });
 

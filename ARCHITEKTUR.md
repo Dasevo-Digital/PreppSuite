@@ -448,6 +448,31 @@ controller that reads its preference once at start listens to
 that holds one watches it. A new controller of that kind does the same,
 or it shows and acts on the old value until the next start.
 
+The same writes go past every side effect a store has. The station
+stores drop the kept reading when the station is changed on this
+device, and a station arriving by sync, handover or backup kept the old
+one: offline, the screen showed the new station's name over the old
+station's value (#239). A kept reading therefore names its station
+(`isReadingOf`), and the store hands it out only for that station. A
+store that keeps anything derived from a carried setting checks it
+against the setting when reading, rather than relying on its own save
+to clear it.
+
+A carried value must also mean the same on the other device. An id that
+this device drew for itself does not: the knowledge archives get a
+random one when added, and a bookmark that named only that id opened on
+no other device and after no new setup (#240). Bookmarks also carry the
+archive's own `M/Name`, which `KnowledgeBookmark.isIn` prefers wherever
+both sides know it; the device that set an older bookmark names it when
+it opens the archive (`adoptArchiveName`).
+
+A `FutureProvider` that reads a store once is `autoDispose`, unless
+something invalidates it after every write. Kept alive, it holds the
+first answer for the rest of the run: the readiness screen showed the
+backup check, the last warning poll and the places as they were at its
+first opening (#241), and a language list that failed once left the
+Kiwix library's language field dead (#242).
+
 Anything else that grows outside drift inherits this problem. A new
 `SharedPreferences` key that holds something a household would be sorry
 to lose is not finished until it is named here and in a backup test.
@@ -551,6 +576,12 @@ that or after a day; the DWD names its five WBI steps "sehr geringe" to
 of them calls itself a warning, and each says so — a real warning arrives
 through the BBK feed. `radiation_level.dart` and `fire_danger_level.dart`
 carry the sources in their library comments.
+
+A WBI row starts on the day it was issued for, which is not always
+today: offline the screen shows the kept row, and before the DWD's run
+in the small hours the newest row is yesterday's. "Heute" is the column
+`todayIndex` names, counted in calendar days, and a row that has run out
+of days names no today at all (#238).
 
 **Where no German authority publishes the interpretation, a foreign
 one is quoted by name.** The blackout clock in

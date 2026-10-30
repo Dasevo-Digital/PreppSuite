@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fire_danger_client.dart';
 import 'fire_danger_level.dart';
+import 'station_reading_cache.dart';
 
 /// Which fire-danger station this household watches, and its last
 /// forecast.
@@ -55,7 +56,8 @@ class FireDangerStore {
     }
   }
 
-  Future<FireDangerForecast?> loadForecast() async {
+  /// The last forecast for [station], or null.
+  Future<FireDangerForecast?> loadForecast(FireDangerStation station) async {
     try {
       final raw = (await SharedPreferences.getInstance()).getString(
         _forecastKey,
@@ -63,6 +65,13 @@ class FireDangerStore {
       if (raw == null) return null;
       final json = jsonDecode(raw);
       if (json is! Map<String, Object?>) return null;
+      if (!isReadingOf(
+        json,
+        stationId: station.id,
+        stationName: station.name,
+      )) {
+        return null;
+      }
 
       final issued = DateTime.tryParse(json['issuedFor'] as String? ?? '');
       final steps = json['days'];
@@ -86,12 +95,16 @@ class FireDangerStore {
     }
   }
 
-  Future<void> saveForecast(FireDangerForecast forecast) async {
+  Future<void> saveForecast(
+    FireDangerStation station,
+    FireDangerForecast forecast,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
         _forecastKey,
         jsonEncode({
+          'stationId': station.id,
           'stationName': forecast.stationName,
           'issuedFor': forecast.issuedFor.toIso8601String(),
           'days': [for (final day in forecast.days) day.step],

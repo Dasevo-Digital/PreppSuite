@@ -14,6 +14,10 @@
 /// Source: dwd.de, "Informationen zum Waldbrandgefahrenindex WBI".
 library;
 
+import 'dart:math' as math;
+
+import '../../../core/calendar_days.dart';
+
 /// One of the five steps the DWD publishes.
 enum FireDangerLevel {
   /// Stufe 1 — sehr geringe Gefahr.
@@ -57,31 +61,49 @@ class FireDangerForecast {
   /// The day the row was issued for, which is the first entry of [days].
   final DateTime issuedFor;
 
-  /// Today first, then each following day. The DWD publishes seven
-  /// columns; a row with fewer is taken as far as it goes rather than
-  /// discarded.
+  /// The day the row was issued for first, then each following day. The
+  /// DWD publishes seven columns; a row with fewer is taken as far as it
+  /// goes rather than discarded.
   final List<FireDangerLevel> days;
 
-  FireDangerLevel get today => days.first;
+  /// Where today falls in [days]: 0 on the day the row was issued for, 1
+  /// the day after.
+  ///
+  /// The newest row is not always today's. Offline the screen shows the
+  /// one it kept, and before the DWD's run in the small hours the newest
+  /// is yesterday's. Until 2.7.9 the first column was "Heute" whatever its
+  /// date, so yesterday's level stood as today's and a rise was counted
+  /// from the wrong day (#238). Calendar days, not 24-hour spans: across
+  /// the start of summer time two days are 47 hours. A clock behind the
+  /// DWD's date counts as the issue day.
+  int todayIndex({DateTime? now}) =>
+      math.max(0, calendarDaysBetween(issuedFor, now ?? DateTime.now()));
 
-  /// The worst level in the days ahead, and how far away it is.
+  /// Today's level, or null once the row has run out of days.
+  FireDangerLevel? today({DateTime? now}) {
+    final index = todayIndex(now: now);
+    return index < days.length ? days[index] : null;
+  }
+
+  /// The worst level in the days after today, and how far away it is.
   ///
   /// This is the thing worth knowing that a single number does not say:
   /// level 2 today with level 5 the day after tomorrow is a different
   /// situation from level 2 all week, and both read as "2" on the front
   /// of the screen.
-  ({FireDangerLevel level, int inDays})? get peakAhead {
-    if (days.length < 2) return null;
+  ({FireDangerLevel level, int inDays})? peakAhead({DateTime? now}) {
+    final start = todayIndex(now: now);
+    if (start + 1 >= days.length) return null;
 
-    var worst = days[1];
+    var worst = days[start + 1];
     var when = 1;
-    for (var i = 2; i < days.length; i++) {
+    for (var i = start + 2; i < days.length; i++) {
       if (days[i].step > worst.step) {
         worst = days[i];
-        when = i;
+        when = i - start;
       }
     }
-    return worst.step > today.step ? (level: worst, inDays: when) : null;
+    return worst.step > days[start].step ? (level: worst, inDays: when) : null;
   }
 
   /// Whether the forecast is too old to show as current.
@@ -91,12 +113,8 @@ class FireDangerForecast {
   /// behind therefore means either the season has ended or the app has
   /// not reached the service, and both of those have to be said rather
   /// than presenting a level from last week as today's.
-  bool isStale({DateTime? now}) {
-    final today = now ?? DateTime.now();
-    final issued = DateTime(issuedFor.year, issuedFor.month, issuedFor.day);
-    final asked = DateTime(today.year, today.month, today.day);
-    return asked.difference(issued).inDays > 1;
-  }
+  bool isStale({DateTime? now}) =>
+      calendarDaysBetween(issuedFor, now ?? DateTime.now()) > 1;
 }
 
 /// The rows of one station's forecast file, newest first.

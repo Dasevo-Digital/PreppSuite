@@ -19,6 +19,7 @@ class ArticleScreen extends StatefulWidget {
     required this.title,
     required this.uri,
     this.archiveId,
+    this.archiveName,
     this.entryUrl,
   });
 
@@ -28,6 +29,9 @@ class ArticleScreen extends StatefulWidget {
   /// Set only for a concrete archive entry; browser-internal links have no
   /// stable ZIM entry id to put in a reading list.
   final String? archiveId;
+
+  /// The archive's own name, which bookmarks share across devices (#240).
+  final String? archiveName;
   final String? entryUrl;
 
   @override
@@ -143,6 +147,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
     final saved = await const KnowledgeBookmarkStore().contains(
       archiveId,
       entryUrl,
+      archiveName: widget.archiveName,
     );
     if (mounted) setState(() => _bookmarked = saved);
   }
@@ -157,6 +162,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
         entryUrl: entryUrl,
         title: widget.title,
         createdAt: DateTime.now(),
+        archiveName: widget.archiveName,
       ),
     );
     if (mounted) setState(() => _bookmarked = saved);

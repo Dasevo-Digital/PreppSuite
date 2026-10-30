@@ -166,6 +166,26 @@ void main() {
     expect(find.textContaining('Zuletzt gespeicherter Wert'), findsOneWidget);
   });
 
+  testWidgets('a station from another device does not show the old one\'s '
+      'reading (#239)', (tester) async {
+    await const AirQualityStore().saveReading(
+      _reading(level: AirQualityClass.poor),
+    );
+    // Written the way sync, a handover or a backup write it: directly.
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'airQualityStation',
+      '{"id":"other","name":"Anderswo"}',
+    );
+    await show(
+      tester,
+      client: _FakeClient(fails: true),
+      now: DateTime(2026, 9, 4, 10),
+    );
+
+    expect(find.text('Schlecht'), findsNothing);
+  });
+
   testWidgets('no health advice of this app\'s own is given', (tester) async {
     // The UBA publishes its behaviour advice only as images; paraphrasing
     // somebody else's health advice is what this app refuses to do.

@@ -55,7 +55,9 @@ class _AirQualityScreenState extends State<AirQualityScreen> {
 
   Future<void> _restore() async {
     final station = await widget.store.loadStation();
-    final kept = await widget.store.loadReading();
+    final kept = station == null
+        ? null
+        : await widget.store.loadReading(station);
     if (!mounted) return;
     setState(() {
       _station = station;

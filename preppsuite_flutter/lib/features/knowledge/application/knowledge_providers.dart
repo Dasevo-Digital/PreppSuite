@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/memory_pressure_listener.dart';
 import '../../maps/application/map_archive_access.dart' show openMapArchive;
+import 'knowledge_bookmark_store.dart';
 import 'knowledge_index_database.dart';
 import 'knowledge_indexer.dart';
 import 'zim_archive.dart';
@@ -329,9 +330,16 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
         // Read here, once, because a library screen shows every archive
         // at the same time and only one of them is ever open.
         title: await archive.metadata('Title'),
+        name: await archive.metadata('Name'),
         description: await archive.metadata('Description'),
         cover: await _cover(archive),
       );
+      // Bookmarks set before 2.8.0 know this archive only by its id,
+      // which no other device shares. Here both are known (#240).
+      final name = enrichedEntry.name;
+      if (name != null) {
+        await const KnowledgeBookmarkStore().adoptArchiveName(entry.id, name);
+      }
       final enrichedLibrary = [
         for (final item in library)
           if (item.id == entry.id) enrichedEntry else item,

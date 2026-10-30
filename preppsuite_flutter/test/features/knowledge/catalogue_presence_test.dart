@@ -150,4 +150,13 @@ void main() {
 
     expect(back.fileName, 'wikipedia_de_all_maxi_2026-10.zim');
   });
+
+  test('the archive\'s own name survives being stored (#240)', () {
+    final archive = stored(
+      location: '/Wissen/wikipedia_de_all_maxi_2026-10.zim',
+    ).copyWith(name: 'wikipedia_de_all');
+    final back = StoredArchive.fromJson(archive.toJson())!;
+
+    expect(back.name, 'wikipedia_de_all');
+  });
 }

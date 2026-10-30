@@ -36,6 +36,7 @@ class StoredArchive {
     this.sizeBytes,
     this.entryCount,
     this.title,
+    this.name,
     this.description,
     this.cover,
     this.fileName,
@@ -57,6 +58,14 @@ class StoredArchive {
   /// `wikipedia_de_all_maxi_2026-01.zim`, which is a file name and not a
   /// thing anybody would choose to read in a library.
   final String? title;
+
+  /// What the archive is, from its own `M/Name`: `wikipedia_de_all`.
+  ///
+  /// The [id] is drawn at random when an archive is added, so it differs
+  /// on every device and after every new setup. The name is the same for
+  /// each monthly build and on every device that has the archive, which
+  /// is what lets a bookmark set on one device open on another (#240).
+  final String? name;
 
   /// The archive's own one-line description, from `M/Description`.
   final String? description;
@@ -83,6 +92,7 @@ class StoredArchive {
     int? sizeBytes,
     int? entryCount,
     String? title,
+    String? name,
     String? description,
     Uint8List? cover,
   }) => StoredArchive(
@@ -92,6 +102,7 @@ class StoredArchive {
     sizeBytes: sizeBytes ?? this.sizeBytes,
     entryCount: entryCount ?? this.entryCount,
     title: title ?? this.title,
+    name: name ?? this.name,
     description: description ?? this.description,
     cover: cover ?? this.cover,
     fileName: fileName,
@@ -107,6 +118,7 @@ class StoredArchive {
     'sizeBytes': sizeBytes,
     'entryCount': entryCount,
     'title': title,
+    if (name != null) 'name': name,
     'description': description,
     if (cover != null) 'cover': base64Encode(cover!),
     if (fileName != null) 'fileName': fileName,
@@ -144,6 +156,7 @@ class StoredArchive {
       sizeBytes: json['sizeBytes'] is int ? json['sizeBytes'] as int : null,
       entryCount: json['entryCount'] is int ? json['entryCount'] as int : null,
       title: text(json['title']),
+      name: text(json['name']),
       description: text(json['description']),
       cover: cover,
       fileName: text(json['fileName']),

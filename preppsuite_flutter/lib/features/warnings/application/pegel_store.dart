@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'pegel_client.dart';
 import 'pegel_level.dart';
+import 'station_reading_cache.dart';
 
 /// Which gauge this household watches, and what it last read.
 ///
@@ -57,7 +58,8 @@ class PegelStore {
     }
   }
 
-  Future<PegelReading?> loadReading() async {
+  /// The last reading taken at [station], or null.
+  Future<PegelReading?> loadReading(PegelStation station) async {
     try {
       final raw = (await SharedPreferences.getInstance()).getString(
         _readingKey,
@@ -65,6 +67,13 @@ class PegelStore {
       if (raw == null) return null;
       final json = jsonDecode(raw);
       if (json is! Map<String, Object?>) return null;
+      if (!isReadingOf(
+        json,
+        stationId: station.uuid,
+        stationName: station.name,
+      )) {
+        return null;
+      }
 
       final at = DateTime.tryParse(json['measuredAt'] as String? ?? '');
       final value = (json['centimetres'] as num?)?.toDouble();
@@ -95,12 +104,13 @@ class PegelStore {
     }
   }
 
-  Future<void> saveReading(PegelReading reading) async {
+  Future<void> saveReading(PegelStation station, PegelReading reading) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
         _readingKey,
         jsonEncode({
+          'stationId': station.uuid,
           'stationName': reading.stationName,
           'water': reading.water,
           'centimetres': reading.centimetres,

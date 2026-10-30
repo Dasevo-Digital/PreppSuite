@@ -53,14 +53,14 @@ void main() {
     stdout.writeln(
       '${forecast!.stationName} ${forecast.issuedFor.toIso8601String()}: '
       '${forecast.days.map((d) => d.step).join(" ")}'
-      '${forecast.peakAhead == null ? "" : " — Spitze "
-                "${forecast.peakAhead!.level.step} in "
-                "${forecast.peakAhead!.inDays} Tagen"}',
+      '${forecast.peakAhead() == null ? "" : " — Spitze "
+                "${forecast.peakAhead()!.level.step} in "
+                "${forecast.peakAhead()!.inDays} Tagen"}',
     );
 
     // Seven columns, and every one of them a step on the DWD's scale.
     expect(forecast.days, hasLength(7));
-    expect(forecast.today.step, inInclusiveRange(1, 5));
+    expect(forecast.days.first.step, inInclusiveRange(1, 5));
 
     // In season the newest row is today's or yesterday's. Out of season
     // — the DWD issues March to October — this is the assertion that

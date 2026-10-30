@@ -14,6 +14,8 @@ import '../../knowledge/application/knowledge_providers.dart';
 import '../../maps/application/offline_map_providers.dart';
 import '../../maps/application/personal_place.dart';
 import '../../maps/application/pmtiles_archive.dart';
+import '../../warnings/application/warning_freshness.dart'
+    show warningPollStatusProvider;
 import '../../warnings/application/warning_poll_status_store.dart';
 import '../../settings/application/backup_reminder.dart';
 import '../../settings/presentation/backup_card.dart' show backupAge;
@@ -22,15 +24,20 @@ import '../../../core/adaptive_columns.dart';
 import '../application/offline_probe.dart';
 import 'offline_probe_card.dart';
 
-final _warningPollStatusProvider = FutureProvider(
-  (ref) => const WarningPollStatusStore().load(),
-);
+// Read each time the screen opens. Kept alive, these were read the first
+// time and then stood for the rest of the run: a backup checked since, a
+// warning poll since, a place set since all went unseen (#241).
+final _warningPollStatusProvider = FutureProvider.autoDispose((ref) {
+  // And again after each poll this app runs while the screen is open.
+  ref.watch(warningPollStatusProvider);
+  return const WarningPollStatusStore().load();
+});
 
-final _backupVerificationProvider = FutureProvider(
+final _backupVerificationProvider = FutureProvider.autoDispose(
   (ref) => const LocalEncryptionReadinessStore().lastVerified(),
 );
 
-final _personalPlacesProvider = FutureProvider(
+final _personalPlacesProvider = FutureProvider.autoDispose(
   (ref) => const PersonalPlaceStore().load(),
 );
 

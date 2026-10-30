@@ -52,7 +52,9 @@ class _FireDangerScreenState extends State<FireDangerScreen> {
 
   Future<void> _restore() async {
     final station = await widget.store.loadStation();
-    final kept = await widget.store.loadForecast();
+    final kept = station == null
+        ? null
+        : await widget.store.loadForecast(station);
     if (!mounted) return;
     setState(() {
       _station = station;
@@ -68,7 +70,7 @@ class _FireDangerScreenState extends State<FireDangerScreen> {
     setState(() => _loading = true);
 
     final fetched = await _client.fetchForecast(station);
-    if (fetched != null) await widget.store.saveForecast(fetched);
+    if (fetched != null) await widget.store.saveForecast(station, fetched);
     if (!mounted) return;
     setState(() {
       _loading = false;
@@ -189,8 +191,19 @@ class _FireDangerScreenState extends State<FireDangerScreen> {
     final theme = Theme.of(context);
     final locale = Localizations.localeOf(context).toString();
     final date = DateFormat.yMd(locale);
-    final stale = forecast.isStale(now: widget.now);
-    final peak = forecast.peakAhead;
+    final now = widget.now;
+    final stale = forecast.isStale(now: now);
+    // Today's column, not the first one: the row on show may be
+    // yesterday's (#238). Once it has run out of days there is no today
+    // in it, and the newest level is shown under its own date.
+    final start = forecast.todayIndex(now: now);
+    final today = forecast.today(now: now);
+    final shown = today ?? forecast.days.first;
+    final issued = forecast.issuedFor;
+    final shownFor = today == null
+        ? issued
+        : DateTime(issued.year, issued.month, issued.day + start);
+    final peak = forecast.peakAhead(now: now);
 
     return [
       if (_offline)
@@ -208,18 +221,18 @@ class _FireDangerScreenState extends State<FireDangerScreen> {
             children: [
               Row(
                 children: [
-                  _LevelChip(level: forecast.today),
+                  _LevelChip(level: shown),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _levelText(l10n, forecast.today),
+                          _levelText(l10n, shown),
                           style: theme.textTheme.titleLarge,
                         ),
                         Text(
-                          l10n.fireDangerStep(forecast.today.step),
+                          l10n.fireDangerStep(shown.step),
                           style: theme.textTheme.bodySmall,
                         ),
                       ],
@@ -229,7 +242,7 @@ class _FireDangerScreenState extends State<FireDangerScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                l10n.fireDangerIssuedFor(date.format(forecast.issuedFor)),
+                l10n.fireDangerIssuedFor(date.format(shownFor)),
                 style: theme.textTheme.bodySmall,
               ),
               // The one thing a single number cannot say.
@@ -248,18 +261,18 @@ class _FireDangerScreenState extends State<FireDangerScreen> {
           ),
         ),
       ),
-      if (forecast.days.length > 1) ...[
+      if (today != null && forecast.days.length - start > 1) ...[
         const SizedBox(height: 16),
         Text(l10n.fireDangerAhead, style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
         Card(
           child: Column(
             children: [
-              for (var day = 0; day < forecast.days.length; day++)
+              for (var day = start; day < forecast.days.length; day++)
                 ListTile(
                   dense: true,
                   leading: _LevelChip(level: forecast.days[day], small: true),
-                  title: Text(_dayText(l10n, day)),
+                  title: Text(_dayText(l10n, day - start)),
                   subtitle: Text(_levelText(l10n, forecast.days[day])),
                 ),
             ],
