@@ -34,6 +34,7 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/private_preferences.dart';
+import '../../../core/settings_arrival.dart';
 import '../../../model/household_profile.dart';
 import '../../../model/household_profile_store.dart';
 import '../../inventory/application/expiry_reminder_provider.dart';
@@ -116,9 +117,11 @@ const carriedSettings = <String, CarriedSetting>{
 
   // The energy plan: what the household draws and what it has put by.
   // Hand-entered, appliance by appliance, and the single most tedious
-  // thing to type twice.
-  'energyDraws': (kind: CarriedKind.textList, when: _always),
-  'energyReserves': (kind: CarriedKind.textList, when: _always),
+  // thing to type twice. Each list is kept as one JSON string; listed
+  // here as a list of strings until 2.7.8, it could not be read and
+  // travelled nowhere, not even into a backup (#236).
+  'energyDraws': (kind: CarriedKind.text, when: _always),
+  'energyReserves': (kind: CarriedKind.text, when: _always),
 
   // A blackout that is running is running for the whole household — the
   // fridge does not care which device is looking at the clock.
@@ -161,7 +164,8 @@ const carriedSettings = <String, CarriedSetting>{
   // articles are opened, and what has been marked.
   'firstAidPackUrl': (kind: CarriedKind.text, when: _always),
   'articleViewerChoice': (kind: CarriedKind.text, when: _setupOnly),
-  'knowledgeArticleBookmarksV1': (kind: CarriedKind.textList, when: _always),
+  // One JSON string as well, and missing from every backup until 2.7.8.
+  'knowledgeArticleBookmarksV1': (kind: CarriedKind.text, when: _always),
 
   // Taste, strictly speaking, but a second device set up from a first is
   // meant to arrive looking like it.
@@ -290,6 +294,7 @@ Future<int> _apply(
     if (!fromBackup && setting.when == _deviceOnly) continue;
     if (await _write(prefs, entry.key, setting.kind, entry.value)) applied++;
   }
+  if (applied > 0) announceSettingsArrival();
   return applied;
 }
 

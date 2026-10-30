@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/platform_storage.dart';
+import '../../../core/settings_arrival.dart';
 import '../../downloads/application/download_folder.dart';
 import 'map_area_download.dart';
 import 'map_download_plan.dart';
@@ -199,6 +200,8 @@ final mapDownloadProvider =
 
 /// The provider new downloads use, and its key.
 final mapSourceProvider = FutureProvider((ref) async {
+  // The provider can arrive with a household or a backup (#237).
+  ref.watch(settingsArrivalProvider);
   const store = MapSourceStore();
   return (provider: await store.provider(), apiKey: await store.apiKey());
 });

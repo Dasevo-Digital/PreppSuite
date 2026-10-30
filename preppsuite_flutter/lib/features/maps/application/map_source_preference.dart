@@ -3,6 +3,8 @@ import 'dart:async' show unawaited;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/settings_arrival.dart';
+
 const _prefsKey = 'mapSourcePreference';
 
 /// Where the map should draw from when there is a choice.
@@ -28,6 +30,8 @@ class MapSourceController extends Notifier<MapSourcePreference> {
   MapSourcePreference build() {
     // Same shape as ThemeModeController: the stored value arrives a frame
     // or two later rather than holding up the first build.
+    // Set again by a household joined or a backup restored (#237).
+    ref.listen(settingsArrivalProvider, (_, _) => unawaited(_loadInitial()));
     unawaited(_loadInitial());
     return MapSourcePreference.offline;
   }

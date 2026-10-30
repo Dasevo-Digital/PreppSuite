@@ -250,29 +250,31 @@ void main() {
   group('local edits and deletions survive reception', () {
     test('an unsent edit wins over an older remote change', () async {
       final prefs = await device({
-        'energyDraws': <String>['old'],
+        'watchedAutobahnen': <String>['old'],
       });
       await readSyncedSettings(preferences: prefs, now: monday);
-      await prefs.setStringList('energyDraws', ['new-local']);
+      await prefs.setStringList('watchedAutobahnen', ['new-local']);
       await applySyncedSettings(
         {
-          'energyDraws': (value: <String>['remote'], at: monday),
+          'watchedAutobahnen': (value: <String>['remote'], at: monday),
         },
         preferences: prefs,
         now: tuesday,
       );
-      expect(prefs.getStringList('energyDraws'), ['new-local']);
+      expect(prefs.getStringList('watchedAutobahnen'), ['new-local']);
       expect(
-        (await const SettingsSyncStore().load(prefs))['energyDraws']!.value,
+        (await const SettingsSyncStore().load(
+          prefs,
+        ))['watchedAutobahnen']!.value,
         ['new-local'],
       );
     });
     test('an unrelated remote key cannot roll back a local edit', () async {
       final prefs = await device({
-        'energyDraws': <String>['old'],
+        'watchedAutobahnen': <String>['old'],
       });
       await readSyncedSettings(preferences: prefs, now: monday);
-      await prefs.setStringList('energyDraws', ['new-local']);
+      await prefs.setStringList('watchedAutobahnen', ['new-local']);
       expect(
         await applySyncedSettings(
           {'daylightLatitude': (value: 52.0, at: monday)},
@@ -281,7 +283,7 @@ void main() {
         ),
         1,
       );
-      expect(prefs.getStringList('energyDraws'), ['new-local']);
+      expect(prefs.getStringList('watchedAutobahnen'), ['new-local']);
       expect(prefs.getDouble('daylightLatitude'), 52);
     });
     test(

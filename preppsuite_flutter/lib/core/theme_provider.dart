@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'settings_arrival.dart';
+
 const _themeModePrefsKey = 'themeModeOverride';
 
 /// The user's explicit light/dark choice from Settings, or [ThemeMode.system]
@@ -15,6 +17,8 @@ class ThemeModeController extends Notifier<ThemeMode> {
     // Starts as "follow system" until the stored preference loads; same
     // brief-flash trade-off as LocaleOverrideController for not blocking
     // app startup on a prefs read.
+    // Set again by a household joined or a backup restored (#237).
+    ref.listen(settingsArrivalProvider, (_, _) => unawaited(_loadInitial()));
     unawaited(_loadInitial());
     return ThemeMode.system;
   }

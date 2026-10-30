@@ -3,6 +3,7 @@ import 'dart:async' show unawaited;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/settings_arrival.dart';
 import 'expiry_reminder_planner.dart';
 
 const _expiryLeadDaysPrefsKey = 'expiryLeadDays';
@@ -24,18 +25,28 @@ const selectableExpiryLeadDays = [90, 60, 30, 14, 7, 3, 1];
 class ExpiryLeadDaysController extends Notifier<List<int>> {
   @override
   List<int> build() {
+    // Lead times from another device or a backup; toggling must start
+    // from them, not from what was read at start (#237).
+    ref.listen(
+      settingsArrivalProvider,
+      (_, _) => unawaited(_loadInitial(arrived: true)),
+    );
     unawaited(_loadInitial());
     return defaultExpiryLeadDays;
   }
 
-  Future<void> _loadInitial() async {
+  Future<void> _loadInitial({bool arrived = false}) async {
     final prefs = await SharedPreferences.getInstance();
     // See LocaleOverrideController for why this guard is needed after an
     // async gap.
     if (!ref.mounted) return;
 
     final stored = prefs.get(_expiryLeadDaysPrefsKey);
-    if (stored == null) return;
+    if (stored == null) {
+      // Removed by another device: back to what a fresh install has.
+      if (arrived) state = defaultExpiryLeadDays;
+      return;
+    }
     if (stored is String) {
       state = _decode(stored);
     } else if (stored is int) {

@@ -8,6 +8,7 @@ import '../../downloads/application/archive_downloader.dart';
 import '../../downloads/application/download_folder.dart';
 import 'first_aid_video_pack.dart';
 import '../../../core/http_client.dart';
+import '../../../core/settings_arrival.dart';
 
 /// Where the video pack folder is on this device.
 final firstAidLibraryProvider = FutureProvider<FirstAidVideoLibrary>((
@@ -91,9 +92,11 @@ class FirstAidPackUrlStore {
   }
 }
 
-final firstAidPackUrlProvider = FutureProvider<String>(
-  (ref) => const FirstAidPackUrlStore().read(),
-);
+final firstAidPackUrlProvider = FutureProvider<String>((ref) {
+  // The address travels with the household (#237).
+  ref.watch(settingsArrivalProvider);
+  return const FirstAidPackUrlStore().read();
+});
 
 /// How far the pack download has got.
 class FirstAidDownloadState {

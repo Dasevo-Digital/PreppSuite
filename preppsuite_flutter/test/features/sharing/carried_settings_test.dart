@@ -65,7 +65,8 @@ void main() {
   group('reading and writing', () {
     test('a full round trip keeps every kind intact', () async {
       SharedPreferences.setMockInitialValues({
-        'energyDraws': ['Kühlschrank;80', 'Router;12'],
+        'energyDraws': '[{"id":"d1","label":"Kühlschrank"}]',
+        'watchedAutobahnen': ['A2', 'A7'],
         'daylightLatitude': 52.52,
         'expiryLeadDays': 14,
         'outageFreezerFull': true,
@@ -81,10 +82,11 @@ void main() {
       expect(await applyCarriedSettings(sent), sent.length);
 
       final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getStringList('energyDraws'), [
-        'Kühlschrank;80',
-        'Router;12',
-      ]);
+      expect(
+        prefs.getString('energyDraws'),
+        '[{"id":"d1","label":"Kühlschrank"}]',
+      );
+      expect(prefs.getStringList('watchedAutobahnen'), ['A2', 'A7']);
       expect(prefs.getDouble('daylightLatitude'), 52.52);
       expect(prefs.getString('expiryLeadDays'), '14');
       expect(prefs.getBool('outageFreezerFull'), isTrue);

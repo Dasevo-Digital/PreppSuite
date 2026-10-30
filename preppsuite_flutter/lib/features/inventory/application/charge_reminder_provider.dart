@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/calendar_days.dart';
+import '../../../core/settings_arrival.dart';
 
 const _chargeReminderDaysPrefsKey = 'chargeReminderDays';
 const _chargeReminderCheckedPrefsKey = 'chargeReminderLastChecked';
@@ -38,14 +39,22 @@ bool isChargeReminderDays(int days) =>
 class ChargeReminderDaysController extends Notifier<int> {
   @override
   int build() {
+    ref.listen(
+      settingsArrivalProvider,
+      (_, _) => unawaited(_load(arrived: true)),
+    );
     unawaited(_load());
     return defaultChargeReminderDays;
   }
 
-  Future<void> _load() async {
+  Future<void> _load({bool arrived = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final stored = prefs.getInt(_chargeReminderDaysPrefsKey);
-    if (!ref.mounted || stored == null) return;
+    if (!ref.mounted) return;
+    if (stored == null) {
+      if (arrived) state = defaultChargeReminderDays;
+      return;
+    }
     state = isChargeReminderDays(stored) ? stored : defaultChargeReminderDays;
   }
 

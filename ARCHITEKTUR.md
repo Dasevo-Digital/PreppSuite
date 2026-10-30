@@ -430,6 +430,24 @@ are omitted from exports and the daylight screen offers location setup again.
 Expiry lead times use the controller's comma-separated text; legacy single
 integers are accepted at the boundary without installing the wrong type.
 
+The kind in `carriedSettings` must be the shape the store really
+writes. Three times it was not: the expiry lead times (#235), the energy
+plan and the article bookmarks (#236) are kept as one string and were
+listed as a number or a list of strings, so reading them failed in
+silence and they reached no backup, no handover and no sync. Tests that
+put values in by hand in the table's shape cannot see that.
+`carried_settings_stores_test` writes every carried key through its real
+store and expects each one back from `readCarriedSettings(forBackup:
+true)`; a key added to the table without a line there fails it.
+
+Settings written from elsewhere -- `applyCarriedSettings`,
+`restoreBackupSettings`, `applySyncedSettings` -- call
+`announceSettingsArrival()` when they changed anything (#237). A
+controller that reads its preference once at start listens to
+`settingsArrivalProvider` and reads again in place; a `FutureProvider`
+that holds one watches it. A new controller of that kind does the same,
+or it shows and acts on the old value until the next start.
+
 Anything else that grows outside drift inherits this problem. A new
 `SharedPreferences` key that holds something a household would be sorry
 to lose is not finished until it is named here and in a backup test.

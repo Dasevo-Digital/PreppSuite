@@ -12,6 +12,7 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/private_preferences.dart';
+import '../../../core/settings_arrival.dart';
 
 import 'carried_settings.dart';
 import 'settings_sync.dart';
@@ -245,5 +246,6 @@ Future<int> _applySyncedSettings(
     }
   }
   await store.save(merged, prefs);
+  if (applied > 0) announceSettingsArrival();
   return applied;
 }

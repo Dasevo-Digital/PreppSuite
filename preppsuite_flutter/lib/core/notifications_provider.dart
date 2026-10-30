@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'notification_service.dart';
+import 'settings_arrival.dart';
 
 const _notificationsEnabledPrefsKey = 'notificationsEnabled';
 
@@ -29,6 +30,9 @@ class NotificationsEnabledController extends Notifier<bool> {
 
   @override
   bool build() {
+    // Read again in place, never through a rebuild: a rebuild reports
+    // false for a moment, which is what unregistered push (see below).
+    ref.listen(settingsArrivalProvider, (_, _) => unawaited(_loadInitial()));
     _initialLoad = _loadInitial();
     unawaited(_initialLoad);
     return false;

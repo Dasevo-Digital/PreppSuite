@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'settings_arrival.dart';
+
 const _localeOverridePrefsKey = 'localeOverride';
 
 /// The user's explicit language choice from Settings, or `null` to follow
@@ -15,6 +17,8 @@ class LocaleOverrideController extends Notifier<Locale?> {
     // Starts as "follow system" (null) until the stored preference loads;
     // the brief flash back to system locale on cold start is an acceptable
     // trade-off for not blocking app startup on a prefs read.
+    // Set again by a household joined or a backup restored (#237).
+    ref.listen(settingsArrivalProvider, (_, _) => unawaited(_loadInitial()));
     unawaited(_loadInitial());
     return null;
   }

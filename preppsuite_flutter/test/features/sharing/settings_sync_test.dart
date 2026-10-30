@@ -51,15 +51,15 @@ void main() {
       // that agree arguing with each other.
       final stamped = stampSettings(
         current: {
-          'energyDraws': <String>['a', 'b'],
+          'watchedAutobahnen': <String>['a', 'b'],
         },
         previous: {
-          'energyDraws': (value: <dynamic>['a', 'b'], at: monday),
+          'watchedAutobahnen': (value: <dynamic>['a', 'b'], at: monday),
         },
         now: tuesday,
       );
 
-      expect(stamped['energyDraws']!.at, monday);
+      expect(stamped['watchedAutobahnen']!.at, monday);
     });
   });
 
@@ -182,7 +182,7 @@ void main() {
       final settings = {
         'pegelStation': (value: 'DRESDEN', at: monday),
         'expiryLeadDays': (value: 7, at: tuesday),
-        'energyDraws': (value: <String>['a', 'b'], at: monday),
+        'watchedAutobahnen': (value: <String>['a', 'b'], at: monday),
       };
 
       final there = decodeStampedSettings(
@@ -191,7 +191,7 @@ void main() {
 
       expect(there['pegelStation']!.value, 'DRESDEN');
       expect(there['expiryLeadDays']!.value, 7);
-      expect(there['energyDraws']!.value, ['a', 'b']);
+      expect(there['watchedAutobahnen']!.value, ['a', 'b']);
       expect(there['pegelStation']!.at, monday);
     });
 
