@@ -815,7 +815,7 @@ Betrieb von einem Datenträger in
 
 ## Entwicklung
 
-Gebaut und getestet wird mit Flutter 3.47.6 (Dart 3.13). Ältere Versionen
+Gebaut und getestet wird mit Flutter 3.47.9 (Dart 3.13.7). Ältere Versionen
 lösen die Abhängigkeiten nicht mehr auf; die pubspec verlangt mindestens
 Flutter 3.47 und Dart 3.13.
 

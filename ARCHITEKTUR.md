@@ -77,7 +77,7 @@ Mac at all.
 
 **The shipped x64 packages for both come from two machines on the LAN**,
 `TestKubuntu` and `TestWindows` in `~/.ssh/config`, each with Flutter
-3.47.6 installed. `.github/workflows/build-desktop.yml` also builds both
+3.47.9 installed. `.github/workflows/build-desktop.yml` also builds both
 targets after Gitea has mirrored a push to GitHub. Those runs are independent
 post-push evidence, but they neither gate Gitea nor supply the packages in a
 release. Gitea itself still has no Actions runner registered. Anything saying
