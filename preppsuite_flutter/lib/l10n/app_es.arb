@@ -1128,7 +1128,7 @@
   "resetSettings": "Restablecer los ajustes de la app",
   "resetSettingsHint": "Restaura los valores por defecto de idioma, apariencia, notificaciones, recordatorios y proveedor de mapas. Los datos y las descargas se conservan.",
   "resetHousehold": "Eliminar el hogar y los datos locales",
-  "resetHouseholdHint": "Elimina de forma permanente de este dispositivo las provisiones, listas, plan de emergencia y tarjetas de emergencia de este hogar.",
+  "resetHouseholdHint": "Elimina de forma permanente de este dispositivo las provisiones, listas, plan de emergencia, tarjetas de emergencia, organización para crisis, mis lugares, contactos de señal de vida, ajustes del hogar y la lista de documentos personales de este hogar. Los mapas y archivos descargados y los propios archivos de documentos se conservan.",
   "resetConfirmTitle": "¿Restablecer ahora?",
   "resetConfirmHousehold": "Los datos locales del hogar se eliminarán de forma permanente. Si hace falta, crea antes una copia de seguridad.",
   "resetDone": "Restablecimiento completado.",

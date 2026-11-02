@@ -11,9 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// gets abandoned.
 ///
 /// Preferences and not the database: this is progress through an exercise,
-/// not household data. It does not sync to the other devices and it does
-/// not belong in a backup — the drill is a rehearsal, and the next one
-/// starts from nothing on purpose (see [clear]).
+/// not inventory. It travels with the household's settings all the same
+/// (`carried_settings.dart`), so a drill run together on two devices ticks
+/// off on both, and the next one still starts from nothing (see [clear]).
 class DrillProgressStore {
   const DrillProgressStore();
 
@@ -48,8 +48,8 @@ class DrillProgressStore {
 
   /// The most recent completed run of each scenario.
   ///
-  /// This remains local like the tick marks. It is a short rehearsal log,
-  /// not a household status report and not something sent to a service.
+  /// Kept in step with the household like the tick marks. It is a short
+  /// rehearsal log, not a status report, and goes to no service.
   Future<Map<String, DateTime>> loadCompleted() async {
     try {
       final raw = (await SharedPreferences.getInstance()).getString(

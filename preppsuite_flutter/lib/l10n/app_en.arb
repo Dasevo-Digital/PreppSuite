@@ -2355,7 +2355,7 @@
   "resetSettings": "Reset app settings",
   "resetSettingsHint": "Restore defaults for language, appearance, notifications, reminders and map provider. Data and downloads remain.",
   "resetHousehold": "Delete household and local data",
-  "resetHouseholdHint": "Permanently delete this household’s inventory, checklists, emergency plan and emergency cards from this device.",
+  "resetHouseholdHint": "Permanently delete this household’s inventory, checklists, emergency plan, emergency cards, crisis organisation, my places, sign-of-life contacts, household settings and the list of personal documents from this device. Downloaded maps and archives and the document files themselves stay.",
   "resetConfirmTitle": "Reset now?",
   "resetConfirmHousehold": "Local household data will be permanently deleted. Create a backup first if needed.",
   "resetDone": "Reset completed.",

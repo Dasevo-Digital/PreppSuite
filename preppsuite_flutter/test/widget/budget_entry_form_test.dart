@@ -152,4 +152,45 @@ void main() {
     useLargeText(tester);
     await show(tester);
   });
+
+  // The amount as a German keyboard types it (#245).
+  group('the amount', () {
+    Future<void> saveAmount(WidgetTester tester, String typed) async {
+      await show(tester);
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Betrag'),
+        typed,
+      );
+      await tester.tap(find.text('Speichern'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('takes a decimal comma', (tester) async {
+      await saveAmount(tester, '12,50');
+
+      expect(find.text('Bitte eine gültige Zahl eingeben.'), findsNothing);
+      expect((await stored())!.amountCents, 1250);
+    });
+
+    testWidgets('still takes a point', (tester) async {
+      await saveAmount(tester, '7.25');
+
+      expect((await stored())!.amountCents, 725);
+    });
+
+    for (final typed in ['1e400', 'Infinity', 'NaN', '-5', '2000000000']) {
+      testWidgets('refuses "$typed" and keeps the entry as it was', (
+        tester,
+      ) async {
+        await saveAmount(tester, typed);
+
+        expect(
+          find.text('Bitte eine gültige Zahl eingeben.'),
+          findsOneWidget,
+        );
+        expect((await stored())!.amountCents, entry.amountCents);
+        expect(tester.takeException(), isNull);
+      });
+    }
+  });
 }

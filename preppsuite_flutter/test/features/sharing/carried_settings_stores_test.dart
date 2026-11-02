@@ -22,6 +22,7 @@ import 'package:preppsuite_flutter/features/maps/application/personal_place.dart
 import 'package:preppsuite_flutter/features/maps/application/tile_source.dart';
 import 'package:preppsuite_flutter/features/preparedness/application/preparedness_hub_store.dart';
 import 'package:preppsuite_flutter/features/sharing/application/carried_settings.dart';
+import 'package:preppsuite_flutter/features/sharing/application/settings_sync_store.dart';
 import 'package:preppsuite_flutter/features/warnings/application/air_quality_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/air_quality_store.dart';
 import 'package:preppsuite_flutter/features/warnings/application/fire_danger_client.dart';
@@ -46,9 +47,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
-  test('everything the stores write comes back out for the backup', () async {
-    final container = ProviderContainer();
-    addTearDown(container.dispose);
+  /// Every carried key, each through the store that really writes it.
+  Future<void> writeEverything(ProviderContainer container) async {
     final at = DateTime.utc(2026, 10, 30, 9);
 
     await const RoadClosureStore().save(['A2']);
@@ -143,6 +143,12 @@ void main() {
         .setEnabled(
           false,
         );
+  }
+
+  test('everything the stores write comes back out for the backup', () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await writeEverything(container);
 
     final backup = await readCarriedSettings(forBackup: true);
 
@@ -190,4 +196,29 @@ void main() {
       expect(marks.single.title, 'Erste Hilfe');
     },
   );
+
+  test('deleting the household forgets every one of them that is the '
+      "household's, through whichever store wrote it (#247)", () async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await writeEverything(container);
+
+    await forgetHouseholdSettings();
+
+    final left = await readCarriedSettings(forBackup: true);
+    expect(left.keys.toSet(), {
+      for (final entry in carriedSettings.entries)
+        if (entry.value.when == CarriedWhen.setupOnly) entry.key,
+    });
+    final prefs = await SharedPreferences.getInstance();
+    expect(
+      prefs.getKeys().where(
+        (key) =>
+            carriedSettings[key] != null &&
+            carriedSettings[key]!.when != CarriedWhen.setupOnly,
+      ),
+      isEmpty,
+      reason: 'the encrypted ones are gone from the disk too',
+    );
+  });
 }

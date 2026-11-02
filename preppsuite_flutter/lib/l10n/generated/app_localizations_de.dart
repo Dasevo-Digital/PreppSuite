@@ -4123,7 +4123,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get resetHouseholdHint =>
-      'Vorräte, Checklisten, Notfallplan und Notfallkarten dieses Haushalts dauerhaft von diesem Gerät löschen.';
+      'Vorräte, Checklisten, Notfallplan, Notfallkarten, Krisenorganisation, Meine Orte, Lebenszeichen-Kontakte, die Einstellungen des Haushalts und die Liste der eigenen Dokumente dauerhaft von diesem Gerät löschen. Heruntergeladene Karten und Archive und die Dokumentdateien selbst bleiben.';
 
   @override
   String get resetConfirmTitle => 'Wirklich zurücksetzen?';

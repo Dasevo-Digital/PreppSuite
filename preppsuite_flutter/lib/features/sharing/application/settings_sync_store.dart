@@ -53,6 +53,24 @@ class SettingsSyncStore {
   }
 }
 
+/// Forgets the household's settings on this device, for a household that
+/// is deleted (#247): every one that is kept in step or stays on the
+/// device, and the comparison base of the exchange with them.
+///
+/// Deleting the household used to leave all of them behind -- the crisis
+/// plan, the meeting points, who is told the household is alive, where it
+/// lives -- and a household set up afterwards on the same device found
+/// them waiting. The base has to go as well: kept, it still held the old
+/// household's values, and the first exchange in another household would
+/// have read every one of them as deleted here and sent that on, clearing
+/// the new household's settings on its other devices.
+Future<void> forgetHouseholdSettings() => _serialized(() async {
+  final prefs = await SharedPreferences.getInstance();
+  await forgetCarriedSettings(prefs);
+  await const PrivatePreferences().remove(SettingsSyncStore._key);
+  announceSettingsArrival();
+});
+
 Map<String, StampedSetting> _shareable(Map<String, StampedSetting> values) => {
   for (final entry in values.entries)
     if (carriedSettings[entry.key]?.when == CarriedWhen.always &&

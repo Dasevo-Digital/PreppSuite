@@ -1303,7 +1303,7 @@
   "resetSettings": "App-Einstellungen zurücksetzen",
   "resetSettingsHint": "Sprache, Darstellung, Benachrichtigungen, Erinnerungen und Kartenanbieter auf Standardwerte setzen. Daten und Downloads bleiben erhalten.",
   "resetHousehold": "Haushalt und lokale Daten löschen",
-  "resetHouseholdHint": "Vorräte, Checklisten, Notfallplan und Notfallkarten dieses Haushalts dauerhaft von diesem Gerät löschen.",
+  "resetHouseholdHint": "Vorräte, Checklisten, Notfallplan, Notfallkarten, Krisenorganisation, Meine Orte, Lebenszeichen-Kontakte, die Einstellungen des Haushalts und die Liste der eigenen Dokumente dauerhaft von diesem Gerät löschen. Heruntergeladene Karten und Archive und die Dokumentdateien selbst bleiben.",
   "resetConfirmTitle": "Wirklich zurücksetzen?",
   "resetConfirmHousehold": "Die lokalen Haushaltsdaten werden dauerhaft gelöscht. Eine Sicherung sollte vorher erstellt werden.",
   "resetDone": "Zurücksetzen abgeschlossen.",

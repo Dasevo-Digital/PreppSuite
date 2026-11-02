@@ -6871,7 +6871,7 @@ abstract class AppLocalizations {
   /// No description provided for @resetHouseholdHint.
   ///
   /// In en, this message translates to:
-  /// **'Permanently delete this household’s inventory, checklists, emergency plan and emergency cards from this device.'**
+  /// **'Permanently delete this household’s inventory, checklists, emergency plan, emergency cards, crisis organisation, my places, sign-of-life contacts, household settings and the list of personal documents from this device. Downloaded maps and archives and the document files themselves stay.'**
   String get resetHouseholdHint;
 
   /// No description provided for @resetConfirmTitle.

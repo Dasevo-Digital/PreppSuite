@@ -4125,7 +4125,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get resetHouseholdHint =>
-      'Elimina de forma permanente de este dispositivo las provisiones, listas, plan de emergencia y tarjetas de emergencia de este hogar.';
+      'Elimina de forma permanente de este dispositivo las provisiones, listas, plan de emergencia, tarjetas de emergencia, organización para crisis, mis lugares, contactos de señal de vida, ajustes del hogar y la lista de documentos personales de este hogar. Los mapas y archivos descargados y los propios archivos de documentos se conservan.';
 
   @override
   String get resetConfirmTitle => '¿Restablecer ahora?';

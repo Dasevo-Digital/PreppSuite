@@ -298,6 +298,23 @@ Future<int> _apply(
   return applied;
 }
 
+/// Removes from this device every setting that belongs to the household:
+/// the ones kept in step and the ones that stay on the device (#247).
+/// What is only carried at setup is how this device is set up, and stays.
+/// `forgetHouseholdSettings` is the caller, and also drops the comparison
+/// base of the exchange.
+Future<void> forgetCarriedSettings([SharedPreferences? preferences]) async {
+  final prefs = preferences ?? await SharedPreferences.getInstance();
+  for (final entry in carriedSettings.entries) {
+    if (entry.value.when == _setupOnly) continue;
+    if (_privateSettings.contains(entry.key)) {
+      await const PrivatePreferences().remove(entry.key);
+    } else {
+      await prefs.remove(entry.key);
+    }
+  }
+}
+
 Future<Object?> _read(
   SharedPreferences prefs,
   String key,

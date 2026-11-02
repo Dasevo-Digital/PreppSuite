@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/platform_storage.dart';
 import '../../../core/settings_arrival.dart';
 import '../../downloads/application/download_folder.dart';
+import '../../downloads/application/download_providers.dart';
 import 'map_area_download.dart';
 import 'map_download_plan.dart';
 import 'map_download_session.dart';
@@ -35,11 +36,12 @@ class MapDownloadState {
 /// The unfinished download waiting to be picked up, if there is one.
 ///
 /// A country is over an hour of tiles, so the normal end of a download is
-/// the app being closed, not the archive being finished.
+/// the app being closed, not the archive being finished. Asked of the
+/// download folder in use, and again when it changes (#246).
 final unfinishedDownloadProvider =
     FutureProvider<({MapDownloadSession session, int stored})?>((ref) async {
       const store = MapDownloadSessionStore();
-      final folder = await const DownloadFolder().current();
+      final folder = await ref.watch(downloadFolderProvider.future);
 
       final session = await store.read(folder);
       if (session == null) return null;

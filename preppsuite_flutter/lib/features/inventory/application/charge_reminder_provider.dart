@@ -8,6 +8,7 @@ import '../../../core/settings_arrival.dart';
 
 const _chargeReminderDaysPrefsKey = 'chargeReminderDays';
 const _chargeReminderCheckedPrefsKey = 'chargeReminderLastChecked';
+const _chargeReminderCountingSincePrefsKey = 'chargeReminderCountingSince';
 
 /// The intervals offered as chips. Zero is a conscious opt-out, not a
 /// missing preference.
@@ -173,3 +174,38 @@ final chargeCheckProvider =
     NotifierProvider<ChargeCheckController, ChargeCheck>(
       ChargeCheckController.new,
     );
+
+/// Where the interval counts from while nobody has confirmed a check yet
+/// (#244).
+///
+/// The first time the reminder is planned on this device, kept from then
+/// on. Counted from "now" instead, every start of the app replanned it a
+/// whole interval out, and a household that opened the app once a
+/// quarter and never tapped "done" was never reminded at all -- the very
+/// household the reminder is for. Like the last check, it stays on this
+/// device.
+class ChargeCountingStart {
+  const ChargeCountingStart();
+
+  /// The start, written now if there is none yet.
+  Future<DateTime> since({DateTime? now}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = DateTime.tryParse(
+      prefs.getString(_chargeReminderCountingSincePrefsKey) ?? '',
+    );
+    if (stored != null) return stored.toLocal();
+    final start = (now ?? DateTime.now()).toUtc();
+    await prefs.setString(
+      _chargeReminderCountingSincePrefsKey,
+      start.toIso8601String(),
+    );
+    return start.toLocal();
+  }
+
+  /// Forgotten when the reminder is switched off, so switching it on
+  /// again a year later starts counting then, not a year ago.
+  Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_chargeReminderCountingSincePrefsKey);
+  }
+}

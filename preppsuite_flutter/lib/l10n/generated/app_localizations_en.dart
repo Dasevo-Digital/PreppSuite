@@ -4095,7 +4095,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetHouseholdHint =>
-      'Permanently delete this household’s inventory, checklists, emergency plan and emergency cards from this device.';
+      'Permanently delete this household’s inventory, checklists, emergency plan, emergency cards, crisis organisation, my places, sign-of-life contacts, household settings and the list of personal documents from this device. Downloaded maps and archives and the document files themselves stay.';
 
   @override
   String get resetConfirmTitle => 'Reset now?';

@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/error_text.dart';
+import '../../../core/number_input.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../inventory/application/inventory_photo_service.dart';
@@ -132,7 +133,7 @@ class _PossessionFormScreenState extends ConsumerState<PossessionFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _submitting = true);
     try {
-      final priceText = _price.text.trim().replaceAll(',', '.');
+      final priceText = _price.text.trim();
       await ref
           .read(possessionControllerProvider(widget.householdId))
           .save(
@@ -143,7 +144,7 @@ class _PossessionFormScreenState extends ConsumerState<PossessionFormScreen> {
               acquiredOn: _acquiredOn,
               purchasePriceCents: priceText.isEmpty
                   ? null
-                  : (double.parse(priceText) * 100).round(),
+                  : readMoneyCents(priceText),
               currency: _currency.text,
               notes: _notes.text,
               photoPath: _photoPath,
@@ -225,9 +226,9 @@ class _PossessionFormScreenState extends ConsumerState<PossessionFormScreen> {
                       decimal: true,
                     ),
                     validator: (value) {
-                      final trimmed = value?.trim().replaceAll(',', '.') ?? '';
+                      final trimmed = value?.trim() ?? '';
                       if (trimmed.isEmpty) return null;
-                      return double.tryParse(trimmed) == null
+                      return readMoneyCents(trimmed) == null
                           ? l10n.invalidNumber
                           : null;
                     },

@@ -473,9 +473,27 @@ backup check, the last warning poll and the places as they were at its
 first opening (#241), and a language list that failed once left the
 Kiwix library's language field dead (#242).
 
+A provider that depends on the download folder watches
+`downloadFolderProvider`, which the settings card invalidates when the
+folder changes. The first aid video library read the folder once, so a
+pack fetched after a change went to the old folder and was not found
+after the next start (#246); the unfinished map download is asked of the
+folder in use the same way.
+
 Anything else that grows outside drift inherits this problem. A new
 `SharedPreferences` key that holds something a household would be sorry
 to lose is not finished until it is named here and in a backup test.
+It is not finished either until deleting the household removes it.
+`forgetHouseholdSettings` drops every carried key that is kept in step
+or stays on the device, the private ones included, and the comparison
+base of the settings exchange with them; what is only carried at setup
+is how the device is set up and stays. Before #247 the crisis plan, the
+meeting points, the check-in contacts and the home coordinates outlived
+"delete the household", and a household set up afterwards found them.
+A base left behind would have been worse: at the first exchange in
+another household it reads every old value as deleted here and sends
+that on. `carried_settings_stores_test` writes every key through its
+store and expects only the setup-only ones to survive.
 
 **The snapshot format in `device_snapshot.dart` is a contract, not a dump.**
 Row codecs are hand-written rather than drift's generated `toJson` precisely
@@ -2932,6 +2950,15 @@ als das sechzigste Glas Marmelade. Die Vorlaufzeiten 7, 14, 21 und 28 Tage
 sind die Wahl des Haushalts, wie lange ein neues Rezept bei ihm dauert,
 keine Aussage über das Medikament.
 
+Dieselbe Falle hatte die Akku-Prüfung des Haushalts (#244). Ohne
+bestätigte Prüfung rechnete sie ab „heute“, und jeder Start der App schob
+sie um das ganze Intervall hinaus: Wer die App alle paar Wochen öffnete
+und nie „Erledigt“ tippte, wurde nie erinnert. Eine Erinnerung muss von
+einem gespeicherten Datum aus rechnen. Ohne Prüfung ist das jetzt der
+erste Tag, an dem sie auf diesem Gerät geplant wurde
+(`ChargeCountingStart`); wer sie ausschaltet, beginnt beim Einschalten
+neu.
+
 `memberId` ordnet ein Medikament einer Notfallkarte zu, ohne Fremdschlüssel
 – seit Schema 24 auch einem Tier, und ebenso Tierfutter, dessen
 Tagesbedarf in `dailyDose` steht und ab heute zählt wie ein Vorrat (#151).
@@ -3294,6 +3321,13 @@ und nicht als verfügbare Vorräte gezählt. Ein Export verlangt eine Korrektur.
 Gelöschte fehlerhafte Zeilen können als Tombstone mit neutralen Zahlen übertragen
 werden; das Original bleibt lokal für die Rücknahme erhalten. Kalenderdaten
 aus CSV müssen nach der Konstruktion mit Jahr, Monat und Tag übereinstimmen.
+
+Geldbeträge (Budget, Kaufpreis eines Besitzstücks) liest `readMoneyCents`:
+Dezimalkomma oder -punkt, endlich, nicht negativ und höchstens eine
+Milliarde, damit die Cents im exakten Ganzzahlbereich bleiben. Das Budget
+las den Betrag mit `double.tryParse` allein und nahm deshalb „12,50“ von
+einer deutschen Tastatur nicht an; „Infinity“ oder „1e400“ ließen in beiden
+Formularen das Speichern an `round()` abbrechen (#245).
 
 Auch aus endlichen Eingaben dürfen keine unendlichen Ergebnisse entstehen:
 Nährwertprodukte, Packungsumrechnungen und Dosierungsquotienten werden vor dem

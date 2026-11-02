@@ -5,16 +5,21 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../downloads/application/archive_downloader.dart';
-import '../../downloads/application/download_folder.dart';
+import '../../downloads/application/download_providers.dart';
 import 'first_aid_video_pack.dart';
 import '../../../core/http_client.dart';
 import '../../../core/settings_arrival.dart';
 
 /// Where the video pack folder is on this device.
+///
+/// Follows the download folder. Read once, it kept the folder the app had
+/// started with: a pack fetched after the folder was changed in the
+/// settings went to the old one, and after the next start the app looked
+/// in the new one and found no pack (#246).
 final firstAidLibraryProvider = FutureProvider<FirstAidVideoLibrary>((
   ref,
 ) async {
-  final downloads = await const DownloadFolder().current();
+  final downloads = await ref.watch(downloadFolderProvider.future);
   return FirstAidVideoLibrary(FirstAidVideoLibrary.inside(downloads));
 });
 

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../model/categories.dart';
 
 import '../../../core/error_text.dart';
+import '../../../core/number_input.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../inventory/application/inventory_category_l10n.dart';
@@ -76,8 +77,7 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
 
     setState(() => _isSubmitting = true);
     final controller = ref.read(budgetControllerProvider(widget.householdId));
-    final amountCents = (double.parse(_amountController.text.trim()) * 100)
-        .round();
+    final amountCents = readMoneyCents(_amountController.text)!;
 
     if (_isEditing) {
       await controller.updateEntry(
@@ -192,7 +192,7 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
                             validator: (value) {
                               final trimmed = value?.trim() ?? '';
                               if (trimmed.isEmpty) return l10n.fieldRequired;
-                              return double.tryParse(trimmed) == null
+                              return readMoneyCents(trimmed) == null
                                   ? l10n.invalidNumber
                                   : null;
                             },

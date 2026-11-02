@@ -5,13 +5,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/app_database_providers.dart';
 import '../../../core/locale_provider.dart';
 import '../../../core/notifications_provider.dart';
+import '../../../core/settings_arrival.dart';
 import '../../../core/theme_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
 import '../../inventory/application/inventory_photo_service.dart';
+import '../../knowledge/application/personal_document_index.dart';
+import '../../knowledge/application/personal_document_store.dart';
 import '../../maps/application/map_source_preference.dart';
 import '../../sharing/application/folder_key_store.dart';
+import '../../sharing/application/settings_sync_store.dart';
 import '../../sharing/application/shared_folder_store.dart';
 import '../../../core/database_snapshots.dart';
 import '../../../core/local_database_encryption.dart';
@@ -92,6 +96,10 @@ class ResetCard extends ConsumerWidget {
     ref.invalidate(themeModeProvider);
     ref.invalidate(notificationsEnabledProvider);
     ref.invalidate(mapSourceProvider);
+    // The lead times and the charge interval are read once at start and
+    // read again only when settings arrive; without this they stayed at
+    // the old values, on screen and in the reminders, until a restart.
+    announceSettingsArrival();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.resetDone)),
@@ -118,6 +126,21 @@ class ResetCard extends ConsumerWidget {
     await const FolderKeyStore().clear(profile.id);
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('nearbyEmergencyContacts');
+    // What the household keeps beside the database: the crisis plan, the
+    // meeting points, who is told it is alive, where it lives (#247).
+    // Left behind, a household set up here afterwards found all of it.
+    await forgetHouseholdSettings();
+    await const PersonalDocumentStore().clear();
+    try {
+      final index = PersonalDocumentIndex();
+      try {
+        await index.clear();
+      } finally {
+        await index.close();
+      }
+    } on Object {
+      // No index yet, or none in a test.
+    }
     await ref.read(householdProfileProvider.notifier).clear();
   }
 }

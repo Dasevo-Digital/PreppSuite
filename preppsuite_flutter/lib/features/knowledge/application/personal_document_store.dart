@@ -255,6 +255,12 @@ class PersonalDocumentStore {
     return (all: updated, added: added);
   });
 
+  /// Forgets the whole list, for a household that is deleted (#247): the
+  /// deadlines and where the originals are kept go with it. The files
+  /// themselves are somebody's own and stay where they are.
+  Future<void> clear() =>
+      _mutate(() => const PrivatePreferences().remove(_documentsKey));
+
   Future<List<PersonalDocument>> remove(String id) => _mutate(() async {
     final updated = [
       for (final item in await _read())

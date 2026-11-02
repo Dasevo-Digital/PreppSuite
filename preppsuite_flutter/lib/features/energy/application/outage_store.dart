@@ -13,10 +13,10 @@ class OutageClock {
 /// Remembers the blackout across restarts.
 ///
 /// In preferences and not in the database, for the same reason the energy
-/// plan is: it is this device's own note about right now, not household
-/// data. It also must not sync — two devices in the same dark flat would
-/// otherwise overwrite each other's start time, and a phone that was
-/// elsewhere would import a blackout that never happened here.
+/// plan is: a note about right now, not inventory. It does travel with the
+/// household's settings (`carried_settings.dart`): the fridge does not care
+/// which device is looking at the clock, so a blackout started on one is
+/// running on all of them, and ending it on one ends it everywhere.
 ///
 /// It has to survive a restart all the same. A four-hour countdown that
 /// resets when the app is reopened would be worse than none: the app

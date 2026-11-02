@@ -24,16 +24,20 @@ class _ChargeReminderSchedulerState
     final days = ref.read(chargeReminderDaysProvider);
     if (!ref.read(notificationsEnabledProvider)) return;
     if (days == 0) {
+      await const ChargeCountingStart().clear();
       await NotificationService.instance.cancelChargeReminder();
       return;
     }
     // Counted from the last confirmed check rather than from now.
     // Measured from now, the interval restarted whenever the setting was
     // touched, and the reminder arrived on time whether or not anybody had
-    // been near the equipment. Nothing recorded means "start counting
-    // today", which is what a fresh install wants.
+    // been near the equipment. Nothing recorded means counting from the
+    // first time this was planned -- kept, not today again on every start,
+    // which put the reminder an interval out each time it ran (#244).
     final from =
-        ref.read(chargeCheckProvider).lastChecked?.toLocal() ?? DateTime.now();
+        ref.read(chargeCheckProvider).lastChecked?.toLocal() ??
+        await const ChargeCountingStart().since();
+    if (!mounted) return;
     final fireAt = _atTen(
       DateTime(from.year, from.month, from.day + days),
     );
