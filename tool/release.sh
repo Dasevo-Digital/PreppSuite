@@ -8,7 +8,10 @@
 #                                     waiting for Linux: the Mac, Android
 #                                     and device-check results in the
 #                                     upload folder are kept, the Linux
-#                                     machine's run is waited for again
+#                                     machine's run is waited for again.
+#                                     With RELEASE_SKIP_REMOTE=1 it goes
+#                                     straight to PDFium and checksums,
+#                                     after a device check run again by hand
 #
 # Before it: the version is raised in pubspec.yaml, committed, tagged
 # v<version> and pushed -- this script builds what the tag says and refuses
@@ -140,9 +143,6 @@ archive="$log/src-$version.tar.gz"
 git archive --format=tar.gz --prefix=src/ -o "$archive" "$tag"
 
 remote_linux="preppsuite-release/$version"
-if $resume && $skip_remote; then
-  fail "--resume wartet auf Linux, RELEASE_SKIP_REMOTE baut ohne"
-fi
 if $resume; then
   for kept in "PreppSuite-$version-macos-local-ad-hoc.zip" \
     "PreppSuite-$version-Android-arm64-v8a.apk" \
@@ -151,7 +151,7 @@ if $resume; then
   done
   grep -qE '^Ergebnis:[[:space:]]+BESTANDEN$' "$out/GERAETETEST-v$version.txt" ||
     fail "Gerätetest im Upload-Ordner nicht bestanden"
-  ssh "$linux" "test -f ~/$remote_linux/build.log" ||
+  $skip_remote || ssh "$linux" "test -f ~/$remote_linux/build.log" ||
     fail "kein Linux-Lauf für $version auf $linux – ohne --resume neu bauen"
   step "Fortsetzen: Mac, Android und Gerätetest liegen schon vor"
 else
