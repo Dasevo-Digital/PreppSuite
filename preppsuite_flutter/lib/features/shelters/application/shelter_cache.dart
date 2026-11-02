@@ -27,6 +27,12 @@ class ShelterCache {
   /// always says when this answer was last confirmed.
   static const maxAge = Duration(days: 7);
 
+  /// How many search areas are kept at most, the newest. Each is a whole
+  /// list in the preferences, which are read in full at every start and
+  /// written in full at every change; until #255 nothing ever removed one,
+  /// so every square kilometre and radius ever searched stayed for good.
+  static const maxAreas = 10;
+
   Future<ShelterCacheEntry?> load(GeoBoundingBox bounds) async {
     final raw = (await SharedPreferences.getInstance()).getString(
       _prefix + _keyFor(bounds),
@@ -65,10 +71,50 @@ class ShelterCache {
       'savedAt': DateTime.now().toUtc().millisecondsSinceEpoch,
       'shelters': shelters.map(_shelterToJson).toList(growable: false),
     });
-    await (await SharedPreferences.getInstance()).setString(
-      _prefix + _keyFor(bounds),
-      raw,
-    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_prefix + _keyFor(bounds), raw);
+    await _prune(prefs);
+  }
+
+  /// Every cached area, for a household that is deleted (#255): the keys
+  /// say, to a square kilometre, where somebody searched.
+  Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (final key in prefs.getKeys().where((k) => k.startsWith(_prefix))) {
+      await prefs.remove(key);
+    }
+  }
+
+  /// Drops what has run out and all but the [maxAreas] newest.
+  static Future<void> _prune(SharedPreferences prefs) async {
+    final now = DateTime.now().toUtc();
+    final kept = <({String key, DateTime savedAt})>[];
+    for (final key in prefs.getKeys().where((k) => k.startsWith(_prefix))) {
+      final savedAt = _savedAt(prefs.get(key));
+      if (savedAt == null || now.difference(savedAt) > maxAge) {
+        await prefs.remove(key);
+      } else {
+        kept.add((key: key, savedAt: savedAt));
+      }
+    }
+    kept.sort((a, b) => b.savedAt.compareTo(a.savedAt));
+    for (final old in kept.skip(maxAreas)) {
+      await prefs.remove(old.key);
+    }
+  }
+
+  static DateTime? _savedAt(Object? raw) {
+    if (raw is! String) return null;
+    try {
+      final json = jsonDecode(raw);
+      if (json is! Map || json['savedAt'] is! int) return null;
+      return DateTime.fromMillisecondsSinceEpoch(
+        json['savedAt'] as int,
+        isUtc: true,
+      );
+    } on FormatException {
+      return null;
+    }
   }
 
   /// Five decimals are approximately a metre. This is deliberate: the map

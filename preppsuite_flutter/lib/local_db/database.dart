@@ -1650,6 +1650,29 @@ class AppDatabase extends _$AppDatabase {
   /// local-time-flagged [DateTime] (see drift's native [DateTimeColumn]
   /// behavior); normalize to UTC here, since it is compared with
   /// `DateTime.utc(...)` elsewhere.
+  /// Every row of [householdId] in the tables a snapshot carries,
+  /// tombstones included. It only ever drops when rows go missing here --
+  /// a household deleted on this device, a database put back -- which is
+  /// how the shared folder knows to read every file again (#254).
+  Future<int> householdRowCount(String householdId) async {
+    Future<int> rows(TableInfo table, GeneratedColumn<String> column) async {
+      final count = countAll();
+      final query = selectOnly(table)
+        ..addColumns([count])
+        ..where(column.equals(householdId));
+      return (await query.getSingle()).read(count) ?? 0;
+    }
+
+    return await rows(inventoryItems, inventoryItems.householdId) +
+        await rows(checklistTemplates, checklistTemplates.householdId) +
+        await rows(checklistItems, checklistItems.householdId) +
+        await rows(budgetEntries, budgetEntries.householdId) +
+        await rows(householdPlans, householdPlans.householdId) +
+        await rows(householdMembers, householdMembers.householdId) +
+        await rows(possessions, possessions.householdId) +
+        await rows(neighbourOffers, neighbourOffers.householdId);
+  }
+
   Future<DateTime?> lastPulledAt(String entity) async {
     final row = await (select(
       syncState,

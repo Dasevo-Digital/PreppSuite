@@ -17,6 +17,7 @@ import '../../maps/application/map_source_preference.dart';
 import '../../sharing/application/folder_key_store.dart';
 import '../../sharing/application/settings_sync_store.dart';
 import '../../sharing/application/shared_folder_store.dart';
+import '../../shelters/application/shelter_cache.dart';
 import '../../../core/database_snapshots.dart';
 import '../../../core/local_database_encryption.dart';
 
@@ -131,6 +132,8 @@ class ResetCard extends ConsumerWidget {
     // Left behind, a household set up here afterwards found all of it.
     await forgetHouseholdSettings();
     await const PersonalDocumentStore().clear();
+    // Where shelters were looked for, to the square kilometre (#255).
+    await const ShelterCache().clear();
     try {
       final index = PersonalDocumentIndex();
       try {

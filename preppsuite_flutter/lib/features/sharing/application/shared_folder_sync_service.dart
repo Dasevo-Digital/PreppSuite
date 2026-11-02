@@ -1,8 +1,13 @@
+import 'dart:convert';
 import 'dart:developer' as developer;
+
+import 'package:cryptography/cryptography.dart' show Sha256;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../local_db/database.dart';
 import 'device_snapshot.dart';
 import 'snapshot_exchange.dart';
+import 'settings_sync.dart';
 import 'settings_sync_store.dart';
 import 'folder_crypto.dart';
 import 'household_file.dart';
@@ -133,6 +138,20 @@ class SharedFolderSyncService {
   /// Named so the "last synced" line in settings has something to read.
   static const syncStateEntity = 'sharedFolder';
 
+  /// Each other device's file as it was when its rows last went in here,
+  /// beside how many rows the household had then -- per database, so a
+  /// database opened afresh reads everything again.
+  ///
+  /// The folder is read every two minutes, and every file in it used to
+  /// be decrypted, decoded and merged row by row each time, unchanged or
+  /// not: in pure Dart and on the interface's isolate, some 80 ms a
+  /// megabyte for the decryption alone (#254). A file exactly as it was,
+  /// into a household that has lost no rows since, has nothing new to
+  /// give. Kept in memory only, so every start of the app reads it all
+  /// once.
+  static final _applied =
+      Expando<Map<String, ({int length, int hash, int rows})>>();
+
   Future<SharedFolderSyncResult> sync() async {
     try {
       if (!await _folder.isWritable()) {
@@ -170,6 +189,17 @@ class SharedFolderSyncService {
 
         foreignFiles++;
 
+        final applied = _applied[_db] ??= {};
+        final memo = '$householdId/$id';
+        final before = applied[memo];
+        if (raw != null &&
+            before != null &&
+            before.length == raw.length &&
+            before.hash == raw.hashCode &&
+            before.rows == await _db.householdRowCount(householdId)) {
+          continue;
+        }
+
         final opened = raw == null ? null : await _open(raw);
         final snapshot = opened == null ? null : DeviceSnapshot.decode(opened);
         if (snapshot == null) {
@@ -182,6 +212,11 @@ class SharedFolderSyncService {
         if (snapshot.householdId != householdId) continue;
 
         received += await _apply(snapshot);
+        applied[memo] = (
+          length: raw!.length,
+          hash: raw.hashCode,
+          rows: await _db.householdRowCount(householdId),
+        );
       }
 
       final beforePublishError = await _checkIdentity();
@@ -316,11 +351,25 @@ class SharedFolderSyncService {
     // clean, so dirty alone cannot recover every existing installation.
     final repairEntity = 'sharedFolderVersion2:$householdId:$deviceId';
     final needsRepair = await _db.lastPulledAt(repairEntity) == null;
+
+    // The settings, stamped, read before deciding: a station changed here
+    // is something to say even when no row moved. Until #253 they were
+    // read only once a row had already decided it, and a changed setting
+    // on its own reached no other device -- not even on "sync now".
+    final settings = await readSyncedSettings();
+    final settingsPrint = await _settingsFingerprint(settings);
+    final settingsKey =
+        'sharedFolderSettingsPublished.v1.$householdId.$deviceId';
+    final settingsChanged =
+        await _publishedSettings(settingsKey, orElse: settingsPrint) !=
+        settingsPrint;
+
     if (!republish &&
         !ourFileIsPlain &&
         !needsRepair &&
         !learnedSomething &&
         ourFileExists &&
+        !settingsChanged &&
         !await _hasUnpublishedRows()) {
       return false;
     }
@@ -333,10 +382,9 @@ class SharedFolderSyncService {
       deviceId: deviceId,
       householdId: householdId,
       // What turns "the settings came over once at setup" into "the
-      // settings stay in step": this file is republished every couple
-      // of minutes, so a station changed on the telephone reaches the
-      // desktop on its next round.
-      settings: await readSyncedSettings(),
+      // settings stay in step": a station changed on the telephone is
+      // published on the next round and reaches the desktop on its own.
+      settings: settings,
     );
 
     final folderKey = key;
@@ -369,7 +417,47 @@ class SharedFolderSyncService {
       offers: versions(snapshot.neighbourOffers),
     );
     await _db.setLastPulledAt(repairEntity, DateTime.now().toUtc());
+    await _rememberPublishedSettings(settingsKey, settingsPrint);
     return true;
+  }
+
+  /// A digest of [settings] as they travel, never the values: some of them
+  /// are kept encrypted on this device, and this lands in plain
+  /// preferences.
+  static Future<String> _settingsFingerprint(
+    Map<String, StampedSetting> settings,
+  ) async {
+    final encoded = encodeStampedSettings(settings);
+    final canonical = jsonEncode({
+      for (final key in encoded.keys.toList()..sort()) key: encoded[key],
+    });
+    final digest = await Sha256().hash(utf8.encode(canonical));
+    return base64Encode(digest.bytes);
+  }
+
+  /// What went out last time; null where nothing is known, which reads as
+  /// changed. A preferences store that cannot be reached reads as
+  /// unchanged instead: the rows decide then, as they always did.
+  static Future<String?> _publishedSettings(
+    String key, {
+    required String orElse,
+  }) async {
+    try {
+      return (await SharedPreferences.getInstance()).getString(key);
+    } on Object {
+      return orElse;
+    }
+  }
+
+  static Future<void> _rememberPublishedSettings(
+    String key,
+    String print,
+  ) async {
+    try {
+      await (await SharedPreferences.getInstance()).setString(key, print);
+    } on Object {
+      // Published all the same; the next round publishes once more.
+    }
   }
 
   Future<bool> _hasUnpublishedRows() async {

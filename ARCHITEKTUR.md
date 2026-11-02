@@ -244,6 +244,16 @@ seconds. Identical snapshots remain no-ops. All household devices need this
 merge rule for guaranteed convergence; the on-disk and wire formats stay
 unchanged. Unseen edits on a device with a fast clock can still win.
 
+**An unchanged file of another device is not read twice.** The folder is
+looked at every two minutes, and every other device's file used to be
+decrypted (AES-GCM in pure Dart, some 80 ms a megabyte), decoded and
+merged row by row on every round, on the interface's isolate (#254).
+`SharedFolderSyncService` remembers, per database instance, each file's
+length and hash beside the household's row count when it went in, and
+skips a file that is exactly as it was into a household that has lost no
+rows since. A database opened afresh or a household deleted here reads
+everything again; so does every start of the app.
+
 **Publishing acknowledges exact row versions, never a wall-clock cutoff.**
 Only the client ids and timestamps actually included in the uploaded snapshot
 may have `dirty` cleared. Edits made during the write remain pending, even
@@ -520,7 +530,10 @@ meeting points, the check-in contacts and the home coordinates outlived
 A base left behind would have been worse: at the first exchange in
 another household it reads every old value as deleted here and sends
 that on. `carried_settings_stores_test` writes every key through its
-store and expects only the setup-only ones to survive.
+store and expects only the setup-only ones to survive. The shelter cache
+goes too (#255): its keys say, to a square kilometre, where somebody
+searched. It also keeps at most ten areas and drops what is past its week
+when it saves, where until then nothing ever removed an entry.
 
 **The snapshot format in `device_snapshot.dart` is a contract, not a dump.**
 Row codecs are hand-written rather than drift's generated `toJson` precisely
@@ -2436,9 +2449,18 @@ und `applySyncedSettings` geben im Fehlerfall leer beziehungsweise null
 zurück, statt zu werfen. Genau diese Reihenfolge stand beim ersten Wurf
 falsch herum, und acht Abgleich-Tests haben es gemeldet.
 
-Getragen wird das im `DeviceSnapshot` — der Datei, die ohnehin alle zwei
-Minuten neu veröffentlicht wird. Damit reist es über **alle vier** Wege
-zugleich: gemeinsamer Ordner, Direktübergabe in beide Richtungen und
+Getragen wird das im `DeviceSnapshot`. Der gemeinsame Ordner schaut alle
+zwei Minuten nach, schreibt die Datei aber nur, wenn es etwas zu sagen
+gibt -- und eine geänderte Einstellung ist etwas zu sagen. Bis #253 war sie
+es nicht: Die Datei wurde nur für geänderte oder empfangene Zeilen neu
+geschrieben, und eine Einstellung allein erreichte kein anderes Gerät,
+auch nicht über „Jetzt abgleichen". Seitdem liest `_publishIfNeeded` die
+gestempelten Einstellungen vor der Entscheidung und vergleicht ihren
+Fingerabdruck mit dem zuletzt veröffentlichten
+(`sharedFolderSettingsPublished.v1.<Haushalt>.<Gerät>`, nur ein SHA-256,
+weil manche Werte privat sind). Mit dem Vergleichsstand der Stempel geht
+das nicht: Der Empfang schreibt lokale Änderungen ebenfalls hinein.
+Damit reist es über **alle vier** Wege zugleich: gemeinsamer Ordner, Direktübergabe in beide Richtungen und
 QR-Kette. `settings_sync_store_test.dart` liest den Quellbaum und meldet
 jeden Weg, der Zeilen zusammenführt und die Einstellungen vergisst; die
 Sicherung ist namentlich ausgenommen, denn ein Rückspielen ist eine Kopie

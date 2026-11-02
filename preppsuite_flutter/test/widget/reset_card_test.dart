@@ -88,6 +88,10 @@ void main() {
       location: '/dokumente/reisepass.pdf',
       label: 'Reisepass',
     );
+    await (await SharedPreferences.getInstance()).setString(
+      'shelterCache.v1.52.20000:10.50000:52.30000:10.60000',
+      '{"savedAt":0,"shelters":[]}',
+    );
     await const SettingsSyncStore().save({
       'chargeReminderDays': (value: 30, at: DateTime.utc(2026, 10, 1)),
     });
@@ -111,6 +115,13 @@ void main() {
     // Kept, the base would read every old value as deleted here at the
     // first exchange in another household, and send that on.
     expect(await const SettingsSyncStore().load(), isEmpty);
+    // Where shelters were looked for (#255).
+    expect(
+      (await SharedPreferences.getInstance()).getKeys().where(
+        (key) => key.startsWith('shelterCache.v1.'),
+      ),
+      isEmpty,
+    );
 
     final left = await readCarriedSettings(forBackup: true);
     expect(
