@@ -26,6 +26,11 @@
 #   RELEASE_DIR           upload folder (default ~/Desktop/PreppSuite-Release-v<version>-Upload)
 #   RELEASE_API           https://<host>/api/v1/repos/<owner>/<repo>  (--publish)
 #   RELEASE_TOKEN         access token for it                          (--publish)
+#   RELEASE_SKIP_REMOTE   1 when the Linux and Windows machines cannot be
+#                         reached and the household decided to release
+#                         without them: macOS and Android only, every check
+#                         on those still runs, and the release text has to
+#                         say that Linux and Windows are missing
 #
 # What it does, in the order that keeps the slow machines busy: the Linux
 # build starts first and runs while the Mac builds macOS and Android and
@@ -57,6 +62,8 @@ esac
 
 linux="${RELEASE_LINUX_HOST:-TestKubuntu}"
 windows="${RELEASE_WINDOWS_HOST:-TestWindows}"
+skip_remote=false
+[ "${RELEASE_SKIP_REMOTE:-}" = 1 ] && skip_remote=true
 out="${RELEASE_DIR:-$HOME/Desktop/PreppSuite-Release-v$version-Upload}"
 tag="v$version"
 log="$(mktemp -d)"
@@ -133,6 +140,9 @@ archive="$log/src-$version.tar.gz"
 git archive --format=tar.gz --prefix=src/ -o "$archive" "$tag"
 
 remote_linux="preppsuite-release/$version"
+if $resume && $skip_remote; then
+  fail "--resume wartet auf Linux, RELEASE_SKIP_REMOTE baut ohne"
+fi
 if $resume; then
   for kept in "PreppSuite-$version-macos-local-ad-hoc.zip" \
     "PreppSuite-$version-Android-arm64-v8a.apk" \
@@ -146,6 +156,9 @@ if $resume; then
   step "Fortsetzen: Mac, Android und Gerätetest liegen schon vor"
 else
 # --- Linux, in the background -------------------------------------------
+if $skip_remote; then
+  step "Linux und Windows ausgelassen (RELEASE_SKIP_REMOTE)"
+else
 step "Linux auf $linux starten"
 ssh "$linux" "rm -rf ~/$remote_linux && mkdir -p ~/$remote_linux"
 scp -q "$archive" "$linux:$remote_linux/src.tar.gz"
@@ -153,6 +166,7 @@ scp -q "$ROOT/tool/linux_release.sh" "$linux:$remote_linux/linux_release.sh"
 ssh "$linux" "cd ~/$remote_linux && tar xzf src.tar.gz && \
   (nohup bash linux_release.sh \$HOME/$remote_linux $version $build \
    > build.log 2>&1 < /dev/null &)"
+fi
 
 # --- macOS ----------------------------------------------------------------
 step "macOS"
@@ -216,6 +230,7 @@ grep -qE '^Ergebnis:[[:space:]]+BESTANDEN$' "$log/device.log" ||
 find "$APP_DIR/build" \( -name '*.app' -o -name '*.appex' \) -prune -exec rm -rf {} +
 fi
 
+if ! $skip_remote; then
 # --- Linux result ---------------------------------------------------------
 step "Auf Linux warten"
 # Two hours: since the translator (#184) the Linux machine also compiles
@@ -270,15 +285,20 @@ grep -q "== FERTIG ==" "$log/windows.log" || fail "Windows-Build unvollständig"
 grep -q "STARTTEST: BESTANDEN" "$log/windows.log" ||
   fail "Starttest unter Windows nicht bestanden, siehe $log/windows.log"
 scp -q "$windows:$win/PreppSuite-$version-windows-x64-unsigned-test.zip" "$out/"
+fi
 
 # --- Checks on the finished packages --------------------------------------
 step "PDFium-Herkunft"
 chmod 644 "$out"/*
-"$ROOT/tool/pdfium_provenance.sh" "$out"/*.zip "$out"/*.apk "$out"/*.tar.gz \
+"$ROOT/tool/pdfium_provenance.sh" "$out"/PreppSuite-"$version"-* \
   > "$log/pdfium.log" 2>&1 || true
 grep "stimmt" "$log/pdfium.log" || true
-[ "$(grep -c "stimmt" "$log/pdfium.log")" -eq 6 ] ||
-  fail "PDFium nicht in allen sechs Paketen bestätigt"
+# Six: the universal Mac package once per architecture, Windows, Linux
+# and both APKs. Four without the two remote machines.
+expected_pdfium=6
+$skip_remote && expected_pdfium=4
+[ "$(grep -c "stimmt" "$log/pdfium.log")" -eq "$expected_pdfium" ] ||
+  fail "PDFium nicht in allen Paketen bestätigt"
 
 step "Prüfsummen"
 (cd "$out" && shasum -a 256 PreppSuite-"$version"-* "GERAETETEST-v$version.txt" \
