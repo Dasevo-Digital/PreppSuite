@@ -65,4 +65,14 @@ void main() {
     expect(dialableNumber('+49 531 4700'), '+495314700');
     expect(dialableNumber('kein Anschluss'), '');
   });
+
+  // The way a German number is written with its country code (#251).
+  test('the bracketed zero after a country code is not dialled', () {
+    expect(dialableNumber('+49 (0)171 2345678'), '+491712345678');
+    expect(dialableNumber('+49 (0) 531 / 47-00'), '+495314700');
+    expect(dialableNumber('0049 (0)531 4700'), '00495314700');
+    // Without a country code the brackets are an area code, kept whole.
+    expect(dialableNumber('(0531) 4700'), '05314700');
+    expect(dialableNumber('0531 (0) 4700'), '053104700');
+  });
 }

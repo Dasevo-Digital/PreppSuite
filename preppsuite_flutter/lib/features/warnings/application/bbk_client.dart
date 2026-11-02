@@ -135,16 +135,23 @@ class BbkClient {
   /// Response shape differs from `mapData.json` (nested under
   /// `payload.data`, plus a top-level `sent` field) — parsed separately
   /// here rather than reusing `_parseEntry`.
+  ///
+  /// Anything but a list with status 200 throws [BbkDashboardUnavailable].
+  /// It used to answer an empty list, which the poll could not tell from
+  /// a district with nothing in force, and it then ended the warnings
+  /// only this dashboard knows (#250).
   Future<List<BbkRawWarning>> fetchDashboard(String kreisSchluessel) async {
     final ars = kreisSchluessel.padRight(12, '0');
     final response = await getWarningResponse(
       _httpClient,
       Uri.parse('$_baseUrl/dashboard/$ars.json'),
     );
-    if (response.statusCode != 200) return [];
+    if (response.statusCode != 200) {
+      throw BbkDashboardUnavailable(response.statusCode);
+    }
 
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-    if (decoded is! List) return [];
+    if (decoded is! List) throw BbkDashboardUnavailable(response.statusCode);
 
     return [
       for (final entry in decoded)
@@ -285,4 +292,16 @@ class BbkClient {
       raw: entry,
     );
   }
+}
+
+/// A district dashboard that did not answer with a list. Not "nothing in
+/// force here": the poll keeps that district's warnings rather than
+/// ending them (#250).
+class BbkDashboardUnavailable implements Exception {
+  const BbkDashboardUnavailable(this.statusCode);
+
+  final int statusCode;
+
+  @override
+  String toString() => 'BBK dashboard answered $statusCode';
 }

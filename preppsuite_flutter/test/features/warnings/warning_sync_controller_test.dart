@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/app_database_providers.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_poll_service.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_region_store.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_sync_controller.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
@@ -17,6 +18,9 @@ class _CountingPoll extends WarningPollService {
   var polls = 0;
   Completer<void>? gate;
 
+  /// The district each poll asked for, in order.
+  final asked = <String?>[];
+
   @override
   Future<WarningPollResult> poll({
     required String countryCode,
@@ -24,6 +28,7 @@ class _CountingPoll extends WarningPollService {
     Iterable<String> extraKreisSchluessel = const [],
   }) async {
     polls++;
+    asked.add(kreisSchluessel);
     await gate?.future;
     return const WarningPollResult(
       fetched: 0,
@@ -113,6 +118,61 @@ void main() {
     expect(service.polls, 2);
 
     keepAlive.close();
+    container.dispose();
+    await database.close();
+  });
+
+  testWidgets('a changed household stops the old poll (#249)', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    final service = _CountingPoll(database);
+    final container = ProviderContainer(
+      overrides: [
+        appDatabaseProvider.overrideWithValue(database),
+        warningPollServiceProvider.overrideWithValue(service),
+      ],
+    );
+    const braunschweig = HouseholdProfile(
+      id: 'h',
+      name: 'Zuhause',
+      countryCode: 'DE',
+      regionKey: '031010000000',
+    );
+    // The same household after "Meine Region" moved it: a new profile.
+    const muenchen = HouseholdProfile(
+      id: 'h',
+      name: 'Zuhause',
+      countryCode: 'DE',
+      regionKey: '091620000000',
+    );
+
+    final before = container.listen(
+      warningSyncControllerProvider(braunschweig),
+      (_, _) {},
+    );
+    await tester.pump();
+    // The shell now shows the new profile and lets go of the old one.
+    before.close();
+    final after = container.listen(
+      warningSyncControllerProvider(muenchen),
+      (_, _) {},
+    );
+    await tester.pump();
+    expect(service.asked, ['03101', '09162']);
+
+    service.asked.clear();
+    await tester.pump(warningForegroundPollInterval);
+    await tester.pump();
+
+    expect(
+      service.asked,
+      ['09162'],
+      reason: 'the old region is not asked again, and nobody polls twice',
+    );
+    final stored = await const WarningRegionStore().load();
+    expect(stored?.ownKreisSchluessel, '09162');
+
+    after.close();
     container.dispose();
     await database.close();
   });

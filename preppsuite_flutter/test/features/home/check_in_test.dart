@@ -27,6 +27,12 @@ void main() {
     expect(phoneNumbersIn('Hausarzt Dr. Weber'), isEmpty);
   });
 
+  test('a sign of life reaches "+49 (0)171 …" (#251)', () {
+    expect(normalisePhone('+49 (0)171 234 56 78'), '+491712345678');
+    expect(normalisePhone('0049 (0) 171 2345678'), '+491712345678');
+    expect(phoneNumbersIn('Mama, +49 (0)171 2345678'), ['+491712345678']);
+  });
+
   test('the sms link puts the body where each platform reads it', () {
     const body = 'Mir geht es gut.\nStand: 6. Okt. 14:05';
     final android = smsUri('+491712345678', body, ios: false).toString();

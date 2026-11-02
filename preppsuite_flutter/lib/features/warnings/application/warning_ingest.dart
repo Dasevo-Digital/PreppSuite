@@ -177,6 +177,16 @@ class WarningIngest {
     required DateTime sent,
   }) {
     final unchanged = existing != null && !sent.isAfter(existing.sent);
+    // A BBK warning in the feed again after it was ended here: it dropped
+    // out of one poll -- a source that flickered, a district that did not
+    // answer -- and came back as it was. BBK rows carry no end of their
+    // own, so being in the feed means being in force. Until #250 the
+    // unchanged row was left as it was, ended, and the warning stayed out
+    // of sight until its source issued a new version.
+    final revives =
+        source == WarningSource.bbk &&
+        existing?.expires != null &&
+        expires == null;
     if (unchanged) {
       // One exception to "unchanged is a no-op": a row that could not be
       // placed when it arrived and can be placed now. That happens when
@@ -204,6 +214,7 @@ class WarningIngest {
           _hasDetail(description, instruction, areaDescription, polygonsJson);
       if (!_narrows(existing.regionKey, regionKey) &&
           !fillsIn &&
+          !revives &&
           // BBK only: its new text arrives plain from the detail fetch.
           // MeteoAlarm's is written as the feed has it, and a row that
           // never matched its cleaned self would be rewritten every poll.

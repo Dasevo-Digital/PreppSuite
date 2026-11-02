@@ -1122,7 +1122,10 @@ class AppDatabase extends _$AppDatabase {
 
   // --- Warnings (fetched locally, never pushed) -------------------------
 
-  /// Not-yet-expired warnings, most recent first. [severity] is stored as
+  /// Warnings not yet expired when the stream was opened, most recent
+  /// first. The moment is bound once and kept for every later run of the
+  /// query, so what ends after that stays in: read it through
+  /// `warningsInForce`, never directly (#248). [severity] is stored as
   /// plain text, so it isn't sorted correctly by SQL (alphabetical, not
   /// severity rank) — pick the most severe one in Dart at the display site
   /// instead (see `warning_severity_l10n.dart`).
@@ -1224,6 +1227,10 @@ class AppDatabase extends _$AppDatabase {
   Future<int> expireMissingWarnings({
     required String source,
     required Set<String> seenExternalIds,
+
+    /// Districts that did not answer this poll: their rows stay as they
+    /// are, because their absence proves nothing (#250).
+    Set<String> keepRegionKeys = const {},
   }) async {
     final active = await (select(
       warnings,
@@ -1231,7 +1238,11 @@ class AppDatabase extends _$AppDatabase {
 
     final now = DateTime.now().toUtc();
     final gone = active
-        .where((w) => !seenExternalIds.contains(w.externalId))
+        .where(
+          (w) =>
+              !seenExternalIds.contains(w.externalId) &&
+              !keepRegionKeys.contains(w.regionKey),
+        )
         .toList();
     if (gone.isEmpty) return 0;
 

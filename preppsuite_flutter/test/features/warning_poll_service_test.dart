@@ -355,6 +355,94 @@ void main() {
     },
   );
 
+  group('a warning that dropped out once (#250)', () {
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    final quiet = '<feed xmlns="http://www.w3.org/2005/Atom"></feed>';
+
+    Future<WarningPollResult> pollWith(Map<String, String> responses) =>
+        service(responses).poll(countryCode: 'DE', kreisSchluessel: '05334');
+
+    Future<List<Warning>> district() async => [
+      for (final w in await db.watchAllWarnings().first)
+        if (w.regionKey == '05334') w,
+    ];
+
+    test('a district dashboard that does not answer keeps its warnings, '
+        'and the nationwide sweep still ends the others', () async {
+      await pollWith({
+        ...allBbkSources(mowasBody: mowas),
+        '$bbkBase/dashboard/053340000000.json': dashboard,
+        meteoUrl: quiet,
+      });
+      expect(await district(), isNotEmpty);
+
+      // The nationwide feed answers in full and empty; the district's own
+      // dashboard is not there (the fixture client answers 404).
+      final result = await pollWith({
+        ...allBbkSources(mowasBody: '[]'),
+        meteoUrl: quiet,
+      });
+
+      expect(result.complete, isTrue);
+      expect(
+        (await district()).every((w) => w.expires == null),
+        isTrue,
+        reason: 'only the district knew them, and it did not answer',
+      );
+      final national = [
+        for (final w in await db.watchAllWarnings().first)
+          if (w.regionKey != '05334') w,
+      ];
+      expect(national, isNotEmpty);
+      expect(national.every((w) => w.expires != null), isTrue);
+    });
+
+    test('an empty dashboard that does answer ends them', () async {
+      await pollWith({
+        ...allBbkSources(mowasBody: mowas),
+        '$bbkBase/dashboard/053340000000.json': dashboard,
+        meteoUrl: quiet,
+      });
+
+      await pollWith({
+        ...allBbkSources(mowasBody: '[]'),
+        '$bbkBase/dashboard/053340000000.json': '[]',
+        meteoUrl: quiet,
+      });
+
+      expect((await district()).every((w) => w.expires != null), isTrue);
+    });
+
+    test('a warning ended here and back in the feed as it was is in force '
+        'again, and not announced twice', () async {
+      final responses = {...allBbkSources(mowasBody: mowas), meteoUrl: quiet};
+      final first = await service(responses).poll(countryCode: 'DE');
+      expect(first.newsworthy, isNotEmpty);
+      await service(
+        responses,
+      ).markNotified(await db.watchAllWarnings().first);
+
+      // One poll in which the source flickered: answered, but empty.
+      await service({
+        ...allBbkSources(mowasBody: '[]'),
+        meteoUrl: quiet,
+      }).poll(countryCode: 'DE');
+      expect(
+        (await db.watchAllWarnings().first).every((w) => w.expires != null),
+        isTrue,
+      );
+
+      final back = await service(responses).poll(countryCode: 'DE');
+
+      final stored = await db.watchAllWarnings().first;
+      expect(stored, isNotEmpty);
+      expect(stored.every((w) => w.expires == null), isTrue);
+      expect(back.newsworthy, isEmpty);
+      expect(stored.every((w) => w.notified), isTrue);
+    });
+  });
+
   group('the detail behind a warning (#177)', () {
     // The bomb disposal in Braunschweig on 2026-10-16, as the feeds carried
     // it: in the nationwide MoWaS map, in the district dashboard, and with

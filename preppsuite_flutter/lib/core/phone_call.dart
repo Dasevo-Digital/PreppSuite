@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/generated/app_localizations.dart';
+import 'phone_number.dart';
 
 /// Calls a number, and says so plainly when this device cannot (#135).
 ///
@@ -38,7 +39,7 @@ Future<void> callNumber(
 
 /// [number] as a `tel:` link wants it: digits, and a leading plus.
 String dialableNumber(String number) {
-  final trimmed = number.trim();
+  final trimmed = withoutTrunkPrefix(number);
   final digits = trimmed.replaceAll(RegExp(r'[^0-9]'), '');
   return trimmed.startsWith('+') ? '+$digits' : digits;
 }

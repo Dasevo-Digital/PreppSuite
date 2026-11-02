@@ -143,11 +143,16 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
   }
 }
 
-final warningSyncControllerProvider =
-    NotifierProvider.family<
-      WarningSyncController,
-      AsyncValue<void>,
-      HouseholdProfile
-    >(
+/// Keyed by the household as it is now, and disposed with it.
+///
+/// Every change to the household -- the region, another place to watch,
+/// one more person -- is a new profile and so a new key. Kept alive, the
+/// controller for the old key went on running its timer: it polled the
+/// old region every fifteen minutes, wrote it back into
+/// [WarningRegionStore] for the background worker and announced that
+/// region's warnings, one more poller for every change (#249). Disposed,
+/// its timer ends with it, and the new key polls the new region at once.
+final warningSyncControllerProvider = NotifierProvider.autoDispose
+    .family<WarningSyncController, AsyncValue<void>, HouseholdProfile>(
       WarningSyncController.new,
     );

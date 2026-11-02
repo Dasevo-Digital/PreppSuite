@@ -188,6 +188,26 @@ sent, in one transaction. Source and external id alone are insufficient: a
 foreground poll and a background poll can overlap, and an escalation must
 stay pending even when its source reuses a timestamp.
 
+**A watched query cannot say "now".** drift binds a value once, when the
+query is built, and runs the query again with that value on every change.
+`watchActiveWarnings` compared `expires` with the moment the banner first
+asked, so whatever ended after the app started stayed "active" in the
+banner, the badge, the overview, the lamps and the home screen widget
+until the next start (#248). The query is now only a first cut;
+`warningsInForce` measures each emission against the clock and emits
+again when the next warning in it ends. Any other watched query that
+needs the current time does the same.
+
+**A BBK warning is over only when a source that answered no longer has
+it.** The nationwide sweep retires what is missing, and only after a
+complete poll. A district whose dashboard did not answer -- an exception
+or any status but 200, which until #250 read as an empty district --
+keeps its rows (`keepRegionKeys`), because what only its dashboard knows
+is not in the sweep. And a BBK row ended here that is back in the feed as
+it was is in force again: BBK rows carry no end of their own, and until
+#250 the unchanged row stayed ended until the source issued a new
+version.
+
 **`HouseholdProfile.id` is the partition key for every local table.** It is
 generated once and changes exactly once more: joining a folder that already
 holds a household adopts that id, and `adoptHouseholdId` re-stamps every
@@ -472,6 +492,13 @@ first answer for the rest of the run: the readiness screen showed the
 backup check, the last warning poll and the places as they were at its
 first opening (#241), and a language list that failed once left the
 Kiwix library's language field dead (#242).
+
+A provider family keyed by an object that every change replaces -- the
+household profile -- is `autoDispose`. Kept alive, every old key goes on
+running: `warningSyncControllerProvider` kept one controller per profile
+the run had seen, each with its fifteen-minute timer, polling the old
+region, writing it back for the background worker and announcing its
+warnings (#249).
 
 A provider that depends on the download folder watches
 `downloadFolderProvider`, which the settings card invalidates when the
@@ -2714,6 +2741,9 @@ einzeln. Gesendet wird erst, wenn die Person dort auf Senden drückt.
   mitgeführte Einstellung. Vorgeschlagen werden der Kontakt außerhalb der
   Region aus dem Notfallplan und Nummern aus dem Notfallkontakt der
   Notfallkarten.
+- Eine Nummer mit Ländervorwahl verliert das „(0)“ dahinter
+  (`withoutTrunkPrefix`, auch für die Anrufknöpfe): „+49 (0)171 …“ ist die
+  übliche Schreibweise, und „+490171…“ erreicht niemanden (#251).
 
 
 ### Ein unlesbarer Schlüsselspeicher heißt nicht „nichts eingerichtet"
@@ -3187,6 +3217,13 @@ generic lock-screen text without document titles or original locations.
 They share the existing 60-slot budget: prescription refills, device charging,
 documents, then inventory expiry. The global notification switch cancels all
 four categories. Linux keeps the in-app due list without scheduled delivery.
+A plan that is already pending schedules nothing: the scheduler compares
+what it would schedule (id, time, title, text) with what it last left
+pending, and only a difference cancels and schedules again, with one look
+at what is pending (`cancelReminders`) instead of one per kind (#252).
+Before, every change to the inventory and every return to the app cost up
+to 64 cancellations and 60 schedules, each rewriting the Android plugin's
+whole list.
 
 The readiness screen's `OfflineProbe` reads actual samples after an explicit
 start: PMTiles metadata and up to two vector tiles, a ZIM main page, document

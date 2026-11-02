@@ -110,6 +110,9 @@ class WarningPollService {
       );
 
       final seen = {for (final w in nationwide.warnings) w.id};
+      // Districts whose dashboard did not answer this time. What only
+      // their dashboard knows is not in [seen], and is not over (#250).
+      final unanswered = <String>{};
 
       final districts = <String>{
         if (kreisSchluessel != null && kreisSchluessel.length >= 5)
@@ -148,7 +151,9 @@ class WarningPollService {
           seen.addAll(precise.map((w) => w.id));
         } on Object {
           // The nationwide feed was complete. A failed optional district
-          // lookup must not keep unrelated, retired nationwide warnings.
+          // lookup must not keep unrelated, retired nationwide warnings --
+          // nor end the ones it alone reported (#250).
+          unanswered.add(district);
         }
       }
 
@@ -158,6 +163,7 @@ class WarningPollService {
         retired += await _db.expireMissingWarnings(
           source: WarningSource.bbk.name,
           seenExternalIds: seen,
+          keepRegionKeys: unanswered,
         );
       }
     }

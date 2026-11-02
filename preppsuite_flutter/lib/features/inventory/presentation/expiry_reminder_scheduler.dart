@@ -41,6 +41,9 @@ class _ExpiryReminderSchedulerState
   bool _running = false;
   bool _again = false;
 
+  /// What this run last left pending, null when that is not known.
+  List<_Pending>? _scheduled;
+
   @override
   void initState() {
     super.initState();
@@ -107,10 +110,8 @@ class _ExpiryReminderSchedulerState
     // empty default simply yields nothing for the items that follow it,
     // and scheduling an empty list is itself a full cancel.
     if (!enabled) {
-      await NotificationService.instance.cancelExpiryReminders();
-      await NotificationService.instance.cancelRefillReminders();
-      await NotificationService.instance.cancelDeviceChargeReminders();
-      await NotificationService.instance.cancelDocumentReminders();
+      _scheduled = null;
+      await NotificationService.instance.cancelReminders();
       return;
     }
 
@@ -120,13 +121,6 @@ class _ExpiryReminderSchedulerState
     }
 
     final now = DateTime.now();
-    // Clear the old allocation before adding any category. Otherwise a
-    // new refill can briefly exceed iOS's limit while yesterday's 60
-    // expiry reminders still occupy their slots and be silently dropped.
-    await NotificationService.instance.cancelExpiryReminders();
-    await NotificationService.instance.cancelRefillReminders();
-    await NotificationService.instance.cancelDeviceChargeReminders();
-    await NotificationService.instance.cancelDocumentReminders();
 
     // Planned first, and taken out of the expiry reminders' share of the
     // 64 notifications iOS keeps: a household with a few medicines in
@@ -136,13 +130,9 @@ class _ExpiryReminderSchedulerState
       items: items,
       now: now,
     ).take(maxScheduledExpiryReminders).toList();
-    await NotificationService.instance.scheduleRefillReminders(
-      refills,
-      title: l10n.refillReminderTitle,
-      body: (reminder) => l10n.refillReminderBody(
-        reminder.itemName,
-        DateFormat.yMMMd(l10n.localeName).format(reminder.runsOutOn),
-      ),
+    String refillBody(RefillReminder reminder) => l10n.refillReminderBody(
+      reminder.itemName,
+      DateFormat.yMMMd(l10n.localeName).format(reminder.runsOutOn),
     );
 
     // Then the devices whose battery is due (#179), from the same share
@@ -152,21 +142,13 @@ class _ExpiryReminderSchedulerState
       items: items,
       now: now,
     ).take(maxScheduledExpiryReminders - refills.length).toList();
-    await NotificationService.instance.scheduleDeviceChargeReminders(
-      charges,
-      title: l10n.deviceChargeReminderTitle,
-      body: (reminder) => l10n.deviceChargeReminderBody(reminder.itemName),
-    );
+    String chargeBody(DeviceChargeReminder reminder) =>
+        l10n.deviceChargeReminderBody(reminder.itemName);
 
     final documents = planDocumentReminders(
       ref.read(personalDocumentsProvider).value ?? const [],
       now: now,
       limit: maxScheduledExpiryReminders - refills.length - charges.length,
-    );
-    await NotificationService.instance.scheduleDocumentReminders(
-      documents,
-      title: l10n.documentReminderTitle,
-      body: l10n.documentReminderBody,
     );
 
     final reminders = planExpiryReminders(
@@ -179,14 +161,77 @@ class _ExpiryReminderSchedulerState
           charges.length -
           documents.length,
     );
+    String expiryBody(ExpiryReminder reminder) => reminder.leadDays == 1
+        ? l10n.expiryReminderBodyTomorrow(reminder.itemName)
+        : l10n.expiryReminderBody(reminder.itemName, reminder.leadDays);
 
+    // What is pending already, said the same way, schedules nothing
+    // (#252). Every change to the inventory -- a count, a note, a sync
+    // bringing rows -- and every return to the app used to cancel and
+    // schedule all of it again: up to 64 cancellations and 60 schedules,
+    // each of which Android's plugin answers by rewriting its whole list.
+    final plan = <_Pending>[
+      for (final r in refills)
+        (
+          id: r.id,
+          at: r.fireAt,
+          title: l10n.refillReminderTitle,
+          body: refillBody(r),
+        ),
+      for (final r in charges)
+        (
+          id: r.id,
+          at: r.fireAt,
+          title: l10n.deviceChargeReminderTitle,
+          body: chargeBody(r),
+        ),
+      for (final r in documents)
+        (
+          id: r.id,
+          at: r.fireAt,
+          title: l10n.documentReminderTitle,
+          body: l10n.documentReminderBody,
+        ),
+      for (final r in reminders)
+        (
+          id: r.id,
+          at: r.fireAt,
+          title: l10n.expiryReminderTitle,
+          body: expiryBody(r),
+        ),
+    ];
+    if (listEquals(plan, _scheduled)) return;
+    _scheduled = null;
+
+    // Clear the old allocation before adding any category. Otherwise a
+    // new refill can briefly exceed iOS's limit while yesterday's 60
+    // expiry reminders still occupy their slots and be silently dropped.
+    await NotificationService.instance.cancelReminders();
+    await NotificationService.instance.scheduleRefillReminders(
+      refills,
+      title: l10n.refillReminderTitle,
+      body: refillBody,
+      replace: false,
+    );
+    await NotificationService.instance.scheduleDeviceChargeReminders(
+      charges,
+      title: l10n.deviceChargeReminderTitle,
+      body: chargeBody,
+      replace: false,
+    );
+    await NotificationService.instance.scheduleDocumentReminders(
+      documents,
+      title: l10n.documentReminderTitle,
+      body: l10n.documentReminderBody,
+      replace: false,
+    );
     await NotificationService.instance.scheduleExpiryReminders(
       reminders,
       title: (_) => l10n.expiryReminderTitle,
-      body: (reminder) => reminder.leadDays == 1
-          ? l10n.expiryReminderBodyTomorrow(reminder.itemName)
-          : l10n.expiryReminderBody(reminder.itemName, reminder.leadDays),
+      body: expiryBody,
+      replace: false,
     );
+    _scheduled = plan;
   }
 
   @override
@@ -213,3 +258,7 @@ class _ExpiryReminderSchedulerState
     return const SizedBox.shrink();
   }
 }
+
+/// One pending reminder as the system holds it: what tells a plan that
+/// needs scheduling from one that is already there.
+typedef _Pending = ({int id, DateTime at, String title, String body});

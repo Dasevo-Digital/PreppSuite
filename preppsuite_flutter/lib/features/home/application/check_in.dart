@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../../core/phone_number.dart';
 import '../../../core/private_preferences.dart';
 
 /// A sign of life, sent by text message (#116).
@@ -40,7 +41,7 @@ class CheckInContact {
 /// Spaces, slashes, dashes and brackets are what people type into a
 /// number and what an `sms:` link does not want.
 String? normalisePhone(String raw) {
-  final trimmed = raw.trim();
+  final trimmed = withoutTrunkPrefix(raw);
   final plus = trimmed.startsWith('+') || trimmed.startsWith('00');
   final digits = trimmed.replaceAll(RegExp(r'[^0-9]'), '');
   final national = trimmed.startsWith('00') ? digits.substring(2) : digits;

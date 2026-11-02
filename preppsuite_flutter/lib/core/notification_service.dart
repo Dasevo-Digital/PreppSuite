@@ -182,6 +182,9 @@ class NotificationService {
     List<ExpiryReminder> reminders, {
     required String Function(ExpiryReminder) title,
     required String Function(ExpiryReminder) body,
+
+    /// False when [cancelReminders] has just cleared the way.
+    bool replace = true,
   }) async {
     // Nothing to schedule with where the platform cannot hold a
     // notification until a date. Returning quietly rather than throwing:
@@ -191,7 +194,7 @@ class NotificationService {
     if (!supportsScheduledNotifications) return;
 
     await _ensureInitialized();
-    await cancelExpiryReminders();
+    if (replace) await cancelExpiryReminders();
 
     for (final reminder in reminders) {
       await _plugin.zonedSchedule(
@@ -220,6 +223,27 @@ class NotificationService {
     }
   }
 
+  /// Cancels every pending reminder the inventory and the documents plan
+  /// -- expiry, prescription, device battery, document deadline -- with
+  /// one look at what is pending rather than one per kind.
+  Future<void> cancelReminders() async {
+    if (!supportsScheduledNotifications) return;
+
+    await _ensureInitialized();
+    const prefixes = [
+      _expiryPayloadPrefix,
+      _refillPayloadPrefix,
+      _deviceChargePayloadPrefix,
+      _documentPayloadPrefix,
+    ];
+    for (final request in await _plugin.pendingNotificationRequests()) {
+      final payload = request.payload ?? '';
+      if (prefixes.any(payload.startsWith)) {
+        await _plugin.cancel(id: request.id);
+      }
+    }
+  }
+
   /// Cancels every pending expiry reminder, leaving other notifications
   /// untouched. Identified by payload rather than by recomputing ids, so
   /// it still works for reminders scheduled by an earlier app run.
@@ -239,10 +263,11 @@ class NotificationService {
     List<DocumentReminder> reminders, {
     required String title,
     required String body,
+    bool replace = true,
   }) async {
     if (!supportsScheduledNotifications) return;
     await _ensureInitialized();
-    await cancelDocumentReminders();
+    if (replace) await cancelDocumentReminders();
     for (final reminder in reminders) {
       await _plugin.zonedSchedule(
         id: reminder.id,
@@ -283,11 +308,12 @@ class NotificationService {
     List<RefillReminder> reminders, {
     required String title,
     required String Function(RefillReminder) body,
+    bool replace = true,
   }) async {
     if (!supportsScheduledNotifications) return;
 
     await _ensureInitialized();
-    await cancelRefillReminders();
+    if (replace) await cancelRefillReminders();
 
     for (final reminder in reminders) {
       await _plugin.zonedSchedule(
@@ -331,11 +357,12 @@ class NotificationService {
     List<DeviceChargeReminder> reminders, {
     required String title,
     required String Function(DeviceChargeReminder) body,
+    bool replace = true,
   }) async {
     if (!supportsScheduledNotifications) return;
 
     await _ensureInitialized();
-    await cancelDeviceChargeReminders();
+    if (replace) await cancelDeviceChargeReminders();
 
     for (final reminder in reminders) {
       await _plugin.zonedSchedule(
