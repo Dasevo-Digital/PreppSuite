@@ -30,6 +30,7 @@ import '../features/home/presentation/burglary_screen.dart';
 import '../features/home/presentation/distress_signal_screen.dart';
 import '../features/home/presentation/emergency_information_screen.dart';
 import '../features/home/presentation/preparedness_tools_screen.dart';
+import '../features/home/presentation/broadcast_radio_screen.dart';
 import '../features/home/presentation/radio_emergency_screen.dart';
 import '../features/home/presentation/readiness_screen.dart';
 import '../features/household/presentation/emergency_cards_screen.dart';
@@ -257,6 +258,24 @@ List<AppDestination> appDestinations() => [
       'polizei',
       '110',
       'sperrnotruf',
+    ],
+  ),
+  AppDestination(
+    id: 'broadcast-radio',
+    title: (l) => l.broadcastRadioTitle,
+    icon: Icons.radio,
+    area: ShellDestination.emergency,
+    open: (_) => const BroadcastRadioScreen(),
+    aliases: [
+      'radio',
+      'rundfunk',
+      'ukw',
+      'dab',
+      'sender',
+      'frequenz',
+      'nachrichten',
+      'kurbelradio',
+      'emisora',
     ],
   ),
   AppDestination(

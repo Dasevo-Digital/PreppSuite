@@ -10303,4 +10303,85 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get errorInputLimit =>
       'Die Datei überschreitet die unterstützten Größen- oder Verarbeitungsgrenzen. Bitte eine kleinere Datei verwenden.';
+
+  @override
+  String get broadcastRadioTitle => 'Radio ohne Internet';
+
+  @override
+  String get broadcastRadioEntryHint =>
+      'Welche Sender hier informieren, und eure UKW-Frequenzen';
+
+  @override
+  String get broadcastRadioIntro =>
+      'Fallen Internet und Mobilfunk aus, bleibt das Radio. Amtliche Warnungen gehen über das Modulare Warnsystem des Bundes auch an die Rundfunksender. Ein Radio mit Batterie oder Kurbel empfängt sie ohne Netz.';
+
+  @override
+  String get broadcastRadioState => 'Bundesland';
+
+  @override
+  String get broadcastRadioChooseState => 'Bundesland wählen';
+
+  @override
+  String broadcastRadioRoleState(String state) {
+    return 'Programm für $state';
+  }
+
+  @override
+  String get broadcastRadioRoleNews => 'Nachrichten und Information';
+
+  @override
+  String get broadcastRadioRoleNational => 'Bundesweit';
+
+  @override
+  String get broadcastRadioUkwAndDab => 'UKW und DAB+';
+
+  @override
+  String broadcastRadioDabUkwOnlyIn(String place) {
+    return 'DAB+, über UKW nur in $place';
+  }
+
+  @override
+  String broadcastRadioFrequencyHere(String mhz) {
+    return 'Hier: $mhz MHz';
+  }
+
+  @override
+  String get broadcastRadioFrequencyAdd => 'Frequenz eintragen';
+
+  @override
+  String broadcastRadioFrequencyTitle(String name) {
+    return 'UKW-Frequenz von $name';
+  }
+
+  @override
+  String get broadcastRadioFrequencyHint =>
+      'Die Frequenz an eurem Ort, zum Beispiel 95,6. Leer lassen entfernt sie.';
+
+  @override
+  String get broadcastRadioFrequencyInvalid =>
+      'Eine UKW-Frequenz liegt zwischen 87,5 und 108 MHz, in Schritten von 0,05.';
+
+  @override
+  String get broadcastRadioTuneTitle => 'So findest du den Sender';
+
+  @override
+  String get broadcastRadioTuneUkw =>
+      'UKW: Sendersuchlauf starten. Die meisten Radios zeigen den Namen des Programms an (RDS).';
+
+  @override
+  String get broadcastRadioTuneDab =>
+      'DAB+: Suchlauf starten und das Programm aus der Liste wählen.';
+
+  @override
+  String get broadcastRadioTuneNow =>
+      'Tragt die Frequenz für euren Ort jetzt ein, solange das Netz geht. Die Sender nennen sie auf ihren Seiten unter „Empfang“, oder ihr lest sie am Radio ab. Eingetragene Frequenzen gelten für den ganzen Haushalt.';
+
+  @override
+  String broadcastRadioLookUp(String host) {
+    return 'Frequenzen auf $host';
+  }
+
+  @override
+  String get broadcastRadioSource =>
+      'Programmnamen und Verbreitung nach der amtlichen Veröffentlichung der Hörfunkprogramme der ARD-Landesrundfunkanstalten und des Deutschlandradios (§ 29 Abs. 4 Medienstaatsvertrag), Stand 1. Februar 2022. Frequenzen nennt diese Seite nicht selbst: Jedes Programm hat viele Sender, und eine falsche Angabe wäre ein Radio, das ins Leere sucht.';
 }

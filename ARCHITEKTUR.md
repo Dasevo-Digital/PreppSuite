@@ -3061,6 +3061,33 @@ des anderen Kanals: Der Hintergrundlauf, der Warnungen zeigt, hat keine
 Übersetzungen, und Android behält den Namen, mit dem ein Kanal angelegt
 wurde. Unter iOS ist das Gegenstück die zeitkritische Mitteilung (#101).
 
+### Radio ohne Internet: Programme ja, Frequenzen nein
+
+Fallen Internet und Mobilfunk aus, informiert das Radio; amtliche Warnungen
+gehen über MoWaS auch an die Rundfunksender. `broadcast_radio.dart` nennt je
+Land das Programm der Landesrundfunkanstalt und ihr Nachrichtenprogramm,
+dazu überall Deutschlandfunk (#267). Die Namen und ob ein Programm über UKW
+und DAB+ läuft, stammen aus der amtlichen Veröffentlichung der
+Hörfunkprogramme nach § 29 Abs. 4 MStV (Stand 1. Februar 2022, Amtsblatt
+Bremen 2022 Nr. 35); SWR Aktuell läuft danach über UKW nur in Stuttgart.
+
+**Frequenzen trägt der Haushalt ein, nicht die App.** Jedes Programm hat
+Dutzende Sender, jede Anstalt veröffentlicht ihre eigene Liste, und keine
+davon ließ sich automatisch lesen und prüfen (ihre Seiten sperren
+automatische Abrufe). Eine falsche Frequenz wäre ein Radio, das in der
+einen Stunde, in der es zählt, ins Leere sucht. Deshalb schreibt der
+Haushalt die Frequenz an seinem Ort einmal auf, solange das Netz geht, und
+sie reist als `radioFrequencies` mit dem Haushalt (eine Küche, ein Ort).
+`parseUkwFrequency` nimmt 87,5 bis 108 MHz im 50-kHz-Raster. Ohne
+Frequenz findet ein Suchlauf das Programm über RDS beziehungsweise die
+DAB+-Liste. Die Seite steht auch im Notfallzugang, also ohne Haushalt;
+dann fragt sie nach dem Land.
+
+Kein Nachrichtenstrom und keine eigene Lageeinschätzung (#62): Offline
+veraltet er und täuscht Aktualität vor, die Auswahl der Quellen wäre eine
+redaktionelle Entscheidung, und die Tagesschau-Schnittstelle erlaubt nach
+ihrer Dokumentation nur private, nicht-kommerzielle Nutzung.
+
 ### Sprechen kann nicht jede Plattform
 
 `core/speech_capabilities.dart` hat dieselbe Form wie

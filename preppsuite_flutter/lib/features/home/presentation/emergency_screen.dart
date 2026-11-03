@@ -21,6 +21,7 @@ import '../../morse/presentation/morse_screen.dart';
 import '../../phrasebook/presentation/phrasebook_screen.dart';
 import '../../translator/presentation/translator_screen.dart';
 import 'distress_signal_screen.dart';
+import 'broadcast_radio_screen.dart';
 import 'radio_emergency_screen.dart';
 import '../../knowledge/application/knowledge_providers.dart';
 import '../../maps/application/offline_map_providers.dart';
@@ -248,6 +249,14 @@ class EmergencyScreen extends ConsumerWidget {
                 title: l10n.translatorTitle,
                 subtitle: l10n.translatorEntryHint,
                 open: () => const TranslatorScreen(),
+              ),
+              // Listening comes before sending: the broadcast radio is
+              // what most households have, and what tells them (#267).
+              _Entry(
+                icon: Icons.radio,
+                title: l10n.broadcastRadioTitle,
+                subtitle: l10n.broadcastRadioEntryHint,
+                open: () => const BroadcastRadioScreen(),
               ),
               _Entry(
                 icon: Icons.settings_input_antenna_outlined,

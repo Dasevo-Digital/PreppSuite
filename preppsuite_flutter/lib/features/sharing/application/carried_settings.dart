@@ -151,6 +151,11 @@ const carriedSettings = <String, CarriedSetting>{
   // in one place, and the answer was asked for with a network.
   'heavyRainHazard.v1': (kind: CarriedKind.text, when: _always),
 
+  // The radio frequencies where the household lives (#267): typed in on
+  // one device while there was a network, needed on whichever is to hand
+  // when there is none. One JSON string, programme to MHz.
+  'radioFrequencies': (kind: CarriedKind.text, when: _always),
+
   // How far ahead the household wants to be warned.
   'expiryLeadDays': (kind: CarriedKind.text, when: _always),
   'chargeReminderDays': (kind: CarriedKind.integer, when: _always),

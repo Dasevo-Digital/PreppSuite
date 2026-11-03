@@ -16890,6 +16890,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The file exceeds the supported size or processing limits. Please use a smaller file.'**
   String get errorInputLimit;
+
+  /// No description provided for @broadcastRadioTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Radio without internet'**
+  String get broadcastRadioTitle;
+
+  /// No description provided for @broadcastRadioEntryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Which stations inform here, and your FM frequencies'**
+  String get broadcastRadioEntryHint;
+
+  /// No description provided for @broadcastRadioIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'When the internet and mobile network fail, the radio remains. Official warnings also go to the broadcasters through the federal Modular Warning System. A battery or crank radio receives them without a network.'**
+  String get broadcastRadioIntro;
+
+  /// No description provided for @broadcastRadioState.
+  ///
+  /// In en, this message translates to:
+  /// **'State'**
+  String get broadcastRadioState;
+
+  /// No description provided for @broadcastRadioChooseState.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a state'**
+  String get broadcastRadioChooseState;
+
+  /// No description provided for @broadcastRadioRoleState.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme for {state}'**
+  String broadcastRadioRoleState(String state);
+
+  /// No description provided for @broadcastRadioRoleNews.
+  ///
+  /// In en, this message translates to:
+  /// **'News and information'**
+  String get broadcastRadioRoleNews;
+
+  /// No description provided for @broadcastRadioRoleNational.
+  ///
+  /// In en, this message translates to:
+  /// **'Nationwide'**
+  String get broadcastRadioRoleNational;
+
+  /// No description provided for @broadcastRadioUkwAndDab.
+  ///
+  /// In en, this message translates to:
+  /// **'FM and DAB+'**
+  String get broadcastRadioUkwAndDab;
+
+  /// No description provided for @broadcastRadioDabUkwOnlyIn.
+  ///
+  /// In en, this message translates to:
+  /// **'DAB+, on FM only in {place}'**
+  String broadcastRadioDabUkwOnlyIn(String place);
+
+  /// No description provided for @broadcastRadioFrequencyHere.
+  ///
+  /// In en, this message translates to:
+  /// **'Here: {mhz} MHz'**
+  String broadcastRadioFrequencyHere(String mhz);
+
+  /// No description provided for @broadcastRadioFrequencyAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add frequency'**
+  String get broadcastRadioFrequencyAdd;
+
+  /// No description provided for @broadcastRadioFrequencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'FM frequency of {name}'**
+  String broadcastRadioFrequencyTitle(String name);
+
+  /// No description provided for @broadcastRadioFrequencyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The frequency where you live, for example 95.6. Leave empty to remove it.'**
+  String get broadcastRadioFrequencyHint;
+
+  /// No description provided for @broadcastRadioFrequencyInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'An FM frequency lies between 87.5 and 108 MHz, in steps of 0.05.'**
+  String get broadcastRadioFrequencyInvalid;
+
+  /// No description provided for @broadcastRadioTuneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How to find the station'**
+  String get broadcastRadioTuneTitle;
+
+  /// No description provided for @broadcastRadioTuneUkw.
+  ///
+  /// In en, this message translates to:
+  /// **'FM: start a station scan. Most radios show the programme\'s name (RDS).'**
+  String get broadcastRadioTuneUkw;
+
+  /// No description provided for @broadcastRadioTuneDab.
+  ///
+  /// In en, this message translates to:
+  /// **'DAB+: start a scan and choose the programme from the list.'**
+  String get broadcastRadioTuneDab;
+
+  /// No description provided for @broadcastRadioTuneNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the frequency for where you live now, while the network works. The broadcasters list it on their sites under reception, or you read it off the radio. Frequencies added here count for the whole household.'**
+  String get broadcastRadioTuneNow;
+
+  /// No description provided for @broadcastRadioLookUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequencies on {host}'**
+  String broadcastRadioLookUp(String host);
+
+  /// No description provided for @broadcastRadioSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme names and distribution as in the official publication of the radio programmes of the ARD state broadcasters and Deutschlandradio (§ 29 (4) Medienstaatsvertrag), as of 1 February 2022. This page names no frequencies itself: every programme has many transmitters, and a wrong one would be a radio searching for nothing.'**
+  String get broadcastRadioSource;
 }
 
 class _AppLocalizationsDelegate

@@ -10251,4 +10251,85 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorInputLimit =>
       'The file exceeds the supported size or processing limits. Please use a smaller file.';
+
+  @override
+  String get broadcastRadioTitle => 'Radio without internet';
+
+  @override
+  String get broadcastRadioEntryHint =>
+      'Which stations inform here, and your FM frequencies';
+
+  @override
+  String get broadcastRadioIntro =>
+      'When the internet and mobile network fail, the radio remains. Official warnings also go to the broadcasters through the federal Modular Warning System. A battery or crank radio receives them without a network.';
+
+  @override
+  String get broadcastRadioState => 'State';
+
+  @override
+  String get broadcastRadioChooseState => 'Choose a state';
+
+  @override
+  String broadcastRadioRoleState(String state) {
+    return 'Programme for $state';
+  }
+
+  @override
+  String get broadcastRadioRoleNews => 'News and information';
+
+  @override
+  String get broadcastRadioRoleNational => 'Nationwide';
+
+  @override
+  String get broadcastRadioUkwAndDab => 'FM and DAB+';
+
+  @override
+  String broadcastRadioDabUkwOnlyIn(String place) {
+    return 'DAB+, on FM only in $place';
+  }
+
+  @override
+  String broadcastRadioFrequencyHere(String mhz) {
+    return 'Here: $mhz MHz';
+  }
+
+  @override
+  String get broadcastRadioFrequencyAdd => 'Add frequency';
+
+  @override
+  String broadcastRadioFrequencyTitle(String name) {
+    return 'FM frequency of $name';
+  }
+
+  @override
+  String get broadcastRadioFrequencyHint =>
+      'The frequency where you live, for example 95.6. Leave empty to remove it.';
+
+  @override
+  String get broadcastRadioFrequencyInvalid =>
+      'An FM frequency lies between 87.5 and 108 MHz, in steps of 0.05.';
+
+  @override
+  String get broadcastRadioTuneTitle => 'How to find the station';
+
+  @override
+  String get broadcastRadioTuneUkw =>
+      'FM: start a station scan. Most radios show the programme\'s name (RDS).';
+
+  @override
+  String get broadcastRadioTuneDab =>
+      'DAB+: start a scan and choose the programme from the list.';
+
+  @override
+  String get broadcastRadioTuneNow =>
+      'Add the frequency for where you live now, while the network works. The broadcasters list it on their sites under reception, or you read it off the radio. Frequencies added here count for the whole household.';
+
+  @override
+  String broadcastRadioLookUp(String host) {
+    return 'Frequencies on $host';
+  }
+
+  @override
+  String get broadcastRadioSource =>
+      'Programme names and distribution as in the official publication of the radio programmes of the ARD state broadcasters and Deutschlandradio (§ 29 (4) Medienstaatsvertrag), as of 1 February 2022. This page names no frequencies itself: every programme has many transmitters, and a wrong one would be a radio searching for nothing.';
 }

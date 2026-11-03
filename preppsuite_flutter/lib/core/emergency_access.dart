@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../features/first_aid/presentation/compression_pacer_screen.dart';
 import '../features/first_aid/presentation/first_aid_screen.dart';
 import '../features/home/presentation/distress_signal_screen.dart';
+import '../features/home/presentation/broadcast_radio_screen.dart';
 import '../features/home/presentation/radio_emergency_screen.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'phone_call.dart';
@@ -75,6 +76,12 @@ class EmergencyAccessScreen extends StatelessWidget {
                   title: Text(l10n.distressTitle),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => open(const DistressSignalScreen()),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.radio),
+                  title: Text(l10n.broadcastRadioTitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => open(const BroadcastRadioScreen()),
                 ),
                 ListTile(
                   leading: const Icon(Icons.radio_outlined),

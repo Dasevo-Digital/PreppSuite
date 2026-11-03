@@ -33,6 +33,7 @@ import 'package:preppsuite_flutter/features/warnings/application/pegel_store.dar
 import 'package:preppsuite_flutter/features/warnings/application/radiation_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/radiation_store.dart';
 import 'package:preppsuite_flutter/features/warnings/application/road_closure_store.dart';
+import 'package:preppsuite_flutter/features/home/application/broadcast_radio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Every carried setting, written the way the app writes it (#236).
@@ -108,6 +109,7 @@ void main() {
         covered: true,
       ),
     );
+    await const BroadcastFrequencyStore().set('ndr1-niedersachsen', 95.6);
     await container.read(expiryLeadDaysProvider.notifier).setLeadDays(const [
       30,
       1,

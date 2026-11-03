@@ -10336,4 +10336,85 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get errorInputLimit =>
       'El archivo supera los límites de tamaño o procesamiento admitidos. Utiliza un archivo más pequeño.';
+
+  @override
+  String get broadcastRadioTitle => 'Radio sin internet';
+
+  @override
+  String get broadcastRadioEntryHint =>
+      'Qué emisoras informan aquí y vuestras frecuencias de FM';
+
+  @override
+  String get broadcastRadioIntro =>
+      'Si fallan internet y la red móvil, queda la radio. Los avisos oficiales también llegan a las emisoras a través del sistema modular de avisos del Gobierno federal. Una radio de pilas o de manivela los recibe sin red.';
+
+  @override
+  String get broadcastRadioState => 'Estado federado';
+
+  @override
+  String get broadcastRadioChooseState => 'Elegir estado federado';
+
+  @override
+  String broadcastRadioRoleState(String state) {
+    return 'Programa para $state';
+  }
+
+  @override
+  String get broadcastRadioRoleNews => 'Noticias e información';
+
+  @override
+  String get broadcastRadioRoleNational => 'En toda Alemania';
+
+  @override
+  String get broadcastRadioUkwAndDab => 'FM y DAB+';
+
+  @override
+  String broadcastRadioDabUkwOnlyIn(String place) {
+    return 'DAB+, en FM solo en $place';
+  }
+
+  @override
+  String broadcastRadioFrequencyHere(String mhz) {
+    return 'Aquí: $mhz MHz';
+  }
+
+  @override
+  String get broadcastRadioFrequencyAdd => 'Añadir frecuencia';
+
+  @override
+  String broadcastRadioFrequencyTitle(String name) {
+    return 'Frecuencia de FM de $name';
+  }
+
+  @override
+  String get broadcastRadioFrequencyHint =>
+      'La frecuencia donde vivís, por ejemplo 95,6. Dejarlo vacío la elimina.';
+
+  @override
+  String get broadcastRadioFrequencyInvalid =>
+      'Una frecuencia de FM está entre 87,5 y 108 MHz, en pasos de 0,05.';
+
+  @override
+  String get broadcastRadioTuneTitle => 'Cómo encontrar la emisora';
+
+  @override
+  String get broadcastRadioTuneUkw =>
+      'FM: iniciar la búsqueda de emisoras. La mayoría de las radios muestran el nombre del programa (RDS).';
+
+  @override
+  String get broadcastRadioTuneDab =>
+      'DAB+: iniciar la búsqueda y elegir el programa de la lista.';
+
+  @override
+  String get broadcastRadioTuneNow =>
+      'Añadid ahora la frecuencia de vuestro lugar, mientras funcione la red. Las emisoras la indican en sus páginas, en el apartado de recepción, o la leéis en la radio. Las frecuencias añadidas valen para todo el hogar.';
+
+  @override
+  String broadcastRadioLookUp(String host) {
+    return 'Frecuencias en $host';
+  }
+
+  @override
+  String get broadcastRadioSource =>
+      'Nombres de los programas y difusión según la publicación oficial de los programas de radio de las emisoras regionales de la ARD y de Deutschlandradio (§ 29, apdo. 4, del Medienstaatsvertrag), a 1 de febrero de 2022. Esta página no indica frecuencias: cada programa tiene muchos emisores, y un dato erróneo sería una radio que busca en vano.';
 }
