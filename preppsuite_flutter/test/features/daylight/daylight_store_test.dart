@@ -56,4 +56,18 @@ void main() {
     expect(parseCoordinates('52, 10', name: '   ')?.name, isNull);
     expect(parseCoordinates('52, 10', name: 'Zuhause')?.name, 'Zuhause');
   });
+
+  test('numbers that are no place are refused (#260)', () {
+    // `double.tryParse` reads all of these, and NaN slipped past the
+    // range check because it compares false either way.
+    for (final input in [
+      'NaN, 10',
+      '52, NaN',
+      'Infinity, 10',
+      '52, -Infinity',
+      '1e400, 10',
+    ]) {
+      expect(parseCoordinates(input), isNull, reason: input);
+    }
+  });
 }

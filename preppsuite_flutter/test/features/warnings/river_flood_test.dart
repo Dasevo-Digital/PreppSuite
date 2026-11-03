@@ -322,7 +322,15 @@ void main() {
         11,
         13,
       ]);
-      expect(parseNationalCodes('kein json', 'gridcode'), isEmpty);
+      expect(parseNationalCodes('kein json', 'gridcode'), isNull);
+      // Dry land is an empty list of polygons, nothing else.
+      expect(
+        parseNationalCodes(codes('gridcode', <Object>[]), 'gridcode'),
+        isEmpty,
+      );
+      // Polygons without the field are an answer that cannot be read:
+      // taken as "no codes", it was dry land (#261).
+      expect(parseNationalCodes(codes('T_Class', [15]), 'LEGENDE'), isNull);
     });
 
     test('layers are read with field and extent', () {
@@ -376,7 +384,7 @@ void main() {
           if (path.endsWith('/layers')) {
             // The frequent flood has no Hesse layer, like the Saarland.
             return http.Response(
-              layers(withHesse: !path.contains('/RWHi/')),
+              layers(withHesse: !path.contains('/Wassertiefen_live_RWH/')),
               200,
             );
           }
@@ -446,7 +454,7 @@ void main() {
             final path = request.url.path;
             if (path.endsWith('/layers')) {
               return http.Response(
-                saar(withSaarland: !path.contains('/RWHi/')),
+                saar(withSaarland: !path.contains('/Wassertiefen_live_RWH/')),
                 200,
               );
             }
@@ -492,6 +500,122 @@ void main() {
       // A Land without a named layer takes the unnamed one at the point.
       expect(ownNationalLayers(layers, 'SN', px, py).map((l) => l.id), [2]);
       expect(ownNationalLayers(layers, 'SN', px + 100, py), isEmpty);
+    });
+
+    test('the class field is the one the polygons carry (#261)', () {
+      List<Map<String, String>> fields(List<String> names) => [
+        for (final name in names) {'name': name},
+      ];
+      // As the renderer says, where the layer lists it.
+      expect(
+        nationalClassField('gridcode', fields(['OBJECTID', 'gridcode', 'Id'])),
+        'gridcode',
+      );
+      // Saxony in the hundred-year service of 2026-11: drawn by LEGENDE,
+      // carrying T_Class alone.
+      expect(
+        nationalClassField(
+          'LEGENDE',
+          fields([
+            'OBJECTID',
+            'SHAPE',
+            'SHAPE_Length',
+            'SHAPE_Area',
+            'T_Class',
+          ]),
+        ),
+        'T_Class',
+      );
+      // Several fields of its own and none of them T_Class: no field.
+      expect(
+        nationalClassField('legende', fields(['FID', 'Shape', 'val', 'art'])),
+        isNull,
+      );
+      // No list to check against: the renderer's word.
+      expect(nationalClassField('gridcode', null), 'gridcode');
+    });
+
+    test('a layer drawn by a field it does not carry is still read', () async {
+      // Dresden in the hundred-year service: the polygons answer T_Class.
+      final client = RiverFloodClient(
+        httpClient: MockClient((request) async {
+          if (request.url.path.endsWith('/layers')) {
+            return http.Response(
+              jsonEncode({
+                'layers': [
+                  {
+                    'id': 0,
+                    'name': 'Wassertiefen',
+                    'capabilities': 'Map,Query,Data',
+                    'extent': {
+                      'xmin': sx - 1000,
+                      'ymin': sy - 1000,
+                      'xmax': sx + 1000,
+                      'ymax': sy + 1000,
+                    },
+                    'drawingInfo': {
+                      'renderer': {'field1': 'LEGENDE'},
+                    },
+                    'fields': [
+                      {'name': 'OBJECTID'},
+                      {'name': 'T_Class'},
+                    ],
+                  },
+                ],
+              }),
+              200,
+            );
+          }
+          return http.Response(codes('T_Class', [15]), 200);
+        }),
+      );
+      final result = await client.check(51.0560, 13.7390, stateCode: 'SN');
+      expect(result.classes[RiverFloodScenario.hundred], 5);
+    });
+
+    test('a service only drawn gives way to the next one (#261)', () async {
+      final asked = <String>[];
+      final client = RiverFloodClient(
+        httpClient: MockClient((request) async {
+          final path = request.url.path;
+          asked.add(path);
+          if (path.endsWith('/layers')) {
+            if (path.contains('/nHWGK_HWRK_2027/')) {
+              return http.Response(
+                jsonEncode({
+                  'error': {'code': 500, 'message': 'Service not started'},
+                }),
+                200,
+              );
+            }
+            // The first of each pair can only be drawn; for the extreme
+            // flood neither can, as on 2026-11-03.
+            final drawnOnly =
+                path.contains('/Wassertiefen_live_RWH/') ||
+                path.contains('_L_live/') ||
+                path.contains('_live_RWL/');
+            final listed = jsonDecode(layers()) as Map<String, Object?>;
+            for (final layer in listed['layers']! as List) {
+              (layer as Map)['capabilities'] = drawnOnly
+                  ? 'Map'
+                  : 'Map,Query,Data';
+            }
+            return http.Response(jsonEncode(listed), 200);
+          }
+          return http.Response(codes('gridcode', [13]), 200);
+        }),
+      );
+      final result = await client.check(50.1065, 8.6820, stateCode: 'HE');
+      expect(result.classes, {
+        RiverFloodScenario.frequent: 3,
+        RiverFloodScenario.hundred: 3,
+      });
+      // The frequent flood was asked in the second service of its pair.
+      expect(
+        asked.where((p) => p.contains('/Wassertiefen_RW_H_live/MapServer/37/')),
+        hasLength(1),
+      );
+      expect(asked.where((p) => p.contains('RWH/MapServer/37/')), isEmpty);
     });
 
     test(

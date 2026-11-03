@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/core/calendar_day.dart';
 import 'package:preppsuite_flutter/features/checklists/application/checklist_providers.dart';
 import 'package:preppsuite_flutter/features/home/application/shell_layout.dart';
 import 'package:preppsuite_flutter/features/home/presentation/overview_screen.dart';
@@ -17,6 +18,15 @@ import 'accessibility.dart';
 /// The counting is settled in `test/features/home/home_overview_test.dart`.
 /// What is left here is whether the cards show it, and whether tapping one
 /// leads where it says it does.
+/// The calendar day as it is, held still.
+class _Today extends CalendarDay {
+  @override
+  DateTime build() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+}
+
 void main() {
   const householdId = 'household-1';
   final now = DateTime.now();
@@ -332,6 +342,9 @@ void main() {
       });
       final container = ProviderContainer(
         overrides: [
+          // Today without the midnight timer: this container outlives the
+          // widget tree, and a timer still pending then fails the test.
+          calendarDayProvider.overrideWith(_Today.new),
           inventoryItemsProvider(
             householdId,
           ).overrideWith((ref) => Stream.value([item()])),

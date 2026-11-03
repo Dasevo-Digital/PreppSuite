@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -90,5 +91,46 @@ void main() {
 
     expect(find.text('Appearance and language'), findsOneWidget);
     expect(find.text('Darstellung und Sprache'), findsNothing);
+  });
+
+  group('extreme warnings through "Do not disturb" (#264)', () {
+    Future<void> openWarnings(WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({'notificationsEnabled': true});
+      await show(tester);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Warnungen und Orte'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('offered on Android, with a word when it cannot open', (
+      tester,
+    ) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      try {
+        await openWarnings(tester);
+        final l10n = AppLocalizations.of(
+          tester.element(find.text('Warnungen und Orte').last),
+        )!;
+        final tile = find.text(l10n.settingsExtremeWarningsTitle);
+        expect(tile, findsOneWidget);
+
+        // No system settings in a test: the app says where to find them.
+        await tester.tap(tile);
+        await tester.pumpAndSettle();
+        expect(find.text(l10n.settingsExtremeWarningsFailed), findsOneWidget);
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+    });
+
+    testWidgets('not offered where there are no channels', (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      try {
+        await openWarnings(tester);
+        expect(find.byIcon(Icons.do_not_disturb_off_outlined), findsNothing);
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+    });
   });
 }

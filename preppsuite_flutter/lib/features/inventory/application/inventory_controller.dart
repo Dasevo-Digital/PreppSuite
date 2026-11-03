@@ -285,6 +285,85 @@ class InventoryController {
     );
   }
 
+  /// Books what was bought into stock (#265): [bought] maps an item's
+  /// client id to the amount, in the item's own unit.
+  ///
+  /// Added to the row as it is stored, not as the shopping list showed
+  /// it: the list may be minutes old, and another device may have booked
+  /// some of it down since. Buying is counting as well, so the count's
+  /// date moves on, which is what a pack in daily use runs out from. All
+  /// in one transaction: the lists recount once, and a booking cut short
+  /// books nothing. Returns what was booked, for [takeBackPurchases].
+  Future<Map<String, double>> bookPurchases(Map<String, double> bought) async {
+    for (final amount in bought.values) {
+      if (!isNonNegativeFinite(amount) || amount <= 0) {
+        throw const InvalidInventoryNumbers();
+      }
+    }
+    final booked = <String, double>{};
+    final now = DateTime.now().toUtc();
+    await _db.transaction(() async {
+      for (final MapEntry(key: clientId, value: amount) in bought.entries) {
+        final row = await _stored(clientId);
+        if (row == null || row.deletedAt != null) continue;
+        if (hasInvalidInventoryNumbers(row)) {
+          throw const InvalidInventoryNumbers();
+        }
+        final quantity = row.quantity + amount;
+        requireInventoryNumbers(
+          quantity: quantity,
+          minQuantity: row.minQuantity,
+          dailyDose: row.dailyDose,
+          packageSize: row.packageSize,
+          nutrition: PackageNutrition.ofItem(row),
+        );
+        await _db.upsertInventoryItem(
+          row
+              .toCompanion(false)
+              .copyWith(
+                quantity: Value(quantity),
+                stockCountedAt: Value(now),
+                updatedAt: Value(now),
+                dirty: const Value(true),
+              ),
+        );
+        booked[clientId] = amount;
+      }
+    });
+    return booked;
+  }
+
+  /// Undoes [bookPurchases]: takes each amount off again, from the row as
+  /// stored now, and never below zero. A new version like any other
+  /// write, so the undoing reaches the other devices as well.
+  Future<void> takeBackPurchases(Map<String, double> booked) async {
+    final now = DateTime.now().toUtc();
+    await _db.transaction(() async {
+      for (final MapEntry(key: clientId, value: amount) in booked.entries) {
+        final row = await _stored(clientId);
+        if (row == null || row.deletedAt != null) continue;
+        await _db.upsertInventoryItem(
+          row
+              .toCompanion(false)
+              .copyWith(
+                quantity: Value(
+                  (row.quantity - amount).clamp(0.0, row.quantity),
+                ),
+                updatedAt: Value(now),
+                dirty: const Value(true),
+              ),
+        );
+      }
+    });
+  }
+
+  Future<InventoryItem?> _stored(String clientId) =>
+      (_db.select(_db.inventoryItems)..where(
+            (t) =>
+                t.clientId.equals(clientId) & t.householdId.equals(householdId),
+          ))
+          .getSingleOrNull();
+
   /// Turns food counted in packages -- "6 Dosen" -- into a measure, once
   /// the household has said what one holds (#109).
   ///

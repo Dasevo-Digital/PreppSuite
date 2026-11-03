@@ -49,55 +49,63 @@ class ChecklistController {
     String languageCode = 'de',
   }) async {
     final newTemplateClientId = const Uuid().v4();
-    await _db.upsertChecklistTemplate(
-      ChecklistTemplatesCompanion.insert(
-        clientId: newTemplateClientId,
-        householdId: Value(householdId),
-        title: source.titleIn(languageCode),
-        category: source.category,
-        kind: Value(source.kind),
-        updatedAt: DateTime.now().toUtc(),
-        dirty: const Value(true),
-      ),
-    );
-
     final items = await _db.watchChecklistItems(source.clientId).first;
-    for (final item in items) {
-      await _db.upsertChecklistItem(
-        ChecklistItemsCompanion.insert(
-          clientId: const Uuid().v4(),
+    // One transaction for the list and every line of it (#259): one
+    // commit, so the watched lists and counts run once rather than once a
+    // line, and an app closed half-way leaves no half copy behind.
+    await _db.transaction(() async {
+      await _db.upsertChecklistTemplate(
+        ChecklistTemplatesCompanion.insert(
+          clientId: newTemplateClientId,
           householdId: Value(householdId),
-          templateClientId: newTemplateClientId,
-          title: item.titleIn(languageCode),
-          targetQuantity: Value(item.targetQuantity),
-          sortOrder: Value(item.sortOrder),
+          title: source.titleIn(languageCode),
+          category: source.category,
+          kind: Value(source.kind),
           updatedAt: DateTime.now().toUtc(),
           dirty: const Value(true),
         ),
       );
-    }
+      for (final item in items) {
+        await _db.upsertChecklistItem(
+          ChecklistItemsCompanion.insert(
+            clientId: const Uuid().v4(),
+            householdId: Value(householdId),
+            templateClientId: newTemplateClientId,
+            title: item.titleIn(languageCode),
+            targetQuantity: Value(item.targetQuantity),
+            sortOrder: Value(item.sortOrder),
+            updatedAt: DateTime.now().toUtc(),
+            dirty: const Value(true),
+          ),
+        );
+      }
+    });
   }
 
   Future<void> deleteTemplate(ChecklistTemplate template) async {
     final now = DateTime.now().toUtc();
-    await _db.upsertChecklistTemplate(
-      ChecklistTemplatesCompanion.insert(
-        clientId: template.clientId,
-        householdId: Value(template.householdId),
-        title: template.title,
-        category: template.category,
-        kind: Value(template.kind),
-        isBuiltIn: Value(template.isBuiltIn),
-        updatedAt: now,
-        dirty: const Value(true),
-        deletedAt: Value(now),
-      ),
-    );
-
     final items = await _db.watchChecklistItems(template.clientId).first;
-    for (final item in items) {
-      await _deleteItem(item, now);
-    }
+    // Together, for the same reasons as [duplicateTemplate]: a deleted
+    // list whose lines were still standing went on counting them in the
+    // overall progress, which reads lines without looking at their list.
+    await _db.transaction(() async {
+      await _db.upsertChecklistTemplate(
+        ChecklistTemplatesCompanion.insert(
+          clientId: template.clientId,
+          householdId: Value(template.householdId),
+          title: template.title,
+          category: template.category,
+          kind: Value(template.kind),
+          isBuiltIn: Value(template.isBuiltIn),
+          updatedAt: now,
+          dirty: const Value(true),
+          deletedAt: Value(now),
+        ),
+      );
+      for (final item in items) {
+        await _deleteItem(item, now);
+      }
+    });
   }
 
   Future<void> addItem({

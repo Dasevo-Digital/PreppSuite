@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/calendar_day.dart';
 import '../../../core/adaptive_columns.dart';
 import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -26,6 +27,8 @@ class MedicationRangeScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final items = ref.watch(inventoryItemsProvider(householdId));
+    // Counted from today, so built again when the day changes (#262).
+    final today = ref.watch(calendarDayProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.medicationTitle)),
@@ -34,7 +37,7 @@ class MedicationRangeScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text(describeError(l10n, error))),
           data: (rows) {
-            final ranges = medicationRanges(rows);
+            final ranges = medicationRanges(rows, now: today);
             final unanswered = medicationsWithoutDose(rows);
             final shortest = firstToRunOut(ranges);
             final decimal = NumberFormat.decimalPattern(l10n.localeName);
@@ -84,7 +87,7 @@ class MedicationRangeScreen extends ConsumerWidget {
                               Text(
                                 l10n.medicationRunsOut(
                                   date.format(
-                                    shortest.runsOutOn(DateTime.now()),
+                                    shortest.runsOutOn(today),
                                   ),
                                 ),
                               ),

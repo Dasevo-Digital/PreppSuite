@@ -2662,6 +2662,24 @@ abstract class AppLocalizations {
   /// **'Local notifications only, while the app is running — no push server.'**
   String get settingsNotificationsToggleHint;
 
+  /// No description provided for @settingsExtremeWarningsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme warnings through Do Not Disturb'**
+  String get settingsExtremeWarningsTitle;
+
+  /// No description provided for @settingsExtremeWarningsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Android sets this per channel, and only you can allow it. Opens the channel “Extreme Warnungen”; switch on “Override Do Not Disturb” there. Other warnings stay quiet.'**
+  String get settingsExtremeWarningsHint;
+
+  /// No description provided for @settingsExtremeWarningsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The setting could not be opened. It is under Settings → Apps → PreppSuite → Notifications → Extreme Warnungen.'**
+  String get settingsExtremeWarningsFailed;
+
   /// No description provided for @settingsUseLocationButton.
   ///
   /// In en, this message translates to:
@@ -14682,6 +14700,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Shopping list saved as a file.'**
   String get shoppingListExported;
+
+  /// No description provided for @shoppingListBought.
+  ///
+  /// In en, this message translates to:
+  /// **'Bought'**
+  String get shoppingListBought;
+
+  /// No description provided for @shoppingListBookTicked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Add 1 item as bought} other{Add {count} items as bought}}'**
+  String shoppingListBookTicked(int count);
+
+  /// No description provided for @shoppingListBookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to the stock'**
+  String get shoppingListBookTitle;
+
+  /// No description provided for @shoppingListBookHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested is what was missing to the minimum. Enter what you actually bought.'**
+  String get shoppingListBookHint;
+
+  /// No description provided for @shoppingListBookConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get shoppingListBookConfirm;
+
+  /// No description provided for @shoppingListBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item restocked.} other{{count} items restocked.}}'**
+  String shoppingListBooked(int count);
 
   /// No description provided for @refillReminderTitle.
   ///

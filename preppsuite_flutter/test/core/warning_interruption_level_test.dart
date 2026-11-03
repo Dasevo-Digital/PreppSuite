@@ -26,4 +26,25 @@ void main() {
       InterruptionLevel.active,
     );
   });
+
+  group('Android: extreme warnings have a channel of their own (#264)', () {
+    test('extreme', () {
+      final details = warningAndroidDetails(WarningSeverity.extreme);
+      expect(details.channelId, extremeWarningChannel.id);
+      expect(details.importance, Importance.max);
+      expect(details.visibility, NotificationVisibility.public);
+    });
+
+    test('everything else keeps the ordinary one', () {
+      for (final severity in [
+        WarningSeverity.severe,
+        WarningSeverity.moderate,
+        WarningSeverity.minor,
+      ]) {
+        final details = warningAndroidDetails(severity);
+        expect(details.channelId, 'warnings', reason: severity.name);
+        expect(details.channelId, isNot(extremeWarningChannel.id));
+      }
+    });
+  });
 }

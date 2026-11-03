@@ -329,8 +329,11 @@ class _EmergencyCardFormScreenState
       _nameError = name.isEmpty ? l10n.emergencyCardNameRequired : null;
       // A year that will not parse is refused rather than dropped: saving
       // a card while silently discarding what someone typed is worse than
-      // asking again.
-      _yearError = (yearText.isNotEmpty && (year == null || year < 1900))
+      // asking again. Nor can it lie ahead: 3000 was stored and shown on
+      // the card for the paramedic (#260).
+      _yearError =
+          (yearText.isNotEmpty &&
+              (year == null || year < 1900 || year > DateTime.now().year))
           ? l10n.emergencyCardBirthYearInvalid
           : null;
     });

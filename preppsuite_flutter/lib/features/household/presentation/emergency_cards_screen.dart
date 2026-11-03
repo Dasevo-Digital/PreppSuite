@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/calendar_day.dart';
 import '../../../core/feel.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -165,6 +166,8 @@ class _MemberCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final items =
         ref.watch(inventoryItemsProvider(householdId)).value ?? const [];
+    // Counted from today, so built again when the day changes (#262).
+    final today = ref.watch(calendarDayProvider);
 
     return Card(
       margin: EdgeInsets.zero,
@@ -225,7 +228,7 @@ class _MemberCard extends ConsumerWidget {
               ],
             ),
           ),
-          for (final line in _lines(_stored(items)))
+          for (final line in _lines(_stored(items, today)))
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Row(
@@ -264,7 +267,7 @@ class _MemberCard extends ConsumerWidget {
   ///
   /// Beside the typed "Dauermedikation", not instead of it: the card says
   /// what is taken, this says whether there is enough of it in the house.
-  String? _stored(List<InventoryItem> items) {
+  String? _stored(List<InventoryItem> items, DateTime today) {
     final mine = [
       for (final item in items)
         if (item.memberId == member.clientId &&
@@ -277,7 +280,8 @@ class _MemberCard extends ConsumerWidget {
     ];
     if (mine.isEmpty) return null;
     final ranges = {
-      for (final range in medicationRanges(mine)) range.item.clientId: range,
+      for (final range in medicationRanges(mine, now: today))
+        range.item.clientId: range,
     };
     String days(int count) => switch (count) {
       0 => l10n.medicationZeroDays,

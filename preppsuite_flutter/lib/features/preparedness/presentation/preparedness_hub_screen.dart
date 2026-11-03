@@ -1,4 +1,4 @@
-import 'dart:async' show unawaited;
+import 'dart:async' show Timer, unawaited;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,7 +7,9 @@ import 'package:intl/intl.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../../core/calendar_day.dart';
 import '../../../core/crisis_mode_provider.dart';
+import '../../../core/settings_arrival.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../energy/application/energy_store.dart';
 import '../../energy/application/outage_store.dart';
@@ -40,7 +42,8 @@ class PreparednessHubScreen extends ConsumerStatefulWidget {
       _PreparednessHubScreenState();
 }
 
-class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
+class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
+    with RereadOnSettingsArrival {
   static const _store = PreparednessHubStore();
 
   AppLocalizations get _l10n => AppLocalizations.of(context)!;
@@ -53,10 +56,21 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
   OutageClock? _outage;
   var _loading = true;
 
+  /// Moves the hours of a running blackout on, which nothing else here
+  /// would: the card said "two hours" for as long as it stayed open, and
+  /// the fridge's four are counted against it (#262).
+  Timer? _outageTick;
+
   @override
   void initState() {
     super.initState();
     unawaited(_load());
+  }
+
+  @override
+  void dispose() {
+    _outageTick?.cancel();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -70,7 +84,34 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
         _outage = outage;
         _loading = false;
       });
+      _followOutage();
     }
+  }
+
+  /// The energy plan and the blackout clock are another device's to
+  /// change as well, and arrive while this screen is open (#262). Only
+  /// those two: the rest is this device's own and written here.
+  @override
+  void settingsArrived() => unawaited(_reloadShared());
+
+  Future<void> _reloadShared() async {
+    final energy = await _energyStore.load();
+    final outage = await _outageStore.load();
+    if (!mounted) return;
+    setState(() {
+      _energy = energy;
+      _outage = outage;
+    });
+    _followOutage();
+  }
+
+  void _followOutage() {
+    _outageTick?.cancel();
+    _outageTick = _outage == null
+        ? null
+        : Timer.periodic(const Duration(minutes: 1), (_) {
+            if (mounted) setState(() {});
+          });
   }
 
   /// What is actually going on, as far as the records say.
@@ -114,6 +155,8 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Medicines in daily use count down by the day (#262).
+    ref.watch(calendarDayProvider);
     final reaches = _reaches();
     final situation = _situation();
     return Scaffold(

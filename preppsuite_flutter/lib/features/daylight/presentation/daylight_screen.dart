@@ -70,16 +70,11 @@ class _DaylightScreenState extends State<DaylightScreen> {
       );
       await widget.store.save(place);
       if (mounted) setState(() => _place = place);
-    } on LocationUnavailableException catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
-          SnackBar(
-            content: Text(describeError(AppLocalizations.of(context)!, error)),
-          ),
-        );
-      }
+    } on Object catch (error) {
+      // Not only a refused location: the place has to be stored, too, and
+      // a store that fails is a message as well, not a button that seems
+      // to do nothing (#260).
+      if (mounted) _tell(error);
     } finally {
       if (mounted) setState(() => _locating = false);
     }
@@ -152,8 +147,21 @@ class _DaylightScreenState extends State<DaylightScreen> {
     );
 
     if (place == null) return;
-    await widget.store.save(place);
+    try {
+      await widget.store.save(place);
+    } on Object catch (error) {
+      if (mounted) _tell(error);
+      return;
+    }
     if (mounted) setState(() => _place = place);
+  }
+
+  void _tell(Object error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(describeError(AppLocalizations.of(context)!, error)),
+      ),
+    );
   }
 
   @override

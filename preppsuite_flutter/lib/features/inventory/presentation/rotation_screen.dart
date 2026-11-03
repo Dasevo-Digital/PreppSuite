@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/calendar_day.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
@@ -27,6 +28,8 @@ class RotationScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final itemsAsync = ref.watch(inventoryItemsProvider(householdId));
+    // Counted from today, so built again when the day changes (#262).
+    final today = ref.watch(calendarDayProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.rotationTitle)),
@@ -35,7 +38,7 @@ class RotationScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text(describeError(l10n, error))),
           data: (items) {
-            final rotation = buildRotation(items);
+            final rotation = buildRotation(items, now: today);
             if (rotation.isEmpty) {
               return Center(
                 child: Padding(

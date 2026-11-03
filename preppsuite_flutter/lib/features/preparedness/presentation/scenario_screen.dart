@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/calendar_day.dart';
 import '../../../core/adaptive_columns.dart';
 import '../../../core/content_swap.dart';
 import '../../../core/error_text.dart';
@@ -57,6 +58,8 @@ class _ScenarioScreenState extends ConsumerState<ScenarioScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final itemsAsync = ref.watch(inventoryItemsProvider(widget.householdId));
+    // Counted from today, so built again when the day changes (#262).
+    ref.watch(calendarDayProvider);
     final profile = ref.watch(householdProfileProvider).value;
     final energy = _energy;
     final items = itemsAsync.value;

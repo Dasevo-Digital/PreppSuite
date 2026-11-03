@@ -100,6 +100,10 @@ DaylightPlace? parseCoordinates(String input, {String? name}) {
   final latitude = double.tryParse(parts[0].trim().replaceAll(',', '.'));
   final longitude = double.tryParse(parts[1].trim().replaceAll(',', '.'));
   if (latitude == null || longitude == null) return null;
+  // Finite first: `double.tryParse` also reads "NaN" and "Infinity", and
+  // NaN is neither below -90 nor above 90 -- it passed the range check,
+  // and [DaylightStore.save] then refused it (#260).
+  if (!latitude.isFinite || !longitude.isFinite) return null;
   if (latitude < -90 || latitude > 90) return null;
   if (longitude < -180 || longitude > 180) return null;
 

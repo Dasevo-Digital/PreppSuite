@@ -1,3 +1,4 @@
+import '../../../core/calendar_day.dart';
 import '../application/inventory_numbers.dart';
 
 import 'dart:convert';
@@ -82,6 +83,8 @@ class _InventoryListScreenState extends ConsumerState<InventoryListScreen> {
     final l10n = AppLocalizations.of(context)!;
     // debounced sync) for as long as this screen is on screen.
     final itemsAsync = ref.watch(inventoryItemsProvider(householdId));
+    // Counted from today, so built again when the day changes (#262).
+    ref.watch(calendarDayProvider);
 
     return Scaffold(
       appBar: AppBar(

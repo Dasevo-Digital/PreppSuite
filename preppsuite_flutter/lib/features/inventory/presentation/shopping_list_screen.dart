@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
+import '../../../core/number_input.dart';
 import '../../household/application/household_providers.dart';
+import '../application/inventory_controller.dart';
 import '../application/inventory_numbers.dart';
 import '../application/inventory_providers.dart';
 import '../application/shopping_list.dart';
@@ -38,6 +40,9 @@ class ShoppingListScreen extends ConsumerStatefulWidget {
 }
 
 class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
+  /// Lines ticked as bought, by item, until they are booked (#265).
+  final _ticked = <String>{};
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -90,6 +95,11 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
             // that measured 201 ms against 12 ms, with all 300 tiles in the
             // element tree instead of the nine on screen.
             final entries = list.entries;
+            // A line that has left the list -- booked, or filled up on
+            // another device -- is no longer ticked.
+            _ticked.retainWhere(
+              (id) => entries.any((entry) => entry.item.clientId == id),
+            );
             // The card, the heading, the entries (or the empty line), the
             // footnote.
             final rows = 3 + (entries.isEmpty ? 1 : entries.length);
@@ -102,12 +112,34 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
                 if (index == 1) return _ItemsHeading(l10n: l10n);
                 if (index == rows - 1) return _MinimumsNote(l10n: l10n);
                 if (entries.isEmpty) return _ItemsEmpty(l10n: l10n);
-                return _ShortfallTile(entry: entries[index - 2], l10n: l10n);
+                final entry = entries[index - 2];
+                return _ShortfallTile(
+                  entry: entry,
+                  l10n: l10n,
+                  ticked: _ticked.contains(entry.item.clientId),
+                  onTicked: (ticked) => setState(() {
+                    ticked
+                        ? _ticked.add(entry.item.clientId)
+                        : _ticked.remove(entry.item.clientId);
+                  }),
+                );
               },
             );
           },
         ),
       ),
+      bottomNavigationBar: shoppingList == null || _ticked.isEmpty
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                child: FilledButton.icon(
+                  onPressed: () => _book(shoppingList, l10n),
+                  icon: const Icon(Icons.add_shopping_cart),
+                  label: Text(l10n.shoppingListBookTicked(_ticked.length)),
+                ),
+              ),
+            ),
       floatingActionButton: shoppingList == null || shoppingList.isEmpty
           ? null
           : FloatingActionButton.extended(
@@ -116,6 +148,49 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
               label: Text(l10n.shoppingListCopy),
             ),
     );
+  }
+
+  /// What was bought, into the stock (#265).
+  ///
+  /// The list said what to buy; until now the stock only learned of the
+  /// shopping one item and one form at a time. Each ticked line is
+  /// offered at what it was short, which is what most people buy, and
+  /// can be changed to what they did. One booking for all of them, and a
+  /// way back for a slip.
+  Future<void> _book(ShoppingList list, AppLocalizations l10n) async {
+    final ticked = [
+      for (final entry in list.entries)
+        if (_ticked.contains(entry.item.clientId)) entry,
+    ];
+    final bought = await showDialog<Map<String, double>>(
+      context: context,
+      builder: (_) => _BookDialog(entries: ticked, l10n: l10n),
+    );
+    if (bought == null || bought.isEmpty || !mounted) return;
+    final controller = ref.read(
+      inventoryControllerProvider(widget.householdId),
+    );
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final booked = await controller.bookPurchases(bought);
+      if (!mounted) return;
+      setState(() => _ticked.removeAll(booked.keys));
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(l10n.shoppingListBooked(booked.length)),
+            action: SnackBarAction(
+              label: l10n.undoAction,
+              onPressed: () => controller.takeBackPurchases(booked),
+            ),
+          ),
+        );
+    } on Object catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(describeError(l10n, error))),
+      );
+    }
   }
 
   /// The lines as a file, for a shopping app to put on a list of its own
@@ -304,10 +379,19 @@ class _MinimumsNote extends StatelessWidget {
 
 /// One item that is short of its own minimum.
 class _ShortfallTile extends StatelessWidget {
-  const _ShortfallTile({required this.entry, required this.l10n});
+  const _ShortfallTile({
+    required this.entry,
+    required this.l10n,
+    required this.ticked,
+    required this.onTicked,
+  });
 
   final ShoppingListEntry entry;
   final AppLocalizations l10n;
+
+  /// Ticked as bought, waiting to be booked.
+  final bool ticked;
+  final ValueChanged<bool> onTicked;
 
   @override
   Widget build(BuildContext context) {
@@ -327,6 +411,11 @@ class _ShortfallTile extends StatelessWidget {
           _number(entry.item.minQuantity ?? 0),
         ),
       ),
+      trailing: Checkbox(
+        value: ticked,
+        semanticLabel: l10n.shoppingListBought,
+        onChanged: (value) => onTicked(value ?? false),
+      ),
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => InventoryItemFormScreen(
@@ -337,6 +426,116 @@ class _ShortfallTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The amounts that were bought, one field a ticked line, each offered
+/// at what that line was short.
+class _BookDialog extends StatefulWidget {
+  const _BookDialog({required this.entries, required this.l10n});
+
+  final List<ShoppingListEntry> entries;
+  final AppLocalizations l10n;
+
+  @override
+  State<_BookDialog> createState() => _BookDialogState();
+}
+
+class _BookDialogState extends State<_BookDialog> {
+  late final _fields = {
+    for (final entry in widget.entries)
+      entry.item.clientId: TextEditingController(
+        text: _fieldNumber(entry.shortfall, widget.l10n.localeName),
+      ),
+  };
+  final _wrong = <String>{};
+
+  @override
+  void dispose() {
+    for (final field in _fields.values) {
+      field.dispose();
+    }
+    super.dispose();
+  }
+
+  void _submit() {
+    final bought = <String, double>{};
+    final wrong = <String>{};
+    for (final MapEntry(key: id, value: field) in _fields.entries) {
+      final text = field.text.trim();
+      // Left empty or at nought: not bought after all, and not booked.
+      if (text.isEmpty) continue;
+      final amount = readNonNegativeNumber(text);
+      if (amount == null) {
+        wrong.add(id);
+      } else if (amount > 0) {
+        bought[id] = amount;
+      }
+    }
+    if (wrong.isNotEmpty) {
+      setState(
+        () => _wrong
+          ..clear()
+          ..addAll(wrong),
+      );
+      return;
+    }
+    Navigator.pop(context, bought);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    return AlertDialog(
+      title: Text(l10n.shoppingListBookTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.shoppingListBookHint),
+            for (final entry in widget.entries)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: TextField(
+                  controller: _fields[entry.item.clientId],
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: entry.item.name,
+                    suffixText: entry.item.unit,
+                    errorText: _wrong.contains(entry.item.clientId)
+                        ? l10n.invalidNumber
+                        : null,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancelButton),
+        ),
+        FilledButton(
+          onPressed: _submit,
+          child: Text(l10n.shoppingListBookConfirm),
+        ),
+      ],
+    );
+  }
+}
+
+/// An amount for a field to be typed over: no thousands separator, which
+/// a reader would take for a decimal point, and the decimal comma where
+/// the language writes one.
+String _fieldNumber(double value, String localeName) {
+  final rounded = (value * 1000).round() / 1000;
+  final text = rounded == rounded.roundToDouble()
+      ? rounded.toStringAsFixed(0)
+      : rounded.toString();
+  return localeName.startsWith('en') ? text : text.replaceAll('.', ',');
 }
 
 String _number(double value) => value == value.roundToDouble()

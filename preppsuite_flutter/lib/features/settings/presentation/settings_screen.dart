@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/locale_provider.dart';
 import '../../translator/presentation/translator_packs_card.dart';
 import '../../../core/notification_capabilities.dart';
+import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
 import '../../../core/theme_provider.dart';
 import '../../../core/crisis_mode_provider.dart';
@@ -359,12 +361,38 @@ class _NotificationsToggle extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final enabled = ref.watch(notificationsEnabledProvider);
 
-    return SwitchListTile(
-      title: Text(l10n.settingsNotificationsToggleLabel),
-      subtitle: Text(l10n.settingsNotificationsToggleHint),
-      value: enabled,
-      onChanged: (value) =>
-          ref.read(notificationsEnabledProvider.notifier).setEnabled(value),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SwitchListTile(
+          title: Text(l10n.settingsNotificationsToggleLabel),
+          subtitle: Text(l10n.settingsNotificationsToggleHint),
+          value: enabled,
+          onChanged: (value) =>
+              ref.read(notificationsEnabledProvider.notifier).setEnabled(value),
+        ),
+        // Only Android has channels, and only there can one be let
+        // through "Do not disturb" on its own (#264).
+        if (enabled &&
+            !kIsWeb &&
+            defaultTargetPlatform == TargetPlatform.android)
+          ListTile(
+            leading: const Icon(Icons.do_not_disturb_off_outlined),
+            title: Text(l10n.settingsExtremeWarningsTitle),
+            subtitle: Text(l10n.settingsExtremeWarningsHint),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final opened = await NotificationService.instance
+                  .openExtremeWarningSettings();
+              if (!opened) {
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l10n.settingsExtremeWarningsFailed)),
+                );
+              }
+            },
+          ),
+      ],
     );
   }
 }

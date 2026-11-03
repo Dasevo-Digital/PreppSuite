@@ -226,13 +226,35 @@ class RiverFloodClient {
   /// The BfG's national flood hazard map, third cycle: one ArcGIS map
   /// service per scenario for rivers (`RW`), and in each a polygon layer
   /// per Land -- found on 2026-10-09 at geoportal.bafg.de.
-  static const _national =
-      'https://geoportal.bafg.de/arcgis3/rest/services/nHWGK_HWRK_2027';
+  static const _national = 'https://geoportal.bafg.de/arcgis3/rest/services';
 
+  /// The services that may answer each scenario, best first; the first
+  /// one whose layers can be queried is used.
+  ///
+  /// A list and not one name, because the BfG moves them. The three
+  /// services of `nHWGK_HWRK_2027` were gone by 2026-11-03 ("not
+  /// started"), and the map went dark for every Land without a service of
+  /// its own (#261). Their successors in `nHWGK_HWRK_live` come in pairs,
+  /// and of each pair only one could be queried then, a different one per
+  /// scenario; for the extreme flood neither could. A scenario none of
+  /// them answers is left out, which the screen shows as "no map", and
+  /// one that becomes queryable later is taken up without a release.
   static const _nationalServices = {
-    RiverFloodScenario.frequent: 'RWHi',
-    RiverFloodScenario.hundred: 'RWMe',
-    RiverFloodScenario.extreme: 'RWLo',
+    RiverFloodScenario.frequent: [
+      'nHWGK_HWRK_live/Wassertiefen_live_RWH',
+      'nHWGK_HWRK_live/Wassertiefen_RW_H_live',
+      'nHWGK_HWRK_2027/RWHi',
+    ],
+    RiverFloodScenario.hundred: [
+      'nHWGK_HWRK_live/Wassertiefen_RW_M_live',
+      'nHWGK_HWRK_live/Wassertiefen_live_RWM',
+      'nHWGK_HWRK_2027/RWMe',
+    ],
+    RiverFloodScenario.extreme: [
+      'nHWGK_HWRK_live/Wassertiefen_RW_L_live',
+      'nHWGK_HWRK_live/Wassertiefen_live_RWL',
+      'nHWGK_HWRK_2027/RWLo',
+    ],
   };
 
   /// The layers of each national service, read once per client: a check
@@ -270,11 +292,12 @@ class RiverFloodClient {
     var listed = false;
     var asked = false;
     var heardAny = false;
-    for (final MapEntry(key: scenario, value: service)
+    for (final MapEntry(key: scenario, value: candidates)
         in _nationalServices.entries) {
+      final String service;
       final List<NationalFloodLayer> layers;
       try {
-        layers = await _layersOf(service);
+        (service, layers) = await _queryableService(candidates);
       } on Object {
         continue;
       }
@@ -295,10 +318,15 @@ class RiverFloodClient {
         final body = await _ask(
           _nationalQuery(service, layer.id, latitude, longitude),
         );
-        if (body == null) continue;
+        // An answer whose polygons do not carry the field is as good as
+        // none: read as "no codes", it was dry land.
+        final codes = body == null
+            ? null
+            : parseNationalCodes(body, layer.field);
+        if (codes == null) continue;
         heardAny = true;
         if (own.contains(layer)) heardOwn = true;
-        for (final code in parseNationalCodes(body, layer.field)) {
+        for (final code in codes) {
           final depth = nationalFloodClass(code);
           if (depth != null &&
               floodClassRank(depth) > floodClassRank(deepest)) {
@@ -317,6 +345,21 @@ class RiverFloodClient {
       stateCode: stateCode,
       national: true,
     );
+  }
+
+  /// The first of [candidates] with layers that can be queried, and those
+  /// layers. Throws when there is none.
+  Future<(String, List<NationalFloodLayer>)> _queryableService(
+    List<String> candidates,
+  ) async {
+    for (final service in candidates) {
+      try {
+        return (service, await _layersOf(service));
+      } on Object {
+        // Gone, stopped, only drawable, or unreachable: the next one.
+      }
+    }
+    throw http.ClientException('no national service for this scenario');
   }
 
   Future<List<NationalFloodLayer>> _layersOf(String service) {
@@ -607,7 +650,12 @@ List<NationalFloodLayer> ownNationalLayers(
   ];
 }
 
-/// The layers of one national service, from its `layers?f=json`.
+/// The layers of one national service, from its `layers?f=json`: those
+/// that can be queried and have a field that holds the class.
+///
+/// A layer only drawn (`capabilities` without `Query`) is left out, so a
+/// service with nothing else counts as having no layers and the next
+/// candidate is asked.
 List<NationalFloodLayer> parseNationalLayers(String body) {
   final Object? decoded;
   try {
@@ -622,9 +670,14 @@ List<NationalFloodLayer> parseNationalLayers(String body) {
     if (layer is! Map) continue;
     final id = layer['id'];
     final extent = layer['extent'];
+    final capabilities = layer['capabilities'];
+    if (capabilities is String && !capabilities.contains('Query')) continue;
     final renderer = (layer['drawingInfo'] as Map?)?['renderer'];
-    final field = renderer is Map ? renderer['field1'] : null;
-    if (id is! int || extent is! Map || field is! String) continue;
+    final field = nationalClassField(
+      renderer is Map ? renderer['field1'] : null,
+      layer['fields'],
+    );
+    if (id is! int || extent is! Map || field == null) continue;
     double? at(String key) => (extent[key] as num?)?.toDouble();
     final (xmin, ymin, xmax, ymax) = (
       at('xmin'),
@@ -650,25 +703,77 @@ List<NationalFloodLayer> parseNationalLayers(String body) {
   return found;
 }
 
+/// The attribute of a layer that holds the class code: the one its
+/// renderer draws by, [drawn], where the layer's [fields] list it.
+///
+/// The renderer is not always right about it. In the hundred-year
+/// service of 2026-11, Saxony's layer is drawn by `LEGENDE`, and its
+/// polygons carry `T_Class` and nothing else; Hamburg's and
+/// Mecklenburg-Western Pomerania's in the extreme one likewise (#261).
+/// Read by the renderer's word, every answer there was empty, which is
+/// dry land. So a field the layer does not list gives way to the one
+/// attribute of its own the layer has, or else to `T_Class`; a layer
+/// with neither has no field, and is left out. Without a list of fields
+/// the renderer is taken at its word.
+String? nationalClassField(Object? drawn, Object? fields) {
+  if (fields is! List) return drawn is String ? drawn : null;
+  final names = [
+    for (final field in fields)
+      if (field is Map && field['name'] is String) field['name'] as String,
+  ];
+  String? listed(String name) {
+    for (final candidate in names) {
+      if (candidate.toLowerCase() == name.toLowerCase()) return candidate;
+    }
+    return null;
+  }
+
+  if (drawn is String && listed(drawn) != null) return drawn;
+  final own = [
+    for (final name in names)
+      if (!_bookkeepingFields.contains(name.toLowerCase())) name,
+  ];
+  if (own.length == 1) return own.single;
+  return listed('T_Class');
+}
+
+/// What every layer carries besides its data, lower case.
+const _bookkeepingFields = {
+  'objectid',
+  'fid',
+  'id',
+  'orig_fid',
+  'shape',
+  'shape_length',
+  'shape_leng',
+  'shape_area',
+};
+
 /// The class codes in a query answer, read from [field] whatever case the
 /// Land wrote it in.
-List<int> parseNationalCodes(String body, String field) {
+///
+/// Null when the answer cannot be read: not JSON, no list of polygons,
+/// or polygons none of which carries [field]. Only an empty list is dry
+/// land.
+List<int>? parseNationalCodes(String body, String field) {
   final Object? decoded;
   try {
     decoded = jsonDecode(body);
   } on FormatException {
-    return const [];
+    return null;
   }
   final features = decoded is Map ? decoded['features'] : null;
-  if (features is! List) return const [];
+  if (features is! List) return null;
   final wanted = field.toLowerCase();
-  return [
+  final codes = [
     for (final feature in features)
       if (feature is Map && feature['attributes'] is Map)
         for (final MapEntry(:key, :value)
             in (feature['attributes'] as Map).entries)
           if ('$key'.toLowerCase() == wanted) ?int.tryParse('$value'.trim()),
   ];
+  if (features.isNotEmpty && codes.isEmpty) return null;
+  return codes;
 }
 
 /// A depth no map put a figure to: flooded, depth not given.

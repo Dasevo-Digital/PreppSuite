@@ -688,6 +688,9 @@
   "localDataRecoveryStartOverBody": "The unreadable files are renamed, not deleted, and stay where they are. PreppSuite then asks from the beginning, where \"Restore from a backup\" brings the household back under the id it had.",
   "settingsNotificationsToggleLabel": "Notify me about new warnings",
   "settingsNotificationsToggleHint": "Local notifications only, while the app is running — no push server.",
+  "settingsExtremeWarningsTitle": "Extreme warnings through Do Not Disturb",
+  "settingsExtremeWarningsHint": "Android sets this per channel, and only you can allow it. Opens the channel “Extreme Warnungen”; switch on “Override Do Not Disturb” there. Other warnings stay quiet.",
+  "settingsExtremeWarningsFailed": "The setting could not be opened. It is under Settings → Apps → PreppSuite → Notifications → Extreme Warnungen.",
   "settingsUseLocationButton": "Determine state via location",
   "settingsLocationNoMatchMessage": "Couldn't match your location to a German state.",
   "shelterMapTitle": "Shelters",
@@ -5145,6 +5148,26 @@
   "shoppingListExport": "Export as a file",
   "shoppingListExportDialogTitle": "Save the shopping list as a file",
   "shoppingListExported": "Shopping list saved as a file.",
+  "shoppingListBought": "Bought",
+  "shoppingListBookTicked": "{count, plural, =1{Add 1 item as bought} other{Add {count} items as bought}}",
+  "@shoppingListBookTicked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shoppingListBookTitle": "Add to the stock",
+  "shoppingListBookHint": "Suggested is what was missing to the minimum. Enter what you actually bought.",
+  "shoppingListBookConfirm": "Add",
+  "shoppingListBooked": "{count, plural, =1{1 item restocked.} other{{count} items restocked.}}",
+  "@shoppingListBooked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "refillReminderTitle": "Get a new prescription",
   "refillReminderBody": "By your last count, {name} lasts until {date}.",
   "@refillReminderBody": {

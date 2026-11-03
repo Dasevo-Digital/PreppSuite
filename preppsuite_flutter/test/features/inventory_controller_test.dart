@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:preppsuite_flutter/features/inventory/application/inventory_numbers.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_csv_import.dart';
 import 'package:preppsuite_flutter/features/sharing/application/snapshot_exchange.dart';
@@ -268,6 +268,85 @@ void main() {
       );
       expect((await storedItem()).unit, 'Stk');
       expect((await storedItem()).quantity, 6);
+    });
+  });
+
+  group('bookPurchases (#265)', () {
+    test('adds to what is stored, counts it, and marks it', () async {
+      await addItem(quantity: 1, minQuantity: 4);
+      // Another device booked one down after the list was drawn: the
+      // purchase adds to that, not to the list's 1.
+      await db.upsertInventoryItem(
+        (await storedItem())
+            .toCompanion(false)
+            .copyWith(quantity: const Value(0.5)),
+      );
+
+      final booked = await controller.bookPurchases({'a': 3});
+
+      final item = await storedItem();
+      expect(booked, {'a': 3});
+      expect(item.quantity, 3.5);
+      expect(item.dirty, isTrue);
+      expect(item.stockCountedAt, isNotNull);
+      expect(item.name, 'Nudeln');
+      expect(item.minQuantity, 4);
+    });
+
+    test('all lines in one commit', () async {
+      await addItem(quantity: 1, minQuantity: 4);
+      await db.upsertInventoryItem(
+        InventoryItemsCompanion.insert(
+          clientId: 'b',
+          householdId: householdId,
+          name: 'Reis',
+          category: 'food',
+          quantity: 0,
+          unit: 'kg',
+          storageLocation: 'Keller',
+          updatedAt: DateTime.utc(2026),
+        ),
+      );
+      var commits = 0;
+      final listening = db
+          .tableUpdates(TableUpdateQuery.onTable(db.inventoryItems))
+          .listen((_) => commits++);
+
+      await controller.bookPurchases({'a': 3, 'b': 2});
+      await pumpEventQueue();
+      await listening.cancel();
+
+      expect(commits, 1);
+    });
+
+    test('a deleted item is left alone, and not reported booked', () async {
+      await addItem(quantity: 1);
+      await controller.deleteItem(await storedItem());
+
+      expect(await controller.bookPurchases({'a': 3}), isEmpty);
+    });
+
+    test('nought, a negative or an endless amount books nothing', () async {
+      await addItem(quantity: 1);
+      for (final amount in [0.0, -1.0, double.infinity, double.nan]) {
+        await expectLater(
+          controller.bookPurchases({'a': amount}),
+          throwsA(isA<InvalidInventoryNumbers>()),
+          reason: '$amount',
+        );
+      }
+      expect((await storedItem()).quantity, 1);
+    });
+
+    test('can be taken back, from what is stored then', () async {
+      await addItem(quantity: 1, minQuantity: 4);
+      final booked = await controller.bookPurchases({'a': 3});
+
+      await controller.takeBackPurchases(booked);
+
+      final item = await storedItem();
+      expect(item.quantity, 1);
+      expect(item.dirty, isTrue);
     });
   });
 

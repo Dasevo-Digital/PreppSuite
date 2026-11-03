@@ -2,7 +2,9 @@ package de.dasevo.preppsuite
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.provider.Settings
 import android.system.Os
 import androidx.documentfile.provider.DocumentFile
 import io.flutter.embedding.android.FlutterFragmentActivity
@@ -30,6 +32,7 @@ import java.util.concurrent.Executors
 class MainActivity : FlutterFragmentActivity() {
     private companion object {
         const val CHANNEL = "preppsuite/storage"
+        const val NOTIFICATIONS_CHANNEL = "preppsuite/notifications"
         const val PICK_FOLDER_REQUEST = 8451
         const val PICK_FILE_REQUEST = 8452
     }
@@ -61,6 +64,14 @@ class MainActivity : FlutterFragmentActivity() {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result -> handle(call, result) }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, NOTIFICATIONS_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "openChannelSettings" ->
+                        result.success(openChannelSettings(call.argument("channel")!!))
+                    else -> result.notImplemented()
+                }
+            }
         textRecognition =
             TextRecognition(applicationContext, flutterEngine.dartExecutor.binaryMessenger)
     }
@@ -69,6 +80,33 @@ class MainActivity : FlutterFragmentActivity() {
         textRecognition?.dispose()
         textRecognition = null
         super.cleanUpFlutterEngine(flutterEngine)
+    }
+
+    /**
+     * Opens the system settings of one notification channel (#264).
+     *
+     * Whether a channel may come through "Do not disturb" is the user's to
+     * decide, there; an app may only set it with access to the whole
+     * policy. Channels exist from Android 8 on; before that there is
+     * nothing to open, and the app's notification settings are the
+     * nearest thing.
+     */
+    private fun openChannelSettings(channel: String): Boolean {
+        val intent =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    .putExtra(Settings.EXTRA_CHANNEL_ID, channel)
+            } else {
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    .setData(Uri.fromParts("package", packageName, null))
+            }
+        return try {
+            startActivity(intent)
+            true
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private fun handle(call: MethodCall, result: MethodChannel.Result) {

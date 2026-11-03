@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../local_db/database.dart' show Warning;
@@ -39,6 +41,48 @@ InterruptionLevel warningInterruptionLevel(WarningSeverity severity) =>
       WarningSeverity.minor ||
       WarningSeverity.moderate => InterruptionLevel.active,
     };
+
+/// The Android channel for extreme warnings, apart from the others (#264).
+///
+/// Android decides per channel whether a notification may come through
+/// "Do not disturb", and only the person holding the telephone can allow
+/// it: an app that sets it itself needs access to the whole policy,
+/// which is more than a warning app should ask for. With every warning
+/// in one channel the choice was all or nothing, and nobody lets a
+/// moderate frost warning wake them at three. Extreme warnings -- the
+/// ones that say leave now -- have this channel to themselves, so it can
+/// be let through on its own. The settings screen opens it.
+///
+/// The name is German like the other channel's: the background worker
+/// that posts warnings has no translations, and Android shows the name
+/// as it was when the channel was first made.
+const extremeWarningChannel = AndroidNotificationChannel(
+  'warnings_extreme',
+  'Extreme Warnungen',
+  description: 'Warnungen der höchsten Stufe, zum Beispiel Evakuierungen.',
+  importance: Importance.max,
+);
+
+/// What a warning of [severity] looks like on Android.
+@visibleForTesting
+AndroidNotificationDetails warningAndroidDetails(WarningSeverity severity) =>
+    severity == WarningSeverity.extreme
+    ? AndroidNotificationDetails(
+        extremeWarningChannel.id,
+        extremeWarningChannel.name,
+        channelDescription: extremeWarningChannel.description,
+        importance: Importance.max,
+        priority: Priority.max,
+        // A warning is public information, and the lock screen is where
+        // it is read at night.
+        visibility: NotificationVisibility.public,
+      )
+    : const AndroidNotificationDetails(
+        'warnings',
+        'Warnungen',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
 
 /// On-device notifications.
 ///
@@ -98,6 +142,29 @@ class NotificationService {
         ),
       ),
     );
+    // Made up front rather than with the first extreme warning, so that
+    // the settings screen has a channel to open before there ever was one.
+    await _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(extremeWarningChannel);
+  }
+
+  static const _androidSettings = MethodChannel('preppsuite/notifications');
+
+  /// Opens Android's settings for [extremeWarningChannel], where "Do not
+  /// disturb" can be let through for it. False where that did not open.
+  Future<bool> openExtremeWarningSettings() async {
+    try {
+      await _ensureInitialized();
+      return await _androidSettings.invokeMethod<bool>('openChannelSettings', {
+            'channel': extremeWarningChannel.id,
+          }) ??
+          false;
+    } on Object {
+      return false;
+    }
   }
 
   /// Requests OS notification permission. Returns whether it was granted —
@@ -147,11 +214,8 @@ class NotificationService {
             WarningSeverity.fromName(warning.severity),
           ),
         ),
-        android: const AndroidNotificationDetails(
-          'warnings',
-          'Warnungen',
-          importance: Importance.high,
-          priority: Priority.high,
+        android: warningAndroidDetails(
+          WarningSeverity.fromName(warning.severity),
         ),
       ),
     );

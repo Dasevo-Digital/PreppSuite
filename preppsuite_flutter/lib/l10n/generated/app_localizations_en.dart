@@ -1530,6 +1530,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Local notifications only, while the app is running — no push server.';
 
   @override
+  String get settingsExtremeWarningsTitle =>
+      'Extreme warnings through Do Not Disturb';
+
+  @override
+  String get settingsExtremeWarningsHint =>
+      'Android sets this per channel, and only you can allow it. Opens the channel “Extreme Warnungen”; switch on “Override Do Not Disturb” there. Other warnings stay quiet.';
+
+  @override
+  String get settingsExtremeWarningsFailed =>
+      'The setting could not be opened. It is under Settings → Apps → PreppSuite → Notifications → Extreme Warnungen.';
+
+  @override
   String get settingsUseLocationButton => 'Determine state via location';
 
   @override
@@ -8856,6 +8868,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shoppingListExported => 'Shopping list saved as a file.';
+
+  @override
+  String get shoppingListBought => 'Bought';
+
+  @override
+  String shoppingListBookTicked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Add $count items as bought',
+      one: 'Add 1 item as bought',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingListBookTitle => 'Add to the stock';
+
+  @override
+  String get shoppingListBookHint =>
+      'Suggested is what was missing to the minimum. Enter what you actually bought.';
+
+  @override
+  String get shoppingListBookConfirm => 'Add';
+
+  @override
+  String shoppingListBooked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items restocked.',
+      one: '1 item restocked.',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get refillReminderTitle => 'Get a new prescription';

@@ -83,6 +83,27 @@ void main() {
     );
   });
 
+  test('a version too long for a number is newer, not an error (#260)', () {
+    expect(
+      NeighbourOfferCode.decode(
+        'Wasser: 20 l\nPreppSuite-Angebot/99999999999999999999 water 2026-10-10',
+      ),
+      isA<NeighbourOfferTooNew>(),
+    );
+  });
+
+  test('a day that does not exist is not rolled over (#260)', () {
+    for (final date in ['2026-13-01', '2026-02-30', '2026-10-45']) {
+      expect(
+        NeighbourOfferCode.decode(
+          'Wasser: 20 l\nPreppSuite-Angebot/1 water $date',
+        ),
+        isA<NotANeighbourOffer>(),
+        reason: date,
+      );
+    }
+  });
+
   test('anything else is not an offer', () {
     for (final text in [
       'https://example.org',

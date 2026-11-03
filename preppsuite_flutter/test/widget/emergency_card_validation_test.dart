@@ -109,4 +109,18 @@ void main() {
     expect(error, findsOneWidget);
     expect(onScreen(tester, error), isTrue);
   });
+
+  testWidgets('a year still to come is refused (#260)', (tester) async {
+    await open(tester);
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'Lena');
+    await tester.enterText(fields.at(1), '${DateTime.now().year + 1}');
+    await scrollToBottom(tester);
+
+    await tester.tap(find.text(l10n.saveButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.emergencyCardBirthYearInvalid), findsOneWidget);
+    expect(find.byType(EmergencyCardFormScreen), findsOneWidget);
+  });
 }

@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show TableUpdateQuery, Value;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -152,6 +152,67 @@ void main() {
       final copiedItems = await db.watchChecklistItems(copy.clientId).first;
       expect(copiedItems.single.title, 'Trinkwasser');
       expect(copiedItems.single.dirty, isTrue);
+    });
+  });
+
+  group('a whole list is written in one commit (#259)', () {
+    Future<ChecklistTemplate> templateWithItems(int count) async {
+      final (template, _) = await syncedTemplateWithItem();
+      for (var i = 2; i <= count; i++) {
+        await db.upsertChecklistItem(
+          ChecklistItemsCompanion.insert(
+            clientId: 'itm-$i',
+            householdId: const Value(householdId),
+            templateClientId: 'tpl-1',
+            title: 'Punkt $i',
+            sortOrder: Value(i),
+            updatedAt: DateTime.utc(2026),
+          ),
+        );
+      }
+      return template;
+    }
+
+    /// How many times the checklist tables report a change while [action]
+    /// runs -- each one runs every watched list and count again.
+    Future<int> commitsDuring(Future<void> Function() action) async {
+      var commits = 0;
+      final listening = db
+          .tableUpdates(
+            TableUpdateQuery.onAllTables([
+              db.checklistTemplates,
+              db.checklistItems,
+            ]),
+          )
+          .listen((_) => commits++);
+      await action();
+      await pumpEventQueue();
+      await listening.cancel();
+      return commits;
+    }
+
+    test('copying a list of eight lines', () async {
+      final template = await templateWithItems(8);
+
+      final commits = await commitsDuring(
+        () => controller.duplicateTemplate(template),
+      );
+
+      expect(commits, 1);
+      final templates = await db.watchChecklistTemplates(householdId).first;
+      final copy = templates.firstWhere((t) => t.clientId != 'tpl-1');
+      expect(await db.watchChecklistItems(copy.clientId).first, hasLength(8));
+    });
+
+    test('deleting a list of eight lines', () async {
+      final template = await templateWithItems(8);
+
+      final commits = await commitsDuring(
+        () => controller.deleteTemplate(template),
+      );
+
+      expect(commits, 1);
+      expect(await db.watchAllChecklistItems(householdId).first, isEmpty);
     });
   });
 }

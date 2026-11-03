@@ -1,3 +1,4 @@
+import '../../../core/calendar_day.dart';
 import '../../inventory/application/inventory_numbers.dart';
 
 import 'package:intl/intl.dart';
@@ -49,8 +50,10 @@ class OverviewScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final inventory = ref.watch(inventoryItemsProvider(profile.id));
+    // Counted from today, so built again when the day changes (#262).
+    final today = ref.watch(calendarDayProvider);
     final items = inventory.value ?? const <InventoryItem>[];
-    final overview = summarizeInventory(items);
+    final overview = summarizeInventory(items, now: today);
 
     final cards = <Widget>[
       _AttentionCard(

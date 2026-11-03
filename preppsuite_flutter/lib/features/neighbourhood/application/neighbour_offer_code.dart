@@ -89,13 +89,27 @@ class NeighbourOfferCode {
     }
     final footer = _footer.firstMatch(lines.last);
     if (footer == null) return const NotANeighbourOffer();
-    if (int.parse(footer[1]!) > version) return const NeighbourOfferTooNew();
+    // `tryParse`, because the digits are whatever the code says: twenty
+    // of them are past what an int holds, and `int.parse` threw on every
+    // frame the camera delivered (#260). A version that large is newer
+    // than this one all the same.
+    final written = int.tryParse(footer[1]!);
+    if (written == null || written > version) {
+      return const NeighbourOfferTooNew();
+    }
 
-    final offeredOn = DateTime.utc(
+    final (year, month, day) = (
       int.parse(footer[3]!),
       int.parse(footer[4]!),
       int.parse(footer[5]!),
     );
+    final offeredOn = DateTime.utc(year, month, day);
+    // `DateTime.utc` rolls "2026-13-45" over into February of the next
+    // year rather than refusing it. A day that does not exist is not one
+    // this app wrote.
+    if (offeredOn.month != month || offeredOn.day != day) {
+      return const NotANeighbourOffer();
+    }
     final body = _afterLabel(lines[0]);
     if (body.isEmpty) return const NotANeighbourOffer();
     final contact = lines.length == 3 ? _afterLabel(lines[1]) : null;

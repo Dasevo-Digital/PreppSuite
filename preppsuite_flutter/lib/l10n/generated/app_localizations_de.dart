@@ -1540,6 +1540,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Nur lokale Benachrichtigungen, solange die App läuft — kein Push-Server.';
 
   @override
+  String get settingsExtremeWarningsTitle =>
+      'Extreme Warnungen auch bei „Bitte nicht stören“';
+
+  @override
+  String get settingsExtremeWarningsHint =>
+      'Android legt das je Kanal fest, und nur du kannst es erlauben. Öffnet den Kanal „Extreme Warnungen“; dort „Bitte nicht stören“ ignorieren einschalten. Andere Warnungen bleiben still.';
+
+  @override
+  String get settingsExtremeWarningsFailed =>
+      'Die Einstellung ließ sich nicht öffnen. Sie steht unter Einstellungen → Apps → PreppSuite → Benachrichtigungen → Extreme Warnungen.';
+
+  @override
   String get settingsUseLocationButton => 'Bundesland per Standort ermitteln';
 
   @override
@@ -8903,6 +8915,41 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get shoppingListExported => 'Einkaufsliste als Datei gesichert.';
+
+  @override
+  String get shoppingListBought => 'Gekauft';
+
+  @override
+  String shoppingListBookTicked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Artikel als gekauft eintragen',
+      one: '1 Artikel als gekauft eintragen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingListBookTitle => 'In den Vorrat eintragen';
+
+  @override
+  String get shoppingListBookHint =>
+      'Vorgeschlagen ist, was bis zur Mindestmenge fehlte. Trag ein, was du wirklich gekauft hast.';
+
+  @override
+  String get shoppingListBookConfirm => 'Eintragen';
+
+  @override
+  String shoppingListBooked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Artikel aufgefüllt.',
+      one: '1 Artikel aufgefüllt.',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get refillReminderTitle => 'Neues Rezept besorgen';

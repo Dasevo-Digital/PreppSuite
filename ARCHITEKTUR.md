@@ -198,6 +198,20 @@ until the next start (#248). The query is now only a first cut;
 again when the next warning in it ends. Any other watched query that
 needs the current time does the same.
 
+**A screen that counts from today follows the day** (#262). What has
+expired, what is due and how many days a medicine has left were counted
+when a screen was built, and a screen is built again when its rows
+change, not when the day does: a desktop left open overnight, or a
+telephone picked up in the morning, showed a tin that ran out at
+midnight under "soon" until something was edited. `calendarDayProvider`
+holds today, moves on at midnight and is checked again when the app
+comes back to the front (a sleeping device fires no timer). Such a
+screen watches it -- overview, inventory list, rotation, medicines,
+emergency cards, scenario, the preparedness hub -- and passes it on as
+"now" where only the date matters. The hub also moves the hours of a
+running blackout on every minute, and reads the energy plan and the
+clock again when another device's settings arrive.
+
 **A BBK warning is over only when a source that answered no longer has
 it.** The nationwide sweep retires what is missing, and only after a
 complete poll. A district whose dashboard did not answer -- an exception
@@ -1205,6 +1219,13 @@ tree; the test suite deliberately targets that layer rather than the UI.
   household gave it a `minQuantity` can be short of one. An item without a
   minimum is unanswered, not empty — counting it as missing would fill the
   list with everything ever entered.
+  What was bought goes back the same way (#265): lines ticked as bought
+  are offered at what they were short, changed to what was really
+  bought, and `InventoryController.bookPurchases` adds that to each row
+  **as stored**, not as the list showed it, in one transaction, with the
+  count's date moved on. The undo takes the amounts off the rows as
+  stored then. Before, the stock learned of the shopping one form at a
+  time.
 - **The rotation queue leaves out what cannot be rotated.** No expiry date
   (salt) and nothing left (quantity zero) are both excluded, and days are
   counted as calendar days rather than elapsed hours so "tomorrow morning"
@@ -1531,6 +1552,32 @@ tree; the test suite deliberately targets that layer rather than the UI.
     flood in the service.
   - One envelope query of ±25 m per layer and scenario instead of 17
     sample points; the layer list is read once per client.
+
+  **The services move, so each scenario has a list of them** (#261). By
+  2026-11-03 `RWHi`, `RWMe` and `RWLo` were gone from the folder and
+  answered "Service … not started", and the national map said "not
+  reachable" for thirteen Länder. Their successors are in
+  `nHWGK_HWRK_live`, in pairs (`Wassertiefen_live_RWH` and
+  `Wassertiefen_RW_H_live`, and so on), with the same legend and layers.
+  Of each pair only one could be queried then -- `live_RWH` for the
+  frequent flood, `RW_M_live` for the hundred-year one -- and for the
+  extreme flood neither, not even with `identify`; only the second cycle
+  (`nHWGK_HWRK/RWlo`, 2019 data) would answer, and an older cycle is not
+  mixed in unnoticed. So `_nationalServices` lists the candidates per
+  scenario, best first, and the first whose layers carry `Query` in
+  their `capabilities` is used. The extreme flood is "no map" until one
+  of its services can be queried, and is taken up then without a
+  release. Checked against Koblenz (HQ100, class 2) and Dresden (5).
+
+  **The renderer's field is checked against the layer's own fields.** In
+  `RW_M_live` Saxony's layer is drawn by `LEGENDE` and its polygons carry
+  only `T_Class`; Hamburg and Mecklenburg-Western Pomerania in the
+  extreme service likewise. Read by the renderer's word every answer was
+  empty, which is dry land. `nationalClassField` takes the renderer's
+  field where the layer lists it, else the layer's one field of its own,
+  else `T_Class`, else none (the layer is left out). And an answer with
+  polygons none of which carries the field is unreadable
+  (`parseNationalCodes` returns null), never "no codes".
 
   **A Land's own service that does not answer falls back to the national
   map.** The NLWKN's service was unreachable for an afternoon on
@@ -2203,6 +2250,16 @@ aus, und die Kachel bekommt ihre Zahlen gereicht. Die Regel dahinter:
 **ein `ref.watch` in einem Listenelement ist ein `ref.watch` mal Anzahl der
 Zeilen.** `allChecklistItemsProvider` existierte bereits genau dafür und
 wird von drei anderen Bildschirmen benutzt.
+
+Dasselbe gilt fürs Schreiben (#259): **jedes `upsert…` ist eine eigene
+Transaktion, und jede lässt alle beobachteten Abfragen der Tabelle neu
+laufen.** Eine Liste mit vierzig Punkten zu kopieren oder zu löschen
+waren einundvierzig Commits und einundvierzig Neuberechnungen von
+Listenübersicht, Fortschritt und Bereitschaft; wurde die App dabei
+beendet, blieb eine halbe Kopie stehen oder eine gelöschte Liste, deren
+Punkte im Gesamtfortschritt weiterzählten. Wer mehrere Zeilen in einem
+Zug schreibt, legt sie in `_db.transaction` (drift schachtelt die inneren
+ein und meldet einmal beim Commit) und liest vorher, nicht darin.
 
 ### `async` verschiebt nichts
 
@@ -2986,6 +3043,24 @@ Eintrag entfernen.
 Apple und Google Trinkgeld nur über ihre eigene Bezahlung erlauben. Die
 bisherigen Pakete sind keine Store-Fassungen.
 
+### Extreme Warnungen haben unter Android einen eigenen Kanal
+
+Ob eine Mitteilung durch „Bitte nicht stören“ kommt, entscheidet Android je
+Kanal, und erlauben kann es nur, wer das Telefon hält. Eine App, die es
+selbst setzt (`setBypassDnd`), braucht Zugriff auf die ganze
+Nicht-stören-Richtlinie, und um den bittet eine Warn-App nicht. Solange alle
+Warnungen im Kanal `warnings` liefen, hieß die Wahl alles oder nichts, und
+niemand lässt sich von einer mäßigen Frostwarnung um drei wecken. Extreme
+Warnungen laufen deshalb im Kanal `warnings_extreme` („Extreme Warnungen“,
+höchste Wichtigkeit, auf dem Sperrbildschirm vollständig), der beim
+Start der Benachrichtigungen angelegt wird, nicht erst mit der ersten
+extremen Warnung (#264). Die Einstellungen öffnen ihn über
+`preppsuite/notifications` → `openChannelSettings`
+(`ACTION_CHANNEL_NOTIFICATION_SETTINGS`). Der Name bleibt deutsch wie der
+des anderen Kanals: Der Hintergrundlauf, der Warnungen zeigt, hat keine
+Übersetzungen, und Android behält den Namen, mit dem ein Kanal angelegt
+wurde. Unter iOS ist das Gegenstück die zeitkritische Mitteilung (#101).
+
 ### Sprechen kann nicht jede Plattform
 
 `core/speech_capabilities.dart` hat dieselbe Form wie
@@ -3429,6 +3504,14 @@ verlangt mehr als null; die Stunden am Tag höchstens 24
 werden konnte das nicht (`jsonEncode` wirft), und die Reichweite warf beim
 Abrunden (#256). Gelesene Einträge mit einer nicht endlichen oder negativen
 Zahl verwirft `fromJson`, weil `jsonDecode('1e400')` unendlich ergibt.
+
+Dieselbe Regel gilt für Koordinaten und Codes (#260): Der Tageslicht-Ort
+verlangt endliche Zahlen, bevor er den Bereich prüft, denn NaN ist weder
+kleiner als -90 noch größer als 90. Die Versionsnummer eines
+Nachbarschafts-Codes liest `int.tryParse` (zwanzig Ziffern sind mehr, als
+ein `int` fasst, und `int.parse` warf bei jedem Kamerabild), und ein Datum
+muss nach `DateTime.utc` noch dasselbe sein, statt dass „2026-13-45“ in den
+Februar rollt. Ein Geburtsjahr liegt zwischen 1900 und dem laufenden Jahr.
 
 Auch aus endlichen Eingaben dürfen keine unendlichen Ergebnisse entstehen:
 Nährwertprodukte, Packungsumrechnungen und Dosierungsquotienten werden vor dem

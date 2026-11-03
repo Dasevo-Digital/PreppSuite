@@ -1542,6 +1542,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'Solo notificaciones locales, mientras la app está en marcha: sin servidor push.';
 
   @override
+  String get settingsExtremeWarningsTitle =>
+      'Avisos extremos también con «No molestar»';
+
+  @override
+  String get settingsExtremeWarningsHint =>
+      'Android lo decide por canal y solo tú puedes permitirlo. Abre el canal «Extreme Warnungen»; activa allí «Ignorar No molestar». Los demás avisos siguen en silencio.';
+
+  @override
+  String get settingsExtremeWarningsFailed =>
+      'No se pudo abrir el ajuste. Está en Ajustes → Aplicaciones → PreppSuite → Notificaciones → Extreme Warnungen.';
+
+  @override
   String get settingsUseLocationButton =>
       'Determinar el estado federado por la ubicación';
 
@@ -8933,6 +8945,41 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get shoppingListExported =>
       'Lista de la compra guardada como archivo.';
+
+  @override
+  String get shoppingListBought => 'Comprado';
+
+  @override
+  String shoppingListBookTicked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Anotar $count artículos como comprados',
+      one: 'Anotar 1 artículo como comprado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get shoppingListBookTitle => 'Añadir a la reserva';
+
+  @override
+  String get shoppingListBookHint =>
+      'Se propone lo que faltaba hasta la cantidad mínima. Indica lo que compraste de verdad.';
+
+  @override
+  String get shoppingListBookConfirm => 'Añadir';
+
+  @override
+  String shoppingListBooked(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count artículos repuestos.',
+      one: '1 artículo repuesto.',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get refillReminderTitle => 'Conseguir una nueva receta';
