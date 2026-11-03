@@ -1,5 +1,7 @@
 import '../../../local_db/database.dart';
+import '../../home/application/home_overview.dart' show expiresSoon;
 import 'device_charge.dart';
+import 'stock_today.dart';
 
 /// [chargeDue] is a device whose battery check has come round (#179).
 enum InventoryStatusFilter { all, expired, expiring, lowStock, chargeDue }
@@ -32,13 +34,14 @@ List<InventoryItem> filterInventory(
 }) {
   final clock = now ?? DateTime.now();
   final today = DateTime(clock.year, clock.month, clock.day);
-  final end = DateTime(today.year, today.month, today.day + 8);
   bool expired(InventoryItem item) =>
       item.expirationDate?.isBefore(today) ?? false;
-  bool expiring(InventoryItem item) =>
-      !expired(item) && (item.expirationDate?.isBefore(end) ?? false);
-  bool low(InventoryItem item) =>
-      item.minQuantity != null && item.quantity < item.minQuantity!;
+  // The same "soon" as the overview that leads here (#271).
+  bool expiring(InventoryItem item) => switch (item.expirationDate) {
+    final expiry? => !expired(item) && expiresSoon(expiry, today),
+    null => false,
+  };
+  bool low(InventoryItem item) => isBelowMinimum(item, now: clock);
   bool chargeDue(InventoryItem item) =>
       deviceChargeCheck(item)?.isDue(now: clock) ?? false;
   int priority(InventoryItem item) => expired(item)

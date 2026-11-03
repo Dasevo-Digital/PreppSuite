@@ -16,10 +16,19 @@ import '../application/broadcast_radio.dart';
 /// for why the app names programmes and leaves frequencies to the
 /// household.
 ///
-/// Works without a household as well -- it is on the emergency screen a
-/// locked or broken household still opens -- and then asks for the Land.
+/// Works without a household as well, and then asks for the Land.
 class BroadcastRadioScreen extends ConsumerStatefulWidget {
-  const BroadcastRadioScreen({super.key});
+  const BroadcastRadioScreen({super.key}) : withHousehold = true;
+
+  /// For the emergency access in front of a locked or broken household
+  /// (`emergency_access.dart`), which shows nothing private (#269). The
+  /// household's Land and the frequencies it wrote down are both a
+  /// pointer to where it lives, so here the page asks for the Land, shows
+  /// no frequencies and takes none.
+  const BroadcastRadioScreen.withoutHousehold({super.key})
+    : withHousehold = false;
+
+  final bool withHousehold;
 
   @override
   ConsumerState<BroadcastRadioScreen> createState() =>
@@ -45,11 +54,13 @@ class _BroadcastRadioScreenState extends ConsumerState<BroadcastRadioScreen>
   void settingsArrived() => unawaited(_load());
 
   Future<void> _load() async {
+    if (!widget.withHousehold) return;
     final frequencies = await _store.load();
     if (mounted) setState(() => _frequencies = frequencies);
   }
 
   String? get _householdState {
+    if (!widget.withHousehold) return null;
     final region = ref.watch(householdProfileProvider).value?.regionKey;
     return region == null
         ? null
@@ -127,7 +138,9 @@ class _BroadcastRadioScreenState extends ConsumerState<BroadcastRadioScreen>
                         stateName: stateName,
                         frequency: _frequencies[programme.id],
                         l10n: l10n,
-                        onEdit: () => _editFrequency(programme),
+                        onEdit: widget.withHousehold
+                            ? () => _editFrequency(programme)
+                            : null,
                       ),
                   ],
                 ),
@@ -149,7 +162,11 @@ class _BroadcastRadioScreenState extends ConsumerState<BroadcastRadioScreen>
                   const SizedBox(height: 10),
                   Text(l10n.broadcastRadioTuneDab),
                   const SizedBox(height: 10),
-                  Text(l10n.broadcastRadioTuneNow),
+                  Text(
+                    widget.withHousehold
+                        ? l10n.broadcastRadioTuneNow
+                        : l10n.broadcastRadioLockedNote,
+                  ),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
@@ -199,7 +216,9 @@ class _ProgrammeTile extends StatelessWidget {
   final String? stateName;
   final double? frequency;
   final AppLocalizations l10n;
-  final VoidCallback onEdit;
+
+  /// Null where frequencies are not the page's to show (#269).
+  final VoidCallback? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -217,16 +236,18 @@ class _ProgrammeTile extends StatelessWidget {
       leading: const Icon(Icons.radio),
       title: Text(programme.name),
       subtitle: Text('$role · ${programme.broadcaster} · $reach'),
-      trailing: TextButton(
-        onPressed: onEdit,
-        child: Text(
-          mhz == null
-              ? l10n.broadcastRadioFrequencyAdd
-              : l10n.broadcastRadioFrequencyHere(
-                  _megahertz(mhz, l10n.localeName),
-                ),
-        ),
-      ),
+      trailing: onEdit == null
+          ? null
+          : TextButton(
+              onPressed: onEdit,
+              child: Text(
+                mhz == null
+                    ? l10n.broadcastRadioFrequencyAdd
+                    : l10n.broadcastRadioFrequencyHere(
+                        _megahertz(mhz, l10n.localeName),
+                      ),
+              ),
+            ),
     );
   }
 }

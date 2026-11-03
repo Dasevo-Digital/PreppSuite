@@ -350,6 +350,108 @@ void main() {
     });
   });
 
+  group('a pack in daily use (#268)', () {
+    // Thirty tablets at one a day, counted twenty days ago: ten are left.
+    Future<void> addPack({int? refillLeadDays = 7, int countedDaysAgo = 20}) {
+      final today = DateTime.now();
+      return db.upsertInventoryItem(
+        InventoryItemsCompanion.insert(
+          clientId: 'a',
+          householdId: householdId,
+          name: 'Ramipril',
+          category: InventoryItemCategory.medical.name,
+          quantity: 30,
+          unit: 'Tablette',
+          storageLocation: 'Hausapotheke',
+          minQuantity: const Value(30),
+          dailyDose: const Value(1),
+          refillLeadDays: Value(refillLeadDays),
+          stockCountedAt: Value(
+            DateTime(
+              today.year,
+              today.month,
+              today.day - countedDaysAgo,
+              12,
+            ).toUtc(),
+          ),
+          updatedAt: DateTime.utc(2026),
+          dirty: const Value(false),
+        ),
+      );
+    }
+
+    bool countedToday(InventoryItem item) {
+      final counted = item.stockCountedAt!.toLocal();
+      final today = DateTime.now();
+      return counted.year == today.year &&
+          counted.month == today.month &&
+          counted.day == today.day;
+    }
+
+    test(
+      'a purchase adds to what is left today, not to the old count',
+      () async {
+        await addPack();
+
+        await controller.bookPurchases({'a': 30});
+
+        final item = await storedItem();
+        expect(item.quantity, 40);
+        expect(countedToday(item), isTrue);
+      },
+    );
+
+    test('a use is taken from what is left today', () async {
+      await addPack();
+
+      await controller.consumeQuantity(await storedItem(), 2);
+
+      final item = await storedItem();
+      expect(item.quantity, 8);
+      expect(countedToday(item), isTrue);
+    });
+
+    test('a reserve put into daily use is counted from today', () async {
+      await addPack(refillLeadDays: null, countedDaysAgo: 60);
+      final reserve = await storedItem();
+
+      await controller.updateItem(
+        reserve,
+        name: reserve.name,
+        category: InventoryItemCategory.medical,
+        quantity: reserve.quantity,
+        unit: reserve.unit,
+        storageLocation: reserve.storageLocation,
+        minQuantity: reserve.minQuantity,
+        dailyDose: reserve.dailyDose,
+        refillLeadDays: 7,
+      );
+
+      final item = await storedItem();
+      expect(item.quantity, 30);
+      expect(countedToday(item), isTrue);
+    });
+
+    test('renaming it still leaves the count where it was', () async {
+      await addPack(countedDaysAgo: 0);
+      final pack = await storedItem();
+
+      await controller.updateItem(
+        pack,
+        name: 'Ramipril 5 mg',
+        category: InventoryItemCategory.medical,
+        quantity: pack.quantity,
+        unit: pack.unit,
+        storageLocation: pack.storageLocation,
+        minQuantity: pack.minQuantity,
+        dailyDose: pack.dailyDose,
+        refillLeadDays: pack.refillLeadDays,
+      );
+
+      expect((await storedItem()).stockCountedAt, pack.stockCountedAt);
+    });
+  });
+
   group('consumeQuantity', () {
     test('subtracts the amount and marks the row dirty for sync', () async {
       await addItem(quantity: 5);
@@ -668,7 +770,15 @@ void main() {
     test('moves when some is booked down', () async {
       await addPills();
       final item = await storedItem();
-      final counted = DateTime.utc(2026, 9, 1);
+      // Ten days ago, at two a day: forty are left before the two booked
+      // down (#268).
+      final today = DateTime.now();
+      final counted = DateTime(
+        today.year,
+        today.month,
+        today.day - 10,
+        12,
+      ).toUtc();
       await db.upsertInventoryItem(
         item.toCompanion(false).copyWith(stockCountedAt: Value(counted)),
       );
@@ -676,7 +786,7 @@ void main() {
       await controller.consumeQuantity(await storedItem(), 2);
 
       final booked = await storedItem();
-      expect(booked.quantity, 58);
+      expect(booked.quantity, 38);
       expect(booked.stockCountedAt!.toUtc().isAfter(counted), isTrue);
       // Booking down is not editing: whose it is and the reminder stay.
       expect(booked.memberId, 'member-1');

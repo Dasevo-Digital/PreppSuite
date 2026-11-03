@@ -1226,12 +1226,30 @@ tree; the test suite deliberately targets that layer rather than the UI.
   count's date moved on. The undo takes the amounts off the rows as
   stored then. Before, the stock learned of the shopping one form at a
   time.
+  **Stock is what is there today** (#268). For a pack of medicine in
+  daily use the stored quantity is the count on the day it was counted;
+  `stockToday` (`stock_today.dart`) takes a dose off for every calendar
+  day since. Everything that compares stock with a minimum (shopping
+  list, overview, badge, filter, list row, the missing-equipment report,
+  linked checklist lines), shows it, or writes a new count from it
+  (`consumeQuantity`, `bookPurchases`, the edit form's figure) goes
+  through it. Working from the stored figure, the shopping list never
+  listed such a pack until somebody recounted, and booking a purchase or
+  a use onto it restarted the count from the old figure: thirty counted
+  twenty days ago plus thirty bought was sixty from today instead of
+  forty, and the prescription reminder came weeks late. A reserve put
+  into daily use is counted from that day. The report no longer filters
+  in SQL, which does not know the days.
 - **The rotation queue leaves out what cannot be rotated.** No expiry date
   (salt) and nothing left (quantity zero) are both excluded, and days are
   counted as calendar days rather than elapsed hours so "tomorrow morning"
   reads as 1 and not 0. Its `soon` window is the overview's `soonWindow`,
   re-exported rather than redeclared: the two must never disagree about
-  the same item.
+  the same item. The inventory filter's "expiring" is the same window
+  through `expiresSoon` (#271); it was a week, and "5 soon" on the
+  overview opened a list with two. The overview counts it in calendar
+  days as well, not as thirty times 24 hours from the moment it is drawn,
+  which lost the thirtieth day across the end of summer time.
 - **Days between two dates are counted on the dates.**
   `calendarDaysBetween` (`lib/core/calendar_days.dart`) is the one way the
   rotation, the backup reminder, the charge check, the medicines and the
@@ -1585,6 +1603,15 @@ tree; the test suite deliberately targets that layer rather than the UI.
   classes the NLWKN gives there (4/4/4). The result carries `national`,
   and the source line names the BfG and the Länder. The BfG states no
   licence on the service; the source line credits both.
+
+  **A host that does not answer is asked once** (#270). A refusal (an
+  error, a stopped service) holds for one service, and the next
+  candidate is asked; silence (no connection, nothing within 20 s) holds
+  for the whole host. Each candidate used to wait out its own 20 s, up
+  to nine of them over the three scenarios: three minutes before "not
+  reachable", where one candidate per scenario had taken one. `_get`
+  tells the two apart. A Land's service that leaves a whole batch of four
+  points silent is given up after that batch, not after all seventeen.
 
 - **Overpass wants a name.** Since autumn 2026 `overpass-api.de` answers
   a request with Dart's default user agent (`Dart/3.x (dart:io)`) with
@@ -3080,8 +3107,14 @@ Haushalt die Frequenz an seinem Ort einmal auf, solange das Netz geht, und
 sie reist als `radioFrequencies` mit dem Haushalt (eine Küche, ein Ort).
 `parseUkwFrequency` nimmt 87,5 bis 108 MHz im 50-kHz-Raster. Ohne
 Frequenz findet ein Suchlauf das Programm über RDS beziehungsweise die
-DAB+-Liste. Die Seite steht auch im Notfallzugang, also ohne Haushalt;
-dann fragt sie nach dem Land.
+DAB+-Liste.
+
+Die Seite steht auch im Notfallzugang, und der zeigt nichts Privates.
+Dort öffnet sie als `BroadcastRadioScreen.withoutHousehold()` (#269):
+ohne das Land des Haushalts, ohne seine Frequenzen und ohne Eintragen.
+Beides verrät grob, wo der Haushalt wohnt, und eingetragen hätte sie
+jeder, der das gesperrte Telefon hält. Sie fragt dann nach dem Land wie
+ohne Haushalt.
 
 Kein Nachrichtenstrom und keine eigene Lageeinschätzung (#62): Offline
 veraltet er und täuscht Aktualität vor, die Auswahl der Quellen wäre eine

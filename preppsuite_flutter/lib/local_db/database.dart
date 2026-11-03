@@ -918,15 +918,18 @@ class AppDatabase extends _$AppDatabase {
         .getSingleOrNull();
   }
 
-  /// Items below their configured minimum — used by the "missing
-  /// equipment" PDF report.
-  Future<List<InventoryItem>> lowStockInventoryItems(String householdId) {
+  /// Items with a minimum, for the "missing equipment" PDF report to
+  /// pick those below it from.
+  ///
+  /// Not compared here: whether a pack in daily use is below its minimum
+  /// depends on the days since it was counted, which SQL does not know
+  /// (`stock_today.dart`, #268).
+  Future<List<InventoryItem>> inventoryItemsWithMinimum(String householdId) {
     return (select(inventoryItems)..where(
           (t) =>
               t.householdId.equals(householdId) &
               t.deletedAt.isNull() &
-              t.minQuantity.isNotNull() &
-              t.quantity.isSmallerThan(t.minQuantity),
+              t.minQuantity.isNotNull(),
         ))
         .get();
   }

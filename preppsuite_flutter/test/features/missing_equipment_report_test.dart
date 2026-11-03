@@ -4,6 +4,7 @@ import 'package:drift/drift.dart' hide isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/budget/application/missing_equipment_report.dart';
+import 'package:preppsuite_flutter/features/inventory/application/stock_today.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
 const _strings = MissingEquipmentReportStrings(
@@ -154,8 +155,16 @@ void main() {
       ),
     );
 
-    final lowStock = await db.lowStockInventoryItems('household-1');
+    final withMinimum = await db.inventoryItemsWithMinimum('household-1');
+    final lowStock = [
+      for (final item in withMinimum)
+        if (isBelowMinimum(item)) item,
+    ];
 
+    expect(withMinimum.map((i) => i.clientId).toSet(), {
+      'low-stock',
+      'well-stocked',
+    });
     expect(lowStock.map((i) => i.clientId), ['low-stock']);
   });
 }

@@ -6019,7 +6019,7 @@ abstract class AppLocalizations {
   /// No description provided for @inventoryExpiringSoon.
   ///
   /// In en, this message translates to:
-  /// **'Expires in the next 7 days'**
+  /// **'Expires within 30 days'**
   String get inventoryExpiringSoon;
 
   /// No description provided for @inventorySortLabel.
@@ -17004,6 +17004,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add the frequency for where you live now, while the network works. The broadcasters list it on their sites under reception, or you read it off the radio. Frequencies added here count for the whole household.'**
   String get broadcastRadioTuneNow;
+
+  /// No description provided for @broadcastRadioLockedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This page shows the frequencies the household wrote down only once the app is unlocked.'**
+  String get broadcastRadioLockedNote;
 
   /// No description provided for @broadcastRadioLookUp.
   ///

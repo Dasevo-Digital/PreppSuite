@@ -184,7 +184,7 @@ void main() {
 
     expect(find.text('abgelaufen'), findsOneWidget);
     expect(find.text('unter Mindestmenge'), findsOneWidget);
-    expect(find.text('läuft in 30 Tagen ab'), findsOneWidget);
+    expect(find.text('läuft in den nächsten 30 Tagen ab'), findsOneWidget);
   });
 
   testWidgets('a warning for this region is named on the card', (tester) async {

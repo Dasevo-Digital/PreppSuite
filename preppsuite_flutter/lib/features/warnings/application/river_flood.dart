@@ -197,12 +197,16 @@ class RiverFloodClient {
     final points = samplePoints(latitude, longitude);
     final answers = <String?>[];
     for (var i = 0; i < points.length; i += 4) {
-      answers.addAll(
-        await Future.wait([
-          for (final (lat, lon) in points.skip(i).take(4))
-            _ask(source.uri(lat, lon)),
-        ]),
-      );
+      final batch = await Future.wait([
+        for (final (lat, lon) in points.skip(i).take(4))
+          _get(source.uri(lat, lon)),
+      ]);
+      // Nobody at home: the other points are on the same host, and each
+      // batch would wait out the same twenty seconds again (#270).
+      if (batch.every((answer) => !answer.reached)) {
+        throw http.ClientException('the flood map service did not answer');
+      }
+      answers.addAll([for (final answer in batch) answer.body]);
     }
     if (answers.every((answer) => answer == null)) {
       throw http.ClientException('no answer from the flood map service');
@@ -298,6 +302,9 @@ class RiverFloodClient {
       final List<NationalFloodLayer> layers;
       try {
         (service, layers) = await _queryableService(candidates);
+      } on _Unreachable {
+        // Every other service is on the same host (#270).
+        throw http.ClientException('the national flood map did not answer');
       } on Object {
         continue;
       }
@@ -315,9 +322,13 @@ class RiverFloodClient {
       var deepest = 0;
       var heardOwn = false;
       for (final layer in [...own, ...neighbours]) {
-        final body = await _ask(
+        final answer = await _get(
           _nationalQuery(service, layer.id, latitude, longitude),
         );
+        if (!answer.reached) {
+          throw http.ClientException('the national flood map did not answer');
+        }
+        final body = answer.body;
         // An answer whose polygons do not carry the field is as good as
         // none: read as "no codes", it was dry land.
         final codes = body == null
@@ -348,15 +359,24 @@ class RiverFloodClient {
   }
 
   /// The first of [candidates] with layers that can be queried, and those
-  /// layers. Throws when there is none.
+  /// layers. Throws when there is none, and [_Unreachable] as soon as the
+  /// host does not answer at all.
+  ///
+  /// A service that is gone, stopped or only drawable gives way to the
+  /// next one; a host that is silent does not. All candidates are on it,
+  /// and asking each in turn waited twenty seconds apiece -- three
+  /// minutes over the three scenarios before the screen could say "not
+  /// reachable" (#270).
   Future<(String, List<NationalFloodLayer>)> _queryableService(
     List<String> candidates,
   ) async {
     for (final service in candidates) {
       try {
         return (service, await _layersOf(service));
+      } on _Unreachable {
+        rethrow;
       } on Object {
-        // Gone, stopped, only drawable, or unreachable: the next one.
+        // Gone, stopped or only drawable: the next one.
       }
     }
     throw http.ClientException('no national service for this scenario');
@@ -366,9 +386,11 @@ class RiverFloodClient {
     final cached = _nationalLayers[service];
     if (cached != null) return cached;
     final loading = () async {
-      final body = await _ask(
+      final answer = await _get(
         Uri.parse('$_national/$service/MapServer/layers?f=json'),
       );
+      if (!answer.reached) throw const _Unreachable();
+      final body = answer.body;
       final layers = body == null ? null : parseNationalLayers(body);
       if (layers == null || layers.isEmpty) {
         throw http.ClientException('no layers in $service');
@@ -413,16 +435,23 @@ class RiverFloodClient {
     );
   }
 
-  Future<String?> _ask(Uri uri) async {
+  /// The body of an answer, or null for a refusal; [reached] is false
+  /// where nothing came back at all -- no connection, or nothing within
+  /// the time -- which, unlike a refusal, holds for the whole host.
+  Future<({String? body, bool reached})> _get(Uri uri) async {
+    final http.Response response;
     try {
-      final response = await _httpClient
+      response = await _httpClient
           .get(uri, headers: {'User-Agent': 'PreppSuite/1.0'})
           .timeout(const Duration(seconds: 20));
-      if (response.statusCode != 200) return null;
-      return utf8.decode(response.bodyBytes, allowMalformed: true);
     } on Object {
-      return null;
+      return (body: null, reached: false);
     }
+    if (response.statusCode != 200) return (body: null, reached: true);
+    return (
+      body: utf8.decode(response.bodyBytes, allowMalformed: true),
+      reached: true,
+    );
   }
 
   static Uri _niedersachsenUri(double latitude, double longitude) {
@@ -477,6 +506,11 @@ class RiverFloodClient {
       },
     );
   }
+}
+
+/// The national map's host did not answer at all (#270).
+class _Unreachable implements Exception {
+  const _Unreachable();
 }
 
 class _RiverSource {

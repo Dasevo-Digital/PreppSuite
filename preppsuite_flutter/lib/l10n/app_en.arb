@@ -2108,7 +2108,7 @@
   "inventoryFilterStatus": "Stock status",
   "inventoryFilterAll": "All",
   "inventoryNoLocation": "No storage location",
-  "inventoryExpiringSoon": "Expires in the next 7 days",
+  "inventoryExpiringSoon": "Expires within 30 days",
   "inventorySortLabel": "Sort by",
   "inventorySortName": "Name",
   "inventorySortExpiry": "Expiry date",
@@ -6099,6 +6099,7 @@
   "broadcastRadioTuneUkw": "FM: start a station scan. Most radios show the programme's name (RDS).",
   "broadcastRadioTuneDab": "DAB+: start a scan and choose the programme from the list.",
   "broadcastRadioTuneNow": "Add the frequency for where you live now, while the network works. The broadcasters list it on their sites under reception, or you read it off the radio. Frequencies added here count for the whole household.",
+  "broadcastRadioLockedNote": "This page shows the frequencies the household wrote down only once the app is unlocked.",
   "broadcastRadioLookUp": "Frequencies on {host}",
   "@broadcastRadioLookUp": {"placeholders": {"host": {"type": "String"}}},
   "broadcastRadioSource": "Programme names and distribution as in the official publication of the radio programmes of the ARD state broadcasters and Deutschlandradio (§ 29 (4) Medienstaatsvertrag), as of 1 February 2022. This page names no frequencies itself: every programme has many transmitters, and a wrong one would be a radio searching for nothing."

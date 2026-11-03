@@ -11,6 +11,7 @@ import 'inventory_providers.dart';
 import 'item_package.dart';
 import 'package_nutrition.dart';
 import 'inventory_numbers.dart';
+import 'stock_today.dart';
 import '../../../core/number_input.dart';
 
 /// Local writes: create, update, and delete-as-tombstone. The UI never
@@ -165,11 +166,16 @@ class InventoryController {
     final now = DateTime.now().toUtc();
     // A new figure is a new count. Anything else on the row -- a name, a
     // shelf, a note -- leaves the count where it was: a pack in daily use
-    // counted from a rename would read as full again (#150).
+    // counted from a rename would read as full again (#150). A stock that
+    // starts being taken from daily is counted from today as well; from
+    // its old count, a reserve put into use would arrive half empty
+    // (#268).
     if (package != null && !isNonNegativeFinite(package.size)) {
       throw const InvalidInventoryNumbers();
     }
-    final recounted = quantity != existing.quantity;
+    final recounted =
+        quantity != existing.quantity ||
+        (refillLeadDays != null && existing.refillLeadDays == null);
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
         clientId: existing.clientId,
@@ -250,10 +256,10 @@ class InventoryController {
     if (!isNonNegativeFinite(amount) || hasInvalidInventoryNumbers(existing)) {
       throw const InvalidInventoryNumbers();
     }
-    final remaining = (existing.quantity - amount).clamp(
-      0.0,
-      existing.quantity,
-    );
+    // From what is there today: a pack in daily use has been taken from
+    // since it was counted, and the new count starts now (#268).
+    final onHand = stockToday(existing);
+    final remaining = (onHand - amount).clamp(0.0, onHand);
 
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
@@ -291,9 +297,11 @@ class InventoryController {
   /// Added to the row as it is stored, not as the shopping list showed
   /// it: the list may be minutes old, and another device may have booked
   /// some of it down since. Buying is counting as well, so the count's
-  /// date moves on, which is what a pack in daily use runs out from. All
-  /// in one transaction: the lists recount once, and a booking cut short
-  /// books nothing. Returns what was booked, for [takeBackPurchases].
+  /// date moves on, which is what a pack in daily use runs out from --
+  /// and its new count is what is left of it today plus what was bought,
+  /// not the old count plus what was bought (#268). All in one
+  /// transaction: the lists recount once, and a booking cut short books
+  /// nothing. Returns what was booked, for [takeBackPurchases].
   Future<Map<String, double>> bookPurchases(Map<String, double> bought) async {
     for (final amount in bought.values) {
       if (!isNonNegativeFinite(amount) || amount <= 0) {
@@ -309,7 +317,7 @@ class InventoryController {
         if (hasInvalidInventoryNumbers(row)) {
           throw const InvalidInventoryNumbers();
         }
-        final quantity = row.quantity + amount;
+        final quantity = stockToday(row, now: now) + amount;
         requireInventoryNumbers(
           quantity: quantity,
           minQuantity: row.minQuantity,

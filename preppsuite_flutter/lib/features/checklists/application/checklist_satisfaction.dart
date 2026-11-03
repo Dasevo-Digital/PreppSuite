@@ -1,14 +1,20 @@
 import '../../../local_db/database.dart';
+import '../../inventory/application/stock_today.dart';
 
+/// Ticked, or covered by the stock it is linked to -- as that stands
+/// today, so a pack in daily use stops covering it as it is used (#268).
 bool isChecklistItemSatisfied(
   ChecklistItem item,
-  Map<String, InventoryItem> inventoryById,
-) {
+  Map<String, InventoryItem> inventoryById, {
+  DateTime? now,
+}) {
   if (item.isChecked) return true;
   final linked = inventoryById[item.linkedInventoryItemId];
-  if (linked == null || linked.quantity <= 0) return false;
+  if (linked == null) return false;
+  final stock = stockToday(linked, now: now);
+  if (stock <= 0) return false;
   final target = item.targetQuantity;
-  return target == null || target <= 0 || linked.quantity >= target;
+  return target == null || target <= 0 || stock >= target;
 }
 
 /// How far each list has got, in one pass over every item.

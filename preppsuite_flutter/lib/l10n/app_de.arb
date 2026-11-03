@@ -1069,7 +1069,7 @@
   "overviewChargeDone": "Geprüft",
   "overviewExpired": "abgelaufen",
   "overviewLowStock": "unter Mindestmenge",
-  "overviewExpiringSoon": "läuft in 30 Tagen ab",
+  "overviewExpiringSoon": "läuft in den nächsten 30 Tagen ab",
   "overviewNoWarnings": "Zurzeit keine Warnung für deine Regionen.",
   "overviewChecklistLists": "{complete} von {total} Listen vollständig",
   "overviewResourcesTitle": "Ressourcen",
@@ -1089,7 +1089,7 @@
   "inventoryFilterStatus": "Bestandsstatus",
   "inventoryFilterAll": "Alle",
   "inventoryNoLocation": "Ohne Lagerort",
-  "inventoryExpiringSoon": "Läuft in den nächsten 7 Tagen ab",
+  "inventoryExpiringSoon": "Läuft in den nächsten 30 Tagen ab",
   "inventorySortLabel": "Sortieren nach",
   "inventorySortName": "Name",
   "inventorySortExpiry": "Ablaufdatum",
@@ -4402,6 +4402,7 @@
   "broadcastRadioTuneUkw": "UKW: Sendersuchlauf starten. Die meisten Radios zeigen den Namen des Programms an (RDS).",
   "broadcastRadioTuneDab": "DAB+: Suchlauf starten und das Programm aus der Liste wählen.",
   "broadcastRadioTuneNow": "Tragt die Frequenz für euren Ort jetzt ein, solange das Netz geht. Die Sender nennen sie auf ihren Seiten unter „Empfang“, oder ihr lest sie am Radio ab. Eingetragene Frequenzen gelten für den ganzen Haushalt.",
+  "broadcastRadioLockedNote": "Frequenzen, die der Haushalt eingetragen hat, zeigt diese Seite erst in der entsperrten App.",
   "broadcastRadioLookUp": "Frequenzen auf {host}",
   "broadcastRadioSource": "Programmnamen und Verbreitung nach der amtlichen Veröffentlichung der Hörfunkprogramme der ARD-Landesrundfunkanstalten und des Deutschlandradios (§ 29 Abs. 4 Medienstaatsvertrag), Stand 1. Februar 2022. Frequenzen nennt diese Seite nicht selbst: Jedes Programm hat viele Sender, und eine falsche Angabe wäre ein Radio, das ins Leere sucht."
 }

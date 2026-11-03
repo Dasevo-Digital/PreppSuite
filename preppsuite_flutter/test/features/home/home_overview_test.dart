@@ -76,6 +76,22 @@ void main() {
       expect(overview.expired, 0);
     });
 
+    test('the thirtieth day is soon at any hour (#271)', () {
+      // Thirty times 24 hours from half past midnight ended at half past
+      // eleven the evening before, once the end of summer time lay in
+      // between, and the thirtieth day was not soon any more.
+      final overview = summarizeInventory([
+        item(expirationDate: DateTime(2026, 11, 19)),
+        item(clientId: 'b', expirationDate: DateTime(2026, 11, 20)),
+      ], now: DateTime(2026, 10, 20, 0, 30));
+
+      expect(overview.expiringSoon, 1);
+      expect(
+        expiresSoon(DateTime(2026, 11, 19), DateTime(2026, 10, 20)),
+        isTrue,
+      );
+    });
+
     test('a day past the window is neither', () {
       final overview = summarizeInventory([
         item(expirationDate: now.add(soonWindow + const Duration(days: 1))),

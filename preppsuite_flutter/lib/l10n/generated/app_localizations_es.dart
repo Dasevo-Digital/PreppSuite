@@ -3564,7 +3564,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get overviewLowStock => 'por debajo del mínimo';
 
   @override
-  String get overviewExpiringSoon => 'caduca en 30 días';
+  String get overviewExpiringSoon => 'caduca en los próximos 30 días';
 
   @override
   String get overviewNoWarnings =>
@@ -3633,7 +3633,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get inventoryNoLocation => 'Sin lugar de almacenamiento';
 
   @override
-  String get inventoryExpiringSoon => 'Caduca en los próximos 7 días';
+  String get inventoryExpiringSoon => 'Caduca en los próximos 30 días';
 
   @override
   String get inventorySortLabel => 'Ordenar por';
@@ -10408,6 +10408,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get broadcastRadioTuneNow =>
       'Añadid ahora la frecuencia de vuestro lugar, mientras funcione la red. Las emisoras la indican en sus páginas, en el apartado de recepción, o la leéis en la radio. Las frecuencias añadidas valen para todo el hogar.';
+
+  @override
+  String get broadcastRadioLockedNote =>
+      'Esta página solo muestra las frecuencias que anotó el hogar cuando la aplicación está desbloqueada.';
 
   @override
   String broadcastRadioLookUp(String host) {

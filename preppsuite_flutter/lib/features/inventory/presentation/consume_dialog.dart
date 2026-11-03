@@ -4,6 +4,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/food_amount.dart';
 import '../application/item_package.dart';
+import '../application/stock_today.dart';
 
 /// Asks how much of an item was used up, and answers in the item's unit.
 ///
@@ -55,7 +56,9 @@ class _ConsumeDialogState extends State<ConsumeDialog> {
     super.dispose();
   }
 
-  double get _quantity => widget.item.quantity;
+  /// What is there today: a pack in daily use less what was taken since
+  /// it was counted (#268).
+  late final double _quantity = stockToday(widget.item);
 
   String _suggestion() {
     final package = _package;

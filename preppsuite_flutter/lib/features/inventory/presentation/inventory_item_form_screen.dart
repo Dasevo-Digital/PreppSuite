@@ -36,6 +36,7 @@ import 'photo_editor_screen.dart';
 import '../application/food_amount.dart';
 import '../application/charge_reminder_provider.dart';
 import '../application/device_charge.dart';
+import '../application/stock_today.dart';
 import 'stored_photo_image.dart';
 
 /// A form filled in from somewhere other than an existing row — the
@@ -231,7 +232,9 @@ class _InventoryItemFormScreenState
     );
     _quantityController = TextEditingController(
       text: switch ((existing, draft)) {
-        (final InventoryItem item, _) => _formatNumber(item.quantity),
+        // What is there today. For a pack in daily use that is less than
+        // its last count, and saving it is a count as of today (#268).
+        (final InventoryItem item, _) => _formatNumber(stockToday(item)),
         (_, final InventoryItemDraft d) => _formatNumber(d.quantity),
         _ => '',
       },

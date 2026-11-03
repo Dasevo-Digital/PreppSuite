@@ -43,13 +43,14 @@ void main() {
     },
   );
   test(
-    'date-only expiry distinguishes yesterday, today and the seven-day boundary',
+    'date-only expiry distinguishes yesterday, today and the end of "soon"',
     () {
+      // Thirty days, as on the overview that leads here (#271).
       final items = [
         item('old', days: -1),
         item('today', days: 0),
-        item('soon', days: 7),
-        item('later', days: 8),
+        item('soon', days: 30),
+        item('later', days: 31),
         item('none'),
       ];
       expect(

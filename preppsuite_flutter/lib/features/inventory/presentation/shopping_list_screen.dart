@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/calendar_day.dart';
 import '../../../core/content_swap.dart';
 import '../../../core/number_input.dart';
 import '../../household/application/household_providers.dart';
@@ -54,6 +55,8 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
       dogs: profile?.dogs ?? 0,
       cats: profile?.cats ?? 0,
     );
+    // A pack in daily use runs lower every day without a write (#268).
+    final today = ref.watch(calendarDayProvider);
     final items = itemsAsync.value;
     final shoppingList = items == null
         ? null
@@ -62,6 +65,7 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
               items: items,
               days: widget.days,
               household: household,
+              now: today,
             ),
           );
 

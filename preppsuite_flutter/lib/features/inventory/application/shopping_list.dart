@@ -8,6 +8,7 @@
 library;
 
 import '../../../local_db/database.dart';
+import 'stock_today.dart';
 import 'supply_calculator.dart';
 
 /// One line to buy: an item under the minimum its household set for it.
@@ -16,8 +17,9 @@ class ShoppingListEntry {
 
   final InventoryItem item;
 
-  /// How much is missing, in the item's own unit. Always above zero —
-  /// an entry only exists because something is short.
+  /// How much is missing today, in the item's own unit. Always above
+  /// zero -- an entry only exists because something is short. For a pack
+  /// in daily use counted from what is left of it today (#268).
   final double shortfall;
 
   /// The share of the minimum that is missing, 0..1.
@@ -71,6 +73,7 @@ ShoppingList buildShoppingList({
   required List<InventoryItem> items,
   required int days,
   SupplyHousehold household = const SupplyHousehold(),
+  DateTime? now,
 }) {
   final supply = calculateSupply(
     items: items,
@@ -84,7 +87,7 @@ ShoppingList buildShoppingList({
     // An item without a minimum is not "at zero", it is unanswered. Only
     // a household that stated a target can be short of it.
     if (minimum == null) continue;
-    final shortfall = minimum - item.quantity;
+    final shortfall = minimum - stockToday(item, now: now);
     if (shortfall <= 0) continue;
     entries.add(ShoppingListEntry(item: item, shortfall: shortfall));
   }

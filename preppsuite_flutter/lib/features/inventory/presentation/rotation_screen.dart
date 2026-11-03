@@ -9,6 +9,7 @@ import '../../../local_db/database.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_providers.dart';
 import '../application/rotation.dart';
+import '../application/stock_today.dart';
 import 'consume_dialog.dart';
 import 'inventory_item_form_screen.dart';
 import '../../../core/error_text.dart';
@@ -170,7 +171,7 @@ class _RotationTile extends ConsumerWidget {
         '${_remaining()} · ${_date(entry.item.expirationDate!)}'
         ' · ${_quantity(entry.item)}',
       ),
-      trailing: entry.item.quantity > 0
+      trailing: stockToday(entry.item) > 0
           ? IconButton(
               icon: const Icon(Icons.remove_circle_outline),
               tooltip: l10n.consumeAction,
@@ -231,8 +232,9 @@ String _date(DateTime value) =>
     DateFormat.yMd().format(value.isUtc ? value.toLocal() : value);
 
 String _quantity(InventoryItem item) {
-  final quantity = item.quantity == item.quantity.roundToDouble()
-      ? item.quantity.toStringAsFixed(0)
-      : item.quantity.toString();
+  final stock = stockToday(item);
+  final quantity = stock == stock.roundToDouble()
+      ? stock.toStringAsFixed(0)
+      : stock.toString();
   return '$quantity ${item.unit}';
 }

@@ -3563,7 +3563,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get overviewLowStock => 'unter Mindestmenge';
 
   @override
-  String get overviewExpiringSoon => 'läuft in 30 Tagen ab';
+  String get overviewExpiringSoon => 'läuft in den nächsten 30 Tagen ab';
 
   @override
   String get overviewNoWarnings => 'Zurzeit keine Warnung für deine Regionen.';
@@ -3631,7 +3631,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get inventoryNoLocation => 'Ohne Lagerort';
 
   @override
-  String get inventoryExpiringSoon => 'Läuft in den nächsten 7 Tagen ab';
+  String get inventoryExpiringSoon => 'Läuft in den nächsten 30 Tagen ab';
 
   @override
   String get inventorySortLabel => 'Sortieren nach';
@@ -10375,6 +10375,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get broadcastRadioTuneNow =>
       'Tragt die Frequenz für euren Ort jetzt ein, solange das Netz geht. Die Sender nennen sie auf ihren Seiten unter „Empfang“, oder ihr lest sie am Radio ab. Eingetragene Frequenzen gelten für den ganzen Haushalt.';
+
+  @override
+  String get broadcastRadioLockedNote =>
+      'Frequenzen, die der Haushalt eingetragen hat, zeigt diese Seite erst in der entsperrten App.';
 
   @override
   String broadcastRadioLookUp(String host) {

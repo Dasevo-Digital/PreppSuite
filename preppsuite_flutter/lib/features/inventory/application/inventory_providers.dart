@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_database_providers.dart';
 import '../../../local_db/database.dart';
 import 'device_charge.dart';
+import 'stock_today.dart';
 
 export '../../../core/app_database_providers.dart';
 
@@ -26,8 +27,7 @@ final inventoryAttentionCountProvider = Provider.autoDispose
       // Past its date from the day after, as everywhere else (#234).
       final today = DateTime(now.year, now.month, now.day);
       return items.where((item) {
-        final isLowStock =
-            item.minQuantity != null && item.quantity < item.minQuantity!;
+        final isLowStock = isBelowMinimum(item, now: now);
         final isExpired =
             item.expirationDate != null && item.expirationDate!.isBefore(today);
         // A device whose battery check has come round wants looking at

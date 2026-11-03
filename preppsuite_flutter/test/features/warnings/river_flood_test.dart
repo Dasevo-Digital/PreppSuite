@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -616,6 +617,42 @@ void main() {
         hasLength(1),
       );
       expect(asked.where((p) => p.contains('RWH/MapServer/37/')), isEmpty);
+    });
+
+    test('a silent host is asked once, not once per service (#270)', () async {
+      final asked = <Uri>[];
+      final client = RiverFloodClient(
+        httpClient: MockClient((request) async {
+          asked.add(request.url);
+          throw TimeoutException('no answer');
+        }),
+      );
+      await expectLater(
+        client.check(50.1065, 8.6820, stateCode: 'HE'),
+        throwsA(isA<http.ClientException>()),
+      );
+      expect(asked, hasLength(1));
+    });
+
+    test('a silent Land host gives way after one round (#270)', () async {
+      final land = <Uri>[];
+      final client = RiverFloodClient(
+        httpClient: MockClient((request) async {
+          if (request.url.host == 'www.umweltkarten-niedersachsen.de') {
+            land.add(request.url);
+            throw TimeoutException('no answer');
+          }
+          // The national map is down as well: what is measured is how
+          // long it takes to say so.
+          return http.Response('', 503);
+        }),
+      );
+      await expectLater(
+        client.check(52.378, 9.700, stateCode: 'NI'),
+        throwsA(isA<http.ClientException>()),
+      );
+      // The first four points, asked together; not the other thirteen.
+      expect(land, hasLength(4));
     });
 
     test(

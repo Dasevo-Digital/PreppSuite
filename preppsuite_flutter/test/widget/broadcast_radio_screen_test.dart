@@ -26,6 +26,7 @@ void main() {
   Future<AppLocalizations> pump(
     WidgetTester tester, {
     HouseholdProfile? profile,
+    Widget screen = const BroadcastRadioScreen(),
   }) async {
     await tester.binding.setSurfaceSize(const Size(420, 1400));
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -34,11 +35,11 @@ void main() {
         overrides: [
           householdProfileProvider.overrideWith(() => _FixedProfile(profile)),
         ],
-        child: const MaterialApp(
-          locale: Locale('de'),
+        child: MaterialApp(
+          locale: const Locale('de'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: BroadcastRadioScreen(),
+          home: screen,
         ),
       ),
     );
@@ -90,7 +91,7 @@ void main() {
     // Deutschlandfunk is everywhere, Land or not.
     expect(find.text('Deutschlandfunk'), findsOneWidget);
 
-    await tester.tap(find.text(l10n.broadcastRadioChooseState));
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Bayern').last);
     await tester.pumpAndSettle();
@@ -118,4 +119,38 @@ void main() {
 
     expect(find.text(l10n.broadcastRadioFrequencyHere('89,2')), findsOneWidget);
   });
+
+  testWidgets(
+    'in the emergency access nothing of the household shows (#269)',
+    (tester) async {
+      SharedPreferences.setMockInitialValues({
+        BroadcastFrequencyStore.key: '{"ndr1-niedersachsen": 95.6}',
+      });
+      final l10n = await pump(
+        tester,
+        profile: const HouseholdProfile(
+          id: 'h',
+          name: 'Haushalt',
+          countryCode: 'DE',
+          regionKey: '03241',
+        ),
+        screen: const BroadcastRadioScreen.withoutHousehold(),
+      );
+
+      // Not the household's Land, not its frequency, and no way to write
+      // one down.
+      expect(find.text(l10n.broadcastRadioChooseState), findsOneWidget);
+      expect(find.text('NDR 1 Niedersachsen'), findsNothing);
+      expect(find.text(l10n.broadcastRadioFrequencyHere('95,6')), findsNothing);
+      expect(find.text(l10n.broadcastRadioFrequencyAdd), findsNothing);
+      expect(find.text(l10n.broadcastRadioLockedNote), findsOneWidget);
+
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Niedersachsen').last);
+      await tester.pumpAndSettle();
+      expect(find.text('NDR 1 Niedersachsen'), findsOneWidget);
+      expect(find.text(l10n.broadcastRadioFrequencyHere('95,6')), findsNothing);
+    },
+  );
 }

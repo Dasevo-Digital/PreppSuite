@@ -42,5 +42,7 @@ cd "$APP"
 flutter analyze
 TZ=Europe/Berlin flutter test --no-pub \
   test/features/inventory/inventory_calendar_export_test.dart \
+  test/features/inventory/stock_today_test.dart \
+  test/features/home/home_overview_test.dart \
   test/core/calendar_days_test.dart
 flutter test --no-pub

@@ -5,9 +5,11 @@
 /// whether the number reassures someone who should be worried.
 library;
 
+import '../../../core/calendar_days.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
 import '../../inventory/application/inventory_category_l10n.dart';
+import '../../inventory/application/stock_today.dart';
 
 /// The state of the stores, in the terms the overview shows them.
 class InventoryOverview {
@@ -47,6 +49,21 @@ class InventoryOverview {
 /// enough to act on, short enough that the number stays small.
 const soonWindow = Duration(days: 30);
 
+/// Whether [expiry] falls on today or one of the [soonWindow] calendar
+/// days after it.
+///
+/// The one "soon" of the overview, the rotation and the inventory filter
+/// (#271). The filter's was a week, so "5 bald" on the overview opened a
+/// list with two in it. And the overview counted thirty times 24 hours
+/// from the moment it was drawn, so whether the thirtieth day was still
+/// soon depended on the hour -- and across the end of summer time, on the
+/// clock change.
+bool expiresSoon(DateTime expiry, DateTime today) {
+  final local = expiry.isUtc ? expiry.toLocal() : expiry;
+  final days = calendarDaysBetween(today, local);
+  return days >= 0 && days <= soonWindow.inDays;
+}
+
 InventoryOverview summarizeInventory(
   List<InventoryItem> items, {
   DateTime? now,
@@ -56,7 +73,6 @@ InventoryOverview summarizeInventory(
   // an item marked for today runs out today and is not past it yet (#234).
   final local = at.toLocal();
   final today = DateTime(local.year, local.month, local.day);
-  final horizon = at.add(soonWindow);
 
   final byCategory = {
     for (final category in InventoryItemCategory.values) category: 0,
@@ -74,13 +90,12 @@ InventoryOverview summarizeInventory(
     if (expiry != null) {
       if (expiry.isBefore(today)) {
         expired++;
-      } else if (expiry.isBefore(horizon)) {
+      } else if (expiresSoon(expiry, today)) {
         expiringSoon++;
       }
     }
 
-    final minimum = item.minQuantity;
-    if (minimum != null && item.quantity < minimum) lowStock++;
+    if (isBelowMinimum(item, now: at)) lowStock++;
   }
 
   return InventoryOverview(

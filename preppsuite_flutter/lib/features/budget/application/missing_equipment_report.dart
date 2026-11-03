@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 import '../../../local_db/database.dart';
 import '../../checklists/application/built_in_template_l10n.dart';
+import '../../inventory/application/stock_today.dart';
 
 /// Localized strings for the report, gathered from `AppLocalizations` by
 /// the caller — keeps this generator free of a `BuildContext` dependency.
@@ -51,7 +52,11 @@ class MissingEquipmentReport {
   }) async {
     final uncheckedItems = await db.uncheckedChecklistItems(householdId);
     final templates = await db.allChecklistTemplates(householdId);
-    final lowStockItems = await db.lowStockInventoryItems(householdId);
+    final now = DateTime.now();
+    final lowStockItems = [
+      for (final item in await db.inventoryItemsWithMinimum(householdId))
+        if (isBelowMinimum(item, now: now)) item,
+    ];
 
     final templateTitleByClientId = {
       for (final template in templates)
@@ -132,7 +137,7 @@ class MissingEquipmentReport {
                 for (final item in lowStockItems)
                   [
                     item.name,
-                    _formatNumber(item.quantity),
+                    _formatNumber(stockToday(item, now: now)),
                     _formatNumber(item.minQuantity!),
                     item.unit,
                   ],

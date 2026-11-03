@@ -3610,7 +3610,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inventoryNoLocation => 'No storage location';
 
   @override
-  String get inventoryExpiringSoon => 'Expires in the next 7 days';
+  String get inventoryExpiringSoon => 'Expires within 30 days';
 
   @override
   String get inventorySortLabel => 'Sort by';
@@ -10323,6 +10323,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get broadcastRadioTuneNow =>
       'Add the frequency for where you live now, while the network works. The broadcasters list it on their sites under reception, or you read it off the radio. Frequencies added here count for the whole household.';
+
+  @override
+  String get broadcastRadioLockedNote =>
+      'This page shows the frequencies the household wrote down only once the app is unlocked.';
 
   @override
   String broadcastRadioLookUp(String host) {

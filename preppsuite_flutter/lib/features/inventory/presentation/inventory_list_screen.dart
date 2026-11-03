@@ -21,6 +21,7 @@ import '../application/inventory_calendar_export.dart';
 import '../application/inventory_csv_export.dart';
 import '../application/inventory_controller.dart';
 import '../application/inventory_providers.dart';
+import '../application/stock_today.dart';
 import '../../energy/presentation/energy_screen.dart';
 import '../application/inventory_photo_service.dart';
 import 'barcode_scanner_screen.dart';
@@ -509,9 +510,11 @@ class _InventoryTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final category = InventoryItemCategoryX.fromName(item.category);
-    final isLowStock =
-        item.minQuantity != null && item.quantity < item.minQuantity!;
     final now = DateTime.now();
+    // What is there today, which for a pack in daily use is less than
+    // its last count (#268).
+    final stock = stockToday(item, now: now);
+    final isLowStock = isBelowMinimum(item, now: now);
     final isExpired =
         item.expirationDate?.isBefore(DateTime(now.year, now.month, now.day)) ??
         false;
@@ -538,8 +541,8 @@ class _InventoryTile extends ConsumerWidget {
             ),
           Text(
             [
-              '${_formatQuantity(item.quantity)} ${item.unit}',
-              ?_packages(item),
+              '${_formatQuantity(stock)} ${item.unit}',
+              ?_packages(item, stock),
               item.storageLocation,
             ].join(' · '),
           ),
@@ -599,7 +602,7 @@ class _InventoryTile extends ConsumerWidget {
             ),
         ],
       ),
-      trailing: item.quantity > 0
+      trailing: stock > 0
           ? IconButton(
               icon: const Icon(Icons.remove_circle_outline),
               tooltip: l10n.consumeAction,
@@ -635,12 +638,12 @@ class _InventoryTile extends ConsumerWidget {
 
   /// "3 × Glas", or "≈ 2,7 × Glas" when the stock is not whole jars.
   /// Null for an item without a package, and for one used up entirely.
-  String? _packages(InventoryItem item) {
+  String? _packages(InventoryItem item, double stock) {
     final package = ItemPackage.of(item);
-    if (package == null || !item.quantity.isFinite || item.quantity <= 0) {
+    if (package == null || !stock.isFinite || stock <= 0) {
       return null;
     }
-    final (:count, :exact) = packageCount(item.quantity, package);
+    final (:count, :exact) = packageCount(stock, package);
     final formatted = _formatQuantity(count);
     return exact
         ? l10n.inventoryPackageCount(formatted, package.name)

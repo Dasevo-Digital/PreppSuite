@@ -19,7 +19,9 @@ import 'phone_call.dart';
 /// for: the emergency numbers, the first-aid guides and the compression
 /// rhythm are part of the app, the distress signal and the radio
 /// frequencies too. Nothing private is shown, so a locked app may show
-/// it as freely as a locked phone shows its emergency call.
+/// it as freely as a locked phone shows its emergency call -- which is
+/// why a screen that can show household data opens here without it
+/// (#269).
 class EmergencyAccessScreen extends StatelessWidget {
   const EmergencyAccessScreen({super.key});
 
@@ -81,7 +83,8 @@ class EmergencyAccessScreen extends StatelessWidget {
                   leading: const Icon(Icons.radio),
                   title: Text(l10n.broadcastRadioTitle),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => open(const BroadcastRadioScreen()),
+                  onTap: () =>
+                      open(const BroadcastRadioScreen.withoutHousehold()),
                 ),
                 ListTile(
                   leading: const Icon(Icons.radio_outlined),

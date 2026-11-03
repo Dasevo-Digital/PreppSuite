@@ -138,11 +138,13 @@ void main() {
     expect(daysUntilFederalWarningDay(from: DateTime(2027, 3, 1, 9)), 192);
   });
 
-  test('"expiring" is the coming week, the change inside it or not', () {
+  test('"expiring" is the coming thirty days, the change inside or not', () {
+    // The overview's window (#271), with the start of summer time on
+    // 28 March inside it.
     final now = DateTime(2027, 3, 21, 12);
     final items = [
-      item(clientId: 'in-seven', expires: DateTime(2027, 3, 28)),
-      item(clientId: 'in-eight', expires: DateTime(2027, 3, 29)),
+      item(clientId: 'in-thirty', expires: DateTime(2027, 4, 20)),
+      item(clientId: 'in-thirty-one', expires: DateTime(2027, 4, 21)),
     ];
 
     final expiring = filterInventory(
@@ -151,6 +153,6 @@ void main() {
       now: now,
     );
 
-    expect([for (final row in expiring) row.clientId], ['in-seven']);
+    expect([for (final row in expiring) row.clientId], ['in-thirty']);
   });
 }
