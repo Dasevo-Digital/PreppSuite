@@ -2,6 +2,7 @@ import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/settings_arrival.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../preparedness/presentation/preparedness_hub_screen.dart';
 import '../application/drill_progress_store.dart';
@@ -22,7 +23,8 @@ class PreparednessToolsScreen extends StatefulWidget {
       _PreparednessToolsScreenState();
 }
 
-class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
+class _PreparednessToolsScreenState extends State<PreparednessToolsScreen>
+    with RereadOnSettingsArrival {
   static const _store = DrillProgressStore();
 
   Set<String> _checked = {};
@@ -35,6 +37,9 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
     unawaited(_restore());
   }
 
+  @override
+  void settingsArrived() => unawaited(_restore());
+
   Future<void> _restore() async {
     final result = await Future.wait([_store.load(), _store.loadCompleted()]);
     if (mounted) {
@@ -45,18 +50,19 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen> {
     }
   }
 
-  void _toggle(_Scenario scenario, String step, {required bool on}) {
+  Future<void> _toggle(
+    _Scenario scenario,
+    String step, {
+    required bool on,
+  }) async {
     final key = '${scenario.id}:$step';
-    final updated = {..._checked};
-    if (on) {
-      updated.add(key);
-    } else {
-      updated.remove(key);
-    }
+    // Shown at once, written into what is stored now (#258).
     setState(() {
-      _checked = updated;
+      _checked = on ? {..._checked, key} : ({..._checked}..remove(key));
     });
-    unawaited(_store.save(updated));
+    final updated = await _store.setStep(key, done: on);
+    if (!mounted) return;
+    setState(() => _checked = updated);
     if (on &&
         scenario.steps.every(
           (item) => updated.contains('${scenario.id}:$item'),

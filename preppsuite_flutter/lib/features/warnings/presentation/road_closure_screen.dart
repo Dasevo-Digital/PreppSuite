@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/settings_arrival.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/road_closure_client.dart';
 import '../application/road_closure_store.dart';
@@ -28,7 +30,8 @@ class RoadClosureScreen extends StatefulWidget {
   State<RoadClosureScreen> createState() => _RoadClosureScreenState();
 }
 
-class _RoadClosureScreenState extends State<RoadClosureScreen> {
+class _RoadClosureScreenState extends State<RoadClosureScreen>
+    with RereadOnSettingsArrival {
   late final RoadClosureClient _client = widget.client ?? RoadClosureClient();
 
   var _roads = <String>[];
@@ -40,6 +43,17 @@ class _RoadClosureScreenState extends State<RoadClosureScreen> {
   void initState() {
     super.initState();
     _restore();
+  }
+
+  /// Roads chosen on another device are the roads here too (#258). Asked
+  /// again only when they changed: settings arrive for many reasons.
+  @override
+  void settingsArrived() => _rereadRoads();
+
+  Future<void> _rereadRoads() async {
+    final roads = await widget.store.load();
+    if (!mounted || listEquals(roads, _roads)) return;
+    await _restore();
   }
 
   Future<void> _restore() async {

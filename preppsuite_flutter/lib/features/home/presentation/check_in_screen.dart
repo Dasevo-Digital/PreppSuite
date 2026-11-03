@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/error_text.dart';
 import '../../../core/geolocation_service.dart';
+import '../../../core/settings_arrival.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../household/application/household_member_controller.dart';
 import '../../household/application/household_plan_controller.dart';
@@ -41,7 +42,8 @@ class CheckInScreen extends ConsumerStatefulWidget {
   ConsumerState<CheckInScreen> createState() => _CheckInScreenState();
 }
 
-class _CheckInScreenState extends ConsumerState<CheckInScreen> {
+class _CheckInScreenState extends ConsumerState<CheckInScreen>
+    with RereadOnSettingsArrival {
   late final GeolocationService _geolocation =
       widget.geolocation ?? GeolocationService();
   final _note = TextEditingController();
@@ -54,10 +56,17 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
   @override
   void initState() {
     super.initState();
+    _reload();
+    _note.addListener(() => setState(() {}));
+  }
+
+  @override
+  void settingsArrived() => _reload();
+
+  void _reload() {
     widget.store.load().then((contacts) {
       if (mounted) setState(() => _contacts = contacts);
     });
-    _note.addListener(() => setState(() {}));
   }
 
   @override
@@ -137,8 +146,14 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     _say(l10n.checkInCopied);
   }
 
-  Future<void> _save(List<CheckInContact> contacts) async {
-    setState(() => _contacts = contacts);
+  /// Applies [edit] to the contacts as they are stored now, not as this
+  /// screen last showed them, so a contact added on another device in the
+  /// meantime stays (#258).
+  Future<void> _change(
+    List<CheckInContact> Function(List<CheckInContact> stored) edit,
+  ) async {
+    final contacts = edit(await widget.store.load());
+    if (mounted) setState(() => _contacts = contacts);
     await widget.store.save(contacts);
   }
 
@@ -149,7 +164,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
       builder: (_) => _ContactDialog(l10n: l10n, name: name, phone: phone),
     );
     if (added == null) return;
-    await _save([..._contacts, added]);
+    await _change((stored) => [...stored, added]);
   }
 
   void _say(String message) {
@@ -241,10 +256,14 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
               leading: IconButton(
                 tooltip: l10n.checkInRemoveContact,
                 icon: const Icon(Icons.close),
-                onPressed: () => _save([
-                  for (final other in _contacts)
-                    if (other != contact) other,
-                ]),
+                onPressed: () => _change(
+                  (stored) => [
+                    for (final other in stored)
+                      if (other.name != contact.name ||
+                          other.phone != contact.phone)
+                        other,
+                  ],
+                ),
               ),
               trailing: _canText
                   ? FilledButton.icon(

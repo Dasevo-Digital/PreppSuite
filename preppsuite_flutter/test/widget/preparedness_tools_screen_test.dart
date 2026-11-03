@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/core/settings_arrival.dart';
 import 'package:preppsuite_flutter/features/home/application/drill_progress_store.dart';
 import 'package:preppsuite_flutter/features/home/presentation/preparedness_tools_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
@@ -71,6 +72,41 @@ void main() {
     await show(tester);
     final again = await openFirstDrill(tester);
     expect(tester.widget<CheckboxListTile>(again.first).value, isTrue);
+  });
+
+  testWidgets('a drill run on two devices keeps the ticks of both (#258)', (
+    tester,
+  ) async {
+    await show(tester);
+    final boxes = await openFirstDrill(tester);
+    expect(await const DrillProgressStore().load(), isEmpty);
+
+    // The other device ticked off a step of another drill.
+    await const DrillProgressStore().save({'other:0'});
+    await tester.tap(boxes.first);
+    await tester.pumpAndSettle();
+
+    final stored = await const DrillProgressStore().load();
+    expect(stored, contains('other:0'));
+    expect(stored, hasLength(2));
+  });
+
+  testWidgets('and shows the other device\'s ticks when they arrive', (
+    tester,
+  ) async {
+    await show(tester);
+    final boxes = await openFirstDrill(tester);
+    expect(tester.widget<CheckboxListTile>(boxes.first).value, isFalse);
+
+    final ticked = await const DrillProgressStore().setStep(
+      'power-outage:0',
+      done: true,
+    );
+    announceSettingsArrival();
+    await tester.pumpAndSettle();
+
+    expect(ticked, {'power-outage:0'});
+    expect(tester.widget<CheckboxListTile>(boxes.first).value, isTrue);
   });
 
   testWidgets('unticking it takes it back out again', (tester) async {

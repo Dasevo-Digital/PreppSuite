@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/energy/application/energy_range.dart';
 
@@ -189,6 +191,36 @@ void main() {
           'kind': 'nuclear',
           'label': 'x',
           'amount': 1,
+        }),
+        isNull,
+      );
+    });
+
+    test('a figure that is not finite is dropped (#256)', () {
+      // `jsonDecode('1e400')` is infinity, and one such figure from
+      // another device made the whole screen throw.
+      expect(
+        EnergyReserve.fromJson(
+          jsonDecode('{"id":"a","kind":"gas","label":"x","amount":1e400}'),
+        ),
+        isNull,
+      );
+      expect(
+        EnergyDraw.fromJson({
+          'id': 'a',
+          'kind': 'gas',
+          'label': 'x',
+          'perHour': double.nan,
+          'hoursPerDay': 1,
+        }),
+        isNull,
+      );
+      expect(
+        EnergyReserve.fromJson({
+          'id': 'a',
+          'kind': 'gas',
+          'label': 'x',
+          'amount': -1,
         }),
         isNull,
       );

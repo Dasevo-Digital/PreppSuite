@@ -77,7 +77,7 @@ class EnergyReserve {
   static EnergyReserve? fromJson(Object? value) {
     if (value is! Map) return null;
     final kind = _kindNamed(value['kind']);
-    final amount = (value['amount'] as num?)?.toDouble();
+    final amount = _figure(value['amount']);
     if (kind == null || amount == null || value['id'] is! String) return null;
     return EnergyReserve(
       id: value['id'] as String,
@@ -127,8 +127,8 @@ class EnergyDraw {
   static EnergyDraw? fromJson(Object? value) {
     if (value is! Map) return null;
     final kind = _kindNamed(value['kind']);
-    final perHour = (value['perHour'] as num?)?.toDouble();
-    final hoursPerDay = (value['hoursPerDay'] as num?)?.toDouble();
+    final perHour = _figure(value['perHour']);
+    final hoursPerDay = _figure(value['hoursPerDay']);
     if (kind == null ||
         perHour == null ||
         hoursPerDay == null ||
@@ -143,6 +143,18 @@ class EnergyDraw {
       hoursPerDay: hoursPerDay,
     );
   }
+}
+
+/// The most a draw can be on in a day.
+const maximumHoursPerDay = 24;
+
+/// A stored figure, or null where it is not a finite number of at least
+/// zero. `jsonDecode` reads "1e400" as infinity, and one such figure from
+/// another device would make the whole screen throw (#256).
+double? _figure(Object? value) {
+  if (value is! num) return null;
+  final figure = value.toDouble();
+  return figure.isFinite && figure >= 0 ? figure : null;
 }
 
 /// The kind by its stored name, or null where a stored file names one

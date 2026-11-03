@@ -364,6 +364,8 @@ void main() {
         '031010000000',
       );
 
+      // A device without a profile: one that has one keeps it (#257).
+      SharedPreferences.setMockInitialValues({});
       HouseholdProfile? handed;
       await BackupService(target).restore(
         raw,
@@ -375,6 +377,110 @@ void main() {
       expect(handed?.children, 2);
     },
   );
+
+  group('restored over the household that is still here (#257)', () {
+    const twoPeople = HouseholdProfile(
+      id: 'home',
+      name: 'Familie',
+      countryCode: 'DE',
+      regionKey: '031010000000',
+      personCount: 2,
+    );
+
+    test('winds no setting and not the profile back', () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final prefs = await SharedPreferences.getInstance();
+      await const HouseholdProfileStore().save(twoPeople);
+      await prefs.setString('pegelStation', 'alt');
+      await prefs.setString('outageStartedAt', '2026-10-01T08:00:00.000Z');
+      final raw = await BackupService(db).exportHousehold('home', 'passwort');
+
+      // Life went on: the power came back, the gauge changed, a baby.
+      await prefs.remove('outageStartedAt');
+      await prefs.setString('pegelStation', 'neu');
+      await const HouseholdProfileStore().save(
+        twoPeople.copyWith(personCount: 3),
+      );
+      HouseholdProfile? handed;
+      await BackupService(db).restore(
+        raw,
+        'home',
+        'passwort',
+        saveProfile: (profile) async => handed = profile,
+      );
+
+      expect(prefs.getString('pegelStation'), 'neu');
+      expect(
+        prefs.getString('outageStartedAt'),
+        isNull,
+        reason: 'a blackout clock in a backup is one that has been stopped',
+      );
+      expect(handed, isNull);
+      expect((await const HouseholdProfileStore().load())?.personCount, 3);
+    });
+
+    test('brings back what this device does not hold', () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final prefs = await SharedPreferences.getInstance();
+      await const HouseholdProfileStore().save(twoPeople);
+      await prefs.setString('radiationStation', 'DEZ1234');
+      await prefs.setBool('outageFreezerFull', false);
+      final raw = await BackupService(db).exportHousehold('home', 'passwort');
+
+      await prefs.remove('radiationStation');
+      await prefs.remove('outageFreezerFull');
+      await BackupService(db).restore(raw, 'home', 'passwort');
+
+      expect(prefs.getString('radiationStation'), 'DEZ1234');
+      expect(prefs.getBool('outageFreezerFull'), isFalse);
+    });
+
+    test('a place comes back whole or not at all', () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(db.close);
+      final prefs = await SharedPreferences.getInstance();
+      await const HouseholdProfileStore().save(twoPeople);
+      await prefs.setDouble('daylightLatitude', 52.27);
+      await prefs.setDouble('daylightLongitude', 10.53);
+      await prefs.setString('daylightPlaceName', 'Oma');
+      final raw = await BackupService(db).exportHousehold('home', 'passwort');
+
+      // Set since, somewhere else and without a name.
+      await prefs.setDouble('daylightLatitude', 53.55);
+      await prefs.setDouble('daylightLongitude', 9.99);
+      await prefs.remove('daylightPlaceName');
+      await BackupService(db).restore(raw, 'home', 'passwort');
+
+      expect(prefs.getDouble('daylightLatitude'), 53.55);
+      expect(prefs.getString('daylightPlaceName'), isNull);
+    });
+
+    test('an empty device still takes all of it, the blackout too', () async {
+      final source = AppDatabase.forTesting(NativeDatabase.memory());
+      final target = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(source.close);
+      addTearDown(target.close);
+      final prefs = await SharedPreferences.getInstance();
+      await const HouseholdProfileStore().save(twoPeople);
+      await prefs.setString('outageStartedAt', '2026-10-01T08:00:00.000Z');
+      final raw = await BackupService(source)
+          .exportHousehold('home', 'passwort');
+      SharedPreferences.setMockInitialValues({});
+
+      final restored = await BackupService(
+        target,
+      ).restoreAsNewHousehold(raw, 'passwort');
+
+      expect(restored?.profile?.personCount, 2);
+      expect(
+        (await SharedPreferences.getInstance()).getString('outageStartedAt'),
+        '2026-10-01T08:00:00.000Z',
+        reason: 'a phone lost during the blackout: the clock goes on',
+      );
+    });
+  });
 
   test('a backup in the older format still restores', () async {
     // Format 1 files are out there and have to keep working.

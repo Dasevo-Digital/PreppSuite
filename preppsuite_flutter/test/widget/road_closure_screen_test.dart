@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/core/settings_arrival.dart';
 import 'package:preppsuite_flutter/features/warnings/application/road_closure_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/road_closure_store.dart';
 import 'package:preppsuite_flutter/features/warnings/presentation/road_closure_screen.dart';
@@ -59,6 +60,20 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  testWidgets('roads chosen on another device show up here (#258)', (
+    tester,
+  ) async {
+    await show(tester, _FakeClient());
+    expect(find.text('Noch keine Autobahn gewählt'), findsOneWidget);
+
+    await const RoadClosureStore().save(['A2']);
+    announceSettingsArrival();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Noch keine Autobahn gewählt'), findsNothing);
+    expect(find.text('A2'), findsWidgets);
+  });
 
   testWidgets('with nothing chosen it explains why it has to be chosen', (
     tester,

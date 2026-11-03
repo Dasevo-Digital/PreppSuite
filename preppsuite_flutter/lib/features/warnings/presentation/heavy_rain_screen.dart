@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/error_text.dart';
 import '../../../core/geolocation_service.dart';
+import '../../../core/settings_arrival.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../household/application/german_states.dart';
 import '../../household/application/household_providers.dart';
@@ -41,7 +42,8 @@ class HeavyRainScreen extends ConsumerStatefulWidget {
   ConsumerState<HeavyRainScreen> createState() => _HeavyRainScreenState();
 }
 
-class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
+class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen>
+    with RereadOnSettingsArrival {
   late final HeavyRainClient _client = widget.client ?? HeavyRainClient();
   late final RiverFloodClient _river = widget.riverClient ?? RiverFloodClient();
   late final GeolocationService _geolocation =
@@ -62,6 +64,14 @@ class _HeavyRainScreenState extends ConsumerState<HeavyRainScreen> {
   void dispose() {
     if (widget.geolocation == null) _geolocation.close();
     super.dispose();
+  }
+
+  /// An address checked on another device is the household's answer
+  /// here too (#258). Not while a check of its own is running: that one
+  /// writes its answer when it is done.
+  @override
+  void settingsArrived() {
+    if (!_busy) _restore();
   }
 
   Future<void> _restore() async {

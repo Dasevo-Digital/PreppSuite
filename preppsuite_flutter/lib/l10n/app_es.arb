@@ -1485,6 +1485,7 @@
   "energyPerHour": "Consumo por hora",
   "energyHoursPerDay": "Horas al día",
   "energyNumberNeeded": "Un número mayor que cero.",
+  "energyHoursPerDayTooMany": "Como máximo 24 horas al día.",
   "energyLabelNeeded": "Un nombre, para que la fila siga diciendo algo más adelante.",
   "energyDays": "{days} días",
   "energyOneDay": "1 día",

@@ -43,6 +43,21 @@ class DrillProgressStore {
     }
   }
 
+  /// Ticks [step] off, or back on, in what is stored now, and answers the
+  /// steps ticked after that. Not a whole set from the screen: a drill run
+  /// on two devices ticks off on both, and the screen that saved its own
+  /// set last undid the other's ticks (#258).
+  Future<Set<String>> setStep(String step, {required bool done}) async {
+    final checked = {...await load()};
+    if (done) {
+      checked.add(step);
+    } else {
+      checked.remove(step);
+    }
+    await save(checked);
+    return checked;
+  }
+
   /// Starts the exercise over.
   Future<void> clear() => save(const {});
 

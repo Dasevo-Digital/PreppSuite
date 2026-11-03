@@ -53,6 +53,22 @@ class OutageClockStore {
     await prefs.setBool(_freezerFullKey, clock.freezerFill == FreezerFill.full);
   }
 
+  /// How full the freezer is, whether or not a blackout is running.
+  Future<FreezerFill> loadFill() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getBool(_freezerFullKey) ?? true)
+        ? FreezerFill.full
+        : FreezerFill.half;
+  }
+
+  /// The freezer answer alone. Saving it through [save] writes the start
+  /// time as well, and a screen that still showed a blackout another
+  /// device had ended started it again that way (#258).
+  Future<void> saveFill(FreezerFill fill) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_freezerFullKey, fill == FreezerFill.full);
+  }
+
   /// The power is back. Keeps the freezer answer — it is a property of
   /// the household's freezer, not of this blackout.
   Future<void> clear() async {

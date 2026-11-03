@@ -478,6 +478,22 @@ controller that reads its preference once at start listens to
 that holds one watches it. A new controller of that kind does the same,
 or it shows and acts on the old value until the next start.
 
+A screen that reads such a setting as it opens and keeps it in its own
+state does the same through `RereadOnSettingsArrival` (#258), and it edits
+what is stored, not what it last showed: read, change, write, in one go.
+A screen stays open while the app sits in the background and the shared
+folder delivers, and until 2.8.3 these screens wrote their old state back
+on the next edit -- the energy plan lost the reserve another device had
+added, the check-in list the contact, a drill the other device's ticks,
+and changing how full the freezer was started a blackout clock that
+another device had stopped. The freezer answer is saved on its own for
+that reason (`OutageClockStore.saveFill`), and "the power is off now"
+keeps a clock another device started first: the earlier start is the
+truer one, and a later one would give the food more time than it has.
+The screens are the energy plan, the blackout clock, the check-in
+contacts, the drills, the heavy rain answer and the Autobahnen; a new one
+that holds a carried setting joins them.
+
 The same writes go past every side effect a store has. The station
 stores drop the kept reading when the station is changed on this
 device, and a station arriving by sync, handover or backup kept the old
@@ -2608,6 +2624,24 @@ angelegte Haushalt trägt eine neue Kennung und würde seine eigene Sicherung
 als fremde abweisen. Auf einem Gerät ohne Zeilen gibt es nichts zu
 verlieren, also wird die Kennung aus der Datei übernommen.
 
+**Über einen Haushalt, der noch da ist, dreht eine Sicherung nichts
+zurück, auch keine Einstellung** (#257). Die Zeilen nehmen nur die neuere
+Fassung, der Krisenplan ebenso. Profil und Einstellungen schrieb
+`restoreOpened` bis 2.8.3 aber ungeprüft zurück: die alte Pegelstation,
+die alte Personenzahl, eine längst beendete Stromausfall-Uhr. Mit
+gemeinsamem Ordner galt das dann als neueste Änderung dieses Geräts und
+ging an alle. Eine Sicherung ist ein Bild der Vergangenheit; was das Gerät
+jetzt hält, ist gleich oder neuer. Deshalb übernimmt
+`restoreBackupSettingsMissingHere` nur, was hier fehlt, und das Profil
+kommt nur, wo keins ist. Was zusammengehört (Tageslicht-Koordinaten und
+ihr Name), kommt zusammen oder gar nicht. Was nur sagt, was gerade
+geschieht (`outageStartedAt`), kommt nie zurück. Ein Gerät ohne Haushalt
+(`restoreOpenedAsNewHousehold`) nimmt weiter alles, auch eine laufende
+Uhr: Ging das Telefon während des Stromausfalls verloren, läuft er weiter.
+Eine hier gelöschte Einstellung, die in der Sicherung stand, kommt dabei
+zurück; ohne gemeinsamen Ordner gibt es keine Löschmarke, die das
+verhindern könnte.
+
 
 ### Sicherungsformat 3: der Haushalt und seine Dateien
 
@@ -3387,6 +3421,14 @@ Milliarde, damit die Cents im exakten Ganzzahlbereich bleiben. Das Budget
 las den Betrag mit `double.tryParse` allein und nahm deshalb „12,50“ von
 einer deutschen Tastatur nicht an; „Infinity“ oder „1e400“ ließen in beiden
 Formularen das Speichern an `round()` abbrechen (#245).
+
+Der Energieplan liest seine Zahlen mit `readNonNegativeNumber` und
+verlangt mehr als null; die Stunden am Tag höchstens 24
+(`maximumHoursPerDay`). Bis 2.8.3 prüfte er nur `> 0`, und
+`double.tryParse` liest auch „Infinity“, „1e400“ und „NaN“: Gespeichert
+werden konnte das nicht (`jsonEncode` wirft), und die Reichweite warf beim
+Abrunden (#256). Gelesene Einträge mit einer nicht endlichen oder negativen
+Zahl verwirft `fromJson`, weil `jsonDecode('1e400')` unendlich ergibt.
 
 Auch aus endlichen Eingaben dürfen keine unendlichen Ergebnisse entstehen:
 Nährwertprodukte, Packungsumrechnungen und Dosierungsquotienten werden vor dem

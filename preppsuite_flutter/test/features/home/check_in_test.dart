@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/app_database_providers.dart';
+import 'package:preppsuite_flutter/core/settings_arrival.dart';
 import 'package:preppsuite_flutter/features/home/application/check_in.dart';
 import 'package:preppsuite_flutter/features/home/presentation/check_in_screen.dart';
 import 'package:preppsuite_flutter/l10n/generated/app_localizations.dart';
@@ -140,6 +141,58 @@ void main() {
     expect(kept!.single.phone, '01712345678');
 
     // Let the providers' streams close before the test ends.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('a contact added on another device stays when one is added '
+      'here (#258)', (tester) async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(db.close);
+    const inge = CheckInContact(name: 'Tante Inge', phone: '+491712345678');
+    const paul = CheckInContact(name: 'Onkel Paul', phone: '+491601112223');
+    await tester.runAsync(() => const CheckInContactStore().save([inge]));
+    // Tall enough that the list builds down to its last button.
+    tester.view.physicalSize = const Size(1200, 4000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appDatabaseProvider.overrideWithValue(db)],
+        child: MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: CheckInScreen(householdId: 'home', launch: (_) async => true),
+        ),
+      ),
+    );
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pumpAndSettle();
+
+    // Paul was added on the laptop and arrives through the shared folder.
+    await tester.runAsync(() async {
+      await const CheckInContactStore().save([inge, paul]);
+      announceSettingsArrival();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+    });
+    await tester.pumpAndSettle();
+    expect(find.text('Onkel Paul', skipOffstage: false), findsOneWidget);
+
+    await tester.tap(find.text('Empfänger hinzufügen'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).at(1), 'Oma');
+    await tester.enterText(find.byType(TextField).at(2), '030 1234567');
+    await tester.tap(find.text('OK'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pumpAndSettle();
+
+    final kept = await tester.runAsync(const CheckInContactStore().load);
+    expect(kept!.map((c) => c.name), ['Tante Inge', 'Onkel Paul', 'Oma']);
+
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 1));
   });

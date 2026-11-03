@@ -5390,6 +5390,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get energyNumberNeeded => 'A number greater than zero.';
 
   @override
+  String get energyHoursPerDayTooMany => 'At most 24 hours a day.';
+
+  @override
   String get energyLabelNeeded =>
       'A name, so the row still says something later.';
 

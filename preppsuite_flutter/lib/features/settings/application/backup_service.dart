@@ -283,6 +283,7 @@ class BackupService {
       envelope['household'],
       key,
       householdId,
+      overHousehold: false,
     );
     final rows = await applyHouseholdSnapshot(database, snapshot);
 
@@ -299,7 +300,9 @@ class BackupService {
   /// directly, as this used to, left the provider holding the old profile
   /// — the next change on screen wrote it back over the restored one — and
   /// skipped the copy of the warning regions the background poll reads.
-  /// Left out, the profile is written to both stores here.
+  /// Left out, the profile is written to both stores here. Either way
+  /// only when this device holds no profile: the one it holds is the
+  /// household as it is now (#257).
   Future<int?> restore(
     String raw,
     String householdId,
@@ -328,8 +331,13 @@ class BackupService {
       envelope['household'],
       key,
       householdId,
+      overHousehold: true,
     );
-    if (profile != null) await (saveProfile ?? _saveProfile)(profile);
+    // The profile held here is the household as it is now; the one in the
+    // file is how it was (#257). It is taken only where there is none.
+    if (profile != null && await const HouseholdProfileStore().load() == null) {
+      await (saveProfile ?? _saveProfile)(profile);
+    }
 
     // The same merge as a shared folder, a QR chain and a handover: a
     // row is taken only when it is newer than what is held, so restoring
@@ -386,23 +394,31 @@ class BackupService {
   /// Skipped without complaint for a format 1 backup, which has no such
   /// section, and for one whose section is damaged: it is the smaller
   /// half of the file and must not cost somebody the household.
+  ///
+  /// [overHousehold] when the household is still on this device: then a
+  /// setting is taken only where this device has none, because what it
+  /// has is newer than the file (#257).
   Future<HouseholdProfile?> _restoreCarried(
     Object? section,
     FolderKey key,
-    String householdId,
-  ) async {
+    String householdId, {
+    required bool overHousehold,
+  }) async {
     if (section is! String) return null;
     final clear = await decryptFromFolder(section, key);
     if (clear == null) return null;
     try {
       final carried = CarriedHousehold.fromJson(jsonDecode(clear));
-      await restoreBackupSettings({
+      final settings = {
         for (final entry in carried.settings.entries)
           // The plan is restored by `_restorePlan`, which *merges* it.
           // Writing it again from here would hand back the older of the
           // two -- the exact thing that merge exists to prevent.
           if (entry.key != 'preparednessHubV1') entry.key: entry.value,
-      });
+      };
+      await (overHousehold
+          ? restoreBackupSettingsMissingHere(settings)
+          : restoreBackupSettings(settings));
       return carried.profile?.copyWith(id: householdId);
     } on Object {
       // Same reasoning as the plan below.

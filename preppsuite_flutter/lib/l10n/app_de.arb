@@ -1978,6 +1978,7 @@
   "energyPerHour": "Verbrauch je Stunde",
   "energyHoursPerDay": "Stunden am Tag",
   "energyNumberNeeded": "Eine Zahl größer als null.",
+  "energyHoursPerDayTooMany": "Höchstens 24 Stunden am Tag.",
   "energyLabelNeeded": "Eine Bezeichnung, damit die Zeile später noch etwas sagt.",
   "energyDays": "{days} Tage",
   "@energyDays": {

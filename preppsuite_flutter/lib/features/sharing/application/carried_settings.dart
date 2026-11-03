@@ -276,10 +276,63 @@ Future<int> applyCarriedSettings(
 
 /// [applyCarriedSettings] for this device's own backup, which also brings
 /// back what stays on the device.
+///
+/// For a device with no household yet. Over one that is still here, see
+/// [restoreBackupSettingsMissingHere].
 Future<int> restoreBackupSettings(
   Map<String, Object?> values, [
   SharedPreferences? preferences,
 ]) => _apply(values, preferences, fromBackup: true);
+
+/// [restoreBackupSettings] over a household that is still on this device:
+/// only what this device does not hold (#257).
+///
+/// A backup is a picture of the past, and what this device holds now is
+/// either the same or newer. Restoring wrote every value back all the
+/// same, while the rows beside it kept their newer versions: the old gauge
+/// came back, the old energy plan, and with a shared folder that old
+/// state then went out to every device as this one's latest change.
+///
+/// What belongs together is taken together or not at all, and what only
+/// says what is happening right now never comes back: a blackout clock in
+/// a backup is one that has since been stopped.
+Future<int> restoreBackupSettingsMissingHere(
+  Map<String, Object?> values, [
+  SharedPreferences? preferences,
+]) async {
+  final prefs = preferences ?? await SharedPreferences.getInstance();
+  final held = <String>{};
+  for (final key in values.keys) {
+    final setting = carriedSettings[key];
+    if (setting == null) continue;
+    if (await _read(prefs, key, setting.kind) != null) held.add(key);
+  }
+  bool missingHere(String key) {
+    if (_happeningNow.contains(key)) return false;
+    for (final group in _takenTogether) {
+      if (group.contains(key)) return !group.any(held.contains);
+    }
+    return !held.contains(key);
+  }
+
+  return _apply(
+    {
+      for (final entry in values.entries)
+        if (missingHere(entry.key)) entry.key: entry.value,
+    },
+    prefs,
+    fromBackup: true,
+  );
+}
+
+/// Settings that only mean something together. A place name restored onto
+/// coordinates set since would name the wrong place.
+const _takenTogether = [
+  {'daylightLatitude', 'daylightLongitude', 'daylightPlaceName'},
+];
+
+/// Settings that state what is going on, not how the household is set up.
+const _happeningNow = {'outageStartedAt'};
 
 Future<int> _apply(
   Map<String, Object?> values,

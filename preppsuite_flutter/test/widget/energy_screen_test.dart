@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/features/sharing/application/carried_settings.dart';
 import 'package:preppsuite_flutter/features/energy/application/energy_range.dart';
 import 'package:preppsuite_flutter/features/energy/application/energy_store.dart';
 import 'package:preppsuite_flutter/features/energy/presentation/energy_screen.dart';
@@ -193,6 +196,91 @@ void main() {
     expect(find.textContaining('Eine Bezeichnung'), findsOneWidget);
     // And nothing was saved behind the dialog.
     expect((await const EnergyPlanStore().load()).reserves, isEmpty);
+  });
+
+  group('a figure that is not a number of anything (#256)', () {
+    for (final typed in ['Infinity', '1e400', 'NaN', '-5']) {
+      testWidgets('"$typed" is refused, not saved half way', (tester) async {
+        await show(tester);
+
+        await tester.tap(find.byTooltip('Vorrat hinzufügen'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).at(0), 'Kartuschen');
+        await tester.enterText(find.byType(TextField).at(1), typed);
+        await tester.tap(find.text('Speichern'));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(
+          find.textContaining('Eine Zahl größer als null'),
+          findsOneWidget,
+        );
+        expect((await const EnergyPlanStore().load()).reserves, isEmpty);
+      });
+    }
+
+    testWidgets('a day has 24 hours', (tester) async {
+      await show(tester);
+
+      await tester.tap(find.byTooltip('Verbraucher hinzufügen'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).at(0), 'Radio');
+      await tester.enterText(find.byType(TextField).at(1), '5');
+      await tester.enterText(find.byType(TextField).at(2), '30');
+      await tester.tap(find.text('Speichern'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Höchstens 24 Stunden am Tag.'), findsOneWidget);
+      expect((await const EnergyPlanStore().load()).draws, isEmpty);
+
+      await tester.enterText(find.byType(TextField).at(2), '24');
+      await tester.tap(find.text('Speichern'));
+      await tester.pumpAndSettle();
+      expect((await const EnergyPlanStore().load()).draws.single.perDay, 120);
+    });
+  });
+
+  group('a plan that changed on another device (#258)', () {
+    String reserves(List<String> labels) => jsonEncode([
+      for (final label in labels)
+        {'id': label, 'kind': 'gas', 'label': label, 'amount': 500},
+    ]);
+
+    testWidgets('shows up while the screen is open', (tester) async {
+      await applyCarriedSettings({
+        'energyReserves': reserves(['A']),
+      });
+      await show(tester);
+      expect(find.text('B'), findsNothing);
+
+      await applyCarriedSettings({
+        'energyReserves': reserves(['A', 'B']),
+      });
+      await tester.pumpAndSettle();
+
+      expect(find.text('B'), findsOneWidget);
+    });
+
+    testWidgets('is not written over by the next entry here', (tester) async {
+      await applyCarriedSettings({
+        'energyReserves': reserves(['A']),
+      });
+      await show(tester);
+
+      await tester.tap(find.byTooltip('Vorrat hinzufügen'));
+      await tester.pumpAndSettle();
+      // The laptop's reserve arrives while the dialog is open.
+      await applyCarriedSettings({
+        'energyReserves': reserves(['A', 'B']),
+      });
+      await tester.enterText(find.byType(TextField).at(0), 'C');
+      await tester.enterText(find.byType(TextField).at(1), '250');
+      await tester.tap(find.text('Speichern'));
+      await tester.pumpAndSettle();
+
+      final stored = await const EnergyPlanStore().load();
+      expect(stored.reserves.map((r) => r.label), ['A', 'B', 'C']);
+    });
   });
 
   testWidgets('an entry can be deleted again', (tester) async {

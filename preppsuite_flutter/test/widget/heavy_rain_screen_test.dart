@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/core/settings_arrival.dart';
 import 'package:preppsuite_flutter/features/warnings/application/heavy_rain_hazard.dart';
 import 'package:preppsuite_flutter/features/warnings/application/river_flood.dart';
 import 'package:preppsuite_flutter/features/warnings/presentation/heavy_rain_screen.dart';
@@ -40,6 +41,28 @@ void main() {
     expect(find.text('Meinen Standort verwenden'), findsOneWidget);
     expect(find.text('Adresse eingeben'), findsOneWidget);
     expect(find.textContaining('dl-de/by-2-0'), findsOneWidget);
+  });
+
+  testWidgets('an address checked on another device shows up here (#258)', (
+    tester,
+  ) async {
+    await show(tester, null);
+    expect(find.textContaining('Braunschweig'), findsNothing);
+
+    await const HeavyRainStore().save(
+      HeavyRainHazard(
+        latitude: 52.2689,
+        longitude: 10.5268,
+        placeName: 'Braunschweig',
+        checkedAt: DateTime(2026, 10, 6),
+        covered: true,
+        results: const {},
+      ),
+    );
+    announceSettingsArrival();
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Braunschweig'), findsOneWidget);
   });
 
   testWidgets('a kept answer is shown in the legend classes', (tester) async {

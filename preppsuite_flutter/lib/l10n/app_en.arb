@@ -3102,6 +3102,7 @@
   "energyPerHour": "Uses per hour",
   "energyHoursPerDay": "Hours a day",
   "energyNumberNeeded": "A number greater than zero.",
+  "energyHoursPerDayTooMany": "At most 24 hours a day.",
   "energyLabelNeeded": "A name, so the row still says something later.",
   "energyDays": "{days} days",
   "@energyDays": {

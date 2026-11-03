@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/adaptive_columns.dart';
+import '../../../core/settings_arrival.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/outage_food_safety.dart';
 import '../application/outage_store.dart';
@@ -26,7 +27,8 @@ class OutageScreen extends StatefulWidget {
   State<OutageScreen> createState() => _OutageScreenState();
 }
 
-class _OutageScreenState extends State<OutageScreen> {
+class _OutageScreenState extends State<OutageScreen>
+    with RereadOnSettingsArrival {
   OutageClock? _clock;
   var _loading = true;
   var _freezerFill = FreezerFill.full;
@@ -54,26 +56,39 @@ class _OutageScreenState extends State<OutageScreen> {
     super.dispose();
   }
 
+  /// A blackout started or ended on another device is started or ended
+  /// here too, also while this screen is open (#258).
+  @override
+  void settingsArrived() => _load();
+
   Future<void> _load() async {
     final clock = await widget.store.load();
+    final fill = clock?.freezerFill ?? await widget.store.loadFill();
     if (!mounted) return;
     setState(() {
       _clock = clock;
-      _freezerFill = clock?.freezerFill ?? FreezerFill.full;
+      _freezerFill = fill;
       _loading = false;
       _now = DateTime.now().toUtc();
     });
   }
 
   Future<void> _start() async {
-    final clock = OutageClock(
-      startedAt: DateTime.now().toUtc(),
-      freezerFill: _freezerFill,
-    );
-    await widget.store.save(clock);
+    // A clock another device started first is the earlier, and so the
+    // truer, start. Restarting it at "now" would tell the household the
+    // food has longer than it has.
+    final running = await widget.store.load();
+    final clock =
+        running ??
+        OutageClock(
+          startedAt: DateTime.now().toUtc(),
+          freezerFill: _freezerFill,
+        );
+    if (running == null) await widget.store.save(clock);
     if (!mounted) return;
     setState(() {
       _clock = clock;
+      _freezerFill = clock.freezerFill;
       _now = DateTime.now().toUtc();
     });
   }
@@ -86,11 +101,9 @@ class _OutageScreenState extends State<OutageScreen> {
 
   Future<void> _setFill(FreezerFill fill) async {
     setState(() => _freezerFill = fill);
-    final clock = _clock;
-    if (clock == null) return;
-    final updated = OutageClock(startedAt: clock.startedAt, freezerFill: fill);
-    await widget.store.save(updated);
-    if (mounted) setState(() => _clock = updated);
+    await widget.store.saveFill(fill);
+    final clock = await widget.store.load();
+    if (mounted) setState(() => _clock = clock);
   }
 
   /// Corrects the start time. A blackout that began during the night is
@@ -127,9 +140,16 @@ class _OutageScreenState extends State<OutageScreen> {
       );
     }
 
+    // Ended elsewhere while the picker was open: correcting the start
+    // of a blackout that is over must not begin another one.
+    final stored = await widget.store.load();
+    if (stored == null) {
+      if (mounted) setState(() => _clock = null);
+      return;
+    }
     final updated = OutageClock(
       startedAt: startedAt.toUtc(),
-      freezerFill: clock.freezerFill,
+      freezerFill: stored.freezerFill,
     );
     await widget.store.save(updated);
     if (!mounted) return;

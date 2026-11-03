@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/adaptive_columns.dart';
+import '../../../core/number_input.dart';
+import '../../../core/settings_arrival.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/energy_l10n.dart';
 import '../application/energy_range.dart';
@@ -24,7 +26,8 @@ class EnergyScreen extends StatefulWidget {
   State<EnergyScreen> createState() => _EnergyScreenState();
 }
 
-class _EnergyScreenState extends State<EnergyScreen> {
+class _EnergyScreenState extends State<EnergyScreen>
+    with RereadOnSettingsArrival {
   var _plan = const EnergyPlan();
   var _loading = true;
 
@@ -33,6 +36,9 @@ class _EnergyScreenState extends State<EnergyScreen> {
     super.initState();
     _restore();
   }
+
+  @override
+  void settingsArrived() => _restore();
 
   Future<void> _restore() async {
     final plan = await widget.store.load();
@@ -43,8 +49,12 @@ class _EnergyScreenState extends State<EnergyScreen> {
     });
   }
 
-  Future<void> _write(EnergyPlan plan) async {
-    setState(() => _plan = plan);
+  /// Applies [edit] to the plan as it is stored now, not as this screen
+  /// last showed it: another device's reserve may have arrived while the
+  /// dialog was open (#258).
+  Future<void> _write(EnergyPlan Function(EnergyPlan stored) edit) async {
+    final plan = edit(await widget.store.load());
+    if (mounted) setState(() => _plan = plan);
     await widget.store.save(plan);
   }
 
@@ -65,28 +75,26 @@ class _EnergyScreenState extends State<EnergyScreen> {
     );
     if (result == null) return;
 
-    final remaining = [
-      for (final item in _plan.reserves)
-        if (item.id != existing?.id) item,
-    ];
-    if (result.deleted) {
-      await _write(EnergyPlan(reserves: remaining, draws: _plan.draws));
-      return;
-    }
-    await _write(
-      EnergyPlan(
+    final id = existing?.id ?? const Uuid().v4();
+    await _write((stored) {
+      final remaining = [
+        for (final item in stored.reserves)
+          if (item.id != id) item,
+      ];
+      return EnergyPlan(
         reserves: [
           ...remaining,
-          EnergyReserve(
-            id: existing?.id ?? const Uuid().v4(),
-            kind: result.kind,
-            label: result.label,
-            amount: result.first,
-          ),
+          if (!result.deleted)
+            EnergyReserve(
+              id: id,
+              kind: result.kind,
+              label: result.label,
+              amount: result.first,
+            ),
         ],
-        draws: _plan.draws,
-      ),
-    );
+        draws: stored.draws,
+      );
+    });
   }
 
   Future<void> _editDraw([EnergyDraw? existing]) async {
@@ -106,29 +114,27 @@ class _EnergyScreenState extends State<EnergyScreen> {
     );
     if (result == null) return;
 
-    final remaining = [
-      for (final item in _plan.draws)
-        if (item.id != existing?.id) item,
-    ];
-    if (result.deleted) {
-      await _write(EnergyPlan(reserves: _plan.reserves, draws: remaining));
-      return;
-    }
-    await _write(
-      EnergyPlan(
-        reserves: _plan.reserves,
+    final id = existing?.id ?? const Uuid().v4();
+    await _write((stored) {
+      final remaining = [
+        for (final item in stored.draws)
+          if (item.id != id) item,
+      ];
+      return EnergyPlan(
+        reserves: stored.reserves,
         draws: [
           ...remaining,
-          EnergyDraw(
-            id: existing?.id ?? const Uuid().v4(),
-            kind: result.kind,
-            label: result.label,
-            perHour: result.first,
-            hoursPerDay: result.second ?? 1,
-          ),
+          if (!result.deleted)
+            EnergyDraw(
+              id: id,
+              kind: result.kind,
+              label: result.label,
+              perHour: result.first,
+              hoursPerDay: result.second ?? 1,
+            ),
         ],
-      ),
-    );
+      );
+    });
   }
 
   @override
@@ -479,8 +485,11 @@ class _EntryDialogState extends State<_EntryDialog> {
   /// Reads a number typed on a German keyboard as readily as on an
   /// English one — a comma is a decimal point here, not a thousands
   /// separator, because nobody stocks four thousand cartridges.
-  static double? _number(String input) =>
-      double.tryParse(input.trim().replaceAll(',', '.'));
+  ///
+  /// Finite, too (#256): `double.tryParse` also reads "Infinity", "1e400"
+  /// and "NaN", which passed a plain `> 0`, could not be saved and made
+  /// the range throw.
+  static double? _number(String input) => readNonNegativeNumber(input);
 
   void _submit() {
     final l10n = AppLocalizations.of(context)!;
@@ -494,9 +503,13 @@ class _EntryDialogState extends State<_EntryDialog> {
       _firstProblem = first == null || first <= 0
           ? l10n.energyNumberNeeded
           : null;
-      _secondProblem =
-          widget.secondLabel != null && (second == null || second <= 0)
+      // The second number is the hours a day, and a day has 24.
+      _secondProblem = widget.secondLabel == null
+          ? null
+          : second == null || second <= 0
           ? l10n.energyNumberNeeded
+          : second > maximumHoursPerDay
+          ? l10n.energyHoursPerDayTooMany
           : null;
     });
     if (_labelProblem != null ||

@@ -9010,6 +9010,12 @@ abstract class AppLocalizations {
   /// **'A number greater than zero.'**
   String get energyNumberNeeded;
 
+  /// No description provided for @energyHoursPerDayTooMany.
+  ///
+  /// In en, this message translates to:
+  /// **'At most 24 hours a day.'**
+  String get energyHoursPerDayTooMany;
+
   /// No description provided for @energyLabelNeeded.
   ///
   /// In en, this message translates to:
