@@ -365,6 +365,42 @@ class InventoryController {
     });
   }
 
+  /// Books each of [clientIds] out entirely (#276): what a blackout has
+  /// spoilt is thrown out, all of it, and the stock should say so.
+  ///
+  /// From the row as stored and what is on it today, in one transaction,
+  /// with the count's date moved on, like [consumeQuantity]. The rows
+  /// stay at nought rather than going, so a minimum puts them on the
+  /// shopping list. Returns what was on each, for [bookPurchases] to put
+  /// back: adding it to nothing is the stock as it was, counted now.
+  Future<Map<String, double>> bookOutAll(Iterable<String> clientIds) async {
+    final taken = <String, double>{};
+    final now = DateTime.now().toUtc();
+    await _db.transaction(() async {
+      for (final clientId in clientIds) {
+        final row = await _stored(clientId);
+        if (row == null || row.deletedAt != null) continue;
+        if (hasInvalidInventoryNumbers(row)) {
+          throw const InvalidInventoryNumbers();
+        }
+        final onHand = stockToday(row, now: now);
+        if (!(onHand > 0)) continue;
+        await _db.upsertInventoryItem(
+          row
+              .toCompanion(false)
+              .copyWith(
+                quantity: const Value(0),
+                stockCountedAt: Value(now),
+                updatedAt: Value(now),
+                dirty: const Value(true),
+              ),
+        );
+        taken[clientId] = onHand;
+      }
+    });
+    return taken;
+  }
+
   Future<InventoryItem?> _stored(String clientId) =>
       (_db.select(_db.inventoryItems)..where(
             (t) =>

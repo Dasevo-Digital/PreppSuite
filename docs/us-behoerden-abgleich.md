@@ -52,6 +52,12 @@ darunter bleibt; ready.gov und das FSIS-Merkblatt geben Kühlschrankware
 nur bis dahin frei. Bis 2.8.8 zählte die Uhr dort noch zwei Stunden
 dazu (#273).
 
+Seit #276 nennt die Uhr auch, was laut Vorrat im Kühlschrank und im
+Gefriergerät liegt (erkannt am Lagerort), und bucht es nach Ablauf auf
+Wunsch aus. Für gekühlte Medikamente gilt dabei eine eigene Zahl von
+ready.gov: Nach **mehr als einem Tag** ohne Strom entsorgen, außer die
+Packung sagt etwas anderes. Sie werden deshalb nie vorausgewählt.
+
 Dazu: nie probieren, um über die Sicherheit zu entscheiden; wieder
 einfrieren ist erlaubt, solange Eiskristalle da sind.
 

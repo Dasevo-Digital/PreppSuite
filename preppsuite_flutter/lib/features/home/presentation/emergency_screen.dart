@@ -215,7 +215,9 @@ class EmergencyScreen extends ConsumerWidget {
             subtitle: Text(l10n.outageEntryHint),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const OutageScreen()),
+              MaterialPageRoute<void>(
+                builder: (_) => OutageScreen(householdId: profile.id),
+              ),
             ),
           ),
           // Every way of being understood when the network is gone, side

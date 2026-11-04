@@ -341,7 +341,7 @@ List<AppDestination> appDestinations() => [
     title: (l) => l.outageTitle,
     icon: Icons.kitchen_outlined,
     area: ShellDestination.emergency,
-    open: (_) => const OutageScreen(),
+    open: (p) => OutageScreen(householdId: p.id),
     aliases: ['stromausfall', 'blackout', 'kuehlschrank', 'gefrierschrank'],
   ),
   AppDestination(

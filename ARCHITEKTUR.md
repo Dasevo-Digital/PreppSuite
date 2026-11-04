@@ -680,7 +680,19 @@ twenty-four of a half-full one, and perishables gone two hours above
 freezer's window only (#273): a refrigerator's four hours are how long
 it keeps food at 4 °C, and both sources discard its perishables once
 they are over. Until 2.8.8 the clock added two more hours there and
-told a household to keep milk and meat for six. The BZfE, the BfR, the
+told a household to keep milk and meat for six.
+What is in the two stores comes from the stock (#276,
+`cold_store_contents.dart`): a row whose storage location names a
+fridge or a freezer -- "Kühlschrank", "Gefriertruhe", "TK-Fach",
+"fridge", "congelador" -- is in it. Read from the household's own words
+and not from a setting, because the location travels with every row
+and a mapping would be one more thing to keep in step across devices;
+a location that names neither ("Küche", "kühler Keller") is not
+guessed at. Once a store's window is over its contents can be booked
+out to nought in one go (`bookOutAll`, undone through `bookPurchases`).
+Food is ticked; a medicine never is, because ready.gov gives it a clock
+of its own -- a refrigerated medicine goes after more than a day without
+power unless its label says otherwise -- and the dialog says so. The BZfE, the BfR, the
 BMEL and the Verbraucherzentrale were all checked and all describe the
 principle without stating hours. So the rule above gains one sentence
 rather than an exception: the source is named on the screen. A cold

@@ -793,4 +793,34 @@ void main() {
       expect(booked.refillLeadDays, 14);
     });
   });
+
+  group('booking out what a blackout spoilt (#276)', () {
+    test('everything chosen goes to nought, and stays in the stores', () async {
+      await addItem(quantity: 5, minQuantity: 2);
+
+      final taken = await controller.bookOutAll(['a', 'not-there']);
+
+      expect(taken, {'a': 5});
+      final item = await storedItem();
+      expect(item.quantity, 0);
+      expect(item.deletedAt, isNull);
+      expect(item.dirty, isTrue);
+      expect(item.stockCountedAt, isNotNull);
+    });
+
+    test('what is already at nought is not booked, and not undone', () async {
+      await addItem(quantity: 0);
+
+      expect(await controller.bookOutAll(['a']), isEmpty);
+    });
+
+    test('putting it back is the stock as it was', () async {
+      await addItem(quantity: 5, minQuantity: 2);
+
+      final taken = await controller.bookOutAll(['a']);
+      await controller.bookPurchases(taken);
+
+      expect((await storedItem()).quantity, 5);
+    });
+  });
 }

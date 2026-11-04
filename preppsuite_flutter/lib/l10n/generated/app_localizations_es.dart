@@ -5904,6 +5904,54 @@ class AppLocalizationsEs extends AppLocalizations {
       'Las cifras en horas son de FEMA (ready.gov) y del USDA (FSIS). Ninguna autoridad alemana publica cifras para esto, por eso se nombra aquí la fuente.';
 
   @override
+  String outageContents(String names) {
+    return 'Dentro, según las provisiones: $names';
+  }
+
+  @override
+  String get outageContentsNone =>
+      'Si en las provisiones el lugar de almacenamiento es «Nevera» o «Congelador», la app muestra aquí lo que hay dentro y ofrece darlo de baja cuando se acabe el plazo.';
+
+  @override
+  String get outageDiscardButton => 'Dar de baja …';
+
+  @override
+  String get outageDiscardTitleRefrigerator => 'Dar de baja del frigorífico';
+
+  @override
+  String get outageDiscardTitleFreezer => 'Dar de baja del congelador';
+
+  @override
+  String get outageDiscardHint =>
+      'Los alimentos están marcados. Desmarca lo que no se estropea. Lo que quede marcado pasa a cero en las provisiones y entra en la lista de la compra por su cantidad mínima.';
+
+  @override
+  String get outageDiscardMedicine =>
+      'Medicamentos que deben guardarse en frío, como la insulina: según ready.gov, se desechan si el corte dura más de un día, salvo que el envase diga otra cosa. Ante la duda, pregunta en la farmacia.';
+
+  @override
+  String outageDiscardConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Dar de baja $count artículos',
+      one: 'Dar de baja 1 artículo',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String outageDiscarded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count artículos dados de baja.',
+      one: '1 artículo dado de baja.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get dailyDoseLabel => 'Tomado al día';
 
   @override

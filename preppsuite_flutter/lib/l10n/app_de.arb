@@ -2255,6 +2255,36 @@
   "outageRuleGenerator": "Notstromaggregat nur im Freien, mindestens 6 Meter von Fenstern, Türen und angebauter Garage entfernt.",
   "outageRuleUnplug": "Geräte vom Netz nehmen: der Strom kommt als Spannungsspitze zurück.",
   "outageSource": "Die Stundenangaben stammen von FEMA (ready.gov) und dem US-Landwirtschaftsministerium (FSIS). Eine deutsche Behörde veröffentlicht dazu keine Zahlen – deshalb steht hier, woher sie kommen.",
+  "outageContents": "Darin laut Vorrat: {names}",
+  "@outageContents": {
+    "placeholders": {
+      "names": {
+        "type": "String"
+      }
+    }
+  },
+  "outageContentsNone": "Steht im Vorrat als Lagerort „Kühlschrank“ oder „Gefriertruhe“, zeigt die App hier, was darin liegt, und bietet nach Ablauf das Ausbuchen an.",
+  "outageDiscardButton": "Ausbuchen …",
+  "outageDiscardTitleRefrigerator": "Aus dem Kühlschrank ausbuchen",
+  "outageDiscardTitleFreezer": "Aus dem Gefriergerät ausbuchen",
+  "outageDiscardHint": "Angehakt sind die Lebensmittel. Nimm den Haken bei allem weg, was nicht verdirbt. Was angehakt bleibt, steht danach im Vorrat auf null und kommt über seine Mindestmenge auf die Einkaufsliste.",
+  "outageDiscardMedicine": "Medikamente, die gekühlt gehören, etwa Insulin: Laut ready.gov nach mehr als einem Tag ohne Strom entsorgen, außer die Packung sagt etwas anderes. Im Zweifel in der Apotheke fragen.",
+  "outageDiscardConfirm": "{count, plural, =1{1 Eintrag ausbuchen} other{{count} Einträge ausbuchen}}",
+  "@outageDiscardConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "outageDiscarded": "{count, plural, =1{1 Eintrag ausgebucht.} other{{count} Einträge ausgebucht.}}",
+  "@outageDiscarded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "dailyDoseLabel": "Verbrauch am Tag",
   "dailyDoseHelper": "In derselben Einheit wie der Bestand: bei 60 Tabletten und 2 am Tag steht hier „2\". Leer lassen, wenn es nicht täglich genommen wird.",
   "medicationTitle": "Medikamente",

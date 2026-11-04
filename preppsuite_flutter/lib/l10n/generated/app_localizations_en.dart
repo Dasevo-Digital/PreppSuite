@@ -5860,6 +5860,54 @@ class AppLocalizationsEn extends AppLocalizations {
       'The hour figures come from FEMA (ready.gov) and the USDA (FSIS). No German authority publishes figures for this, which is why the source is named here.';
 
   @override
+  String outageContents(String names) {
+    return 'In it, says the inventory: $names';
+  }
+
+  @override
+  String get outageContentsNone =>
+      'Where the inventory gives “Fridge” or “Freezer” as a storage location, the app shows here what is in it and offers to book it out once the time is up.';
+
+  @override
+  String get outageDiscardButton => 'Book out …';
+
+  @override
+  String get outageDiscardTitleRefrigerator => 'Book out of the fridge';
+
+  @override
+  String get outageDiscardTitleFreezer => 'Book out of the freezer';
+
+  @override
+  String get outageDiscardHint =>
+      'The food is ticked. Untick anything that does not spoil. What stays ticked is set to zero in the inventory and goes on the shopping list through its minimum.';
+
+  @override
+  String get outageDiscardMedicine =>
+      'Medicines that need to be kept cold, such as insulin: ready.gov says to discard them once the power has been out for more than a day, unless the label says otherwise. If in doubt, ask a pharmacist.';
+
+  @override
+  String outageDiscardConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Book out $count items',
+      one: 'Book out 1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String outageDiscarded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items booked out.',
+      one: '1 item booked out.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get dailyDoseLabel => 'Taken per day';
 
   @override

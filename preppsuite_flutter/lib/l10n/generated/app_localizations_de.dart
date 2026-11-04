@@ -5894,6 +5894,54 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Stundenangaben stammen von FEMA (ready.gov) und dem US-Landwirtschaftsministerium (FSIS). Eine deutsche Behörde veröffentlicht dazu keine Zahlen – deshalb steht hier, woher sie kommen.';
 
   @override
+  String outageContents(String names) {
+    return 'Darin laut Vorrat: $names';
+  }
+
+  @override
+  String get outageContentsNone =>
+      'Steht im Vorrat als Lagerort „Kühlschrank“ oder „Gefriertruhe“, zeigt die App hier, was darin liegt, und bietet nach Ablauf das Ausbuchen an.';
+
+  @override
+  String get outageDiscardButton => 'Ausbuchen …';
+
+  @override
+  String get outageDiscardTitleRefrigerator => 'Aus dem Kühlschrank ausbuchen';
+
+  @override
+  String get outageDiscardTitleFreezer => 'Aus dem Gefriergerät ausbuchen';
+
+  @override
+  String get outageDiscardHint =>
+      'Angehakt sind die Lebensmittel. Nimm den Haken bei allem weg, was nicht verdirbt. Was angehakt bleibt, steht danach im Vorrat auf null und kommt über seine Mindestmenge auf die Einkaufsliste.';
+
+  @override
+  String get outageDiscardMedicine =>
+      'Medikamente, die gekühlt gehören, etwa Insulin: Laut ready.gov nach mehr als einem Tag ohne Strom entsorgen, außer die Packung sagt etwas anderes. Im Zweifel in der Apotheke fragen.';
+
+  @override
+  String outageDiscardConfirm(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge ausbuchen',
+      one: '1 Eintrag ausbuchen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String outageDiscarded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge ausgebucht.',
+      one: '1 Eintrag ausgebucht.',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get dailyDoseLabel => 'Verbrauch am Tag';
 
   @override

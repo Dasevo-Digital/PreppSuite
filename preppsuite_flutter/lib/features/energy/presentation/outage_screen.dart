@@ -1,11 +1,18 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/adaptive_columns.dart';
+import '../../../core/error_text.dart';
 import '../../../core/settings_arrival.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../local_db/database.dart';
+import '../../inventory/application/inventory_controller.dart';
+import '../../inventory/application/inventory_providers.dart';
+import '../../inventory/application/stock_today.dart';
+import '../application/cold_store_contents.dart';
 import '../application/outage_food_safety.dart';
 import '../application/outage_store.dart';
 
@@ -18,10 +25,19 @@ import '../application/outage_store.dart';
 ///
 /// The figures are FEMA's and the USDA's, and the screen says so at the
 /// bottom. See `outage_food_safety.dart` for why they are not German.
+///
+/// With a [householdId], each store also says what the household's
+/// stores keep in it, and once its time is up offers to book that out
+/// (#276); see `cold_store_contents.dart`.
 class OutageScreen extends StatefulWidget {
-  const OutageScreen({super.key, this.store = const OutageClockStore()});
+  const OutageScreen({
+    super.key,
+    this.store = const OutageClockStore(),
+    this.householdId,
+  });
 
   final OutageClockStore store;
+  final String? householdId;
 
   @override
   State<OutageScreen> createState() => _OutageScreenState();
@@ -159,6 +175,91 @@ class _OutageScreenState extends State<OutageScreen>
     });
   }
 
+  /// The two cards, and with a household what its stores keep in each.
+  Widget _stores(OutageClock clock, AppLocalizations l10n) {
+    final statuses = coldStoreStatuses(
+      startedAt: clock.startedAt,
+      now: _now,
+      freezerFill: clock.freezerFill,
+    );
+    Widget cards(
+      ColdStoreContents? contents,
+      InventoryController Function()? stock,
+    ) => Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final status in statuses)
+          _StoreCard(
+            status: status,
+            endsAt: windowEndsAt(clock.startedAt, status),
+            l10n: l10n,
+            items: contents?.of(status.store) ?? const [],
+            onDiscard: stock == null || !status.isOver
+                ? null
+                : () => _discard(
+                    status.store,
+                    contents!.of(status.store),
+                    stock(),
+                    l10n,
+                  ),
+          ),
+        if (contents != null && contents.isEmpty)
+          Text(
+            l10n.outageContentsNone,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+      ],
+    );
+
+    final householdId = widget.householdId;
+    if (householdId == null) return cards(null, null);
+    return Consumer(
+      builder: (context, ref, _) {
+        final items = ref.watch(inventoryItemsProvider(householdId)).value;
+        return cards(
+          items == null ? null : coldStoreContents(items, now: _now),
+          () => ref.read(inventoryControllerProvider(householdId)),
+        );
+      },
+    );
+  }
+
+  /// What the household throws out of [store], out of the stock as well
+  /// (#276), with a way back for a slip.
+  Future<void> _discard(
+    ColdStore store,
+    List<InventoryItem> items,
+    InventoryController stock,
+    AppLocalizations l10n,
+  ) async {
+    final chosen = await showDialog<Set<String>>(
+      context: context,
+      builder: (_) => _DiscardDialog(store: store, items: items, l10n: l10n),
+    );
+    if (chosen == null || chosen.isEmpty || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final taken = await stock.bookOutAll(chosen);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(l10n.outageDiscarded(taken.length)),
+            action: taken.isEmpty
+                ? null
+                : SnackBarAction(
+                    label: l10n.undoAction,
+                    onPressed: () => stock.bookPurchases(taken),
+                  ),
+          ),
+        );
+    } on Object catch (error) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(describeError(l10n, error))),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -184,16 +285,7 @@ class _OutageScreenState extends State<OutageScreen>
                         label: Text(l10n.outageStart),
                       )
                     else ...[
-                      for (final status in coldStoreStatuses(
-                        startedAt: clock.startedAt,
-                        now: _now,
-                        freezerFill: clock.freezerFill,
-                      ))
-                        _StoreCard(
-                          status: status,
-                          endsAt: windowEndsAt(clock.startedAt, status),
-                          l10n: l10n,
-                        ),
+                      _stores(clock, l10n),
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -292,11 +384,19 @@ class _StoreCard extends StatelessWidget {
     required this.status,
     required this.endsAt,
     required this.l10n,
+    this.items = const [],
+    this.onDiscard,
   });
 
   final ColdStoreStatus status;
   final DateTime endsAt;
   final AppLocalizations l10n;
+
+  /// What the stores keep in this one.
+  final List<InventoryItem> items;
+
+  /// Offered once the window is over and there is something in it.
+  final VoidCallback? onDiscard;
 
   @override
   Widget build(BuildContext context) {
@@ -344,15 +444,118 @@ class _StoreCard extends StatelessWidget {
               // the bar measures how much of the cold is spent.
               semanticsLabel: l10n.outageTitle,
             ),
+            if (items.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(l10n.outageContents(_names(items))),
+              if (onDiscard != null) ...[
+                const SizedBox(height: 8),
+                spoilt
+                    ? FilledButton.icon(
+                        onPressed: onDiscard,
+                        icon: const Icon(Icons.delete_outline),
+                        label: Text(l10n.outageDiscardButton),
+                      )
+                    : OutlinedButton.icon(
+                        onPressed: onDiscard,
+                        icon: const Icon(Icons.delete_outline),
+                        label: Text(l10n.outageDiscardButton),
+                      ),
+              ],
+            ],
           ],
         ),
       ),
     );
   }
 
+  /// Three names and how many more: a card, not the list. The whole list
+  /// is in the dialog that books it out.
+  static String _names(List<InventoryItem> items) {
+    final shown = items.take(3).map((item) => item.name).join(', ');
+    return items.length > 3 ? '$shown +${items.length - 3}' : shown;
+  }
+
   /// Hours and minutes, or minutes alone under an hour.
   static String _words(AppLocalizations l10n, Duration left) {
     if (left.inHours < 1) return l10n.outageRemainingMinutes(left.inMinutes);
     return l10n.outageRemainingHours(left.inHours, left.inMinutes % 60);
+  }
+}
+
+/// What goes out of one store: everything in it, the food ticked.
+class _DiscardDialog extends StatefulWidget {
+  const _DiscardDialog({
+    required this.store,
+    required this.items,
+    required this.l10n,
+  });
+
+  final ColdStore store;
+  final List<InventoryItem> items;
+  final AppLocalizations l10n;
+
+  @override
+  State<_DiscardDialog> createState() => _DiscardDialogState();
+}
+
+class _DiscardDialogState extends State<_DiscardDialog> {
+  late final _ticked = {
+    for (final item in widget.items)
+      if (proposedForDiscard(item)) item.clientId,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    final number = NumberFormat.decimalPattern(l10n.localeName);
+    return AlertDialog(
+      title: Text(switch (widget.store) {
+        ColdStore.refrigerator => l10n.outageDiscardTitleRefrigerator,
+        ColdStore.freezer => l10n.outageDiscardTitleFreezer,
+      }),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.outageDiscardHint),
+            const SizedBox(height: 8),
+            for (final item in widget.items)
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _ticked.contains(item.clientId),
+                onChanged: (ticked) => setState(() {
+                  ticked == true
+                      ? _ticked.add(item.clientId)
+                      : _ticked.remove(item.clientId);
+                }),
+                title: Text(item.name),
+                subtitle: Text(
+                  '${number.format(stockToday(item))} ${item.unit}'.trim(),
+                ),
+              ),
+            if (widget.items.any(isColdMedicine)) ...[
+              const SizedBox(height: 8),
+              Text(
+                l10n.outageDiscardMedicine,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(l10n.cancelButton),
+        ),
+        FilledButton(
+          onPressed: _ticked.isEmpty
+              ? null
+              : () => Navigator.pop(context, Set.of(_ticked)),
+          child: Text(l10n.outageDiscardConfirm(_ticked.length)),
+        ),
+      ],
+    );
   }
 }

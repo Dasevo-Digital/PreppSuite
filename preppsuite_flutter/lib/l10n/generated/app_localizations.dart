@@ -9766,6 +9766,60 @@ abstract class AppLocalizations {
   /// **'The hour figures come from FEMA (ready.gov) and the USDA (FSIS). No German authority publishes figures for this, which is why the source is named here.'**
   String get outageSource;
 
+  /// No description provided for @outageContents.
+  ///
+  /// In en, this message translates to:
+  /// **'In it, says the inventory: {names}'**
+  String outageContents(String names);
+
+  /// No description provided for @outageContentsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the inventory gives “Fridge” or “Freezer” as a storage location, the app shows here what is in it and offers to book it out once the time is up.'**
+  String get outageContentsNone;
+
+  /// No description provided for @outageDiscardButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Book out …'**
+  String get outageDiscardButton;
+
+  /// No description provided for @outageDiscardTitleRefrigerator.
+  ///
+  /// In en, this message translates to:
+  /// **'Book out of the fridge'**
+  String get outageDiscardTitleRefrigerator;
+
+  /// No description provided for @outageDiscardTitleFreezer.
+  ///
+  /// In en, this message translates to:
+  /// **'Book out of the freezer'**
+  String get outageDiscardTitleFreezer;
+
+  /// No description provided for @outageDiscardHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The food is ticked. Untick anything that does not spoil. What stays ticked is set to zero in the inventory and goes on the shopping list through its minimum.'**
+  String get outageDiscardHint;
+
+  /// No description provided for @outageDiscardMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'Medicines that need to be kept cold, such as insulin: ready.gov says to discard them once the power has been out for more than a day, unless the label says otherwise. If in doubt, ask a pharmacist.'**
+  String get outageDiscardMedicine;
+
+  /// No description provided for @outageDiscardConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Book out 1 item} other{Book out {count} items}}'**
+  String outageDiscardConfirm(int count);
+
+  /// No description provided for @outageDiscarded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item booked out.} other{{count} items booked out.}}'**
+  String outageDiscarded(int count);
+
   /// No description provided for @dailyDoseLabel.
   ///
   /// In en, this message translates to:
