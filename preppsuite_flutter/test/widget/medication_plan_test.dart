@@ -181,8 +181,11 @@ void main() {
 
   testWidgets('the medication screen says what is left today, and what '
       'was counted when (#272)', (tester) async {
-    // Sixty counted ten days ago at two a day: forty are left.
-    final counted = DateTime.now().subtract(const Duration(days: 10));
+    // Sixty counted ten days ago at two a day: forty are left. Ten
+    // calendar days, at noon, so that no change of summer time moves the
+    // count onto another day.
+    final now = DateTime.now();
+    final counted = DateTime(now.year, now.month, now.day - 10, 12);
     await pump(
       tester,
       const MedicationRangeScreen(householdId: householdId),

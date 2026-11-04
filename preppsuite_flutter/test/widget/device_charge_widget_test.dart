@@ -152,7 +152,14 @@ void main() {
       stock: [
         item(
           every: 30,
-          checked: DateTime.now().subtract(const Duration(days: 10)),
+          // Ten calendar days ago, at noon: ten times 24 hours lands on
+          // another day around a change of summer time.
+          checked: DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day - 10,
+            12,
+          ),
         ),
       ],
     );

@@ -34,7 +34,11 @@ void main() {
     dirty: false,
   );
 
-  // Thirty counted twenty days ago at one a day: ten are left.
+  // Thirty counted twenty days ago at one a day: ten are left. Twenty
+  // calendar days, at noon: twenty times 24 hours back from late in the
+  // evening crossed the end of summer time into the day after, and left
+  // eleven.
+  final today = DateTime.now();
   final pills = InventoryItem(
     clientId: 'ramipril',
     householdId: 'h',
@@ -45,7 +49,7 @@ void main() {
     storageLocation: 'Bad',
     dailyDose: 1,
     refillLeadDays: 7,
-    stockCountedAt: DateTime.now().subtract(const Duration(days: 20)),
+    stockCountedAt: DateTime(today.year, today.month, today.day - 20, 12),
     updatedAt: DateTime.now().toUtc(),
     dirty: false,
   );
