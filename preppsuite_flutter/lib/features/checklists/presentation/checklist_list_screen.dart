@@ -9,6 +9,7 @@ import 'package:printing/printing.dart';
 import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/calendar_day.dart';
 import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../../budget/application/missing_equipment_report.dart';
@@ -41,6 +42,8 @@ class ChecklistListScreen extends ConsumerWidget {
       items:
           ref.watch(allChecklistItemsProvider(householdId)).value ?? const [],
       inventoryById: {for (final item in inventory) item.clientId: item},
+      // A linked pack in daily use is counted down to today (#272).
+      now: ref.watch(calendarDayProvider),
     );
 
     // Two tabs rather than two headings down one list: the question

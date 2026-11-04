@@ -3,8 +3,9 @@ import 'package:preppsuite_flutter/features/energy/application/outage_food_safet
 
 /// The figures themselves are FEMA's and the USDA's, so what is worth
 /// testing is not "is four hours four hours" but the edges a household
-/// actually meets: the moment a window closes, the two hours after it,
-/// a freezer that is half empty, and a clock that was corrected.
+/// actually meets: the moment a window closes, the two hours after a
+/// freezer's, a freezer that is half empty, and a clock that was
+/// corrected.
 void main() {
   final wentDark = DateTime.utc(2026, 9, 14, 20);
 
@@ -54,28 +55,54 @@ void main() {
     });
   });
 
-  group('the two-hour rule', () {
-    test('has not started while the window is still open', () {
+  group('the refrigerator has no two hours after its four (#273)', () {
+    // ready.gov: safe as long as the power was out no more than four
+    // hours; FSIS: discard refrigerated perishables after four hours.
+    test('its perishables go the moment the four hours are over', () {
       expect(
-        fridge(at(const Duration(hours: 2))).graceRemaining,
-        perishableGrace,
+        fridge(at(const Duration(hours: 3, minutes: 59))).isSpoilt,
+        isFalse,
       );
-      expect(fridge(at(const Duration(hours: 2))).isSpoilt, isFalse);
+      expect(fridge(at(const Duration(hours: 4))).isSpoilt, isTrue);
+      expect(
+        fridge(at(const Duration(hours: 4))).graceRemaining,
+        Duration.zero,
+      );
+    });
+
+    test('and not before, however little is left', () {
+      final status = fridge(at(const Duration(hours: 2)));
+      expect(status.isSpoilt, isFalse);
+      expect(status.grace, Duration.zero);
+    });
+  });
+
+  group('the two-hour rule after a freezer', () {
+    test('has not started while the window is still open', () {
+      final status = freezer(at(const Duration(hours: 12)));
+      expect(status.graceRemaining, perishableGrace);
+      expect(status.isSpoilt, isFalse);
     });
 
     test('runs down over the two hours after the window', () {
       expect(
-        fridge(at(const Duration(hours: 5))).graceRemaining,
+        freezer(at(const Duration(hours: 49))).graceRemaining,
+        const Duration(hours: 1),
+      );
+      expect(
+        freezer(
+          at(const Duration(hours: 25), fill: FreezerFill.half),
+        ).graceRemaining,
         const Duration(hours: 1),
       );
     });
 
-    test('is what decides that food is thrown out', () {
+    test('is what decides that thawed food is thrown out', () {
       expect(
-        fridge(at(const Duration(hours: 5, minutes: 59))).isSpoilt,
+        freezer(at(const Duration(hours: 49, minutes: 59))).isSpoilt,
         isFalse,
       );
-      expect(fridge(at(const Duration(hours: 6))).isSpoilt, isTrue);
+      expect(freezer(at(const Duration(hours: 50))).isSpoilt, isTrue);
     });
   });
 

@@ -30,15 +30,20 @@ bool isChecklistItemSatisfied(
 /// One pass, one map, handed down. A template with no items at all is
 /// absent from the result rather than present as 0 of 0: the screen
 /// shows a line per list only where there is something to report.
+///
+/// [now] is the day a linked pack in daily use is counted down to (#272).
 Map<String, ({int done, int total})> checklistProgressByTemplate({
   required Iterable<ChecklistItem> items,
   required Map<String, InventoryItem> inventoryById,
+  DateTime? now,
 }) {
   final progress = <String, ({int done, int total})>{};
   for (final item in items) {
     final at = progress[item.templateClientId] ?? (done: 0, total: 0);
     progress[item.templateClientId] = (
-      done: at.done + (isChecklistItemSatisfied(item, inventoryById) ? 1 : 0),
+      done:
+          at.done +
+          (isChecklistItemSatisfied(item, inventoryById, now: now) ? 1 : 0),
       total: at.total + 1,
     );
   }

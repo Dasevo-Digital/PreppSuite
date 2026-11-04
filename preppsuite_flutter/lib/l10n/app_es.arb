@@ -2448,7 +2448,7 @@
   "refillLeadDays": "{days} días antes de que se acabe",
   "emergencyCardStored": "En la reserva",
   "emergencyCardStoredReach": "{name}: {days}",
-  "medicationInUse": "En uso diario, contado el {date}",
+  "medicationInUse": "En uso diario, contado el {date}: {count} {unit}",
   "medicationRefillOn": "Recordatorio de nueva receta el {date}",
   "medicationRefillDue": "Es hora de una nueva receta",
   "scenarioTitle": "Sin electricidad, agua ni calefacción",

@@ -9,6 +9,7 @@ library;
 import '../../../core/calendar_days.dart';
 import '../../../local_db/database.dart';
 import '../../home/application/home_overview.dart' show soonWindow;
+import 'stock_today.dart';
 
 export '../../home/application/home_overview.dart' show soonWindow;
 
@@ -53,7 +54,9 @@ class RotationEntry {
 /// Two kinds of row are left out on purpose. An item with no date cannot
 /// be rotated — salt does not expire, and listing it would bury the ones
 /// that do. An item at zero has nothing left to use; it belongs on the
-/// shopping list instead, and it gets there through its minimum.
+/// shopping list instead, and it gets there through its minimum. Zero
+/// today, that is: a pack in daily use that has been taken down to
+/// nothing since it was counted is as empty as one booked out (#272).
 List<RotationEntry> buildRotation(
   List<InventoryItem> items, {
   DateTime? now,
@@ -66,7 +69,7 @@ List<RotationEntry> buildRotation(
   for (final item in items) {
     final expiry = item.expirationDate;
     if (expiry == null) continue;
-    if (item.quantity <= 0) continue;
+    if (stockToday(item, now: now) <= 0) continue;
 
     final daysLeft = calendarDaysBetween(today, _dateOnly(expiry));
     entries.add(

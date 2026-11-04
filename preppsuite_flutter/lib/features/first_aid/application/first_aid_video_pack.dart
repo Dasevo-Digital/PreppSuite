@@ -21,7 +21,8 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:archive/archive.dart';
+// archive 4.6 has a `Sha256` of its own; the pack's digest is cryptography's.
+import 'package:archive/archive.dart' hide Sha256;
 import 'package:cryptography/cryptography.dart';
 import 'package:path/path.dart' as p;
 

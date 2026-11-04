@@ -676,7 +676,11 @@ one is quoted by name.** The blackout clock in
 `energy/application/outage_food_safety.dart` is the only place this
 applies: four hours of refrigerator, forty-eight of a full freezer,
 twenty-four of a half-full one, and perishables gone two hours above
-4 °C. Those figures are FEMA's and the USDA's. The BZfE, the BfR, the
+4 °C. Those figures are FEMA's and the USDA's. The two hours follow a
+freezer's window only (#273): a refrigerator's four hours are how long
+it keeps food at 4 °C, and both sources discard its perishables once
+they are over. Until 2.8.8 the clock added two more hours there and
+told a household to keep milk and meat for six. The BZfE, the BfR, the
 BMEL and the Verbraucherzentrale were all checked and all describe the
 principle without stating hours. So the rule above gains one sentence
 rather than an exception: the source is named on the screen. A cold
@@ -1240,8 +1244,18 @@ tree; the test suite deliberately targets that layer rather than the UI.
   forty, and the prescription reminder came weeks late. A reserve put
   into daily use is counted from that day. The report no longer filters
   in SQL, which does not know the days.
+  2.8.7 missed four places (#272). A checklist line was ticked by
+  today's stock but its subtitle named the count, printed as a double
+  ("30.0 Tablette"), and so did the list a pack is linked from; the
+  lists' progress now passes the calendar day too. The medicines screen
+  said "Bestand 30" beside ten days left: it shows today's stock, with
+  the count and its date after it. The CSV export wrote the count, and
+  a file without a count date has to carry today's stock instead. And
+  the rotation kept a pack that had been taken down to nothing.
+  The raw `quantity` stays right where the count itself is meant: the
+  sync and backup records, which carry `stockCountedAt` beside it.
 - **The rotation queue leaves out what cannot be rotated.** No expiry date
-  (salt) and nothing left (quantity zero) are both excluded, and days are
+  (salt) and nothing left (nothing in stock today) are both excluded, and days are
   counted as calendar days rather than elapsed hours so "tomorrow morning"
   reads as 1 and not 0. Its `soon` window is the overview's `soonWindow`,
   re-exported rather than redeclared: the two must never disagree about

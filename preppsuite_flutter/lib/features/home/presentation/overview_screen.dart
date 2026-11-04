@@ -768,9 +768,10 @@ class _ChecklistCard extends ConsumerWidget {
     final inventory =
         ref.watch(inventoryItemsProvider(householdId)).value ?? const [];
     final inventoryById = {for (final item in inventory) item.clientId: item};
+    final today = ref.watch(calendarDayProvider);
     final effectiveItems = [
       for (final item in items)
-        isChecklistItemSatisfied(item, inventoryById)
+        isChecklistItemSatisfied(item, inventoryById, now: today)
             ? item.copyWith(isChecked: true)
             : item,
     ];

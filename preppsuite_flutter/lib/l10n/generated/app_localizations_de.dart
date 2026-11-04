@@ -3728,7 +3728,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Noch kein Vorrat zum Verknüpfen vorhanden.';
 
   @override
-  String checklistLinkedStock(String name, num quantity, String unit) {
+  String checklistLinkedStock(String name, String quantity, String unit) {
     return '$name: $quantity $unit vorhanden';
   }
 
@@ -8993,8 +8993,8 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String medicationInUse(String date) {
-    return 'In täglichem Gebrauch, gezählt am $date';
+  String medicationInUse(String date, String count, String unit) {
+    return 'In täglichem Gebrauch, gezählt am $date: $count $unit';
   }
 
   @override

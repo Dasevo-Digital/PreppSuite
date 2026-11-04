@@ -11,13 +11,25 @@
 /// says so rather than presenting the figures as the app's own. A cold
 /// chain is not a national quantity; what would be wrong is inventing one.
 ///
-/// - refrigerator, door kept shut: about **4 hours**
+/// - refrigerator, door kept shut: about **4 hours**, and its perishables
+///   are discarded once those are over
 /// - full freezer: about **48 hours**
 /// - half-full freezer: about **24 hours**
 /// - the threshold itself: **40 °F**, which is 4 °C
 /// - perishables that spent **2 hours** above it are discarded
 /// - never taste food to decide; refreezing is allowed while ice crystals
 ///   remain
+///
+/// **The two hours come after a freezer, not after a refrigerator**
+/// (#273). A refrigerator's four hours are how long it keeps food at
+/// 4 °C or below -- ready.gov: refrigerated food is safe as long as the
+/// power was out for no more than four hours, and the FSIS fact sheet
+/// says to discard refrigerated perishables after four hours without
+/// power. Until 2.8.8 the clock added the two-hour rule on top and said
+/// "discard in 2 h" at four hours: milk and meat kept for six hours that
+/// both sources throw out at four. A freezer's hours are how long it
+/// holds its temperature; after that the contents thaw, and what has
+/// thawed gets the two hours above 4 °C.
 ///
 /// Sources: <https://www.ready.gov/power-outages>, <https://www.ready.gov/food>
 /// and the FSIS "Keep Your Food Safe During Emergencies" fact sheet.
@@ -42,9 +54,9 @@ const refrigeratorWindow = Duration(hours: 4);
 const fullFreezerWindow = Duration(hours: 48);
 const halfFreezerWindow = Duration(hours: 24);
 
-/// How long a perishable may sit above [safeTemperatureCelsius] before it
-/// is thrown out. Starts when the store's own window has run out, not
-/// when the power went.
+/// How long a thawed perishable may sit above [safeTemperatureCelsius]
+/// before it is thrown out. Starts when the freezer's window has run out,
+/// not when the power went; a refrigerator has none (see above).
 const perishableGrace = Duration(hours: 2);
 
 /// 40 °F, stated in the unit the app speaks.
@@ -56,6 +68,7 @@ class ColdStoreStatus {
     required this.store,
     required this.window,
     required this.elapsed,
+    this.grace = Duration.zero,
   });
 
   final ColdStore store;
@@ -63,6 +76,10 @@ class ColdStoreStatus {
   /// How long this store is expected to hold, from the moment the power
   /// went.
   final Duration window;
+
+  /// How long after [window] its perishables may still be kept:
+  /// [perishableGrace] for a freezer, nothing for a refrigerator.
+  final Duration grace;
 
   /// How long the power has been off. May exceed [window].
   final Duration elapsed;
@@ -73,20 +90,20 @@ class ColdStoreStatus {
     return left.isNegative ? Duration.zero : left;
   }
 
-  /// The window has run out. Not the same as "the food is spoilt" — it
-  /// means the figure no longer answers, and [graceRemaining] takes over.
+  /// The window has run out. For a freezer not yet the same as "the food
+  /// is spoilt" — [graceRemaining] takes over; for a refrigerator it is.
   bool get isOver => elapsed >= window;
 
-  /// After the window, the two-hour rule. Zero once that is gone too,
-  /// which is the point at which perishables are discarded.
+  /// After the window, what is left of [grace]. Zero once that is gone
+  /// too, which is the point at which perishables are discarded.
   Duration get graceRemaining {
-    if (!isOver) return perishableGrace;
-    final left = window + perishableGrace - elapsed;
+    if (!isOver) return grace;
+    final left = window + grace - elapsed;
     return left.isNegative ? Duration.zero : left;
   }
 
   /// Perishables in this store are to be thrown out.
-  bool get isSpoilt => graceRemaining == Duration.zero;
+  bool get isSpoilt => isOver && graceRemaining == Duration.zero;
 
   /// How much of the window is used up, 0..1 — for a progress bar.
   double get fraction {
@@ -122,6 +139,7 @@ List<ColdStoreStatus> coldStoreStatuses({
         FreezerFill.half => halfFreezerWindow,
       },
       elapsed: elapsed,
+      grace: perishableGrace,
     ),
   ];
 }

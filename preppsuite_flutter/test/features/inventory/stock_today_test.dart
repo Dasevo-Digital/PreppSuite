@@ -1,8 +1,12 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/checklists/application/checklist_satisfaction.dart';
 import 'package:preppsuite_flutter/features/home/application/home_overview.dart';
+import 'package:preppsuite_flutter/features/inventory/application/inventory_csv_export.dart';
+import 'package:preppsuite_flutter/features/inventory/application/inventory_csv_import.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_filter.dart';
 import 'package:preppsuite_flutter/features/inventory/application/medication_range.dart';
+import 'package:preppsuite_flutter/features/inventory/application/rotation.dart';
 import 'package:preppsuite_flutter/features/inventory/application/shopping_list.dart';
 import 'package:preppsuite_flutter/features/inventory/application/stock_today.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
@@ -148,6 +152,60 @@ void main() {
           now: DateTime(2026, 10, 20),
         ),
         isTrue,
+      );
+    });
+  });
+
+  group('everything else that shows it (#272)', () {
+    ChecklistItem line({double target = 14}) => ChecklistItem(
+      clientId: 'line',
+      householdId: 'household-1',
+      templateClientId: 'list',
+      title: 'Medikamente für zwei Wochen',
+      isChecked: false,
+      linkedInventoryItemId: 'ramipril',
+      targetQuantity: target,
+      sortOrder: 0,
+      updatedAt: DateTime.utc(2026),
+      dirty: false,
+    );
+
+    test("a list's progress counts the pack down as its line does", () {
+      final byId = {'ramipril': item()};
+      expect(
+        checklistProgressByTemplate(
+          items: [line()],
+          inventoryById: byId,
+          now: now,
+        )['list'],
+        (done: 0, total: 1),
+      );
+      expect(
+        checklistProgressByTemplate(
+          items: [line()],
+          inventoryById: byId,
+          now: DateTime(2026, 10, 20),
+        )['list'],
+        (done: 1, total: 1),
+      );
+    });
+
+    test('the CSV holds what is left, since it has no day for the count', () {
+      double exported(InventoryItem row) => parseInventoryCsv(
+        buildInventoryCsv([row], now: now),
+      ).rows.single.parsed!.quantity;
+      expect(exported(item()), 10);
+      expect(exported(item(refillLeadDays: null)), 30);
+    });
+
+    test('a pack taken down to nothing is not left to use first', () {
+      final expiring = item(quantity: 15).copyWith(
+        expirationDate: Value(DateTime(2026, 11, 20)),
+      );
+      expect(buildRotation([expiring], now: now), isEmpty);
+      expect(
+        buildRotation([expiring], now: DateTime(2026, 10, 20)),
+        hasLength(1),
       );
     });
   });

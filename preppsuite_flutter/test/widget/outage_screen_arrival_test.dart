@@ -37,6 +37,25 @@ void main() {
     return SharedPreferences.getInstance();
   }
 
+  testWidgets('five hours on, the refrigerator says to discard, not to '
+      'wait two more hours (#273)', (tester) async {
+    await show(tester, {'outageStartedAt': hoursAgo(5)});
+    // The refrigerator's four hours are over: its perishables go now.
+    expect(find.text('Verderbliches entsorgen'), findsOneWidget);
+    expect(find.textContaining('entsorgen in'), findsNothing);
+  });
+
+  testWidgets('a freezer past its day has two hours for what has thawed', (
+    tester,
+  ) async {
+    await show(tester, {
+      'outageStartedAt': hoursAgo(25),
+      'outageFreezerFull': false,
+    });
+    expect(find.text('Verderbliches entsorgen'), findsOneWidget);
+    expect(find.textContaining('Abgelaufen – entsorgen in'), findsOneWidget);
+  });
+
   testWidgets('a blackout ended elsewhere stays ended when the freezer '
       'answer changes here', (tester) async {
     final prefs = await show(tester, {'outageStartedAt': hoursAgo(1)});

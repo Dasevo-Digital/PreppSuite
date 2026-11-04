@@ -43,6 +43,14 @@ Behörde nennt:
 | Gefriergerät, halb voll | etwa **24 Stunden** |
 | Schwelle | 40 °F, also **4 °C** |
 | Verderbliches darüber | nach **2 Stunden** entsorgen |
+| Verderbliches im Kühlschrank | nach den **4 Stunden** entsorgen |
+
+Die zwei Stunden schließen nur an das Gefriergerät an: Dessen Stunden
+sagen, wie lange es die Temperatur hält, danach taut das Gefriergut auf.
+Die vier Stunden des Kühlschranks sind die Zeit, in der er bei 4 °C oder
+darunter bleibt; ready.gov und das FSIS-Merkblatt geben Kühlschrankware
+nur bis dahin frei. Bis 2.8.8 zählte die Uhr dort noch zwei Stunden
+dazu (#273).
 
 Dazu: nie probieren, um über die Sicherheit zu entscheiden; wieder
 einfrieren ist erlaubt, solange Eiskristalle da sind.

@@ -6200,7 +6200,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'{name}: {quantity} {unit} available'**
-  String checklistLinkedStock(String name, num quantity, String unit);
+  String checklistLinkedStock(String name, String quantity, String unit);
 
   /// No description provided for @navEmergency.
   ///
@@ -14806,8 +14806,8 @@ abstract class AppLocalizations {
   /// No description provided for @medicationInUse.
   ///
   /// In en, this message translates to:
-  /// **'In daily use, counted on {date}'**
-  String medicationInUse(String date);
+  /// **'In daily use, counted on {date}: {count} {unit}'**
+  String medicationInUse(String date, String count, String unit);
 
   /// No description provided for @medicationRefillOn.
   ///

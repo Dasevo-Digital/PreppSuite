@@ -64,12 +64,12 @@ Future<String?> _pick({
 }) async {
   // Since file_picker 12 the dialog writes the bytes on every platform and
   // answers a `Uri`. The desktop check above stays as a net: it costs one
-  // stat of a file that is there.
+  // stat of a file that is there. The extension travels in [fileName]:
+  // `saveFile` never read a file type or [allowedExtensions], and
+  // file_picker 13.2 says so and drops them in 14.
   final uri = await FilePicker.saveFile(
     dialogTitle: dialogTitle,
     fileName: fileName,
-    type: FileType.custom,
-    allowedExtensions: allowedExtensions,
     bytes: bytes,
   );
   if (uri == null) return null;

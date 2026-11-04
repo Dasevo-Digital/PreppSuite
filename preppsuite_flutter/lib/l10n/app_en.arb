@@ -2152,7 +2152,7 @@
         "type": "String"
       },
       "quantity": {
-        "type": "num"
+        "type": "String"
       },
       "unit": {
         "type": "String"
@@ -5206,10 +5206,16 @@
       }
     }
   },
-  "medicationInUse": "In daily use, counted on {date}",
+  "medicationInUse": "In daily use, counted on {date}: {count} {unit}",
   "@medicationInUse": {
     "placeholders": {
       "date": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      },
+      "unit": {
         "type": "String"
       }
     }

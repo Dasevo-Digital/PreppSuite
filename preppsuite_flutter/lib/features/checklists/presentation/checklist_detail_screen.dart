@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../core/feel.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/calendar_day.dart';
 import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../application/built_in_template_l10n.dart';
@@ -12,6 +14,7 @@ import '../application/checklist_controller.dart';
 import '../application/checklist_providers.dart';
 import '../application/checklist_satisfaction.dart';
 import '../../inventory/application/inventory_providers.dart';
+import '../../inventory/application/stock_today.dart';
 import '../../inventory/presentation/supply_groups_screen.dart';
 import '../../../model/categories.dart';
 import '../../../core/error_text.dart';
@@ -68,6 +71,10 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
         ref.watch(inventoryItemsProvider(widget.householdId)).value ?? const [];
     final inventoryById = {for (final item in inventory) item.clientId: item};
     final language = Localizations.localeOf(context).languageCode;
+    // The line under an item and its tick say the same thing: what is on
+    // the shelf today, which for a pack in daily use is less than its
+    // count (#272), and follows the day.
+    final today = ref.watch(calendarDayProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.template.titleIn(language))),
@@ -95,6 +102,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
                     final complete = isChecklistItemSatisfied(
                       item,
                       inventoryById,
+                      now: today,
                     );
                     final supplied = complete && !item.isChecked;
                     return CheckboxListTile(
@@ -120,7 +128,7 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
                           : Text(
                               l10n.checklistLinkedStock(
                                 linked.name,
-                                linked.quantity,
+                                _amount(l10n, stockToday(linked, now: today)),
                                 linked.unit,
                               ),
                             ),
@@ -195,6 +203,11 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
     );
   }
 
+  /// "29,3" in German and "29.3" in English, and "30" rather than the
+  /// "30.0" a double prints by itself.
+  static String _amount(AppLocalizations l10n, double value) =>
+      NumberFormat.decimalPattern(l10n.localeName).format(value);
+
   Future<String?> _chooseInventoryItem(
     BuildContext context,
     List<InventoryItem> items,
@@ -224,7 +237,9 @@ class _ChecklistDetailScreenState extends ConsumerState<ChecklistDetailScreen> {
                       : Icons.radio_button_off,
                 ),
                 title: Text(item.name),
-                subtitle: Text('${item.quantity} ${item.unit}'),
+                subtitle: Text(
+                  '${_amount(l10n, stockToday(item))} ${item.unit}'.trim(),
+                ),
                 contentPadding: EdgeInsets.zero,
               ),
             ),

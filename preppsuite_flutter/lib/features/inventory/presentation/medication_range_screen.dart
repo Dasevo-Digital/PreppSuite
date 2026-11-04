@@ -9,6 +9,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
 import '../application/inventory_providers.dart';
 import '../application/medication_range.dart';
+import '../application/stock_today.dart';
 
 /// How long the medicines last.
 ///
@@ -113,17 +114,25 @@ class MedicationRangeScreen extends ConsumerWidget {
                             title: Text(range.item.name),
                             subtitle: Text(
                               [
+                                // What is left today, as in the stores
+                                // (#272): for a pack in daily use the
+                                // count less what has been taken since.
                                 l10n.medicationStock(
-                                  number(range.item.quantity),
+                                  number(
+                                    stockToday(range.item, now: range.today),
+                                  ),
                                   range.item.unit,
                                   number(range.dailyDose),
                                 ),
                                 // A pack in daily use counts from a date,
-                                // and says which, so a stale count can be
-                                // seen for what it is (#150).
+                                // and says which and what was counted, so
+                                // a stale count can be seen for what it is
+                                // (#150).
                                 if (range.inDailyUse)
                                   l10n.medicationInUse(
                                     date.format(range.countedOn),
+                                    number(range.item.quantity),
+                                    range.item.unit,
                                   ),
                                 if (range.refillOn case final day?)
                                   day.isAfter(range.today)

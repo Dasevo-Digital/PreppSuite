@@ -1126,7 +1126,7 @@
         "type": "String"
       },
       "quantity": {
-        "type": "num"
+        "type": "String"
       },
       "unit": {
         "type": "String"
@@ -3670,7 +3670,7 @@
   "refillLeadDays": "{days} Tage vor dem Ende",
   "emergencyCardStored": "Im Vorrat",
   "emergencyCardStoredReach": "{name}: {days}",
-  "medicationInUse": "In täglichem Gebrauch, gezählt am {date}",
+  "medicationInUse": "In täglichem Gebrauch, gezählt am {date}: {count} {unit}",
   "medicationRefillOn": "Erinnerung an ein neues Rezept am {date}",
   "medicationRefillDue": "Zeit für ein neues Rezept",
   "scenarioTitle": "Ohne Strom, Wasser und Heizung",

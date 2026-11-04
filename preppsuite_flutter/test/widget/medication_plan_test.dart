@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -176,5 +177,23 @@ void main() {
       find.textContaining(l10n.medicationRefillOn('').trim()),
       findsOneWidget,
     );
+  });
+
+  testWidgets('the medication screen says what is left today, and what '
+      'was counted when (#272)', (tester) async {
+    // Sixty counted ten days ago at two a day: forty are left.
+    final counted = DateTime.now().subtract(const Duration(days: 10));
+    await pump(
+      tester,
+      const MedicationRangeScreen(householdId: householdId),
+      stock: [pills().copyWith(stockCountedAt: Value(counted))],
+    );
+
+    expect(
+      find.textContaining('Bestand 40 Tabletten, 2 am Tag'),
+      findsOneWidget,
+    );
+    expect(find.textContaining(': 60 Tabletten'), findsOneWidget);
+    expect(find.textContaining('Bestand 60'), findsNothing);
   });
 }

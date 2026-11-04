@@ -3705,7 +3705,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checklistNoStockToLink => 'There is no stock item to link yet.';
 
   @override
-  String checklistLinkedStock(String name, num quantity, String unit) {
+  String checklistLinkedStock(String name, String quantity, String unit) {
     return '$name: $quantity $unit available';
   }
 
@@ -8946,8 +8946,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String medicationInUse(String date) {
-    return 'In daily use, counted on $date';
+  String medicationInUse(String date, String count, String unit) {
+    return 'In daily use, counted on $date: $count $unit';
   }
 
   @override

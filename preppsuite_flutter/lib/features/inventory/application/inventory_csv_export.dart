@@ -1,6 +1,7 @@
 import 'package:csv/csv.dart';
 
 import '../../../local_db/database.dart';
+import 'stock_today.dart';
 
 /// Column headers written by the export.
 ///
@@ -32,7 +33,13 @@ const inventoryCsvFieldDelimiter = ';';
 /// for a separator by anything else that reads the file. Dates are written
 /// as `YYYY-MM-DD`, the one format that sorts correctly as text and is
 /// unambiguous between German and US readings.
-String buildInventoryCsv(List<InventoryItem> items) {
+///
+/// The quantity is what is on the shelf on the day of [now] (#272). For
+/// a pack of medicine in daily use that is less than its count, and the
+/// file has no column for the day it was counted: the count alone, read
+/// back or opened in a spreadsheet, would be the tablets taken since
+/// counted again.
+String buildInventoryCsv(List<InventoryItem> items, {DateTime? now}) {
   final rows = <List<String>>[
     inventoryCsvHeaders,
     for (final item in items)
@@ -40,7 +47,7 @@ String buildInventoryCsv(List<InventoryItem> items) {
         [
           item.name,
           item.category,
-          _number(item.quantity),
+          _number(stockToday(item, now: now)),
           item.unit,
           item.storageLocation,
           _date(item.expirationDate),
