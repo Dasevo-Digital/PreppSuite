@@ -5916,6 +5916,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Angehakt sind die Lebensmittel. Nimm den Haken bei allem weg, was nicht verdirbt. Was angehakt bleibt, steht danach im Vorrat auf null und kommt über seine Mindestmenge auf die Einkaufsliste.';
 
   @override
+  String get outageDiscardGraceHint =>
+      'Die zwei Stunden für Aufgetautes laufen noch, deshalb ist nichts angehakt. Was noch Eiskristalle hat, darf wieder eingefroren werden. Was du anhakst, steht danach im Vorrat auf null.';
+
+  @override
   String get outageDiscardMedicine =>
       'Medikamente, die gekühlt gehören, etwa Insulin: Laut ready.gov nach mehr als einem Tag ohne Strom entsorgen, außer die Packung sagt etwas anderes. Im Zweifel in der Apotheke fragen.';
 

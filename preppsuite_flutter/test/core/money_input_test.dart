@@ -35,4 +35,14 @@ void main() {
     expect(readMoneyCents('${maximumMoneyAmount + 1}'), isNull);
     expect(maximumMoneyAmount * 100, lessThan(1 << 53));
   });
+
+  test('a figure for a field is written as its language writes it (#279)', () {
+    expect(localiseDecimal('12.50', 'de'), '12,50');
+    expect(localiseDecimal('1.5', 'es'), '1,5');
+    expect(localiseDecimal('1.5', 'en'), '1.5');
+    expect(localiseDecimal('30', 'de'), '30');
+    // And it reads back as it was.
+    expect(readMoneyCents(localiseDecimal('12.50', 'de')), 1250);
+    expect(readNonNegativeNumber(localiseDecimal('1.5', 'de')), 1.5);
+  });
 }

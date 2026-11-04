@@ -95,6 +95,12 @@ void main() {
     return rows.where((row) => row.clientId == entry.clientId).firstOrNull;
   }
 
+  testWidgets('the amount opens as German writes it (#279)', (tester) async {
+    await show(tester);
+    expect(find.widgetWithText(TextFormField, '12,90'), findsOneWidget);
+    expect(find.text('12.90'), findsNothing);
+  });
+
   testWidgets('deleting offers a way back instead of asking first', (
     tester,
   ) async {

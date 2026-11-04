@@ -76,6 +76,21 @@ class _PossessionFormScreenState extends ConsumerState<PossessionFormScreen> {
     _photoPath = existing?.photoPath;
   }
 
+  var _localised = false;
+
+  /// The amount with the decimal comma where the language writes one
+  /// (#279); here, because [initState] may not ask for the language.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_localised) return;
+    _localised = true;
+    _price.text = localiseDecimal(
+      _price.text,
+      AppLocalizations.of(context)!.localeName,
+    );
+  }
+
   @override
   void dispose() {
     for (final path in _sessionPhotos) {

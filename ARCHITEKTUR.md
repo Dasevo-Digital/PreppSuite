@@ -56,7 +56,9 @@ Zstandard, the translator library where the package carries it -- and
 draws the emergency help. The iPhone device check and the Android CI pick
 it up with the other files; `tool/linux_release.sh` and
 `tool/windows_build.ps1` run it after their build, and `tool/release.sh`
-refuses to go on without `STARTTEST: BESTANDEN` from both. On TestKubuntu
+refuses to go on without `STARTTEST: BESTANDEN` from both. A Linux run
+that ended without it is started again on fresh sources by
+`tool/release.sh <version> --resume` (#280). On TestKubuntu
 it uses the build user's own Wayland session (`/run/user/<uid>/wayland-0`),
 so that user has to be signed in to the desktop -- no virtual display is
 installed. On TestWindows it runs over ssh without a desktop. Measured
@@ -692,7 +694,10 @@ guessed at. Once a store's window is over its contents can be booked
 out to nought in one go (`bookOutAll`, undone through `bookPurchases`).
 Food is ticked; a medicine never is, because ready.gov gives it a clock
 of its own -- a refrigerated medicine goes after more than a day without
-power unless its label says otherwise -- and the dialog says so. The BZfE, the BfR, the
+power unless its label says otherwise -- and the dialog says so. And
+food only once the store is spoilt (#278): a freezer past its window is
+within its two hours, its card still says "discard in", and what has ice
+crystals left may be refrozen, so nothing is ticked then. The BZfE, the BfR, the
 BMEL and the Verbraucherzentrale were all checked and all describe the
 principle without stating hours. So the rule above gains one sentence
 rather than an exception: the source is named on the screen. A cold
@@ -3598,6 +3603,20 @@ Nachbarschafts-Codes liest `int.tryParse` (zwanzig Ziffern sind mehr, als
 ein `int` fasst, und `int.parse` warf bei jedem Kamerabild), und ein Datum
 muss nach `DateTime.utc` noch dasselbe sein, statt dass „2026-13-45“ in den
 Februar rollt. Ein Geburtsjahr liegt zwischen 1900 und dem laufenden Jahr.
+Die Modellversionen in Mozillas Übersetzer-Liste werden als Ziffernfolgen
+verglichen, nicht mit `int.parse` gelesen: eine Version mit zwanzig Ziffern
+warf, und mit ihr fiel der ganze Katalog aus, nicht nur der eine Eintrag.
+Eine Sirenen-Reichweite aus OpenStreetMap muss endlich sein und unter
+hundert Kilometern liegen; vierhundert Ziffern sind für ein `double`
+unendlich, und `round()` warf beim Zeichnen der Sirenen-Seite (#277).
+
+Zahlen, die ein Formular zum Überschreiben vorbelegt, stehen mit dem
+Dezimalkomma da, wo die Sprache eines schreibt (`localiseDecimal`, #279);
+gelesen wird beides. Vorrat, Budget und Hausrat setzten „1.5“ und „12.50“
+vor einen deutschen Leser. Gesetzt wird das im ersten
+`didChangeDependencies`, weil `initState` die Sprache nicht erfragen darf,
+und im Vorratsformular vor dem Start der Änderungserkennung, damit das
+Öffnen nicht schon als Änderung gilt.
 
 Auch aus endlichen Eingaben dürfen keine unendlichen Ergebnisse entstehen:
 Nährwertprodukte, Packungsumrechnungen und Dosierungsquotienten werden vor dem

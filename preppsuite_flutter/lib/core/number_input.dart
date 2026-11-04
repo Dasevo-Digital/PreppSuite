@@ -6,6 +6,15 @@ double? readNonNegativeNumber(String raw) {
   return value != null && isNonNegativeFinite(value) ? value : null;
 }
 
+/// [text], a number written with a decimal point, with the decimal comma
+/// where the language of [localeName] writes one (#279): what goes into
+/// a field the household types over. No thousands separator, which a
+/// reader would take for a decimal point; [readNonNegativeNumber] reads
+/// either mark back. The forms put "1.5" and "12.50" in front of a German
+/// reader, who writes "1,5" and saw "1,5" everywhere else in the app.
+String localiseDecimal(String text, String localeName) =>
+    localeName.startsWith('en') ? text : text.replaceAll('.', ',');
+
 /// The most a money field takes, in whole units of its currency.
 ///
 /// A billion is more than any household spends on one thing, and in cents

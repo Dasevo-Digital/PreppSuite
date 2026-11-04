@@ -126,6 +126,12 @@ void main() {
     expect(siren('600 m').sirenRangeMetres, 600);
     expect(siren('1,5 km').sirenRangeMetres, 1500);
     expect(siren('weit').sirenRangeMetres, isNull);
+    // Four hundred digits are infinity to a double, and rounding that
+    // threw while the screen was drawn (#277). A hundred kilometres is a
+    // typo, not a siren.
+    expect(siren('9' * 400).sirenRangeMetres, isNull);
+    expect(siren('150 km').sirenRangeMetres, isNull);
+    expect(siren('100 km').sirenRangeMetres, 100000);
   });
 
   test('whether the siren is heard', () {

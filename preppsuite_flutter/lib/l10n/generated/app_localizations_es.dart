@@ -5926,6 +5926,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Los alimentos están marcados. Desmarca lo que no se estropea. Lo que quede marcado pasa a cero en las provisiones y entra en la lista de la compra por su cantidad mínima.';
 
   @override
+  String get outageDiscardGraceHint =>
+      'Las dos horas para lo descongelado siguen corriendo, así que no hay nada marcado. Lo que aún tenga cristales de hielo se puede volver a congelar. Lo que marques pasa a cero en las provisiones.';
+
+  @override
   String get outageDiscardMedicine =>
       'Medicamentos que deben guardarse en frío, como la insulina: según ready.gov, se desechan si el corte dura más de un día, salvo que el envase diga otra cosa. Ante la duda, pregunta en la farmacia.';
 

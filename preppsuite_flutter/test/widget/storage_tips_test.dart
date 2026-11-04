@@ -178,7 +178,11 @@ void main() {
     final field = tester.widget<TextFormField>(
       find.widgetWithText(TextFormField, 'Kalorien je 100 g (kcal, optional)'),
     );
-    expect(double.parse(field.controller!.text), closeTo(213, 1));
+    // Written as German writes it, "212,7" (#279).
+    expect(
+      double.parse(field.controller!.text.replaceAll(',', '.')),
+      closeTo(213, 1),
+    );
 
     // And the line underneath multiplies it back out to what the table
     // printed, which is how a wrong basis would be visible.

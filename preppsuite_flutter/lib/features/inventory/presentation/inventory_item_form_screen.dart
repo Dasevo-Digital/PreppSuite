@@ -286,6 +286,35 @@ class _InventoryItemFormScreenState
     _barcode = existing?.barcode;
     _offProductId = existing?.offProductId;
     _photoPaths = [...?existing?.photoPaths];
+  }
+
+  /// The language the numbers are written in; see [didChangeDependencies].
+  String _localeName = 'en';
+  var _localised = false;
+
+  /// The figures with the decimal comma where the language writes one
+  /// (#279). Here rather than in [initState], which may not ask for the
+  /// language, and before the form listens, so that writing them is not
+  /// an edit to warn about.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_localised) return;
+    _localised = true;
+    _localeName = AppLocalizations.of(context)!.localeName;
+    for (final field in [
+      _quantityController,
+      _packageSizeController,
+      _minQuantityController,
+      _dailyDoseController,
+      _caloriesController,
+      _proteinController,
+      _carbohydrateController,
+      _fatController,
+      _fiberController,
+    ]) {
+      field.text = localiseDecimal(field.text, _localeName);
+    }
     _initialSignature = _signature;
     for (final controller in _controllers) {
       controller.addListener(_onFieldChanged);
@@ -647,8 +676,9 @@ class _InventoryItemFormScreenState
         : null;
   }
 
-  String? _grams(double? value) =>
-      value == null ? null : _formatNumber(_roundGrams(value));
+  String? _grams(double? value) => value == null
+      ? null
+      : localiseDecimal(_formatNumber(_roundGrams(value)), _localeName);
 
   /// Reads the nutrition fields back. An empty field means "not known"
   /// and is stored as null rather than zero — the supply calculator adds

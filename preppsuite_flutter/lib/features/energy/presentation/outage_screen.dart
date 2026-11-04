@@ -197,7 +197,7 @@ class _OutageScreenState extends State<OutageScreen>
             onDiscard: stock == null || !status.isOver
                 ? null
                 : () => _discard(
-                    status.store,
+                    status,
                     contents!.of(status.store),
                     stock(),
                     l10n,
@@ -227,14 +227,19 @@ class _OutageScreenState extends State<OutageScreen>
   /// What the household throws out of [store], out of the stock as well
   /// (#276), with a way back for a slip.
   Future<void> _discard(
-    ColdStore store,
+    ColdStoreStatus status,
     List<InventoryItem> items,
     InventoryController stock,
     AppLocalizations l10n,
   ) async {
     final chosen = await showDialog<Set<String>>(
       context: context,
-      builder: (_) => _DiscardDialog(store: store, items: items, l10n: l10n),
+      builder: (_) => _DiscardDialog(
+        store: status.store,
+        spoilt: status.isSpoilt,
+        items: items,
+        l10n: l10n,
+      ),
     );
     if (chosen == null || chosen.isEmpty || !mounted) return;
     final messenger = ScaffoldMessenger.of(context);
@@ -482,15 +487,24 @@ class _StoreCard extends StatelessWidget {
   }
 }
 
-/// What goes out of one store: everything in it, the food ticked.
+/// What goes out of one store: everything in it, the food ticked once
+/// it is to be thrown out.
 class _DiscardDialog extends StatefulWidget {
   const _DiscardDialog({
     required this.store,
+    required this.spoilt,
     required this.items,
     required this.l10n,
   });
 
   final ColdStore store;
+
+  /// The store's time is up entirely. A freezer past its window but
+  /// within its two hours is not (#278): the card still says "discard
+  /// in ...", and what has ice crystals left may be refrozen, so nothing
+  /// is ticked for the household then.
+  final bool spoilt;
+
   final List<InventoryItem> items;
   final AppLocalizations l10n;
 
@@ -500,8 +514,9 @@ class _DiscardDialog extends StatefulWidget {
 
 class _DiscardDialogState extends State<_DiscardDialog> {
   late final _ticked = {
-    for (final item in widget.items)
-      if (proposedForDiscard(item)) item.clientId,
+    if (widget.spoilt)
+      for (final item in widget.items)
+        if (proposedForDiscard(item)) item.clientId,
   };
 
   @override
@@ -518,7 +533,11 @@ class _DiscardDialogState extends State<_DiscardDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.outageDiscardHint),
+            Text(
+              widget.spoilt
+                  ? l10n.outageDiscardHint
+                  : l10n.outageDiscardGraceHint,
+            ),
             const SizedBox(height: 8),
             for (final item in widget.items)
               CheckboxListTile(

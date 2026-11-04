@@ -22,23 +22,34 @@ export PATH="$HOME/flutter/bin:$PATH"
 
 # The translator's sources and the sqlite3 build hook's library come from
 # GitHub, which drops connections from this network now and then: 2.7.4
-# and 2.7.5 each lost a build to it (#227). Three tries, a minute apart.
+# and 2.7.5 each lost a build to it (#227). And for minutes rather than
+# seconds: on 4 November 2026 twice for five to ten, longer than three
+# tries a minute apart, and 2.8.8 and 2.8.9 were each started again by
+# hand (#280). Five tries, the wait doubling from a minute -- a quarter of
+# an hour of waiting in all.
 retry() {
-  local attempt
-  for attempt in 1 2 3; do
+  local attempt wait=60
+  for attempt in 1 2 3 4 5; do
     "$@" && return 0
-    [ "$attempt" = 3 ] && return 1
-    echo "Versuch $attempt fehlgeschlagen, neuer Versuch in 60 s: $1"
-    sleep 60
+    [ "$attempt" = 5 ] && return 1
+    echo "Versuch $attempt fehlgeschlagen, neuer Versuch in $wait s: $1"
+    sleep "$wait"
+    wait=$((wait * 2))
   done
 }
 
 cd "$work/src/preppsuite_flutter"
-# Before the app, or CMake has nothing to bundle; whether it arrived is
-# checked by the caller in the package listing.
+# Before the app, or CMake has nothing to bundle. Without it the run
+# stops here (#280): it used to build on, and the start test failed a
+# quarter of an hour later on the library it had never had. Stopped, it
+# says LINUX-FEHLGESCHLAGEN at once, and `release.sh --resume` starts it
+# again on fresh sources.
 translator() { native/translate/build_linux.sh > "$work/translate-linux.log" 2>&1; }
-retry translator ||
-  { echo "UEBERSETZER-LINUX: FEHLGESCHLAGEN"; tail -n 20 "$work/translate-linux.log"; }
+retry translator || {
+  echo "UEBERSETZER-LINUX: FEHLGESCHLAGEN"
+  tail -n 20 "$work/translate-linux.log"
+  exit 1
+}
 flutter pub get
 # A start test run earlier in this folder leaves the debug kernel in the
 # shared build/flutter_assets, and the release build copies it into the

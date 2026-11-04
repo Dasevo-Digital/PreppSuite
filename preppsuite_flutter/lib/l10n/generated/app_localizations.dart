@@ -9802,6 +9802,12 @@ abstract class AppLocalizations {
   /// **'The food is ticked. Untick anything that does not spoil. What stays ticked is set to zero in the inventory and goes on the shopping list through its minimum.'**
   String get outageDiscardHint;
 
+  /// No description provided for @outageDiscardGraceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The two hours for thawed food are still running, so nothing is ticked. Anything that still has ice crystals may be refrozen. Whatever you tick is set to zero in the inventory.'**
+  String get outageDiscardGraceHint;
+
   /// No description provided for @outageDiscardMedicine.
   ///
   /// In en, this message translates to:

@@ -55,6 +55,21 @@ class _BudgetEntryFormScreenState extends ConsumerState<BudgetEntryFormScreen> {
     _purchaseDate = existing?.purchaseDate;
   }
 
+  var _localised = false;
+
+  /// The amount with the decimal comma where the language writes one
+  /// (#279); here, because [initState] may not ask for the language.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_localised) return;
+    _localised = true;
+    _amountController.text = localiseDecimal(
+      _amountController.text,
+      AppLocalizations.of(context)!.localeName,
+    );
+  }
+
   @override
   void dispose() {
     _labelController.dispose();

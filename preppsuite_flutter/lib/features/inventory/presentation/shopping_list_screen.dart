@@ -539,7 +539,7 @@ String _fieldNumber(double value, String localeName) {
   final text = rounded == rounded.roundToDouble()
       ? rounded.toStringAsFixed(0)
       : rounded.toString();
-  return localeName.startsWith('en') ? text : text.replaceAll('.', ',');
+  return localiseDecimal(text, localeName);
 }
 
 String _number(double value) => value == value.roundToDouble()

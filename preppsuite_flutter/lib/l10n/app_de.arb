@@ -2268,6 +2268,7 @@
   "outageDiscardTitleRefrigerator": "Aus dem Kühlschrank ausbuchen",
   "outageDiscardTitleFreezer": "Aus dem Gefriergerät ausbuchen",
   "outageDiscardHint": "Angehakt sind die Lebensmittel. Nimm den Haken bei allem weg, was nicht verdirbt. Was angehakt bleibt, steht danach im Vorrat auf null und kommt über seine Mindestmenge auf die Einkaufsliste.",
+  "outageDiscardGraceHint": "Die zwei Stunden für Aufgetautes laufen noch, deshalb ist nichts angehakt. Was noch Eiskristalle hat, darf wieder eingefroren werden. Was du anhakst, steht danach im Vorrat auf null.",
   "outageDiscardMedicine": "Medikamente, die gekühlt gehören, etwa Insulin: Laut ready.gov nach mehr als einem Tag ohne Strom entsorgen, außer die Packung sagt etwas anderes. Im Zweifel in der Apotheke fragen.",
   "outageDiscardConfirm": "{count, plural, =1{1 Eintrag ausbuchen} other{{count} Einträge ausbuchen}}",
   "@outageDiscardConfirm": {

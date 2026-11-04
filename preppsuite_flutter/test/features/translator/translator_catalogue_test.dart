@@ -109,6 +109,20 @@ void main() {
     expect(sorted, ['1.0a1', '1.0', '1.1', '2.0a1', '2.0', '2.1']);
   });
 
+  test('a version with more digits than an int holds is ordered, not '
+      'thrown (#277)', () {
+    const huge = '1.99999999999999999999';
+    expect(compareModelVersions(huge, '1.2'), greaterThan(0));
+    expect(compareModelVersions('2.0', huge), greaterThan(0));
+    expect(
+      compareModelVersions('1.0a99999999999999999999', '1.0'),
+      lessThan(0),
+    );
+    // Leading zeros write the same number.
+    expect(compareModelVersions('1.02', '1.2'), 0);
+    expect(compareModelVersions('1.10', '1.9'), greaterThan(0));
+  });
+
   test('a translation goes through English unless one side is English', () {
     expect(directionsFor(de, en).map((d) => d.code), ['deen']);
     expect(directionsFor(en, PhraseLanguage.uk).map((d) => d.code), ['enuk']);

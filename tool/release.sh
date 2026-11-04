@@ -8,7 +8,10 @@
 #                                     waiting for Linux: the Mac, Android
 #                                     and device-check results in the
 #                                     upload folder are kept, the Linux
-#                                     machine's run is waited for again.
+#                                     machine's run is waited for again --
+#                                     or, where it ended without passing
+#                                     its start test, started again on
+#                                     fresh sources (#280).
 #                                     With RELEASE_SKIP_REMOTE=1 it goes
 #                                     straight to PDFium and checksums,
 #                                     after a device check run again by hand
@@ -143,6 +146,29 @@ archive="$log/src-$version.tar.gz"
 git archive --format=tar.gz --prefix=src/ -o "$archive" "$tag"
 
 remote_linux="preppsuite-release/$version"
+
+# The Linux machine's run, on fresh sources: the tag's archive in a folder
+# of its own, so nothing a run before it left there is built again.
+start_linux() {
+  step "Linux auf $linux starten"
+  ssh "$linux" "rm -rf ~/$remote_linux && mkdir -p ~/$remote_linux"
+  scp -q "$archive" "$linux:$remote_linux/src.tar.gz"
+  scp -q "$ROOT/tool/linux_release.sh" "$linux:$remote_linux/linux_release.sh"
+  ssh "$linux" "cd ~/$remote_linux && tar xzf src.tar.gz && \
+    (nohup bash linux_release.sh \$HOME/$remote_linux $version $build \
+     > build.log 2>&1 < /dev/null &)"
+}
+
+# Where that run stands: none, running, passed, or failed -- ended, but
+# not with its start test passed.
+linux_state() {
+  ssh "$linux" "f=~/$remote_linux/build.log
+    if [ ! -f \$f ]; then echo none
+    elif grep -qx ALLES-FERTIG \$f && grep -q 'STARTTEST: BESTANDEN' \$f; then echo passed
+    elif grep -qx -e ALLES-FERTIG -e LINUX-FEHLGESCHLAGEN \$f; then echo failed
+    else echo running; fi"
+}
+
 if $resume; then
   for kept in "PreppSuite-$version-macos-local-ad-hoc.zip" \
     "PreppSuite-$version-Android-arm64-v8a.apk" \
@@ -151,21 +177,26 @@ if $resume; then
   done
   grep -qE '^Ergebnis:[[:space:]]+BESTANDEN$' "$out/GERAETETEST-v$version.txt" ||
     fail "Gerätetest im Upload-Ordner nicht bestanden"
-  $skip_remote || ssh "$linux" "test -f ~/$remote_linux/build.log" ||
-    fail "kein Linux-Lauf für $version auf $linux – ohne --resume neu bauen"
   step "Fortsetzen: Mac, Android und Gerätetest liegen schon vor"
+  if ! $skip_remote; then
+    # A run that ended without passing its start test is not waited for
+    # a second time but started again (#280): twice on 4 November 2026
+    # GitHub was out of reach for longer than the Linux machine tried,
+    # and the run had to be started again by hand. One still running, or
+    # one that passed, is waited for as it is.
+    case "$(linux_state)" in
+      none | failed) start_linux ;;
+      running) echo "Linux läuft noch, es wird darauf gewartet" ;;
+      passed) echo "Linux ist schon fertig und bestanden" ;;
+      *) fail "Stand des Linux-Laufs auf $linux nicht lesbar" ;;
+    esac
+  fi
 else
 # --- Linux, in the background -------------------------------------------
 if $skip_remote; then
   step "Linux und Windows ausgelassen (RELEASE_SKIP_REMOTE)"
 else
-step "Linux auf $linux starten"
-ssh "$linux" "rm -rf ~/$remote_linux && mkdir -p ~/$remote_linux"
-scp -q "$archive" "$linux:$remote_linux/src.tar.gz"
-scp -q "$ROOT/tool/linux_release.sh" "$linux:$remote_linux/linux_release.sh"
-ssh "$linux" "cd ~/$remote_linux && tar xzf src.tar.gz && \
-  (nohup bash linux_release.sh \$HOME/$remote_linux $version $build \
-   > build.log 2>&1 < /dev/null &)"
+start_linux
 fi
 
 # --- macOS ----------------------------------------------------------------
@@ -241,7 +272,7 @@ for _ in $(seq 1 720); do
   # A build that stopped says so (#227) and is not waited for.
   if ssh "$linux" "grep -q LINUX-FEHLGESCHLAGEN ~/$remote_linux/build.log"; then
     ssh "$linux" "grep -E 'ERROR|error:|FEHLGESCHLAGEN' ~/$remote_linux/build.log | tail -5" || true
-    fail "Linux-Build abgebrochen, siehe ~/$remote_linux/build.log auf $linux"
+    fail "Linux-Build abgebrochen, siehe ~/$remote_linux/build.log auf $linux; --resume startet ihn neu"
   fi
   # The start test reads the desktop keyring, which waits for somebody to
   # unlock it; linux_release.sh says so in its log rather than hanging.
@@ -255,7 +286,7 @@ done
 ssh "$linux" "grep -q ALLES-FERTIG ~/$remote_linux/build.log" ||
   fail "Linux-Build nicht fertig, siehe ~/$remote_linux/build.log"
 ssh "$linux" "grep -q 'STARTTEST: BESTANDEN' ~/$remote_linux/build.log" ||
-  fail "Starttest unter Linux nicht bestanden, siehe ~/$remote_linux/build.log"
+  fail "Starttest unter Linux nicht bestanden, siehe ~/$remote_linux/build.log; --resume startet Linux neu"
 ssh "$linux" "grep -q 'lib/libpdfium.so' ~/$remote_linux/inhalt.txt" ||
   fail "Linux-Paket ohne PDFium"
 ssh "$linux" "grep -q 'lib/libpreppsuite_translate.so' ~/$remote_linux/inhalt.txt" ||

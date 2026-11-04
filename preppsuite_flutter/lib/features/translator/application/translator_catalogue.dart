@@ -272,28 +272,46 @@ bool releasedFor(Object? filter, {required bool android}) {
 
 /// Orders Mozilla's model versions: `2.1` after `2.0`, and `1.0a1`, an
 /// early build of 1.0, before `1.0` itself.
+///
+/// The numbers are compared as digits, not parsed (#277): the list is
+/// Mozilla's, but what it says is read as input, and one version with
+/// twenty digits in it made `int.parse` throw -- and with it the whole
+/// catalogue, not just that record.
 int compareModelVersions(String a, String b) {
-  (List<int>, int?) parts(String v) {
+  (List<String>, String?) parts(String v) {
     final match = RegExp(r'^(\d+(?:\.\d+)*)(?:[ab](\d+))?').firstMatch(v);
-    if (match == null) return (const [0], null);
-    return (
-      [for (final n in match.group(1)!.split('.')) int.parse(n)],
-      match.group(2) == null ? null : int.parse(match.group(2)!),
-    );
+    if (match == null) return (const ['0'], null);
+    return (match.group(1)!.split('.'), match.group(2));
   }
 
   final (na, pa) = parts(a);
   final (nb, pb) = parts(b);
   for (var i = 0; i < na.length || i < nb.length; i++) {
-    final x = i < na.length ? na[i] : 0;
-    final y = i < nb.length ? nb[i] : 0;
-    if (x != y) return x.compareTo(y);
+    final x = i < na.length ? na[i] : '0';
+    final y = i < nb.length ? nb[i] : '0';
+    final order = _compareDigits(x, y);
+    if (order != 0) return order;
   }
   // Same number: the release outranks any pre-release of it.
   if (pa == null && pb == null) return 0;
   if (pa == null) return 1;
   if (pb == null) return -1;
-  return pa.compareTo(pb);
+  return _compareDigits(pa, pb);
+}
+
+/// Two runs of decimal digits by the number they write, of any length:
+/// without leading zeros the longer is the larger, and of two as long the
+/// one that sorts later as text.
+int _compareDigits(String a, String b) {
+  String bare(String digits) {
+    final stripped = digits.replaceFirst(RegExp(r'^0+'), '');
+    return stripped.isEmpty ? '0' : stripped;
+  }
+
+  final x = bare(a);
+  final y = bare(b);
+  final byLength = x.length.compareTo(y.length);
+  return byLength != 0 ? byLength : x.compareTo(y);
 }
 
 class TranslatorCatalogueException implements Exception {

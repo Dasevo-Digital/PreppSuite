@@ -5882,6 +5882,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'The food is ticked. Untick anything that does not spoil. What stays ticked is set to zero in the inventory and goes on the shopping list through its minimum.';
 
   @override
+  String get outageDiscardGraceHint =>
+      'The two hours for thawed food are still running, so nothing is ticked. Anything that still has ice crystals may be refrozen. Whatever you tick is set to zero in the inventory.';
+
+  @override
   String get outageDiscardMedicine =>
       'Medicines that need to be kept cold, such as insulin: ready.gov says to discard them once the power has been out for more than a day, unless the label says otherwise. If in doubt, ask a pharmacist.';
 

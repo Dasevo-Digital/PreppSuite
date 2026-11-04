@@ -73,9 +73,11 @@ void main() {
     WidgetTester tester, {
     required int hours,
     List<InventoryItem>? items,
+    bool freezerFull = true,
   }) async {
     SharedPreferences.setMockInitialValues({
       'outageStartedAt': hoursAgo(hours),
+      'outageFreezerFull': freezerFull,
     });
     tester.view.physicalSize = const Size(1200, 3000);
     tester.view.devicePixelRatio = 1;
@@ -163,5 +165,29 @@ void main() {
 
     expect(find.text(l10n.outageContentsNone), findsOneWidget);
     expect(find.text(l10n.outageDiscardButton), findsNothing);
+  });
+
+  testWidgets('a freezer within its two hours offers the list with nothing '
+      'ticked (#278)', (tester) async {
+    // A half-full freezer holds a day; 25 hours on, its two hours for
+    // what has thawed are running, and the card still says "discard in".
+    final l10n = await show(tester, hours: 25, freezerFull: false);
+
+    // Fridge first, freezer second.
+    expect(find.text(l10n.outageDiscardButton), findsNWidgets(2));
+    await tester.tap(find.text(l10n.outageDiscardButton).last);
+    await tester.pumpAndSettle();
+
+    expect(find.text(l10n.outageDiscardTitleFreezer), findsOneWidget);
+    expect(find.text(l10n.outageDiscardGraceHint), findsOneWidget);
+    final peas = tester.widget<CheckboxListTile>(
+      find.widgetWithText(CheckboxListTile, 'Erbsen'),
+    );
+    expect(peas.value, isFalse);
+    // Nothing chosen, nothing to confirm.
+    final confirm = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, l10n.outageDiscardConfirm(0)),
+    );
+    expect(confirm.onPressed, isNull);
   });
 }

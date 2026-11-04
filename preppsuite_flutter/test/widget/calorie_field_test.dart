@@ -129,7 +129,14 @@ void main() {
     await open(tester, bread(calories: 2.13));
     await tester.pumpAndSettle();
 
-    expect(find.text('2.13'), findsOneWidget);
+    // With the decimal comma the German form is read in (#279).
+    expect(find.text('2,13'), findsOneWidget);
+    // Written so before the form listens: opening it is not an edit, and
+    // leaving it asks nothing.
+    final guard = tester.widget<PopScope<Object?>>(
+      find.byWidgetPredicate((widget) => widget is PopScope),
+    );
+    expect(guard.canPop, isTrue);
   });
 
   testWidgets('a unit that is not a measure is refused for food', (

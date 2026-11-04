@@ -227,6 +227,17 @@ Bauen feststeht, ist der übliche Ablauf dreiteilig: `tool/release.sh
 `tool/release.sh <version> --publish-only` den Ordner, ohne noch einmal zu
 bauen. Vorher prüft es die Dateien gegen `SHA256SUMS.txt`.
 
+GitHub ist von den Build-Rechnern aus nicht immer erreichbar, und dort
+liegen die Quellen des Übersetzers und die sqlite3-Bibliotheken. Am
+4. November 2026 fiel es zweimal für fünf bis zehn Minuten aus. Deshalb
+versucht `tool/linux_release.sh` jeden Download-Schritt fünfmal, mit
+Pausen von einer, zwei, vier und acht Minuten. Kommt der Übersetzer
+trotzdem nicht zustande, bricht der Linux-Lauf sofort ab, statt ohne ihn
+weiterzubauen und erst im Starttest zu scheitern (#280). Danach genügt
+`tool/release.sh <version> --resume`: Mac-, Android-Pakete und Gerätetest
+bleiben, ein gescheiterter Linux-Lauf startet auf frischen Quellen neu,
+ein laufender oder bestandener wird abgewartet.
+
 ## Woher PDFium kommt
 
 PDFium ist die einzige fremde Binärdatei, die in ein PreppSuite-Paket

@@ -59,6 +59,9 @@ enum EmergencyPointKind {
   }
 }
 
+/// Beyond this a mapped siren range is read as a typo (#277).
+const _sirenRangeCeilingMetres = 100000;
+
 class EmergencyPoint {
   const EmergencyPoint({
     required this.id,
@@ -117,7 +120,13 @@ class EmergencyPoint {
     );
     if (match == null) return null;
     final value = double.parse(match.group(1)!.replaceAll(',', '.'));
-    return (match.group(2) == 'km' ? value * 1000 : value).round();
+    final metres = match.group(2) == 'km' ? value * 1000 : value;
+    // Four hundred digits are "infinity" to a double, and `round` on it
+    // threw while the siren screen was being drawn (#277). Nor is a
+    // hundred kilometres the range of any siren: that is a typo, and a
+    // typo is no range at all.
+    if (!metres.isFinite || metres > _sirenRangeCeilingMetres) return null;
+    return metres.round();
   }
 
   Map<String, Object?> toJson() => {
