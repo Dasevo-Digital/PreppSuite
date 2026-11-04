@@ -19,6 +19,7 @@ import '../../../local_db/database.dart';
 import 'charge_reminder_provider.dart';
 import 'device_charge.dart';
 import 'expiry_reminder_planner.dart';
+import 'stock_today.dart';
 
 /// Builds the calendar, or null when there is nothing to put in it.
 ///
@@ -46,7 +47,9 @@ String? buildInventoryCalendar({
   final events = <List<String>>[];
   for (final item in items) {
     final expires = item.expirationDate;
-    if (item.deletedAt != null || item.quantity <= 0 || expires == null) {
+    if (item.deletedAt != null ||
+        isUsedUp(item, now: clock) ||
+        expires == null) {
       continue;
     }
     final day = DateTime(expires.year, expires.month, expires.day);
@@ -123,7 +126,7 @@ int calendarItemCount(List<InventoryItem> items, {DateTime? now}) {
   return items.where((item) {
     final expires = item.expirationDate;
     return item.deletedAt == null &&
-        item.quantity > 0 &&
+        !isUsedUp(item, now: clock) &&
         expires != null &&
         !DateTime(expires.year, expires.month, expires.day).isBefore(today);
   }).length;

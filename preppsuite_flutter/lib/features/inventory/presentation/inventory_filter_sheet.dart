@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/name_order.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
@@ -29,7 +30,7 @@ class _InventoryFilterSheetState extends State<InventoryFilterSheet> {
     final locations = {
       for (final item in widget.items) item.storageLocation,
       ?_location,
-    }.toList()..sort();
+    }.toList()..sort(compareNames);
     return SafeArea(
       child: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(

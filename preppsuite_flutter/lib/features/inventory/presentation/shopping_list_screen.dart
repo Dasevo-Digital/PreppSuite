@@ -448,7 +448,7 @@ class _BookDialogState extends State<_BookDialog> {
   late final _fields = {
     for (final entry in widget.entries)
       entry.item.clientId: TextEditingController(
-        text: _fieldNumber(entry.shortfall, widget.l10n.localeName),
+        text: fieldNumber(entry.shortfall, widget.l10n.localeName),
       ),
   };
   final _wrong = <String>{};
@@ -529,17 +529,6 @@ class _BookDialogState extends State<_BookDialog> {
       ],
     );
   }
-}
-
-/// An amount for a field to be typed over: no thousands separator, which
-/// a reader would take for a decimal point, and the decimal comma where
-/// the language writes one.
-String _fieldNumber(double value, String localeName) {
-  final rounded = (value * 1000).round() / 1000;
-  final text = rounded == rounded.roundToDouble()
-      ? rounded.toStringAsFixed(0)
-      : rounded.toString();
-  return localiseDecimal(text, localeName);
 }
 
 String _number(double value) => value == value.roundToDouble()

@@ -7,6 +7,7 @@
 /// tomatoes, and it can hold every minimum and still be four days short.
 library;
 
+import '../../../core/name_order.dart';
 import '../../../local_db/database.dart';
 import 'stock_today.dart';
 import 'supply_calculator.dart';
@@ -97,7 +98,7 @@ ShoppingList buildShoppingList({
     if (byRatio != 0) return byRatio;
     // Stable and readable rather than arbitrary: the same list twice
     // running must not reshuffle itself.
-    return a.item.name.toLowerCase().compareTo(b.item.name.toLowerCase());
+    return compareNames(a.item.name, b.item.name);
   });
 
   return ShoppingList(

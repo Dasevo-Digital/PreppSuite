@@ -515,14 +515,18 @@ class _InventoryTile extends ConsumerWidget {
     // its last count (#268).
     final stock = stockToday(item, now: now);
     final isLowStock = isBelowMinimum(item, now: now);
+    // As the filter reads it: nothing left, nothing expired (#281).
     final isExpired =
-        item.expirationDate?.isBefore(DateTime(now.year, now.month, now.day)) ??
-        false;
+        !isUsedUp(item, now: now) &&
+        (item.expirationDate?.isBefore(
+              DateTime(now.year, now.month, now.day),
+            ) ??
+            false);
 
     final photos = item.photoPaths;
     // Read from the row itself: a watch here would be one per row (see
     // "Was eine Liste je Zeile kostet").
-    final charge = deviceChargeCheck(item);
+    final charge = deviceChargeCheck(item, now: now);
     final chargeDays = charge?.daysUntilDue(now: now);
     final chargeDue = charge?.isDue(now: now) ?? false;
 

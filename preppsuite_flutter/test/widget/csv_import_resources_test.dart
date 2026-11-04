@@ -91,4 +91,63 @@ void main() {
     expect(find.byType(ListTile).evaluate().length, lessThan(30));
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('a German reader sees decimal commas in the preview and the '
+      'edit dialog (#284)', (tester) async {
+    final previous = FilePickerPlatform.instance;
+    addTearDown(() => FilePickerPlatform.instance = previous);
+    FilePickerPlatform.instance = _Picker(
+      _File(
+        Uint8List.fromList(
+          utf8.encode(
+            'name,category,quantity,unit,storageLocation,minQuantity\n'
+            'Reis,food,1.5,kg,Keller,0.25\n',
+          ),
+        ),
+      ),
+    );
+    // The German instructions are long enough to push the button out of
+    // a phone's first screen, and the list builds only what is in view.
+    tester.view.physicalSize = const Size(1200, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const InventoryCsvImportScreen(householdId: 'test'),
+        ),
+      ),
+    );
+    final l10n = AppLocalizations.of(
+      tester.element(find.byType(InventoryCsvImportScreen)),
+    )!;
+    await tester.ensureVisible(find.text(l10n.csvImportPickFileButton));
+    await tester.pumpAndSettle();
+    await tester.runAsync(() async {
+      await tester.tap(find.text(l10n.csvImportPickFileButton));
+      await Future<void>.delayed(const Duration(seconds: 1));
+    });
+    await tester.pumpAndSettle();
+
+    expect(find.text('1,5 kg · Keller'), findsOneWidget);
+
+    await tester.tap(find.byTooltip(l10n.csvImportEditRowTooltip));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.csvImportEditRowTitle), findsOneWidget);
+    String field(String text) => tester
+        .widget<EditableText>(
+          find.descendant(
+            of: find.widgetWithText(TextFormField, text),
+            matching: find.byType(EditableText),
+          ),
+        )
+        .controller
+        .text;
+    expect(field('1,5'), '1,5');
+    expect(field('0,25'), '0,25');
+    expect(tester.takeException(), isNull);
+  });
 }

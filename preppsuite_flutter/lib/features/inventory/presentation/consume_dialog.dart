@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/number_input.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/food_amount.dart';
@@ -71,17 +72,9 @@ class _ConsumeDialogState extends State<ConsumeDialog> {
     return _quantity >= 1 ? '1' : _format(_quantity);
   }
 
-  String _format(double value) {
-    final rounded = (value * 1000).round() / 1000;
-    final text = rounded == rounded.roundToDouble()
-        ? rounded.toStringAsFixed(0)
-        : rounded.toString();
-    // The field takes a comma, and a German or Spanish reader expects
-    // one back. English is the only language here that writes a point.
-    return widget.l10n.localeName.startsWith('en')
-        ? text
-        : text.replaceAll('.', ',');
-  }
+  // The field takes a comma, and a German or Spanish reader expects one
+  // back.
+  String _format(double value) => fieldNumber(value, widget.l10n.localeName);
 
   double? get _typed =>
       double.tryParse(_controller.text.trim().replaceAll(',', '.'));

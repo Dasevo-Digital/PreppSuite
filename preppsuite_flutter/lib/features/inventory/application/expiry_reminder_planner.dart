@@ -1,4 +1,5 @@
 import '../../../local_db/database.dart';
+import 'stock_today.dart';
 
 /// Default lead times, in days before an item's expiration date. Two
 /// reminders rather than one: the far one leaves room to actually use the
@@ -87,7 +88,8 @@ class ExpiryReminder {
 /// does not carry its own; `InventoryItem.expiryLeadDays` overrides it per
 /// row, including with an empty list to mean "never for this one".
 ///
-/// Items without an expiration date are skipped, as are reminders whose
+/// Items without an expiration date are skipped, and so is what will be
+/// used up by the time a reminder rings (see `isUsedUp`), as are reminders whose
 /// moment has already passed: an item expiring tomorrow gets no 30-day
 /// reminder, and an already-expired item gets none at all. Expiry that has
 /// already happened is the attention badge's job (see
@@ -124,6 +126,10 @@ List<ExpiryReminder> planExpiryReminders({
         reminderHour,
       );
       if (!fireAt.isAfter(now)) continue;
+      // Nothing left by then, nothing to be reminded of: a row booked
+      // out to zero, or a pack in daily use that will be empty before
+      // the morning this would ring (#281).
+      if (isUsedUp(item, now: fireAt)) continue;
 
       reminders.add(
         ExpiryReminder(

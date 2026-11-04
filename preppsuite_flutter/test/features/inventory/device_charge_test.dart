@@ -14,12 +14,13 @@ void main() {
     DateTime? checked,
     String category = 'energy',
     DateTime? deletedAt,
+    double quantity = 1,
   }) => InventoryItem(
     clientId: name,
     householdId: 'h',
     name: name,
     category: category,
-    quantity: 1,
+    quantity: quantity,
     unit: 'Stück',
     storageLocation: 'Flur',
     chargeEveryDays: every,
@@ -36,6 +37,19 @@ void main() {
         deviceChargeCheck(device('Lampe', deletedAt: DateTime.utc(2026))),
         isNull,
       );
+    });
+
+    test('none once nothing of it is left (#281)', () {
+      final gone = device(
+        'Powerbank',
+        quantity: 0,
+        checked: DateTime(2026, 8, 1),
+      );
+      expect(deviceChargeCheck(gone), isNull);
+      expect(deviceCharges([gone, device('Radio')]).map((d) => d.item.name), [
+        'Radio',
+      ]);
+      expect(planDeviceChargeReminders(items: [gone], now: now), isEmpty);
     });
 
     test('is due in calendar days from the last check', () {

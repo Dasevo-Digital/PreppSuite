@@ -101,12 +101,12 @@ void main() {
       expect(overview.expired, 0);
     });
 
-    test('an item both empty and expired is counted in both', () {
-      // They are separate things to do — replace it, and buy more — so
-      // collapsing them would hide one of the two.
+    test('an item both short and expired is counted in both', () {
+      // They are separate things to do — throw out what is there, and
+      // buy more — so collapsing them would hide one of the two.
       final overview = summarizeInventory([
         item(
-          quantity: 0,
+          quantity: 1,
           minQuantity: 3,
           expirationDate: now.subtract(const Duration(days: 5)),
         ),
@@ -115,6 +115,28 @@ void main() {
       expect(overview.expired, 1);
       expect(overview.lowStock, 1);
       expect(overview.needsAttention, 2);
+    });
+
+    test('an empty row has nothing to expire, only to buy (#281)', () {
+      // The milk booked out after a blackout keeps its date.
+      final overview = summarizeInventory([
+        item(
+          clientId: 'milk',
+          quantity: 0,
+          minQuantity: 3,
+          expirationDate: now.subtract(const Duration(days: 5)),
+        ),
+        item(
+          clientId: 'yoghurt',
+          quantity: 0,
+          expirationDate: now.add(const Duration(days: 3)),
+        ),
+      ], now: now);
+
+      expect(overview.expired, 0);
+      expect(overview.expiringSoon, 0);
+      expect(overview.lowStock, 1);
+      expect(overview.needsAttention, 1);
     });
 
     test('exactly at the minimum is not low', () {

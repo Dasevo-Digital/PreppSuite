@@ -6,6 +6,7 @@ import '../application/pegel_client.dart';
 import '../application/pegel_level.dart';
 import '../application/pegel_store.dart';
 import '../../../core/adaptive_columns.dart';
+import '../../../core/name_order.dart';
 
 /// The water level at one gauge, with what it means.
 ///
@@ -336,11 +337,13 @@ class _StationPickerState extends State<_StationPicker> {
       // Copied before sorting: a failed fetch hands back a const empty
       // list, and sorting that throws "Cannot modify an unmodifiable
       // list" -- which is to say the picker crashed for anybody offline.
-      _stations = [...fetched]
-        ..sort((a, b) {
-          final water = a.water.compareTo(b.water);
-          return water != 0 ? water : a.name.compareTo(b.name);
-        });
+      // A new list, by water and then by place, in the order of a
+      // dictionary: "ÜBERLINGEN" was after "ZELL" (#283). The NUL keeps
+      // a water ahead of a longer one that starts with its name.
+      _stations = sortedByName(
+        fetched,
+        (station) => '${station.water}\u0000${station.name}',
+      );
       _loading = false;
     });
   }

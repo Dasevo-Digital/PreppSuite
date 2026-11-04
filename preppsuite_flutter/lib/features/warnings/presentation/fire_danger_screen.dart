@@ -6,6 +6,7 @@ import '../application/fire_danger_client.dart';
 import '../application/fire_danger_level.dart';
 import '../application/fire_danger_store.dart';
 import '../../../core/adaptive_columns.dart';
+import '../../../core/name_order.dart';
 
 /// The forest fire danger index at one DWD station, today and ahead.
 ///
@@ -396,7 +397,8 @@ class _StationPickerState extends State<_StationPicker> {
     setState(() {
       // Copied before sorting: a failed fetch hands back a const empty
       // list, and sorting that throws.
-      _stations = [...fetched]..sort((a, b) => a.name.compareTo(b.name));
+      // A new list, and in the order of a dictionary (#283).
+      _stations = sortedByName(fetched, (station) => station.name);
       _loading = false;
     });
   }

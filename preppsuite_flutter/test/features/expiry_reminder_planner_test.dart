@@ -9,13 +9,21 @@ void main() {
     DateTime? expirationDate,
     DateTime? deletedAt,
     String? expiryLeadDays,
+    double quantity = 1,
+    String category = 'food',
+    double? dailyDose,
+    int? refillLeadDays,
+    DateTime? stockCountedAt,
   }) {
     return InventoryItem(
       clientId: clientId,
       householdId: 'h',
       name: name,
-      category: 'food',
-      quantity: 1,
+      category: category,
+      quantity: quantity,
+      dailyDose: dailyDose,
+      refillLeadDays: refillLeadDays,
+      stockCountedAt: stockCountedAt,
       unit: 'Stk',
       storageLocation: 'Keller',
       expirationDate: expirationDate,
@@ -43,6 +51,48 @@ void main() {
       expect(reminders[0].leadDays, 30);
       expect(reminders[1].fireAt, DateTime(2026, 11, 24, expiryReminderHour));
       expect(reminders[1].leadDays, 7);
+    });
+
+    test('skips what will be gone before it would ring (#281)', () {
+      final reminders = planExpiryReminders(
+        items: [
+          // Booked out after a blackout; the date stays on the row.
+          item(
+            clientId: 'milk',
+            quantity: 0,
+            expirationDate: DateTime(2026, 9, 10),
+          ),
+          // Twenty tablets at one a day, counted today: empty on
+          // 12 September, so the 30-day reminder on 1 November rings for
+          // nothing, and so does the 7-day one.
+          item(
+            clientId: 'tablets',
+            category: 'medical',
+            quantity: 20,
+            dailyDose: 1,
+            refillLeadDays: 7,
+            stockCountedAt: now.toUtc(),
+            expirationDate: DateTime(2026, 12, 1),
+          ),
+          // A hundred and twenty last until after both.
+          item(
+            clientId: 'more tablets',
+            category: 'medical',
+            quantity: 120,
+            dailyDose: 1,
+            refillLeadDays: 7,
+            stockCountedAt: now.toUtc(),
+            expirationDate: DateTime(2026, 12, 1),
+          ),
+        ],
+        now: now,
+        leadDays: const [30, 7],
+      );
+
+      expect(reminders.map((r) => r.itemClientId), [
+        'more tablets',
+        'more tablets',
+      ]);
     });
 
     test('skips items without an expiration date', () {

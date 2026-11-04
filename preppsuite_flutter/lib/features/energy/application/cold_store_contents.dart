@@ -15,6 +15,7 @@
 /// worse than a fridge the screen does not know about.
 library;
 
+import '../../../core/name_order.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
 import '../../inventory/application/stock_today.dart';
@@ -81,8 +82,7 @@ ColdStoreContents coldStoreContents(
     if (store == null || !(stockToday(item, now: now) > 0)) continue;
     (store == ColdStore.freezer ? freezer : refrigerator).add(item);
   }
-  int byName(InventoryItem a, InventoryItem b) =>
-      a.name.toLowerCase().compareTo(b.name.toLowerCase());
+  int byName(InventoryItem a, InventoryItem b) => compareNames(a.name, b.name);
   return ColdStoreContents(
     refrigerator: refrigerator..sort(byName),
     freezer: freezer..sort(byName),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../core/local_database_encryption.dart';
+import '../core/name_order.dart';
 import '../core/open_databases.dart';
 
 import 'tables/budget_entries_table.dart';
@@ -730,16 +731,43 @@ class AppDatabase extends _$AppDatabase {
 
   /// What the household owns, grouped by room in the screen and ordered
   /// here so that rows from the same room arrive together.
+  ///
+  /// Ordered in Dart, not by SQLite: its comparison put "Wohnzimmer"
+  /// before "arbeitszimmer" and "Übertopf" after "Zange" (#283; see
+  /// `name_order.dart`). Entries without a room come first, as they did.
   Stream<List<Possession>> watchPossessions(String householdId) {
-    return (select(possessions)
-          ..where(
-            (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
-          )
-          ..orderBy([
-            (t) => OrderingTerm.asc(t.room),
-            (t) => OrderingTerm.asc(t.name),
-          ]))
-        .watch();
+    return (select(possessions)..where(
+          (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
+        ))
+        .watch()
+        .map(_byRoomAndName);
+  }
+
+  static List<Possession> _byRoomAndName(List<Possession> rows) {
+    final keyed = [
+      for (final row in rows)
+        (
+          row: row,
+          room: row.room == null ? null : nameSortKey(row.room!),
+          name: nameSortKey(row.name),
+        ),
+    ];
+    keyed.sort((a, b) {
+      final ra = a.room, rb = b.room;
+      if (ra == null || rb == null) {
+        if (ra != rb) return ra == null ? -1 : 1;
+      } else {
+        final byRoom = ra.compareTo(rb);
+        if (byRoom != 0) return byRoom;
+        // Two spellings of one room, "Küche" and "küche": side by side,
+        // and each in one piece.
+        final byText = a.row.room!.compareTo(b.row.room!);
+        if (byText != 0) return byText;
+      }
+      final byName = a.name.compareTo(b.name);
+      return byName != 0 ? byName : a.row.name.compareTo(b.row.name);
+    });
+    return [for (final entry in keyed) entry.row];
   }
 
   Future<void> upsertPossession(PossessionsCompanion possession) {
@@ -883,13 +911,17 @@ class AppDatabase extends _$AppDatabase {
 
   // --- Inventory ------------------------------------------------------
 
+  /// The household's stores, by name in the order a person reads them
+  /// (#283). Every screen that lists them without a sort of its own --
+  /// the medicines, the pickers, the search -- shows them in this order,
+  /// so it is made here, and in Dart: SQLite's comparison would put every
+  /// capital first and "Äpfel" after "Zucker".
   Stream<List<InventoryItem>> watchInventoryItems(String householdId) {
-    return (select(inventoryItems)
-          ..where(
-            (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
-          )
-          ..orderBy([(t) => OrderingTerm.asc(t.name)]))
-        .watch();
+    return (select(inventoryItems)..where(
+          (t) => t.householdId.equals(householdId) & t.deletedAt.isNull(),
+        ))
+        .watch()
+        .map((rows) => sortedByName(rows, (row) => row.name));
   }
 
   /// The item this household keeps under [barcode], or null.

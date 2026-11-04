@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_database_providers.dart';
+import '../../../core/calendar_day.dart';
 import '../../../local_db/database.dart';
-import 'device_charge.dart';
-import 'stock_today.dart';
+import 'inventory_filter.dart';
 
 export '../../../core/app_database_providers.dart';
 
@@ -15,24 +15,20 @@ final inventoryItemsProvider = StreamProvider.autoDispose
           ref.watch(appDatabaseProvider).watchInventoryItems(householdId),
     );
 
-/// Count of items that are either below their minimum quantity or past
-/// their expiration date — drives the attention badge on the Inventory nav
-/// destination in `HomeShell`, so low stock/expiring items are surfaced
-/// proactively instead of only when a user happens to open the list.
+/// Count of items that are either below their minimum quantity, past
+/// their expiration date or due a battery check — drives the attention
+/// badge on the Inventory nav destination in `HomeShell`, so low
+/// stock/expiring items are surfaced proactively instead of only when a
+/// user happens to open the list.
+///
+/// Counted by the inventory filter, so the badge and the list it leads to
+/// agree on what wants looking at (#281), and again at midnight: it read
+/// the clock when the rows last changed, so a tin that ran out overnight
+/// came onto the badge only once something was edited (#282).
 final inventoryAttentionCountProvider = Provider.autoDispose
     .family<int, String>((ref, householdId) {
       final itemsAsync = ref.watch(inventoryItemsProvider(householdId));
       final items = itemsAsync.value ?? const [];
-      final now = DateTime.now();
-      // Past its date from the day after, as everywhere else (#234).
-      final today = DateTime(now.year, now.month, now.day);
-      return items.where((item) {
-        final isLowStock = isBelowMinimum(item, now: now);
-        final isExpired =
-            item.expirationDate != null && item.expirationDate!.isBefore(today);
-        // A device whose battery check has come round wants looking at
-        // as much as an empty shelf does (#179).
-        final chargeDue = deviceChargeCheck(item)?.isDue(now: now) ?? false;
-        return isLowStock || isExpired || chargeDue;
-      }).length;
+      // Only the date counts here, so the day is the clock.
+      return countNeedingAttention(items, now: ref.watch(calendarDayProvider));
     });

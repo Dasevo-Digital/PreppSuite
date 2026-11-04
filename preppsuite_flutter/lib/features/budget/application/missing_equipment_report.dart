@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../../../core/name_order.dart';
 import '../../../local_db/database.dart';
 import '../../checklists/application/built_in_template_l10n.dart';
 import '../../inventory/application/stock_today.dart';
@@ -67,7 +68,8 @@ class MissingEquipmentReport {
       final title = templateTitleByClientId[item.templateClientId] ?? '—';
       itemsByTemplateTitle.putIfAbsent(title, () => []).add(item);
     }
-    final sortedTemplateTitles = itemsByTemplateTitle.keys.toList()..sort();
+    final sortedTemplateTitles = itemsByTemplateTitle.keys.toList()
+      ..sort(compareNames);
 
     // The bundled base-14 PDF fonts (Helvetica etc.) have no Unicode
     // support and mangle German umlauts/ß — embed a real Unicode font

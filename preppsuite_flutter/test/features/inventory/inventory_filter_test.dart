@@ -106,4 +106,55 @@ void main() {
       );
     },
   );
+
+  group('an empty row (#281)', () {
+    final items = [
+      item('Milch', days: -2, quantity: 0),
+      item('Joghurt', days: 3, quantity: 0),
+      item('Ravioli', days: -1),
+    ];
+    List<String> found(InventoryStatusFilter status) => [
+      for (final row in filterInventory(
+        items,
+        now: now,
+        filter: InventoryFilter(status: status),
+      ))
+        row.name,
+    ];
+
+    test('is neither expired nor expiring, but still short', () {
+      expect(found(InventoryStatusFilter.expired), ['Ravioli']);
+      expect(found(InventoryStatusFilter.expiring), isEmpty);
+      expect(found(InventoryStatusFilter.lowStock), ['Joghurt', 'Milch']);
+    });
+
+    test('and the badge counts what the filter finds', () {
+      // Ravioli past its date; the two empty rows under their minimum.
+      expect(countNeedingAttention(items, now: now), 3);
+      expect(
+        countNeedingAttention([
+          item('Milch', days: -2, quantity: 5),
+          item('Reis', quantity: 5),
+        ], now: now),
+        1,
+      );
+    });
+  });
+
+  test('sorts by name as a dictionary does (#283)', () {
+    final items = [
+      item('Zucker'),
+      item('Öl'),
+      item('apfelmus'),
+      item('Äpfel'),
+      item('Nudeln'),
+    ];
+    expect(filterInventory(items, now: now).map((e) => e.name), [
+      'Äpfel',
+      'apfelmus',
+      'Nudeln',
+      'Öl',
+      'Zucker',
+    ]);
+  });
 }

@@ -112,4 +112,40 @@ void main() {
     expect(find.text(l10n.rotationExpiredHeading), findsOneWidget);
     expect(find.text(l10n.rotationSoonHeading), findsNothing);
   });
+
+  testWidgets('and the badge on the inventory counts it then too (#282)', (
+    tester,
+  ) async {
+    final tin = InventoryItem(
+      clientId: 'tin',
+      householdId: 'h',
+      name: 'Ravioli',
+      category: 'food',
+      quantity: 2,
+      unit: 'Dose',
+      storageLocation: 'Keller',
+      expirationDate: DateTime(2026, 11, 3),
+      updatedAt: DateTime.utc(2026),
+      dirty: false,
+    );
+    final container = ProviderContainer(
+      overrides: [
+        inventoryItemsProvider('h').overrideWith((ref) => Stream.value([tin])),
+      ],
+    );
+    final counts = <int>[];
+    container.listen(
+      inventoryAttentionCountProvider('h'),
+      (_, count) => counts.add(count),
+      fireImmediately: true,
+    );
+    await tester.pump();
+    expect(counts.last, 0);
+
+    clock = DateTime(2026, 11, 4, 0, 0, 1);
+    await tester.pump(const Duration(seconds: 61));
+
+    expect(counts.last, 1);
+    container.dispose();
+  });
 }

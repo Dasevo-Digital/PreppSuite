@@ -7,6 +7,7 @@
 library;
 
 import '../../../core/calendar_days.dart';
+import '../../../core/name_order.dart';
 import '../../../local_db/database.dart';
 import '../../home/application/home_overview.dart' show soonWindow;
 import 'stock_today.dart';
@@ -69,7 +70,7 @@ List<RotationEntry> buildRotation(
   for (final item in items) {
     final expiry = item.expirationDate;
     if (expiry == null) continue;
-    if (stockToday(item, now: now) <= 0) continue;
+    if (isUsedUp(item, now: now)) continue;
 
     final daysLeft = calendarDaysBetween(today, _dateOnly(expiry));
     entries.add(
@@ -88,7 +89,7 @@ List<RotationEntry> buildRotation(
   entries.sort((a, b) {
     final byDate = a.daysLeft.compareTo(b.daysLeft);
     if (byDate != 0) return byDate;
-    return a.item.name.toLowerCase().compareTo(b.item.name.toLowerCase());
+    return compareNames(a.item.name, b.item.name);
   });
   return entries;
 }

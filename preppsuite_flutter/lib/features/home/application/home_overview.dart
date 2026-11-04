@@ -86,7 +86,9 @@ InventoryOverview summarizeInventory(
     final category = InventoryItemCategoryX.fromName(item.category);
     byCategory[category] = (byCategory[category] ?? 0) + 1;
 
-    final expiry = item.expirationDate;
+    // A row at zero keeps its date, but nothing on the shelf has it
+    // (#281).
+    final expiry = isUsedUp(item, now: at) ? null : item.expirationDate;
     if (expiry != null) {
       if (expiry.isBefore(today)) {
         expired++;

@@ -246,4 +246,32 @@ void main() {
       expect(await applyHouseholdSnapshot(b, decoded), 0);
     });
   });
+
+  test('rooms and things come in the order of a dictionary (#283)', () async {
+    final db = open();
+    final controller = controllerFor(db);
+    for (final (name, room) in [
+      ('Zange', 'Werkstatt'),
+      ('Übertopf', 'Wohnzimmer'),
+      ('Sofa', 'Wohnzimmer'),
+      ('Laptop', 'arbeitszimmer'),
+      ('Fahrrad', null),
+      ('Öllampe', 'Wohnzimmer'),
+    ]) {
+      await controller.save(PossessionDraft(name: name, room: room));
+    }
+
+    final stored = await db.watchPossessions(householdId).first;
+
+    // Without a room first, as before; then "arbeitszimmer" despite its
+    // small a, and in the living room the Ü among the u.
+    expect(stored.map((p) => p.name), [
+      'Fahrrad',
+      'Laptop',
+      'Zange',
+      'Öllampe',
+      'Sofa',
+      'Übertopf',
+    ]);
+  });
 }

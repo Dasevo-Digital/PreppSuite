@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../model/categories.dart';
 import '../../../core/bounded_input.dart';
 import '../../../core/error_text.dart';
+import '../../../core/number_input.dart';
 import '../../../core/resource_limits.dart';
 import '../../../core/worker_job.dart';
 
@@ -106,7 +107,10 @@ class _InventoryCsvImportScreenState
 
     final edited = await showDialog<ParsedInventoryRow>(
       context: context,
-      builder: (context) => _EditRowDialog(row: rows[index]),
+      builder: (context) => _EditRowDialog(
+        row: rows[index],
+        localeName: AppLocalizations.of(context)!.localeName,
+      ),
     );
     if (edited == null || !mounted) return;
 
@@ -289,7 +293,7 @@ class _ImportRowTile extends StatelessWidget {
         leading: Icon(categoryIcon(parsed.category)),
         title: Text(parsed.name),
         subtitle: Text(
-          '${_formatNumber(parsed.quantity)} ${parsed.unit} · ${parsed.storageLocation}',
+          '${_formatNumber(parsed.quantity, l10n.localeName)} ${parsed.unit} · ${parsed.storageLocation}',
         ),
         onTap: onTap,
         trailing: _RowActions(l10n: l10n, onTap: onTap, onRemove: onRemove),
@@ -350,9 +354,11 @@ class _RowActions extends StatelessWidget {
   }
 }
 
-String _formatNumber(double value) => value == value.roundToDouble()
-    ? value.toStringAsFixed(0)
-    : value.toString();
+/// A number read from the file, as the reader's language writes it
+/// (#284). Six places, not three: this is a figure from somebody's own
+/// list, and the edit dialog must not round it on the way back in.
+String _formatNumber(double value, String localeName) =>
+    fieldNumber(value, localeName, decimals: 6);
 
 /// A form, scoped to a single pending CSV row, that lets the user fill in
 /// or correct its fields before import. Works equally for a row that
@@ -361,9 +367,12 @@ String _formatNumber(double value) => value == value.roundToDouble()
 /// raw CSV text otherwise. Returns the resulting row via [Navigator.pop],
 /// or `null` if cancelled.
 class _EditRowDialog extends StatefulWidget {
-  const _EditRowDialog({required this.row});
+  const _EditRowDialog({required this.row, required this.localeName});
 
   final InventoryCsvRow row;
+
+  /// For the numbers it fills in; `initState` may not ask for it.
+  final String localeName;
 
   @override
   State<_EditRowDialog> createState() => _EditRowDialogState();
@@ -388,7 +397,9 @@ class _EditRowDialogState extends State<_EditRowDialog> {
 
     _nameController = TextEditingController(text: parsed?.name ?? row.nameRaw);
     _quantityController = TextEditingController(
-      text: parsed != null ? _formatNumber(parsed.quantity) : row.quantityRaw,
+      text: parsed != null
+          ? _formatNumber(parsed.quantity, widget.localeName)
+          : row.quantityRaw,
     );
     _unitController = TextEditingController(text: parsed?.unit ?? row.unitRaw);
     _storageLocationController = TextEditingController(
@@ -396,7 +407,7 @@ class _EditRowDialogState extends State<_EditRowDialog> {
     );
     _minQuantityController = TextEditingController(
       text: parsed?.minQuantity != null
-          ? _formatNumber(parsed!.minQuantity!)
+          ? _formatNumber(parsed!.minQuantity!, widget.localeName)
           : row.minQuantityRaw,
     );
     _notesController = TextEditingController(

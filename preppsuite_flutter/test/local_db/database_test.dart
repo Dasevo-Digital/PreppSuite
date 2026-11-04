@@ -54,6 +54,26 @@ void main() {
     },
   );
 
+  test(
+    'watchInventoryItems comes in the order of a dictionary (#283)',
+    () async {
+      // SQLite's comparison gave apfelmus, Nudeln, Zucker, Äpfel, Öl.
+      for (final name in ['Zucker', 'Öl', 'apfelmus', 'Nudeln', 'Äpfel']) {
+        await db.upsertInventoryItem(draft(clientId: name, name: name));
+      }
+
+      final items = await db.watchInventoryItems('household-1').first;
+
+      expect(items.map((i) => i.name), [
+        'Äpfel',
+        'apfelmus',
+        'Nudeln',
+        'Öl',
+        'Zucker',
+      ]);
+    },
+  );
+
   test('watchInventoryItems excludes tombstoned rows', () async {
     await db.upsertInventoryItem(
       draft(clientId: 'a', deletedAt: DateTime.utc(2026, 2)),

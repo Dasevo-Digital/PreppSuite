@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import 'air_quality_level.dart';
 import '../../../core/http_client.dart';
+import '../../../core/name_order.dart';
 
 /// One measuring station of the federal air quality network.
 class AirQualityStation {
@@ -195,8 +196,8 @@ class AirQualityClient {
         ),
       );
     }
-    stations.sort((a, b) => a.name.compareTo(b.name));
-    return stations;
+    // "Überlingen" among the u, not after "Zwiesel" (#283).
+    return sortedByName(stations, (station) => station.name);
   }
 
   /// The newest hour in an `airquality` answer, or null when the station

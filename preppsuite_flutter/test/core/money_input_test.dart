@@ -45,4 +45,12 @@ void main() {
     expect(readMoneyCents(localiseDecimal('12.50', 'de')), 1250);
     expect(readNonNegativeNumber(localiseDecimal('1.5', 'de')), 1.5);
   });
+
+  test('a figure filled in for typing over is rounded once, here (#284)', () {
+    expect(fieldNumber(0.1 + 0.2, 'de'), '0,3');
+    expect(fieldNumber(2, 'de'), '2');
+    expect(fieldNumber(7 / 3, 'en'), '2.333');
+    expect(fieldNumber(0.123456, 'es', decimals: 6), '0,123456');
+    expect(readNonNegativeNumber(fieldNumber(1.25, 'de')), 1.25);
+  });
 }

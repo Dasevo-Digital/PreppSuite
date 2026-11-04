@@ -9,9 +9,11 @@
 /// stepped around is stepped around here too.
 library;
 
+import '../../../core/name_order.dart';
 import '../../../local_db/database.dart';
 import 'charge_reminder_provider.dart';
 import 'expiry_reminder_planner.dart' show expiryReminderHour;
+import 'stock_today.dart';
 
 /// The intervals the form offers, in days. The household setting's,
 /// without "off" -- a device that needs no check simply has none.
@@ -21,9 +23,13 @@ const deviceChargeIntervals = [14, 30, 60, 90, 180, 365];
 const defaultDeviceChargeDays = 90;
 
 /// [item]'s battery check, or null where it has none.
-ChargeCheck? deviceChargeCheck(InventoryItem item) {
+///
+/// None either once nothing of it is left: a power bank booked out has
+/// no battery in the house to look at (#281).
+ChargeCheck? deviceChargeCheck(InventoryItem item, {DateTime? now}) {
   final every = item.chargeEveryDays;
   if (every == null || every <= 0 || item.deletedAt != null) return null;
+  if (isUsedUp(item, now: now)) return null;
   return ChargeCheck(lastChecked: item.chargeCheckedAt, everyDays: every);
 }
 
@@ -49,17 +55,17 @@ List<DeviceCharge> deviceCharges(
 }) {
   final charges = [
     for (final item in items)
-      if (deviceChargeCheck(item) case final check?)
+      if (deviceChargeCheck(item, now: now) case final check?)
         DeviceCharge(item: item, check: check),
   ];
   charges.sort((a, b) {
     final da = a.daysUntilDue(now: now);
     final db = b.daysUntilDue(now: now);
-    if (da == null && db == null) return a.item.name.compareTo(b.item.name);
+    if (da == null && db == null) return compareNames(a.item.name, b.item.name);
     if (da == null) return 1;
     if (db == null) return -1;
     final byDays = da.compareTo(db);
-    return byDays != 0 ? byDays : a.item.name.compareTo(b.item.name);
+    return byDays != 0 ? byDays : compareNames(a.item.name, b.item.name);
   });
   return charges;
 }

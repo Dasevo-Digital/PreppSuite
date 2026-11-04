@@ -209,8 +209,9 @@ midnight under "soon" until something was edited. `calendarDayProvider`
 holds today, moves on at midnight and is checked again when the app
 comes back to the front (a sleeping device fires no timer). Such a
 screen watches it -- overview, inventory list, rotation, medicines,
-emergency cards, scenario, the preparedness hub -- and passes it on as
-"now" where only the date matters. The hub also moves the hours of a
+emergency cards, scenario, the preparedness hub, and since #282 the
+badge on the inventory -- and passes it on as "now" where only the date
+matters. The hub also moves the hours of a
 running blackout on every minute, and reads the energy plan and the
 clock again when another device's settings arrive.
 
@@ -1271,6 +1272,19 @@ tree; the test suite deliberately targets that layer rather than the UI.
   the rotation kept a pack that had been taken down to nothing.
   The raw `quantity` stays right where the count itself is meant: the
   sync and backup records, which carry `stockCountedAt` beside it.
+  **Nothing left, nothing to expire** (#281). `isUsedUp` is today's stock
+  at zero. Such a row keeps its date and stays in the list (the shopping
+  list finds it through its minimum), but the overview, the badge, the
+  filter, the list row, the expiry and battery reminders and the
+  calendar export leave its date and its battery check alone. Only the
+  rotation and the calendar export did before; since #276 books fridge
+  food out to zero after a blackout, the milk thrown away counted as
+  "expired" and a week later came a reminder that it was about to be.
+  The expiry reminder asks about the morning it rings, so a pack in
+  daily use that will be empty by then gets none. A figure that is not
+  a number is not "nothing": its row is flagged as broken, and its date
+  still counts. The badge counts through `countNeedingAttention`, the
+  filter's own tests, so the number and the list behind it agree.
 - **The rotation queue leaves out what cannot be rotated.** No expiry date
   (salt) and nothing left (nothing in stock today) are both excluded, and days are
   counted as calendar days rather than elapsed hours so "tomorrow morning"
@@ -3616,7 +3630,26 @@ gelesen wird beides. Vorrat, Budget und Hausrat setzten „1.5“ und „12.50�
 vor einen deutschen Leser. Gesetzt wird das im ersten
 `didChangeDependencies`, weil `initState` die Sprache nicht erfragen darf,
 und im Vorratsformular vor dem Start der Änderungserkennung, damit das
-Öffnen nicht schon als Änderung gilt.
+Öffnen nicht schon als Änderung gilt. Geschrieben wird so eine Zahl an
+einer Stelle, `fieldNumber` (#284): Einkaufsliste und Verbrauchsdialog
+hatten je eine eigene Kopie, und der CSV-Import keine, seine Vorschau und
+sein Bearbeiten-Dialog zeigten „1.5“. Der Import rundet auf sechs Stellen
+statt drei, damit eine Zahl aus der Datei auf dem Weg durch den Dialog
+nicht gekürzt wird.
+
+Namen werden sortiert wie in einem Wörterbuch (`name_order.dart`, #283):
+ohne Groß und Klein, ä, ö und ü wie a, o und u, ß wie ss, die Akzente
+der anderen Sprachen ebenso; nur ñ bleibt ein eigener Buchstabe nach n,
+wie im Spanischen. `String.compareTo` vergleicht Code-Einheiten und
+setzte jeden Großbuchstaben vor jeden kleinen und jeden Umlaut hinter
+„z“: „apfelmus, Nudeln, Zucker, Äpfel, Öl“. SQLite vergleicht ebenso,
+deshalb sortieren `watchInventoryItems` und `watchPossessions` in Dart,
+und jede Liste ohne eigene Sortierung (Medikamente, Auswahllisten, Suche)
+erbt die Reihenfolge von dort. Dieselbe Funktion ordnet die Messstellen
+von Pegeln, Strahlung, Waldbrand und Luft, die Lagerorte im Filter und
+die Geräte mit Akku-Prüfung. Wo zwei Namen denselben Schlüssel haben,
+entscheidet der Name selbst, damit die Reihenfolge auf jedem Gerät
+dieselbe bleibt.
 
 Auch aus endlichen Eingaben dürfen keine unendlichen Ergebnisse entstehen:
 Nährwertprodukte, Packungsumrechnungen und Dosierungsquotienten werden vor dem

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 /// Household amounts must be finite and non-negative on every input path.
 bool isNonNegativeFinite(double value) => value.isFinite && value >= 0;
 
@@ -14,6 +16,22 @@ double? readNonNegativeNumber(String raw) {
 /// reader, who writes "1,5" and saw "1,5" everywhere else in the app.
 String localiseDecimal(String text, String localeName) =>
     localeName.startsWith('en') ? text : text.replaceAll('.', ',');
+
+/// [value] for a field to be typed over, in the words of
+/// [localiseDecimal]: no decimals for a whole number, at most [decimals]
+/// otherwise, so a quotient does not arrive as 0.30000000000000004.
+///
+/// The one place this is written (#284). The shopping list and the
+/// consume dialog each had their own copy, and the CSV import had none:
+/// its preview and its edit dialog showed "1.5" to a German reader.
+String fieldNumber(double value, String localeName, {int decimals = 3}) {
+  final scale = math.pow(10, decimals);
+  final rounded = (value * scale).round() / scale;
+  final text = rounded == rounded.roundToDouble()
+      ? rounded.toStringAsFixed(0)
+      : rounded.toString();
+  return localiseDecimal(text, localeName);
+}
 
 /// The most a money field takes, in whole units of its currency.
 ///
