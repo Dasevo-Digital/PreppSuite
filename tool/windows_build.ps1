@@ -19,13 +19,20 @@ if (-not (Test-Path native\translate\build\preppsuite_translate.dll)) { throw 'p
 flutter pub get
 if ($LASTEXITCODE -ne 0) { throw 'pub get fehlgeschlagen' }
 # The sqlite3 build hook downloads its library from GitHub, which drops
-# connections from this network now and then (#227). Three tries, a
-# minute apart.
+# connections from this network now and then (#227), and so does the
+# printing plugin's CMake step for PDFium. Three tries, a minute apart.
+#
+# Each on a fresh build folder. When the PDFium download failed, CMake
+# stopped before Flutter's CMakeLists moved the install prefix from
+# CMake's default (C:\Program Files\preppsuite_flutter) to the release
+# folder, and the cache kept the default: 2.9.1's second try "built"
+# PreppSuite.exe and installed nothing next to it (#285).
 foreach ($attempt in 1..3) {
   flutter build windows --release --build-name $Version --build-number $BuildNumber
   if ($LASTEXITCODE -eq 0) { break }
   if ($attempt -eq 3) { throw 'build fehlgeschlagen' }
   Write-Output "== Build-Versuch $attempt fehlgeschlagen, neuer Versuch in 60 s =="
+  if (Test-Path build\windows) { Remove-Item -Recurse -Force build\windows }
   Start-Sleep -Seconds 60
 }
 

@@ -238,6 +238,23 @@ weiterzubauen und erst im Starttest zu scheitern (#280). Danach genügt
 bleiben, ein gescheiterter Linux-Lauf startet auf frischen Quellen neu,
 ein laufender oder bestandener wird abgewartet.
 
+Unter Windows lädt zusätzlich das CMake des printing-Plugins PDFium von
+GitHub. Scheitert das, bleibt CMake vor der Stelle stehen, an der
+Flutter das Installationsziel auf den Release-Ordner setzt, und der Cache
+behält den Standard `C:\Program Files\preppsuite_flutter`. Ein zweiter
+Versuch im selben Ordner meldete bei 2.9.1 Erfolg und legte nur die
+`PreppSuite.exe` ab. `tool/windows_build.ps1` löscht deshalb vor jedem
+neuen Versuch `build\windows` (#285). Die Prüfung auf die Übersetzer-DLL
+im Paket hat den Fehler bemerkt, bevor ein unvollständiges Paket
+entstand.
+
+Bei 2.9.1 war GitHub von TestKubuntu aus zweimal länger weg, als die
+fünf Versuche abdecken. Die Übersetzer-Quellen auf dem festen Commit
+liegen aber auch auf dem Mac, in `native/translate/build/translations`,
+samt `pcre2-10.39.tar.gz` und der Marke `.source-ready-<commit>`. Ins
+Build-Verzeichnis des Linux-Laufs kopiert, übernimmt `translate_source.sh`
+sie ohne Netz. Wie das dauerhaft ohne GitHub geht, steht in #232.
+
 ## Woher PDFium kommt
 
 PDFium ist die einzige fremde Binärdatei, die in ein PreppSuite-Paket
