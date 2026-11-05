@@ -2349,6 +2349,14 @@ Bestand“ war hellblau wie eine harmlose Notiz. Von Hand gesetzte Paare hält
 niemand mehr für uns ein, deshalb misst `app_palette_test` ihren Kontrast in
 beiden Themen.
 
+**Die Schriftgrößen stehen im Thema selbst.** `ThemeData.textTheme` trägt
+beim Bauen nur Farben; die Größen mischt Flutter erst bei `Theme.of` hinein.
+Ein Stil, der von dort in `listTileTheme` oder `appBarTheme` wandert, hat
+keine Größe und fällt still auf 14 zurück. So standen Seitentitel lange bei
+14, und die Listentitel wären auf 14 gefallen. `_theme` geht deshalb von
+`Typography.englishLike2021` aus, und `app_palette_test` verlangt von jedem
+Stil an einer Komponente eine Größe.
+
 **Die Teile sind aus dem Grund da, dass sie weniger kosten.** `StatusTag`
 statt `Chip` für ein Wort, das niemand antippt (ein Drittel der Elemente und
 niedriger, damit eine Zeile mit Hinweis nicht höher wird als die daneben),

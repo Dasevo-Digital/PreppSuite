@@ -52,6 +52,29 @@ void main() {
     });
   }
 
+  test('every style handed to a component names its size', () {
+    // `ThemeData.textTheme` has no sizes until a screen reads it. A style
+    // taken from it for a component theme fell back to 14 without a word:
+    // list titles under their intended 16, and page titles at 14.
+    for (final theme in [appLightTheme, appDarkTheme]) {
+      final styles = <String, TextStyle?>{
+        'page title': theme.appBarTheme.titleTextStyle,
+        'list title': theme.listTileTheme.titleTextStyle,
+        'list subtitle': theme.listTileTheme.subtitleTextStyle,
+        'tab': theme.tabBarTheme.labelStyle,
+        'chip': theme.chipTheme.labelStyle,
+        'floating button': theme.floatingActionButtonTheme.extendedTextStyle,
+        'bar label': theme.navigationBarTheme.labelTextStyle?.resolve({}),
+        'rail label': theme.navigationRailTheme.selectedLabelTextStyle,
+      };
+      for (final MapEntry(key: name, value: style) in styles.entries) {
+        expect(style?.fontSize, isNotNull, reason: name);
+      }
+      expect(theme.listTileTheme.titleTextStyle?.fontSize, 16);
+      expect(theme.appBarTheme.titleTextStyle?.fontSize, 20);
+    }
+  });
+
   test('the palette keeps its identity: green, and ochre for "soon"', () {
     for (final theme in [appLightTheme, appDarkTheme]) {
       final c = theme.colorScheme;

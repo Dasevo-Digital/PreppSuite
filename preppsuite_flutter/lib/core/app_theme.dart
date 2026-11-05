@@ -175,7 +175,13 @@ TextTheme _textTheme(TextTheme base) => base.copyWith(
 ThemeData _theme(Brightness brightness) {
   final scheme = _scheme(brightness);
   final base = ThemeData(colorScheme: scheme, useMaterial3: true);
-  final text = _textTheme(base.textTheme);
+  // With the type scale in it. `base.textTheme` carries colours and no
+  // sizes: Flutter merges those in when a screen reads `Theme.of`, which is
+  // too late for the styles handed to the component themes below. A style
+  // taken from it has no font size at all and falls back to 14, which is
+  // how the page titles went unnoticed at 14 and list titles came out
+  // smaller than they were meant to.
+  final text = _textTheme(Typography.englishLike2021.merge(base.textTheme));
 
   return base.copyWith(
     textTheme: text,
@@ -362,8 +368,7 @@ ThemeData _theme(Brightness brightness) {
       // Where you are is said by the weight of its name too, and not only
       // by the pale shape behind the icon.
       labelTextStyle: WidgetStateProperty.resolveWith(
-        (states) => text.labelSmall?.copyWith(
-          letterSpacing: 0.2,
+        (states) => text.labelMedium?.copyWith(
           fontWeight: states.contains(WidgetState.selected)
               ? FontWeight.w700
               : FontWeight.w500,
@@ -378,13 +383,11 @@ ThemeData _theme(Brightness brightness) {
       indicatorColor: scheme.secondaryContainer,
       labelType: NavigationRailLabelType.all,
       useIndicator: true,
-      selectedLabelTextStyle: text.labelSmall?.copyWith(
-        letterSpacing: 0.2,
+      selectedLabelTextStyle: text.labelMedium?.copyWith(
         fontWeight: FontWeight.w700,
         color: scheme.onSurface,
       ),
-      unselectedLabelTextStyle: text.labelSmall?.copyWith(
-        letterSpacing: 0.2,
+      unselectedLabelTextStyle: text.labelMedium?.copyWith(
         fontWeight: FontWeight.w500,
         color: scheme.onSurfaceVariant,
       ),
