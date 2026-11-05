@@ -12,4 +12,12 @@ void main() {
     expect(formatByteSize(14578860032), '15 GB');
     expect(formatByteSize(1400000000), '1.4 GB');
   });
+
+  test('in the reader\'s notation (#294)', () {
+    expect(formatByteSize(1400000000, locale: 'de'), '1,4 GB');
+    expect(formatByteSize(1400000000, locale: 'es'), '1,4 GB');
+    expect(formatByteSize(159075814, locale: 'de'), '159 MB');
+    // Rounded before the decimal is chosen: not "10,0 GB".
+    expect(formatByteSize(9960000000, locale: 'de'), '10 GB');
+  });
 }

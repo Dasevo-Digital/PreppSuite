@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'
     show PredictiveBackEvent, SystemNavigator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import 'core/app_theme.dart';
 import 'core/app_lock_gate.dart';
@@ -96,6 +97,14 @@ class _PreppSuiteAppState extends ConsumerState<PreppSuiteApp>
       // around the navigator (#39); selectable_everywhere.dart says why
       // it takes both.
       builder: (context, child) {
+        // The language every date and number is written in when a screen
+        // does not name one (#294). Flutter's localisations do not set it,
+        // so `intl` stayed on en_US: "11/5/2026" for the fifth of
+        // November, and "44,000 kcal" -- forty-four to a German reader.
+        // Set here, under the Localizations the app resolved, on every
+        // build: a change of language rebuilds this, and the assignment
+        // costs nothing when it is the same.
+        Intl.defaultLocale = AppLocalizations.of(context)!.localeName;
         final media = MediaQuery.of(context);
         // Outside the app lock: a device that cannot open its databases
         // cannot check the lock either, and the passphrase prompt would

@@ -100,4 +100,36 @@ void main() {
     expect(restored.neighborhood, isEmpty);
     expect(restored.maintenanceEveryDays, isEmpty);
   });
+
+  group('maintenance schedule (#291)', () {
+    test('the water filter is looked up where the hub ticks it off', () {
+      expect(maintenanceCheckKey('waterFilter'), 'water_filter');
+      expect(maintenanceCheckKey('batteries'), 'batteries');
+    });
+
+    test('due counts calendar days, not the hour of the last check', () {
+      final changed = DateTime(2026, 8, 7, 18);
+      bool dueOn(DateTime now) =>
+          isMaintenanceDue(lastChecked: changed, everyDays: 90, now: now);
+
+      // Ninety days on, from the first minute of that day -- not from six
+      // in the evening, when nothing redraws the screen.
+      expect(dueOn(DateTime(2026, 11, 4, 23, 59)), isFalse);
+      expect(dueOn(DateTime(2026, 11, 5, 0, 1)), isTrue);
+      // Across the end of summer time, ninety days stay ninety days.
+      expect(dueOn(DateTime(2026, 11, 5, 9)), isTrue);
+    });
+
+    test('nothing is due without an interval, everything without a check', () {
+      final now = DateTime(2026, 11, 5);
+      expect(
+        isMaintenanceDue(lastChecked: null, everyDays: 0, now: now),
+        isFalse,
+      );
+      expect(
+        isMaintenanceDue(lastChecked: null, everyDays: 30, now: now),
+        isTrue,
+      );
+    });
+  });
 }

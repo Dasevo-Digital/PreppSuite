@@ -57,3 +57,33 @@ GeoBoundingBox boundingBoxForRadius(LatLng center, double radiusKm) {
     north: snapped.latitude + latDelta,
   );
 }
+
+/// An Overpass `around:` circle that does not name the point it is drawn
+/// around (#293).
+///
+/// The defibrillator and emergency-point searches sent the device's own
+/// fix, to the last digit, while the privacy notes said the position goes
+/// out rounded -- as it does for the shelter search above. The centre is
+/// snapped to [searchGridDegrees] and written with two places, and the
+/// radius grows by the furthest the snap can have moved it, so the circle
+/// still holds everything within [radiusMetres] of the real position.
+/// Whoever asks drops what lies beyond that again.
+({String latitude, String longitude, int radiusMetres}) gridCircle(
+  double latitude,
+  double longitude,
+  int radiusMetres,
+) {
+  const metresPerDegree = 111320.0;
+  double snap(double degrees) =>
+      (degrees / searchGridDegrees).round() * searchGridDegrees;
+  final lat = snap(latitude);
+  final lon = snap(longitude);
+  final northSouth = searchGridDegrees / 2 * metresPerDegree;
+  final eastWest = northSouth * math.cos(lat * math.pi / 180).abs();
+  final moved = math.sqrt(northSouth * northSouth + eastWest * eastWest);
+  return (
+    latitude: lat.toStringAsFixed(2),
+    longitude: lon.toStringAsFixed(2),
+    radiusMetres: radiusMetres + moved.ceil(),
+  );
+}

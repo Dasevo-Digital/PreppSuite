@@ -27,6 +27,7 @@ import 'kiwix_library_screen.dart';
 import 'knowledge_index_panel.dart';
 import 'personal_documents_screen.dart';
 import '../../../core/error_text.dart';
+import '../../downloads/application/byte_size.dart';
 
 /// Looking things up without a network: search an offline archive by
 /// title, open what it finds.
@@ -632,12 +633,13 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
                         alignment: Alignment.centerLeft,
                         child: Text(
                           l10n.knowledgeTotalSize(
-                            _formatBytes(
+                            formatByteSize(
                               state.library.fold<int>(
                                 0,
                                 (sum, archive) =>
                                     sum + (archive.sizeBytes ?? 0),
                               ),
+                              locale: l10n.localeName,
                             ),
                           ),
                         ),
@@ -731,17 +733,6 @@ class _KnowledgeScreenState extends ConsumerState<KnowledgeScreen> {
       SnackBar(content: Text(l10n.knowledgeErrorUnreadable)),
     );
   }
-}
-
-String _formatBytes(int bytes) {
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  var value = bytes.toDouble();
-  var unit = 0;
-  while (value >= 1024 && unit < units.length - 1) {
-    value /= 1024;
-    unit++;
-  }
-  return '${value >= 10 || unit == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(1)} ${units[unit]}';
 }
 
 /// The library as tiles, each showing what the archive says about itself.
@@ -929,7 +920,10 @@ class _ArchiveTile extends StatelessWidget {
                     Text(
                       l10n.knowledgeArchiveStats(
                         archive.entryCount!,
-                        _formatBytes(archive.sizeBytes!),
+                        formatByteSize(
+                          archive.sizeBytes!,
+                          locale: l10n.localeName,
+                        ),
                       ),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
@@ -1270,7 +1264,7 @@ class _LibraryCostsNote extends ConsumerWidget {
           Text(
             l10n.knowledgeCostsArchives(
               costs.archives,
-              _formatBytes(costs.archiveBytes),
+              formatByteSize(costs.archiveBytes, locale: l10n.localeName),
             ),
             style: style,
           ),
@@ -1278,13 +1272,15 @@ class _LibraryCostsNote extends ConsumerWidget {
             Text(l10n.knowledgeCostsUnknown(costs.unknownSizes), style: style),
           if (costs.indexBytes > 0)
             Text(
-              l10n.knowledgeCostsIndexes(_formatBytes(costs.indexBytes)),
+              l10n.knowledgeCostsIndexes(
+                formatByteSize(costs.indexBytes, locale: l10n.localeName),
+              ),
               style: style,
             ),
           Text(
             l10n.knowledgeCostsMemory(
-              _formatBytes(maxClusterBytes),
-              _formatBytes(clusterCacheBytes),
+              formatByteSize(maxClusterBytes, locale: l10n.localeName),
+              formatByteSize(clusterCacheBytes, locale: l10n.localeName),
             ),
             style: style,
           ),

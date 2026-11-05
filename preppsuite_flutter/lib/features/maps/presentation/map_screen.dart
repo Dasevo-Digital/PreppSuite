@@ -18,6 +18,8 @@ import '../application/readable_position.dart';
 import 'my_position_screen.dart';
 import '../../emergency_points/application/emergency_points.dart';
 import '../../first_aid/application/defibrillators.dart';
+import '../../../core/error_text.dart';
+import '../../../core/feature_activity.dart';
 
 /// Roughly the centre of Germany, so the map opens on something before a
 /// position or a search has resolved.
@@ -52,6 +54,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   final _geolocation = GeolocationService();
 
   LatLng? _position;
+
+  /// The fix behind [_position], with its accuracy and the moment it was
+  /// taken. "My position" is handed this rather than the bare point
+  /// (#292): it did not measure again when given one, and showed a fix
+  /// from the morning, or the device's last known one, as where somebody
+  /// stood now -- on the page made for reading a position out.
+  ReadablePosition? _fix;
   LatLng? _searchPosition;
   String? _searchLabel;
   bool _locating = false;
@@ -76,6 +85,27 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     _loadPersonalPlaces();
     _loadDefibrillators();
     _loadEmergencyPoints();
+  }
+
+  /// Whether the tab was being looked at, last time anybody asked.
+  bool? _active;
+
+  /// Reads the stored searches again each time the tab comes back (#292).
+  ///
+  /// The map is a tab that stays alive, and it read them in [initState]
+  /// only: defibrillators or emergency points found later, on their own
+  /// screens, reached the map after the next start. The same for places
+  /// saved elsewhere. Coming back is the moment they can have changed.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final active = FeatureActivity.of(context);
+    if (active && _active == false) {
+      _loadPersonalPlaces();
+      _loadDefibrillators();
+      _loadEmergencyPoints();
+    }
+    _active = active;
   }
 
   Future<void> _loadEmergencyPoints() async {
@@ -135,12 +165,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final generation = ++_lookupGeneration;
     setState(() => _locating = true);
     try {
-      final position = await _geolocation.getCurrentLatLng();
+      final fix = await _geolocation.getCurrentFix();
       if (!mounted || generation != _lookupGeneration) return;
-      setState(() => _position = position);
+      final position = LatLng(fix.latitude, fix.longitude);
+      setState(() {
+        _fix = fix;
+        _position = position;
+      });
       _mapController.move(position, 13);
     } on LocationUnavailableException catch (error) {
-      if (mounted && generation == _lookupGeneration) _say('$error');
+      if (mounted && generation == _lookupGeneration) {
+        _say(describeError(l10n, error));
+      }
     } finally {
       if (mounted) setState(() => _locating = false);
     }
@@ -283,14 +319,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 IconButton.filledTonal(
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => MyPositionScreen(
-                        initial: _position == null
-                            ? null
-                            : ReadablePosition(
-                                latitude: _position!.latitude,
-                                longitude: _position!.longitude,
-                              ),
-                      ),
+                      builder: (_) => MyPositionScreen(initial: _fix),
                     ),
                   ),
                   // Not "my location": that button is next to it and

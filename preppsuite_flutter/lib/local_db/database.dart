@@ -1520,6 +1520,13 @@ class AppDatabase extends _$AppDatabase {
       // being the household's plan and start being an orphan that syncs
       // forever without ever being shown. It is moved to the new key,
       // keeping its `updatedAt` so the folder's own plan can still win.
+      //
+      // And only if it does not lose. A QR chain applies the other
+      // household's rows first and moves afterwards, so the other plan
+      // can already be under the new key -- and it was simply written
+      // over, newer or not, and marked to go out again (#287). The same
+      // comparison as [_mergeInto]: the later stamp, and on a tie the
+      // contents, so both devices settle on one plan.
       final plan = await (select(
         householdPlans,
       )..where((t) => t.clientId.equals(from))).getSingleOrNull();
@@ -1527,15 +1534,25 @@ class AppDatabase extends _$AppDatabase {
         await (delete(
           householdPlans,
         )..where((t) => t.clientId.equals(from))).go();
-        await into(householdPlans).insertOnConflictUpdate(
-          plan
-              .toCompanion(false)
-              .copyWith(
-                clientId: Value(to),
-                householdId: Value(to),
-                dirty: const Value(true),
-              ),
-        );
+        final moved = plan
+            .toCompanion(false)
+            .copyWith(
+              clientId: Value(to),
+              householdId: Value(to),
+              dirty: const Value(true),
+            );
+        final there = await (select(
+          householdPlans,
+        )..where((t) => t.clientId.equals(to))).getSingleOrNull();
+        if (there == null ||
+            _wins(
+              moved,
+              plan.updatedAt,
+              there.toCompanion(false),
+              there.updatedAt,
+            )) {
+          await into(householdPlans).insertOnConflictUpdate(moved);
+        }
       }
     });
   }
@@ -1646,6 +1663,20 @@ class AppDatabase extends _$AppDatabase {
       changed++;
     }
     return changed;
+  }
+
+  /// Whether [candidate], stamped [candidateAt], replaces [stored],
+  /// stamped [storedAt]: the rule [_mergeInto] applies to every row.
+  static bool _wins(
+    UpdateCompanion<Object?> candidate,
+    DateTime candidateAt,
+    UpdateCompanion<Object?> stored,
+    DateTime storedAt,
+  ) {
+    final seconds = candidateAt.millisecondsSinceEpoch ~/ 1000;
+    final previous = storedAt.millisecondsSinceEpoch ~/ 1000;
+    if (seconds != previous) return seconds > previous;
+    return _sharedContents(candidate).compareTo(_sharedContents(stored)) > 0;
   }
 
   static String _sharedContents(UpdateCompanion<Object?> companion) {

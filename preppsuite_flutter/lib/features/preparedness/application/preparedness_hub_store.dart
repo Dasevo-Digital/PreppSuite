@@ -487,6 +487,30 @@ class EvacuationCard {
   );
   final String id, label, start, destination, route, locations;
   final DateTime checkedAt;
+
+  /// The same card, rewritten and checked now.
+  ///
+  /// Under its own id. An edit used to be a new card (#291), and the
+  /// merge decides per id which version is newer: a backup made before
+  /// the edit brought the old card back beside the new one instead of
+  /// losing to it.
+  EvacuationCard edited({
+    required String label,
+    required String start,
+    required String destination,
+    required String route,
+    required String locations,
+    DateTime? now,
+  }) => EvacuationCard(
+    id: id,
+    label: label,
+    start: start,
+    destination: destination,
+    route: route,
+    locations: locations,
+    checkedAt: now ?? DateTime.now(),
+  );
+
   Map<String, Object?> toJson() => {
     'id': id,
     'label': label,

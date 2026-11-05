@@ -17082,6 +17082,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Programme names and distribution as in the official publication of the radio programmes of the ARD state broadcasters and Deutschlandradio (§ 29 (4) Medienstaatsvertrag), as of 1 February 2022. This page names no frequencies itself: every programme has many transmitters, and a wrong one would be a radio searching for nothing.'**
   String get broadcastRadioSource;
+
+  /// No description provided for @locationDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Without access to the location the position cannot be found. Access can be allowed in the system settings.'**
+  String get locationDenied;
+
+  /// No description provided for @locationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The location cannot be found right now. It works better outdoors or by a window.'**
+  String get locationUnavailable;
+
+  /// No description provided for @transferWorking.
+  ///
+  /// In en, this message translates to:
+  /// **'Transferring … Keep both devices awake and close together. With many photos this takes a while.'**
+  String get transferWorking;
+
+  /// No description provided for @transferWorkingStay.
+  ///
+  /// In en, this message translates to:
+  /// **'The transfer is still running. Please wait until it has finished.'**
+  String get transferWorkingStay;
+
+  /// No description provided for @lockScreenCardFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'emergency-card-lock-screen'**
+  String get lockScreenCardFileName;
+
+  /// No description provided for @articleBookmarkAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add bookmark'**
+  String get articleBookmarkAdd;
+
+  /// No description provided for @articleBookmarkRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove bookmark'**
+  String get articleBookmarkRemove;
 }
 
 class _AppLocalizationsDelegate

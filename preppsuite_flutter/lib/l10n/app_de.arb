@@ -4435,5 +4435,12 @@
   "broadcastRadioTuneNow": "Tragt die Frequenz für euren Ort jetzt ein, solange das Netz geht. Die Sender nennen sie auf ihren Seiten unter „Empfang“, oder ihr lest sie am Radio ab. Eingetragene Frequenzen gelten für den ganzen Haushalt.",
   "broadcastRadioLockedNote": "Frequenzen, die der Haushalt eingetragen hat, zeigt diese Seite erst in der entsperrten App.",
   "broadcastRadioLookUp": "Frequenzen auf {host}",
-  "broadcastRadioSource": "Programmnamen und Verbreitung nach der amtlichen Veröffentlichung der Hörfunkprogramme der ARD-Landesrundfunkanstalten und des Deutschlandradios (§ 29 Abs. 4 Medienstaatsvertrag), Stand 1. Februar 2022. Frequenzen nennt diese Seite nicht selbst: Jedes Programm hat viele Sender, und eine falsche Angabe wäre ein Radio, das ins Leere sucht."
+  "broadcastRadioSource": "Programmnamen und Verbreitung nach der amtlichen Veröffentlichung der Hörfunkprogramme der ARD-Landesrundfunkanstalten und des Deutschlandradios (§ 29 Abs. 4 Medienstaatsvertrag), Stand 1. Februar 2022. Frequenzen nennt diese Seite nicht selbst: Jedes Programm hat viele Sender, und eine falsche Angabe wäre ein Radio, das ins Leere sucht.",
+  "locationDenied": "Ohne Zugriff auf den Standort lässt sich die Position nicht bestimmen. Der Zugriff lässt sich in den Systemeinstellungen erlauben.",
+  "locationUnavailable": "Der Standort ist gerade nicht zu bestimmen. Unter freiem Himmel oder am Fenster klappt es eher.",
+  "transferWorking": "Wird übertragen … Beide Geräte wach und beieinander lassen. Mit vielen Fotos dauert es etwas.",
+  "transferWorkingStay": "Die Übertragung läuft noch. Bitte warten, bis sie fertig ist.",
+  "lockScreenCardFileName": "notfallkarte-sperrbildschirm",
+  "articleBookmarkAdd": "Lesezeichen setzen",
+  "articleBookmarkRemove": "Lesezeichen entfernen"
 }

@@ -23,6 +23,7 @@ import '../application/checklist_satisfaction.dart';
 import '../../inventory/application/inventory_providers.dart';
 import 'checklist_detail_screen.dart';
 import '../../../core/error_text.dart';
+import '../../../core/name_order.dart';
 
 class ChecklistListScreen extends ConsumerWidget {
   const ChecklistListScreen({super.key, required this.householdId});
@@ -301,9 +302,15 @@ class _GroupedTemplateList extends StatelessWidget {
           .add(template);
     }
 
+    // Within a section by the title as it is read, the way the inventory
+    // sorts (#283): the database orders by the stored title, which is the
+    // German one for a built-in list and binary for all of them, so a
+    // Spanish reader got the German order and "übungen" came last.
+    final language = Localizations.localeOf(context).languageCode;
     final sections = [
       for (final category in ChecklistCategory.values)
-        if (byCategory[category] != null) (category, byCategory[category]!),
+        if (byCategory[category] case final group?)
+          (category, sortedByName(group, (t) => t.titleIn(language))),
     ];
 
     return ListView.builder(

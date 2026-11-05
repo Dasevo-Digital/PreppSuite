@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
@@ -133,12 +134,18 @@ class _GroupRow extends StatelessWidget {
   /// Grams become kilograms and millilitres litres above a thousand,
   /// because "0,33 kg" is the BLE's own way of writing it and "330 g"
   /// would make the reader do the conversion the table already did.
+  ///
+  /// In the reader's notation (#294): the comma used to be put in for
+  /// every language, so an English reader saw "1,5 kg".
   String _amount(double value) {
     final kilo = row.base == FoodBase.mass;
     if (value >= 1000) {
       final big = value / 1000;
-      return '${big.toStringAsFixed(big >= 10 ? 0 : 1).replaceAll('.', ',')}'
-          ' ${kilo ? 'kg' : 'l'}';
+      final number = NumberFormat.decimalPatternDigits(
+        locale: l10n.localeName,
+        decimalDigits: big >= 10 ? 0 : 1,
+      ).format(big);
+      return '$number ${kilo ? 'kg' : 'l'}';
     }
     return '${value.toStringAsFixed(0)} ${kilo ? 'g' : 'ml'}';
   }

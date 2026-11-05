@@ -218,6 +218,57 @@ void main() {
       },
     );
 
+    test(
+      'a newer plan that is already here is not written over (#287)',
+      () async {
+        // A QR chain applies the other household's rows first and moves this
+        // device's afterwards, so the other plan is already under the new
+        // key when the old one arrives there. It was replaced, newer or not.
+        await writePlan(
+          laptop,
+          household: 'own-household',
+          near: 'Alt und allein',
+          updatedAt: DateTime.utc(2026, 1, 1),
+        );
+        await writePlan(
+          laptop,
+          near: 'Der echte Treffpunkt',
+          updatedAt: DateTime.utc(2026, 6, 1),
+        );
+
+        await laptop.adoptHouseholdId(from: 'own-household', to: householdId);
+
+        expect(
+          (await laptop.watchHouseholdPlan(householdId).first)
+              ?.meetingPointNear,
+          'Der echte Treffpunkt',
+        );
+        expect(await laptop.watchHouseholdPlan('own-household').first, isNull);
+      },
+    );
+
+    test('an older plan that is already here gives way to this one', () async {
+      await writePlan(
+        laptop,
+        household: 'own-household',
+        near: 'Neu und eigen',
+        updatedAt: DateTime.utc(2026, 6, 1),
+      );
+      await writePlan(
+        laptop,
+        near: 'Vom letzten Jahr',
+        updatedAt: DateTime.utc(2025, 6, 1),
+      );
+
+      await laptop.adoptHouseholdId(from: 'own-household', to: householdId);
+
+      expect(
+        (await laptop.watchHouseholdPlan(householdId).first)?.meetingPointNear,
+        'Neu und eigen',
+      );
+      expect(await laptop.dirtyHouseholdPlans(householdId), hasLength(1));
+    });
+
     test('joining with no plan of its own changes nothing', () async {
       await laptop.adoptHouseholdId(from: 'own-household', to: householdId);
 

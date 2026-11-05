@@ -1,5 +1,7 @@
 import 'package:uuid/uuid.dart';
 
+import '../../../core/calendar_days.dart';
+
 /// Private resilience planning that stays on this device with the crisis hub.
 ///
 /// The entries deliberately contain no contacts from the address book, GPS
@@ -335,3 +337,29 @@ List<T> mergeById<T>(
   }
   return [for (final id in order) byId[id] as T];
 }
+
+/// Where the hub writes down when [task] was last done.
+///
+/// The schedule names its tasks in camel case, and its intervals are
+/// stored under those names. The hub's list ticks the water filter off
+/// as `water_filter`, so the schedule looked it up under a key nothing
+/// wrote and showed the filter as due straight after it was done
+/// (#291). The intervals keep their stored key; only the lookup maps.
+String maintenanceCheckKey(String task) =>
+    task == 'waterFilter' ? 'water_filter' : task;
+
+/// Whether a task done on [lastChecked] and due every [everyDays] days
+/// is due on the calendar day of [now].
+///
+/// Counted in calendar days, as `ChargeCheck` counts them. The time of
+/// the last check came into it before (#291): a filter changed at six in
+/// the evening turned due at six, ninety days on, and nothing redraws a
+/// screen at six.
+bool isMaintenanceDue({
+  required DateTime? lastChecked,
+  required int everyDays,
+  required DateTime now,
+}) =>
+    everyDays > 0 &&
+    (lastChecked == null ||
+        calendarDaysBetween(lastChecked.toLocal(), now.toLocal()) >= everyDays);

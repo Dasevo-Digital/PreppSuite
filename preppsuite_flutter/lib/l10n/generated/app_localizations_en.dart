@@ -10388,4 +10388,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get broadcastRadioSource =>
       'Programme names and distribution as in the official publication of the radio programmes of the ARD state broadcasters and Deutschlandradio (§ 29 (4) Medienstaatsvertrag), as of 1 February 2022. This page names no frequencies itself: every programme has many transmitters, and a wrong one would be a radio searching for nothing.';
+
+  @override
+  String get locationDenied =>
+      'Without access to the location the position cannot be found. Access can be allowed in the system settings.';
+
+  @override
+  String get locationUnavailable =>
+      'The location cannot be found right now. It works better outdoors or by a window.';
+
+  @override
+  String get transferWorking =>
+      'Transferring … Keep both devices awake and close together. With many photos this takes a while.';
+
+  @override
+  String get transferWorkingStay =>
+      'The transfer is still running. Please wait until it has finished.';
+
+  @override
+  String get lockScreenCardFileName => 'emergency-card-lock-screen';
+
+  @override
+  String get articleBookmarkAdd => 'Add bookmark';
+
+  @override
+  String get articleBookmarkRemove => 'Remove bookmark';
 }

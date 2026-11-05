@@ -9,6 +9,10 @@ import '../application/daylight_l10n.dart';
 import '../application/daylight_store.dart';
 import '../application/sun_moon.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/calendar_day.dart';
+
 /// Sun and moon for one place, worked out here.
 ///
 /// The only screen in this app whose answer is neither fetched nor
@@ -16,7 +20,7 @@ import '../application/sun_moon.dart';
 /// tenth day without a network as on the first. The place is remembered
 /// precisely because the day it matters is the day the position lookup
 /// has nothing to talk to either.
-class DaylightScreen extends StatefulWidget {
+class DaylightScreen extends ConsumerStatefulWidget {
   const DaylightScreen({
     super.key,
     this.store = const DaylightStore(),
@@ -29,10 +33,10 @@ class DaylightScreen extends StatefulWidget {
   final DateTime? now;
 
   @override
-  State<DaylightScreen> createState() => _DaylightScreenState();
+  ConsumerState<DaylightScreen> createState() => _DaylightScreenState();
 }
 
-class _DaylightScreenState extends State<DaylightScreen> {
+class _DaylightScreenState extends ConsumerState<DaylightScreen> {
   final _geolocation = GeolocationService();
 
   DaylightPlace? _place;
@@ -213,6 +217,11 @@ class _DaylightScreenState extends State<DaylightScreen> {
   Widget _almanac(AppLocalizations l10n, DaylightPlace place) {
     final theme = Theme.of(context);
     final locale = Localizations.localeOf(context).toString();
+    // Watched so the page turns over at midnight and on coming back to
+    // the app (#292). Left open overnight it showed yesterday's sun and
+    // called today "tomorrow". The hour itself comes from the clock: the
+    // provider only says which day it is.
+    ref.watch(calendarDayProvider);
     final now = widget.now ?? DateTime.now();
     // The next date, not 24 hours on: the evening before summer time
     // begins, 24 hours on is already the day after tomorrow.

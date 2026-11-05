@@ -210,12 +210,12 @@ void main() {
     // a device.
     await openSheet(tester, both);
 
-    // Binary units here, which is what `_formatBytes` on this screen
-    // uses: 3,592,670,002 bytes is 3.3 GiB.
+    // Decimal units and a decimal comma, as everywhere else in the app
+    // since #294: 3,592,670,002 bytes is 3.6 GB.
     expect(
       find.descendant(
         of: find.byType(GridView),
-        matching: find.textContaining('886124 Einträge · ungefähr 3.3 GB'),
+        matching: find.textContaining('886124 Einträge · ungefähr 3,6 GB'),
       ),
       findsOneWidget,
     );

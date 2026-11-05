@@ -8,8 +8,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../application/household_member_controller.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/app_database_providers.dart';
 import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
 import '../application/card_species.dart';
@@ -357,9 +357,16 @@ class _HouseholdPlanScreenState extends ConsumerState<HouseholdPlanScreen> {
     // the copy that survives a dead phone, and they are also a loose
     // sheet naming somebody's blood group and medication — a trade worth
     // making sometimes and not worth making silently.
+    //
+    // Read from the database, not from the provider: it disposes itself
+    // when nothing watches it, and opened from the search before the
+    // household tab, nothing did -- the question was never asked and the
+    // cards never printed (#290).
+    final database = ref.read(appDatabaseProvider);
     final members = profile == null
         ? const <HouseholdMember>[]
-        : ref.read(householdMembersProvider(profile.id)).value ?? const [];
+        : await database.householdMembersOnce(profile.id);
+    if (!mounted) return;
     var withCards = false;
     if (members.isNotEmpty) {
       final answer = await _askAboutCards(l10n, members.length);

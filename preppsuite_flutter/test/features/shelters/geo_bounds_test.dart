@@ -41,6 +41,31 @@ void main() {
       expect(box.east, greaterThanOrEqualTo(reach.east));
     }
   });
+
+  group('the circle around defibrillators and emergency points (#293)', () {
+    test('names a grid point, not the fix', () {
+      final circle = gridCircle(home.latitude, home.longitude, 2000);
+      expect(circle.latitude, '52.27');
+      expect(circle.longitude, '10.53');
+      final next = gridCircle(neighbour.latitude, neighbour.longitude, 2000);
+      expect(next, circle);
+    });
+
+    test('still holds everything within the radius of the real position', () {
+      final circle = gridCircle(home.latitude, home.longitude, 2000);
+      final lat = double.parse(circle.latitude);
+      final lon = double.parse(circle.longitude);
+      // The fix itself lies within the grown radius by the most the snap
+      // moved it, so a point 2000 m beyond the fix in any direction is
+      // inside the circle.
+      const metresPerDegree = 111320.0;
+      final dy = (home.latitude - lat) * metresPerDegree;
+      final dx = (home.longitude - lon) * metresPerDegree * _cos(lat);
+      final moved = math.sqrt(dx * dx + dy * dy);
+      expect(circle.radiusMetres, greaterThanOrEqualTo(2000 + moved));
+      expect(circle.radiusMetres, lessThan(2000 + 700));
+    });
+  });
 }
 
 /// The box as it was drawn before the snap, which is what has to fit

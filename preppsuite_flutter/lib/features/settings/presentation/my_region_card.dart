@@ -25,11 +25,12 @@ class MyRegionCard extends ConsumerWidget {
         profile.countryCode,
         profile.countryCode,
         profile.countryCode,
+        profile.countryCode,
       ),
     );
-    final countryName = Localizations.localeOf(context).languageCode == 'de'
-        ? country.nameDe
-        : country.nameEn;
+    final countryName = country.nameIn(
+      Localizations.localeOf(context).languageCode,
+    );
 
     return Card(
       child: ListTile(
@@ -143,9 +144,9 @@ class _EditRegionDialogState extends ConsumerState<_EditRegionDialog> {
                   DropdownMenuItem(
                     value: country.code,
                     child: Text(
-                      Localizations.localeOf(context).languageCode == 'de'
-                          ? country.nameDe
-                          : country.nameEn,
+                      country.nameIn(
+                        Localizations.localeOf(context).languageCode,
+                      ),
                     ),
                   ),
               ],

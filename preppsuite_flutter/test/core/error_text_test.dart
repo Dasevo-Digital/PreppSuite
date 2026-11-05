@@ -6,6 +6,7 @@ import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/error_text.dart';
+import 'package:preppsuite_flutter/core/geolocation_service.dart';
 import 'package:preppsuite_flutter/features/downloads/application/archive_downloader.dart';
 import 'package:preppsuite_flutter/features/knowledge/application/zim_archive.dart';
 import 'package:preppsuite_flutter/features/maps/application/pmtiles_archive.dart';
@@ -71,5 +72,32 @@ void main() {
 
     expect(describeError(de, error), isNot(contains('0x1234')));
     expect(describeError(de, error), isNot(contains('PmTiles')));
+  });
+
+  test('a refused position says why, not its own name (#292)', () {
+    expect(
+      describeError(
+        de,
+        const LocationUnavailableException(LocationRefusal.servicesOff),
+      ),
+      de.settingsLocationServicesOff,
+    );
+    expect(
+      describeError(
+        en,
+        const LocationUnavailableException(LocationRefusal.denied),
+      ),
+      en.locationDenied,
+    );
+    expect(
+      describeError(
+        de,
+        const LocationUnavailableException(
+          LocationRefusal.unavailable,
+          'kCLErrorDomain error 0',
+        ),
+      ),
+      de.locationUnavailable,
+    );
   });
 }

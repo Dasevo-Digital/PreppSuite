@@ -2,6 +2,8 @@ import 'dart:async' show TimeoutException;
 import 'dart:io';
 
 import 'bounded_input.dart';
+import 'geolocation_service.dart'
+    show LocationRefusal, LocationUnavailableException;
 
 import 'package:drift/drift.dart'
     show DriftWrappedException, InvalidDataException;
@@ -39,6 +41,15 @@ import '../features/inventory/application/inventory_numbers.dart';
 /// the useful recovery instruction instead.
 String describeError(AppLocalizations l10n, Object error) {
   return switch (error) {
+    // Why there is no position, and what to do about it (#292). It fell
+    // through to the generic sentence below on most screens, and two of
+    // them printed the reason's own name: "servicesOff", "denied".
+    LocationUnavailableException(:final reason) => switch (reason) {
+      LocationRefusal.servicesOff => l10n.settingsLocationServicesOff,
+      LocationRefusal.deniedForever => l10n.settingsLocationDeniedForever,
+      LocationRefusal.denied => l10n.locationDenied,
+      LocationRefusal.unavailable => l10n.locationUnavailable,
+    },
     InputTooLarge() => l10n.errorInputLimit,
     InvalidInventoryNumbers() => l10n.inventoryInvalidNumbers,
     // The databases run in a background isolate, and what fails there

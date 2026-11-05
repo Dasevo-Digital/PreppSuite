@@ -279,8 +279,7 @@ class ZimArchive {
     return leftUrl.compareTo(rightUrl);
   }
 
-  _TitleOrder? _titleOrderCache;
-  bool _titleOrderResolved = false;
+  Future<_TitleOrder?>? _titleOrderLoad;
 
   /// How to walk the archive's entries by title.
   ///
@@ -288,10 +287,23 @@ class ZimArchive {
   /// read like any other blob; version 5 keeps a plain table of 32-bit
   /// indexes in the file, which can be binary-searched without loading
   /// anything at all.
-  Future<_TitleOrder?> _titleOrder() async {
-    if (_titleOrderResolved) return _titleOrderCache;
-    _titleOrderResolved = true;
+  ///
+  /// Loaded once, and every search asking meanwhile waits for that one
+  /// load (#295). It was marked as done before the listing -- eleven to
+  /// twenty-seven megabytes, slow over a USB disk or Android's document
+  /// access -- had been read: a second keystroke in the meantime found no
+  /// listing and answered "no titles", and a first read that failed left
+  /// title search answering nothing until the app was restarted. A failed
+  /// load is now forgotten, and the next search tries again.
+  Future<_TitleOrder?> _titleOrder() {
+    final loading = _titleOrderLoad ??= _loadTitleOrder();
+    return loading.catchError((Object error, StackTrace stack) {
+      if (identical(_titleOrderLoad, loading)) _titleOrderLoad = null;
+      return Future<_TitleOrder?>.error(error, stack);
+    });
+  }
 
+  Future<_TitleOrder?> _loadTitleOrder() async {
     for (final path in ['listing/titleOrdered/v1', 'listing/titleOrdered/v0']) {
       final listing = await findByUrl('X', path);
       if (listing == null || listing.isRedirect) continue;
@@ -306,14 +318,14 @@ class ZimArchive {
         0,
         bytes.length ~/ 4,
       );
-      return _titleOrderCache = _TitleOrder(
+      return _TitleOrder(
         count: indexes.length,
         at: (position) async => indexes[position],
       );
     }
 
     if (header.majorVersion == 5 && header.titlePointerPosition > 0) {
-      return _titleOrderCache = _TitleOrder(
+      return _TitleOrder(
         count: header.entryCount,
         at: (position) async {
           final bytes = await _source.read(

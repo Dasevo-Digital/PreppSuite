@@ -5,6 +5,7 @@ import '../../../core/progress_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../application/knowledge_indexer.dart';
 import '../application/knowledge_providers.dart';
+import '../../downloads/application/byte_size.dart';
 
 /// The state of the full-text index, and the one decision it needs.
 ///
@@ -188,7 +189,9 @@ class KnowledgeIndexPanel extends ConsumerWidget {
       ),
       const SizedBox(height: 6),
       Text(
-        l10n.knowledgeIndexStorage(_formatBytes(state.storageBytes)),
+        l10n.knowledgeIndexStorage(
+          formatByteSize(state.storageBytes, locale: l10n.localeName),
+        ),
         style: theme.textTheme.bodySmall,
       ),
       if (!state.compact) ...[
@@ -213,10 +216,5 @@ class KnowledgeIndexPanel extends ConsumerWidget {
         ),
       ),
     ];
-  }
-
-  String _formatBytes(int bytes) {
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).ceil()} KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 }

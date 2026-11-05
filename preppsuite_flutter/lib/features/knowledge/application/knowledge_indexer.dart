@@ -65,7 +65,17 @@ class IndexPlan {
     this.entryIndexes, {
     required this.clusters,
     required this.blobs,
+    this.complete = true,
   });
+
+  /// False when the scan was stopped before it reached the last entry.
+  ///
+  /// Such a plan holds the articles of the first part of the archive
+  /// only, and [KnowledgeIndexer.run] refuses it (#286): resumed with it,
+  /// the position already reached was past its end, nothing was left to
+  /// do, and the index was marked complete with most of the archive
+  /// never read.
+  final bool complete;
 
   /// ZIM entry indexes, ordered so each cluster is decompressed once.
   final List<int> entryIndexes;
@@ -107,9 +117,13 @@ class KnowledgeIndexer {
   }) async {
     final total = archive.header.entryCount;
     final targets = <({int cluster, int blob, int entry})>[];
+    var complete = true;
 
     for (var at = 0; at < total; at += _scanChunk) {
-      if (cancelled?.call() ?? false) break;
+      if (cancelled?.call() ?? false) {
+        complete = false;
+        break;
+      }
       onProgress?.call(
         IndexProgress(phase: IndexPhase.scanning, done: at, total: total),
       );
@@ -139,6 +153,7 @@ class KnowledgeIndexer {
         for (final target in targets) target.cluster,
       ]),
       blobs: Uint32List.fromList([for (final target in targets) target.blob]),
+      complete: complete,
     );
   }
 
@@ -162,6 +177,10 @@ class KnowledgeIndexer {
     void Function(IndexProgress)? onProgress,
     bool Function()? cancelled,
   }) async {
+    // Stopped while scanning: there is nothing to index from, and the
+    // index stays exactly as it was.
+    if (!plan.complete) return false;
+
     final resumable =
         await index.indexedArchive() == fingerprint &&
         !await index.isComplete();

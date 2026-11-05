@@ -61,11 +61,11 @@ void main() {
     ]);
 
     expect(
-      find.text('3 Archive, zusammen 1.5 GB auf dem Datenträger.'),
+      find.text('3 Archive, zusammen 1,6 GB auf dem Datenträger.'),
       findsOneWidget,
     );
     expect(find.textContaining('Bei einem ist die Größe'), findsOneWidget);
-    expect(find.text('Eigene Suchindizes: 300 MB.'), findsOneWidget);
-    expect(find.textContaining('höchstens 64 MB'), findsOneWidget);
+    expect(find.text('Eigene Suchindizes: 315 MB.'), findsOneWidget);
+    expect(find.textContaining('höchstens 67 MB'), findsOneWidget);
   });
 }

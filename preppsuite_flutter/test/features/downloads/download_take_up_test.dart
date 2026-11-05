@@ -51,6 +51,30 @@ void main() {
       folder.deleteSync(recursive: true);
     });
 
+    test('asked for again, it fetches rather than reopening the copy on '
+        'disk (#295)', () async {
+      var tookUp = false;
+      final notifier = container.read(archiveDownloadProvider.notifier);
+      await notifier.start(
+        ArchiveDownloadRequest(
+          url: request.url,
+          fileName: request.fileName,
+          label: request.label,
+          replace: true,
+        ),
+        onFinished: (downloadRef, path, label) async {
+          tookUp = true;
+          return null;
+        },
+      );
+
+      // "Download again, because the file is damaged" used to open the
+      // damaged file once more without a byte being fetched.
+      expect(tookUp, isFalse);
+      expect(container.read(archiveDownloadProvider).finishedPath, isNull);
+      await notifier.cancel();
+    });
+
     test('is handed a ref that reads providers', () async {
       String? seen;
       await container

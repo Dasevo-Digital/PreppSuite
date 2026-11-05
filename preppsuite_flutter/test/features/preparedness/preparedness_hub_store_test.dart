@@ -136,6 +136,37 @@ void main() {
       expect(merged.communication.text, 'Kontaktkette');
     });
 
+    test('an edited card stays the same card (#291)', () {
+      final card = EvacuationCard(
+        id: 'a',
+        label: 'Hochwasser',
+        start: 'Wohnung',
+        destination: 'Schule',
+        route: 'Hauptstrasse',
+        locations: '',
+        checkedAt: DateTime(2026, 3, 1),
+      );
+      final edited = card.edited(
+        label: 'Hochwasser',
+        start: 'Wohnung',
+        destination: 'Sporthalle',
+        route: 'Nebenstrassen',
+        locations: '',
+        now: DateTime(2026, 11, 5),
+      );
+
+      expect(edited.id, 'a');
+      expect(edited.checkedAt, DateTime(2026, 11, 5));
+      // A backup made before the edit loses to it instead of bringing the
+      // old card back beside it.
+      final merged = PreparednessHubData(
+        evacuationCards: [edited],
+      ).mergeWith(PreparednessHubData(evacuationCards: [card]));
+      expect(merged.evacuationCards.map((item) => item.destination), [
+        'Sporthalle',
+      ]);
+    });
+
     test('cards are joined by id, held order first', () {
       EvacuationCard card(String id, String destination, DateTime at) =>
           EvacuationCard(

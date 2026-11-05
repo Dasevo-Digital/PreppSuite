@@ -61,7 +61,10 @@ void main() {
     );
     final found = await client.near(52.2689, 10.5268);
     expect(query, contains('"emergency"="defibrillator"'));
-    expect(query, contains('around:2000,52.2689,10.5268'));
+    // Around the grid point, with the radius grown by the most the snap
+    // moved it; never the fix itself (#293).
+    expect(query, contains(',52.27,10.53);'));
+    expect(query, isNot(contains('52.2689')));
     expect(found.map((d) => d.id), [1, 2]);
     expect(found.first.locationIn('en'), 'Next to room 143');
     expect(found.first.locationIn('de'), 'Neben Raum 143');

@@ -20,6 +20,8 @@ import '../application/handover_payload.dart';
 import '../application/local_handover.dart';
 import 'household_conflict_dialog.dart';
 import '../application/qr_chain.dart';
+import '../../../core/error_text.dart';
+import '../../inventory/application/inventory_numbers.dart';
 
 /// Where a transfer carries on: the household id, and whether this
 /// device's own rows are discarded on the way rather than re-stamped.
@@ -85,6 +87,17 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
   var _done = false;
   String? _result;
   bool _failed = false;
+
+  /// Between the last picture read and the result: the exchange, the
+  /// question about a second household, the move.
+  ///
+  /// The screen showed its check mark through all of it and could be left
+  /// with back (#289). A handover then finished without anybody to move
+  /// the household over: the rows that came in stayed under the other id,
+  /// the profile kept its own, and a first run kept settings for a
+  /// household it then forgot. Back now waits, and the screen says it is
+  /// still at work.
+  bool get _working => _done && _result == null;
 
   /// How many rows arrived, once something did.
   ///
@@ -231,8 +244,9 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
         householdId: householdId,
         invitation: invitation,
       );
+      if (!mounted) return;
       if (move.discard) await _moveInto(move);
-      if (widget.adoptHousehold) {
+      if (widget.adoptHousehold && mounted) {
         await _adoptSetup(householdId, result.household);
       }
       if (!mounted) return;
@@ -260,13 +274,19 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
           LocalHandoverFailure.interrupted => l10n.transferInterrupted,
         };
       });
+    } on InvalidInventoryNumbers catch (error) {
+      _fail(describeError(l10n, error));
     } on Object {
-      if (!mounted) return;
-      setState(() {
-        _failed = true;
-        _result = l10n.transferBroken;
-      });
+      _fail(l10n.transferBroken);
     }
+  }
+
+  void _fail(String message) {
+    if (!mounted) return;
+    setState(() {
+      _failed = true;
+      _result = message;
+    });
   }
 
   Future<void> _finish() async {
@@ -306,12 +326,13 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
         ref.read(appDatabaseProvider),
         snapshot,
       );
+      if (!mounted) return;
       await _moveInto(move);
       await applySyncedSettings(snapshot.settings);
       // No photographs on this road — see `handover_payload.dart` — but
       // the settings fit, and a device being set up should not have to
       // type them again.
-      if (widget.adoptHousehold) {
+      if (widget.adoptHousehold && mounted) {
         await _adoptSetup(householdId, payload.household);
       }
       if (!mounted) return;
@@ -319,14 +340,14 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
         _rows = rows;
         _result = rows == 0 ? l10n.transferNothingNew : l10n.transferDone(rows);
       });
+    } on InvalidInventoryNumbers catch (error) {
+      // Not the pictures: a row of this household holds a number that
+      // cannot travel, and it is that row that needs correcting (#289).
+      _fail(describeError(l10n, error));
     } on Object {
-      if (!mounted) return;
-      // Anything that goes wrong here is the same thing to the person
+      // Anything else that goes wrong here is the same thing to the person
       // holding the phone: the pictures did not add up, film them again.
-      setState(() {
-        _failed = true;
-        _result = l10n.transferBroken;
-      });
+      _fail(l10n.transferBroken);
     }
   }
 
@@ -354,91 +375,117 @@ class _QrReceiveScreenState extends ConsumerState<QrReceiveScreen> {
     final theme = Theme.of(context);
     final total = _receiver.expected;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.transferReceiveTitle)),
-      body: Column(
-        children: [
-          Expanded(
-            child: _done
-                ? Center(
-                    child: Icon(
-                      _failed ? Icons.error_outline : Icons.check_circle,
-                      size: 72,
-                      color: _failed
-                          ? theme.colorScheme.error
-                          : theme.colorScheme.primary,
-                    ),
-                  )
-                : MobileScanner(
-                    controller: _scanner,
-                    onDetect: _onDetect,
-                    errorBuilder: (context, error) => CameraUnavailable(
-                      error: error,
-                      alternative: l10n.cameraAlternativeTransfer,
-                    ),
-                  ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_result case final result?) ...[
-                  Text(
-                    result,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  if (_failed)
-                    FilledButton(
-                      onPressed: _again,
-                      child: Text(l10n.transferReceive),
+    return PopScope(
+      canPop: !_working,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(l10n.transferWorkingStay)));
+      },
+      child: Scaffold(
+        appBar: AppBar(title: Text(l10n.transferReceiveTitle)),
+        body: Column(
+          children: [
+            Expanded(
+              child: _working
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(height: 16),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Text(
+                              l10n.transferWorking,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
                     )
-                  else
-                    FilledButton(
-                      onPressed: () => Navigator.of(context).pop(_rows),
-                      child: Text(
-                        MaterialLocalizations.of(context).okButtonLabel,
+                  : _done
+                  ? Center(
+                      child: Icon(
+                        _failed ? Icons.error_outline : Icons.check_circle,
+                        size: 72,
+                        color: _failed
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.primary,
+                      ),
+                    )
+                  : MobileScanner(
+                      controller: _scanner,
+                      onDetect: _onDetect,
+                      errorBuilder: (context, error) => CameraUnavailable(
+                        error: error,
+                        alternative: l10n.cameraAlternativeTransfer,
                       ),
                     ),
-                ] else ...[
-                  Text(l10n.transferReceiveHint, textAlign: TextAlign.center),
-                  const SizedBox(height: 12),
-                  Text(
-                    total == null
-                        ? l10n.transferWaiting
-                        : l10n.transferProgress(_receiver.received, total),
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  // What the camera is looking at right now. A count that
-                  // stands still says nothing about why; this says
-                  // whether the pictures are changing at all.
-                  if (_receiver.lastSeen case final seen?) ...[
-                    const SizedBox(height: 4),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (_result case final result?) ...[
                     Text(
-                      _receiver.discarded > 0
-                          ? l10n.transferLastSeenMixed(
-                              seen + 1,
-                              _receiver.discarded,
-                            )
-                          : l10n.transferLastSeen(seen + 1),
+                      result,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    if (_failed)
+                      FilledButton(
+                        onPressed: _again,
+                        child: Text(l10n.transferReceive),
+                      )
+                    else
+                      FilledButton(
+                        onPressed: () => Navigator.of(context).pop(_rows),
+                        child: Text(
+                          MaterialLocalizations.of(context).okButtonLabel,
+                        ),
+                      ),
+                  ] else if (!_working) ...[
+                    Text(l10n.transferReceiveHint, textAlign: TextAlign.center),
+                    const SizedBox(height: 12),
+                    Text(
+                      total == null
+                          ? l10n.transferWaiting
+                          : l10n.transferProgress(_receiver.received, total),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    // What the camera is looking at right now. A count that
+                    // stands still says nothing about why; this says
+                    // whether the pictures are changing at all.
+                    if (_receiver.lastSeen case final seen?) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        _receiver.discarded > 0
+                            ? l10n.transferLastSeenMixed(
+                                seen + 1,
+                                _receiver.discarded,
+                              )
+                            : l10n.transferLastSeen(seen + 1),
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    // Indeterminate until the first frame says how many
+                    // there are; a bar sitting at zero reads as broken.
+                    LinearProgressIndicator(
+                      value: total == null ? null : _receiver.progress,
                     ),
                   ],
-                  const SizedBox(height: 8),
-                  // Indeterminate until the first frame says how many
-                  // there are; a bar sitting at zero reads as broken.
-                  LinearProgressIndicator(
-                    value: total == null ? null : _receiver.progress,
-                  ),
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

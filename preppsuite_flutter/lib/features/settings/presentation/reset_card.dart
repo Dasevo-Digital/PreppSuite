@@ -10,6 +10,7 @@ import '../../../core/theme_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../household/application/household_providers.dart';
+import '../../household/application/lock_screen_card_file.dart';
 import '../../inventory/application/inventory_photo_service.dart';
 import '../../knowledge/application/personal_document_index.dart';
 import '../../knowledge/application/personal_document_store.dart';
@@ -134,6 +135,8 @@ class ResetCard extends ConsumerWidget {
     await const PersonalDocumentStore().clear();
     // Where shelters were looked for, to the square kilometre (#255).
     await const ShelterCache().clear();
+    // A lock-screen card a share sheet was still holding (#293).
+    await deleteLockScreenCardFiles();
     try {
       final index = PersonalDocumentIndex();
       try {

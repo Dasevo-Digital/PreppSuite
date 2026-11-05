@@ -127,6 +127,33 @@ void main() {
       expect(added.sortOrder, 1, reason: 'appended after the existing item');
     });
 
+    test('a line added after deletions goes to the end (#296)', () async {
+      await syncedTemplateWithItem();
+      for (final title in ['Kanister', 'Filter', 'Tabletten', 'Eimer']) {
+        await controller.addItem(templateClientId: 'tpl-1', title: title);
+      }
+      // Two from the middle go: the count of lines is now a position the
+      // last line already holds.
+      for (final title in ['Kanister', 'Filter']) {
+        final item =
+            (await db
+                    .watchChecklistItems(
+                      'tpl-1',
+                    )
+                    .first)
+                .firstWhere((i) => i.title == title);
+        await controller.deleteItem(item);
+      }
+
+      await controller.addItem(templateClientId: 'tpl-1', title: 'Neu');
+
+      final titles = [
+        for (final item in await db.watchChecklistItems('tpl-1').first)
+          item.title,
+      ];
+      expect(titles.last, 'Neu');
+    });
+
     test('creating a template', () async {
       await controller.createTemplate(
         title: 'Neue Liste',

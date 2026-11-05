@@ -15,7 +15,16 @@ class ArchiveDownloadRequest {
     required this.fileName,
     required this.label,
     this.estimatedLength,
+    this.replace = false,
   });
+
+  /// Fetch it even when a file of that name is already in the folder,
+  /// and put the fresh one in its place once it is complete.
+  ///
+  /// For "download again, because the file is damaged" (#295). A file
+  /// already here used to be taken up without a byte being fetched, so the
+  /// damaged copy was simply opened once more.
+  final bool replace;
 
   final Uri url;
 
@@ -144,7 +153,7 @@ class ArchiveDownloadController extends Notifier<ArchiveDownloadState> {
     // got its final name after the downloader checked it against the
     // length the server stated, so its presence is the guarantee.
     final existing = File(target);
-    if (await existing.exists()) {
+    if (!request.replace && await existing.exists()) {
       state = ArchiveDownloadState(request: request, finishedPath: target);
       await _takeUp(request, target, onFinished);
       return;

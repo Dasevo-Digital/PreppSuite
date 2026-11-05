@@ -168,8 +168,8 @@ class _RotationTile extends ConsumerWidget {
       ),
       title: Text(entry.item.name),
       subtitle: Text(
-        '${_remaining()} · ${_date(entry.item.expirationDate!)}'
-        ' · ${_quantity(entry.item)}',
+        '${_remaining()} · ${_date(entry.item.expirationDate!, l10n)}'
+        ' · ${_quantity(entry.item, l10n)}',
       ),
       trailing: stockToday(entry.item) > 0
           ? IconButton(
@@ -228,13 +228,17 @@ class _Hint extends StatelessWidget {
   }
 }
 
-String _date(DateTime value) =>
-    DateFormat.yMd().format(value.isUtc ? value.toLocal() : value);
+/// In the reader's own order (#294). Without a locale, `intl` writes
+/// en_US: a German reader saw "11/5/2026" and could take it for the
+/// eleventh of May.
+String _date(DateTime value, AppLocalizations l10n) => DateFormat.yMd(
+  l10n.localeName,
+).format(value.isUtc ? value.toLocal() : value);
 
-String _quantity(InventoryItem item) {
-  final stock = stockToday(item);
-  final quantity = stock == stock.roundToDouble()
-      ? stock.toStringAsFixed(0)
-      : stock.toString();
-  return '$quantity ${item.unit}';
+/// "1,5 kg" where the language writes a decimal comma, as in the list.
+String _quantity(InventoryItem item, AppLocalizations l10n) {
+  final quantity = NumberFormat.decimalPattern(
+    l10n.localeName,
+  ).format(stockToday(item));
+  return '$quantity ${item.unit}'.trim();
 }

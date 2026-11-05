@@ -10440,4 +10440,29 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get broadcastRadioSource =>
       'Programmnamen und Verbreitung nach der amtlichen Veröffentlichung der Hörfunkprogramme der ARD-Landesrundfunkanstalten und des Deutschlandradios (§ 29 Abs. 4 Medienstaatsvertrag), Stand 1. Februar 2022. Frequenzen nennt diese Seite nicht selbst: Jedes Programm hat viele Sender, und eine falsche Angabe wäre ein Radio, das ins Leere sucht.';
+
+  @override
+  String get locationDenied =>
+      'Ohne Zugriff auf den Standort lässt sich die Position nicht bestimmen. Der Zugriff lässt sich in den Systemeinstellungen erlauben.';
+
+  @override
+  String get locationUnavailable =>
+      'Der Standort ist gerade nicht zu bestimmen. Unter freiem Himmel oder am Fenster klappt es eher.';
+
+  @override
+  String get transferWorking =>
+      'Wird übertragen … Beide Geräte wach und beieinander lassen. Mit vielen Fotos dauert es etwas.';
+
+  @override
+  String get transferWorkingStay =>
+      'Die Übertragung läuft noch. Bitte warten, bis sie fertig ist.';
+
+  @override
+  String get lockScreenCardFileName => 'notfallkarte-sperrbildschirm';
+
+  @override
+  String get articleBookmarkAdd => 'Lesezeichen setzen';
+
+  @override
+  String get articleBookmarkRemove => 'Lesezeichen entfernen';
 }

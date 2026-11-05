@@ -270,6 +270,10 @@ class LocalHandoverHost {
     required CarriedHousehold offering,
   }) async {
     try {
+      if (request.method == 'GET' && request.uri.path == '/photos') {
+        await _answerPhotoNames(request, db: db, householdId: householdId);
+        return;
+      }
       if (request.method != 'POST' || request.uri.path != '/handover') {
         await _finishError(request, HttpStatus.notFound);
         return;
@@ -318,11 +322,14 @@ class LocalHandoverHost {
           skip: incoming.knownPhotos,
         ),
       );
-      final body = await answer.seal(invitation.key);
+      // With its length, so the guest can give a large answer the time
+      // its size needs rather than the time its own request needed (#288).
+      final body = utf8.encode(await answer.seal(invitation.key));
       request.response
         ..statusCode = HttpStatus.ok
         ..headers.contentType = ContentType.text
-        ..write(body);
+        ..contentLength = body.length
+        ..add(body);
       await request.response.close();
 
       if (!_stopping) {
@@ -340,6 +347,32 @@ class LocalHandoverHost {
       // still standing there with the other device.
       await _finishError(request, HttpStatus.internalServerError);
     }
+  }
+
+  /// The names of the pictures this device holds, sealed like everything
+  /// else on this socket (#288).
+  ///
+  /// Asked by the guest before it sends its own. It cannot otherwise know
+  /// what is here, so it offered its first twenty megabytes every time,
+  /// and whatever lay beyond them never arrived however often the two
+  /// met. Readable only with the key on the screen; to anybody else on
+  /// the network it is a blob the size of a list of file names.
+  Future<void> _answerPhotoNames(
+    HttpRequest request, {
+    required AppDatabase db,
+    required String householdId,
+  }) async {
+    final names = (await localPhotoNames(db, householdId: householdId)).toList()
+      ..sort();
+    final body = utf8.encode(
+      await encryptForFolder(jsonEncode({'photos': names}), invitation.key),
+    );
+    request.response
+      ..statusCode = HttpStatus.ok
+      ..headers.contentType = ContentType.text
+      ..contentLength = body.length
+      ..add(body);
+    await request.response.close();
   }
 
   /// Allows a small bounded drain for a size error, so an ordinary guest
@@ -440,36 +473,54 @@ Future<LocalHandoverResult> joinLocalHandover({
     throw const LocalHandoverException(LocalHandoverFailure.otherHousehold);
   }
 
-  final ours = await readHouseholdSnapshot(
-    db,
-    deviceId: deviceId,
-    householdId: householdId,
-    settings: await readSyncedSettings(),
-  );
-  final mine = await localPhotoNames(db, householdId: householdId);
-  final offer = HandoverPayload(
-    snapshot: ours,
-    // No settings going this way. Only a device being set up applies what
-    // it is handed, and that is never the host — so sending the guest's
-    // own would put its configuration on the wire for nothing.
-    // Everything this device has. It cannot know what the host is
-    // missing, so it offers the lot and the host keeps what is new.
-    photos: await readHouseholdPhotos(db, householdId: householdId),
-    // What it already holds, so the answer leaves those out.
-    knownPhotos: mine,
-  );
-  final body = await offer.seal(invitation.key);
-
-  final exchange = exchangeTimeout ?? exchangeTimeoutFor(body.length);
-
-  /// Whether any address answered at all. What separates "nothing there"
-  /// from "something there that did not finish", which are two different
-  /// things to go and do.
-  var connected = false;
-
   final client = HttpClient()..connectionTimeout = connectTimeout;
   try {
-    for (final address in invitation.addresses) {
+    // First what the host already has, so the pictures sent are the ones
+    // it lacks (#288). No address taking a connection at all is the same
+    // "nothing there" the exchange below would end in, only sooner.
+    final asked = await _hostPhotoNames(client, invitation, connectTimeout);
+    if (asked == null) {
+      throw const LocalHandoverException(LocalHandoverFailure.unreachable);
+    }
+
+    final ours = await readHouseholdSnapshot(
+      db,
+      deviceId: deviceId,
+      householdId: householdId,
+      settings: await readSyncedSettings(),
+    );
+    final mine = await localPhotoNames(db, householdId: householdId);
+    final offer = HandoverPayload(
+      snapshot: ours,
+      // No settings going this way. Only a device being set up applies
+      // what it is handed, and that is never the host — so sending the
+      // guest's own would put its configuration on the wire for nothing.
+      // The pictures the host said it lacks; all of them for a host too
+      // old to say, which then keeps what is new.
+      photos: await readHouseholdPhotos(
+        db,
+        householdId: householdId,
+        skip: asked.names,
+      ),
+      // What it already holds, so the answer leaves those out.
+      knownPhotos: mine,
+    );
+    final body = await offer.seal(invitation.key);
+
+    final exchange = exchangeTimeout ?? exchangeTimeoutFor(body.length);
+
+    /// Whether any address answered at all. What separates "nothing
+    /// there" from "something there that did not finish", which are two
+    /// different things to go and do.
+    var connected = false;
+
+    // The address that answered the question first, then the rest.
+    final addresses = [
+      asked.address,
+      for (final address in invitation.addresses)
+        if (address != asked.address) address,
+    ];
+    for (final address in addresses) {
       final HttpClientRequest request;
       try {
         request = await client
@@ -512,12 +563,25 @@ Future<LocalHandoverResult> joinLocalHandover({
         if (response.statusCode != HttpStatus.ok) {
           throw const LocalHandoverException(LocalHandoverFailure.unreadable);
         }
+        final maxBytes = min(maxResponseBytes, localHandoverMaxRequestBytes);
         answer = utf8.decode(
           await readBoundedBytes(
             response,
-            maxBytes: min(maxResponseBytes, localHandoverMaxRequestBytes),
+            maxBytes: maxBytes,
             declaredLength: response.contentLength,
-            timeout: exchange,
+            // The answer's own size decides how long it may take, not the
+            // request's (#288). A device being set up asks with a few
+            // kilobytes and was given half a minute to receive up to the
+            // host's whole photo budget; on a weak network that ended as
+            // "interrupted". The host states the length; an older one
+            // does not, and gets the time the largest answer would need.
+            timeout:
+                exchangeTimeout ??
+                exchangeTimeoutFor(
+                  response.contentLength >= 0
+                      ? response.contentLength
+                      : maxBytes,
+                ),
             onAbort: () => client.close(force: true),
           ),
         );
@@ -551,15 +615,76 @@ Future<LocalHandoverResult> joinLocalHandover({
         household: theirs.household,
       );
     }
+
+    throw LocalHandoverException(
+      connected
+          ? LocalHandoverFailure.interrupted
+          : LocalHandoverFailure.unreachable,
+    );
   } finally {
     client.close(force: true);
   }
+}
 
-  throw LocalHandoverException(
-    connected
-        ? LocalHandoverFailure.interrupted
-        : LocalHandoverFailure.unreachable,
-  );
+/// The most a list of picture names may weigh on the way back. Several
+/// thousand names, far past what [handoverPhotoBudgetBytes] could carry.
+const _photoNamesLimit = 1024 * 1024;
+
+/// Asks the host which pictures it already holds (#288).
+///
+/// The first address that takes a connection, with what it said: the
+/// names, or none at all from a host that does not know the question --
+/// an older version answers 404 -- or whose answer would not open. Null
+/// when no address took a connection.
+Future<({String address, PhotoRequest names})?> _hostPhotoNames(
+  HttpClient client,
+  LocalHandoverInvitation invitation,
+  Duration timeout,
+) async {
+  for (final address in invitation.addresses) {
+    final HttpClientRequest request;
+    try {
+      request = await client
+          .get(address, invitation.port, '/photos')
+          .timeout(timeout);
+    } on Object {
+      continue;
+    }
+    // Past here the address took the connection, so it is there, whatever
+    // it then makes of the question.
+    try {
+      final response = await request.close().timeout(timeout);
+      if (response.statusCode != HttpStatus.ok) {
+        await response.drain<void>().timeout(timeout);
+        return (address: address, names: const <String>{});
+      }
+      final raw = utf8.decode(
+        await readBoundedBytes(
+          response,
+          maxBytes: _photoNamesLimit,
+          declaredLength: response.contentLength,
+          // A list of names is a few kilobytes; a host that takes longer
+          // than a connection may is not going to make it up later, and
+          // the exchange goes ahead without the list.
+          timeout: timeout,
+        ),
+      );
+      final plain = await decryptFromFolder(raw, invitation.key);
+      final json = plain == null ? null : jsonDecode(plain);
+      final names = json is Map ? json['photos'] : null;
+      return (
+        address: address,
+        names: <String>{
+          if (names is List)
+            for (final name in names)
+              if (name is String) name,
+        },
+      );
+    } on Object {
+      return (address: address, names: const <String>{});
+    }
+  }
+  return null;
 }
 
 /// How long an exchange of [bodyBytes] is allowed to take.

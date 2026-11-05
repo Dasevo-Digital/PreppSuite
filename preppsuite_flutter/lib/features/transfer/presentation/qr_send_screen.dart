@@ -16,6 +16,7 @@ import '../application/local_handover.dart';
 import '../application/local_discovery.dart';
 import '../application/qr_chain.dart';
 import 'qr_code_view.dart';
+import '../../../core/error_text.dart';
 
 /// Offers the household to another device, by whichever road is open.
 ///
@@ -106,8 +107,9 @@ class _QrSendScreenState extends ConsumerState<QrSendScreen> {
   }
 
   Future<void> _openNetwork() async {
+    LocalHandoverHost? started;
     try {
-      final host = await LocalHandoverHost.start(
+      final host = started = await LocalHandoverHost.start(
         db: ref.read(appDatabaseProvider),
         deviceId: await const SharedFolderStore().deviceId(),
         householdId: widget.householdId,
@@ -142,7 +144,14 @@ class _QrSendScreenState extends ConsumerState<QrSendScreen> {
       });
     } on Object {
       // No network, or the port could not be opened. The pictures still
-      // work, and that is the whole point of having both.
+      // work, and that is the whole point of having both. A host that did
+      // start before the announcement failed is stopped rather than left
+      // listening on a port nothing shows (#289).
+      if (started != null && !identical(started, _host)) {
+        await _watching?.cancel();
+        _watching = null;
+        unawaited(started.stop());
+      }
       if (!mounted) return;
       setState(() {
         _networkTried = true;
@@ -329,11 +338,18 @@ class _Chain extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (failure != null) {
+    // What went wrong, in the words the rest of the app uses for it. It
+    // said "nothing to transfer" for every failure (#289) -- including a
+    // household holding an old row with a broken number, which needs the
+    // hint to correct that row.
+    if (failure case final failure?) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(l10n.transferSendNothing, textAlign: TextAlign.center),
+          child: Text(
+            describeError(l10n, failure),
+            textAlign: TextAlign.center,
+          ),
         ),
       );
     }

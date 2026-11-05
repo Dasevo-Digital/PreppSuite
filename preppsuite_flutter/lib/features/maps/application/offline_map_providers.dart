@@ -20,6 +20,7 @@ import 'map_style_fingerprint.dart';
 import 'map_archive_access.dart';
 import 'offline_map_store.dart';
 import 'pmtiles_archive.dart';
+import 'vector_tile_disk_cache.dart';
 
 /// Why an archive cannot be used. Null means it can.
 enum OfflineMapProblem {
@@ -97,6 +98,7 @@ class OfflineMapController extends AsyncNotifier<OfflineMapState> {
     if (opened.problem != null) return opened.problem;
 
     await _store.save(location: location, label: label);
+    await clearVectorTileDiskCache();
 
     final previous = _current;
     _current = opened.archive;
@@ -109,6 +111,7 @@ class OfflineMapController extends AsyncNotifier<OfflineMapState> {
   /// never owned it.
   Future<void> forget() async {
     await _store.clear();
+    await clearVectorTileDiskCache();
     _closeCurrent();
     state = const AsyncData(OfflineMapState());
   }

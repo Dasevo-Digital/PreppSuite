@@ -9,6 +9,7 @@ import 'package:printing/printing.dart';
 
 import '../../../core/calendar_day.dart';
 import '../../../core/crisis_mode_provider.dart';
+import '../../../core/pdf_theme.dart';
 import '../../../core/settings_arrival.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../energy/application/energy_store.dart';
@@ -16,8 +17,6 @@ import '../../energy/application/outage_store.dart';
 import '../../warnings/application/warning_providers.dart';
 import '../../household/application/card_species.dart';
 import '../../household/application/emergency_plan_report.dart';
-import '../../household/application/household_member_controller.dart';
-import '../../household/application/household_plan_controller.dart';
 import '../../household/application/household_providers.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/application/supply_calculator.dart';
@@ -1020,10 +1019,17 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
   /// the same trade `EmergencyPlanReport` spells out: a printed card is
   /// the copy that still works when the phone is dead, and it is a loose
   /// sheet naming somebody's blood group and medication.
+  ///
+  /// Members and plan come from the database, not from their providers:
+  /// those dispose themselves when nothing watches them, and from this
+  /// screen nothing does unless the household tab happens to be open.
+  /// Without it the cards were never offered and the plan printed empty
+  /// (#290).
   Future<void> _exportFolder(List<AutonomyReach> reaches) async {
-    final members =
-        ref.read(householdMembersProvider(widget.householdId)).value ??
-        const [];
+    final database = ref.read(appDatabaseProvider);
+    final members = await database.householdMembersOnce(widget.householdId);
+    final plan = await database.watchHouseholdPlan(widget.householdId).first;
+    if (!mounted) return;
     var withCards = false;
     if (members.isNotEmpty) {
       final answer = await _askAboutCards(members.length);
@@ -1032,7 +1038,6 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
     }
     if (!mounted) return;
     final locale = _l10n.localeName;
-    final plan = ref.read(householdPlanProvider(widget.householdId)).value;
     final profile = ref.read(householdProfileProvider).value;
     final l10n = _l10n;
     final autonomy = [
@@ -1412,13 +1417,21 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
       ),
     );
     if (saved != true || label.text.trim().isEmpty) return;
-    final edited = EvacuationCard.create(
-      label: label.text.trim(),
-      start: start.text.trim(),
-      destination: destination.text.trim(),
-      route: route.text.trim(),
-      locations: locations.text.trim(),
-    );
+    final edited = current == null
+        ? EvacuationCard.create(
+            label: label.text.trim(),
+            start: start.text.trim(),
+            destination: destination.text.trim(),
+            route: route.text.trim(),
+            locations: locations.text.trim(),
+          )
+        : current.edited(
+            label: label.text.trim(),
+            start: start.text.trim(),
+            destination: destination.text.trim(),
+            route: route.text.trim(),
+            locations: locations.text.trim(),
+          );
     await _change(
       _data.copyWith(
         evacuationCards: current == null
@@ -1549,7 +1562,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
   ];
 
   Future<void> _exportEvents() async {
-    final document = pw.Document();
+    final document = pw.Document(theme: await unicodePdfTheme());
     document.addPage(
       pw.MultiPage(
         build: (_) => [
@@ -1564,7 +1577,9 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
                     event.kind,
                     style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                   ),
-                  pw.Text(event.at.toLocal().toString()),
+                  // As on screen; it printed `DateTime.toString()`,
+                  // microseconds and all (#290).
+                  pw.Text(_dateTime(event.at)),
                   if (event.note.isNotEmpty)
                     pw.Text(_l10n.hubEventsObservationLine(event.note)),
                   if (event.action.isNotEmpty)
@@ -1612,7 +1627,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
       .join('\n');
 
   Future<void> _exportBriefing() async {
-    final document = pw.Document();
+    final document = pw.Document(theme: await unicodePdfTheme());
     final plans = [
       (_l10n.hubBriefingCommunication, _data.communication.text),
       (_l10n.hubBriefingSupport, _data.support.text),
@@ -1636,7 +1651,7 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
       pw.MultiPage(
         build: (_) => [
           pw.Header(level: 0, child: pw.Text(_l10n.hubBriefingPdfTitle)),
-          pw.Text(_l10n.hubBriefingCreated('${DateTime.now().toLocal()}')),
+          pw.Text(_l10n.hubBriefingCreated(_dateTime(DateTime.now()))),
           pw.SizedBox(height: 12),
           for (final plan in plans)
             if (plan.$2.isNotEmpty)

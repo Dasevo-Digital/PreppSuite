@@ -517,6 +517,103 @@ void main() {
     });
   });
 
+  group('what the host already holds (#288)', () {
+    test('it names its pictures, readable only with the key', () async {
+      final a = open();
+      final theirs = await folder('host');
+      final file = File(p.join(theirs.path, 'a3f2.jpg'));
+      await file.writeAsBytes(Uint8List.fromList(List.filled(256, 42)));
+      await a.upsertInventoryItem(
+        InventoryItemsCompanion.insert(
+          clientId: 'item-a',
+          householdId: householdId,
+          name: 'Haferflocken',
+          category: 'Lebensmittel',
+          quantity: 2,
+          unit: 'kg',
+          storageLocation: 'Keller',
+          updatedAt: DateTime.utc(2026, 9, 13, 10),
+          photoPath: Value(file.path),
+        ),
+      );
+      final host = await hostOn(a);
+
+      final client = HttpClient();
+      addTearDown(client.close);
+      final request = await client.get(
+        '127.0.0.1',
+        host.invitation.port,
+        '/photos',
+      );
+      final response = await request.close();
+      expect(response.statusCode, HttpStatus.ok);
+      expect(response.contentLength, greaterThan(0));
+      final body = await utf8.decodeStream(response);
+
+      final plain = await decryptFromFolder(body, host.invitation.key);
+      expect(jsonDecode(plain!), {
+        'photos': ['a3f2.jpg'],
+      });
+      expect(await decryptFromFolder(body, FolderKey(Uint8List(32))), isNull);
+    });
+
+    test('a host too old to say still gets a handover', () async {
+      // An older version answers the question with 404. The guest then
+      // sends what it has, as before, instead of giving up.
+      final a = open();
+      final b = open();
+      await putItem(
+        b,
+        id: 'item-b',
+        name: 'Passierte Tomaten',
+        quantity: 6,
+        updatedAt: DateTime.utc(2026, 9, 13, 11),
+      );
+      final real = await hostOn(a);
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      addTearDown(() => server.close(force: true));
+      server.listen((request) async {
+        if (request.uri.path == '/photos') {
+          request.response.statusCode = HttpStatus.notFound;
+          await request.response.close();
+          return;
+        }
+        // Everything else to the real host, as a newer one would answer.
+        final client = HttpClient();
+        final forward = await client.post(
+          '127.0.0.1',
+          real.invitation.port,
+          request.uri.path,
+        );
+        forward.headers.contentType = ContentType.text;
+        await forward.addStream(request);
+        final answer = await forward.close();
+        request.response.statusCode = answer.statusCode;
+        await request.response.addStream(answer);
+        await request.response.close();
+        client.close();
+      });
+
+      final result = await joinLocalHandover(
+        db: b,
+        deviceId: 'device-b',
+        householdId: householdId,
+        invitation: LocalHandoverInvitation(
+          addresses: const ['127.0.0.1'],
+          port: server.port,
+          householdId: householdId,
+          key: real.invitation.key,
+        ),
+      );
+
+      expect(result.sent, 1);
+      expect(
+        (await a.watchInventoryItems(householdId).first).single.name,
+        'Passierte Tomaten',
+      );
+    });
+  });
+
   group('who is allowed in', () {
     test('somebody who did not see the screen is turned away', () async {
       // The whole security model in one test: the key is only on the

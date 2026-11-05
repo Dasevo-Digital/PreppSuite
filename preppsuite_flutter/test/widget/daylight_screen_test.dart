@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/daylight/application/daylight_store.dart';
 import 'package:preppsuite_flutter/features/daylight/presentation/daylight_screen.dart';
@@ -22,11 +23,13 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-      MaterialApp(
-        locale: const Locale('de'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: DaylightScreen(now: now),
+      ProviderScope(
+        child: MaterialApp(
+          locale: const Locale('de'),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: DaylightScreen(now: now),
+        ),
       ),
     );
     await tester.pumpAndSettle();

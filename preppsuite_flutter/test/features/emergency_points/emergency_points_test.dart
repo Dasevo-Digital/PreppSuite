@@ -42,13 +42,44 @@ void main() {
       }),
     );
     final found = await client.near(52.0, 10.0);
-    expect(query, contains('"emergency"="drinking_water"](around:5000,'));
-    expect(query, contains('"emergency"="disaster_help_point"](around:10000,'));
-    expect(query, contains('"emergency"="siren"](around:2000,'));
+    // Each radius, grown by the most the snap to the grid can have moved
+    // the centre (#293).
+    int radiusOf(String tag) => int.parse(
+      RegExp('"emergency"="$tag"\\]\\(around:(\\d+),').firstMatch(query!)![1]!,
+    );
+    expect(radiusOf('drinking_water'), inInclusiveRange(5000, 5700));
+    expect(radiusOf('disaster_help_point'), inInclusiveRange(10000, 10700));
+    expect(radiusOf('siren'), inInclusiveRange(2000, 2700));
     // An out per kind: under one shared limit Berlin's wells pushed out
     // everything else.
     expect('out 2000;'.allMatches(query!).length, 3);
     expect(found.single.kind, EmergencyPointKind.siren);
+  });
+
+  test('the position goes out on the grid, not to the metre (#293)', () async {
+    String? query;
+    final client = EmergencyPointClient(
+      retryDelay: Duration.zero,
+      httpClient: MockClient((request) async {
+        query = request.bodyFields['data'];
+        return http.Response.bytes(utf8.encode('{"elements": []}'), 200);
+      }),
+    );
+    await client.near(52.268874, 10.526770);
+    expect(query, contains(',52.27,10.53);'));
+    expect(query, isNot(contains('52.2688')));
+  });
+
+  test('what the larger circle brings in beyond the radius is dropped', () {
+    // A siren 2.3 km north: inside the grown circle, outside 2 km.
+    final body = jsonEncode({
+      'elements': [
+        node(1, 52.0207, 10.0, {'emergency': 'siren'}),
+        node(2, 52.0090, 10.0, {'emergency': 'siren'}),
+      ],
+    });
+    final found = parseEmergencyPoints(body, 52.0, 10.0);
+    expect(found.map((point) => point.id), [2]);
   });
 
   test('the nearest of each kind, and no more than kept', () {

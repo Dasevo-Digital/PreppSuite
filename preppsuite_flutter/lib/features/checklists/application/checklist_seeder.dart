@@ -64,33 +64,40 @@ class ChecklistSeeder {
         continue;
       }
 
-      await _db.upsertChecklistTemplate(
-        ChecklistTemplatesCompanion.insert(
-          clientId: template.clientId,
-          householdId: Value(householdId),
-          title: template.title,
-          category: template.category.name,
-          kind: Value(template.kind.name),
-          isBuiltIn: const Value(true),
-          updatedAt: seededAt,
-          dirty: const Value(true),
-        ),
-      );
-
-      var sortOrder = 0;
-      for (final item in template.items) {
-        await _db.upsertChecklistItem(
-          ChecklistItemsCompanion.insert(
-            clientId: item.clientId,
+      // A list and its lines in one transaction (#296). Written one row
+      // at a time, the overview watching both recounted after each of
+      // some 250 rows on a first start; and an app closed half way left a
+      // list without the rest of its lines for good, because the next
+      // start skips every list that exists.
+      await _db.transaction(() async {
+        await _db.upsertChecklistTemplate(
+          ChecklistTemplatesCompanion.insert(
+            clientId: template.clientId,
             householdId: Value(householdId),
-            templateClientId: template.clientId,
-            title: item.title,
-            sortOrder: Value(sortOrder++),
+            title: template.title,
+            category: template.category.name,
+            kind: Value(template.kind.name),
+            isBuiltIn: const Value(true),
             updatedAt: seededAt,
             dirty: const Value(true),
           ),
         );
-      }
+
+        var sortOrder = 0;
+        for (final item in template.items) {
+          await _db.upsertChecklistItem(
+            ChecklistItemsCompanion.insert(
+              clientId: item.clientId,
+              householdId: Value(householdId),
+              templateClientId: template.clientId,
+              title: item.title,
+              sortOrder: Value(sortOrder++),
+              updatedAt: seededAt,
+              dirty: const Value(true),
+            ),
+          );
+        }
+      });
     }
   }
 }

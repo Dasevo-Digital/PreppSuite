@@ -208,7 +208,7 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
         list,
         now: now,
         language: Localizations.localeOf(context).languageCode,
-        formatAmount: _number,
+        formatAmount: (value) => _number(value, l10n),
       ),
     );
   }
@@ -220,19 +220,19 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
     if (!list.targetMet) {
       if (list.waterShortfallLiters > 0) {
         lines.add(
-          '- ${l10n.shoppingListWaterGap(_number(list.waterShortfallLiters))}',
+          '- ${l10n.shoppingListWaterGap(_number(list.waterShortfallLiters, l10n))}',
         );
       }
       if (list.calorieShortfall > 0) {
         lines.add(
-          '- ${l10n.shoppingListEnergyGap(_integer(list.calorieShortfall))}',
+          '- ${l10n.shoppingListEnergyGap(_integer(list.calorieShortfall, l10n))}',
         );
       }
       lines.add('');
     }
     for (final entry in list.entries) {
       lines.add(
-        '- ${entry.item.name}: ${_number(entry.shortfall)} ${entry.item.unit}',
+        '- ${entry.item.name}: ${_number(entry.shortfall, l10n)} ${entry.item.unit}',
       );
     }
 
@@ -287,14 +287,14 @@ class _TargetCard extends StatelessWidget {
                 _GapRow(
                   icon: Icons.water_drop_outlined,
                   text: l10n.shoppingListWaterGap(
-                    _number(list.waterShortfallLiters),
+                    _number(list.waterShortfallLiters, l10n),
                   ),
                 ),
               if (list.calorieShortfall > 0)
                 _GapRow(
                   icon: Icons.local_fire_department_outlined,
                   text: l10n.shoppingListEnergyGap(
-                    _integer(list.calorieShortfall),
+                    _integer(list.calorieShortfall, l10n),
                   ),
                 ),
             ],
@@ -410,9 +410,9 @@ class _ShortfallTile extends StatelessWidget {
       title: Text(entry.item.name),
       subtitle: Text(
         l10n.shoppingListShortfall(
-          _number(entry.shortfall),
+          _number(entry.shortfall, l10n),
           entry.item.unit,
-          _number(entry.item.minQuantity ?? 0),
+          _number(entry.item.minQuantity ?? 0, l10n),
         ),
       ),
       trailing: Checkbox(
@@ -531,8 +531,16 @@ class _BookDialogState extends State<_BookDialog> {
   }
 }
 
-String _number(double value) => value == value.roundToDouble()
-    ? value.toStringAsFixed(0)
-    : NumberFormat.decimalPatternDigits(decimalDigits: 1).format(value);
+/// In the reader's own notation (#294). Without a locale `intl` writes
+/// en_US, and "44,000 kcal" reads as forty-four to a German or Spanish
+/// reader, for whom the comma is the decimal mark.
+String _number(double value, AppLocalizations l10n) =>
+    value == value.roundToDouble()
+    ? NumberFormat.decimalPattern(l10n.localeName).format(value)
+    : NumberFormat.decimalPatternDigits(
+        locale: l10n.localeName,
+        decimalDigits: 1,
+      ).format(value);
 
-String _integer(int value) => NumberFormat.decimalPattern().format(value);
+String _integer(int value, AppLocalizations l10n) =>
+    NumberFormat.decimalPattern(l10n.localeName).format(value);

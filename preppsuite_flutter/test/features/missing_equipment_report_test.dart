@@ -167,4 +167,67 @@ void main() {
     });
     expect(lowStock.map((i) => i.clientId), ['low-stock']);
   });
+
+  test('lists what is open on the lists of things to have, and only that '
+      '(#290)', () async {
+    Future<void> template(String id, String kind) => db.upsertChecklistTemplate(
+      ChecklistTemplatesCompanion.insert(
+        clientId: id,
+        householdId: const Value('household-1'),
+        title: id,
+        category: 'water',
+        kind: Value(kind),
+        updatedAt: DateTime.utc(2026),
+      ),
+    );
+    Future<void> item(
+      String id,
+      String template, {
+      int order = 0,
+      String? linked,
+      double? target,
+    }) => db.upsertChecklistItem(
+      ChecklistItemsCompanion.insert(
+        clientId: id,
+        householdId: const Value('household-1'),
+        templateClientId: template,
+        title: id,
+        sortOrder: Value(order),
+        linkedInventoryItemId: Value(linked),
+        targetQuantity: Value(target),
+        updatedAt: DateTime.utc(2026),
+      ),
+    );
+    await template('wasser', 'preparation');
+    await template('stromausfall', 'response');
+    await db.upsertInventoryItem(
+      InventoryItemsCompanion.insert(
+        clientId: 'kanister',
+        householdId: 'household-1',
+        name: 'Kanister',
+        category: 'water',
+        quantity: 2,
+        unit: 'Stück',
+        storageLocation: 'Keller',
+        updatedAt: DateTime.utc(2026),
+      ),
+    );
+    await item('filter', 'wasser', order: 2);
+    await item('tabletten', 'wasser', order: 1);
+    // Covered by the stock it is linked to: done on the checklist screen.
+    await item('kanister', 'wasser', linked: 'kanister', target: 2);
+    // A step to take while it happens, not equipment.
+    await item('kuehlschrank-zu', 'stromausfall');
+
+    final open = openEquipment(
+      unchecked: await db.uncheckedChecklistItems('household-1'),
+      templates: await db.allChecklistTemplates('household-1'),
+      inventoryById: {
+        for (final row in await db.watchInventoryItems('household-1').first)
+          row.clientId: row,
+      },
+    );
+
+    expect(open.map((item) => item.clientId), ['tabletten', 'filter']);
+  });
 }

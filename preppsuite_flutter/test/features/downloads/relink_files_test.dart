@@ -53,6 +53,28 @@ void main() {
     expect(library.selectedId, 'wiki');
   });
 
+  test('an archive found again keeps its name and file name (#295)', () async {
+    final wiki = put('wikipedia_de_all_maxi_2026-10.zim', 20);
+    await const ZimStore().save(const [
+      StoredArchive(
+        id: 'wiki',
+        location: '/old/container/Documents/wikipedia_de_all_maxi_2026-10.zim',
+        label: 'wikipedia_de_all_maxi_2026-10.zim',
+        name: 'wikipedia_de_all',
+        fileName: 'wikipedia_de_all_maxi_2026-10.zim',
+      ),
+    ], selectedId: 'wiki');
+
+    expect(await relinker().run(), 1);
+    final found = (await const ZimStore().library()).archives.single;
+    expect(found.location, wiki.path);
+    // The file name is what tells the library on a Mac, whose locations
+    // name no file, which build is already here; and the name is what
+    // bookmarks from other devices are matched by.
+    expect(found.fileName, 'wikipedia_de_all_maxi_2026-10.zim');
+    expect(found.name, 'wikipedia_de_all');
+  });
+
   test('a downloaded map is found by the name in its old path', () async {
     final map = put('map-1234.pmtiles', 10);
     put('other.pmtiles', 11);

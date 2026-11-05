@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../core/private_preferences.dart';
 import '../../first_aid/application/defibrillators.dart' show distanceMetres;
+import '../../shelters/application/geo_bounds.dart' show gridCircle;
 import '../../shelters/application/overpass_shelter_client.dart';
 import '../../../core/http_client.dart';
 
@@ -206,9 +207,13 @@ class EmergencyPointClient {
   Future<List<EmergencyPoint>> near(double latitude, double longitude) async {
     final query = StringBuffer('[out:json][timeout:25];');
     for (final kind in EmergencyPointKind.values) {
+      // Around a grid point, not the fix itself (#293); the parse below
+      // keeps what is within the radius of the real position.
+      final circle = gridCircle(latitude, longitude, kind.radiusMetres);
       query.write(
         'node["emergency"="${kind.tag}"]'
-        '(around:${kind.radiusMetres},$latitude,$longitude);out 2000;',
+        '(around:${circle.radiusMetres},${circle.latitude},'
+        '${circle.longitude});out 2000;',
       );
     }
     final response = await askOverpass(
@@ -255,7 +260,11 @@ List<EmergencyPoint> parseEmergencyPoints(
       distanceMetres(latitude, longitude, point.latitude, point.longitude);
   return [
     for (final kind in EmergencyPointKind.values)
-      ...((byKind[kind] ?? [])..sort((a, b) => away(a).compareTo(away(b))))
+      ...((byKind[kind] ?? [])
+            // The query circle is a little larger than the radius; see
+            // `gridCircle`.
+            ..removeWhere((point) => away(point) > kind.radiusMetres)
+            ..sort((a, b) => away(a).compareTo(away(b))))
           .take(kind.kept),
   ];
 }

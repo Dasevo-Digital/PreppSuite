@@ -116,7 +116,7 @@ class ResiliencePlanPanel extends StatelessWidget {
         for (final task in _maintenanceTasks)
           _MaintenanceScheduleRow(
             task: task,
-            lastChecked: maintenance[task],
+            lastChecked: maintenance[maintenanceCheckKey(task)],
             everyDays: plan.maintenanceEveryDays[task] ?? 0,
             label: _maintenanceLabel(l10n, task),
             l10n: l10n,
@@ -497,19 +497,13 @@ class _MaintenanceScheduleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final due =
-        everyDays > 0 &&
-        (lastChecked == null ||
-            !DateTime.now().isBefore(
-              // Calendar days, not 24-hour blocks, as in `ChargeCheck`.
-              DateTime(
-                lastChecked!.year,
-                lastChecked!.month,
-                lastChecked!.day + everyDays,
-                lastChecked!.hour,
-                lastChecked!.minute,
-              ),
-            ));
+    // The hub redraws at midnight (it watches the calendar day), which is
+    // the only moment this can change.
+    final due = isMaintenanceDue(
+      lastChecked: lastChecked,
+      everyDays: everyDays,
+      now: DateTime.now(),
+    );
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(

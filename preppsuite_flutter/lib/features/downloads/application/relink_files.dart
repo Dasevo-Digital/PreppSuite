@@ -97,16 +97,7 @@ class FileRelinker {
         continue;
       }
       archives.add(
-        StoredArchive(
-          id: archive.id,
-          location: await _remember(match.path, archive.label),
-          label: archive.label,
-          sizeBytes: archive.sizeBytes,
-          entryCount: archive.entryCount,
-          title: archive.title,
-          description: archive.description,
-          cover: archive.cover,
-        ),
+        archive.relocated(await _remember(match.path, archive.label)),
       );
       changed = true;
       found++;

@@ -315,6 +315,42 @@ void main() {
       }
     });
 
+    test('stopping while the archive is scanned leaves the index as it was '
+        '(#286)', () async {
+      final archive = await archiveWith([
+        for (var i = 0; i < 6; i++)
+          article('Artikel$i', '<p>Begriff$i</p>', url: 'Artikel$i'),
+      ]);
+      final indexer = KnowledgeIndexer(archive: archive, index: index);
+      var seen = 0;
+      await indexer.run(
+        await indexer.plan(),
+        fingerprint: 'test',
+        cancelled: () => seen++ >= 3,
+      );
+      final reached = await index.progress();
+      expect(reached, greaterThan(0));
+
+      // "Continue", then "Cancel" while the entries are still being
+      // scanned. The plan holds the first part of the archive only -- here
+      // nothing -- and the position already reached is past its end. It
+      // used to mark the index complete with half the archive unread.
+      final cut = await indexer.plan(cancelled: () => true);
+      expect(cut.complete, isFalse);
+
+      expect(await indexer.run(cut, fingerprint: 'test'), isFalse);
+      expect(await index.isComplete(), isFalse);
+      expect(await index.progress(), reached);
+
+      expect(
+        await indexer.run(await indexer.plan(), fingerprint: 'test'),
+        isTrue,
+      );
+      for (var i = 0; i < 6; i++) {
+        expect(await hits(archive, 'Begriff$i'), hasLength(1), reason: '$i');
+      }
+    });
+
     test(
       'an index built from another archive is thrown away, not reused',
       () async {

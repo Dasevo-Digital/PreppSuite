@@ -136,10 +136,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           DropdownMenuItem(
                             value: country.code,
                             child: Text(
-                              Localizations.localeOf(context).languageCode ==
-                                      'de'
-                                  ? country.nameDe
-                                  : country.nameEn,
+                              country.nameIn(
+                                Localizations.localeOf(context).languageCode,
+                              ),
                             ),
                           ),
                       ],

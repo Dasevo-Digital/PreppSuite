@@ -134,8 +134,19 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     final current = state.value ?? const KnowledgeState();
 
     final existing = _entryAt(current.library, location);
+    // The same download again under another handle (#295). On a Mac every
+    // remembered file gets a fresh bookmark, so the location alone never
+    // matched: downloading an archive a second time added a second entry,
+    // with an id of its own and an empty index. The Kiwix file name says
+    // which build it is wherever it sits.
+    final sameFile = existing != null || fileName == null
+        ? null
+        : current.library
+              .where((archive) => archive.fileName == fileName)
+              .firstOrNull;
     final entry =
         existing ??
+        sameFile?.relocated(location) ??
         StoredArchive(
           id: ZimStore.newId(),
           location: location,
@@ -143,9 +154,14 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
           fileName: fileName,
         );
 
-    final library = existing == null
-        ? [...current.library, entry]
-        : current.library;
+    final library = existing != null
+        ? current.library
+        : sameFile != null
+        ? [
+            for (final archive in current.library)
+              archive.id == sameFile.id ? entry : archive,
+          ]
+        : [...current.library, entry];
 
     return _switchTo(library, entry);
   }
@@ -211,7 +227,15 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
       return;
     }
 
-    await _switchTo(library, library.first);
+    final problem = await _switchTo(library, library.first);
+    if (problem == null) return;
+    // What is left would not open -- an unplugged disk, say. The entry just
+    // removed must not stay open and selected behind the list that no
+    // longer holds it, with its index deleted underneath it (#295): nothing
+    // is open now, and the problem is still said.
+    await _store.save(library, selectedId: null);
+    _closeCurrent();
+    state = AsyncData(KnowledgeState(library: library, problem: problem));
   }
 
   /// Removes every archive from the library.
@@ -463,11 +487,31 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
       return const KnowledgeIndexState();
     }
 
+    return _stored(index, archiveId);
+  }
+
+  /// What the index on disk says about itself.
+  ///
+  /// A partial one says how far it got. The screen reads that as "stopped
+  /// at x of y", and without it said 0 of y every time (#286).
+  Future<KnowledgeIndexState> _stored(
+    KnowledgeIndexDatabase index,
+    String archiveId,
+  ) async {
+    final complete = await index.isComplete();
+    final total = await index.total();
     return KnowledgeIndexState(
-      status: await index.isComplete()
+      status: complete
           ? KnowledgeIndexStatus.ready
           : KnowledgeIndexStatus.partial,
-      articleCount: await index.total(),
+      progress: complete
+          ? null
+          : IndexProgress(
+              phase: IndexPhase.indexing,
+              done: await index.progress(),
+              total: total,
+            ),
+      articleCount: total,
       storageBytes: await index.storageBytes(archiveId),
       compact: await index.isCompact(),
     );
@@ -539,17 +583,16 @@ class KnowledgeIndexController extends AsyncNotifier<KnowledgeIndexState> {
     );
 
     if (!ref.mounted) return;
+    // Read back rather than assumed: a run stopped during the scan never
+    // touched the index, which is then as it was -- partial, or not there
+    // at all for an archive that was never begun.
+    final index = ref.read(knowledgeIndexDatabaseProvider)!;
+    final stored = await index.indexedArchive() == fingerprint
+        ? await _stored(index, archiveId)
+        : const KnowledgeIndexState();
+    if (!ref.mounted) return;
     state = AsyncData(
-      KnowledgeIndexState(
-        status: finished
-            ? KnowledgeIndexStatus.ready
-            : KnowledgeIndexStatus.partial,
-        articleCount: plan.articleCount,
-        storageBytes: await ref
-            .read(knowledgeIndexDatabaseProvider)!
-            .storageBytes(archiveId),
-        compact: await ref.read(knowledgeIndexDatabaseProvider)!.isCompact(),
-      ),
+      finished ? stored.copyWith(articleCount: plan.articleCount) : stored,
     );
   }
 

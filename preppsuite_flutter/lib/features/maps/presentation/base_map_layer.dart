@@ -125,7 +125,13 @@ class _BaseMapLayerState extends ConsumerState<BaseMapLayer> {
         tileProviders: TileProviders({
           'openmaptiles': PmTilesVectorTileProvider(archive),
         }),
-        key: ValueKey(_cacheGeneration),
+        // The archive is part of the key (#292). The layer compares its
+        // theme and nothing about its tile providers when it is handed new
+        // ones, and its caches keep the provider they were made with: a map
+        // still on screen when another archive was taken into use went on
+        // reading the one just closed, and every tile not yet in memory
+        // stayed blank.
+        key: ValueKey((_cacheGeneration, archive)),
         // A map keeps its renderer while it is on screen and for
         // [BaseMapLayer.releaseGrace] after. Pressure recreates it with a smaller
         // budget, or drops it outright where it is not on screen; the map

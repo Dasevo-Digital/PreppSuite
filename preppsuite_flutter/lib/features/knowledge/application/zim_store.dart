@@ -88,6 +88,25 @@ class StoredArchive {
   /// tells the library which build of an archive is already here.
   final String? fileName;
 
+  /// The same entry, found at [location] now.
+  ///
+  /// Everything else stays, the name and the file name included: the
+  /// relinker rebuilt entries without them (#295), and the file name, once
+  /// lost, was the only thing that told the library on a Mac which build
+  /// was already here.
+  StoredArchive relocated(String location) => StoredArchive(
+    id: id,
+    location: location,
+    label: label,
+    sizeBytes: sizeBytes,
+    entryCount: entryCount,
+    title: title,
+    name: name,
+    description: description,
+    cover: cover,
+    fileName: fileName,
+  );
+
   StoredArchive copyWith({
     int? sizeBytes,
     int? entryCount,

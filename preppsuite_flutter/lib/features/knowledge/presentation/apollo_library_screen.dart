@@ -5,6 +5,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../application/knowledge_providers.dart';
 import '../application/recommended_archives.dart';
 import 'kiwix_library_screen.dart';
+import '../../downloads/application/byte_size.dart';
 
 /// A small, deliberate offline curriculum rather than an unstructured list
 /// of very large downloads.  The content itself stays in standard ZIM files,
@@ -280,7 +281,10 @@ class _OfflineStatus extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              l10n.knowledgeApolloStatus(archiveCount, _formatBytes(knownSize)),
+              l10n.knowledgeApolloStatus(
+                archiveCount,
+                formatByteSize(knownSize, locale: l10n.localeName),
+              ),
             ),
             const SizedBox(height: 12),
             LinearProgressIndicator(value: progress),
@@ -380,15 +384,4 @@ class _PathCard extends StatelessWidget {
       ),
     );
   }
-}
-
-String _formatBytes(int bytes) {
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  var value = bytes.toDouble();
-  var unit = 0;
-  while (value >= 1024 && unit < units.length - 1) {
-    value /= 1024;
-    unit++;
-  }
-  return '${value >= 10 || unit == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(1)} ${units[unit]}';
 }

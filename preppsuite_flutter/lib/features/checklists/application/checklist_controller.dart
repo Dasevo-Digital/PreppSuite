@@ -114,6 +114,14 @@ class ChecklistController {
     double? targetQuantity,
   }) async {
     final currentItems = await _db.watchChecklistItems(templateClientId).first;
+    // After the last line, not at the count of lines (#296). Deleted lines
+    // leave gaps -- and the four retired built-in ones left gaps in every
+    // household -- so the count was a position some line already held,
+    // and the new one sorted in before it.
+    final last = currentItems.fold<int>(
+      -1,
+      (highest, item) => item.sortOrder > highest ? item.sortOrder : highest,
+    );
     await _db.upsertChecklistItem(
       ChecklistItemsCompanion.insert(
         clientId: const Uuid().v4(),
@@ -121,7 +129,7 @@ class ChecklistController {
         templateClientId: templateClientId,
         title: title,
         targetQuantity: Value(targetQuantity),
-        sortOrder: Value(currentItems.length),
+        sortOrder: Value(last + 1),
         updatedAt: DateTime.now().toUtc(),
         dirty: const Value(true),
       ),

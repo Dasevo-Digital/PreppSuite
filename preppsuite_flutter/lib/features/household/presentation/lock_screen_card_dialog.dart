@@ -1,13 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/error_text.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../application/lock_screen_card.dart';
+import '../application/lock_screen_card_file.dart';
 
 /// Lets the person choose what goes onto the lock-screen picture, then
 /// hands the picture to the share sheet, from where it is saved to the
@@ -70,17 +68,18 @@ class _LockScreenCardDialogState extends State<LockScreenCardDialog> {
         ),
         size: size,
       );
-      // The temporary directory: this copy exists only for the seconds
-      // it takes the share sheet to hand it on.
-      final file = File(
-        '${(await getTemporaryDirectory()).path}'
-        '${Platform.pathSeparator}notfallkarte-sperrbildschirm.png',
-      );
+      // The temporary directory: this copy exists only for the time it
+      // takes the share sheet to hand it on, and is deleted after (#293).
+      final file = await lockScreenCardFile(l10n.lockScreenCardFileName);
       await file.writeAsBytes(png, flush: true);
       navigator.pop();
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path, mimeType: 'image/png')]),
-      );
+      try {
+        await SharePlus.instance.share(
+          ShareParams(files: [XFile(file.path, mimeType: 'image/png')]),
+        );
+      } finally {
+        await deleteLockScreenCardFiles();
+      }
     } catch (error) {
       messenger.showSnackBar(
         SnackBar(

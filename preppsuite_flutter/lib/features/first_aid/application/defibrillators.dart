@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 
 import '../../../core/private_preferences.dart';
+import '../../shelters/application/geo_bounds.dart' show gridCircle;
 import '../../shelters/application/overpass_shelter_client.dart';
 import '../../../core/http_client.dart';
 
@@ -132,10 +133,13 @@ class DefibrillatorClient {
   /// Every defibrillator within [defibrillatorRadiusMetres], nearest
   /// first. Throws an `OverpassException` when no instance answered.
   Future<List<Defibrillator>> near(double latitude, double longitude) async {
+    // Around a grid point, not the fix itself (#293).
+    final circle = gridCircle(latitude, longitude, defibrillatorRadiusMetres);
     final query =
         '[out:json][timeout:25];'
         'node["emergency"="defibrillator"]'
-        '(around:$defibrillatorRadiusMetres,$latitude,$longitude);'
+        '(around:${circle.radiusMetres},${circle.latitude},'
+        '${circle.longitude});'
         'out 200;';
     final response = await askOverpass(
       _httpClient,
@@ -158,6 +162,12 @@ class DefibrillatorClient {
             'tags': element['tags'],
           }),
     ];
+    // The circle asked for is a little larger than the radius.
+    found.removeWhere(
+      (aed) =>
+          distanceMetres(latitude, longitude, aed.latitude, aed.longitude) >
+          defibrillatorRadiusMetres,
+    );
     found.sort(
       (a, b) => distanceMetres(
         latitude,

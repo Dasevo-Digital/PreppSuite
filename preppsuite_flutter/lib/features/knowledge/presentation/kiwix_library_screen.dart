@@ -84,13 +84,23 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
   }
 
   /// The catalogue speaks ISO 639-3; the app's locales are two-letter.
+  /// Spanish was missing and opened the library on English archives
+  /// (#294).
   static String _isoThreeFor(String languageCode) => switch (languageCode) {
     'de' => 'deu',
-    'en' => 'eng',
+    'es' => 'spa',
     _ => 'eng',
   };
 
+  /// Which list is being asked for (#295). A page that arrives for an
+  /// older one -- the language changed, a shortcut tapped while it was on
+  /// its way -- is dropped instead of being appended to the new list,
+  /// which then showed English archives under "Deutsch" and a total that
+  /// belonged to neither.
+  var _generation = 0;
+
   Future<void> _reload() async {
+    _generation++;
     setState(() {
       _entries.clear();
       _total = 0;
@@ -100,6 +110,7 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
   }
 
   Future<void> _fetch() async {
+    final generation = _generation;
     setState(() => _loading = true);
     try {
       final page = await ref
@@ -110,14 +121,14 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
             start: _entries.length,
             count: _pageSize,
           );
-      if (!mounted) return;
+      if (!mounted || generation != _generation) return;
       setState(() {
         _entries.addAll(page.entries);
         _total = page.total;
         _loading = false;
       });
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || generation != _generation) return;
       setState(() {
         _error = error;
         _loading = false;
@@ -137,8 +148,9 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
     // archive somebody wanted to look at. Asked rather than refused: a
     // damaged copy is a real reason to fetch it again (#37).
     final library = ref.read(knowledgeProvider).value?.library ?? const [];
-    if (presenceOf(entry, library) == CataloguePresence.sameBuild) {
-      final again = await showDialog<bool>(
+    final again = presenceOf(entry, library) == CataloguePresence.sameBuild;
+    if (again) {
+      final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
           title: Text(l10n.kiwixAlreadyHereTitle),
@@ -155,7 +167,7 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
           ],
         ),
       );
-      if (again != true || !mounted) return;
+      if (confirmed != true || !mounted) return;
     }
 
     final folder = await const DownloadFolder().current();
@@ -195,6 +207,8 @@ class _KiwixLibraryScreenState extends ConsumerState<KiwixLibraryScreen> {
             fileName: entry.fileName,
             label: entry.title,
             estimatedLength: entry.size,
+            // Asked for again: fetched, not the copy on disk reopened.
+            replace: again,
           ),
           // Taking it into use straight away is the point of downloading
           // it; there is no second step worth asking about.

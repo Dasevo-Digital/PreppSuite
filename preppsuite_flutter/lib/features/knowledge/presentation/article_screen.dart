@@ -54,6 +54,14 @@ class _ArticleScreenState extends State<ArticleScreen> {
   bool _loading = true;
   bool _bookmarked = false;
 
+  /// The entry on display, for the bookmark button.
+  ///
+  /// Follows the links (#295). The button used the entry this screen was
+  /// opened with, so after a link the title bar named the new page while a
+  /// tap bookmarked -- or removed the bookmark of -- the first one. Null
+  /// for a page that is not an article of the archive.
+  late String? _entryUrl = widget.entryUrl;
+
   /// Why the page did not arrive, in the engine's own words.
   String? _failure;
 
@@ -119,10 +127,19 @@ class _ArticleScreenState extends State<ArticleScreen> {
               });
             }
           },
-          onUrlChange: (_) {
+          onUrlChange: (change) {
             // Cleared on the way out, so the bar never names the page
             // before last while the next one is still arriving.
-            if (mounted) setState(() => _pageTitle = null);
+            if (!mounted) return;
+            final entryUrl = _entryUrlOf(change.url);
+            setState(() {
+              _pageTitle = null;
+              if (entryUrl != _entryUrl) {
+                _entryUrl = entryUrl;
+                _bookmarked = false;
+              }
+            });
+            unawaited(_restoreBookmark());
           },
         ),
       )
@@ -140,32 +157,52 @@ class _ArticleScreenState extends State<ArticleScreen> {
     );
   }
 
+  /// The archive entry [url] shows, or null when it shows none.
+  ///
+  /// The loopback server puts an entry at `/<namespace>/<url>`; articles
+  /// live in `C`, or in `A` in archives written before 2021.
+  String? _entryUrlOf(String? url) {
+    final uri = url == null ? null : Uri.tryParse(url);
+    if (uri == null || !isArchiveUrl(uri, widget.uri)) return null;
+    final segments = uri.pathSegments;
+    if (segments.length < 2) return null;
+    if (segments.first != 'C' && segments.first != 'A') return null;
+    return segments.skip(1).join('/');
+  }
+
   Future<void> _restoreBookmark() async {
     final archiveId = widget.archiveId;
-    final entryUrl = widget.entryUrl;
+    final entryUrl = _entryUrl;
     if (archiveId == null || entryUrl == null) return;
     final saved = await const KnowledgeBookmarkStore().contains(
       archiveId,
       entryUrl,
       archiveName: widget.archiveName,
     );
-    if (mounted) setState(() => _bookmarked = saved);
+    // Only for the page still on display: a link followed meanwhile has
+    // an answer of its own coming.
+    if (mounted && entryUrl == _entryUrl) setState(() => _bookmarked = saved);
   }
 
   Future<void> _toggleBookmark() async {
     final archiveId = widget.archiveId;
-    final entryUrl = widget.entryUrl;
+    final entryUrl = _entryUrl;
     if (archiveId == null || entryUrl == null) return;
     final saved = await const KnowledgeBookmarkStore().toggle(
       KnowledgeBookmark(
         archiveId: archiveId,
         entryUrl: entryUrl,
-        title: widget.title,
+        // The first page under the title it was opened with, as before; a
+        // page reached by a link under its own, or its entry's name while
+        // that is still arriving.
+        title: entryUrl == widget.entryUrl
+            ? widget.title
+            : _pageTitle ?? entryUrl.split('/').last.replaceAll('_', ' '),
         createdAt: DateTime.now(),
         archiveName: widget.archiveName,
       ),
     );
-    if (mounted) setState(() => _bookmarked = saved);
+    if (mounted && entryUrl == _entryUrl) setState(() => _bookmarked = saved);
   }
 
   NavigationDecision _decideNavigation(NavigationRequest request) {
@@ -199,11 +236,11 @@ class _ArticleScreenState extends State<ArticleScreen> {
       appBar: AppBar(
         title: Text(_pageTitle ?? widget.title),
         actions: [
-          if (widget.archiveId != null && widget.entryUrl != null)
+          if (widget.archiveId != null && _entryUrl != null)
             IconButton(
               tooltip: _bookmarked
-                  ? 'Lesezeichen entfernen'
-                  : 'Lesezeichen setzen',
+                  ? l10n.articleBookmarkRemove
+                  : l10n.articleBookmarkAdd,
               icon: Icon(_bookmarked ? Icons.bookmark : Icons.bookmark_border),
               onPressed: _toggleBookmark,
             ),

@@ -85,7 +85,12 @@ class _ShelterMapScreenState extends State<ShelterMapScreen> {
       _setCenter(position);
     } on LocationUnavailableException catch (error) {
       if (mounted && generation == _lookupGeneration) {
-        setState(() => _locationError = '$error');
+        setState(
+          () => _locationError = describeError(
+            AppLocalizations.of(context)!,
+            error,
+          ),
+        );
       }
     }
   }

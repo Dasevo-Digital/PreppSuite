@@ -1,12 +1,15 @@
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../core/name_order.dart';
 import '../../../local_db/database.dart';
+import '../../../model/categories.dart';
 import '../../checklists/application/built_in_template_l10n.dart';
+import '../../checklists/application/checklist_satisfaction.dart';
 import '../../inventory/application/stock_today.dart';
 
 /// Localized strings for the report, gathered from `AppLocalizations` by
@@ -51,9 +54,17 @@ class MissingEquipmentReport {
     required MissingEquipmentReportStrings strings,
     String languageCode = 'de',
   }) async {
-    final uncheckedItems = await db.uncheckedChecklistItems(householdId);
     final templates = await db.allChecklistTemplates(householdId);
     final now = DateTime.now();
+    final uncheckedItems = openEquipment(
+      unchecked: await db.uncheckedChecklistItems(householdId),
+      templates: templates,
+      inventoryById: {
+        for (final item in await db.watchInventoryItems(householdId).first)
+          item.clientId: item,
+      },
+      now: now,
+    );
     final lowStockItems = [
       for (final item in await db.inventoryItemsWithMinimum(householdId))
         if (isBelowMinimum(item, now: now)) item,
@@ -139,8 +150,8 @@ class MissingEquipmentReport {
                 for (final item in lowStockItems)
                   [
                     item.name,
-                    _formatNumber(stockToday(item, now: now)),
-                    _formatNumber(item.minQuantity!),
+                    _formatNumber(stockToday(item, now: now), languageCode),
+                    _formatNumber(item.minQuantity!, languageCode),
                     item.unit,
                   ],
               ],
@@ -152,7 +163,35 @@ class MissingEquipmentReport {
     return document.save();
   }
 
-  String _formatNumber(double value) => value == value.roundToDouble()
-      ? value.toStringAsFixed(0)
-      : value.toString();
+  /// "2,5" where the language writes a decimal comma (#294); it printed
+  /// "2.5" in every language.
+  String _formatNumber(double value, String languageCode) =>
+      NumberFormat.decimalPattern(languageCode).format(value);
+}
+
+/// What the report calls missing: the open lines of the lists of things
+/// to have, in their own order (#290).
+///
+/// Not every unchecked line. One that the stock it is linked to covers
+/// is shown as done on the checklist screen, so a report that listed it
+/// never said "nothing open" while every list stood at 100 %. And the
+/// lists about acting -- "Wenn der Strom ausfällt" -- are steps to take
+/// while it happens, not equipment anybody can be short of.
+List<ChecklistItem> openEquipment({
+  required List<ChecklistItem> unchecked,
+  required List<ChecklistTemplate> templates,
+  required Map<String, InventoryItem> inventoryById,
+  DateTime? now,
+}) {
+  final toHave = {
+    for (final template in templates)
+      if (ChecklistKind.fromName(template.kind) == ChecklistKind.preparation)
+        template.clientId,
+  };
+  return [
+    for (final item in unchecked)
+      if (toHave.contains(item.templateClientId) &&
+          !isChecklistItemSatisfied(item, inventoryById, now: now))
+        item,
+  ]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
 }

@@ -209,9 +209,9 @@ midnight under "soon" until something was edited. `calendarDayProvider`
 holds today, moves on at midnight and is checked again when the app
 comes back to the front (a sleeping device fires no timer). Such a
 screen watches it -- overview, inventory list, rotation, medicines,
-emergency cards, scenario, the preparedness hub, and since #282 the
-badge on the inventory -- and passes it on as "now" where only the date
-matters. The hub also moves the hours of a
+emergency cards, scenario, the preparedness hub, since #282 the badge
+on the inventory and since #292 the daylight page -- and passes it on as
+"now" where only the date matters. The hub also moves the hours of a
 running blackout on every minute, and reads the energy plan and the
 clock again when another device's settings arrive.
 
@@ -1967,6 +1967,32 @@ wrong and frightening. What rides along:
     file name is **not** trusted: it goes into a path, so it is rejected
     unless it is a bare file name.
 
+    The guest cannot know what the host holds before it sends, so it asks
+    first (#288): `GET /photos` answers with the host's picture names,
+    sealed with the invitation key. Without that the guest offered its
+    first twenty megabytes every time, and whatever lay beyond the budget
+    never reached the host. A host too old to know the question answers
+    404, and the guest sends what it has, as before. The host states the
+    length of its answer, and the guest gives that answer the time its own
+    size needs (`exchangeTimeoutFor`); it used to get the time the guest's
+    request needed, which for a device being set up was half a minute for
+    up to the host's whole photo budget.
+
+**Moving into the other household keeps the newer plan** (#287). The plan's
+`clientId` is the household id, so `adoptHouseholdId` moves it to the new
+key instead of re-stamping it. A QR chain applies the other household's
+rows first and moves afterwards, so the other plan can already be under
+the new key; the moved plan replaces it only when it wins by the rule
+`_mergeInto` applies to every row (later stamp, then contents). It used
+to be written over, newer or not, and sent out again.
+
+**The receive screen holds still while it works** (#289). Between the
+last picture read and the result -- the exchange, the question about a
+second household, the move -- back is refused and the screen shows that
+it is still at work. Left during a handover that replaced this device's
+data, the move never ran: the rows that came in stayed under the other
+id while the profile kept its own.
+
 Writing a received photo onto a row uses `setInventoryPhotoPath` /
 `setPossessionPhotoPath` and deliberately **not** an upsert: the path is
 local, so touching `updatedAt` or `dirty` would push the row straight back
@@ -3637,6 +3663,18 @@ sein Bearbeiten-Dialog zeigten „1.5“. Der Import rundet auf sechs Stellen
 statt drei, damit eine Zahl aus der Datei auf dem Weg durch den Dialog
 nicht gekürzt wird.
 
+Datum und Zahl stehen in der Sprache der App, auch wo ein Bildschirm
+keine nennt (#294). Flutters Lokalisierung setzt `Intl.defaultLocale`
+nicht, also schrieb `intl` ohne Angabe en_US: die Rotationsliste den
+5. November als „11/5/2026“, die Einkaufsliste „44,000 kcal“ (auf Deutsch
+und Spanisch vierundvierzig). `app.dart` setzt die Standardsprache bei
+jedem Bauen auf die der App; Bildschirme geben sie trotzdem mit, wo sie
+sie haben. `formatByteSize` schreibt jede Dateigröße der App, dezimal
+und mit Dezimalkomma („1,4 GB“); die eigenen binären Formatierer der
+Wissensbildschirme sind weg. Kein Formatierer ersetzt den Punkt mehr
+selbst durch ein Komma: die Vorratsgruppen schrieben das auch auf
+Englisch.
+
 Namen werden sortiert wie in einem Wörterbuch (`name_order.dart`, #283):
 ohne Groß und Klein, ä, ö und ü wie a, o und u, ß wie ss, die Akzente
 der anderen Sprachen ebenso; nur ñ bleibt ein eigener Buchstabe nach n,
@@ -3649,7 +3687,9 @@ erbt die Reihenfolge von dort. Dieselbe Funktion ordnet die Messstellen
 von Pegeln, Strahlung, Waldbrand und Luft, die Lagerorte im Filter und
 die Geräte mit Akku-Prüfung. Wo zwei Namen denselben Schlüssel haben,
 entscheidet der Name selbst, damit die Reihenfolge auf jedem Gerät
-dieselbe bleibt.
+dieselbe bleibt. Die Checklisten-Übersicht ordnet ihre Listen innerhalb
+einer Kategorie nach dem angezeigten Titel (#294); die Datenbank kennt
+nur den gespeicherten, bei eingebauten Listen den deutschen.
 
 Auch aus endlichen Eingaben dürfen keine unendlichen Ergebnisse entstehen:
 Nährwertprodukte, Packungsumrechnungen und Dosierungsquotienten werden vor dem
@@ -3675,3 +3715,63 @@ schließt ihn bei Ende, Fehler oder Abbruch. Ein übergebener Client bleibt beim
 Aufrufer. Auch verworfene Statusantworten und der 416-Abschluss abonnieren und
 beenden den Body, damit der native Transport seine Verbindung freigibt.
 Ein Abbruch beendet bereits das Warten auf Header oder eine Wiederholung.
+
+### Aus der Durchsicht vom 5. November (#286–#296)
+
+**Ein abgebrochener Durchlauf baut keinen Index fertig** (#286). Wird das
+Durchsuchen der Einträge abgebrochen, trägt der Plan `complete: false`,
+und `KnowledgeIndexer.run` lehnt ihn ab. Fortgesetzt mit einem halben
+Plan stand die erreichte Position hinter dessen Ende, nichts blieb zu
+tun, und der Index galt als vollständig. Ein angehaltener Index liest
+seinen Stand (`progress`) aus der Datenbank, damit „Angehalten bei x von
+y“ stimmt.
+
+**PDFs lesen aus der Datenbank, nicht aus Providern** (#290). Personen und
+Krisenplan für Notfallmappe und Krisenplan-PDF kommen aus
+`householdMembersOnce` und `watchHouseholdPlan(…).first`. Die
+autoDispose-Provider liefern ohne Beobachter nichts, und vom Suchergebnis
+oder der Vorsorge-Zentrale aus beobachtete sie niemand. Jedes PDF wird in
+NotoSans gesetzt (`unicodePdfTheme`): Helvetica deckt nur U+0000–00FF.
+„Fehlende Ausrüstung“ listet nur offene Zeilen der Vorbereitungslisten,
+die nicht schon verknüpfter Vorrat erfüllt (`openEquipment`).
+
+**Wartung zählt Kalendertage, und der Wasserfilter heißt zweimal anders**
+(#291). Der Wartungsplan führt seine Aufgaben in camelCase, die Zentrale
+hakt den Wasserfilter als `water_filter` ab; `maintenanceCheckKey`
+übersetzt beim Nachschlagen, gespeicherte Intervalle bleiben unter ihrem
+Schlüssel. Eine bearbeitete Evakuierungskarte behält ihre Kennung
+(`EvacuationCard.edited`), sonst brachte eine ältere Sicherung die alte
+Karte daneben zurück.
+
+**Karte und Position** (#292). Der Vektorkartenlayer hat das Archiv im
+Schlüssel, weil `vector_map_tiles` neue Kachelquellen nicht bemerkt; und
+`clearVectorTileDiskCache` leert `<temp>/.vector_map`, wenn ein anderes
+Archiv in Gebrauch geht, weil dessen Schlüssel kein Archiv kennt. „Meine
+Position“ bekommt von der Karte die ganze Messung mit Genauigkeit und
+Zeitpunkt, damit eine alte als alt erscheint. `describeError` erklärt
+`LocationUnavailableException` mit Worten statt mit dem Namen des Grundes.
+Die Karte liest gespeicherte Defibrillator- und Notfallpunkt-Suchen und
+eigene Orte neu, wenn ihr Tab wieder sichtbar wird.
+
+**Die eigene Position geht gerundet hinaus, auch für Defibrillatoren und
+Notfallpunkte** (#293). `gridCircle` legt den Overpass-Kreis um einen
+Rasterpunkt mit zwei Nachkommastellen und vergrößert den Radius um die
+größte mögliche Verschiebung; was dadurch jenseits des Radius
+hereinkommt, wird verworfen. Das Sperrbildschirm-Bild der Notfallkarte
+liegt in einem eigenen Ordner unter `temp` und wird nach dem Teilen und
+bei „Haushalt und lokale Daten löschen“ gelöscht
+(`deleteLockScreenCardFiles`).
+
+**Ein Archiv ist eine Datei, wo immer sie liegt** (#295). „Noch einmal
+herunterladen“ setzt `replace` und lädt wirklich, statt die vorhandene
+Datei wieder zu öffnen. `useArchive` erkennt dasselbe Archiv auch an
+seinem Kiwix-Dateinamen: unter macOS bekommt jede gemerkte Datei ein neues
+Lesezeichen, der Ort allein passte nie. `StoredArchive.relocated` behält
+Name und Dateinamen, die der Relinker verlor. Die Titelliste eines
+Archivs wird einmal geladen, und jede Suche wartet auf diese Ladung; ein
+Fehler wird vergessen. Der Lesezeichen-Knopf folgt Links im Artikel.
+
+**Checklisten** (#296). Eine neue Zeile kommt hinter die letzte
+(`max(sortOrder) + 1`), nicht auf die Zahl der Zeilen. Die Erstbefüllung
+schreibt eine Liste mit ihren Zeilen in einer Transaktion: eine
+abgebrochene Befüllung ließ sonst eine Liste für immer unvollständig.
