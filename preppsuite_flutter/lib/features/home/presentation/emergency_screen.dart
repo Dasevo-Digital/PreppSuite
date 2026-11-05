@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_theme.dart';
+import '../../../core/app_ui.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../checklists/application/checklist_providers.dart';
@@ -107,15 +109,27 @@ class EmergencyScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
+          // Side by side and the same width, so the thumb does not have to
+          // find them; 112 in the one colour on this screen that means it.
+          Row(
             children: [
-              _CallButton(label: l10n.emergencyCall112, number: '112'),
-              _CallButton(label: l10n.emergencyCall110, number: '110'),
+              Expanded(
+                child: _CallButton(
+                  label: l10n.emergencyCall112,
+                  number: '112',
+                  urgent: true,
+                ),
+              ),
+              const SizedBox(width: AppSpace.md),
+              Expanded(
+                child: _CallButton(
+                  label: l10n.emergencyCall110,
+                  number: '110',
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpace.md),
           // First in the list, and the only entry here that needs nothing
           // downloaded, nothing configured and no network. Somebody
           // opening this screen with a casualty in front of them should
@@ -123,7 +137,11 @@ class EmergencyScreen extends ConsumerWidget {
           Card(
             color: Theme.of(context).colorScheme.secondaryContainer,
             child: ListTile(
-              leading: const Icon(Icons.medical_services_outlined),
+              leading: IconBadge(
+                Icons.medical_services_outlined,
+                background: Theme.of(context).colorScheme.primary,
+                foreground: Theme.of(context).colorScheme.onPrimary,
+              ),
               title: Text(
                 l10n.firstAidTitle,
                 style: Theme.of(context).textTheme.titleMedium,
@@ -135,90 +153,62 @@ class EmergencyScreen extends ConsumerWidget {
               ),
             ),
           ),
-          // Right under first aid, because it belongs to the same minute
-          // (#117).
-          ListTile(
-            leading: const Icon(Icons.monitor_heart_outlined),
-            title: Text(l10n.aedTitle),
-            subtitle: Text(l10n.aedEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const DefibrillatorScreen(),
+          const SizedBox(height: AppSpace.md),
+          _EntryCard(
+            entries: [
+              // Right under first aid, because it belongs to the same
+              // minute (#117).
+              _Entry(
+                icon: Icons.monitor_heart_outlined,
+                title: l10n.aedTitle,
+                subtitle: l10n.aedEntryHint,
+                open: () => const DefibrillatorScreen(),
               ),
-            ),
-          ),
-          // Water, information and the siren for the long blackout
-          // (#127, #128), beside the other thing searched once and kept.
-          ListTile(
-            leading: const Icon(Icons.water_drop_outlined),
-            title: Text(l10n.emergencyPointsTitle),
-            subtitle: Text(l10n.emergencyPointsEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const EmergencyPointsScreen(),
+              // Water, information and the siren for the long blackout
+              // (#127, #128), beside the other thing searched once and
+              // kept.
+              _Entry(
+                icon: Icons.water_drop_outlined,
+                title: l10n.emergencyPointsTitle,
+                subtitle: l10n.emergencyPointsEntryHint,
+                open: () => const EmergencyPointsScreen(),
               ),
-            ),
-          ),
-          // Then, and with a name of its own rather than three screens
-          // down in the crisis organisation, where it was the nineteenth
-          // section of twenty: a child, or a parent reading with one, has
-          // to be able to find it.
-          ListTile(
-            leading: const Icon(Icons.auto_stories_outlined),
-            title: Text(kidsComic(l10n.localeName).title),
-            subtitle: Text(l10n.emergencyComicHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const KidsComicScreen()),
-            ),
-          ),
-          // Third: after the casualty and the child comes the family
-          // that is waiting to hear (#116).
-          ListTile(
-            leading: const Icon(Icons.sms_outlined),
-            title: Text(l10n.checkInTitle),
-            subtitle: Text(l10n.checkInEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => CheckInScreen(householdId: profile.id),
+              // Then, and with a name of its own rather than three screens
+              // down in the crisis organisation, where it was the
+              // nineteenth section of twenty: a child, or a parent reading
+              // with one, has to be able to find it.
+              _Entry(
+                icon: Icons.auto_stories_outlined,
+                title: kidsComic(l10n.localeName).title,
+                subtitle: l10n.emergencyComicHint,
+                open: () => const KidsComicScreen(),
               ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.contact_phone_outlined),
-            title: Text(l10n.emergencyDirectoryTitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const EmergencyInformationScreen(),
+              // Third: after the casualty and the child comes the family
+              // that is waiting to hear (#116).
+              _Entry(
+                icon: Icons.sms_outlined,
+                title: l10n.checkInTitle,
+                subtitle: l10n.checkInEntryHint,
+                open: () => CheckInScreen(householdId: profile.id),
               ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.playlist_add_check_circle_outlined),
-            title: Text(l10n.drillsTitle),
-            subtitle: Text(l10n.drillsSubtitle),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) =>
-                    PreparednessToolsScreen(householdId: profile.id),
+              _Entry(
+                icon: Icons.contact_phone_outlined,
+                title: l10n.emergencyDirectoryTitle,
+                open: () => const EmergencyInformationScreen(),
               ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.power_off_outlined),
-            title: Text(l10n.outageTitle),
-            subtitle: Text(l10n.outageEntryHint),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => OutageScreen(householdId: profile.id),
+              _Entry(
+                icon: Icons.playlist_add_check_circle_outlined,
+                title: l10n.drillsTitle,
+                subtitle: l10n.drillsSubtitle,
+                open: () => PreparednessToolsScreen(householdId: profile.id),
               ),
-            ),
+              _Entry(
+                icon: Icons.power_off_outlined,
+                title: l10n.outageTitle,
+                subtitle: l10n.outageEntryHint,
+                open: () => OutageScreen(householdId: profile.id),
+              ),
+            ],
           ),
           // Every way of being understood when the network is gone, side
           // by side and named as what they are for (#187). They used to be
@@ -460,16 +450,32 @@ class EmergencyScreen extends ConsumerWidget {
 }
 
 class _CallButton extends StatelessWidget {
-  const _CallButton({required this.label, required this.number});
+  const _CallButton({
+    required this.label,
+    required this.number,
+    this.urgent = false,
+  });
   final String label;
   final String number;
 
+  /// The call for when somebody is hurt.
+  final bool urgent;
+
   @override
-  Widget build(BuildContext context) => FilledButton.icon(
-    onPressed: () => callNumber(context, number),
-    icon: const Icon(Icons.call),
-    label: Text(label),
-  );
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return FilledButton.icon(
+      style: urgent
+          ? FilledButton.styleFrom(
+              backgroundColor: scheme.error,
+              foregroundColor: scheme.onError,
+            )
+          : null,
+      onPressed: () => callNumber(context, number),
+      icon: const Icon(Icons.call),
+      label: Text(label),
+    );
+  }
 }
 
 class _PlanRow extends StatelessWidget {
@@ -491,13 +497,13 @@ class _Entry {
   const _Entry({
     required this.icon,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.open,
   });
 
   final IconData icon;
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final Widget Function() open;
 }
 
@@ -512,25 +518,33 @@ class _Section extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
-      const SizedBox(height: 20),
-      Text(title, style: Theme.of(context).textTheme.titleLarge),
-      const SizedBox(height: 8),
-      Card(
-        child: Column(
-          children: [
-            for (final entry in entries)
-              ListTile(
-                leading: Icon(entry.icon),
-                title: Text(entry.title),
-                subtitle: Text(entry.subtitle),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => entry.open()),
-                ),
-              ),
-          ],
-        ),
-      ),
+      SectionHeading(title),
+      _EntryCard(entries: entries),
     ],
+  );
+}
+
+/// The rows of a [_Section], or of the unheaded block under first aid.
+class _EntryCard extends StatelessWidget {
+  const _EntryCard({required this.entries});
+
+  final List<_Entry> entries;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: Column(
+      children: [
+        for (final entry in entries)
+          ListTile(
+            leading: IconBadge(entry.icon),
+            title: Text(entry.title),
+            subtitle: entry.subtitle == null ? null : Text(entry.subtitle!),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => entry.open())),
+          ),
+      ],
+    ),
   );
 }

@@ -9,6 +9,7 @@ import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
 import '../../../core/theme_provider.dart';
 import '../../../core/crisis_mode_provider.dart';
+import '../../../core/app_ui.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../downloads/presentation/download_folder_card.dart';
@@ -222,7 +223,7 @@ class _CategoryTile extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     margin: EdgeInsets.zero,
     child: ListTile(
-      leading: Icon(icon),
+      leading: IconBadge(icon),
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: const Icon(Icons.chevron_right),

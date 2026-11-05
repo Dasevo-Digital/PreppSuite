@@ -33,6 +33,8 @@ import '../application/warning_freshness.dart';
 import '../application/warning_sync_controller.dart';
 import 'warning_freshness_notice.dart';
 import 'warning_speech.dart';
+import '../../../core/app_ui.dart';
+import '../../../core/app_theme.dart';
 
 class WarningListScreen extends ConsumerStatefulWidget {
   const WarningListScreen({super.key, required this.profile, this.now});
@@ -218,8 +220,14 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
     final current =
         fresh == null || fresh.freshness == WarningFreshness.current;
 
-    Widget messageWithHint(Widget message) => ListView(
-      children: [
+    // One gutter and one gap, set here rather than by each block. They
+    // brought their own margins, which added up to the 24 between the
+    // blocks into gaps of up to 40, and one card stood wider than the rest.
+    Widget messageWithHint(Widget message) => AdaptiveColumns(
+      padding: _pagePadding,
+      spacing: AppSpace.md,
+      maxColumns: 1,
+      blocks: [
         ?notice,
         ?warningDay,
         message,
@@ -316,6 +324,8 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
           // list is what the subscribed regions currently have out, tens of
           // entries at the very worst, not a household's whole inventory.
           return AdaptiveColumns(
+            padding: _pagePadding,
+            spacing: AppSpace.md,
             blocks: [
               ...leading,
               for (final warning in sorted)
@@ -333,6 +343,14 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
     );
   }
 }
+
+/// The page's gutter, for every block of the list.
+const _pagePadding = EdgeInsets.fromLTRB(
+  AppSpace.lg,
+  AppSpace.sm,
+  AppSpace.lg,
+  AppSpace.xl,
+);
 
 /// Search field plus the four conditions the list can be narrowed by.
 ///
@@ -448,7 +466,7 @@ class _ResultCount extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+      padding: const EdgeInsetsDirectional.only(start: AppSpace.xs),
       child: Row(
         children: [
           Expanded(
@@ -482,7 +500,6 @@ class _NinaHint extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -537,31 +554,32 @@ class _WarningTile extends StatelessWidget {
 
     final colors = warningSeverityColors(context, severity);
 
-    return ExpansionTile(
-      leading: CircleAvatar(
-        backgroundColor: colors.background,
-        // Without this the icon takes `onPrimaryContainer`, which is what
-        // CircleAvatar falls back to under Material 3 — a green, on a red.
-        foregroundColor: colors.foreground,
-        child: const Icon(Icons.warning_amber_rounded, size: 18),
-      ),
-      title: Text(warning.headline),
-      subtitle: Text(
-        [
-          localizeWarningSeverity(l10n, severity),
-          if (isExpired) l10n.warningExpiredLabel,
-        ].join(' · '),
-      ),
-      children: [
-        _WarningDetails(
-          warning: warning,
-          severity: severity,
-          colors: colors,
-          source: source,
-          l10n: l10n,
-          regions: regions,
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        leading: IconBadge(
+          Icons.warning_amber_rounded,
+          background: colors.background,
+          foreground: colors.foreground,
         ),
-      ],
+        title: Text(warning.headline),
+        subtitle: Text(
+          [
+            localizeWarningSeverity(l10n, severity),
+            if (isExpired) l10n.warningExpiredLabel,
+          ].join(' · '),
+        ),
+        children: [
+          _WarningDetails(
+            warning: warning,
+            severity: severity,
+            colors: colors,
+            source: source,
+            l10n: l10n,
+            regions: regions,
+          ),
+        ],
+      ),
     );
   }
 }

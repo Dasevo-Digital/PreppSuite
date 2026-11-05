@@ -310,30 +310,22 @@ class _OverviewCard extends StatelessWidget {
                         ),
                       ),
                       ?trailing,
+                      // The whole card is the way in, and this says so.
+                      // It used to be a line "Öffnen" of its own under
+                      // every card: forty pixels a card, five cards, the
+                      // same word.
+                      Icon(
+                        Icons.chevron_right,
+                        size: 20,
+                        color: theme.colorScheme.onSurfaceVariant,
+                        semanticLabel: AppLocalizations.of(
+                          context,
+                        )!.overviewOpen,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   child,
-                  const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.overviewOpen,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        Icon(
-                          Icons.chevron_right,
-                          size: 20,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -479,13 +471,13 @@ class _Meter extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              semanticsValue: percentValue(l10n, progress),
-            ),
+          // Ochre until the target is reached, as on the lamp above: green
+          // on a bar that is a third full said the opposite of its number.
+          LinearProgressIndicator(
+            value: progress,
+            minHeight: 8,
+            color: short ? theme.colorScheme.tertiary : null,
+            semanticsValue: percentValue(l10n, progress),
           ),
         ],
       ),

@@ -10141,7 +10141,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstAidEntryHint.
   ///
   /// In en, this message translates to:
-  /// **'Instructions, drawings and a pacer for chest compressions. No network, no download.'**
+  /// **'Instructions, drawings and a pacer for chest compressions, no network needed.'**
   String get firstAidEntryHint;
 
   /// No description provided for @firstAidSearchHint.
@@ -13336,7 +13336,7 @@ abstract class AppLocalizations {
   /// No description provided for @emergencyComicHint.
   ///
   /// In en, this message translates to:
-  /// **'An emergency comic for children: what to do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war.'**
+  /// **'A comic for children: power cuts, sirens, storms, fire and talk of war.'**
   String get emergencyComicHint;
 
   /// No description provided for @backupContentsTitle.
@@ -13744,7 +13744,7 @@ abstract class AppLocalizations {
   /// No description provided for @checkInEntryHint.
   ///
   /// In en, this message translates to:
-  /// **'Say by text message that you are all right – a text often still gets through when mobile data is overloaded.'**
+  /// **'Say by text that you are all right. A text often gets through when mobile data does not.'**
   String get checkInEntryHint;
 
   /// No description provided for @checkInStatusLabel.
@@ -13900,7 +13900,7 @@ abstract class AppLocalizations {
   /// No description provided for @aedEntryHint.
   ///
   /// In en, this message translates to:
-  /// **'Where the nearest defibrillator is – search once with a connection, then also offline.'**
+  /// **'Search once with a connection, then also offline.'**
   String get aedEntryHint;
 
   /// No description provided for @aedCall112First.
@@ -14242,7 +14242,7 @@ abstract class AppLocalizations {
   /// No description provided for @emergencyPointsEntryHint.
   ///
   /// In en, this message translates to:
-  /// **'Where there is water and information in a blackout, and whether a siren is within earshot.'**
+  /// **'Water and information in a blackout, and whether a siren is within earshot.'**
   String get emergencyPointsEntryHint;
 
   /// No description provided for @emergencyPointsIntro.
@@ -17124,6 +17124,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove bookmark'**
   String get articleBookmarkRemove;
+
+  /// No description provided for @supplyCalculatorNotesAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes on this calculation'**
+  String get supplyCalculatorNotesAction;
 }
 
 class _AppLocalizationsDelegate

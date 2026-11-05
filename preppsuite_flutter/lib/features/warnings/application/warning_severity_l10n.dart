@@ -89,6 +89,25 @@ const _ladderDark = <WarningSeverity, WarningSeverityColors>{
   ),
 };
 
+/// The rung as one strong colour, for something too small to carry text.
+///
+/// A lamp on the overview was given the ladder's background, which is
+/// meant to have a text on it. On a white card "severe" came out as a dot
+/// of the palest pink, on the screen where it has to be seen first.
+Color warningSeveritySignal(BuildContext context, WarningSeverity severity) {
+  final dark = Theme.of(context).brightness == Brightness.dark;
+  return switch (severity) {
+    WarningSeverity.minor =>
+      dark ? const Color(0xFF8EC5EE) : const Color(0xFF2F6FA8),
+    WarningSeverity.moderate =>
+      dark ? const Color(0xFFF2C14E) : const Color(0xFFD99A00),
+    WarningSeverity.severe =>
+      dark ? const Color(0xFFFF8A70) : const Color(0xFFD9482B),
+    WarningSeverity.extreme =>
+      dark ? const Color(0xFFFFB4AB) : const Color(0xFFB3261E),
+  };
+}
+
 /// The colours a severity is shown in.
 ///
 /// Both halves together, deliberately. This used to hand out a background

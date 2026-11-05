@@ -9,6 +9,8 @@ import 'package:printing/printing.dart';
 import '../../../model/categories.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../core/app_theme.dart';
+import '../../../core/app_ui.dart';
 import '../../../core/calendar_day.dart';
 import '../../../core/content_swap.dart';
 import '../../../local_db/database.dart';
@@ -332,26 +334,35 @@ class _GroupedTemplateList extends StatelessWidget {
         }
 
         final (category, group) = sections[index - 1];
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-              child: Text(
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SectionHeading(
                 localizeChecklistCategory(l10n, category),
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpace.xs,
+                  AppSpace.lg,
+                  AppSpace.xs,
+                  AppSpace.sm,
                 ),
               ),
-            ),
-            for (final template in group)
-              _TemplateTile(
-                template: template,
-                progress: progress[template.clientId],
-                householdId: householdId,
-                l10n: l10n,
+              Card(
+                child: Column(
+                  children: [
+                    for (final template in group)
+                      _TemplateTile(
+                        template: template,
+                        progress: progress[template.clientId],
+                        householdId: householdId,
+                        l10n: l10n,
+                      ),
+                  ],
+                ),
               ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -382,25 +393,33 @@ class _TemplateTile extends ConsumerWidget {
     // only when one of its menu items is chosen.
     final language = Localizations.localeOf(context).languageCode;
     return ListTile(
-      leading: Icon(
+      leading: IconBadge(
         checklistCategoryIcon(ChecklistCategory.fromName(template.category)),
       ),
-      title: Row(
+      title: Text(template.titleIn(language)),
+      // "Vorlage" as a word in the line rather than a chip beside the
+      // title. Nineteen rows said it nineteen times, each in a box of its
+      // own, and the box took the title's width away; what a row has to
+      // show first is how far the list has got.
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(child: Text(template.titleIn(language))),
-          if (template.isBuiltIn)
-            Padding(
-              padding: const EdgeInsets.only(left: 8),
-              child: Chip(
-                label: Text(l10n.builtInBadge),
-                visualDensity: VisualDensity.compact,
-              ),
+          Text(
+            [
+              if (progress case final progress?)
+                l10n.checklistProgress(progress.done, progress.total),
+              if (template.isBuiltIn) l10n.builtInBadge,
+            ].join(' · '),
+          ),
+          if (progress case final progress? when progress.total > 0) ...[
+            const SizedBox(height: 6),
+            ThinMeter(
+              value: progress.done / progress.total,
+              height: 4,
             ),
+          ],
         ],
       ),
-      subtitle: progress == null
-          ? null
-          : Text(l10n.checklistProgress(progress!.done, progress!.total)),
       trailing: PopupMenuButton<_TemplateAction>(
         onSelected: (action) {
           final controller = ref.read(

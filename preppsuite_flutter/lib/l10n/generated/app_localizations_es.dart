@@ -6144,7 +6144,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get firstAidEntryHint =>
-      'Instrucciones, dibujos y un marcapasos para las compresiones torácicas. Sin red, sin descargas.';
+      'Instrucciones, dibujos y un marcapasos para las compresiones, sin red.';
 
   @override
   String get firstAidSearchHint => '¿Qué buscas?';
@@ -8127,7 +8127,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get emergencyComicHint =>
-      'Un cómic de emergencia para niños: qué hacer en un corte de luz, cuando suena la sirena, en una tormenta, en un incendio y cuando se habla de guerra.';
+      'Un cómic para niños: apagones, sirenas, tormentas, incendios y cuando se habla de guerra.';
 
   @override
   String get backupContentsTitle => 'Qué entra en la copia de seguridad';
@@ -8373,7 +8373,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get checkInEntryHint =>
-      'Decir por SMS que estás bien: un SMS suele llegar aunque los datos móviles estén saturados.';
+      'Decir por SMS que estás bien. Un SMS suele llegar aunque los datos móviles estén saturados.';
 
   @override
   String get checkInStatusLabel => '¿Qué debe llegar?';
@@ -8464,7 +8464,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aedEntryHint =>
-      'Dónde está el desfibrilador más cercano: busca una vez con conexión y después también sin ella.';
+      'Busca una vez con conexión y después también sin ella.';
 
   @override
   String get aedCall112First =>
@@ -8666,7 +8666,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get emergencyPointsEntryHint =>
-      'Dónde hay agua e información durante un apagón, y si hay una sirena al alcance del oído.';
+      'Agua e información en un apagón, y si hay una sirena al alcance del oído.';
 
   @override
   String get emergencyPointsIntro =>
@@ -10498,4 +10498,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get articleBookmarkRemove => 'Quitar marcador';
+
+  @override
+  String get supplyCalculatorNotesAction => 'Notas sobre el cálculo';
 }

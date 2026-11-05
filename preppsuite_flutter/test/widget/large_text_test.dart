@@ -27,6 +27,7 @@ import 'package:preppsuite_flutter/features/first_aid/presentation/first_aid_vid
 import 'package:preppsuite_flutter/features/energy/presentation/outage_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/medication_range_screen.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/rotation_screen.dart';
+import 'package:preppsuite_flutter/features/neighbourhood/application/neighbour_offer_controller.dart';
 import 'package:preppsuite_flutter/features/possessions/application/possession_controller.dart';
 import 'package:preppsuite_flutter/features/possessions/presentation/possession_form_screen.dart';
 import 'package:preppsuite_flutter/features/possessions/presentation/possessions_screen.dart';
@@ -128,6 +129,9 @@ void _screens(Locale locale) {
             householdId,
           ).overrideWith((ref) => Stream.value(null)),
           possessionsProvider(
+            householdId,
+          ).overrideWith((ref) => Stream.value(const [])),
+          neighbourOffersProvider(
             householdId,
           ).overrideWith((ref) => Stream.value(const [])),
           checklistItemsProvider(

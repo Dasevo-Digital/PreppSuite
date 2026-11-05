@@ -29,7 +29,7 @@ class WarningFreshnessNotice extends StatelessWidget {
     final at = this.at;
     if (freshness == WarningFreshness.current && at != null) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Text(
           l10n.warningsUpdatedAt(formatWarningTime(l10n, at, now)),
           style: theme.textTheme.bodySmall?.copyWith(
@@ -40,10 +40,9 @@ class WarningFreshnessNotice extends StatelessWidget {
     }
     final colours = theme.colorScheme;
     return Card(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       color: colours.errorContainer,
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(16),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

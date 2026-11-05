@@ -3,6 +3,8 @@ import 'dart:async' show unawaited;
 import 'package:flutter/material.dart';
 
 import '../../../core/settings_arrival.dart';
+import '../../../core/app_theme.dart';
+import '../../../core/app_ui.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../preparedness/presentation/preparedness_hub_screen.dart';
 import '../application/drill_progress_store.dart';
@@ -97,6 +99,13 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen>
                   Text(l10n.drillsImmediateDanger),
                   const SizedBox(height: 12),
                   FilledButton.icon(
+                    // The one call on this card, on a red ground: green
+                    // here said "all clear" on the button that means the
+                    // opposite.
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      foregroundColor: Theme.of(context).colorScheme.onError,
+                    ),
                     onPressed: () => callNumber(context, '112'),
                     icon: const Icon(Icons.call),
                     label: Text(l10n.drillsCallEmergency),
@@ -108,7 +117,7 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen>
           const SizedBox(height: 12),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.folder_special_outlined),
+              leading: const IconBadge(Icons.folder_special_outlined),
               title: Text(l10n.toolsHubTitle),
               subtitle: Text(
                 l10n.toolsHubBody,
@@ -134,8 +143,10 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen>
           const SizedBox(height: 8),
           for (final lesson in _Lesson.values)
             Card(
+              margin: const EdgeInsets.only(bottom: AppSpace.sm),
+              clipBehavior: Clip.antiAlias,
               child: ExpansionTile(
-                leading: Icon(lesson.icon),
+                leading: IconBadge(lesson.icon),
                 title: Text(_lessonTitle(l10n, lesson)),
                 subtitle: Text(_lessonSummary(l10n, lesson)),
                 childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -208,16 +219,10 @@ class _PreparednessToolsScreenState extends State<PreparednessToolsScreen>
           const SizedBox(height: 8),
           for (final scenario in _Scenario.values)
             Card(
+              margin: const EdgeInsets.only(bottom: AppSpace.sm),
+              clipBehavior: Clip.antiAlias,
               child: ExpansionTile(
-                leading: CircleAvatar(
-                  backgroundColor: Theme.of(
-                    context,
-                  ).colorScheme.primaryContainer,
-                  foregroundColor: Theme.of(
-                    context,
-                  ).colorScheme.onPrimaryContainer,
-                  child: Icon(scenario.icon),
-                ),
+                leading: IconBadge(scenario.icon),
                 title: Text(_drillTitle(l10n, scenario)),
                 subtitle: Text(
                   switch (_completed[scenario.id]) {

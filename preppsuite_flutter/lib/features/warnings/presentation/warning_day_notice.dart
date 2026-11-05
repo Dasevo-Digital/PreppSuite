@@ -47,7 +47,6 @@ class WarningDayNotice extends StatelessWidget {
     final days = daysUntilFederalWarningDay(from: now);
 
     return Card(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(

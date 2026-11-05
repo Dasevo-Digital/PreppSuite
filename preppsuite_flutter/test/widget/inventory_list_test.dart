@@ -3,6 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:preppsuite_flutter/core/app_ui.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_controller.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_providers.dart';
 import 'package:preppsuite_flutter/features/inventory/presentation/consume_dialog.dart';
@@ -117,7 +118,7 @@ void main() {
   testWidgets('marks an item below its minimum as low stock', (tester) async {
     await pumpList(tester, [item(quantity: 1, minQuantity: 3)]);
 
-    expect(find.widgetWithText(Chip, 'Niedriger Bestand'), findsOneWidget);
+    expect(find.widgetWithText(StatusTag, 'Niedriger Bestand'), findsOneWidget);
   });
 
   testWidgets('marks an item past its expiration date as expired', (
@@ -127,7 +128,7 @@ void main() {
       item(expirationDate: DateTime.now().subtract(const Duration(days: 1))),
     ]);
 
-    expect(find.widgetWithText(Chip, 'Abgelaufen'), findsOneWidget);
+    expect(find.widgetWithText(StatusTag, 'Abgelaufen'), findsOneWidget);
   });
 
   testWidgets('an item that is neither low nor expired carries no chip', (
@@ -141,7 +142,7 @@ void main() {
       ),
     ]);
 
-    expect(find.byType(Chip), findsNothing);
+    expect(find.byType(StatusTag), findsNothing);
   });
 
   testWidgets('deducting through the dialog asks for the entered amount', (

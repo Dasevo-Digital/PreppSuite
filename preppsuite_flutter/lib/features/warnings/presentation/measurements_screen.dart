@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/app_ui.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import 'air_quality_screen.dart';
 import 'fire_danger_screen.dart';
@@ -100,9 +101,8 @@ class MeasurementsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Card(
-      margin: const EdgeInsets.fromLTRB(12, 8, 12, 16),
       child: ListTile(
-        leading: const Icon(Icons.sensors_outlined),
+        leading: const IconBadge(Icons.sensors_outlined),
         title: Text(l10n.measurementsTitle),
         subtitle: Text(l10n.measurementsHint),
         trailing: const Icon(Icons.chevron_right),

@@ -3527,7 +3527,7 @@
   "firstAidTitle": "First aid",
   "firstAidContentVersionTitle": "Where these guides come from",
   "firstAidContentVersionBody": "Content follows the 2025 Guidelines of the European Resuscitation Council and was checked guide by guide against the German Red Cross's first aid pages in October 2026. Some guides follow the IFRC, the paediatricians, the German Life Saving Association or a German clinical guideline; each one names its source. What a first aid course teaches is agreed jointly by the aid organisations; in a course, what is said there applies.",
-  "firstAidEntryHint": "Instructions, drawings and a pacer for chest compressions. No network, no download.",
+  "firstAidEntryHint": "Instructions, drawings and a pacer for chest compressions, no network needed.",
   "firstAidSearchHint": "What are you looking for?",
   "firstAidSearchEmpty": "There is no guide here for that.",
   "firstAidDisclaimer": "These guides replace neither a first aid course nor an emergency call. In doubt: call 112 and stay on the line — the dispatcher will talk you through it.",
@@ -4576,7 +4576,7 @@
   "@knowledgeDocumentTooLargeForReader": {"placeholders": {"size": {"type": "String"}, "limit": {"type": "String"}}},
   "knowledgeDocumentTooLargeInside": "This document holds more than the built-in reader can handle on this device. Another app can still read it.",
   "knowledgeDocumentTruncated": "From here on the document is too long for the built-in reader. Another app shows the rest.",
-  "emergencyComicHint": "An emergency comic for children: what to do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war.",
+  "emergencyComicHint": "A comic for children: power cuts, sirens, storms, fire and talk of war.",
   "backupContentsTitle": "What goes into the backup",
   "backupRestoreContentsTitle": "What is restored",
   "backupContentsHousehold": "Household, settings and emergency plan",
@@ -4745,7 +4745,7 @@
   },
   "heavyRainPrivacy": "For the check, the coordinates go to the BKG map service, and a position rounded to about a kilometre goes to OpenStreetMap to find the state.",
   "checkInTitle": "Send a sign of life",
-  "checkInEntryHint": "Say by text message that you are all right – a text often still gets through when mobile data is overloaded.",
+  "checkInEntryHint": "Say by text that you are all right. A text often gets through when mobile data does not.",
   "checkInStatusLabel": "What should arrive?",
   "checkInSafe": "I am all right.",
   "checkInNeedHelp": "I need help.",
@@ -4799,7 +4799,7 @@
   "checkInNoSmsApp": "No text message app can be opened here. Copy the text or send it with another app.",
   "checkInPrivacy": "The message only goes through the text or messaging app you choose. PreppSuite sends nothing itself.",
   "aedTitle": "Defibrillators nearby",
-  "aedEntryHint": "Where the nearest defibrillator is – search once with a connection, then also offline.",
+  "aedEntryHint": "Search once with a connection, then also offline.",
   "aedCall112First": "In a cardiac arrest, call 112 first and start chest compressions. Whoever is free fetches the defibrillator.",
   "aedUseLocation": "Search here",
   "aedSearchAddress": "Enter an address",
@@ -4934,7 +4934,7 @@
   "riverFloodSource": "Source: NLWKN, flood hazard maps (Floods Directive, 2nd cycle)",
   "riverFloodFailed": "The state's map service did not answer.",
   "emergencyPointsTitle": "Emergency wells, help points and sirens",
-  "emergencyPointsEntryHint": "Where there is water and information in a blackout, and whether a siren is within earshot.",
+  "emergencyPointsEntryHint": "Water and information in a blackout, and whether a siren is within earshot.",
   "emergencyPointsIntro": "In a long blackout, mains water, phone and internet fail one after another. Where the nearest emergency well and help point are can still be looked up now – the search is kept and is there offline afterwards.",
   "emergencyPointsPlace": "{place}, as of {date}",
   "@emergencyPointsPlace": {
@@ -6146,5 +6146,6 @@
   "transferWorkingStay": "The transfer is still running. Please wait until it has finished.",
   "lockScreenCardFileName": "emergency-card-lock-screen",
   "articleBookmarkAdd": "Add bookmark",
-  "articleBookmarkRemove": "Remove bookmark"
+  "articleBookmarkRemove": "Remove bookmark",
+  "supplyCalculatorNotesAction": "Notes on this calculation"
 }

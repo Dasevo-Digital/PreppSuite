@@ -6134,7 +6134,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get firstAidEntryHint =>
-      'Anleitungen, Zeichnungen und ein Taktgeber für die Herzdruckmassage. Ohne Netz, ohne Download.';
+      'Anleitungen, Zeichnungen und ein Taktgeber für die Herzdruckmassage, ganz ohne Netz.';
 
   @override
   String get firstAidSearchHint => 'Wonach suchst du?';
@@ -8097,7 +8097,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get emergencyComicHint =>
-      'Notfall-Comic für Kinder: was tun bei Stromausfall, Sirene, Sturm, Feuer und wenn von Krieg die Rede ist.';
+      'Comic für Kinder: Stromausfall, Sirene, Sturm, Feuer und wenn von Krieg die Rede ist.';
 
   @override
   String get backupContentsTitle => 'Was in die Sicherung kommt';
@@ -8343,7 +8343,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get checkInEntryHint =>
-      'Per SMS sagen, dass es dir gut geht – eine SMS kommt oft noch durch, wenn das mobile Internet überlastet ist.';
+      'Per SMS sagen, dass es dir gut geht. Eine SMS kommt oft auch im überlasteten Netz durch.';
 
   @override
   String get checkInStatusLabel => 'Was soll ankommen?';
@@ -8433,8 +8433,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aedTitle => 'Defibrillatoren in der Nähe';
 
   @override
-  String get aedEntryHint =>
-      'Wo der nächste Defibrillator hängt – einmal mit Netz suchen, danach auch offline.';
+  String get aedEntryHint => 'Einmal mit Netz suchen, danach auch offline.';
 
   @override
   String get aedCall112First =>
@@ -8635,7 +8634,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get emergencyPointsEntryHint =>
-      'Wo es im Stromausfall Wasser und Auskunft gibt, und ob eine Sirene in Hörweite steht.';
+      'Wasser und Auskunft im Stromausfall, und ob eine Sirene in Hörweite steht.';
 
   @override
   String get emergencyPointsIntro =>
@@ -10465,4 +10464,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get articleBookmarkRemove => 'Lesezeichen entfernen';
+
+  @override
+  String get supplyCalculatorNotesAction => 'Hinweise zur Berechnung';
 }

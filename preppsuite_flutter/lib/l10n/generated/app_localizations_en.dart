@@ -6100,7 +6100,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstAidEntryHint =>
-      'Instructions, drawings and a pacer for chest compressions. No network, no download.';
+      'Instructions, drawings and a pacer for chest compressions, no network needed.';
 
   @override
   String get firstAidSearchHint => 'What are you looking for?';
@@ -8059,7 +8059,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emergencyComicHint =>
-      'An emergency comic for children: what to do in a power cut, when the siren wails, in a storm, in a fire and when there is talk of war.';
+      'A comic for children: power cuts, sirens, storms, fire and talk of war.';
 
   @override
   String get backupContentsTitle => 'What goes into the backup';
@@ -8302,7 +8302,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkInEntryHint =>
-      'Say by text message that you are all right – a text often still gets through when mobile data is overloaded.';
+      'Say by text that you are all right. A text often gets through when mobile data does not.';
 
   @override
   String get checkInStatusLabel => 'What should arrive?';
@@ -8392,7 +8392,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aedEntryHint =>
-      'Where the nearest defibrillator is – search once with a connection, then also offline.';
+      'Search once with a connection, then also offline.';
 
   @override
   String get aedCall112First =>
@@ -8590,7 +8590,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emergencyPointsEntryHint =>
-      'Where there is water and information in a blackout, and whether a siren is within earshot.';
+      'Water and information in a blackout, and whether a siren is within earshot.';
 
   @override
   String get emergencyPointsIntro =>
@@ -10413,4 +10413,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get articleBookmarkRemove => 'Remove bookmark';
+
+  @override
+  String get supplyCalculatorNotesAction => 'Notes on this calculation';
 }

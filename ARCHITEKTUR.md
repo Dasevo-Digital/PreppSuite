@@ -2333,6 +2333,55 @@ bewegen, bekommt die frühere Bild-zu-Bild-Änderung, nicht eine kürzere
 Fassung dieser. Und es bleibt unter 250 ms; darüber liest sich eine
 Überblendung als langsame App, was das Gegenteil des Zwecks ist.
 
+### Wie die App aussieht, und was das kosten darf
+
+Das Aussehen steht an drei Stellen und nirgends sonst: Farben, Schrift und
+Abstände in `core/app_theme.dart`, die kleinen Teile in `core/app_ui.dart`,
+die Warnstufen als eigene Leiter in `warning_severity_l10n.dart` (#298).
+
+**Waldgrün und Ocker.** Rot heißt: etwas ist schon falsch. Ocker (`tertiary`)
+heißt: bald ansehen, oder noch nicht am Ziel; Balken und Ringe stehen in
+Ocker, bis der Wert erreicht ist. Grün heißt: erreicht, oder die Marke der
+App. Eine Rolle aus `ColorScheme.fromSeed` wird von Hand gesetzt, sobald sie
+aus der Palette fällt: Der Seed lieferte ein Limettengrün als
+`primaryContainer` und ein Cyan als `tertiaryContainer`, und „niedriger
+Bestand“ war hellblau wie eine harmlose Notiz. Von Hand gesetzte Paare hält
+niemand mehr für uns ein, deshalb misst `app_palette_test` ihren Kontrast in
+beiden Themen.
+
+**Die Teile sind aus dem Grund da, dass sie weniger kosten.** `StatusTag`
+statt `Chip` für ein Wort, das niemand antippt (ein Drittel der Elemente und
+niedriger, damit eine Zeile mit Hinweis nicht höher wird als die daneben),
+`IconBadge` statt `CircleAvatar`, `ThinMeter` statt
+`LinearProgressIndicator`, wo nichts sich bewegt. Keiner hat einen Ticker,
+eine Tintenfläche oder eine eigene Ebene, und `app_ui_test` hält das fest.
+Ein `Chip` bleibt, wo man ihn antippt; ein runder Avatar bleibt, wo er eine
+Person oder eine Nummer ist. Fotos in Listen sind eine `DecorationImage` mit
+Rundung: die Ecken kosten so keine Clip-Ebene je Zeile.
+
+**Was nicht in die App kommt:** eigene Schriftarten (die App nimmt die des
+Systems; Noto Sans ist nur für PDFs dabei), Unschärfe, Verläufe über ganze
+Flächen, Schatten außer dem einen am schwebenden Knopf, Ebenen mit
+Deckkraft, Bilder als Dekoration. Alles davon kostet Grafikspeicher oder
+Akku, auf dem Bildschirm, den jemand im Stromausfall offen hat.
+
+**Eine Karte beantwortet eine Frage.** Die Hauptkarte der Übersicht trug die
+Warnung und dazu, ob Karte und Wissen da sind, und nahm ein Drittel des
+Telefons ein. Sie ist jetzt halb so hoch, und was offline da ist, steht als
+Zeile darunter und führt dorthin. Die Karten der Übersicht sind als Ganzes
+der Weg hinein und sagen das mit einem Pfeil im Kopf; die Zeile „Öffnen“ unter
+jeder kostete vierzig Pixel je Karte. Zeilen einer Gruppe stehen in einer
+Karte, und der Seitenrand gehört der Seite, nicht jedem Block: Die
+Warnungsliste hatte Lücken von bis zu 40 Pixeln, weil Blöcke ihre eigenen
+Ränder zum Abstand der Spalten addierten.
+
+`test/screenshots/design_review_test.dart` rendert die Hauptbildschirme mit
+einem Beispielhaushalt, hell, dunkel, als Telefon und als breites Fenster,
+und schreibt je Bildschirm die Zahl der Elemente und Ebenen in `costs.tsv`.
+Wer das Aussehen ändert, vergleicht beides davor und danach:
+
+    PREPPSUITE_REVIEW=/ein/ordner flutter test test/screenshots/design_review_test.dart
+
 ### Was eine Liste je Zeile kostet
 
 Die Checklistenansicht hat lange je Kachel einen eigenen Strom ihrer

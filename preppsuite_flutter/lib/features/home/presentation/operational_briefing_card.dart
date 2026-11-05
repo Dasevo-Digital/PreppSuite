@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_theme.dart';
+import '../../../core/app_ui.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../../inventory/application/charge_reminder_provider.dart';
@@ -89,100 +91,112 @@ class OperationalBriefingCard extends ConsumerWidget {
       );
     }
 
-    return Semantics(
-      container: true,
-      label: '${l10n.operationsTitle}: ${briefing.title}. ${briefing.detail}',
-      child: Card(
-        color: briefing.background,
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: briefing.foreground.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(briefing.icon, color: briefing.foreground),
+    // Two things the first version kept in one card. The red card held the
+    // sentence about the warning *and* whether the map and the library are
+    // there, which have nothing to do with it; and at a third of a phone's
+    // height it left the rest of the page below the fold. The card answers
+    // one question now, and what is there offline is a line under it.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          container: true,
+          label:
+              '${l10n.operationsTitle}: ${briefing.title}. ${briefing.detail}',
+          child: Card(
+            color: briefing.background,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpace.lg,
+                AppSpace.lg,
+                AppSpace.lg,
+                AppSpace.xs,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.operationsTitle.toUpperCase(),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: briefing.foreground,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconBadge(
+                        briefing.icon,
+                        background: briefing.foreground.withValues(alpha: 0.12),
+                        foreground: briefing.foreground,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      briefing.title,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: briefing.foreground,
+                      const SizedBox(width: AppSpace.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.operationsTitle.toUpperCase(),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: briefing.foreground,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              briefing.title,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: briefing.foreground,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpace.sm),
+                  Text(
+                    briefing.detail,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: briefing.foreground,
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      briefing.detail,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: briefing.foreground,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton.icon(
+                  ),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: TextButton.icon(
                       style: TextButton.styleFrom(
                         foregroundColor: briefing.foreground,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 6,
-                        ),
                       ),
+                      iconAlignment: IconAlignment.end,
                       onPressed: () => onNavigate(briefing.destination),
-                      icon: const Icon(Icons.arrow_forward),
+                      icon: const Icon(Icons.arrow_forward, size: 18),
                       label: Text(briefing.action),
                     ),
-                    const SizedBox(height: 4),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 6,
-                      children: [
-                        // Zwei Beschriftungen und nicht eine: der Chip
-                        // steht fuer sich, und „Offline-Wissen
-                        // verfuegbar" ist eine Behauptung. Sie stand auf
-                        // einem Telefon, auf dem gar keine Wissensdatei
-                        // lag — daneben nur ein graues Buchsymbol statt
-                        // eines gruenen Hakens. Wer liest, liest den
-                        // Satz.
-                        _ReadinessChip(
-                          icon: Icons.map_outlined,
-                          label: mapReady
-                              ? l10n.readinessMap
-                              : l10n.readinessMapMissing,
-                          ready: mapReady,
-                        ),
-                        _ReadinessChip(
-                          icon: Icons.menu_book_outlined,
-                          label: knowledgeReady
-                              ? l10n.readinessKnowledge
-                              : l10n.readinessKnowledgeMissing,
-                          ready: knowledgeReady,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
+        Wrap(
+          spacing: AppSpace.sm,
+          children: [
+            // Zwei Beschriftungen und nicht eine: der Eintrag steht für
+            // sich, und „Offline-Wissen verfügbar" ist eine Behauptung. Sie
+            // stand auf einem Telefon, auf dem gar keine Wissensdatei lag —
+            // daneben nur ein graues Buchsymbol statt eines grünen Hakens.
+            // Wer liest, liest den Satz.
+            _ReadinessChip(
+              icon: Icons.map_outlined,
+              label: mapReady ? l10n.readinessMap : l10n.readinessMapMissing,
+              ready: mapReady,
+              onTap: () => onNavigate(ShellDestination.map),
+            ),
+            _ReadinessChip(
+              icon: Icons.menu_book_outlined,
+              label: knowledgeReady
+                  ? l10n.readinessKnowledge
+                  : l10n.readinessKnowledgeMissing,
+              ready: knowledgeReady,
+              onTap: () => onNavigate(ShellDestination.knowledge),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -207,29 +221,58 @@ class _Briefing {
   final Color background;
 }
 
+/// Whether the map or the library is there, and the way to it.
+///
+/// A plain row with a tap on it rather than a chip: there are two of them,
+/// but they stand on the first screen of the app, and what is missing here
+/// is a thing to go and fix, so the line leads there.
 class _ReadinessChip extends StatelessWidget {
   const _ReadinessChip({
     required this.icon,
     required this.label,
     required this.ready,
+    required this.onTap,
   });
 
   final IconData icon;
   final String label;
   final bool ready;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = ready ? theme.colorScheme.primary : theme.colorScheme.outline;
-    return Chip(
-      visualDensity: VisualDensity.compact,
-      avatar: Icon(
-        ready ? Icons.check_circle_outline : icon,
-        size: 16,
-        color: color,
+    final color = ready
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurfaceVariant;
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppRadius.small),
+      onTap: onTap,
+      // At least a finger high, though the text is small print: it is a
+      // way somewhere, and 32 points of it failed the tap-target guideline.
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 48),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpace.xs),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                ready ? Icons.check_circle_outline : icon,
+                size: 16,
+                color: color,
+              ),
+              const SizedBox(width: AppSpace.xs + 2),
+              Flexible(
+                child: Text(
+                  label,
+                  style: theme.textTheme.labelMedium?.copyWith(color: color),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      label: Text(label),
     );
   }
 }

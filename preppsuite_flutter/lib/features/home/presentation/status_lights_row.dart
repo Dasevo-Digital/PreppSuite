@@ -84,7 +84,7 @@ class StatusLightsRow extends ConsumerWidget {
         fresh.freshness != WarningFreshness.current;
     final situationColour = severity == null
         ? theme.colorScheme.outline
-        : warningSeverityColors(context, severity).background;
+        : warningSeveritySignal(context, severity);
 
     // Both lamps the height of the taller one, without either of them
     // being told a number. Inside a `ListView` the row has no height to
@@ -216,8 +216,8 @@ class _Lamp extends StatelessWidget {
                   // The lamp itself: filled when there is an answer,
                   // a ring when there is not.
                   Container(
-                    width: 16,
-                    height: 16,
+                    width: 12,
+                    height: 12,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: filled ? colour : Colors.transparent,
@@ -228,7 +228,7 @@ class _Lamp extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: theme.textTheme.labelSmall?.copyWith(
+                      style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -252,7 +252,10 @@ class _Lamp extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
+                // With the dots: cut off without them, the card on a phone
+                // ended in the middle of "Gegen die Empfehlung".
                 maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

@@ -41,6 +41,28 @@ abstract final class AppRadius {
   static const large = 28.0;
 }
 
+/// The steps every distance on a page is taken from.
+///
+/// Named for the same reason as [AppRadius]. Screens grew their own 10s
+/// and 14s, and the page reads as untidy without anybody being able to say
+/// why.
+abstract final class AppSpace {
+  /// Between lines that belong to one thing.
+  static const xs = 4.0;
+
+  /// Inside a row, between an icon and its text.
+  static const sm = 8.0;
+
+  /// Between the blocks of a page.
+  static const md = 12.0;
+
+  /// The side margin of a page, and the inside of a card.
+  static const lg = 16.0;
+
+  /// Above a new section.
+  static const xl = 24.0;
+}
+
 /// Whether this platform expects Apple's conventions.
 bool get _isApple =>
     defaultTargetPlatform == TargetPlatform.iOS ||
@@ -72,8 +94,20 @@ ColorScheme _scheme(Brightness brightness) {
       surfaceContainerHigh: const Color(0xFFEAEFE5),
       surfaceContainerHighest: const Color(0xFFE2E8DC),
       outlineVariant: const Color(0xFFCBD5C6),
+      // Sage rather than what the seed produces. The generated container
+      // is a bright lime, and a lime button on this muted ground was the
+      // loudest thing on every list.
+      primaryContainer: const Color(0xFFC5E6CD),
+      onPrimaryContainer: const Color(0xFF0E2E1A),
       secondaryContainer: const Color(0xFFCCE9D4),
       onSecondaryContainer: const Color(0xFF10301C),
+      // Ochre, for "look at this soon". The seed's tertiary is a cool cyan
+      // that belongs to no part of this palette and said nothing: "low
+      // stock" came out pale blue, the colour of a harmless note.
+      tertiary: const Color(0xFF8A6500),
+      onTertiary: const Color(0xFFFFFFFF),
+      tertiaryContainer: const Color(0xFFFBE7B8),
+      onTertiaryContainer: const Color(0xFF2C1F00),
     );
   }
 
@@ -91,22 +125,49 @@ ColorScheme _scheme(Brightness brightness) {
     onPrimaryContainer: const Color(0xFFBFF3D0),
     secondaryContainer: const Color(0xFF244A33),
     onSecondaryContainer: const Color(0xFFBEE9CC),
+    // A deep red for a filled area, not the saturated one the seed gives.
+    // It is the same as the severe rung of the warning ladder, and this is
+    // an app somebody opens in the dark.
+    errorContainer: const Color(0xFF5C1A10),
+    onErrorContainer: const Color(0xFFFFDAD4),
+    tertiary: const Color(0xFFE8C26C),
+    onTertiary: const Color(0xFF3D2E00),
+    tertiaryContainer: const Color(0xFF4B3B12),
+    onTertiaryContainer: const Color(0xFFFCE8BA),
   );
 }
 
 /// A type scale with more contrast between a heading and its text than
 /// Material's default, which on a dense screen like the overview reads as
 /// one long grey block.
+///
+/// Running text is set closer than Material's default as well. Its 0.5 of
+/// tracking is meant for a small phone in the 2018 sense; on the labels and
+/// sentences this app is made of, it spreads a line until it wraps once
+/// more than it has to.
 TextTheme _textTheme(TextTheme base) => base.copyWith(
   headlineSmall: base.headlineSmall?.copyWith(
     fontWeight: FontWeight.w600,
     letterSpacing: -0.4,
   ),
+  // Twenty rather than Material's twenty-two: this is the page title and
+  // the heading of a section at once, and at twenty-two the headings of a
+  // page stood taller than anything they were heading.
   titleLarge: base.titleLarge?.copyWith(
+    fontSize: 20,
     fontWeight: FontWeight.w600,
     letterSpacing: -0.2,
   ),
-  titleMedium: base.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+  titleMedium: base.titleMedium?.copyWith(
+    fontWeight: FontWeight.w600,
+    letterSpacing: 0,
+  ),
+  titleSmall: base.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+  bodyLarge: base.bodyLarge?.copyWith(letterSpacing: 0.1),
+  bodyMedium: base.bodyMedium?.copyWith(letterSpacing: 0.1),
+  bodySmall: base.bodySmall?.copyWith(letterSpacing: 0.15),
+  labelLarge: base.labelLarge?.copyWith(fontWeight: FontWeight.w600),
+  labelMedium: base.labelMedium?.copyWith(letterSpacing: 0.2),
   // Labels that sit above a group of numbers, in small caps spacing.
   labelSmall: base.labelSmall?.copyWith(letterSpacing: 0.6),
 );
@@ -114,9 +175,10 @@ TextTheme _textTheme(TextTheme base) => base.copyWith(
 ThemeData _theme(Brightness brightness) {
   final scheme = _scheme(brightness);
   final base = ThemeData(colorScheme: scheme, useMaterial3: true);
+  final text = _textTheme(base.textTheme);
 
   return base.copyWith(
-    textTheme: _textTheme(base.textTheme),
+    textTheme: text,
     scaffoldBackgroundColor: scheme.surface,
 
     // Apple's own apps do not tint the bar when content scrolls under it,
@@ -127,7 +189,7 @@ ThemeData _theme(Brightness brightness) {
       scrolledUnderElevation: 0,
       elevation: 0,
       centerTitle: _isApple,
-      titleTextStyle: _textTheme(base.textTheme).titleLarge,
+      titleTextStyle: text.titleLarge,
     ),
 
     // Outlined rather than raised. Elevation on a dark ground is a lighter
@@ -180,6 +242,31 @@ ThemeData _theme(Brightness brightness) {
       ),
     ),
 
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.small),
+        ),
+      ),
+    ),
+
+    // The one thing a list asks you to do, in the colour of the app. On
+    // the seed's container it was the brightest object on the page without
+    // being the most important one. The elevation is the only shadow left
+    // in the app, and it is one rectangle.
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: scheme.primary,
+      foregroundColor: scheme.onPrimary,
+      elevation: 2,
+      focusElevation: 2,
+      hoverElevation: 3,
+      highlightElevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+      ),
+      extendedTextStyle: text.labelLarge,
+    ),
+
     expansionTileTheme: ExpansionTileThemeData(
       shape: const RoundedRectangleBorder(),
       collapsedShape: const RoundedRectangleBorder(),
@@ -197,12 +284,55 @@ ThemeData _theme(Brightness brightness) {
         borderRadius: BorderRadius.circular(AppRadius.small),
       ),
       side: BorderSide(color: scheme.outlineVariant),
+      labelStyle: text.labelMedium?.copyWith(color: scheme.onSurface),
     ),
 
+    // Title and subtitle told apart by weight as well as by colour: a list
+    // of entries that are all the same size reads as one grey block.
     listTileTheme: ListTileThemeData(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.medium),
       ),
+      titleTextStyle: text.bodyLarge?.copyWith(
+        color: scheme.onSurface,
+        fontWeight: FontWeight.w500,
+      ),
+      subtitleTextStyle: text.bodyMedium?.copyWith(
+        color: scheme.onSurfaceVariant,
+      ),
+      iconColor: scheme.onSurfaceVariant,
+      horizontalTitleGap: AppSpace.md,
+    ),
+
+    tabBarTheme: TabBarThemeData(
+      dividerColor: scheme.outlineVariant,
+      labelStyle: text.labelLarge,
+      unselectedLabelStyle: text.labelLarge?.copyWith(
+        fontWeight: FontWeight.w500,
+      ),
+    ),
+
+    // Floating and rounded like everything else that lies over a page. It
+    // sits above the bar instead of pushing the floating button up.
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.small),
+      ),
+    ),
+
+    popupMenuTheme: PopupMenuThemeData(
+      color: scheme.surfaceContainerLow,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.small),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
+      elevation: 2,
+    ),
+
+    checkboxTheme: CheckboxThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
     ),
 
     bottomSheetTheme: BottomSheetThemeData(
@@ -229,8 +359,15 @@ ThemeData _theme(Brightness brightness) {
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       indicatorColor: scheme.secondaryContainer,
-      labelTextStyle: WidgetStatePropertyAll(
-        _textTheme(base.textTheme).labelSmall,
+      // Where you are is said by the weight of its name too, and not only
+      // by the pale shape behind the icon.
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => text.labelSmall?.copyWith(
+          letterSpacing: 0.2,
+          fontWeight: states.contains(WidgetState.selected)
+              ? FontWeight.w700
+              : FontWeight.w500,
+        ),
       ),
       indicatorShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.small),
@@ -241,6 +378,16 @@ ThemeData _theme(Brightness brightness) {
       indicatorColor: scheme.secondaryContainer,
       labelType: NavigationRailLabelType.all,
       useIndicator: true,
+      selectedLabelTextStyle: text.labelSmall?.copyWith(
+        letterSpacing: 0.2,
+        fontWeight: FontWeight.w700,
+        color: scheme.onSurface,
+      ),
+      unselectedLabelTextStyle: text.labelSmall?.copyWith(
+        letterSpacing: 0.2,
+        fontWeight: FontWeight.w500,
+        color: scheme.onSurfaceVariant,
+      ),
       indicatorShape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.small),
       ),

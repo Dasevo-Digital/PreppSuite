@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import '../../../core/app_theme.dart';
+import '../../../core/app_ui.dart';
+import '../../../core/progress_text.dart';
 import 'measure_conversion_sheet.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -533,7 +535,7 @@ class _InventoryTile extends ConsumerWidget {
     return ListTile(
       leading: photos.isNotEmpty
           ? _ItemThumbnail(photos: photos, l10n: l10n)
-          : CircleAvatar(child: Icon(categoryIcon(category))),
+          : IconBadge(categoryIcon(category)),
       title: Text(item.name),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -560,19 +562,17 @@ class _InventoryTile extends ConsumerWidget {
             ),
           if (isExpired || isLowStock || chargeDue)
             Padding(
-              padding: const EdgeInsets.only(top: 4),
+              padding: const EdgeInsets.only(top: AppSpace.xs),
               child: Wrap(
                 spacing: 6,
-                runSpacing: 4,
+                runSpacing: AppSpace.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   if (chargeDue) ...[
-                    Chip(
-                      avatar: const Icon(Icons.battery_alert_outlined),
-                      label: Text(l10n.deviceChargeDueBadge),
-                      visualDensity: VisualDensity.compact,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.errorContainer,
+                    StatusTag.problem(
+                      context,
+                      l10n.deviceChargeDueBadge,
+                      icon: Icons.battery_alert_outlined,
                     ),
                     // Done at the shelf, without opening the form: the
                     // check is charging it, not editing it.
@@ -585,22 +585,9 @@ class _InventoryTile extends ConsumerWidget {
                           .markCharged(item),
                     ),
                   ],
-                  if (isExpired)
-                    Chip(
-                      label: Text(l10n.expiredBadge),
-                      visualDensity: VisualDensity.compact,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.errorContainer,
-                    ),
+                  if (isExpired) StatusTag.problem(context, l10n.expiredBadge),
                   if (isLowStock)
-                    Chip(
-                      label: Text(l10n.lowStockBadge),
-                      visualDensity: VisualDensity.compact,
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.tertiaryContainer,
-                    ),
+                    StatusTag.attention(context, l10n.lowStockBadge),
                 ],
               ),
             ),
@@ -782,11 +769,24 @@ class _ItemThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final more = photos.length - 1;
-    final avatar = CircleAvatar(
-      backgroundImage: ResizeImage.resizeIfNeeded(
-        96,
-        96,
-        StoredPhotoImage(InventoryPhotoService.resolvePhotoPath(photos.first)),
+    // The same square as the icon in the row beside it. Painted as a
+    // decoration, so the corners cost no clip layer per row.
+    final avatar = SizedBox.square(
+      dimension: 40,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppRadius.small),
+          image: DecorationImage(
+            fit: BoxFit.cover,
+            image: ResizeImage.resizeIfNeeded(
+              96,
+              96,
+              StoredPhotoImage(
+                InventoryPhotoService.resolvePhotoPath(photos.first),
+              ),
+            ),
+          ),
+        ),
       ),
     );
     if (more <= 0) return avatar;
@@ -950,40 +950,59 @@ class _HouseholdLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Row(
-          children: [
-            Icon(
-              Icons.groups_outlined,
-              size: 18,
-              color: theme.colorScheme.primary,
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                l10n.supplyCalculatorHouseholdLine(_who()),
-                style: theme.textTheme.bodyMedium,
-              ),
-            ),
-          ],
+        Icon(
+          Icons.groups_outlined,
+          size: 18,
+          color: theme.colorScheme.primary,
         ),
-        if (household.hasPets) ...[
-          const SizedBox(height: 4),
-          Text(
-            l10n.supplyCalculatorPetFoodNote,
-            style: theme.textTheme.bodySmall,
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            l10n.supplyCalculatorHouseholdLine(_who()),
+            style: theme.textTheme.bodyMedium,
           ),
-        ],
-        // Shown to everyone, because age is not in the profile and the
-        // app therefore cannot know whether it applies. A line that says
-        // "add more if this is you" is the honest version of a number the
-        // app would otherwise have to guess at.
-        const SizedBox(height: 4),
-        Text(
-          l10n.supplyCalculatorSeniorNote,
-          style: theme.textTheme.bodySmall,
+        ),
+        // The notes behind a tap, and for the same reason as
+        // [_UnmeasuredNotice]: they stand here every time the inventory is
+        // opened, the senior note took three lines of it on a phone, and a
+        // paragraph in that position is a paragraph people learn to skip.
+        IconButton(
+          icon: const Icon(Icons.info_outline, size: 20),
+          tooltip: l10n.supplyCalculatorNotesAction,
+          onPressed: () => showDialog<void>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text(l10n.supplyCalculatorNotesAction),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (household.hasPets) ...[
+                      Text(l10n.supplyCalculatorPetFoodNote),
+                      const SizedBox(height: AppSpace.md),
+                    ],
+                    // Shown to everyone, because age is not in the profile
+                    // and the app therefore cannot know whether it applies.
+                    // A line that says "add more if this is you" is the
+                    // honest version of a number the app would otherwise
+                    // have to guess at.
+                    Text(l10n.supplyCalculatorSeniorNote),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    MaterialLocalizations.of(context).closeButtonLabel,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -1051,42 +1070,54 @@ class _SupplyRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final progress = target > 0 ? (current / target).clamp(0.0, 1.0) : 0.0;
 
-    return Column(
-      children: [
-        Text(label, style: Theme.of(context).textTheme.labelMedium),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: 96,
-          height: 96,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: 96,
-                height: 96,
-                child: CircularProgressIndicator(
+    return MergeSemantics(
+      child: Column(
+        children: [
+          Text(label, style: theme.textTheme.labelMedium),
+          const SizedBox(height: AppSpace.sm),
+          SizedBox.square(
+            dimension: 84,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // With the rest of the circle drawn: an arc on its own does
+                // not say how far it has to go. Ochre short of the target,
+                // like the lamp and the bars on the overview.
+                CircularProgressIndicator(
                   value: progress,
-                  strokeWidth: 6,
+                  strokeWidth: 7,
+                  strokeCap: StrokeCap.round,
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  color: progress < 1
+                      ? theme.colorScheme.tertiary
+                      : theme.colorScheme.primary,
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  l10n.supplyCalculatorProgress(
-                    formatter(current),
-                    formatter(target),
-                    unit,
+                Center(
+                  child: Text(
+                    percentValue(l10n, progress) ?? '',
+                    style: theme.textTheme.titleMedium,
                   ),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.labelSmall,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: AppSpace.sm),
+          Text(
+            l10n.supplyCalculatorProgress(
+              formatter(current),
+              formatter(target),
+              unit,
+            ),
+            textAlign: TextAlign.center,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

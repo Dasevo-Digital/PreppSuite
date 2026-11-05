@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/app_ui.dart';
 import '../../../core/calendar_day.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../core/content_swap.dart';
@@ -161,10 +162,10 @@ class _RotationTile extends ConsumerWidget {
     };
 
     return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: background,
-        foregroundColor: foreground,
-        child: const Icon(Icons.schedule, size: 18),
+      leading: IconBadge(
+        Icons.schedule,
+        background: background,
+        foreground: foreground,
       ),
       title: Text(entry.item.name),
       subtitle: Text(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_ui.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
 import '../application/household_providers.dart';
@@ -35,128 +36,124 @@ class HouseholdOverviewScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           Card(
-            child: Consumer(
-              builder: (context, ref, _) {
-                final plan = ref.watch(householdPlanProvider(profile.id)).value;
-                return ListTile(
-                  leading: const Icon(Icons.emergency_share_outlined),
-                  title: Text(l10n.householdPlanTitle),
-                  // Says whether there is one, because a plan nobody wrote
-                  // is the case this screen exists to make visible.
-                  subtitle: Text(
-                    plan?.meetingPointNear ??
-                        plan?.contactName ??
-                        l10n.householdPlanEmpty,
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          HouseholdPlanScreen(householdId: profile.id),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.location_on_outlined),
-              title: Text(l10n.followedPlacesTitle),
-              subtitle: Text(
-                // Not a heading with a number glued in front and made
-                // lowercase: that produced „1 weitere orte" — a plural
-                // for one place, and a German noun in lower case. The
-                // count and its word belong in one translated message.
-                profile.extraRegions.isEmpty
-                    ? l10n.settingsNoAdditionalRegions
-                    : l10n.followedPlacesCount(profile.extraRegions.length),
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => FollowedPlacesScreen(profile: profile),
+            child: Column(
+              children: [
+                Consumer(
+                  builder: (context, ref, _) {
+                    final plan = ref
+                        .watch(householdPlanProvider(profile.id))
+                        .value;
+                    return ListTile(
+                      leading: const IconBadge(Icons.emergency_share_outlined),
+                      title: Text(l10n.householdPlanTitle),
+                      // Says whether there is one, because a plan nobody wrote
+                      // is the case this screen exists to make visible.
+                      subtitle: Text(
+                        plan?.meetingPointNear ??
+                            plan?.contactName ??
+                            l10n.householdPlanEmpty,
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              HouseholdPlanScreen(householdId: profile.id),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: Consumer(
-              builder: (context, ref, _) {
-                final members =
-                    ref.watch(householdMembersProvider(profile.id)).value ??
-                    const [];
-                return ListTile(
-                  leading: const Icon(Icons.medical_information_outlined),
-                  title: Text(l10n.emergencyCardsTitle),
+                ListTile(
+                  leading: const IconBadge(Icons.location_on_outlined),
+                  title: Text(l10n.followedPlacesTitle),
                   subtitle: Text(
-                    members.isEmpty
-                        ? l10n.emergencyCardsEmpty
-                        : l10n.emergencyCardsCount(members.length),
+                    // Not a heading with a number glued in front and made
+                    // lowercase: that produced „1 weitere orte" — a plural
+                    // for one place, and a German noun in lower case. The
+                    // count and its word belong in one translated message.
+                    profile.extraRegions.isEmpty
+                        ? l10n.settingsNoAdditionalRegions
+                        : l10n.followedPlacesCount(profile.extraRegions.length),
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          EmergencyCardsScreen(householdId: profile.id),
+                    MaterialPageRoute<void>(
+                      builder: (_) => FollowedPlacesScreen(profile: profile),
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: Consumer(
-              builder: (context, ref, _) {
-                final rows =
-                    ref.watch(possessionsProvider(profile.id)).value ??
-                    const [];
-                return ListTile(
-                  leading: const Icon(Icons.inventory_2_outlined),
-                  title: Text(l10n.possessionsTitle),
-                  subtitle: Text(
-                    rows.isEmpty
-                        ? l10n.possessionsEntryHint
-                        : l10n.possessionsCount(rows.length),
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          PossessionsScreen(householdId: profile.id),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: Consumer(
-              builder: (context, ref, _) {
-                final rows =
-                    ref.watch(neighbourOffersProvider(profile.id)).value ??
-                    const [];
-                return ListTile(
-                  leading: const Icon(Icons.diversity_3_outlined),
-                  title: Text(l10n.neighbourhoodTitle),
-                  subtitle: Text(
-                    rows.isEmpty
-                        ? l10n.neighbourhoodEntryHint
-                        : l10n.neighbourhoodCount(rows.length),
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          NeighbourhoodScreen(householdId: profile.id),
-                    ),
-                  ),
-                );
-              },
+                ),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final members =
+                        ref.watch(householdMembersProvider(profile.id)).value ??
+                        const [];
+                    return ListTile(
+                      leading: const IconBadge(
+                        Icons.medical_information_outlined,
+                      ),
+                      title: Text(l10n.emergencyCardsTitle),
+                      subtitle: Text(
+                        members.isEmpty
+                            ? l10n.emergencyCardsEmpty
+                            : l10n.emergencyCardsCount(members.length),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              EmergencyCardsScreen(householdId: profile.id),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final rows =
+                        ref.watch(possessionsProvider(profile.id)).value ??
+                        const [];
+                    return ListTile(
+                      leading: const IconBadge(Icons.inventory_2_outlined),
+                      title: Text(l10n.possessionsTitle),
+                      subtitle: Text(
+                        rows.isEmpty
+                            ? l10n.possessionsEntryHint
+                            : l10n.possessionsCount(rows.length),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              PossessionsScreen(householdId: profile.id),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                Consumer(
+                  builder: (context, ref, _) {
+                    final rows =
+                        ref.watch(neighbourOffersProvider(profile.id)).value ??
+                        const [];
+                    return ListTile(
+                      leading: const IconBadge(Icons.diversity_3_outlined),
+                      title: Text(l10n.neighbourhoodTitle),
+                      subtitle: Text(
+                        rows.isEmpty
+                            ? l10n.neighbourhoodEntryHint
+                            : l10n.neighbourhoodCount(rows.length),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              NeighbourhoodScreen(householdId: profile.id),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),

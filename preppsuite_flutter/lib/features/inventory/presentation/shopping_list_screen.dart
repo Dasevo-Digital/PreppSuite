@@ -17,6 +17,7 @@ import '../application/supply_calculator.dart';
 import 'inventory_item_form_screen.dart';
 import 'shopping_file_share.dart';
 import '../../../core/error_text.dart';
+import '../../../core/app_ui.dart';
 
 /// What to buy.
 ///
@@ -402,10 +403,10 @@ class _ShortfallTile extends StatelessWidget {
     final theme = Theme.of(context);
 
     return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: theme.colorScheme.tertiaryContainer,
-        foregroundColor: theme.colorScheme.onTertiaryContainer,
-        child: const Icon(Icons.remove_shopping_cart_outlined, size: 18),
+      leading: IconBadge(
+        Icons.remove_shopping_cart_outlined,
+        background: theme.colorScheme.tertiaryContainer,
+        foreground: theme.colorScheme.onTertiaryContainer,
       ),
       title: Text(entry.item.name),
       subtitle: Text(
