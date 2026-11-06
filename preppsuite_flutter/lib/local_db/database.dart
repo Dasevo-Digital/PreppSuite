@@ -1223,6 +1223,22 @@ class AppDatabase extends _$AppDatabase {
     return {for (final row in rows) row.externalId: row};
   }
 
+  /// Whether anything from [source] is stored for [countryCode].
+  Future<bool> hasWarnings({
+    required String source,
+    required String countryCode,
+  }) async {
+    final row =
+        await (select(warnings)
+              ..where(
+                (t) =>
+                    t.source.equals(source) & t.countryCode.equals(countryCode),
+              )
+              ..limit(1))
+            .getSingleOrNull();
+    return row != null;
+  }
+
   /// Warnings that have not been announced yet.
   Future<List<Warning>> unnotifiedWarnings() {
     return (select(warnings)..where((t) => t.notified.equals(false))).get();

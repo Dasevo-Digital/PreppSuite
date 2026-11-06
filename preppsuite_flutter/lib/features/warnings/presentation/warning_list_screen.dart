@@ -319,13 +319,16 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
 
           // Columns rather than one stretched list: a warning tile at
           // desktop width puts its headline at one edge and its time at the
-          // other. Everything is built rather than only what is on screen,
-          // which is affordable here and nowhere else in the app -- this
-          // list is what the subscribed regions currently have out, tens of
-          // entries at the very worst, not a household's whole inventory.
+          // other. Columns build every block rather than what is on screen,
+          // which a few dozen warnings can afford and a nationwide frost
+          // cannot: MeteoAlarm had 808 out on 2026-11-06, and with no region
+          // chosen that was 722 ms and 67,930 elements per rebuild, for
+          // every key typed into the search field, against 17 ms in one
+          // column (#300). So a long list stays one column.
           return AdaptiveColumns(
             padding: _pagePadding,
             spacing: AppSpace.md,
+            maxColumns: sorted.length > _mostWarningsInColumns ? 1 : 3,
             blocks: [
               ...leading,
               for (final warning in sorted)
@@ -345,6 +348,9 @@ class _WarningListScreenState extends ConsumerState<WarningListScreen> {
 }
 
 /// The page's gutter, for every block of the list.
+/// Past this many the warning list stops laying itself out in columns.
+const _mostWarningsInColumns = 40;
+
 const _pagePadding = EdgeInsets.fromLTRB(
   AppSpace.lg,
   AppSpace.sm,

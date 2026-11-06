@@ -114,8 +114,17 @@ class AdaptiveColumns extends StatelessWidget {
         // The narrow case stays the plain scrolling column it was, with a
         // ListView that only builds what is on screen.
         if (columns == 1) {
+          // A page held to one column on a window with room for more keeps
+          // a readable line, the leftover going to the margins as it does
+          // with columns (see [_stretch]).
+          final spare =
+              constraints.maxWidth -
+              padding.horizontal -
+              columnWidth * _stretch;
           return ListView(
-            padding: padding,
+            padding: maxColumns == 1 && spare > 0
+                ? padding.add(EdgeInsets.symmetric(horizontal: spare / 2))
+                : padding,
             children: spaced(blocks, unpack: true),
           );
         }

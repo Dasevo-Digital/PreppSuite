@@ -107,6 +107,10 @@ class StoredArchive {
     fileName: fileName,
   );
 
+  /// Whether everything the archive says about itself is stored here.
+  bool get isDescribed =>
+      title != null && name != null && description != null && cover != null;
+
   StoredArchive copyWith({
     int? sizeBytes,
     int? entryCount,

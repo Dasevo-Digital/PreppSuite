@@ -93,6 +93,25 @@ void main() {
     );
   });
 
+  test('the sweep leaves a sealed picture as it is', () async {
+    final target = file('sealed.jpg');
+    await const PhotoVault().write(target, picture);
+    final before = target.readAsBytesSync();
+
+    expect(await const PhotoVault().sealDirectory(directory), 0);
+
+    expect(target.readAsBytesSync(), before);
+  });
+
+  test('the sweep seals a file too short to hold a seal', () async {
+    final target = file('tiny.jpg')..writeAsBytesSync([1, 2, 3]);
+
+    expect(await const PhotoVault().sealDirectory(directory), 1);
+
+    expect(PhotoVault.isSealed(target.readAsBytesSync()), isTrue);
+    expect(await const PhotoVault().read(target), [1, 2, 3]);
+  });
+
   test('another installation\'s key opens nothing', () async {
     final target = file('photo.jpg');
     await const PhotoVault().write(target, picture);

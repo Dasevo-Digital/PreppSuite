@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -199,6 +200,55 @@ void main() {
 
     expect(state.library.map((a) => a.label), ['Wikibooks', 'Klexikon']);
     expect(state.title, 'Klexikon');
+  });
+
+  group('what the library already knows about an archive (#302)', () {
+    Future<StoredArchive> added() async {
+      final first = ProviderContainer();
+      addTearDown(first.dispose);
+      await load(first);
+      await first
+          .read(knowledgeProvider.notifier)
+          .useArchive(
+            location: writeArchive('Im Archiv', 'archiv.zim'),
+            label: 'Archiv',
+          );
+      return (await load(first)).library.single;
+    }
+
+    Future<KnowledgeState> restart(StoredArchive stored) async {
+      await const ZimStore().save([stored], selectedId: stored.id);
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      return load(container);
+    }
+
+    StoredArchive described(StoredArchive entry, {int? sizeBytes}) =>
+        entry.copyWith(
+          sizeBytes: sizeBytes,
+          title: 'Gespeichert',
+          name: 'name',
+          description: 'Beschreibung',
+          cover: Uint8List.fromList([1, 2, 3]),
+        );
+
+    test('is not read from the file again at every start', () async {
+      final state = await restart(described(await added()));
+
+      expect(state.title, 'Gespeichert');
+      expect(state.library.single.title, 'Gespeichert');
+    });
+
+    test('another file under the same id is read after all', () async {
+      final entry = await added();
+
+      final state = await restart(
+        described(entry, sizeBytes: entry.sizeBytes! + 1),
+      );
+
+      expect(state.title, 'Im Archiv');
+      expect(state.library.single.sizeBytes, entry.sizeBytes);
+    });
   });
 
   group('carrying over a single-archive setup', () {

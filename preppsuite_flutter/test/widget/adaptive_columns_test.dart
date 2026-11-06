@@ -24,6 +24,36 @@ void main() {
       SizedBox(height: 80, child: Text('Block $i')),
   ];
 
+  testWidgets('a page held to one column keeps a readable line', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1300, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AdaptiveColumns(
+            padding: const EdgeInsets.all(16),
+            maxColumns: 1,
+            blocks: [
+              for (var i = 0; i < 200; i++)
+                SizedBox(
+                  key: ValueKey(i),
+                  height: 80,
+                  child: Text('Block $i'),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(const ValueKey(0))).width, 700);
+    expect(tester.getCenter(find.byKey(const ValueKey(0))).dx, 650);
+    // And it is still the list that builds only what is on screen.
+    expect(find.byKey(const ValueKey(199)), findsNothing);
+  });
+
   group('how many columns', () {
     test('a phone gets one', () {
       expect(AdaptiveColumns.columnsFor(400), 1);

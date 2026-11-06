@@ -17,6 +17,18 @@ class WarningPollStatusStore {
   static const _sourcePrefix = 'warningPollLastComplete.';
   static const sources = ['bbk', 'meteoalarm'];
 
+  static const _stampPrefix = 'warningFeedStamp.';
+
+  /// How long a feed's stamp may stand in for reading the feed.
+  ///
+  /// A stamp says what the feed held when this device last stored it, and
+  /// the table can have moved since: an update that reads the feed
+  /// differently, a table that was replaced. The half-hourly rebuild of
+  /// the feed normally settles that first. This is for the day it stops
+  /// doing that, and an hour is what the app calls stale anyway
+  /// ([warningStaleAfter]).
+  static const feedStampValidFor = Duration(hours: 1);
+
   Future<WarningPollStatus> load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -53,6 +65,45 @@ class WarningPollStatusStore {
     } on Object {
       // A warning refresh must not be reported as failed merely because
       // its diagnostic timestamp cannot be saved.
+    }
+  }
+
+  /// The stamp [feed] carried when it was last read to its end, or null
+  /// when that is too long ago to go by.
+  Future<String?> feedStamp(String feed, {DateTime? now}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getStringList('$_stampPrefix$feed');
+      if (saved == null || saved.length != 2) return null;
+      final read = _parse(saved.first);
+      if (read == null) return null;
+      final age = (now ?? DateTime.now().toUtc()).difference(read);
+      if (age.isNegative || age >= feedStampValidFor) return null;
+      return saved.last;
+    } on Object {
+      // Without one the feed is simply read in full.
+      return null;
+    }
+  }
+
+  /// Notes that [feed] was read to its end and stored, carrying [stamp].
+  Future<void> saveFeedStamp(
+    String feed,
+    String? stamp, {
+    DateTime? now,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (stamp == null) {
+        await prefs.remove('$_stampPrefix$feed');
+        return;
+      }
+      await prefs.setStringList('$_stampPrefix$feed', [
+        (now ?? DateTime.now().toUtc()).toIso8601String(),
+        stamp,
+      ]);
+    } on Object {
+      // Same reasoning as in [record].
     }
   }
 

@@ -173,7 +173,9 @@ is open, and `runWarningBackgroundPoll` in a separate isolate via WorkManager.
 The controller polls at start, every fifteen minutes after that and when the
 warnings screen's refresh button asks, one poll at a time (#178); until then
 it polled once at start, and the three desktops, which have no background
-worker, showed the morning's warnings all day.
+worker, showed the morning's warnings all day. Every poll asks every feed;
+MeteoAlarm is left after its first kilobytes when it has not been rebuilt
+since the last full read (#299, see the review of 6 November).
 The isolate has no Riverpod, no widget tree and no profile object — it reads
 `WarningRegionStore` (preferences) and the local database. That is why
 relevance takes a plain `WarningRegionFilter` and not the profile itself.
@@ -2967,8 +2969,10 @@ Weg, auf dem die App sie sich gemerkt hat:
   Kennungswechsel hinweg (2.4.1).
 
 `relinkMovedFiles` läuft deshalb beim Start nach dem Schlüssel und vor den
-Providern, höchstens zehn Sekunden. Es probiert Karte, Archive und eigene
-Dokumente. Was nicht aufgeht, sucht es in den Ordnern, die die App ohne
+Providern, nach einem Versionswechsel höchstens zehn Sekunden, sonst zwei
+(#302). Es läuft bei jedem Start: Auch eine Wiederherstellung aus einer
+Sicherung bringt ein iPhone in einen neuen Container, mit derselben Version.
+Es probiert Karte, Archive und eigene Dokumente. Was nicht aufgeht, sucht es in den Ordnern, die die App ohne
 Rückfrage erreicht (Download-Ordner, Datenordner, je zwei Ebenen tief): nach
 dem Namen, ein Archiv auch nach seiner genauen Größe, denn ein Archiv mit
 Titel als Bezeichnung („Projekt Gutenberg-Bibliothek“) hat keinen
@@ -3832,3 +3836,46 @@ Fehler wird vergessen. Der Lesezeichen-Knopf folgt Links im Artikel.
 (`max(sortOrder) + 1`), nicht auf die Zahl der Zeilen. Die Erstbefüllung
 schreibt eine Liste mit ihren Zeilen in einer Transaktion: eine
 abgebrochene Befüllung ließ sonst eine Liste für immer unvollständig.
+
+### Aus der Durchsicht vom 6. November (#299–#302)
+
+**MeteoAlarm wird nur gelesen, wenn es neu gebaut wurde** (#299). Der Feed
+für Deutschland hatte an diesem Tag 1,2 MB. Der Server komprimiert nicht,
+kennt weder ETag noch Last-Modified und ignoriert Range. `fetchCountry`
+liest deshalb als Strom und schließt die Verbindung, sobald das `<updated>`
+im Kopf des Feeds dasselbe ist wie beim letzten vollständigen Lesen. Das
+kostete im Versuch 7,8 kB und 53 ms statt 1,2 MB und 835 ms. Das Parsen
+läuft in `Isolate.run`.
+
+`<updated>` ist die Bauzeit, nicht der Stand: Der Feed wird alle 30 Minuten
+neu gebaut (:05 und :35), auch wenn sich nichts geändert hat. Gemessen am
+6. November: Kopien desselben Baus waren Byte für Byte gleich, zwei Bauten
+nacheinander unterschieden sich nur im Stempel. Derselbe Stempel beweist
+also, dass nichts neu ist; ein neuer beweist nichts. Bei einem Abruf alle
+15 Minuten fällt jedes zweite Lesen weg, nicht fast alle. Die
+`Content-Length` ist bei unverändertem Inhalt gleich und würde mehr sparen,
+ist aber kein Beweis: Eine neu ausgegebene Warnung hat oft dieselbe Länge,
+mit neuer Kennung und neuem Ablauf. Sie wird deshalb nicht verwendet.
+
+Ein abgebrochener Abruf zählt als beantwortet: Die Zeilen von MeteoAlarm
+enden über ihr eigenes `expires`, nicht durch Fehlen im Feed. Der Stempel
+liegt je Land in `WarningPollStatusStore`, wird erst nach dem Speichern
+geschrieben und gilt nur, solange für das Land etwas gespeichert ist:
+sonst bliebe eine geleerte Tabelle bis zum nächsten Bau leer. Nach einer
+Stunde zählt er in keinem Fall mehr. Eine Sperre nach Zeit, wie zuerst
+vorgeschlagen, gibt es nicht. Sie hätte nur noch ein paar Kilobyte gespart
+und `lagging` eine dritte Bedeutung gegeben, nämlich „nicht gefragt“.
+
+**Lange Warnlisten bleiben eine Spalte** (#300). `AdaptiveColumns` baut in
+Spalten jeden Block. Bei 808 Warnungen waren das 722 ms und 67.930 Elemente
+je Neuaufbau, für jeden Tastendruck im Suchfeld. Ab 41 sichtbaren Warnungen
+hält die Liste deshalb eine Spalte und baut nur noch, was zu sehen ist. Wer
+`AdaptiveColumns` mit `maxColumns: 1` in einem breiten Fenster benutzt,
+bekommt eine lesbare Zeilenlänge: Der Rest des Fensters wird Rand.
+
+**Der Start liest weniger** (#302). `sealDirectory` prüft die ersten 36 Byte
+einer Datei statt die ganze Datei. `_open` liest Titel, Name, Beschreibung
+und Titelbild nur noch, wenn sie fehlen oder wenn Größe oder Eintragszahl
+zeigen, dass unter der Kennung eine andere Datei liegt, und schreibt die
+Bibliothek nur nach einer Änderung. Offen bleibt, dass die Übersicht für
+ihre Statuszeile das Archiv öffnet (#302, Punkt 3).

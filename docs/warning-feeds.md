@@ -79,6 +79,12 @@ ein `<entry>` pro Warnung/Gebiet:
 - `cap:areaDesc` → sowohl `Warning.regionKey` als auch `Warning.description`.
 - Bewusst das **Legacy-Atom-Format**, nicht RSS (seit Anfang 2026 deprecated).
 
+Der Server komprimiert nicht, sendet weder `ETag` noch `Last-Modified` und
+ignoriert `Range`. Das `<updated>` des Feeds steht in den ersten 1 000 Byte
+vor dem ersten `<entry>` und ist die Bauzeit: Alle Länder werden alle
+30 Minuten neu gebaut (:05 und :35), auch ohne Änderung. Derselbe Stempel
+heißt also unverändert, ein neuer heißt nichts (geprüft am 2026-11-06).
+
 ## Normalisierung & Dedupe
 
 `WarningNormalizer` upserted nach `(source, externalId)`. Ein bestehender

@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/platform_storage.dart';
 import '../../../core/portable_data.dart';
@@ -238,14 +240,45 @@ Future<bool> _locationOpens(String location) async {
 Future<String> _rememberPath(String path, String label) async =>
     (await rememberStoragePath(path, label: label))?.value ?? path;
 
+const _relinkedVersionKey = 'relinkLastVersion';
+
+/// How long the first picture waits for the relinker.
+///
+/// Ten seconds right after an update, which is when it finds something.
+/// Any other start has little to find and pays the most for it: with a
+/// disk unplugged every one of them searched the folders for what is on
+/// that disk (#302). It still runs, because an update is not the only way
+/// a path goes stale: a phone restored from a backup comes back in a new
+/// container with the same version.
+Duration relinkBudget({String? lastVersion, String? version}) =>
+    version != null && version == lastVersion
+    ? const Duration(seconds: 2)
+    : const Duration(seconds: 10);
+
 /// Runs the relinker at start-up, bounded: a slow network volume must
 /// not keep the app from opening. Whatever it did not finish, the next
 /// start does.
 Future<void> relinkMovedFiles() async {
+  SharedPreferences? preferences;
+  String? version;
+  try {
+    preferences = await SharedPreferences.getInstance();
+    version = (await PackageInfo.fromPlatform()).version;
+  } on Object {
+    // Then this start counts as an update: a longer wait, nothing skipped.
+  }
   try {
     final found = await FileRelinker().run().timeout(
-      const Duration(seconds: 10),
+      relinkBudget(
+        lastVersion: preferences?.getString(_relinkedVersionKey),
+        version: version,
+      ),
     );
+    // Only after a run that finished, or the next start would be the short
+    // one with the work of this update still open.
+    if (version != null) {
+      await preferences?.setString(_relinkedVersionKey, version);
+    }
     if (found > 0) debugPrint('relinked $found file(s)');
   } on Object {
     // Never a reason not to start.

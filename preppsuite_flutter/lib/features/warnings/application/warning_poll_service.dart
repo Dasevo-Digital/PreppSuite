@@ -176,15 +176,26 @@ class WarningPollService {
       // warning had arrived (#46). It makes the picture incomplete, no
       // more.
       try {
-        final warnings = await _meteoAlarm.fetchCountry(slug);
-        fetched += warnings.length;
-        newsworthy.addAll(
-          await _ingest.ingestMeteoAlarm(
-            warnings,
-            countryCode: countryCode,
-            areas: areas,
-          ),
+        final feed = await _meteoAlarm.fetchCountry(
+          slug,
+          knownStamp: await _knownStamp(slug, countryCode),
         );
+        final warnings = feed.warnings;
+        if (warnings != null) {
+          fetched += warnings.length;
+          newsworthy.addAll(
+            await _ingest.ingestMeteoAlarm(
+              warnings,
+              countryCode: countryCode,
+              areas: areas,
+            ),
+          );
+          // After storing, so a run that fails in between reads it again.
+          await const WarningPollStatusStore().saveFeedStamp(slug, feed.stamp);
+        }
+        // A feed that said it has not changed has answered in full, and
+        // nothing is missing: MeteoAlarm's rows end by their own expiry,
+        // not by dropping out of the feed.
         sourcesOk['meteoalarm'] = true;
       } on Object {
         complete = false;
@@ -206,6 +217,19 @@ class WarningPollService {
       retired: retired,
       complete: complete,
     );
+  }
+
+  /// The stamp the feed may be compared with, or null to read it in full.
+  ///
+  /// Null with nothing stored for this country: after the data was deleted
+  /// or a backup came back, the stamp still says these warnings are here.
+  /// A country that really has none has a feed of a few kilobytes.
+  Future<String?> _knownStamp(String slug, String countryCode) async {
+    final stored = await _db.hasWarnings(
+      source: WarningSource.meteoalarm.name,
+      countryCode: countryCode,
+    );
+    return stored ? const WarningPollStatusStore().feedStamp(slug) : null;
   }
 
   /// How many stored warnings without a detail one poll asks again for.

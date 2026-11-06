@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:drift/drift.dart' show Value;
 
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:preppsuite_flutter/features/warnings/application/bbk_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/meteoalarm_client.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_poll_service.dart';
@@ -13,6 +15,33 @@ import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'fixture_http_client.dart';
+
+/// Serves bodies in small pieces and counts how much of MeteoAlarm was
+/// actually taken, which is the whole point of the head check.
+class _ChunkedClient extends http.BaseClient {
+  _ChunkedClient(this.bodies);
+
+  final Map<String, String> bodies;
+  var meteoAlarmBytes = 0;
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final body = bodies[request.url.toString()];
+    if (body == null) return http.StreamedResponse(const Stream.empty(), 404);
+    final bytes = utf8.encode(body);
+    final metered = request.url.host == 'feeds.meteoalarm.org';
+
+    Stream<List<int>> chunks() async* {
+      for (var at = 0; at < bytes.length; at += 512) {
+        final piece = bytes.sublist(at, min(at + 512, bytes.length));
+        if (metered) meteoAlarmBytes += piece.length;
+        yield piece;
+      }
+    }
+
+    return http.StreamedResponse(chunks(), 200, request: request);
+  }
+}
 
 void main() {
   late AppDatabase db;
@@ -288,6 +317,115 @@ void main() {
       final status = await const WarningPollStatusStore().load();
       expect(status.lastComplete, status.lastAttempt);
       expect(status.lagging('DE'), isEmpty);
+    });
+  });
+
+  group('a feed that has not changed (#299)', () {
+    const stamp = '2026-08-14T09:35:49.797094Z';
+    const newer = '2026-08-14T10:05:00.000000Z';
+    late _ChunkedClient client;
+    late WarningPollService poller;
+
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+      client = _ChunkedClient({
+        ...allBbkSources(mowasBody: mowas),
+        meteoUrl: meteoalarm,
+      });
+      poller = WarningPollService(
+        database: db,
+        bbkClient: BbkClient(httpClient: client),
+        meteoAlarmClient: MeteoAlarmClient(httpClient: client),
+      );
+    });
+
+    Future<WarningPollResult> pollAgain() {
+      client.meteoAlarmBytes = 0;
+      return poller.poll(countryCode: 'DE');
+    }
+
+    Future<int> stored() async => (await db.watchAllWarnings().first).length;
+
+    test('is left after its head, and counts as answered', () async {
+      await poller.poll(countryCode: 'DE');
+      final whole = client.meteoAlarmBytes;
+      final before = await stored();
+
+      final again = await pollAgain();
+
+      expect(client.meteoAlarmBytes, lessThan(whole));
+      expect(client.meteoAlarmBytes, lessThanOrEqualTo(1024));
+      expect(await stored(), before);
+      expect(again.complete, isTrue);
+      final status = await const WarningPollStatusStore().load();
+      expect(status.lagging('DE'), isEmpty);
+    });
+
+    test('a new stamp reads it and stores what changed', () async {
+      await poller.poll(countryCode: 'DE');
+      final before = await stored();
+      final identifier = RegExp(
+        '<cap:identifier>([^<]+)<',
+      ).firstMatch(meteoalarm)!.group(1)!;
+      client.bodies[meteoUrl] = meteoalarm
+          .replaceAll(stamp, newer)
+          .replaceFirst(identifier, 'neue-meldung');
+
+      await pollAgain();
+
+      expect(await stored(), before + 1);
+      expect(await const WarningPollStatusStore().feedStamp('germany'), newer);
+    });
+
+    test('a stamp from over an hour ago does not stand in for it', () async {
+      await poller.poll(countryCode: 'DE');
+      final whole = client.meteoAlarmBytes;
+      await const WarningPollStatusStore().saveFeedStamp(
+        'germany',
+        stamp,
+        now: DateTime.now().toUtc().subtract(const Duration(hours: 2)),
+      );
+
+      await pollAgain();
+
+      expect(client.meteoAlarmBytes, whole);
+    });
+
+    test('a table that was emptied is filled again', () async {
+      await poller.poll(countryCode: 'DE');
+      final before = await stored();
+      await db.delete(db.warnings).go();
+
+      await pollAgain();
+
+      expect(await stored(), before);
+    });
+
+    test('a feed that arrived broken leaves the stamp alone', () async {
+      await poller.poll(countryCode: 'DE');
+      client.bodies[meteoUrl] = meteoalarm
+          .replaceAll(stamp, newer)
+          .substring(0, 1500);
+
+      final broken = await pollAgain();
+
+      expect(broken.complete, isFalse);
+      expect(await const WarningPollStatusStore().feedStamp('germany'), stamp);
+    });
+
+    test('each country has its own stamp', () async {
+      const store = WarningPollStatusStore();
+      await store.saveFeedStamp('germany', stamp);
+
+      expect(await store.feedStamp('germany'), stamp);
+      expect(await store.feedStamp('austria'), isNull);
+    });
+
+    test('the stamp is the feed\'s, not its first entry\'s', () {
+      expect(meteoAlarmFeedStamp('<feed><updated>a</updated><entry>'), 'a');
+      expect(meteoAlarmFeedStamp('<feed><entry><updated>b</updated>'), isNull);
+      expect(meteoAlarmFeedStamp('<feed><title>Alerting'), isNull);
+      expect(meteoAlarmFeedStamp('<feed><updated>2026-08'), isNull);
     });
   });
 

@@ -45,6 +45,30 @@ void main() {
     expect(response.body, 'warnung');
   });
 
+  test('a read ended by its first bytes closes the connection', () async {
+    var cancelled = false;
+    final stream = StreamController<List<int>>(
+      onCancel: () => cancelled = true,
+    );
+    final client = MockClient.streaming(
+      (_, _) async => http.StreamedResponse(stream.stream, 200),
+    );
+    stream.add([1, 2, 3]);
+
+    await expectLater(
+      getWarningResponse(
+        client,
+        uri,
+        onChunk: (_) => throw const FormatException('genug'),
+      ),
+      throwsA(isA<FormatException>()),
+    );
+
+    expect(cancelled, isTrue);
+    await stream.close();
+    client.close();
+  });
+
   test('rejects a warning feed above its byte budget', () async {
     final client = MockClient((_) async => http.Response('12345', 200));
 

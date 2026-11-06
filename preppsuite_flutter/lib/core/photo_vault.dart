@@ -136,7 +136,9 @@ class PhotoVault {
   /// Seals every plain picture in [directory] and returns how many.
   ///
   /// Run once at start-up, so pictures nobody opens do not stay in the
-  /// clear for ever. Does nothing without a key.
+  /// clear for ever. Does nothing without a key. A sealed picture costs a
+  /// look at its first bytes: 300 of them took 31 ms that way, against
+  /// 131 ms and 240 MB read when every file was read whole (#302).
   Future<int> sealDirectory(Directory directory) async {
     final key = await _key();
     if (key == null || !await directory.exists()) return 0;
@@ -145,15 +147,24 @@ class PhotoVault {
     await for (final entry in directory.list(followLinks: false)) {
       if (entry is! File || entry.path.endsWith('.tmp')) continue;
       try {
-        final bytes = await entry.readAsBytes();
-        if (isSealed(bytes)) continue;
-        await _replace(entry, await _seal(bytes, key));
+        if (isSealed(await _head(entry))) continue;
+        await _replace(entry, await _seal(await entry.readAsBytes(), key));
         sealed++;
       } on Object {
         // One picture that cannot be sealed now is sealed on its next read.
       }
     }
     return sealed;
+  }
+
+  /// As much of [file] as [isSealed] looks at.
+  static Future<Uint8List> _head(File file) async {
+    final open = await file.open();
+    try {
+      return await open.read(_magic.length + _nonceLength + _macLength);
+    } finally {
+      await open.close();
+    }
   }
 
   static Future<void> _replace(File file, Uint8List bytes) async {

@@ -107,7 +107,10 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
     );
 
     final opened = await _open(stored.archives, wanted);
-    if (opened.isReady) {
+    final changed =
+        !identical(opened.library, stored.archives) ||
+        opened.selectedId != stored.selectedId;
+    if (opened.isReady && changed) {
       await _store.save(opened.library, selectedId: opened.selectedId);
     }
     _currentArchive = opened.archive;
@@ -348,33 +351,50 @@ class KnowledgeController extends AsyncNotifier<KnowledgeState> {
       // close it by. A rejected archive used to leave its port bound.
       server = await ZimHttpServer.start(archive);
 
-      final enrichedEntry = entry.copyWith(
-        sizeBytes: archive.header.checksumPosition + 16,
-        entryCount: archive.header.entryCount,
-        // Read here, once, because a library screen shows every archive
-        // at the same time and only one of them is ever open.
-        title: await archive.metadata('Title'),
-        name: await archive.metadata('Name'),
-        description: await archive.metadata('Description'),
-        cover: await _cover(archive),
-      );
+      final sizeBytes = archive.header.checksumPosition + 16;
+      final entryCount = archive.header.entryCount;
+      // Stored for this very file, which is what the size and the count
+      // stand for: an archive replaced under the same id has neither.
+      final same =
+          entry.sizeBytes == sizeBytes && entry.entryCount == entryCount;
+      final enrichedEntry = same && entry.isDescribed
+          ? entry
+          : entry.copyWith(
+              sizeBytes: sizeBytes,
+              entryCount: entryCount,
+              // Read here, once, because a library screen shows every
+              // archive at the same time and only one of them is ever open.
+              // Only what is missing: this ran at every start and unpacked
+              // a whole cluster for a cover already stored (#302).
+              title:
+                  (same ? entry.title : null) ??
+                  await archive.metadata('Title'),
+              name:
+                  (same ? entry.name : null) ?? await archive.metadata('Name'),
+              description:
+                  (same ? entry.description : null) ??
+                  await archive.metadata('Description'),
+              cover: (same ? entry.cover : null) ?? await _cover(archive),
+            );
       // Bookmarks set before 2.8.0 know this archive only by its id,
       // which no other device shares. Here both are known (#240).
       final name = enrichedEntry.name;
       if (name != null) {
         await const KnowledgeBookmarkStore().adoptArchiveName(entry.id, name);
       }
-      final enrichedLibrary = [
-        for (final item in library)
-          if (item.id == entry.id) enrichedEntry else item,
-      ];
+      final enrichedLibrary = identical(enrichedEntry, entry)
+          ? library
+          : [
+              for (final item in library)
+                if (item.id == entry.id) enrichedEntry else item,
+            ];
 
       return KnowledgeState(
         library: enrichedLibrary,
         selectedId: entry.id,
         archive: archive,
         server: server,
-        title: await archive.metadata('Title'),
+        title: enrichedEntry.title,
       );
     } on Object {
       await server?.close();

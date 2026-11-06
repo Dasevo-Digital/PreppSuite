@@ -169,4 +169,25 @@ void main() {
     expect(document.indexStatus, 'ready');
     expect(document.indexedCharacters, 1200);
   });
+
+  group('how long the first picture waits (#302)', () {
+    test('after an update it gets the long wait', () {
+      expect(
+        relinkBudget(lastVersion: '2.9.2', version: '2.9.3'),
+        const Duration(seconds: 10),
+      );
+      expect(relinkBudget(version: '2.9.3'), const Duration(seconds: 10));
+    });
+
+    test('any other start waits for two seconds, and still looks', () {
+      expect(
+        relinkBudget(lastVersion: '2.9.3', version: '2.9.3'),
+        const Duration(seconds: 2),
+      );
+    });
+
+    test('a version that cannot be read counts as an update', () {
+      expect(relinkBudget(lastVersion: '2.9.3'), const Duration(seconds: 10));
+    });
+  });
 }
