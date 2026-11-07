@@ -116,4 +116,36 @@ void main() {
     );
     handle.dispose();
   });
+
+  // Ochre until the value is reached (#322). A green bar at one point of
+  // ten says "done" to anybody who only glances at it.
+  Color fill(WidgetTester tester) {
+    final boxes = tester.widgetList<DecoratedBox>(
+      find.descendant(
+        of: find.byType(ThinMeter),
+        matching: find.byType(DecoratedBox),
+      ),
+    );
+    return (boxes.last.decoration as BoxDecoration).color!;
+  }
+
+  testWidgets('a meter short of its goal is ochre', (tester) async {
+    await pump(tester, const SizedBox(width: 200, child: ThinMeter(value: .1)));
+    expect(fill(tester), appLightTheme.colorScheme.tertiary);
+  });
+
+  testWidgets('a meter at its goal is green', (tester) async {
+    await pump(tester, const SizedBox(width: 200, child: ThinMeter(value: 1)));
+    expect(fill(tester), appLightTheme.colorScheme.primary);
+  });
+
+  // Both styles carry `onSurface`, and a colour in the style wins over the
+  // defaults: the chosen tab differed by its weight alone (#322).
+  test('the chosen tab has a colour of its own', () {
+    for (final theme in [appLightTheme, appDarkTheme]) {
+      final tabs = theme.tabBarTheme;
+      expect(tabs.labelColor, theme.colorScheme.primary);
+      expect(tabs.unselectedLabelColor, theme.colorScheme.onSurfaceVariant);
+    }
+  });
 }

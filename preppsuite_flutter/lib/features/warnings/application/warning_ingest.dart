@@ -176,6 +176,14 @@ class WarningIngest {
     required DateTime? expires,
     required DateTime sent,
   }) {
+    // A warning for the whole country concerns everyone, whatever Land its
+    // id names and whichever district's dashboard listed it (#307). Read
+    // from what is stored as well, because the dashboard's pass is compact
+    // and a warning stored before this was understood gets no detail again.
+    final everywhere =
+        source == WarningSource.bbk &&
+        bbkAreaIsWholeCountry(areaDescription ?? existing?.areaDescription);
+    final region = everywhere ? null : regionKey;
     final unchanged = existing != null && !sent.isAfter(existing.sent);
     // A BBK warning in the feed again after it was ended here: it dropped
     // out of one poll -- a source that flickered, a district that did not
@@ -209,10 +217,17 @@ class WarningIngest {
       // these rows (#177). Or one stored before its text was made plain,
       // which is rewritten once, cleaned -- MoWaS warnings run for weeks,
       // and theirs would otherwise keep their `<br/>` until they end.
+      //
+      // And one way out of a Land altogether: a warning for the whole
+      // country that its id filed under the Land of its sender (#307). A
+      // row that was not announced stays unannounced here, so the poll
+      // announces it now that it concerns this household.
       final fillsIn =
           lacksBbkDetail(existing) &&
           _hasDetail(description, instruction, areaDescription, polygonsJson);
-      if (!_narrows(existing.regionKey, regionKey) &&
+      final widens = everywhere && existing.regionKey != null;
+      if (!widens &&
+          !_narrows(existing.regionKey, region) &&
           !fillsIn &&
           !revives &&
           // BBK only: its new text arrives plain from the detail fetch.
@@ -234,9 +249,10 @@ class WarningIngest {
     // fills in the text widen a district back to its Land.
     String? kept(String? incoming, String? stored) =>
         incoming ?? (unchanged ? capPlainText(stored) : null);
-    final placed = unchanged && !_narrows(existing.regionKey, regionKey)
+    final placed =
+        unchanged && !everywhere && !_narrows(existing.regionKey, region)
         ? existing.regionKey
-        : regionKey;
+        : region;
 
     final escalated =
         existing != null &&
@@ -289,7 +305,9 @@ class WarningIngest {
 /// Where a BBK warning applies, best effort, in order of trust.
 ///
 /// 1. A precise per-Kreis fetch, where the district is known outright.
-/// 2. The state in the warning's own id, which is most sources.
+/// 2. The state in the warning's own id, which is most sources, though it
+///    says who sent the warning rather than where it applies. A warning
+///    for the whole country is no state at all, see [bbkAreaIsWholeCountry].
 /// 3. The one state its area description unanimously names.
 /// 4. The one state the authority that issued it sits in.
 ///
@@ -378,9 +396,6 @@ String? bbkRegionFromId(String id) {
   return null;
 }
 
-/// Whether [next] says more precisely where a warning applies than
-/// [stored]: a key where there was none, or a district of the Land that
-/// was stored.
 /// Whether a warning carries any of what only its CAP detail brings.
 bool _hasDetail(
   String? description,
@@ -411,12 +426,48 @@ bool lacksBbkDetail(Warning warning) => !_hasDetail(
   warning.polygonsJson,
 );
 
+/// Whether [next] says more precisely where a warning applies than
+/// [stored]: a key where there was none, or a district where there was a
+/// Land.
+///
+/// Any Land, not only the district's own (#307). The Land comes from the
+/// warning's id, and the id names who sent it, not where it applies: a
+/// warning sent in Ulm can cover Neu-Ulm, across the border in Bavaria. A
+/// district's dashboard listing a warning is the strongest statement
+/// there is about that district, and held to the Land of the id it left
+/// the warning with a household it was meant for, filed under "elsewhere".
 bool _narrows(String? stored, String? next) {
   if (next == null) return false;
   if (stored == null) return true;
-  final land = germanStateByBbkCode(stored);
-  return land != null &&
+  return germanStateByBbkCode(stored) != null &&
       next.length >= 5 &&
-      next.startsWith(land.arsPrefix) &&
       germanStateByBbkCode(next) == null;
+}
+
+/// The names a warning for all of Germany goes by in its CAP area.
+const _wholeCountryAreas = {
+  'deutschland',
+  'bundesrepublik deutschland',
+  'bundesgebiet',
+  'gesamtes bundesgebiet',
+};
+
+/// Whether a warning's area description is the whole country (#307).
+///
+/// The real case is the record of the warning day in 2025: id
+/// `mow.DE-NW-BN-SE030-20250911-30-001`, severity Extreme, area
+/// "Deutschland". Its id reads as North Rhine-Westphalia, because that is
+/// where the federal office sends from, so every household with a
+/// district elsewhere had it as somebody else's: no notification, no
+/// banner, and a place at the end of the list. Any federal alert would
+/// have gone the same way.
+///
+/// By the name of the area and nothing looser. The record's `AreaId` of 0
+/// looks like the same statement, but nothing says it is not simply the
+/// first area of the message.
+bool bbkAreaIsWholeCountry(String? areaDescription) {
+  if (areaDescription == null) return false;
+  return areaDescription
+      .split('\n')
+      .any((area) => _wholeCountryAreas.contains(area.trim().toLowerCase()));
 }

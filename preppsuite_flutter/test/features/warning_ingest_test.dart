@@ -262,19 +262,34 @@ Kreis Kassel;06633;HE
       },
     );
 
-    test(
-      'a district of another Land does not replace the stored one',
-      () async {
-        final warning = raw(id: 'mow.DE-NI-BS-W001-20261008-001');
-        await ingest.ingestBbk([warning], countryCode: 'DE');
-        await ingest.ingestBbk(
-          [warning],
-          countryCode: 'DE',
-          regionKeyOverride: '05554',
-        );
-        expect(await storedRegionKey(), 'NI');
-      },
-    );
+    // A warning's id names who sent it. One sent in Ulm can cover Neu-Ulm,
+    // and the district's own dashboard listing it is what says so (#307).
+    test('a district of another Land replaces the stored Land', () async {
+      final warning = raw(id: 'mow.DE-BW-UL-W001-20261008-001');
+      await ingest.ingestBbk([warning], countryCode: 'DE');
+      await ingest.ingestBbk(
+        [warning],
+        countryCode: 'DE',
+        regionKeyOverride: '09775',
+      );
+      expect(await storedRegionKey(), '09775');
+    });
+
+    test('one district does not replace another', () async {
+      final warning = raw(id: 'mow.DE-BW-UL-W002-20261008-001');
+      await ingest.ingestBbk([warning], countryCode: 'DE');
+      await ingest.ingestBbk(
+        [warning],
+        countryCode: 'DE',
+        regionKeyOverride: '09775',
+      );
+      await ingest.ingestBbk(
+        [warning],
+        countryCode: 'DE',
+        regionKeyOverride: '08421',
+      );
+      expect(await storedRegionKey(), '09775');
+    });
 
     group('and whose area description cannot be placed either', () {
       // The real case, live on 2026-09-14: a severe drinking-water alert

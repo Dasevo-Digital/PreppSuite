@@ -4,6 +4,7 @@ import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 import 'package:preppsuite_flutter/core/app_database_providers.dart';
 import 'package:preppsuite_flutter/core/platform_storage.dart';
 import 'package:preppsuite_flutter/features/household/application/household_providers.dart';
@@ -207,6 +208,42 @@ void main() {
       expect(error, SharedFolderJoinError.unreadable);
       expect(await names(mine.id), ['Trinkwasser']);
       expect(container.read(householdProfileProvider).value?.id, mine.id);
+    });
+
+    // An identity file that cannot be read is not an empty folder. A new one
+    // over it strands every other device, and takes the salt of a sealed
+    // folder with it (#312).
+    group('whose identity file cannot be read', () {
+      File householdFile() =>
+          File(p.join(root.path, preppSuiteFolderName, 'household.json'));
+
+      test('leaves it alone when it is there', () async {
+        await seedFolder(theirs.encode());
+        final damaged = [0xff, 0xfe, 0x00, 0x7b];
+        householdFile().writeAsBytesSync(damaged);
+
+        final error = await container
+            .read(sharedFolderProvider.notifier)
+            .joinFolder(location(), profile: mine, discardOwnRows: true);
+
+        expect(error, SharedFolderJoinError.incomplete);
+        expect(householdFile().readAsBytesSync(), damaged);
+        expect(container.read(householdProfileProvider).value?.id, mine.id);
+        expect(container.read(sharedFolderProvider).value?.folder, isNull);
+      });
+
+      test('founds nothing where devices have written', () async {
+        await seedFolder(theirs.encode());
+        await IoSyncFolder(root.path).writeDeviceFile('other', '{}');
+        householdFile().deleteSync();
+
+        final error = await container
+            .read(sharedFolderProvider.notifier)
+            .joinFolder(location(), profile: mine);
+
+        expect(error, SharedFolderJoinError.incomplete);
+        expect(householdFile().existsSync(), isFalse);
+      });
     });
   });
 

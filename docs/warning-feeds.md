@@ -42,6 +42,13 @@ serverseitig möglich (siehe „Bekannte Einschränkungen" unten). Beispiel:
   bekanntes Bundeslandkürzel sind — ein falscher `regionKey` würde die
   Warnung vor den betroffenen Haushalten verbergen, ein fehlender zeigt
   sie allen.
+- Dieses Land nennt den **Absender**, nicht das Gebiet (#307). Der Warntag
+  2025 trägt `mow.DE-NW-BN-SE030-20250911-30-001`, weil das BBK aus Bonn
+  sendet; sein Gebiet ist „Deutschland“. Das Gebiet aus der Detailseite geht
+  deshalb vor: „Deutschland“, „Bundesrepublik Deutschland“ und „(gesamtes)
+  Bundesgebiet“ ergeben `regionKey = null`, also „betrifft alle“. `AreaId` 0
+  wird dafür nicht benutzt: Nichts belegt, dass es nicht nur das erste Gebiet
+  der Meldung ist.
 
 ## MeteoAlarm (feeds.meteoalarm.org)
 
@@ -103,7 +110,10 @@ für jeden Kreis ab, den ein Haushalt als eigene Region oder als
 zusätzliches Abo führt. Warnungen aus diesem Abruf tragen den genauen
 fünfstelligen Kreisschlüssel als `regionKey` statt des groben
 Bundeslandkürzels. `WarningService.isWarningRelevant` entscheidet damit
-je Haushalt, was überhaupt ausgeliefert wird.
+je Haushalt, was überhaupt ausgeliefert wird. Das gilt auch für einen Kreis
+in einem anderen Land als dem der Kennung (#307): Eine Warnung aus Ulm kann
+Neu-Ulm betreffen, und dass das Dashboard des Kreises sie führt, ist die
+stärkste Aussage, die es gibt.
 
 Da die BBK-Endpunkte kein Ablaufdatum liefern, beendet der Poller deren
 Warnungen selbst: Was in einem vollständigen **BBK-Abruf**

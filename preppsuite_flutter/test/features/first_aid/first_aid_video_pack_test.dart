@@ -150,6 +150,36 @@ void main() {
         });
         expect(FirstAidVideoPack.parse(two).videos.single.id, 'good');
       });
+
+      // The desktops hand the file to the system to open, and to Windows
+      // an opened `.bat` is a program that runs (#318).
+      for (final name in [
+        'anleitung.bat',
+        'anleitung.exe',
+        'anleitung.cmd',
+        'anleitung.ps1',
+        'anleitung.lnk',
+        'anleitung.command',
+        'anleitung.desktop',
+        'anleitung.mp4.exe',
+        'anleitung',
+      ]) {
+        test('a pack cannot carry $name', () {
+          expect(
+            () => FirstAidVideoPack.parse(manifest(file: name)),
+            throwsFormatException,
+          );
+        });
+      }
+
+      test('a film keeps its name, whatever the case of its ending', () {
+        expect(
+          FirstAidVideoPack.parse(
+            manifest(file: 'CPR.MP4'),
+          ).videos.single.fileName,
+          'CPR.MP4',
+        );
+      });
     });
   });
 

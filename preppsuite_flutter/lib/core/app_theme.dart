@@ -310,8 +310,13 @@ ThemeData _theme(Brightness brightness) {
       horizontalTitleGap: AppSpace.md,
     ),
 
+    // The colours by name, not left to the styles. A label style carrying a
+    // colour wins over the defaults, and both of these carry `onSurface`,
+    // so the chosen tab differed from the others by its weight alone.
     tabBarTheme: TabBarThemeData(
       dividerColor: scheme.outlineVariant,
+      labelColor: scheme.primary,
+      unselectedLabelColor: scheme.onSurfaceVariant,
       labelStyle: text.labelLarge,
       unselectedLabelStyle: text.labelLarge?.copyWith(
         fontWeight: FontWeight.w500,

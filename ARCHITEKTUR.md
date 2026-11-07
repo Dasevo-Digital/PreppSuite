@@ -3879,3 +3879,74 @@ und Titelbild nur noch, wenn sie fehlen oder wenn Größe oder Eintragszahl
 zeigen, dass unter der Kennung eine andere Datei liegt, und schreibt die
 Bibliothek nur nach einer Änderung. Offen bleibt, dass die Übersicht für
 ihre Statuszeile das Archiv öffnet (#302, Punkt 3).
+
+### Aus der Durchsicht vom 7. November (#307–#322)
+
+**Die Kennung einer Warnung nennt den Absender, nicht das Gebiet** (#307).
+Der Warntag 2025 heißt `mow.DE-NW-BN-SE030-20250911-30-001`, weil das BBK aus
+Bonn sendet; sein Gebiet ist „Deutschland“. Die App las daraus Nordrhein-
+Westfalen, und jeder Haushalt mit einem Kreis anderswo hatte die Warnung als
+fremd: keine Meldung, kein Banner, unten in der Liste. Eine echte
+Zivilschutzwarnung wäre genauso gelaufen. Jetzt gilt zuerst das Gebiet:
+`bbkAreaIsWholeCountry` macht aus „Deutschland“ und seinen Schreibweisen
+`regionKey = null`, auch für schon gespeicherte Zeilen, weil das Gebiet
+mitgespeichert ist. Danach gilt das Dashboard: `_narrows` lässt einen Kreis
+jedes Land ersetzen, nicht nur das eigene. Eine Warnung aus Ulm kann Neu-Ulm
+betreffen, und dass das Dashboard des Kreises sie führt, ist die stärkste
+Aussage, die es gibt. Eine Zeile, die noch nicht gemeldet war, bleibt dabei
+ungemeldet, also meldet der Abruf sie, sobald sie den Haushalt betrifft. Eine
+schon gemeldete wird nicht noch einmal gemeldet.
+
+**Eine neue Datenbank liest die eigene Gerätedatei, bevor sie schreibt**
+(#311). Die eigene Datei wurde immer übersprungen, mit der Begründung, sie
+könne nur enthalten, was man schon hat. Das stimmt erst, wenn diese Datenbank
+sie geschrieben hat. Die Gerätekennung überlebt „Neu einrichten“ und „Haushalt
+löschen“, und `needsRepair` veröffentlichte dann den leeren Stand über die
+Datei, ohne Fehlermeldung. Im Probetest waren 40 Zeilen danach 0. Für einen
+Haushalt, dessen einzige Kopie der Ordner ist, war das alles. `sync()` liest
+die Datei jetzt, solange der Eintrag `sharedFolderVersion2` fehlt. Lässt sie
+sich dabei nicht lesen und die Datenbank ist leer, wird nichts geschrieben:
+Eine leere Datenbank hat nichts zu sagen, und die Datei kann ein laufender
+Download sein. Die erste Zeile hebt das auf, deshalb kann ein dauerhaft
+beschädigter Stand kein Gerät stumm halten.
+
+**Fehlt und unlesbar sind verschiedene Antworten** (#312). `readHouseholdFile`
+gab bei einem Lesefehler null zurück, auf allen Plattformen, und null heißt
+„dieser Ordner war nie in Gebrauch“. `joinFolder` schrieb dann eine neue
+Kennung über die vorhandene. Alle anderen Geräte hätten mit
+`differentHousehold` gestoppt, und in einem versiegelten Ordner wären Salz und
+`check` weg gewesen. Jetzt wirft `readHouseholdFile`, wenn die Datei da ist und
+sich nicht lesen lässt, in `IoSyncFolder` und über `read-failed` aus
+`MainActivity.kt` und `StorageBridge.swift`. Eine Gerätedatei darf weiter als
+fehlend gelten, sie kostet nur diese Datei. `joinFolder` gründet außerdem
+nichts, solange in `devices/` etwas liegt.
+
+**Eine Sicherung bekommt ihren Namen erst, wenn sie vollständig ist** (#314).
+`FilePicker.saveFile` schreibt die übergebenen Bytes, sobald eine Datei gewählt
+ist, und `bytes` ist Pflicht. Mit `Uint8List(0)` war die gewählte Datei also
+sofort leer, und schlug die neue Sicherung danach fehl, waren beide Stände weg.
+Auf den Desktops wird deshalb ein Ordner gewählt, die Sicherung entsteht dort
+als `.part`, und `finishBackupFile` benennt sie um, neben eine vorhandene
+gleichen Namens statt über sie. Der Umweg über den Temp-Ordner hätte den Dialog
+behalten, aber die ganze Sicherung müsste auf die Systemplatte passen. Mit
+Archiven auf einer externen Platte tut sie das oft nicht. Der Download-Ordner
+arbeitet im Sandkasten schon genauso.
+
+**Ein Videopaket darf nur Filme enthalten** (#318). Auf den Desktops bekommt
+das System die Datei zum Öffnen, und für Windows ist ein geöffnetes `.bat` ein
+laufendes Programm. `hasSafeFileName` prüft deshalb auch die Endung gegen
+`firstAidVideoExtensions`, vor jedem Lesen und vor dem Öffnen.
+
+**Ein Farbpaar wird ganz benutzt** (#322). Der Stufen-Chip in den Warndetails
+nahm Hintergrund und Symbol aus `warningSeverityColors`, die Beschriftung aus
+dem Thema: 1,32:1 im dunklen Design, bei der höchsten Stufe.
+`warning_severity_colors_test` konnte das nicht sehen, er misst das Paar.
+`warning_details_chip_test` misst deshalb den fertigen Chip. `TabBarThemeData`
+nennt die Farben jetzt ausdrücklich, weil eine Farbe im `labelStyle` vor den
+Vorgaben gewinnt. `ThinMeter` steht ohne eigene Farbe in Ocker, bis der Wert
+erreicht ist.
+
+**Lebenswichtige Medikamente werden nicht weggeworfen** (#309). Der Text nannte
+ready.gov als Quelle fürs Entsorgen nach einem Tag, nannte Insulin als Beispiel
+und ließ den nächsten Satz der Quelle weg: Hängt ein Leben daran, wird das
+Medikament weiterverwendet, bis Ersatz da ist.

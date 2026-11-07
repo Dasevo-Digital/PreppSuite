@@ -59,6 +59,34 @@ void main() {
     },
   );
 
+  // What is not there and what cannot be read are different answers, and
+  // only the first may lead to a new identity being written (#312).
+  group('a file that is there and cannot be read', () {
+    final notText = [0xff, 0xfe, 0x00, 0x7b];
+
+    test('as the identity file is an error, not an empty folder', () async {
+      await folder.writeHouseholdFile('{}');
+      File(
+        p.join(root.path, preppSuiteFolderName, 'household.json'),
+      ).writeAsBytesSync(notText);
+
+      await expectLater(folder.readHouseholdFile(), throwsFormatException);
+    });
+
+    test('as a device file costs that file, not the run', () async {
+      await folder.writeDeviceFile('other', '{}');
+      File(
+        p.join(root.path, preppSuiteFolderName, 'devices', 'other.json'),
+      ).writeAsBytesSync(notText);
+
+      expect(await folder.readDeviceFile('other'), isNull);
+    });
+
+    test('an identity file that is not there still reads as null', () async {
+      expect(await folder.readHouseholdFile(), isNull);
+    });
+  });
+
   test('a write probe leaves nothing behind', () async {
     expect(await folder.isWritable(), isTrue);
 

@@ -745,6 +745,7 @@
   "sharingUpToDate": "Alles auf dem Stand.",
   "sharingErrorUnwritable": "In diesen Ordner lässt sich nicht schreiben. Unter Android geht die Freigabe bei einer Neuinstallation verloren und lässt sich in den Systemeinstellungen entziehen – wähle den Ordner dann einfach erneut. Sonst prüfe, ob er noch da und beschreibbar ist.",
   "sharingErrorUnreadable": "Im Ordner liegt bereits ein Haushalt, der sich nicht lesen lässt. Vermutlich stammt er aus einer neueren Version von PreppSuite.",
+  "sharingErrorIncomplete": "Im Ordner liegen Daten eines Haushalts, aber seine Kennung lässt sich gerade nicht lesen. Warte, bis der Ordner ganz geladen ist, und versuche es noch einmal.",
   "sharingErrorNeedsPassphrase": "Dein Haushalt wird verschlüsselt geteilt. Ein neuer Ordner braucht deshalb ein Kennwort.",
   "sharingErrorNotEncrypted": "Im Ordner liegt ein unverschlüsselter Haushalt, deiner wird aber verschlüsselt geteilt. Damit nichts unverschlüsselt dort landet, wurde der Ordner nicht übernommen. Wähle einen leeren Ordner, PreppSuite legt ihn dann verschlüsselt an.",
   "sharingFoundSealedTitle": "Ordner verschlüsselt anlegen",
@@ -2269,7 +2270,7 @@
   "outageDiscardTitleFreezer": "Aus dem Gefriergerät ausbuchen",
   "outageDiscardHint": "Angehakt sind die Lebensmittel. Nimm den Haken bei allem weg, was nicht verdirbt. Was angehakt bleibt, steht danach im Vorrat auf null und kommt über seine Mindestmenge auf die Einkaufsliste.",
   "outageDiscardGraceHint": "Die zwei Stunden für Aufgetautes laufen noch, deshalb ist nichts angehakt. Was noch Eiskristalle hat, darf wieder eingefroren werden. Was du anhakst, steht danach im Vorrat auf null.",
-  "outageDiscardMedicine": "Medikamente, die gekühlt gehören, etwa Insulin: Laut ready.gov nach mehr als einem Tag ohne Strom entsorgen, außer die Packung sagt etwas anderes. Im Zweifel in der Apotheke fragen.",
+  "outageDiscardMedicine": "Medikamente, die gekühlt gehören: Laut ready.gov nach mehr als einem Tag ohne Strom entsorgen, außer die Packung sagt etwas anderes. Der Beipackzettel nennt, wie lange ein Mittel ungekühlt hält. Lebenswichtige Medikamente wie Insulin nicht wegwerfen: weiterverwenden, bis Ersatz da ist, und Arzt oder Apotheke fragen.",
   "outageDiscardConfirm": "{count, plural, =1{1 Eintrag ausbuchen} other{{count} Einträge ausbuchen}}",
   "@outageDiscardConfirm": {
     "placeholders": {

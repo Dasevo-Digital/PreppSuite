@@ -1362,6 +1362,7 @@
   "sharingUpToDate": "Everything is up to date.",
   "sharingErrorUnwritable": "This folder cannot be written to. On Android the permission is lost on reinstall and can be revoked in the system settings — just pick the folder again. Otherwise check that it is still there and writable.",
   "sharingErrorUnreadable": "There is already a household in this folder, and it cannot be read. It probably comes from a newer version of PreppSuite.",
+  "sharingErrorIncomplete": "This folder holds a household's data, but its identity file cannot be read right now. Wait until the folder has finished loading and try again.",
   "sharingErrorNeedsPassphrase": "Your household is shared encrypted, so a new folder needs a passphrase.",
   "sharingErrorNotEncrypted": "There is a household in this folder without encryption, and yours is shared encrypted. So that nothing lands there unencrypted, the folder was not taken over. Pick an empty folder and PreppSuite sets it up encrypted.",
   "sharingFoundSealedTitle": "Set up the folder encrypted",
@@ -3393,7 +3394,7 @@
   "outageDiscardTitleFreezer": "Book out of the freezer",
   "outageDiscardHint": "The food is ticked. Untick anything that does not spoil. What stays ticked is set to zero in the inventory and goes on the shopping list through its minimum.",
   "outageDiscardGraceHint": "The two hours for thawed food are still running, so nothing is ticked. Anything that still has ice crystals may be refrozen. Whatever you tick is set to zero in the inventory.",
-  "outageDiscardMedicine": "Medicines that need to be kept cold, such as insulin: ready.gov says to discard them once the power has been out for more than a day, unless the label says otherwise. If in doubt, ask a pharmacist.",
+  "outageDiscardMedicine": "Medicines that need to be kept cold: ready.gov says to discard them once the power has been out for more than a day, unless the label says otherwise. The leaflet says how long a medicine keeps without a fridge. Do not throw away life-saving medicines such as insulin: keep using them until there is a new supply, and ask a doctor or pharmacist.",
   "outageDiscardConfirm": "{count, plural, =1{Book out 1 item} other{Book out {count} items}}",
   "@outageDiscardConfirm": {
     "placeholders": {

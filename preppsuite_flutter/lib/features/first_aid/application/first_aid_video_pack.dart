@@ -35,6 +35,18 @@ const firstAidPackFormat = 1;
 /// The manifest's name inside a pack folder and inside a pack zip.
 const firstAidPackFileName = 'paket.json';
 
+/// What a pack may carry. Containers a system player opens and nothing
+/// that runs.
+const firstAidVideoExtensions = {
+  '.mp4',
+  '.m4v',
+  '.mov',
+  '.webm',
+  '.mkv',
+  '.avi',
+  '.ogv',
+};
+
 /// One clip.
 class FirstAidVideo {
   const FirstAidVideo({
@@ -88,12 +100,21 @@ class FirstAidVideo {
 
   Duration? get length => seconds == null ? null : Duration(seconds: seconds!);
 
-  /// Whether [fileName] is a plain name that stays inside the folder.
+  /// Whether [fileName] is a plain name that stays inside the folder and
+  /// is a film.
+  ///
+  /// The film as well (#318), because the desktops hand the file to the
+  /// system to open, and to Windows an opened `.bat` or `.exe` is a program
+  /// that runs. Anybody can build a pack, and a file out of a pack carries
+  /// no mark that it came from elsewhere.
   bool get hasSafeFileName =>
       fileName.isNotEmpty &&
       fileName == p.basename(fileName) &&
       fileName != '.' &&
-      fileName != '..';
+      fileName != '..' &&
+      firstAidVideoExtensions.contains(
+        p.extension(fileName).toLowerCase(),
+      );
 
   static FirstAidVideo _fromJson(Map<String, Object?> json) {
     final url = json['url'];

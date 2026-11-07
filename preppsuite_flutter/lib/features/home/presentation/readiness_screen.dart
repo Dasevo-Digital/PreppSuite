@@ -126,7 +126,12 @@ class ReadinessScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 10),
-                  LinearProgressIndicator(value: readyCount / checks.length),
+                  LinearProgressIndicator(
+                    value: readyCount / checks.length,
+                    color: readyCount < checks.length
+                        ? Theme.of(context).colorScheme.tertiary
+                        : null,
+                  ),
                   const SizedBox(height: 8),
                   Text(l10n.readinessSummaryHint),
                 ],

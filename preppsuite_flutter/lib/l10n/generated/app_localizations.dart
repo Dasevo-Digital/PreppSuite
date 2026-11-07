@@ -4096,6 +4096,12 @@ abstract class AppLocalizations {
   /// **'There is already a household in this folder, and it cannot be read. It probably comes from a newer version of PreppSuite.'**
   String get sharingErrorUnreadable;
 
+  /// No description provided for @sharingErrorIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'This folder holds a household\'s data, but its identity file cannot be read right now. Wait until the folder has finished loading and try again.'**
+  String get sharingErrorIncomplete;
+
   /// No description provided for @sharingErrorNeedsPassphrase.
   ///
   /// In en, this message translates to:
@@ -9811,7 +9817,7 @@ abstract class AppLocalizations {
   /// No description provided for @outageDiscardMedicine.
   ///
   /// In en, this message translates to:
-  /// **'Medicines that need to be kept cold, such as insulin: ready.gov says to discard them once the power has been out for more than a day, unless the label says otherwise. If in doubt, ask a pharmacist.'**
+  /// **'Medicines that need to be kept cold: ready.gov says to discard them once the power has been out for more than a day, unless the label says otherwise. The leaflet says how long a medicine keeps without a fridge. Do not throw away life-saving medicines such as insulin: keep using them until there is a new supply, and ask a doctor or pharmacist.'**
   String get outageDiscardMedicine;
 
   /// No description provided for @outageDiscardConfirm.

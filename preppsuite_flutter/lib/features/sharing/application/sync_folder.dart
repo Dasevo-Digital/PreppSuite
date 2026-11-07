@@ -59,8 +59,13 @@ abstract class SyncFolder {
 
   Future<void> writeDeviceFile(String deviceId, String contents);
 
-  /// The shared identity file, or null when this folder has never been
-  /// used by PreppSuite.
+  /// The shared identity file, or null when it is not there.
+  ///
+  /// Throws when it is there and cannot be read (#312). Null is a statement
+  /// about the folder, and what follows from it is that a new identity may
+  /// be written. Over a real one that strands every other device, and in a
+  /// sealed folder it takes the salt with it, so nobody can derive the key
+  /// again. A device file can afford to read as absent, this one cannot.
   Future<String?> readHouseholdFile();
 
   Future<void> writeHouseholdFile(String contents);
@@ -107,10 +112,22 @@ class IoSyncFolder implements SyncFolder {
   }
 
   @override
-  Future<String?> readDeviceFile(String deviceId) => _readIfPresent(
-    File(p.join(_devices.path, '$deviceId.json')),
-    maxSnapshotBytes,
-  );
+  Future<String?> readDeviceFile(String deviceId) async {
+    try {
+      return await _readIfPresent(
+        File(p.join(_devices.path, '$deviceId.json')),
+        maxSnapshotBytes,
+      );
+    } on FileSystemException {
+      // A file the sync engine is mid-download on, or one the user has no
+      // permission for. Both are worth skipping rather than failing the
+      // whole sync over -- the next run picks it up.
+      return null;
+    } on FormatException {
+      // Not text, so a damaged file: that one, and not the run.
+      return null;
+    }
+  }
 
   @override
   Future<void> writeDeviceFile(String deviceId, String contents) async {
@@ -143,22 +160,15 @@ class IoSyncFolder implements SyncFolder {
   }
 
   Future<String?> _readIfPresent(File file, int maxBytes) async {
-    try {
-      if (!await file.exists()) return null;
-      return utf8.decode(
-        await readBoundedBytes(
-          file.openRead(),
-          maxBytes: maxBytes,
-          declaredLength: await file.length(),
-          timeout: const Duration(seconds: 60),
-        ),
-      );
-    } on FileSystemException {
-      // A file the sync engine is mid-download on, or one the user has no
-      // permission for. Both are worth skipping rather than failing the
-      // whole sync over — the next run picks it up.
-      return null;
-    }
+    if (!await file.exists()) return null;
+    return utf8.decode(
+      await readBoundedBytes(
+        file.openRead(),
+        maxBytes: maxBytes,
+        declaredLength: await file.length(),
+        timeout: const Duration(seconds: 60),
+      ),
+    );
   }
 
   /// Writes to a temporary name and renames into place.

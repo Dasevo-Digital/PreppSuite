@@ -153,6 +153,16 @@ Die Datei wird unter einem Zwischennamen geschrieben und dann umbenannt.
 Sonst bekämen die Sync-Dienste, die den Ordner beobachten, halbe Dateien zu
 verteilen.
 
+Die eigene Datei wird nicht gelesen, sobald diese Datenbank sie geschrieben
+hat. Vorher schon: Nach „Neu einrichten“ oder einem erneuten Beitritt ist sie
+vielleicht die einzige Kopie (#311). Lässt sie sich dann nicht lesen und die
+Datenbank ist noch leer, schreibt das Gerät nichts, bis es etwas zu sagen hat.
+
+Liegen in `devices/` Dateien, lässt sich aber die `household.json` nicht lesen,
+tritt kein neues Gerät bei. Eine neue Kennung würde alle anderen Geräte
+aussperren (#312). Ein Gerät, das schon dazugehört, schreibt eine wirklich
+fehlende Datei wieder hin.
+
 ## Was seit 0.12 mitreist
 
 Neben Vorrat, Checklisten und Budget liegen zwei weitere Sätze im Ordner:

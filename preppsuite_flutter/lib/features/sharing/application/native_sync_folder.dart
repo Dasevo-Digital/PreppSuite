@@ -56,8 +56,16 @@ class NativeSyncFolder implements SyncFolder {
   }
 
   @override
-  Future<String?> readDeviceFile(String deviceId) =>
-      _read(deviceFilePath(deviceId), maxSnapshotBytes);
+  Future<String?> readDeviceFile(String deviceId) async {
+    try {
+      return await _read(deviceFilePath(deviceId), maxSnapshotBytes);
+    } on PlatformException catch (error) {
+      // A file the sync engine is mid-download on, or one held open. It
+      // costs this file and not the run, and the next run picks it up.
+      if (error.code == 'read-failed') return null;
+      rethrow;
+    }
+  }
 
   @override
   Future<void> writeDeviceFile(String deviceId, String contents) =>

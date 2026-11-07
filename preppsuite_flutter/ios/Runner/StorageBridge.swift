@@ -256,6 +256,9 @@ final class StorageBridge: NSObject {
     } ?? []
   }
 
+  private static let readFailed = FlutterError(
+    code: "read-failed", message: "The file could not be read.", details: nil)
+
   private func read(_ uri: String, _ path: String, maxBytes: Int) -> Any? {
     let limit = max(0, min(maxBytes, 64 * 1024 * 1024))
     return withAccess(uri) { root -> Any? in
@@ -287,9 +290,14 @@ final class StorageBridge: NSObject {
           }
           if data.count > limit {
             text = FlutterError(code: "read-too-large", message: "File exceeds the read limit.", details: nil)
-          } else { text = String(data: data, encoding: .utf8) }
-        } catch { text = nil }
+          } else { text = String(data: data, encoding: .utf8) ?? Self.readFailed }
+        } catch {
+          // Not nil where the file is there: nil says it is not, and the
+          // caller may then write a new one over it.
+          text = FileManager.default.fileExists(atPath: url.path) ? Self.readFailed : nil
+        }
       }
+      if coordinationError != nil && text == nil { return Self.readFailed }
       return text
     }
   }

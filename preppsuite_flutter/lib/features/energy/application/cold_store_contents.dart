@@ -102,7 +102,10 @@ bool proposedForDiscard(InventoryItem item) =>
 /// A medicine kept cold. ready.gov: one that should be refrigerated is
 /// discarded once the power has been out for more than a day, unless its
 /// label says otherwise -- a different clock from the food's, so it is
-/// never ticked for the household.
+/// never ticked for the household. And the same page's next sentence,
+/// which the text left out until #309 while naming insulin as its example:
+/// where a life depends on the medicine, it is used until there is a new
+/// supply. Throwing away the only insulin in a blackout is the worse risk.
 bool isColdMedicine(InventoryItem item) =>
     InventoryItemCategory.fromName(item.category) ==
     InventoryItemCategory.medical;

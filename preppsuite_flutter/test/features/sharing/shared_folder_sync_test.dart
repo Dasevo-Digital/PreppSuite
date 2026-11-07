@@ -368,6 +368,76 @@ void main() {
     },
   );
 
+  group('a database that has not seen its own file (#311)', () {
+    // The same id with an empty database: a key lost and "start over", or a
+    // reset and a second join. The id survives both, so the file used to be
+    // skipped as "ours" and replaced by the empty one, with no error. For a
+    // household whose only copy is the folder that was everything.
+    Future<void> leaveAFile() async {
+      await phone.upsertInventoryItem(water());
+      await serviceFor(phone, 'phone').sync();
+      expect(folder.deviceFiles, contains('phone'));
+    }
+
+    test('reads it before it writes', () async {
+      await leaveAFile();
+
+      final fresh = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(fresh.close);
+      final result = await serviceFor(fresh, 'phone').sync();
+
+      expect(result.error, isNull);
+      expect(result.received, greaterThan(0));
+      expect(await fresh.inventoryItemsForSync(householdId), hasLength(1));
+      expect(
+        DeviceSnapshot.decode(folder.deviceFiles['phone']!)!.inventoryItems,
+        hasLength(1),
+        reason: 'the file still holds the row',
+      );
+    });
+
+    test('and leaves it alone once it has written it', () async {
+      await leaveAFile();
+      final writes = folder.deviceWrites;
+
+      final result = await serviceFor(phone, 'phone').sync();
+
+      expect(result.received, 0);
+      expect(folder.deviceWrites, writes);
+    });
+
+    test('does not replace a file it could not read with nothing', () async {
+      await leaveAFile();
+      final damaged = folder.deviceFiles['phone']!.substring(0, 40);
+      folder.deviceFiles['phone'] = damaged;
+
+      final fresh = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(fresh.close);
+      final result = await serviceFor(fresh, 'phone').sync();
+
+      expect(result.published, isFalse);
+      expect(folder.deviceFiles['phone'], damaged);
+      // A file of its own is not "the other devices cannot be read".
+      expect(result.error, isNull);
+    });
+
+    test('but what it has to say goes out all the same', () async {
+      await leaveAFile();
+      folder.deviceFiles['phone'] = 'damaged for good';
+
+      final fresh = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(fresh.close);
+      await fresh.upsertInventoryItem(water(clientId: 'new'));
+      final result = await serviceFor(fresh, 'phone').sync();
+
+      expect(result.published, isTrue);
+      expect(
+        DeviceSnapshot.decode(folder.deviceFiles['phone']!)!.inventoryItems,
+        hasLength(1),
+      );
+    });
+  });
+
   test('a missing identity file is written back', () async {
     folder.householdFile = null;
 

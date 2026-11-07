@@ -557,7 +557,7 @@ sie nennt.
 |---|---|
 | `format` | 1. Ein höherer Wert wird mit einem Satz abgelehnt, nicht halb gelesen. |
 | `guide` | Die Kennung der Anleitung. `tool/erste_hilfe_paket.sh --ids` listet sie. |
-| `file` | Ein reiner Dateiname. Ein Name mit Pfadanteil wird verworfen – eine Beschreibung kommt aus dem Netz, und eine, die `../../` nennen dürfte, wäre ein Weg, irgendwohin zu schreiben. |
+| `file` | Ein reiner Dateiname mit einer dieser Endungen: `.mp4`, `.m4v`, `.mov`, `.webm`, `.mkv`, `.avi`, `.ogv`. Alles andere wird verworfen – eine Beschreibung kommt aus dem Netz, und eine, die `../../` nennen dürfte, wäre ein Weg, irgendwohin zu schreiben. Die Desktops geben die Datei dem System zum Öffnen, und für Windows ist ein geöffnetes `.bat` ein laufendes Programm. |
 | `url` | Absolut oder relativ zu `baseUrl`. Fehlt sie, ist das Paket nur als Datei zu bekommen. |
 | `bytes`, `sha256` | Werden nach dem Laden geprüft. Passt etwas nicht, wird die Datei gelöscht statt behalten. |
 | `credit`, `licence` | Stehen unter dem Video. Die meisten freien Lizenzen verlangen das, und der Zuschauer beurteilt danach, was er da sieht. |

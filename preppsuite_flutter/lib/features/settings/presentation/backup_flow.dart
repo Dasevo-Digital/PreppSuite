@@ -433,14 +433,29 @@ Future<WrittenBackup?> writeBackupWithProgress(
   );
 }
 
+/// What a backup is called on the desktops until it is complete.
+const partialBackupSuffix = '.part';
+
 /// Where "Datensicherung erstellen" writes.
 ///
-/// On the desktops the save dialog names a path and the backup is
-/// written straight there, however large it is. On iOS and Android the
-/// dialog writes the file itself and wants the bytes in hand, which a
-/// backup with archives in it cannot be -- so it is written into the
-/// app's temporary folder first, and [saveOrShareBackup] decides what
-/// happens next.
+/// On the desktops a folder is chosen and the backup is written there
+/// under a provisional name, however large it is. [saveOrShareBackup]
+/// gives it its own name once it is complete (#314).
+///
+/// A folder and not the save dialog, because that dialog writes what it is
+/// handed the moment a file is picked, and it insists on being handed
+/// something. Picking the existing backup of the day emptied it there and
+/// then, and a backup that then failed took both with it: a full disk, a
+/// cancel, one invalid row. Writing to a temporary folder first would keep
+/// the dialog, but it would need the whole backup to fit on the system
+/// disk, which a backup with archives on an external disk often does not.
+/// The sandbox lets this process write in the folder for as long as it
+/// runs, the way the download folder does.
+///
+/// On iOS and Android the dialog writes the file itself and wants the
+/// bytes in hand, which a backup with archives in it cannot be -- so it is
+/// written into the app's temporary folder first, and [saveOrShareBackup]
+/// decides what happens next.
 Future<File?> backupTarget({required String dialogTitle}) async {
   final name = backupFileName();
   if (_pickerWritesItself) {
@@ -448,16 +463,31 @@ Future<File?> backupTarget({required String dialogTitle}) async {
       '${(await getTemporaryDirectory()).path}${Platform.pathSeparator}$name',
     );
   }
-  // The dialog writes what it is handed, and a backup with archives in it
-  // cannot be handed over whole. So it writes nothing, and the backup is
-  // streamed into the file it named -- the sandbox lets this process write
-  // where the person chose, for as long as it runs.
-  final uri = await FilePicker.saveFile(
-    dialogTitle: dialogTitle,
-    fileName: name,
-    bytes: Uint8List(0),
+  final folder = await FilePicker.getDirectoryPath(dialogTitle: dialogTitle);
+  if (folder == null) return null;
+  return File('$folder${Platform.pathSeparator}$name$partialBackupSuffix');
+}
+
+/// Gives a complete backup written under [partialBackupSuffix] its name,
+/// next to any backup that already has it. Answers the finished file.
+///
+/// Beside and not over: a backup is what somebody goes back to, and which
+/// of two from one day is the one wanted is for them to say.
+@visibleForTesting
+Future<File> finishBackupFile(File partial) async {
+  final name = partial.path.substring(
+    0,
+    partial.path.length - partialBackupSuffix.length,
   );
-  return uri == null ? null : File(uri.toFilePath());
+  const extension = '.preppsuite';
+  final stem = name.endsWith(extension)
+      ? name.substring(0, name.length - extension.length)
+      : name;
+  var target = File(name);
+  for (var number = 2; await target.exists(); number++) {
+    target = File('$stem-$number$extension');
+  }
+  return partial.rename(target.path);
 }
 
 /// A temporary file for a backup that is handed to the share sheet.
@@ -481,14 +511,17 @@ String backupFileName([DateTime? now]) {
 /// file instead -- "In Dateien sichern" is there too.
 const _pickerLimitBytes = 100 * 1024 * 1024;
 
-/// Finishes a backup written by [backupTarget] on iOS and Android.
+/// Finishes a backup written by [backupTarget].
 /// Answers false when the person backed out.
 Future<bool> saveOrShareBackup(
   File file, {
   required String dialogTitle,
   required String subject,
 }) async {
-  if (!_pickerWritesItself) return true;
+  if (!_pickerWritesItself) {
+    await finishBackupFile(file);
+    return true;
+  }
   try {
     if (await file.length() <= _pickerLimitBytes) {
       return await saveFileWithPicker(

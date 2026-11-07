@@ -2434,6 +2434,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Ya hay un hogar en esta carpeta y no se puede leer. Probablemente viene de una versión más reciente de PreppSuite.';
 
   @override
+  String get sharingErrorIncomplete =>
+      'Esta carpeta contiene datos de un hogar, pero ahora no se puede leer su identificación. Espera a que la carpeta termine de cargarse e inténtalo de nuevo.';
+
+  @override
   String get sharingErrorNeedsPassphrase =>
       'Tu hogar se comparte cifrado; por eso una carpeta nueva necesita una frase de contraseña.';
 
@@ -5931,7 +5935,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get outageDiscardMedicine =>
-      'Medicamentos que deben guardarse en frío, como la insulina: según ready.gov, se desechan si el corte dura más de un día, salvo que el envase diga otra cosa. Ante la duda, pregunta en la farmacia.';
+      'Medicamentos que deben guardarse en frío: según ready.gov, se desechan si el corte dura más de un día, salvo que el envase diga otra cosa. El prospecto indica cuánto tiempo aguanta sin nevera. No tires medicamentos vitales como la insulina: sigue usándolos hasta tener repuesto y pregunta a tu médico o en la farmacia.';
 
   @override
   String outageDiscardConfirm(int count) {

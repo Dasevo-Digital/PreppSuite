@@ -897,6 +897,11 @@ class _SupplyGroupsLine extends StatelessWidget {
                                     child: LinearProgressIndicator(
                                       value: row.share.clamp(0, 1).toDouble(),
                                       minHeight: 5,
+                                      color: row.share >= 1
+                                          ? null
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.tertiary,
                                     ),
                                   ),
                                 ),

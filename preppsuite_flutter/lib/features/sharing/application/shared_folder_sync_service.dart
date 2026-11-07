@@ -170,9 +170,17 @@ class SharedFolderSyncService {
       var foreignFiles = 0;
       var skippedFiles = 0;
 
+      // Our own file can only contain what we already have, once this
+      // database has written it. Until then it may be all that is left: a
+      // key lost and "start over", the folder as the household's only copy.
+      // The id survives that, and the file used to be skipped here and
+      // replaced at the end of the run by an empty one (#311).
+      final ownFileKnown = await _db.lastPulledAt(_publishedEntity) != null;
+      var ownFileUnread = false;
+
       for (final id in deviceIds) {
-        // Our own file can only contain what we already have.
-        if (id == deviceId) continue;
+        final own = id == deviceId;
+        if (own && ownFileKnown) continue;
 
         final raw = await _folder.readDeviceFile(id);
         // A plain file in a sealed folder is never read. Anybody who can
@@ -185,9 +193,12 @@ class SharedFolderSyncService {
         // [_publishIfNeeded]). Not counted as skipped, either: a folder
         // whose other devices have not caught up yet is not one this
         // version cannot read.
-        if (raw != null && _sealing && !looksEncrypted(raw)) continue;
+        if (raw != null && _sealing && !looksEncrypted(raw)) {
+          ownFileUnread = ownFileUnread || own;
+          continue;
+        }
 
-        foreignFiles++;
+        if (!own) foreignFiles++;
 
         final applied = _applied[_db] ??= {};
         final memo = '$householdId/$id';
@@ -206,7 +217,11 @@ class SharedFolderSyncService {
           // Damaged, half-downloaded, written by a newer version, or
           // sealed under a key this device does not hold. All of them
           // mean the same thing here: leave it alone and try again.
-          skippedFiles++;
+          if (own) {
+            ownFileUnread = true;
+          } else {
+            skippedFiles++;
+          }
           continue;
         }
         if (snapshot.householdId != householdId) continue;
@@ -229,11 +244,20 @@ class SharedFolderSyncService {
       final ourFile = deviceIds.contains(deviceId)
           ? await _folder.readDeviceFile(deviceId)
           : null;
-      final published = await _publishIfNeeded(
-        learnedSomething: received > 0,
-        ourFileExists: ourFile != null,
-        ourFileIsPlain: _sealing && ourFile != null && !looksEncrypted(ourFile),
-      );
+      // A database with nothing in it has nothing to say, and a file of
+      // ours it could not read may be a download still under way. Writing
+      // would turn that into an empty file for good; waiting costs nothing,
+      // because the first row here lifts this.
+      final holdsBack =
+          ownFileUnread && await _db.householdRowCount(householdId) == 0;
+      final published =
+          !holdsBack &&
+          await _publishIfNeeded(
+            learnedSomething: received > 0,
+            ourFileExists: ourFile != null,
+            ourFileIsPlain:
+                _sealing && ourFile != null && !looksEncrypted(ourFile),
+          );
 
       await _db.setLastPulledAt(syncStateEntity, DateTime.now().toUtc());
 
@@ -303,6 +327,9 @@ class SharedFolderSyncService {
     return null;
   }
 
+  /// Set once this database has published to the folder as this device.
+  String get _publishedEntity => 'sharedFolderVersion2:$householdId:$deviceId';
+
   /// Whether this run has to seal what it writes.
   bool get _sealing => (_folderIdentity ?? identity).isEncrypted;
 
@@ -349,8 +376,7 @@ class SharedFolderSyncService {
     // Re-offer clean rows once after upgrading the conflict rule. The old
     // second-granularity acknowledgement could mark an unpublished edit
     // clean, so dirty alone cannot recover every existing installation.
-    final repairEntity = 'sharedFolderVersion2:$householdId:$deviceId';
-    final needsRepair = await _db.lastPulledAt(repairEntity) == null;
+    final needsRepair = await _db.lastPulledAt(_publishedEntity) == null;
 
     // The settings, stamped, read before deciding: a station changed here
     // is something to say even when no row moved. Until #253 they were
@@ -416,7 +442,7 @@ class SharedFolderSyncService {
       owned: versions(snapshot.possessions),
       offers: versions(snapshot.neighbourOffers),
     );
-    await _db.setLastPulledAt(repairEntity, DateTime.now().toUtc());
+    await _db.setLastPulledAt(_publishedEntity, DateTime.now().toUtc());
     await _rememberPublishedSettings(settingsKey, settingsPrint);
     return true;
   }

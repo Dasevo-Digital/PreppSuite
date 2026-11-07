@@ -671,6 +671,11 @@ class _WarningDetails extends StatelessWidget {
                     localizeWarningSeverity(l10n, severity),
                   ),
                 ),
+                // The pair, not half of it. The label fell to the theme's
+                // `onSurface`, which on the extreme background comes to
+                // 1.3:1 in the dark and 2.6:1 in the light: the one level
+                // that has to be read was the one that could not be.
+                labelStyle: TextStyle(color: colors.foreground),
                 backgroundColor: colors.background,
                 side: BorderSide.none,
               ),

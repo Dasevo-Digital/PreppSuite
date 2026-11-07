@@ -169,7 +169,8 @@ class ThinMeter extends StatelessWidget {
             heightFactor: 1,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: color ?? scheme.primary,
+                // Ochre until the value is reached, green once it is.
+                color: color ?? (value >= 1 ? scheme.primary : scheme.tertiary),
                 borderRadius: radius,
               ),
             ),

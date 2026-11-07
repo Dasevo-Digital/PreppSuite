@@ -2417,6 +2417,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'There is already a household in this folder, and it cannot be read. It probably comes from a newer version of PreppSuite.';
 
   @override
+  String get sharingErrorIncomplete =>
+      'This folder holds a household\'s data, but its identity file cannot be read right now. Wait until the folder has finished loading and try again.';
+
+  @override
   String get sharingErrorNeedsPassphrase =>
       'Your household is shared encrypted, so a new folder needs a passphrase.';
 
@@ -5887,7 +5891,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get outageDiscardMedicine =>
-      'Medicines that need to be kept cold, such as insulin: ready.gov says to discard them once the power has been out for more than a day, unless the label says otherwise. If in doubt, ask a pharmacist.';
+      'Medicines that need to be kept cold: ready.gov says to discard them once the power has been out for more than a day, unless the label says otherwise. The leaflet says how long a medicine keeps without a fridge. Do not throw away life-saving medicines such as insulin: keep using them until there is a new supply, and ask a doctor or pharmacist.';
 
   @override
   String outageDiscardConfirm(int count) {

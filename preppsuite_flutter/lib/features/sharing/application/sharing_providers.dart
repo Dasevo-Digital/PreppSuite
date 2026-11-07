@@ -19,6 +19,10 @@ enum SharedFolderJoinError {
   /// no longer there.
   unwritable,
 
+  /// Devices have written here, but the folder's identity file cannot be
+  /// read at the moment.
+  incomplete,
+
   /// There is a `household.json` there, but it is damaged or was written
   /// by a newer version of the app.
   unreadable,
@@ -124,8 +128,20 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
     final folder = syncFolderFor(location.value);
     if (!await folder.isWritable()) return SharedFolderJoinError.unwritable;
 
-    final raw = await folder.readHouseholdFile();
+    final String? raw;
+    try {
+      raw = await folder.readHouseholdFile();
+    } on Object {
+      return SharedFolderJoinError.incomplete;
+    }
     if (raw == null) {
+      // Devices have written here, so the folder is not empty, whatever
+      // the read said: a cloud folder still loading, a placeholder. A new
+      // identity would strand them all, and in a sealed folder it would
+      // take the salt with it (#312).
+      if ((await folder.listDeviceIds()).isNotEmpty) {
+        return SharedFolderJoinError.incomplete;
+      }
       if (await const FolderKeyStore().requiresEncryption(profile.id)) {
         if (passphrase == null) return SharedFolderJoinError.needsPassphrase;
         final error = await FolderEncryption(

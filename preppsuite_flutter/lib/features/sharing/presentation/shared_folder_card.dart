@@ -261,6 +261,7 @@ String sharingJoinErrorText(
 ) => switch (error) {
   SharedFolderJoinError.unwritable => l10n.sharingErrorUnwritable,
   SharedFolderJoinError.unreadable => l10n.sharingErrorUnreadable,
+  SharedFolderJoinError.incomplete => l10n.sharingErrorIncomplete,
   SharedFolderJoinError.needsPassphrase => l10n.sharingErrorNeedsPassphrase,
   SharedFolderJoinError.notEncrypted => l10n.sharingErrorNotEncrypted,
 };

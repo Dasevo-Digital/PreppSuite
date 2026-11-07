@@ -401,25 +401,27 @@ class _TemplateTile extends ConsumerWidget {
       // title. Nineteen rows said it nineteen times, each in a box of its
       // own, and the box took the title's width away; what a row has to
       // show first is how far the list has got.
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            [
-              if (progress case final progress?)
-                l10n.checklistProgress(progress.done, progress.total),
-              if (template.isBuiltIn) l10n.builtInBadge,
-            ].join(' · '),
-          ),
-          if (progress case final progress? when progress.total > 0) ...[
-            const SizedBox(height: 6),
-            ThinMeter(
-              value: progress.done / progress.total,
-              height: 4,
+      subtitle: progress == null && !template.isBuiltIn
+          ? null
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  [
+                    if (progress case final progress?)
+                      l10n.checklistProgress(progress.done, progress.total),
+                    if (template.isBuiltIn) l10n.builtInBadge,
+                  ].join(' · '),
+                ),
+                if (progress case final progress? when progress.total > 0) ...[
+                  const SizedBox(height: 6),
+                  ThinMeter(
+                    value: progress.done / progress.total,
+                    height: 4,
+                  ),
+                ],
+              ],
             ),
-          ],
-        ],
-      ),
       trailing: PopupMenuButton<_TemplateAction>(
         onSelected: (action) {
           final controller = ref.read(

@@ -2434,6 +2434,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Im Ordner liegt bereits ein Haushalt, der sich nicht lesen lässt. Vermutlich stammt er aus einer neueren Version von PreppSuite.';
 
   @override
+  String get sharingErrorIncomplete =>
+      'Im Ordner liegen Daten eines Haushalts, aber seine Kennung lässt sich gerade nicht lesen. Warte, bis der Ordner ganz geladen ist, und versuche es noch einmal.';
+
+  @override
   String get sharingErrorNeedsPassphrase =>
       'Dein Haushalt wird verschlüsselt geteilt. Ein neuer Ordner braucht deshalb ein Kennwort.';
 
@@ -5921,7 +5925,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get outageDiscardMedicine =>
-      'Medikamente, die gekühlt gehören, etwa Insulin: Laut ready.gov nach mehr als einem Tag ohne Strom entsorgen, außer die Packung sagt etwas anderes. Im Zweifel in der Apotheke fragen.';
+      'Medikamente, die gekühlt gehören: Laut ready.gov nach mehr als einem Tag ohne Strom entsorgen, außer die Packung sagt etwas anderes. Der Beipackzettel nennt, wie lange ein Mittel ungekühlt hält. Lebenswichtige Medikamente wie Insulin nicht wegwerfen: weiterverwenden, bis Ersatz da ist, und Arzt oder Apotheke fragen.';
 
   @override
   String outageDiscardConfirm(int count) {

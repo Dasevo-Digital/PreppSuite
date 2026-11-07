@@ -136,7 +136,9 @@ class MainActivity : FlutterFragmentActivity() {
                 } catch (_: ReadTooLarge) {
                     runOnUiThread { result.error("read-too-large", "File exceeds the read limit.", null) }
                 } catch (_: Exception) {
-                    runOnUiThread { result.success(null) }
+                    // Not null: null says the file is not there, and the
+                    // caller may then write a new one over it.
+                    runOnUiThread { result.error("read-failed", "The file could not be read.", null) }
                 }
             }
             "write" -> {
@@ -311,21 +313,20 @@ class MainActivity : FlutterFragmentActivity() {
         val file = directory.findFile(segments.last()) ?: return null
         if (!file.isFile) return null
 
-        return try {
-            contentResolver.openInputStream(file.uri)?.use { stream ->
-                val limit = maxBytes.coerceIn(0, 64 * 1024 * 1024)
-                val bytes = java.io.ByteArrayOutputStream()
-                val buffer = ByteArray(8192)
-                while (true) {
-                    val count = stream.read(buffer, 0, minOf(buffer.size, limit - bytes.size() + 1))
-                    if (count < 0) break
-                    if (bytes.size() + count > limit) throw ReadTooLarge()
-                    bytes.write(buffer, 0, count)
-                }
-                bytes.toString(Charsets.UTF_8.name())
+        val input = contentResolver.openInputStream(file.uri)
+            ?: throw java.io.IOException("No stream for an existing file.")
+        return input.use { stream ->
+            val limit = maxBytes.coerceIn(0, 64 * 1024 * 1024)
+            val bytes = java.io.ByteArrayOutputStream()
+            val buffer = ByteArray(8192)
+            while (true) {
+                val count = stream.read(buffer, 0, minOf(buffer.size, limit - bytes.size() + 1))
+                if (count < 0) break
+                if (bytes.size() + count > limit) throw ReadTooLarge()
+                bytes.write(buffer, 0, count)
             }
-        } catch (error: ReadTooLarge) { throw error
-        } catch (_: Exception) { null }
+            bytes.toString(Charsets.UTF_8.name())
+        }
     }
 
     /**

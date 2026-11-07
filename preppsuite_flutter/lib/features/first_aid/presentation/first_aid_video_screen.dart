@@ -145,7 +145,9 @@ class _FirstAidVideoScreenState extends ConsumerState<FirstAidVideoScreen> {
           // content:// URI through a FileProvider, and there is nothing
           // to gain by building one when the clip already plays in the
           // page above.
-          if (file != null && _opensInSystemPlayer) ...[
+          if (file != null &&
+              _opensInSystemPlayer &&
+              widget.video.hasSafeFileName) ...[
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: () => launchUrl(file.uri),
