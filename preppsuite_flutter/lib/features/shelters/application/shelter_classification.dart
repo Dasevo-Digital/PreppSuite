@@ -70,9 +70,13 @@ List<ClassifiedShelter> classifyOverpassFeatures(
 /// Pure classification from raw OSM tags, kept separate for direct
 /// unit-testing against real captured tag combinations.
 ShelterConfidence classifyOverpassTags(Map<String, String> tags) {
+  // Any value of `historic`, not only "yes": a bunker is mostly tagged
+  // `historic=bunker` or `ruins` or `fort` where it is tagged at all (#338).
+  final historic = tags['historic'];
   final isHistoricOrDisused =
-      tags['historic'] == 'yes' ||
+      (historic != null && historic != 'no') ||
       tags['disused'] == 'yes' ||
+      tags['abandoned'] == 'yes' ||
       tags['ruins'] == 'yes' ||
       tags['access'] == 'no';
   if (isHistoricOrDisused) return ShelterConfidence.red;

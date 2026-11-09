@@ -120,13 +120,17 @@ class EmergencyScreen extends ConsumerWidget {
                   urgent: true,
                 ),
               ),
-              const SizedBox(width: AppSpace.md),
-              Expanded(
-                child: _CallButton(
-                  label: l10n.emergencyCall110,
-                  number: '110',
+              // 110 is the police in Germany and the fire brigade in Norway.
+              // Everywhere else this app can be set up, 112 reaches help.
+              if (profile.countryCode == 'DE') ...[
+                const SizedBox(width: AppSpace.md),
+                Expanded(
+                  child: _CallButton(
+                    label: l10n.emergencyCall110,
+                    number: '110',
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
           const SizedBox(height: AppSpace.md),

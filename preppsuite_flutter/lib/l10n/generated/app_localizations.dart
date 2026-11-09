@@ -2422,6 +2422,18 @@ abstract class AppLocalizations {
   /// **'Not enabled'**
   String get settingsWarningReadinessDisabled;
 
+  /// No description provided for @settingsWarningReadinessSystemBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked by the system. Warnings will not appear as notifications.'**
+  String get settingsWarningReadinessSystemBlocked;
+
+  /// No description provided for @settingsWarningReadinessSystemAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow notifications'**
+  String get settingsWarningReadinessSystemAllow;
+
   /// No description provided for @settingsWarningReadinessRegionsSet.
   ///
   /// In en, this message translates to:
@@ -2937,6 +2949,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} expires in {days} days.'**
   String expiryReminderBody(String name, int days);
+
+  /// No description provided for @expiryReminderBodyMedicine.
+  ///
+  /// In en, this message translates to:
+  /// **'A medicine expires in {days} days.'**
+  String expiryReminderBodyMedicine(int days);
+
+  /// No description provided for @expiryReminderBodyMedicineTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'A medicine expires tomorrow.'**
+  String get expiryReminderBodyMedicineTomorrow;
 
   /// No description provided for @expiryReminderBodyTomorrow.
   ///
@@ -10504,6 +10528,12 @@ abstract class AppLocalizations {
   /// **'Now 2 breaths'**
   String get pacerBreathe;
 
+  /// No description provided for @pacerBreatheHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap when you are done'**
+  String get pacerBreatheHint;
+
   /// No description provided for @pacerSwapNow.
   ///
   /// In en, this message translates to:
@@ -14500,7 +14530,7 @@ abstract class AppLocalizations {
   /// No description provided for @emergencyAccessCall110.
   ///
   /// In en, this message translates to:
-  /// **'Call 110 – police'**
+  /// **'Call 110 – police in Germany'**
   String get emergencyAccessCall110;
 
   /// No description provided for @emergencyAccessNote.
@@ -14812,8 +14842,8 @@ abstract class AppLocalizations {
   /// No description provided for @refillReminderBody.
   ///
   /// In en, this message translates to:
-  /// **'By your last count, {name} lasts until {date}.'**
-  String refillReminderBody(String name, String date);
+  /// **'By your last count, a medicine lasts until {date}.'**
+  String refillReminderBody(String date);
 
   /// No description provided for @inventoryMemberLabel.
   ///

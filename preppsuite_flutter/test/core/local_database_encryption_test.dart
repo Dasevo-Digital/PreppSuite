@@ -199,6 +199,61 @@ void main() {
   });
 
   group('while it runs', () {
+    test('a background isolate never repairs a migration (#334)', () async {
+      // From there a migration under way looks like an interrupted one,
+      // and the repair deletes the copy that is being written.
+      final path = pathTo('preppsuite');
+      _writeHousehold(path, 'Ours');
+      final copy = File('$path.encrypting')..writeAsStringSync('half written');
+      storage.values[_modeKey] = 'migrating';
+      storage.values[_keyKey] = _freshKey();
+
+      await expectLater(
+        LocalDatabaseEncryption(storage: storage).initialize(
+          directory: directory,
+          repairInterruptedMigration: false,
+        ),
+        throwsA(isA<LocalDataBusy>()),
+      );
+
+      expect(copy.existsSync(), isTrue);
+      expect(storage.values[_modeKey], 'migrating');
+    });
+
+    test('a copy without the household never replaces it (#334)', () {
+      final path = pathTo('preppsuite');
+      _writeHousehold(path, 'Ours');
+
+      expect(
+        () => encryptDatabaseFileForTesting(
+          path,
+          _freshKey(),
+          afterCopy: () => File('$path.encrypting').deleteSync(),
+        ),
+        throwsStateError,
+      );
+
+      expect(_readHousehold(path), 'Ours');
+    }, skip: noCipher);
+
+    test('a connection waits for another before it gives up (#334)', () async {
+      for (final encrypted in [true, false]) {
+        final folder = await directory.createTemp('mode');
+        final store = _MemoryKeyStorage();
+        if (!encrypted) store.values[_modeKey] = 'plaintext';
+        final encryption = LocalDatabaseEncryption(storage: store);
+        await encryption.initialize(directory: folder);
+
+        final database = AppDatabase.forTesting(encryption.open('preppsuite'));
+        addTearDown(database.close);
+        final row = await database
+            .customSelect('PRAGMA busy_timeout')
+            .getSingle();
+
+        expect(row.read<int>('timeout'), 5000);
+      }
+    }, skip: noCipher);
+
     test('nothing may open a database while it is being replaced', () async {
       _writeHousehold(pathTo('preppsuite'), 'Beispielperson');
 

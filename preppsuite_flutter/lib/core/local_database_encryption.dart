@@ -5,10 +5,12 @@ import 'dart:math';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:sqlite3/sqlite3.dart' show OpenMode, sqlite3;
 
 import 'app_database_directory.dart';
+import 'secure_storage.dart';
 import 'portable_data.dart';
 
 /// The database files whose contents belong to the household.
@@ -54,9 +56,7 @@ abstract interface class LocalDatabaseKeyStorage {
 }
 
 class SecureLocalDatabaseKeyStorage implements LocalDatabaseKeyStorage {
-  const SecureLocalDatabaseKeyStorage([
-    this._storage = const FlutterSecureStorage(),
-  ]);
+  const SecureLocalDatabaseKeyStorage([this._storage = appSecureStorage]);
 
   final FlutterSecureStorage _storage;
 
@@ -198,9 +198,20 @@ class LocalDatabaseEncryption {
     }
   }
 
-  /// Must run before a database is opened.  It is safe to call repeatedly,
-  /// including from the Android/iOS background warning isolate.
-  Future<void> initialize({Directory? directory}) async {
+  /// Must run before a database is opened.  It is safe to call repeatedly.
+  ///
+  /// The background warning isolate passes [repairInterruptedMigration]
+  /// false, and gets [LocalDataBusy] where a migration is marked as running
+  /// (#334). From another isolate a migration in progress looks exactly
+  /// like one that was interrupted, and the repair deletes the copy being
+  /// written: the migration then went on with a new, empty file under that
+  /// name, passed its check and replaced the household with it. Only the
+  /// app's own start may repair, because only there can nothing else be
+  /// running.
+  Future<void> initialize({
+    Directory? directory,
+    bool repairInterruptedMigration = true,
+  }) async {
     if (_mode != null) return;
 
     final resolvedDirectory = directory ?? await appDatabaseDirectory();
@@ -208,6 +219,7 @@ class LocalDatabaseEncryption {
     final savedMode = await _storage.read(_modeKey);
 
     if (savedMode == 'migrating') {
+      if (!repairInterruptedMigration) throw const LocalDataBusy();
       await _recoverInterruptedMigration(resolvedDirectory);
     }
 
@@ -418,10 +430,16 @@ class LocalDatabaseEncryption {
       final path = file.path;
       return NativeDatabase.createInBackground(
         file,
-        setup: (database) => _configureCipherForFile(database, path, key),
+        setup: (database) {
+          _configureCipherForFile(database, path, key);
+          _waitForOtherConnections(database);
+        },
       );
     }
-    return NativeDatabase.createInBackground(file);
+    return NativeDatabase.createInBackground(
+      file,
+      setup: _waitForOtherConnections,
+    );
   }
 
   /// The databases that still hold readable plaintext.
@@ -634,7 +652,14 @@ class LocalDatabaseEncryption {
 
 /// The blocking half of [LocalDatabaseEncryption._encryptFile], written so
 /// that everything it touches is a String and it can run on its own isolate.
-void _encryptFileSync(String path, String key) {
+@visibleForTesting
+void encryptDatabaseFileForTesting(
+  String path,
+  String key, {
+  void Function()? afterCopy,
+}) => _encryptFileSync(path, key, afterCopy: afterCopy);
+
+void _encryptFileSync(String path, String key, {void Function()? afterCopy}) {
   final source = File(path);
   final temporary = File('$path$_encryptingSuffix');
   final recovery = File('$path$_recoverySuffix');
@@ -642,11 +667,13 @@ void _encryptFileSync(String path, String key) {
 
   final sourceDatabase = sqlite3.open(path);
   try {
+    _waitForOtherConnections(sourceDatabase);
     sourceDatabase.execute('PRAGMA wal_checkpoint(TRUNCATE)');
     sourceDatabase.execute('VACUUM INTO ${_sqlLiteral(temporary.path)}');
   } finally {
     sourceDatabase.close();
   }
+  afterCopy?.call();
 
   // `PRAGMA key` announces that the file already is encrypted, and on a
   // plaintext one it leaves nothing readable behind -- not even for the
@@ -667,7 +694,8 @@ void _encryptFileSync(String path, String key) {
   final verify = sqlite3.open(temporary.path);
   try {
     _configureCipher(verify, key);
-    verify.select('SELECT count(*) FROM sqlite_master').first;
+    // That it opens is not enough: an empty file opens as well (#334).
+    _expectSameContents(path, verify);
   } finally {
     verify.close();
   }
@@ -707,6 +735,56 @@ bool _isPlaintextFileSync(File file) {
   } on FileSystemException {
     return false;
   }
+}
+
+/// Throws unless [copy] holds the tables and row counts of the file at
+/// [path], the last moment at which that file can still be kept.
+///
+/// Virtual tables are left out: they are read through their shadow tables,
+/// which are counted, and some of them cannot be counted at all.
+void _expectSameContents(String path, dynamic copy) {
+  final original = sqlite3.open(path, mode: OpenMode.readOnly);
+  try {
+    final expected = _rowCounts(original);
+    final copied = _rowCounts(copy);
+    final same =
+        expected.length == copied.length &&
+        expected.entries.every((table) => copied[table.key] == table.value);
+    if (!same) {
+      throw StateError('The encrypted copy does not match the original.');
+    }
+  } finally {
+    original.close();
+  }
+}
+
+Map<String, int> _rowCounts(dynamic database) {
+  final tables = database.select(
+    "SELECT name FROM sqlite_master WHERE type = 'table' "
+    "AND name NOT LIKE 'sqlite_%' "
+    "AND sql NOT LIKE 'CREATE VIRTUAL%'",
+  );
+  return {
+    for (final row in tables)
+      row['name'] as String:
+          database
+                  .select(
+                    'SELECT count(*) AS n FROM '
+                    '"${(row['name'] as String).replaceAll('"', '""')}"',
+                  )
+                  .first['n']
+              as int,
+  };
+}
+
+/// How long a connection waits for another before it gives up (#334).
+///
+/// Each database has its connection here and, on a telephone, the
+/// background worker's beside it, and two desktop windows can be open.
+/// Without a wait the loser of two writes fails at once with "database is
+/// locked", which reached the person as a raw error on saving.
+void _waitForOtherConnections(dynamic database) {
+  database.execute('PRAGMA busy_timeout = 5000');
 }
 
 void _configureCipher(dynamic database, String key) {

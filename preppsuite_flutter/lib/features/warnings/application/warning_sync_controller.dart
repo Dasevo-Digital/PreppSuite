@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart' show AppLifecycleListener;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../model/household_profile.dart';
@@ -50,7 +51,20 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
       warningForegroundPollInterval,
       (_) => syncNow(),
     );
-    ref.onDispose(timer.cancel);
+    // Back in front is when somebody looks at what the background worker
+    // stored while they were away (#332).
+    AppLifecycleListener? lifecycle;
+    try {
+      lifecycle = AppLifecycleListener(
+        onResume: () => ref.read(appDatabaseProvider).refreshWarningWatchers(),
+      );
+    } on Object {
+      // No binding, as in a plain unit test: nothing comes to the front.
+    }
+    ref.onDispose(() {
+      timer.cancel();
+      lifecycle?.dispose();
+    });
 
     // Registering and cancelling both have to follow the switch, not just
     // its first value — see `ensureLoaded` for why that first value lies
@@ -104,7 +118,12 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
     } finally {
       // Every attempt, answered or not, moves how old the warnings are
       // (#138).
-      if (ref.mounted) ref.invalidate(warningPollStatusProvider);
+      if (ref.mounted) {
+        ref.invalidate(warningPollStatusProvider);
+        // And a row the background worker wrote is unchanged to this poll,
+        // so nothing else would show it (#332).
+        ref.read(appDatabaseProvider).refreshWarningWatchers();
+      }
     }
   }
 
@@ -125,8 +144,12 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
     );
     if (pending.isEmpty) return;
 
+    // Stays unannounced rather than being marked as told; see the worker.
+    final notifications = NotificationService.instance;
+    if (!await notifications.systemAllowsNotifications()) return;
+
     for (final warning in pending) {
-      await NotificationService.instance.showLocalWarning(warning);
+      await notifications.showLocalWarning(warning);
     }
     await service.markNotified(pending);
   }

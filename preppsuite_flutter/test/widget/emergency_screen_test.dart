@@ -36,7 +36,11 @@ void main() {
     countryCode: 'DE',
   );
 
-  Future<void> show(WidgetTester tester, Locale locale) async {
+  Future<void> show(
+    WidgetTester tester,
+    Locale locale, {
+    HouseholdProfile profile = profile,
+  }) async {
     await tester.binding.setSurfaceSize(const Size(600, 3000));
     addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -71,6 +75,29 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  testWidgets('110 is offered in Germany', (tester) async {
+    await show(tester, const Locale('de'));
+
+    expect(find.text('Polizei 110'), findsOneWidget);
+  });
+
+  testWidgets('and nowhere else, where it can be somebody else (#339)', (
+    tester,
+  ) async {
+    await show(
+      tester,
+      const Locale('es'),
+      profile: const HouseholdProfile(
+        id: 'home',
+        name: 'Casa',
+        countryCode: 'ES',
+      ),
+    );
+
+    expect(find.text('Policía 110'), findsNothing);
+    expect(find.textContaining('112'), findsWidgets);
+  });
 
   testWidgets('the offline section is English on an English locale', (
     tester,

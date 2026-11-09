@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
@@ -30,6 +31,10 @@ class WarningReadinessCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notificationsEnabled = ref.watch(notificationsEnabledProvider);
+    // The switch says what somebody wants, this what the system allows.
+    final blockedBySystem =
+        notificationsEnabled &&
+        ref.watch(systemNotificationsAllowedProvider).value == false;
     final status = ref.watch(warningReadinessProvider).value;
     final hasPrimaryRegion = profile.regionKey != null;
     final additionalRegions = profile.extraRegions.length;
@@ -60,10 +65,32 @@ class WarningReadinessCard extends ConsumerWidget {
                   ? Icons.notifications_active_outlined
                   : Icons.notifications_off_outlined,
               title: l10n.settingsWarningReadinessNotifications,
-              value: notificationsEnabled
+              value: blockedBySystem
+                  ? l10n.settingsWarningReadinessSystemBlocked
+                  : notificationsEnabled
                   ? l10n.settingsWarningReadinessEnabled
                   : l10n.settingsWarningReadinessDisabled,
+              colour: blockedBySystem
+                  ? Theme.of(context).colorScheme.error
+                  : null,
             ),
+            if (blockedBySystem)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final notifications = NotificationService.instance;
+                    // Asking does nothing once it has been refused for
+                    // good; then only the system's own page can change it.
+                    if (!await notifications.requestPermission()) {
+                      await notifications.openSystemNotificationSettings();
+                    }
+                    ref.invalidate(systemNotificationsAllowedProvider);
+                  },
+                  icon: const Icon(Icons.notifications_active_outlined),
+                  label: Text(l10n.settingsWarningReadinessSystemAllow),
+                ),
+              ),
             const Divider(height: 1),
             _ReadinessRow(
               icon: Icons.location_on_outlined,

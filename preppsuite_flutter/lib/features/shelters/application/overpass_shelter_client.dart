@@ -31,8 +31,11 @@ class OverpassShelterFeature {
 /// Queries the public, key-less Overpass API for OSM elements tagged as a
 /// bunker or shelter. `military`/`building=bunker` covers most German
 /// Cold-War-era bunkers (per the confirmed-live sample query, usually also
-/// carrying `historic`/`disused`/`ruins`); `emergency`/`amenity=shelter`
-/// covers the (rare) modern civil-protection tagging.
+/// carrying `historic`/`disused`/`ruins`); `emergency=shelter` covers the
+/// (rare) modern civil-protection tagging. `amenity=shelter` is deliberately
+/// not asked for (#338): in OpenStreetMap that is shelter from the weather,
+/// a bus stop or a hut at a barbecue site, and the map showed them as
+/// possible bunkers.
 class OverpassShelterClient {
   OverpassShelterClient({
     http.Client? httpClient,
@@ -134,7 +137,6 @@ class OverpassShelterClient {
         'node["building"="bunker"]($bbox);'
         'way["building"="bunker"]($bbox);'
         'node["emergency"="shelter"]($bbox);'
-        'node["amenity"="shelter"]($bbox);'
         ');'
         'out center $_resultLimit;';
 

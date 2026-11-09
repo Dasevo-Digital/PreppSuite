@@ -358,4 +358,7 @@ class EmergencyPointStore {
 
   Future<void> save(EmergencyPointSearch search) =>
       const PrivatePreferences().setString(_key, jsonEncode(search.toJson()));
+
+  /// For a household that is deleted (#336).
+  Future<void> clear() => const PrivatePreferences().remove(_key);
 }

@@ -57,12 +57,16 @@ void main() {
       // added a rounded interval per beat would be several beats out by
       // here -- which means the count of thirty would be wrong, which
       // means the breaths come at the wrong moment.
+      const only = CompressionPacer(compressionsPerCycle: 0);
       const tenMinutes = Duration(minutes: 10);
-      expect(pacer.at(tenMinutes).beat, 1100);
+      expect(only.at(tenMinutes).beat, 1100);
     });
 
     test('at 100 a minute an exact minute is exactly a hundred beats', () {
-      const hundred = CompressionPacer(beatsPerMinute: 100);
+      const hundred = CompressionPacer(
+        beatsPerMinute: 100,
+        compressionsPerCycle: 0,
+      );
       expect(hundred.at(const Duration(minutes: 1)).beat, 100);
     });
   });
@@ -72,15 +76,15 @@ void main() {
       final interval = pacer.beatInterval;
       expect(pacer.at(interval * 29).compression, 30);
       expect(pacer.at(interval * 29).cycle, 1);
-      expect(pacer.at(interval * 30).compression, 1);
-      expect(pacer.at(interval * 30).cycle, 2);
+      expect(pacer.at(pacer.onsetOf(30)).compression, 1);
+      expect(pacer.at(pacer.onsetOf(30)).cycle, 2);
     });
 
     test('the thirtieth beat is the one that calls for breaths', () {
       final interval = pacer.beatInterval;
       expect(pacer.at(interval * 28).isLastOfCycle, isFalse);
       expect(pacer.at(interval * 29).isLastOfCycle, isTrue);
-      expect(pacer.at(interval * 30).isLastOfCycle, isFalse);
+      expect(pacer.at(pacer.onsetOf(30)).isLastOfCycle, isFalse);
     });
 
     test('a child counts to fifteen', () {
@@ -88,8 +92,8 @@ void main() {
       final interval = child.beatInterval;
       expect(child.at(interval * 14).compression, 15);
       expect(child.at(interval * 14).isLastOfCycle, isTrue);
-      expect(child.at(interval * 15).compression, 1);
-      expect(child.at(interval * 15).cycle, 2);
+      expect(child.at(child.onsetOf(15)).compression, 1);
+      expect(child.at(child.onsetOf(15)).cycle, 2);
     });
 
     test('compression-only never asks for breaths and keeps counting up', () {
@@ -98,6 +102,61 @@ void main() {
       expect(only.at(interval * 40).compression, 41);
       expect(only.at(interval * 40).isLastOfCycle, isFalse);
       expect(only.at(interval * 40).cycle, 1);
+    });
+  });
+
+  group('the breaths (#337)', () {
+    final pressing = pacer.beatInterval * 30;
+
+    test('the beat waits for them after the last compression', () {
+      final tick = pacer.at(pressing);
+      expect(tick.isBreathing, isTrue);
+      expect(tick.breathLeft, CompressionPacer.breathPause);
+      expect(tick.compression, 30);
+    });
+
+    test('no beat falls inside the pause', () {
+      // A change of `beat` is a click. Clicking through the breaths is
+      // what sent people back in at the wrong count.
+      expect(pacer.at(pressing).beat, 29);
+      expect(pacer.at(pressing + const Duration(seconds: 4)).beat, 29);
+      expect(pacer.at(pressing + CompressionPacer.breathPause).beat, 30);
+    });
+
+    test('every round is thirty compressions, however long it runs', () {
+      for (final round in [0, 1, 7, 40]) {
+        final first = pacer.at(pacer.onsetOf(round * 30));
+        final last = pacer.at(pacer.onsetOf(round * 30 + 29));
+        expect(first.compression, 1, reason: 'round $round');
+        expect(first.cycle, round + 1);
+        expect(last.compression, 30, reason: 'round $round');
+        expect(last.cycle, round + 1);
+      }
+    });
+
+    test('a tap starts the next round and leaves the clock alone', () {
+      final elapsed = pressing + const Duration(seconds: 2);
+      final waiting = pacer.at(elapsed);
+      final after = pacer.at(elapsed, skipped: waiting.breathLeft);
+      expect(after.isBreathing, isFalse);
+      expect(after.compression, 1);
+      expect(after.cycle, 2);
+      expect(after.elapsed, elapsed, reason: 'two minutes stay two minutes');
+    });
+
+    test('a beat is placed behind the pauses before it', () {
+      expect(pacer.onsetOf(30), pressing + CompressionPacer.breathPause);
+      expect(
+        pacer.onsetOf(61),
+        pacer.beatInterval * 61 + CompressionPacer.breathPause * 2,
+      );
+    });
+
+    test('compression-only never waits', () {
+      const only = CompressionPacer(compressionsPerCycle: 0);
+      for (var seconds = 0; seconds < 300; seconds += 7) {
+        expect(only.at(Duration(seconds: seconds)).isBreathing, isFalse);
+      }
     });
   });
 
@@ -124,8 +183,9 @@ void main() {
   });
 
   test('a beat can be placed in time without adding intervals up', () {
-    expect(pacer.onsetOf(0), Duration.zero);
-    expect(pacer.onsetOf(110), closeTo60Seconds);
+    const only = CompressionPacer(compressionsPerCycle: 0);
+    expect(only.onsetOf(0), Duration.zero);
+    expect(only.onsetOf(110), closeTo60Seconds);
   });
 }
 

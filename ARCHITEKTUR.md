@@ -876,7 +876,9 @@ every video that pointed at it. Adding is free; renaming is not.
 **The compression pacer is a pure function of elapsed time,** never a
 counter a timer increments. 110 a minute is 545,454.54… µs; a counting
 pacer is several beats adrift after two minutes, which puts the count of
-thirty — and therefore the breaths — in the wrong place. See
+thirty — and therefore the breaths — in the wrong place. The pause for the
+breaths is part of that function, and what tapping cuts from it is passed in
+as `skipped`, so that the count moves on and the clock does not. See
 `compression_pacer.dart`.
 
 **A video pack manifest is untrusted input.** It arrives from an address
@@ -3950,3 +3952,66 @@ erreicht ist.
 ready.gov als Quelle fürs Entsorgen nach einem Tag, nannte Insulin als Beispiel
 und ließ den nächsten Satz der Quelle weg: Hängt ein Leben daran, wird das
 Medikament weiterverwendet, bis Ersatz da ist.
+
+### Aus der Durchsicht vom 9. November (#319, #331–#339)
+
+**Geplante Erinnerungen brauchen ihre Empfänger im Manifest** (#331).
+`flutter_local_notifications` trägt sie seit Version 16 nicht mehr selbst
+ein. Ohne `ScheduledNotificationReceiver` kam unter Android nie eine
+Erinnerung an, und nichts zeigte das: Der Alarm war gestellt, die Liste der
+geplanten Mitteilungen stimmte. `android_manifest_test` hält die Einträge
+fest. Ein Medikament wird in einer Erinnerung nicht genannt (#319): Der Text
+steht auf dem Sperrbildschirm und beim Plugin im Klartext in den
+Einstellungen.
+
+**Fremde Verbindungen sieht Drift nicht** (#332). Der Hintergrundlauf
+schreibt über eine eigene Verbindung. Was er speichert, meldet er als
+Mitteilung, und in der offenen App war es weder im Banner noch in der Liste,
+auch nach dem nächsten Abruf nicht, denn für den war die Zeile unverändert.
+`refreshWarningWatchers` läuft bei der Rückkehr in die App und nach jedem
+Abruf im Vordergrund. Der Hintergrundlauf setzt auch die Lage im
+Startbildschirm-Widget; den Vorrat kann er nicht rechnen, ihm fehlt das
+Profil. Der Stand trägt immer das Datum.
+
+**Der Schalter sagt, was jemand will, das System, was geht** (#333).
+`systemAllowsNotifications` wird vor jedem Melden gefragt. Ohne Erlaubnis
+bleibt eine Warnung ungemeldet, statt als gemeldet verbucht zu werden, und
+sie kommt mit dem ersten Abruf nach der Freigabe. Ein Schalter, der aus einer
+Sicherung oder Übergabe auf „an“ ankommt, wird einmal je Gerät dem System
+vorgelegt (`notificationsPermissionAskedHere`, wird nicht mitgenommen).
+
+**Nur der Start der App repariert eine Umstellung** (#334). Von einem anderen
+Isolate aus sieht eine laufende Umstellung aus wie eine abgebrochene, und die
+Reparatur löscht die gerade entstehende Kopie. Die Umstellung öffnete dann
+eine neue, leere Datei, ihre Prüfung bestand, und der Haushalt war weg. Der
+Hintergrundlauf ruft `initialize` deshalb mit
+`repairInterruptedMigration: false` auf, und `_encryptFileSync` vergleicht vor
+dem Tausch Tabellen und Zeilenzahlen. Jede Verbindung setzt
+`busy_timeout = 5000`, sonst scheitert der Verlierer zweier Schreibvorgänge
+sofort mit „database is locked“.
+
+**Ein Lesefehler löscht keinen Schlüssel** (#335). `appSecureStorage` ist der
+einzige Weg zum Schlüsselspeicher und setzt `resetOnError: false`. Mit der
+Vorgabe des Plugins löscht jede Ausnahme beim Lesen unter Android den Eintrag
+oder alles. Ein Test verbietet weitere `FlutterSecureStorage(`-Aufrufe.
+
+**„Haushalt löschen“ nimmt auch mit, was neben den Zeilen liegt** (#336):
+die Marke in `sync_state`, die sonst beim erneuten Beitritt die eigene Datei
+ungelesen überschreiben ließ, alle sieben Arten von Erinnerungen, die letzten
+Suchen nach Defibrillatoren und Notfallpunkten, das Datum der letzten
+Sicherung, alte Ordnerschlüssel, das Fehlerprotokoll und das Widget.
+
+**Der Taktgeber wartet auf die Beatmung** (#337), siehe oben. Solange er
+läuft, bekommt die Scheibe den Platz, die Hinweise scrollen in ihrem Anteil,
+und Stopp bleibt stehen. Jeder Schlag wechselt die Farbe des Kreises hart:
+Das ist das Blinken, das der Text verspricht, und mit zwei Wechseln je Sekunde
+bei 120/min liegt es unter der Grenze von drei Blitzen je Sekunde.
+
+**`amenity=shelter` ist Wetterschutz** (#338): Bushaltestellen und
+Grillhütten. Die Abfrage fragt es nicht mehr ab, und jeder `historic`-Wert
+außer `no` sowie `abandoned=yes` zählen als rot. Der Zwischenspeicher trägt
+deshalb `v2`, damit keine alten Treffer eine Woche stehen bleiben.
+
+**110 ist die deutsche Polizei** (#339). Im Notfallbereich gibt es den Knopf
+nur bei `countryCode == 'DE'`. Vor der Sperre ist das Land nicht lesbar, dort
+sagt die Beschriftung, wofür die Nummer gilt.

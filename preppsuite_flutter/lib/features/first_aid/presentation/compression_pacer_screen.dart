@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
@@ -23,12 +24,19 @@ import '../application/compression_pacer.dart';
 /// the vibration does not exist on desktop, and the flash is useless if
 /// nobody looks. Together they get through.
 class CompressionPacerScreen extends StatefulWidget {
-  const CompressionPacerScreen({super.key, this.compressionsPerCycle = 30});
+  const CompressionPacerScreen({
+    super.key,
+    this.compressionsPerCycle = 30,
+    @visibleForTesting this.stopwatch,
+  });
 
   /// 30, or 15 for a helper trained in resuscitating children, who picks
   /// it on the screen. The 2025 guidelines give 30:2 to everybody else,
   /// children included.
   final int compressionsPerCycle;
+
+  /// The clock, for a test to wind on.
+  final Stopwatch? stopwatch;
 
   @override
   State<CompressionPacerScreen> createState() => _CompressionPacerScreenState();
@@ -39,8 +47,14 @@ class _CompressionPacerScreenState extends State<CompressionPacerScreen>
   late int _cycle = widget.compressionsPerCycle;
   var _rate = CompressionPacer.defaultBeatsPerMinute;
 
-  final _stopwatch = Stopwatch();
+  late final _stopwatch = widget.stopwatch ?? Stopwatch();
   Ticker? _ticker;
+
+  /// What tapping has cut from the pauses for the breaths.
+  var _skipped = Duration.zero;
+
+  /// The round whose breaths have been announced, so it buzzes once.
+  var _breathsAnnounced = 0;
   AudioPlayer? _player;
 
   /// Whether a tone could be played at all. False turns into a line on
@@ -114,6 +128,8 @@ class _CompressionPacerScreenState extends State<CompressionPacerScreen>
     if (_running) return;
     _soundedBeat = -1;
     _swapsAnnounced = 0;
+    _skipped = Duration.zero;
+    _breathsAnnounced = 0;
     _stopwatch
       ..reset()
       ..start();
@@ -145,7 +161,11 @@ class _CompressionPacerScreenState extends State<CompressionPacerScreen>
   /// frame that arrives late — and under load they do — cannot lose a
   /// beat or shift the count of thirty.
   void _onFrame(Duration _) {
-    final tick = _pacer.at(_stopwatch.elapsed);
+    final tick = _pacer.at(_stopwatch.elapsed, skipped: _skipped);
+    if (tick.isBreathing && tick.cycle != _breathsAnnounced) {
+      _breathsAnnounced = tick.cycle;
+      Feel.beatChange();
+    }
     if (tick.beat != _soundedBeat) {
       _soundedBeat = tick.beat;
       _sound();
@@ -157,6 +177,13 @@ class _CompressionPacerScreenState extends State<CompressionPacerScreen>
       Feel.beatChange();
     }
     setState(() => _tick = tick);
+  }
+
+  /// Done with the breaths before the pause is over.
+  void _endBreaths() {
+    final tick = _tick;
+    if (tick == null || !tick.isBreathing) return;
+    _skipped += tick.breathLeft;
   }
 
   void _sound() {
@@ -180,78 +207,113 @@ class _CompressionPacerScreenState extends State<CompressionPacerScreen>
     final theme = Theme.of(context);
     final tick = _tick;
 
+    final notes = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (tick != null)
+          Text(
+            l10n.pacerElapsed(_clock(tick.elapsed)),
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium,
+          ),
+        const SizedBox(height: 4),
+        Text(
+          l10n.pacerDepth,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall,
+        ),
+        if (!_hasSound) ...[
+          const SizedBox(height: 4),
+          Text(
+            l10n.pacerNoSound,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+        ],
+      ],
+    );
+
+    final dial = _Dial(
+      tick: tick,
+      running: _running,
+      l10n: l10n,
+      onBreathsDone: _endBreaths,
+    );
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.pacerTitle)),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: _Dial(tick: tick, running: _running, l10n: l10n),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        // Two layouts, because the two moments ask for different things.
+        // Before it starts there is time to scroll. While it runs nothing
+        // may move out of sight, so the dial takes what is there, the notes
+        // scroll inside their share, and Stop stays where it is (#337).
+        child: _running
+            ? Column(
                 children: [
-                  if (tick != null)
-                    Text(
-                      l10n.pacerElapsed(_clock(tick.elapsed)),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium,
+                  Expanded(flex: 3, child: dial),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: notes,
                     ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.pacerDepth,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall,
                   ),
-                  if (!_hasSound) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.pacerNoSound,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.error,
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 64,
+                      child: FilledButton.tonalIcon(
+                        onPressed: _stop,
+                        icon: const Icon(Icons.stop),
+                        label: Text(l10n.pacerStop),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : SingleChildScrollView(
+                child: Column(
+                  children: [
+                    dial,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          notes,
+                          const SizedBox(height: 16),
+                          _RateChoice(
+                            rate: _rate,
+                            enabled: true,
+                            onChanged: (value) => setState(() => _rate = value),
+                            l10n: l10n,
+                          ),
+                          const SizedBox(height: 8),
+                          _CycleChoice(
+                            cycle: _cycle,
+                            enabled: true,
+                            onChanged: (value) =>
+                                setState(() => _cycle = value),
+                            l10n: l10n,
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 64,
+                            child: FilledButton.icon(
+                              onPressed: _start,
+                              icon: const Icon(Icons.play_arrow),
+                              label: Text(l10n.pacerStart),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                  const SizedBox(height: 16),
-                  // The settings are disabled while it runs rather than
-                  // hidden: nobody should be changing the ratio mid-count,
-                  // and a control that vanishes makes the screen jump.
-                  _RateChoice(
-                    rate: _rate,
-                    enabled: !_running,
-                    onChanged: (value) => setState(() => _rate = value),
-                    l10n: l10n,
-                  ),
-                  const SizedBox(height: 8),
-                  _CycleChoice(
-                    cycle: _cycle,
-                    enabled: !_running,
-                    onChanged: (value) => setState(() => _cycle = value),
-                    l10n: l10n,
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 64,
-                    child: _running
-                        ? FilledButton.tonalIcon(
-                            onPressed: _stop,
-                            icon: const Icon(Icons.stop),
-                            label: Text(l10n.pacerStop),
-                          )
-                        : FilledButton.icon(
-                            onPressed: _start,
-                            icon: const Icon(Icons.play_arrow),
-                            label: Text(l10n.pacerStart),
-                          ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -265,11 +327,17 @@ class _CompressionPacerScreenState extends State<CompressionPacerScreen>
 
 /// The count, the flash and the changeover notice.
 class _Dial extends StatelessWidget {
-  const _Dial({required this.tick, required this.running, required this.l10n});
+  const _Dial({
+    required this.tick,
+    required this.running,
+    required this.l10n,
+    required this.onBreathsDone,
+  });
 
   final PacerTick? tick;
   final bool running;
   final AppLocalizations l10n;
+  final VoidCallback onBreathsDone;
 
   @override
   Widget build(BuildContext context) {
@@ -293,77 +361,167 @@ class _Dial extends StatelessWidget {
     }
 
     final breathing = tick.isLastOfCycle;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // No implicit animation: a 200 ms fade at 110 beats a minute
-            // is still fading when the next beat lands, and the result
-            // reads as a wobble rather than a beat.
-            Container(
-              width: 220,
-              height: 220,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: breathing
-                    ? scheme.tertiaryContainer
-                    : scheme.primaryContainer,
-              ),
-              alignment: Alignment.center,
-              child: FittedBox(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    '${tick.compression}',
-                    style: theme.textTheme.displayLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: breathing
-                          ? scheme.onTertiaryContainer
-                          : scheme.onPrimaryContainer,
-                      // Digits of the same width, so the count does not
-                      // shuffle sideways between 9 and 10.
-                      fontFeatures: const [FontFeature.tabularFigures()],
+    final pausing = tick.isBreathing;
+    // Every beat swaps the colour, with no fade: this is the flash the idle
+    // text promises, and for somebody who cannot hear the tone and has no
+    // vibration it is the beat. At 120 a minute that is two changes a
+    // second, well under the three a second that can trigger a seizure.
+    final lit = !breathing && tick.beat.isOdd;
+    final background = breathing
+        ? scheme.tertiaryContainer
+        : lit
+        ? scheme.primary
+        : scheme.primaryContainer;
+    final foreground = breathing
+        ? scheme.onTertiaryContainer
+        : lit
+        ? scheme.onPrimary
+        : scheme.onPrimaryContainer;
+    final digits = theme.textTheme.displayLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: foreground,
+      // Digits of the same width, so the count does not shuffle sideways
+      // between 9 and 10.
+      fontFeatures: const [FontFeature.tabularFigures()],
+    );
+    final secondsLeft = tick.breathLeft.inMicroseconds == 0
+        ? 0
+        : (tick.breathLeft.inMicroseconds / 1000000).ceil();
+    final swapNote = tick.swapsDue > 0 && tick.elapsed.inSeconds % 120 < 6;
+
+    return LayoutBuilder(
+      builder: (context, constraints) => Semantics(
+        button: pausing,
+        onTap: pausing ? onBreathsDone : null,
+        // The whole area: the hands have just come off a chest, and nobody
+        // is going to aim.
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: pausing ? onBreathsDone : null,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 220,
+                        maxHeight: 220,
+                      ),
+                      // No implicit animation: a 200 ms fade at 110 beats a
+                      // minute is still fading when the next beat lands, and
+                      // the result reads as a wobble rather than a beat.
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: background,
+                          ),
+                          child: Center(
+                            child: FittedBox(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: pausing
+                                    ? Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.air,
+                                            size: 48,
+                                            color: foreground,
+                                          ),
+                                          Text('$secondsLeft s', style: digits),
+                                        ],
+                                      )
+                                    : Text(
+                                        '${tick.compression}',
+                                        style: digits,
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              tick.compressionsPerCycle == 0
-                  ? l10n.pacerPushOnly
-                  : l10n.pacerOfCycle(
-                      tick.compressionsPerCycle,
-                      tick.cycle,
+                const SizedBox(height: 8),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      tick.compressionsPerCycle == 0
+                          ? l10n.pacerPushOnly
+                          : l10n.pacerOfCycle(
+                              tick.compressionsPerCycle,
+                              tick.cycle,
+                            ),
+                      style: theme.textTheme.titleMedium,
                     ),
-              style: theme.textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            // The space is held whether or not there is anything in it,
-            // so nothing below jumps on every thirtieth beat.
-            SizedBox(
-              height: 40,
-              child: breathing
-                  ? Text(
-                      l10n.pacerBreathe,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: scheme.tertiary,
-                        fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // An IndexedStack is as tall as its tallest child, so the
+                // circle does not jump on every thirtieth beat. Scaled down
+                // rather than cut off when the text is larger than the room
+                // for it (#337): the call to breathe is the one line on this
+                // screen that has to be readable whole.
+                Flexible(
+                  flex: 3,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: SizedBox(
+                      width: math.max(0, constraints.maxWidth - 32),
+                      child: IndexedStack(
+                        alignment: Alignment.center,
+                        index: breathing
+                            ? 1
+                            : swapNote
+                            ? 2
+                            : 0,
+                        children: [
+                          const SizedBox.shrink(),
+                          Semantics(
+                            liveRegion: breathing,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  l10n.pacerBreathe,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        color: scheme.tertiary,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                ),
+                                Text(
+                                  l10n.pacerBreatheHint,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.titleMedium,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            l10n.pacerSwapNow,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: scheme.error,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
                       ),
-                    )
-                  : tick.swapsDue > 0 && tick.elapsed.inSeconds % 120 < 6
-                  ? Text(
-                      l10n.pacerSwapNow,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: scheme.error,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    )
-                  : null,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

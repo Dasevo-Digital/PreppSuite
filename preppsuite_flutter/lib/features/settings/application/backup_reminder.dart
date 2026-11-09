@@ -117,6 +117,16 @@ class BackupStatusController extends Notifier<BackupStatus> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_lastKey, moment.toIso8601String());
   }
+
+  /// For a household that is deleted (#336): the backup that was made is
+  /// not one of whatever is set up here next.
+  Future<void> forget() async {
+    _marked = false;
+    _last = null;
+    state = BackupStatus(lastBackup: null, everyDays: state.everyDays);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_lastKey);
+  }
 }
 
 final backupStatusProvider =

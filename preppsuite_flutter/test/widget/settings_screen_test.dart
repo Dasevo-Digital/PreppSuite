@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/settings/presentation/settings_screen.dart';
@@ -115,6 +116,13 @@ void main() {
         expect(tile, findsOneWidget);
 
         // No system settings in a test: the app says where to find them.
+        // Answered here, because a channel nobody listens on answers from
+        // outside the test's clock, and nothing would wait for it.
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        const channel = MethodChannel('preppsuite/notifications');
+        messenger.setMockMethodCallHandler(channel, (_) async => false);
+        addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
         await tester.tap(tile);
         await tester.pumpAndSettle();
         expect(find.text(l10n.settingsExtremeWarningsFailed), findsOneWidget);

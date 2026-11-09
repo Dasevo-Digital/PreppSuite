@@ -61,7 +61,10 @@ class _HomeScreenWidgetSyncState extends ConsumerState<HomeScreenWidgetSync> {
         supply: supply,
         situation: situation,
         l10n: AppLocalizations.of(context)!,
-        time: TimeOfDay.now().format(context),
+        time: homeWidgetStamp(
+          DateTime.now(),
+          AppLocalizations.of(context)!.localeName,
+        ),
       );
       unawaited(_publisher.publish(snapshot));
     }

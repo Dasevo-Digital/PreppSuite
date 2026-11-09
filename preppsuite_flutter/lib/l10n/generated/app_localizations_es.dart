@@ -1389,6 +1389,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsWarningReadinessDisabled => 'No activadas';
 
   @override
+  String get settingsWarningReadinessSystemBlocked =>
+      'Bloqueadas por el sistema. Las alertas no aparecerán como notificaciones.';
+
+  @override
+  String get settingsWarningReadinessSystemAllow => 'Permitir notificaciones';
+
+  @override
   String settingsWarningReadinessRegionsSet(int count) {
     return 'Lugar principal y $count regiones adicionales';
   }
@@ -1718,6 +1725,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String expiryReminderBody(String name, int days) {
     return '$name caduca dentro de $days días.';
   }
+
+  @override
+  String expiryReminderBodyMedicine(int days) {
+    return 'Un medicamento caduca dentro de $days días.';
+  }
+
+  @override
+  String get expiryReminderBodyMedicineTomorrow =>
+      'Un medicamento caduca mañana.';
 
   @override
   String expiryReminderBodyTomorrow(String name) {
@@ -6148,7 +6164,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get firstAidEntryHint =>
-      'Instrucciones, dibujos y un marcapasos para las compresiones, sin red.';
+      'Instrucciones, dibujos y un metrónomo para las compresiones, sin red.';
 
   @override
   String get firstAidSearchHint => '¿Qué buscas?';
@@ -6202,7 +6218,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get firstAidOpenPacer => 'Iniciar el marcapasos';
+  String get firstAidOpenPacer => 'Iniciar el metrónomo';
 
   @override
   String get firstAidChartOpen => 'Ampliar la lámina';
@@ -6322,7 +6338,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get firstAidVideoPackClose => 'Cerrar';
 
   @override
-  String get pacerTitle => 'Marcapasos';
+  String get pacerTitle => 'Metrónomo';
 
   @override
   String get pacerStart => 'Iniciar';
@@ -6359,6 +6375,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pacerBreathe => 'Ahora 2 insuflaciones';
+
+  @override
+  String get pacerBreatheHint => 'Toca cuando termines';
 
   @override
   String get pacerSwapNow => 'Relevaos si sois dos';
@@ -8833,7 +8852,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get emergencyAccessCall112 => 'Llamar al 112 – bomberos y ambulancia';
 
   @override
-  String get emergencyAccessCall110 => 'Llamar al 110 – policía';
+  String get emergencyAccessCall110 => 'Llamar al 110 – policía en Alemania';
 
   @override
   String get emergencyAccessNote =>
@@ -9041,8 +9060,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get refillReminderTitle => 'Conseguir una nueva receta';
 
   @override
-  String refillReminderBody(String name, String date) {
-    return 'Según tu último recuento, $name dura hasta el $date.';
+  String refillReminderBody(String date) {
+    return 'Según tu último recuento, un medicamento dura hasta el $date.';
   }
 
   @override

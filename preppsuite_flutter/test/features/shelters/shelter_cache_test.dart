@@ -66,7 +66,7 @@ void main() {
 
     Future<int> cachedAreas() async => (await SharedPreferences.getInstance())
         .getKeys()
-        .where((key) => key.startsWith('shelterCache.v1.'))
+        .where((key) => key.startsWith('shelterCache.v2.'))
         .length;
 
     test('at most ten areas, the newest', () async {
@@ -85,15 +85,18 @@ void main() {
           .subtract(const Duration(days: 8))
           .millisecondsSinceEpoch;
       SharedPreferences.setMockInitialValues({
+        'shelterCache.v2.1:2:3:4': '{"savedAt":$old,"shelters":[]}',
+        'shelterCache.v2.broken': 'not json',
+        // From before bus stops stopped counting as shelters (#338).
         'shelterCache.v1.1:2:3:4': '{"savedAt":$old,"shelters":[]}',
-        'shelterCache.v1.broken': 'not json',
       });
 
       await const ShelterCache().save(bounds, const []);
 
       final prefs = await SharedPreferences.getInstance();
+      expect(prefs.containsKey('shelterCache.v2.1:2:3:4'), isFalse);
+      expect(prefs.containsKey('shelterCache.v2.broken'), isFalse);
       expect(prefs.containsKey('shelterCache.v1.1:2:3:4'), isFalse);
-      expect(prefs.containsKey('shelterCache.v1.broken'), isFalse);
       expect(await cachedAreas(), 1);
     });
 

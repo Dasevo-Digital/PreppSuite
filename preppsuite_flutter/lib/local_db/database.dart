@@ -685,6 +685,13 @@ class AppDatabase extends _$AppDatabase {
     await (delete(
       neighbourOffers,
     )..where((t) => t.householdId.equals(householdId))).go();
+    // The record that this database wrote its device file in the folder.
+    // Left behind it outlived the rows, and joining the same folder again
+    // skipped reading that file and replaced it with the empty household:
+    // for a device alone in the folder, the only copy (#336).
+    await (delete(
+      syncState,
+    )..where((t) => t.entity.like('sharedFolderVersion2:$householdId:%'))).go();
   });
 
   // --- Household members ------------------------------------------------
@@ -1196,6 +1203,16 @@ class AppDatabase extends _$AppDatabase {
     if (rows.isEmpty) return;
     await batch((b) => b.insertAllOnConflictUpdate(warnings, rows));
   }
+
+  /// Runs every watcher of the warnings again.
+  ///
+  /// Drift knows of the writes made through this connection and of no
+  /// others, and the background worker has its own (#332). What it stored
+  /// reached the person as a notification and then was nowhere in the
+  /// open app: not in the banner, not in the list, not even after the next
+  /// poll in the foreground, because to that poll the row was unchanged.
+  void refreshWarningWatchers() =>
+      notifyUpdates({TableUpdate.onTable(warnings, kind: UpdateKind.update)});
 
   /// The warning stored under [source]/[externalId], or null.
   ///

@@ -34,6 +34,32 @@ void main() {
       );
     });
 
+    for (final value in ['bunker', 'ruins', 'fort']) {
+      test('historic=$value is red, not only historic=yes (#338)', () {
+        expect(
+          classifyOverpassTags({'military': 'bunker', 'historic': value}),
+          ShelterConfidence.red,
+        );
+      });
+    }
+
+    test('so is an abandoned one (#338)', () {
+      expect(
+        classifyOverpassTags(const {
+          'building': 'bunker',
+          'abandoned': 'yes',
+        }),
+        ShelterConfidence.red,
+      );
+    });
+
+    test('historic=no says it is not (#338)', () {
+      expect(
+        classifyOverpassTags(const {'military': 'bunker', 'historic': 'no'}),
+        ShelterConfidence.yellow,
+      );
+    });
+
     test('a plain, still-standing bunker with no historic/disused/ruins/'
         'access tag is yellow (possible, unconfirmed)', () {
       expect(

@@ -41,7 +41,7 @@ Format: README.md in this folder.
 
 ### facts
 - Ambulance and fire brigade: 112
-- Police: 110
+- Police in Germany: 110
 - Out-of-hours doctor: 116 117
 - Across Europe: 112
 

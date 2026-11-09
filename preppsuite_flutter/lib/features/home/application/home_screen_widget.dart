@@ -13,12 +13,19 @@
 library;
 
 import 'dart:io';
+import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
+import '../../warnings/application/warning_region_filter.dart';
+import '../../warnings/application/warning_relevance.dart';
 import 'status_lights.dart';
 
 /// What the home screen widget draws.
@@ -40,7 +47,7 @@ class HomeWidgetSnapshot {
   final String situationState;
   final String situationText;
 
-  /// "Stand: 14:05", so the widget never passes for live.
+  /// "Stand: 9.11., 14:05", so the widget never passes for live.
   final String updatedText;
 
   Map<String, String> toData() => {
@@ -100,6 +107,59 @@ HomeWidgetSnapshot buildHomeWidgetSnapshot({
   );
 }
 
+/// The moment in the widget's "as of" line: always with the day, or a line
+/// written on Monday reads on Thursday as if it were today (#332).
+String homeWidgetStamp(DateTime moment, String localeName) =>
+    DateFormat.Md(localeName).add_jm().format(moment);
+
+/// The situation lamp as the background worker can write it (#332).
+///
+/// Only that lamp and the "as of" line. The supply lamp needs the household
+/// profile, which a background isolate does not have, and it is not what
+/// changes while nobody has the app open. A warning is. Without this the
+/// widget said "calm" under a notification announcing an extreme warning.
+Future<void> publishHomeWidgetSituation({
+  required AppDatabase database,
+  required WarningRegionFilter filter,
+  HomeWidgetPublisher? publisher,
+  DateTime? now,
+}) async {
+  final out = publisher ?? HomeWidgetPublisher();
+  if (!out.isActive) return;
+  try {
+    final moment = now ?? DateTime.now();
+    final relevant = [
+      for (final warning in await database.watchActiveWarnings().first)
+        if ((warning.expires == null || warning.expires!.isAfter(moment)) &&
+            isWarningRelevant(warning: warning, filter: filter))
+          warning,
+    ];
+    final l10n = await _workerLocalizations();
+    await initializeDateFormatting(l10n.localeName);
+    final snapshot = buildHomeWidgetSnapshot(
+      supply: const SupplyStatus(light: SupplyLight.unknown),
+      situation: situationStatus(relevant),
+      l10n: l10n,
+      time: homeWidgetStamp(moment, l10n.localeName),
+    );
+    await out.publishSituation(snapshot);
+  } on Object {
+    // A widget left as it was must not cost the poll that tried.
+  }
+}
+
+/// The app's language, for an isolate with no widget tree to ask.
+Future<AppLocalizations> _workerLocalizations() async {
+  final prefs = await SharedPreferences.getInstance();
+  final wanted =
+      prefs.getString('localeOverride') ??
+      PlatformDispatcher.instance.locale.languageCode;
+  final supported = AppLocalizations.supportedLocales;
+  return lookupAppLocalizations(
+    supported.contains(Locale(wanted)) ? Locale(wanted) : supported.first,
+  );
+}
+
 String _severity(AppLocalizations l10n, WarningSeverity severity) =>
     switch (severity) {
       WarningSeverity.minor => l10n.warningSeverityMinor,
@@ -134,7 +194,62 @@ class HomeWidgetPublisher {
   bool get _enabled =>
       enabled ?? (!kIsWeb && (Platform.isAndroid || Platform.isIOS));
 
+  /// Whether this platform has a widget to publish to at all.
+  bool get isActive => _enabled;
+
   var _groupSet = false;
+
+  /// Writes only what the background worker knows about: the situation
+  /// lamp and the time. Failures are swallowed, as in [publish].
+  Future<void> publishSituation(HomeWidgetSnapshot snapshot) async {
+    if (!_enabled) return;
+    try {
+      await HomeWidget.setAppGroupId(appGroup);
+      await HomeWidget.saveWidgetData<String>(
+        'situationState',
+        snapshot.situationState,
+      );
+      await HomeWidget.saveWidgetData<String>(
+        'situationText',
+        snapshot.situationText,
+      );
+      await HomeWidget.saveWidgetData<String>(
+        'updatedText',
+        snapshot.updatedText,
+      );
+      await HomeWidget.updateWidget(
+        androidName: androidProvider,
+        iOSName: iosWidget,
+      );
+    } on Object {
+      // See [publish].
+    }
+  }
+
+  /// Empties the widget, for a household that is deleted (#336): the app
+  /// is gone from the data, and the home screen should not still say how
+  /// long its stock lasts.
+  Future<void> clear() async {
+    if (!_enabled) return;
+    try {
+      await HomeWidget.setAppGroupId(appGroup);
+      for (final key in const HomeWidgetSnapshot(
+        supplyState: '',
+        supplyText: '',
+        situationState: '',
+        situationText: '',
+        updatedText: '',
+      ).toData().keys) {
+        await HomeWidget.saveWidgetData<String>(key, null);
+      }
+      await HomeWidget.updateWidget(
+        androidName: androidProvider,
+        iOSName: iosWidget,
+      );
+    } on Object {
+      // See [publish].
+    }
+  }
 
   /// Publishes [snapshot] unless it is the one already there. Failures are
   /// swallowed: a home screen widget that could not be refreshed must not

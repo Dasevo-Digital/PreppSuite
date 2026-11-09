@@ -37,7 +37,7 @@ const firstAidGuidesDe = <FirstAidGuide>[
     ],
     facts: [
       FirstAidFact('Rettungsdienst und Feuerwehr', '112'),
-      FirstAidFact('Polizei', '110'),
+      FirstAidFact('Polizei in Deutschland', '110'),
       FirstAidFact('Ärztlicher Bereitschaftsdienst', '116 117'),
       FirstAidFact('Europaweit', '112'),
     ],

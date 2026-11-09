@@ -199,6 +199,57 @@ class NotificationService {
     return true;
   }
 
+  /// Whether the system would show a notification right now.
+  ///
+  /// Asked again every time, because the answer is the person's to change
+  /// in the system settings at any moment, and a notification posted
+  /// without permission disappears without a word (#333). True where the
+  /// platform cannot say, and when asking fails: then showing it is the
+  /// better guess.
+  Future<bool> systemAllowsNotifications() async {
+    try {
+      await _ensureInitialized();
+      final android = await _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.areNotificationsEnabled();
+      if (android != null) return android;
+      final iOS = await _plugin
+          .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin
+          >()
+          ?.checkPermissions();
+      if (iOS != null) return iOS.isEnabled;
+      final macOS = await _plugin
+          .resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin
+          >()
+          ?.checkPermissions();
+      if (macOS != null) return macOS.isEnabled;
+    } on Object {
+      // A plugin that cannot answer says nothing about the permission.
+    }
+    return true;
+  }
+
+  /// Opens this app's page in the system's notification settings, for a
+  /// permission that can no longer be asked for. False where it did not
+  /// open.
+  Future<bool> openSystemNotificationSettings() async {
+    try {
+      await _ensureInitialized();
+      return await _plugin
+              .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin
+              >()
+              ?.openAppNotificationSettings() ??
+          false;
+    } on Object {
+      return false;
+    }
+  }
+
   Future<void> showLocalWarning(Warning warning) async {
     await _ensureInitialized();
     await _plugin.show(
@@ -570,5 +621,13 @@ class NotificationService {
     if (!supportsScheduledNotifications) return;
     await _ensureInitialized();
     await _plugin.cancel(id: _warningDayId);
+  }
+
+  /// Every reminder this app has planned, of all seven kinds (#336).
+  Future<void> cancelAllReminders() async {
+    await cancelReminders();
+    await cancelChargeReminder();
+    await cancelBackupReminder();
+    await cancelWarningDayReminder();
   }
 }

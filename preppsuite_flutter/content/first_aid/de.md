@@ -64,7 +64,7 @@ Format: README.md in this folder.
 
 ### facts
 - Rettungsdienst und Feuerwehr: 112
-- Polizei: 110
+- Polizei in Deutschland: 110
 - Ärztlicher Bereitschaftsdienst: 116 117
 - Europaweit: 112
 

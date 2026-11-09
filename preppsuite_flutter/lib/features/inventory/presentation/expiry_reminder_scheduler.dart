@@ -16,6 +16,24 @@ import '../application/refill_reminder_planner.dart';
 import '../../knowledge/application/document_deadline.dart';
 import '../../knowledge/application/personal_document_provider.dart';
 
+/// What an expiry reminder says.
+///
+/// A medicine goes unnamed (#319). On most telephones the lock screen shows
+/// the text of a notification to whoever picks it up, and what somebody
+/// takes is nobody else's business; the plugin also keeps the text of
+/// everything scheduled in plain preferences, beside the encrypted
+/// database. A tin of soup can stay a tin of soup.
+String expiryReminderBody(AppLocalizations l10n, ExpiryReminder reminder) =>
+    switch ((reminder.isMedicine, reminder.leadDays == 1)) {
+      (true, true) => l10n.expiryReminderBodyMedicineTomorrow,
+      (true, false) => l10n.expiryReminderBodyMedicine(reminder.leadDays),
+      (false, true) => l10n.expiryReminderBodyTomorrow(reminder.itemName),
+      (false, false) => l10n.expiryReminderBody(
+        reminder.itemName,
+        reminder.leadDays,
+      ),
+    };
+
 /// Invisible widget that keeps the scheduled expiry reminders -- and the
 /// prescription reminders beside them (#150) -- in step with the
 /// inventory and the user's settings.
@@ -130,8 +148,9 @@ class _ExpiryReminderSchedulerState
       items: items,
       now: now,
     ).take(maxScheduledExpiryReminders).toList();
+    // Without the name, and only ever about a medicine: see
+    // [expiryReminderBody].
     String refillBody(RefillReminder reminder) => l10n.refillReminderBody(
-      reminder.itemName,
       DateFormat.yMMMd(l10n.localeName).format(reminder.runsOutOn),
     );
 
@@ -161,9 +180,8 @@ class _ExpiryReminderSchedulerState
           charges.length -
           documents.length,
     );
-    String expiryBody(ExpiryReminder reminder) => reminder.leadDays == 1
-        ? l10n.expiryReminderBodyTomorrow(reminder.itemName)
-        : l10n.expiryReminderBody(reminder.itemName, reminder.leadDays);
+    String expiryBody(ExpiryReminder reminder) =>
+        expiryReminderBody(l10n, reminder);
 
     // What is pending already, said the same way, schedules nothing
     // (#252). Every change to the inventory -- a count, a note, a sync

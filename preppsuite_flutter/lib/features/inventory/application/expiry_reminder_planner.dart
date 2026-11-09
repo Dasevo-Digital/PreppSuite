@@ -1,4 +1,5 @@
 import '../../../local_db/database.dart';
+import '../../../model/categories.dart';
 import 'stock_today.dart';
 
 /// Default lead times, in days before an item's expiration date. Two
@@ -56,6 +57,7 @@ class ExpiryReminder {
     required this.expirationDate,
     required this.leadDays,
     required this.fireAt,
+    this.isMedicine = false,
   });
 
   /// Notification id. Derived from the item and lead time so the same
@@ -75,6 +77,10 @@ class ExpiryReminder {
 
   /// Local wall-clock instant the notification should fire at.
   final DateTime fireAt;
+
+  /// Whether this is a medicine, whose name stays off the lock screen
+  /// (#319).
+  final bool isMedicine;
 }
 
 /// Works out which reminders should currently be scheduled for [items].
@@ -139,6 +145,7 @@ List<ExpiryReminder> planExpiryReminders({
           expirationDate: expiration,
           leadDays: lead,
           fireAt: fireAt,
+          isMedicine: item.category == InventoryItemCategory.medical.name,
         ),
       );
     }

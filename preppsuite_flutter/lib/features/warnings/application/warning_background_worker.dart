@@ -8,6 +8,7 @@ import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
 import '../../../core/local_database_encryption.dart';
 import '../../../local_db/database.dart';
+import '../../home/application/home_screen_widget.dart';
 import 'warning_poll_service.dart';
 import 'warning_poll_status_store.dart';
 import 'warning_region_filter.dart';
@@ -84,8 +85,8 @@ Future<bool> runWarningBackgroundPoll({
 
   // Opened here rather than shared with the UI isolate: when the app is
   // closed there is nothing to share with, and when it is open SQLite's
-  // own locking keeps the two consistent. The cost is that the UI does not
-  // see these writes until it queries again, which it does on every open.
+  // own locking keeps the two consistent. The open app does not see these
+  // writes by itself; `refreshWarningWatchers` is how it comes to (#332).
   final db = database ?? AppDatabase();
   final service = pollService ?? WarningPollService(database: db);
   final notifier = notifications ?? NotificationService.instance;
@@ -104,10 +105,17 @@ Future<bool> runWarningBackgroundPoll({
       isRelevant: (warning) =>
           isWarningRelevant(warning: warning, filter: filter),
     );
-    for (final warning in pending) {
-      await notifier.showLocalWarning(warning);
+    // Without the system's permission `show` does nothing and says
+    // nothing, and the warning would be booked as told (#333). Left
+    // unmarked, it is announced by the first run after permission comes
+    // back, as long as it is still in force.
+    if (pending.isNotEmpty && await notifier.systemAllowsNotifications()) {
+      for (final warning in pending) {
+        await notifier.showLocalWarning(warning);
+      }
+      await service.markNotified(pending);
     }
-    await service.markNotified(pending);
+    await publishHomeWidgetSituation(database: db, filter: filter);
     return true;
   } catch (_) {
     // A failed poll is not worth a retry storm: the next scheduled run is
@@ -127,7 +135,11 @@ Future<bool> runWarningBackgroundPoll({
 /// should be reported as a poll that had nothing to do.
 Future<bool> _localDatabaseIsOpenable() async {
   try {
-    await LocalDatabaseEncryption.instance.initialize();
+    // Never the repair: to this isolate a migration in progress looks
+    // like an interrupted one (#334).
+    await LocalDatabaseEncryption.instance.initialize(
+      repairInterruptedMigration: false,
+    );
   } on Object {
     return false;
   }

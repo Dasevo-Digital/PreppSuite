@@ -43,6 +43,8 @@ void main() {
         httpClient: MockClient((request) async {
           expect(request.method, 'POST');
           expect(request.body, contains('military'));
+          // A bus stop is a shelter from the rain (#338).
+          expect(request.body, isNot(contains('amenity')));
           return http.Response(fixture, 200);
         }),
       );

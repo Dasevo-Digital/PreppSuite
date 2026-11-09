@@ -1,6 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/secure_storage.dart';
 import 'tile_source.dart';
 
 const _providerKey = 'mapTileProvider';
@@ -17,7 +18,7 @@ abstract interface class MapApiKeyStore {
 
 class SecureMapApiKeyStore implements MapApiKeyStore {
   const SecureMapApiKeyStore([
-    this._storage = const FlutterSecureStorage(),
+    this._storage = appSecureStorage,
   ]);
 
   static const _secureKey = 'map_tiler_api_key';

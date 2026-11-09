@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/features/inventory/application/expiry_reminder_planner.dart';
+import 'package:preppsuite_flutter/features/inventory/presentation/expiry_reminder_scheduler.dart';
+import 'package:preppsuite_flutter/l10n/generated/app_localizations_de.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 
 void main() {
@@ -35,6 +37,46 @@ void main() {
   }
 
   final now = DateTime(2026, 8, 23, 12);
+
+  group('a medicine on the lock screen (#319)', () {
+    final l10n = AppLocalizationsDe();
+
+    ExpiryReminder planned(String category, int lead) => planExpiryReminders(
+      items: [
+        item(
+          clientId: 'a',
+          name: 'Insulin',
+          category: category,
+          expirationDate: DateTime(2026, 12, 1),
+        ),
+      ],
+      now: now,
+      leadDays: [lead],
+    ).single;
+
+    test('goes unnamed', () {
+      expect(
+        expiryReminderBody(l10n, planned('medical', 7)),
+        'Ein Medikament läuft in 7 Tagen ab.',
+      );
+      expect(
+        expiryReminderBody(l10n, planned('medical', 1)),
+        'Ein Medikament läuft morgen ab.',
+      );
+    });
+
+    test('a tin of soup keeps its name', () {
+      expect(
+        expiryReminderBody(l10n, planned('food', 7)),
+        contains('Insulin'),
+      );
+    });
+
+    test('and the prescription reminder names nothing', () {
+      expect(l10n.refillReminderBody('1. Dez. 2026'), isNot(contains('{')));
+      expect(l10n.refillReminderBody('1. Dez. 2026'), contains('Medikament'));
+    });
+  });
 
   group('planExpiryReminders', () {
     test('plans one reminder per lead time, at the configured hour', () {

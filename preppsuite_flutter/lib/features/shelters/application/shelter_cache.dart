@@ -21,7 +21,11 @@ class ShelterCacheEntry {
 class ShelterCache {
   const ShelterCache();
 
-  static const _prefix = 'shelterCache.v1.';
+  /// `v2` since bus stops stopped counting as shelters (#338). What `v1`
+  /// held still names them as bunkers, so it goes the next time anything
+  /// is saved or cleared rather than being shown for another week.
+  static const _prefix = 'shelterCache.v2.';
+  static const _retiredPrefix = 'shelterCache.v1.';
 
   /// A week is long enough to bridge a public-service outage, while the UI
   /// always says when this answer was last confirmed.
@@ -80,13 +84,20 @@ class ShelterCache {
   /// say, to a square kilometre, where somebody searched.
   Future<void> clear() async {
     final prefs = await SharedPreferences.getInstance();
-    for (final key in prefs.getKeys().where((k) => k.startsWith(_prefix))) {
+    for (final key in prefs.getKeys().where(
+      (k) => k.startsWith(_prefix) || k.startsWith(_retiredPrefix),
+    )) {
       await prefs.remove(key);
     }
   }
 
   /// Drops what has run out and all but the [maxAreas] newest.
   static Future<void> _prune(SharedPreferences prefs) async {
+    for (final key in prefs.getKeys().where(
+      (k) => k.startsWith(_retiredPrefix),
+    )) {
+      await prefs.remove(key);
+    }
     final now = DateTime.now().toUtc();
     final kept = <({String key, DateTime savedAt})>[];
     for (final key in prefs.getKeys().where((k) => k.startsWith(_prefix))) {

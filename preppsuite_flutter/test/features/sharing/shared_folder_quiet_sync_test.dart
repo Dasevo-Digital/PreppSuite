@@ -161,7 +161,9 @@ void main() {
       await phone.deleteHouseholdData(householdId);
       await serviceFor(phone, 'phone').sync();
 
-      expect(phone.merges, 2);
+      // The first sync, then the laptop's file and its own: having deleted
+      // the household it no longer knows that it wrote that one (#336).
+      expect(phone.merges, 3);
       expect(await phone.inventoryItemsForSync(householdId), hasLength(1));
     });
   });

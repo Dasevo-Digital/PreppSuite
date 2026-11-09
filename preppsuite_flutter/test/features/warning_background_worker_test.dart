@@ -70,7 +70,13 @@ class _StubPollService extends WarningPollService {
 /// Records what would have been shown, so the worker can be exercised
 /// without a platform channel.
 class _RecordingNotifications implements NotificationService {
+  _RecordingNotifications({this.allowed = true});
+
+  final bool allowed;
   final shown = <Warning>[];
+
+  @override
+  Future<bool> systemAllowsNotifications() async => allowed;
 
   @override
   Future<void> showLocalWarning(Warning warning) async => shown.add(warning);
@@ -153,6 +159,35 @@ void main() {
     expect(ok, isTrue);
     expect(poller.polls, 1);
     expect(notifications.shown.map((w) => w.externalId), ['severe-1']);
+  });
+
+  test('what the system would not show is not booked as told', () async {
+    // Permission taken away in the system settings, or never given on a
+    // device set up from a backup (#333).
+    SharedPreferences.setMockInitialValues({'notificationsEnabled': true});
+    await const WarningRegionStore().save(
+      const WarningRegionFilter(
+        countryCode: 'DE',
+        ownRegionKey: '053340000000',
+      ),
+    );
+
+    final blocked = _RecordingNotifications(allowed: false);
+    final ok = await runWarningBackgroundPoll(
+      database: db,
+      notifications: blocked,
+      pollService: _StubPollService(db),
+    );
+    expect(ok, isTrue);
+    expect(blocked.shown, isEmpty);
+
+    final allowedAgain = _RecordingNotifications();
+    await runWarningBackgroundPoll(
+      database: db,
+      notifications: allowedAgain,
+      pollService: _StubPollService(db),
+    );
+    expect(allowedAgain.shown.map((w) => w.externalId), ['severe-1']);
   });
 
   test('a second run does not announce the same warning again', () async {

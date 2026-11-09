@@ -6,6 +6,8 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'secure_storage.dart';
+
 /// The lock exists but its state cannot be read right now.
 ///
 /// Kept apart from "no lock is set" on purpose, because the two look
@@ -23,7 +25,7 @@ abstract interface class AppLockStorage {
 
 class SecureAppLockStorage implements AppLockStorage {
   SecureAppLockStorage([FlutterSecureStorage? storage])
-    : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? appSecureStorage;
 
   final FlutterSecureStorage _storage;
 

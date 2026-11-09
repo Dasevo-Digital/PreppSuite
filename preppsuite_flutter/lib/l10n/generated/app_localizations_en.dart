@@ -1380,6 +1380,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsWarningReadinessDisabled => 'Not enabled';
 
   @override
+  String get settingsWarningReadinessSystemBlocked =>
+      'Blocked by the system. Warnings will not appear as notifications.';
+
+  @override
+  String get settingsWarningReadinessSystemAllow => 'Allow notifications';
+
+  @override
   String settingsWarningReadinessRegionsSet(int count) {
     return 'Primary place and $count additional regions';
   }
@@ -1704,6 +1711,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String expiryReminderBody(String name, int days) {
     return '$name expires in $days days.';
   }
+
+  @override
+  String expiryReminderBodyMedicine(int days) {
+    return 'A medicine expires in $days days.';
+  }
+
+  @override
+  String get expiryReminderBodyMedicineTomorrow =>
+      'A medicine expires tomorrow.';
 
   @override
   String expiryReminderBodyTomorrow(String name) {
@@ -6314,6 +6330,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pacerBreathe => 'Now 2 breaths';
 
   @override
+  String get pacerBreatheHint => 'Tap when you are done';
+
+  @override
   String get pacerSwapNow => 'Swap over if there are two of you';
 
   @override
@@ -8756,7 +8775,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyAccessCall112 => 'Call 112 – fire and ambulance';
 
   @override
-  String get emergencyAccessCall110 => 'Call 110 – police';
+  String get emergencyAccessCall110 => 'Call 110 – police in Germany';
 
   @override
   String get emergencyAccessNote =>
@@ -8964,8 +8983,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refillReminderTitle => 'Get a new prescription';
 
   @override
-  String refillReminderBody(String name, String date) {
-    return 'By your last count, $name lasts until $date.';
+  String refillReminderBody(String date) {
+    return 'By your last count, a medicine lasts until $date.';
   }
 
   @override

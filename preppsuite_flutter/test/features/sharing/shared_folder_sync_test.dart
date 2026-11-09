@@ -396,6 +396,23 @@ void main() {
       );
     });
 
+    test('a household deleted here reads its file on joining again', () async {
+      // The same database this time. The record that it had written the
+      // file outlived the rows, and the only copy was replaced (#336).
+      await leaveAFile();
+      await phone.deleteHouseholdData(householdId);
+
+      final result = await serviceFor(phone, 'phone').sync();
+
+      expect(result.error, isNull);
+      expect(result.received, greaterThan(0));
+      expect(await phone.inventoryItemsForSync(householdId), hasLength(1));
+      expect(
+        DeviceSnapshot.decode(folder.deviceFiles['phone']!)!.inventoryItems,
+        hasLength(1),
+      );
+    });
+
     test('and leaves it alone once it has written it', () async {
       await leaveAFile();
       final writes = folder.deviceWrites;

@@ -235,6 +235,15 @@ der Minute sind 545.454,54… Mikrosekunden; ein zählender Taktgeber wäre
 nach zwei Minuten mehrere Schläge daneben, und dann käme die Aufforderung
 zu beatmen an der falschen Stelle.
 
+Nach jedem Durchgang wartet der Takt fünf Sekunden auf die zwei
+Beatmungen. Früher lief er durch: Die Aufforderung stand für einen Schlag,
+und wer so lange beatmete, wie zwei Beatmungen dauern, stieg irgendwo
+zwischen zehn und neunzehn wieder ein und kam nach einem Dutzend
+Kompressionen bei „dreißig“ an. Wer eher fertig ist, tippt auf die Fläche,
+und der nächste Durchgang beginnt. Länger als fünf Sekunden wartet der Takt
+nicht, denn die Kompressionen sind das, was nicht ruhen darf; die Leitlinie
+erlaubt für beide Beatmungen zusammen höchstens zehn Sekunden.
+
 Der Ton ist eine selbst erzeugte WAV-Datei von 2,5 kB
 (`assets/sounds/metronome_click.wav`, erzeugt wie in der Versionsgeschichte
 beschrieben) – keine Lizenzfrage, kein Download.

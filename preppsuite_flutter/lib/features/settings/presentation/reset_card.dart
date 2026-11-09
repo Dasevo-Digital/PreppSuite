@@ -3,12 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/app_database_providers.dart';
+import '../../../core/error_log.dart';
 import '../../../core/locale_provider.dart';
+import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
 import '../../../core/settings_arrival.dart';
 import '../../../core/theme_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
+import '../../emergency_points/application/emergency_points.dart';
+import '../../first_aid/application/defibrillators.dart';
+import '../../home/application/home_screen_widget.dart';
 import '../../household/application/household_providers.dart';
 import '../../household/application/lock_screen_card_file.dart';
 import '../../inventory/application/inventory_photo_service.dart';
@@ -18,7 +23,9 @@ import '../../maps/application/map_source_preference.dart';
 import '../../sharing/application/folder_key_store.dart';
 import '../../sharing/application/settings_sync_store.dart';
 import '../../sharing/application/shared_folder_store.dart';
+import '../../sharing/application/sharing_providers.dart';
 import '../../shelters/application/shelter_cache.dart';
+import '../application/backup_reminder.dart';
 import '../../../core/database_snapshots.dart';
 import '../../../core/local_database_encryption.dart';
 
@@ -126,6 +133,7 @@ class ResetCard extends ConsumerWidget {
     }
     await const SharedFolderStore().clearLocation();
     await const FolderKeyStore().clear(profile.id);
+    await const FolderKeyStore().clearAllKeys();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('nearbyEmergencyContacts');
     // What the household keeps beside the database: the crisis plan, the
@@ -135,6 +143,10 @@ class ResetCard extends ConsumerWidget {
     await const PersonalDocumentStore().clear();
     // Where shelters were looked for, to the square kilometre (#255).
     await const ShelterCache().clear();
+    // The same goes for the last searches for help nearby (#336).
+    await const EmergencyPointStore().clear();
+    await const DefibrillatorStore().clear();
+    await ref.read(backupStatusProvider.notifier).forget();
     // A lock-screen card a share sheet was still holding (#293).
     await deleteLockScreenCardFiles();
     try {
@@ -147,6 +159,18 @@ class ResetCard extends ConsumerWidget {
     } on Object {
       // No index yet, or none in a test.
     }
+    await ErrorLog.instance.clear();
+    await HomeWidgetPublisher().clear();
+    // Last before the shell goes, and not left to the schedulers: they
+    // wait half a second, and the shell's end cancels them (#336). A
+    // reminder naming something from this household would go on ringing
+    // for a household that no longer exists.
+    try {
+      await NotificationService.instance.cancelAllReminders();
+    } on Object {
+      // No plugin in a test, and nothing a failure here could undo.
+    }
+    ref.invalidate(sharedFolderProvider);
     await ref.read(householdProfileProvider.notifier).clear();
   }
 }

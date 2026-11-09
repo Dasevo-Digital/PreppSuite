@@ -12,6 +12,11 @@
 /// beats adrift, and the count of thirty is wrong. Asking "how many beats
 /// fit into the time since the start" cannot drift, however late the
 /// caller is.
+///
+/// After every round the beat waits for the breaths (#337). It used to run
+/// straight on: the call to breathe stood for one beat, and whoever took
+/// the seconds that two breaths take came back in at ten or nineteen and
+/// reached "thirty" after a dozen compressions.
 library;
 
 /// How fast to beat and how the beats are grouped.
@@ -38,6 +43,14 @@ class CompressionPacer {
   /// shallower with fatigue long before the person doing them notices.
   static const swapInterval = Duration(minutes: 2);
 
+  /// How long the beat waits for two breaths before it starts again.
+  ///
+  /// The guideline allows up to ten seconds for both, and five is what they
+  /// take when they go well. Whoever is done sooner taps; see `skipped` in
+  /// [at]. Longer than this and the next round starts without them, which
+  /// is the right way round: compressions are what must not stop.
+  static const breathPause = Duration(seconds: 5);
+
   final int beatsPerMinute;
 
   /// 30 for an adult, 15 for a child. Zero means "do not group them" —
@@ -55,20 +68,46 @@ class CompressionPacer {
       beatsPerMinute.clamp(minimumBeatsPerMinute, maximumBeatsPerMinute);
 
   /// Where the pacer is [elapsed] after it started.
-  PacerTick at(Duration elapsed) {
+  ///
+  /// [skipped] is what has been cut from breathing pauses by tapping. It
+  /// moves the count on and leaves the clock alone: [PacerTick.elapsed]
+  /// stays the time that has really passed, which is what the changeover
+  /// after two minutes is about.
+  PacerTick at(Duration elapsed, {Duration skipped = Duration.zero}) {
     // A negative elapsed can only come from a clock correction. Reading it
     // as "not started yet" keeps the count at zero instead of running the
     // counter backwards.
     final micros = elapsed.inMicroseconds;
-    final beat = micros <= 0 ? 0 : micros ~/ beatInterval.inMicroseconds;
+    final position = micros <= 0 ? 0 : micros + skipped.inMicroseconds;
+    final realElapsed = micros <= 0 ? Duration.zero : elapsed;
+    final interval = beatInterval.inMicroseconds;
 
-    final grouped = compressionsPerCycle > 0;
+    if (compressionsPerCycle <= 0) {
+      final beat = position ~/ interval;
+      return PacerTick(
+        beat: beat,
+        compression: beat + 1,
+        compressionsPerCycle: compressionsPerCycle,
+        cycle: 1,
+        elapsed: realElapsed,
+      );
+    }
+
+    final pressing = compressionsPerCycle * interval;
+    final round = pressing + breathPause.inMicroseconds;
+    final rounds = position ~/ round;
+    final into = position - rounds * round;
+    final breathing = into >= pressing;
+    final beatOfRound = breathing ? compressionsPerCycle - 1 : into ~/ interval;
     return PacerTick(
-      beat: beat,
-      compression: grouped ? (beat % compressionsPerCycle) + 1 : beat + 1,
+      beat: rounds * compressionsPerCycle + beatOfRound,
+      compression: beatOfRound + 1,
       compressionsPerCycle: compressionsPerCycle,
-      cycle: grouped ? (beat ~/ compressionsPerCycle) + 1 : 1,
-      elapsed: micros <= 0 ? Duration.zero : elapsed,
+      cycle: rounds + 1,
+      elapsed: realElapsed,
+      breathLeft: breathing
+          ? Duration(microseconds: round - into)
+          : Duration.zero,
     );
   }
 
@@ -76,8 +115,14 @@ class CompressionPacer {
   ///
   /// The UI schedules against this rather than adding intervals together,
   /// for the same reason [at] exists.
-  Duration onsetOf(int beat) =>
-      Duration(microseconds: beat * beatInterval.inMicroseconds);
+  Duration onsetOf(int beat) {
+    final pauses = compressionsPerCycle > 0 ? beat ~/ compressionsPerCycle : 0;
+    return Duration(
+      microseconds:
+          beat * beatInterval.inMicroseconds +
+          pauses * breathPause.inMicroseconds,
+    );
+  }
 }
 
 /// One moment of a running pacer.
@@ -88,6 +133,7 @@ class PacerTick {
     required this.compressionsPerCycle,
     required this.cycle,
     required this.elapsed,
+    this.breathLeft = Duration.zero,
   });
 
   /// Beats since the start, the first being zero. This is what the sound
@@ -104,6 +150,12 @@ class PacerTick {
   final int cycle;
 
   final Duration elapsed;
+
+  /// How much of the pause for the breaths is left; zero while pressing.
+  final Duration breathLeft;
+
+  /// Whether the compressions of this round are done and the beat waits.
+  bool get isBreathing => breathLeft > Duration.zero;
 
   /// Whether this beat completes a cycle, and breaths come next.
   bool get isLastOfCycle =>

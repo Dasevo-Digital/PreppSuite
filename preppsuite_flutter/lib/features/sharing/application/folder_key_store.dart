@@ -80,4 +80,15 @@ class FolderKeyStore {
     }
     await const PrivatePreferences().remove(_keyFor(householdId));
   }
+
+  /// Every key still held, those of earlier households too, for a
+  /// household that is deleted (#336). The requirements stay, as in
+  /// [clear]: they are what stops a downgrade.
+  Future<void> clearAllKeys() async {
+    final prefs = await SharedPreferences.getInstance();
+    final held = prefs.getKeys().where((key) => key.startsWith('folderKey.'));
+    for (final key in held.toList()) {
+      await const PrivatePreferences().remove(key);
+    }
+  }
 }

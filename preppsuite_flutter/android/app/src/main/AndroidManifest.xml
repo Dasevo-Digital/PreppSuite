@@ -8,6 +8,9 @@
     <!-- Android 13 and later ask the user before any notification shows.
          Expiry reminders and warnings both depend on it. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- What brings the reminders back after a restart (#331). WorkManager
+         happens to ask for it too, but that is its own reason. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <!-- geolocator does not declare these itself, unlike most plugins: the
          app has to ask. Without them the shelter map and the region lookup
          fail silently on Android. Coarse is listed alongside fine so the
@@ -65,6 +68,23 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/preppsuite_widget_info" />
+        </receiver>
+        <!-- The notification plugin has not declared these itself since its
+             version 16. Without them no scheduled reminder ever showed: the
+             alarm was set, the list of pending ones looked right, and when
+             it came due nothing was there to receive it (#331). -->
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
+            android:exported="false" />
+        <receiver
+            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
         </receiver>
     </application>
     <!-- Required to query activities that can process text, see:

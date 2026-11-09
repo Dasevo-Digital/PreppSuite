@@ -642,6 +642,8 @@
   "settingsWarningReadinessRefresh": "Last complete refresh",
   "settingsWarningReadinessEnabled": "Enabled",
   "settingsWarningReadinessDisabled": "Not enabled",
+  "settingsWarningReadinessSystemBlocked": "Blocked by the system. Warnings will not appear as notifications.",
+  "settingsWarningReadinessSystemAllow": "Allow notifications",
   "settingsWarningReadinessRegionsSet": "Primary place and {count} additional regions",
   "@settingsWarningReadinessRegionsSet": {"placeholders": {"count": {"type": "int"}}},
   "settingsWarningReadinessRegionsMissing": "No primary place configured yet",
@@ -851,6 +853,15 @@
       }
     }
   },
+  "expiryReminderBodyMedicine": "A medicine expires in {days} days.",
+  "@expiryReminderBodyMedicine": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "expiryReminderBodyMedicineTomorrow": "A medicine expires tomorrow.",
   "expiryReminderBodyTomorrow": "{name} expires tomorrow.",
   "@expiryReminderBodyTomorrow": {
     "placeholders": {
@@ -3662,6 +3673,7 @@
     }
   },
   "pacerBreathe": "Now 2 breaths",
+  "pacerBreatheHint": "Tap when you are done",
   "pacerSwapNow": "Swap over if there are two of you",
   "pacerPushOnly": "Push without stopping",
   "pacerPushOnlyShort": "Push only",
@@ -5086,7 +5098,7 @@
   "emergencyAccessTitle": "Emergency",
   "emergencyAccessButton": "Emergency: 112 and first aid",
   "emergencyAccessCall112": "Call 112 – fire and ambulance",
-  "emergencyAccessCall110": "Call 110 – police",
+  "emergencyAccessCall110": "Call 110 – police in Germany",
   "emergencyAccessNote": "This help is part of the app and needs no stored data. It works even when the app is locked or the household cannot be loaded right now.",
   "householdLoadFailedTitle": "The household cannot be loaded right now",
   "householdLoadRetry": "Try again",
@@ -5201,12 +5213,9 @@
     }
   },
   "refillReminderTitle": "Get a new prescription",
-  "refillReminderBody": "By your last count, {name} lasts until {date}.",
+  "refillReminderBody": "By your last count, a medicine lasts until {date}.",
   "@refillReminderBody": {
     "placeholders": {
-      "name": {
-        "type": "String"
-      },
       "date": {
         "type": "String"
       }
