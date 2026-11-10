@@ -119,6 +119,10 @@ class ResetCard extends ConsumerWidget {
   Future<void> _resetHousehold(BuildContext context, WidgetRef ref) async {
     if (!await _confirm(context, l10n.resetConfirmHousehold)) return;
     final db = ref.read(appDatabaseProvider);
+    // Out of the folder before anything is deleted, and after any run
+    // under way has finished: a run that saw the rows go wrote the empty
+    // household over this device's file (#336).
+    await ref.read(sharedFolderProvider.notifier).leaveFolder();
     // Pictures first: the rows are the only record of which files were
     // this household's.
     await deleteHouseholdPhotos(db, householdId: profile.id);

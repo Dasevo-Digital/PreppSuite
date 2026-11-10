@@ -253,6 +253,7 @@ class SharedFolderSyncService {
       final published =
           !holdsBack &&
           await _publishIfNeeded(
+            ownFileWasKnown: ownFileKnown,
             learnedSomething: received > 0,
             ourFileExists: ourFile != null,
             ourFileIsPlain:
@@ -369,6 +370,7 @@ class SharedFolderSyncService {
   /// and since the others no longer read plain files, the rows in it
   /// reach nobody until it is.
   Future<bool> _publishIfNeeded({
+    required bool ownFileWasKnown,
     required bool learnedSomething,
     required bool ourFileExists,
     required bool ourFileIsPlain,
@@ -377,6 +379,13 @@ class SharedFolderSyncService {
     // second-granularity acknowledgement could mark an unpublished edit
     // clean, so dirty alone cannot recover every existing installation.
     final needsRepair = await _db.lastPulledAt(_publishedEntity) == null;
+
+    // The mark was there when this run began, which is why our own file
+    // was not read, and it has gone since: the household was deleted under
+    // a run already under way (#336). Writing now would put the empty
+    // database over what may be the only copy. The next run reads the file
+    // first, because the mark is gone.
+    if (needsRepair && ownFileWasKnown) return false;
 
     // The settings, stamped, read before deciding: a station changed here
     // is something to say even when no row moved. Until #253 they were

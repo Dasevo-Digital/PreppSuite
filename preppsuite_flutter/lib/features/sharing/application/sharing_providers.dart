@@ -84,6 +84,9 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   Timer? _timer;
   bool _syncing = false;
 
+  /// The run under way, for [leaveFolder] to wait for.
+  Completer<void>? _running;
+
   @override
   Future<SharedFolderState> build() async {
     ref.onDispose(() => _timer?.cancel());
@@ -191,9 +194,14 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   /// The snapshot stays in the folder. Removing it would delete this
   /// device's rows from everyone else's next merge, which is not what
   /// "stop syncing my phone" means.
+  ///
+  /// Waits for a run under way. "Delete household" leaves first, and a run
+  /// that went on after it had deleted the rows wrote the empty household
+  /// over this device's file (#336).
   Future<void> leaveFolder() async {
     await _store.clearLocation();
     _restartTimer(active: false);
+    await _running?.future;
     state = AsyncData(
       (state.value ?? const SharedFolderState()).copyWith(clearFolder: true),
     );
@@ -215,6 +223,7 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
     if (profile == null) return;
 
     _syncing = true;
+    final running = _running = Completer<void>();
     _update((current) => current.copyWith(syncing: true));
     try {
       final service = await _serviceFor(folder, profile, republish);
@@ -234,6 +243,8 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
       );
     } finally {
       _syncing = false;
+      _running = null;
+      running.complete();
     }
   }
 
