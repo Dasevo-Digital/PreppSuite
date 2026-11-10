@@ -18,6 +18,8 @@ import '../../warnings/application/warning_providers.dart';
 import '../../household/application/card_species.dart';
 import '../../household/application/emergency_plan_report.dart';
 import '../../household/application/household_providers.dart';
+import '../../household/application/meeting_point_places.dart';
+import '../../household/presentation/meeting_point_way.dart';
 import '../../inventory/application/inventory_providers.dart';
 import '../../inventory/application/supply_calculator.dart';
 import '../../inventory/presentation/prepper_recipes_screen.dart';
@@ -1037,6 +1039,8 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
       withCards = answer;
     }
     if (!mounted) return;
+    final places = await ref.read(meetingPointStoreProvider).load();
+    if (!mounted) return;
     final locale = _l10n.localeName;
     final profile = ref.read(householdProfileProvider).value;
     final l10n = _l10n;
@@ -1058,6 +1062,10 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
         members: withCards ? members : const [],
         hub: _data,
         autonomy: autonomy,
+        meetingPlaces: {
+          for (final MapEntry(:key, :value) in places.entries)
+            key: formatPlaceCoordinates(value),
+        },
         strings: EmergencyFolderReportStrings(
           title: l10n.hubFolderReportTitle,
           generatedOn: l10n.pdfGeneratedOn(

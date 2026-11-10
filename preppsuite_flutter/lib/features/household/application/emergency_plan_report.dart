@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../../../core/pdf_blocks.dart';
 import '../../../local_db/database.dart';
 import 'card_people.dart';
 import 'card_species.dart';
@@ -193,7 +194,7 @@ class EmergencyPlanReport {
             if (section.rows.isEmpty)
               pw.Text(strings.empty)
             else
-              for (final row in section.rows) pw.Bullet(text: row),
+              for (final row in section.rows) pdfLine(row),
           ],
           if (members.isNotEmpty) ...[
             pw.Header(level: 1, text: strings.cards),
@@ -211,18 +212,11 @@ class EmergencyPlanReport {
               ),
             ),
             pw.SizedBox(height: 8),
-            for (final member in members) ...[
-              pw.Text(
+            for (final member in members)
+              ...pdfCard(
                 member.name,
-                style: pw.TextStyle(
-                  fontSize: 13,
-                  fontWeight: pw.FontWeight.bold,
-                ),
+                emergencyCardRows(member, strings.fields),
               ),
-              for (final row in emergencyCardRows(member, strings.fields))
-                pw.Bullet(text: '${row.label}: ${row.value}'),
-              pw.SizedBox(height: 10),
-            ],
           ],
         ],
       ),

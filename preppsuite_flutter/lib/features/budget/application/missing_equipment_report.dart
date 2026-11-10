@@ -6,6 +6,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../core/name_order.dart';
+import '../../../core/pdf_blocks.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
 import '../../checklists/application/built_in_template_l10n.dart';
@@ -126,8 +127,8 @@ class MissingEquipmentReport {
                 templateTitle,
                 style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
               ),
-              pw.Bullet(
-                text: itemsByTemplateTitle[templateTitle]!
+              pdfLine(
+                itemsByTemplateTitle[templateTitle]!
                     .map((item) => item.titleIn(languageCode))
                     .join(', '),
               ),

@@ -102,6 +102,58 @@ void main() {
 
   setUpAll(TestWidgetsFlutterBinding.ensureInitialized);
 
+  group('long entries (#351)', () {
+    final pasted = [
+      for (var i = 1; i <= 60; i++) 'Mittel $i 5 mg morgens und abends',
+    ].join('\n');
+
+    test('a pasted medication plan prints instead of failing', () async {
+      final pdf = await render(
+        members: [
+          member(medication: pasted),
+          member(clientId: 'm2', name: 'Ben Muster'),
+        ],
+      );
+      final text = textIn(pdf);
+      expect(text, contains('Mittel 60'));
+      // Too long for one page: every line says whose it is.
+      expect(RegExp('Medikation').allMatches(text).length, greaterThan(0));
+      expect(
+        RegExp('Anna Muster').allMatches(text).length,
+        greaterThanOrEqualTo(2),
+        reason: 'the name goes with every line of a card this long',
+      );
+    });
+
+    test('so do notes of a page and more', () async {
+      final notes = List.filled(900, 'Wasser').join(' ');
+      final pdf = await const EmergencyPlanReport().build(
+        plan: plan.copyWith(notes: Value(notes)),
+        householdName: 'Familie Muster',
+        strings: strings,
+        font: pw.Font.helvetica(),
+      );
+      expect(textIn(pdf), contains('Wasser'));
+    });
+
+    test('thirty short cards each stay under their name', () async {
+      final pdf = await render(
+        members: [
+          for (var i = 0; i < 30; i++)
+            member(
+              clientId: 'm$i',
+              name: 'Person $i',
+              bloodType: 'A+',
+              allergies: 'Penicillin',
+              medication: 'Ramipril 5 mg',
+              conditions: 'Bluthochdruck',
+            ),
+        ],
+      );
+      expect(textIn(pdf), contains('Person 29'));
+    });
+  });
+
   test('the municipality contact point reaches the paper', () async {
     // The one thing on this sheet that is only useful on paper: it is
     // where somebody walks to when the power has been out for two days

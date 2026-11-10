@@ -27,7 +27,9 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../../../core/pdf_blocks.dart';
 import '../../../local_db/database.dart';
+import '../../household/application/meeting_point_places.dart';
 import '../../household/application/emergency_plan_report.dart';
 import 'preparedness_hub_store.dart';
 
@@ -110,6 +112,11 @@ class EmergencyFolderReport {
     PreparednessHubData hub = const PreparednessHubData(),
     List<({String label, String value})> autonomy = const [],
 
+    /// The meeting points' coordinates, as the crisis plan prints them.
+    /// The folder left them off, and on paper they are what finds the
+    /// place when "the corner by the bakery" means nothing to anybody.
+    Map<MeetingPoint, String> meetingPlaces = const {},
+
     /// Overridden in tests, for the reason `EmergencyPlanReport` gives:
     /// the bundled Noto subsets itself into glyph indices, so a built-in
     /// font is the only way to read what actually reached the paper.
@@ -126,8 +133,13 @@ class EmergencyFolderReport {
       (
         title: strings.meetingPoints,
         rows: [
-          ?plan?.meetingPointNear,
-          ?plan?.meetingPointFar,
+          for (final (point, text) in [
+            (MeetingPoint.near, plan?.meetingPointNear),
+            (MeetingPoint.far, plan?.meetingPointFar),
+          ])
+            if ([?text, ?meetingPlaces[point]] case final parts
+                when parts.isNotEmpty)
+              parts.join(' · '),
         ],
       ),
       (
@@ -201,7 +213,7 @@ class EmergencyFolderReport {
             if (section.rows.isEmpty)
               pw.Text(strings.empty)
             else
-              for (final row in section.rows) pw.Bullet(text: row),
+              for (final row in section.rows) pdfLine(row),
           ],
           pw.Header(level: 1, text: strings.evacuation),
           if (hub.evacuationCards.isEmpty)
@@ -221,11 +233,9 @@ class EmergencyFolderReport {
                 ),
               ),
               if (card.route.trim().isNotEmpty)
-                pw.Bullet(text: '${strings.evacuationRoute}: ${card.route}'),
+                pdfLine('${strings.evacuationRoute}: ${card.route}'),
               if (card.locations.trim().isNotEmpty)
-                pw.Bullet(
-                  text: '${strings.evacuationPlaces}: ${card.locations}',
-                ),
+                pdfLine('${strings.evacuationPlaces}: ${card.locations}'),
               pw.SizedBox(height: 8),
             ],
           if (members.isNotEmpty) ...[
@@ -244,18 +254,11 @@ class EmergencyFolderReport {
               ),
             ),
             pw.SizedBox(height: 8),
-            for (final member in members) ...[
-              pw.Text(
+            for (final member in members)
+              ...pdfCard(
                 member.name,
-                style: pw.TextStyle(
-                  fontSize: 13,
-                  fontWeight: pw.FontWeight.bold,
-                ),
+                emergencyCardRows(member, strings.fields),
               ),
-              for (final row in emergencyCardRows(member, strings.fields))
-                pw.Bullet(text: '${row.label}: ${row.value}'),
-              pw.SizedBox(height: 10),
-            ],
           ],
         ],
       ),
