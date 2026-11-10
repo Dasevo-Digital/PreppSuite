@@ -250,7 +250,7 @@ const builtInTemplates = [
       BuiltInItem(
         '00000000-0000-4000-8000-000000000605',
         'Notrufnummern: 112 für Feuerwehr und Rettungsdienst, '
-            '110 für die Polizei',
+            '110 für die Polizei in Deutschland',
       ),
       BuiltInItem(
         '00000000-0000-4000-8000-000000000606',

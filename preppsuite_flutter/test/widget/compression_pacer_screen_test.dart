@@ -129,6 +129,54 @@ void main() {
     await stop(tester, l10n);
   });
 
+  testWidgets('the changeover is not hidden behind the breaths (#337)', (
+    tester,
+  ) async {
+    final (clock, l10n) = await start(tester);
+    // The first pause that begins more than six seconds after the
+    // two-minute mark, so only the new rule can show the note.
+    var round = 0;
+    Duration pauseStart() =>
+        pacer.onsetOf(30 * (round + 1) - 1) + pacer.beatInterval;
+    while (pauseStart() < const Duration(minutes: 2, seconds: 7)) {
+      round++;
+    }
+    await windTo(tester, clock, pauseStart() + const Duration(seconds: 1));
+
+    expect(find.text(l10n.pacerBreathe), findsOneWidget);
+    final note = tester.widget<Opacity>(
+      find.ancestor(
+        of: find.text(l10n.pacerSwapNow).first,
+        matching: find.byType(Opacity),
+      ),
+    );
+    expect(note.opacity, 1);
+    await stop(tester, l10n);
+  });
+
+  testWidgets('a screen reader hears the call once and a labelled button', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final (clock, l10n) = await start(tester);
+    await windTo(tester, clock, breaths);
+
+    final call = tester.getSemantics(find.text(l10n.pacerBreathe));
+    expect(call.getSemanticsData().flagsCollection.isLiveRegion, isTrue);
+    expect(call.label, isNot(contains(' s')), reason: 'no countdown in it');
+    expect(
+      find.bySemanticsLabel(l10n.pacerBreatheHint),
+      findsOneWidget,
+      reason: 'the button says what it does',
+    );
+    final button = tester.getSemantics(
+      find.bySemanticsLabel(l10n.pacerBreatheHint),
+    );
+    expect(button.getSemanticsData().flagsCollection.isButton, isTrue);
+    await stop(tester, l10n);
+    semantics.dispose();
+  });
+
   testWidgets('a tap while pressing does nothing to the count', (tester) async {
     final (clock, l10n) = await start(tester);
     await windTo(tester, clock, pacer.beatInterval * 4);

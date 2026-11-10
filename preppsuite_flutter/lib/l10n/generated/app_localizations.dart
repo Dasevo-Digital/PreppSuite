@@ -1315,7 +1315,7 @@ abstract class AppLocalizations {
   /// No description provided for @burglaryCaughtCall.
   ///
   /// In en, this message translates to:
-  /// **'Call 110 at once.'**
+  /// **'Call the emergency number at once: 110 in Germany, 112 elsewhere.'**
   String get burglaryCaughtCall;
 
   /// No description provided for @burglaryCaughtDescribe.
@@ -1333,7 +1333,7 @@ abstract class AppLocalizations {
   /// No description provided for @burglaryAfterThreat.
   ///
   /// In en, this message translates to:
-  /// **'Call 110 if you are under acute threat.'**
+  /// **'If you are under acute threat, call 110 in Germany, 112 elsewhere.'**
   String get burglaryAfterThreat;
 
   /// No description provided for @burglaryAfterReport.

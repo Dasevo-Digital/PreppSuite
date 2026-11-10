@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/notifications_provider.dart';
@@ -9,7 +11,17 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   final original = NotificationsEnabledController.askSystem;
-  tearDown(() => NotificationsEnabledController.askSystem = original);
+  final originalFolder = NotificationsEnabledController.markerFolder;
+  late Directory cache;
+  setUp(() async {
+    cache = await Directory.systemTemp.createTemp('preppsuite-cache');
+    NotificationsEnabledController.markerFolder = () async => cache;
+  });
+  tearDown(() async {
+    NotificationsEnabledController.askSystem = original;
+    NotificationsEnabledController.markerFolder = originalFolder;
+    await cache.delete(recursive: true);
+  });
 
   var asked = 0;
   void systemAnswers(bool answer) {
@@ -61,6 +73,36 @@ void main() {
 
     expect(asked, 0);
   });
+
+  test('a preference that came with a transferred phone is not "asked" '
+      '(#333)', () async {
+    // Android's device-to-device transfer carries the preferences, and
+    // 2.9.5 kept the marker there. The cache folder stays behind.
+    SharedPreferences.setMockInitialValues({
+      'notificationsEnabled': true,
+      'notificationsPermissionAskedHere': true,
+    });
+    systemAnswers(true);
+
+    await load();
+
+    expect(asked, 1);
+  });
+
+  test(
+    'without a cache folder it never asks rather than every start',
+    () async {
+      SharedPreferences.setMockInitialValues({'notificationsEnabled': true});
+      NotificationsEnabledController.markerFolder = () async =>
+          throw const FileSystemException('none');
+      systemAnswers(true);
+
+      await load();
+      await load();
+
+      expect(asked, 0);
+    },
+  );
 
   test('turning it on here counts as having asked', () async {
     SharedPreferences.setMockInitialValues({});

@@ -736,7 +736,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'If you cannot get out: open a window if you can and call for help.';
 
   @override
-  String get burglaryCaughtCall => 'Call 110 at once.';
+  String get burglaryCaughtCall =>
+      'Call the emergency number at once: 110 in Germany, 112 elsewhere.';
 
   @override
   String get burglaryCaughtDescribe =>
@@ -746,7 +747,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get burglaryAfterTitle => 'Afterwards';
 
   @override
-  String get burglaryAfterThreat => 'Call 110 if you are under acute threat.';
+  String get burglaryAfterThreat =>
+      'If you are under acute threat, call 110 in Germany, 112 elsewhere.';
 
   @override
   String get burglaryAfterReport =>

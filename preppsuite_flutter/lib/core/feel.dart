@@ -90,4 +90,19 @@ abstract final class Feel {
   static void beatChange() {
     if (_possible) unawaited(HapticFeedback.vibrate());
   }
+
+  /// The pacer's compressions are done for this round and it waits for
+  /// the breaths: two light taps.
+  ///
+  /// Its own pattern, because it comes every twenty seconds or so. It used
+  /// [beatChange], and the changeover, which comes every two minutes and
+  /// has to be noticed, no longer stood out from it (#337).
+  static void breathe() {
+    if (!_possible) return;
+    unawaited(() async {
+      await HapticFeedback.lightImpact();
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      await HapticFeedback.lightImpact();
+    }());
+  }
 }

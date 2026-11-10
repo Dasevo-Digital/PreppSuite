@@ -1,6 +1,8 @@
 import 'dart:async' show unawaited;
+import 'dart:io';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/widgets.dart' show AppLifecycleListener;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,9 +12,11 @@ import 'settings_arrival.dart';
 
 const _notificationsEnabledPrefsKey = 'notificationsEnabled';
 
-/// Whether this device's system has been asked at all. Not carried with the
-/// household: it is the one thing a backup cannot know about another device.
-const _permissionAskedHerePrefsKey = 'notificationsPermissionAskedHere';
+/// Whether this device's system has been asked at all: a file in the
+/// cache folder, which neither a backup nor Android's device-to-device
+/// transfer carries (#333). A preference travelled with the transfer, and
+/// a new telephone that came with "asked" was never asked.
+const _permissionAskedHereFile = 'notifications-permission-asked';
 
 /// Reads the persisted notification setting without a provider container.
 ///
@@ -38,6 +42,31 @@ class NotificationsEnabledController extends Notifier<bool> {
   @visibleForTesting
   static Future<bool> Function() askSystem =
       NotificationService.instance.requestPermission;
+
+  /// Where the marker goes, for a test to point elsewhere.
+  @visibleForTesting
+  static Future<Directory> Function() markerFolder =
+      getApplicationCacheDirectory;
+
+  static Future<File?> _marker() async {
+    try {
+      final folder = await markerFolder();
+      return File(
+        '${folder.path}${Platform.pathSeparator}'
+        '$_permissionAskedHereFile',
+      );
+    } on Object {
+      return null;
+    }
+  }
+
+  static Future<void> _rememberAsked() async {
+    try {
+      await (await _marker())?.writeAsString('1', flush: true);
+    } on Object {
+      // Asked again next time; with permission given that shows nothing.
+    }
+  }
 
   @override
   bool build() {
@@ -73,9 +102,12 @@ class NotificationsEnabledController extends Notifier<bool> {
   /// on while nothing could appear. Once per device, and after the load
   /// rather than inside it, so that a dialog left open holds nothing up.
   Future<void> _askIfNeverAskedHere() async {
+    // No marker to be had means no way to keep the promise of "once", so
+    // rather never than every start.
+    final marker = await _marker();
+    if (marker == null || await marker.exists()) return;
+    await _rememberAsked();
     final prefs = await SharedPreferences.getInstance();
-    if (prefs.getBool(_permissionAskedHerePrefsKey) ?? false) return;
-    await prefs.setBool(_permissionAskedHerePrefsKey, true);
     final bool granted;
     try {
       granted = await askSystem();
@@ -95,7 +127,7 @@ class NotificationsEnabledController extends Notifier<bool> {
     state = actuallyEnabled;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_notificationsEnabledPrefsKey, actuallyEnabled);
-    if (enabled) await prefs.setBool(_permissionAskedHerePrefsKey, true);
+    if (enabled) await _rememberAsked();
   }
 }
 

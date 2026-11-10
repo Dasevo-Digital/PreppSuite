@@ -164,7 +164,7 @@ class _CompressionPacerScreenState extends State<CompressionPacerScreen>
     final tick = _pacer.at(_stopwatch.elapsed, skipped: _skipped);
     if (tick.isBreathing && tick.cycle != _breathsAnnounced) {
       _breathsAnnounced = tick.cycle;
-      Feel.beatChange();
+      Feel.breathe();
     }
     if (tick.beat != _soundedBeat) {
       _soundedBeat = tick.beat;
@@ -387,11 +387,26 @@ class _Dial extends StatelessWidget {
     final secondsLeft = tick.breathLeft.inMicroseconds == 0
         ? 0
         : (tick.breathLeft.inMicroseconds / 1000000).ceil();
-    final swapNote = tick.swapsDue > 0 && tick.elapsed.inSeconds % 120 < 6;
+    // Six seconds from each changeover, and through the pause for the
+    // breaths that follows within a round of it. The pause is where two
+    // rescuers change over, and the call to breathe used to cover the
+    // note for most of it (#337).
+    final sinceSwap =
+        tick.elapsed - CompressionPacer.swapInterval * tick.swapsDue;
+    final swapNote =
+        tick.swapsDue > 0 &&
+        (sinceSwap < const Duration(seconds: 6) ||
+            (breathing && sinceSwap < const Duration(seconds: 30)));
 
     return LayoutBuilder(
+      // Its own node with its own words: a button without a label read as
+      // "button", and the countdown inside it was read out every second
+      // (#337).
       builder: (context, constraints) => Semantics(
+        container: true,
+        explicitChildNodes: true,
         button: pausing,
+        label: pausing ? l10n.pacerBreatheHint : null,
         onTap: pausing ? onBreathsDone : null,
         // The whole area: the hands have just come off a chest, and nobody
         // is going to aim.
@@ -425,16 +440,21 @@ class _Dial extends StatelessWidget {
                               child: Padding(
                                 padding: const EdgeInsets.all(24),
                                 child: pausing
-                                    ? Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.air,
-                                            size: 48,
-                                            color: foreground,
-                                          ),
-                                          Text('$secondsLeft s', style: digits),
-                                        ],
+                                    ? ExcludeSemantics(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.air,
+                                              size: 48,
+                                              color: foreground,
+                                            ),
+                                            Text(
+                                              '$secondsLeft s',
+                                              style: digits,
+                                            ),
+                                          ],
+                                        ),
                                       )
                                     : Text(
                                         '${tick.compression}',
@@ -484,12 +504,15 @@ class _Dial extends StatelessWidget {
                             : 0,
                         children: [
                           const SizedBox.shrink(),
-                          Semantics(
-                            liveRegion: breathing,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Announced once when it appears, and nothing
+                              // else in it: the hint is the button's label.
+                              Semantics(
+                                container: true,
+                                liveRegion: breathing,
+                                child: Text(
                                   l10n.pacerBreathe,
                                   textAlign: TextAlign.center,
                                   style: theme.textTheme.headlineSmall
@@ -498,13 +521,28 @@ class _Dial extends StatelessWidget {
                                         fontWeight: FontWeight.w700,
                                       ),
                                 ),
-                                Text(
+                              ),
+                              ExcludeSemantics(
+                                child: Text(
                                   l10n.pacerBreatheHint,
                                   textAlign: TextAlign.center,
                                   style: theme.textTheme.titleMedium,
                                 ),
-                              ],
-                            ),
+                              ),
+                              // Always there and only sometimes visible, so
+                              // the pause takes the same room either way.
+                              Opacity(
+                                opacity: breathing && swapNote ? 1 : 0,
+                                child: Text(
+                                  l10n.pacerSwapNow,
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: scheme.error,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           Text(
                             l10n.pacerSwapNow,

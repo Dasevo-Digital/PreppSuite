@@ -739,7 +739,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'Kommst du nicht heraus: wenn möglich ein Fenster öffnen und um Hilfe rufen.';
 
   @override
-  String get burglaryCaughtCall => 'Sofort 110.';
+  String get burglaryCaughtCall =>
+      'Sofort den Notruf: 110 in Deutschland, sonst 112.';
 
   @override
   String get burglaryCaughtDescribe =>
@@ -749,7 +750,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get burglaryAfterTitle => 'Danach';
 
   @override
-  String get burglaryAfterThreat => 'Bei akuter Bedrohung 110.';
+  String get burglaryAfterThreat =>
+      'Bei akuter Bedrohung den Notruf: 110 in Deutschland, sonst 112.';
 
   @override
   String get burglaryAfterReport =>

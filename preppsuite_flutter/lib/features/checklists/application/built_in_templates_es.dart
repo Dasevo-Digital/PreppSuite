@@ -84,7 +84,7 @@ const builtInChecklistsEs = <String, String>{
       'ninguno',
   '00000000-0000-4000-8000-000000000605':
       'Números de emergencia: 112 para bomberos y ambulancia, 110 para la '
-      'policía',
+      'policía en Alemania',
   '00000000-0000-4000-8000-000000000606':
       'La app de avisos NINA de la BBK en el teléfono',
   // Wichtige Dokumente

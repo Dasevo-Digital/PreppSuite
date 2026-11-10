@@ -236,15 +236,30 @@ class NotificationService {
   /// Opens this app's page in the system's notification settings, for a
   /// permission that can no longer be asked for. False where it did not
   /// open.
+  ///
+  /// All three systems that keep such a page. Only Android's was asked,
+  /// and on a Mac or an iPad the button that should lead there did nothing
+  /// at all (#333).
   Future<bool> openSystemNotificationSettings() async {
     try {
       await _ensureInitialized();
-      return await _plugin
+      final opened =
+          await _plugin
               .resolvePlatformSpecificImplementation<
                 AndroidFlutterLocalNotificationsPlugin
               >()
               ?.openAppNotificationSettings() ??
-          false;
+          await _plugin
+              .resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin
+              >()
+              ?.openAppNotificationSettings() ??
+          await _plugin
+              .resolvePlatformSpecificImplementation<
+                MacOSFlutterLocalNotificationsPlugin
+              >()
+              ?.openAppNotificationSettings();
+      return opened ?? false;
     } on Object {
       return false;
     }

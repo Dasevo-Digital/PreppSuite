@@ -78,7 +78,8 @@ const builtInChecklistsEn = <String, String>{
   '00000000-0000-4000-8000-000000000604':
       'Important phone numbers on paper — a flat phone gives none of them up',
   '00000000-0000-4000-8000-000000000605':
-      'Emergency numbers: 112 for fire and ambulance, 110 for the police',
+      'Emergency numbers: 112 for fire and ambulance, 110 for the police in '
+      'Germany',
   '00000000-0000-4000-8000-000000000606':
       'The BBK’s warning app NINA on the phone',
   // Wichtige Dokumente
