@@ -54,13 +54,29 @@ List<LockScreenField> availableLockScreenFields(HouseholdMember card) => [
 /// One printed line: a label and what follows it.
 typedef LockScreenLine = ({String label, String value});
 
-/// The lines for [fields], in the enum's order, labelled by [label].
+/// The order on the picture: whom to call straight after the name (#350).
+///
+/// It came last, and what does not fit is left off from the end, so with
+/// many fields ticked the one line a stranger with the phone can act on
+/// was the first to go.
+const lockScreenPrintOrder = [
+  LockScreenField.name,
+  LockScreenField.contacts,
+  LockScreenField.birthYear,
+  LockScreenField.bloodType,
+  LockScreenField.allergies,
+  LockScreenField.medication,
+  LockScreenField.conditions,
+  LockScreenField.careNeeds,
+];
+
+/// The lines for [fields], in [lockScreenPrintOrder], labelled by [label].
 List<LockScreenLine> lockScreenLines(
   HouseholdMember card,
   Set<LockScreenField> fields, {
   required String Function(LockScreenField field) label,
 }) => [
-  for (final field in LockScreenField.values)
+  for (final field in lockScreenPrintOrder)
     if (fields.contains(field))
       if (_value(card, field) case final value? when value.isNotEmpty)
         (label: label(field), value: value),
@@ -89,10 +105,14 @@ String? _value(HouseholdMember card, LockScreenField field) => switch (field) {
 /// [size] is in physical pixels, the phone's own screen. The text starts
 /// below the top third, where the clock and the date sit on every lock
 /// screen, and it is large: it is read at arm's length, often by torch.
+///
+/// [onLeftOff] hears which lines did not fit, so that the person can be
+/// told before the picture goes onto a lock screen without them.
 Future<Uint8List> renderLockScreenCard({
   required String heading,
   required List<LockScreenLine> lines,
   required Size size,
+  void Function(List<LockScreenLine> leftOff)? onLeftOff,
 }) async {
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder, Offset.zero & size);
@@ -131,7 +151,12 @@ Future<Uint8List> renderLockScreenCard({
   band.paint(canvas, Offset(margin + unit * 4, y + unit * 2.5));
   y += bandHeight + unit * 5;
 
+  final leftOff = <LockScreenLine>[];
   for (final line in lines) {
+    if (leftOff.isNotEmpty) {
+      leftOff.add(line);
+      continue;
+    }
     final label = TextPainter(
       text: TextSpan(
         text: line.label.toUpperCase(),
@@ -160,12 +185,17 @@ Future<Uint8List> renderLockScreenCard({
     )..layout(maxWidth: width);
     // Stops before the bottom edge, where the lock screen keeps its own
     // buttons; what does not fit is left off rather than drawn under them.
-    if (y + label.height + value.height > size.height * 0.9) break;
+    if (y + label.height + value.height > size.height * 0.9) {
+      leftOff.add(line);
+      continue;
+    }
     label.paint(canvas, Offset(margin, y));
     y += label.height + unit;
     value.paint(canvas, Offset(margin, y));
     y += value.height + unit * 4;
   }
+
+  if (leftOff.isNotEmpty) onLeftOff?.call(leftOff);
 
   final picture = recorder.endRecording();
   final image = await picture.toImage(

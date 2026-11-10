@@ -54,6 +54,38 @@ void main() {
     expect(defaultLockScreenFields, contains(LockScreenField.contacts));
   });
 
+  test('whom to call comes straight after the name (#350)', () {
+    final lines = lockScreenLines(card(), {
+      ...LockScreenField.values,
+    }, label: label);
+
+    expect(lines.take(2).map((l) => l.label), ['name', 'contacts']);
+  });
+
+  testWidgets('what does not fit is said, not dropped in silence (#350)', (
+    tester,
+  ) async {
+    final long = card(
+      medication: List.filled(4, 'Ramipril 5 mg morgens').join(', '),
+      allergies: List.filled(4, 'Penicillin, Nüsse').join(', '),
+    );
+    var leftOff = <LockScreenLine>[];
+    await tester.runAsync(() async {
+      await renderLockScreenCard(
+        heading: 'IM NOTFALL',
+        lines: [
+          ...lockScreenLines(long, {...LockScreenField.values}, label: label),
+          for (var i = 0; i < 6; i++) (label: 'extra $i', value: 'x' * 80),
+        ],
+        size: const Size(1080, 2400),
+        onLeftOff: (lines) => leftOff = lines,
+      );
+    });
+
+    expect(leftOff, isNotEmpty);
+    expect(leftOff.map((l) => l.label), isNot(contains('contacts')));
+  });
+
   test('the lines are what was chosen, in a fixed order', () {
     final lines = lockScreenLines(
       card(),

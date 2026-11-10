@@ -31,6 +31,10 @@ class _LockScreenCardDialogState extends State<LockScreenCardDialog> {
   };
   var _working = false;
 
+  /// What did not fit the last time, until the choice changes: shown in
+  /// the dialog, and a second tap makes the picture anyway (#350).
+  List<String>? _leftOff;
+
   String _label(AppLocalizations l10n, LockScreenField field) =>
       switch (field) {
         LockScreenField.name => l10n.emergencyCardName,
@@ -57,8 +61,10 @@ class _LockScreenCardDialogState extends State<LockScreenCardDialog> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     final size = _targetSize(context);
+    final confirmed = _leftOff != null;
     setState(() => _working = true);
     try {
+      List<LockScreenLine> leftOff = const [];
       final png = await renderLockScreenCard(
         heading: l10n.lockScreenCardHeading,
         lines: lockScreenLines(
@@ -67,7 +73,16 @@ class _LockScreenCardDialogState extends State<LockScreenCardDialog> {
           label: (field) => _label(l10n, field),
         ),
         size: size,
+        onLeftOff: (lines) => leftOff = lines,
       );
+      if (leftOff.isNotEmpty && !confirmed) {
+        if (mounted) {
+          setState(
+            () => _leftOff = [for (final line in leftOff) line.label],
+          );
+        }
+        return;
+      }
       // The temporary directory: this copy exists only for the time it
       // takes the share sheet to hand it on, and is deleted after (#293).
       final file = await lockScreenCardFile(l10n.lockScreenCardFileName);
@@ -126,11 +141,18 @@ class _LockScreenCardDialogState extends State<LockScreenCardDialog> {
               contentPadding: EdgeInsets.zero,
               value: _chosen.contains(field),
               title: Text(_label(l10n, field)),
-              onChanged: (value) => setState(
-                () =>
-                    value == true ? _chosen.add(field) : _chosen.remove(field),
-              ),
+              onChanged: (value) => setState(() {
+                value == true ? _chosen.add(field) : _chosen.remove(field);
+                _leftOff = null;
+              }),
             ),
+          if (_leftOff case final left?) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.lockScreenCardLeftOff(left.join(', ')),
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+          ],
         ],
       ),
       actions: [
@@ -140,7 +162,11 @@ class _LockScreenCardDialogState extends State<LockScreenCardDialog> {
         ),
         FilledButton(
           onPressed: _working || _chosen.isEmpty ? null : () => _create(l10n),
-          child: Text(l10n.lockScreenCardCreate),
+          child: Text(
+            _leftOff == null
+                ? l10n.lockScreenCardCreate
+                : l10n.lockScreenCardCreateAnyway,
+          ),
         ),
       ],
     );

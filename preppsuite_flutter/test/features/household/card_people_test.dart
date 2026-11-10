@@ -84,10 +84,11 @@ void main() {
       expect(encodeCardPeople(const [CardPerson()]), isNull);
     });
 
-    test('a row with a number but no name is dropped', () {
-      // The form offers a blank row on "add". One left with only a stray
-      // digit must not become a nameless number on a card.
-      expect(encodeCardPeople(const [CardPerson(phone: '0531')]), isNull);
+    test('a row with a number but no name is kept (#350)', () {
+      // It used to be dropped, on the theory that it was a stray digit in
+      // the blank row "add" offers. It was as often "Sohn, 0171 …", gone
+      // without a word. The form now asks for the name instead.
+      expect(encodeCardPeople(const [CardPerson(phone: '0531')]), '· 0531');
     });
 
     test('surrounding space is not stored', () {

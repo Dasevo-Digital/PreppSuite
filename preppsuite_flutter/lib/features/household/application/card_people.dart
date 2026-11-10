@@ -113,10 +113,11 @@ CardPerson? _parseLine(String line) {
 
   var name = head;
   var role = '';
-  // The last pair, so a name that itself carries brackets keeps them.
+  // The last pair, so a name that itself carries brackets keeps them. A
+  // pair at the very start is an entry without a name: "(Sohn) · 0171 …".
   if (head.endsWith(')')) {
     final open = head.lastIndexOf('(');
-    if (open > 0) {
+    if (open >= 0) {
       role = head.substring(open + 1, head.length - 1).trim();
       name = head.substring(0, open).trim();
     }
@@ -127,13 +128,14 @@ CardPerson? _parseLine(String line) {
 
 /// What goes back into the column, or null where nothing was typed.
 ///
-/// An entry with no name is dropped rather than stored: the form offers a
-/// blank row as soon as somebody taps "add", and a row left untouched
-/// must not become a nameless number on a card a paramedic reads.
+/// Only a row with nothing in it is dropped: the form offers a blank row as
+/// soon as somebody taps "add". A row with a number and no name used to go
+/// as well, without a word (#350). "Sohn, 0171 …" is a number a paramedic
+/// can ring, and the form asks for the name instead of throwing it away.
 String? encodeCardPeople(Iterable<CardPerson> people) {
   final lines = [
     for (final person in people)
-      if (person.name.trim().isNotEmpty) person.line,
+      if (!person.isBlank) person.line.trim(),
   ];
   return lines.isEmpty ? null : lines.join('\n');
 }

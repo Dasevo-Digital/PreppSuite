@@ -164,7 +164,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get regionKeyHelper =>
-      'Nur für Deutschland, für genauere Warnmeldungen';
+      'Nur für Deutschland, für genauere Warnmeldungen. Keine Postleitzahl.';
+
+  @override
+  String get regionKeyUnknown =>
+      'Diesen Schlüssel hat kein Kreis. Bitte den Regionalschlüssel eingeben, keine Postleitzahl.';
 
   @override
   String get createButton => 'Erstellen';
@@ -2356,6 +2360,18 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get lockScreenCardPrivacy =>
       'Was auf dem Bild steht, kann jeder lesen, der das Telefon in der Hand hat. Wähle nur aus, was im Notfall helfen soll.';
+
+  @override
+  String get cardPersonNameMissing =>
+      'Ohne Namen weiß niemand, nach wem er am Telefon fragt.';
+
+  @override
+  String lockScreenCardLeftOff(String fields) {
+    return 'Passt nicht mehr aufs Bild: $fields. Weniger auswählen oder trotzdem erstellen.';
+  }
+
+  @override
+  String get lockScreenCardCreateAnyway => 'Trotzdem erstellen';
 
   @override
   String get lockScreenCardCreate => 'Bild erstellen';

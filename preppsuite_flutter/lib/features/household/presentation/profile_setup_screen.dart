@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
+import '../../settings/presentation/my_region_card.dart';
+import '../../warnings/application/dwd_areas_provider.dart';
 import '../application/household_providers.dart';
 import '../application/warning_feed_countries.dart';
 import 'count_tile.dart';
@@ -156,6 +158,19 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           helperText: l10n.regionKeyHelper,
                         ),
                         keyboardType: TextInputType.number,
+                        // A postcode typed here used to be stored as it was
+                        // and hid the warnings for the own district (#349).
+                        validator: (value) => regionKeyProblem(
+                          (value ?? '').trim(),
+                          areas: ref.read(dwdAreasProvider).value,
+                          l10n: l10n,
+                        ),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      const SizedBox(height: 8),
+                      RegionKeyPreview(
+                        regionKey: _regionController.text.trim(),
+                        l10n: l10n,
                       ),
                     ],
                     const SizedBox(height: 24),

@@ -367,8 +367,14 @@ abstract class AppLocalizations {
   /// No description provided for @regionKeyHelper.
   ///
   /// In en, this message translates to:
-  /// **'Germany only, for more precise warnings'**
+  /// **'Germany only, for more precise warnings. Not a postcode.'**
   String get regionKeyHelper;
+
+  /// No description provided for @regionKeyUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'No district has this key. Enter the regional key, not a postcode.'**
+  String get regionKeyUnknown;
 
   /// No description provided for @createButton.
   ///
@@ -3969,6 +3975,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Anybody who holds the phone can read what is on the picture. Choose only what should help in an emergency.'**
   String get lockScreenCardPrivacy;
+
+  /// No description provided for @cardPersonNameMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Without a name nobody knows whom to ask for on the phone.'**
+  String get cardPersonNameMissing;
+
+  /// No description provided for @lockScreenCardLeftOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Does not fit on the picture: {fields}. Choose fewer or create it anyway.'**
+  String lockScreenCardLeftOff(String fields);
+
+  /// No description provided for @lockScreenCardCreateAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Create anyway'**
+  String get lockScreenCardCreateAnyway;
 
   /// No description provided for @lockScreenCardCreate.
   ///

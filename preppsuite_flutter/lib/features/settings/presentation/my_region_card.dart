@@ -102,13 +102,18 @@ class _EditRegionDialogState extends ConsumerState<_EditRegionDialog> {
     final region = _regionKeyController.text.trim();
 
     // Empty clears the region, which is a legitimate choice — it means
-    // "show me everything".
-    if (_countryCode == 'DE' &&
-        region.isNotEmpty &&
-        !RegExp(r'^\d{5}(\d{7})?$').hasMatch(region)) {
-      setState(
-        () => _error = AppLocalizations.of(context)!.settingsRegionKeyInvalid,
-      );
+    // "show me everything". A key the preview below already marks as
+    // unknown is refused too: stored, it hid the warnings for the own
+    // district and state (#349).
+    final problem = _countryCode == 'DE'
+        ? regionKeyProblem(
+            region,
+            areas: ref.read(dwdAreasProvider).value,
+            l10n: AppLocalizations.of(context)!,
+          )
+        : null;
+    if (problem != null) {
+      setState(() => _error = problem);
       return;
     }
 
@@ -169,7 +174,7 @@ class _EditRegionDialogState extends ConsumerState<_EditRegionDialog> {
                 onChanged: (_) => setState(() => _error = null),
               ),
               const SizedBox(height: 8),
-              _KeyPreview(
+              RegionKeyPreview(
                 regionKey: _regionKeyController.text.trim(),
                 l10n: l10n,
               ),
@@ -189,8 +194,12 @@ class _EditRegionDialogState extends ConsumerState<_EditRegionDialog> {
 }
 
 /// What the key in the field currently names.
-class _KeyPreview extends ConsumerWidget {
-  const _KeyPreview({required this.regionKey, required this.l10n});
+class RegionKeyPreview extends ConsumerWidget {
+  const RegionKeyPreview({
+    super.key,
+    required this.regionKey,
+    required this.l10n,
+  });
 
   final String regionKey;
   final AppLocalizations l10n;

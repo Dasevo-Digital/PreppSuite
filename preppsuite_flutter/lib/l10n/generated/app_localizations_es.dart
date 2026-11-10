@@ -162,7 +162,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get regionKeyLabel => 'Clave regional (opcional)';
 
   @override
-  String get regionKeyHelper => 'Solo en Alemania, para avisos más precisos';
+  String get regionKeyHelper =>
+      'Solo en Alemania, para avisos más precisos. No es el código postal.';
+
+  @override
+  String get regionKeyUnknown =>
+      'Ningún distrito tiene esta clave. Introduce la clave regional, no el código postal.';
 
   @override
   String get createButton => 'Crear';
@@ -2356,6 +2361,18 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get lockScreenCardPrivacy =>
       'Cualquiera que tenga el teléfono en la mano puede leer lo que hay en la imagen. Elige solo lo que deba ayudar en una emergencia.';
+
+  @override
+  String get cardPersonNameMissing =>
+      'Sin nombre nadie sabe por quién preguntar al teléfono.';
+
+  @override
+  String lockScreenCardLeftOff(String fields) {
+    return 'No cabe en la imagen: $fields. Elige menos o créala de todos modos.';
+  }
+
+  @override
+  String get lockScreenCardCreateAnyway => 'Crear de todos modos';
 
   @override
   String get lockScreenCardCreate => 'Crear imagen';

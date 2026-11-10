@@ -81,7 +81,8 @@
   "householdNameLabel": "Household name",
   "countryLabel": "Country",
   "regionKeyLabel": "Regional key (optional)",
-  "regionKeyHelper": "Germany only, for more precise warnings",
+  "regionKeyHelper": "Germany only, for more precise warnings. Not a postcode.",
+  "regionKeyUnknown": "No district has this key. Enter the regional key, not a postcode.",
   "createButton": "Create",
   "fieldRequired": "This field is required.",
   "errorGeneric": "An unexpected error occurred. Please try again.",
@@ -1313,6 +1314,16 @@
   "lockScreenCardTitle": "Picture for the lock screen",
   "lockScreenCardIntro": "Paramedics do not unlock a stranger's phone, but they see its lock screen. The picture opens in the share sheet: choose \"Save Image\" there and set it as the lock-screen wallpaper in Settings.",
   "lockScreenCardPrivacy": "Anybody who holds the phone can read what is on the picture. Choose only what should help in an emergency.",
+  "cardPersonNameMissing": "Without a name nobody knows whom to ask for on the phone.",
+  "lockScreenCardLeftOff": "Does not fit on the picture: {fields}. Choose fewer or create it anyway.",
+  "@lockScreenCardLeftOff": {
+    "placeholders": {
+      "fields": {
+        "type": "String"
+      }
+    }
+  },
+  "lockScreenCardCreateAnyway": "Create anyway",
   "lockScreenCardCreate": "Create picture",
   "lockScreenCardHeading": "IN CASE OF EMERGENCY",
   "lockScreenCardCall": "Call in an emergency",

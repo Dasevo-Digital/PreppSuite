@@ -586,7 +586,12 @@ class _PeopleSection extends StatelessWidget {
         border: const OutlineInputBorder(),
         isDense: true,
       ),
+      onChanged: (_) => onChanged(),
     );
+    // Kept when it is saved (#350), but whoever rings the number should
+    // know whom they are asking for.
+    final nameMissing =
+        row.name.text.trim().isEmpty && row.phone.text.trim().isNotEmpty;
 
     return Padding(
       key: row.key,
@@ -603,7 +608,12 @@ class _PeopleSection extends StatelessWidget {
                     labelText: nameLabel,
                     border: const OutlineInputBorder(),
                     isDense: true,
+                    helperText: nameMissing
+                        ? AppLocalizations.of(context)!.cardPersonNameMissing
+                        : null,
+                    helperMaxLines: 3,
                   ),
+                  onChanged: (_) => onChanged(),
                 ),
               ),
               IconButton(

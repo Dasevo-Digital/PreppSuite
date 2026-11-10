@@ -106,12 +106,21 @@ class WarningRegionFilter {
   /// not, every warning in the country is shown — the safe reading for a
   /// civil-protection alert.
   bool get hasAnyRegion =>
-      (ownRegionKey != null && ownRegionKey!.length >= 5) ||
-      extraRegions.isNotEmpty;
+      ownKreisSchluessel != null || extraRegions.isNotEmpty;
 
+  /// The first five digits, or null where there is no key that names a
+  /// German state.
+  ///
+  /// A postcode in the field used to switch off the warnings for the own
+  /// district and state (#349): "77756" counted as a region, "77" is no
+  /// state, and a flood in the district and a warning for all of
+  /// Baden-Württemberg both read as somewhere else. A key that cannot be a
+  /// district now counts as none, which shows everything in the country,
+  /// the safe reading. The forms refuse such keys; this is for the ones
+  /// already stored.
   String? get ownKreisSchluessel {
     final key = ownRegionKey;
-    if (key == null || key.length < 5) return null;
+    if (key == null || !isGermanRegionKey(key)) return null;
     return key.substring(0, 5);
   }
 
@@ -124,4 +133,12 @@ class WarningRegionFilter {
       if (region.kind == WarningRegionKind.kreis && region.value.length >= 5)
         region.value.substring(0, 5),
   }.toList(growable: false);
+}
+
+/// Whether [key] begins like an official German regional key: five digits,
+/// the first two one of the sixteen states.
+bool isGermanRegionKey(String key) {
+  if (!RegExp(r'^\d{5}').hasMatch(key)) return false;
+  final state = int.parse(key.substring(0, 2));
+  return state >= 1 && state <= 16;
 }
