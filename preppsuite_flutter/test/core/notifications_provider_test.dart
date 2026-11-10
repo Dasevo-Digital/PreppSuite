@@ -37,8 +37,9 @@ void main() {
     addTearDown(container.dispose);
     final notifier = container.read(notificationsEnabledProvider.notifier);
     await notifier.ensureLoaded();
-    // The question goes out after the load, on purpose.
-    await pumpEventQueue();
+    // The question goes out after the load, on purpose, and reads a real
+    // file: waiting for the event queue alone was not always enough.
+    await notifier.askedForTesting;
     return (container, container.read(notificationsEnabledProvider));
   }
 

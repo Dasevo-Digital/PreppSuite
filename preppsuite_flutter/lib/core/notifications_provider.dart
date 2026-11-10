@@ -38,6 +38,14 @@ class NotificationsEnabledStore {
 class NotificationsEnabledController extends Notifier<bool> {
   Future<void>? _initialLoad;
 
+  /// The question to the system, while it is under way.
+  Future<void>? _asking;
+
+  /// Completes once the question after the load has been answered; a test
+  /// cannot know otherwise, because the marker is a real file.
+  @visibleForTesting
+  Future<void> get askedForTesting => _asking ?? Future.value();
+
   /// What asks the system, for a test to replace.
   @visibleForTesting
   static Future<bool> Function() askSystem =
@@ -94,7 +102,7 @@ class NotificationsEnabledController extends Notifier<bool> {
     // async gap.
     if (!ref.mounted) return;
     state = enabled;
-    if (enabled) unawaited(_askIfNeverAskedHere());
+    if (enabled) unawaited(_asking = _askIfNeverAskedHere());
   }
 
   /// A switch that arrived on from another device, in a backup or a
