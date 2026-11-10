@@ -8,6 +8,7 @@ import '../../first_aid/application/step_speech.dart';
 import '../../phrasebook/application/phrasebook.dart' show PhraseLanguage;
 import '../../phrasebook/presentation/phrase_display.dart'
     show phraseSpeechProvider, phraseVoiceProvider;
+import '../application/warning_translations.dart';
 
 /// Reading a warning out loud (#201).
 ///
@@ -27,12 +28,16 @@ PhraseLanguage warningLanguage(WarningSource source) => switch (source) {
   WarningSource.meteoalarm => PhraseLanguage.en,
 };
 
-/// Headline, description and what to do, in that order.
-String warningSpeechText(Warning warning) => [
-  warning.headline,
-  ?warning.description,
-  ?warning.instruction,
-].where((part) => part.trim().isNotEmpty).join('\n');
+/// Headline, description and what to do, in that order, in [language]
+/// where the BBK translated into it (#357).
+String warningSpeechText(Warning warning, {String language = 'de'}) {
+  final text = warning.textIn(language);
+  return [
+    text.headline,
+    ?text.description,
+    ?text.instruction,
+  ].where((part) => part.trim().isNotEmpty).join('\n');
+}
 
 class SpeakWarningButton extends ConsumerStatefulWidget {
   const SpeakWarningButton({
@@ -74,15 +79,29 @@ class _SpeakWarningButtonState extends ConsumerState<SpeakWarningButton> {
     }
     setState(() => _speaking = true);
     await _speech.speak(
-      warningSpeechText(widget.warning),
+      warningSpeechText(widget.warning, language: _language(context)),
       languageCode: voice,
     );
   }
 
+  /// The app's language when the warning is translated into it, so that
+  /// the words and the voice match.
+  String _language(BuildContext context) {
+    final app = Localizations.localeOf(context).languageCode;
+    return widget.warning.isTranslatedFor(app) ? app : 'de';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final language = _language(context);
     final voice = ref
-        .watch(phraseVoiceProvider(warningLanguage(widget.source)))
+        .watch(
+          phraseVoiceProvider(
+            language == 'de'
+                ? warningLanguage(widget.source)
+                : PhraseLanguage.values.byName(language),
+          ),
+        )
         .value;
     if (voice == null) return const SizedBox.shrink();
 

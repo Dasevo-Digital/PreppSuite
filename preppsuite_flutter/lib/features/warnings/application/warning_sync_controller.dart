@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../model/household_profile.dart';
 
 import '../../../core/app_database_providers.dart';
+import '../../../core/app_language.dart';
 import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
 import 'warning_background_worker.dart';
@@ -148,8 +149,9 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
     final notifications = NotificationService.instance;
     if (!await notifications.systemAllowsNotifications()) return;
 
+    final language = (await appLocaleWithoutContext()).languageCode;
     for (final warning in pending) {
-      await notifications.showLocalWarning(warning);
+      await notifications.showLocalWarning(warning, language: language);
     }
     await service.markNotified(pending);
   }

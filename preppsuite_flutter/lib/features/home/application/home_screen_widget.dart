@@ -13,14 +13,13 @@
 library;
 
 import 'dart:io';
-import 'dart:ui' show Locale, PlatformDispatcher;
 
 import 'package:flutter/foundation.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/app_language.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../local_db/database.dart';
 import '../../../model/categories.dart';
@@ -149,16 +148,8 @@ Future<void> publishHomeWidgetSituation({
 }
 
 /// The app's language, for an isolate with no widget tree to ask.
-Future<AppLocalizations> _workerLocalizations() async {
-  final prefs = await SharedPreferences.getInstance();
-  final wanted =
-      prefs.getString('localeOverride') ??
-      PlatformDispatcher.instance.locale.languageCode;
-  final supported = AppLocalizations.supportedLocales;
-  return lookupAppLocalizations(
-    supported.contains(Locale(wanted)) ? Locale(wanted) : supported.first,
-  );
-}
+Future<AppLocalizations> _workerLocalizations() async =>
+    lookupAppLocalizations(await appLocaleWithoutContext());
 
 String _severity(AppLocalizations l10n, WarningSeverity severity) =>
     switch (severity) {

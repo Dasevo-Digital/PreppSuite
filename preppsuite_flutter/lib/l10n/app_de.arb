@@ -4204,6 +4204,12 @@
       }
     }
   },
+  "warningEasyGerman": "Leichte Sprache",
+  "warningOfficialTranslation": "Amtliche Übersetzung: {language}",
+  "warningGermanOriginal": "Amtlicher Text auf Deutsch",
+  "warningExtraLanguageTitle": "Warnungen zusätzlich in",
+  "warningExtraLanguageHint": "Die amtliche Übersetzung, wo das Bundesamt eine mitschickt. Maßgeblich bleibt der deutsche Text.",
+  "warningExtraLanguageNone": "Keine weitere Sprache",
   "warningReadAloud": "Vorlesen",
   "warningStopReading": "Vorlesen beenden",
   "translatorConversation": "Gespräch",

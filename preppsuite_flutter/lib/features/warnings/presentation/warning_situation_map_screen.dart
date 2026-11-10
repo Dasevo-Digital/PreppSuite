@@ -23,6 +23,7 @@ import '../application/warning_polygon_codec.dart';
 import '../application/warning_providers.dart';
 import '../application/warning_relevance.dart';
 import '../application/warning_severity_l10n.dart';
+import '../application/warning_translations.dart';
 
 /// All active CAP areas in one place.
 ///
@@ -340,9 +341,10 @@ class _WarningAtPoint extends StatelessWidget {
   Widget build(BuildContext context) {
     final severity = warningSeverityFromName(warning.severity);
     final colors = warningSeverityColors(context, severity);
-    final guidance = warning.instruction?.trim().isNotEmpty == true
-        ? warning.instruction!.trim()
-        : warning.description?.trim();
+    final text = warning.textIn(l10n.localeName);
+    final guidance = text.instruction?.trim().isNotEmpty == true
+        ? text.instruction!.trim()
+        : text.description?.trim();
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
@@ -360,7 +362,7 @@ class _WarningAtPoint extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        warning.headline,
+                        text.headline,
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       Text(localizeWarningSeverity(l10n, severity)),
@@ -469,7 +471,7 @@ class _WarningSummary extends StatelessWidget {
               color: colors.foreground,
             ),
             title: Text(
-              warning.headline,
+              warning.textIn(l10n.localeName).headline,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

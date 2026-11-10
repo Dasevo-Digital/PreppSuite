@@ -3978,7 +3978,9 @@ Profil. Der Stand trägt immer das Datum.
 bleibt eine Warnung ungemeldet, statt als gemeldet verbucht zu werden, und
 sie kommt mit dem ersten Abruf nach der Freigabe. Ein Schalter, der aus einer
 Sicherung oder Übergabe auf „an“ ankommt, wird einmal je Gerät dem System
-vorgelegt (`notificationsPermissionAskedHere`, wird nicht mitgenommen).
+vorgelegt. Ob das geschehen ist, steht seit dem 10. November in einer Datei
+im Cache-Ordner, die weder eine Sicherung noch die Android-Geräteübertragung
+mitnimmt; die Einstellung, die es vorher war, reiste mit der Übertragung.
 
 **Nur der Start der App repariert eine Umstellung** (#334). Von einem anderen
 Isolate aus sieht eine laufende Umstellung aus wie eine abgebrochene, und die
@@ -4015,3 +4017,38 @@ deshalb `v2`, damit keine alten Treffer eine Woche stehen bleiben.
 **110 ist die deutsche Polizei** (#339). Im Notfallbereich gibt es den Knopf
 nur bei `countryCode == 'DE'`. Vor der Sperre ist das Land nicht lesbar, dort
 sagt die Beschriftung, wofür die Nummer gilt.
+
+### Aus der Durchsicht vom 10. November (#336–#357)
+
+**Ein Lauf, unter dem der Haushalt gelöscht wird, schreibt nicht** (#336).
+Die Korrektur vom 9. November löschte mit dem Haushalt auch die Marke, dass
+diese Datenbank ihre Ordnerdatei geschrieben hat. Ein Abgleich, der die Marke
+vor dem Löschen gelesen und die eigene Datei deshalb übersprungen hatte, fand
+sie danach nicht mehr, hielt das für eine Reparatur und schrieb den leeren
+Haushalt über die Datei. Verschwindet die Marke während eines Laufs, schreibt
+dieser Lauf nicht; der nächste liest die Datei zuerst. „Haushalt löschen“
+verlässt außerdem zuerst den Ordner und wartet auf einen laufenden Abgleich.
+
+**Ein Regionalschlüssel nennt ein Bundesland** (#349). Eine Postleitzahl im
+Feld galt als Region, „77“ ist aber kein Land, und Warnungen für den eigenen
+Kreis und das eigene Land standen unter „anderswo“. Ein gespeicherter
+Schlüssel, dessen erste zwei Ziffern nicht 01 bis 16 sind, gilt als keiner;
+beide Formulare weisen Schlüssel ab, die kein Kreis hat.
+
+**Gedrucktes darf länger als eine Seite sein** (#351). `pw.Bullet` lässt sich
+nicht teilen, und ein langer Eintrag ließ das ganze Dokument scheitern.
+`lib/core/pdf_blocks.dart` setzt Zeilen, die auf die nächste Seite
+weiterlaufen, und hält eine Notfallkarte auf einer Seite, wo sie passt; eine
+längere nennt die Person in jeder Zeile.
+
+**Warnungen in der Sprache der Oberfläche** (#357). Das BBK schickt MoWaS- und
+DWD-Meldungen mit amtlichen Übersetzungen (Leichte Sprache, Englisch,
+Spanisch, Französisch, Polnisch, Russisch, Türkisch, Arabisch). Sie stehen als
+JSON in `warnings.translationsJson` (Schema 28): null, solange die
+Detailseite nicht gelesen ist, `{}`, wenn sie keine hatte. Deutsch bleibt die
+Fassung, mit der die App rechnet: Relevanz, Trinkwasser, Listen und die
+Quittung vergleichen die deutschen Spalten. Gezeigt, gemeldet und vorgelesen
+wird in der Sprache der App, wo es eine Übersetzung gibt, und eine zweite
+Sprache lässt sich je Gerät wählen (`warningExtraLanguage`, wird nicht
+mitgenommen). Gespeicherte Warnungen ohne Übersetzungen holt der Abruf im
+Rahmen von `detailRetriesPerPoll` nach, ohne sie noch einmal zu melden.

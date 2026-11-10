@@ -5914,6 +5914,19 @@
       }
     }
   },
+  "warningEasyGerman": "Easy German (Leichte Sprache)",
+  "warningOfficialTranslation": "Official translation: {language}",
+  "@warningOfficialTranslation": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "warningGermanOriginal": "Official text in German",
+  "warningExtraLanguageTitle": "Also show warnings in",
+  "warningExtraLanguageHint": "The official translation where the German Federal Office sends one. The German text remains authoritative.",
+  "warningExtraLanguageNone": "No other language",
   "warningReadAloud": "Read aloud",
   "warningStopReading": "Stop reading",
   "translatorConversation": "Conversation",

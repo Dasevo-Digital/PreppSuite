@@ -30,6 +30,7 @@ import '../application/emergency_folder_report.dart';
 import '../application/preparedness_hub_store.dart';
 import 'resilience_plan_panel.dart';
 import 'scenario_screen.dart';
+import '../../warnings/application/warning_translations.dart';
 
 /// Private, offline planning tools. The screen intentionally has no map or
 /// cloud action: routes and sensitive document locations stay on this device.
@@ -457,7 +458,10 @@ class _PreparednessHubScreenState extends ConsumerState<PreparednessHubScreen>
             ),
             const SizedBox(height: 8),
             if (warning != null)
-              Text(warning.headline, style: TextStyle(color: onColor)),
+              Text(
+                warning.textIn(_l10n.localeName).headline,
+                style: TextStyle(color: onColor),
+              ),
             if (situation.warnings.length > 1)
               Text(
                 _l10n.hubSituationMoreWarnings(situation.warnings.length - 1),

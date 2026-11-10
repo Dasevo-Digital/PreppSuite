@@ -10,6 +10,7 @@ import 'cap_text.dart';
 import '../../household/application/german_states.dart';
 import 'dwd_areas.dart';
 import 'meteoalarm_client.dart';
+import 'warning_translations.dart';
 import 'warning_severity_l10n.dart';
 
 /// A warning worth telling the user about, with the reason it qualified.
@@ -76,6 +77,10 @@ class WarningIngest {
         polygonsJson: warning.polygons.isEmpty
             ? null
             : jsonEncode(warning.polygons),
+        translationsJson: switch (warning.translations) {
+          final translations? => encodeWarningTranslations(translations),
+          null => null,
+        },
         effective: _parseDateTime(warning.startDate) ?? DateTime.now().toUtc(),
         expires: null,
         sent: _parseDateTime(warning.startDate) ?? DateTime.now().toUtc(),
@@ -172,6 +177,7 @@ class WarningIngest {
     required String? areaDescription,
     required String? senderContact,
     required String? polygonsJson,
+    String? translationsJson,
     required DateTime effective,
     required DateTime? expires,
     required DateTime sent,
@@ -226,7 +232,12 @@ class WarningIngest {
           lacksBbkDetail(existing) &&
           _hasDetail(description, instruction, areaDescription, polygonsJson);
       final widens = everywhere && existing.regionKey != null;
+      // A warning stored before translations were kept, now read with
+      // them (#357). Not newsworthy: the words are the same warning.
+      final translates =
+          existing.translationsJson == null && translationsJson != null;
       if (!widens &&
+          !translates &&
           !_narrows(existing.regionKey, region) &&
           !fillsIn &&
           !revives &&
@@ -279,6 +290,10 @@ class WarningIngest {
         ),
         senderContact: Value(kept(senderContact, existing?.senderContact)),
         polygonsJson: Value(kept(polygonsJson, existing?.polygonsJson)),
+        // Not through [kept]: that cleans text, and this is JSON.
+        translationsJson: Value(
+          translationsJson ?? (unchanged ? existing.translationsJson : null),
+        ),
         effective: effective,
         expires: Value(expires),
         sent: sent,

@@ -79,7 +79,10 @@ class _RecordingNotifications implements NotificationService {
   Future<bool> systemAllowsNotifications() async => allowed;
 
   @override
-  Future<void> showLocalWarning(Warning warning) async => shown.add(warning);
+  Future<void> showLocalWarning(
+    Warning warning, {
+    String language = 'de',
+  }) async => shown.add(warning);
 
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

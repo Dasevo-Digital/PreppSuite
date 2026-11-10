@@ -265,9 +265,12 @@ class WarningPollService {
         final sent = DateTime.tryParse(warning.startDate)?.toUtc();
         final changed =
             existing == null || (sent != null && sent.isAfter(existing.sent));
+        // Asked again for a detail that never arrived, and once for every
+        // warning stored before its translations were kept (#357): those
+        // run for weeks, and would otherwise stay German until they end.
         final missing =
             !changed &&
-            lacksBbkDetail(existing) &&
+            (lacksBbkDetail(existing) || existing.translationsJson == null) &&
             retries++ < detailRetriesPerPoll;
         if (changed || missing) result[at] = await _bbk.fetchDetails(warning);
       }

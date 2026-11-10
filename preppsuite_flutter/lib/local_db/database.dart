@@ -35,7 +35,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 27;
+  static const currentSchemaVersion = 28;
 
   AppDatabase() : super(_openConnection()) {
     OpenDatabases.track(this);
@@ -639,6 +639,15 @@ class AppDatabase extends _$AppDatabase {
             inventoryItems,
             inventoryItems.thirdPhotoPath,
           );
+        }
+      }
+      if (from < 28) {
+        // The official translations of a warning (#357). Null afterwards,
+        // which the next polls fill in for the warnings still in force.
+        if (!await _hasTable('warnings')) {
+          await m.createTable(warnings);
+        } else {
+          await _addColumnOnce(m, warnings, warnings.translationsJson);
         }
       }
     },

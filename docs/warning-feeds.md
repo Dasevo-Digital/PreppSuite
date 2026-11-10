@@ -144,6 +144,14 @@ und für gespeicherte, die noch keine haben, höchstens
 fehlgeschlagene Detailabfrage sonst endgültig war: Die Warnung galt danach
 als unverändert und wurde nie wieder gefragt.
 
+**Die Detailseite bringt die Übersetzungen mit** (#357). Am 10.11.2026 trugen
+alle MoWaS- und DWD-Meldungen `info`-Blöcke in `de` (bei DWD `de-DE`),
+`de-LS` (Leichte Sprache, nur MoWaS), `en`, `ar`, `es`, `fr`, `pl`, `ru` und
+`tr`. Bei MoWaS sind Überschrift und Handlungsempfehlung übersetzt, bei DWD
+alles. Die App speichert sie neben dem deutschen Text und zeigt sie in der
+Sprache der Oberfläche; die deutsche Fassung bleibt maßgeblich und
+aufklappbar.
+
 **Ein knapper Eintrag löscht keine Details** (#177). Der Kreis-Abruf läuft
 nach dem bundesweiten und schreibt die Zeile neu, um den Schlüssel vom Land
 auf den Kreis zu verengen. Bis 2.5.5 schrieb er dabei seine eigenen, leeren

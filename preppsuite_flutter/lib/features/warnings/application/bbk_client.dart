@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import 'cap_text.dart';
 import 'warning_http.dart';
+import 'warning_translations.dart';
 import '../../../core/http_client.dart';
 
 /// A single raw entry from a BBK (warnung.bund.de) `mapData.json` feed —
@@ -26,6 +27,7 @@ class BbkRawWarning {
     this.areaDescription,
     this.senderContact,
     this.polygons = const [],
+    this.translations,
   });
 
   final String id;
@@ -39,12 +41,17 @@ class BbkRawWarning {
   final String? senderContact;
   final List<String> polygons;
 
+  /// The official translations, by language (#357). Null where the detail
+  /// was not read, empty where it was and carried none.
+  final Map<String, WarningText>? translations;
+
   BbkRawWarning withDetails({
     String? description,
     String? instruction,
     String? areaDescription,
     String? senderContact,
     List<String> polygons = const [],
+    Map<String, WarningText> translations = const {},
   }) => BbkRawWarning(
     id: id,
     startDate: startDate,
@@ -56,6 +63,7 @@ class BbkRawWarning {
     areaDescription: areaDescription,
     senderContact: senderContact,
     polygons: polygons,
+    translations: translations,
   );
 }
 
@@ -180,14 +188,26 @@ class BbkClient {
       if (infos is! List) return warning;
 
       Map<dynamic, dynamic>? selected;
+      final translations = <String, WarningText>{};
       for (final item in infos) {
         if (item is! Map) continue;
-        final language = '${item['language'] ?? ''}'.toLowerCase();
+        final language = normalizeCapLanguage('${item['language'] ?? ''}');
         selected ??= item;
-        if (language == 'de' || language == 'de-de') {
+        if (language == 'de') {
           selected = item;
-          break;
+          continue;
         }
+        // Every other block is an official translation (#357). Kept as
+        // plain text, the same way as the German.
+        final headline =
+            capPlainText(item['headline']) ?? capPlainText(item['event']);
+        if (language.isEmpty || headline == null) continue;
+        translations[language] = WarningText(
+          event: capPlainText(item['event']) ?? headline,
+          headline: headline,
+          description: capPlainText(item['description']),
+          instruction: capPlainText(item['instruction']),
+        );
       }
       if (selected == null) return warning;
 
@@ -228,6 +248,7 @@ class BbkClient {
         areaDescription: capPlainText(areaNames.join('\n')),
         senderContact: capPlainText(contact ?? decoded['sender']),
         polygons: polygons,
+        translations: translations,
       );
     } on Object {
       return warning;

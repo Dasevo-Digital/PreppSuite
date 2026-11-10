@@ -16489,6 +16489,42 @@ abstract class AppLocalizations {
   /// **'The browser could not be opened. The address is {address}.'**
   String supportOpenFailed(String address);
 
+  /// No description provided for @warningEasyGerman.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy German (Leichte Sprache)'**
+  String get warningEasyGerman;
+
+  /// No description provided for @warningOfficialTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Official translation: {language}'**
+  String warningOfficialTranslation(String language);
+
+  /// No description provided for @warningGermanOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Official text in German'**
+  String get warningGermanOriginal;
+
+  /// No description provided for @warningExtraLanguageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Also show warnings in'**
+  String get warningExtraLanguageTitle;
+
+  /// No description provided for @warningExtraLanguageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The official translation where the German Federal Office sends one. The German text remains authoritative.'**
+  String get warningExtraLanguageHint;
+
+  /// No description provided for @warningExtraLanguageNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No other language'**
+  String get warningExtraLanguageNone;
+
   /// No description provided for @warningReadAloud.
   ///
   /// In en, this message translates to:

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../features/warnings/application/warning_translations.dart';
 import '../local_db/database.dart' show Warning;
 import '../model/categories.dart' show WarningSeverity;
 
@@ -265,14 +266,20 @@ class NotificationService {
     }
   }
 
-  Future<void> showLocalWarning(Warning warning) async {
+  /// Announces [warning] in [language] where the BBK sent a translation
+  /// into it, in German otherwise (#357).
+  Future<void> showLocalWarning(
+    Warning warning, {
+    String language = 'de',
+  }) async {
     await _ensureInitialized();
+    final text = warning.textIn(language);
     await _plugin.show(
       // Stable per-warning id so re-notifying the same warning (e.g. after
       // an unrelated field update) replaces rather than stacks.
       id: warning.externalId.hashCode,
-      title: warning.headline,
-      body: warning.eventType,
+      title: text.headline,
+      body: text.event,
       notificationDetails: NotificationDetails(
         macOS: const DarwinNotificationDetails(),
         iOS: DarwinNotificationDetails(

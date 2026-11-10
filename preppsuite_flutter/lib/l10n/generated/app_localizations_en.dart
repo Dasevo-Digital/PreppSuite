@@ -10028,6 +10028,27 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get warningEasyGerman => 'Easy German (Leichte Sprache)';
+
+  @override
+  String warningOfficialTranslation(String language) {
+    return 'Official translation: $language';
+  }
+
+  @override
+  String get warningGermanOriginal => 'Official text in German';
+
+  @override
+  String get warningExtraLanguageTitle => 'Also show warnings in';
+
+  @override
+  String get warningExtraLanguageHint =>
+      'The official translation where the German Federal Office sends one. The German text remains authoritative.';
+
+  @override
+  String get warningExtraLanguageNone => 'No other language';
+
+  @override
   String get warningReadAloud => 'Read aloud';
 
   @override

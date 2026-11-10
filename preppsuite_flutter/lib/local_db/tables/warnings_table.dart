@@ -27,6 +27,12 @@ class Warnings extends Table {
   TextColumn get senderContact => text().nullable()();
   TextColumn get polygonsJson => text().nullable()();
 
+  /// The official translations the BBK sends with a warning, as JSON from
+  /// language to text (#357): `{"en": {"headline": …}, "de-ls": …}`. Null
+  /// until the detail has been read, `{}` when it came without any. The
+  /// German columns above stay what the app reasons with.
+  TextColumn get translationsJson => text().nullable()();
+
   DateTimeColumn get effective => dateTime()();
   DateTimeColumn get expires => dateTime().nullable()();
   DateTimeColumn get sent => dateTime()();

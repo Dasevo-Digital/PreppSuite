@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 import 'package:workmanager/workmanager.dart';
 
+import '../../../core/app_language.dart';
 import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
 import '../../../core/local_database_encryption.dart';
@@ -110,8 +111,9 @@ Future<bool> runWarningBackgroundPoll({
     // unmarked, it is announced by the first run after permission comes
     // back, as long as it is still in force.
     if (pending.isNotEmpty && await notifier.systemAllowsNotifications()) {
+      final language = (await appLocaleWithoutContext()).languageCode;
       for (final warning in pending) {
-        await notifier.showLocalWarning(warning);
+        await notifier.showLocalWarning(warning, language: language);
       }
       await service.markNotified(pending);
     }

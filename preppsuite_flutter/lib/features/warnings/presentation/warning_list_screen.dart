@@ -18,6 +18,9 @@ import '../../checklists/application/hazard_response_lists.dart';
 import '../../checklists/presentation/checklist_detail_screen.dart';
 import '../../household/application/household_providers.dart';
 import '../application/warning_filter.dart';
+import '../application/warning_language_provider.dart';
+import '../application/warning_translations.dart';
+import 'warning_translation_sections.dart';
 import '../application/warning_polygon_codec.dart';
 import '../application/warning_relevance.dart';
 import '../application/warning_region_filter.dart';
@@ -568,7 +571,7 @@ class _WarningTile extends StatelessWidget {
           background: colors.background,
           foreground: colors.foreground,
         ),
-        title: Text(warning.headline),
+        title: Text(warning.textIn(l10n.localeName).headline),
         subtitle: Text(
           [
             localizeWarningSeverity(l10n, severity),
@@ -593,7 +596,7 @@ class _WarningTile extends StatelessWidget {
 /// The complete, locally cached CAP message. This deliberately lives in the
 /// expansion rather than behind a network request: when a warning is already
 /// visible, its area, instructions and publisher must remain readable offline.
-class _WarningDetails extends StatelessWidget {
+class _WarningDetails extends ConsumerWidget {
   const _WarningDetails({
     required this.warning,
     required this.severity,
@@ -611,10 +614,19 @@ class _WarningDetails extends StatelessWidget {
   final WarningRegionFilter regions;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final material = MaterialLocalizations.of(context);
     final polygons = warningPolygons(warning);
+    // The app's language where the BBK translated into it, German
+    // otherwise, and a second language on request (#357).
+    final language = l10n.localeName;
+    final text = warning.textIn(language);
+    final extraLanguage = ref.watch(warningExtraLanguageProvider);
+    final extra =
+        extraLanguage == null || normalizeCapLanguage(extraLanguage) == language
+        ? null
+        : warning.translationIn(extraLanguage);
     final end = warning.expires == null
         ? l10n.warningDetailsUntilFurtherNotice
         : _formatDateTime(material, warning.expires!);
@@ -630,7 +642,7 @@ class _WarningDetails extends StatelessWidget {
     final recommendation = _DetailSection(
       icon: Icons.accessibility_new_outlined,
       title: l10n.warningInstructionsTitle,
-      body: warning.instruction ?? l10n.warningDetailsNoInstructions,
+      body: text.instruction ?? l10n.warningDetailsNoInstructions,
     );
     final area = _DetailSection(
       icon: Icons.map_outlined,
@@ -645,7 +657,7 @@ class _WarningDetails extends StatelessWidget {
         children: [
           if (polygons.isNotEmpty) ...[
             _WarningMapPreview(
-              title: warning.headline,
+              title: text.headline,
               polygons: polygons,
               colors: colors,
               expandLabel: l10n.warningShowMap,
@@ -654,7 +666,7 @@ class _WarningDetails extends StatelessWidget {
           ],
           Text(period, style: theme.textTheme.bodyMedium),
           const SizedBox(height: 8),
-          Text(warning.headline, style: theme.textTheme.headlineSmall),
+          Text(text.headline, style: theme.textTheme.headlineSmall),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
@@ -682,9 +694,21 @@ class _WarningDetails extends StatelessWidget {
               SpeakWarningButton(warning: warning, source: source),
             ],
           ),
-          if (warning.description != null) ...[
+          if (text.description case final description?) ...[
             const SizedBox(height: 12),
-            Text(warning.description!, style: theme.textTheme.bodyLarge),
+            Text(description, style: theme.textTheme.bodyLarge),
+          ],
+          if (extra != null) ...[
+            const SizedBox(height: 20),
+            WarningTranslationSection(
+              language: normalizeCapLanguage(extraLanguage!),
+              text: extra,
+              l10n: l10n,
+            ),
+          ],
+          if (warning.isTranslatedFor(language)) ...[
+            const SizedBox(height: 12),
+            WarningGermanOriginal(text: warning.germanText, l10n: l10n),
           ],
           const SizedBox(height: 24),
           LayoutBuilder(

@@ -10079,6 +10079,27 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get warningEasyGerman => 'Leichte Sprache';
+
+  @override
+  String warningOfficialTranslation(String language) {
+    return 'Amtliche Übersetzung: $language';
+  }
+
+  @override
+  String get warningGermanOriginal => 'Amtlicher Text auf Deutsch';
+
+  @override
+  String get warningExtraLanguageTitle => 'Warnungen zusätzlich in';
+
+  @override
+  String get warningExtraLanguageHint =>
+      'Die amtliche Übersetzung, wo das Bundesamt eine mitschickt. Maßgeblich bleibt der deutsche Text.';
+
+  @override
+  String get warningExtraLanguageNone => 'Keine weitere Sprache';
+
+  @override
   String get warningReadAloud => 'Vorlesen';
 
   @override

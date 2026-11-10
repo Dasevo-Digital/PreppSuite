@@ -33,6 +33,7 @@ import 'followed_places_screen.dart';
 import 'error_log_card.dart';
 import '../../../core/adaptive_columns.dart';
 import '../../../core/store_build.dart';
+import 'warning_language_card.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key, required this.profile});
@@ -73,6 +74,7 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ),
                 Card(child: _NotificationsToggle(l10n: l10n)),
+                WarningLanguageCard(l10n: l10n),
                 WarningReadinessCard(
                   profile: profile,
                   l10n: l10n,
