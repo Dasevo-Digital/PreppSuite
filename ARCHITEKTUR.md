@@ -4119,3 +4119,49 @@ weg. Das Banner zeigt drei Zeilen, die Liste der Lagekarte zwei: Mit zwei
 und einer blieb von einem übersetzten Titel der Name des Ereignisses, der
 Ort fiel weg. Die Abrufe fragen nur gefolgte Kreise, die es gibt, und der
 Rahmen für das Nachholen gilt je Durchgang, bundesweit und je Kreis.
+
+### Aus der Übergabe vom 11. November (#368–#372)
+
+**Eine Seite, die den Haushalt ändert, liest ihn selbst** (#368). „Meine
+Warnorte“ wird als eigene Seite geöffnet und bekam den Haushalt vom Öffnen
+mit. Was dort hinzukam, entfernt oder geändert wurde, war gespeichert, aber
+erst nach einem Neustart zu sehen. Die Reiter baut `HouseholdGate` mit jedem
+neuen Stand neu, eine geöffnete Seite nicht. `FollowedPlacesScreen` liest
+deshalb `householdProfileProvider` und nimmt den übergebenen Wert nur, bis
+der da ist.
+
+**Ein Eintrag, der nicht zu lesen ist, kostet nur sich selbst** (#369).
+Die Umwandlungen in `BbkClient` liefen über die ganze Liste auf einmal und
+außerhalb jeder Fehlerbehandlung. Ein einziger Eintrag ohne `startDate` ließ
+den ganzen Abruf scheitern: keine Warnung gespeichert, MeteoAlarm nicht
+gefragt. Jetzt wird jeder Eintrag für sich gelesen; einer, der nicht geht,
+macht die Quelle unvollständig, und dann endet keine gespeicherte Warnung.
+Scheitert BBK ganz, kommt MeteoAlarm trotzdem dran, und der Fehler steht im
+Fehlerprotokoll.
+
+**Was nicht geantwortet hat, steht im Status** (#371). Ein Kreis-Dashboard,
+das nicht oder nicht ganz antwortete, schützte zwar seine Warnungen vor dem
+Beenden (#250), der Abruf galt aber als vollständig. Jetzt ist er
+unvollständig, und BBK gilt nicht als aktuell. Ob Warnungen enden, ist davon
+getrennt (`mayRetire`): Die bundesweiten dürfen es weiter, die des Kreises
+nicht.
+
+**Ein Ordnerabgleich zur Zeit** (#370). `syncNow` galt erst als laufend,
+nachdem der Ordnerpfad gelesen war. Rückkehr in die App, Takt und Knopf
+konnten so zwei Läufe zugleich starten, die dieselbe Gerätedatei über
+dieselbe Zwischendatei schrieben; `leaveFolder` sah den zweiten nicht, und
+ein Auftrag zum Neuschreiben nach dem Einschalten der Verschlüsselung ging
+verloren. Jetzt ist der Lauf vor dem ersten `await` angemeldet. Eine Anfrage
+während eines Laufs wird ein weiterer Lauf danach, mehrere werden einer,
+und wer anfragt, wartet auf den Lauf, der seine Anfrage abdeckt.
+
+**Fortgesetzt wird nur dieselbe Datei** (#372). Beim Fortsetzen hängte der
+Downloader an, was die Adresse gerade lieferte. War die Datei inzwischen
+ersetzt, entstand eine Mischung aus Anfang alt und Ende neu, die als fertig
+galt. Neben der Teildatei liegt jetzt `….part.id` mit `Last-Modified` und
+starkem `ETag` der ersten Antwort. Weicht die Antwort beim Fortsetzen davon
+ab oder beginnt ihr Bereich woanders, fängt der Download neu an. Verglichen
+wird selbst statt über `If-Range`: Die Spiegel von Kiwix nennen dieselbe
+Datei mit verschiedenen ETags, und mit `If-Range` käme ein großes Archiv nie
+über einen Abbruch hinaus. Das Datum zählt vor dem ETag. Ein Server, der
+nichts davon nennt, wird wie bisher fortgesetzt.

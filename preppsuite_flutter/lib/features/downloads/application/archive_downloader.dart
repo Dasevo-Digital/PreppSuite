@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
@@ -98,6 +99,10 @@ class ArchiveDownloader {
   /// The half-finished file sits beside the target under this suffix, so
   /// nothing ever points a reader at an archive that is still growing.
   static const partialSuffix = '.part';
+
+  /// Beside the partial file: which file it is a part of, as the server
+  /// named it when the download began (#372).
+  static const identitySuffix = '.part.id';
 
   /// Fetches [url] into [targetPath], appending to an existing partial
   /// file if there is one.
@@ -258,6 +263,8 @@ class ArchiveDownloader {
     // Marked before a byte is written, so an interrupted download is not
     // backed up either — those are the large ones that sit around longest.
     await excludeFromBackup(partial.path);
+    final identityFile = File('$targetPath$identitySuffix');
+    final known = received > 0 ? await _PartIdentity.read(identityFile) : null;
 
     final attemptAbort = Completer<void>();
     unawaited(
@@ -282,15 +289,31 @@ class ArchiveDownloader {
       /// What the server says the whole file is. Null means it did not say.
       int? stated;
 
+      final answered = _PartIdentity.of(response.headers);
       switch (response.statusCode) {
         case 206:
-          stated = _totalFromContentRange(response.headers['content-range']);
+          // The rest of the same file, from where the partial one ends, or
+          // nothing. The range used to be appended as it came: when the
+          // file behind the address had been replaced since the download
+          // began, the end of the new one went onto the start of the old,
+          // and with the new length the mix counted as finished (#372).
+          final range = response.headers['content-range'];
+          if (_startFromContentRange(range) != received ||
+              (known != null && !known.matches(answered))) {
+            await _startOver(partial, identityFile);
+            throw const DownloadException(
+              'the file changed since the download began',
+              retryable: true,
+            );
+          }
+          stated = _totalFromContentRange(range);
         case 200:
           // The server ignored the range and is sending the whole file
           // again. Starting over is the only correct reading of that.
           append = false;
           received = 0;
           stated = response.contentLength;
+          await answered.write(identityFile);
         case 416:
           // "Range not satisfiable": the partial file is at least as long
           // as the whole one. Servers state the real length here as
@@ -299,12 +322,15 @@ class ArchiveDownloader {
           final whole = _totalFromContentRange(
             response.headers['content-range'],
           );
-          if (whole != null && await partial.length() == whole) {
+          if (whole != null &&
+              await partial.length() == whole &&
+              (known == null || known.matches(answered))) {
             await partial.rename(targetPath);
+            await _forget(identityFile);
             yield DownloadProgress(received: whole, total: whole);
             return;
           }
-          await partial.delete();
+          await _startOver(partial, identityFile);
           throw const DownloadException('the partial file does not match');
         default:
           throw DownloadException('the server answered ${response.statusCode}');
@@ -354,6 +380,7 @@ class ArchiveDownloader {
       }
 
       await partial.rename(targetPath);
+      await _forget(identityFile);
       // Again under the final name. The flag is an extended attribute and
       // survives a rename on the same volume, but this is the state that
       // has to be right, and it costs one call.
@@ -376,11 +403,100 @@ class ArchiveDownloader {
     }
   }
 
+  /// `bytes 200-1023/1024` — the 200.
+  static int? _startFromContentRange(String? header) {
+    if (header == null) return null;
+    final match = RegExp(r'bytes\s+(\d+)-').firstMatch(header);
+    return match == null ? null : int.tryParse(match.group(1)!);
+  }
+
+  static Future<void> _startOver(File partial, File identity) async {
+    if (await partial.exists()) await partial.delete();
+    await _forget(identity);
+  }
+
+  static Future<void> _forget(File identity) async {
+    try {
+      if (await identity.exists()) await identity.delete();
+    } on FileSystemException {
+      // A note that stays behind is compared, never trusted blindly.
+    }
+  }
+
   /// `bytes 200-1023/1024` — the part after the slash.
   static int? _totalFromContentRange(String? header) {
     if (header == null) return null;
     final slash = header.lastIndexOf('/');
     if (slash < 0) return null;
     return int.tryParse(header.substring(slash + 1).trim());
+  }
+}
+
+/// Which file a partial download is part of: what the server said about
+/// the file when the download began (#372).
+///
+/// Compared rather than sent as `If-Range`. Kiwix hands each request to
+/// one of several mirrors, which name the same file with different ETags;
+/// `If-Range` would answer every resumed attempt with the whole file
+/// again, and an archive of ten gigabytes would never get past its first
+/// dropped connection. The date of the file is the same on every mirror
+/// and changes when the file does, so it is what counts where a server
+/// gives one; a strong ETag only where there is no date.
+class _PartIdentity {
+  const _PartIdentity({this.lastModified, this.etag});
+
+  factory _PartIdentity.of(Map<String, String> headers) {
+    final etag = headers['etag']?.trim();
+    return _PartIdentity(
+      lastModified: headers['last-modified']?.trim(),
+      // A weak one says "the same meaning", not "the same bytes".
+      etag: etag == null || etag.startsWith('W/') ? null : etag,
+    );
+  }
+
+  final String? lastModified;
+  final String? etag;
+
+  bool get isEmpty => lastModified == null && etag == null;
+
+  /// False only where both sides say something and it differs. A server
+  /// that names nothing cannot be held to anything.
+  bool matches(_PartIdentity other) {
+    if (lastModified != null && other.lastModified != null) {
+      return lastModified == other.lastModified;
+    }
+    if (etag != null && other.etag != null) return etag == other.etag;
+    return true;
+  }
+
+  static Future<_PartIdentity?> read(File file) async {
+    try {
+      if (!await file.exists()) return null;
+      final json = jsonDecode(await file.readAsString());
+      if (json is! Map) return null;
+      final identity = _PartIdentity(
+        lastModified: json['lastModified'] as String?,
+        etag: json['etag'] as String?,
+      );
+      return identity.isEmpty ? null : identity;
+    } on Object {
+      return null;
+    }
+  }
+
+  Future<void> write(File file) async {
+    try {
+      if (isEmpty) {
+        if (await file.exists()) await file.delete();
+        return;
+      }
+      await file.writeAsString(
+        jsonEncode({'lastModified': ?lastModified, 'etag': ?etag}),
+        flush: true,
+      );
+    } on FileSystemException {
+      // Without the note the download still works; it only cannot tell a
+      // replaced file on resuming, as before.
+    }
   }
 }

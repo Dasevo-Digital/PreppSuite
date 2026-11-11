@@ -135,7 +135,8 @@ class BbkClient {
         complete = false;
         continue;
       }
-      results.addAll(source);
+      results.addAll(source.warnings);
+      if (!source.complete) complete = false;
     }
 
     return BbkFetchResult(warnings: results, complete: complete);
@@ -155,8 +156,9 @@ class BbkClient {
   /// Anything but a list with status 200 throws [BbkDashboardUnavailable].
   /// It used to answer an empty list, which the poll could not tell from
   /// a district with nothing in force, and it then ended the warnings
-  /// only this dashboard knows (#250).
-  Future<List<BbkRawWarning>> fetchDashboard(String kreisSchluessel) async {
+  /// only this dashboard knows (#250). An entry that cannot be read is
+  /// left out and makes the answer incomplete (#369).
+  Future<BbkFetchResult> fetchDashboard(String kreisSchluessel) async {
     final ars = kreisSchluessel.padRight(12, '0');
     final response = await getWarningResponse(
       _httpClient,
@@ -169,11 +171,45 @@ class BbkClient {
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
     if (decoded is! List) throw BbkDashboardUnavailable(response.statusCode);
 
-    return [
-      for (final entry in decoded)
-        if (entry is Map<String, dynamic>) _parseDashboardEntry(entry),
-    ];
+    return _parseAll(decoded, _parseDashboardEntry);
   }
+
+  /// Every entry of [entries] that [parse] can read, and whether that was
+  /// all of them.
+  ///
+  /// One at a time (#369). The casts used to run over the whole list at
+  /// once, outside any error handling: a single entry without its
+  /// `startDate` threw out of [fetchAll], the poll stopped there, and no
+  /// warning of any source was stored, nor MeteoAlarm asked. Something
+  /// that is not an entry at all was passed over without a word, and the
+  /// list counted as complete.
+  BbkFetchResult _parseAll(
+    List<dynamic> entries,
+    BbkRawWarning? Function(Map<String, dynamic> entry) parse,
+  ) {
+    final warnings = <BbkRawWarning>[];
+    var complete = true;
+    for (final entry in entries) {
+      BbkRawWarning? warning;
+      if (entry is Map<String, dynamic>) {
+        try {
+          warning = parse(entry);
+        } on Object {
+          warning = null;
+        }
+      }
+      if (warning == null) {
+        complete = false;
+      } else {
+        warnings.add(warning);
+      }
+    }
+    return BbkFetchResult(warnings: warnings, complete: complete);
+  }
+
+  /// [value] where it is text with something in it.
+  static String? _text(Object? value) =>
+      value is String && value.trim().isNotEmpty ? value : null;
 
   /// Loads the German CAP detail behind a compact map/dashboard entry.
   /// A failed detail request deliberately returns the compact warning: the
@@ -286,29 +322,33 @@ class BbkClient {
     }
   }
 
-  BbkRawWarning _parseDashboardEntry(Map<String, dynamic> entry) {
+  /// Null where the entry has no id or no date: it cannot be stored.
+  BbkRawWarning? _parseDashboardEntry(Map<String, dynamic> entry) {
+    final id = _text(entry['id']);
+    final sent = _text(entry['sent']);
+    if (id == null || sent == null) return null;
     final i18nTitle = entry['i18nTitle'];
-    final titleDe = i18nTitle is Map ? i18nTitle['de'] as String? : null;
+    final titleDe = i18nTitle is Map ? _text(i18nTitle['de']) : null;
     final payload = entry['payload'];
     final data = payload is Map ? payload['data'] : null;
-    final severity = data is Map ? data['severity'] as String? : null;
-    final headline = data is Map ? data['headline'] as String? : null;
-    final messageType = data is Map ? data['msgType'] : null;
+    final severity = data is Map ? _text(data['severity']) : null;
+    final headline = data is Map ? _text(data['headline']) : null;
+    final messageType = data is Map ? _text(data['msgType']) : null;
 
     return BbkRawWarning(
-      id: entry['id'] as String,
-      startDate: entry['sent'] as String,
+      id: id,
+      startDate: sent,
       severity: severity ?? 'Minor',
-      eventTitleDe: titleDe ?? headline ?? entry['id'] as String,
+      eventTitleDe: titleDe ?? headline ?? id,
       raw: entry,
-      messageType: messageType is String ? messageType : null,
+      messageType: messageType,
     );
   }
 
   /// Returns `null` when the source could not be read at all — distinct
   /// from an empty list, which means the source answered and has nothing
   /// active. See [BbkFetchResult.complete].
-  Future<List<BbkRawWarning>?> _fetchSource(String source) async {
+  Future<BbkFetchResult?> _fetchSource(String source) async {
     final http.Response response;
     try {
       response = await getWarningResponse(
@@ -328,26 +368,24 @@ class BbkClient {
     }
     if (decoded is! List) return null;
 
-    return [
-      for (final entry in decoded)
-        if (entry is Map<String, dynamic>) _parseEntry(entry),
-    ];
+    return _parseAll(decoded, _parseEntry);
   }
 
-  BbkRawWarning _parseEntry(Map<String, dynamic> entry) {
+  /// Null where the entry has no id or no start: it cannot be stored.
+  BbkRawWarning? _parseEntry(Map<String, dynamic> entry) {
+    final id = _text(entry['id']);
+    final startDate = _text(entry['startDate']);
+    if (id == null || startDate == null) return null;
     final i18nTitle = entry['i18nTitle'];
-    final titleDe = i18nTitle is Map ? i18nTitle['de'] as String? : null;
+    final titleDe = i18nTitle is Map ? _text(i18nTitle['de']) : null;
 
     return BbkRawWarning(
-      id: entry['id'] as String,
-      startDate: entry['startDate'] as String,
-      severity: entry['severity'] as String? ?? 'Minor',
-      eventTitleDe: titleDe ?? entry['id'] as String,
+      id: id,
+      startDate: startDate,
+      severity: _text(entry['severity']) ?? 'Minor',
+      eventTitleDe: titleDe ?? id,
       raw: entry,
-      messageType: switch (entry['type']) {
-        final String type => type,
-        _ => null,
-      },
+      messageType: _text(entry['type']),
     );
   }
 }

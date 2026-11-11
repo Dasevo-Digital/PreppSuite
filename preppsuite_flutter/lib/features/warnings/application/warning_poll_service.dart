@@ -1,3 +1,4 @@
+import '../../../core/error_log.dart';
 import '../../../model/categories.dart';
 
 import '../../../local_db/database.dart';
@@ -93,78 +94,107 @@ class WarningPollService {
     }
 
     if (countryCode == 'DE') {
-      final nationwide = await _bbk.fetchAll();
-      final detailedNationwide = await _detailsForChanged(
-        nationwide.warnings,
-        clock: clock,
-      );
-      complete = nationwide.complete;
-      sourcesOk['bbk'] = nationwide.complete;
-      fetched += nationwide.warnings.length;
-      newsworthy.addAll(
-        await _ingest.ingestBbk(
-          detailedNationwide,
-          countryCode: 'DE',
-          areas: areas,
-        ),
-      );
-
-      final seen = {for (final w in nationwide.warnings) w.id};
-      // Districts whose dashboard did not answer this time. What only
-      // their dashboard knows is not in [seen], and is not over (#250).
-      final unanswered = <String>{};
-
-      final districts = <String>{
-        if (kreisSchluessel != null && kreisSchluessel.length >= 5)
-          kreisSchluessel.substring(0, 5),
-        for (final extra in extraKreisSchluessel)
-          if (extra.length >= 5) extra.substring(0, 5),
-      };
-      for (final district in districts) {
-        // Reserve time for the independent weather source. Optional details
-        // must not keep a refresh occupied for an unbounded number of calls.
-        if (clock.elapsed >= detailBudget) {
-          // A district-only warning may still be active. Without this
-          // requested dashboard, absence from the national feed proves nothing.
-          complete = false;
-          sourcesOk['bbk'] = false;
-          break;
-        }
-        // A precise dashboard is an enhancement over the nationwide feed.
-        // One offline "Meine Orte" entry must not cancel all current alerts.
-        try {
-          final compactPrecise = await _bbk.fetchDashboard(district);
-          final precise = await _detailsForChanged(
-            compactPrecise,
-            clock: clock,
-          );
-          fetched += precise.length;
-          newsworthy.addAll(
-            await _ingest.ingestBbk(
-              precise,
-              countryCode: 'DE',
-              regionKeyOverride: district,
-            ),
-          );
-          // Folded in so a warning only the per-Kreis endpoint knows about
-          // is not retired by the sweep below.
-          seen.addAll(precise.map((w) => w.id));
-        } on Object {
-          // The nationwide feed was complete. A failed optional district
-          // lookup must not keep unrelated, retired nationwide warnings --
-          // nor end the ones it alone reported (#250).
-          unanswered.add(district);
-        }
-      }
-
-      // Only when every source answered. An incomplete picture would end
-      // warnings that are still running — see [BbkFetchResult.complete].
-      if (complete) {
-        retired += await _db.expireMissingWarnings(
-          source: WarningSource.bbk.name,
-          seenExternalIds: seen,
-          keepRegionKeys: unanswered,
+      // One BBK source that cannot be read must not cost MeteoAlarm, which
+      // comes after (#369). The poll used to end here with the error, and
+      // the weather warnings of that poll were never asked for.
+      try {
+        final nationwide = await _bbk.fetchAll();
+        final detailedNationwide = await _detailsForChanged(
+          nationwide.warnings,
+          clock: clock,
         );
+        complete = nationwide.complete;
+        sourcesOk['bbk'] = nationwide.complete;
+        // Whether absence from this poll may end a stored warning. Not the
+        // same as [complete]: a district dashboard that did not answer
+        // makes the poll incomplete, but its own warnings are kept by
+        // [unanswered], and the nationwide ones may still end (#371).
+        var mayRetire = nationwide.complete;
+        fetched += nationwide.warnings.length;
+        newsworthy.addAll(
+          await _ingest.ingestBbk(
+            detailedNationwide,
+            countryCode: 'DE',
+            areas: areas,
+          ),
+        );
+
+        final seen = {for (final w in nationwide.warnings) w.id};
+        // Districts whose dashboard did not answer this time, or not in
+        // full. What only their dashboard knows is not in [seen], and is
+        // not over (#250).
+        final unanswered = <String>{};
+
+        final districts = <String>{
+          if (kreisSchluessel != null && kreisSchluessel.length >= 5)
+            kreisSchluessel.substring(0, 5),
+          for (final extra in extraKreisSchluessel)
+            if (extra.length >= 5) extra.substring(0, 5),
+        };
+        for (final district in districts) {
+          // Reserve time for the independent weather source. Optional
+          // details must not keep a refresh occupied for an unbounded
+          // number of calls.
+          if (clock.elapsed >= detailBudget) {
+            // A district-only warning may still be active. Without this
+            // requested dashboard, absence from the national feed proves
+            // nothing.
+            complete = false;
+            sourcesOk['bbk'] = false;
+            mayRetire = false;
+            break;
+          }
+          // A precise dashboard is an enhancement over the nationwide feed.
+          // One offline "Meine Orte" entry must not cancel all current
+          // alerts.
+          try {
+            final dashboard = await _bbk.fetchDashboard(district);
+            final precise = await _detailsForChanged(
+              dashboard.warnings,
+              clock: clock,
+            );
+            fetched += precise.length;
+            newsworthy.addAll(
+              await _ingest.ingestBbk(
+                precise,
+                countryCode: 'DE',
+                regionKeyOverride: district,
+              ),
+            );
+            // Folded in so a warning only the per-Kreis endpoint knows
+            // about is not retired by the sweep below.
+            seen.addAll(precise.map((w) => w.id));
+            if (!dashboard.complete) {
+              unanswered.add(district);
+              complete = false;
+              sourcesOk['bbk'] = false;
+            }
+          } on Object {
+            // The nationwide feed was complete. A failed optional district
+            // lookup must not keep unrelated, retired nationwide warnings
+            // -- nor end the ones it alone reported (#250). But the poll
+            // did not get everything, and the status says so: it counted
+            // as complete, and "updated" stood over a district whose
+            // warnings had not been asked (#371).
+            unanswered.add(district);
+            complete = false;
+            sourcesOk['bbk'] = false;
+          }
+        }
+
+        // Only when every source answered. An incomplete picture would end
+        // warnings that are still running — see [BbkFetchResult.complete].
+        if (mayRetire) {
+          retired += await _db.expireMissingWarnings(
+            source: WarningSource.bbk.name,
+            seenExternalIds: seen,
+            keepRegionKeys: unanswered,
+          );
+        }
+      } on Object catch (error, stack) {
+        complete = false;
+        sourcesOk['bbk'] = false;
+        ErrorLog.instance.record(error, stack, context: 'BBK-Abruf');
       }
     }
 

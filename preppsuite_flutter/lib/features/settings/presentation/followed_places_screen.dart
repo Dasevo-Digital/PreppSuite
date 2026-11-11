@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../model/household_profile.dart';
+import '../../household/application/household_providers.dart';
 import 'additional_regions_card.dart';
 import 'my_region_card.dart';
 
@@ -10,13 +12,19 @@ import 'my_region_card.dart';
 /// Map markers remain device-local personal places. This screen is only for
 /// warning subscriptions, so an additional region can never accidentally
 /// become a published contact or a navigation destination.
-class FollowedPlacesScreen extends StatelessWidget {
+///
+/// Opened as a route of its own, so [profile] is the household as it was
+/// when the screen opened. What is changed here is read back from
+/// [householdProfileProvider]: a place added on this screen showed only
+/// after the app had been restarted (#368).
+class FollowedPlacesScreen extends ConsumerWidget {
   const FollowedPlacesScreen({super.key, required this.profile});
 
   final HouseholdProfile profile;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(householdProfileProvider).value ?? this.profile;
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Scaffold(

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart' show protected, visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/app_database_providers.dart';
@@ -82,10 +83,16 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   static const _store = SharedFolderStore();
 
   Timer? _timer;
-  bool _syncing = false;
 
-  /// The run under way, for [leaveFolder] to wait for.
+  /// The run under way, for [leaveFolder] and for any request that comes
+  /// in meanwhile to wait for.
   Completer<void>? _running;
+
+  /// Requests that came in while a run was under way: one more run after
+  /// it, which writes this device's file regardless when any of them
+  /// asked for that.
+  Completer<void>? _queued;
+  bool _queuedRepublish = false;
 
   @override
   Future<SharedFolderState> build() async {
@@ -213,18 +220,58 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
   /// [republish] writes this device's file even when nothing changed —
   /// for the run right after encryption is switched on, when the file
   /// already there is still in the clear.
-  Future<void> syncNow({bool republish = false}) async {
-    if (_syncing) return;
+  ///
+  /// One run at a time (#370). The run used to count as under way only
+  /// after the folder path had been read, so the return to the app, the
+  /// two-minute timer and the button could start two at once. Both wrote
+  /// this device's file through the same temporary name, the first to end
+  /// cleared what [leaveFolder] waits for while the second still ran, and
+  /// a request to republish that came during a run was dropped. Now a
+  /// request during a run is one more run after it, and every caller
+  /// waits for the run that covers its request.
+  Future<void> syncNow({bool republish = false}) {
+    if (_running != null) {
+      _queuedRepublish = _queuedRepublish || republish;
+      return (_queued ??= Completer<void>()).future;
+    }
+    return _run(republish);
+  }
 
+  Future<void> _run(bool republish) async {
+    // Before the first await, so that nothing can start beside it and
+    // [leaveFolder] sees it from the first moment.
+    final running = _running = Completer<void>();
+    try {
+      await runSync(republish: republish);
+    } finally {
+      _running = null;
+      running.complete();
+      final queued = _queued;
+      if (queued != null) {
+        final again = _queuedRepublish;
+        _queued = null;
+        _queuedRepublish = false;
+        if (ref.mounted) {
+          unawaited(_run(again).whenComplete(queued.complete));
+        } else {
+          queued.complete();
+        }
+      }
+    }
+  }
+
+  /// One run: read the folder, merge, write. Only [syncNow] calls it.
+  @protected
+  @visibleForTesting
+  Future<void> runSync({required bool republish}) async {
     final folder = await _store.location();
     if (folder == null) return;
 
     final profile = ref.read(householdProfileProvider).value;
     if (profile == null) return;
 
-    _syncing = true;
-    final running = _running = Completer<void>();
     _update((current) => current.copyWith(syncing: true));
+    var reported = false;
     try {
       final service = await _serviceFor(folder, profile, republish);
       final result = service == null
@@ -241,10 +288,11 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
               : current.lastSyncedAt,
         ),
       );
+      reported = true;
     } finally {
-      _syncing = false;
-      _running = null;
-      running.complete();
+      if (!reported && ref.mounted) {
+        _update((current) => current.copyWith(syncing: false));
+      }
     }
   }
 

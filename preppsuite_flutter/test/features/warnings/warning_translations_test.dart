@@ -382,7 +382,7 @@ void main() {
     final all = await client.fetchAll();
     expect(all.warnings.single.messageType, 'Update');
     final dashboard = await client.fetchDashboard('05370');
-    expect(dashboard.single.messageType, 'Cancel');
+    expect(dashboard.warnings.single.messageType, 'Cancel');
   });
 
   test('the stored form is the same for the same translations', () {
@@ -521,8 +521,8 @@ class _Bbk extends BbkClient {
       BbkFetchResult(warnings: feed, complete: true);
 
   @override
-  Future<List<BbkRawWarning>> fetchDashboard(String kreisSchluessel) async =>
-      const [];
+  Future<BbkFetchResult> fetchDashboard(String kreisSchluessel) async =>
+      const BbkFetchResult(warnings: [], complete: true);
 
   @override
   Future<BbkRawWarning> fetchDetails(BbkRawWarning warning) async {

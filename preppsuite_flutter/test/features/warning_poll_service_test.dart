@@ -522,7 +522,9 @@ void main() {
         meteoUrl: quiet,
       });
 
-      expect(result.complete, isTrue);
+      // Not everything was asked, and the poll says so (#371); what may
+      // end still goes by what answered.
+      expect(result.complete, isFalse);
       expect(
         (await district()).every((w) => w.expires == null),
         isTrue,
