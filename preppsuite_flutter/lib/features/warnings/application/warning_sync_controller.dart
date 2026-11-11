@@ -106,8 +106,11 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
         countryCode: filter.countryCode,
         kreisSchluessel: filter.ownKreisSchluessel,
         extraKreisSchluessel: [
+          // Only districts that exist: a postcode stored before the form
+          // checked cost a request every poll, answered 404 (#367).
           for (final region in filter.extraRegions)
-            if (region.kind == WarningRegionKind.kreis) region.value,
+            if (region.kind == WarningRegionKind.kreis && region.isPlaced)
+              region.value,
         ],
       );
       await _notifyIfEnabled(service, filter);

@@ -5932,6 +5932,10 @@
       }
     }
   },
+  "warningAllClearNote": "All clear: this message ends the warning.",
+  "@warningAllClearNote": {
+    "description": "Above the details of a message that ends its warning. The publisher sometimes leaves the old instructions in it."
+  },
   "warningGermanOriginal": "Official text in German",
   "warningExtraLanguageTitle": "Also show warnings in",
   "warningExtraLanguageHint": "The official translation where the German Federal Office sends one. The German text remains authoritative.",

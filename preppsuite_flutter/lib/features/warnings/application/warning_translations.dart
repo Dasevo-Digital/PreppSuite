@@ -184,6 +184,13 @@ Map<String, WarningTranslation> decodeWarningTranslations(String? stored) {
 /// Whether [language] is written right to left.
 bool isRightToLeft(String language) => language == 'ar';
 
+/// "Entwarnung:" at the start of a German headline, as MoWaS writes an
+/// all-clear, with a colon or a dash.
+final _leadingAllClear = RegExp(
+  r'^\s*entwarnung\s*[:\-–]\s*',
+  caseSensitive: false,
+);
+
 /// The two-letter language [appLanguage] stands for.
 String _baseLanguage(String appLanguage) =>
     normalizeCapLanguage(appLanguage).split('-').first;
@@ -208,19 +215,29 @@ extension WarningLanguages on Warning {
 
   /// What to show in an app set to [appLanguage]: its translation where
   /// the BBK sent one, the German wherever it did not.
-  WarningText textIn(String appLanguage) {
+  WarningText textIn(String appLanguage) =>
+      _textIn(appLanguage, germanHeadline: headline);
+
+  WarningText _textIn(String appLanguage, {required String germanHeadline}) {
     final language = _baseLanguage(appLanguage);
     final german = germanText;
     if (language == 'de') return german;
     final translation = translationIn(language);
-    if (translation == null) return german;
+    if (translation == null) {
+      return WarningText(
+        event: german.event,
+        headline: germanHeadline,
+        description: german.description,
+        instruction: german.instruction,
+      );
+    }
     return WarningText(
       event: translation.event ?? german.event,
       headline:
           translation.headline ??
           switch (translation.event) {
-            final event? => '$event – ${german.headline}',
-            null => german.headline,
+            final event? => '$event – $germanHeadline',
+            null => germanHeadline,
           },
       description: translation.description ?? german.description,
       instruction: translation.instruction ?? german.instruction,
@@ -231,10 +248,21 @@ extension WarningLanguages on Warning {
   /// [appLanguage]. [allClear] puts the app's word for an all-clear in
   /// front where the version ends its warning. German needs none: its
   /// headline says "Entwarnung" itself.
+  ///
+  /// Where the word stands in front, the German "Entwarnung:" after it is
+  /// left off (#367). It said the same twice, and on a two-line banner the
+  /// twelve characters were the ones that pushed the place out of sight.
   String titleIn(String appLanguage, {String Function(String)? allClear}) {
-    final title = textIn(appLanguage).headline;
-    if (!isAllClear || allClear == null) return title;
-    return _baseLanguage(appLanguage) == 'de' ? title : allClear(title);
+    if (!isAllClear || allClear == null || _baseLanguage(appLanguage) == 'de') {
+      return textIn(appLanguage).headline;
+    }
+    final rest = headline.replaceFirst(_leadingAllClear, '');
+    return allClear(
+      _textIn(
+        appLanguage,
+        germanHeadline: rest.trim().isEmpty ? headline : rest,
+      ).headline,
+    );
   }
 
   /// Whether [textIn] gives anything other than the German.

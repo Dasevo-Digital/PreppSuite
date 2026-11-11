@@ -36,6 +36,7 @@ class _StubPollService extends WarningPollService {
 
   final AppDatabase _db;
   int polls = 0;
+  List<String> askedExtra = const [];
 
   @override
   Future<WarningPollResult> poll({
@@ -44,6 +45,7 @@ class _StubPollService extends WarningPollService {
     Iterable<String> extraKreisSchluessel = const [],
   }) async {
     polls++;
+    askedExtra = extraKreisSchluessel.toList();
     await _db.upsertWarning(
       WarningsCompanion.insert(
         source: 'bbk',
@@ -162,6 +164,29 @@ void main() {
     expect(ok, isTrue);
     expect(poller.polls, 1);
     expect(notifications.shown.map((w) => w.externalId), ['severe-1']);
+  });
+
+  test('a followed postcode is not asked for (#367)', () async {
+    SharedPreferences.setMockInitialValues({'notificationsEnabled': true});
+    await const WarningRegionStore().save(
+      const WarningRegionFilter(
+        countryCode: 'DE',
+        ownRegionKey: '053340000000',
+        extraRegions: [
+          WarningRegion(kind: WarningRegionKind.kreis, value: '04109'),
+          WarningRegion(kind: WarningRegionKind.kreis, value: '03101'),
+        ],
+      ),
+    );
+    final poller = _StubPollService(db);
+
+    await runWarningBackgroundPoll(
+      database: db,
+      notifications: _RecordingNotifications(),
+      pollService: poller,
+    );
+
+    expect(poller.askedExtra, ['03101']);
   });
 
   test('what the system would not show is not booked as told', () async {

@@ -473,7 +473,9 @@ class _WarningSummary extends StatelessWidget {
             ),
             title: Text(
               warningTitle(warning, l10n),
-              maxLines: 1,
+              // Two: in one, a translated title kept only the event's name
+              // and the start of the German, never the place (#367).
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
             subtitle: Text(localizeWarningSeverity(l10n, severity)),

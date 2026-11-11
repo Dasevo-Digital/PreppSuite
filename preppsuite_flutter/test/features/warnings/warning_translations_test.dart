@@ -196,10 +196,11 @@ void main() {
         warning.textIn('es').headline,
         'Interrupción del suministro eléctrico – $germanHeadline',
       );
+      // The German "Entwarnung:" is left off behind the app's word (#367).
       expect(
         warning.titleIn('es', allClear: allClear),
         'Fin del aviso: Interrupción del suministro eléctrico – '
-        '$germanHeadline',
+        'Stromausfall in Teilen von Hückelhoven / Erkelenz',
       );
       expect(warning.titleIn('de', allClear: allClear), germanHeadline);
       expect(warning.textIn('es').instruction, 'No hay ningún peligro.');
@@ -208,6 +209,26 @@ void main() {
         warning.description,
         reason: 'the description stays German, as the BBK sent it',
       );
+    });
+
+    test('an all-clear without a translation says it once', () async {
+      const older = BbkRawWarning(
+        id: 'mow.DE-NW-ERK-SE056-20261111-56-002',
+        startDate: '2026-11-11T08:00:00+01:00',
+        severity: 'Minor',
+        eventTitleDe: germanHeadline,
+        raw: {},
+        messageType: 'Cancel',
+      );
+      await WarningIngest(db).ingestBbk([older], countryCode: 'DE');
+      final warning = await stored(older.id);
+
+      expect(
+        warning.titleIn('en', allClear: (title) => 'All clear: $title'),
+        'All clear: Stromausfall in Teilen von Hückelhoven / Erkelenz',
+      );
+      expect(warning.titleIn('de', allClear: allClear), germanHeadline);
+      expect(warning.textIn('en').headline, germanHeadline);
     });
 
     test('kept small: no copy of the German text', () async {

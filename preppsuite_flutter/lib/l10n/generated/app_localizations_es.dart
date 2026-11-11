@@ -10124,6 +10124,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get warningAllClearNote =>
+      'Fin del aviso: este mensaje pone fin al aviso.';
+
+  @override
   String get warningGermanOriginal => 'Texto oficial en alemán';
 
   @override

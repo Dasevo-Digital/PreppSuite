@@ -232,7 +232,8 @@ class WarningPollService {
     return stored ? const WarningPollStatusStore().feedStamp(slug) : null;
   }
 
-  /// How many stored warnings without a detail one poll asks again for.
+  /// How many stored warnings without a detail one pass asks again for:
+  /// the nationwide feed and each district dashboard are a pass each.
   ///
   /// Every source has a detail behind every warning (all six checked live
   /// on 2026-10-17), so a row without one is a request that failed, and
@@ -241,8 +242,9 @@ class WarningPollService {
   /// a poll, not three hundred every fifteen minutes.
   static const detailRetriesPerPoll = 12;
 
-  /// How many stored warnings without their translations one poll reads
-  /// again, after the missing details (#357).
+  /// How many stored warnings without their translations one pass reads
+  /// again, after the missing details (#357); a pass as for
+  /// [detailRetriesPerPoll].
   static const translationRetriesPerPoll = 12;
 
   /// BBK's map feed is deliberately small. Fetch full CAP payloads only for

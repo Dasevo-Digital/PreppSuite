@@ -94,7 +94,10 @@ class WarningBanner extends ConsumerWidget {
                           localizeWarningSeverity(l10n, severity),
                           warningTitle(mostSevere, l10n),
                         ),
-                        maxLines: 2,
+                        // Three: a translated title puts the event's name
+                        // in front of the German headline, and in two the
+                        // place fell off (#367).
+                        maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),

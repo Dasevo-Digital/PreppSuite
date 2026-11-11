@@ -117,6 +117,10 @@ void main() {
     expect(find.text('Hervir el agua'), findsNothing);
     expect(find.text('Hierva el agua.'), findsOneWidget);
     expect(find.text('Texto oficial en alemán'), findsOneWidget);
+    expect(
+      find.text('Fin del aviso: este mensaje pone fin al aviso.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('in German the German, and no original to unfold', (
@@ -129,11 +133,36 @@ void main() {
     expect(find.text('Amtlicher Text auf Deutsch'), findsNothing);
   });
 
+  testWidgets('an all-clear says so in a second language the app speaks', (
+    tester,
+  ) async {
+    // The English the BBK sent for Husum's all-clear still said to avoid
+    // the area; the section has to say that the warning is over (#367).
+    SharedPreferences.setMockInitialValues({'warningExtraLanguage': 'es'});
+    await open(tester, const Locale('de'));
+
+    expect(find.text('Amtliche Übersetzung: Español'), findsOneWidget);
+    expect(
+      find.text('Fin del aviso: este mensaje pone fin al aviso.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Entwarnung: Diese Meldung hebt die Warnung auf.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('a second language chosen on this device', (tester) async {
     SharedPreferences.setMockInitialValues({'warningExtraLanguage': 'tr'});
     await open(tester, const Locale('de'));
 
     expect(find.text('Amtliche Übersetzung: Türkçe'), findsOneWidget);
+    // No Turkish word for it the BBK gave: the German note above is the
+    // only one, not repeated in the section (#367).
+    expect(
+      find.text('Entwarnung: Diese Meldung hebt die Warnung auf.'),
+      findsOneWidget,
+    );
     expect(find.text('Suyu kaynatın'), findsOneWidget);
     expect(find.text('Suyu kaynatmadan içmeyin.'), findsOneWidget);
     // Only what the language says: the German description is above.

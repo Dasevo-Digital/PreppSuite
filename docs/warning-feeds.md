@@ -140,7 +140,8 @@ Warnung antwortet mit einer Weiterleitung ins Archiv
 
 `WarningPollService` holt die Detailseite für neue und geänderte Warnungen
 und für gespeicherte, die noch keine haben, höchstens
-`detailRetriesPerPoll` (12) je Abruf. Das Nachholen gibt es, weil eine
+`detailRetriesPerPoll` (12) je Durchgang (der bundesweite und jeder
+Kreis-Abruf ist einer), danach ebenso viele ohne Übersetzungen. Das Nachholen gibt es, weil eine
 fehlgeschlagene Detailabfrage sonst endgültig war: Die Warnung galt danach
 als unverändert und wurde nie wieder gefragt.
 

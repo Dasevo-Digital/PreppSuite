@@ -2732,6 +2732,7 @@
   "warningEasyGerman": "Alemán fácil (Leichte Sprache)",
   "warningOfficialTranslation": "Traducción oficial: {language}",
   "warningAllClearTitle": "Fin del aviso: {title}",
+  "warningAllClearNote": "Fin del aviso: este mensaje pone fin al aviso.",
   "warningGermanOriginal": "Texto oficial en alemán",
   "warningExtraLanguageTitle": "Mostrar los avisos también en",
   "warningExtraLanguageHint": "La traducción oficial cuando la Oficina Federal alemana la envía. El texto alemán sigue siendo el válido.",

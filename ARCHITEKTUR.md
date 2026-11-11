@@ -4106,3 +4106,16 @@ das Dokument scheiterte, das 2.9.5 noch gedruckt hatte. Die Schätzung nimmt
 60 Zeichen an, und `pdfKeepingCardsTogether` setzt das Dokument einmal neu,
 mit jeder Karte fortlaufend, wenn das Zusammenhalten trotzdem an einer Seite
 scheitert.
+
+**Eine Entwarnung sagt es in jeder Ansicht** (#367). Manche Absender lassen
+in einer Entwarnung die alten Anweisungen stehen: Husums sagte am
+11. November noch, das Gebiet zu meiden und die Fenster zu schließen. Die
+Details tragen deshalb über dem Text einen Hinweis, dass die Meldung die
+Warnung aufhebt (`WarningAllClearNote`), der Abschnitt in weiterer Sprache
+ebenso, wo die App diese Sprache spricht (Englisch, Spanisch). Für die
+übrigen gibt es kein amtliches Wort, und die App erfindet keines. Wo das
+Wort der App-Sprache vor dem Titel steht, fällt das deutsche „Entwarnung:“
+weg. Das Banner zeigt drei Zeilen, die Liste der Lagekarte zwei: Mit zwei
+und einer blieb von einem übersetzten Titel der Name des Ereignisses, der
+Ort fiel weg. Die Abrufe fragen nur gefolgte Kreise, die es gibt, und der
+Rahmen für das Nachholen gilt je Durchgang, bundesweit und je Kreis.

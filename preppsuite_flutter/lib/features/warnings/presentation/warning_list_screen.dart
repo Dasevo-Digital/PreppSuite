@@ -697,6 +697,10 @@ class _WarningDetails extends ConsumerWidget {
               SpeakWarningButton(warning: warning, source: source),
             ],
           ),
+          if (warning.isAllClear) ...[
+            const SizedBox(height: 12),
+            WarningAllClearNote(words: l10n),
+          ],
           if (text.description case final description?) ...[
             const SizedBox(height: 12),
             Text(description, style: theme.textTheme.bodyLarge),
@@ -707,6 +711,7 @@ class _WarningDetails extends ConsumerWidget {
               language: normalizeCapLanguage(extraLanguage!),
               text: extra,
               l10n: l10n,
+              allClear: warning.isAllClear,
             ),
           ],
           if (warning.isTranslatedFor(language)) ...[

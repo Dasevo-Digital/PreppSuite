@@ -16507,6 +16507,12 @@ abstract class AppLocalizations {
   /// **'All clear: {title}'**
   String warningAllClearTitle(String title);
 
+  /// Above the details of a message that ends its warning. The publisher sometimes leaves the old instructions in it.
+  ///
+  /// In en, this message translates to:
+  /// **'All clear: this message ends the warning.'**
+  String get warningAllClearNote;
+
   /// No description provided for @warningGermanOriginal.
   ///
   /// In en, this message translates to:

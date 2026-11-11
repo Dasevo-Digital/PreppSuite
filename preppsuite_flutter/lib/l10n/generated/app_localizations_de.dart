@@ -10092,6 +10092,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get warningAllClearNote =>
+      'Entwarnung: Diese Meldung hebt die Warnung auf.';
+
+  @override
   String get warningGermanOriginal => 'Amtlicher Text auf Deutsch';
 
   @override

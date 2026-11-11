@@ -16,19 +16,75 @@ String warningLanguageName(AppLocalizations l10n, String language) =>
     ? l10n.warningEasyGerman
     : warningLanguageEndonyms[language] ?? language;
 
+/// The app's own words in [language], where it has them: German for
+/// Leichte Sprache, null for a language the app does not speak.
+AppLocalizations? warningLocalizationsFor(String language) {
+  final code = language == 'de-ls' ? 'de' : language.split('-').first;
+  final spoken = AppLocalizations.supportedLocales.any(
+    (locale) => locale.languageCode == code,
+  );
+  return spoken ? lookupAppLocalizations(Locale(code)) : null;
+}
+
+/// The line above a message that ends its warning (#367).
+///
+/// Some publishers leave the old instructions in an all-clear: Husum's,
+/// on 11 November 2026, still said to avoid the area and close the
+/// windows. Under the German headline "Entwarnung" says so; under a
+/// translation, nothing did.
+class WarningAllClearNote extends StatelessWidget {
+  const WarningAllClearNote({super.key, required this.words});
+
+  final AppLocalizations words;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.task_alt, color: theme.colorScheme.primary),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            words.warningAllClearNote,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// A warning's words in one more language, under a heading that says
 /// which and that it is the official one (#357).
+///
+/// [allClear] adds the note that the message ends the warning, in that
+/// language, where the app speaks it (English, Spanish). For the others
+/// there is no official word and the app does not make one up; the note in
+/// the app's own language stands above the section.
 class WarningTranslationSection extends StatelessWidget {
   const WarningTranslationSection({
     super.key,
     required this.language,
     required this.text,
     required this.l10n,
+    this.allClear = false,
   });
 
   final String language;
   final WarningTranslation text;
   final AppLocalizations l10n;
+  final bool allClear;
+
+  /// The note in this section's language, where the app speaks it and it
+  /// is not the app's own: that one stands above already.
+  AppLocalizations? get _ownWords {
+    final words = warningLocalizationsFor(language);
+    return words == null || words.localeName == l10n.localeName ? null : words;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +108,10 @@ class WarningTranslationSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
+        if ((allClear ? _ownWords : null) case final words?) ...[
+          WarningAllClearNote(words: words),
+          const SizedBox(height: 6),
+        ],
         // Arabic runs right to left, whatever the app's own direction.
         Directionality(
           textDirection: isRightToLeft(language)

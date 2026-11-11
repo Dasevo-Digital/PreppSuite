@@ -10041,6 +10041,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get warningAllClearNote => 'All clear: this message ends the warning.';
+
+  @override
   String get warningGermanOriginal => 'Official text in German';
 
   @override

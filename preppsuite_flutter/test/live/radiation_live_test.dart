@@ -41,10 +41,23 @@ void main() {
     addTearDown(client.close);
 
     final stations = await client.fetchStations();
-    final station = stations.firstWhere((s) => s.name == 'Hausach');
-
-    final reading = await client.fetchReading(station);
-    expect(reading, isNotNull);
+    // Hausach first, as before, and others where it lags. One station can
+    // be hours behind the rest: on 11 November 2026 Hausach's newest value
+    // was from 06:00 UTC while 1488 others had 08:00. The app says so, as
+    // it should; this test wants a station on an ordinary day (#367).
+    final candidates = [
+      ...stations.where((s) => s.name == 'Hausach'),
+      ...stations.take(10),
+    ];
+    RadiationReading? reading;
+    for (final station in candidates) {
+      final candidate = await client.fetchReading(station);
+      if (candidate != null && !candidate.isStale()) {
+        reading = candidate;
+        break;
+      }
+    }
+    expect(reading, isNotNull, reason: 'none of the stations asked is current');
 
     stdout.writeln(
       '${reading!.stationName}: ${reading.microsievertsPerHour} µSv/h, '
