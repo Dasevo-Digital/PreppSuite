@@ -104,9 +104,12 @@ _Bindings get _bindings => _cached ??= _Bindings(_openLibrary());
 /// Looks in order: told to us, bundled with the app, on the loader's
 /// path, or in the build directory of a working copy.
 DynamicLibrary _openLibrary() {
+  // iOS loads code only from a signed framework inside the app (#374).
   final name = Platform.isWindows
       ? 'preppsuite_translate.dll'
-      : Platform.isMacOS || Platform.isIOS
+      : Platform.isIOS
+      ? 'preppsuite_translate.framework/preppsuite_translate'
+      : Platform.isMacOS
       ? 'libpreppsuite_translate.dylib'
       : 'libpreppsuite_translate.so';
 
@@ -130,6 +133,8 @@ DynamicLibrary _openLibrary() {
 String? _bundled(String name) {
   final beside = File(Platform.resolvedExecutable).parent;
   if (Platform.isMacOS) return '${beside.parent.path}/Frameworks/$name';
+  // The executable sits at the top of an iOS bundle, Frameworks beside it.
+  if (Platform.isIOS) return '${beside.path}/Frameworks/$name';
   if (Platform.isLinux) return '${beside.path}/lib/$name';
   if (Platform.isWindows) return '${beside.path}\\$name';
   return null;

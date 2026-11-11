@@ -116,15 +116,14 @@ void main() {
   testWidgets('the translator library loads where the package carries it', (
     tester,
   ) async {
-    // The release builds it for Linux, Windows and Android arm64 (#184,
-    // #185); a working copy or the CI may not have, so Android only
-    // insists when told to. iOS has none.
-    const expectOnAndroid = bool.fromEnvironment(
-      'PREPPSUITE_EXPECT_TRANSLATOR',
-    );
+    // The release builds it for Linux, Windows, Android arm64 and iOS
+    // (#184, #185, #374); a working copy or the CI may not have, so
+    // Android and iOS only insist when told to. The device check tells
+    // the iPhone simulator.
+    const expected = bool.fromEnvironment('PREPPSUITE_EXPECT_TRANSLATOR');
     if (Platform.isLinux ||
         Platform.isWindows ||
-        (Platform.isAndroid && expectOnAndroid)) {
+        ((Platform.isAndroid || Platform.isIOS) && expected)) {
       expect(translatorAvailable, isTrue, reason: 'preppsuite_translate');
     }
     if (!translatorAvailable) return;

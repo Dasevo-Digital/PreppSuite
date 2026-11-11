@@ -1083,14 +1083,25 @@ shim in `native/translate/`, which links Mozilla's translation engine
 statically. **The library is optional**: a build without it runs and the
 screen says the translator is not part of it.
 Every release package carries it except armeabi-v7a (Marian's ARM
-kernels are AArch64 only) and iOS. The release builds it before each
+kernels are AArch64 only). The release builds it before each
 package and refuses a package without it, because the Xcode phase, the
 Linux/Windows CMake rules and Gradle all only warn when it is missing:
 `build_macos.sh` before `flutter build macos`, `build_android.sh`
 (arm64, API 28 -- Bionic lacks iconv and glob below it) before the APKs,
 and on the Linux machine `build_linux.sh` before the app and
 `build_windows.sh` (mingw-w64) after it, the DLL then going to the
-Windows machine. The start test insists on it under Linux and Windows. Model packs are
+Windows machine. The start test insists on it under Linux and Windows.
+**iOS has it since #374**: `build_ios.sh` builds
+`build/ios/<sdk>/preppsuite_translate.framework` for the devices and the
+simulator, arm64 only, with a fixed armv8-a baseline (Marian's default
+"native" would describe the Mac that builds) and without PCRE2's JIT,
+which an iOS app may not use. iOS loads code only from a signed framework
+inside the app, so the loader asks for
+`Frameworks/preppsuite_translate.framework/preppsuite_translate` there,
+and the Runner's "Embed Translator" phase copies the one for the SDK it
+builds and signs it. There is no iOS package; the device check builds the
+simulator framework first and its start test insists on it. A device
+build needs `build_ios.sh` run before `xcodebuild`, or it goes without. Model packs are
 checked against Mozilla's SHA-256 and get their manifest last. **A newer
 version of a pack already here never replaces it in place** (#220): it is
 fetched into `<code>.new` and swapped in by two renames once every file

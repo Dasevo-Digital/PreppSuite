@@ -104,12 +104,22 @@ und exportiert nur ihre sechs Funktionen.
   armeabi-v7a-Paket lädt die Bibliothek nicht, und der Bildschirm sagt,
   dass der Übersetzer fehlt. Gradle nimmt `build/android-jni/` auf, wenn
   es da ist.
-- Die Xcode-Phase „Embed Translator“ kopiert die Bibliothek nach
-  `Contents/Frameworks` und signiert sie; die CMake-Dateien für Linux und
+- `build_ios.sh` baut für iPhone/iPad und für den Simulator, je nur
+  arm64 (#374), mit Ruy und Accelerate wie auf dem Mac, aber mit der
+  festen Grundlinie armv8-a statt „native“: Der Bau-Mac ist nicht das
+  Telefon. PCRE2 bekommt dort keinen JIT, weil eine iOS-App keinen Code in
+  den Speicher schreiben und ausführen darf; die Satztrennung arbeitet
+  dann ohne. iOS lädt Code nur aus signierten Frameworks, deshalb liegt
+  jeder Bau als `build/ios/<sdk>/preppsuite_translate.framework` vor.
+- Die Xcode-Phase „Embed Translator“ kopiert die Bibliothek auf dem Mac
+  nach `Contents/Frameworks`, unter iOS das Framework des gebauten SDK
+  nach `Frameworks/`, und signiert sie; die CMake-Dateien für Linux und
   Windows legen sie ins Paket. Fehlt sie, warnen alle nur. Deshalb baut
   `tool/release.sh` (bzw. `tool/linux_release.sh`) sie vor jedem Paket und
   bricht ab, wenn sie danach nicht im Paket liegt; der Starttest
-  verlangt sie unter Linux und Windows.
+  verlangt sie unter Linux und Windows, und im iPhone-Simulator, weil
+  `tool/release_device_check.py` das Simulator-Framework vorher baut und
+  es verlangt.
 
 **Dart.** `lib/features/translator/`:
 
@@ -163,10 +173,11 @@ zeigt.
 
 1. Android: Messung auf einem echten älteren Telefon. Die Modelle
    brauchen zusammen mit der Engine rund 200 MB Arbeitsspeicher.
-2. iPhone und iPad: erst mit der Developer-Lizenz; gebaut wird dafür
-   noch nichts.
+2. iPhone und iPad: gebaut seit #374; die Messung des Arbeitsspeichers
+   auf einem echten Gerät steht noch aus.
 
-Wo der Übersetzer fehlt (iPhone, Android vor Version 9, 32-Bit-Android),
+Wo der Übersetzer fehlt (Android vor Version 9, 32-Bit-Android, ein
+Simulator auf einem Intel-Mac),
 sagt der Bildschirm, dass er in dieser Ausgabe nicht enthalten ist; der
 Sprachführer funktioniert überall.
 

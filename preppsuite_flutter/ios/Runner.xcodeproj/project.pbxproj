@@ -285,6 +285,7 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				590D8A3900A573197D465739 /* Embed Foundation Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
+				7F3A2C1E5D48409BAE12F374 /* Embed Translator */,
 				D69C984115E49968600F6408 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
@@ -497,6 +498,21 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		7F3A2C1E5D48409BAE12F374 /* Embed Translator */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Translator";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\n# The offline translator (#374). Optional, as on the Mac: without it the\n# app builds and runs, and the translator screen says it is not part of\n# this build. native/translate/build_ios.sh builds one framework per SDK.\nFRAMEWORK=\"$SRCROOT/../native/translate/build/ios/$PLATFORM_NAME/preppsuite_translate.framework\"\nif [ ! -f \"$FRAMEWORK/preppsuite_translate\" ]; then\n  echo \"warning: preppsuite_translate.framework für $PLATFORM_NAME fehlt, kein Übersetzer in diesem Build (native/translate/build_ios.sh baut ihn)\"\n  exit 0\nfi\n\nDESTINATION=\"$TARGET_BUILD_DIR/$FRAMEWORKS_FOLDER_PATH\"\nmkdir -p \"$DESTINATION\"\nrm -rf \"$DESTINATION/preppsuite_translate.framework\"\nditto \"$FRAMEWORK\" \"$DESTINATION/preppsuite_translate.framework\"\n# Signed here: Xcode signs what it embeds itself, not what a script puts\n# beside it, and iOS loads no unsigned code. Ad hoc where the build is not\n# signed at all (the simulator, --no-codesign).\ncodesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY:--}\" \\\n  --timestamp=none \"$DESTINATION/preppsuite_translate.framework\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

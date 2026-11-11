@@ -31,7 +31,8 @@ ihre jeweils eigenen Bedingungen.
   enthaltenen Bibliotheken; Herkunft geprüft gegen
   `tool/pdfium_provenance.txt`
 - Übersetzungs-Engine aus `mozilla/translations` (Verzeichnis `inference/`,
-  in den Paketen für macOS, Linux, Windows und Android arm64) — MPL-2.0;
+  in den Paketen für macOS, Linux, Windows und Android arm64 und in der
+  iOS-App) — MPL-2.0;
   Quelle `github.com/mozilla/translations`, Commit und die sechs
   geänderten Stellen in
   `preppsuite_flutter/native/translate/translate_source.sh`. Statisch

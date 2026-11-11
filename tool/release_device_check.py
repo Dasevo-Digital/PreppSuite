@@ -82,6 +82,20 @@ def flutter_version():
 _PLUGIN_RACE = "Build input file cannot be found"
 
 
+def build_translator(log_path):
+    """The simulator's translator framework, before the first test file
+    builds the app (#374). The Runner only warns when it is missing, so a
+    build without it would run every test and pass over the translator.
+    Ninja rebuilds what changed; with nothing changed it takes seconds."""
+    with log_path.open("w") as log:
+        result = subprocess.run(
+            [str(APP / "native" / "translate" / "build_ios.sh"), "iphonesimulator"],
+            cwd=APP, stdout=log, stderr=subprocess.STDOUT,
+        )
+    if result.returncode != 0:
+        sys.exit(f"Übersetzer für den Simulator ließ sich nicht bauen, siehe {log_path}")
+
+
 def run_tests(udid, log_path):
     """Each test file on its own, so one retry costs one file."""
     code = 0
@@ -90,6 +104,9 @@ def run_tests(udid, log_path):
             for attempt in (1, 2):
                 result = subprocess.run(
                     ["flutter", "test", "--no-pub", "--reporter", "json",
+                     # The start test then insists on the translator
+                     # (#374) instead of passing over a build without it.
+                     "--dart-define=PREPPSUITE_EXPECT_TRANSLATOR=true",
                      str(test.relative_to(APP)), "-d", udid],
                     cwd=APP, capture_output=True, text=True,
                 )
@@ -154,6 +171,7 @@ def main():
     folder.mkdir(parents=True, exist_ok=True)
     v = version()
 
+    build_translator(folder / f"geraetetest-uebersetzer-v{v}.log")
     device, ios = pick_simulator()
     udid = device["udid"]
     started_here = device["state"] != "Booted"
@@ -194,8 +212,8 @@ def main():
         f"{sum(o == 'FEHLER' for o in results.values())} fehlgeschlagen",
         "",
         "Geprüft werden die nativen Kanäle, die kein Unit-Test erreicht:",
-        "Speicherbrücke, Foto-Tresor, Archivleser und Artikelansicht",
-        "(preppsuite_flutter/integration_test/).",
+        "Speicherbrücke, Foto-Tresor, Archivleser, Artikelansicht und",
+        "Übersetzer (preppsuite_flutter/integration_test/).",
         "",
     ] + [f"  [{o}] {name}" for name, o in results.items()]
     protocol = folder / f"GERAETETEST-v{v}.txt"

@@ -409,8 +409,8 @@ Richtung), danach geht es offline; zwischen zwei Sprachen ohne Englisch
 übersetzt er über Englisch und braucht zwei Pakete. Kein Text verlässt
 das Gerät. Unter jeder Übersetzung steht, dass sie maschinell ist; sie
 lässt sich wie ein Satz des Sprachführers groß zeigen und vorlesen. Auf
-macOS, Linux, Windows und Android ab Version 9 (64-Bit); im
-armeabi-v7a-Paket und auf dem iPhone fehlt er
+macOS, Linux, Windows, iPhone und iPad sowie Android ab Version 9
+(64-Bit); im armeabi-v7a-Paket fehlt er
 ([Stand](docs/uebersetzer-offline-plan.md)).
 
 Im **Gespräch** teilen sich zwei Personen den Bildschirm: unten schreibt,
