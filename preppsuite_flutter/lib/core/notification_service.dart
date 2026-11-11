@@ -1,8 +1,11 @@
+import 'dart:ui' show Locale;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../features/warnings/application/warning_translations.dart';
+import '../l10n/generated/app_localizations.dart';
 import '../local_db/database.dart' show Warning;
 import '../model/categories.dart' show WarningSeverity;
 
@@ -84,6 +87,34 @@ AndroidNotificationDetails warningAndroidDetails(WarningSeverity severity) =>
         importance: Importance.high,
         priority: Priority.high,
       );
+
+/// The title of a warning's notification: what the app calls it in
+/// [language] (#357).
+@visibleForTesting
+String warningNotificationTitle(Warning warning, String language) {
+  AppLocalizations? l10n;
+  try {
+    l10n = lookupAppLocalizations(Locale(language));
+  } on FlutterError {
+    l10n = null;
+  }
+  return warning.titleIn(language, allClear: l10n?.warningAllClearTitle);
+}
+
+/// The line beneath: the event where it says more than the title, the
+/// area otherwise. It was the event always, and for a BBK warning that is
+/// its headline once more, or the German "Gefahreninformation" beneath a
+/// translated title (#357).
+@visibleForTesting
+String? warningNotificationBody(Warning warning, String language) {
+  final text = warning.textIn(language);
+  final title = text.headline.toLowerCase();
+  final event = text.event.trim();
+  if (event.isNotEmpty && !title.contains(event.toLowerCase())) return event;
+  final area = warning.areaDescription?.trim();
+  if (area == null || area.isEmpty) return null;
+  return area.split('\n').map((line) => line.trim()).join(', ');
+}
 
 /// On-device notifications.
 ///
@@ -273,13 +304,12 @@ class NotificationService {
     String language = 'de',
   }) async {
     await _ensureInitialized();
-    final text = warning.textIn(language);
     await _plugin.show(
       // Stable per-warning id so re-notifying the same warning (e.g. after
       // an unrelated field update) replaces rather than stacks.
       id: warning.externalId.hashCode,
-      title: text.headline,
-      body: text.event,
+      title: warningNotificationTitle(warning, language),
+      body: warningNotificationBody(warning, language),
       notificationDetails: NotificationDetails(
         macOS: const DarwinNotificationDetails(),
         iOS: DarwinNotificationDetails(

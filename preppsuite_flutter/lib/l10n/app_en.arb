@@ -5923,6 +5923,15 @@
       }
     }
   },
+  "warningAllClearTitle": "All clear: {title}",
+  "@warningAllClearTitle": {
+    "description": "The title of a warning the publisher has ended, where the title is not the German headline that already says so.",
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "warningGermanOriginal": "Official text in German",
   "warningExtraLanguageTitle": "Also show warnings in",
   "warningExtraLanguageHint": "The official translation where the German Federal Office sends one. The German text remains authoritative.",

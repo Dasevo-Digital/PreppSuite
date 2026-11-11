@@ -134,94 +134,101 @@ class EmergencyPlanReport {
     font ??= pw.Font.ttf(
       await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'),
     );
-    final document = pw.Document(
-      theme: pw.ThemeData.withFont(base: font, bold: font),
-    );
-    final sections = <({String title, List<String> rows})>[
-      (
-        title: strings.meetingPoints,
-        rows: [
-          for (final (point, text) in [
-            (MeetingPoint.near, plan.meetingPointNear),
-            (MeetingPoint.far, plan.meetingPointFar),
-          ])
-            if ([?text, ?meetingPlaces[point]] case final parts
-                when parts.isNotEmpty)
-              parts.join(' · '),
-        ],
-      ),
-      (
-        title: strings.contact,
-        rows: [
-          if (plan.contactName != null) plan.contactName!,
-          if (plan.contactPhone != null) plan.contactPhone!,
-        ],
-      ),
-      // Its own section rather than a third line under the contact: on
-      // paper the heading is what somebody reads first, and "where to go
-      // when nothing works" is not the same errand as "who to ring".
-      (
-        title: strings.contactPoint,
-        rows: [if (plan.localContactPoint != null) plan.localContactPoint!],
-      ),
-      (
-        title: strings.equipment,
-        rows: [
-          if (plan.kitLocation != null) plan.kitLocation!,
-          if (plan.shutoffLocation != null) plan.shutoffLocation!,
-        ],
-      ),
-      (title: strings.notes, rows: [if (plan.notes != null) plan.notes!]),
-    ];
-    document.addPage(
-      pw.MultiPage(
-        build: (_) => [
-          pw.Header(
-            level: 0,
-            child: pw.Text(
-              strings.title,
-              style: const pw.TextStyle(fontSize: 24),
-            ),
-          ),
-          pw.Text(householdName, style: const pw.TextStyle(fontSize: 14)),
-          pw.Text(
-            strings.generatedOn,
-            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
-          ),
-          pw.SizedBox(height: 16),
-          for (final section in sections) ...[
-            pw.Header(level: 1, text: section.title),
-            if (section.rows.isEmpty)
-              pw.Text(strings.empty)
-            else
-              for (final row in section.rows) pdfLine(row),
+    // A fresh document each time: one that failed halfway holds the
+    // pages it had set.
+    Future<Uint8List> render(bool cardsTogether) async {
+      final document = pw.Document(
+        theme: pw.ThemeData.withFont(base: font, bold: font),
+      );
+      final sections = <({String title, List<String> rows})>[
+        (
+          title: strings.meetingPoints,
+          rows: [
+            for (final (point, text) in [
+              (MeetingPoint.near, plan.meetingPointNear),
+              (MeetingPoint.far, plan.meetingPointFar),
+            ])
+              if ([?text, ?meetingPlaces[point]] case final parts
+                  when parts.isNotEmpty)
+                parts.join(' · '),
           ],
-          if (members.isNotEmpty) ...[
-            pw.Header(level: 1, text: strings.cards),
-            // On the sheet itself, not only in the dialog that offered it.
-            // The dialog is gone the moment it is answered; the paper is
-            // what somebody finds in a drawer two years from now.
-            pw.Container(
-              padding: const pw.EdgeInsets.all(6),
-              decoration: pw.BoxDecoration(
-                border: pw.Border.all(color: PdfColors.grey600),
-              ),
+        ),
+        (
+          title: strings.contact,
+          rows: [
+            if (plan.contactName != null) plan.contactName!,
+            if (plan.contactPhone != null) plan.contactPhone!,
+          ],
+        ),
+        // Its own section rather than a third line under the contact: on
+        // paper the heading is what somebody reads first, and "where to go
+        // when nothing works" is not the same errand as "who to ring".
+        (
+          title: strings.contactPoint,
+          rows: [if (plan.localContactPoint != null) plan.localContactPoint!],
+        ),
+        (
+          title: strings.equipment,
+          rows: [
+            if (plan.kitLocation != null) plan.kitLocation!,
+            if (plan.shutoffLocation != null) plan.shutoffLocation!,
+          ],
+        ),
+        (title: strings.notes, rows: [if (plan.notes != null) plan.notes!]),
+      ];
+      document.addPage(
+        pw.MultiPage(
+          build: (_) => [
+            pw.Header(
+              level: 0,
               child: pw.Text(
-                strings.cardsWarning,
-                style: const pw.TextStyle(fontSize: 9),
+                strings.title,
+                style: const pw.TextStyle(fontSize: 24),
               ),
             ),
-            pw.SizedBox(height: 8),
-            for (final member in members)
-              ...pdfCard(
-                member.name,
-                emergencyCardRows(member, strings.fields),
+            pw.Text(householdName, style: const pw.TextStyle(fontSize: 14)),
+            pw.Text(
+              strings.generatedOn,
+              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+            ),
+            pw.SizedBox(height: 16),
+            for (final section in sections) ...[
+              pw.Header(level: 1, text: section.title),
+              if (section.rows.isEmpty)
+                pw.Text(strings.empty)
+              else
+                for (final row in section.rows) pdfLine(row),
+            ],
+            if (members.isNotEmpty) ...[
+              pw.Header(level: 1, text: strings.cards),
+              // On the sheet itself, not only in the dialog that offered it.
+              // The dialog is gone the moment it is answered; the paper is
+              // what somebody finds in a drawer two years from now.
+              pw.Container(
+                padding: const pw.EdgeInsets.all(6),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey600),
+                ),
+                child: pw.Text(
+                  strings.cardsWarning,
+                  style: const pw.TextStyle(fontSize: 9),
+                ),
               ),
+              pw.SizedBox(height: 8),
+              for (final member in members)
+                ...pdfCard(
+                  member.name,
+                  emergencyCardRows(member, strings.fields),
+                  together: cardsTogether,
+                ),
+            ],
           ],
-        ],
-      ),
-    );
-    return document.save();
+        ),
+      );
+      return document.save();
+    }
+
+    return pdfKeepingCardsTogether(render);
   }
 }
 

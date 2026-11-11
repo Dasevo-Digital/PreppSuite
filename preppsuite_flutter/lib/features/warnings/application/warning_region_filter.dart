@@ -8,6 +8,9 @@
 /// without any of that.
 library;
 
+import '../../household/application/german_states.dart';
+import 'german_district_keys.dart';
+
 /// How coarse an additional region is.
 enum WarningRegionKind {
   /// A 5-digit Kreisschlüssel.
@@ -77,6 +80,12 @@ class WarningRegion {
   @override
   int get hashCode => Object.hash(kind, value);
 
+  /// Whether this names a district or a state that exists.
+  bool get isPlaced => switch (kind) {
+    WarningRegionKind.kreis => isGermanRegionKey(value),
+    WarningRegionKind.bundesland => germanStateByBbkCode(value) != null,
+  };
+
   WarningRegion copyWith({String? label, bool clearLabel = false}) =>
       WarningRegion(
         kind: kind,
@@ -105,19 +114,28 @@ class WarningRegionFilter {
   /// Whether the device has said anything about where it is. When it has
   /// not, every warning in the country is shown — the safe reading for a
   /// civil-protection alert.
-  bool get hasAnyRegion =>
-      ownKreisSchluessel != null || extraRegions.isNotEmpty;
+  ///
+  /// Nor has it where its own key names no district (#349). Followed
+  /// places alone would then decide, and the warnings for where the
+  /// household lives read as somewhere else. A followed place that names
+  /// nothing does not count either.
+  bool get hasAnyRegion {
+    if (ownKreisSchluessel != null) return true;
+    final own = ownRegionKey?.trim() ?? '';
+    return own.isEmpty && extraRegions.any((region) => region.isPlaced);
+  }
 
-  /// The first five digits, or null where there is no key that names a
-  /// German state.
+  /// The first five digits, or null where the key names no German
+  /// district.
   ///
   /// A postcode in the field used to switch off the warnings for the own
   /// district and state (#349): "77756" counted as a region, "77" is no
   /// state, and a flood in the district and a warning for all of
-  /// Baden-Württemberg both read as somewhere else. A key that cannot be a
-  /// district now counts as none, which shows everything in the country,
-  /// the safe reading. The forms refuse such keys; this is for the ones
-  /// already stored.
+  /// Baden-Württemberg both read as somewhere else. Two digits from 01 to
+  /// 16 were not enough: "04109" is Leipzig's postcode and began like
+  /// Bremen. A key counts only where the district table has it; otherwise
+  /// it is none, which shows everything in the country, the safe reading.
+  /// The forms refuse such keys; this is for the ones already stored.
   String? get ownKreisSchluessel {
     final key = ownRegionKey;
     if (key == null || !isGermanRegionKey(key)) return null;
@@ -130,15 +148,11 @@ class WarningRegionFilter {
   List<String> get followedKreisSchluessel => {
     ?ownKreisSchluessel,
     for (final region in extraRegions)
-      if (region.kind == WarningRegionKind.kreis && region.value.length >= 5)
+      if (region.kind == WarningRegionKind.kreis && region.isPlaced)
         region.value.substring(0, 5),
   }.toList(growable: false);
 }
 
-/// Whether [key] begins like an official German regional key: five digits,
-/// the first two one of the sixteen states.
-bool isGermanRegionKey(String key) {
-  if (!RegExp(r'^\d{5}').hasMatch(key)) return false;
-  final state = int.parse(key.substring(0, 2));
-  return state >= 1 && state <= 16;
-}
+/// Whether [key] begins with the key of a German district.
+bool isGermanRegionKey(String key) =>
+    key.length >= 5 && germanDistrictKeys.contains(key.substring(0, 5));

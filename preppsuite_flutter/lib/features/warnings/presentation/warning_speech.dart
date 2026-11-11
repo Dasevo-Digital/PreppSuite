@@ -29,9 +29,13 @@ PhraseLanguage warningLanguage(WarningSource source) => switch (source) {
 };
 
 /// Headline, description and what to do, in that order, in [language]
-/// where the BBK translated into it (#357).
+/// where the BBK translated all of it (#357). A MoWaS translation leaves
+/// the description German, and a Spanish voice reading German is no help
+/// to anyone; that warning is read in German, as before.
 String warningSpeechText(Warning warning, {String language = 'de'}) {
-  final text = warning.textIn(language);
+  final text = warning.isWhollyTranslatedFor(language)
+      ? warning.textIn(language)
+      : warning.germanText;
   return [
     text.headline,
     ?text.description,
@@ -71,7 +75,7 @@ class _SpeakWarningButtonState extends ConsumerState<SpeakWarningButton> {
     super.dispose();
   }
 
-  Future<void> _toggle(String voice) async {
+  Future<void> _toggle(String voice, String language) async {
     if (_speaking) {
       setState(() => _speaking = false);
       await _speech.stop();
@@ -79,35 +83,34 @@ class _SpeakWarningButtonState extends ConsumerState<SpeakWarningButton> {
     }
     setState(() => _speaking = true);
     await _speech.speak(
-      warningSpeechText(widget.warning, language: _language(context)),
+      warningSpeechText(widget.warning, language: language),
       languageCode: voice,
     );
   }
 
-  /// The app's language when the warning is translated into it, so that
-  /// the words and the voice match.
-  String _language(BuildContext context) {
-    final app = Localizations.localeOf(context).languageCode;
-    return widget.warning.isTranslatedFor(app) ? app : 'de';
-  }
-
   @override
   Widget build(BuildContext context) {
-    final language = _language(context);
-    final voice = ref
-        .watch(
-          phraseVoiceProvider(
-            language == 'de'
-                ? warningLanguage(widget.source)
-                : PhraseLanguage.values.byName(language),
-          ),
-        )
+    // The app's language when the warning is translated into it whole, so
+    // that the words and the voice match; the original otherwise, and also
+    // where the device has no voice for the translation.
+    final app = Localizations.localeOf(context).languageCode;
+    final translatedLanguage = widget.warning.isWhollyTranslatedFor(app)
+        ? PhraseLanguage.values.asNameMap()[app]
+        : null;
+    final translatedVoice = translatedLanguage == null
+        ? null
+        : ref.watch(phraseVoiceProvider(translatedLanguage)).value;
+    final originalVoice = ref
+        .watch(phraseVoiceProvider(warningLanguage(widget.source)))
         .value;
+    final (voice, language) = translatedVoice != null
+        ? (translatedVoice, app)
+        : (originalVoice, 'de');
     if (voice == null) return const SizedBox.shrink();
 
     final l10n = AppLocalizations.of(context)!;
     return TextButton.icon(
-      onPressed: () => _toggle(voice),
+      onPressed: () => _toggle(voice, language),
       icon: Icon(
         _speaking ? Icons.stop_circle_outlined : Icons.volume_up_outlined,
       ),

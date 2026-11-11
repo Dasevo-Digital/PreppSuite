@@ -125,144 +125,152 @@ class EmergencyFolderReport {
     font ??= pw.Font.ttf(
       await rootBundle.load('assets/fonts/NotoSans-Regular.ttf'),
     );
-    final document = pw.Document(
-      theme: pw.ThemeData.withFont(base: font, bold: font),
-    );
+    // A fresh document each time: one that failed halfway holds the
+    // pages it had set.
+    Future<Uint8List> render(bool cardsTogether) async {
+      final document = pw.Document(
+        theme: pw.ThemeData.withFont(base: font, bold: font),
+      );
 
-    final sections = <({String title, List<String> rows})>[
-      (
-        title: strings.meetingPoints,
-        rows: [
-          for (final (point, text) in [
-            (MeetingPoint.near, plan?.meetingPointNear),
-            (MeetingPoint.far, plan?.meetingPointFar),
-          ])
-            if ([?text, ?meetingPlaces[point]] case final parts
-                when parts.isNotEmpty)
-              parts.join(' · '),
-        ],
-      ),
-      (
-        title: strings.contact,
-        rows: [
-          ?plan?.contactName,
-          ?plan?.contactPhone,
-        ],
-      ),
-      (
-        title: strings.contactPoint,
-        rows: [?plan?.localContactPoint],
-      ),
-      (
-        title: strings.equipment,
-        rows: [
-          ?plan?.kitLocation,
-          ?plan?.shutoffLocation,
-        ],
-      ),
-      (title: strings.notes, rows: [?plan?.notes]),
-      (
-        title: strings.folder,
-        rows: [
-          if (hub.folder.location.trim().isNotEmpty) hub.folder.location.trim(),
-          if (hub.folder.copiesReady) strings.folderCopiesReady,
-          if (hub.folder.takeWhenLeaving) strings.folderTakeAlong,
-        ],
-      ),
-      (
-        title: strings.communication,
-        rows: [
-          if (hub.communication.text.trim().isNotEmpty)
-            hub.communication.text.trim(),
-        ],
-      ),
-      (
-        title: strings.radio,
-        rows: [
-          for (final plan in hub.radioPlans)
-            '${plan.station}: ${plan.band} ${plan.frequency} · '
-                '${plan.receiver} · ${plan.power}',
-        ],
-      ),
-      (
-        title: strings.autonomy,
-        rows: [for (final row in autonomy) '${row.label}: ${row.value}'],
-      ),
-    ];
-
-    document.addPage(
-      pw.MultiPage(
-        build: (_) => [
-          pw.Header(
-            level: 0,
-            child: pw.Text(
-              strings.title,
-              style: const pw.TextStyle(fontSize: 24),
-            ),
-          ),
-          pw.Text(householdName, style: const pw.TextStyle(fontSize: 14)),
-          pw.Text(
-            strings.generatedOn,
-            style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
-          ),
-          pw.SizedBox(height: 8),
-          pw.Text(strings.intro, style: const pw.TextStyle(fontSize: 10)),
-          pw.SizedBox(height: 16),
-          for (final section in sections) ...[
-            pw.Header(level: 1, text: section.title),
-            if (section.rows.isEmpty)
-              pw.Text(strings.empty)
-            else
-              for (final row in section.rows) pdfLine(row),
+      final sections = <({String title, List<String> rows})>[
+        (
+          title: strings.meetingPoints,
+          rows: [
+            for (final (point, text) in [
+              (MeetingPoint.near, plan?.meetingPointNear),
+              (MeetingPoint.far, plan?.meetingPointFar),
+            ])
+              if ([?text, ?meetingPlaces[point]] case final parts
+                  when parts.isNotEmpty)
+                parts.join(' · '),
           ],
-          pw.Header(level: 1, text: strings.evacuation),
-          if (hub.evacuationCards.isEmpty)
-            pw.Text(strings.empty)
-          else
-            for (final card in hub.evacuationCards) ...[
-              pw.Text(
-                // An ASCII arrow, not U+2192: the bundled NotoSans is a
-                // subset (see `tool/font_instance.py`) and does not carry
-                // it, so a real arrow prints as nothing at all. Measured,
-                // not assumed — and the crisis briefing had been shipping
-                // an invisible one.
-                '${card.label}: ${card.start} -> ${card.destination}',
-                style: pw.TextStyle(
-                  fontSize: 13,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-              if (card.route.trim().isNotEmpty)
-                pdfLine('${strings.evacuationRoute}: ${card.route}'),
-              if (card.locations.trim().isNotEmpty)
-                pdfLine('${strings.evacuationPlaces}: ${card.locations}'),
-              pw.SizedBox(height: 8),
-            ],
-          if (members.isNotEmpty) ...[
-            pw.Header(level: 1, text: strings.cards),
-            // On the sheet itself, not only in the dialog that offered
-            // it: the dialog is gone once answered, the paper is what
-            // somebody finds in a drawer two years from now.
-            pw.Container(
-              padding: const pw.EdgeInsets.all(6),
-              decoration: pw.BoxDecoration(
-                border: pw.Border.all(color: PdfColors.grey600),
-              ),
+        ),
+        (
+          title: strings.contact,
+          rows: [
+            ?plan?.contactName,
+            ?plan?.contactPhone,
+          ],
+        ),
+        (
+          title: strings.contactPoint,
+          rows: [?plan?.localContactPoint],
+        ),
+        (
+          title: strings.equipment,
+          rows: [
+            ?plan?.kitLocation,
+            ?plan?.shutoffLocation,
+          ],
+        ),
+        (title: strings.notes, rows: [?plan?.notes]),
+        (
+          title: strings.folder,
+          rows: [
+            if (hub.folder.location.trim().isNotEmpty)
+              hub.folder.location.trim(),
+            if (hub.folder.copiesReady) strings.folderCopiesReady,
+            if (hub.folder.takeWhenLeaving) strings.folderTakeAlong,
+          ],
+        ),
+        (
+          title: strings.communication,
+          rows: [
+            if (hub.communication.text.trim().isNotEmpty)
+              hub.communication.text.trim(),
+          ],
+        ),
+        (
+          title: strings.radio,
+          rows: [
+            for (final plan in hub.radioPlans)
+              '${plan.station}: ${plan.band} ${plan.frequency} · '
+                  '${plan.receiver} · ${plan.power}',
+          ],
+        ),
+        (
+          title: strings.autonomy,
+          rows: [for (final row in autonomy) '${row.label}: ${row.value}'],
+        ),
+      ];
+
+      document.addPage(
+        pw.MultiPage(
+          build: (_) => [
+            pw.Header(
+              level: 0,
               child: pw.Text(
-                strings.cardsWarning,
-                style: const pw.TextStyle(fontSize: 9),
+                strings.title,
+                style: const pw.TextStyle(fontSize: 24),
               ),
+            ),
+            pw.Text(householdName, style: const pw.TextStyle(fontSize: 14)),
+            pw.Text(
+              strings.generatedOn,
+              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
             ),
             pw.SizedBox(height: 8),
-            for (final member in members)
-              ...pdfCard(
-                member.name,
-                emergencyCardRows(member, strings.fields),
+            pw.Text(strings.intro, style: const pw.TextStyle(fontSize: 10)),
+            pw.SizedBox(height: 16),
+            for (final section in sections) ...[
+              pw.Header(level: 1, text: section.title),
+              if (section.rows.isEmpty)
+                pw.Text(strings.empty)
+              else
+                for (final row in section.rows) pdfLine(row),
+            ],
+            pw.Header(level: 1, text: strings.evacuation),
+            if (hub.evacuationCards.isEmpty)
+              pw.Text(strings.empty)
+            else
+              for (final card in hub.evacuationCards) ...[
+                pw.Text(
+                  // An ASCII arrow, not U+2192: the bundled NotoSans is a
+                  // subset (see `tool/font_instance.py`) and does not carry
+                  // it, so a real arrow prints as nothing at all. Measured,
+                  // not assumed — and the crisis briefing had been shipping
+                  // an invisible one.
+                  '${card.label}: ${card.start} -> ${card.destination}',
+                  style: pw.TextStyle(
+                    fontSize: 13,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                if (card.route.trim().isNotEmpty)
+                  pdfLine('${strings.evacuationRoute}: ${card.route}'),
+                if (card.locations.trim().isNotEmpty)
+                  pdfLine('${strings.evacuationPlaces}: ${card.locations}'),
+                pw.SizedBox(height: 8),
+              ],
+            if (members.isNotEmpty) ...[
+              pw.Header(level: 1, text: strings.cards),
+              // On the sheet itself, not only in the dialog that offered
+              // it: the dialog is gone once answered, the paper is what
+              // somebody finds in a drawer two years from now.
+              pw.Container(
+                padding: const pw.EdgeInsets.all(6),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey600),
+                ),
+                child: pw.Text(
+                  strings.cardsWarning,
+                  style: const pw.TextStyle(fontSize: 9),
+                ),
               ),
+              pw.SizedBox(height: 8),
+              for (final member in members)
+                ...pdfCard(
+                  member.name,
+                  emergencyCardRows(member, strings.fields),
+                  together: cardsTogether,
+                ),
+            ],
           ],
-        ],
-      ),
-    );
-    return document.save();
+        ),
+      );
+      return document.save();
+    }
+
+    return pdfKeepingCardsTogether(render);
   }
 }

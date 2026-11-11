@@ -4052,3 +4052,57 @@ wird in der Sprache der App, wo es eine Übersetzung gibt, und eine zweite
 Sprache lässt sich je Gerät wählen (`warningExtraLanguage`, wird nicht
 mitgenommen). Gespeicherte Warnungen ohne Übersetzungen holt der Abruf im
 Rahmen von `detailRetriesPerPoll` nach, ohne sie noch einmal zu melden.
+
+### Aus der Durchsicht vom 11. November (#349, #351, #357)
+
+**Was MoWaS übersetzt, ist keine Überschrift** (#357). In den übersetzten
+Blöcken einer MoWaS-Meldung steht im Feld `headline` nur der Name des
+Ereignisses („Power outage“), die Beschreibung ist die deutsche, übersetzt
+ist nur, was zu tun ist. Die deutsche Überschrift sagt „Entwarnung“,
+„1. AKTUALISIERUNG“ und wo. 2.9.6 zeigte den Namen statt ihrer: Eine
+Entwarnung sah aus wie eine laufende Gefahr, und zwei Trinkwasserwarnungen
+für verschiedene Orte hießen gleich. Jetzt steht der übersetzte Name vor der
+deutschen Überschrift („Power outage – Entwarnung: Stromausfall …“), und eine
+Entwarnung trägt das Wort der App-Sprache davor (`warningAllClearTitle`). Dafür
+speichert `warnings.messageType` (Schema 29) CAPs `msgType`, den
+`mapData.json` als `type`, das Kreis-Dashboard als `payload.data.msgType` und
+die Detailseite als `msgType` liefern. Nur DWD übersetzt die Überschrift
+selbst (`bbkTranslatesHeadline`).
+
+Gespeichert wird je Sprache nur, was sich vom Deutschen unterscheidet
+(`WarningTranslation`); `textIn` füllt den Rest mit dem Deutschen auf. Ganz
+gespeichert waren die Übersetzungen achtmal so groß wie der deutsche Text.
+Die Umstellung auf Schema 29 verwirft die Übersetzungen aus 2.9.6, die
+Abrufe holen sie in der neuen Form nach, mit eigenem Rahmen
+(`translationRetriesPerPoll`) und erst nach fehlenden Details.
+
+Vorgelesen wird in der App-Sprache nur eine ganz übersetzte Meldung
+(`isWhollyTranslatedFor`), sonst das Deutsche mit deutscher Stimme, auch
+wenn das Gerät für die App-Sprache keine Stimme hat. Die Mitteilung trägt
+den Titel wie die Liste; darunter steht das Ereignis, wo es mehr sagt als
+der Titel, sonst das Gebiet, nie mehr „Gefahreninformation“. Die Suche
+durchsucht auch die Übersetzungen. In einem Abschnitt in weiterer Sprache
+steht nur, was diese Sprache sagt, und jeder Teil läuft in der Richtung
+seiner Wörter.
+
+**Ein Regionalschlüssel ist ein Kreis, den es gibt** (#349). Die Prüfung vom
+10. November sah nur auf die ersten zwei Ziffern, und viele Postleitzahlen
+beginnen wie ein Land: Mit „04109“ (Leipzig) galt eine Bremer Warnung als
+eigenes Land und Leipzigs eigene als anderswo. `isGermanRegionKey` prüft
+jetzt gegen `germanDistrictKeys`, die 401 Kreise der Warnzellentabelle als
+Konstante, damit der Filter ein reiner Wert bleibt, den auch der
+Hintergrund-Isolate ohne Laden liest. `tool/german_district_keys.py` schreibt
+sie aus `assets/dwd_warncells.csv`, `region_key_test` hält beide gleich. Ein
+eigener Schlüssel, der keinen Kreis nennt, gilt als keiner, auch wenn
+weitere Orte gefolgt werden: Sonst entschieden die allein, und der eigene
+Wohnort lag anderswo. Gefolgte Orte, die nichts nennen, zählen nicht, und
+das Formular für zusätzliche Regionen weist sie ab.
+
+**Die Schätzung darf sich irren, der Druck nicht** (#351). `pdfCard` hält
+eine Karte zusammen, wenn sie nach geschätzten Zeilen passt. 90 Zeichen je
+Zeile waren zu viel (mit Noto passen 70 bis 75): Eine Karte mit 24
+mittellangen Zeilen galt als 27 Zeilen, war 812 von 728 Punkten hoch, und
+das Dokument scheiterte, das 2.9.5 noch gedruckt hatte. Die Schätzung nimmt
+60 Zeichen an, und `pdfKeepingCardsTogether` setzt das Dokument einmal neu,
+mit jeder Karte fortlaufend, wenn das Zusammenhalten trotzdem an einer Seite
+scheitert.

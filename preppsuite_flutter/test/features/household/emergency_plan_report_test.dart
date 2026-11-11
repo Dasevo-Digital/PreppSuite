@@ -3,7 +3,9 @@ import 'dart:typed_data';
 import 'package:drift/drift.dart' show Value;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pdf/pdf.dart' show PdfException;
 import 'package:pdf/widgets.dart' as pw;
+import 'package:preppsuite_flutter/core/pdf_blocks.dart';
 import 'package:preppsuite_flutter/features/household/application/emergency_plan_report.dart';
 import 'package:preppsuite_flutter/features/household/application/meeting_point_places.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
@@ -134,6 +136,55 @@ void main() {
         font: pw.Font.helvetica(),
       );
       expect(textIn(pdf), contains('Wasser'));
+    });
+
+    test('a card of medium lines prints with the bundled font', () async {
+      // Measured in the review of 11 November: 2.9.6 guessed 27 lines and
+      // kept this card together, and it was 812 points of a 728-point page.
+      const line =
+          'Metoprololsuccinat 47,5 mg Retardtablette, 1-0-1, morgens und '
+          'abends nach dem Essen';
+      final pdf = await const EmergencyPlanReport().build(
+        plan: plan,
+        householdName: 'Familie Muster',
+        strings: strings,
+        members: [
+          member(
+            medication: List.filled(12, line).join('\n'),
+            conditions: List.filled(12, line).join('\n'),
+          ),
+        ],
+      );
+      expect(pdf, isNotEmpty);
+    });
+
+    test('a card the guess takes for short runs on where it is not', () async {
+      // Wide letters: each line is one by the count of its characters and
+      // two on the page, so a card guessed to fit is taller than a sheet.
+      final wide = ['W' * 48, ...List.filled(28, 'W' * 59)].join('\n');
+      final rows = [(label: 'Medikation', value: wide)];
+      expect(
+        rows.fold(1, (n, r) => n + pdfEstimatedLines('${r.label}: ${r.value}')),
+        lessThanOrEqualTo(pdfCardLinesTogether),
+        reason: 'guessed short enough to keep together',
+      );
+      final together = pw.Document(
+        theme: pw.ThemeData.withFont(base: pw.Font.helvetica()),
+      );
+      expect(
+        () => together.addPage(
+          pw.MultiPage(build: (_) => pdfCard('Anna Muster', rows)),
+        ),
+        throwsA(isA<PdfException>()),
+        reason: 'and taller than a page',
+      );
+
+      final pdf = await render(members: [member(medication: wide)]);
+      expect(
+        RegExp('Anna Muster').allMatches(textIn(pdf)).length,
+        greaterThanOrEqualTo(2),
+        reason: 'set again with the card running on, the name on each line',
+      );
     });
 
     test('thirty short cards each stay under their name', () async {

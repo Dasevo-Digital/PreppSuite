@@ -33,6 +33,12 @@ class Warnings extends Table {
   /// German columns above stay what the app reasons with.
   TextColumn get translationsJson => text().nullable()();
 
+  /// CAP's `msgType` as the BBK sends it: `Alert`, `Update` or `Cancel`
+  /// (schema 29). The German headline says "Entwarnung" itself; a
+  /// translated title has to be told (#357). Null for MeteoAlarm and for
+  /// rows stored before.
+  TextColumn get messageType => text().nullable()();
+
   DateTimeColumn get effective => dateTime()();
   DateTimeColumn get expires => dateTime().nullable()();
   DateTimeColumn get sent => dateTime()();

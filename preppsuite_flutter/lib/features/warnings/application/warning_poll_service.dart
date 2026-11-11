@@ -241,6 +241,10 @@ class WarningPollService {
   /// a poll, not three hundred every fifteen minutes.
   static const detailRetriesPerPoll = 12;
 
+  /// How many stored warnings without their translations one poll reads
+  /// again, after the missing details (#357).
+  static const translationRetriesPerPoll = 12;
+
   /// BBK's map feed is deliberately small. Fetch full CAP payloads only for
   /// new or changed warnings, and for stored ones that never got theirs;
   /// the rest already carry their cached text. Four workers keep a weather
@@ -255,29 +259,44 @@ class WarningPollService {
     // question again for every one of them.
     final stored = await _db.warningsBySource(WarningSource.bbk.name);
     final result = List<BbkRawWarning>.from(warnings);
+
+    // In this order, because the time is limited: what is new or changed,
+    // then a detail that never arrived, and only then the translations of
+    // a warning stored before they were kept (#357). Those run for weeks
+    // and would otherwise stay German until they end, but they shared one
+    // count with the missing details, and a warning without its text
+    // waited behind them.
+    final changed = <int>[];
+    final missingDetail = <int>[];
+    final missingTranslations = <int>[];
+    for (var at = 0; at < warnings.length; at++) {
+      final warning = warnings[at];
+      final existing = stored[warning.id];
+      final sent = DateTime.tryParse(warning.startDate)?.toUtc();
+      if (existing == null || (sent != null && sent.isAfter(existing.sent))) {
+        changed.add(at);
+      } else if (lacksBbkDetail(existing)) {
+        missingDetail.add(at);
+      } else if (existing.translationsJson == null) {
+        missingTranslations.add(at);
+      }
+    }
+    final planned = [
+      ...changed,
+      ...missingDetail.take(detailRetriesPerPoll),
+      ...missingTranslations.take(translationRetriesPerPoll),
+    ];
+
     var next = 0;
-    var retries = 0;
     Future<void> worker() async {
-      while (next < warnings.length && clock.elapsed < detailBudget) {
-        final at = next++;
-        final warning = warnings[at];
-        final existing = stored[warning.id];
-        final sent = DateTime.tryParse(warning.startDate)?.toUtc();
-        final changed =
-            existing == null || (sent != null && sent.isAfter(existing.sent));
-        // Asked again for a detail that never arrived, and once for every
-        // warning stored before its translations were kept (#357): those
-        // run for weeks, and would otherwise stay German until they end.
-        final missing =
-            !changed &&
-            (lacksBbkDetail(existing) || existing.translationsJson == null) &&
-            retries++ < detailRetriesPerPoll;
-        if (changed || missing) result[at] = await _bbk.fetchDetails(warning);
+      while (next < planned.length && clock.elapsed < detailBudget) {
+        final at = planned[next++];
+        result[at] = await _bbk.fetchDetails(warnings[at]);
       }
     }
 
     await Future.wait(
-      List.generate(warnings.length.clamp(0, 4), (_) => worker()),
+      List.generate(planned.length.clamp(0, 4), (_) => worker()),
     );
     return result;
   }

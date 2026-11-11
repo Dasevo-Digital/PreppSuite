@@ -29,7 +29,7 @@ import '../application/shell_layout.dart';
 import 'operational_briefing_card.dart';
 import '../../inventory/application/device_charge.dart';
 import '../../inventory/application/inventory_controller.dart';
-import '../../warnings/application/warning_translations.dart';
+import '../../warnings/presentation/warning_translation_sections.dart';
 
 /// The first thing the app shows: what state this household is in.
 ///
@@ -737,9 +737,7 @@ class _WarningCard extends ConsumerWidget {
               label: Text('${mine.length}'),
             ),
       child: Text(
-        mine.isEmpty
-            ? l10n.overviewNoWarnings
-            : mine.first.textIn(l10n.localeName).headline,
+        mine.isEmpty ? l10n.overviewNoWarnings : warningTitle(mine.first, l10n),
         style: theme.textTheme.bodyMedium,
       ),
     );

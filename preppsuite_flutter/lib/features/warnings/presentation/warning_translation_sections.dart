@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' show Bidi;
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../local_db/database.dart';
 import '../application/warning_translations.dart';
+
+/// What the app calls [warning] in its own language (#357).
+String warningTitle(Warning warning, AppLocalizations l10n) =>
+    warning.titleIn(l10n.localeName, allClear: l10n.warningAllClearTitle);
 
 /// The name of [language] as a reader looks for it: in itself, and
 /// Leichte Sprache in the app's words.
@@ -21,12 +27,13 @@ class WarningTranslationSection extends StatelessWidget {
   });
 
   final String language;
-  final WarningText text;
+  final WarningTranslation text;
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final heading = text.heading;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -50,7 +57,12 @@ class WarningTranslationSection extends StatelessWidget {
           textDirection: isRightToLeft(language)
               ? TextDirection.rtl
               : TextDirection.ltr,
-          child: WarningTextBody(text: text),
+          // Only what this language says: what it left German is above.
+          child: WarningTextBody(
+            headline: heading,
+            description: text.description,
+            instruction: text.instruction,
+          ),
         ),
       ],
     );
@@ -76,32 +88,53 @@ class WarningGermanOriginal extends StatelessWidget {
     expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
     leading: const Icon(Icons.article_outlined),
     title: Text(l10n.warningGermanOriginal),
-    children: [WarningTextBody(text: text)],
+    children: [
+      WarningTextBody(
+        headline: text.headline,
+        description: text.description,
+        instruction: text.instruction,
+      ),
+    ],
   );
 }
 
 /// Headline, description and what to do.
+///
+/// Each part runs in its own direction. A paragraph in German or with a
+/// place name inside the Arabic would otherwise be laid out right to left,
+/// and its full stop stood at its start.
 class WarningTextBody extends StatelessWidget {
-  const WarningTextBody({super.key, required this.text});
+  const WarningTextBody({
+    super.key,
+    this.headline,
+    this.description,
+    this.instruction,
+  });
 
-  final WarningText text;
+  final String? headline;
+  final String? description;
+  final String? instruction;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final parts = [
+      if (headline case final text?) (text, theme.textTheme.titleMedium),
+      if (description case final text?) (text, theme.textTheme.bodyLarge),
+      if (instruction case final text?) (text, theme.textTheme.bodyLarge),
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 6,
       children: [
-        Text(text.headline, style: theme.textTheme.titleMedium),
-        if (text.description case final description?) ...[
-          const SizedBox(height: 6),
-          Text(description, style: theme.textTheme.bodyLarge),
-        ],
-        if (text.instruction case final instruction?) ...[
-          const SizedBox(height: 6),
-          Text(instruction, style: theme.textTheme.bodyLarge),
-        ],
+        for (final (text, style) in parts)
+          Text(text, style: style, textDirection: warningTextDirection(text)),
       ],
     );
   }
 }
+
+/// The direction [text] is written in, by its words rather than the
+/// screen's.
+TextDirection warningTextDirection(String text) =>
+    Bidi.detectRtlDirectionality(text) ? TextDirection.rtl : TextDirection.ltr;

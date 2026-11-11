@@ -10087,6 +10087,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String warningAllClearTitle(String title) {
+    return 'Entwarnung: $title';
+  }
+
+  @override
   String get warningGermanOriginal => 'Amtlicher Text auf Deutsch';
 
   @override

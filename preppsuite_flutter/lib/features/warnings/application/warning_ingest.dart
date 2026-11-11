@@ -81,6 +81,7 @@ class WarningIngest {
           final translations? => encodeWarningTranslations(translations),
           null => null,
         },
+        messageType: warning.messageType,
         effective: _parseDateTime(warning.startDate) ?? DateTime.now().toUtc(),
         expires: null,
         sent: _parseDateTime(warning.startDate) ?? DateTime.now().toUtc(),
@@ -178,6 +179,7 @@ class WarningIngest {
     required String? senderContact,
     required String? polygonsJson,
     String? translationsJson,
+    String? messageType,
     required DateTime effective,
     required DateTime? expires,
     required DateTime sent,
@@ -236,8 +238,12 @@ class WarningIngest {
       // them (#357). Not newsworthy: the words are the same warning.
       final translates =
           existing.translationsJson == null && translationsJson != null;
+      // And one stored before the type of its message was kept, so that a
+      // translated title can say it ends the warning.
+      final typed = existing.messageType == null && messageType != null;
       if (!widens &&
           !translates &&
+          !typed &&
           !_narrows(existing.regionKey, region) &&
           !fillsIn &&
           !revives &&
@@ -293,6 +299,9 @@ class WarningIngest {
         // Not through [kept]: that cleans text, and this is JSON.
         translationsJson: Value(
           translationsJson ?? (unchanged ? existing.translationsJson : null),
+        ),
+        messageType: Value(
+          messageType ?? (unchanged ? existing.messageType : null),
         ),
         effective: effective,
         expires: Value(expires),

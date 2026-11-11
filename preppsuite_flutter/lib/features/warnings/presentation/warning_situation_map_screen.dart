@@ -24,6 +24,7 @@ import '../application/warning_providers.dart';
 import '../application/warning_relevance.dart';
 import '../application/warning_severity_l10n.dart';
 import '../application/warning_translations.dart';
+import 'warning_translation_sections.dart';
 
 /// All active CAP areas in one place.
 ///
@@ -362,7 +363,7 @@ class _WarningAtPoint extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        text.headline,
+                        warningTitle(warning, l10n),
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       Text(localizeWarningSeverity(l10n, severity)),
@@ -471,7 +472,7 @@ class _WarningSummary extends StatelessWidget {
               color: colors.foreground,
             ),
             title: Text(
-              warning.textIn(l10n.localeName).headline,
+              warningTitle(warning, l10n),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

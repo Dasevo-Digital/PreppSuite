@@ -16501,6 +16501,12 @@ abstract class AppLocalizations {
   /// **'Official translation: {language}'**
   String warningOfficialTranslation(String language);
 
+  /// The title of a warning the publisher has ended, where the title is not the German headline that already says so.
+  ///
+  /// In en, this message translates to:
+  /// **'All clear: {title}'**
+  String warningAllClearTitle(String title);
+
   /// No description provided for @warningGermanOriginal.
   ///
   /// In en, this message translates to:

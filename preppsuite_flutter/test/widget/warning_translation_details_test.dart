@@ -47,18 +47,18 @@ void main() {
     headline: 'Abkochgebot',
     description: 'Leitungswasser nur abgekocht trinken.',
     instruction: 'Wasser abkochen.',
+    // As MoWaS translates: the event's name and what to do (#357).
     translationsJson: encodeWarningTranslations({
-      'es': const WarningText(
-        event: 'Hervir',
-        headline: 'Hervir el agua',
+      'es': const WarningTranslation(
+        event: 'Hervir el agua',
         instruction: 'Hierva el agua.',
       ),
-      'tr': const WarningText(
-        event: 'Kaynatma',
-        headline: 'Suyu kaynatın',
-        instruction: 'Suyu kaynatın.',
+      'tr': const WarningTranslation(
+        event: 'Suyu kaynatın',
+        instruction: 'Suyu kaynatmadan içmeyin.',
       ),
     }),
+    messageType: 'Cancel',
     effective: DateTime.utc(2026),
     sent: DateTime.utc(2026),
     updatedAt: DateTime.utc(2026),
@@ -108,7 +108,13 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await open(tester, const Locale('es'));
 
-    expect(find.text('Hervir el agua'), findsWidgets);
+    // The German headline stays, after the event's name, and the end of
+    // the warning is said in Spanish: the German says it in German only.
+    expect(
+      find.text('Fin del aviso: Hervir el agua – Abkochgebot'),
+      findsWidgets,
+    );
+    expect(find.text('Hervir el agua'), findsNothing);
     expect(find.text('Hierva el agua.'), findsOneWidget);
     expect(find.text('Texto oficial en alemán'), findsOneWidget);
   });
@@ -128,6 +134,12 @@ void main() {
     await open(tester, const Locale('de'));
 
     expect(find.text('Amtliche Übersetzung: Türkçe'), findsOneWidget);
-    expect(find.text('Suyu kaynatın.'), findsOneWidget);
+    expect(find.text('Suyu kaynatın'), findsOneWidget);
+    expect(find.text('Suyu kaynatmadan içmeyin.'), findsOneWidget);
+    // Only what the language says: the German description is above.
+    expect(
+      find.text('Leitungswasser nur abgekocht trinken.'),
+      findsOneWidget,
+    );
   });
 }

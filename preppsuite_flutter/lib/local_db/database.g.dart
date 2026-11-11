@@ -7475,6 +7475,17 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _messageTypeMeta = const VerificationMeta(
+    'messageType',
+  );
+  @override
+  late final GeneratedColumn<String> messageType = GeneratedColumn<String>(
+    'message_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _effectiveMeta = const VerificationMeta(
     'effective',
   );
@@ -7547,6 +7558,7 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
     senderContact,
     polygonsJson,
     translationsJson,
+    messageType,
     effective,
     expires,
     sent,
@@ -7676,6 +7688,15 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
         ),
       );
     }
+    if (data.containsKey('message_type')) {
+      context.handle(
+        _messageTypeMeta,
+        messageType.isAcceptableOrUnknown(
+          data['message_type']!,
+          _messageTypeMeta,
+        ),
+      );
+    }
     if (data.containsKey('effective')) {
       context.handle(
         _effectiveMeta,
@@ -7773,6 +7794,10 @@ class $WarningsTable extends Warnings with TableInfo<$WarningsTable, Warning> {
         DriftSqlType.string,
         data['${effectivePrefix}translations_json'],
       ),
+      messageType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}message_type'],
+      ),
       effective: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}effective'],
@@ -7826,6 +7851,12 @@ class Warning extends DataClass implements Insertable<Warning> {
   /// until the detail has been read, `{}` when it came without any. The
   /// German columns above stay what the app reasons with.
   final String? translationsJson;
+
+  /// CAP's `msgType` as the BBK sends it: `Alert`, `Update` or `Cancel`
+  /// (schema 29). The German headline says "Entwarnung" itself; a
+  /// translated title has to be told (#357). Null for MeteoAlarm and for
+  /// rows stored before.
+  final String? messageType;
   final DateTime effective;
   final DateTime? expires;
   final DateTime sent;
@@ -7853,6 +7884,7 @@ class Warning extends DataClass implements Insertable<Warning> {
     this.senderContact,
     this.polygonsJson,
     this.translationsJson,
+    this.messageType,
     required this.effective,
     this.expires,
     required this.sent,
@@ -7888,6 +7920,9 @@ class Warning extends DataClass implements Insertable<Warning> {
     }
     if (!nullToAbsent || translationsJson != null) {
       map['translations_json'] = Variable<String>(translationsJson);
+    }
+    if (!nullToAbsent || messageType != null) {
+      map['message_type'] = Variable<String>(messageType);
     }
     map['effective'] = Variable<DateTime>(effective);
     if (!nullToAbsent || expires != null) {
@@ -7928,6 +7963,9 @@ class Warning extends DataClass implements Insertable<Warning> {
       translationsJson: translationsJson == null && nullToAbsent
           ? const Value.absent()
           : Value(translationsJson),
+      messageType: messageType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(messageType),
       effective: Value(effective),
       expires: expires == null && nullToAbsent
           ? const Value.absent()
@@ -7957,6 +7995,7 @@ class Warning extends DataClass implements Insertable<Warning> {
       senderContact: serializer.fromJson<String?>(json['senderContact']),
       polygonsJson: serializer.fromJson<String?>(json['polygonsJson']),
       translationsJson: serializer.fromJson<String?>(json['translationsJson']),
+      messageType: serializer.fromJson<String?>(json['messageType']),
       effective: serializer.fromJson<DateTime>(json['effective']),
       expires: serializer.fromJson<DateTime?>(json['expires']),
       sent: serializer.fromJson<DateTime>(json['sent']),
@@ -7981,6 +8020,7 @@ class Warning extends DataClass implements Insertable<Warning> {
       'senderContact': serializer.toJson<String?>(senderContact),
       'polygonsJson': serializer.toJson<String?>(polygonsJson),
       'translationsJson': serializer.toJson<String?>(translationsJson),
+      'messageType': serializer.toJson<String?>(messageType),
       'effective': serializer.toJson<DateTime>(effective),
       'expires': serializer.toJson<DateTime?>(expires),
       'sent': serializer.toJson<DateTime>(sent),
@@ -8003,6 +8043,7 @@ class Warning extends DataClass implements Insertable<Warning> {
     Value<String?> senderContact = const Value.absent(),
     Value<String?> polygonsJson = const Value.absent(),
     Value<String?> translationsJson = const Value.absent(),
+    Value<String?> messageType = const Value.absent(),
     DateTime? effective,
     Value<DateTime?> expires = const Value.absent(),
     DateTime? sent,
@@ -8028,6 +8069,7 @@ class Warning extends DataClass implements Insertable<Warning> {
     translationsJson: translationsJson.present
         ? translationsJson.value
         : this.translationsJson,
+    messageType: messageType.present ? messageType.value : this.messageType,
     effective: effective ?? this.effective,
     expires: expires.present ? expires.value : this.expires,
     sent: sent ?? this.sent,
@@ -8065,6 +8107,9 @@ class Warning extends DataClass implements Insertable<Warning> {
       translationsJson: data.translationsJson.present
           ? data.translationsJson.value
           : this.translationsJson,
+      messageType: data.messageType.present
+          ? data.messageType.value
+          : this.messageType,
       effective: data.effective.present ? data.effective.value : this.effective,
       expires: data.expires.present ? data.expires.value : this.expires,
       sent: data.sent.present ? data.sent.value : this.sent,
@@ -8089,6 +8134,7 @@ class Warning extends DataClass implements Insertable<Warning> {
           ..write('senderContact: $senderContact, ')
           ..write('polygonsJson: $polygonsJson, ')
           ..write('translationsJson: $translationsJson, ')
+          ..write('messageType: $messageType, ')
           ..write('effective: $effective, ')
           ..write('expires: $expires, ')
           ..write('sent: $sent, ')
@@ -8113,6 +8159,7 @@ class Warning extends DataClass implements Insertable<Warning> {
     senderContact,
     polygonsJson,
     translationsJson,
+    messageType,
     effective,
     expires,
     sent,
@@ -8136,6 +8183,7 @@ class Warning extends DataClass implements Insertable<Warning> {
           other.senderContact == this.senderContact &&
           other.polygonsJson == this.polygonsJson &&
           other.translationsJson == this.translationsJson &&
+          other.messageType == this.messageType &&
           other.effective == this.effective &&
           other.expires == this.expires &&
           other.sent == this.sent &&
@@ -8157,6 +8205,7 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
   final Value<String?> senderContact;
   final Value<String?> polygonsJson;
   final Value<String?> translationsJson;
+  final Value<String?> messageType;
   final Value<DateTime> effective;
   final Value<DateTime?> expires;
   final Value<DateTime> sent;
@@ -8177,6 +8226,7 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     this.senderContact = const Value.absent(),
     this.polygonsJson = const Value.absent(),
     this.translationsJson = const Value.absent(),
+    this.messageType = const Value.absent(),
     this.effective = const Value.absent(),
     this.expires = const Value.absent(),
     this.sent = const Value.absent(),
@@ -8198,6 +8248,7 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     this.senderContact = const Value.absent(),
     this.polygonsJson = const Value.absent(),
     this.translationsJson = const Value.absent(),
+    this.messageType = const Value.absent(),
     required DateTime effective,
     this.expires = const Value.absent(),
     required DateTime sent,
@@ -8227,6 +8278,7 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     Expression<String>? senderContact,
     Expression<String>? polygonsJson,
     Expression<String>? translationsJson,
+    Expression<String>? messageType,
     Expression<DateTime>? effective,
     Expression<DateTime>? expires,
     Expression<DateTime>? sent,
@@ -8248,6 +8300,7 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
       if (senderContact != null) 'sender_contact': senderContact,
       if (polygonsJson != null) 'polygons_json': polygonsJson,
       if (translationsJson != null) 'translations_json': translationsJson,
+      if (messageType != null) 'message_type': messageType,
       if (effective != null) 'effective': effective,
       if (expires != null) 'expires': expires,
       if (sent != null) 'sent': sent,
@@ -8271,6 +8324,7 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     Value<String?>? senderContact,
     Value<String?>? polygonsJson,
     Value<String?>? translationsJson,
+    Value<String?>? messageType,
     Value<DateTime>? effective,
     Value<DateTime?>? expires,
     Value<DateTime>? sent,
@@ -8292,6 +8346,7 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
       senderContact: senderContact ?? this.senderContact,
       polygonsJson: polygonsJson ?? this.polygonsJson,
       translationsJson: translationsJson ?? this.translationsJson,
+      messageType: messageType ?? this.messageType,
       effective: effective ?? this.effective,
       expires: expires ?? this.expires,
       sent: sent ?? this.sent,
@@ -8343,6 +8398,9 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
     if (translationsJson.present) {
       map['translations_json'] = Variable<String>(translationsJson.value);
     }
+    if (messageType.present) {
+      map['message_type'] = Variable<String>(messageType.value);
+    }
     if (effective.present) {
       map['effective'] = Variable<DateTime>(effective.value);
     }
@@ -8380,6 +8438,7 @@ class WarningsCompanion extends UpdateCompanion<Warning> {
           ..write('senderContact: $senderContact, ')
           ..write('polygonsJson: $polygonsJson, ')
           ..write('translationsJson: $translationsJson, ')
+          ..write('messageType: $messageType, ')
           ..write('effective: $effective, ')
           ..write('expires: $expires, ')
           ..write('sent: $sent, ')

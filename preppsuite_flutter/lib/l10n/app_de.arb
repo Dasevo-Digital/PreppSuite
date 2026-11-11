@@ -4206,6 +4206,7 @@
   },
   "warningEasyGerman": "Leichte Sprache",
   "warningOfficialTranslation": "Amtliche Übersetzung: {language}",
+  "warningAllClearTitle": "Entwarnung: {title}",
   "warningGermanOriginal": "Amtlicher Text auf Deutsch",
   "warningExtraLanguageTitle": "Warnungen zusätzlich in",
   "warningExtraLanguageHint": "Die amtliche Übersetzung, wo das Bundesamt eine mitschickt. Maßgeblich bleibt der deutsche Text.",

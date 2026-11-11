@@ -9,7 +9,7 @@ import '../application/warning_relevance.dart';
 import '../application/warning_severity_l10n.dart';
 import '../application/warning_sync_controller.dart';
 import 'warning_list_screen.dart';
-import '../application/warning_translations.dart';
+import 'warning_translation_sections.dart';
 
 /// App-wide banner showing the most severe active warning, if any. Meant to
 /// sit above the tab content in [HomeShell] so it's visible regardless of
@@ -92,7 +92,7 @@ class WarningBanner extends ConsumerWidget {
                       child: Text(
                         l10n.warningBannerSeverity(
                           localizeWarningSeverity(l10n, severity),
-                          mostSevere.textIn(l10n.localeName).headline,
+                          warningTitle(mostSevere, l10n),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

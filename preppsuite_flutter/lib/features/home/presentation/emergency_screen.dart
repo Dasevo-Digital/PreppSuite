@@ -38,7 +38,7 @@ import '../../first_aid/presentation/defibrillator_screen.dart';
 import '../../emergency_points/presentation/emergency_points_screen.dart';
 import '../../../core/phone_call.dart';
 import '../../household/application/card_species.dart';
-import '../../warnings/application/warning_translations.dart';
+import '../../warnings/presentation/warning_translation_sections.dart';
 
 /// The information that must remain quick to reach when time, power or a
 /// data connection is scarce. All values are derived from existing records.
@@ -306,7 +306,7 @@ class EmergencyScreen extends ConsumerWidget {
                         ListTile(
                           leading: const Icon(Icons.warning_amber_rounded),
                           title: Text(
-                            warning.textIn(l10n.localeName).headline,
+                            warningTitle(warning, l10n),
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => onNavigate(ShellDestination.warnings),

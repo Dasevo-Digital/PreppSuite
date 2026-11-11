@@ -108,7 +108,6 @@ class _EditRegionDialogState extends ConsumerState<_EditRegionDialog> {
     final problem = _countryCode == 'DE'
         ? regionKeyProblem(
             region,
-            areas: ref.read(dwdAreasProvider).value,
             l10n: AppLocalizations.of(context)!,
           )
         : null;

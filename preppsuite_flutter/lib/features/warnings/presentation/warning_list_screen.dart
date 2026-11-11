@@ -571,7 +571,7 @@ class _WarningTile extends StatelessWidget {
           background: colors.background,
           foreground: colors.foreground,
         ),
-        title: Text(warning.textIn(l10n.localeName).headline),
+        title: Text(warningTitle(warning, l10n)),
         subtitle: Text(
           [
             localizeWarningSeverity(l10n, severity),
@@ -657,7 +657,7 @@ class _WarningDetails extends ConsumerWidget {
         children: [
           if (polygons.isNotEmpty) ...[
             _WarningMapPreview(
-              title: text.headline,
+              title: warningTitle(warning, l10n),
               polygons: polygons,
               colors: colors,
               expandLabel: l10n.warningShowMap,
@@ -666,7 +666,10 @@ class _WarningDetails extends ConsumerWidget {
           ],
           Text(period, style: theme.textTheme.bodyMedium),
           const SizedBox(height: 8),
-          Text(text.headline, style: theme.textTheme.headlineSmall),
+          Text(
+            warningTitle(warning, l10n),
+            style: theme.textTheme.headlineSmall,
+          ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,

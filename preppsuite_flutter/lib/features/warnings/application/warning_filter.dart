@@ -3,6 +3,7 @@ import '../../../model/categories.dart';
 import 'warning_relevance.dart';
 import 'warning_region_filter.dart';
 import 'warning_severity_l10n.dart';
+import 'warning_translations.dart';
 
 /// Whether a warning is still running.
 ///
@@ -122,10 +123,11 @@ class WarningFilter {
     // Diacritics are left alone deliberately: "Münster" and "Munster" are
     // different places, and folding them together would answer a search
     // for one with the other.
+    //
+    // The translations too (#357): the list shows a warning by its
+    // translated title, and a search for what is on screen found nothing.
     return [
-      warning.headline,
-      warning.description ?? '',
-      warning.eventType,
+      ...warning.searchableTexts,
       warning.regionKey ?? '',
     ].any((field) => field.toLowerCase().contains(needle));
   }

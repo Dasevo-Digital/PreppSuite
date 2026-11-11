@@ -162,7 +162,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         // and hid the warnings for the own district (#349).
                         validator: (value) => regionKeyProblem(
                           (value ?? '').trim(),
-                          areas: ref.read(dwdAreasProvider).value,
                           l10n: l10n,
                         ),
                         onChanged: (_) => setState(() {}),

@@ -28,6 +28,7 @@ class BbkRawWarning {
     this.senderContact,
     this.polygons = const [],
     this.translations,
+    this.messageType,
   });
 
   final String id;
@@ -43,7 +44,12 @@ class BbkRawWarning {
 
   /// The official translations, by language (#357). Null where the detail
   /// was not read, empty where it was and carried none.
-  final Map<String, WarningText>? translations;
+  final Map<String, WarningTranslation>? translations;
+
+  /// CAP's `msgType`: `Alert`, `Update` or `Cancel`. Every feed carries it
+  /// (`type` in `mapData.json`, `msgType` in a dashboard's payload and the
+  /// detail).
+  final String? messageType;
 
   BbkRawWarning withDetails({
     String? description,
@@ -51,7 +57,8 @@ class BbkRawWarning {
     String? areaDescription,
     String? senderContact,
     List<String> polygons = const [],
-    Map<String, WarningText> translations = const {},
+    Map<String, WarningTranslation> translations = const {},
+    String? messageType,
   }) => BbkRawWarning(
     id: id,
     startDate: startDate,
@@ -64,6 +71,7 @@ class BbkRawWarning {
     senderContact: senderContact,
     polygons: polygons,
     translations: translations,
+    messageType: messageType ?? this.messageType,
   );
 }
 
@@ -188,7 +196,19 @@ class BbkClient {
       if (infos is! List) return warning;
 
       Map<dynamic, dynamic>? selected;
-      final translations = <String, WarningText>{};
+      final others = <String, WarningText>{};
+      WarningText? read(Map<dynamic, dynamic> item) {
+        final headline =
+            capPlainText(item['headline']) ?? capPlainText(item['event']);
+        if (headline == null) return null;
+        return WarningText(
+          event: capPlainText(item['event']) ?? headline,
+          headline: headline,
+          description: capPlainText(item['description']),
+          instruction: capPlainText(item['instruction']),
+        );
+      }
+
       for (final item in infos) {
         if (item is! Map) continue;
         final language = normalizeCapLanguage('${item['language'] ?? ''}');
@@ -199,17 +219,24 @@ class BbkClient {
         }
         // Every other block is an official translation (#357). Kept as
         // plain text, the same way as the German.
-        final headline =
-            capPlainText(item['headline']) ?? capPlainText(item['event']);
-        if (language.isEmpty || headline == null) continue;
-        translations[language] = WarningText(
-          event: capPlainText(item['event']) ?? headline,
-          headline: headline,
-          description: capPlainText(item['description']),
-          instruction: capPlainText(item['instruction']),
-        );
+        if (language.isEmpty) continue;
+        if (read(item) case final text?) others[language] = text;
       }
       if (selected == null) return warning;
+
+      // Only what a language says differently: MoWaS repeats the German
+      // description in every block (see `warning_translations.dart`).
+      final german = read(selected);
+      final translatesHeadline = bbkTranslatesHeadline(warning.id);
+      final translations = <String, WarningTranslation>{
+        for (final MapEntry(key: language, value: text) in others.entries)
+          if (german != null)
+            language: ?compactWarningTranslation(
+              german: german,
+              translated: text,
+              translatesHeadline: translatesHeadline,
+            ),
+      };
 
       final areas = selected['area'];
       final areaNames = <String>[];
@@ -249,6 +276,10 @@ class BbkClient {
         senderContact: capPlainText(contact ?? decoded['sender']),
         polygons: polygons,
         translations: translations,
+        messageType: switch (decoded['msgType']) {
+          final String type => type,
+          _ => null,
+        },
       );
     } on Object {
       return warning;
@@ -262,6 +293,7 @@ class BbkClient {
     final data = payload is Map ? payload['data'] : null;
     final severity = data is Map ? data['severity'] as String? : null;
     final headline = data is Map ? data['headline'] as String? : null;
+    final messageType = data is Map ? data['msgType'] : null;
 
     return BbkRawWarning(
       id: entry['id'] as String,
@@ -269,6 +301,7 @@ class BbkClient {
       severity: severity ?? 'Minor',
       eventTitleDe: titleDe ?? headline ?? entry['id'] as String,
       raw: entry,
+      messageType: messageType is String ? messageType : null,
     );
   }
 
@@ -311,6 +344,10 @@ class BbkClient {
       severity: entry['severity'] as String? ?? 'Minor',
       eventTitleDe: titleDe ?? entry['id'] as String,
       raw: entry,
+      messageType: switch (entry['type']) {
+        final String type => type,
+        _ => null,
+      },
     );
   }
 }

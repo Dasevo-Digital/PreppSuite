@@ -35,7 +35,7 @@ part 'database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   /// Shown in the settings version information without opening the database.
-  static const currentSchemaVersion = 28;
+  static const currentSchemaVersion = 29;
 
   AppDatabase() : super(_openConnection()) {
     OpenDatabases.track(this);
@@ -648,6 +648,22 @@ class AppDatabase extends _$AppDatabase {
           await m.createTable(warnings);
         } else {
           await _addColumnOnce(m, warnings, warnings.translationsJson);
+        }
+      }
+      if (from < 29) {
+        // Whether a version ends its warning (#357), filled in by the next
+        // poll. And the translations of 2.9.6 let go: they were kept whole,
+        // eight times the German text, with the event's name of a MoWaS
+        // warning taken for its headline. The polls read them again, in
+        // the form kept now; a cache, and until then the German shows.
+        // Run a second time, it only lets go of them again.
+        if (!await _hasTable('warnings')) {
+          await m.createTable(warnings);
+        } else {
+          await _addColumnOnce(m, warnings, warnings.messageType);
+          await customStatement(
+            'UPDATE warnings SET translations_json = NULL',
+          );
         }
       }
     },

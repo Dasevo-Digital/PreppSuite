@@ -122,9 +122,15 @@ class _AddRegionDialogState extends ConsumerState<_AddRegionDialog> {
         final value = _kreisController.text.trim();
         // A Kreisschlüssel is exactly five digits; anything else silently
         // matches nothing, which looks like the feature being broken
-        // rather than the input being wrong.
+        // rather than the input being wrong. And it is a district's: a
+        // postcode has five digits too, and followed, it made every placed
+        // warning read as somewhere else (#349).
         if (!RegExp(r'^\d{5}$').hasMatch(value)) {
           setState(() => _error = l10n.settingsKreisSchluesselInvalid);
+          return;
+        }
+        if (!isGermanRegionKey(value)) {
+          setState(() => _error = l10n.regionKeyUnknown);
           return;
         }
         region = WarningRegion(
