@@ -3334,6 +3334,24 @@ starten. `test/ios_entitlements_test.dart` hält beides fest. Die Person
 kann zeitkritische Mitteilungen in den iOS-Einstellungen der App
 abschalten; ohne Fokus verhalten sie sich wie gewöhnliche.
 
+**Eine angetippte Mitteilung öffnet ihre Seite** (#382). Jede Mitteilung
+trug schon eine Payload, aber nur, damit die App ihre eigenen geplanten
+Erinnerungen wiederfindet und abbestellt. Ein Antippen öffnete die App und
+sonst nichts, auf jeder Plattform; unter iOS kam es vor #345 nicht einmal
+bei der App an, weil der Mitteilungs-Delegate fehlte. Jetzt hört
+`NotificationService` beim Initialisieren auf das Antippen (`taps`) und
+reicht einmal die Payload weiter, mit der die App gestartet wurde
+(`takeLaunchPayload`). `notificationTargetFor` bildet sie ab: die
+Datensicherung auf „Daten und Sicherheit“, Ablauf, Rezept und Akku eines
+Geräts auf den Vorratsartikel (gelöscht: der Vorrat), die
+Akku-Prüfung des Haushalts auf die Übersicht, Dokumentfristen auf die
+eigenen Dokumente, Warnungen und den Warntag auf die Warnungen. Warnungen
+tragen dafür jetzt `warning:<id>`. `NotificationTaps` sitzt neben
+`AppShortcuts` im Shell und öffnet das Ziel. Ist eine Seite über dem Shell
+offen, kommt ein Reiter als eigene Seite darüber, statt darunter zu
+wechseln: Schließen könnte eine angefangene Eingabe verwerfen. Eine
+Payload, die diese Fassung nicht kennt, öffnet nur die App.
+
 ### Radio ohne Internet: Programme ja, Frequenzen nein
 
 Fallen Internet und Mobilfunk aus, informiert das Radio; amtliche Warnungen

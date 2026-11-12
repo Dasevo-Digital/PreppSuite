@@ -131,18 +131,7 @@ class SettingsScreen extends ConsumerWidget {
             icon: Icons.security_outlined,
             title: l10n.settingsCategoryData,
             subtitle: l10n.settingsCategoryDataBody,
-            onTap: () => _open(
-              context,
-              (l10n) => l10n.settingsCategoryData,
-              (l10n) => [
-                AppLockCard(l10n: l10n),
-                SharedFolderCard(profile: profile, l10n: l10n),
-                TransferCard(householdId: profile.id, l10n: l10n),
-                BackupCard(householdId: profile.id, l10n: l10n),
-                LocalEncryptionCard(householdId: profile.id, l10n: l10n),
-                ResetCard(profile: profile, l10n: l10n),
-              ],
-            ),
+            onTap: () => openDataCategory(context, profile),
           ),
           _CategoryTile(
             icon: Icons.offline_pin_outlined,
@@ -185,7 +174,25 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _open(
+  /// Opens "Daten und Sicherheit", where the backup is: a tapped reminder
+  /// to make one lands here (#382).
+  static void openDataCategory(
+    BuildContext context,
+    HouseholdProfile profile,
+  ) => _open(
+    context,
+    (l10n) => l10n.settingsCategoryData,
+    (l10n) => [
+      AppLockCard(l10n: l10n),
+      SharedFolderCard(profile: profile, l10n: l10n),
+      TransferCard(householdId: profile.id, l10n: l10n),
+      BackupCard(householdId: profile.id, l10n: l10n),
+      LocalEncryptionCard(householdId: profile.id, l10n: l10n),
+      ResetCard(profile: profile, l10n: l10n),
+    ],
+  );
+
+  static void _open(
     BuildContext context,
     String Function(AppLocalizations l10n) title,
     List<Widget> Function(AppLocalizations l10n) children,

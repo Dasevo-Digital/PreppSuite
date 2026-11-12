@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
@@ -130,11 +131,43 @@ class NotificationService {
   final _plugin = FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
+  final _taps = StreamController<String>.broadcast();
+  bool _launchTaken = false;
+
+  /// The payloads of the notifications tapped while the app runs (#382).
+  /// Until then a tap only opened the app, on every platform: nothing
+  /// listened for it.
+  Stream<String> get taps => _taps.stream;
+
+  /// The payload of the notification whose tap started the app, once;
+  /// null for a start any other way, and on every later call.
+  Future<String?> takeLaunchPayload() async {
+    if (_launchTaken) return null;
+    _launchTaken = true;
+    try {
+      await _ensureInitialized();
+      final details = await _plugin.getNotificationAppLaunchDetails();
+      if (!(details?.didNotificationLaunchApp ?? false)) return null;
+      final payload = details?.notificationResponse?.payload;
+      return payload == null || payload.isEmpty ? null : payload;
+    } on Object {
+      // A platform without launch details, or a plugin that is not there:
+      // the app started, which is what it would have done anyway.
+      return null;
+    }
+  }
+
+  void _tapped(NotificationResponse response) {
+    final payload = response.payload;
+    if (payload != null && payload.isNotEmpty) _taps.add(payload);
+  }
+
   Future<void> _ensureInitialized() async {
     if (_initialized) return;
     _initialized = true;
 
     await _plugin.initialize(
+      onDidReceiveNotificationResponse: _tapped,
       settings: const InitializationSettings(
         // Permission is requested explicitly when the user enables
         // notifications in Settings (see [requestPermission]), not here —
@@ -310,6 +343,7 @@ class NotificationService {
       id: warning.externalId.hashCode,
       title: warningNotificationTitle(warning, language),
       body: warningNotificationBody(warning, language),
+      payload: '$warningPayloadPrefix${warning.externalId}',
       notificationDetails: NotificationDetails(
         macOS: const DarwinNotificationDetails(),
         iOS: DarwinNotificationDetails(
@@ -327,10 +361,18 @@ class NotificationService {
   /// Payload prefix marking a notification as an expiry reminder, so
   /// [scheduleExpiryReminders] can clear exactly its own pending ones and
   /// leave anything else (warnings) alone.
-  static const _expiryPayloadPrefix = 'expiry:';
-  static const _refillPayloadPrefix = 'refill:';
-  static const _deviceChargePayloadPrefix = 'charge-item:';
-  static const _documentPayloadPrefix = 'document-deadline:';
+  static const expiryPayloadPrefix = 'expiry:';
+  static const refillPayloadPrefix = 'refill:';
+  static const deviceChargePayloadPrefix = 'charge-item:';
+  static const documentPayloadPrefix = 'document-deadline:';
+
+  /// The payloads of the reminders that come one at a time, and the
+  /// prefix of a warning's. Public because a tapped notification is taken
+  /// back to its page by them (#382).
+  static const chargeReminderPayload = 'charge-reminder';
+  static const backupReminderPayload = 'backup-reminder';
+  static const warningDayPayload = 'warning-day';
+  static const warningPayloadPrefix = 'warning:';
   static const _chargeReminderId = 90407;
   static const _warningDayId = 90408;
   static const _backupReminderId = 90409;
@@ -368,7 +410,7 @@ class NotificationService {
         id: reminder.id,
         title: title(reminder),
         body: body(reminder),
-        payload: '$_expiryPayloadPrefix${reminder.itemClientId}',
+        payload: '$expiryPayloadPrefix${reminder.itemClientId}',
         // `fireAt` is local wall-clock time; converting it to UTC gives the
         // right absolute instant without needing the timezone database and
         // a platform channel to name the local zone. The only cost is that
@@ -398,10 +440,10 @@ class NotificationService {
 
     await _ensureInitialized();
     const prefixes = [
-      _expiryPayloadPrefix,
-      _refillPayloadPrefix,
-      _deviceChargePayloadPrefix,
-      _documentPayloadPrefix,
+      expiryPayloadPrefix,
+      refillPayloadPrefix,
+      deviceChargePayloadPrefix,
+      documentPayloadPrefix,
     ];
     for (final request in await _plugin.pendingNotificationRequests()) {
       final payload = request.payload ?? '';
@@ -420,7 +462,7 @@ class NotificationService {
     await _ensureInitialized();
     final pending = await _plugin.pendingNotificationRequests();
     for (final request in pending) {
-      if (request.payload?.startsWith(_expiryPayloadPrefix) ?? false) {
+      if (request.payload?.startsWith(expiryPayloadPrefix) ?? false) {
         await _plugin.cancel(id: request.id);
       }
     }
@@ -442,7 +484,7 @@ class NotificationService {
         // A lock-screen notification must not disclose document names,
         // deadlines or where somebody keeps the original.
         body: body,
-        payload: '$_documentPayloadPrefix${reminder.documentId}',
+        payload: '$documentPayloadPrefix${reminder.documentId}',
         scheduledDate: tz.TZDateTime.from(reminder.fireAt.toUtc(), tz.UTC),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         notificationDetails: NotificationDetails(
@@ -463,7 +505,7 @@ class NotificationService {
     if (!supportsScheduledNotifications) return;
     await _ensureInitialized();
     for (final request in await _plugin.pendingNotificationRequests()) {
-      if (request.payload?.startsWith(_documentPayloadPrefix) ?? false) {
+      if (request.payload?.startsWith(documentPayloadPrefix) ?? false) {
         await _plugin.cancel(id: request.id);
       }
     }
@@ -487,7 +529,7 @@ class NotificationService {
         id: reminder.id,
         title: title,
         body: body(reminder),
-        payload: '$_refillPayloadPrefix${reminder.itemClientId}',
+        payload: '$refillPayloadPrefix${reminder.itemClientId}',
         // Local wall-clock time to UTC; see [scheduleExpiryReminders].
         scheduledDate: tz.TZDateTime.from(reminder.fireAt.toUtc(), tz.UTC),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -512,7 +554,7 @@ class NotificationService {
     await _ensureInitialized();
     final pending = await _plugin.pendingNotificationRequests();
     for (final request in pending) {
-      if (request.payload?.startsWith(_refillPayloadPrefix) ?? false) {
+      if (request.payload?.startsWith(refillPayloadPrefix) ?? false) {
         await _plugin.cancel(id: request.id);
       }
     }
@@ -536,7 +578,7 @@ class NotificationService {
         id: reminder.id,
         title: title,
         body: body(reminder),
-        payload: '$_deviceChargePayloadPrefix${reminder.itemClientId}',
+        payload: '$deviceChargePayloadPrefix${reminder.itemClientId}',
         // Local wall-clock time to UTC; see [scheduleExpiryReminders].
         scheduledDate: tz.TZDateTime.from(reminder.fireAt.toUtc(), tz.UTC),
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -561,7 +603,7 @@ class NotificationService {
     await _ensureInitialized();
     final pending = await _plugin.pendingNotificationRequests();
     for (final request in pending) {
-      if (request.payload?.startsWith(_deviceChargePayloadPrefix) ?? false) {
+      if (request.payload?.startsWith(deviceChargePayloadPrefix) ?? false) {
         await _plugin.cancel(id: request.id);
       }
     }
@@ -580,7 +622,7 @@ class NotificationService {
       id: _chargeReminderId,
       title: title,
       body: body,
-      payload: 'charge-reminder',
+      payload: chargeReminderPayload,
       scheduledDate: tz.TZDateTime.from(fireAt.toUtc(), tz.UTC),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       notificationDetails: const NotificationDetails(
@@ -615,7 +657,7 @@ class NotificationService {
       id: _backupReminderId,
       title: title,
       body: body,
-      payload: 'backup-reminder',
+      payload: backupReminderPayload,
       scheduledDate: tz.TZDateTime.from(fireAt.toUtc(), tz.UTC),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       notificationDetails: const NotificationDetails(
@@ -653,7 +695,7 @@ class NotificationService {
       id: _warningDayId,
       title: title,
       body: body,
-      payload: 'warning-day',
+      payload: warningDayPayload,
       scheduledDate: tz.TZDateTime.from(fireAt.toUtc(), tz.UTC),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       notificationDetails: const NotificationDetails(

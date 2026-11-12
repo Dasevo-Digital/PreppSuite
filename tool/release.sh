@@ -159,14 +159,23 @@ start_linux() {
      > build.log 2>&1 < /dev/null &)"
 }
 
+# Whether the Linux machine's run is still going. A restart of the machine
+# ends it without a word in its log: on 12 November 2026 TestKubuntu was
+# restarted while the run waited for its keyring, and the release went on
+# waiting for a run that no longer existed, and --resume too.
+linux_alive() {
+  ssh "$linux" "pgrep -f '[l]inux_release\.sh' >/dev/null"
+}
+
 # Where that run stands: none, running, passed, or failed -- ended, but
-# not with its start test passed.
+# not with its start test passed, or gone without ending at all.
 linux_state() {
   ssh "$linux" "f=~/$remote_linux/build.log
     if [ ! -f \$f ]; then echo none
     elif grep -qx ALLES-FERTIG \$f && grep -q 'STARTTEST: BESTANDEN' \$f; then echo passed
     elif grep -qx -e ALLES-FERTIG -e LINUX-FEHLGESCHLAGEN \$f; then echo failed
-    else echo running; fi"
+    elif pgrep -f '[l]inux_release\.sh' >/dev/null; then echo running
+    else echo failed; fi"
 }
 
 if $resume; then
@@ -273,6 +282,12 @@ for _ in $(seq 1 720); do
   if ssh "$linux" "grep -q LINUX-FEHLGESCHLAGEN ~/$remote_linux/build.log"; then
     ssh "$linux" "grep -E 'ERROR|error:|FEHLGESCHLAGEN' ~/$remote_linux/build.log | tail -5" || true
     fail "Linux-Build abgebrochen, siehe ~/$remote_linux/build.log auf $linux; --resume startet ihn neu"
+  fi
+  # Gone without either word: the machine restarted under it. Asked for
+  # the end once more first, in case it finished in between.
+  if ! linux_alive &&
+    ! ssh "$linux" "grep -q ALLES-FERTIG ~/$remote_linux/build.log"; then
+    fail "Linux-Lauf auf $linux endete ohne Ergebnis, etwa durch einen Neustart; --resume startet ihn neu"
   fi
   # The start test reads the desktop keyring, which waits for somebody to
   # unlock it; linux_release.sh says so in its log rather than hanging.

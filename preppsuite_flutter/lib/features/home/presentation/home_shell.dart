@@ -31,6 +31,7 @@ import 'emergency_screen.dart';
 import 'home_screen_widget_sync.dart';
 import '../../settings/presentation/backup_reminder_scheduler.dart';
 import 'app_shortcuts.dart';
+import 'notification_taps.dart';
 import '../../settings/presentation/database_snapshot_scheduler.dart';
 
 /// Top-level navigation once a profile exists.
@@ -143,6 +144,12 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             const DatabaseSnapshotScheduler(),
             // Draws nothing; the long-press menu on the app icon (#123).
             AppShortcuts(householdId: householdId),
+            // Draws nothing; a tapped notification opens its page (#382).
+            NotificationTaps(
+              profile: widget.profile,
+              onNavigate: _select,
+              screenFor: (destination) => _screenFor(destination, householdId),
+            ),
             const WarningDayScheduler(),
             // Above the rail as well as the tabs: a warning concerns the
             // whole app, so it gets the whole width.
