@@ -20,6 +20,8 @@ keinem dieser Dienste, es legt nur Dateien in einen Ordner.
     household.json          # wem der Ordner gehört
     devices/
       <geräte-id>.json      # ein vollständiger Stand je Gerät
+    photos/                 # nur in einem verschlüsselten Ordner (#376)
+      <name>-<geräte-id>.json   # ein versiegeltes Foto, einmal geschrieben
 ```
 
 `preppsuite/` ist ein eigenes Unterverzeichnis, weil der gewählte Ordner
@@ -89,12 +91,66 @@ Schreibens bleiben für den nächsten Durchlauf offen. Beim ersten Abgleich
 nach dem Update wird der lokale Stand einmal vollständig neu veröffentlicht,
 auch wenn ältere Versionen ihn irrtümlich schon als übertragen markiert hatten.
 
+## Fotos (#376)
+
+Fotos aus Vorrat und Hausratverzeichnis reisen nur durch einen
+**verschlüsselten** Ordner. Ein offener Ordner ist für den Anbieter lesbar,
+und das Hausratverzeichnis ist dafür da, Wertsachen samt Seriennummer zu
+fotografieren.
+
+In der Zeile steht weiterhin nur der Pfad auf dem eigenen Gerät; er reist
+nicht. Was reist, ist **welches Bild** an welchem Platz liegt: je Platz die
+SHA-256 des Bildes (`photoHashes`, drei Plätze beim Vorrat, einer beim
+Hausrat). Diese Liste steht auch in offenen Ordnern, im QR-Abgleich und in
+der Übergabe; sie verrät über die Bilder nichts.
+
+Die Bilder selbst liegen als eigene Dateien unter `photos/`, versiegelt mit
+dem Schlüssel des Ordners. Sie stehen nicht in der Gerätedatei, weil die bei
+jeder Änderung ganz neu geschrieben wird; ein Megabyte Fotos darin würde
+alle paar Minuten wieder hochgeladen. Ein Foto wird einmal geschrieben und
+dann nur noch gelesen.
+
+- Der Dateiname ist aus der SHA-256 abgeleitet, mit einem eigenen, aus dem
+  Ordnerschlüssel gewonnenen Schlüssel. Der Ordner verrät also nicht, welche
+  Bilder es sind. Nach dem Entschlüsseln prüft das Gerät, dass das Bild
+  wirklich die gesuchte SHA-256 hat; wer im Ordner schreiben kann, kann
+  kein Bild für ein anderes ausgeben.
+- Im Namen steht das Gerät, das die Datei geschrieben hat. So schreibt und
+  löscht auch hier nie ein Gerät die Datei eines anderen. Ein Bild, das
+  zwei Geräte haben, liegt trotzdem nur einmal im Ordner: Wer es zuerst
+  hochlädt, legt es ab, das andere sieht es und lädt nichts.
+- Ein Gerät nimmt seine eigenen Bilder wieder heraus, sobald keine Zeile des
+  Haushalts sie mehr nennt.
+- Je Durchgang werden höchstens 32 MB Bilder gesendet und 32 MB geholt;
+  der Rest folgt zwei Minuten später.
+
+### Wer recht hat
+
+Die Liste folgt der Version der Zeile, aber mit einer eigenen Regel, weil
+ein Gerät auch Zeilen bearbeitet, deren Bilder es nie hatte:
+
+- Eine **neuere** Version bringt ihre Liste mit, wenn sie eine hat. Hat sie
+  keine – eine ältere App, oder ein Gerät, das die Bilder nie kannte –,
+  bleibt die gespeicherte. Drei leere Plätze sind dagegen eine Aussage und
+  leeren die Bilder überall.
+- Dieselbe Version füllt eine unbekannte Liste. Zwei verschiedene Listen
+  derselben Version (eine Übergabe vor #376 ließ jedem Gerät sein Foto)
+  einigen sich überall gleich: die mit mehr Bildern bleibt, bei gleich
+  vielen entscheidet der Text.
+- Wer ein Foto setzt, ersetzt oder entfernt, berechnet die Liste sofort
+  beim Speichern. Ein- und Ausbuchen fasst die Fotos nicht an.
+- Zeilen von vor #376 bekommen ihre Liste beim nächsten Abgleich aus den
+  Bildern, die das Gerät lesen kann – ohne dass die Zeile als geändert
+  gilt.
+
+Keine dieser Schritte zählt als Bearbeitung: Ein ankommendes Foto setzt nur
+den lokalen Pfad.
+
 ## Was nicht mitreist
 
-- **Fotos zu Vorräten.** Der Pfad zeigt in das Dokumentenverzeichnis eines
-  bestimmten Geräts, und das Bild selbst liegt nicht im Ordner. Ein Pfad,
-  der drüben ins Leere zeigt, wäre schlechter als gar keiner. Die
-  Zusammenführung lässt die lokale Spalte deshalb unberührt.
+- **Fotos in einem offenen Ordner** (siehe oben) und der Pfad eines Fotos in
+  jedem Ordner. Ein Pfad, der drüben ins Leere zeigt, wäre schlechter als
+  gar keiner.
 - **Warnungen.** Ein Zwischenspeicher, den jedes Gerät in Minuten selbst
   wieder füllt.
 - **Alles, was das Gerät über sich selbst weiß:** Region, Personenzahl,
@@ -179,8 +235,8 @@ Neben Vorrat, Checklisten und Budget liegen zwei weitere Sätze im Ordner:
 Seit Schema 14 kommt ein dritter dazu:
 
 - **Das Hausratverzeichnis** – eine Zeile je Gegenstand, mit Raum,
-  Seriennummer, Kaufdatum und Preis. Das Foto bleibt auf dem Gerät, das es
-  aufgenommen hat, wie bei Vorratsartikeln auch.
+  Seriennummer, Kaufdatum und Preis. Das Foto reist wie bei
+  Vorratsartikeln nur durch einen verschlüsselten Ordner (#376).
 
 Eine Datei, die vor Schema 14 geschrieben wurde, hat diesen Satz gar nicht.
 Sie bleibt lesbar: ein fehlender Schlüssel wird als leere Liste gelesen,

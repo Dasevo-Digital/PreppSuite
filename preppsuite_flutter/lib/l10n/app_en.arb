@@ -1215,8 +1215,8 @@
     }
   },
   "sharingErrorLocked": "This folder is encrypted and this device does not have the passphrase. Nothing is being read or written until you enter it.",
-  "folderEncryptionOff": "Off. Everything in the folder is readable by anyone who can see it — including your sync provider.",
-  "folderEncryptionOn": "On. The folder holds only sealed files.",
+  "folderEncryptionOff": "Off. Everything in the folder is readable by anyone who can see it — including your sync provider. Photos from the inventory and the household inventory therefore stay on each device.",
+  "folderEncryptionOn": "On. The folder holds only sealed files. Photos from the inventory and the household inventory travel with them, sealed.",
   "folderEncryptionEnable": "Turn on encryption",
   "folderEncryptionUnlock": "Enter passphrase",
   "folderEncryptionPassphrase": "Passphrase",

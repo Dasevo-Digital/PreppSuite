@@ -337,6 +337,17 @@ class $InventoryItemsTable extends InventoryItems
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _photoHashesMeta = const VerificationMeta(
+    'photoHashes',
+  );
+  @override
+  late final GeneratedColumn<String> photoHashes = GeneratedColumn<String>(
+    'photo_hashes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -404,6 +415,7 @@ class $InventoryItemsTable extends InventoryItems
     photoPath,
     secondPhotoPath,
     thirdPhotoPath,
+    photoHashes,
     updatedAt,
     deletedAt,
     dirty,
@@ -662,6 +674,15 @@ class $InventoryItemsTable extends InventoryItems
         ),
       );
     }
+    if (data.containsKey('photo_hashes')) {
+      context.handle(
+        _photoHashesMeta,
+        photoHashes.isAcceptableOrUnknown(
+          data['photo_hashes']!,
+          _photoHashesMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -810,6 +831,10 @@ class $InventoryItemsTable extends InventoryItems
       thirdPhotoPath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}third_photo_path'],
+      ),
+      photoHashes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_hashes'],
       ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -1002,8 +1027,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   /// Path to a locally-stored photo of the item (see
   /// `inventory_photo_service.dart`), relative to the app's documents
   /// directory. Device-local and deliberately never shared: the path means
-  /// nothing on another device, and the picture itself is not in the
-  /// folder. The shared-folder merge leaves this column alone.
+  /// nothing on another device. The merge leaves this column alone; which
+  /// picture it is travels as [photoHashes], and through an encrypted
+  /// folder the picture with it (#376).
   final String? photoPath;
 
   /// The second and third photo of the item (#211): the same kind of
@@ -1015,6 +1041,18 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
   /// before the second, and a column per place keeps where it belongs.
   final String? secondPhotoPath;
   final String? thirdPhotoPath;
+
+  /// What the three photos *are*, for every device (#376): a JSON list of
+  /// three places, each the SHA-256 of the picture in it or null for an
+  /// empty one. The paths above say where a picture lies on this machine;
+  /// this says which picture belongs there, and it travels.
+  ///
+  /// Null as a whole means not known -- a row from before #376, or one
+  /// whose photos changed here and have not been read yet. That is a
+  /// different statement from three empty places, and the merge keeps
+  /// the two apart: an unknown list never clears a known one. See
+  /// `photo_hashes.dart`.
+  final String? photoHashes;
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final bool dirty;
@@ -1049,6 +1087,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     this.photoPath,
     this.secondPhotoPath,
     this.thirdPhotoPath,
+    this.photoHashes,
     required this.updatedAt,
     this.deletedAt,
     required this.dirty,
@@ -1131,6 +1170,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     }
     if (!nullToAbsent || thirdPhotoPath != null) {
       map['third_photo_path'] = Variable<String>(thirdPhotoPath);
+    }
+    if (!nullToAbsent || photoHashes != null) {
+      map['photo_hashes'] = Variable<String>(photoHashes);
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -1218,6 +1260,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       thirdPhotoPath: thirdPhotoPath == null && nullToAbsent
           ? const Value.absent()
           : Value(thirdPhotoPath),
+      photoHashes: photoHashes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoHashes),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
@@ -1264,6 +1309,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       photoPath: serializer.fromJson<String?>(json['photoPath']),
       secondPhotoPath: serializer.fromJson<String?>(json['secondPhotoPath']),
       thirdPhotoPath: serializer.fromJson<String?>(json['thirdPhotoPath']),
+      photoHashes: serializer.fromJson<String?>(json['photoHashes']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       dirty: serializer.fromJson<bool>(json['dirty']),
@@ -1303,6 +1349,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       'photoPath': serializer.toJson<String?>(photoPath),
       'secondPhotoPath': serializer.toJson<String?>(secondPhotoPath),
       'thirdPhotoPath': serializer.toJson<String?>(thirdPhotoPath),
+      'photoHashes': serializer.toJson<String?>(photoHashes),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'dirty': serializer.toJson<bool>(dirty),
@@ -1340,6 +1387,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     Value<String?> photoPath = const Value.absent(),
     Value<String?> secondPhotoPath = const Value.absent(),
     Value<String?> thirdPhotoPath = const Value.absent(),
+    Value<String?> photoHashes = const Value.absent(),
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     bool? dirty,
@@ -1392,6 +1440,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     thirdPhotoPath: thirdPhotoPath.present
         ? thirdPhotoPath.value
         : this.thirdPhotoPath,
+    photoHashes: photoHashes.present ? photoHashes.value : this.photoHashes,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     dirty: dirty ?? this.dirty,
@@ -1462,6 +1511,9 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
       thirdPhotoPath: data.thirdPhotoPath.present
           ? data.thirdPhotoPath.value
           : this.thirdPhotoPath,
+      photoHashes: data.photoHashes.present
+          ? data.photoHashes.value
+          : this.photoHashes,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
@@ -1501,6 +1553,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           ..write('photoPath: $photoPath, ')
           ..write('secondPhotoPath: $secondPhotoPath, ')
           ..write('thirdPhotoPath: $thirdPhotoPath, ')
+          ..write('photoHashes: $photoHashes, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('dirty: $dirty')
@@ -1540,6 +1593,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
     photoPath,
     secondPhotoPath,
     thirdPhotoPath,
+    photoHashes,
     updatedAt,
     deletedAt,
     dirty,
@@ -1578,6 +1632,7 @@ class InventoryItem extends DataClass implements Insertable<InventoryItem> {
           other.photoPath == this.photoPath &&
           other.secondPhotoPath == this.secondPhotoPath &&
           other.thirdPhotoPath == this.thirdPhotoPath &&
+          other.photoHashes == this.photoHashes &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.dirty == this.dirty);
@@ -1614,6 +1669,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
   final Value<String?> photoPath;
   final Value<String?> secondPhotoPath;
   final Value<String?> thirdPhotoPath;
+  final Value<String?> photoHashes;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<bool> dirty;
@@ -1649,6 +1705,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.photoPath = const Value.absent(),
     this.secondPhotoPath = const Value.absent(),
     this.thirdPhotoPath = const Value.absent(),
+    this.photoHashes = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.dirty = const Value.absent(),
@@ -1685,6 +1742,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     this.photoPath = const Value.absent(),
     this.secondPhotoPath = const Value.absent(),
     this.thirdPhotoPath = const Value.absent(),
+    this.photoHashes = const Value.absent(),
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.dirty = const Value.absent(),
@@ -1728,6 +1786,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Expression<String>? photoPath,
     Expression<String>? secondPhotoPath,
     Expression<String>? thirdPhotoPath,
+    Expression<String>? photoHashes,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<bool>? dirty,
@@ -1764,6 +1823,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       if (photoPath != null) 'photo_path': photoPath,
       if (secondPhotoPath != null) 'second_photo_path': secondPhotoPath,
       if (thirdPhotoPath != null) 'third_photo_path': thirdPhotoPath,
+      if (photoHashes != null) 'photo_hashes': photoHashes,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (dirty != null) 'dirty': dirty,
@@ -1802,6 +1862,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     Value<String?>? photoPath,
     Value<String?>? secondPhotoPath,
     Value<String?>? thirdPhotoPath,
+    Value<String?>? photoHashes,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<bool>? dirty,
@@ -1838,6 +1899,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
       photoPath: photoPath ?? this.photoPath,
       secondPhotoPath: secondPhotoPath ?? this.secondPhotoPath,
       thirdPhotoPath: thirdPhotoPath ?? this.thirdPhotoPath,
+      photoHashes: photoHashes ?? this.photoHashes,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       dirty: dirty ?? this.dirty,
@@ -1938,6 +2000,9 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
     if (thirdPhotoPath.present) {
       map['third_photo_path'] = Variable<String>(thirdPhotoPath.value);
     }
+    if (photoHashes.present) {
+      map['photo_hashes'] = Variable<String>(photoHashes.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -1986,6 +2051,7 @@ class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
           ..write('photoPath: $photoPath, ')
           ..write('secondPhotoPath: $secondPhotoPath, ')
           ..write('thirdPhotoPath: $thirdPhotoPath, ')
+          ..write('photoHashes: $photoHashes, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('dirty: $dirty, ')
@@ -6011,6 +6077,17 @@ class $PossessionsTable extends Possessions
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _photoHashesMeta = const VerificationMeta(
+    'photoHashes',
+  );
+  @override
+  late final GeneratedColumn<String> photoHashes = GeneratedColumn<String>(
+    'photo_hashes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -6058,6 +6135,7 @@ class $PossessionsTable extends Possessions
     currency,
     notes,
     photoPath,
+    photoHashes,
     updatedAt,
     deletedAt,
     dirty,
@@ -6149,6 +6227,15 @@ class $PossessionsTable extends Possessions
         photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
       );
     }
+    if (data.containsKey('photo_hashes')) {
+      context.handle(
+        _photoHashesMeta,
+        photoHashes.isAcceptableOrUnknown(
+          data['photo_hashes']!,
+          _photoHashesMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -6218,6 +6305,10 @@ class $PossessionsTable extends Possessions
         DriftSqlType.string,
         data['${effectivePrefix}photo_path'],
       ),
+      photoHashes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_hashes'],
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -6264,13 +6355,19 @@ class Possession extends DataClass implements Insertable<Possession> {
 
   /// Path to a locally-stored photo, relative to the app's documents
   /// directory — same convention as [InventoryItems.photoPath], and
-  /// device-local for the same reason: the path means nothing elsewhere
-  /// and the picture is not in the shared folder.
+  /// device-local for the same reason: the path means nothing elsewhere.
+  /// The picture reaches the other devices through an encrypted shared
+  /// folder (#376), a handover or a backup, never a plain folder.
   ///
   /// Which is worth saying out loud for this table in particular: the
-  /// photo is the most persuasive part of a claim and it lives only on
-  /// the device that took it. That is what the PDF export is for.
+  /// photo is the most persuasive part of a claim, and without one of
+  /// those roads it lives only on the device that took it. That is what
+  /// the PDF export is for.
   final String? photoPath;
+
+  /// Which picture [photoPath] holds, as a JSON list of one SHA-256 or
+  /// null; the same as [InventoryItems.photoHashes], with one place.
+  final String? photoHashes;
   final DateTime updatedAt;
   final DateTime? deletedAt;
   final bool dirty;
@@ -6285,6 +6382,7 @@ class Possession extends DataClass implements Insertable<Possession> {
     this.currency,
     this.notes,
     this.photoPath,
+    this.photoHashes,
     required this.updatedAt,
     this.deletedAt,
     required this.dirty,
@@ -6315,6 +6413,9 @@ class Possession extends DataClass implements Insertable<Possession> {
     }
     if (!nullToAbsent || photoPath != null) {
       map['photo_path'] = Variable<String>(photoPath);
+    }
+    if (!nullToAbsent || photoHashes != null) {
+      map['photo_hashes'] = Variable<String>(photoHashes);
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -6348,6 +6449,9 @@ class Possession extends DataClass implements Insertable<Possession> {
       photoPath: photoPath == null && nullToAbsent
           ? const Value.absent()
           : Value(photoPath),
+      photoHashes: photoHashes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoHashes),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
@@ -6372,6 +6476,7 @@ class Possession extends DataClass implements Insertable<Possession> {
       currency: serializer.fromJson<String?>(json['currency']),
       notes: serializer.fromJson<String?>(json['notes']),
       photoPath: serializer.fromJson<String?>(json['photoPath']),
+      photoHashes: serializer.fromJson<String?>(json['photoHashes']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       dirty: serializer.fromJson<bool>(json['dirty']),
@@ -6391,6 +6496,7 @@ class Possession extends DataClass implements Insertable<Possession> {
       'currency': serializer.toJson<String?>(currency),
       'notes': serializer.toJson<String?>(notes),
       'photoPath': serializer.toJson<String?>(photoPath),
+      'photoHashes': serializer.toJson<String?>(photoHashes),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'dirty': serializer.toJson<bool>(dirty),
@@ -6408,6 +6514,7 @@ class Possession extends DataClass implements Insertable<Possession> {
     Value<String?> currency = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<String?> photoPath = const Value.absent(),
+    Value<String?> photoHashes = const Value.absent(),
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
     bool? dirty,
@@ -6424,6 +6531,7 @@ class Possession extends DataClass implements Insertable<Possession> {
     currency: currency.present ? currency.value : this.currency,
     notes: notes.present ? notes.value : this.notes,
     photoPath: photoPath.present ? photoPath.value : this.photoPath,
+    photoHashes: photoHashes.present ? photoHashes.value : this.photoHashes,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     dirty: dirty ?? this.dirty,
@@ -6448,6 +6556,9 @@ class Possession extends DataClass implements Insertable<Possession> {
       currency: data.currency.present ? data.currency.value : this.currency,
       notes: data.notes.present ? data.notes.value : this.notes,
       photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
+      photoHashes: data.photoHashes.present
+          ? data.photoHashes.value
+          : this.photoHashes,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       dirty: data.dirty.present ? data.dirty.value : this.dirty,
@@ -6467,6 +6578,7 @@ class Possession extends DataClass implements Insertable<Possession> {
           ..write('currency: $currency, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
+          ..write('photoHashes: $photoHashes, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('dirty: $dirty')
@@ -6486,6 +6598,7 @@ class Possession extends DataClass implements Insertable<Possession> {
     currency,
     notes,
     photoPath,
+    photoHashes,
     updatedAt,
     deletedAt,
     dirty,
@@ -6504,6 +6617,7 @@ class Possession extends DataClass implements Insertable<Possession> {
           other.currency == this.currency &&
           other.notes == this.notes &&
           other.photoPath == this.photoPath &&
+          other.photoHashes == this.photoHashes &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
           other.dirty == this.dirty);
@@ -6520,6 +6634,7 @@ class PossessionsCompanion extends UpdateCompanion<Possession> {
   final Value<String?> currency;
   final Value<String?> notes;
   final Value<String?> photoPath;
+  final Value<String?> photoHashes;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
   final Value<bool> dirty;
@@ -6535,6 +6650,7 @@ class PossessionsCompanion extends UpdateCompanion<Possession> {
     this.currency = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
+    this.photoHashes = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.dirty = const Value.absent(),
@@ -6551,6 +6667,7 @@ class PossessionsCompanion extends UpdateCompanion<Possession> {
     this.currency = const Value.absent(),
     this.notes = const Value.absent(),
     this.photoPath = const Value.absent(),
+    this.photoHashes = const Value.absent(),
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
     this.dirty = const Value.absent(),
@@ -6570,6 +6687,7 @@ class PossessionsCompanion extends UpdateCompanion<Possession> {
     Expression<String>? currency,
     Expression<String>? notes,
     Expression<String>? photoPath,
+    Expression<String>? photoHashes,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
     Expression<bool>? dirty,
@@ -6587,6 +6705,7 @@ class PossessionsCompanion extends UpdateCompanion<Possession> {
       if (currency != null) 'currency': currency,
       if (notes != null) 'notes': notes,
       if (photoPath != null) 'photo_path': photoPath,
+      if (photoHashes != null) 'photo_hashes': photoHashes,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (dirty != null) 'dirty': dirty,
@@ -6605,6 +6724,7 @@ class PossessionsCompanion extends UpdateCompanion<Possession> {
     Value<String?>? currency,
     Value<String?>? notes,
     Value<String?>? photoPath,
+    Value<String?>? photoHashes,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
     Value<bool>? dirty,
@@ -6621,6 +6741,7 @@ class PossessionsCompanion extends UpdateCompanion<Possession> {
       currency: currency ?? this.currency,
       notes: notes ?? this.notes,
       photoPath: photoPath ?? this.photoPath,
+      photoHashes: photoHashes ?? this.photoHashes,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
       dirty: dirty ?? this.dirty,
@@ -6661,6 +6782,9 @@ class PossessionsCompanion extends UpdateCompanion<Possession> {
     if (photoPath.present) {
       map['photo_path'] = Variable<String>(photoPath.value);
     }
+    if (photoHashes.present) {
+      map['photo_hashes'] = Variable<String>(photoHashes.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -6689,6 +6813,7 @@ class PossessionsCompanion extends UpdateCompanion<Possession> {
           ..write('currency: $currency, ')
           ..write('notes: $notes, ')
           ..write('photoPath: $photoPath, ')
+          ..write('photoHashes: $photoHashes, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('dirty: $dirty, ')

@@ -178,8 +178,9 @@ class InventoryItems extends Table {
   /// Path to a locally-stored photo of the item (see
   /// `inventory_photo_service.dart`), relative to the app's documents
   /// directory. Device-local and deliberately never shared: the path means
-  /// nothing on another device, and the picture itself is not in the
-  /// folder. The shared-folder merge leaves this column alone.
+  /// nothing on another device. The merge leaves this column alone; which
+  /// picture it is travels as [photoHashes], and through an encrypted
+  /// folder the picture with it (#376).
   TextColumn get photoPath => text().nullable()();
 
   /// The second and third photo of the item (#211): the same kind of
@@ -191,6 +192,18 @@ class InventoryItems extends Table {
   /// before the second, and a column per place keeps where it belongs.
   TextColumn get secondPhotoPath => text().nullable()();
   TextColumn get thirdPhotoPath => text().nullable()();
+
+  /// What the three photos *are*, for every device (#376): a JSON list of
+  /// three places, each the SHA-256 of the picture in it or null for an
+  /// empty one. The paths above say where a picture lies on this machine;
+  /// this says which picture belongs there, and it travels.
+  ///
+  /// Null as a whole means not known -- a row from before #376, or one
+  /// whose photos changed here and have not been read yet. That is a
+  /// different statement from three empty places, and the merge keeps
+  /// the two apart: an unknown list never clears a known one. See
+  /// `photo_hashes.dart`.
+  TextColumn get photoHashes => text().nullable()();
 
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

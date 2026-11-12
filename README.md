@@ -498,11 +498,11 @@ ein Gerät, das schon in Benutzung ist, behält seine eigenen. Die
 Geräteeinstellungen bleiben, wo sie sind: die Gerätekennung, alle lokalen
 Dateipfade und der Karten-Schlüssel aus dem Schlüsselbund reisen nicht mit.
 
-**Die Fotos gehen nur über die Direktübergabe** – den Weg über das örtliche
-Netz. In der Bilderfolge wären es je Foto rund zweihundert zusätzliche
-Einzelbilder zum Abfilmen, und im gemeinsamen Ordner würden dieselben Bytes
-bei jedem Abgleich neu geschrieben. Die Gegenseite nennt, was sie schon
-hat, also trägt eine zweite Übergabe nichts doppelt.
+**Die Fotos gehen über die Direktübergabe** – den Weg über das örtliche
+Netz – und durch einen **verschlüsselten** gemeinsamen Ordner, nicht über
+die Bilderfolge: Dort wären es je Foto rund zweihundert zusätzliche
+Einzelbilder zum Abfilmen. Die Gegenseite nennt, was sie schon hat, also
+trägt eine zweite Übergabe nichts doppelt.
 
 **Stromausfall.** Eine Uhr für das, was im Dunkeln wirklich gefragt wird:
 wie lange Kühlschrank und Gefriergerät noch halten. Vier Stunden, 48 bei
@@ -957,10 +957,13 @@ Die App ist im Alltag benutzbar, einige Kanten sind aber bekannt:
   Verschlüsselung". Eine bereits verschlüsselte Installation sagt
   stattdessen, dass sie ihren Schlüssel nicht findet, und rührt nichts an.
 
-- Fotos zu Vorratsartikeln liegen im gemeinsamen Ordner **nicht** – dort
-  stehen nur die Daten. Auf einem mitgeführten Datenträger wandern sie mit,
-  und seit 1.9.2 gehen sie auch über die Direktübergabe im örtlichen Netz
-  auf ein zweites Gerät. Über die QR-Bilderfolge gehen sie nicht.
+- Fotos aus Vorrat und Hausratverzeichnis liegen nur in einem
+  **verschlüsselten** gemeinsamen Ordner, jedes als eigene versiegelte
+  Datei, die einmal geschrieben wird (#376). In einem offenen Ordner
+  stehen nur die Daten. Auf einem mitgeführten Datenträger wandern die
+  Fotos mit, und seit 1.9.2 gehen sie auch über die Direktübergabe im
+  örtlichen Netz auf ein zweites Gerät. Über die QR-Bilderfolge gehen sie
+  nicht.
 - Veröffentlicht werden **macOS, Windows, Linux und Android**, jeweils aus
   einem Bau auf der echten Maschine. Die Android-Pakete tragen seit 0.11.0
   den eigenen Schlüssel mit der Signaturkette; die Desktop-Bauten sind

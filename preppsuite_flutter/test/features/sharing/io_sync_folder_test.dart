@@ -191,4 +191,29 @@ void main() {
       'Trinkwasser',
     );
   });
+
+  test(
+    'pictures live in photos/, written whole and removed again (#376)',
+    () async {
+      final name = '${'c' * 64}-phone.json';
+      expect(await folder.listPhotoFiles(), isEmpty);
+      expect(await folder.readPhotoFile(name), isNull);
+
+      await folder.writePhotoFile(name, '{"sealed":true}');
+      File(p.join(root.path, 'preppsuite', 'photos', 'stray.txt'))
+          .writeAsStringSync('x');
+      expect(await folder.listPhotoFiles(), [name]);
+      expect(await folder.readPhotoFile(name), '{"sealed":true}');
+      expect(
+        Directory(p.join(root.path, 'preppsuite', 'photos'))
+            .listSync()
+            .where((e) => e.path.endsWith('.tmp')),
+        isEmpty,
+      );
+
+      await folder.deletePhotoFile(name);
+      await folder.deletePhotoFile(name);
+      expect(await folder.listPhotoFiles(), isEmpty);
+    },
+  );
 }

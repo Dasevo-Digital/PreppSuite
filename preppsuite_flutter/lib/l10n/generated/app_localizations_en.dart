@@ -2093,10 +2093,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get folderEncryptionOff =>
-      'Off. Everything in the folder is readable by anyone who can see it — including your sync provider.';
+      'Off. Everything in the folder is readable by anyone who can see it — including your sync provider. Photos from the inventory and the household inventory therefore stay on each device.';
 
   @override
-  String get folderEncryptionOn => 'On. The folder holds only sealed files.';
+  String get folderEncryptionOn =>
+      'On. The folder holds only sealed files. Photos from the inventory and the household inventory travel with them, sealed.';
 
   @override
   String get folderEncryptionEnable => 'Turn on encryption';

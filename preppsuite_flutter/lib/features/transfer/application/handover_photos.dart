@@ -17,18 +17,20 @@ import '../../../core/photo_vault.dart';
 /// snapshot carries no photo at all, and a second device used to show an
 /// inventory of grey placeholders.
 ///
-/// These travel beside the snapshot rather than inside it, and only on a
-/// local handover. That is deliberate:
+/// These travel beside the snapshot rather than inside it. That is
+/// deliberate:
 ///
 ///  * The **QR chain** paints the payload on screen as a run of pictures.
 ///    A single 300 kB photo is some two hundred more frames to film; the
-///    inventory would never finish.
+///    inventory would never finish. It carries none.
 ///  * The **shared folder** republishes a whole snapshot per device per
 ///    sync. Photos in there would be re-uploaded every few minutes,
-///    forever, to say the same thing.
+///    forever, to say the same thing. An encrypted folder carries them as
+///    files of their own instead, each written once (#376); see
+///    `folder_photos.dart`.
 ///
 /// A handover is neither: two devices in one room, one request, once. So
-/// the bytes go there and nowhere else.
+/// the bytes go beside it.
 ///
 /// The receiving side asks for what it lacks — see [PhotoRequest] — so a
 /// second handover between the same two devices carries nothing twice.

@@ -110,9 +110,10 @@ Waschmaschine im Kalorienziel wäre das Ergebnis einer Vermischung.
 
 Die PDF-Ausgabe ist der eigentliche Zweck. Eine Liste dessen, was
 verbrannt ist, die nur in der verbrannten Wohnung liegt, ist keine Liste.
-**Die Fotos sind nicht im PDF** — sie liegen nur auf dem Gerät, das sie
-aufgenommen hat, und würden aus zwei Seiten vierzig Megabyte machen, die
-dann niemand verschickt.
+**Die Fotos sind nicht im PDF** — sie würden aus zwei Seiten vierzig
+Megabyte machen, die dann niemand verschickt. Auf andere Geräte kommen sie
+durch einen verschlüsselten gemeinsamen Ordner (#376), eine Übergabe oder
+eine Sicherung.
 
 ### Die Checkliste „Wenn der Strom ausfällt"
 

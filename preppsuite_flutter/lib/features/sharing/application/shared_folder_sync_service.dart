@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
+import 'dart:io';
 
 import 'package:cryptography/cryptography.dart' show Sha256;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../local_db/database.dart';
+import '../../inventory/application/photo_content_index.dart';
 import 'device_snapshot.dart';
+import 'folder_photos.dart';
 import 'snapshot_exchange.dart';
 import 'settings_sync.dart';
 import 'settings_sync_store.dart';
@@ -50,8 +53,12 @@ class SharedFolderSyncResult {
     this.received = 0,
     this.devicesSeen = 0,
     this.published = false,
+    this.photos = const FolderPhotoResult(),
     this.error,
   });
+
+  /// What happened to the pictures (#376); nothing in a plain folder.
+  final FolderPhotoResult photos;
 
   /// Rows that were actually applied — newer than what was stored here.
   final int received;
@@ -90,7 +97,17 @@ class SharedFolderSyncService {
     this.republish = false,
     this.requireEncryption = false,
     this.onEncryptedFolder,
-  }) : _db = database;
+    PhotoContentIndex? photoIndex,
+    this._photosDirectory,
+  }) : _db = database,
+       _photoIndex = photoIndex ?? PhotoContentIndex.instance;
+
+  /// Which picture each photo file here holds (#376).
+  final PhotoContentIndex _photoIndex;
+
+  /// Where pictures that arrive are put; null for the app's own folder.
+  /// A test hands in a temporary one.
+  final Directory? _photosDirectory;
 
   final AppDatabase _db;
   final SyncFolder _folder;
@@ -234,10 +251,18 @@ class SharedFolderSyncService {
         );
       }
 
+      // The pictures (#376), before this device writes its own file: the
+      // lists it fills in go out with it, and a picture is in the folder
+      // before the file that names it.
+      final listsFilled = await _fillPhotoLists();
+      final pictures = await _photoSync();
+      final photos = await _exchangePhotos(pictures);
+
       final beforePublishError = await _checkIdentity();
       if (beforePublishError != null) {
         return SharedFolderSyncResult(
           received: received,
+          photos: photos,
           error: beforePublishError,
         );
       }
@@ -254,11 +279,18 @@ class SharedFolderSyncService {
           !holdsBack &&
           await _publishIfNeeded(
             ownFileWasKnown: ownFileKnown,
-            learnedSomething: received > 0,
+            learnedSomething: received > 0 || listsFilled > 0,
             ourFileExists: ourFile != null,
             ourFileIsPlain:
                 _sealing && ourFile != null && !looksEncrypted(ourFile),
           );
+
+      // Only after a run that read every file in the folder. A file still
+      // downloading may hold the rows that name a picture, and this device
+      // would take it out from under them.
+      if (pictures != null && skippedFiles == 0 && !ownFileUnread) {
+        await _cleanUpPhotos(pictures);
+      }
 
       await _db.setLastPulledAt(syncStateEntity, DateTime.now().toUtc());
 
@@ -266,6 +298,7 @@ class SharedFolderSyncService {
         received: received,
         devicesSeen: {...deviceIds, if (published) deviceId}.length,
         published: published,
+        photos: photos,
         // Only when *every* other device's file was unreadable. One
         // skipped file among several is a download in progress; all of
         // them is a folder this version cannot read.
@@ -291,6 +324,66 @@ class SharedFolderSyncService {
       );
     }
   }
+
+  /// Writes down the lists of pictures this device can tell; see
+  /// [fillUnknownPhotoLists]. A failure costs the lists, never the rows.
+  Future<int> _fillPhotoLists() async {
+    try {
+      return await fillUnknownPhotoLists(
+        _db,
+        householdId: householdId,
+        index: _photoIndex,
+      );
+    } on Object catch (error, stack) {
+      _logPhotos('picture lists could not be filled', error, stack);
+      return 0;
+    }
+  }
+
+  /// The pictures' half of this run, or null where there is none: a plain
+  /// folder, or one that cannot hold pictures.
+  Future<FolderPhotoSync?> _photoSync() async {
+    final folder = _folder;
+    final folderKey = key;
+    if (!_sealing || folderKey == null || folder is! SyncPhotoFolder) {
+      return null;
+    }
+    return FolderPhotoSync(
+      database: _db,
+      folder: folder as SyncPhotoFolder,
+      key: folderKey,
+      deviceId: deviceId,
+      householdId: householdId,
+      index: _photoIndex,
+      photosDirectory: _photosDirectory,
+    );
+  }
+
+  Future<FolderPhotoResult> _exchangePhotos(FolderPhotoSync? pictures) async {
+    if (pictures == null) return const FolderPhotoResult();
+    try {
+      return await pictures.exchange();
+    } on Object catch (error, stack) {
+      _logPhotos('pictures could not be exchanged', error, stack);
+      return const FolderPhotoResult();
+    }
+  }
+
+  Future<void> _cleanUpPhotos(FolderPhotoSync pictures) async {
+    try {
+      await pictures.cleanUp();
+    } on Object catch (error, stack) {
+      _logPhotos('pictures could not be cleaned up', error, stack);
+    }
+  }
+
+  static void _logPhotos(String message, Object error, StackTrace stack) =>
+      developer.log(
+        message,
+        name: 'preppsuite.sharing',
+        error: error,
+        stackTrace: stack,
+      );
 
   /// Confirms the folder still belongs to this household, restoring the
   /// identity file if it has been lost.

@@ -2106,11 +2106,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get folderEncryptionOff =>
-      'Aus. Alles im Ordner ist für jeden lesbar, der ihn sehen kann – auch für deinen Anbieter.';
+      'Aus. Alles im Ordner ist für jeden lesbar, der ihn sehen kann – auch für deinen Anbieter. Fotos aus Vorrat und Hausratverzeichnis reisen deshalb nicht mit.';
 
   @override
   String get folderEncryptionOn =>
-      'An. Im Ordner liegen nur versiegelte Dateien.';
+      'An. Im Ordner liegen nur versiegelte Dateien. Fotos aus Vorrat und Hausratverzeichnis reisen versiegelt mit.';
 
   @override
   String get folderEncryptionEnable => 'Verschlüsselung einschalten';

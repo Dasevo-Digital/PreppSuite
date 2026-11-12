@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart';
 
+import '../../../core/photo_hashes.dart';
 import '../../../local_db/database.dart';
 import '../../inventory/application/inventory_numbers.dart';
 import '../../inventory/application/package_nutrition.dart';
@@ -217,10 +218,27 @@ Map<String, Object?> encodeInventoryItem(InventoryItem row) => {
   'updatedAt': _date(row.updatedAt),
   'deletedAt': _date(row.deletedAt),
   // photoPath is deliberately absent: it points into this device's
-  // documents directory, and the picture itself is not in the folder. A
-  // path that resolves to nothing on the other device is worse than no
-  // path at all. The merge leaves the local value untouched.
+  // documents directory, and a path that resolves to nothing on the other
+  // device is worse than no path at all. Which pictures the row has goes
+  // instead, by their contents (#376); an unknown list goes as null.
+  'photoHashes': decodePhotoHashes(
+    row.photoHashes,
+    places: inventoryPhotoPlaces,
+  ),
 };
+
+/// The list of pictures a row brings, or nothing when it brings none.
+///
+/// Null, a missing key and a list this app would not write all read the
+/// same: as no statement at all, which leaves the stored list alone. A
+/// device that does not know a row's pictures -- an older app, or one that
+/// never held them -- must not empty them on every other device.
+Value<String?> _photoHashesValue(Object? raw, {required int places}) {
+  final hashes = photoHashesFromJson(raw, places: places);
+  return hashes == null
+      ? const Value.absent()
+      : Value(encodePhotoHashes(hashes));
+}
 
 /// Returns null when the row is unusable, so one bad entry costs one row
 /// rather than the whole sync.
@@ -329,6 +347,10 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
         ? Value(asUtcDate(json['chargeCheckedAt']))
         : const Value.absent(),
     notes: Value(_string(json['notes'])),
+    photoHashes: _photoHashesValue(
+      json['photoHashes'],
+      places: inventoryPhotoPlaces,
+    ),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),
     // Arrived from elsewhere, so there is nothing of ours to publish.
@@ -495,7 +517,12 @@ Map<String, Object?> encodePossession(Possession row) => {
   'updatedAt': _date(row.updatedAt),
   'deletedAt': _date(row.deletedAt),
   // photoPath stays behind for the same reason it does on an inventory
-  // item: it names a file in this device's documents directory.
+  // item: it names a file in this device's documents directory. Which
+  // picture it is travels, as there.
+  'photoHashes': decodePhotoHashes(
+    row.photoHashes,
+    places: possessionPhotoPlaces,
+  ),
 };
 
 PossessionsCompanion? decodePossession(Map<String, Object?> json) {
@@ -523,6 +550,10 @@ PossessionsCompanion? decodePossession(Map<String, Object?> json) {
     purchasePriceCents: Value(_int(json['purchasePriceCents'])),
     currency: Value(_string(json['currency'])),
     notes: Value(_string(json['notes'])),
+    photoHashes: _photoHashesValue(
+      json['photoHashes'],
+      places: possessionPhotoPlaces,
+    ),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),
     dirty: const Value(false),

@@ -136,4 +136,50 @@ void main() {
       expect(isNativeStorageHandle('/home/me/Sync'), isFalse);
     });
   });
+
+  group('pictures (#376)', () {
+    test(
+      'live beside the devices, in photos/, under their own limit',
+      () async {
+        reply = ['${'a' * 64}-phone.json', 'notes.txt'];
+        expect(await folder.listPhotoFiles(), ['${'a' * 64}-phone.json']);
+        reply = null;
+        await folder.readPhotoFile('${'a' * 64}-phone.json');
+        await folder.writePhotoFile('${'a' * 64}-laptop.json', '{}');
+        await folder.deletePhotoFile('${'a' * 64}-laptop.json');
+        expect(calls.map((c) => c.method), ['list', 'read', 'write', 'delete']);
+        expect(calls[0].arguments['path'], photosDirectoryPath);
+        expect(
+          calls[1].arguments['path'],
+          'preppsuite/photos/${'a' * 64}-phone.json',
+        );
+        expect(calls[1].arguments['maxBytes'], maxFolderPhotoBytes);
+        expect(
+          calls[2].arguments['path'],
+          'preppsuite/photos/${'a' * 64}-laptop.json',
+        );
+        expect(
+          calls[3].arguments['path'],
+          'preppsuite/photos/${'a' * 64}-laptop.json',
+        );
+      },
+    );
+
+    test('a name never climbs out of the photo directory', () async {
+      await folder.readPhotoFile('../devices/phone.json');
+      expect(calls.single.arguments['path'], 'preppsuite/photos/phone.json');
+    });
+
+    test('a picture that cannot be read or removed costs nothing', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            channel,
+            (call) async => throw PlatformException(
+              code: call.method == 'read' ? 'read-failed' : 'delete-failed',
+            ),
+          );
+      expect(await folder.readPhotoFile('${'a' * 64}-phone.json'), isNull);
+      await folder.deletePhotoFile('${'a' * 64}-phone.json');
+    });
+  });
 }

@@ -132,6 +132,22 @@ void main() {
       expect(writable, isFalse);
     });
 
+    testWidgets('deleting through a dead handle removes nothing, quietly', (
+      tester,
+    ) async {
+      expect(usesNativeStoragePicker, isTrue);
+
+      // The pictures' cleanup in a shared folder (#376). The method has to
+      // be there on both platforms -- an unknown one would be a missing
+      // plugin -- and a handle that resolves to nothing removes nothing.
+      final removed = await nativeStorageChannel.invokeMethod<bool>('delete', {
+        'uri': 'bookmark://00000000-0000-0000-0000-000000000000',
+        'path': 'preppsuite/photos/${'a' * 64}-test.json',
+      });
+
+      expect(removed, isFalse);
+    });
+
     testWidgets('reading through a dead handle gives nothing, not an error', (
       tester,
     ) async {

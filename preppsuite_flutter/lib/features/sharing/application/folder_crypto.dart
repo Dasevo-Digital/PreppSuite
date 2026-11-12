@@ -12,6 +12,7 @@
 library;
 
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -183,6 +184,53 @@ Future<String> encryptForFolder(String plaintext, FolderKey key) async {
     'nonce': base64Encode(box.nonce),
     'data': base64Encode(box.cipherText),
     'mac': base64Encode(box.mac.bytes),
+  });
+}
+
+/// Encrypts a picture under [key], in the same envelope as text (#376).
+///
+/// Off the interface's isolate: AES-GCM in pure Dart is a few megabytes a
+/// second, and a sync may seal a dozen pictures in a row.
+Future<String> encryptBytesForFolder(Uint8List bytes, FolderKey key) {
+  final secret = key.bytes;
+  return Isolate.run(() async {
+    final algorithm = AesGcm.with256bits();
+    final box = await algorithm.encrypt(
+      bytes,
+      secretKey: SecretKey(secret),
+      nonce: algorithm.newNonce(),
+    );
+    return jsonEncode({
+      'preppsuite': 'enc',
+      'v': 1,
+      'alg': 'aes-gcm-256',
+      'nonce': base64Encode(box.nonce),
+      'data': base64Encode(box.cipherText),
+      'mac': base64Encode(box.mac.bytes),
+    });
+  });
+}
+
+/// The picture [encryptBytesForFolder] sealed, or null -- for the same
+/// reasons, and with the same single answer, as [decryptFromFolder].
+Future<Uint8List?> decryptBytesFromFolder(String raw, FolderKey key) {
+  final secret = key.bytes;
+  return Isolate.run(() async {
+    final envelope = readEnvelope(raw);
+    if (envelope == null) return null;
+    try {
+      final clear = await AesGcm.with256bits().decrypt(
+        SecretBox(
+          envelope.cipherText,
+          nonce: envelope.nonce,
+          mac: Mac(envelope.mac),
+        ),
+        secretKey: SecretKey(secret),
+      );
+      return Uint8List.fromList(clear);
+    } on Object {
+      return null;
+    }
   });
 }
 

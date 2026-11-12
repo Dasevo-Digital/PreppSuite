@@ -14,6 +14,7 @@ import 'package:path/path.dart' as p;
 const preppSuiteFolderName = 'preppsuite';
 
 const _devicesFolderName = 'devices';
+const _photosFolderName = 'photos';
 const _householdFileName = 'household.json';
 const _probeFileName = '.preppsuite-write-test';
 
@@ -29,6 +30,35 @@ const householdFilePath = '$preppSuiteFolderName/$_householdFileName';
 
 String deviceFilePath(String deviceId) =>
     '$devicesDirectoryPath/$deviceId.json';
+
+/// Where the household's pictures lie, sealed, in an encrypted folder
+/// (#376). See `folder_photos.dart`.
+const photosDirectoryPath = '$preppSuiteFolderName/$_photosFolderName';
+
+String photoFilePath(String fileName) => '$photosDirectoryPath/$fileName';
+
+/// A folder that can also hold the household's pictures (#376).
+///
+/// Apart from [SyncFolder] so that a folder which cannot -- a test's, or
+/// one added later -- still syncs its rows: the pictures are what is left
+/// out then, as they were before.
+///
+/// The rule of the folder holds here as well. Every picture file carries
+/// the name of the device that wrote it, so no two devices ever write or
+/// delete the same path; a picture two devices both hold is in the folder
+/// once, from whichever put it there first.
+abstract interface class SyncPhotoFolder {
+  /// The names of the picture files, without their directory.
+  Future<List<String>> listPhotoFiles();
+
+  /// The sealed picture, or null when it is not there or not readable yet.
+  Future<String?> readPhotoFile(String fileName);
+
+  Future<void> writePhotoFile(String fileName, String contents);
+
+  /// Best effort: a file that cannot go now goes on a later run.
+  Future<void> deletePhotoFile(String fileName);
+}
 
 /// A directory two or more devices can both see — a Nextcloud, Syncthing,
 /// Dropbox or iCloud Drive folder.
@@ -77,7 +107,7 @@ abstract class SyncFolder {
 /// and Android as far as the picked path is permitted. Everything it does
 /// is a plain file operation, so the folder stays readable — and
 /// repairable — with a text editor.
-class IoSyncFolder implements SyncFolder {
+class IoSyncFolder implements SyncFolder, SyncPhotoFolder {
   IoSyncFolder(this.rootPath);
 
   /// The folder the user picked, without PreppSuite's own subdirectory.
@@ -86,6 +116,8 @@ class IoSyncFolder implements SyncFolder {
   Directory get _base => Directory(p.join(rootPath, preppSuiteFolderName));
 
   Directory get _devices => Directory(p.join(_base.path, _devicesFolderName));
+
+  Directory get _photos => Directory(p.join(_base.path, _photosFolderName));
 
   @override
   Future<bool> isWritable() async {
@@ -157,6 +189,53 @@ class IoSyncFolder implements SyncFolder {
       File(p.join(_base.path, _householdFileName)),
       contents,
     );
+  }
+
+  @override
+  Future<List<String>> listPhotoFiles() async {
+    if (!await _photos.exists()) return const [];
+    return [
+      await for (final entry in _photos.list())
+        if (entry is File && entry.path.endsWith('.json'))
+          p.basename(entry.path),
+    ];
+  }
+
+  @override
+  Future<String?> readPhotoFile(String fileName) async {
+    try {
+      return await _readIfPresent(
+        File(p.join(_photos.path, p.basename(fileName))),
+        maxFolderPhotoBytes,
+      );
+    } on FileSystemException {
+      return null;
+    } on FormatException {
+      return null;
+    } on InputTooLarge {
+      return null;
+    }
+  }
+
+  @override
+  Future<void> writePhotoFile(String fileName, String contents) async {
+    if (utf8.encode(contents).length > maxFolderPhotoBytes) {
+      throw const InputTooLarge(maxFolderPhotoBytes);
+    }
+    await _photos.create(recursive: true);
+    await _writeAtomically(
+      File(p.join(_photos.path, p.basename(fileName))),
+      contents,
+    );
+  }
+
+  @override
+  Future<void> deletePhotoFile(String fileName) async {
+    try {
+      await File(p.join(_photos.path, p.basename(fileName))).delete();
+    } on FileSystemException {
+      // Already gone, or held open; the next run tries again.
+    }
   }
 
   Future<String?> _readIfPresent(File file, int maxBytes) async {

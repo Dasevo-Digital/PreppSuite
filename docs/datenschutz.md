@@ -41,11 +41,15 @@ Benutzerrechte und – falls eingeschaltet – durch FileVault. Die Karte
 Signierung der Pakete entfällt diese Einschränkung.
 
 Beim Teilen über einen gemeinsamen Ordner schreibt PreppSuite verschlüsselte
-Gerätedateien in den gewählten Ordner. Nextcloud, Syncthing, iCloud Drive,
+Gerätedateien in den gewählten Ordner. Ist der Ordner verschlüsselt, legt es
+dort auch die Fotos aus Vorrat und Hausratverzeichnis ab, jedes versiegelt
+und unter einem Namen, der nicht verrät, welches Bild es ist; in einen
+offenen Ordner kommen keine Fotos (#376). Nextcloud, Syncthing, iCloud Drive,
 Dropbox oder ein anderer Transportdienst wird nicht von PreppSuite betrieben
-und kann Verbindungsdaten sowie verschlüsselte Dateien speichern. Die
-Passphrase muss allen beteiligten Geräten auf einem getrennten, sicheren Weg
-mitgeteilt werden.
+und kann Verbindungsdaten sowie verschlüsselte Dateien speichern; an Zahl und
+Größe der Fotodateien lässt sich ungefähr ablesen, wie viele Fotos ein
+Haushalt hat. Die Passphrase muss allen beteiligten Geräten auf einem
+getrennten, sicheren Weg mitgeteilt werden.
 
 Android-Cloud-Backup ist für App-Daten deaktiviert. Große heruntergeladene
 Dateien werden unter iOS vom Geräte-Backup ausgeschlossen. Einzelheiten stehen

@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/app_database_providers.dart';
+import '../../../core/photo_hashes.dart';
 import '../../../local_db/database.dart';
+import '../../inventory/application/photo_content_index.dart';
 
 final possessionsProvider = StreamProvider.autoDispose
     .family<List<Possession>, String>((ref, householdId) {
@@ -43,12 +45,25 @@ class PossessionController {
   const PossessionController({
     required AppDatabase database,
     required this.householdId,
+    this._photos,
   }) : _db = database;
 
   final AppDatabase _db;
   final String householdId;
+  final PhotoContentIndex? _photos;
 
   Future<void> save(PossessionDraft draft, {Possession? existing}) async {
+    // Which picture the entry has (#376), read while it is certain; see
+    // the inventory controller's reason for doing it here.
+    final photoHashes =
+        existing != null && existing.photoPath == draft.photoPath
+        ? const Value<String?>.absent()
+        : Value(switch (await (_photos ?? PhotoContentIndex.instance).hashesOf([
+            draft.photoPath,
+          ])) {
+            final hashes? => encodePhotoHashes(hashes),
+            null => null,
+          });
     await _db.upsertPossession(
       PossessionsCompanion.insert(
         clientId: existing?.clientId ?? const Uuid().v4(),
@@ -61,6 +76,7 @@ class PossessionController {
         currency: Value(_trimmed(draft.currency)),
         notes: Value(_trimmed(draft.notes)),
         photoPath: Value(draft.photoPath),
+        photoHashes: photoHashes,
         updatedAt: DateTime.now().toUtc(),
         // An edit must be able to undo a delete, or a rewritten row would
         // keep its tombstone and vanish again at the next merge.

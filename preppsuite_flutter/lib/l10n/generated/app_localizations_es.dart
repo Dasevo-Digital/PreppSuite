@@ -2106,11 +2106,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get folderEncryptionOff =>
-      'Desactivado. Todo lo que hay en la carpeta lo puede leer quien pueda verla, incluido tu proveedor de sincronización.';
+      'Desactivado. Todo lo que hay en la carpeta lo puede leer quien pueda verla, incluido tu proveedor de sincronización. Por eso las fotos de las provisiones y del inventario del hogar se quedan en cada dispositivo.';
 
   @override
   String get folderEncryptionOn =>
-      'Activado. La carpeta solo contiene archivos sellados.';
+      'Activado. La carpeta solo contiene archivos sellados. Las fotos de las provisiones y del inventario del hogar viajan también, selladas.';
 
   @override
   String get folderEncryptionEnable => 'Activar el cifrado';

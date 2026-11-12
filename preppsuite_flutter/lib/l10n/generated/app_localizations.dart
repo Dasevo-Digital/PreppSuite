@@ -3517,13 +3517,13 @@ abstract class AppLocalizations {
   /// No description provided for @folderEncryptionOff.
   ///
   /// In en, this message translates to:
-  /// **'Off. Everything in the folder is readable by anyone who can see it — including your sync provider.'**
+  /// **'Off. Everything in the folder is readable by anyone who can see it — including your sync provider. Photos from the inventory and the household inventory therefore stay on each device.'**
   String get folderEncryptionOff;
 
   /// No description provided for @folderEncryptionOn.
   ///
   /// In en, this message translates to:
-  /// **'On. The folder holds only sealed files.'**
+  /// **'On. The folder holds only sealed files. Photos from the inventory and the household inventory travel with them, sealed.'**
   String get folderEncryptionOn;
 
   /// No description provided for @folderEncryptionEnable.

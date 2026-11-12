@@ -5,11 +5,14 @@ import '../../../model/categories.dart';
 
 import 'package:uuid/uuid.dart';
 
+import '../../../core/photo_hashes.dart';
 import '../../../local_db/database.dart';
 import 'inventory_csv_import.dart';
+import 'inventory_photo_service.dart';
 import 'inventory_providers.dart';
 import 'item_package.dart';
 import 'package_nutrition.dart';
+import 'photo_content_index.dart';
 import 'inventory_numbers.dart';
 import 'stock_today.dart';
 import '../../../core/number_input.dart';
@@ -21,10 +24,38 @@ import '../../../core/number_input.dart';
 /// Nothing here pushes. A write only marks the row dirty; publishing it to
 /// a shared folder is the sync controller's job, on its own schedule.
 class InventoryController {
-  InventoryController(this._db, this.householdId);
+  InventoryController(this._db, this.householdId, {PhotoContentIndex? photos})
+    : _photos = photos ?? PhotoContentIndex.instance;
 
   final AppDatabase _db;
   final String householdId;
+  final PhotoContentIndex _photos;
+
+  /// Which pictures a row being saved has (#376), or nothing to say when
+  /// its photos are the ones it had.
+  ///
+  /// Read here, from the files, because this is the one moment the device
+  /// knows for certain: the person just chose these pictures. Left for
+  /// later, the list would go out as unknown, and a version whose pictures
+  /// changed would reach the other devices with their old ones still
+  /// beside it.
+  Future<Value<String?>> _photoHashesFor(
+    List<String> photoPaths, {
+    InventoryItem? existing,
+  }) async {
+    final places = [
+      for (var place = 0; place < maxItemPhotos; place++)
+        photoPaths.elementAtOrNull(place),
+    ];
+    if (existing != null &&
+        places[0] == existing.photoPath &&
+        places[1] == existing.secondPhotoPath &&
+        places[2] == existing.thirdPhotoPath) {
+      return const Value.absent();
+    }
+    final hashes = await _photos.hashesOf(places);
+    return Value(hashes == null ? null : encodePhotoHashes(hashes));
+  }
 
   Future<void> addItem({
     required String name,
@@ -77,6 +108,7 @@ class InventoryController {
       throw const InvalidInventoryNumbers();
     }
     final now = DateTime.now().toUtc();
+    final photoHashes = await _photoHashesFor(photoPaths);
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
         clientId: const Uuid().v4(),
@@ -104,6 +136,7 @@ class InventoryController {
         photoPath: Value(photoPaths.elementAtOrNull(0)),
         secondPhotoPath: Value(photoPaths.elementAtOrNull(1)),
         thirdPhotoPath: Value(photoPaths.elementAtOrNull(2)),
+        photoHashes: photoHashes,
         calories: Value(nutrition.kcal),
         proteinGrams: Value(nutrition.proteinGrams),
         carbohydrateGrams: Value(nutrition.carbohydrateGrams),
@@ -176,6 +209,7 @@ class InventoryController {
     final recounted =
         quantity != existing.quantity ||
         (refillLeadDays != null && existing.refillLeadDays == null);
+    final photoHashes = await _photoHashesFor(photoPaths, existing: existing);
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
         clientId: existing.clientId,
@@ -203,6 +237,7 @@ class InventoryController {
         photoPath: Value(photoPaths.elementAtOrNull(0)),
         secondPhotoPath: Value(photoPaths.elementAtOrNull(1)),
         thirdPhotoPath: Value(photoPaths.elementAtOrNull(2)),
+        photoHashes: photoHashes,
         calories: Value(nutrition.kcal),
         proteinGrams: Value(nutrition.proteinGrams),
         carbohydrateGrams: Value(nutrition.carbohydrateGrams),
@@ -275,9 +310,9 @@ class InventoryController {
         expirationDate: Value(existing.expirationDate),
         minQuantity: Value(existing.minQuantity),
         notes: Value(existing.notes),
-        photoPath: Value(existing.photoPath),
-        secondPhotoPath: Value(existing.secondPhotoPath),
-        thirdPhotoPath: Value(existing.thirdPhotoPath),
+        // The photos are left out: a booking does not move them, and the
+        // copy of the row this was read from may be older than a picture
+        // that has arrived since (#376).
         calories: Value(existing.calories),
         proteinGrams: Value(existing.proteinGrams),
         carbohydrateGrams: Value(existing.carbohydrateGrams),
@@ -511,9 +546,9 @@ class InventoryController {
         expirationDate: Value(existing.expirationDate),
         minQuantity: Value(existing.minQuantity),
         notes: Value(existing.notes),
-        photoPath: Value(existing.photoPath),
-        secondPhotoPath: Value(existing.secondPhotoPath),
-        thirdPhotoPath: Value(existing.thirdPhotoPath),
+        // The photos are left out: a booking does not move them, and the
+        // copy of the row this was read from may be older than a picture
+        // that has arrived since (#376).
         calories: Value(existing.calories),
         proteinGrams: Value(existing.proteinGrams),
         carbohydrateGrams: Value(existing.carbohydrateGrams),

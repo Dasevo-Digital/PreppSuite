@@ -1971,12 +1971,13 @@ wrong and frightening. What rides along:
     does not carry it -- every device writes there, so it would need a
     rule for whose settings win, and there is none;
   * **the photographs** (`transfer/application/handover_photos.dart`),
-    on the **handover alone**. They are in no snapshot because what the
-    row stores is a path into one machine's own folder, and the other two
-    roads cannot carry the bytes: the QR chain would need some two hundred
-    extra frames per picture, and the
-    shared folder republishes a whole snapshot per device per sync, so the
-    same bytes would be re-uploaded forever. The receiving side sends the
+    beside the snapshot. They are in no snapshot because what the row
+    stores is a path into one machine's own folder; the snapshot carries
+    only *which* pictures a row has (`photoHashes`, see "Pictures through
+    the shared folder" below). The QR chain cannot carry the bytes -- some
+    two hundred extra frames per picture -- and the shared folder carries
+    them as files of their own, never inside a device file, and only when
+    it is encrypted (#376). The receiving side sends the
     names it already holds, so a second handover carries nothing twice,
     and a row that already has a working picture keeps it. The incoming
     file name is **not** trusted: it goes into a path, so it is rejected
@@ -2020,6 +2021,61 @@ switched off. Measured on a 600-character frame, the default paint left
 37% of the painted pixels neither dark nor light, and a grey module is not
 a value a decoder can read -- a code that looks perfectly fine and does
 not scan.
+
+### Pictures through the shared folder (#376)
+
+Until #376 a second device at the folder showed grey placeholders: the
+row's photo columns are paths into one machine's folder, and the device
+file is written whole on every change, so pictures inside it would be
+uploaded again every few minutes. Now each place of a row is also named
+by the SHA-256 of its picture -- `inventory_items.photo_hashes` (three
+places) and `possessions.photo_hashes` (one), schema 30 -- and that list
+travels in every snapshot. In an **encrypted** folder the pictures follow
+as files of their own (`sharing/application/folder_photos.dart`):
+`preppsuite/photos/<name>-<device>.json`, sealed with the folder key in
+the device files' envelope, written once. `<name>` is an HMAC of the
+SHA-256 under a key derived from the folder key, so the folder does not
+say which pictures they are; a fetched picture is checked against the
+SHA-256 it was asked for. `<device>` keeps the folder's rule: no two
+devices write or delete the same path, and a device removes only its own
+pictures, once no row names them. A plain folder gets the lists but no
+pictures.
+
+**The list is not an ordinary column**, because a device edits rows whose
+pictures it never had. `_sharedContents` leaves it out, and `_mergeInto`
+gives it its own rule:
+
+  * a newer version brings its list where it has one; one without a list
+    -- an older app, a device that never held the pictures, written as a
+    missing key or null -- keeps the stored list. Three empty places are a
+    statement and do empty the pictures;
+  * the same version fills an unknown list, and two different lists for
+    one version (a handover before #376 left every device its own photo)
+    settle by `comparePhotoHashes` -- more pictures first, then the text --
+    which every device applies the same way;
+  * none of it moves `updatedAt` or raises `dirty`, and a list learned
+    counts as received, so the device republishes it.
+
+**Whoever changes a picture says which it is, at once.** The inventory
+and possession controllers read the files on save (`PhotoContentIndex`,
+which keeps each file's hash in the preferences: files never change once
+written). Left for later, the version would reach the other devices
+without a list, and they would keep their old one beside it. Bookings
+leave the photo columns out of the write altogether -- their copy of the
+row can be older than a picture that arrived since. A local write that
+moves a picture without a list (anything added later) turns the list
+unknown in `upsertInventoryItem`/`upsertPossession`; unknown never clears
+anything. Rows from before #376 get their list on the next folder sync
+from the pictures this device can read (`fillUnknownPhotoLists`), not as
+an edit.
+
+A run fills the lists, exchanges the pictures (32 MB sent and 32 MB
+fetched at most), publishes, then cleans up. A picture arriving is
+written under a new name and only the path is set; two places never share
+a file, and the file a place gave up is deleted at the end of the run
+unless another place still shows it. All of it is best effort: a picture
+that fails costs that picture, never the rows. The bridges on iOS, macOS
+and Android have a `delete` for the cleanup.
 
 ### Nutrition is per 100 g, and nothing converts on the way in
 

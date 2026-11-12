@@ -122,6 +122,8 @@ final class StorageBridge: NSObject {
       } catch {
         result(FlutterError(code: "write-failed", message: "The selected folder could not be written.", details: nil))
       }
+    case "delete":
+      result(delete(arguments["uri"] as? String ?? "", arguments["path"] as? String ?? ""))
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -320,6 +322,29 @@ final class StorageBridge: NSObject {
     if let error = coordinationError { throw error }
     guard let outcome = written else { throw CocoaError(.fileWriteUnknown) }
     try outcome.get()
+  }
+
+  /// Removes one file inside the folder: a picture no row names any more
+  /// (#376). Coordinated like a write, so a cloud provider that is still
+  /// downloading the file is not handed a hole. False when there was
+  /// nothing to remove or it could not go; either way the caller tries
+  /// again on a later run.
+  private func delete(_ uri: String, _ path: String) -> Bool {
+    return withAccess(uri) { root -> Bool? in
+      var segments = Self.segments(path)
+      guard let name = segments.popLast(), name != ".", name != "..",
+            !segments.contains(".."),
+            let folder = directory(in: root, segments: segments, create: false)
+      else { return false }
+      let file = folder.appendingPathComponent(name)
+      guard FileManager.default.fileExists(atPath: file.path) else { return false }
+      var removed = false
+      var coordinationError: NSError?
+      NSFileCoordinator().coordinate(writingItemAt: file, options: .forDeleting, error: &coordinationError) { url in
+        removed = (try? FileManager.default.removeItem(at: url)) != nil
+      }
+      return removed
+    } ?? false
   }
 
   private func directory(in root: URL, segments: [String], create: Bool) -> URL? {

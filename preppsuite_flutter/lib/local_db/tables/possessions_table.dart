@@ -42,13 +42,19 @@ class Possessions extends Table {
 
   /// Path to a locally-stored photo, relative to the app's documents
   /// directory — same convention as [InventoryItems.photoPath], and
-  /// device-local for the same reason: the path means nothing elsewhere
-  /// and the picture is not in the shared folder.
+  /// device-local for the same reason: the path means nothing elsewhere.
+  /// The picture reaches the other devices through an encrypted shared
+  /// folder (#376), a handover or a backup, never a plain folder.
   ///
   /// Which is worth saying out loud for this table in particular: the
-  /// photo is the most persuasive part of a claim and it lives only on
-  /// the device that took it. That is what the PDF export is for.
+  /// photo is the most persuasive part of a claim, and without one of
+  /// those roads it lives only on the device that took it. That is what
+  /// the PDF export is for.
   TextColumn get photoPath => text().nullable()();
+
+  /// Which picture [photoPath] holds, as a JSON list of one SHA-256 or
+  /// null; the same as [InventoryItems.photoHashes], with one place.
+  TextColumn get photoHashes => text().nullable()();
 
   DateTimeColumn get updatedAt => dateTime()();
   DateTimeColumn get deletedAt => dateTime().nullable()();

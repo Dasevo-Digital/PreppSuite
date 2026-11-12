@@ -33,11 +33,14 @@ extension InventoryItemPhotos on InventoryItem {
 ///
 /// [InventoryItems.photoPath] is a plain local file path, which is why no
 /// snapshot carries it: it would name a directory on somebody else's
-/// machine. The pictures themselves do travel, but on **one road only** —
-/// a local handover, two devices in one room, one request — where the
-/// bytes can ride beside the rows; see `handover_photos.dart`. The shared
-/// folder and the QR chain still carry none, for the reasons set out
-/// there.
+/// machine. The snapshot carries which picture it is instead
+/// ([InventoryItems.photoHashes]). The pictures themselves travel beside
+/// the rows on a local handover (`handover_photos.dart`) and as sealed
+/// files of their own through an encrypted shared folder
+/// (`folder_photos.dart`, #376); the QR chain carries none.
+///
+/// Every picture is a new file, never an old one written over: the photo
+/// index (`photo_content_index.dart`) knows a file's picture by its name.
 class InventoryPhotoService {
   const InventoryPhotoService();
 

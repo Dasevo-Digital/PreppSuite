@@ -153,6 +153,13 @@ class MainActivity : FlutterFragmentActivity() {
                     result.error("write-failed", "The selected folder could not be written.", null)
                 }
             }
+            "delete" -> {
+                try {
+                    result.success(delete(call.argument("uri")!!, call.argument("path")!!))
+                } catch (_: Exception) {
+                    result.error("delete-failed", "The file could not be removed.", null)
+                }
+            }
             else -> result.notImplemented()
         }
     }
@@ -354,6 +361,21 @@ class MainActivity : FlutterFragmentActivity() {
             it.write(contents.toByteArray(Charsets.UTF_8))
             it.flush()
         }
+    }
+
+    /**
+     * Removes one file inside the folder: a picture no row names any more
+     * (#376). False when there was nothing to remove; the caller tries
+     * again on a later run either way.
+     */
+    private fun delete(uri: String, path: String): Boolean {
+        val segments = path.split('/')
+        val name = segments.last()
+        if (name.isEmpty() || name == "." || name == ".." || segments.contains("..")) return false
+        val directory = directoryAt(uri, segments.dropLast(1).joinToString("/"), create = false)
+            ?: return false
+        val file = directory.findFile(name) ?: return false
+        return file.isFile && file.delete()
     }
 
     private fun directoryAt(uri: String, path: String, create: Boolean): DocumentFile? {
