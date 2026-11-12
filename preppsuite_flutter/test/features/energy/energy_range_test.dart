@@ -234,4 +234,37 @@ void main() {
       expect(EnergyReserve.fromJson('nonsense'), isNull);
     });
   });
+
+  test('figures no plan has are refused, and the days stay a number', () {
+    // A reserve of 1e308 was finite and passed #256; two of them summed to
+    // infinity, and the range threw inside the build on every device.
+    expect(
+      EnergyReserve.fromJson({
+        'id': 'a',
+        'kind': EnergyKind.values.first.name,
+        'label': 'x',
+        'amount': 1e308,
+      }),
+      isNull,
+    );
+    expect(
+      EnergyReserve.fromJson({
+        'id': 'a',
+        'kind': EnergyKind.values.first.name,
+        'label': 'x',
+        'amount': maximumEnergyFigure,
+      }),
+      isNotNull,
+    );
+    final kind = EnergyKind.values.first;
+    expect(
+      EnergyRange(kind: kind, stored: double.infinity, perDay: 1).days,
+      maximumEnergyDays,
+    );
+    expect(
+      EnergyRange(kind: kind, stored: 1e9, perDay: 1e-300).days,
+      maximumEnergyDays,
+    );
+    expect(EnergyRange(kind: kind, stored: 10, perDay: 3).days, 3);
+  });
 }

@@ -28,6 +28,27 @@ void main() {
     expect(place!.latitude, closeTo(52.2689, 1e-6));
   });
 
+  test('a space separates two numbers with decimal commas', () {
+    for (final input in [
+      '52,2689 10,5268',
+      '52,2689  10,5268',
+      '52.2689 , 10.5268',
+    ]) {
+      final place = parseCoordinates(input);
+      expect(place?.latitude, closeTo(52.2689, 1e-9), reason: input);
+      expect(place?.longitude, closeTo(10.5268, 1e-9), reason: input);
+    }
+    // Without any space the commas still decide.
+    expect(
+      parseCoordinates('52,2689,10,5268')?.longitude,
+      closeTo(10.5268, 1e-9),
+    );
+    expect(
+      parseCoordinates('52.2689,10.5268')?.longitude,
+      closeTo(10.5268, 1e-9),
+    );
+  });
+
   test('degree signs are ignored', () {
     expect(parseCoordinates('52.2689°, 10.5268°'), isNotNull);
   });

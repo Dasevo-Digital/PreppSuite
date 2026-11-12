@@ -254,10 +254,24 @@ class _OfferTile extends ConsumerWidget {
                   ),
                 );
               case _OfferAction.delete:
+                // Gone from every device of the household, from one tap in
+                // a menu: so it can be taken back.
                 Feel.removed();
-                ref
-                    .read(neighbourOfferControllerProvider(householdId))
-                    .delete(row);
+                final controller = ref.read(
+                  neighbourOfferControllerProvider(householdId),
+                );
+                controller.delete(row);
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.neighbourhoodDeleted),
+                      action: SnackBarAction(
+                        label: l10n.undoAction,
+                        onPressed: () => controller.restore(row),
+                      ),
+                    ),
+                  );
             }
           },
           itemBuilder: (_) => [

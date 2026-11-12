@@ -141,6 +141,13 @@ final _decode = {
   // runs of dots are the same thing from a hand correcting itself.
   MorseProsign.sos.code: 'SOS',
   MorseProsign.error.code: '…',
+  // The procedure signals the screen's own chart teaches, written the way
+  // radio operators write them. They came out as "unknown" before. End of
+  // message is the plus sign's code and stays one.
+  MorseProsign.understood.code: '<VE>',
+  MorseProsign.wait.code: '<AS>',
+  MorseProsign.start.code: '<KA>',
+  MorseProsign.endOfWork.code: '<SK>',
 };
 
 /// Accented letters the table does not have, sent as their base letter.

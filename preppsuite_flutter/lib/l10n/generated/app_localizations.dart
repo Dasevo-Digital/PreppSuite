@@ -15463,6 +15463,12 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get neighbourhoodDelete;
 
+  /// No description provided for @neighbourhoodDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer deleted, on every device of the household.'**
+  String get neighbourhoodDeleted;
+
   /// No description provided for @neighbourhoodOfferedOn.
   ///
   /// In en, this message translates to:

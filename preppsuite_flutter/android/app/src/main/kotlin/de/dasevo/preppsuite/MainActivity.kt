@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.provider.DocumentsContract
 import android.provider.Settings
 import android.system.Os
 import androidx.documentfile.provider.DocumentFile
@@ -125,9 +126,21 @@ class MainActivity : FlutterFragmentActivity() {
                 result.success(null)
             }
             "ensureWritable" -> result.success(ensureWritable(call.argument("uri")!!))
-            "list" -> result.success(
-                list(call.argument("uri")!!, call.argument("path")!!)
-            )
+            // Off the main thread, as reads are (#376): a folder with the
+            // household's pictures in it holds hundreds of files, and the
+            // provider answers each question with a binder call.
+            "list" -> {
+                val uri = call.argument<String>("uri")!!
+                val path = call.argument<String>("path")!!
+                fileReads.execute {
+                    val names = try {
+                        list(uri, path)
+                    } catch (_: Exception) {
+                        emptyList()
+                    }
+                    runOnUiThread { result.success(names) }
+                }
+            }
             "read" -> fileReads.execute {
                 try {
                     val text = read(call.argument("uri")!!, call.argument("path")!!,
@@ -141,23 +154,35 @@ class MainActivity : FlutterFragmentActivity() {
                     runOnUiThread { result.error("read-failed", "The file could not be read.", null) }
                 }
             }
+            // On the same thread as reads, so a read and a write of one file
+            // keep the order Dart asked for them in.
             "write" -> {
-                try {
-                    write(
-                        call.argument("uri")!!,
-                        call.argument("path")!!,
-                        call.argument("contents")!!,
-                    )
-                    result.success(null)
-                } catch (_: Exception) {
-                    result.error("write-failed", "The selected folder could not be written.", null)
+                val uri = call.argument<String>("uri")!!
+                val path = call.argument<String>("path")!!
+                val contents = call.argument<String>("contents")!!
+                fileReads.execute {
+                    try {
+                        write(uri, path, contents)
+                        runOnUiThread { result.success(null) }
+                    } catch (_: Exception) {
+                        runOnUiThread {
+                            result.error("write-failed", "The selected folder could not be written.", null)
+                        }
+                    }
                 }
             }
             "delete" -> {
-                try {
-                    result.success(delete(call.argument("uri")!!, call.argument("path")!!))
-                } catch (_: Exception) {
-                    result.error("delete-failed", "The file could not be removed.", null)
+                val uri = call.argument<String>("uri")!!
+                val path = call.argument<String>("path")!!
+                fileReads.execute {
+                    try {
+                        val removed = delete(uri, path)
+                        runOnUiThread { result.success(removed) }
+                    } catch (_: Exception) {
+                        runOnUiThread {
+                            result.error("delete-failed", "The file could not be removed.", null)
+                        }
+                    }
                 }
             }
             else -> result.notImplemented()
@@ -306,9 +331,40 @@ class MainActivity : FlutterFragmentActivity() {
             resolveDirectory(root, listOf("preppsuite", "devices"), create = true) != null
     }
 
+    /**
+     * The names of the files in a directory, in one query.
+     *
+     * `DocumentFile.listFiles()` and then `isFile` and `name` on each child
+     * is two more queries per file; with the household's pictures in the
+     * folder that was some six hundred binder calls every two minutes
+     * (#376). The same children, asked for their name and type at once.
+     */
     private fun list(uri: String, path: String): List<String> {
         val directory = directoryAt(uri, path, create = false) ?: return emptyList()
-        return directory.listFiles().filter { it.isFile }.mapNotNull { it.name }
+        val children = DocumentsContract.buildChildDocumentsUriUsingTree(
+            directory.uri,
+            DocumentsContract.getDocumentId(directory.uri),
+        )
+        val names = mutableListOf<String>()
+        contentResolver.query(
+            children,
+            arrayOf(
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
+                DocumentsContract.Document.COLUMN_MIME_TYPE,
+            ),
+            null,
+            null,
+            null,
+        )?.use { cursor ->
+            while (cursor.moveToNext()) {
+                val name = cursor.getString(0) ?: continue
+                val type = cursor.getString(1)
+                // What DocumentFile.isFile says: a type, and not a folder's.
+                if (type.isNullOrEmpty() || type == DocumentsContract.Document.MIME_TYPE_DIR) continue
+                names.add(name)
+            }
+        }
+        return names
     }
 
     private class ReadTooLarge : Exception()

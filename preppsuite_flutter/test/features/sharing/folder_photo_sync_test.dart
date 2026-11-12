@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:preppsuite_flutter/core/photo_hashes.dart';
 import 'package:preppsuite_flutter/features/inventory/application/inventory_controller.dart';
+import 'package:preppsuite_flutter/features/inventory/application/inventory_photo_service.dart';
 import 'package:preppsuite_flutter/features/inventory/application/photo_content_index.dart';
 import 'package:preppsuite_flutter/features/sharing/application/folder_crypto.dart';
 import 'package:preppsuite_flutter/features/sharing/application/folder_photos.dart';
@@ -224,13 +225,13 @@ void main() {
     expect(row.quantity, 2);
     expect(File(row.photoPath!).readAsBytesSync(), tin);
     expect(
-      decodePhotoHashes(row.photoHashes, places: 3),
-      [photoContentHashSync(tin), null, null],
+      decodePhotoList(row.photoHashes, places: 3),
+      PhotoList([photoContentHashSync(tin), null, null]),
     );
   });
 
   test(
-    'a plain folder carries no pictures, only which ones they are',
+    'a plain folder carries neither pictures nor their hashes',
     () async {
       folder.householdFile = plain().encode();
       await addTin(phone, photoPaths: [phone.picture('tin', tin)]);
@@ -238,9 +239,14 @@ void main() {
       await sync(laptop);
 
       expect(folder.photoFiles, isEmpty);
+      expect(folder.deviceFiles['phone'], isNot(contains('photoHashes')));
+      expect(
+        folder.deviceFiles['phone'],
+        isNot(contains(photoContentHashSync(tin))),
+      );
       final row = await only(laptop);
       expect(row.photoPath, isNull);
-      expect(row.photoHashes, (await only(phone)).photoHashes);
+      expect(row.photoHashes, isNull);
     },
   );
 
@@ -264,38 +270,44 @@ void main() {
     expect((await only(laptop)).photoPath, isNull);
   });
 
-  test('pictures from before #376 are read once and announced', () async {
-    // A row as an older version left it: a picture, and no list.
-    final path = phone.picture('tin', tin);
-    await phone.db.upsertInventoryItem(
-      InventoryItemsCompanion.insert(
-        clientId: 'tin',
-        householdId: _household,
-        name: 'Ravioli',
-        category: 'food',
-        quantity: 4,
-        unit: 'Dose',
-        storageLocation: 'Keller',
-        photoPath: Value(path),
-        updatedAt: DateTime.utc(2026, 11, 1),
-        dirty: const Value(false),
-      ),
-    );
-    final before = await phone.item('tin');
-    expect(before.photoHashes, isNull);
+  test(
+    'pictures from before #376 are announced as seen, not as an edit',
+    () async {
+      // A row as an older version left it: a picture, and no list.
+      final path = phone.picture('tin', tin);
+      await phone.db.upsertInventoryItem(
+        InventoryItemsCompanion.insert(
+          clientId: 'tin',
+          householdId: _household,
+          name: 'Ravioli',
+          category: 'food',
+          quantity: 4,
+          unit: 'Dose',
+          storageLocation: 'Keller',
+          photoPath: Value(path),
+          updatedAt: DateTime.utc(2026, 11, 1),
+          dirty: const Value(false),
+        ),
+      );
+      final before = await phone.item('tin');
+      expect(before.photoHashes, isNull);
 
-    await sync(phone);
-    final after = await phone.item('tin');
-    expect(
-      decodePhotoHashes(after.photoHashes, places: 3),
-      [photoContentHashSync(tin), null, null],
-    );
-    expect(after.updatedAt, before.updatedAt, reason: 'not an edit');
-    expect(after.dirty, isFalse);
+      await sync(phone);
+      final after = await phone.item('tin');
+      expect(
+        decodePhotoList(after.photoHashes, places: 3),
+        PhotoList([photoContentHashSync(tin), null, null], seen: true),
+      );
+      expect(after.updatedAt, before.updatedAt, reason: 'not an edit');
+      expect(after.dirty, isFalse);
 
-    await sync(laptop);
-    expect(File((await laptop.item('tin')).photoPath!).readAsBytesSync(), tin);
-  });
+      await sync(laptop);
+      expect(
+        File((await laptop.item('tin')).photoPath!).readAsBytesSync(),
+        tin,
+      );
+    },
+  );
 
   test('two devices with different old pictures settle on one', () async {
     // A handover before #376 left each device the picture it had.
@@ -378,5 +390,176 @@ void main() {
     folder.deviceFiles.remove('laptop');
     await sync(phone);
     expect(folder.photoFiles, isEmpty);
+  });
+
+  /// A row as an older version left it on [device]: pictures in the
+  /// places given, no list.
+  Future<void> beforeTheUpdate(
+    _Device device, {
+    List<int>? first,
+    List<int>? second,
+  }) => device.db.upsertInventoryItem(
+    InventoryItemsCompanion.insert(
+      clientId: 'tin',
+      householdId: _household,
+      name: 'Ravioli',
+      category: 'food',
+      quantity: 4,
+      unit: 'Dose',
+      storageLocation: 'Keller',
+      photoPath: Value(first == null ? null : device.picture('first', first)),
+      secondPhotoPath: Value(
+        second == null ? null : device.picture('second', second),
+      ),
+      updatedAt: DateTime.utc(2026, 11, 1),
+      dirty: const Value(false),
+    ),
+  );
+
+  test(
+    'a device without the pictures, syncing first, takes none away',
+    () async {
+      // The review's first finding: the laptop never got the picture, and
+      // after the update it reached the folder before the phone did.
+      await beforeTheUpdate(phone, first: tin);
+      await beforeTheUpdate(laptop);
+      await sync(laptop);
+      await sync(phone);
+      await sync(laptop);
+
+      final onPhone = await phone.item('tin');
+      expect(File(onPhone.photoPath!).readAsBytesSync(), tin);
+      final onLaptop = await laptop.item('tin');
+      expect(File(onLaptop.photoPath!).readAsBytesSync(), tin);
+      expect(folder.photoFiles, hasLength(1));
+    },
+  );
+
+  test('two devices with one picture each both end up with both', () async {
+    await beforeTheUpdate(phone, first: tin);
+    await beforeTheUpdate(laptop, second: jar);
+    for (var round = 0; round < 2; round++) {
+      await sync(phone);
+      await sync(laptop);
+    }
+    for (final device in [phone, laptop]) {
+      final row = await device.item('tin');
+      expect(File(row.photoPath!).readAsBytesSync(), tin, reason: device.id);
+      expect(
+        File(row.secondPhotoPath!).readAsBytesSync(),
+        jar,
+        reason: device.id,
+      );
+    }
+  });
+
+  test(
+    'a booking on a device that holds none of the pictures keeps them',
+    () async {
+      await beforeTheUpdate(phone, first: tin);
+      await beforeTheUpdate(laptop);
+      // The laptop books before the phone has said anything.
+      await laptop.inventory.consumeQuantity(await laptop.item('tin'), 1);
+      await sync(laptop);
+      await sync(phone);
+
+      final onPhone = await phone.item('tin');
+      expect(onPhone.quantity, 3);
+      expect(File(onPhone.photoPath!).readAsBytesSync(), tin);
+    },
+  );
+
+  test(
+    'renaming on a device that has only the second picture keeps the first',
+    () async {
+      // The review's second finding.
+      await addTin(
+        phone,
+        photoPaths: [phone.picture('tin', tin), phone.picture('jar', jar)],
+      );
+      await sync(phone);
+      await sync(laptop);
+      // The laptop's first picture has not arrived (yet): a lazy cloud
+      // download, a budget, a handover that brought only the second.
+      final item = await laptop.item((await only(phone)).clientId);
+      File(item.photoPath!).deleteSync();
+      await laptop.db.setInventoryPhotoPath(
+        householdId: _household,
+        clientId: item.clientId,
+        photoPath: null,
+      );
+      final partial = await laptop.item(item.clientId);
+      await laptop.inventory.updateItem(
+        partial,
+        name: 'Ravioli mit Käse',
+        category: InventoryItemCategory.food,
+        quantity: partial.quantity,
+        unit: partial.unit,
+        storageLocation: partial.storageLocation,
+        photoPaths: partial.photoPaths,
+      );
+      await sync(laptop);
+      await sync(phone);
+
+      final onPhone = await only(phone);
+      expect(onPhone.name, 'Ravioli mit Käse');
+      expect(File(onPhone.photoPath!).readAsBytesSync(), tin);
+      expect(File(onPhone.secondPhotoPath!).readAsBytesSync(), jar);
+      expect(folder.photoFiles, hasLength(2));
+    },
+  );
+
+  test(
+    'a picture added where one has not arrived yet keeps that one too',
+    () async {
+      await addTin(phone, photoPaths: [phone.picture('tin', tin)]);
+      await sync(phone);
+      // The laptop has the row, not the picture, and adds one of its own.
+      folder.photoFiles.clear();
+      await sync(laptop);
+      final row = await only(laptop);
+      expect(row.photoPath, isNull);
+      await laptop.inventory.updateItem(
+        row,
+        name: row.name,
+        category: InventoryItemCategory.food,
+        quantity: row.quantity,
+        unit: row.unit,
+        storageLocation: row.storageLocation,
+        photoPaths: [laptop.picture('jar', jar)],
+      );
+      await sync(laptop);
+      await sync(phone);
+
+      final onPhone = await only(phone);
+      expect(File(onPhone.photoPath!).readAsBytesSync(), jar);
+      expect(File(onPhone.secondPhotoPath!).readAsBytesSync(), tin);
+    },
+  );
+
+  test('a picture saved while a run is fetching stays', () async {
+    await addTin(phone, photoPaths: [phone.picture('tin', tin)]);
+    await sync(phone);
+    await laptop.db.upsertInventoryItem(
+      (await only(phone))
+          .toCompanion(false)
+          .copyWith(dirty: const Value(false)),
+    );
+    final row = await only(laptop);
+    // What a run read at its start, and a save that came after it.
+    final mine = laptop.picture('mine', jar);
+    await laptop.db.setInventoryPhotoPath(
+      householdId: _household,
+      clientId: row.clientId,
+      photoPath: mine,
+    );
+    final written = await laptop.db.setInventoryPhotoPath(
+      householdId: _household,
+      clientId: row.clientId,
+      photoPath: '/photos/fetched.jpg',
+      onlyIf: const Value(null),
+    );
+    expect(written, 0);
+    expect((await only(laptop)).photoPath, mine);
   });
 }

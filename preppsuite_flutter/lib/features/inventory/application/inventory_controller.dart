@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../model/categories.dart';
@@ -31,31 +34,76 @@ class InventoryController {
   final String householdId;
   final PhotoContentIndex _photos;
 
-  /// Which pictures a row being saved has (#376), or nothing to say when
-  /// its photos are the ones it had.
+  /// Which pictures a row being saved has (#376): the list set by this
+  /// edit, or nothing to say -- and nothing to write, places included --
+  /// when its photos are the ones the screen opened with.
   ///
   /// Read here, from the files, because this is the one moment the device
   /// knows for certain: the person just chose these pictures. Left for
   /// later, the list would go out as unknown, and a version whose pictures
   /// changed would reach the other devices with their old ones still
   /// beside it.
-  Future<Value<String?>> _photoHashesFor(
+  ///
+  /// Pictures the row has that this device cannot show -- not fetched
+  /// yet, or never sent -- are kept behind the ones on screen. The person
+  /// could not see them, so they did not take them out; and without this,
+  /// renaming an item on a device that had only its second picture so far
+  /// took the first one off every other device.
+  Future<({Value<String?> hashes, bool places})> _photosFor(
     List<String> photoPaths, {
     InventoryItem? existing,
   }) async {
-    final places = [
-      for (var place = 0; place < maxItemPhotos; place++)
-        photoPaths.elementAtOrNull(place),
-    ];
-    if (existing != null &&
-        places[0] == existing.photoPath &&
-        places[1] == existing.secondPhotoPath &&
-        places[2] == existing.thirdPhotoPath) {
-      return const Value.absent();
+    if (existing != null && listEquals(photoPaths, existing.photoPaths)) {
+      return (hashes: const Value<String?>.absent(), places: false);
     }
-    final hashes = await _photos.hashesOf(places);
-    return Value(hashes == null ? null : encodePhotoHashes(hashes));
+    final stored = decodePhotoList(
+      existing?.photoHashes,
+      places: inventoryPhotoPlaces,
+    );
+    final before = [
+      existing?.photoPath,
+      existing?.secondPhotoPath,
+      existing?.thirdPhotoPath,
+    ];
+
+    Future<String?> hashAt(String path) async {
+      final slot = before.indexOf(path);
+      final kept = slot < 0 ? null : stored?.places[slot];
+      return kept ??
+          await _photos.hashOf(
+            File(InventoryPhotoService.resolvePhotoPath(path)),
+          );
+    }
+
+    final shown = <String>[];
+    for (final path in photoPaths.take(maxItemPhotos)) {
+      final hash = await hashAt(path);
+      // A picture on screen that cannot be read: what this edit holds is
+      // not known, and an unknown list takes nothing from anybody.
+      if (hash == null) {
+        return (hashes: const Value<String?>(null), places: true);
+      }
+      shown.add(hash);
+    }
+    final hidden = <String>[
+      if (stored != null)
+        for (final (slot, hash) in stored.places.indexed)
+          if (hash != null &&
+              !shown.contains(hash) &&
+              !_showsHere(before[slot]))
+            hash,
+    ];
+    final places = <String?>[...shown, ...hidden].take(maxItemPhotos).toList();
+    while (places.length < maxItemPhotos) {
+      places.add(null);
+    }
+    return (hashes: Value(encodePhotoList(PhotoList(places))), places: true);
   }
+
+  /// Whether the place stored as [path] shows a picture on this device.
+  static bool _showsHere(String? path) =>
+      path != null &&
+      File(InventoryPhotoService.resolvePhotoPath(path)).existsSync();
 
   Future<void> addItem({
     required String name,
@@ -108,7 +156,7 @@ class InventoryController {
       throw const InvalidInventoryNumbers();
     }
     final now = DateTime.now().toUtc();
-    final photoHashes = await _photoHashesFor(photoPaths);
+    final photos = await _photosFor(photoPaths);
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
         clientId: const Uuid().v4(),
@@ -133,10 +181,20 @@ class InventoryController {
         notes: Value(notes),
         barcode: Value(barcode),
         offProductId: Value(offProductId),
-        photoPath: Value(photoPaths.elementAtOrNull(0)),
-        secondPhotoPath: Value(photoPaths.elementAtOrNull(1)),
-        thirdPhotoPath: Value(photoPaths.elementAtOrNull(2)),
-        photoHashes: photoHashes,
+        // Left out when the photos are the ones the screen opened with:
+        // the screen keeps them closed up, without the gaps a picture
+        // that has not arrived yet leaves, and writing that back would
+        // move pictures between places for nothing.
+        photoPath: photos.places
+            ? Value(photoPaths.elementAtOrNull(0))
+            : const Value.absent(),
+        secondPhotoPath: photos.places
+            ? Value(photoPaths.elementAtOrNull(1))
+            : const Value.absent(),
+        thirdPhotoPath: photos.places
+            ? Value(photoPaths.elementAtOrNull(2))
+            : const Value.absent(),
+        photoHashes: photos.hashes,
         calories: Value(nutrition.kcal),
         proteinGrams: Value(nutrition.proteinGrams),
         carbohydrateGrams: Value(nutrition.carbohydrateGrams),
@@ -209,7 +267,7 @@ class InventoryController {
     final recounted =
         quantity != existing.quantity ||
         (refillLeadDays != null && existing.refillLeadDays == null);
-    final photoHashes = await _photoHashesFor(photoPaths, existing: existing);
+    final photos = await _photosFor(photoPaths, existing: existing);
     await _db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
         clientId: existing.clientId,
@@ -234,10 +292,20 @@ class InventoryController {
         chargeEveryDays: Value(chargeEveryDays),
         chargeCheckedAt: Value(chargeCheckedAt?.toUtc()),
         notes: Value(notes),
-        photoPath: Value(photoPaths.elementAtOrNull(0)),
-        secondPhotoPath: Value(photoPaths.elementAtOrNull(1)),
-        thirdPhotoPath: Value(photoPaths.elementAtOrNull(2)),
-        photoHashes: photoHashes,
+        // Left out when the photos are the ones the screen opened with:
+        // the screen keeps them closed up, without the gaps a picture
+        // that has not arrived yet leaves, and writing that back would
+        // move pictures between places for nothing.
+        photoPath: photos.places
+            ? Value(photoPaths.elementAtOrNull(0))
+            : const Value.absent(),
+        secondPhotoPath: photos.places
+            ? Value(photoPaths.elementAtOrNull(1))
+            : const Value.absent(),
+        thirdPhotoPath: photos.places
+            ? Value(photoPaths.elementAtOrNull(2))
+            : const Value.absent(),
+        photoHashes: photos.hashes,
         calories: Value(nutrition.kcal),
         proteinGrams: Value(nutrition.proteinGrams),
         carbohydrateGrams: Value(nutrition.carbohydrateGrams),

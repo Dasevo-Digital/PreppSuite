@@ -96,13 +96,13 @@ auch wenn ältere Versionen ihn irrtümlich schon als übertragen markiert hatte
 Fotos aus Vorrat und Hausratverzeichnis reisen nur durch einen
 **verschlüsselten** Ordner. Ein offener Ordner ist für den Anbieter lesbar,
 und das Hausratverzeichnis ist dafür da, Wertsachen samt Seriennummer zu
-fotografieren.
+fotografieren. In einen offenen Ordner kommen deshalb weder die Fotos noch
+ihre Prüfsummen: Mit einer Kopie eines Bildes ließe sich sonst bestätigen,
+dass es in diesem Haushalt liegt.
 
 In der Zeile steht weiterhin nur der Pfad auf dem eigenen Gerät; er reist
 nicht. Was reist, ist **welches Bild** an welchem Platz liegt: je Platz die
-SHA-256 des Bildes (`photoHashes`, drei Plätze beim Vorrat, einer beim
-Hausrat). Diese Liste steht auch in offenen Ordnern, im QR-Abgleich und in
-der Übergabe; sie verrät über die Bilder nichts.
+SHA-256 des Bildes (drei Plätze beim Vorrat, einer beim Hausrat).
 
 Die Bilder selbst liegen als eigene Dateien unter `photos/`, versiegelt mit
 dem Schlüssel des Ordners. Sie stehen nicht in der Gerätedatei, weil die bei
@@ -117,34 +117,38 @@ dann nur noch gelesen.
   kein Bild für ein anderes ausgeben.
 - Im Namen steht das Gerät, das die Datei geschrieben hat. So schreibt und
   löscht auch hier nie ein Gerät die Datei eines anderen. Ein Bild, das
-  zwei Geräte haben, liegt trotzdem nur einmal im Ordner: Wer es zuerst
-  hochlädt, legt es ab, das andere sieht es und lädt nichts.
+  zwei Geräte haben, liegt trotzdem nur einmal im Ordner.
 - Ein Gerät nimmt seine eigenen Bilder wieder heraus, sobald keine Zeile des
-  Haushalts sie mehr nennt.
+  Haushalts sie mehr nennt – und nur nach einem Durchgang, der jede
+  Gerätedatei lesen konnte.
 - Je Durchgang werden höchstens 32 MB Bilder gesendet und 32 MB geholt;
   der Rest folgt zwei Minuten später.
 
 ### Wer recht hat
 
-Die Liste folgt der Version der Zeile, aber mit einer eigenen Regel, weil
-ein Gerät auch Zeilen bearbeitet, deren Bilder es nie hatte:
+Ein Gerät bearbeitet auch Zeilen, deren Bilder es nie hatte. Deshalb gibt
+es zwei Arten von Liste:
 
-- Eine **neuere** Version bringt ihre Liste mit, wenn sie eine hat. Hat sie
-  keine – eine ältere App, oder ein Gerät, das die Bilder nie kannte –,
-  bleibt die gespeicherte. Drei leere Plätze sind dagegen eine Aussage und
-  leeren die Bilder überall.
-- Dieselbe Version füllt eine unbekannte Liste. Zwei verschiedene Listen
-  derselben Version (eine Übergabe vor #376 ließ jedem Gerät sein Foto)
-  einigen sich überall gleich: die mit mehr Bildern bleibt, bei gleich
-  vielen entscheidet der Text.
-- Wer ein Foto setzt, ersetzt oder entfernt, berechnet die Liste sofort
-  beim Speichern. Ein- und Ausbuchen fasst die Fotos nicht an.
-- Zeilen von vor #376 bekommen ihre Liste beim nächsten Abgleich aus den
-  Bildern, die das Gerät lesen kann – ohne dass die Zeile als geändert
-  gilt.
+- **Gesetzt** wird eine Liste, wenn jemand Fotos setzt, ersetzt oder
+  entfernt; das Gerät berechnet sie sofort beim Speichern. Ein leerer Platz
+  darin ist leer und leert das Bild überall. Bilder, die die Zeile hat, die
+  das Gerät aber (noch) nicht zeigt, bleiben dabei hinten in der Liste
+  stehen: Wer sie nicht sehen konnte, hat sie nicht entfernt.
+- **Gesehen** ist eine Liste, die ein Gerät aus seinen eigenen Dateien
+  ableitet – für Zeilen von vor #376. Ein leerer Platz darin sagt nur, dass
+  dieses Gerät dort nichts hat. Gesehene Listen vereinigen sich Platz für
+  Platz und überstimmen nie eine gesetzte.
+- Eine **neuere** Version bringt ihre gesetzte Liste mit. Hat sie keine
+  oder nur eine gesehene, bleibt die gespeicherte. Dieselbe Version füllt
+  eine unbekannte Liste; gesetzt geht vor gesehen.
+- Speichert jemand eine Zeile, ohne die Fotos zu ändern, schreibt das Gerät
+  weder Liste noch Plätze. Ein- und Ausbuchen fasst die Fotos nicht an.
+- Jeder Abgleich trägt zuerst ein, was das Gerät selbst sieht, und liest
+  erst dann die anderen Gerätedateien.
 
-Keine dieser Schritte zählt als Bearbeitung: Ein ankommendes Foto setzt nur
-den lokalen Pfad.
+Keiner dieser Schritte zählt als Bearbeitung: Ein ankommendes Foto setzt nur
+den lokalen Pfad, und nur, solange dort noch steht, was der Durchgang zu
+Beginn gelesen hat.
 
 ## Was nicht mitreist
 

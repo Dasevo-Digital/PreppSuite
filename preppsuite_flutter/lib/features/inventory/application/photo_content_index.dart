@@ -52,28 +52,6 @@ class PhotoContentIndex {
     return hash;
   }
 
-  /// The list of pictures in [stored], place by place -- each a path the
-  /// way a row keeps it, or null for an empty place.
-  ///
-  /// Null when one of the places names a picture this device cannot read:
-  /// a list with a gap in it would say that place is empty, and empty is
-  /// what another device would then make it.
-  Future<List<String?>?> hashesOf(List<String?> stored) async {
-    final hashes = <String?>[];
-    for (final path in stored) {
-      if (path == null || path.isEmpty) {
-        hashes.add(null);
-        continue;
-      }
-      final hash = await hashOf(
-        File(InventoryPhotoService.resolvePhotoPath(path)),
-      );
-      if (hash == null) return null;
-      hashes.add(hash);
-    }
-    return hashes;
-  }
-
   /// A file in [directory] that holds [hash], or null.
   Future<File?> fileWith(String hash, Directory directory) async {
     final known = await _loaded();
@@ -87,11 +65,33 @@ class PhotoContentIndex {
 
   /// Notes that [file] holds [hash], for a picture whose bytes were in
   /// hand when it was written.
+  ///
+  /// Kept at most every few seconds rather than on every picture: a first
+  /// sync reads a few hundred of them, and writing the whole table each
+  /// time grew with its square. [flush] keeps the rest; what is lost
+  /// without it costs a second reading of those pictures, nothing else.
   Future<void> remember(File file, String hash) async {
     final known = await _loaded();
     final name = p.basename(file.path);
     if (known[name] == hash) return;
     known[name] = hash;
+    _unsaved = true;
+    final now = DateTime.now();
+    final last = _savedAt;
+    if (last == null || now.difference(last) >= const Duration(seconds: 5)) {
+      await flush();
+    }
+  }
+
+  bool _unsaved = false;
+  DateTime? _savedAt;
+
+  /// Keeps what has been learned since the last time.
+  Future<void> flush() async {
+    final known = _known;
+    if (!_unsaved || known == null) return;
+    _unsaved = false;
+    _savedAt = DateTime.now();
     await _store.save(known);
   }
 
@@ -102,9 +102,11 @@ class PhotoContentIndex {
       for (final name in known.keys)
         if (!await File(p.join(directory.path, name)).exists()) name,
     ];
-    if (gone.isEmpty) return;
-    known.removeWhere((name, _) => gone.contains(name));
-    await _store.save(known);
+    if (gone.isNotEmpty) {
+      known.removeWhere((name, _) => gone.contains(name));
+      _unsaved = true;
+    }
+    await flush();
   }
 }
 

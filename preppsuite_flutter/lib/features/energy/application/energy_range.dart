@@ -148,13 +148,28 @@ class EnergyDraw {
 /// The most a draw can be on in a day.
 const maximumHoursPerDay = 24;
 
+/// The largest amount, draw or count the plan takes: a billion of any
+/// unit, far past any household and far enough from the largest double
+/// that two of them still add up. `1e308` was finite, passed #256, and two
+/// such reserves summed to infinity; the range then threw on every device
+/// the plan reached, and the screen that throws is the one to fix it on.
+const maximumEnergyFigure = 1e9;
+
+/// The most days a range is said to last. A tiny draw against a large
+/// reserve gives a quotient no `int` holds; a hundred years is "for ever"
+/// in any plan.
+const maximumEnergyDays = 36500;
+
 /// A stored figure, or null where it is not a finite number of at least
-/// zero. `jsonDecode` reads "1e400" as infinity, and one such figure from
-/// another device would make the whole screen throw (#256).
+/// zero and at most [maximumEnergyFigure]. `jsonDecode` reads "1e400" as
+/// infinity, and one such figure from another device would make the whole
+/// screen throw (#256).
 double? _figure(Object? value) {
   if (value is! num) return null;
   final figure = value.toDouble();
-  return figure.isFinite && figure >= 0 ? figure : null;
+  return figure.isFinite && figure >= 0 && figure <= maximumEnergyFigure
+      ? figure
+      : null;
 }
 
 /// The kind by its stored name, or null where a stored file names one
@@ -187,7 +202,14 @@ class EnergyRange {
   /// Whole days, and rounded **down**: a reserve that lasts three days
   /// and twenty hours lasts three days. Rounding that up is how a plan
   /// ends a day early.
-  int? get days => perDay > 0 ? (stored / perDay).floor() : null;
+  int? get days {
+    if (perDay <= 0) return null;
+    final lasts = stored / perDay;
+    // Never `floor()` of what no int holds: it throws, inside a build.
+    return !lasts.isFinite || lasts >= maximumEnergyDays
+        ? maximumEnergyDays
+        : lasts.floor();
+  }
 
   /// Stocked but nothing uses it. Not a fault — a spare cylinder for a
   /// stove that was never entered is the commonest case — but it is why

@@ -76,13 +76,21 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 1100));
       final region = await client.resolve(place.stateName!);
 
-      // Deliberately tiny, so this stays polite to a public server.
+      // Deliberately tiny, so this stays polite to a public server: the
+      // world's low levels, which every plan starts with (9a22e60), and
+      // 400 tiles beside them. With 400 in all, as this test once asked,
+      // the world alone took 341 and no plan fitted.
+      final world = MapDownloadStep(
+        label: 'world',
+        area: MapArea.world(),
+      ).tileCount;
+      final budget = world + 400;
       final plan = staggeredPlan(
         rings: [
           MapDownloadRing(label: region!.name, box: region.areaAt(14)),
           MapDownloadRing(label: place.name, box: place.areaAt(14)),
         ],
-        budget: 400,
+        budget: budget,
       )!;
 
       for (final step in plan.steps) {
@@ -91,8 +99,9 @@ void main() {
           '${step.tileCount}',
         );
       }
-      expect(plan.steps, hasLength(2));
-      expect(plan.tileCount, lessThanOrEqualTo(400));
+      expect(plan.steps, hasLength(3));
+      expect(plan.steps.first.area.minZoom, 0);
+      expect(plan.tileCount, lessThanOrEqualTo(budget));
 
       final source = await TileSourceClient().load(MapTileProvider.openFreeMap);
       final directory = await Directory.systemTemp.createTemp('stagger_live');

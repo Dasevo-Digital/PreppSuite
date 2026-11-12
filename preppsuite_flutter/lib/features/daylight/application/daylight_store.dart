@@ -73,14 +73,20 @@ class DaylightStore {
 /// normal state of a text field, not an error.
 DaylightPlace? parseCoordinates(String input, {String? name}) {
   // Comma as a separator and comma as a decimal point both occur, and on
-  // a German keyboard the second is the likely one. A semicolon or a
-  // space settles it outright; otherwise the number of commas does. Two
-  // commas means one number carries a decimal point, four halves means
-  // both do.
+  // a German keyboard the second is the likely one. A semicolon, a comma
+  // followed by a space, or a space alone settles it outright; otherwise
+  // the number of commas does. Two commas means one number carries a
+  // decimal point, four halves means both do. The space was promised
+  // here and not kept: "52,2689 10,5268" went down the comma count and
+  // was refused.
   final cleaned = input.trim().replaceAll('°', '');
   final List<String> parts;
   if (cleaned.contains(';')) {
     parts = cleaned.split(';');
+  } else if (cleaned.contains(RegExp(r',\s'))) {
+    parts = cleaned.split(RegExp(r'\s*,\s+'));
+  } else if (cleaned.contains(RegExp(r'\s'))) {
+    parts = cleaned.split(RegExp(r'\s+'));
   } else if (cleaned.contains(',')) {
     final pieces = cleaned.split(',');
     parts = switch (pieces.length) {
@@ -93,7 +99,7 @@ DaylightPlace? parseCoordinates(String input, {String? name}) {
       _ => const [],
     };
   } else {
-    parts = cleaned.split(RegExp(r'\s+'));
+    parts = [cleaned];
   }
 
   if (parts.length != 2) return null;

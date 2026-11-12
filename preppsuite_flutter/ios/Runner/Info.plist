@@ -95,6 +95,8 @@
 	</array>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
+		<!-- The name Dart submits under (#345): the task's unique name. -->
+		<string>preppsuite.warningPoll.periodic</string>
 		<string>preppsuite.warningPoll</string>
 	</array>
 </dict>

@@ -145,8 +145,11 @@ void main() {
   testWidgets('a third that came without the second is the second here', (
     tester,
   ) async {
-    // After a handover that left the second photo behind. Opened and
-    // saved, the form closes the gap.
+    // After a handover that left the second photo behind: the form shows
+    // it second. Saved without touching the photos, the places stay as
+    // they are (#376) -- they are where the row's list says each picture
+    // belongs, and the second may still arrive. Closing the gap used to
+    // move pictures between places for nothing.
     await open(tester, await stored(first: 'p/a.jpg', third: 'p/c.jpg'));
 
     expect(find.bySemanticsLabel('Foto 2 von 2'), findsOneWidget);
@@ -154,9 +157,10 @@ void main() {
     await save(tester);
 
     final row = await reread();
+    expect(row.name, 'Rote Linsen');
     expect(row.photoPath, 'p/a.jpg');
-    expect(row.secondPhotoPath, 'p/c.jpg');
-    expect(row.thirdPhotoPath, isNull);
+    expect(row.secondPhotoPath, isNull);
+    expect(row.thirdPhotoPath, 'p/c.jpg');
   });
 
   testWidgets('three photos fill the row on a phone at twice the font', (

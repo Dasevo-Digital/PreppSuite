@@ -1,6 +1,8 @@
 /// Reading and writing the household's inventory of what it owns.
 library;
 
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -8,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/app_database_providers.dart';
 import '../../../core/photo_hashes.dart';
 import '../../../local_db/database.dart';
+import '../../inventory/application/inventory_photo_service.dart';
 import '../../inventory/application/photo_content_index.dart';
 
 final possessionsProvider = StreamProvider.autoDispose
@@ -54,16 +57,13 @@ class PossessionController {
 
   Future<void> save(PossessionDraft draft, {Possession? existing}) async {
     // Which picture the entry has (#376), read while it is certain; see
-    // the inventory controller's reason for doing it here.
+    // the inventory controller's reason for doing it here. Unchanged, the
+    // list is left as it is: this device may simply not have the picture
+    // yet. A new one is the person's choice and replaces it.
     final photoHashes =
         existing != null && existing.photoPath == draft.photoPath
         ? const Value<String?>.absent()
-        : Value(switch (await (_photos ?? PhotoContentIndex.instance).hashesOf([
-            draft.photoPath,
-          ])) {
-            final hashes? => encodePhotoHashes(hashes),
-            null => null,
-          });
+        : await _photoListFor(draft.photoPath, existing: existing);
     await _db.upsertPossession(
       PossessionsCompanion.insert(
         clientId: existing?.clientId ?? const Uuid().v4(),
@@ -98,6 +98,26 @@ class PossessionController {
             dirty: const Value(true),
           ),
     );
+  }
+
+  Future<Value<String?>> _photoListFor(
+    String? path, {
+    Possession? existing,
+  }) async {
+    if (path == null) {
+      return Value(encodePhotoList(const PhotoList([null])));
+    }
+    // The picture the entry already had, where it came back unchanged.
+    final stored = decodePhotoList(
+      existing?.photoHashes,
+      places: possessionPhotoPlaces,
+    );
+    final hash = existing?.photoPath == path
+        ? stored?.places.first
+        : await (_photos ?? PhotoContentIndex.instance).hashOf(
+            File(InventoryPhotoService.resolvePhotoPath(path)),
+          );
+    return Value(hash == null ? null : encodePhotoList(PhotoList([hash])));
   }
 
   static String? _trimmed(String? value) {

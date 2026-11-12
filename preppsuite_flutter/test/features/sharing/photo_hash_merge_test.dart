@@ -25,6 +25,7 @@ void main() {
     required DateTime at,
     double quantity = 4,
     Object? photoHashes = const _Missing(),
+    List<String?>? seen,
   }) => {
     'clientId': 'tin',
     'householdId': household,
@@ -62,6 +63,7 @@ void main() {
     'updatedAt': at.toIso8601String(),
     'deletedAt': null,
     if (photoHashes is! _Missing) 'photoHashes': photoHashes,
+    'photoHashesSeen': ?seen,
   };
 
   Future<int> apply(Map<String, Object?> json) => applyHouseholdSnapshot(
@@ -77,13 +79,15 @@ void main() {
   Future<InventoryItem> stored() async =>
       (await db.inventoryItemsForSync(household)).single;
 
-  List<String?>? listOf(InventoryItem row) =>
-      decodePhotoHashes(row.photoHashes, places: 3);
+  PhotoList? listOf(InventoryItem row) =>
+      decodePhotoList(row.photoHashes, places: 3);
+  PhotoList set(List<String?> places) => PhotoList(places);
+  PhotoList seenList(List<String?> places) => PhotoList(places, seen: true);
 
   test('a newer version brings its list', () async {
     await apply(row(at: version, photoHashes: [a, null, null]));
     await apply(row(at: later, quantity: 2, photoHashes: [b, null, null]));
-    expect(listOf(await stored()), [b, null, null]);
+    expect(listOf(await stored()), set([b, null, null]));
     expect((await stored()).quantity, 2);
   });
 
@@ -92,7 +96,7 @@ void main() {
     // An older app writes no key at all; a newer one that never held the
     // pictures writes null. Neither empties them.
     await apply(row(at: later, quantity: 3));
-    expect(listOf(await stored()), [a, null, null]);
+    expect(listOf(await stored()), set([a, null, null]));
     await apply(
       row(
         at: later.add(const Duration(hours: 1)),
@@ -100,14 +104,14 @@ void main() {
         photoHashes: null,
       ),
     );
-    expect(listOf(await stored()), [a, null, null]);
+    expect(listOf(await stored()), set([a, null, null]));
     expect((await stored()).quantity, 2);
   });
 
   test('three empty places do empty the pictures', () async {
     await apply(row(at: version, photoHashes: [a, null, null]));
     await apply(row(at: later, photoHashes: [null, null, null]));
-    expect(listOf(await stored()), [null, null, null]);
+    expect(listOf(await stored()), set([null, null, null]));
   });
 
   test('the same version fills an unknown list, without an edit', () async {
@@ -116,70 +120,76 @@ void main() {
     final changed = await apply(row(at: version, photoHashes: [a, null, null]));
     expect(changed, 1, reason: 'learned, so it is published again');
     final after = await stored();
-    expect(listOf(after), [a, null, null]);
+    expect(listOf(after), set([a, null, null]));
     expect(after.updatedAt.isAtSameMomentAs(version), isTrue);
     expect(after.dirty, isFalse);
     expect(await apply(row(at: version, photoHashes: [a, null, null])), 0);
   });
 
-  test('two lists for one version settle the same in any order', () async {
+  test('two seen lists for one version join, the same in any order', () async {
     final second = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(second.close);
-    Future<void> into(AppDatabase target, Object? hashes) =>
+    Future<void> into(AppDatabase target, List<String?> seen) =>
         applyHouseholdSnapshot(
           target,
           DeviceSnapshot(
             deviceId: 'other',
             householdId: household,
             writtenAt: DateTime.utc(2026, 11, 3),
-            inventoryItems: [row(at: version, photoHashes: hashes)],
+            inventoryItems: [row(at: version, seen: seen)],
           ),
         );
-    final fuller = [b, a, null];
-    final single = [a, null, null];
-    await into(db, single);
-    await into(db, fuller);
-    await into(second, fuller);
-    await into(second, single);
-    expect(listOf(await stored()), fuller);
+    // Two devices that each got one picture of the item by a handover.
+    await into(db, [a, null, null]);
+    await into(db, [null, b, null]);
+    await into(second, [null, b, null]);
+    await into(second, [a, null, null]);
+    expect(listOf(await stored()), seenList([a, b, null]));
     expect(
-      decodePhotoHashes(
+      decodePhotoList(
         (await second.inventoryItemsForSync(household)).single.photoHashes,
         places: 3,
       ),
-      fuller,
+      seenList([a, b, null]),
     );
+  });
+
+  test('a seen list never empties what an edit set', () async {
+    await apply(row(at: version, photoHashes: [a, null, null]));
+    // A device that has none of the pictures, at the same version and at
+    // a newer one: nothing it says takes the picture out.
+    await apply(row(at: version, seen: [null, null, null]));
+    await apply(row(at: later, quantity: 2, seen: [null, b, null]));
+    expect(listOf(await stored()), set([a, null, null]));
+    expect((await stored()).quantity, 2);
+  });
+
+  test('an edit set at the same version beats what was only seen', () async {
+    await apply(row(at: version, seen: [a, b, null]));
+    await apply(row(at: version, photoHashes: [b, null, null]));
+    expect(listOf(await stored()), set([b, null, null]));
   });
 
   test('a list alone never wins a row', () async {
-    await apply(row(at: version, quantity: 4, photoHashes: [a, null, null]));
+    await apply(row(at: version, quantity: 4, seen: [a, null, null]));
     // The same second, the same contents, another list: only the list can
     // move, and only by its own rule.
-    await apply(row(at: version, quantity: 4, photoHashes: [b, null, null]));
+    await apply(row(at: version, quantity: 4, seen: [null, b, null]));
     final after = await stored();
     expect(after.quantity, 4);
-    expect(
-      after.photoHashes,
-      comparePhotoHashes(
-                encodePhotoHashes([b, null, null]),
-                encodePhotoHashes([a, null, null]),
-              ) >
-              0
-          ? encodePhotoHashes([b, null, null])
-          : encodePhotoHashes([a, null, null]),
-    );
+    expect(listOf(after), seenList([a, b, null]));
   });
 
   test(
-    'a sibling of the same second that wins its row keeps the fuller list',
+    'a sibling of the same second that wins its row keeps the set list',
     () async {
       await apply(row(at: version, quantity: 4, photoHashes: [b, a, null]));
-      // Other contents that sort higher win the row; the list they bring has
-      // fewer pictures and does not replace the stored one.
-      await apply(row(at: version, quantity: 9, photoHashes: [a, null, null]));
+      // Other contents that sort higher win the row; the list they bring
+      // was only seen and does not replace the one an edit set.
+      await apply(row(at: version, quantity: 9, seen: [a, null, null]));
       final after = await stored();
       expect(after.quantity, 9);
-      expect(listOf(after), [b, a, null]);
+      expect(listOf(after), set([b, a, null]));
     },
   );
 
@@ -210,7 +220,7 @@ void main() {
         await local(
           tin(
             photoPath: const Value('/photos/one.jpg'),
-            photoHashes: Value(encodePhotoHashes([a, null, null])),
+            photoHashes: Value(encodePhotoList(PhotoList([a, null, null]))),
           ),
         );
         await local(tin(photoPath: const Value('/photos/two.jpg')));
@@ -222,12 +232,12 @@ void main() {
       await local(
         tin(
           photoPath: const Value('/photos/one.jpg'),
-          photoHashes: Value(encodePhotoHashes([a, null, null])),
+          photoHashes: Value(encodePhotoList(PhotoList([a, null, null]))),
         ),
       );
       await local(tin(photoPath: const Value('/photos/one.jpg'), quantity: 3));
       await local(tin(quantity: 2));
-      expect(listOf(await stored()), [a, null, null]);
+      expect(listOf(await stored()), set([a, null, null]));
     });
 
     test('of a possession follows the same rule', () async {
@@ -241,12 +251,12 @@ void main() {
             updatedAt: DateTime.now().toUtc(),
           );
       await db.upsertPossession(
-        lamp('/photos/l.jpg', hashes: encodePhotoHashes([a])),
+        lamp('/photos/l.jpg', hashes: encodePhotoList(PhotoList([a]))),
       );
       await db.upsertPossession(lamp('/photos/l.jpg'));
       expect(
         (await db.possessionsForSync(household)).single.photoHashes,
-        encodePhotoHashes([a]),
+        encodePhotoList(PhotoList([a])),
       );
       await db.upsertPossession(lamp('/photos/m.jpg'));
       expect(
@@ -257,7 +267,11 @@ void main() {
   });
 
   test('the list goes out with the row, an unknown one as null', () async {
-    await apply(row(at: version, photoHashes: [a, null, null]));
+    await apply(row(at: version, seen: [a, null, null]));
+    final seenJson = encodeInventoryItem(await stored());
+    expect(seenJson['photoHashesSeen'], [a, null, null]);
+    expect(seenJson.containsKey('photoHashes'), isFalse);
+    await apply(row(at: later, photoHashes: [a, null, null]));
     expect(encodeInventoryItem(await stored())['photoHashes'], [a, null, null]);
     await db.customStatement('UPDATE inventory_items SET photo_hashes = NULL');
     final json = encodeInventoryItem(await stored());

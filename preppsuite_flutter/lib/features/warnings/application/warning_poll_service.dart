@@ -26,11 +26,16 @@ class WarningPollResult {
   /// about.
   final List<NotifiableWarning> newsworthy;
 
-  /// Warnings ended because they dropped out of a complete poll.
+  /// Warnings ended because they dropped out of the feed that listed them.
+  ///
+  /// The nationwide list retires only when it was read whole, and a
+  /// district's warnings only when its dashboard answered (#369, #371). So
+  /// a poll can retire nationwide warnings and still not be [complete],
+  /// because a district did not answer.
   final int retired;
 
-  /// False when at least one source could not be read. Nothing was
-  /// retired in that case.
+  /// False when at least one source could not be read. What that source
+  /// listed is not retired.
   final bool complete;
 }
 

@@ -9436,6 +9436,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get neighbourhoodDelete => 'Löschen';
 
   @override
+  String get neighbourhoodDeleted =>
+      'Angebot gelöscht, auf allen Geräten des Haushalts.';
+
+  @override
   String neighbourhoodOfferedOn(String date) {
     return 'angeboten am $date';
   }

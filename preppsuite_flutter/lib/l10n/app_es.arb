@@ -2558,6 +2558,7 @@
   "neighbourhoodShowCode": "Mostrar como código QR",
   "neighbourhoodEdit": "Editar",
   "neighbourhoodDelete": "Eliminar",
+  "neighbourhoodDeleted": "Oferta eliminada, en todos los dispositivos del hogar.",
   "neighbourhoodOfferedOn": "ofrecido el {date}",
   "neighbourhoodKindWater": "Agua",
   "neighbourhoodKindFood": "Alimentos",

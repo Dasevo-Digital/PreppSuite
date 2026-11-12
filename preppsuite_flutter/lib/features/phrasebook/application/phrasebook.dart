@@ -13,6 +13,8 @@
 /// [reviewedPhraseLanguages], and only then does the note go away for it.
 library;
 
+import '../../search/application/app_search.dart' show foldForSearch;
+
 part 'phrasebook_phrases.dart';
 
 /// The languages a phrase is given in. German, English and Spanish are
@@ -67,21 +69,24 @@ List<Phrase> phrasesIn(PhraseGroup group) => [
 ];
 
 /// The phrases whose [from] or [to] text contains every word of [query],
-/// ignoring case. Empty query, every phrase.
+/// ignoring case and accents. Empty query, every phrase.
+///
+/// Folded the way the app's search folds (#108): Spanish is mostly typed
+/// without its accents, and "policia" or "donde" found nothing.
 List<Phrase> searchPhrases(
   String query, {
   required PhraseLanguage from,
   required PhraseLanguage to,
 }) {
-  final words = query.toLowerCase().trim().split(RegExp(r'\s+'))
+  final words = foldForSearch(query).trim().split(RegExp(r'\s+'))
     ..removeWhere((w) => w.isEmpty);
   if (words.isEmpty) return phrasebookPhrases;
   return [
     for (final phrase in phrasebookPhrases)
       if (words.every(
         (w) =>
-            phrase[from].toLowerCase().contains(w) ||
-            phrase[to].toLowerCase().contains(w),
+            foldForSearch(phrase[from]).contains(w) ||
+            foldForSearch(phrase[to]).contains(w),
       ))
         phrase,
   ];

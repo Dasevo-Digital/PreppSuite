@@ -1146,6 +1146,19 @@ tree; the test suite deliberately targets that layer rather than the UI.
   [`docs/warning-feeds.md`](docs/warning-feeds.md).
 - Background polling is dependable on Android (15-minute floor, a platform
   limit) and opportunistic on iOS. The app never promises the iOS case.
+  **Until #345 it never ran on iOS at all.** The plugin submits a
+  `BGAppRefreshTask` under the task's *unique name*
+  (`warningPollTaskUniqueName`, `preppsuite.warningPoll.periodic`), and
+  `Info.plist` permitted only the task name; and BGTaskScheduler takes a
+  launch handler only before launching ends, which nothing registered.
+  The refused submit was logged by the plugin and looked like success in
+  Dart. `AppDelegate.swift` now registers the handler and the background
+  engine's plugins in `didFinishLaunching`, and `Info.plist` permits the
+  unique name; `test/ios_background_poll_test.dart` keeps the three in
+  step. The same delegate method sets `UNUserNotificationCenter`'s
+  delegate: without it iOS shows no banner while the app is open, and a
+  warning found by a foreground poll was marked as told unseen. The
+  simulator has no background scheduler, so only a device shows a run.
 - NINA delivers the same warnings in ~30 seconds against this app's 15
   minutes. The warning screen says so rather than pretending otherwise.
 - Android and iOS both reach picked storage through the same channel
@@ -2029,53 +2042,74 @@ row's photo columns are paths into one machine's folder, and the device
 file is written whole on every change, so pictures inside it would be
 uploaded again every few minutes. Now each place of a row is also named
 by the SHA-256 of its picture -- `inventory_items.photo_hashes` (three
-places) and `possessions.photo_hashes` (one), schema 30 -- and that list
-travels in every snapshot. In an **encrypted** folder the pictures follow
-as files of their own (`sharing/application/folder_photos.dart`):
+places) and `possessions.photo_hashes` (one), schema 30. In an
+**encrypted** folder the list travels in the device file and the pictures
+follow as files of their own (`sharing/application/folder_photos.dart`):
 `preppsuite/photos/<name>-<device>.json`, sealed with the folder key in
 the device files' envelope, written once. `<name>` is an HMAC of the
 SHA-256 under a key derived from the folder key, so the folder does not
 say which pictures they are; a fetched picture is checked against the
 SHA-256 it was asked for. `<device>` keeps the folder's rule: no two
 devices write or delete the same path, and a device removes only its own
-pictures, once no row names them. A plain folder gets the lists but no
-pictures.
+pictures, once no row names them, and only after a run that read every
+file in the folder. A plain folder carries neither the pictures nor the
+lists: a hash lets anybody holding a copy of a picture confirm it is in
+the household (`DeviceSnapshot.withoutPhotoLists`).
 
-**The list is not an ordinary column**, because a device edits rows whose
-pictures it never had. `_sharedContents` leaves it out, and `_mergeInto`
-gives it its own rule:
+**Two kinds of list, because a device edits rows whose pictures it never
+had** (`core/photo_hashes.dart`). The first version of #376 had one kind,
+and the review found two ways to lose a picture with it: a device
+without the pictures filled in "three empty places" and the device with
+them took that for a removal, and a rename on a device that had only the
+second picture rebuilt the list from what it held and took the first one
+off everywhere. Now:
 
-  * a newer version brings its list where it has one; one without a list
-    -- an older app, a device that never held the pictures, written as a
-    missing key or null -- keeps the stored list. Three empty places are a
-    statement and do empty the pictures;
-  * the same version fills an unknown list, and two different lists for
-    one version (a handover before #376 left every device its own photo)
-    settle by `comparePhotoHashes` -- more pictures first, then the text --
-    which every device applies the same way;
-  * none of it moves `updatedAt` or raises `dirty`, and a list learned
-    counts as received, so the device republishes it.
+  * a **set** list comes from an edit -- the controllers read the files on
+    save -- and an empty place in it is empty, everywhere;
+  * a **seen** list is what one device holds, read off its files by
+    `fillSeenPhotoLists` for rows from before #376 (and only where it holds
+    a picture of the row). An empty place in it says nothing; two seen
+    lists join place by place (`joinPhotoPlaces`), and a seen list never
+    overrules a set one;
+  * a newer version brings its set list, keeps the stored one when it
+    brings none or only a seen one (which joins a stored seen list); the
+    same version fills an unknown list and prefers set to seen
+    (`photoListForNewer`, `photoListForSameVersion` in `_mergeInto`);
+  * `_sharedContents` leaves the list out, so it never wins a row, and none
+    of it moves `updatedAt` or raises `dirty`. A list learned counts as
+    received, so the device republishes it.
 
-**Whoever changes a picture says which it is, at once.** The inventory
-and possession controllers read the files on save (`PhotoContentIndex`,
-which keeps each file's hash in the preferences: files never change once
-written). Left for later, the version would reach the other devices
-without a list, and they would keep their old one beside it. Bookings
-leave the photo columns out of the write altogether -- their copy of the
-row can be older than a picture that arrived since. A local write that
-moves a picture without a list (anything added later) turns the list
-unknown in `upsertInventoryItem`/`upsertPossession`; unknown never clears
-anything. Rows from before #376 get their list on the next folder sync
-from the pictures this device can read (`fillUnknownPhotoLists`), not as
-an edit.
+On the wire a set list is `photoHashes`, a seen one `photoHashesSeen`, an
+unknown one `photoHashes: null`; a reader that knows only `photoHashes`
+cannot take what one device holds for an edit.
 
-A run fills the lists, exchanges the pictures (32 MB sent and 32 MB
-fetched at most), publishes, then cleans up. A picture arriving is
-written under a new name and only the path is set; two places never share
-a file, and the file a place gave up is deleted at the end of the run
-unless another place still shows it. All of it is best effort: a picture
-that fails costs that picture, never the rows. The bridges on iOS, macOS
-and Android have a `delete` for the cleanup.
+**Whoever changes a picture says which it is, at once, and keeps what it
+cannot see.** The screen hands its photos over closed up, without the
+gaps a picture not yet arrived leaves. If they are the ones it opened
+with, the controller writes neither the places nor the list. If they
+changed, the new list is the pictures on screen followed by the ones the
+row has that this device does not show (`InventoryController._photosFor`).
+Bookings leave the photo columns out of the write -- their copy of the row
+can be older than a picture that arrived since. A local write that moves a
+picture without a list turns the list unknown in
+`upsertInventoryItem`/`upsertPossession`; unknown never clears anything.
+
+A run fills the seen lists **before** it reads anybody else's file, so a
+list that knows nothing of a picture here meets this device's own instead
+of taking its place. Then it merges, exchanges the pictures (32 MB sent
+and 32 MB fetched at most; a picture the folder would refuse sealed is
+skipped by its size before it is read), publishes, and cleans up. A
+picture arriving is written under a new name and set with a
+compare-and-set on the place (`onlyIf`), so a picture saved during the run
+is not written over; two places never share a file, and the file a place
+gave up is deleted at the end of the run unless another place still
+shows it. All of it is best effort: a picture that fails costs that
+picture, never the rows. The bridges on iOS, macOS and Android have a
+`delete` for the cleanup; on Android `list`, `write` and `delete` run on
+the bridge's file thread, and `list` is one query instead of three per
+file. `PhotoContentIndex` keeps each file's hash in the preferences
+(files never change once written) and writes that table at most every
+few seconds.
 
 ### Nutrition is per 100 g, and nothing converts on the way in
 
@@ -3765,6 +3799,13 @@ verlangt mehr als null; die Stunden am Tag höchstens 24
 werden konnte das nicht (`jsonEncode` wirft), und die Reichweite warf beim
 Abrunden (#256). Gelesene Einträge mit einer nicht endlichen oder negativen
 Zahl verwirft `fromJson`, weil `jsonDecode('1e400')` unendlich ergibt.
+Endlich reichte aber nicht: Zwei Vorräte von je `1e308` ergaben zusammen
+unendlich, und ein winziger Verbrauch gegen einen großen Vorrat einen
+Quotienten, den kein `int` fasst. Die Reichweite warf dann im `build`, auf
+jedem Gerät, das den Plan bekam, und gerade auf dem Bildschirm, auf dem man
+ihn reparieren müsste. Seitdem nimmt der Plan höchstens
+`maximumEnergyFigure` (eine Milliarde) je Zahl an, beim Tippen und beim
+Lesen, und `days` hört bei `maximumEnergyDays` (hundert Jahren) auf.
 
 Dieselbe Regel gilt für Koordinaten und Codes (#260): Der Tageslicht-Ort
 verlangt endliche Zahlen, bevor er den Bereich prüft, denn NaN ist weder

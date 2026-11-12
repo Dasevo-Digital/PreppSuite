@@ -5499,6 +5499,7 @@
   "neighbourhoodShowCode": "Show as QR code",
   "neighbourhoodEdit": "Edit",
   "neighbourhoodDelete": "Delete",
+  "neighbourhoodDeleted": "Offer deleted, on every device of the household.",
   "neighbourhoodOfferedOn": "offered on {date}",
   "@neighbourhoodOfferedOn": {
     "placeholders": {

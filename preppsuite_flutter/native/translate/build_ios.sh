@@ -63,38 +63,54 @@ engine="$(translate_source "$BUILD")"
 for sdk in "${sdks[@]}"; do
   out="$BUILD/ios-$sdk"
   echo "== $sdk =="
-  mkdir -p "$out"
-  if [ ! -f "$out/build.ninja" ]; then
-    # A toolchain file, as on the Mac: PCRE2 is built as an external
-    # project, which only the toolchain file reaches. CMake makes every
-    # executable an app bundle on iOS, and SentencePiece's command-line
-    # tools then have nowhere to be installed to; none of them is built.
-    #
-    # And no JIT for the sentence splitter's regular expressions: an iOS
-    # app may not write code into memory and run it, and PCRE2's JIT needs
-    # __clear_cache, which iOS does not link. The splitter asks PCRE2
-    # whether it has one and matches without it otherwise. Forced, because
-    # the engine passes -DPCRE2_SUPPORT_JIT=ON to PCRE2's build and this
-    # file is read after that, at its project().
-    cat >"$out/toolchain.cmake" <<TOOLCHAIN
-set(CMAKE_SYSTEM_NAME iOS)
+  # A toolchain file, as on the Mac: PCRE2 is built as an external
+  # project, which only the toolchain file reaches. CMake makes every
+  # executable an app bundle on iOS, and SentencePiece's command-line
+  # tools then have nowhere to be installed to; none of them is built.
+  #
+  # And no JIT for the sentence splitter's regular expressions: an iOS
+  # app may not write code into memory and run it, and PCRE2's JIT needs
+  # __clear_cache, which iOS does not link. The splitter asks PCRE2
+  # whether it has one and matches without it otherwise. Forced, because
+  # the engine passes -DPCRE2_SUPPORT_JIT=ON to PCRE2's build and this
+  # file is read after that, at its project().
+  toolchain="set(CMAKE_SYSTEM_NAME iOS)
 set(CMAKE_OSX_SYSROOT $sdk)
-set(CMAKE_OSX_ARCHITECTURES arm64 CACHE STRING "")
+set(CMAKE_OSX_ARCHITECTURES arm64 CACHE STRING \"\")
 set(CMAKE_OSX_DEPLOYMENT_TARGET $IOS_TARGET)
 set(CMAKE_SYSTEM_PROCESSOR arm64)
 set(CMAKE_MACOSX_BUNDLE OFF)
-set(PCRE2_SUPPORT_JIT OFF CACHE BOOL "" FORCE)
-TOOLCHAIN
-    cmake -S "$HERE" -B "$out" -G Ninja \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_TOOLCHAIN_FILE="$out/toolchain.cmake" \
-      -DCMAKE_OSX_ARCHITECTURES=arm64 \
-      -DBUILD_ARCH=armv8-a \
-      -DBERGAMOT_SOURCE="$engine" \
-      -DUSE_FBGEMM=OFF \
-      -DUSE_MKL=OFF \
-      -DSSPLIT_USE_INTERNAL_PCRE2=ON >"$out/configure.log" 2>&1 ||
+set(PCRE2_SUPPORT_JIT OFF CACHE BOOL \"\" FORCE)"
+  configure=(
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_TOOLCHAIN_FILE="$out/toolchain.cmake"
+    -DCMAKE_OSX_ARCHITECTURES=arm64
+    -DBUILD_ARCH=armv8-a
+    -DBERGAMOT_SOURCE="$engine"
+    -DUSE_FBGEMM=OFF
+    -DUSE_MKL=OFF
+    -DSSPLIT_USE_INTERNAL_PCRE2=ON
+  )
+  # What the build directory was configured with. CMake writes the SDK's
+  # versioned path into every compile command, and an Xcode update renames
+  # it: Ninja, which never reconfigures on its own, then recompiled
+  # everything against a sysroot that was gone, and the release's device
+  # check stopped on it. A changed SDK, toolchain or argument list starts
+  # this SDK's directory over -- only this one.
+  stamp="$(xcrun --sdk "$sdk" --show-sdk-path)
+$(xcrun --sdk "$sdk" --show-sdk-version)
+$toolchain
+${configure[*]}"
+  if [ -f "$out/build.ninja" ] && [ "$(cat "$out/.configured" 2>/dev/null)" != "$stamp" ]; then
+    echo "  neu konfigurieren: SDK oder Einstellungen geändert"
+    rm -rf "$out"
+  fi
+  mkdir -p "$out"
+  if [ ! -f "$out/build.ninja" ]; then
+    printf '%s\n' "$toolchain" >"$out/toolchain.cmake"
+    cmake -S "$HERE" -B "$out" -G Ninja "${configure[@]}" >"$out/configure.log" 2>&1 ||
       { tail -30 "$out/configure.log"; exit 1; }
+    printf '%s' "$stamp" >"$out/.configured"
   fi
   ninja -C "$out" preppsuite_translate >"$out/build.log" 2>&1 ||
     { grep -E "error:|FAILED" "$out/build.log" | head -20; exit 1; }

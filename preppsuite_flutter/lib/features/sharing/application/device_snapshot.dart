@@ -102,6 +102,22 @@ class DeviceSnapshot {
 
   String encode() => const JsonEncoder.withIndent('  ').convert(toJson());
 
+  /// This snapshot without the lists of pictures; see [withoutPhotoList].
+  DeviceSnapshot withoutPhotoLists() => DeviceSnapshot(
+    deviceId: deviceId,
+    householdId: householdId,
+    writtenAt: writtenAt,
+    inventoryItems: [for (final row in inventoryItems) withoutPhotoList(row)],
+    checklistTemplates: checklistTemplates,
+    checklistItems: checklistItems,
+    budgetEntries: budgetEntries,
+    householdPlans: householdPlans,
+    householdMembers: householdMembers,
+    possessions: [for (final row in possessions) withoutPhotoList(row)],
+    neighbourOffers: neighbourOffers,
+    settings: settings,
+  );
+
   /// The same content as [encode], still as a map.
   ///
   /// A local handover sends a *superset* of this — the settings and the
@@ -221,11 +237,20 @@ Map<String, Object?> encodeInventoryItem(InventoryItem row) => {
   // documents directory, and a path that resolves to nothing on the other
   // device is worse than no path at all. Which pictures the row has goes
   // instead, by their contents (#376); an unknown list goes as null.
-  'photoHashes': decodePhotoHashes(
-    row.photoHashes,
-    places: inventoryPhotoPlaces,
-  ),
+  ..._photoListJson(row.photoHashes, places: inventoryPhotoPlaces),
 };
+
+/// A row's list of pictures as it travels: a set list as `photoHashes`, a
+/// seen one as `photoHashesSeen`, an unknown one as `photoHashes: null`.
+/// Two keys rather than a flag inside one, so that nothing reading only
+/// `photoHashes` can take what one device happens to hold for an edit.
+Map<String, Object?> _photoListJson(String? stored, {required int places}) {
+  final list = decodePhotoList(stored, places: places);
+  if (list == null) return {'photoHashes': null};
+  return list.seen
+      ? {'photoHashesSeen': list.places}
+      : {'photoHashes': list.places};
+}
 
 /// The list of pictures a row brings, or nothing when it brings none.
 ///
@@ -233,12 +258,23 @@ Map<String, Object?> encodeInventoryItem(InventoryItem row) => {
 /// same: as no statement at all, which leaves the stored list alone. A
 /// device that does not know a row's pictures -- an older app, or one that
 /// never held them -- must not empty them on every other device.
-Value<String?> _photoHashesValue(Object? raw, {required int places}) {
-  final hashes = photoHashesFromJson(raw, places: places);
-  return hashes == null
-      ? const Value.absent()
-      : Value(encodePhotoHashes(hashes));
+Value<String?> _photoListValue(
+  Map<String, Object?> json, {
+  required int places,
+}) {
+  final set = photoHashesFromJson(json['photoHashes'], places: places);
+  if (set != null) return Value(encodePhotoList(PhotoList(set)));
+  final seen = photoHashesFromJson(json['photoHashesSeen'], places: places);
+  if (seen != null) return Value(encodePhotoList(PhotoList(seen, seen: true)));
+  return const Value.absent();
 }
+
+/// [row] without its list of pictures, for a plain folder: the pictures do
+/// not go there, so neither do their hashes, which would let anybody with a
+/// copy of a picture confirm it is in this household.
+Map<String, Object?> withoutPhotoList(Map<String, Object?> row) => {...row}
+  ..remove('photoHashes')
+  ..remove('photoHashesSeen');
 
 /// Returns null when the row is unusable, so one bad entry costs one row
 /// rather than the whole sync.
@@ -347,10 +383,7 @@ InventoryItemsCompanion? decodeInventoryItem(Map<String, Object?> json) {
         ? Value(asUtcDate(json['chargeCheckedAt']))
         : const Value.absent(),
     notes: Value(_string(json['notes'])),
-    photoHashes: _photoHashesValue(
-      json['photoHashes'],
-      places: inventoryPhotoPlaces,
-    ),
+    photoHashes: _photoListValue(json, places: inventoryPhotoPlaces),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),
     // Arrived from elsewhere, so there is nothing of ours to publish.
@@ -519,10 +552,7 @@ Map<String, Object?> encodePossession(Possession row) => {
   // photoPath stays behind for the same reason it does on an inventory
   // item: it names a file in this device's documents directory. Which
   // picture it is travels, as there.
-  'photoHashes': decodePhotoHashes(
-    row.photoHashes,
-    places: possessionPhotoPlaces,
-  ),
+  ..._photoListJson(row.photoHashes, places: possessionPhotoPlaces),
 };
 
 PossessionsCompanion? decodePossession(Map<String, Object?> json) {
@@ -550,10 +580,7 @@ PossessionsCompanion? decodePossession(Map<String, Object?> json) {
     purchasePriceCents: Value(_int(json['purchasePriceCents'])),
     currency: Value(_string(json['currency'])),
     notes: Value(_string(json['notes'])),
-    photoHashes: _photoHashesValue(
-      json['photoHashes'],
-      places: possessionPhotoPlaces,
-    ),
+    photoHashes: _photoListValue(json, places: possessionPhotoPlaces),
     updatedAt: updatedAt,
     deletedAt: Value(asUtcDate(json['deletedAt'])),
     dirty: const Value(false),

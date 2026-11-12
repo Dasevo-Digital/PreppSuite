@@ -315,14 +315,19 @@ class _RangeCard extends StatelessWidget {
                     style: theme.textTheme.titleSmall,
                   ),
                 ),
+                // Flexible: at large text "Reicht keinen Tag" took the
+                // whole row and the kind beside it shrank to nothing.
                 if (days != null)
-                  Text(
-                    days,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      // Coloured only where it is nothing, the same rule
-                      // the fire-danger scale follows: a colour that is
-                      // always on says nothing when it matters.
-                      color: range.days == 0 ? theme.colorScheme.error : null,
+                  Flexible(
+                    child: Text(
+                      days,
+                      textAlign: TextAlign.end,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        // Coloured only where it is nothing, the same rule
+                        // the fire-danger scale follows: a colour that is
+                        // always on says nothing when it matters.
+                        color: range.days == 0 ? theme.colorScheme.error : null,
+                      ),
                     ),
                   ),
               ],
@@ -466,13 +471,14 @@ class _EntryDialogState extends State<_EntryDialog> {
     text: widget.second == null ? '' : _plain(widget.second!),
   );
 
+  /// The number to type over, with the decimal mark the list beside it
+  /// shows (#279): "0,5", not "0.5", for a German or Spanish reader.
+  String _plain(double value) =>
+      fieldNumber(value, AppLocalizations.of(context)!.localeName);
+
   String? _labelProblem;
   String? _firstProblem;
   String? _secondProblem;
-
-  static String _plain(double value) => value == value.roundToDouble()
-      ? value.round().toString()
-      : value.toString();
 
   @override
   void dispose() {
@@ -489,7 +495,14 @@ class _EntryDialogState extends State<_EntryDialog> {
   /// Finite, too (#256): `double.tryParse` also reads "Infinity", "1e400"
   /// and "NaN", which passed a plain `> 0`, could not be saved and made
   /// the range throw.
-  static double? _number(String input) => readNonNegativeNumber(input);
+  ///
+  /// And at most [maximumEnergyFigure], which keeps a sum of them finite.
+  static double? _number(String input) => switch (readNonNegativeNumber(
+    input,
+  )) {
+    final value? when value <= maximumEnergyFigure => value,
+    _ => null,
+  };
 
   void _submit() {
     final l10n = AppLocalizations.of(context)!;

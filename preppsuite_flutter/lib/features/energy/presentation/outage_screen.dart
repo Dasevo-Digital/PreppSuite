@@ -297,9 +297,10 @@ class _OutageScreenState extends State<OutageScreen>
                           Expanded(
                             child: Text(
                               l10n.outageRunningSince(
-                                DateFormat.Hm(
+                                outageClockTime(
+                                  clock.startedAt,
                                   l10n.localeName,
-                                ).format(clock.startedAt.toLocal()),
+                                ),
                               ),
                               style: theme.textTheme.bodySmall,
                             ),
@@ -437,9 +438,7 @@ class _StoreCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              l10n.outageUntil(
-                DateFormat.Hm(l10n.localeName).format(endsAt.toLocal()),
-              ),
+              l10n.outageUntil(outageClockTime(endsAt, l10n.localeName)),
               style: theme.textTheme.bodySmall,
             ),
             const SizedBox(height: 10),
@@ -577,4 +576,20 @@ class _DiscardDialogState extends State<_DiscardDialog> {
       ],
     );
   }
+}
+
+/// [instant] as the clock shows it: the time alone today, and with the day
+/// on any other. A full freezer holds 48 hours, and "Bis 14:30" on a note
+/// on its door meant the day after tomorrow; a blackout that began
+/// yesterday evening did not begin "seit 22:30" today.
+String outageClockTime(DateTime instant, String localeName, {DateTime? now}) {
+  final local = instant.toLocal();
+  final today = (now ?? DateTime.now()).toLocal();
+  final sameDay =
+      local.year == today.year &&
+      local.month == today.month &&
+      local.day == today.day;
+  return sameDay
+      ? DateFormat.Hm(localeName).format(local)
+      : DateFormat.MEd(localeName).add_Hm().format(local);
 }

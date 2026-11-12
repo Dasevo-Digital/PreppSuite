@@ -4,11 +4,15 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/photo_hashes.dart';
 
-/// The names a row gives its pictures (#376), and the rule two devices
-/// settle on when they name the same version's pictures differently.
+/// The names a row gives its pictures (#376), the two kinds of list, and
+/// the rules by which they meet.
 void main() {
   final a = 'a' * 64;
   final b = 'b' * 64;
+  final c = 'c' * 64;
+
+  PhotoList set(List<String?> places) => PhotoList(places);
+  PhotoList seen(List<String?> places) => PhotoList(places, seen: true);
 
   test('a picture is named by its SHA-256', () async {
     // The standard test vector for "abc".
@@ -25,26 +29,94 @@ void main() {
     expect(photoHashesFromJson([a, 'x', null], places: 3), isNull);
     expect(photoHashesFromJson(['A' * 64, null, null], places: 3), isNull);
     expect(photoHashesFromJson(null, places: 3), isNull);
-    expect(photoHashesFromJson('[]', places: 3), isNull);
-    expect(decodePhotoHashes('not json', places: 3), isNull);
-    expect(
-      decodePhotoHashes(encodePhotoHashes([a, null, null]), places: 3),
-      [a, null, null],
-    );
+    expect(decodePhotoList('not json', places: 3), isNull);
   });
 
-  test('of two lists for one version, the one with more pictures stays', () {
-    final one = encodePhotoHashes([a, null, null]);
-    final two = encodePhotoHashes([b, a, null]);
-    expect(comparePhotoHashes(two, one), greaterThan(0));
-    expect(comparePhotoHashes(one, two), lessThan(0));
+  test('a set and a seen list are stored apart and read back', () {
+    final asSet = set([a, null, null]);
+    final asSeen = seen([null, b, null]);
+    expect(decodePhotoList(encodePhotoList(asSet), places: 3), asSet);
+    expect(decodePhotoList(encodePhotoList(asSeen), places: 3), asSeen);
+    expect(encodePhotoList(asSeen), startsWith('{'));
+    expect(asSet, isNot(seen([a, null, null])));
   });
 
-  test('between equally full lists the text decides, the same everywhere', () {
-    final first = encodePhotoHashes([a, null, null]);
-    final second = encodePhotoHashes([b, null, null]);
-    final order = comparePhotoHashes(first, second);
-    expect(order, isNot(0));
-    expect(comparePhotoHashes(second, first), -order.sign * order.abs());
+  test('two lists join place by place, the same in either order', () {
+    expect(joinPhotoPlaces([a, null, null], [null, b, null]), [a, b, null]);
+    expect(joinPhotoPlaces([a, null, null], [b, null, null]), [b, null, null]);
+    expect(joinPhotoPlaces([b, null, null], [a, null, null]), [b, null, null]);
+  });
+
+  group('a newer version', () {
+    test('with a set list brings it, empty places and all', () {
+      expect(
+        photoListForNewer(
+          stored: set([a, b, null]),
+          incoming: set([c, null, null]),
+        ),
+        set([c, null, null]),
+      );
+    });
+
+    test('without a list keeps what is stored', () {
+      expect(
+        photoListForNewer(stored: set([a, null, null])),
+        set([a, null, null]),
+      );
+    });
+
+    test('with a seen list adds to a seen one and leaves a set one', () {
+      expect(
+        photoListForNewer(
+          stored: seen([a, null, null]),
+          incoming: seen([null, b, null]),
+        ),
+        seen([a, b, null]),
+      );
+      expect(
+        photoListForNewer(
+          stored: set([a, null, null]),
+          incoming: seen([null, b, null]),
+        ),
+        set([a, null, null]),
+        reason: 'an emptied place is not filled again by what a device holds',
+      );
+    });
+  });
+
+  group('the same version', () {
+    test('fills an unknown list', () {
+      expect(
+        photoListForSameVersion(incoming: seen([a, null, null])),
+        seen([a, null, null]),
+      );
+    });
+
+    test('a set list beats a seen one, whichever arrives first', () {
+      expect(
+        photoListForSameVersion(
+          stored: seen([a, b, null]),
+          incoming: set([c, null, null]),
+        ),
+        set([c, null, null]),
+      );
+      expect(
+        photoListForSameVersion(
+          stored: set([c, null, null]),
+          incoming: seen([a, b, null]),
+        ),
+        set([c, null, null]),
+      );
+    });
+
+    test('a seen list that knows nothing never empties a place', () {
+      expect(
+        photoListForSameVersion(
+          stored: seen([a, null, null]),
+          incoming: seen([null, null, b]),
+        ),
+        seen([a, null, b]),
+      );
+    });
   });
 }

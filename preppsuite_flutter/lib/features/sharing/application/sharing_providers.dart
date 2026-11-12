@@ -252,7 +252,21 @@ class SharedFolderController extends AsyncNotifier<SharedFolderState> {
         _queued = null;
         _queuedRepublish = false;
         if (ref.mounted) {
-          unawaited(_run(again).whenComplete(queued.complete));
+          // A run that throws -- only the preferences can, the sync itself
+          // catches everything -- is logged; the callers waiting for it are
+          // answered all the same.
+          unawaited(
+            _run(again)
+                .catchError((Object error, StackTrace stack) {
+                  developer.log(
+                    'a queued shared folder run failed',
+                    name: 'preppsuite.sharing',
+                    error: error,
+                    stackTrace: stack,
+                  );
+                })
+                .whenComplete(queued.complete),
+          );
         } else {
           queued.complete();
         }

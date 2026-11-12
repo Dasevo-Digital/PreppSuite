@@ -3801,6 +3801,7 @@
   "neighbourhoodShowCode": "Als QR-Code zeigen",
   "neighbourhoodEdit": "Bearbeiten",
   "neighbourhoodDelete": "Löschen",
+  "neighbourhoodDeleted": "Angebot gelöscht, auf allen Geräten des Haushalts.",
   "neighbourhoodOfferedOn": "angeboten am {date}",
   "neighbourhoodKindWater": "Wasser",
   "neighbourhoodKindFood": "Lebensmittel",

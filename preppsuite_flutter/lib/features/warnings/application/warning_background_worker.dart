@@ -32,7 +32,13 @@ bool get supportsBackgroundWarningPolling {
 
 /// Task name registered with the platform scheduler.
 const warningPollTaskName = 'preppsuite.warningPoll';
-const _warningPollTaskId = 'preppsuite.warningPoll.periodic';
+
+/// The task's unique name, which is what iOS knows it by (#345): the
+/// plugin submits a BGAppRefreshTask under it, so `Info.plist` has to
+/// permit it and `AppDelegate.swift` registers its launch handler under
+/// it. A mismatch fails quietly -- the submit is refused and only logged,
+/// and the poll never runs in the background.
+const warningPollTaskUniqueName = 'preppsuite.warningPoll.periodic';
 
 /// How often the platform is asked to run the poll.
 ///
@@ -159,7 +165,7 @@ Future<bool> _localDatabaseIsOpenable() async {
 Future<void> scheduleWarningPolling() async {
   await Workmanager().initialize(warningCallbackDispatcher);
   await Workmanager().registerPeriodicTask(
-    _warningPollTaskId,
+    warningPollTaskUniqueName,
     warningPollTaskName,
     frequency: warningPollInterval,
     existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
@@ -170,5 +176,5 @@ Future<void> scheduleWarningPolling() async {
 /// Stops the periodic poll — called when the user switches notifications
 /// off, so the app stops spending battery on something nobody will see.
 Future<void> cancelWarningPolling() async {
-  await Workmanager().cancelByUniqueName(_warningPollTaskId);
+  await Workmanager().cancelByUniqueName(warningPollTaskUniqueName);
 }

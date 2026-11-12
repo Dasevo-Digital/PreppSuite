@@ -113,6 +113,22 @@ void main() {
     );
   });
 
+  test('search finds Spanish typed without its accents', () {
+    final found = searchPhrases(
+      'policia',
+      from: PhraseLanguage.de,
+      to: PhraseLanguage.es,
+    );
+    expect(
+      found.map((p) => p[PhraseLanguage.es]),
+      contains('Por favor, llame a la policía.'),
+    );
+    expect(
+      searchPhrases('POLICÍA', from: PhraseLanguage.de, to: PhraseLanguage.es),
+      found,
+    );
+  });
+
   test('right to left where the script is', () {
     expect(
       [

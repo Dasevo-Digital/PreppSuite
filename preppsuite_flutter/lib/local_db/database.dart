@@ -908,17 +908,32 @@ class AppDatabase extends _$AppDatabase {
   ///
   /// A null [photoPath] empties the place: the row's list says another
   /// device took the picture out (#376).
+  ///
+  /// With [onlyIf] the place is written only while it still holds that
+  /// path: a folder sync works from what it read at its start, and a
+  /// picture somebody saved in the meantime must not be written over.
   Future<int> setInventoryPhotoPath({
     required String householdId,
     required String clientId,
     required String? photoPath,
     int slot = 0,
+    Value<String?> onlyIf = const Value.absent(),
   }) {
     final path = Value<String?>(photoPath);
-    return (update(inventoryItems)..where(
-          (t) =>
-              t.householdId.equals(householdId) & t.clientId.equals(clientId),
-        ))
+    return (update(inventoryItems)..where((t) {
+          final column = switch (slot) {
+            0 => t.photoPath,
+            1 => t.secondPhotoPath,
+            2 => t.thirdPhotoPath,
+            _ => throw RangeError.range(slot, 0, 2, 'slot'),
+          };
+          final row =
+              t.householdId.equals(householdId) & t.clientId.equals(clientId);
+          if (!onlyIf.present) return row;
+          final expected = onlyIf.value;
+          return row &
+              (expected == null ? column.isNull() : column.equals(expected));
+        }))
         .write(switch (slot) {
           0 => InventoryItemsCompanion(photoPath: path),
           1 => InventoryItemsCompanion(secondPhotoPath: path),
@@ -932,46 +947,57 @@ class AppDatabase extends _$AppDatabase {
     required String householdId,
     required String clientId,
     required String? photoPath,
+    Value<String?> onlyIf = const Value.absent(),
   }) {
-    return (update(possessions)..where(
-          (t) =>
-              t.householdId.equals(householdId) & t.clientId.equals(clientId),
-        ))
+    return (update(possessions)..where((t) {
+          final row =
+              t.householdId.equals(householdId) & t.clientId.equals(clientId);
+          if (!onlyIf.present) return row;
+          final expected = onlyIf.value;
+          return row &
+              (expected == null
+                  ? t.photoPath.isNull()
+                  : t.photoPath.equals(expected));
+        }))
         .write(PossessionsCompanion(photoPath: Value(photoPath)));
   }
 
-  /// Writes down which pictures a row has, read from the files this device
-  /// holds (#376). Not an edit, for the reason [setInventoryPhotoPath] is
-  /// not one: neither `updatedAt` nor `dirty` moves. The list is a fact
-  /// about the version every device already has, and it travels with that
-  /// version's next publication. Only a list that is still unknown is
-  /// filled: one that arrived in the meantime knows more than this device's
-  /// files.
-  Future<int> fillInventoryPhotoHashes({
+  /// Writes down which pictures this device holds for a row, as a list
+  /// seen here (#376). Not an edit, for the reason [setInventoryPhotoPath]
+  /// is not one: neither `updatedAt` nor `dirty` moves. Only while the list
+  /// is still [expected]: one set by an edit that arrived in the meantime
+  /// knows more than this device's files.
+  Future<int> replaceInventoryPhotoHashes({
     required String householdId,
     required String clientId,
+    required String? expected,
     required String hashes,
   }) {
     return (update(inventoryItems)..where(
           (t) =>
               t.householdId.equals(householdId) &
               t.clientId.equals(clientId) &
-              t.photoHashes.isNull(),
+              (expected == null
+                  ? t.photoHashes.isNull()
+                  : t.photoHashes.equals(expected)),
         ))
         .write(InventoryItemsCompanion(photoHashes: Value(hashes)));
   }
 
-  /// The same for the possessions list. See [fillInventoryPhotoHashes].
-  Future<int> fillPossessionPhotoHashes({
+  /// The same for the possessions list. See [replaceInventoryPhotoHashes].
+  Future<int> replacePossessionPhotoHashes({
     required String householdId,
     required String clientId,
+    required String? expected,
     required String hashes,
   }) {
     return (update(possessions)..where(
           (t) =>
               t.householdId.equals(householdId) &
               t.clientId.equals(clientId) &
-              t.photoHashes.isNull(),
+              (expected == null
+                  ? t.photoHashes.isNull()
+                  : t.photoHashes.equals(expected)),
         ))
         .write(PossessionsCompanion(photoHashes: Value(hashes)));
   }
@@ -1742,6 +1768,7 @@ class AppDatabase extends _$AppDatabase {
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
         (row) => row.toCompanion(false),
         photoHashesOf: (row) => row.photoHashes,
+        photoPlaces: inventoryPhotoPlaces,
       );
       changed += await _mergeInto(
         checklistTemplates,
@@ -1779,6 +1806,7 @@ class AppDatabase extends _$AppDatabase {
         (row) => (clientId: row.clientId, updatedAt: row.updatedAt),
         (row) => row.toCompanion(false),
         photoHashesOf: (row) => row.photoHashes,
+        photoPlaces: possessionPhotoPlaces,
       );
       changed += await _mergeInto(
         neighbourOffers,
@@ -1796,19 +1824,20 @@ class AppDatabase extends _$AppDatabase {
   /// Local-only columns never participate, and identical replays are free.
   ///
   /// [photoHashesOf] names the list of pictures a table's rows carry
-  /// (#376), which follows a rule of its own. A newer row brings its list
-  /// when it has one, and keeps the stored one when it has none: a device
+  /// (#376), with [photoPlaces] places, which follows a rule of its own
+  /// (`photo_hashes.dart`): a newer version's list stands when it was set
+  /// by an edit, a list only seen on some device adds to what was only
+  /// seen, and a version that brings none keeps the stored one. A device
   /// that edits a row without knowing its pictures says nothing about
-  /// them. For the same version the list fills an unknown one, and two
-  /// different lists settle on the one [comparePhotoHashes] keeps -- on
-  /// every device the same, so they stop trading pictures. None of that
-  /// raises `dirty` or moves `updatedAt`.
+  /// them. None of that raises `dirty` or moves `updatedAt`, and a list
+  /// never wins a row.
   Future<int> _mergeInto<T extends Table, R, C extends UpdateCompanion<R>>(
     TableInfo<T, R> table,
     List<IncomingRow<C>> incoming,
     ({String clientId, DateTime updatedAt}) Function(R) identify,
     C Function(R) companionOf, {
     String? Function(R)? photoHashesOf,
+    int photoPlaces = 0,
   }) async {
     if (incoming.isEmpty) return 0;
     final stored = {
@@ -1825,6 +1854,10 @@ class AppDatabase extends _$AppDatabase {
       variables: [Variable(photos), Variable(clientId)],
       updates: {table},
     );
+    PhotoList? listOf(String? encoded) =>
+        decodePhotoList(encoded, places: photoPlaces);
+    String? encoded(PhotoList? list) =>
+        list == null ? null : encodePhotoList(list);
     var changed = 0;
     for (final candidate in incoming) {
       final photos = photoHashesOf == null
@@ -1838,43 +1871,58 @@ class AppDatabase extends _$AppDatabase {
       final previous = stored[candidate.clientId];
       final sameSecond =
           previous != null && version.seconds == previous.seconds;
-      // Which list stays when both speak of this version.
       final previousPhotos = previous?.photos;
-      final photosWin =
-          photos != null &&
-          (previousPhotos == null ||
-              (photos != previousPhotos &&
-                  comparePhotoHashes(photos, previousPhotos) > 0));
       if (previous != null &&
           (version.seconds < previous.seconds ||
               (sameSecond &&
                   version.contents.compareTo(previous.contents) <= 0))) {
         // The row stays, and it can still learn which pictures it has.
-        if (sameSecond && photosWin) {
-          await keepPhotos(candidate.clientId, photos);
-          stored[candidate.clientId] = (
-            seconds: previous.seconds,
-            contents: previous.contents,
-            photos: photos,
+        if (sameSecond && photos != null) {
+          final kept = encoded(
+            photoListForSameVersion(
+              stored: listOf(previousPhotos),
+              incoming: listOf(photos),
+            ),
           );
-          changed++;
+          if (kept != previousPhotos) {
+            await keepPhotos(candidate.clientId, kept);
+            stored[candidate.clientId] = (
+              seconds: previous.seconds,
+              contents: previous.contents,
+              photos: kept,
+            );
+            changed++;
+          }
         }
         continue;
       }
       await into(table).insertOnConflictUpdate(candidate.companion);
-      // A sibling of the same second that wins on its contents does not
-      // also win on its list.
-      final kept = sameSecond && photos != null && !photosWin
-          ? previousPhotos
-          : (photos ?? previousPhotos);
-      if (sameSecond && photos != null && !photosWin) {
-        await keepPhotos(candidate.clientId, previousPhotos);
+      // What the write left in place -- the incoming list where it brought
+      // one -- and what the rule keeps. A seen list never overwrites a set
+      // one, and a sibling of the same second that wins on its contents
+      // does not also win on its list.
+      final written = photos ?? previousPhotos;
+      final kept = photoHashesOf == null
+          ? null
+          : encoded(
+              sameSecond
+                  ? photoListForSameVersion(
+                      stored: listOf(previousPhotos),
+                      incoming: listOf(photos),
+                    )
+                  : photoListForNewer(
+                      stored: listOf(previousPhotos),
+                      incoming: listOf(photos),
+                    ),
+            );
+      if (photoHashesOf != null && kept != written) {
+        await keepPhotos(candidate.clientId, kept);
       }
       // Also compare against rows accepted earlier in this same snapshot.
       stored[candidate.clientId] = (
         seconds: version.seconds,
         contents: version.contents,
-        photos: kept,
+        photos: photoHashesOf == null ? null : kept,
       );
       changed++;
     }

@@ -22,6 +22,8 @@
 /// inventory: what the screen showed is all anybody who films it gets.
 library;
 
+import 'package:flutter/widgets.dart' show StringCharacters;
+
 /// What an offer is about, for the icon and for sorting a list by it.
 /// Deliberately few: the text says what it really is.
 enum NeighbourOfferKind { water, food, energy, tools, care, help, other }
@@ -136,9 +138,16 @@ class NeighbourOfferCode {
 
 /// One line, at most [limit] characters: an offer is a line of text, and
 /// a line break inside one would read as the next field of the code.
+///
+/// Characters as the field counts them, not UTF-16 units: a text with an
+/// emoji in it passed the field and was cut here, and a cut through a
+/// surrogate pair went into the code as a broken character.
 String cleanNeighbourOfferText(String text, int limit) {
   final line = text.replaceAll(RegExp(r'\s+'), ' ').trim();
-  return line.length <= limit ? line : line.substring(0, limit).trimRight();
+  final characters = line.characters;
+  return characters.length <= limit
+      ? line
+      : characters.take(limit).toString().trimRight();
 }
 
 sealed class NeighbourOfferDecoded {

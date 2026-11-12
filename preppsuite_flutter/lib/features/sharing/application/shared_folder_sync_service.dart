@@ -182,6 +182,11 @@ class SharedFolderSyncService {
         return SharedFolderSyncResult(error: identityError);
       }
 
+      // What this device holds of the pictures, before anybody else's list
+      // is read (#376): a list that knows nothing of a picture here must
+      // meet this device's own, not take its place.
+      final listsFilled = await _fillPhotoLists();
+
       final deviceIds = await _folder.listDeviceIds();
       var received = 0;
       var foreignFiles = 0;
@@ -251,10 +256,8 @@ class SharedFolderSyncService {
         );
       }
 
-      // The pictures (#376), before this device writes its own file: the
-      // lists it fills in go out with it, and a picture is in the folder
-      // before the file that names it.
-      final listsFilled = await _fillPhotoLists();
+      // The pictures (#376), before this device writes its own file: a
+      // picture is in the folder before the file that names it.
       final pictures = await _photoSync();
       final photos = await _exchangePhotos(pictures);
 
@@ -325,11 +328,11 @@ class SharedFolderSyncService {
     }
   }
 
-  /// Writes down the lists of pictures this device can tell; see
-  /// [fillUnknownPhotoLists]. A failure costs the lists, never the rows.
+  /// Writes down the pictures this device holds; see [fillSeenPhotoLists].
+  /// A failure costs the lists, never the rows.
   Future<int> _fillPhotoLists() async {
     try {
-      return await fillUnknownPhotoLists(
+      return await fillSeenPhotoLists(
         _db,
         householdId: householdId,
         index: _photoIndex,
@@ -524,7 +527,10 @@ class SharedFolderSyncService {
       deviceId,
       _sealing
           ? await encryptForFolder(snapshot.encode(), folderKey!)
-          : snapshot.encode(),
+          // No pictures go into a plain folder, and so no hashes of them
+          // either (#376): with a copy of a picture, anybody who can read
+          // the folder could confirm it is in this household.
+          : snapshot.withoutPhotoLists().encode(),
     );
     List<PublishedRow> versions(List<Map<String, Object?>> rows) => [
       for (final row in rows)

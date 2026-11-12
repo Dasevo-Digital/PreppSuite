@@ -128,6 +128,20 @@ class NeighbourOfferController {
     );
   }
 
+  /// Takes a deletion back: the offer as it was, without its tombstone,
+  /// as a new edit so the other devices get it back too.
+  Future<void> restore(NeighbourOffer offer) {
+    return _db.upsertNeighbourOffer(
+      offer
+          .toCompanion(false)
+          .copyWith(
+            deletedAt: const Value(null),
+            updatedAt: Value(DateTime.now().toUtc()),
+            dirty: const Value(true),
+          ),
+    );
+  }
+
   /// Today where the offer is made, as the midnight-UTC instant every
   /// offer's day is stored as -- a date, which is all an offer carries.
   static DateTime _today(DateTime now) {

@@ -28,12 +28,14 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
 import '../../../core/photo_hashes.dart';
 import '../../../core/photo_vault.dart';
 import '../../../core/portable_paths.dart';
+import '../../../core/resource_limits.dart';
 import '../../../local_db/database.dart';
 import '../../inventory/application/inventory_photo_service.dart';
 import '../../inventory/application/photo_content_index.dart';
@@ -106,47 +108,82 @@ typedef _Place = ({
   String? wanted,
 });
 
-/// Writes down the lists of pictures this device can tell, for the rows
-/// whose list is still unknown. Answers how many it filled.
+/// Writes down which pictures this device holds, for the rows whose list
+/// was not set by an edit. Answers how many lists it changed.
 ///
 /// That is a row from before #376, or one whose pictures changed here
-/// without the screen being able to read them. Only where every picture
-/// the row names can be read: a list with a gap would say that place is
-/// empty, and another device would empty it.
+/// without the screen being able to read them. What comes out is a list
+/// *seen* here: the places this device can show, and nothing about the
+/// others -- a device that never got a picture sees an empty place where
+/// there is none, and must not make it empty anywhere. A row this device
+/// holds no picture of gets no list at all. A list set by an edit is left
+/// alone; it knows more than these files.
 ///
-/// Runs for every folder, plain ones too: the lists are no secret, and a
-/// folder encrypted later then knows them already.
-Future<int> fillUnknownPhotoLists(
+/// Runs for every folder, plain ones too, and before this run reads the
+/// other devices' files: what this device holds is in its own list before
+/// anybody else's can be taken for it.
+Future<int> fillSeenPhotoLists(
   AppDatabase db, {
   required String householdId,
   required PhotoContentIndex index,
 }) async {
-  var filled = 0;
+  Future<List<String?>> seenHere(List<String?> paths) async => [
+    for (final path in paths)
+      path == null || path.isEmpty
+          ? null
+          : await index.hashOf(
+              File(InventoryPhotoService.resolvePhotoPath(path)),
+            ),
+  ];
+
+  PhotoList? next(PhotoList? stored, List<String?> seen) {
+    if (stored != null && !stored.seen) return null;
+    if (seen.every((hash) => hash == null)) return null;
+    final joined = PhotoList(
+      stored == null ? seen : joinPhotoPlaces(stored.places, seen),
+      seen: true,
+    );
+    return joined == stored ? null : joined;
+  }
+
+  var changed = 0;
   for (final row in await db.inventoryItemsForSync(householdId)) {
-    if (row.photoHashes != null || row.deletedAt != null) continue;
-    final hashes = await index.hashesOf([
-      row.photoPath,
-      row.secondPhotoPath,
-      row.thirdPhotoPath,
-    ]);
-    if (hashes == null) continue;
-    filled += await db.fillInventoryPhotoHashes(
+    if (row.deletedAt != null) continue;
+    final stored = decodePhotoList(
+      row.photoHashes,
+      places: inventoryPhotoPlaces,
+    );
+    if (stored != null && !stored.seen) continue;
+    final list = next(
+      stored,
+      await seenHere([row.photoPath, row.secondPhotoPath, row.thirdPhotoPath]),
+    );
+    if (list == null) continue;
+    changed += await db.replaceInventoryPhotoHashes(
       householdId: householdId,
       clientId: row.clientId,
-      hashes: encodePhotoHashes(hashes),
+      expected: row.photoHashes,
+      hashes: encodePhotoList(list),
     );
   }
   for (final row in await db.possessionsForSync(householdId)) {
-    if (row.photoHashes != null || row.deletedAt != null) continue;
-    final hashes = await index.hashesOf([row.photoPath]);
-    if (hashes == null) continue;
-    filled += await db.fillPossessionPhotoHashes(
+    if (row.deletedAt != null) continue;
+    final stored = decodePhotoList(
+      row.photoHashes,
+      places: possessionPhotoPlaces,
+    );
+    if (stored != null && !stored.seen) continue;
+    final list = next(stored, await seenHere([row.photoPath]));
+    if (list == null) continue;
+    changed += await db.replacePossessionPhotoHashes(
       householdId: householdId,
       clientId: row.clientId,
-      hashes: encodePhotoHashes(hashes),
+      expected: row.photoHashes,
+      hashes: encodePhotoList(list),
     );
   }
-  return filled;
+  await index.flush();
+  return changed;
 }
 
 /// What one run did with the pictures.
@@ -228,13 +265,10 @@ class FolderPhotoSync {
             clientId: row.clientId,
             slot: slot,
             path: path == null || path.isEmpty ? null : path,
-            wanted: switch (decodePhotoHashes(
-              row.photoHashes,
-              places: inventoryPhotoPlaces,
-            )) {
-              final hashes? => hashes[slot],
-              null => _unknown,
-            },
+            wanted: _wanted(
+              decodePhotoList(row.photoHashes, places: inventoryPhotoPlaces),
+              slot,
+            ),
           ),
     for (final row in await _db.possessionsForSync(householdId))
       if (row.deletedAt == null)
@@ -245,19 +279,25 @@ class FolderPhotoSync {
           path: row.photoPath == null || row.photoPath!.isEmpty
               ? null
               : row.photoPath,
-          wanted: switch (decodePhotoHashes(
-            row.photoHashes,
-            places: possessionPhotoPlaces,
-          )) {
-            final hashes? => hashes[0],
-            null => _unknown,
-          },
+          wanted: _wanted(
+            decodePhotoList(row.photoHashes, places: possessionPhotoPlaces),
+            0,
+          ),
         ),
   ];
 
-  /// What a place wants when its row's list is not known: nothing can be
-  /// said about it, and nothing is done to it.
+  /// What a place wants when nothing can be said about it -- its row's list
+  /// is not known, or was only seen somewhere and names nothing here -- and
+  /// nothing is done to it.
   static const _unknown = '?';
+
+  /// The picture [list] wants in [slot]: a hash, null for a place an edit
+  /// emptied, or [_unknown].
+  static String? _wanted(PhotoList? list, int slot) {
+    if (list == null) return _unknown;
+    final hash = list.places[slot];
+    return hash == null && list.seen ? _unknown : hash;
+  }
 
   /// Sends what the folder lacks and fetches what this device lacks.
   Future<FolderPhotoResult> exchange() async {
@@ -294,6 +334,10 @@ class FolderPhotoSync {
       if (!offered.add(picture.hash)) continue;
       final name = await names.nameOf(picture.hash);
       if (listing[name]?.isNotEmpty ?? false) continue;
+      // Looked at before it is opened: a picture the folder would refuse
+      // sealed -- Base64 makes four bytes of three -- would otherwise be
+      // read and sealed again on every run, and refused every time.
+      if (!_fitsTheFolder(picture.file)) continue;
       final bytes = await _vault.read(picture.file);
       if (bytes == null || bytes.length > budget) continue;
       try {
@@ -334,10 +378,30 @@ class FolderPhotoSync {
       if (await _point(place, storeLocation(arrived.path)) > 0) {
         fetched++;
         if (place.path case final path?) released.add(path);
+      } else {
+        // The place changed while this run was fetching: somebody saved a
+        // picture there. Theirs stays, and this copy goes.
+        released.add(arrived.path);
       }
     }
     await _letGo(released);
+    await _index.flush();
+    _lastListing = listing;
     return FolderPhotoResult(fetched: fetched, emptied: emptied, sent: sent);
+  }
+
+  /// The folder's picture files as [exchange] left them, for [cleanUp]: on
+  /// Android every listing is a query per file, and once per run is enough.
+  Map<String, List<String>>? _lastListing;
+
+  /// Whether the sealed picture in [file] stays within what the folder
+  /// takes. A stat, so it costs nothing on the runs where it does not fit.
+  static bool _fitsTheFolder(File file) {
+    try {
+      return file.lengthSync() * 4 ~/ 3 + 4096 <= maxFolderPhotoBytes;
+    } on FileSystemException {
+      return false;
+    }
   }
 
   int _fetchBudget = 0;
@@ -389,17 +453,21 @@ class FolderPhotoSync {
     return null;
   }
 
+  /// Points [place] at [path], only while it still holds what this run
+  /// read: a picture saved there in the meantime is not written over.
   Future<int> _point(_Place place, String? path) => place.possession
       ? _db.setPossessionPhotoPath(
           householdId: householdId,
           clientId: place.clientId,
           photoPath: path,
+          onlyIf: Value(place.path),
         )
       : _db.setInventoryPhotoPath(
           householdId: householdId,
           clientId: place.clientId,
           photoPath: path,
           slot: place.slot,
+          onlyIf: Value(place.path),
         );
 
   /// Deletes the files places showed before, unless a place still shows
@@ -437,7 +505,11 @@ class FolderPhotoSync {
       wanted.add(await names.nameOf(hash));
     }
     var removed = 0;
-    for (final fileName in await _folder.listPhotoFiles()) {
+    final files = switch (_lastListing) {
+      final listing? => [for (final names in listing.values) ...names],
+      null => await _folder.listPhotoFiles(),
+    };
+    for (final fileName in files) {
       final parsed = parseFolderPhotoFileName(fileName);
       if (parsed == null || parsed.deviceId != deviceId) continue;
       if (wanted.contains(parsed.name)) continue;

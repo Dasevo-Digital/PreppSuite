@@ -77,6 +77,12 @@ class _MorseScreenState extends State<MorseScreen>
   var _lit = false;
   int? _character;
 
+  /// The character the count stands at: the last one sent. The rhythm
+  /// names none in the gaps between letters and words and in the pause at
+  /// the end, and the count read "1 of 12" in each of them; the sender
+  /// lost their place.
+  int? _counted;
+
   @override
   void dispose() {
     _stop();
@@ -127,6 +133,7 @@ class _MorseScreenState extends State<MorseScreen>
       setState(() {
         _lit = lit;
         _character = character;
+        if (character != null) _counted = character;
       });
     });
     setState(() {});
@@ -145,6 +152,7 @@ class _MorseScreenState extends State<MorseScreen>
     _codes = const [];
     _lit = false;
     _character = null;
+    _counted = null;
   }
 
   @override
@@ -487,7 +495,7 @@ class _MorseScreenState extends State<MorseScreen>
                     const SizedBox(height: 8),
                     Text(
                       l10n.morseLampSending(
-                        (at ?? 0) + 1,
+                        (_counted ?? 0) + 1,
                         rhythm.characters,
                       ),
                       style: theme.textTheme.bodyMedium?.copyWith(

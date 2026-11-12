@@ -9388,6 +9388,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get neighbourhoodDelete => 'Delete';
 
   @override
+  String get neighbourhoodDeleted =>
+      'Offer deleted, on every device of the household.';
+
+  @override
   String neighbourhoodOfferedOn(String date) {
     return 'offered on $date';
   }
