@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:preppsuite_flutter/features/emergency_points/application/offline_nearby_points.dart';
 import 'package:preppsuite_flutter/features/first_aid/application/defibrillators.dart';
+import 'package:preppsuite_flutter/features/shelters/application/geo_bounds.dart';
 import 'package:preppsuite_flutter/core/geolocation_service.dart';
 import 'package:preppsuite_flutter/features/first_aid/presentation/defibrillator_screen.dart';
 import 'package:preppsuite_flutter/features/shelters/application/overpass_shelter_client.dart';
@@ -175,14 +177,19 @@ void main() {
 
     Future<void> searchAddress(
       WidgetTester tester,
-      DefibrillatorClient client,
-    ) async {
+      DefibrillatorClient client, {
+      OfflineNearbyPointStore offlinePoints = const OfflineNearbyPointStore(),
+    }) async {
       await tester.pumpWidget(
         MaterialApp(
           locale: const Locale('de'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: DefibrillatorScreen(client: client, geolocation: geolocation()),
+          home: DefibrillatorScreen(
+            client: client,
+            geolocation: geolocation(),
+            offlinePoints: offlinePoints,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -206,13 +213,14 @@ void main() {
 
       expect(
         find.text(
-          'OpenStreetMap antwortet gerade nicht. '
-          'Bitte gleich noch einmal versuchen.',
+          'OpenStreetMap ist gerade gestört: Keiner der Server hat '
+          'geantwortet. An deinem Netz liegt es nicht. Bitte später noch '
+          'einmal versuchen.',
         ),
         findsOneWidget,
       );
       expect(find.textContaining('Keine Verbindung'), findsNothing);
-      expect(find.textContaining('letzte Suche'), findsNothing);
+      expect(find.textContaining('gespeicherte Suche'), findsNothing);
     });
 
     testWidgets('no network over a kept list says it is the last one', (
@@ -240,11 +248,110 @@ void main() {
         failing(() => const SocketException('Network is unreachable')),
       );
 
+      // With the day it is from (#366): a list from October is not the
+      // same answer as one from this morning.
       expect(
-        find.text('Keine Verbindung. Gezeigt wird die letzte Suche.'),
+        find.text(
+          'Keine Verbindung. Gezeigt wird die gespeicherte Suche vom '
+          '6. Okt. 2026.',
+        ),
         findsOneWidget,
       );
       expect(find.textContaining('Neben Raum 143'), findsOneWidget);
     });
+
+    testWidgets('OpenStreetMap down: the offline map\'s points, with their '
+        'day (#366)', (tester) async {
+      await searchAddress(
+        tester,
+        DefibrillatorClient(
+          retryDelay: Duration.zero,
+          httpClient: MockClient((request) async => http.Response('', 502)),
+        ),
+        offlinePoints: _KeptWithMap([
+          const Defibrillator(
+            id: 7,
+            latitude: 52.2733,
+            longitude: 10.5254,
+            tags: {'defibrillator:location': 'Am Empfang'},
+          ),
+        ]),
+      );
+
+      expect(
+        find.text(
+          'OpenStreetMap ist gerade gestört: Keiner der Server hat '
+          'geantwortet. Gezeigt werden die mit der Offline-Karte '
+          'gespeicherten Punkte, Stand 1. Nov. 2026.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Am Empfang'), findsOneWidget);
+      expect(
+        find.textContaining('1. Nov. 2026, aus der Offline-Karte'),
+        findsOneWidget,
+      );
+      // The map's points are not kept as the last search: they are kept
+      // anyway, and a real search would be lost under them.
+      expect(await const DefibrillatorStore().load(), isNull);
+    });
+
+    testWidgets('the live answer replaces the offline map\'s points', (
+      tester,
+    ) async {
+      await searchAddress(
+        tester,
+        DefibrillatorClient(
+          retryDelay: Duration.zero,
+          httpClient: MockClient(
+            (request) async => http.Response.bytes(utf8.encode(answer), 200),
+          ),
+        ),
+        offlinePoints: _KeptWithMap([
+          const Defibrillator(
+            id: 7,
+            latitude: 52.2733,
+            longitude: 10.5254,
+            tags: {'defibrillator:location': 'Am Empfang'},
+          ),
+        ]),
+      );
+
+      expect(find.textContaining('Am Empfang'), findsNothing);
+      expect(find.textContaining('Neben Raum 143'), findsOneWidget);
+      expect(find.textContaining('aus der Offline-Karte'), findsNothing);
+      expect(find.textContaining('gestört'), findsNothing);
+      expect(await const DefibrillatorStore().load(), isNotNull);
+    });
   });
+}
+
+/// Points kept with an offline map of Braunschweig, fetched on
+/// 1 November 2026. Answered without a file: the store itself is tested
+/// in `offline_nearby_points_test.dart`, and real file reads do not run
+/// in a widget test's clock.
+class _KeptWithMap extends OfflineNearbyPointStore {
+  _KeptWithMap(this.defibrillators);
+
+  final List<Defibrillator> defibrillators;
+
+  @override
+  Future<OfflineNearbyAnswer?> around(
+    double latitude,
+    double longitude,
+  ) async => OfflineNearbyAnswer(
+    kept: OfflineNearbyPoints(
+      bounds: const GeoBoundingBox(
+        west: 10.4,
+        south: 52.2,
+        east: 10.7,
+        north: 52.4,
+      ),
+      fetchedAt: DateTime(2026, 11, 1, 12),
+      defibrillators: defibrillators.length,
+      points: 0,
+    ),
+    defibrillators: defibrillators,
+    points: const [],
+  );
 }

@@ -52,17 +52,27 @@ class OverpassShelterClient {
     if (_ownsClient) _httpClient.close();
   }
 
-  /// The main instance first, then a mirror.
+  /// The main instance first, then two others.
   ///
   /// Not redundancy for its own sake: `overpass-api.de/api/status` states
   /// "Rate limit: 2" — two concurrent queries per IP address — and
   /// answers 429 for the third. Pressing refresh twice is enough to hit
   /// it, which is what "OpenStreetMap/Overpass konnte nicht geladen
-  /// werden" was usually reporting. Both were confirmed live on
-  /// 2026-09-11; the mirror is slower (6.5 s against 0.5 s for the same
-  /// query) which is why it is second and not first.
+  /// werden" was usually reporting. The kumi mirror was confirmed live on
+  /// 2026-09-11 and is slower (6.5 s against 0.5 s for the same query),
+  /// which is why it is last. private.coffee came in with #366: from 8
+  /// November 2026 the main instance answered 502 for days and kumi not
+  /// at all. All three are in Germany or Switzerland; instances run by
+  /// mail.ru or in Russia are left out, because what goes there is a
+  /// search area around somebody's home.
+  ///
+  /// Even three fail together, as they did on 12 November. The
+  /// defibrillator and emergency-point searches ask QLever
+  /// (`osm_point_sources.dart`), which is not an Overpass at all, right
+  /// after the main instance and before the other two (`askNearbyPoints`).
   static const endpoints = [
     'https://overpass-api.de/api/interpreter',
+    'https://overpass.private.coffee/api/interpreter',
     'https://overpass.kumi.systems/api/interpreter',
   ];
 
@@ -197,11 +207,17 @@ Future<http.Response> askOverpass(
   String query, {
   Duration retryDelay = OverpassShelterClient.defaultRetryDelay,
   Duration timeout = const Duration(seconds: 30),
+  Iterable<String> endpoints = OverpassShelterClient.endpoints,
 }) async {
   OverpassException? last;
   Object? failure;
+  // Whether any instance was there at all: answered, or took the request
+  // and ran out of time. With one instance the last error said that on
+  // its own; with three, a single one whose name no longer resolves
+  // would have turned "the service is down" into "no connection" (#366).
+  var reached = false;
 
-  for (final endpoint in OverpassShelterClient.endpoints) {
+  for (final endpoint in endpoints) {
     for (var attempt = 0; attempt < 2; attempt++) {
       if (attempt > 0) await Future<void>.delayed(retryDelay);
 
@@ -222,9 +238,11 @@ Future<http.Response> askOverpass(
       } on Object catch (error) {
         // A dead instance is worth moving on from, not retrying.
         failure = error;
+        if (error is! SocketException) reached = true;
         break;
       }
 
+      reached = true;
       if (response.statusCode == 200) return response;
 
       last = OverpassException(response.statusCode);
@@ -232,7 +250,7 @@ Future<http.Response> askOverpass(
     }
   }
 
-  throw last ?? OverpassException(0, cause: failure);
+  throw last ?? OverpassException(0, cause: failure, reachedAny: reached);
 }
 
 class _CachedShelters {
@@ -250,7 +268,11 @@ class _CachedShelters {
 /// unreachable, which does not. The shelter screen used to report both
 /// as one sentence with no reason in it at all.
 class OverpassException implements Exception {
-  const OverpassException(this.statusCode, {this.cause});
+  const OverpassException(
+    this.statusCode, {
+    this.cause,
+    this.reachedAny = false,
+  });
 
   /// The HTTP status, or 0 when no instance answered at all.
   final int statusCode;
@@ -258,11 +280,17 @@ class OverpassException implements Exception {
   /// Why no instance answered, when none did: the last error on the way.
   final Object? cause;
 
+  /// Whether one of the instances was there at all -- answered, or took
+  /// the request and ran out of time -- although none gave an answer.
+  final bool reachedAny;
+
   /// Whether this device could not reach any instance at all, as opposed
   /// to reaching them and getting no answer in time. Only the first is
   /// "no connection"; saying so for the second sends somebody to look at
-  /// a network that works (#217).
-  bool get noNetwork => statusCode == 0 && cause is SocketException;
+  /// a network that works (#217). Every instance has to have been out of
+  /// reach, not only the last one asked (#366).
+  bool get noNetwork =>
+      statusCode == 0 && cause is SocketException && !reachedAny;
 
   /// Whether this is the rate limit or their own query timeout — the two
   /// that are about the moment rather than the request.

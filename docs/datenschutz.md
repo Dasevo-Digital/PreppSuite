@@ -65,13 +65,24 @@ ab. Übertragen werden IP-Adresse sowie gewählte Region, Station oder Strecke.
 **Karten und Ortssuche.** Ohne Offline-Archiv werden Kartenkacheln von
 OpenStreetMap geladen. Orts- und Rückwärtssuche verwendet Nominatim;
 Schutzräume, Defibrillatoren und Notfallpunkte (Notbrunnen, Hilfspunkte,
-Sirenen) kommen über Overpass, Schutzräume außerdem über WWBOTA. Übertragen
+Sirenen) kommen über Overpass (overpass-api.de, overpass.private.coffee,
+overpass.kumi.systems), Schutzräume außerdem über WWBOTA. Antwortet Overpass
+nicht, fragt die Suche nach Defibrillatoren und Notfallpunkten QLever an der
+Universität Freiburg (qlever.dev) mit demselben Suchgebiet. Übertragen
 werden IP-Adresse, Suchtext, Koordinaten oder Kartenausschnitt. Der eigene
 Standort geht dabei nur gerundet hinaus: für die Bestimmung des Bundeslands
 auf zwei Nachkommastellen (etwa ein Kilometer), für die Suche nach
 Schutzräumen, Defibrillatoren und Notfallpunkten als Suchgebiet um einen
 Rasterpunkt im selben Abstand statt um die genaue Position. Offline-Karte und lokale Umgebungssuche vermeiden diese Abrufe
 nach dem Download.
+
+**Punkte zur Offline-Karte.** Wird eine Offline-Karte übernommen, lädt die
+App einmal alle Defibrillatoren und Notfallpunkte ihres Gebiets, danach alle
+60 Tage neu. Dafür geht der Rahmen der Karte an QLever, ersatzweise an
+Overpass, also das Kartengebiet und nicht der eigene Standort. Die Punkte
+liegen unverschlüsselt im Datenordner der App, weil es öffentliche Daten
+für ein Gebiet sind, das die Kartendatei selbst schon nennt. Sie werden
+gelöscht, wenn keine Offline-Karte mehr gewählt ist.
 
 **Kartendownload.** Kartenarchive werden von OpenFreeMap oder – nach eigener
 Konfiguration – MapTiler geladen. Der Anbieter erhält IP-Adresse und das

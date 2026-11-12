@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:http/http.dart' as http;
 
 import '../../../core/private_preferences.dart';
+import '../../emergency_points/application/osm_point_sources.dart';
 import '../../shelters/application/geo_bounds.dart' show gridCircle;
 import '../../shelters/application/overpass_shelter_client.dart';
 import '../../../core/http_client.dart';
@@ -131,7 +132,8 @@ class DefibrillatorClient {
   }
 
   /// Every defibrillator within [defibrillatorRadiusMetres], nearest
-  /// first. Throws an `OverpassException` when no instance answered.
+  /// first. Throws an `OverpassException` when neither the Overpass
+  /// instances nor QLever answered.
   Future<List<Defibrillator>> near(double latitude, double longitude) async {
     // Around a grid point, not the fix itself (#293).
     final circle = gridCircle(latitude, longitude, defibrillatorRadiusMetres);
@@ -141,43 +143,53 @@ class DefibrillatorClient {
         '(around:${circle.radiusMetres},${circle.latitude},'
         '${circle.longitude});'
         'out 200;';
-    final response = await askOverpass(
+    return askNearbyPoints(
       _httpClient,
-      query,
+      overpassQuery: query,
+      box: boxAroundCircle(circle),
       retryDelay: _retryDelay,
       // Somebody may be kneeling next to a person while this runs. The
       // query is tiny and normally back within a second or two.
       timeout: const Duration(seconds: 15),
+      fromOverpass: (response) {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        final elements = decoded is Map ? decoded['elements'] : null;
+        if (elements is! List) return const <Defibrillator>[];
+        return nearestDefibrillators(
+          [
+            for (final element in elements)
+              if (element is Map && element['type'] == 'node')
+                ?Defibrillator.fromJson({
+                  'id': element['id'],
+                  'lat': element['lat'],
+                  'lon': element['lon'],
+                  'tags': element['tags'],
+                }),
+          ],
+          latitude,
+          longitude,
+        );
+      },
+      fromQlever: (set) =>
+          nearestDefibrillators(set.defibrillators, latitude, longitude),
     );
-    final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-    final elements = decoded is Map ? decoded['elements'] : null;
-    if (elements is! List) return const [];
-    final found = [
-      for (final element in elements)
-        if (element is Map && element['type'] == 'node')
-          ?Defibrillator.fromJson({
-            'id': element['id'],
-            'lat': element['lat'],
-            'lon': element['lon'],
-            'tags': element['tags'],
-          }),
-    ];
-    // The circle asked for is a little larger than the radius.
-    found.removeWhere(
-      (aed) =>
-          distanceMetres(latitude, longitude, aed.latitude, aed.longitude) >
-          defibrillatorRadiusMetres,
-    );
-    found.sort(
-      (a, b) => distanceMetres(
-        latitude,
-        longitude,
-        a.latitude,
-        a.longitude,
-      ).compareTo(distanceMetres(latitude, longitude, b.latitude, b.longitude)),
-    );
-    return found;
   }
+}
+
+/// Those of [all] within [defibrillatorRadiusMetres] of the place, nearest
+/// first: for an answer about a circle a little larger than that, and for
+/// the ones kept with the offline map (#366).
+List<Defibrillator> nearestDefibrillators(
+  Iterable<Defibrillator> all,
+  double latitude,
+  double longitude,
+) {
+  double away(Defibrillator aed) =>
+      distanceMetres(latitude, longitude, aed.latitude, aed.longitude);
+  return [
+    for (final aed in all)
+      if (away(aed) <= defibrillatorRadiusMetres) aed,
+  ]..sort((a, b) => away(a).compareTo(away(b)));
 }
 
 /// The last search, for the day without a network.
@@ -188,7 +200,14 @@ class DefibrillatorSearch {
     required this.checkedAt,
     required this.found,
     this.placeName,
+    this.fromOfflineMap = false,
   });
+
+  /// Taken from the points kept with the offline map rather than asked
+  /// for (#366); [checkedAt] is then when those were fetched. Never
+  /// stored as the last search: the map's points are kept anyway, and a
+  /// real search from before would be lost under them.
+  final bool fromOfflineMap;
 
   final double latitude;
   final double longitude;

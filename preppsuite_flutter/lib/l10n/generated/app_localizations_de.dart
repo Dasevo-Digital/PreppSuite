@@ -8527,19 +8527,70 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aedOpenMap => 'Auf der Karte öffnen';
 
   @override
-  String get aedOffline => 'Keine Verbindung. Gezeigt wird die letzte Suche.';
+  String aedOffline(String date) {
+    return 'Keine Verbindung. Gezeigt wird die gespeicherte Suche vom $date.';
+  }
 
   @override
   String get aedOfflineNothingKept =>
-      'Keine Verbindung, und eine frühere Suche ist nicht gespeichert. Einmal mit Netz suchen, danach geht es auch offline.';
+      'Keine Verbindung, und eine frühere Suche ist nicht gespeichert. Einmal mit Netz suchen oder in den Einstellungen eine Offline-Karte wählen: Mit ihr werden die Punkte ihres Gebiets mitgenommen.';
 
   @override
   String get aedNoAnswer =>
-      'OpenStreetMap antwortet gerade nicht. Bitte gleich noch einmal versuchen.';
+      'OpenStreetMap ist gerade gestört: Keiner der Server hat geantwortet. An deinem Netz liegt es nicht. Bitte später noch einmal versuchen.';
 
   @override
-  String get aedNoAnswerKept =>
-      'OpenStreetMap antwortet gerade nicht. Gezeigt wird die letzte Suche.';
+  String aedNoAnswerKept(String date) {
+    return 'OpenStreetMap ist gerade gestört: Keiner der Server hat geantwortet. Gezeigt wird die gespeicherte Suche vom $date.';
+  }
+
+  @override
+  String aedOfflineMap(String date) {
+    return 'Keine Verbindung. Gezeigt werden die mit der Offline-Karte gespeicherten Punkte, Stand $date.';
+  }
+
+  @override
+  String aedNoAnswerMap(String date) {
+    return 'OpenStreetMap ist gerade gestört: Keiner der Server hat geantwortet. Gezeigt werden die mit der Offline-Karte gespeicherten Punkte, Stand $date.';
+  }
+
+  @override
+  String aedFromOfflineMap(String date) {
+    return '$date, aus der Offline-Karte';
+  }
+
+  @override
+  String offlineMapPointsKept(int defibrillators, int points, String date) {
+    final intl.NumberFormat defibrillatorsNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String defibrillatorsString = defibrillatorsNumberFormat.format(
+      defibrillators,
+    );
+    final intl.NumberFormat pointsNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String pointsString = pointsNumberFormat.format(points);
+
+    return 'Mitgenommen für dieses Kartengebiet: $defibrillatorsString Defibrillatoren sowie $pointsString Notbrunnen, Infopunkte und Sirenen, Stand $date.';
+  }
+
+  @override
+  String get offlineMapPointsFetching =>
+      'Defibrillatoren, Notbrunnen, Infopunkte und Sirenen des Kartengebiets werden geladen …';
+
+  @override
+  String get offlineMapPointsFailed =>
+      'Defibrillatoren, Notbrunnen, Infopunkte und Sirenen des Kartengebiets konnten nicht geladen werden.';
+
+  @override
+  String get offlineMapPointsTooLarge =>
+      'Das Kartengebiet ist zu groß, um seine Defibrillatoren, Notbrunnen, Infopunkte und Sirenen mitzunehmen.';
+
+  @override
+  String get offlineMapPointsMissing =>
+      'Defibrillatoren, Notbrunnen, Infopunkte und Sirenen des Kartengebiets sind noch nicht gespeichert.';
+
+  @override
+  String get offlineMapPointsRefresh => 'Punkte aktualisieren';
 
   @override
   String get aedIncomplete =>

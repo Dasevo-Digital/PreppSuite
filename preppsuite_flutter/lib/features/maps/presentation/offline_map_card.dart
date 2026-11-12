@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../l10n/generated/app_localizations.dart';
+import '../../emergency_points/application/offline_nearby_points.dart';
+import '../../shelters/application/geo_bounds.dart' show GeoBoundingBox;
 import '../application/map_archive_access.dart';
 import '../application/offline_map_providers.dart';
 import 'map_download_screen.dart';
@@ -84,6 +87,10 @@ class _Body extends ConsumerWidget {
                 color: theme.colorScheme.error,
               ),
             ),
+          if (archive != null) ...[
+            const SizedBox(height: 8),
+            _OfflinePoints(bounds: boundsOfArchive(archive), l10n: l10n),
+          ],
         ],
         const SizedBox(height: 12),
         Wrap(
@@ -142,4 +149,67 @@ class _Body extends ConsumerWidget {
     OfflineMapProblem.notVectorTiles => l10n.offlineMapErrorNotVector,
     OfflineMapProblem.unknownSchema => l10n.offlineMapErrorSchema,
   };
+}
+
+/// What came along with the map for the searches near a place (#366):
+/// how many, from when, and a way to ask again.
+class _OfflinePoints extends ConsumerWidget {
+  const _OfflinePoints({required this.bounds, required this.l10n});
+
+  final GeoBoundingBox bounds;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final state = ref.watch(offlineNearbyPointsProvider).value;
+    if (state == null) return const SizedBox.shrink();
+    final kept = state.kept;
+    final forThisMap = kept != null && kept.isFor(bounds);
+
+    final text = switch (state.status) {
+      OfflinePointsStatus.fetching => l10n.offlineMapPointsFetching,
+      OfflinePointsStatus.tooLarge => l10n.offlineMapPointsTooLarge,
+      OfflinePointsStatus.failed when !forThisMap =>
+        l10n.offlineMapPointsFailed,
+      _ when forThisMap => l10n.offlineMapPointsKept(
+        kept.defibrillators,
+        kept.points,
+        DateFormat.yMMMd(l10n.localeName).format(kept.fetchedAt.toLocal()),
+      ),
+      _ => l10n.offlineMapPointsMissing,
+    };
+    final failedAgain =
+        state.status == OfflinePointsStatus.failed && forThisMap;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(text, style: theme.textTheme.bodySmall),
+        if (failedAgain)
+          Text(
+            l10n.offlineMapPointsFailed,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+        if (state.status == OfflinePointsStatus.fetching)
+          const Padding(
+            padding: EdgeInsets.only(top: 4),
+            child: LinearProgressIndicator(),
+          )
+        else if (state.status != OfflinePointsStatus.tooLarge)
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              onPressed: () => ref
+                  .read(offlineNearbyPointsProvider.notifier)
+                  .refresh(bounds),
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.offlineMapPointsRefresh),
+            ),
+          ),
+      ],
+    );
+  }
 }

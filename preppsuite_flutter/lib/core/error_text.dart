@@ -61,10 +61,12 @@ String describeError(AppLocalizations l10n, Object error) {
     ),
 
     // No network. By far the most common of these, and the only one where
-    // trying again is the right advice.
+    // trying again is the right advice. An Overpass search that reached
+    // none of its instances is the same thing in its own wrapping (#366).
     SocketException() ||
     HttpException() ||
-    TimeoutException() => l10n.errorNoConnection,
+    TimeoutException() ||
+    OverpassException(noNetwork: true) => l10n.errorNoConnection,
 
     // A file that was there when it was picked and is not now: an unplugged
     // disk, a folder the user tidied, a permission that did not survive.

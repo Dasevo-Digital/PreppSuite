@@ -138,10 +138,11 @@ void main() {
 
         await client.fetchShelters(bounds);
 
+        // The next instance answers; the third is not asked at all.
         expect(asked, [
           'overpass-api.de',
           'overpass-api.de',
-          'overpass.kumi.systems',
+          'overpass.private.coffee',
         ]);
       },
       timeout: const Timeout(Duration(seconds: 40)),
@@ -163,7 +164,11 @@ void main() {
         client.fetchShelters(bounds),
         throwsA(isA<OverpassException>()),
       );
-      expect(asked, ['overpass-api.de', 'overpass.kumi.systems']);
+      expect(asked, [
+        'overpass-api.de',
+        'overpass.private.coffee',
+        'overpass.kumi.systems',
+      ]);
     });
 
     test('an unreachable instance is moved on from, not retried', () async {
@@ -179,7 +184,11 @@ void main() {
         client.fetchShelters(bounds),
         throwsA(isA<OverpassException>()),
       );
-      expect(asked, ['overpass-api.de', 'overpass.kumi.systems']);
+      expect(asked, [
+        'overpass-api.de',
+        'overpass.private.coffee',
+        'overpass.kumi.systems',
+      ]);
     });
 
     test('a rate limit is the kind that clears itself', () {

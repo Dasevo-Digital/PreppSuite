@@ -7,6 +7,7 @@ import '../../first_aid/application/defibrillators.dart' show distanceMetres;
 import '../../shelters/application/geo_bounds.dart' show gridCircle;
 import '../../shelters/application/overpass_shelter_client.dart';
 import '../../../core/http_client.dart';
+import 'osm_point_sources.dart';
 
 /// Emergency wells, disaster help points and sirens near a place, from
 /// OpenStreetMap (#127, #128).
@@ -216,15 +217,24 @@ class EmergencyPointClient {
         '${circle.longitude});out 2000;',
       );
     }
-    final response = await askOverpass(
+    // One box around the widest circle for QLever; each kind keeps its
+    // own radius when the answer is sorted.
+    final widest = EmergencyPointKind.values
+        .map((kind) => kind.radiusMetres)
+        .reduce((a, b) => a > b ? a : b);
+    return askNearbyPoints(
       _httpClient,
-      query.toString(),
+      overpassQuery: query.toString(),
+      box: boxAroundCircle(gridCircle(latitude, longitude, widest)),
       retryDelay: _retryDelay,
-    );
-    return parseEmergencyPoints(
-      utf8.decode(response.bodyBytes),
-      latitude,
-      longitude,
+      timeout: const Duration(seconds: 20),
+      fromOverpass: (response) => parseEmergencyPoints(
+        utf8.decode(response.bodyBytes),
+        latitude,
+        longitude,
+      ),
+      fromQlever: (set) =>
+          nearestEmergencyPoints(set.points, latitude, longitude),
     );
   }
 }
@@ -239,7 +249,7 @@ List<EmergencyPoint> parseEmergencyPoints(
   final decoded = jsonDecode(body);
   final elements = decoded is Map ? decoded['elements'] : null;
   if (elements is! List) return const [];
-  final byKind = <EmergencyPointKind, List<EmergencyPoint>>{};
+  final points = <EmergencyPoint>[];
   for (final element in elements) {
     if (element is! Map || element['type'] != 'node') continue;
     final tags = element['tags'];
@@ -254,17 +264,31 @@ List<EmergencyPoint> parseEmergencyPoints(
       'lon': element['lon'],
       'tags': tags,
     });
-    if (point != null) (byKind[kind] ??= []).add(point);
+    if (point != null) points.add(point);
   }
+  return nearestEmergencyPoints(points, latitude, longitude);
+}
+
+/// The nearest [EmergencyPointKind.kept] of each kind within its radius,
+/// nearest first: for an answer about a circle a little larger than the
+/// radius (see `gridCircle`), and for the points kept with the offline
+/// map (#366).
+List<EmergencyPoint> nearestEmergencyPoints(
+  Iterable<EmergencyPoint> all,
+  double latitude,
+  double longitude,
+) {
   double away(EmergencyPoint point) =>
       distanceMetres(latitude, longitude, point.latitude, point.longitude);
+  final byKind = <EmergencyPointKind, List<EmergencyPoint>>{};
+  for (final point in all) {
+    if (away(point) <= point.kind.radiusMetres) {
+      (byKind[point.kind] ??= []).add(point);
+    }
+  }
   return [
     for (final kind in EmergencyPointKind.values)
-      ...((byKind[kind] ?? [])
-            // The query circle is a little larger than the radius; see
-            // `gridCircle`.
-            ..removeWhere((point) => away(point) > kind.radiusMetres)
-            ..sort((a, b) => away(a).compareTo(away(b))))
+      ...((byKind[kind] ?? [])..sort((a, b) => away(a).compareTo(away(b))))
           .take(kind.kept),
   ];
 }
@@ -277,7 +301,14 @@ class EmergencyPointSearch {
     required this.checkedAt,
     required this.found,
     this.placeName,
+    this.fromOfflineMap = false,
   });
+
+  /// Taken from the points kept with the offline map rather than asked
+  /// for (#366); [checkedAt] is then when those were fetched. Never
+  /// stored as the last search: the map's points are kept anyway, and a
+  /// real search from before would be lost under them.
+  final bool fromOfflineMap;
 
   final double latitude;
   final double longitude;

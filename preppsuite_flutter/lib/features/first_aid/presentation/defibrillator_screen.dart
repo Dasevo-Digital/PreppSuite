@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -12,6 +13,8 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../shelters/application/overpass_shelter_client.dart'
     show OverpassException;
 import '../application/defibrillators.dart';
+import '../../emergency_points/application/offline_nearby_points.dart'
+    show OfflineNearbyPointStore;
 import '../../warnings/presentation/address_dialog.dart';
 
 /// Where the nearest defibrillators hang (#117).
@@ -27,12 +30,16 @@ class DefibrillatorScreen extends StatefulWidget {
     this.client,
     this.geolocation,
     this.store = const DefibrillatorStore(),
+    this.offlinePoints = const OfflineNearbyPointStore(),
   });
 
   /// Injectable for tests.
   final DefibrillatorClient? client;
   final GeolocationService? geolocation;
   final DefibrillatorStore store;
+
+  /// The points kept with the offline map (#366).
+  final OfflineNearbyPointStore offlinePoints;
 
   @override
   State<DefibrillatorScreen> createState() => _DefibrillatorScreenState();
@@ -52,20 +59,50 @@ NearbySearchProblem nearbySearchProblemOf(Object error) =>
     ? NearbySearchProblem.offline
     : NearbySearchProblem.noAnswer;
 
-/// What to say about [problem], and about the last search only where
-/// there is one. Before #217 every failure read "Keine Verbindung.
+/// What to say about [problem], and about what is shown instead only
+/// where something is. Before #217 every failure read "Keine Verbindung.
 /// Gezeigt wird die letzte Suche." -- on a network that worked, above a
-/// list that was not there.
+/// list that was not there. Since #366 it says how old that is, and
+/// whether it is the last search or the points kept with the offline map.
 String nearbySearchProblemText(
   AppLocalizations l10n,
   NearbySearchProblem problem, {
-  required bool kept,
-}) => switch ((problem, kept)) {
-  (NearbySearchProblem.offline, true) => l10n.aedOffline,
-  (NearbySearchProblem.offline, false) => l10n.aedOfflineNothingKept,
-  (NearbySearchProblem.noAnswer, true) => l10n.aedNoAnswerKept,
-  (NearbySearchProblem.noAnswer, false) => l10n.aedNoAnswer,
-};
+  DateTime? keptAt,
+  bool fromOfflineMap = false,
+}) {
+  if (keptAt == null) {
+    return switch (problem) {
+      NearbySearchProblem.offline => l10n.aedOfflineNothingKept,
+      NearbySearchProblem.noAnswer => l10n.aedNoAnswer,
+    };
+  }
+  final date = DateFormat.yMMMd(l10n.localeName).format(keptAt.toLocal());
+  return switch ((problem, fromOfflineMap)) {
+    (NearbySearchProblem.offline, false) => l10n.aedOffline(date),
+    (NearbySearchProblem.offline, true) => l10n.aedOfflineMap(date),
+    (NearbySearchProblem.noAnswer, false) => l10n.aedNoAnswerKept(date),
+    (NearbySearchProblem.noAnswer, true) => l10n.aedNoAnswerMap(date),
+  };
+}
+
+/// What a search that runs in the background brought: its answer, or why
+/// there is none. Held rather than awaited at once, so that the points
+/// kept with the offline map can be shown in the meantime, and a failure
+/// that arrives first is not an unhandled one.
+typedef NearbyOutcome<T> = ({T? found, Object? error, StackTrace? stack});
+
+Future<NearbyOutcome<T>> nearbyOutcome<T>(Future<T> search) => search.then(
+  (found) => (found: found, error: null, stack: null),
+  onError: (Object error, StackTrace stack) =>
+      (found: null, error: error, stack: stack),
+);
+
+/// The date in a list's heading: when it was searched, or when the
+/// offline map's points were fetched.
+String nearbyListDate(AppLocalizations l10n, DateTime at, bool fromOfflineMap) {
+  final date = DateFormat.yMMMd(l10n.localeName).format(at.toLocal());
+  return fromOfflineMap ? l10n.aedFromOfflineMap(date) : date;
+}
 
 class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
   late final DefibrillatorClient _client =
@@ -133,20 +170,48 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
   }
 
   Future<void> _find(double latitude, double longitude, String? name) async {
-    final List<Defibrillator> found;
-    try {
-      found = await _client.near(latitude, longitude);
-    } on Object catch (error, stack) {
+    // Asked at once, answered whenever it is. What the offline map brought along is on the device and there in a
+    // moment; the network may take half a minute, or not answer (#366).
+    // Looked up beside the search rather than before it, and never waited
+    // for: a file that is slow to read must not hold up the answer.
+    final live = nearbyOutcome(_client.near(latitude, longitude));
+    var answered = false;
+    unawaited(
+      widget.offlinePoints.around(latitude, longitude).then((offline) {
+        // An answer from the network is newer than anything kept.
+        if (offline == null || answered || !mounted) return;
+        setState(() {
+          _search = DefibrillatorSearch(
+            latitude: latitude,
+            longitude: longitude,
+            placeName: name,
+            checkedAt: offline.kept.fetchedAt,
+            found: offline.defibrillators,
+            fromOfflineMap: true,
+          );
+        });
+      }),
+    );
+
+    final outcome = await live;
+    final found = outcome.found;
+    if (found == null) {
+      final error = outcome.error!;
       final problem = nearbySearchProblemOf(error);
       // A device without network is not a fault worth keeping. A network
       // that works and no answer is, and the protocol is what shows why.
       if (problem == NearbySearchProblem.noAnswer) {
-        ErrorLog.instance.record(error, stack, context: 'Defibrillatoren');
+        ErrorLog.instance.record(
+          error,
+          outcome.stack,
+          context: 'Defibrillatoren',
+        );
       }
       if (!mounted) return;
       setState(() => _problem = problem);
       return;
     }
+    answered = true;
     final search = DefibrillatorSearch(
       latitude: latitude,
       longitude: longitude,
@@ -234,7 +299,8 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
                     nearbySearchProblemText(
                       l10n,
                       problem,
-                      kept: search != null,
+                      keptAt: search?.checkedAt,
+                      fromOfflineMap: search?.fromOfflineMap ?? false,
                     ),
                     style: theme.textTheme.bodyMedium,
                   ),
@@ -251,9 +317,7 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
   List<Widget> _results(AppLocalizations l10n, DefibrillatorSearch search) {
     final theme = Theme.of(context);
     final radius = defibrillatorRadiusMetres ~/ 1000;
-    final date = DateFormat.yMMMd(
-      l10n.localeName,
-    ).format(search.checkedAt.toLocal());
+    final date = nearbyListDate(l10n, search.checkedAt, search.fromOfflineMap);
     final place = search.placeName ?? l10n.aedHere;
     if (search.found.isEmpty) {
       return [Text(l10n.aedNone(radius))];

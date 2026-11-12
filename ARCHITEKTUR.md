@@ -1708,6 +1708,40 @@ tree; the test suite deliberately targets that layer rather than the UI.
   `defibrillator:location` (in the app's language where a mapper wrote
   one), level, opening hours and `access`, and says the list is not
   complete.
+- **Points near a place do not hang on Overpass alone, and come along
+  with the offline map** (#366). From 8 November 2026 the public Overpass
+  instances answered 502 or nothing for days; on 12 November all three
+  failed together, and a household that had never searched from home had
+  nothing. Three changes:
+  - `askNearbyPoints` asks the main Overpass instance, then QLever
+    (`qlever.dev/api/osm-planet`, University of Freiburg, the same
+    OpenStreetMap data behind SPARQL), then the other two instances.
+    QLever is second, not last, because two instances that do not answer
+    cost fifteen seconds each: asked in turn, the defibrillator search
+    took over half a minute to reach the one that answered in under a
+    second. It gets the same box around the same grid point
+    (`boxAroundCircle(gridCircle(...))`) and is read as tab-separated
+    N-Triples (`parseQleverPoints`); anything that is not that table
+    throws rather than reading as "nothing near".
+  - "No connection" only when no way was reached at all. With one
+    instance the last error said so; with several, one name that no
+    longer resolves had turned "the service is down" into "check your
+    network". The screens now say the service is down, and say from
+    which day the list shown instead is.
+  - When an offline map is taken into use, `OfflineNearbyPointsKeeper`
+    asks QLever (Overpass as the way back) for every defibrillator, well,
+    help point and siren in the map's box and keeps them packed in the
+    support directory, only the tags the screens read
+    (`osmPointKeys`). Germany's box was 49,804 points, 26 MB from QLever
+    in two seconds. Not encrypted: public points over a box the map
+    itself already names, and nothing about which spot in it is home.
+    Boxes over 400 square degrees are not taken (a continent would be
+    hundreds of thousands of points for searches of two to ten
+    kilometres), the points are asked for again after 60 days or for
+    another box, and they go with the map. The two screens look them up
+    beside the search, never before it, show them as soon as they are
+    read and replace them with the network's answer; the map's points
+    are never stored as the last search.
 - **Only the woodland index ships.** The grassland index (GLFI) sits
   beside it in the same directory and is not used: the DWD publishes the
   five-step wording for the WBI and not, where this was written, for the

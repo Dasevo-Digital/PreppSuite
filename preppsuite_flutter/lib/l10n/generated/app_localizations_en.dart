@@ -8488,19 +8488,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aedOpenMap => 'Open on the map';
 
   @override
-  String get aedOffline => 'No connection. Showing the last search.';
+  String aedOffline(String date) {
+    return 'No connection. Showing the saved search from $date.';
+  }
 
   @override
   String get aedOfflineNothingKept =>
-      'No connection, and no earlier search is saved. Search once with a connection; after that it works offline too.';
+      'No connection, and no earlier search is saved. Search once with a connection, or choose an offline map in the settings: the points of its region are kept with it.';
 
   @override
   String get aedNoAnswer =>
-      'OpenStreetMap is not answering right now. Please try again in a moment.';
+      'OpenStreetMap is down right now: none of its servers answered. It is not your network. Please try again later.';
 
   @override
-  String get aedNoAnswerKept =>
-      'OpenStreetMap is not answering right now. Showing the last search.';
+  String aedNoAnswerKept(String date) {
+    return 'OpenStreetMap is down right now: none of its servers answered. Showing the saved search from $date.';
+  }
+
+  @override
+  String aedOfflineMap(String date) {
+    return 'No connection. Showing the points kept with the offline map, as of $date.';
+  }
+
+  @override
+  String aedNoAnswerMap(String date) {
+    return 'OpenStreetMap is down right now: none of its servers answered. Showing the points kept with the offline map, as of $date.';
+  }
+
+  @override
+  String aedFromOfflineMap(String date) {
+    return '$date, from the offline map';
+  }
+
+  @override
+  String offlineMapPointsKept(int defibrillators, int points, String date) {
+    final intl.NumberFormat defibrillatorsNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String defibrillatorsString = defibrillatorsNumberFormat.format(
+      defibrillators,
+    );
+    final intl.NumberFormat pointsNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String pointsString = pointsNumberFormat.format(points);
+
+    return 'Kept for this map’s region: $defibrillatorsString defibrillators and $pointsString emergency wells, help points and sirens, as of $date.';
+  }
+
+  @override
+  String get offlineMapPointsFetching =>
+      'Fetching the defibrillators, emergency wells, help points and sirens of the map’s region …';
+
+  @override
+  String get offlineMapPointsFailed =>
+      'The defibrillators, emergency wells, help points and sirens of the map’s region could not be fetched.';
+
+  @override
+  String get offlineMapPointsTooLarge =>
+      'The map’s region is too large to keep its defibrillators, emergency wells, help points and sirens with it.';
+
+  @override
+  String get offlineMapPointsMissing =>
+      'The defibrillators, emergency wells, help points and sirens of the map’s region are not saved yet.';
+
+  @override
+  String get offlineMapPointsRefresh => 'Update points';
 
   @override
   String get aedIncomplete =>

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -14,9 +15,12 @@ import '../../first_aid/presentation/defibrillator_screen.dart'
     show
         NearbySearchProblem,
         compassLabel,
+        nearbyListDate,
+        nearbyOutcome,
         nearbySearchProblemOf,
         nearbySearchProblemText;
 import '../application/emergency_points.dart';
+import '../application/offline_nearby_points.dart' show OfflineNearbyPointStore;
 import '../../warnings/presentation/address_dialog.dart';
 
 /// Emergency wells, help points and the nearest siren (#127, #128).
@@ -31,12 +35,16 @@ class EmergencyPointsScreen extends StatefulWidget {
     this.client,
     this.geolocation,
     this.store = const EmergencyPointStore(),
+    this.offlinePoints = const OfflineNearbyPointStore(),
   });
 
   /// Injectable for tests.
   final EmergencyPointClient? client;
   final GeolocationService? geolocation;
   final EmergencyPointStore store;
+
+  /// The points kept with the offline map (#366).
+  final OfflineNearbyPointStore offlinePoints;
 
   @override
   State<EmergencyPointsScreen> createState() => _EmergencyPointsScreenState();
@@ -108,18 +116,45 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
   }
 
   Future<void> _find(double latitude, double longitude, String? name) async {
-    final List<EmergencyPoint> found;
-    try {
-      found = await _client.near(latitude, longitude);
-    } on Object catch (error, stack) {
+    // As on the defibrillator screen (#366): what the offline map brought
+    // along as soon as it is read, the network's answer when it comes,
+    // neither waiting for the other.
+    final live = nearbyOutcome(_client.near(latitude, longitude));
+    var answered = false;
+    unawaited(
+      widget.offlinePoints.around(latitude, longitude).then((offline) {
+        // An answer from the network is newer than anything kept.
+        if (offline == null || answered || !mounted) return;
+        setState(() {
+          _search = EmergencyPointSearch(
+            latitude: latitude,
+            longitude: longitude,
+            placeName: name,
+            checkedAt: offline.kept.fetchedAt,
+            found: offline.points,
+            fromOfflineMap: true,
+          );
+        });
+      }),
+    );
+
+    final outcome = await live;
+    final found = outcome.found;
+    if (found == null) {
+      final error = outcome.error!;
       final problem = nearbySearchProblemOf(error);
       if (problem == NearbySearchProblem.noAnswer) {
-        ErrorLog.instance.record(error, stack, context: 'Notfallpunkte');
+        ErrorLog.instance.record(
+          error,
+          outcome.stack,
+          context: 'Notfallpunkte',
+        );
       }
       if (!mounted) return;
       setState(() => _problem = problem);
       return;
     }
+    answered = true;
     final search = EmergencyPointSearch(
       latitude: latitude,
       longitude: longitude,
@@ -196,7 +231,8 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
                     nearbySearchProblemText(
                       l10n,
                       problem,
-                      kept: search != null,
+                      keptAt: search?.checkedAt,
+                      fromOfflineMap: search?.fromOfflineMap ?? false,
                     ),
                     style: theme.textTheme.bodyMedium,
                   ),
@@ -215,9 +251,7 @@ class _EmergencyPointsScreenState extends State<EmergencyPointsScreen> {
 
   List<Widget> _results(AppLocalizations l10n, EmergencyPointSearch search) {
     final theme = Theme.of(context);
-    final date = DateFormat.yMMMd(
-      l10n.localeName,
-    ).format(search.checkedAt.toLocal());
+    final date = nearbyListDate(l10n, search.checkedAt, search.fromOfflineMap);
     final wells = search.of(EmergencyPointKind.well);
     final helpPoints = search.of(EmergencyPointKind.helpPoint);
     return [

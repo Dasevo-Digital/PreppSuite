@@ -32,6 +32,7 @@ import 'home_screen_widget_sync.dart';
 import '../../settings/presentation/backup_reminder_scheduler.dart';
 import 'app_shortcuts.dart';
 import 'notification_taps.dart';
+import '../../emergency_points/presentation/offline_nearby_points_keeper.dart';
 import '../../settings/presentation/database_snapshot_scheduler.dart';
 
 /// Top-level navigation once a profile exists.
@@ -151,6 +152,9 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               screenFor: (destination) => _screenFor(destination, householdId),
             ),
             const WarningDayScheduler(),
+            // Draws nothing; takes the defibrillators and emergency points
+            // of the offline map's region along with it (#366).
+            const OfflineNearbyPointsKeeper(),
             // Above the rail as well as the tabs: a warning concerns the
             // whole app, so it gets the whole width.
             WarningBanner(profile: widget.profile),

@@ -14044,26 +14044,80 @@ abstract class AppLocalizations {
   /// No description provided for @aedOffline.
   ///
   /// In en, this message translates to:
-  /// **'No connection. Showing the last search.'**
-  String get aedOffline;
+  /// **'No connection. Showing the saved search from {date}.'**
+  String aedOffline(String date);
 
   /// No description provided for @aedOfflineNothingKept.
   ///
   /// In en, this message translates to:
-  /// **'No connection, and no earlier search is saved. Search once with a connection; after that it works offline too.'**
+  /// **'No connection, and no earlier search is saved. Search once with a connection, or choose an offline map in the settings: the points of its region are kept with it.'**
   String get aedOfflineNothingKept;
 
   /// No description provided for @aedNoAnswer.
   ///
   /// In en, this message translates to:
-  /// **'OpenStreetMap is not answering right now. Please try again in a moment.'**
+  /// **'OpenStreetMap is down right now: none of its servers answered. It is not your network. Please try again later.'**
   String get aedNoAnswer;
 
   /// No description provided for @aedNoAnswerKept.
   ///
   /// In en, this message translates to:
-  /// **'OpenStreetMap is not answering right now. Showing the last search.'**
-  String get aedNoAnswerKept;
+  /// **'OpenStreetMap is down right now: none of its servers answered. Showing the saved search from {date}.'**
+  String aedNoAnswerKept(String date);
+
+  /// No description provided for @aedOfflineMap.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Showing the points kept with the offline map, as of {date}.'**
+  String aedOfflineMap(String date);
+
+  /// No description provided for @aedNoAnswerMap.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenStreetMap is down right now: none of its servers answered. Showing the points kept with the offline map, as of {date}.'**
+  String aedNoAnswerMap(String date);
+
+  /// No description provided for @aedFromOfflineMap.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}, from the offline map'**
+  String aedFromOfflineMap(String date);
+
+  /// No description provided for @offlineMapPointsKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept for this map’s region: {defibrillators} defibrillators and {points} emergency wells, help points and sirens, as of {date}.'**
+  String offlineMapPointsKept(int defibrillators, int points, String date);
+
+  /// No description provided for @offlineMapPointsFetching.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching the defibrillators, emergency wells, help points and sirens of the map’s region …'**
+  String get offlineMapPointsFetching;
+
+  /// No description provided for @offlineMapPointsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The defibrillators, emergency wells, help points and sirens of the map’s region could not be fetched.'**
+  String get offlineMapPointsFailed;
+
+  /// No description provided for @offlineMapPointsTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'The map’s region is too large to keep its defibrillators, emergency wells, help points and sirens with it.'**
+  String get offlineMapPointsTooLarge;
+
+  /// No description provided for @offlineMapPointsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The defibrillators, emergency wells, help points and sirens of the map’s region are not saved yet.'**
+  String get offlineMapPointsMissing;
+
+  /// No description provided for @offlineMapPointsRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Update points'**
+  String get offlineMapPointsRefresh;
 
   /// No description provided for @aedIncomplete.
   ///
