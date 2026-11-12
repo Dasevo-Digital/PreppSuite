@@ -3321,7 +3321,18 @@ extremen Warnung (#264). Die Einstellungen öffnen ihn über
 (`ACTION_CHANNEL_NOTIFICATION_SETTINGS`). Der Name bleibt deutsch wie der
 des anderen Kanals: Der Hintergrundlauf, der Warnungen zeigt, hat keine
 Übersetzungen, und Android behält den Namen, mit dem ein Kanal angelegt
-wurde. Unter iOS ist das Gegenstück die zeitkritische Mitteilung (#101).
+wurde. Unter iOS ist das Gegenstück die zeitkritische Mitteilung (#101):
+schwere und extreme Warnungen tragen `InterruptionLevel.timeSensitive`
+(`warningInterruptionLevel`) und kommen damit durch einen Fokus. Das wirkt
+nur mit der Berechtigung `com.apple.developer.usernotifications.time-sensitive`
+in `ios/Runner/Runner.entitlements`, und die bekommt nur ein bezahltes
+Team: Mit dem persönlichen erzeugte Xcode kein Profil, und kein Gerätebau
+ließ sich mehr signieren. Seit dem 12.11.2026 ist sie drin; das Profil
+enthält sie. Unter macOS nicht: Die Mac-Pakete sind ad hoc signiert, und
+eine Berechtigung, die ein Profil verlangt, ließe die App ohne eins nicht
+starten. `test/ios_entitlements_test.dart` hält beides fest. Die Person
+kann zeitkritische Mitteilungen in den iOS-Einstellungen der App
+abschalten; ohne Fokus verhalten sie sich wie gewöhnliche.
 
 ### Radio ohne Internet: Programme ja, Frequenzen nein
 
