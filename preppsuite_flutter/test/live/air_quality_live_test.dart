@@ -111,10 +111,55 @@ void main() {
       }
 
       // The boundary the app was written against: ozone's best class ends
-      // at 60 µg/m³ in the hourly index.
-      expect(thresholds[3]!.first.max, 60);
+      // at 24 µg/m³ in the hourly revised index (60 in the classic one).
+      expect(thresholds[3]!.first.max, 24);
     },
     timeout: const Timeout(Duration(minutes: 3)),
+    skip: reason,
+  );
+
+  test(
+    'every class the interface gives lies in the span the screen shows',
+    () async {
+      // The screen prints each pollutant's class with the span it stands
+      // for. Version 4 classifies by the revised index and version 3 by
+      // the classic one (#320); a span from the wrong one would put
+      // "11 bis 30" beside a value of 37. Checked on what the stations
+      // actually report, not on the numbers written into a test.
+      final client = AirQualityClient();
+      final thresholds = await client.fetchThresholds();
+      final stations = await client.fetchStations();
+
+      var checked = 0;
+      for (final station in stations.take(15)) {
+        final reading = await client.fetchReading(station.id);
+        if (reading == null) continue;
+        for (final component in reading.components) {
+          if (component.level == AirQualityClass.unknown) continue;
+          final span = thresholds[component.id]?.firstWhere(
+            (s) => s.level == component.level,
+          );
+          expect(
+            span,
+            isNotNull,
+            reason: '${station.name}: no span for ${component.code}',
+          );
+          // The spans are whole numbers with gaps between them (20, then
+          // 21); a value of 20.4 belongs to the lower one.
+          expect(
+            component.value,
+            inInclusiveRange(span!.min - 1, span.max + 1),
+            reason:
+                '${station.name}: ${component.code} ${component.value} '
+                'is ${component.level.name}, span ${span.min} to ${span.max}',
+          );
+          checked++;
+        }
+      }
+      stdout.writeln('$checked Werte gegen ihre Schwelle geprüft');
+      expect(checked, greaterThan(10));
+    },
+    timeout: const Timeout(Duration(minutes: 5)),
     skip: reason,
   );
 }

@@ -186,6 +186,27 @@ void main() {
     expect(find.text('Schlecht'), findsNothing);
   });
 
+  testWidgets('a reading kept in the classic index is not shown beside the '
+      'revised thresholds (#320)', (tester) async {
+    await const AirQualityStore().saveStation(_station);
+    // What versions before #320 kept: the same fields, no index named.
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'airQualityLastReading',
+      '{"stationId":"${_station.id}","measuredAt":"2026-09-04T09:00:00.000",'
+          '"level":3,"incomplete":false,'
+          '"components":[{"id":5,"value":37,"level":3}]}',
+    );
+    await show(
+      tester,
+      client: _FakeClient(fails: true),
+      now: DateTime(2026, 9, 4, 10),
+    );
+
+    expect(find.text('Schlecht'), findsNothing);
+    expect(find.textContaining('Zuletzt gespeicherter Wert'), findsNothing);
+  });
+
   testWidgets('no health advice of this app\'s own is given', (tester) async {
     // The UBA publishes its behaviour advice only as images; paraphrasing
     // somebody else's health advice is what this app refuses to do.

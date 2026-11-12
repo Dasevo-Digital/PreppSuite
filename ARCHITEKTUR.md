@@ -1536,13 +1536,21 @@ tree; the test suite deliberately targets that layer rather than the UI.
   first in an emergency. `BbkFetchResult.complete` still means every
   source answered.
 - **The air quality index is the UBA's, class and thresholds alike.**
-  `luftdaten.umweltbundesamt.de/api/air-data`, no key. The `airquality`
-  endpoint returns an index of 0 to 4 per hour per station and each
-  pollutant's own index beside it; the class boundaries come from
-  `v4/thresholds` rather than being written down here, because they have
-  already changed once — the UBA publishes both the classic index (`aq`)
-  and its post-WHO-2021 revision (`aq4`) on the same endpoint, and only
-  `aq` at scope 2 matches what `airquality` returns. **The UBA's
+  `luftdaten.umweltbundesamt.de/api/air-data/v4`, no key. The
+  `airquality` endpoint returns an index of 0 to 4 per hour per station
+  and each pollutant's own index beside it; the class boundaries come
+  from `thresholds` rather than being written down here, because they
+  have already changed once — the UBA publishes both the classic index
+  (`aq`) and its post-WHO-2021 revision (`aq4`) on the same endpoint.
+  Version 3, which ends on 1 February 2027, returned `aq`; version 4
+  returns `aq4` at scope 2, and the client takes exactly that (#320).
+  Measured on 12 November 2026 over five stations and 236 hours, every
+  class version 4 gave lies in its `aq4` span; `aq` disagreed for half
+  the nitrogen dioxide and ozone hours. The particulate values differ
+  too — 68 against 37 µg/m³ of PM₁₀ for the same hour and station — so
+  the two versions do not average them the same way. A reading kept from
+  before the change names no index and is not shown, and the live test
+  checks real readings against the spans the screen prints. **The UBA's
   behaviour advice is deliberately not shipped**: it is published only as
   images, and paraphrasing somebody else's health advice is exactly what
   the rule against invented scales exists to prevent. The screen names

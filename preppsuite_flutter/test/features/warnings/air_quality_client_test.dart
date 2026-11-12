@@ -32,19 +32,21 @@ const _reading = '''
  "count":1}
 ''';
 
-/// Ozone and nitrogen dioxide, hourly, classic index — with rows from
-/// other scopes and the revised index mixed in, exactly as the interface
-/// sends them.
+/// Ozone and nitrogen dioxide, hourly, revised index (`aq4`) — with rows
+/// of the classic index and of other scopes mixed in, exactly as version
+/// 4 of the interface sends them (numbers from 2026-11-12).
 const _thresholds = '''
-{"count":6,
+{"count":8,
  "indices":["threshold id","component id","scope id","threshold type",
    "threshold min","threshold max","threshold index"],
  "1":["1","3","2","aq","0","60","0"],
  "2":["2","3","2","aq","61","120","1"],
- "3":["3","3","2","aq","121","180","2"],
- "4":["4","3","2","aq4","0","24","0"],
- "5":["5","3","4","me","0","12","0"],
- "6":["6","5","2","aq","0","20","0"]}
+ "3":["3","3","2","aq4","0","24","0"],
+ "4":["4","3","2","aq4","25","72","1"],
+ "5":["5","3","2","aq4","73","144","2"],
+ "6":["6","3","4","me","0","12","0"],
+ "7":["7","5","2","aq","0","20","0"],
+ "8":["8","5","2","aq4","0","10","0"]}
 ''';
 
 void main() {
@@ -88,18 +90,28 @@ void main() {
     expect(AirQualityClient.parseReading('{"data":{}}', '513'), isNull);
   });
 
-  test('only the hourly classic index is taken from the thresholds', () {
+  test('only the hourly revised index is taken from the thresholds', () {
     final thresholds = AirQualityClient.parseThresholds(_thresholds);
 
-    // The revised index (aq4) and the daily scopes are on the same
-    // endpoint; mixing them would put a reading in the wrong class.
+    // Version 4 classifies by the revised index (#320). The classic one
+    // and the daily scopes are on the same endpoint; taking them would
+    // put a reading in the wrong class -- nitrogen dioxide at 40 is
+    // "good" by the classic index and "moderate" by the one the
+    // interface now returns.
     expect(thresholds.keys.toSet(), {3, 5});
     final ozone = thresholds[3]!;
     expect(ozone.length, 3);
     expect(ozone.first.level, AirQualityClass.veryGood);
-    expect(ozone.first.max, 60);
+    expect(ozone.first.max, 24);
     expect(ozone.last.level, AirQualityClass.moderate);
-    expect(ozone.last.min, 121);
+    expect(ozone.last.min, 73);
+    expect(thresholds[5]!.single.max, 10);
+  });
+
+  test('the interface asked is version 4, thresholds included', () {
+    // Version 3 ends on 1 February 2027 (#320).
+    expect(AirQualityClient.base, endsWith('/api/air-data/v4'));
+    expect(AirQualityClient.thresholdType, 'aq4');
   });
 
   test('an index the interface does not give is not invented', () {

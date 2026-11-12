@@ -88,13 +88,21 @@ class AirQualityClient {
   /// hiccup, not an outage, and an outage should still be reported.
   final Duration _retryDelay;
 
-  static const base = 'https://luftdaten.umweltbundesamt.de/api/air-data/v3';
+  /// Version 4 since #320. Version 3 announced its end in its
+  /// own answers — `Deprecation` from 1 November 2026, `Sunset` on
+  /// 1 February 2027 — and after that the screen would only have shown
+  /// that the values cannot be reached.
+  static const base = 'https://luftdaten.umweltbundesamt.de/api/air-data/v4';
 
-  /// `aq` is the classic index the `airquality` endpoint returns, at
-  /// scope 2 — the one-hour mean. The UBA also publishes `aq4`, its
-  /// revision after the WHO's 2021 guidelines, on the same endpoint;
-  /// mixing the two would put a reading in the wrong class.
-  static const thresholdType = 'aq';
+  /// `aq4` is the index version 4's `airquality` endpoint returns, at
+  /// scope 2 — the one-hour mean: the UBA's revision after the WHO's 2021
+  /// guidelines. Version 3 returned the classic `aq`, and the thresholds
+  /// endpoint publishes both side by side; taking the other one would put
+  /// a reading in the wrong class. Measured on 12 November 2026 over five
+  /// stations and 236 hours: every pollutant's class from version 4 lies
+  /// in its `aq4` span, while `aq` disagreed for half the nitrogen
+  /// dioxide and ozone hours.
+  static const thresholdType = 'aq4';
   static const hourlyScope = '2';
 
   /// Column positions in a station row.
@@ -144,10 +152,7 @@ class AirQualityClient {
   /// and a threshold this app remembers wrongly is exactly the invented
   /// scale it must not ship.
   Future<Map<int, List<AirQualityThreshold>>> fetchThresholds() async {
-    final uri = Uri.parse(
-      'https://luftdaten.umweltbundesamt.de/api/air-data/v4'
-      '/thresholds/json?lang=de',
-    );
+    final uri = Uri.parse('$base/thresholds/json?lang=de');
     return parseThresholds(await _get(uri));
   }
 

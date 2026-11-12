@@ -70,6 +70,11 @@ class AirQualityStore {
       if (at == null || stationId == null) return null;
       // Named from the start, and not compared until 2.8.0 (#239).
       if (stationId != station.id) return null;
+      // A reading kept before version 4 carries classes of the classic index
+      // (#320). Shown beside the revised thresholds, a nitrogen dioxide
+      // value of 37 would sit in "good" with a span of 11 to 30 next to
+      // it. It is an hour's value and stale within three; it goes.
+      if (json['index'] != AirQualityClient.thresholdType) return null;
 
       final components = <AirQualityComponent>[];
       for (final entry in (json['components'] as List? ?? const [])) {
@@ -107,6 +112,7 @@ class AirQualityStore {
         _readingKey,
         jsonEncode({
           'stationId': reading.stationId,
+          'index': AirQualityClient.thresholdType,
           'measuredAt': reading.measuredAt.toIso8601String(),
           'level': reading.level.step,
           'incomplete': reading.incomplete,
