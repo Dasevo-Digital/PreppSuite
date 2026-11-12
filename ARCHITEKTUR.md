@@ -1102,6 +1102,21 @@ and the Runner's "Embed Translator" phase copies the one for the SDK it
 builds and signs it. There is no iOS package; the device check builds the
 simulator framework first and its start test insists on it. A device
 build needs `build_ios.sh` run before `xcodebuild`, or it goes without.
+**TestFlight is built from the tag** (#379): `tool/ios_testflight.sh
+<version>` checks out the tag into a worktree of its own, builds the
+device framework and an App Store archive, and refuses it without the
+right version and build number, the translator, the widget, both privacy
+manifests or the time-sensitive entitlement; `--upload` then exports it to
+App Store Connect for internal testers only. Team id and API key live in
+the login keychain, never here, and the key is a file only for the length
+of the run. The privacy manifests (`ios/Runner/PrivacyInfo.xcprivacy`,
+`ios/PreppSuiteWidget/PrivacyInfo.xcprivacy`) declare what the app's own
+code uses and App Store Connect asks reasons for: `UserDefaults` (the
+storage bridge's bookmarks, CA92.1; the widget's app group, 1C8F.1) and
+file timestamps (the app's own files, C617.1, and documents somebody
+picked, 3B52.1). The Flutter engine brings its own; the two plugins
+without one, flutter_tts and zstandard_ios, use none of those APIs.
+`docs/testflight.md` is the setting up that only the account can do.
 **The Mac's arm64 half has a fixed baseline too** (#375): armv8.4-a,
 which every Apple silicon Mac runs, dot product included. Left at
 "native", Apple clang on the M5 that builds it made that apple-m1 plus

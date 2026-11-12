@@ -27,6 +27,8 @@
 		0161A2009E9A57C767BDD59E /* TextRecognitionBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E33DF8E429553C61B82197D7 /* TextRecognitionBridge.swift */; };
 		FE19496B89A4520A15D6383F /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1523A0BB27F1476B48006BF5 /* Pods_RunnerTests.framework */; };
 		PS0000000000000000000004 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = PS0000000000000000000003 /* InfoPlist.strings */; };
+		7F3A2C1E5D48409BAE12F380 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 7F3A2C1E5D48409BAE12F379 /* PrivacyInfo.xcprivacy */; };
+		7F3A2C1E5D48409BAE12F382 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 7F3A2C1E5D48409BAE12F381 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -111,6 +113,8 @@
 		F84B960CA942FCA49B2D7DDD /* PreppSuiteWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PreppSuiteWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		PS0000000000000000000001 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		PS0000000000000000000002 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		7F3A2C1E5D48409BAE12F379 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		7F3A2C1E5D48409BAE12F381 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,6 +197,7 @@
 				42C0413E7C717BFC96157297 /* PreppSuiteWidget.entitlements */,
 				B85CDAA686CB3007A9024FA2 /* Widget.xcconfig */,
 				875B05ECA691686DE23436B8 /* Localizable.strings */,
+				7F3A2C1E5D48409BAE12F381 /* PrivacyInfo.xcprivacy */,
 			);
 			path = PreppSuiteWidget;
 			sourceTree = "<group>";
@@ -240,6 +245,7 @@
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
 				97C147021CF9000F007C117D /* Info.plist */,
 				PS0000000000000000000003 /* InfoPlist.strings */,
+				7F3A2C1E5D48409BAE12F379 /* PrivacyInfo.xcprivacy */,
 				1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */,
 				1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */,
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
@@ -393,6 +399,7 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				7F3A2C1E5D48409BAE12F380 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,6 +408,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B4064729E5C8419EED508D9A /* Localizable.strings in Resources */,
+				7F3A2C1E5D48409BAE12F382 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

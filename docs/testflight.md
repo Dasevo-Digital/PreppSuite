@@ -1,0 +1,78 @@
+# iPhone und iPad über TestFlight
+
+Bisher kam jede Fassung per Kabel auf die eigenen iPhones und iPads, aus
+einem Bau, der nur für die eingetragenen Geräte signiert war. Mit
+TestFlight holen sich die Geräte jede neue Fassung selbst, auch unterwegs,
+und ein neues Gerät braucht keinen neuen Bau (#379).
+
+Verteilt wird nur an **interne Tester**: Mitglieder des eigenen Teams in
+App Store Connect, bis zu 100 Personen. Dafür prüft Apple die App nicht.
+Ein Bau läuft 90 Tage.
+
+## Einmal einrichten
+
+Diese Schritte erledigt selbst, wer das Entwicklerkonto führt. Nichts
+davon steht im Repository.
+
+1. **App-Eintrag.** In App Store Connect unter *Apps* eine neue App
+   anlegen: Plattform iOS, Name „PreppSuite“, Bundle-ID
+   `de.dasevo.preppsuite`, SKU frei wählbar. Der Name ist damit im App
+   Store reserviert, die App erscheint dort aber nicht.
+2. **API-Schlüssel.** Unter *Benutzer und Zugriff → Integrationen → App
+   Store Connect API* einen Team-Schlüssel anlegen. Mit der Rolle *Admin*
+   kann `xcodebuild` das Verteilungszertifikat und die Profile selbst
+   anlegen. Die `.p8`-Datei lässt sich nur einmal herunterladen.
+   Schlüssel-ID und Aussteller-ID stehen auf derselben Seite.
+3. **Schlüsselbund.** Die vier Werte kommen in den Anmelde-Schlüsselbund
+   des Macs, der die Releases baut:
+
+   ```bash
+   security add-generic-password -a preppsuite -s de.dasevo.preppsuite.team-id -w TEAM-ID
+   security add-generic-password -a preppsuite -s de.dasevo.preppsuite.asc-key-id -w SCHLUESSEL-ID
+   security add-generic-password -a preppsuite -s de.dasevo.preppsuite.asc-issuer -w AUSSTELLER-ID
+   security add-generic-password -a preppsuite -s de.dasevo.preppsuite.asc-key -w "$(cat AuthKey_SCHLUESSEL-ID.p8)"
+   ```
+
+   Danach die `.p8`-Datei an einem sicheren Ort ablegen oder löschen.
+4. **Verschlüsselung.** App Store Connect fragt bei jedem Bau, ob die App
+   Verschlüsselung verwendet. PreppSuite verschlüsselt die Datenbank, die
+   Datensicherung und den gemeinsamen Ordner mit üblichen Verfahren. Die
+   Antwort gibt, wer das Konto führt. Steht sie fest, kann sie als
+   `ITSAppUsesNonExemptEncryption` in die `Info.plist`; dann fragt App
+   Store Connect nicht mehr.
+5. **Tester.** Wer testen soll, wird unter *Benutzer und Zugriff* ins
+   Team eingeladen und in TestFlight einer internen Gruppe zugeordnet.
+   Auf dem Gerät die App *TestFlight* installieren und die Einladung
+   annehmen.
+
+## Je Release
+
+Nach dem Release, vom Tag:
+
+```bash
+tool/ios_testflight.sh 3.0.1 --upload
+```
+
+Das Skript baut aus dem Tag in einem eigenen Worktree den Übersetzer
+für Geräte und ein App-Store-Archiv. Danach prüft es:
+
+- Version und Build-Nummer
+- den Übersetzer
+- das Widget
+- die Privacy-Manifeste von App und Widget
+- die Berechtigung für zeitkritische Mitteilungen
+
+Erst dann lädt es hoch. Ohne `--upload` baut und prüft es nur. Mit
+`TESTFLIGHT_REF=<commit>` lässt sich ein anderer Stand zur Probe bauen;
+hochgeladen wird so ein Stand nie.
+
+Nach Apples Verarbeitung erscheint der Bau in TestFlight, und die Geräte
+der Gruppe bekommen ihn angeboten.
+
+## Daten beim Umstieg
+
+Die TestFlight-Fassung hat dieselbe Bundle-ID und dasselbe Team wie die
+per Kabel eingespielte. Nach Apples Regeln behält iOS deshalb beim
+Ersetzen den Datenordner, den Schlüsselbund und die App-Gruppe. Geprüft
+wird das beim ersten Umstieg auf einem eigenen Gerät; vorher trotzdem eine
+Datensicherung anlegen.
