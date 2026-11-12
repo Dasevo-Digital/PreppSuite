@@ -45,30 +45,54 @@ engine="$(translate_source "$BUILD")"
 for arch in arm64 x86_64; do
   out="$BUILD/macos-$arch"
   echo "== $arch =="
-  mkdir -p "$out"
+  # A toolchain file rather than flags alone: the engine builds PCRE2 as
+  # an external project, which only the toolchain file reaches.
+  toolchain="set(CMAKE_OSX_ARCHITECTURES $arch CACHE STRING \"\")
+set(CMAKE_OSX_DEPLOYMENT_TARGET $MACOSX_DEPLOYMENT_TARGET)
+set(CMAKE_SYSTEM_PROCESSOR $arch)"
+  # A fixed CPU baseline for both (#375). Marian's default is "native",
+  # which asks the compiler about the machine doing the building: on the
+  # M5 this is built on, Apple clang made that apple-m1 plus v8.7, i8mm
+  # and bf16 -- instructions an M1 does not have. None was in the library
+  # yet, but a newer compiler vectorising a loop with one of them would
+  # have crashed the translator on every M1 and M2 with SIGILL, and
+  # nothing here would have noticed. armv8.4-a is what every Apple silicon
+  # Mac runs, dot product included; Ruy still picks its kernels at run
+  # time. Intel Macs without AVX2 still exist; intgemm picks the widest
+  # instructions at run time, so that baseline only has to run anywhere.
+  case "$arch" in
+    arm64) cpu=armv8.4-a ;;
+    x86_64) cpu=x86-64-v2 ;;
+  esac
+  configure=(
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_TOOLCHAIN_FILE="$out/toolchain.cmake"
+    -DCMAKE_OSX_ARCHITECTURES="$arch"
+    -DBUILD_ARCH="$cpu"
+    -DBERGAMOT_SOURCE="$engine"
+    -DUSE_FBGEMM=OFF
+    -DSSPLIT_USE_INTERNAL_PCRE2=ON
+  )
   # Configured once; Ninja then rebuilds only what changed, so a run after
   # an edit to the shim takes seconds and a run with nothing changed none.
+  # A directory configured with other settings -- an SDK an Xcode update
+  # renamed, or the baseline above -- starts over, as on iOS (#378):
+  # Ninja never reconfigures on its own, and the new baseline would
+  # otherwise only have reached a clean checkout.
+  stamp="$(xcrun --sdk macosx --show-sdk-path)
+$(xcrun --sdk macosx --show-sdk-version)
+$toolchain
+${configure[*]}"
+  if [ -f "$out/build.ninja" ] && [ "$(cat "$out/.configured" 2>/dev/null)" != "$stamp" ]; then
+    echo "  neu konfigurieren: SDK oder Einstellungen geändert"
+    rm -rf "$out"
+  fi
+  mkdir -p "$out"
   if [ ! -f "$out/build.ninja" ]; then
-    # A toolchain file rather than flags alone: the engine builds PCRE2 as
-    # an external project, which only the toolchain file reaches.
-    cat >"$out/toolchain.cmake" <<TOOLCHAIN
-set(CMAKE_OSX_ARCHITECTURES $arch CACHE STRING "")
-set(CMAKE_OSX_DEPLOYMENT_TARGET $MACOSX_DEPLOYMENT_TARGET)
-set(CMAKE_SYSTEM_PROCESSOR $arch)
-TOOLCHAIN
-    extra=()
-    # Intel Macs without AVX2 still exist; intgemm picks the widest
-    # instructions at run time, so the baseline only has to run anywhere.
-    [ "$arch" = "x86_64" ] && extra+=(-DBUILD_ARCH=x86-64-v2)
-    cmake -S "$HERE" -B "$out" -G Ninja \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_TOOLCHAIN_FILE="$out/toolchain.cmake" \
-      -DCMAKE_OSX_ARCHITECTURES="$arch" \
-      -DBERGAMOT_SOURCE="$engine" \
-      -DUSE_FBGEMM=OFF \
-      -DSSPLIT_USE_INTERNAL_PCRE2=ON \
-      ${extra[@]+"${extra[@]}"} >"$out/configure.log" 2>&1 ||
+    printf '%s\n' "$toolchain" >"$out/toolchain.cmake"
+    cmake -S "$HERE" -B "$out" -G Ninja "${configure[@]}" >"$out/configure.log" 2>&1 ||
       { tail -30 "$out/configure.log"; exit 1; }
+    printf '%s' "$stamp" >"$out/.configured"
   fi
   ninja -C "$out" preppsuite_translate translate_selftest >"$out/build.log" 2>&1 ||
     { grep -E "error:|FAILED" "$out/build.log" | head -20; exit 1; }
@@ -81,6 +105,9 @@ lipo -create \
 install_name_tool -id @rpath/libpreppsuite_translate.dylib \
   "$BUILD/libpreppsuite_translate.dylib"
 lipo -info "$BUILD/libpreppsuite_translate.dylib"
+# The baseline holds only if nothing beyond it is in the library: an
+# intrinsic or a flag in the engine could still bring one in (#375).
+"$HERE/check_arm64_baseline.sh" "$BUILD/libpreppsuite_translate.dylib"
 echo "== exportiert =="
 nm -gU "$BUILD/libpreppsuite_translate.dylib" | grep " T " | awk '{print $3}' | sort -u
 echo "== hängt ab von =="

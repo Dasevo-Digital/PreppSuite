@@ -1101,7 +1101,19 @@ inside the app, so the loader asks for
 and the Runner's "Embed Translator" phase copies the one for the SDK it
 builds and signs it. There is no iOS package; the device check builds the
 simulator framework first and its start test insists on it. A device
-build needs `build_ios.sh` run before `xcodebuild`, or it goes without. Model packs are
+build needs `build_ios.sh` run before `xcodebuild`, or it goes without.
+**The Mac's arm64 half has a fixed baseline too** (#375): armv8.4-a,
+which every Apple silicon Mac runs, dot product included. Left at
+"native", Apple clang on the M5 that builds it made that apple-m1 plus
+v8.7, i8mm and bf16; none of those was in the library yet, but one a
+newer compiler vectorised in would have stopped the translator on every
+M1 with SIGILL while this machine ran it. `build_macos.sh` keeps a stamp
+of SDK, toolchain and arguments per architecture and starts a directory
+over when it changes, as `build_ios.sh` does, and ends with
+`check_arm64_baseline.sh`: the arm64 slice is disassembled with every
+extension on and refused if it holds i8mm, bf16, SVE or SME. Checked
+against libraries built to have them, and against 3.0.0's, which had
+none. Model packs are
 checked against Mozilla's SHA-256 and get their manifest last. **A newer
 version of a pack already here never replaces it in place** (#220): it is
 fetched into `<code>.new` and swapped in by two renames once every file
