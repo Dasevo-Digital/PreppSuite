@@ -1471,7 +1471,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settingsLocalEncryptionNoKeyStore =>
-      'Dieses Gerät gibt keinen Schlüsselspeicher frei. Unter macOS braucht die App dafür eine Signatur, die die derzeitigen Fassungen noch nicht haben. Ohne sie bleiben Datenbank, persönliche Einstellungen und Fotos unverschlüsselt.';
+      'Dieses Gerät gibt keinen Schlüsselspeicher frei. Unter macOS braucht die App dafür ihre Signatur mit Developer ID, die dieser Bau nicht hat. Ohne Schlüsselspeicher bleiben Datenbank, persönliche Einstellungen und Fotos unverschlüsselt.';
 
   @override
   String get settingsLocalEncryptionScope =>

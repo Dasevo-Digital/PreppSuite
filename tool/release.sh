@@ -37,6 +37,15 @@
 #                         without them: macOS and Android only, every check
 #                         on those still runs, and the release text has to
 #                         say that Linux and Windows are missing
+#   RELEASE_MAC_AD_HOC    1 for a Mac package signed ad hoc, as before
+#                         #387: no Developer ID, no notarization, no data
+#                         key on the Mac. Only when the household decided
+#                         so; the release text has to say it.
+#
+# The Mac package is signed with the Developer ID in the login keychain,
+# with its provisioning profile, and notarized (#387). Identity, profiles
+# and the App Store Connect API key are checked before anything is built,
+# so a missing one stops the run at once rather than after the Mac build.
 #
 # What it does, in the order that keeps the slow machines busy: the Linux
 # build starts first and runs while the Mac builds macOS and Android and
@@ -73,6 +82,13 @@ skip_remote=false
 out="${RELEASE_DIR:-$HOME/Desktop/PreppSuite-Release-v$version-Upload}"
 tag="v$version"
 log="$(mktemp -d)"
+mac_ad_hoc=false
+[ "${RELEASE_MAC_AD_HOC:-}" = 1 ] && mac_ad_hoc=true
+if $mac_ad_hoc; then
+  mac_zip="PreppSuite-$version-macos-local-ad-hoc.zip"
+else
+  mac_zip="PreppSuite-$version-macos.zip"
+fi
 
 step() { printf '\n== %s ==\n' "$*"; }
 fail() { echo "FEHLER: $*" >&2; echo "Protokolle: $log" >&2; exit 1; }
@@ -141,6 +157,22 @@ line="$(git show "$tag:preppsuite_flutter/pubspec.yaml" | sed -n 's/^version:[[:
 build="${line#*+}"
 [[ "$build" =~ ^[0-9]+$ ]] || fail "ungültige Build-Nummer in pubspec.yaml"
 
+# What the Mac package needs, before anything is built: the Developer ID,
+# its profiles for the app and for the test app tool/macos_install.sh
+# makes of it, and the API key notarization signs in with (#387).
+if ! $resume && ! $mac_ad_hoc; then
+  step "Developer ID"
+  developer_id="$ROOT/tool/macos_developer_id.py"
+  python3 "$developer_id" identity >/dev/null || fail "kein Developer-ID-Zertifikat (RELEASE_MAC_AD_HOC=1 für ein Paket ohne)"
+  for bundle_id in de.dasevo.preppsuite de.dasevo.preppsuite.test; do
+    python3 "$developer_id" profile "$bundle_id" >/dev/null ||
+      fail "kein Developer-ID-Profil für $bundle_id: python3 tool/macos_developer_id.py create-profile $bundle_id"
+  done
+  python3 "$developer_id" asc-key "$log" >/dev/null || fail "API-Schlüssel für die Notarisierung fehlt (docs/testflight.md)"
+  rm -f "$log/AuthKey.p8"
+  echo "Zertifikat, Profile und API-Schlüssel vorhanden"
+fi
+
 mkdir -p "$out"
 archive="$log/src-$version.tar.gz"
 git archive --format=tar.gz --prefix=src/ -o "$archive" "$tag"
@@ -184,7 +216,7 @@ linux_state() {
 }
 
 if $resume; then
-  for kept in "PreppSuite-$version-macos-local-ad-hoc.zip" \
+  for kept in "$mac_zip" \
     "PreppSuite-$version-Android-arm64-v8a.apk" \
     "PreppSuite-$version-Android-armeabi-v7a.apk" "GERAETETEST-v$version.txt"; do
     [ -f "$out/$kept" ] || fail "$kept fehlt – ohne --resume neu bauen"
@@ -225,12 +257,21 @@ app="$APP_DIR/build/macos/Build/Products/Release/PreppSuite.app"
   --build-number "$build") > "$log/macos.log" 2>&1 || fail "macOS-Build"
 [ -f "$app/Contents/Frameworks/libpreppsuite_translate.dylib" ] ||
   fail "Mac-Paket ohne Übersetzer-Bibliothek"
-"$ROOT/tool/macos_sign.sh" "$app" --allow-ad-hoc > "$log/sign.log" 2>&1 ||
-  fail "macOS-Signatur"
+if $mac_ad_hoc; then
+  "$ROOT/tool/macos_sign.sh" "$app" --allow-ad-hoc > "$log/sign.log" 2>&1 ||
+    fail "macOS-Signatur, siehe $log/sign.log"
+else
+  "$ROOT/tool/macos_sign.sh" "$app" --identity auto --profile auto > "$log/sign.log" 2>&1 ||
+    fail "macOS-Signatur, siehe $log/sign.log"
+fi
 codesign --verify --deep --strict "$app" || fail "Signatur ungültig"
 [ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' \
   "$app/Contents/Info.plist")" = "$version" ] || fail "falsche Version im Mac-Paket"
-ditto -c -k --keepParent "$app" "$out/PreppSuite-$version-macos-local-ad-hoc.zip"
+if ! $mac_ad_hoc; then
+  "$ROOT/tool/macos_notarize.sh" "$app" > "$log/notarize.log" 2>&1 ||
+    fail "Notarisierung, siehe $log/notarize.log"
+fi
+ditto -c -k --keepParent "$app" "$out/$mac_zip"
 # No unpacked copy in the upload folder, unlike the general release
 # layout: Spotlight lists every PreppSuite.app it finds, and each of them
 # opens the real household. After a release there are exactly two,

@@ -24,7 +24,13 @@
 # Usage:
 #   tool/macos_install.sh                        # the last build
 #   tool/macos_install.sh path/to/PreppSuite.app
-#   tool/macos_install.sh path/to/PreppSuite-x.y.z-macos-universal.zip
+#   tool/macos_install.sh path/to/PreppSuite-x.y.z-macos.zip
+#
+# A release signed with the Developer ID and notarized (#387) goes in as
+# it is: re-signing it would cost it the ticket stapled to it. The test
+# copy has to be signed again after its identifier changed, with the same
+# Developer ID and the profile for its own identifier, so that it gets a
+# data key of its own as well. An ad hoc build is signed ad hoc, as before.
 set -euo pipefail
 
 readonly REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -102,18 +108,31 @@ for app in "$PROD_APP" "$TEST_APP"; do
   echo "   nach ${waited} s beendet"
 done
 
-# Both are signed from the repository's Release.entitlements rather than
-# from whatever the source bundle happens to carry. That is deliberate:
-# `flutter build macos` writes get-task-allow into the Release bundle, a
-# debug entitlement that lets any process attach to the app. Signing from
-# the file drops it.
+# An ad hoc build is signed from the repository's Release.entitlements
+# rather than from whatever the source bundle happens to carry. That is
+# deliberate: `flutter build macos` writes get-task-allow into the Release
+# bundle, a debug entitlement that lets any process attach to the app.
+# Signing from the file drops it. A Developer ID release was signed that
+# way by tool/release.sh already.
 sign="$REPO_ROOT/tool/macos_sign.sh"
 [ -x "$sign" ] || die "tool/macos_sign.sh fehlt"
+# Read into a variable, never `codesign … | grep -q`: under pipefail that
+# pipeline ends in SIGPIPE when grep stops at its match while codesign is
+# still writing, and a notarized release would be re-signed ad hoc.
+developer_id=false
+signature="$(codesign -dv --verbose=2 "$source" 2>&1 || true)"
+grep -q '^Authority=Developer ID Application' <<<"$signature" && developer_id=true
 
 echo "== $PROD_APP =="
 rm -rf "$PROD_APP"
 ditto "$source" "$PROD_APP"
-"$sign" "$PROD_APP" --allow-ad-hoc >/dev/null || die "$PROD_APP liess sich nicht signieren"
+if $developer_id; then
+  codesign --verify --deep --strict "$PROD_APP" || die "$PROD_APP: Signatur ungültig"
+  xcrun stapler validate "$PROD_APP" >/dev/null 2>&1 ||
+    echo "   Hinweis: kein Notarisierungsticket angeheftet"
+else
+  "$sign" "$PROD_APP" --allow-ad-hoc >/dev/null || die "$PROD_APP liess sich nicht signieren"
+fi
 
 echo "== $TEST_APP =="
 rm -rf "$TEST_APP"
@@ -124,9 +143,17 @@ ditto "$source" "$TEST_APP"
   "$TEST_APP/Contents/Info.plist"
 
 # Editing Info.plist invalidates the signature, and macOS kills a bundle
-# whose signature does not match rather than explaining itself. Ad-hoc,
-# like the build itself: there is no Developer ID here.
-"$sign" "$TEST_APP" --allow-ad-hoc >/dev/null || die "das Test-Bündel liess sich nicht signieren"
+# whose signature does not match rather than explaining itself. Signed the
+# way the build was: with the Developer ID and the test app's own profile,
+# or ad hoc. The profile of the real app would not do -- it names the real
+# identifier, and the keychain would refuse the test app.
+rm -f "$TEST_APP/Contents/embedded.provisionprofile"
+if $developer_id; then
+  "$sign" "$TEST_APP" --identity auto --profile auto >/dev/null ||
+    die "das Test-Bündel liess sich nicht signieren (Profil für $TEST_ID: python3 tool/macos_developer_id.py create-profile $TEST_ID)"
+else
+  "$sign" "$TEST_APP" --allow-ad-hoc >/dev/null || die "das Test-Bündel liess sich nicht signieren"
+fi
 
 # Nothing should be left where Spotlight would offer it as a third app,
 # and removing the bundle is only half of that: Launch Services keeps its

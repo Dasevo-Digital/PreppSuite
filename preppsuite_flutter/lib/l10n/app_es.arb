@@ -408,7 +408,7 @@
   "settingsLocalEncryptionStateRecovery": "Clave no disponible",
   "settingsLocalEncryptionUnsupported": "Esta versión no incluye biblioteca de cifrado.",
   "settingsLocalEncryptionPortable": "Una carpeta de datos que llevas contigo no se cifra: la clave se quedaría en este ordenador y la carpeta no se abriría en ningún otro.",
-  "settingsLocalEncryptionNoKeyStore": "Este dispositivo no da acceso a un almacén de claves. En macOS la app necesita una firma para ello, que las versiones actuales aún no tienen. Sin ella, la base de datos, los ajustes personales y las fotos quedan sin cifrar.",
+  "settingsLocalEncryptionNoKeyStore": "Este dispositivo no da acceso a un almacén de claves. En macOS la app necesita para ello su firma con Developer ID, que esta compilación no tiene. Sin almacén de claves, la base de datos, los ajustes personales y las fotos quedan sin cifrar.",
   "settingsLocalEncryptionScope": "También se cifran: los ajustes personales y las fotos de provisiones y bienes. No se incluyen: PDF, mapas, archivos ZIM ni nada que exportes.",
   "settingsLocalEncryptionTestBackup": "Probar una copia de seguridad",
   "settingsLocalEncryptionTestBackupHint": "Vuelve a leer un archivo de copia de seguridad. No se cambia nada.",

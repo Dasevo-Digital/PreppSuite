@@ -4,8 +4,18 @@
 #
 # Usage:
 #   tool/macos_sign.sh <path to .app> [--entitlements <plist>]
-#                                     [--identity <signing identity>]
+#                                     [--identity <signing identity>|auto]
+#                                     [--profile <provisionprofile>|auto]
 #                                     [--allow-ad-hoc]
+#
+# With a Developer ID (#387) the bundle also gets its provisioning profile,
+# `Contents/embedded.provisionprofile`, and the entitlements it allows are
+# added to the outer bundle's: the application identifier, the team and
+# the app's own keychain group. Without them the data protection keychain
+# refuses the app as it refuses an ad hoc one, and the household stays
+# unencrypted. `auto` finds the identity and the profile for the bundle's
+# identifier on this machine (tool/macos_developer_id.py); neither is
+# named in the repository.
 #
 # Why at all: the Flutter build signs ad-hoc and WITHOUT the hardened
 # runtime. Without it there is no library validation and no protection
@@ -34,12 +44,15 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP=""
 ENTITLEMENTS="$ROOT/preppsuite_flutter/macos/Runner/Release.entitlements"
 IDENTITY=""
+PROFILE=""
 ALLOW_AD_HOC=false
+DEVELOPER_ID="$ROOT/tool/macos_developer_id.py"
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --entitlements) ENTITLEMENTS="$2"; shift 2 ;;
     --identity)     IDENTITY="$2"; shift 2 ;;
+    --profile)      PROFILE="$2"; shift 2 ;;
     --allow-ad-hoc) ALLOW_AD_HOC=true; shift ;;
     -*) printf '%sUnknown option: %s%s\n' "$RED" "$1" "$OFF"; exit 2 ;;
     *)  APP="$1"; shift ;;
@@ -55,11 +68,30 @@ done
   exit 2
 }
 [ -n "$IDENTITY" ] || IDENTITY="-"
+if [ "$IDENTITY" = "auto" ]; then
+  IDENTITY="$(python3 "$DEVELOPER_ID" identity)" || exit 1
+fi
+if [ "$IDENTITY" != "-" ]; then
+  # A Developer ID without its profile signs an app that cannot keep its
+  # key: refused rather than shipped that way.
+  [ -n "$PROFILE" ] || PROFILE=auto
+  if [ "$PROFILE" = "auto" ]; then
+    bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Contents/Info.plist")"
+    PROFILE="$(python3 "$DEVELOPER_ID" profile "$bundle_id")" || exit 1
+  fi
+  [ -f "$PROFILE" ] || { bad "no provisioning profile at $PROFILE"; exit 1; }
+elif [ -n "$PROFILE" ]; then
+  bad "a provisioning profile goes with a Developer ID, not with an ad-hoc signature"
+  exit 2
+fi
 
 heading "Starting point"
 note "Bundle:       $APP"
 note "Entitlements: ${ENTITLEMENTS#$ROOT/}"
-note "Identity:     $([ "$IDENTITY" = "-" ] && echo "ad-hoc" || echo "$IDENTITY")"
+# The identity by its hash: its name is a person's, and this output ends
+# up in logs.
+note "Identity:     $([ "$IDENTITY" = "-" ] && echo "ad-hoc" || echo "Developer ID ${IDENTITY:0:8}…")"
+[ -z "$PROFILE" ] || note "Profile:      $(basename "$PROFILE")"
 
 # With an ad-hoc signature library validation MUST be off. It compares
 # team identifiers, and an ad-hoc signature has none — every bundled
@@ -82,6 +114,15 @@ if [ "$IDENTITY" = "-" ]; then
   ENTITLEMENTS="$RELAXED"
   trap 'rm -f "$RELAXED"' EXIT
   note "ad-hoc: library validation switched off (see comment in this script)"
+fi
+
+if [ -n "$PROFILE" ]; then
+  MERGED="$(mktemp -t preppsuite-entitlements).plist"
+  python3 "$DEVELOPER_ID" entitlements "$PROFILE" "$ENTITLEMENTS" "$MERGED" || exit 1
+  ENTITLEMENTS="$MERGED"
+  trap 'rm -f "$MERGED"' EXIT
+  cp "$PROFILE" "$APP/Contents/embedded.provisionprofile"
+  note "profile embedded; keychain entitlements taken from it"
 fi
 
 heading "Signing inside out"
@@ -224,12 +265,15 @@ if [ ! -f "$zstd_lib" ]; then
   exit 1
 fi
 missing=""
+# Into a variable first: `nm | grep -q` under pipefail ends in SIGPIPE as
+# soon as the list outgrows the pipe's buffer and grep stops at its match.
+zstd_symbols="$(nm -gU "$zstd_lib" 2>/dev/null)"
 for symbol in _ZSTD_decompress _ZSTD_compressBound _ZSTD_getFrameContentSize; do
-  nm -gU "$zstd_lib" 2>/dev/null | grep -qE "[[:space:]]${symbol}$" || \
+  grep -qE "[[:space:]]${symbol}$" <<<"$zstd_symbols" || \
     missing="$missing $symbol"
 done
 if [ -z "$missing" ]; then
-  good "zstd is compiled in ($(nm -gU "$zstd_lib" 2>/dev/null | grep -c 'ZSTD_') symbols)"
+  good "zstd is compiled in ($(grep -c 'ZSTD_' <<<"$zstd_symbols") symbols)"
 else
   bad "zstandard_macos carries no zstd —$missing"
   note "cd preppsuite_flutter/macos && pod install, then build again."

@@ -125,7 +125,7 @@ builds is also the machine that uses the app, and a build leaves copies
 behind:
 
 ```bash
-tool/macos_install.sh ~/Desktop/PreppSuite-Release-v<version>-Upload/PreppSuite-<version>-macos-local-ad-hoc.zip
+tool/macos_install.sh ~/Desktop/PreppSuite-Release-v<version>-Upload/PreppSuite-<version>-macos.zip
 ```
 
 It installs the released bundle as both `/Applications/PreppSuite.app`
@@ -1440,8 +1440,32 @@ tree; the test suite deliberately targets that layer rather than the UI.
   app as far as TCC is concerned, and folder and location access get
   asked for again after each update. A real signing identity is the only
   thing that fixes it for camera and location; the sandbox is what fixes
-  it for folders. `tool/macos_sign.sh --identity <name>` takes one when
-  there is one.
+  it for folders. Since #387 the release is signed with the Developer ID
+  (`tool/macos_sign.sh --identity auto --profile auto`), and its
+  requirement names the team and the identifier instead of one binary.
+- **The Mac package is signed with the Developer ID, with its profile,
+  and notarized** (#387). The Developer ID alone would not have given the
+  app a key: the data protection keychain wants
+  `com.apple.application-identifier` and `keychain-access-groups`, and a
+  Mac honours them only when a provisioning profile in the bundle allows
+  them. A Developer ID profile (`MAC_APP_DIRECT`) needs no devices;
+  Xcode's own automatic signing would not make one from the command line
+  here, because it wants a development profile for a registered Mac
+  first. `tool/macos_developer_id.py` finds the identity (by its hash --
+  the name is a person's), finds or creates the profiles for
+  `de.dasevo.preppsuite` and `de.dasevo.preppsuite.test` through the App
+  Store Connect API, and adds the identifier, the team and the app's own
+  keychain group to the entitlements at signing time. None of them is in
+  `Release.entitlements`: an ad hoc build with them would not start, and
+  the team id does not belong in the repository. `tool/macos_notarize.sh`
+  submits with the API key `docs/testflight.md` stores, staples the
+  ticket and refuses the app unless Gatekeeper calls it "Notarized
+  Developer ID". `tool/release.sh` checks identity, profiles and key
+  before it builds anything; `RELEASE_MAC_AD_HOC=1` is the old package.
+  `tool/macos_install.sh` installs a notarized release as it is and signs
+  the test copy again with its own profile. A household that ran
+  unencrypted stays so until somebody starts the encryption on the
+  "Lokale Verschlüsselung" card; a new one starts encrypted.
 - **An ad-hoc signed macOS build has no data key, so nothing on it is
   encrypted at rest.** `flutter_secure_storage` uses the data protection
   keychain on macOS, and writing to it needs an application identifier the

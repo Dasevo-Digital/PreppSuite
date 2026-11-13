@@ -37,11 +37,30 @@ Gegenprobe vor dem Hochladen: `tar tzf ... | head -3` muss mit
 
 ## macOS
 
-macOS-Releases entstehen mit `tool/macos_release.sh --identity ...
---notary-profile ...`. Das Skript verweigert Ad-hoc-Signaturen, notariert den
-Build, stapelt das Ticket, prueft Gatekeeper und erzeugt erst dann das ZIP. Die
-lokale Produktiv-/Testinstallation darf weiterhin explizit Ad-hoc-signiert sein;
-sie ist kein weiterzugebendes Release.
+Das Mac-Paket baut `tool/release.sh` mit (#387). Es signiert mit dem
+Zertifikat „Developer ID Application“ aus dem Anmelde-Schlüsselbund und legt
+das Developer-ID-Profil der App ins Bündel; erst das Profil erlaubt der App den
+Schlüsselbund und damit einen Datenschlüssel. Danach notarisiert
+`tool/macos_notarize.sh` die App mit dem API-Schlüssel aus
+`docs/testflight.md`, heftet das Ticket an und prüft, dass Gatekeeper sie als
+„Notarized Developer ID“ annimmt. Erst dann entsteht das ZIP.
+
+Zertifikat, Profile und Schlüssel stehen nicht im Repository.
+`tool/macos_developer_id.py` findet sie auf dem Mac und legt fehlende Profile
+über App Store Connect an:
+
+```bash
+python3 tool/macos_developer_id.py create-profile de.dasevo.preppsuite de.dasevo.preppsuite.test
+```
+
+Ein Developer-ID-Profil braucht keine eingetragenen Geräte. Das zweite ist für
+„PreppSuite Test“, das `tool/macos_install.sh` aus demselben Paket macht.
+Profile gelten so lange wie das Zertifikat; danach den Befehl wiederholen.
+Zertifikate seit 2021 führt App Store Connect als
+`DEVELOPER_ID_APPLICATION_G2`; der Helfer sucht beide Typen.
+
+Ein ad hoc signiertes Paket wie vor #387 gibt es nur noch mit
+`RELEASE_MAC_AD_HOC=1`: ohne Notarisierung und ohne Datenschlüssel.
 
 ## Windows
 

@@ -1474,7 +1474,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsLocalEncryptionNoKeyStore =>
-      'Este dispositivo no da acceso a un almacén de claves. En macOS la app necesita una firma para ello, que las versiones actuales aún no tienen. Sin ella, la base de datos, los ajustes personales y las fotos quedan sin cifrar.';
+      'Este dispositivo no da acceso a un almacén de claves. En macOS la app necesita para ello su firma con Developer ID, que esta compilación no tiene. Sin almacén de claves, la base de datos, los ajustes personales y las fotos quedan sin cifrar.';
 
   @override
   String get settingsLocalEncryptionScope =>
