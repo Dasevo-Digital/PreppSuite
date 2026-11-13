@@ -128,7 +128,9 @@ print("ok")
     // when grep stops at its match while codesign is still writing. That
     // happened on 13.11.2026: a good Developer ID signature read as none,
     // and macos_install.sh would have re-signed a notarized release ad hoc.
-    final pattern = RegExp(r'\b(codesign|nm|security|spctl)\b[^|#]*\|\s*grep\s+-q');
+    final pattern = RegExp(
+      r'\b(codesign|nm|security|spctl)\b[^|#]*\|\s*grep\s+-q',
+    );
     for (final name in [
       'macos_sign.sh',
       'macos_notarize.sh',
@@ -139,7 +141,11 @@ print("ok")
       for (var i = 0; i < lines.length; i++) {
         final line = lines[i].trimLeft();
         if (line.startsWith('#')) continue;
-        expect(pattern.hasMatch(line), isFalse, reason: '$name:${i + 1}: $line');
+        expect(
+          pattern.hasMatch(line),
+          isFalse,
+          reason: '$name:${i + 1}: $line',
+        );
       }
     }
   });
