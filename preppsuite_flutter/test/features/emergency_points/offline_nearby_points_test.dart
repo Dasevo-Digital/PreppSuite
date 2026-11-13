@@ -301,6 +301,30 @@ void main() {
       expect(asked, hasLength(3));
     });
 
+    test(
+      'points kept by 3.0.1 are fetched once more, and shown till then',
+      () async {
+        // 3.0.1 may have kept a table QLever cut short (#385). Its
+        // description names no format.
+        await store.save(braunschweig, set);
+        final meta = File('${dir.path}/offline_nearby_points.json');
+        meta.writeAsStringSync(
+          meta.readAsStringSync().replaceFirst(RegExp(r',"format":\d+'), ''),
+        );
+        expect((await store.kept())!.format, 1);
+        expect(await store.around(52.2689, 10.5268), isNotNull);
+
+        final c = container();
+        final points = c.read(offlineNearbyPointsProvider.notifier);
+        await points.ensureFor(braunschweig);
+        expect(asked, hasLength(1));
+        expect((await store.kept())!.format, offlinePointsFormat);
+
+        await points.ensureFor(braunschweig);
+        expect(asked, hasLength(1));
+      },
+    );
+
     test('does not take a continent along', () async {
       final c = container();
       await c

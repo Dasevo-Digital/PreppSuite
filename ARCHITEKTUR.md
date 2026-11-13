@@ -1804,8 +1804,11 @@ tree; the test suite deliberately targets that layer rather than the UI.
     large keeps none, and a fetch that ends after the map changed or went
     is thrown away. Both files are written beside the old ones and
     swapped in by renames, the description last, so an interrupted write
-    reads as nothing kept. The two screens look them up
-    beside the search, never before it, show them as soon as they are
+    reads as nothing kept. The description names a format
+    (`offlinePointsFormat`); a lower one is fetched again however young it
+    is and shown until the new answer comes -- 2 since 3.0.2, because 3.0.1
+    took a table QLever had cut short for the whole. The two screens
+    look them up beside the search, never before it, show them as soon as they are
     read and replace them with the network's answer; a lookup that ends
     after a later search is dropped, and the map's points are never
     stored as the last search.

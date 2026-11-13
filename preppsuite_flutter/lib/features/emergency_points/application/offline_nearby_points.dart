@@ -45,10 +45,15 @@ class OfflineNearbyPoints {
     required this.fetchedAt,
     required this.defibrillators,
     required this.points,
+    this.format = offlinePointsFormat,
   });
 
   final GeoBoundingBox bounds;
   final DateTime fetchedAt;
+
+  /// How the points were fetched: [offlinePointsFormat] for this version,
+  /// 1 for what 3.0.1 kept, which may be a table QLever cut short.
+  final int format;
 
   /// How many of each are kept.
   final int defibrillators;
@@ -81,6 +86,7 @@ class OfflineNearbyPoints {
     'fetchedAt': fetchedAt.toUtc().toIso8601String(),
     'defibrillators': defibrillators,
     'points': points,
+    'format': format,
   };
 
   static OfflineNearbyPoints? fromJson(Object? json) {
@@ -108,9 +114,16 @@ class OfflineNearbyPoints {
       fetchedAt: fetchedAt,
       defibrillators: (json['defibrillators'] as num?)?.toInt() ?? 0,
       points: (json['points'] as num?)?.toInt() ?? 0,
+      format: (json['format'] as num?)?.toInt() ?? 1,
     );
   }
 }
+
+/// Raised when what is kept has to be fetched again however young it is.
+/// 2 since 3.0.2: 3.0.1 took a table QLever had cut short for the whole of
+/// it (#385), so what it kept is asked for once more. Until that answer
+/// comes, and if it does not, the old points are still shown.
+const offlinePointsFormat = 2;
 
 /// What the kept points have near one place.
 class OfflineNearbyAnswer {
@@ -385,6 +398,7 @@ class OfflineNearbyPointsController extends AsyncNotifier<OfflinePointsState> {
     if (!_isWanted(bounds)) return;
     if (kept != null &&
         kept.isFor(bounds) &&
+        kept.format >= offlinePointsFormat &&
         (now ?? DateTime.now()).difference(kept.fetchedAt) <
             offlinePointsRefreshAfter) {
       return;
