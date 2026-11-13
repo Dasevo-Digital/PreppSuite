@@ -149,7 +149,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             NotificationTaps(
               profile: widget.profile,
               onNavigate: _select,
-              screenFor: (destination) => _screenFor(destination, householdId),
+              screenFor: (destination) =>
+                  _pushedScreenFor(destination, householdId),
             ),
             const WarningDayScheduler(),
             // Draws nothing; takes the defibrillators and emergency points
@@ -186,15 +187,31 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     );
   }
 
-  Widget _screenFor(ShellDestination destination, String householdId) {
+  /// A tab's screen as a page of its own above whatever is open (#382).
+  /// Its links to other tabs open those as pages too: switching the tab
+  /// beneath would change nothing anybody can see.
+  Widget _pushedScreenFor(ShellDestination destination, String householdId) {
+    void open(ShellDestination next) => Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _pushedScreenFor(next, householdId),
+      ),
+    );
+    return _screenFor(destination, householdId, onNavigate: open);
+  }
+
+  Widget _screenFor(
+    ShellDestination destination,
+    String householdId, {
+    void Function(ShellDestination destination)? onNavigate,
+  }) {
     return switch (destination) {
       ShellDestination.overview => OverviewScreen(
         profile: widget.profile,
-        onNavigate: _select,
+        onNavigate: onNavigate ?? _select,
       ),
       ShellDestination.emergency => EmergencyScreen(
         profile: widget.profile,
-        onNavigate: _select,
+        onNavigate: onNavigate ?? _select,
       ),
       ShellDestination.inventory => InventoryListScreen(
         householdId: householdId,

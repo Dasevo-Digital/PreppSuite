@@ -1105,17 +1105,31 @@ build needs `build_ios.sh` run before `xcodebuild`, or it goes without.
 **TestFlight is built from the tag** (#379): `tool/ios_testflight.sh
 <version>` checks out the tag into a worktree of its own, builds the
 device framework and an App Store archive, and refuses it without the
-right version and build number, the translator, the widget, both privacy
-manifests or the time-sensitive entitlement; `--upload` then exports it to
-App Store Connect for internal testers only. Team id and API key live in
-the login keychain, never here, and the key is a file only for the length
-of the run. The privacy manifests (`ios/Runner/PrivacyInfo.xcprivacy`,
-`ios/PreppSuiteWidget/PrivacyInfo.xcprivacy`) declare what the app's own
-code uses and App Store Connect asks reasons for: `UserDefaults` (the
-storage bridge's bookmarks, CA92.1; the widget's app group, 1C8F.1) and
-file timestamps (the app's own files, C617.1, and documents somebody
-picked, 3B52.1). The Flutter engine brings its own; the two plugins
-without one, flutter_tts and zstandard_ios, use none of those APIs.
+right version and build number (taken from the tag's pubspec, as
+`release.sh` does), the translator, the widget, both privacy manifests or
+the time-sensitive entitlement; `--upload` then exports it to App Store
+Connect for internal testers only. Team id and API key live in the login
+keychain, never here, the key base64-encoded: `security -w` hands back a
+secret with line breaks in it as hex, and a `.p8` file has several. The
+key is a file only for the length of the run. The privacy manifests
+(`ios/Runner/PrivacyInfo.xcprivacy`,
+`ios/PreppSuiteWidget/PrivacyInfo.xcprivacy`) declare what App Store
+Connect asks reasons for, in the app's own code and in the libraries that
+bring no manifest of their own: `UserDefaults` (the storage bridge's
+bookmarks, CA92.1; home_widget writing the widget's data into the app
+group, 1C8F.1, which the widget's manifest declares for reading it), file
+timestamps (the app's own files, C617.1, and documents somebody picked,
+3B52.1) and disk space (E174.1), because the SQLite build `sqlite3mc`
+calls `statfs` and `fstatfs`, which Apple counts as disk space APIs
+whatever they are asked for. Checked on 13 November 2026 against the
+built frameworks (`nm -u`) and the plugins' objects: the engine and the
+plugins with a manifest of their own (shared_preferences,
+flutter_local_notifications and a dozen more) speak for themselves; of
+those without one -- home_widget, audioplayers, printing, pdfium_flutter
+with PDFium, flutter_tts, zstandard_ios, sqlite3mc, objective_c and the
+translator -- only home_widget and the `stat`, `fstat` and `statfs` calls
+of PDFium, sqlite3mc and the translator touch Apple's list.
+`test/ios_privacy_manifest_test.dart` holds the declarations;
 `docs/testflight.md` is the setting up that only the account can do.
 **The Mac's arm64 half has a fixed baseline too** (#375): armv8.4-a,
 which every Apple silicon Mac runs, dot product included. Left at
@@ -1126,9 +1140,13 @@ M1 with SIGILL while this machine ran it. `build_macos.sh` keeps a stamp
 of SDK, toolchain and arguments per architecture and starts a directory
 over when it changes, as `build_ios.sh` does, and ends with
 `check_arm64_baseline.sh`: the arm64 slice is disassembled with every
-extension on and refused if it holds i8mm, bf16, SVE or SME. Checked
-against libraries built to have them, and against 3.0.0's, which had
-none. Model packs are
+extension on and refused if it holds i8mm, bf16, SVE or SME -- SVE and
+SME by their z, p and za registers and by the few instructions that
+touch only general ones (`cntw`, `rdvl`, `addvl`) -- and refused as well
+when it counted no instruction at all, which an objdump printing another
+layout would otherwise pass. Checked against libraries built to have
+them (`test/translator_build_test.dart` builds them on a Mac), and
+against 3.0.0's, which had none. Model packs are
 checked against Mozilla's SHA-256 and get their manifest last. **A newer
 version of a pack already here never replaces it in place** (#220): it is
 fetched into `<code>.new` and swapped in by two renames once every file
@@ -1577,7 +1595,8 @@ tree; the test suite deliberately targets that layer rather than the UI.
   too — 68 against 37 µg/m³ of PM₁₀ for the same hour and station — so
   the two versions do not average them the same way. A reading kept from
   before the change names no index and is not shown, and the live test
-  checks real readings against the spans the screen prints. **The UBA's
+  checks real readings against the spans the screen prints. Spans that
+  do not come leave a fresh reading standing, shown without them. **The UBA's
   behaviour advice is deliberately not shipped**: it is published only as
   images, and paraphrasing somebody else's health advice is exactly what
   the rule against invented scales exists to prevent. The screen names
@@ -1747,28 +1766,49 @@ tree; the test suite deliberately targets that layer rather than the UI.
     cost fifteen seconds each: asked in turn, the defibrillator search
     took over half a minute to reach the one that answered in under a
     second. It gets the same box around the same grid point
-    (`boxAroundCircle(gridCircle(...))`) and is read as tab-separated
-    N-Triples (`parseQleverPoints`); anything that is not that table
-    throws rather than reading as "nothing near".
+    (`boxAroundCircle(gridCircle(...))`) and its tab-separated table is
+    read by `parseQleverPoints`. That table only looks like N-Triples:
+    quotes and backslashes in a value stay as they are, a line feed is
+    written `\n`, a carriage return is left in. Anything that is not the
+    table throws rather than reading as "nothing near", and so does a
+    table QLever cut short: when a query fails while the answer is on its
+    way, the status line said 200 already, and a line `!!!!>># An error
+    has occurred ...` after a broken row is the only sign. Overpass does
+    the like under load: 200, whatever it had by then, and `"remark":
+    "runtime error: ..."`. `overpassGaveUp` moves on to the next instance
+    on such an answer, and `overpassElements` refuses it, a page that is
+    not JSON and one without elements -- each of them used to read as an
+    empty list.
   - "No connection" only when no way was reached at all. With one
     instance the last error said so; with several, one name that no
     longer resolves had turned "the service is down" into "check your
-    network". The screens now say the service is down, and say from
-    which day the list shown instead is.
+    network". The screens now say that none of the search services
+    answered, and from which day the list shown instead is -- not that
+    the network is fine: a timeout counts as reached, and a weak network
+    or a hotel's sign-in page times out or answers nonsense too.
   - When an offline map is taken into use, `OfflineNearbyPointsKeeper`
     asks QLever (Overpass as the way back) for every defibrillator, well,
     help point and siren in the map's box and keeps them packed in the
     support directory, only the tags the screens read
-    (`osmPointKeys`). Germany's box was 49,804 points, 26 MB from QLever
-    in two seconds. Not encrypted: public points over a box the map
-    itself already names, and nothing about which spot in it is home.
+    (`osmPointKeys`). Germany's box was 49,804 points: 29 MB of table,
+    3 MB packed on the way, in about six seconds on 13 November 2026, and
+    read on an isolate of its own. Not encrypted: public points over a
+    box the map itself already names, and nothing about which spot in it
+    is home.
     Boxes over 400 square degrees are not taken (a continent would be
     hundreds of thousands of points for searches of two to ten
-    kilometres), the points are asked for again after 60 days or for
-    another box, and they go with the map. The two screens look them up
+    kilometres), the points are asked for again after 60 days (the
+    keeper looks every twelve hours, for a desktop app left open) or for
+    another box. They go with the map: another map's points are removed
+    before its own are fetched and are not shown meanwhile, a map too
+    large keeps none, and a fetch that ends after the map changed or went
+    is thrown away. Both files are written beside the old ones and
+    swapped in by renames, the description last, so an interrupted write
+    reads as nothing kept. The two screens look them up
     beside the search, never before it, show them as soon as they are
-    read and replace them with the network's answer; the map's points
-    are never stored as the last search.
+    read and replace them with the network's answer; a lookup that ends
+    after a later search is dropped, and the map's points are never
+    stored as the last search.
 - **Only the woodland index ships.** The grassland index (GLFI) sits
   beside it in the same directory and is not used: the DWD publishes the
   five-step wording for the WBI and not, where this was written, for the
@@ -3414,12 +3454,17 @@ reicht einmal die Payload weiter, mit der die App gestartet wurde
 Datensicherung auf „Daten und Sicherheit“, Ablauf, Rezept und Akku eines
 Geräts auf den Vorratsartikel (gelöscht: der Vorrat), die
 Akku-Prüfung des Haushalts auf die Übersicht, Dokumentfristen auf die
-eigenen Dokumente, Warnungen und den Warntag auf die Warnungen. Warnungen
-tragen dafür jetzt `warning:<id>`. `NotificationTaps` sitzt neben
+eigenen Dokumente, Warnungen und den Warntag auf die Liste der Warnungen.
+Warnungen tragen jetzt `warning:<id>`; die Kennung öffnet noch nicht die
+einzelne Warnung, steht dafür aber bereit. `NotificationTaps` sitzt neben
 `AppShortcuts` im Shell und öffnet das Ziel. Ist eine Seite über dem Shell
 offen, kommt ein Reiter als eigene Seite darüber, statt darunter zu
-wechseln: Schließen könnte eine angefangene Eingabe verwerfen. Eine
-Payload, die diese Fassung nicht kennt, öffnet nur die App.
+wechseln: Schließen könnte eine angefangene Eingabe verwerfen. Eine so
+geöffnete Übersicht öffnet auch ihre Verweise auf andere Reiter als
+Seiten, sonst wechselte der Reiter unsichtbar darunter. Die Payload, mit
+der die App gestartet wurde, kommt nach dem nächsten Frame, um den die
+App dafür bittet. Eine Payload, die diese Fassung nicht kennt, öffnet nur
+die App.
 
 ### Radio ohne Internet: Programme ja, Frequenzen nein
 

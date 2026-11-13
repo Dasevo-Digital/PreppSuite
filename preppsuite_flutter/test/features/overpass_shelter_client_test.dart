@@ -191,6 +191,44 @@ void main() {
       ]);
     });
 
+    test('an answer that gave up moves on to the next instance', () async {
+      final asked = <String>[];
+      final response = await askOverpass(
+        MockClient((request) async {
+          asked.add(request.url.host);
+          if (asked.length == 1) {
+            return http.Response(
+              '{"version":0.6,"elements":[],\n'
+              '"remark": "runtime error: Query timed out in \\"query\\" '
+              'at line 1 after 25 seconds."}',
+              200,
+            );
+          }
+          return http.Response('{"elements":[]}', 200);
+        }),
+        '[out:json];node(1);out;',
+        retryDelay: Duration.zero,
+      );
+      expect(asked, hasLength(2));
+      expect(overpassElements(response.body), isEmpty);
+    });
+
+    test('an answer that is not one says so instead of "nothing"', () {
+      for (final body in [
+        '<html>Anmeldung</html>',
+        '{"version":0.6}',
+        '{"elements":[],"remark":"runtime error: out of memory"}',
+      ]) {
+        expect(
+          () => overpassElements(body),
+          throwsA(isA<OverpassException>()),
+          reason: body,
+        );
+      }
+      // An answer with nothing near is still an answer.
+      expect(overpassElements('{"elements":[]}'), isEmpty);
+    });
+
     test('a rate limit is the kind that clears itself', () {
       expect(const OverpassException(429).isBusy, isTrue);
       expect(const OverpassException(504).isBusy, isTrue);

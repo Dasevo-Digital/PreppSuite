@@ -60,9 +60,12 @@ class _NotificationTapsState extends ConsumerState<NotificationTaps> {
     unawaited(
       launch().then((payload) {
         if (payload == null || !mounted) return;
-        // After the first frame: the shell is still being laid out when a
-        // start from a notification gets here.
-        WidgetsBinding.instance.addPostFrameCallback((_) => _open(payload));
+        // After the next frame: the shell may still be laid out when a
+        // start from a notification gets here. Asked for, since a shell
+        // that has settled draws no frame of its own accord.
+        WidgetsBinding.instance
+          ..addPostFrameCallback((_) => _open(payload))
+          ..scheduleFrame();
       }),
     );
   }

@@ -240,15 +240,14 @@ class EmergencyPointClient {
 }
 
 /// The nearest [EmergencyPointKind.kept] of each kind in an Overpass
-/// answer, nearest first.
+/// answer, nearest first. Throws an `OverpassException` for an answer
+/// that is not one (`overpassElements`).
 List<EmergencyPoint> parseEmergencyPoints(
   String body,
   double latitude,
   double longitude,
 ) {
-  final decoded = jsonDecode(body);
-  final elements = decoded is Map ? decoded['elements'] : null;
-  if (elements is! List) return const [];
+  final elements = overpassElements(body);
   final points = <EmergencyPoint>[];
   for (final element in elements) {
     if (element is! Map || element['type'] != 'node') continue;

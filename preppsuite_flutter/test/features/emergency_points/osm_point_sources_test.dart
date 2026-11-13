@@ -14,14 +14,15 @@ import 'package:preppsuite_flutter/features/shelters/application/overpass_shelte
 import 'package:preppsuite_flutter/l10n/generated/app_localizations_de.dart';
 
 /// Rows as QLever sends them, cut from its answer for Braunschweig on
-/// 2026-11-12, with an escaped line break and quote put in.
+/// 2026-11-12, with a line break and quotes put in the way QLever writes
+/// them: the line break as `\n`, the quotes as they are.
 const _tsv =
     '?node\t?wkt\t?key\t?value\n'
     '<https://www.openstreetmap.org/node/10>\tPOINT(10.528850 52.276314)\t'
     '<https://www.openstreetmap.org/wiki/Key:emergency>\t"defibrillator"\n'
     '<https://www.openstreetmap.org/node/10>\tPOINT(10.528850 52.276314)\t'
     '<https://www.openstreetmap.org/wiki/Key:defibrillator:location>\t'
-    r'"Kaufland \"Info\"\nlinks vom Eingang"'
+    r'"Kaufland "Info"\nlinks vom Eingang"'
     '\n'
     '<https://www.openstreetmap.org/node/10>\tPOINT(10.528850 52.276314)\t'
     '<https://www.openstreetmap.org/wiki/Key:operator>\t'
@@ -65,6 +66,76 @@ void main() {
       expect(set.points.last.ref, 'BS-12');
       // A hydrant is `emergency=*` too, and not one of the four.
       expect(set.length, 4);
+    });
+
+    test('values keep backslashes and carriage returns as mapped', () {
+      // From Germany's box on 13 November 2026: QLever leaves a backslash
+      // and a carriage return in a value as they are.
+      const rows =
+          '?node\t?wkt\t?key\t?value\n'
+          '<https://www.openstreetmap.org/node/40>\tPOINT(6.188366 48.645108)\t'
+          '<https://www.openstreetmap.org/wiki/Key:emergency>\t"defibrillator"\n'
+          '<https://www.openstreetmap.org/node/40>\tPOINT(6.188366 48.645108)\t'
+          '<https://www.openstreetmap.org/wiki/Key:defibrillator:location>\t'
+          '"au bout du hall,\r\\nau niveau d\'une porte grise"\n'
+          '<https://www.openstreetmap.org/node/40>\tPOINT(6.188366 48.645108)\t'
+          '<https://www.openstreetmap.org/wiki/Key:opening_hours>\t'
+          r'"24\7"'
+          '\n'
+          '<https://www.openstreetmap.org/node/40>\tPOINT(6.188366 48.645108)\t'
+          '<https://www.openstreetmap.org/wiki/Key:description>\t'
+          r'"Ecke Khevenhüllerstraße \ Goethestraße"'
+          '\n';
+      final aed = parseQleverPoints(rows).defibrillators.single;
+      expect(
+        aed.tags['defibrillator:location'],
+        "au bout du hall,\r\nau niveau d'une porte grise",
+      );
+      expect(aed.tags['opening_hours'], r'24\7');
+      expect(
+        aed.tags['description'],
+        r'Ecke Khevenhüllerstraße \ Goethestraße',
+      );
+    });
+
+    test('a table cut short by an error is not taken as complete', () {
+      // QLever has sent 200 by the time a query fails while the table is
+      // on its way; the line it appends is the only sign (13 November
+      // 2026, a time limit too short for Germany).
+      final cut =
+          '${_tsv.substring(0, _tsv.length - 40)}\n'
+          ' !!!!>># An error has occurred while exporting the query result. '
+          'Unfortunately due to limitations in the HTTP 1.1 protocol, there '
+          'is no better way to report this than to append it to the '
+          'incomplete result. The error message was:\n'
+          'Operation timed out.\n';
+      expect(() => parseQleverPoints(cut), throwsA(isA<QleverException>()));
+      // A value that merely shouts is a value.
+      expect(
+        parseQleverPoints(
+          '?node\t?wkt\t?key\t?value\n'
+          '<https://www.openstreetmap.org/node/50>\tPOINT(8.49 47.42)\t'
+          '<https://www.openstreetmap.org/wiki/Key:emergency>\t"defibrillator"\n'
+          '<https://www.openstreetmap.org/node/50>\tPOINT(8.49 47.42)\t'
+          '<https://www.openstreetmap.org/wiki/Key:defibrillator:location>\t'
+          '"Ist nicht mehr im Betrieb!!!!"\n',
+        ).defibrillators.single.tags['defibrillator:location'],
+        'Ist nicht mehr im Betrieb!!!!',
+      );
+    });
+
+    test('a large answer is read the same on its own isolate', () async {
+      final rows = StringBuffer('?node\t?wkt\t?key\t?value\n');
+      for (var id = 1; rows.length < 300 * 1024; id++) {
+        rows.write(
+          '<https://www.openstreetmap.org/node/$id>\tPOINT(10.5 52.27)\t'
+          '<https://www.openstreetmap.org/wiki/Key:emergency>\t"siren"\n',
+        );
+      }
+      final text = rows.toString();
+      final set = await readQleverPoints(utf8.encode(text));
+      expect(set.points.length, parseQleverPoints(text).points.length);
+      expect(set.points.length, greaterThan(2500));
     });
 
     test('an answer that is not the table is not an empty table', () {
@@ -324,6 +395,78 @@ void main() {
       );
     });
 
+    test('an Overpass answer that gave up is not "nothing near"', () async {
+      // Under load Overpass answers 200 with what it had found by then --
+      // here nothing -- and a remark that the query timed out. Read as an
+      // answer, that replaced a good last search with an empty list.
+      final asked = <String>[];
+      final gaveUp = jsonEncode({
+        'elements': <Object>[],
+        'remark':
+            'runtime error: Query timed out in "query" at line 1 after 26 '
+            'seconds.',
+      });
+      final client = DefibrillatorClient(
+        retryDelay: Duration.zero,
+        httpClient: MockClient((request) async {
+          asked.add(request.url.host);
+          if (_isOverpass(request)) return http.Response(gaveUp, 200);
+          return http.Response.bytes(utf8.encode(_tsv), 200);
+        }),
+      );
+
+      final found = await client.near(52.2689, 10.5268);
+
+      expect(found.map((d) => d.id), [10]);
+      expect(asked, ['overpass-api.de', 'qlever.dev']);
+    });
+
+    test('a page that is not Overpass\'s JSON goes on to QLever', () async {
+      // A hotel network's sign-in page, answered with 200 for any address.
+      final client = EmergencyPointClient(
+        retryDelay: Duration.zero,
+        httpClient: MockClient((request) async {
+          if (_isOverpass(request)) {
+            return http.Response('<html>Bitte anmelden</html>', 200);
+          }
+          return http.Response.bytes(utf8.encode(_tsv), 200);
+        }),
+      );
+
+      final found = await client.near(52.2689, 10.5268);
+
+      expect(found, isNotEmpty);
+    });
+
+    test(
+      'when everything gave up, it is a failure, not an empty list',
+      () async {
+        final client = DefibrillatorClient(
+          retryDelay: Duration.zero,
+          httpClient: MockClient((request) async {
+            if (_isOverpass(request)) {
+              return http.Response(
+                '{"elements":[],"remark":"runtime error: out of memory"}',
+                200,
+              );
+            }
+            return http.Response('{"exception":"busy"}', 503);
+          }),
+        );
+
+        await expectLater(
+          client.near(52.2689, 10.5268),
+          throwsA(
+            isA<OverpassException>().having(
+              (e) => e.noNetwork,
+              'noNetwork',
+              false,
+            ),
+          ),
+        );
+      },
+    );
+
     test('when QLever fails too, the Overpass failure is reported', () async {
       final client = DefibrillatorClient(
         retryDelay: Duration.zero,
@@ -377,5 +520,23 @@ void main() {
     expect(query, contains('defibrillator|drinking_water'));
     expect(set.points.single.kind, EmergencyPointKind.helpPoint);
     expect(set.points.single.tags.containsKey('phone'), isFalse);
+  });
+
+  test('a country box Overpass gave up on is not kept as empty', () async {
+    // Saved, it would have said "0 defibrillators" for sixty days.
+    final client = MockClient(
+      (request) async => http.Response(
+        '{"elements":[],"remark":"runtime error: Query timed out"}',
+        200,
+      ),
+    );
+    await expectLater(
+      askOverpassForPoints(
+        client,
+        const GeoBoundingBox(west: 10, south: 52, east: 11, north: 53),
+        retryDelay: Duration.zero,
+      ),
+      throwsA(isA<OverpassException>()),
+    );
   });
 }

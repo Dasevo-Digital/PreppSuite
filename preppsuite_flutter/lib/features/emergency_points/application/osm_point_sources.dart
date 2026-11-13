@@ -16,7 +16,9 @@ library;
 
 import 'dart:convert';
 import 'dart:io' show SocketException;
+import 'dart:isolate';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -143,8 +145,8 @@ class QleverException implements Exception {
 }
 
 /// The SPARQL query for every point in [box]: one row per point and tag,
-/// tab-separated, which for all of Germany is about 26 MB against several
-/// times that as JSON.
+/// tab-separated, which for all of Germany is about 29 MB (3 MB packed on
+/// the way) against several times that as JSON.
 String qleverQuery(GeoBoundingBox box) {
   String degrees(double value) => value.toStringAsFixed(5);
   final kinds = emergencyTags.map((tag) => '"$tag"').join(' ');
@@ -188,15 +190,43 @@ Future<NearbyPointSet> askQlever(
   if (response.statusCode != 200) {
     throw QleverException(response.statusCode);
   }
-  return parseQleverPoints(utf8.decode(response.bodyBytes));
+  return readQleverPoints(response.bodyBytes);
 }
+
+/// [parseQleverPoints] on the bytes of an answer, on an isolate of its own
+/// once the answer is large: the box of a country is 29 MB of text, and
+/// the app is starting while it is read.
+Future<NearbyPointSet> readQleverPoints(Uint8List bytes) async {
+  if (bytes.length < _readHereBelow) {
+    return parseQleverPoints(utf8.decode(bytes));
+  }
+  return Isolate.run(() => parseQleverPoints(utf8.decode(bytes)));
+}
+
+/// Below this an answer is read where it arrives: a search near a place is
+/// a few kilobytes, less than starting an isolate costs.
+const _readHereBelow = 256 * 1024;
+
+/// What QLever appends when the query fails while the table is already
+/// on its way. The status line said 200 by then, so this line after a
+/// row cut off in the middle is the only sign: measured on 13 November
+/// 2026 with a time limit too short for Germany, 50,460 lines of an
+/// answer of about 200,000 came back as 200, followed by "Operation timed
+/// out." (#366).
+const qleverExportFailed = '!!!!>># An error has occurred';
 
 /// The table [qleverQuery] asks for, as points. Throws a
 /// [QleverException] for anything that is not that table -- an error page
 /// read as an empty table would say there is no defibrillator anywhere
-/// near.
+/// near, and a table cut short would leave out the ones it did not reach.
+///
+/// Rows end at a line feed and nowhere else. QLever writes a line feed in
+/// a value as `\n` and a tab as a space, but leaves a carriage return
+/// as it is: one description in Germany's box holds one, and splitting
+/// there as well dropped that tag.
 NearbyPointSet parseQleverPoints(String body) {
-  final lines = const LineSplitter().convert(body);
+  if (body.contains(qleverExportFailed)) throw const QleverException(200);
+  final lines = body.split('\n');
   if (lines.isEmpty || !lines.first.startsWith('?node')) {
     throw const QleverException(200);
   }
@@ -252,50 +282,17 @@ final _pointPattern = RegExp(
   return (lat: lat, lon: lon);
 }
 
-/// An N-Triples literal: `"text"`, perhaps with `@lang` or `^^<type>`
-/// behind it, with `\n`, `\t`, `\"` and `\uXXXX` escaped inside.
+/// A literal as QLever's table writes it: `"text"`, perhaps with `@lang`
+/// or `^^<type>` behind it. Not N-Triples, although it looks like it:
+/// quotes and backslashes inside stay as they are (`""zu den
+/// Schulzeiten""`, `24\7`, `Khevenhüllerstraße \ Goethestraße`, all in
+/// Germany's box on 13 November 2026), and only a line feed is written as
+/// `\n`. Reading the rest as escapes made `24\7` into `247`.
 String? _literal(String cell) {
   if (!cell.startsWith('"')) return null;
   final end = cell.lastIndexOf('"');
   if (end <= 0) return null;
-  final inner = cell.substring(1, end);
-  if (!inner.contains(r'\')) return inner;
-
-  final out = StringBuffer();
-  for (var i = 0; i < inner.length; i++) {
-    final char = inner[i];
-    if (char != r'\' || i + 1 == inner.length) {
-      out.write(char);
-      continue;
-    }
-    final next = inner[++i];
-    switch (next) {
-      case 'n':
-        out.write('\n');
-      case 't':
-        out.write('\t');
-      case 'r':
-        out.write('\r');
-      case 'b':
-        out.write('\b');
-      case 'f':
-        out.write('\f');
-      case 'u' || 'U':
-        final length = next == 'u' ? 4 : 8;
-        final code = i + length < inner.length
-            ? int.tryParse(inner.substring(i + 1, i + 1 + length), radix: 16)
-            : null;
-        if (code == null) {
-          out.write(next);
-        } else {
-          out.writeCharCode(code);
-          i += length;
-        }
-      default:
-        out.write(next);
-    }
-  }
-  return out.toString();
+  return cell.substring(1, end).replaceAll(r'\n', '\n');
 }
 
 /// Every point in [box], from the Overpass instances: the way back when
@@ -318,9 +315,14 @@ Future<NearbyPointSet> askOverpassForPoints(
     retryDelay: retryDelay,
     timeout: timeout,
   );
-  final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-  final elements = decoded is Map ? decoded['elements'] : null;
-  if (elements is! List) return const NearbyPointSet();
+  final bytes = response.bodyBytes;
+  // A country's box is tens of megabytes of JSON.
+  return Isolate.run(
+    () => _overpassPointSet(overpassElements(utf8.decode(bytes))),
+  );
+}
+
+NearbyPointSet _overpassPointSet(List<Object?> elements) {
   return pointSetOf([
     for (final element in elements)
       if (element is Map &&

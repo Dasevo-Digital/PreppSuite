@@ -16,9 +16,13 @@
 #   de.dasevo.preppsuite.team-id      the team id (or PREPPSUITE_TEAM_ID)
 #   de.dasevo.preppsuite.asc-key-id   App Store Connect API key id
 #   de.dasevo.preppsuite.asc-issuer   its issuer id
-#   de.dasevo.preppsuite.asc-key      the .p8 key itself, as text
-# The key is written to a file only for the length of the run, readable by
-# this user alone, and removed again however the run ends.
+#   de.dasevo.preppsuite.asc-key      the .p8 key itself, base64-encoded
+# Base64, because `security find-generic-password -w` hands back a secret
+# with a line break in it as hex, and a .p8 file has several: stored as
+# text, the key came back as a hex string xcodebuild cannot read. A key
+# stored that way anyway is turned back from hex. It is written to a file
+# only for the length of the run, readable by this user alone, and
+# removed again however the run ends.
 #
 # Usage:
 #   tool/ios_testflight.sh 3.0.1            # archive and check
@@ -38,10 +42,8 @@ step() { printf '\n== %s ==\n' "$1"; }
 version="${1:-}"
 upload=false
 [ "${2:-}" = "--upload" ] && upload=true
-[[ "$version" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] ||
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] ||
   fail "Version angeben, etwa 3.0.1"
-# The build number of every package (release.sh): 3.0.1 is 301.
-build=$((BASH_REMATCH[1] * 100 + BASH_REMATCH[2] * 10 + BASH_REMATCH[3]))
 tag="v$version"
 ref="${TESTFLIGHT_REF:-$tag}"
 if [ "$ref" = "$tag" ]; then
@@ -53,8 +55,31 @@ else
   git -C "$ROOT" rev-parse -q --verify "$ref^{commit}" >/dev/null ||
     fail "$ref ist kein Commit"
 fi
+# The build number as release.sh takes it: from the pubspec of what is
+# built, whose version has to be the one asked for. Not worked out from
+# the version -- it was not always that, and App Store Connect refuses a
+# number it has had before.
+line="$(git -C "$ROOT" show "$ref:preppsuite_flutter/pubspec.yaml" |
+  sed -n 's/^version:[[:space:]]*//p')"
+[ "${line%%+*}" = "$version" ] || fail "pubspec.yaml von $ref sagt $line, nicht $version"
+build="${line#*+}"
+[[ "$build" =~ ^[0-9]+$ ]] || fail "ungültige Build-Nummer in pubspec.yaml von $ref"
 
 secret() { security find-generic-password -s "$1" -w 2>/dev/null || true; }
+
+# The API key as the .p8 text, from base64 or, stored straight from the
+# file, from the hex `security -w` turns it into.
+api_key() {
+  local raw
+  raw="$(secret de.dasevo.preppsuite.asc-key)"
+  if [[ "$raw" =~ ^([0-9a-f][0-9a-f])+$ ]]; then
+    printf '%s' "$raw" | xxd -r -p
+  elif [[ "$raw" == -----BEGIN* ]]; then
+    printf '%s\n' "$raw"
+  elif [ -n "$raw" ]; then
+    printf '%s' "$raw" | base64 -D
+  fi
+}
 
 team="${PREPPSUITE_TEAM_ID:-$(secret de.dasevo.preppsuite.team-id)}"
 [ -n "$team" ] || fail "Team-ID fehlt (Schlüsselbund de.dasevo.preppsuite.team-id oder PREPPSUITE_TEAM_ID)"
@@ -74,9 +99,11 @@ issuer="$(secret de.dasevo.preppsuite.asc-issuer)"
 if [ -n "$key_id" ] && [ -n "$issuer" ]; then
   (
     umask 077
-    secret de.dasevo.preppsuite.asc-key >"$work/AuthKey.p8"
-  )
+    api_key >"$work/AuthKey.p8"
+  ) || fail "API-Schlüssel nicht lesbar (de.dasevo.preppsuite.asc-key)"
   [ -s "$work/AuthKey.p8" ] || fail "API-Schlüssel fehlt (de.dasevo.preppsuite.asc-key)"
+  grep -q -- "-----BEGIN PRIVATE KEY-----" "$work/AuthKey.p8" ||
+    fail "de.dasevo.preppsuite.asc-key ist kein .p8-Schlüssel (siehe docs/testflight.md)"
   auth=(
     -authenticationKeyPath "$work/AuthKey.p8"
     -authenticationKeyID "$key_id"
@@ -89,12 +116,18 @@ fi
 step "Quellen von $ref"
 git -C "$ROOT" worktree add --detach "$work/src" "$ref" >/dev/null
 app="$work/src/preppsuite_flutter"
-# The translator's build directory comes along as a clone, so its engine
-# sources and toolchain are not fetched again; build_ios.sh starts the
-# device directory over itself where its settings differ.
-if [ -d "$ROOT/preppsuite_flutter/native/translate/build" ]; then
-  cp -cR "$ROOT/preppsuite_flutter/native/translate/build" \
-    "$app/native/translate/build"
+# The translator's engine sources come along, so they are not fetched
+# again: the checkout, the pinned PCRE2 tarball and the mark that both are
+# ready. Not the build directories: the device one starts over anyway,
+# since its stamp names this worktree's path, and copying all of them
+# across volumes was 1.4 GB for nothing.
+translate_build="$ROOT/preppsuite_flutter/native/translate/build"
+if [ -d "$translate_build/translations" ]; then
+  mkdir -p "$app/native/translate/build"
+  for kept in "$translate_build"/translations "$translate_build"/pcre2-*.tar.gz \
+    "$translate_build"/.source-ready-*; do
+    [ -e "$kept" ] && cp -cR "$kept" "$app/native/translate/build/"
+  done
 fi
 
 step "Übersetzer für iPhone und iPad"
@@ -118,7 +151,10 @@ archive="$work/PreppSuite.xcarchive"
   ${auth[@]+"${auth[@]}"} \
   DEVELOPMENT_TEAM="$team" PREPPSUITE_REQUIRE_TRANSLATOR=1 \
   archive) >"$work/archive.log" 2>&1 ||
-  { grep -E "error:|BUILD FAILED|ARCHIVE FAILED" "$work/archive.log" | head -20; fail "xcodebuild archive"; }
+  {
+    grep -E "error:|BUILD FAILED|ARCHIVE FAILED" "$work/archive.log" | head -20 || true
+    fail "xcodebuild archive"
+  }
 
 step "Prüfen"
 bundle="$archive/Products/Applications/Runner.app"
@@ -175,7 +211,10 @@ xcodebuild -exportArchive -archivePath "$archive" \
   -exportOptionsPlist "$work/ExportOptions.plist" \
   -exportPath "$work/export" -allowProvisioningUpdates \
   "${auth[@]}" >"$work/upload.log" 2>&1 ||
-  { grep -E "error|Error|FAILED" "$work/upload.log" | head -20; fail "Hochladen"; }
-grep -E "Upload succeeded|EXPORT SUCCEEDED|Uploaded" "$work/upload.log" | tail -3
+  {
+    grep -E "error|Error|FAILED" "$work/upload.log" | head -20 || true
+    fail "Hochladen"
+  }
+grep -E "Upload succeeded|EXPORT SUCCEEDED|Uploaded" "$work/upload.log" | tail -3 || true
 step "Hochgeladen"
 echo "$version ($build) erscheint nach Apples Verarbeitung in TestFlight."

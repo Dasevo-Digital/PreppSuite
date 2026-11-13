@@ -8564,15 +8564,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get aedOfflineNothingKept =>
-      'Sin conexión y sin ninguna búsqueda guardada. Busca una vez con conexión o elige un mapa sin conexión en los ajustes: con él se guardan los puntos de su zona.';
+      'Sin conexión y sin ninguna búsqueda guardada. Busca una vez con conexión; después funciona también sin ella. Un mapa sin conexión elegido en los ajustes guarda los puntos de su zona.';
 
   @override
   String get aedNoAnswer =>
-      'OpenStreetMap tiene problemas en este momento: ninguno de sus servidores ha respondido. No es tu red. Vuelve a intentarlo más tarde.';
+      'Ninguno de los servicios de búsqueda de OpenStreetMap ha dado respuesta ahora mismo. Vuelve a intentarlo más tarde.';
 
   @override
   String aedNoAnswerKept(String date) {
-    return 'OpenStreetMap tiene problemas en este momento: ninguno de sus servidores ha respondido. Se muestra la búsqueda guardada del $date.';
+    return 'Ninguno de los servicios de búsqueda de OpenStreetMap ha dado respuesta ahora mismo. Se muestra la búsqueda guardada del $date.';
   }
 
   @override
@@ -8582,7 +8582,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String aedNoAnswerMap(String date) {
-    return 'OpenStreetMap tiene problemas en este momento: ninguno de sus servidores ha respondido. Se muestran los puntos guardados con el mapa sin conexión, a $date.';
+    return 'Ninguno de los servicios de búsqueda de OpenStreetMap ha dado respuesta ahora mismo. Se muestran los puntos guardados con el mapa sin conexión, a $date.';
   }
 
   @override

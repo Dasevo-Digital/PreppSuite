@@ -55,7 +55,7 @@ set(CMAKE_SYSTEM_PROCESSOR $arch)"
   # M5 this is built on, Apple clang made that apple-m1 plus v8.7, i8mm
   # and bf16 -- instructions an M1 does not have. None was in the library
   # yet, but a newer compiler vectorising a loop with one of them would
-  # have crashed the translator on every M1 and M2 with SIGILL, and
+  # have crashed the translator on every M1 with SIGILL, and
   # nothing here would have noticed. armv8.4-a is what every Apple silicon
   # Mac runs, dot product included; Ruy still picks its kernels at run
   # time. Intel Macs without AVX2 still exist; intgemm picks the widest

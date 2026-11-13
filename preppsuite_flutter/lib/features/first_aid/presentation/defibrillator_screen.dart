@@ -114,6 +114,9 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
   var _restoring = true;
   var _busy = false;
 
+  /// Counts the searches, so that a late answer knows it is not the last.
+  var _searches = 0;
+
   /// Why the last search brought nothing new, or null after one that did.
   NearbySearchProblem? _problem;
 
@@ -175,11 +178,16 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
     // Looked up beside the search rather than before it, and never waited
     // for: a file that is slow to read must not hold up the answer.
     final live = nearbyOutcome(_client.near(latitude, longitude));
+    final search = ++_searches;
     var answered = false;
     unawaited(
       widget.offlinePoints.around(latitude, longitude).then((offline) {
-        // An answer from the network is newer than anything kept.
-        if (offline == null || answered || !mounted) return;
+        // An answer from the network is newer than anything kept, and a
+        // later search is about another place: a slow read for this one
+        // must not put its points over that one's.
+        if (offline == null || answered || search != _searches || !mounted) {
+          return;
+        }
         setState(() {
           _search = DefibrillatorSearch(
             latitude: latitude,
@@ -212,17 +220,17 @@ class _DefibrillatorScreenState extends State<DefibrillatorScreen> {
       return;
     }
     answered = true;
-    final search = DefibrillatorSearch(
+    final result = DefibrillatorSearch(
       latitude: latitude,
       longitude: longitude,
       placeName: name,
       checkedAt: DateTime.now(),
       found: found,
     );
-    await widget.store.save(search);
+    await widget.store.save(result);
     if (!mounted) return;
     setState(() {
-      _search = search;
+      _search = result;
       _problem = null;
     });
   }

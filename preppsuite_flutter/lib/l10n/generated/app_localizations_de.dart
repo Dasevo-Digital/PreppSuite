@@ -8533,15 +8533,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get aedOfflineNothingKept =>
-      'Keine Verbindung, und eine frühere Suche ist nicht gespeichert. Einmal mit Netz suchen oder in den Einstellungen eine Offline-Karte wählen: Mit ihr werden die Punkte ihres Gebiets mitgenommen.';
+      'Keine Verbindung, und eine frühere Suche ist nicht gespeichert. Einmal mit Netz suchen, danach geht es auch offline. Eine in den Einstellungen gewählte Offline-Karte nimmt die Punkte ihres Gebiets mit.';
 
   @override
   String get aedNoAnswer =>
-      'OpenStreetMap ist gerade gestört: Keiner der Server hat geantwortet. An deinem Netz liegt es nicht. Bitte später noch einmal versuchen.';
+      'Keiner der Suchdienste für OpenStreetMap hat gerade eine Antwort geliefert. Bitte später noch einmal versuchen.';
 
   @override
   String aedNoAnswerKept(String date) {
-    return 'OpenStreetMap ist gerade gestört: Keiner der Server hat geantwortet. Gezeigt wird die gespeicherte Suche vom $date.';
+    return 'Keiner der Suchdienste für OpenStreetMap hat gerade eine Antwort geliefert. Gezeigt wird die gespeicherte Suche vom $date.';
   }
 
   @override
@@ -8551,7 +8551,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String aedNoAnswerMap(String date) {
-    return 'OpenStreetMap ist gerade gestört: Keiner der Server hat geantwortet. Gezeigt werden die mit der Offline-Karte gespeicherten Punkte, Stand $date.';
+    return 'Keiner der Suchdienste für OpenStreetMap hat gerade eine Antwort geliefert. Gezeigt werden die mit der Offline-Karte gespeicherten Punkte, Stand $date.';
   }
 
   @override

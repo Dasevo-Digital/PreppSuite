@@ -44,10 +44,11 @@ AirQualityReading _reading({
 );
 
 class _FakeClient implements AirQualityClient {
-  _FakeClient({this.reading, this.fails = false});
+  _FakeClient({this.reading, this.fails = false, this.thresholdsFail = false});
 
   final AirQualityReading? reading;
   final bool fails;
+  final bool thresholdsFail;
   var readingCalls = 0;
 
   @override
@@ -65,11 +66,12 @@ class _FakeClient implements AirQualityClient {
       const [_station];
 
   @override
-  Future<Map<int, List<AirQualityThreshold>>> fetchThresholds() async => const {
-    3: [
-      AirQualityThreshold(level: AirQualityClass.good, min: 61, max: 120),
-    ],
-  };
+  Future<Map<int, List<AirQualityThreshold>>> fetchThresholds() async {
+    if (thresholdsFail) throw const AirQualityException(503);
+    return const {
+      3: [AirQualityThreshold(level: AirQualityClass.good, min: 61, max: 120)],
+    };
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -164,6 +166,26 @@ void main() {
 
     expect(find.text('Schlecht'), findsWidgets);
     expect(find.textContaining('Zuletzt gespeicherter Wert'), findsOneWidget);
+  });
+
+  testWidgets('spans that do not come leave the fresh reading standing', (
+    tester,
+  ) async {
+    // The reading came and the class boundaries did not: the reading used
+    // to be thrown away with them and the screen called itself offline.
+    await const AirQualityStore().saveStation(_station);
+    await show(
+      tester,
+      client: _FakeClient(
+        reading: _reading(level: AirQualityClass.good),
+        thresholdsFail: true,
+      ),
+      now: DateTime(2026, 9, 4, 10),
+    );
+
+    expect(find.text('Gut'), findsWidgets);
+    expect(find.textContaining('Zuletzt gespeicherter Wert'), findsNothing);
+    expect(find.textContaining('61 bis 120'), findsNothing);
   });
 
   testWidgets('a station from another device does not show the old one\'s '

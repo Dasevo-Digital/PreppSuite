@@ -11,9 +11,14 @@
 /// So the region the offline map covers is asked for once, all of it, and
 /// kept on the device beside the map: every defibrillator, emergency well,
 /// disaster help point and siren in its box. For Germany that was 49,804
-/// points on 12 November 2026, about 26 MB as QLever sends it and a few MB
-/// packed here. The screens look in it first and show what it has at
-/// once, then ask the network and replace it with the answer.
+/// points on 12 November 2026, about 29 MB of table from QLever (3 MB
+/// packed on the way) and a few MB packed here. The screens ask the
+/// network and, beside it, look in here; what is here is shown until the
+/// answer comes, and stays when none does.
+///
+/// The points go with the map: another map's box replaces them, a map
+/// too large for them or none at all removes them, and an answer that
+/// arrives for a map no longer in use is thrown away.
 library;
 
 import 'dart:async';
@@ -217,34 +222,43 @@ class OfflineNearbyPointStore {
 
   /// Keeps [set] as the points of [bounds], replacing what was there.
   ///
-  /// The points first and through a temporary file, the small file last:
-  /// an interrupted write leaves the old pair, or points nothing names,
-  /// never a description of points that are not there.
+  /// Both files are written beside the old ones first. Then the small
+  /// file goes, the points take their place and the small file follows:
+  /// an interrupted write leaves the old pair, or points nothing names --
+  /// which read as nothing kept -- and never one box's description over
+  /// another box's points.
   Future<OfflineNearbyPoints> save(
     GeoBoundingBox bounds,
     NearbyPointSet set, {
     DateTime? fetchedAt,
   }) async {
     final data = await _file(_dataName);
-    final part = File('${data.path}.part');
-    final bytes = await Isolate.run(() => _encode(set));
-    await part.writeAsBytes(bytes, flush: true);
-    await part.rename(data.path);
-
+    final meta = await _file(_metaName);
+    final dataPart = File('${data.path}.part');
+    final metaPart = File('${meta.path}.part');
     final kept = OfflineNearbyPoints(
       bounds: bounds,
       fetchedAt: fetchedAt ?? DateTime.now(),
       defibrillators: set.defibrillators.length,
       points: set.points.length,
     );
-    await (await _file(
-      _metaName,
-    )).writeAsString(jsonEncode(kept.toJson()), flush: true);
+    final bytes = await Isolate.run(() => _encode(set));
+    await dataPart.writeAsBytes(bytes, flush: true);
+    await metaPart.writeAsString(jsonEncode(kept.toJson()), flush: true);
+
+    if (meta.existsSync()) await meta.delete();
+    await dataPart.rename(data.path);
+    await metaPart.rename(meta.path);
     return kept;
   }
 
   Future<void> clear() async {
-    for (final name in const [_metaName, _dataName, '$_dataName.part']) {
+    for (final name in const [
+      _metaName,
+      _dataName,
+      '$_dataName.part',
+      '$_metaName.part',
+    ]) {
       try {
         final file = await _file(name);
         if (file.existsSync()) await file.delete();
@@ -284,8 +298,8 @@ NearbyPointSet _decode(List<int> bytes) {
 /// country is what it is built for and what an Overpass instance turns
 /// away; the Overpass instances when QLever does not answer.
 Future<NearbyPointSet> fetchOfflinePoints(GeoBoundingBox box) async {
-  // Germany is 26 MB from QLever, and the answer starts only once the
-  // query has run.
+  // Germany is 29 MB of table from QLever, and the answer starts only
+  // once the query has run.
   final client = TimeoutClient(responseTimeout: const Duration(minutes: 2));
   try {
     try {
@@ -311,7 +325,8 @@ enum OfflinePointsStatus {
   /// Being asked for.
   fetching,
 
-  /// The last attempt brought nothing; whatever was kept before stays.
+  /// The last attempt brought nothing; what was kept before for the
+  /// same box stays.
   failed,
 
   /// The map's box is larger than [maxOfflinePointArea].
@@ -345,6 +360,16 @@ class OfflineNearbyPointsController extends AsyncNotifier<OfflinePointsState> {
   OfflineNearbyPointStore get _store =>
       ref.read(offlineNearbyPointStoreProvider);
 
+  /// The box of the map in use, or null for none. Set before anything is
+  /// awaited, so that a fetch which ends after the map changed or went
+  /// knows it is no longer wanted.
+  GeoBoundingBox? _wanted;
+
+  /// The fetch under way. Asked again meanwhile, for the same box or
+  /// another, the caller waits for it; it fetches again for whatever box
+  /// is wanted when it ends.
+  Future<void>? _running;
+
   @override
   Future<OfflinePointsState> build() async =>
       OfflinePointsState(kept: await _store.kept());
@@ -352,18 +377,12 @@ class OfflineNearbyPointsController extends AsyncNotifier<OfflinePointsState> {
   /// Takes the points of [bounds] along unless they are already kept and
   /// not older than [offlinePointsRefreshAfter].
   Future<void> ensureFor(GeoBoundingBox bounds, {DateTime? now}) async {
-    final current = await future;
-    if (current.status == OfflinePointsStatus.fetching) return;
-    if (!offlinePointAreaFits(bounds)) {
-      state = AsyncData(
-        OfflinePointsState(
-          kept: current.kept,
-          status: OfflinePointsStatus.tooLarge,
-        ),
-      );
-      return;
-    }
-    final kept = current.kept;
+    _wanted = bounds;
+    if (_running case final running?) return running;
+    final kept = (await future).kept;
+    if (_running case final running?) return running;
+    // Superseded while it waited; the later call sees to it.
+    if (!_isWanted(bounds)) return;
     if (kept != null &&
         kept.isFor(bounds) &&
         (now ?? DateTime.now()).difference(kept.fetchedAt) <
@@ -374,53 +393,85 @@ class OfflineNearbyPointsController extends AsyncNotifier<OfflinePointsState> {
   }
 
   /// Asks for the points of [bounds] now.
-  Future<void> refresh(GeoBoundingBox bounds) async {
-    final current = await future;
-    if (current.status == OfflinePointsStatus.fetching) return;
-    if (!offlinePointAreaFits(bounds)) {
-      state = AsyncData(
-        OfflinePointsState(
-          kept: current.kept,
-          status: OfflinePointsStatus.tooLarge,
-        ),
-      );
-      return;
-    }
-    state = AsyncData(
-      OfflinePointsState(
-        kept: current.kept,
-        status: OfflinePointsStatus.fetching,
-      ),
-    );
-    try {
-      final set = await ref.read(offlinePointsFetcherProvider)(bounds);
-      final kept = await _store.save(bounds, set);
-      state = AsyncData(OfflinePointsState(kept: kept));
-    } on Object catch (error, stack) {
-      // A device without network is not a fault; a service that does not
-      // answer is worth the protocol.
-      final offline =
-          error is SocketException ||
-          (error is QleverException && error.unreachable);
-      if (!offline) {
-        ErrorLog.instance.record(
-          error,
-          stack,
-          context: 'Notfallpunkte der Offline-Karte',
-        );
-      }
-      state = AsyncData(
-        OfflinePointsState(
-          kept: current.kept,
-          status: OfflinePointsStatus.failed,
-        ),
-      );
-    }
+  Future<void> refresh(GeoBoundingBox bounds) {
+    _wanted = bounds;
+    return _running ??= _fetchWanted().whenComplete(() => _running = null);
   }
 
-  /// Drops the kept points, for a map that is no longer used.
+  /// Drops the kept points, for a map that is no longer used. A fetch
+  /// under way is thrown away when it ends.
   Future<void> forget() async {
+    _wanted = null;
     await _store.clear();
     state = const AsyncData(OfflinePointsState());
   }
+
+  bool _isWanted(GeoBoundingBox bounds) {
+    final wanted = _wanted;
+    return wanted != null && _sameBox(wanted, bounds);
+  }
+
+  Future<void> _fetchWanted() async {
+    while (true) {
+      final bounds = _wanted;
+      if (bounds == null) return;
+      var kept = (await future).kept;
+      if (!_isWanted(bounds)) continue;
+      if (kept != null && !kept.isFor(bounds)) {
+        // The points go with the map. Another map's are not shown for
+        // this one while its own are fetched, nor when that fails, nor
+        // when it is too large to have any.
+        await _store.clear();
+        kept = null;
+        state = const AsyncData(OfflinePointsState());
+        if (!_isWanted(bounds)) continue;
+      }
+      if (!offlinePointAreaFits(bounds)) {
+        state = const AsyncData(
+          OfflinePointsState(status: OfflinePointsStatus.tooLarge),
+        );
+        return;
+      }
+      state = AsyncData(
+        OfflinePointsState(kept: kept, status: OfflinePointsStatus.fetching),
+      );
+      try {
+        final set = await ref.read(offlinePointsFetcherProvider)(bounds);
+        if (!_isWanted(bounds)) continue;
+        final kept = await _store.save(bounds, set);
+        if (!_isWanted(bounds)) {
+          // The map changed or went while the files were written.
+          await _store.clear();
+          continue;
+        }
+        state = AsyncData(OfflinePointsState(kept: kept));
+        return;
+      } on Object catch (error, stack) {
+        if (!_isWanted(bounds)) continue;
+        // A device without network is not a fault; a service that does
+        // not answer is worth the protocol.
+        final offline =
+            error is SocketException ||
+            (error is QleverException && error.unreachable);
+        if (!offline) {
+          ErrorLog.instance.record(
+            error,
+            stack,
+            context: 'Notfallpunkte der Offline-Karte',
+          );
+        }
+        state = AsyncData(
+          OfflinePointsState(kept: kept, status: OfflinePointsStatus.failed),
+        );
+        return;
+      }
+    }
+  }
 }
+
+bool _sameBox(GeoBoundingBox a, GeoBoundingBox b) => OfflineNearbyPoints(
+  bounds: a,
+  fetchedAt: DateTime.utc(2000),
+  defibrillators: 0,
+  points: 0,
+).isFor(b);

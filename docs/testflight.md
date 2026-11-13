@@ -19,31 +19,42 @@ davon steht im Repository.
    `de.dasevo.preppsuite`, SKU frei wählbar. Der Name ist damit im App
    Store reserviert, die App erscheint dort aber nicht.
 2. **API-Schlüssel.** Unter *Benutzer und Zugriff → Integrationen → App
-   Store Connect API* einen Team-Schlüssel anlegen. Mit der Rolle *Admin*
-   kann `xcodebuild` das Verteilungszertifikat und die Profile selbst
-   anlegen. Die `.p8`-Datei lässt sich nur einmal herunterladen.
-   Schlüssel-ID und Aussteller-ID stehen auf derselben Seite.
+   Store Connect API* einen Team-Schlüssel anlegen. Beim ersten Mal muss,
+   wer das Konto führt, dort zuerst den Zugang zur API beantragen. Mit
+   der Rolle *Admin* kann `xcodebuild` das Verteilungszertifikat und die
+   Profile selbst anlegen. Die `.p8`-Datei lässt sich nur einmal
+   herunterladen. Schlüssel-ID und Aussteller-ID stehen auf derselben
+   Seite.
 3. **Schlüsselbund.** Die vier Werte kommen in den Anmelde-Schlüsselbund
-   des Macs, der die Releases baut:
+   des Macs, der die Releases baut, der Schlüssel selbst base64-kodiert:
 
    ```bash
    security add-generic-password -a preppsuite -s de.dasevo.preppsuite.team-id -w TEAM-ID
    security add-generic-password -a preppsuite -s de.dasevo.preppsuite.asc-key-id -w SCHLUESSEL-ID
    security add-generic-password -a preppsuite -s de.dasevo.preppsuite.asc-issuer -w AUSSTELLER-ID
-   security add-generic-password -a preppsuite -s de.dasevo.preppsuite.asc-key -w "$(cat AuthKey_SCHLUESSEL-ID.p8)"
+   security add-generic-password -a preppsuite -s de.dasevo.preppsuite.asc-key -w "$(base64 -i AuthKey_SCHLUESSEL-ID.p8)"
    ```
 
-   Danach die `.p8`-Datei an einem sicheren Ort ablegen oder löschen.
-4. **Verschlüsselung.** App Store Connect fragt bei jedem Bau, ob die App
-   Verschlüsselung verwendet. PreppSuite verschlüsselt die Datenbank, die
-   Datensicherung und den gemeinsamen Ordner mit üblichen Verfahren. Die
-   Antwort gibt, wer das Konto führt. Steht sie fest, kann sie als
-   `ITSAppUsesNonExemptEncryption` in die `Info.plist`; dann fragt App
-   Store Connect nicht mehr.
+   Base64, weil `security` einen Eintrag mit Zeilenumbrüchen, wie ihn
+   jede `.p8`-Datei hat, nur als Hex-Folge wieder herausgibt. Das Skript
+   kommt mit beidem zurecht und prüft, dass ein privater Schlüssel
+   herauskommt. Danach die `.p8`-Datei an einem sicheren Ort ablegen oder
+   löschen.
+4. **Verschlüsselung.** App Store Connect fragt zu jedem Bau nach der
+   Exportkontrolle. Bis die Frage beantwortet ist, steht der Bau auf
+   „Fehlende Compliance“ und lässt sich auch intern nicht installieren.
+   PreppSuite verschlüsselt die Datenbank, die Datensicherung und den
+   gemeinsamen Ordner mit üblichen Verfahren. Die Antwort gibt, wer das
+   Konto führt. Steht sie fest, kann sie in die `Info.plist`: Mit
+   `ITSAppUsesNonExemptEncryption` = NO, wenn die Verschlüsselung
+   ausgenommen ist, fragt App Store Connect nicht mehr. Mit YES braucht es
+   zusätzlich den Code aus der Exportgenehmigung
+   (`ITSEncryptionExportComplianceCode`).
 5. **Tester.** Wer testen soll, wird unter *Benutzer und Zugriff* ins
    Team eingeladen und in TestFlight einer internen Gruppe zugeordnet.
-   Auf dem Gerät die App *TestFlight* installieren und die Einladung
-   annehmen.
+   Ist bei der Gruppe die automatische Verteilung eingeschaltet, bekommt
+   sie jeden neuen Bau ohne weiteren Klick. Auf dem Gerät die App
+   *TestFlight* installieren und die Einladung annehmen.
 
 ## Je Release
 
@@ -54,9 +65,10 @@ tool/ios_testflight.sh 3.0.1 --upload
 ```
 
 Das Skript baut aus dem Tag in einem eigenen Worktree den Übersetzer
-für Geräte und ein App-Store-Archiv. Danach prüft es:
+für Geräte und ein App-Store-Archiv. Version und Build-Nummer nimmt es wie
+`release.sh` aus der `pubspec.yaml` des Tags. Danach prüft es:
 
-- Version und Build-Nummer
+- Version und Build-Nummer im Archiv
 - den Übersetzer
 - das Widget
 - die Privacy-Manifeste von App und Widget

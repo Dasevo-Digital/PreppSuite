@@ -152,9 +152,7 @@ class DefibrillatorClient {
       // query is tiny and normally back within a second or two.
       timeout: const Duration(seconds: 15),
       fromOverpass: (response) {
-        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-        final elements = decoded is Map ? decoded['elements'] : null;
-        if (elements is! List) return const <Defibrillator>[];
+        final elements = overpassElements(utf8.decode(response.bodyBytes));
         return nearestDefibrillators(
           [
             for (final element in elements)

@@ -75,11 +75,18 @@ class _AirQualityScreenState extends State<AirQualityScreen> {
     AirQualityReading? fetched;
     try {
       fetched = await _client.fetchReading(station.id);
-      // Only worth having beside a reading, and cheap to skip when the
-      // first call already failed.
-      if (_thresholds.isEmpty) _thresholds = await _client.fetchThresholds();
     } on Object {
       fetched = null;
+    }
+    // Only worth having beside a reading. Asked for on their own: the
+    // spans failing to come is no reason to throw away the reading that
+    // did, and report the screen offline.
+    if (fetched != null && _thresholds.isEmpty) {
+      try {
+        _thresholds = await _client.fetchThresholds();
+      } on Object {
+        // Shown without spans; the next refresh asks again.
+      }
     }
 
     if (fetched != null) await widget.store.saveReading(fetched);

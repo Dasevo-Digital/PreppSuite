@@ -8494,15 +8494,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aedOfflineNothingKept =>
-      'No connection, and no earlier search is saved. Search once with a connection, or choose an offline map in the settings: the points of its region are kept with it.';
+      'No connection, and no earlier search is saved. Search once with a connection; after that it works offline too. An offline map chosen in the settings keeps the points of its region with it.';
 
   @override
   String get aedNoAnswer =>
-      'OpenStreetMap is down right now: none of its servers answered. It is not your network. Please try again later.';
+      'None of the OpenStreetMap search services returned an answer just now. Please try again later.';
 
   @override
   String aedNoAnswerKept(String date) {
-    return 'OpenStreetMap is down right now: none of its servers answered. Showing the saved search from $date.';
+    return 'None of the OpenStreetMap search services returned an answer just now. Showing the saved search from $date.';
   }
 
   @override
@@ -8512,7 +8512,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String aedNoAnswerMap(String date) {
-    return 'OpenStreetMap is down right now: none of its servers answered. Showing the points kept with the offline map, as of $date.';
+    return 'None of the OpenStreetMap search services returned an answer just now. Showing the points kept with the offline map, as of $date.';
   }
 
   @override

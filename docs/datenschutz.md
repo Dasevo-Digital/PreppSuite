@@ -66,15 +66,20 @@ ab. Übertragen werden IP-Adresse sowie gewählte Region, Station oder Strecke.
 OpenStreetMap geladen. Orts- und Rückwärtssuche verwendet Nominatim;
 Schutzräume, Defibrillatoren und Notfallpunkte (Notbrunnen, Hilfspunkte,
 Sirenen) kommen über Overpass (overpass-api.de, overpass.private.coffee,
-overpass.kumi.systems), Schutzräume außerdem über WWBOTA. Antwortet Overpass
-nicht, fragt die Suche nach Defibrillatoren und Notfallpunkten QLever an der
-Universität Freiburg (qlever.dev) mit demselben Suchgebiet. Übertragen
-werden IP-Adresse, Suchtext, Koordinaten oder Kartenausschnitt. Der eigene
-Standort geht dabei nur gerundet hinaus: für die Bestimmung des Bundeslands
-auf zwei Nachkommastellen (etwa ein Kilometer), für die Suche nach
-Schutzräumen, Defibrillatoren und Notfallpunkten als Suchgebiet um einen
-Rasterpunkt im selben Abstand statt um die genaue Position. Offline-Karte und lokale Umgebungssuche vermeiden diese Abrufe
-nach dem Download.
+overpass.kumi.systems), Schutzräume außerdem über WWBOTA. Antwortet der
+erste Overpass-Server nicht, fragt die Suche nach Defibrillatoren und
+Notfallpunkten als Nächstes QLever an der Universität Freiburg
+(qlever.dev) mit demselben Suchgebiet, danach die beiden anderen
+Overpass-Server. Übertragen werden IP-Adresse, Suchtext, Koordinaten oder
+Kartenausschnitt. Der eigene Standort geht dabei nur gerundet hinaus: für
+die Bestimmung des Bundeslands auf zwei Nachkommastellen (etwa ein
+Kilometer), für die Suche nach Schutzräumen, Defibrillatoren und
+Notfallpunkten als Suchgebiet um einen Rasterpunkt im selben Abstand statt
+um die genaue Position. Offline-Karte und lokale Umgebungssuche kommen nach
+dem Download ohne diese Abrufe aus. Die Suche nach Defibrillatoren und
+Notfallpunkten fragt auch mit Offline-Karte im Netz nach dem aktuellen
+Stand; die mit der Karte gespeicherten Punkte (siehe unten) zeigt sie,
+solange keine Antwort da ist.
 
 **Punkte zur Offline-Karte.** Wird eine Offline-Karte übernommen, lädt die
 App einmal alle Defibrillatoren und Notfallpunkte ihres Gebiets, danach alle
@@ -82,7 +87,8 @@ App einmal alle Defibrillatoren und Notfallpunkte ihres Gebiets, danach alle
 Overpass, also das Kartengebiet und nicht der eigene Standort. Die Punkte
 liegen unverschlüsselt im Datenordner der App, weil es öffentliche Daten
 für ein Gebiet sind, das die Kartendatei selbst schon nennt. Sie werden
-gelöscht, wenn keine Offline-Karte mehr gewählt ist.
+gelöscht, wenn keine Offline-Karte mehr gewählt ist oder eine andere Karte
+an ihre Stelle tritt.
 
 **Kartendownload.** Kartenarchive werden von OpenFreeMap oder – nach eigener
 Konfiguration – MapTiler geladen. Der Anbieter erhält IP-Adresse und das

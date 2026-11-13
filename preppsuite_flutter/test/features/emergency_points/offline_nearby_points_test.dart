@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -107,6 +108,135 @@ void main() {
     test('a description without its points answers nothing', () async {
       await store.save(braunschweig, set);
       File('${dir.path}/offline_nearby_points.json.gz').deleteSync();
+      expect(await store.around(52.2689, 10.5268), isNull);
+    });
+
+    test('points without their description answer nothing', () async {
+      // Where a write stops between the two renames: the new points are
+      // in place, the description of the old box is already gone.
+      await store.save(braunschweig, set);
+      File('${dir.path}/offline_nearby_points.json').deleteSync();
+      expect(await store.kept(), isNull);
+      expect(await store.around(52.2689, 10.5268), isNull);
+    });
+
+    test('a write leaves no temporary file, and clearing takes any', () async {
+      File('${dir.path}/offline_nearby_points.json.part')
+          .writeAsStringSync('{');
+      await store.save(braunschweig, set);
+      expect(
+        dir.listSync().map((f) => f.path.split('/').last),
+        isNot(contains('offline_nearby_points.json.gz.part')),
+      );
+      await store.clear();
+      expect(dir.listSync(), isEmpty);
+    });
+  });
+
+  group('the points go with the map', () {
+    const hannover = GeoBoundingBox(
+      west: 9.6,
+      south: 52.3,
+      east: 9.9,
+      north: 52.45,
+    );
+    late List<GeoBoundingBox> asked;
+    late List<Completer<NearbyPointSet>> answers;
+
+    ProviderContainer held() {
+      asked = [];
+      answers = [];
+      final container = ProviderContainer(
+        overrides: [
+          offlineNearbyPointStoreProvider.overrideWithValue(store),
+          offlinePointsFetcherProvider.overrideWithValue((box) {
+            asked.add(box);
+            final answer = Completer<NearbyPointSet>();
+            answers.add(answer);
+            return answer.future;
+          }),
+        ],
+      );
+      addTearDown(container.dispose);
+      return container;
+    }
+
+    Future<void> until(bool Function() condition) async {
+      for (var i = 0; i < 200 && !condition(); i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      expect(condition(), isTrue);
+    }
+
+    test('a map changed while its points are fetched gets its own', () async {
+      final c = held();
+      final points = c.read(offlineNearbyPointsProvider.notifier);
+      final first = points.ensureFor(braunschweig);
+      await until(() => asked.length == 1);
+
+      final second = points.ensureFor(hannover);
+      answers[0].complete(set);
+      await until(() => asked.length == 2);
+      expect(asked.last.west, hannover.west);
+      answers[1].complete(set);
+      await Future.wait([first, second]);
+
+      expect((await store.kept())!.isFor(hannover), isTrue);
+      expect(
+        c.read(offlineNearbyPointsProvider).value!.kept!.isFor(hannover),
+        isTrue,
+      );
+    });
+
+    test('a map dropped while its points are fetched keeps none', () async {
+      final c = held();
+      final points = c.read(offlineNearbyPointsProvider.notifier);
+      final fetching = points.ensureFor(braunschweig);
+      await until(() => asked.length == 1);
+
+      await points.forget();
+      answers[0].complete(set);
+      await fetching;
+
+      expect(await store.kept(), isNull);
+      expect(c.read(offlineNearbyPointsProvider).value!.kept, isNull);
+      expect(asked, hasLength(1));
+    });
+
+    test('a map too large keeps none of the last map\'s points', () async {
+      final c = held();
+      final points = c.read(offlineNearbyPointsProvider.notifier);
+      final fetching = points.ensureFor(braunschweig);
+      await until(() => asked.length == 1);
+      answers[0].complete(set);
+      await fetching;
+
+      await points.ensureFor(
+        const GeoBoundingBox(west: -25, south: 34, east: 45, north: 72),
+      );
+
+      final state = c.read(offlineNearbyPointsProvider).value!;
+      expect(state.status, OfflinePointsStatus.tooLarge);
+      expect(state.kept, isNull);
+      expect(await store.around(52.2689, 10.5268), isNull);
+    });
+
+    test('a failed fetch for another map shows none of the last', () async {
+      final c = held();
+      final points = c.read(offlineNearbyPointsProvider.notifier);
+      final first = points.ensureFor(braunschweig);
+      await until(() => asked.length == 1);
+      answers[0].complete(set);
+      await first;
+
+      final second = points.ensureFor(hannover);
+      await until(() => asked.length == 2);
+      answers[1].completeError(const SocketException('Network unreachable'));
+      await second;
+
+      final state = c.read(offlineNearbyPointsProvider).value!;
+      expect(state.status, OfflinePointsStatus.failed);
+      expect(state.kept, isNull);
       expect(await store.around(52.2689, 10.5268), isNull);
     });
   });

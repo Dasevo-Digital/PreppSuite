@@ -136,23 +136,23 @@ void main() {
         if (reading == null) continue;
         for (final component in reading.components) {
           if (component.level == AirQualityClass.unknown) continue;
-          final span = thresholds[component.id]?.firstWhere(
-            (s) => s.level == component.level,
-          );
+          final span = thresholds[component.id]
+              ?.where((s) => s.level == component.level)
+              .firstOrNull;
           expect(
             span,
             isNotNull,
             reason: '${station.name}: no span for ${component.code}',
           );
-          // The spans are whole numbers with gaps between them (20, then
-          // 21); a value of 20.4 belongs to the lower one.
-          expect(
-            component.value,
-            inInclusiveRange(span!.min - 1, span.max + 1),
-            reason:
-                '${station.name}: ${component.code} ${component.value} '
-                'is ${component.level.name}, span ${span.min} to ${span.max}',
-          );
+          // The spans are whole numbers with gaps between them (30, then
+          // 31): 30.4 still belongs to the lower one, 31 no longer does.
+          // Strictly inside one either side, so a class off by one at its
+          // boundary fails.
+          final reason =
+              '${station.name}: ${component.code} ${component.value} '
+              'is ${component.level.name}, span ${span!.min} to ${span.max}';
+          expect(component.value, greaterThan(span.min - 1), reason: reason);
+          expect(component.value, lessThan(span.max + 1), reason: reason);
           checked++;
         }
       }

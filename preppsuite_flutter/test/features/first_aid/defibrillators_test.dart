@@ -213,9 +213,8 @@ void main() {
 
       expect(
         find.text(
-          'OpenStreetMap ist gerade gestört: Keiner der Server hat '
-          'geantwortet. An deinem Netz liegt es nicht. Bitte später noch '
-          'einmal versuchen.',
+          'Keiner der Suchdienste für OpenStreetMap hat gerade eine '
+          'Antwort geliefert. Bitte später noch einmal versuchen.',
         ),
         findsOneWidget,
       );
@@ -280,8 +279,8 @@ void main() {
 
       expect(
         find.text(
-          'OpenStreetMap ist gerade gestört: Keiner der Server hat '
-          'geantwortet. Gezeigt werden die mit der Offline-Karte '
+          'Keiner der Suchdienste für OpenStreetMap hat gerade eine '
+          'Antwort geliefert. Gezeigt werden die mit der Offline-Karte '
           'gespeicherten Punkte, Stand 1. Nov. 2026.',
         ),
         findsOneWidget,
@@ -320,7 +319,7 @@ void main() {
       expect(find.textContaining('Am Empfang'), findsNothing);
       expect(find.textContaining('Neben Raum 143'), findsOneWidget);
       expect(find.textContaining('aus der Offline-Karte'), findsNothing);
-      expect(find.textContaining('gestört'), findsNothing);
+      expect(find.textContaining('Suchdienste'), findsNothing);
       expect(await const DefibrillatorStore().load(), isNotNull);
     });
   });

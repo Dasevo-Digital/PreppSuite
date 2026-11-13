@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show SocketException;
+import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
@@ -151,10 +153,7 @@ class OverpassShelterClient {
         'out center $_resultLimit;';
 
     final response = await _ask(query);
-    final decoded = jsonDecode(utf8.decode(response.bodyBytes));
-    if (decoded is! Map) return [];
-    final elements = decoded['elements'];
-    if (elements is! List) return [];
+    final elements = overpassElements(utf8.decode(response.bodyBytes));
 
     return [
       for (final entry in elements)
@@ -243,7 +242,12 @@ Future<http.Response> askOverpass(
       }
 
       reached = true;
-      if (response.statusCode == 200) return response;
+      if (response.statusCode == 200) {
+        if (!overpassGaveUp(response.bodyBytes)) return response;
+        // Said 200 and gave up on the query: another instance may not.
+        last = const OverpassException(200);
+        break;
+      }
 
       last = OverpassException(response.statusCode);
       if (!last.isBusy) break;
@@ -251,6 +255,50 @@ Future<http.Response> askOverpass(
   }
 
   throw last ?? OverpassException(0, cause: failure, reachedAny: reached);
+}
+
+/// Whether an answer with status 200 says that Overpass gave up on the
+/// query. It reports its own time limit or memory running out -- under
+/// load, for a query that is normally done in a second -- not with an
+/// error status but with 200, whatever elements it had by then, and a
+/// remark at the end: `"remark": "runtime error: Query timed out in
+/// "query" at line 1 after 26 seconds."`. Read as an answer, that is
+/// "nothing near", and it replaced a good last search (#366).
+///
+/// Only the end is read, where the remark stands, so that a large answer
+/// is not decoded twice; [overpassElements] looks at the whole.
+bool overpassGaveUp(Uint8List bytes) {
+  final tail = utf8.decode(
+    bytes.sublist(math.max(0, bytes.length - 4096)),
+    allowMalformed: true,
+  );
+  return _gaveUpRemark.hasMatch(tail);
+}
+
+final _gaveUpRemark = RegExp(
+  r'"remark"\s*:\s*"runtime error|<remark>\s*runtime error',
+);
+
+/// The `elements` of an Overpass answer in JSON. Throws an
+/// [OverpassException] with status 200 for an answer that is not one: not
+/// JSON (a sign-in page of a hotel network, a body cut short), no list of
+/// elements, or the remark of [overpassGaveUp]. Each of them used to read
+/// as an empty list, which a screen shows as "nothing near".
+List<Object?> overpassElements(String body) {
+  final Object? decoded;
+  try {
+    decoded = jsonDecode(body);
+  } on FormatException {
+    throw const OverpassException(200);
+  }
+  if (decoded is! Map) throw const OverpassException(200);
+  final remark = decoded['remark'];
+  if (remark is String && remark.contains('runtime error')) {
+    throw const OverpassException(200);
+  }
+  final elements = decoded['elements'];
+  if (elements is! List) throw const OverpassException(200);
+  return elements;
 }
 
 class _CachedShelters {
@@ -274,7 +322,9 @@ class OverpassException implements Exception {
     this.reachedAny = false,
   });
 
-  /// The HTTP status, or 0 when no instance answered at all.
+  /// The HTTP status, or 0 when no instance answered at all. 200 is an
+  /// answer that was not one: the query given up on, or not the JSON
+  /// asked for (see [overpassElements]).
   final int statusCode;
 
   /// Why no instance answered, when none did: the last error on the way.

@@ -19,6 +19,11 @@ class OfflineNearbyPointsKeeper extends ConsumerStatefulWidget {
 
 class _OfflineNearbyPointsKeeperState
     extends ConsumerState<OfflineNearbyPointsKeeper> {
+  /// Looks again now and then: a desktop app can stay open for weeks, and
+  /// the map itself does not change to say that its points are 60 days
+  /// old.
+  Timer? _again;
+
   @override
   void initState() {
     super.initState();
@@ -34,6 +39,21 @@ class _OfflineNearbyPointsKeeperState
         unawaited(points.forget());
       }
     }, fireImmediately: true);
+    _again = Timer.periodic(const Duration(hours: 12), (_) {
+      final archive = ref.read(offlineMapProvider).value?.archive;
+      if (archive == null) return;
+      unawaited(
+        ref
+            .read(offlineNearbyPointsProvider.notifier)
+            .ensureFor(boundsOfArchive(archive)),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _again?.cancel();
+    super.dispose();
   }
 
   @override
