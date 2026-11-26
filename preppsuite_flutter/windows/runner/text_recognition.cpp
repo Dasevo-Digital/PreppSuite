@@ -44,9 +44,23 @@ std::vector<std::string> LanguagesOf(const EncodableMap* arguments) {
   return languages;
 }
 
-// An engine for the first asked-for language Windows can read, else for
-// the user's own languages, else none.
+// Whether |language| is written in Latin letters. A language Windows names
+// no script for counts as Latin, as every language did before #409.
+bool WrittenInLatin(const Language& language) {
+  const auto script = language.Script();
+  return script.empty() || script == L"Latn";
+}
+
+// An engine for the first asked-for language Windows can read. Failing
+// that, and only when every asked-for language is written in Latin
+// letters, one for the user's own languages if they are Latin too: a
+// Polish sign read as German comes through, if with a plain l where the
+// sign has an l with a stroke. Another script gets no stand-in (#409).
+// A Russian sign read with the German engine is a jumble of letters that
+// would then be translated; without an engine, "support" says that the
+// language pack is missing.
 OcrEngine EngineFor(const std::vector<std::string>& languages) {
+  bool latin = true;
   for (const auto& tag : languages) {
     Language language{winrt::to_hstring(tag)};
     if (OcrEngine::IsLanguageSupported(language)) {
@@ -54,8 +68,12 @@ OcrEngine EngineFor(const std::vector<std::string>& languages) {
         return engine;
       }
     }
+    latin = latin && WrittenInLatin(language);
   }
-  return OcrEngine::TryCreateFromUserProfileLanguages();
+  if (!latin) return OcrEngine{nullptr};
+  auto engine = OcrEngine::TryCreateFromUserProfileLanguages();
+  if (engine && WrittenInLatin(engine.RecognizerLanguage())) return engine;
+  return OcrEngine{nullptr};
 }
 
 // The lines top to bottom, with a blank line where the gap above a line is
