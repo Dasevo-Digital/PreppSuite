@@ -199,9 +199,14 @@ ArticleDocument parseArticle(String source, {Uri? baseUrl}) {
 /// Walks the tree once, collecting blocks and gathering inline runs as it
 /// goes.
 class _Builder {
-  _Builder(this.baseUrl);
+  _Builder(this.baseUrl, {this.inCell = false});
 
   final Uri? baseUrl;
+
+  /// Whether this builds a table cell, where a picture inline -- a flag
+  /// beside a country, a symbol beside a figure -- stands as its words.
+  final bool inCell;
+
   final blocks = <ArticleBlock>[];
 
   /// Inline text seen since the last block was closed.
@@ -309,7 +314,12 @@ class _Builder {
         if (text.trim().isNotEmpty) blocks.add(ArticleCode(text));
 
       case 'img':
-        _addImage(node);
+        if (inCell) {
+          final alt = _trimmed(node.attributes['alt']);
+          if (alt != null) _addText(alt, style);
+        } else {
+          _addImage(node);
+        }
 
       case 'figure':
         flush();
@@ -402,12 +412,20 @@ class _Builder {
     );
   }
 
+  /// A table as rows of cells, each cell one run of text (#408).
+  ///
+  /// Only the table's own rows: `querySelectorAll('tr')` also took the
+  /// rows of every table inside a cell, so an inner table came out a
+  /// second time as rows of the outer one. And the whole cell: only its
+  /// loose text was kept, so whatever stood in a paragraph, a list or a
+  /// picture inside a cell -- most of an infobox -- was gone. A cell has
+  /// no room for blocks, so they become its lines.
   void _addTable(dom.Element node, _Style style) {
     final rows = <List<ArticleText>>[];
     var headerRows = 0;
     var stillHeading = true;
 
-    for (final row in node.querySelectorAll('tr')) {
+    for (final row in _rowsOf(node)) {
       final cells = <ArticleText>[];
       var allHeadings = true;
 
@@ -416,11 +434,12 @@ class _Builder {
         if (tag != 'td' && tag != 'th') continue;
         if (tag != 'th') allHeadings = false;
 
-        final nested = _Builder(baseUrl);
+        final nested = _Builder(baseUrl, inCell: true);
         for (final child in cell.nodes) {
           nested.visit(child, style: style);
         }
-        cells.add(nested._take());
+        nested.flush();
+        cells.add(_asLines(nested.blocks));
       }
 
       if (cells.isEmpty) continue;
@@ -434,6 +453,20 @@ class _Builder {
 
     if (rows.isEmpty) return;
     blocks.add(ArticleTable(rows: rows, headerRows: headerRows));
+  }
+
+  /// The rows of [table] itself, directly or in its head, body or foot.
+  static Iterable<dom.Element> _rowsOf(dom.Element table) sync* {
+    for (final child in table.children) {
+      switch (child.localName?.toLowerCase()) {
+        case 'tr':
+          yield child;
+        case 'thead' || 'tbody' || 'tfoot':
+          for (final row in child.children) {
+            if (row.localName?.toLowerCase() == 'tr') yield row;
+          }
+      }
+    }
   }
 
   String _nextMarker() {
@@ -510,6 +543,45 @@ class _Builder {
       return trimmed;
     }
   }
+}
+
+/// [blocks] as one run of text, a line for each.
+ArticleText _asLines(List<ArticleBlock> blocks) {
+  final spans = <ArticleSpan>[];
+  void line(List<ArticleSpan> more) {
+    if (more.isEmpty) return;
+    if (spans.isNotEmpty) spans.add(const ArticleSpan('\n'));
+    spans.addAll(more);
+  }
+
+  for (final block in blocks) {
+    switch (block) {
+      case ArticleParagraph(:final text) ||
+          ArticleHeading(:final text) ||
+          ArticleQuote(:final text):
+        line(text.spans);
+      case ArticleListEntry(:final text, :final depth, :final marker):
+        line([ArticleSpan('${'  ' * depth}$marker '), ...text.spans]);
+      case ArticleCode(:final text):
+        line([ArticleSpan(text.trim(), code: true)]);
+      case ArticleImage(:final caption, :final alt):
+        final words = caption ?? alt;
+        if (words != null) line([ArticleSpan(words)]);
+      case ArticleTable(:final rows):
+        for (final row in rows) {
+          final cells = <ArticleSpan>[];
+          for (final cell in row) {
+            if (cell.isEmpty) continue;
+            if (cells.isNotEmpty) cells.add(const ArticleSpan(' · '));
+            cells.addAll(cell.spans);
+          }
+          line(cells);
+        }
+      case ArticleRule():
+        break;
+    }
+  }
+  return ArticleText(List.unmodifiable(spans));
 }
 
 /// Trims the runs and drops the empty ones.

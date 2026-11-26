@@ -163,6 +163,75 @@ void main() {
     expect(table.rows[1].map((c) => c.plain), ['Blei', '0,010 mg/l']);
   });
 
+  group('what stands inside a table cell (#408)', () {
+    test('paragraphs and lists in a cell become its lines', () {
+      // Only the loose text of a cell used to be kept: whatever stood in a
+      // paragraph or a list -- most of an infobox -- was gone.
+      final table =
+          parse('''
+            <table><tr>
+              <th>Vorrat</th>
+              <td><p>Für zehn Tage:</p><ul><li>Wasser</li><li>Brot</li></ul></td>
+            </tr></table>
+          ''').blocks.single
+              as ArticleTable;
+
+      expect(table.rows.single.map((cell) => cell.plain), [
+        'Vorrat',
+        'Für zehn Tage:\n• Wasser\n• Brot',
+      ]);
+    });
+
+    test('a table inside a cell stays inside it', () {
+      // Every row of an inner table also came out as a row of the outer.
+      final table =
+          parse('''
+            <table>
+              <tr><td>Außen</td><td><table>
+                <tr><td>Innen eins</td><td>1</td></tr>
+                <tr><td>Innen zwei</td><td>2</td></tr>
+              </table></td></tr>
+              <tr><td>Unten</td><td>3</td></tr>
+            </table>
+          ''').blocks.single
+              as ArticleTable;
+
+      expect(table.rows, hasLength(2));
+      expect(table.rows.first.last.plain, 'Innen eins · 1\nInnen zwei · 2');
+      expect(table.rows.last.map((cell) => cell.plain), ['Unten', '3']);
+    });
+
+    test('a picture in a cell leaves its words', () {
+      final table =
+          parse(
+                '<table><tr><td><img src="../I/flagge.png" alt="Deutschland">'
+                ' 83 Mio.</td></tr></table>',
+              ).blocks.single
+              as ArticleTable;
+
+      expect(table.rows.single.single.plain, 'Deutschland 83 Mio.');
+    });
+
+    test('the rows of head, body and foot all count', () {
+      final table =
+          parse('''
+            <table>
+              <thead><tr><th>Stoff</th></tr></thead>
+              <tbody><tr><td>Blei</td></tr></tbody>
+              <tfoot><tr><td>Quelle</td></tr></tfoot>
+            </table>
+          ''').blocks.single
+              as ArticleTable;
+
+      expect(table.headerRows, 1);
+      expect(table.rows.map((row) => row.single.plain), [
+        'Stoff',
+        'Blei',
+        'Quelle',
+      ]);
+    });
+  });
+
   test('formatting survives being nested', () {
     final document = parse('<p><b>sehr <i>gutes</i></b> Wasser</p>');
     final spans = (document.blocks.single as ArticleParagraph).text.spans;
