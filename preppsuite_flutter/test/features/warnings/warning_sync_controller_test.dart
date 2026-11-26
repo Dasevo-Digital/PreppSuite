@@ -1,15 +1,18 @@
 import 'dart:async';
 
 import 'package:drift/native.dart';
+import 'package:flutter/widgets.dart' show AppLifecycleState;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:preppsuite_flutter/core/app_database_providers.dart';
+import 'package:preppsuite_flutter/features/warnings/application/warning_freshness.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_poll_service.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_region_store.dart';
 import 'package:preppsuite_flutter/features/warnings/application/warning_sync_controller.dart';
 import 'package:preppsuite_flutter/local_db/database.dart';
 import 'package:preppsuite_flutter/model/household_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 /// Counts polls and holds each one open until it is released.
 class _CountingPoll extends WarningPollService {
@@ -120,6 +123,108 @@ void main() {
     keepAlive.close();
     container.dispose();
     await database.close();
+  });
+
+  group('back in front (#396)', () {
+    /// Back to the front after a while in the background.
+    void comeBack(WidgetTester tester) {
+      for (final state in [
+        AppLifecycleState.inactive,
+        AppLifecycleState.hidden,
+        AppLifecycleState.paused,
+        AppLifecycleState.hidden,
+        AppLifecycleState.inactive,
+        AppLifecycleState.resumed,
+      ]) {
+        tester.binding.handleAppLifecycleStateChanged(state);
+      }
+    }
+
+    /// Writes past the open app's copy of the preferences, as the
+    /// background run does from its own isolate.
+    Future<void> attemptedElsewhere(DateTime at) =>
+        SharedPreferencesStorePlatform.instance.setValue(
+          'String',
+          'flutter.warningPollLastAttempt',
+          at.toUtc().toIso8601String(),
+        );
+
+    testWidgets('polls when the last attempt is older than the interval', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      final service = _CountingPoll(database);
+      final container = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(database),
+          warningPollServiceProvider.overrideWithValue(service),
+        ],
+      );
+      final keepAlive = container.listen(
+        warningSyncControllerProvider(profile),
+        (_, _) {},
+      );
+      await tester.pump();
+      expect(service.polls, 1);
+
+      // The night: the last poll was at eleven, and the device slept.
+      await attemptedElsewhere(
+        DateTime.now().subtract(const Duration(hours: 8)),
+      );
+      comeBack(tester);
+      await tester.pump();
+      await tester.pump();
+
+      expect(service.polls, 2);
+
+      keepAlive.close();
+      container.dispose();
+      await database.close();
+    });
+
+    testWidgets('a recent background run is enough, and its time is shown', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({});
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      final service = _CountingPoll(database);
+      final container = ProviderContainer(
+        overrides: [
+          appDatabaseProvider.overrideWithValue(database),
+          warningPollServiceProvider.overrideWithValue(service),
+        ],
+      );
+      final keepAlive = container.listen(
+        warningSyncControllerProvider(profile),
+        (_, _) {},
+      );
+      final status = container.listen(warningPollStatusProvider, (_, _) {});
+      await tester.pump();
+      expect(service.polls, 1);
+      await tester.runAsync(
+        () => container.read(warningPollStatusProvider.future),
+      );
+
+      final background = DateTime.now().toUtc().subtract(
+        const Duration(minutes: 3),
+      );
+      await attemptedElsewhere(background);
+      comeBack(tester);
+      await tester.pump();
+      await tester.pump();
+
+      expect(service.polls, 1, reason: 'the background run polled just now');
+      final shown = await tester.runAsync(
+        () => container.read(warningPollStatusProvider.future),
+      );
+      expect(shown?.lastAttempt, background);
+
+      status.close();
+      keepAlive.close();
+      container.dispose();
+      await database.close();
+    });
   });
 
   testWidgets('a changed household stops the old poll (#249)', (tester) async {

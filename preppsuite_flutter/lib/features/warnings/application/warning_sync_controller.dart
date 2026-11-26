@@ -11,6 +11,7 @@ import '../../../core/notification_service.dart';
 import '../../../core/notifications_provider.dart';
 import 'warning_background_worker.dart';
 import 'warning_poll_service.dart';
+import 'warning_poll_status_store.dart';
 import 'warning_region_filter.dart';
 import 'warning_region_store.dart';
 import 'warning_relevance.dart';
@@ -52,13 +53,9 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
       warningForegroundPollInterval,
       (_) => syncNow(),
     );
-    // Back in front is when somebody looks at what the background worker
-    // stored while they were away (#332).
     AppLifecycleListener? lifecycle;
     try {
-      lifecycle = AppLifecycleListener(
-        onResume: () => ref.read(appDatabaseProvider).refreshWarningWatchers(),
-      );
+      lifecycle = AppLifecycleListener(onResume: () => unawaited(resumed()));
     } on Object {
       // No binding, as in a plain unit test: nothing comes to the front.
     }
@@ -81,6 +78,30 @@ class WarningSyncController extends Notifier<AsyncValue<void>> {
 
     Future.microtask(syncNow);
     return const AsyncData(null);
+  }
+
+  /// The app is back in front.
+  ///
+  /// That is when somebody looks at what the background worker stored
+  /// while they were away (#332), and at how old it is: the status is read
+  /// again, the background run's stamp included (#396). And it polls when
+  /// the last attempt, here or in the background, is older than
+  /// [warningForegroundPollInterval]. The timer does not run while the
+  /// device sleeps: a laptop opened at seven after a last poll at eleven
+  /// the night before showed the night's ended warnings in the banner and
+  /// none of the new ones until the next tick, up to fifteen minutes on.
+  Future<void> resumed() async {
+    ref.read(appDatabaseProvider).refreshWarningWatchers();
+    ref.invalidate(warningPollStatusProvider);
+    final last = (await const WarningPollStatusStore().load()).lastAttempt;
+    if (!ref.mounted) return;
+    if (last != null) {
+      final age = DateTime.now().toUtc().difference(last);
+      // A last attempt in the future is a clock that was set back, and
+      // says nothing about how old the warnings are.
+      if (!age.isNegative && age < warningForegroundPollInterval) return;
+    }
+    await syncNow();
   }
 
   /// Polls now, or joins the poll already under way.
