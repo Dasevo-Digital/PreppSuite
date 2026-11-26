@@ -335,10 +335,49 @@ final class StorageBridge: NSObject {
         at: folder,
         includingPropertiesForKeys: [.isRegularFileKey]
       )) ?? []
-      return entries.filter { (try? $0.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true }
-        .map { $0.lastPathComponent }
+      var names: [String] = []
+      var seen = Set<String>()
+      for entry in entries
+      where (try? entry.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true {
+        // A file iCloud has not downloaded yet is a placeholder named
+        // `.<name>.icloud` (#398). Listed as that, it was dropped by the
+        // caller, which looks for `.json`, and never read: the other
+        // devices' rows and pictures did not arrive while the run reported
+        // success. Under its own name the caller reads it, and `read`
+        // fetches it. Not fetched here: of the pictures only the missing
+        // ones are read, and fetching all would undo what iOS freed.
+        let name = Self.cloudPlaceholderTarget(entry.lastPathComponent) ?? entry.lastPathComponent
+        if seen.insert(name).inserted { names.append(name) }
+      }
+      return names
     } ?? []
   }
+
+  /// The name iCloud's placeholder `.<name>.icloud` stands for, or nil.
+  ///
+  /// iOS and macOS up to 13 keep such a placeholder in place of a file in
+  /// iCloud Drive that is not on the device. Later systems, and other
+  /// providers such as Nextcloud, list the file under its own name.
+  private static func cloudPlaceholderTarget(_ name: String) -> String? {
+    let suffix = ".icloud"
+    guard name.hasPrefix("."), name.hasSuffix(suffix), name.count > suffix.count + 1 else {
+      return nil
+    }
+    return String(name.dropFirst().dropLast(suffix.count))
+  }
+
+  private static func cloudPlaceholder(for file: URL) -> URL {
+    return file.deletingLastPathComponent()
+      .appendingPathComponent(".\(file.lastPathComponent).icloud")
+  }
+
+  /// How long a read waits for iCloud to download a file.
+  ///
+  /// The read blocks `fileReads`, and with it every other folder call and
+  /// the map's tiles. After this it gives up with `read-failed`, which costs
+  /// a device file or a picture only this run; the download goes on, and a
+  /// later run reads the file.
+  private static let downloadWait: TimeInterval = 30
 
   private static let readFailed = FlutterError(
     code: "read-failed", message: "The file could not be read.", details: nil)
@@ -352,13 +391,28 @@ final class StorageBridge: NSObject {
       else { return nil }
 
       let file = folder.appendingPathComponent(name)
+      let placeholder = Self.cloudPlaceholder(for: file)
+      let files = FileManager.default
+      // Asked for here as well as by the coordinated read below (#398), so
+      // that the download goes on when the read stops waiting for it.
+      let pending = !files.fileExists(atPath: file.path) && files.fileExists(atPath: placeholder.path)
+      if pending { try? files.startDownloadingUbiquitousItem(at: file) }
       var text: Any?
       // Coordinated because the folder is the whole point of the feature
       // and it is normally a cloud one — iCloud Drive, Nextcloud. An
       // uncoordinated read of a file another device just wrote can find a
-      // placeholder that has not been downloaded yet.
+      // placeholder that has not been downloaded yet; a coordinated one
+      // waits for the download. For an iCloud placeholder up to
+      // `downloadWait` only, as its download no longer needs the read.
+      // Other providers fetch for the read itself, so that one waits.
+      let coordinator = NSFileCoordinator()
+      let giveUp = DispatchWorkItem { coordinator.cancel() }
+      if pending {
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + Self.downloadWait, execute: giveUp)
+      }
+      defer { giveUp.cancel() }
       var coordinationError: NSError?
-      NSFileCoordinator().coordinate(readingItemAt: file, options: [], error: &coordinationError) { url in
+      coordinator.coordinate(readingItemAt: file, options: [], error: &coordinationError) { url in
         do {
           let handle = try FileHandle(forReadingFrom: url)
           defer { handle.closeFile() }
@@ -377,8 +431,10 @@ final class StorageBridge: NSObject {
           } else { text = String(data: data, encoding: .utf8) ?? Self.readFailed }
         } catch {
           // Not nil where the file is there: nil says it is not, and the
-          // caller may then write a new one over it.
-          text = FileManager.default.fileExists(atPath: url.path) ? Self.readFailed : nil
+          // caller may then write a new one over it. A placeholder is a
+          // file that is there.
+          let there = files.fileExists(atPath: url.path) || files.fileExists(atPath: placeholder.path)
+          text = there ? Self.readFailed : nil
         }
       }
       if coordinationError != nil && text == nil { return Self.readFailed }
@@ -419,7 +475,14 @@ final class StorageBridge: NSObject {
             let folder = directory(in: root, segments: segments, create: false)
       else { return false }
       let file = folder.appendingPathComponent(name)
-      guard FileManager.default.fileExists(atPath: file.path) else { return false }
+      guard FileManager.default.fileExists(atPath: file.path) else {
+        // Not downloaded (#398). Fetched, so that a later run finds the
+        // file itself to remove rather than its placeholder.
+        if FileManager.default.fileExists(atPath: Self.cloudPlaceholder(for: file).path) {
+          try? FileManager.default.startDownloadingUbiquitousItem(at: file)
+        }
+        return false
+      }
       var removed = false
       var coordinationError: NSError?
       NSFileCoordinator().coordinate(writingItemAt: file, options: .forDeleting, error: &coordinationError) { url in
