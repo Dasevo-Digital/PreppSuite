@@ -152,7 +152,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
               screenFor: (destination) =>
                   _pushedScreenFor(destination, householdId),
             ),
-            const WarningDayScheduler(),
+            // Draws nothing; Germany's warning day, for households there.
+            WarningDayScheduler(countryCode: widget.profile.countryCode),
             // Draws nothing; takes the defibrillators and emergency points
             // of the offline map's region along with it (#366).
             const OfflineNearbyPointsKeeper(),

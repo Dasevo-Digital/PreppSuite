@@ -12,9 +12,18 @@ import '../application/warning_day.dart';
 ///
 /// Unlike the other schedulers here there is nothing to listen to: the
 /// date follows a rule and no setting moves it. So this schedules once on
-/// mount and then only reacts to notifications being switched on or off.
+/// mount and then only reacts to notifications being switched on or off,
+/// and to the household moving country.
+///
+/// The warning day is Germany's (#396). A household in Austria or
+/// Switzerland was reminded at nine that today was the nationwide warning
+/// day, of a country it does not live in; outside Germany the reminder is
+/// cancelled instead, which also takes back one planned before a move.
 class WarningDayScheduler extends ConsumerStatefulWidget {
-  const WarningDayScheduler({super.key});
+  const WarningDayScheduler({super.key, required this.countryCode});
+
+  /// The household's country, as in `HouseholdProfile.countryCode`.
+  final String countryCode;
 
   @override
   ConsumerState<WarningDayScheduler> createState() =>
@@ -30,9 +39,24 @@ class _WarningDaySchedulerState extends ConsumerState<WarningDayScheduler> {
     WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_schedule()));
   }
 
+  @override
+  void didUpdateWidget(WarningDayScheduler oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.countryCode != widget.countryCode) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => unawaited(_schedule()),
+      );
+    }
+  }
+
   Future<void> _schedule() async {
     if (!mounted) return;
     if (!ref.read(notificationsEnabledProvider)) return;
+
+    if (widget.countryCode != 'DE') {
+      await NotificationService.instance.cancelWarningDayReminder();
+      return;
+    }
 
     // Nine in the morning: the test warning goes out at eleven, and a
     // reminder that arrives after it has been and gone is worse than
@@ -48,6 +72,7 @@ class _WarningDaySchedulerState extends ConsumerState<WarningDayScheduler> {
       return;
     }
 
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
     await NotificationService.instance.scheduleWarningDayReminder(
       fireAt: fireAt,
