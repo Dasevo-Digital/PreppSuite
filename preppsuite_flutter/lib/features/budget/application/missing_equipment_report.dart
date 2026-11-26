@@ -147,13 +147,17 @@ class MissingEquipmentReport {
                 strings.columnMinQuantity,
                 strings.columnUnit,
               ],
+              // Cut to what a cell holds (#403): a name or a unit of a
+              // few thousand characters made a row taller than a page,
+              // which a release build laid out for ever. It is a
+              // shopping list, and the start of a name says what to buy.
               data: [
                 for (final item in lowStockItems)
                   [
-                    item.name,
+                    pdfCell(item.name),
                     _formatNumber(stockToday(item, now: now), languageCode),
                     _formatNumber(item.minQuantity!, languageCode),
-                    item.unit,
+                    pdfCell(item.unit),
                   ],
               ],
             ),

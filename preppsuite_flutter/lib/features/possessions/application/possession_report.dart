@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import '../../../core/pdf_blocks.dart';
 import '../../../local_db/database.dart';
 import 'possession_controller.dart';
 
@@ -107,7 +108,10 @@ class PossessionReport {
             pw.Text(strings.empty)
           else ...[
             for (final entry in grouped.entries) ...[
-              pw.Header(level: 1, text: entry.key ?? strings.noRoom),
+              pw.Header(
+                level: 1,
+                text: pdfCell(entry.key ?? strings.noRoom),
+              ),
               pw.TableHelper.fromTextArray(
                 headers: [
                   strings.columnName,
@@ -119,18 +123,34 @@ class PossessionReport {
                 data: [
                   for (final row in entry.value)
                     [
-                      row.name,
-                      row.serialNumber ?? '',
-                      row.acquiredOn == null ? '' : date(row.acquiredOn!),
-                      row.purchasePriceCents == null
-                          ? ''
-                          : money(row.purchasePriceCents!, row.currency),
-                      row.notes ?? '',
+                      for (final text in [
+                        row.name,
+                        row.serialNumber ?? '',
+                        row.acquiredOn == null ? '' : date(row.acquiredOn!),
+                        row.purchasePriceCents == null
+                            ? ''
+                            : money(row.purchasePriceCents!, row.currency),
+                        row.notes ?? '',
+                      ])
+                        pdfCell(text),
                     ],
                 ],
                 cellStyle: const pw.TextStyle(fontSize: 9),
                 headerStyle: const pw.TextStyle(fontSize: 9),
               ),
+              // What a cell had to shorten, in full and free to run on
+              // to the next page: an insurer reads the whole note.
+              for (final row in entry.value)
+                for (final (label, text) in [
+                  (strings.columnName, row.name),
+                  (strings.columnSerial, row.serialNumber),
+                  (strings.columnNotes, row.notes),
+                ])
+                  if (text != null && pdfCellShortens(text))
+                    pdfLine(
+                      '${pdfCell(row.name)}, $label: $text',
+                      style: const pw.TextStyle(fontSize: 9),
+                    ),
               pw.SizedBox(height: 12),
             ],
             pw.Divider(),

@@ -18,6 +18,37 @@ pw.Widget pdfLine(String text, {pw.TextStyle? style}) => pw.Padding(
   child: pw.Text('•  $text', style: style, overflow: pw.TextOverflow.span),
 );
 
+/// How much of a text one cell of a table holds (#403).
+///
+/// pdf cannot split a table row across pages, and the check that stops
+/// `MultiPage` once a widget can never fit is an `assert`: in a release
+/// build a row taller than a page -- a note of a few thousand characters
+/// in a field without a limit -- laid out the same page for ever, on the
+/// interface's isolate. 200 characters on one line fill the narrowest
+/// column a table of five gives such a text about a dozen times, a
+/// fraction of a page.
+const pdfCellCharacters = 200;
+
+/// [text] as a cell of a table shows it: on one line, and cut with an
+/// ellipsis after [pdfCellCharacters]. Whatever must not be lost is
+/// printed in full elsewhere, with [pdfLine], which runs on.
+String pdfCell(String text) {
+  final flat = _oneLine(text);
+  if (flat.length <= pdfCellCharacters) return flat;
+  var end = pdfCellCharacters - 1;
+  // Not between the two halves of a character outside the BMP.
+  final unit = flat.codeUnitAt(end - 1);
+  if (unit >= 0xD800 && unit <= 0xDBFF) end--;
+  return '${flat.substring(0, end).trimRight()}…';
+}
+
+/// Whether [pdfCell] leaves out part of [text].
+bool pdfCellShortens(String text) => pdfCell(text) != _oneLine(text);
+
+/// Line breaks and runs of spaces as one space: a note of two hundred
+/// empty lines is two hundred lines of a cell.
+String _oneLine(String text) => text.replaceAll(RegExp(r'\s+'), ' ').trim();
+
 /// About how many characters a bulleted line holds on an A4 page at the
 /// sheets' size. Measured with the bundled Noto: 70 to 75. Fewer are
 /// assumed, because a guess too high is a card that does not fit; 90 was

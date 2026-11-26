@@ -127,6 +127,35 @@ void main() {
     },
   );
 
+  test('an item named at great length still makes a report (#403)', () async {
+    // A table row taller than a page: pdf cannot split it, and a release
+    // build laid the same page out for ever instead of failing.
+    await db.upsertInventoryItem(
+      InventoryItemsCompanion.insert(
+        clientId: 'long',
+        householdId: 'household-1',
+        name: List.filled(1250, 'Kerzen, ').join(),
+        category: 'tools',
+        quantity: 1,
+        unit: List.filled(500, 'Stück').join('\n'),
+        storageLocation: 'Keller',
+        minQuantity: const Value(6),
+        updatedAt: DateTime.utc(2026),
+      ),
+    );
+
+    final bytes = await const MissingEquipmentReport()
+        .build(
+          db: db,
+          householdId: 'household-1',
+          householdName: 'Test-Haushalt',
+          strings: _strings,
+        )
+        .timeout(const Duration(seconds: 30));
+
+    expect(ascii.decode(bytes.take(5).toList()), '%PDF-');
+  });
+
   test('build includes inventory items below their minimum quantity', () async {
     await db.upsertInventoryItem(
       InventoryItemsCompanion.insert(
