@@ -416,7 +416,7 @@ class WarningPollService {
 /// What of [pending] goes out as a notification: one per message (#395).
 ///
 /// MeteoAlarm keeps a row per message and area, and one message can name
-/// a hundred districts. A household that follows a Land, or none, would
+/// dozens of areas. A household that follows a Land, or none, would
 /// have had a notification for every one of them, all saying the same.
 /// The one shown is the area nearest the household by
 /// [warningRelevanceRank], the first of them at a tie; the others are

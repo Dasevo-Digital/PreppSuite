@@ -49,10 +49,10 @@ class MeteoAlarmRawWarning {
 ///
 /// The feed has one entry per message and area, and one message can name
 /// many areas. On 2026-11-26 the German feed held 1,167 entries under 66
-/// identifiers, one of them for 156 districts. Stored by the identifier
-/// alone, every entry of a message wrote the same row, the last one won,
-/// and a warning for 156 districts stood in the list as a warning for one
-/// of them -- and was nobody else's.
+/// identifiers, one of them for 73 areas. Stored by the identifier alone,
+/// every entry of a message wrote the same row, the last one won, and a
+/// warning for 73 areas stood in the list as a warning for one of them --
+/// and was nobody else's.
 String meteoAlarmExternalId(MeteoAlarmRawWarning warning) {
   final area =
       warning.areaCode ?? (warning.areaDesc.isEmpty ? null : warning.areaDesc);
