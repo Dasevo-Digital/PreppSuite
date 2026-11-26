@@ -22,6 +22,7 @@ class MeteoAlarmRawWarning {
     required this.expires,
     required this.raw,
     this.areaCode,
+    this.messageType,
   });
 
   final String identifier;
@@ -37,6 +38,10 @@ class MeteoAlarmRawWarning {
   /// The area's own code in MeteoAlarm, its `EMMA_ID` geocode (`DE271`),
   /// where the entry carries one.
   final String? areaCode;
+
+  /// CAP's `msgType`, which the feed calls `message_type`: `Alert`,
+  /// `Update` or `Cancel`.
+  final String? messageType;
 }
 
 /// What a MeteoAlarm entry is stored under, and what a full read of its
@@ -205,6 +210,7 @@ class MeteoAlarmClient {
 
     return MeteoAlarmRawWarning(
       areaCode: geocode('EMMA_ID'),
+      messageType: capOrNull('message_type')?.trim(),
       identifier: cap('identifier'),
       title: entry.getElement('title')?.innerText ?? cap('areaDesc'),
       areaDesc: cap('areaDesc'),

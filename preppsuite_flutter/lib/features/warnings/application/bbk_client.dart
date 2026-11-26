@@ -29,6 +29,7 @@ class BbkRawWarning {
     this.polygons = const [],
     this.translations,
     this.messageType,
+    this.references = const [],
   });
 
   final String id;
@@ -51,6 +52,11 @@ class BbkRawWarning {
   /// detail).
   final String? messageType;
 
+  /// The ids of the messages this one updates or cancels, from CAP's
+  /// `references` in the detail (#395). Empty where the detail was not
+  /// read or names none.
+  final List<String> references;
+
   BbkRawWarning withDetails({
     String? description,
     String? instruction,
@@ -59,6 +65,7 @@ class BbkRawWarning {
     List<String> polygons = const [],
     Map<String, WarningTranslation> translations = const {},
     String? messageType,
+    List<String> references = const [],
   }) => BbkRawWarning(
     id: id,
     startDate: startDate,
@@ -72,8 +79,18 @@ class BbkRawWarning {
     polygons: polygons,
     translations: translations,
     messageType: messageType ?? this.messageType,
+    references: references,
   );
 }
+
+/// The message ids in a CAP `references`: a list of `sender,id,sent`,
+/// separated by spaces. Confirmed on the DWD's detail on 2026-11-26:
+/// `opendata@dwd.de,dwdmap.2.49.0.0.276.0.DWD.PVW.1795610940000.….MUL,
+/// 2026-11-25T12:49:00-00:00`.
+List<String> bbkReferencedIds(String references) => [
+  for (final triplet in references.trim().split(RegExp(r'\s+')))
+    if (triplet.split(',') case [_, final id, ...] when id.isNotEmpty) id,
+];
 
 /// The outcome of a nationwide poll across every BBK source.
 ///
@@ -315,6 +332,10 @@ class BbkClient {
         messageType: switch (decoded['msgType']) {
           final String type => type,
           _ => null,
+        },
+        references: switch (decoded['references']) {
+          final String references => bbkReferencedIds(references),
+          _ => const [],
         },
       );
     } on Object {

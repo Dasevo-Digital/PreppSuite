@@ -83,4 +83,23 @@ void main() {
       'police',
     });
   });
+
+  test('CAP references name the messages they replace (#395)', () {
+    // As the DWD's detail had it on 2026-11-26, and two of them, which
+    // CAP separates with a space.
+    expect(
+      bbkReferencedIds(
+        'opendata@dwd.de,dwdmap.2.49.0.0.276.0.DWD.PVW.1795610940000.'
+        '1dcc04fd.MUL,2026-11-25T12:49:00-00:00 '
+        'opendata@dwd.de,dwdmap.2.49.0.0.276.0.DWD.PVW.1795612440000.'
+        '4338a7be.MUL,2026-11-25T13:14:00-00:00',
+      ),
+      [
+        'dwdmap.2.49.0.0.276.0.DWD.PVW.1795610940000.1dcc04fd.MUL',
+        'dwdmap.2.49.0.0.276.0.DWD.PVW.1795612440000.4338a7be.MUL',
+      ],
+    );
+    expect(bbkReferencedIds(''), isEmpty);
+    expect(bbkReferencedIds('no-triplet'), isEmpty);
+  });
 }

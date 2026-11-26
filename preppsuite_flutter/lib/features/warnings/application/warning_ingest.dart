@@ -56,9 +56,28 @@ class WarningIngest {
     final notifiable = <NotifiableWarning>[];
     final rows = <WarningsCompanion>[];
 
+    // The DWD's rows by their CAP identifier, whatever the feed put before
+    // it: the nationwide map writes `dwdmap.`, and a reference is matched
+    // even where another feed of the BBK writes it otherwise.
+    Map<String, Warning>? dwdByCapId;
+    Warning? referenced(String id) =>
+        existing[id] ??
+        (dwdByCapId ??= {
+          for (final row in existing.values)
+            if (bbkIsDwd(row.externalId)) _capIdentifier(row.externalId): row,
+        })[_capIdentifier(id)];
+
     for (final warning in warnings) {
       final result = _prepare(
         existing: existing[warning.id],
+        // The version a DWD update replaces, which its detail names (#395).
+        // Each update has a new id, and each was announced again. Only
+        // the DWD's: an update of a civil-protection warning can carry
+        // new instructions, and is announced as before.
+        predecessors: [
+          if (bbkIsDwd(warning.id) && warning.messageType != 'Cancel')
+            for (final id in warning.references) ?referenced(id),
+        ],
         source: WarningSource.bbk,
         externalId: warning.id,
         countryCode: countryCode,
@@ -111,23 +130,53 @@ class WarningIngest {
     final notifiable = <NotifiableWarning>[];
     final rows = <WarningsCompanion>[];
 
+    // Where a new version finds the one it replaces (#395). The DWD gives
+    // every new version a new identifier -- the moment it was sent and a
+    // new UUID -- and this feed does not say which one it replaces.
+    final byEventAndArea = <(String, String, String), List<Warning>>{};
+    for (final row in existing.values) {
+      final area = row.areaDescription;
+      if (area == null) continue;
+      (byEventAndArea[(row.countryCode, row.eventType, area)] ??= []).add(row);
+    }
+
     for (final warning in warnings) {
       if (warning.identifier.isEmpty) continue;
 
       final sent = _parseDateTime(warning.sent);
       if (sent == null) continue;
+      final effective = _parseDateTime(warning.onset) ?? sent;
+      final expires = _parseDateTime(warning.expires);
 
       final externalId = meteoAlarmExternalId(warning);
       final stored = existing[externalId];
       final result = _prepare(
         existing: stored,
-        // A row an older version stored under the message alone, before
-        // its areas were told apart (#395). Its announcement covers every
-        // area of the message, so they are not announced again.
-        predecessors: [
-          if (stored == null && externalId != warning.identifier)
-            ?existing[warning.identifier],
-        ],
+        predecessors: stored != null
+            ? const []
+            : [
+                // A row an older version stored under the message alone,
+                // before its areas were told apart. Its announcement
+                // covers every area of the message.
+                if (externalId != warning.identifier)
+                  ?existing[warning.identifier],
+                // The same event for the same area, in force while this
+                // one is: the version it updates, or one it continues.
+                // Every update the DWD issues used to be announced as a
+                // warning of its own. A higher level is still news, and
+                // the DWD names a higher level differently ("significant
+                // icy surfaces"), so that is new anyway. Not for a
+                // cancellation, which says something new.
+                if (warning.messageType != 'Cancel')
+                  for (final earlier
+                      in byEventAndArea[(
+                            countryCode,
+                            warning.event,
+                            warning.areaDesc,
+                          )] ??
+                          const <Warning>[])
+                    if (_overlaps(earlier, effective, expires)) earlier,
+              ],
         source: WarningSource.meteoalarm,
         externalId: externalId,
         countryCode: countryCode,
@@ -149,8 +198,8 @@ class WarningIngest {
         areaDescription: warning.areaDesc.isEmpty ? null : warning.areaDesc,
         senderContact: null,
         polygonsJson: null,
-        effective: _parseDateTime(warning.onset) ?? sent,
-        expires: _parseDateTime(warning.expires),
+        effective: effective,
+        expires: expires,
         sent: sent,
       );
       if (result == null) continue;
@@ -437,6 +486,22 @@ String? bbkRegionFromId(String id) {
     if (germanStateByBbkCode(code) != null) return code;
   }
   return null;
+}
+
+/// Whether a BBK warning is the DWD's. Its nationwide map writes
+/// `dwdmap.2.49.0.0.276.0.DWD.PVW.…` (live on 2026-11-26); older
+/// captures have `dwd.…`.
+bool bbkIsDwd(String id) => id.startsWith('dwd');
+
+/// A BBK id without the name of the feed in front of it.
+String _capIdentifier(String id) => id.replaceFirst(RegExp(r'^[a-z]+\.'), '');
+
+/// Whether [earlier] is in force at some time between [effective] and
+/// [expires], an open end being no end.
+bool _overlaps(Warning earlier, DateTime effective, DateTime? expires) {
+  final endsBefore = earlier.expires?.isBefore(effective) ?? false;
+  final startsAfter = expires != null && earlier.effective.isAfter(expires);
+  return !endsBefore && !startsAfter;
 }
 
 /// Whether [a] and [b] are the same moment, as the database keeps it: to

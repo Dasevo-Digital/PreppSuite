@@ -1019,6 +1019,219 @@ void main() {
       expect(german, ['snowfall']);
     });
   });
+
+  group('an update of a warning that was announced (#395)', () {
+    setUp(() => SharedPreferences.setMockInitialValues({}));
+
+    final now = DateTime.fromMillisecondsSinceEpoch(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000 * 1000,
+      isUtc: true,
+    );
+
+    Future<List<Warning>> pending() =>
+        service({}).pendingNotifications(isRelevant: (_) => true);
+
+    /// Announces whatever is pending, as the controller and the worker do.
+    Future<List<Warning>> announce() async {
+      final told = await pending();
+      await service({}).markNotified(told);
+      return told;
+    }
+
+    group('from MeteoAlarm', () {
+      String icy({
+        required String identifier,
+        String event = 'significant icy surfaces',
+        String severity = 'Moderate',
+        String messageType = 'Alert',
+        Duration sentAgo = Duration.zero,
+        Duration startsIn = Duration.zero,
+        Duration endsIn = const Duration(hours: 8),
+      }) => _meteoEntry(
+        identifier: '2.49.0.0.276.0.DWD.PVW.$identifier.MUL',
+        area: 'Kreis Steinburg',
+        areaCode: 'DE158',
+        event: event,
+        severity: severity,
+        messageType: messageType,
+        sent: now.subtract(sentAgo),
+        onset: now.subtract(sentAgo).add(startsIn),
+        expires: now.add(endsIn),
+      );
+      final first = icy(
+        identifier: '1795662600000.1b0489cc',
+        sentAgo: const Duration(hours: 3),
+      );
+
+      Future<void> pollWith(String stamp, List<String> entries) => service({
+        ...allBbkSources(),
+        meteoUrl: _meteoFeed(stamp, entries),
+      }).poll(countryCode: 'DE');
+
+      test('at the same level is not announced again', () async {
+        await pollWith('build-1', [first]);
+        expect(await announce(), hasLength(1));
+
+        await pollWith('build-2', [
+          icy(identifier: '1795681440000.63963189', messageType: 'Update'),
+        ]);
+
+        expect(await pending(), isEmpty);
+        final stored = await db.warningsBySource('meteoalarm');
+        expect(stored.values.every((w) => w.notified), isTrue);
+      });
+
+      test('nor is one that carries it on while it is in force', () async {
+        await pollWith('build-1', [first]);
+        await announce();
+
+        await pollWith('build-2', [
+          first,
+          icy(
+            identifier: '1795681440000.63963189',
+            startsIn: const Duration(hours: 7),
+            endsIn: const Duration(hours: 14),
+          ),
+        ]);
+
+        expect(await pending(), isEmpty);
+      });
+
+      test('at a higher level it is', () async {
+        await pollWith('build-1', [first]);
+        await announce();
+
+        await pollWith('build-2', [
+          icy(
+            identifier: '1795681440000.63963189',
+            severity: 'Severe',
+            messageType: 'Update',
+          ),
+        ]);
+
+        expect((await pending()).single.severity, 'severe');
+      });
+
+      test('and so is another event, and one after a pause', () async {
+        await pollWith('build-1', [first]);
+        await announce();
+
+        await pollWith('build-2', [
+          first,
+          icy(identifier: '1795681440000.63963189', event: 'fog'),
+          icy(
+            identifier: '1795681440000.7cef54ab',
+            startsIn: const Duration(hours: 9),
+            endsIn: const Duration(hours: 16),
+          ),
+        ]);
+
+        expect(await pending(), hasLength(2));
+      });
+
+      test('one that was never announced does not stand in', () async {
+        // Not marked as told: notifications off, or not relevant then.
+        await pollWith('build-1', [first]);
+
+        await pollWith('build-2', [
+          icy(identifier: '1795681440000.63963189', messageType: 'Update'),
+        ]);
+
+        expect(
+          (await pending()).map((w) => w.externalId),
+          contains(startsWith('2.49.0.0.276.0.DWD.PVW.1795681440000')),
+        );
+      });
+    });
+
+    group('from the BBK, for the DWD', () {
+      const before =
+          'dwdmap.2.49.0.0.276.0.DWD.PVW.1795610940000.'
+          '1dcc04fd-4c8e-4b67-a27c-9cf84911b6ec.MUL';
+      const after =
+          'dwdmap.2.49.0.0.276.0.DWD.PVW.1795681620000.'
+          '9690190b-af72-47aa-b370-0036c57d2679.MUL';
+
+      Map<String, String> feeds(
+        String id, {
+        String severity = 'Moderate',
+        String? references,
+      }) {
+        final sent = id == before
+            ? now.subtract(const Duration(hours: 20))
+            : now.subtract(const Duration(minutes: 5));
+        return {
+          ...allBbkSources(mowasBody: '[]'),
+          '$bbkBase/dwd/mapData.json': jsonEncode([
+            {
+              'id': id,
+              'startDate': sent.toIso8601String(),
+              'severity': severity,
+              'type': references == null ? 'Alert' : 'Update',
+              'i18nTitle': {'de': 'Amtliche WARNUNG vor SCHNEEFALL'},
+            },
+          ]),
+          '$bbkBase/warnings/$id.json': jsonEncode({
+            'identifier': id,
+            'sender': 'opendata@dwd.de',
+            'msgType': references == null ? 'Alert' : 'Update',
+            'references': ?references,
+            'info': [
+              {
+                'language': 'de-DE',
+                'event': 'SCHNEEFALL',
+                'headline': 'Amtliche WARNUNG vor SCHNEEFALL',
+                'severity': severity,
+                'area': [
+                  {'areaDesc': 'Gemeinde Mittenwald, Gemeinde Krün'},
+                ],
+              },
+            ],
+          }),
+        };
+      }
+
+      const replacing = 'opendata@dwd.de,$before,2026-11-25T12:49:00-00:00';
+
+      test('the version its detail names is not announced again', () async {
+        await service(feeds(before)).poll(countryCode: 'DE');
+        expect(await announce(), hasLength(1));
+
+        await service(
+          feeds(after, references: replacing),
+        ).poll(countryCode: 'DE');
+
+        expect(await pending(), isEmpty);
+        final stored = await db.warningsBySource('bbk');
+        expect(stored[after]!.notified, isTrue);
+        expect(stored[before]!.expires, isNotNull, reason: 'it left the map');
+      });
+
+      test('a higher level is', () async {
+        await service(feeds(before)).poll(countryCode: 'DE');
+        await announce();
+
+        await service(
+          feeds(after, severity: 'Severe', references: replacing),
+        ).poll(countryCode: 'DE');
+
+        expect((await pending()).map((w) => w.externalId), [after]);
+      });
+
+      test('nor does one name a version that was never told', () async {
+        await service(feeds(before)).poll(countryCode: 'DE');
+
+        await service(
+          feeds(after, references: replacing),
+        ).poll(countryCode: 'DE');
+
+        expect(
+          (await pending()).map((w) => w.externalId),
+          containsAll([after]),
+        );
+      });
+    });
+  });
 }
 
 /// One MeteoAlarm entry in the live shape of 2026-11-26.
